@@ -2291,6 +2291,7 @@ setInterval(update_icmp_table, 5000);
                 has_exporters = has_exporters,
                 is_viewed = interface.isViewed(),
                 is_clickhouse_enabled = hasClickHouseSupport(),
+                is_enterprise_l = ntop.isEnterpriseL(),
                 is_pcap = interface.isPcapDumpInterface()
             })
             template.render("pages/vue_page.template", { vue_page_name = "PageFlowsList", page_context = json_context })
