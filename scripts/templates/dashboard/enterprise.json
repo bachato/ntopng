@@ -150,12 +150,26 @@
 			"component" : "sankey",
 			"id" : "server_port_analysis",
 			"i18n_name" : "server_ports_analysis",
-			"width" : 12,
+			"width" : 8,
 			"height" : 4,
 			"params" : {
 				"url" : "/lua/pro/rest/v2/get/vlan/live_ports.lua",
 				"url_params" : {
 					"limit" : 20
+				}
+			}
+		},
+		{
+			"component" : "pie",
+			"id" : "qoe_stats",
+			"i18n_name" : "qoe",
+			"width" : 4,
+			"height" : 4,
+			"params" : {
+				"url" : "/lua/rest/v2/get/interface/qoe/stats.lua",
+				"url_params" : {
+					"breed" : "true",
+					"ndpistats_mode" : "sinceStartup"
 				}
 			}
 		}
