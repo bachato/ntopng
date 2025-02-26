@@ -15,6 +15,12 @@ package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 local alert_consts = require "alert_consts"
 local host_pools = require "host_pools"
 local consts = require "consts"
+local qoe_utils
+
+if ntop.isEnterpriseL() then
+    package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
+    qoe_utils = require "qoe_utils"
+end
 
 local snmp_filter_options_cache
 
@@ -988,14 +994,14 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
             }
         end
     elseif tag.value_type == "qoe_score" then
-        if not ntop.isEnterpriseXL() then
-            -- Exclude the filter if it's not XL, this info is found only in the xl version
+        if not qoe_utils then
+            -- Exclude the filter if it's not L, this info is found only in the l version
             filter = nil
             return nil
         end
         filter.value_type = 'array'
         filter.options = {}
-        for _, info in pairsByKeys(getPossibleQoE(), asc) do
+        for _, info in pairsByKeys(qoe_utils.getPossibleQoE(), asc) do
             filter.options[#filter.options + 1] = {
                 value = info.value,
                 label = i18n(info.i18n_label),

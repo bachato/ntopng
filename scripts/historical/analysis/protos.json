@@ -77,11 +77,11 @@
 		"dataPointSelection" : "db_analyze"
 	    },
 	    "chart_gui_filter" : "l4proto", // Filter displayed in the GUI
-	    "chart_sql_query" : "SELECT QOE_SCORE_RANGE, COUNT(*) AS count FROM (SELECT CASE WHEN QOE_SCORE BETWEEN 1 AND 49 THEN 1 WHEN QOE_SCORE BETWEEN 50 AND 59 THEN 50 WHEN QOE_SCORE BETWEEN 60 AND 74 THEN 60 WHEN QOE_SCORE BETWEEN 75 AND 89 THEN 75 WHEN QOE_SCORE BETWEEN 90 AND 100 THEN 90 ELSE 0 END AS QOE_SCORE_RANGE FROM flows WHERE ($WHERE$)) f GROUP BY f.QOE_SCORE_RANGE ORDER BY count DESC",
+	    "chart_sql_query" : "SELECT QOE_SCORE_RANGE as QOE_SCORE, COUNT(*) AS count FROM (SELECT CASE WHEN QOE_SCORE BETWEEN 1 AND 50 THEN 1 WHEN QOE_SCORE BETWEEN 51 AND 60 THEN 51 WHEN QOE_SCORE BETWEEN 61 AND 75 THEN 61 WHEN QOE_SCORE BETWEEN 76 AND 90 THEN 76 WHEN QOE_SCORE BETWEEN 91 AND 100 THEN 91 ELSE 0 END AS QOE_SCORE_RANGE FROM flows WHERE ($WHERE$)) f GROUP BY f.QOE_SCORE_RANGE ORDER BY count DESC",
 	    "chart_type" : "donut_apex_chart",
 	    "chart_aggregate_low_data" : false,
 	    "chart_record_value" : "count",
-	    "chart_record_label" : "QOE_SCORE_RANGE",
+	    "chart_record_label" : "QOE_SCORE",
 	    "chart_width" : 4, // Chart width, it can be a number between 1 and 12, optional feature
 	    "chart_y_formatter" : "format_value", // JS tooltip event, optional feature
 	},{

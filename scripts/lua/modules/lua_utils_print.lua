@@ -467,49 +467,6 @@ end
 
 -- ##############################################
 
-local possible_qoe = {
-    {i18n_badge = "flow_details.qoe_excellent", i18n_label = "flow_details.qoe_excellent_label", value = 91, max_value = 100},
-    {i18n_badge = "flow_details.qoe_good", i18n_label = "flow_details.qoe_good_label", value = 76, max_value = 90},
-    {i18n_badge = "flow_details.qoe_fair", i18n_label = "flow_details.qoe_fair_label", value = 61, max_value = 75},
-    {i18n_badge = "flow_details.qoe_degraded", i18n_label = "flow_details.qoe_degraded_label", value = 51, max_value = 60},
-    {i18n_badge = "flow_details.qoe_poor", i18n_label = "flow_details.qoe_poor_label", value = 1, max_value = 50}
-}
-
--- See QoEQualityLabel in http_src/utilities/qoe-utils.js
-function formatQoE(qoe)
-    local value = qoe.qoe_score
-
-    if ((value == 0) or (value > 100)) then
-        label = "" -- Unknown QoE
-    else
-        for _, qoe_value in ipairs(possible_qoe) do
-            if value >= qoe_value.value and value <= qoe_value.max_value then
-                label = i18n(qoe_value.i18n_badge, { value = value })
-            end
-        end
-    end
-
-    if (#qoe.issues > 0) then
-        label = label .. "\n<p><ul>\n"
-
-        for _, i in pairs(qoe.issues) do
-            label = label .. "<li>" .. i .. "\n"
-        end
-
-        label = label .. "\n</ul>\n"
-    end
-
-    return (label)
-end
-
--- ##############################################
-
-function getPossibleQoE()
-    return possible_qoe
-end
-
--- ##############################################
-
 if (trace_script_duration ~= nil) then
     io.write(debug.getinfo(1, 'S').source .. " executed in " ..
                  (os.clock() - clock_start) * 1000 .. " ms\n")

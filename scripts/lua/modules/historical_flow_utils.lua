@@ -10,6 +10,11 @@ local format_utils = require "format_utils"
 local flow_risk_utils = require "flow_risk_utils"
 local country_codes = require "country_codes"
 local network_consts = require "network_consts"
+local qoe_utils
+if ntop.isEnterpriseL() then
+    package.path = dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" .. package.path
+    qoe_utils = require "qoe_utils"
+end
 
 local historical_flow_utils = {}
 
@@ -1083,6 +1088,14 @@ local function format_flow_qoe_score(score, flow)
    return label
 end
 
+local function chart_format_flow_qoe_score(score, flow)
+    local label = tonumber(score)
+    if qoe_utils then
+        label = qoe_utils.getQoELabel(label)
+    end
+    return label
+end
+
 local function format_flow_observation_point(id, flow)
    return getFullObsPointName(tonumber(id), nil, true)
 end
@@ -1141,7 +1154,7 @@ local flow_columns = {
    ['SRC2DST_TCP_FLAGS'] =    { tag = "src2dst_tcp_flags", dt_func = dt_format_tcp_flags, db_type = "Number", db_raw_type = "Uint8" },
    ['DST2SRC_TCP_FLAGS'] =    { tag = "dst2src_tcp_flags", dt_func = dt_format_tcp_flags, db_type = "Number", db_raw_type = "Uint8" },
    ['SCORE'] =                { tag = "score",        dt_func = dt_format_score, format_func = format_flow_score, i18n = i18n("score"), order = 9, db_type = "Number", db_raw_type = "Uint16" },
-   ['QOE_SCORE'] =            { tag = "qoe_score",    dt_func = dt_format_qoe_score, format_func = format_flow_qoe_score, i18n = i18n("db_search.tags.qoe_score"), order = 10, db_type = "Number", db_raw_type = "Uint8" },
+   ['QOE_SCORE'] =            { tag = "qoe_score",    dt_func = dt_format_qoe_score, format_func = format_flow_qoe_score, simple_dt_func = chart_format_flow_qoe_score, i18n = i18n("db_search.tags.qoe_score"), order = 10, db_type = "Number", db_raw_type = "Uint8" },
    ['L7_PROTO_MASTER'] =      { tag = "l7proto_master", dt_func = dt_format_l7_proto, simple_dt_func = interface.getnDPIProtoName, hide = true },
    ['CLIENT_NW_LATENCY_US'] = { tag = "cli_nw_latency", dt_func = dt_format_latency_ms, i18n = i18n("db_search.cli_nw_latency"), order = 13, db_type = "Number", db_raw_type = "Uint32" },
    ['SERVER_NW_LATENCY_US'] = { tag = "srv_nw_latency", dt_func = dt_format_latency_ms, i18n = i18n("db_search.srv_nw_latency"), order = 14, db_type = "Number", db_raw_type = "Uint32" },
@@ -1907,7 +1920,6 @@ end
 function historical_flow_utils.simpleColumnFormatter(records, label)
    local extended_flow_columns = historical_flow_utils.get_extended_flow_columns()
    local process_records = records["results"] or {}
-   local extended_flow_columns = historical_flow_utils.get_extended_flow_columns()
 
    -- Cycling the value of the record
    for _, record in pairs(process_records) do

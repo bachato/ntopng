@@ -9,6 +9,7 @@ require "voip_utils"
 require "flow_utils"
 
 local shaper_utils
+local qoe_utils
 local checks           = require("checks")
 local format_utils     = require "format_utils"
 local have_nedge       = ntop.isnEdge()
@@ -35,6 +36,9 @@ local auth             = require "auth"
 if ntop.isPro() then
    package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
    shaper_utils = require("shaper_utils")
+   if ntop.isEnterpriseL() then
+      qoe_utils = require "qoe_utils"
+   end
 
    if ntop.isnEdge() then
       package.path = dirs.installdir .. "/scripts/lua/pro/nedge/modules/system_config/?.lua;" .. package.path
@@ -1007,10 +1011,11 @@ else
          url .. "\" download=\"iec104-" .. flow_key .. ".json\">JSON</A></td></tr>")
    end
    
-   if((flow.qoe ~= nil) and (flow.qoe.score ~= nil)) then
+   -- qoe_utils is defined only if ntop is Enterprise L
+   if (qoe_utils and (flow.qoe ~= nil) and (flow.qoe.score ~= nil)) then
       print("<tr><th width=10%>" .. i18n("flow_details.qoe") .. "</th>")
-      print("<td>" .. formatQoE(flow.qoe.score.cli_to_srv) .. "</td>")
-      print("<td>" .. formatQoE(flow.qoe.score.srv_to_cli) .. "</td>")
+      print("<td>" .. qoe_utils.formatQoE(flow.qoe.score.cli_to_srv) .. "</td>")
+      print("<td>" .. qoe_utils.formatQoE(flow.qoe.score.srv_to_cli) .. "</td>")
       print("</tr>")
    end
    
