@@ -1680,7 +1680,7 @@ bool Ntop::checkHTTPAuth(const char *user, const char *password, char *group) co
   if (Utils::postHTTPJsonData(NULL,  // no token
 			      NULL,  // no digest user
 			      NULL,  // no digest password
-			      httpUrl, postData, 0, &stats, returnData,
+			      httpUrl, postData, 0, 0, &stats, returnData,
 			      MAX_HTTP_AUTHENTICATOR_RETURN_DATA_LEN,
 			      &rc)) {
     if (rc == 200) {

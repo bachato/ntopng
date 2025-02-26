@@ -218,7 +218,8 @@ void ElasticSearch::indexESdata() {
 
       if (!Utils::postHTTPJsonData(NULL, ntop->getPrefs()->get_es_user(),
                                    ntop->getPrefs()->get_es_pwd(),
-                                   ntop->getPrefs()->get_es_url(), postbuf, 0,
+                                   ntop->getPrefs()->get_es_url(), postbuf,
+				   0, 0,
                                    &stats)) {
         /* Post failure */
         ntop->getTrace()->traceEvent(
@@ -259,7 +260,7 @@ const char *ElasticSearch::get_es_version() {
       long http_ret_code =
           Utils::httpGet(es_version_query_url, ntop->getPrefs()->get_es_user(),
                          ntop->getPrefs()->get_es_pwd(),
-                         NULL /* user_header_token */, 5, buf, buf_len);
+                         NULL /* user_header_token */, 5, 0, buf, buf_len);
       if (http_ret_code == 200) {
         json_object *o, *obj, *obj2;
         enum json_tokener_error jerr = json_tokener_success;
@@ -361,7 +362,7 @@ void ElasticSearch::pushEStemplate() {
   while (max_attempts > 0) {
     if (!Utils::postHTTPJsonData(NULL, ntop->getPrefs()->get_es_user(),
                                  ntop->getPrefs()->get_es_pwd(),
-                                 es_template_push_url, postbuf, 0, &stats)) {
+                                 es_template_push_url, postbuf, 0, 0, &stats)) {
       /* Post failure */
       _usleep(100000);
     } else {

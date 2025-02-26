@@ -2348,7 +2348,7 @@ static int ntop_http_redirect(lua_State *vm) {
 // *** API ***
 static int ntop_http_get(lua_State *vm) {
   char *url, *username = NULL, *pwd = NULL;
-  int timeout = 30;
+  int connection_timeout = 30, lifetime_timeout = 0;
   bool return_content = true, use_cookie_authentication = false;
   bool follow_redirects = true;
   int ip_version = 0;
@@ -2371,8 +2371,8 @@ static int ntop_http_get(lua_State *vm) {
   }
 
   if (lua_type(vm, 4) == LUA_TNUMBER) {
-    timeout = lua_tointeger(vm, 4);
-    if (timeout < 1) timeout = 1;
+    connection_timeout = lua_tointeger(vm, 4);
+    if (connection_timeout < 1) connection_timeout = 1;
   }
 
   /*
@@ -2396,7 +2396,8 @@ static int ntop_http_get(lua_State *vm) {
   if (lua_type(vm, 8) == LUA_TNUMBER) ip_version = lua_tointeger(vm, 8);
 
   Utils::httpGetPost(vm, url, username, pwd, NULL /* user_header_token */,
-                     timeout, return_content, use_cookie_authentication, &stats,
+                     connection_timeout, lifetime_timeout,
+		     return_content, use_cookie_authentication, &stats,
                      NULL, NULL, follow_redirects, ip_version);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -2407,7 +2408,7 @@ static int ntop_http_get(lua_State *vm) {
 // *** API ***
 static int ntop_http_get_auth_token(lua_State *vm) {
   char *url, *auth_token = NULL;
-  int timeout = 30;
+  int connection_timeout = 30, lifetime_timeout = 0;
   bool return_content = true, use_cookie_authentication = false;
   bool follow_redirects = true;
   int ip_version = 0;
@@ -2426,8 +2427,8 @@ static int ntop_http_get_auth_token(lua_State *vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
 
   if (lua_type(vm, 3) == LUA_TNUMBER) {
-    timeout = lua_tointeger(vm, 3);
-    if (timeout < 1) timeout = 1;
+    connection_timeout = lua_tointeger(vm, 3);
+    if (connection_timeout < 1) connection_timeout = 1;
   }
 
   /*
@@ -2448,7 +2449,8 @@ static int ntop_http_get_auth_token(lua_State *vm) {
   if (lua_type(vm, 7) == LUA_TNUMBER) ip_version = lua_tointeger(vm, 7);
 
   Utils::httpGetPost(vm, url, NULL /* username */, NULL /* pwd */, auth_token,
-                     timeout, return_content, use_cookie_authentication, &stats,
+                     connection_timeout, lifetime_timeout,
+		     return_content, use_cookie_authentication, &stats,
                      NULL, NULL, follow_redirects, ip_version);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -2956,7 +2958,7 @@ static int ntop_change_user_pcap_download_permission(lua_State *vm) {
 static int ntop_post_http_json_data(lua_State *vm) {
   char *username, *password, *url, *json, *bearer_token = NULL;
   HTTPTranferStats stats;
-  int timeout = 0;
+  int connection_timeout = 0, lifetime_timeout = 0;
 
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
@@ -2978,15 +2980,14 @@ static int ntop_post_http_json_data(lua_State *vm) {
   if ((json = (char *)lua_tostring(vm, 4)) == NULL)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
 
-  /* Optional timeout */
-  if (lua_type(vm, 5) == LUA_TNUMBER) timeout = lua_tonumber(vm, 5);
+  /* Optional connection timeout */
+  if (lua_type(vm, 5) == LUA_TNUMBER) connection_timeout = lua_tonumber(vm, 5);
 
   /* Optional Bearer Token */
-  if (lua_type(vm, 6) == LUA_TSTRING)
-    bearer_token = (char *)lua_tostring(vm, 6);
+  if (lua_type(vm, 6) == LUA_TSTRING) bearer_token = (char *)lua_tostring(vm, 6);
 
   bool rv = Utils::postHTTPJsonData(bearer_token, username, password, url, json,
-                                    timeout, &stats);
+                                    connection_timeout, lifetime_timeout, &stats);
 
   lua_pushboolean(vm, rv);
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -2996,7 +2997,7 @@ static int ntop_post_http_json_data(lua_State *vm) {
 
 static int ntop_http_post(lua_State *vm) {
   char *username = (char *)"", *password = (char *)"", *url, *form_data;
-  int timeout = 30;
+  int connection_timeout = 30, lifetime_timeout = 0;
   bool return_content = false;
   bool use_cookie_authentication = false;
   HTTPTranferStats stats;
@@ -3020,7 +3021,7 @@ static int ntop_http_post(lua_State *vm) {
       return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
 
   if (lua_type(vm, 5) == LUA_TNUMBER) /* Optional */
-    timeout = lua_tonumber(vm, 5);
+    connection_timeout = lua_tonumber(vm, 5);
 
   if (lua_type(vm, 6) == LUA_TBOOLEAN) /* Optional */
     return_content = lua_toboolean(vm, 6) ? true : false;
@@ -3029,7 +3030,8 @@ static int ntop_http_post(lua_State *vm) {
     use_cookie_authentication = lua_toboolean(vm, 7) ? true : false;
 
   Utils::httpGetPost(vm, url, username, password, NULL /* user_header_token */,
-                     timeout, return_content, use_cookie_authentication, &stats,
+                     connection_timeout, lifetime_timeout,
+		     return_content, use_cookie_authentication, &stats,
                      form_data, NULL, true, 0);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -3039,7 +3041,7 @@ static int ntop_http_post(lua_State *vm) {
 
 static int ntop_http_post_auth_token(lua_State *vm) {
   char *url, *auth_token = NULL, *form_data;
-  int timeout = 30;
+  int connection_timeout = 30, lifetime_timeout = 0;
   bool return_content = false;
   bool use_cookie_authentication = false;
   HTTPTranferStats stats;
@@ -3062,7 +3064,7 @@ static int ntop_http_post_auth_token(lua_State *vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
 
   if (lua_type(vm, 4) == LUA_TNUMBER) /* Optional */
-    timeout = lua_tonumber(vm, 4);
+    connection_timeout = lua_tonumber(vm, 4);
 
   if (lua_type(vm, 5) == LUA_TBOOLEAN) /* Optional */
     return_content = lua_toboolean(vm, 5) ? true : false;
@@ -3071,7 +3073,8 @@ static int ntop_http_post_auth_token(lua_State *vm) {
     use_cookie_authentication = lua_toboolean(vm, 6) ? true : false;
 
   Utils::httpGetPost(vm, url, NULL /* username */, NULL /* pwd */, auth_token,
-                     timeout, return_content, use_cookie_authentication, &stats,
+                     connection_timeout, lifetime_timeout,
+		     return_content, use_cookie_authentication, &stats,
                      form_data, NULL, true, 0);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -3081,7 +3084,7 @@ static int ntop_http_post_auth_token(lua_State *vm) {
 
 static int ntop_http_put_auth_token(lua_State *vm) {
   char *url, *auth_token = NULL, *form_data;
-  int timeout = 30;
+  int connection_timeout = 30, lifetime_timeout = 0;
   bool return_content = false;
   bool use_cookie_authentication = false;
   HTTPTranferStats stats;
@@ -3104,7 +3107,7 @@ static int ntop_http_put_auth_token(lua_State *vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
 
   if (lua_type(vm, 4) == LUA_TNUMBER) /* Optional */
-    timeout = lua_tonumber(vm, 4);
+    connection_timeout = lua_tonumber(vm, 4);
 
   if (lua_type(vm, 5) == LUA_TBOOLEAN) /* Optional */
     return_content = lua_toboolean(vm, 5) ? true : false;
@@ -3113,7 +3116,8 @@ static int ntop_http_put_auth_token(lua_State *vm) {
     use_cookie_authentication = lua_toboolean(vm, 6) ? true : false;
 
   Utils::httpGetPost(vm, url, NULL /* username */, NULL /* pwd */, auth_token,
-                     timeout, return_content, use_cookie_authentication, &stats,
+                     connection_timeout, lifetime_timeout,
+		     return_content, use_cookie_authentication, &stats,
                      form_data, NULL, true, 0, true);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -3124,7 +3128,7 @@ static int ntop_http_put_auth_token(lua_State *vm) {
 static int ntop_http_fetch(lua_State *vm) {
   char *url, *f, fname[PATH_MAX];
   HTTPTranferStats stats;
-  int timeout = 30;
+  int connection_timeout = 30, lifetime_timeout = 0;
 
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
@@ -3137,12 +3141,13 @@ static int ntop_http_fetch(lua_State *vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
 
   if (lua_type(vm, 3) == LUA_TNUMBER) /* Optional */
-    timeout = lua_tonumber(vm, 3);
+    connection_timeout = lua_tonumber(vm, 3);
 
   snprintf(fname, sizeof(fname), "%s", f);
   ntop->fixPath(fname);
 
-  Utils::httpGetPost(vm, url, NULL, NULL, NULL /* user_header_token */, timeout,
+  Utils::httpGetPost(vm, url, NULL, NULL, NULL /* user_header_token */,
+		     connection_timeout, lifetime_timeout,
                      false, false, &stats, NULL, fname, true, 0);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -3152,8 +3157,8 @@ static int ntop_http_fetch(lua_State *vm) {
 
 static int ntop_post_http_text_file(lua_State *vm) {
   char *username, *password, *url, *path;
-  bool delete_file_after_post = false;
-  int timeout = 30;
+  bool delete_file_after_post = false;  
+  int connection_timeout = 30, lifetime_timeout = 0;
   HTTPTranferStats stats;
 
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
@@ -3179,12 +3184,14 @@ static int ntop_post_http_text_file(lua_State *vm) {
   if (lua_type(vm, 5) == LUA_TBOOLEAN) /* Optional */
     delete_file_after_post = lua_toboolean(vm, 5) ? true : false;
 
-  if (lua_type(vm, 6) == LUA_TNUMBER) /* Optional */
-    timeout = lua_tonumber(vm, 6);
-
-  if (timeout < 1) timeout = 1;
-
-  if (Utils::postHTTPTextFile(vm, username, password, url, path, timeout,
+  if (lua_type(vm, 6) == LUA_TNUMBER) {
+    /* Optional */
+    connection_timeout = lua_tonumber(vm, 6);    
+    if (connection_timeout < 1) connection_timeout = 1;
+  }
+  
+  if (Utils::postHTTPTextFile(vm, username, password, url, path,
+			      connection_timeout, lifetime_timeout,
                               &stats)) {
     if (delete_file_after_post) {
       if (unlink(path) != 0)

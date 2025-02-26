@@ -109,27 +109,35 @@ class Utils {
   static bool sendUDPData(char *host, int port, char *data);
   static bool postHTTPJsonData(char *bearer_token, char *username,
                                char *password, char *url, char *json,
-                               int timeout, HTTPTranferStats *stats);
+			       int connect_timeout,
+			       int max_duration_timeout,
+			       HTTPTranferStats *stats);
   static bool postHTTPJsonData(char *bearer_token, char *username,
                                char *password, char *url, char *json,
-                               int timeout, HTTPTranferStats *stats,
+			       int connect_timeout,
+			       int max_duration_timeout,
+			       HTTPTranferStats *stats,
                                char *return_data, int return_data_size,
                                int *response_code);
   static bool sendMail(lua_State *vm, char *from, char *to, char *cc,
                        char *message, char *smtp_server, char *username,
                        char *password, bool use_proxy, bool verbose);
   static bool postHTTPTextFile(lua_State *vm, char *username, char *password,
-                               char *url, char *path, int timeout,
+                               char *url, char *path,
+			       int connect_timeout,
+			       int max_duration_timeout,
                                HTTPTranferStats *stats);
   static bool httpGetPost(lua_State *vm, char *url, char *username,
-                          char *password, char *user_header_token, int timeout,
+                          char *password, char *user_header_token,
+			  int connect_timeout, int max_duration_timeout,			  
                           bool return_content, bool use_cookie_authentication,
                           HTTPTranferStats *stats, const char *form_data,
                           char *write_fname, bool follow_redirects,
                           int ip_version, bool use_put_method = false);
   static long httpGet(const char *url, const char *username,
                       const char *password, const char *user_header_token,
-                      int timeout, char *const resp, const u_int resp_len);
+                      int connect_timeout, int max_duration_timeout,
+		       char *const resp, const u_int resp_len);
   static bool progressCanContinue(ProgressState *progressState);
   static char *urlEncode(const char *url);
   static ticks getticks();

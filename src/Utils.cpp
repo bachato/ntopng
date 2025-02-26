@@ -605,10 +605,10 @@ time_t Utils::str2epoch(const char *str) {
 #ifndef WIN32
   /* Re-add local timezone removed by mktime */
   t += tm.tm_gmtoff;
-#endif  
+#endif
 
-  /* Check for TZ offset */ 
-  tz_str = &str[19]; /* Move after seconds */ 
+  /* Check for TZ offset */
+  tz_str = &str[19]; /* Move after seconds */
   tz_offset = strchr(tz_str, '+');
   if (!tz_offset) tz_offset = strchr(tz_str, '-');
   if (tz_offset) {
@@ -1690,7 +1690,9 @@ static void fillcURLProxy(CURL *curl) {
 /* **************************************** */
 
 bool Utils::postHTTPJsonData(char *bearer_token, char *username, char *password,
-                             char *url, char *json, int timeout,
+                             char *url, char *json,
+			     int connect_timeout,
+			     int max_duration_timeout,
                              HTTPTranferStats *stats) {
   CURL *curl;
   bool ret = false;
@@ -1736,13 +1738,15 @@ bool Utils::postHTTPJsonData(char *bearer_token, char *username, char *password,
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(json));
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_post_writefunc);
 
-    if (timeout) {
-      curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
-      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, timeout);
+    if (connect_timeout) {
+      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, connect_timeout);
 #ifdef CURLOPT_CONNECTTIMEOUT_MS
-      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, timeout * 1000);
+      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout * 1000);
 #endif
     }
+
+    if(max_duration_timeout)
+      curl_easy_setopt(curl, CURLOPT_TIMEOUT, max_duration_timeout);
 
     res = curl_easy_perform(curl);
 
@@ -1778,7 +1782,9 @@ bool Utils::postHTTPJsonData(char *bearer_token, char *username, char *password,
 /* **************************************** */
 
 bool Utils::postHTTPJsonData(char *bearer_token, char *username, char *password,
-                             char *url, char *json, int timeout,
+                             char *url, char *json,
+			     int connect_timeout,
+			     int max_duration_timeout,
                              HTTPTranferStats *stats, char *return_data,
                              int return_data_size, int *response_code) {
   CURL *curl;
@@ -1830,13 +1836,15 @@ bool Utils::postHTTPJsonData(char *bearer_token, char *username, char *password,
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &fetcher);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_get_writefunc);
 
-    if (timeout) {
-      curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
-      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, timeout);
+    if (connect_timeout) {
+      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, connect_timeout);
 #ifdef CURLOPT_CONNECTTIMEOUT_MS
-      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, timeout * 1000);
+      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout * 1000);
 #endif
     }
+
+    if(max_duration_timeout)
+      curl_easy_setopt(curl, CURLOPT_TIMEOUT, max_duration_timeout);
 
     res = curl_easy_perform(curl);
 
@@ -1869,7 +1877,9 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb,
 }
 
 bool Utils::postHTTPTextFile(lua_State *vm, char *username, char *password,
-                             char *url, char *path, int timeout,
+                             char *url, char *path,
+			     int connect_timeout,
+			     int max_duration_timeout,
                              HTTPTranferStats *stats) {
   CURL *curl;
   bool ret = true;
@@ -1920,12 +1930,14 @@ bool Utils::postHTTPTextFile(lua_State *vm, char *username, char *password,
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (curl_off_t)file_len);
 
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
-    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, timeout);
-
+    if(connect_timeout > 0) {
+      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, connect_timeout);
 #ifdef CURLOPT_CONNECTTIMEOUT_MS
-    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, timeout * 1000);
+      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout * 1000);
 #endif
+    }
+
+    if(max_duration_timeout > 0) curl_easy_setopt(curl, CURLOPT_TIMEOUT, max_duration_timeout);
 
     state = (DownloadState *)malloc(sizeof(DownloadState));
     if (state != NULL) {
@@ -1990,7 +2002,7 @@ bool Utils::sendMail(lua_State *vm, char *from, char *to, char *cc,
   bool ret = true, canRetry = false;
   const char *ret_str = "";
   u_int8_t num_runs = 0;
-  
+
 #ifdef HAVE_CURL_SMTP
   CURL *curl;
   CURLcode res;
@@ -2008,7 +2020,7 @@ bool Utils::sendMail(lua_State *vm, char *from, char *to, char *cc,
 
   if (curl) {
     num_runs++;
-    
+
   retry_sendMail:
     if (use_proxy) {
       fillcURLProxy(curl);
@@ -2083,7 +2095,7 @@ bool Utils::sendMail(lua_State *vm, char *from, char *to, char *cc,
 	*/
 	goto retry_sendMail;
       }
-      
+
       ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to send email to (%s): %s",
                                    smtp_server, curl_easy_strerror(res));
       if (ntop->getTrace()->get_trace_level() < TRACE_LEVEL_DEBUG && !verbose)
@@ -2250,7 +2262,8 @@ bool Utils::httpGetPost(lua_State *vm, char *url,
                         /* NOTE if user_header_token != NULL, username AND
                            password are ignored, and vice-versa */
                         char *username, char *password, char *user_header_token,
-                        int timeout, bool return_content,
+                        int connect_timeout, int max_duration_timeout,
+			bool return_content,
                         bool use_cookie_authentication, HTTPTranferStats *stats,
                         const char *form_data, char *write_fname,
                         bool follow_redirects, int ip_version,
@@ -2388,8 +2401,15 @@ bool Utils::httpGetPost(lua_State *vm, char *url,
       curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6);
 
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
-    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, timeout);
+
+    if(connect_timeout > 0) {
+      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, connect_timeout);
+#ifdef CURLOPT_CONNECTTIMEOUT_MS
+      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout * 1000);
+#endif
+    }
+
+    if(max_duration_timeout > 0) curl_easy_setopt(curl, CURLOPT_TIMEOUT, max_duration_timeout);
 
     if (!form_data) {
       /* A GET request, track client connection status */
@@ -2487,7 +2507,9 @@ long Utils::httpGet(const char *url,
                     /* NOTE if user_header_token != NULL, username AND password
                        are ignored, and vice-versa */
                     const char *username, const char *password,
-                    const char *user_header_token, int timeout,
+                    const char *user_header_token,
+		    int connect_timeout,
+		    int max_duration_timeout,
                     char *const resp, const u_int resp_len) {
   CURL *curl = curl_easy_init();
   long response_code = 0;
@@ -2535,15 +2557,17 @@ long Utils::httpGet(const char *url,
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
     curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 5);
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
-    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, timeout);
 
+    if(connect_timeout > 0) {
+      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, connect_timeout);
 #ifdef CURLOPT_CONNECTTIMEOUT_MS
-    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, timeout * 1000);
+      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout * 1000);
 #endif
+    }
 
-    snprintf(ua, sizeof(ua), "%s [%s][%s]", PACKAGE_STRING, PACKAGE_MACHINE,
-             PACKAGE_OS);
+    if(max_duration_timeout > 0) curl_easy_setopt(curl, CURLOPT_TIMEOUT, max_duration_timeout);
+
+    snprintf(ua, sizeof(ua), "%s [%s][%s]", PACKAGE_STRING, PACKAGE_MACHINE, PACKAGE_OS);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, ua);
 
     if (curl_easy_perform(curl) == CURLE_OK) {
@@ -5031,27 +5055,27 @@ OSType Utils::OShint2OSType(enum operating_system_hint os) {
   case os_hint_windows:
     return(os_windows);
     break;
-    
+
   case os_hint_macos:
     return(os_macos);
     break;
-    
+
   case os_hint_ios_ipad_os:
     return(os_ios);
     break;
-    
+
   case os_hint_android:
     return(os_android);
     break;
-    
+
   case os_hint_linux:
     return(os_linux);
     break;
-    
+
   case os_hint_freebsd:
     return(os_freebsd);
     break;
-    
+
   default:
     return(os_unknown);
   }
@@ -5062,14 +5086,14 @@ OSType Utils::OShint2OSType(enum operating_system_hint os) {
 DeviceType Utils::getDeviceTypeFromOsDetail(const char *os,
 					    enum operating_system_hint *hint) {
   *hint = os_hint_unknown;
-  
+
   if (strcasestr(os, "iPhone")) {
     *hint = os_hint_ios_ipad_os;
     return (device_phone);
   } else if (strcasestr(os, "Android")) {
     *hint = os_hint_android;
     return (device_phone);
-  } else if(strcasestr(os, "mobile"))    
+  } else if(strcasestr(os, "mobile"))
     return (device_phone);
   else if (strcasestr(os, "Mac OS")
 	   || strstr(os, "Macintosh")
@@ -7589,34 +7613,34 @@ const char* Utils::OSType2Str(OSType os) {
   case os_linux:
     return("Linux");
     break;
-    
+
   case os_windows:
     return("Windows");
     break;
-    
+
   case os_macos:
     return("macOS");
     break;
-    
+
   case os_ios:
     return("iOS/iPad");
     break;
-    
+
   case os_android:
     return("Android");
     break;
-    
+
   case os_laserjet:
     return("LaserJet");
     break;
-    
+
   case os_apple_airport:
     return("AppleAirport");
     break;
-    
+
   case os_freebsd:
     return("FreeBSD");
-    break;  
+    break;
 
   default:
     return("");
