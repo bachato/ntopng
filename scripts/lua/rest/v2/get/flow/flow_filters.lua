@@ -114,31 +114,6 @@ if not host then
     }
 end
 
-if ntop.isEnterpriseL then
-    local qoe_filters = {{
-        key = "qoe",
-        value = "",
-        label = i18n("all")
-    }}
-
-    if flowstats["qoe"] then
-        for key, value in pairsByField(flowstats["qoe"], "id", rev) do
-            qoe_filters[#qoe_filters + 1] = {
-                key = "qoe",
-                value = value.id,
-                label = i18n("flow_details.qoe_" .. key .. "_label")
-            }
-        end
-    end
-
-    rsp[#rsp + 1] = {
-        action = "qoe",
-        label = i18n("qoe"),
-        name = "qoe",
-        value = qoe_filters
-    }
-end
-
 local protocol_filters = {{
     key = "l4proto",
     value = "",
@@ -313,6 +288,31 @@ rsp[#rsp + 1] = {
     name = "alert_type",
     value = status_filters
 }
+
+if ntop.isEnterpriseL then
+    local qoe_filters = {{
+        key = "qoe",
+        value = "",
+        label = i18n("all")
+    }}
+
+    if flowstats["qoe"] then
+        for key, value in pairsByField(flowstats["qoe"], "id", rev) do
+            qoe_filters[#qoe_filters + 1] = {
+                key = "qoe",
+                value = value.id,
+                label = i18n("flow_details.qoe_" .. key .. "_label")
+            }
+        end
+    end
+
+    rsp[#rsp + 1] = {
+        action = "qoe",
+        label = i18n("qoe"),
+        name = "qoe",
+        value = qoe_filters
+    }
+end
 
 local tcp_state_filters = {{
     key = "tcp_flow_state",
