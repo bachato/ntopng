@@ -246,6 +246,7 @@ const change_dropdowns = (item) => {
   if (tmp.key === "speedtest") {
     host.value.value = "speedtest.net"
     disable_host.value = true;
+    check_host(host.value.value);
   }
   granularities_list.value = tmp.granularities.map((t) => {
     return {
