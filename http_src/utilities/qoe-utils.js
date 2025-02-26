@@ -44,7 +44,7 @@ const QoEQualityIcon = (value) => {
     } else if (value > 50) {
         icon = '<svg data-bs-toggle="tooltip" data-bs-placement="bottom" title="' + QoEQualityLabel(value) + '" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-signal-medium mb-1 text-warning" style="margin-top:-4px;"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/></svg>'
     } else if (value > 0) {
-        icon = '<svg data-bs-toggle="tooltip" data-bs-placement="bottom" title="' + QoEQualityLabel(value) + '" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-signal-low mb-1 text-error" style="margin-top:-4px;"><path d="M2 20h.01"/><path d="M7 20v-4"/></svg>'
+        icon = '<svg data-bs-toggle="tooltip" data-bs-placement="bottom" title="' + QoEQualityLabel(value) + '" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-signal-low mb-1 text-danger" style="margin-top:-4px;"><path d="M2 20h.01"/><path d="M7 20v-4"/></svg>'
     }
 
     return icon;
