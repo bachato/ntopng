@@ -31,7 +31,8 @@ RecipientQueue::RecipientQueue(u_int16_t _recipient_id) {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   
   recipient_id = _recipient_id;
-  queue = NULL, drops = 0, enqueued = 0;
+  queue = NULL;
+  drops = 0, enqueued = 0;
   delivered = 0, delivery_failures = 0, filtered_out = 0;
   last_use = 0;
   match_alert_id = false;
@@ -160,6 +161,7 @@ bool RecipientQueue::enqueue(const AlertFifoItem* const notification) {
 	(i.e. flow alerts are not stored but read from flows) But still increment the number of uses 
       */
       enqueued++;
+      delivered++;
 #ifdef DEBUG_RECIPIENT_QUEUE
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "Flow alert (no enqueue - clickhouse uses: %u)", enqueued);
 #endif
