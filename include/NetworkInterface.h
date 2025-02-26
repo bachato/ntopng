@@ -1371,6 +1371,7 @@ public:
 				   bool *matched);
 
 #ifdef NTOPNG_PRO
+  void lua_qoe_types(lua_State *vm, flowHostRetriever *retriever);
   static bool compute_client_server_flow_stats(GenericHashEntry *node,
                                                void *user_data, bool *matched);
   static bool compute_app_client_server_flow_stats(GenericHashEntry *node,

@@ -74,7 +74,9 @@ Paginator::Paginator() {
   icmp_type = u_int8_t(-1);
   icmp_code = u_int8_t(-1);
   dscp_filter = (u_int8_t)-1;
-
+#ifdef NTOPNG_PRO
+  qoe_filter = (u_int8_t)-1;
+#endif
   details_level = details_normal;
   details_level_set = false;
 
@@ -233,7 +235,11 @@ void Paginator::readOptions(lua_State* L, int index) {
         else if (!strcmp(key, "icmp_code"))
           icmp_code = lua_tointeger(L, -1);
         else if (!strcmp(key, "dscpFilter"))
-          dscp_filter = lua_tointeger(L, -1);
+            dscp_filter = lua_tointeger(L, -1);
+    #ifdef NTOPNG_PRO
+        else if (!strcmp(key, "qoeFilter"))
+            qoe_filter = lua_tointeger(L, -1);
+    #endif
         else if (!strcmp(key, "ifaceIndex"))
           iface_index_filter = lua_tointeger(L, -1);
         else if (!strcmp(key, "statusFilter"))

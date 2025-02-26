@@ -24,7 +24,6 @@ local flow_info = _GET["flow_info"]
 local flowstats = interface.getActiveFlowsStats(host, nil, false, talking_with, client, server, flow_info)
 local selected_ip = _GET["flowhosts_type"]
 
-
 local rsp = {}
 
 if interface.isView() then
@@ -112,6 +111,31 @@ if not host then
         label = i18n("db_explorer.host_data"),
         name = "flowhosts_type",
         value = hosts_type_filters
+    }
+end
+
+if ntop.isEnterpriseL then
+    local qoe_filters = {{
+        key = "qoe",
+        value = "",
+        label = i18n("all")
+    }}
+
+    if flowstats["qoe"] then
+        for key, value in pairsByField(flowstats["qoe"], "id", rev) do
+            qoe_filters[#qoe_filters + 1] = {
+                key = "qoe",
+                value = value.id,
+                label = i18n("flow_details.qoe_" .. key .. "_label")
+            }
+        end
+    end
+
+    rsp[#rsp + 1] = {
+        action = "qoe",
+        label = i18n("qoe"),
+        name = "qoe",
+        value = qoe_filters
     }
 end
 

@@ -158,6 +158,7 @@ function getFlowsFilter()
     local ipversion = _GET["version"]
     local l4proto = _GET["l4proto"]
     local vlan = _GET["vlan"]
+    local qoe = _GET["qoe"]
     local username = _GET["username"]
     local host = _GET["host"]
     local pid_name = _GET["pid_name"]
@@ -218,6 +219,10 @@ function getFlowsFilter()
         network_id = tonumber(network_id)
     end
 
+    if qoe then
+        qoe = tonumber(qoe)
+    end
+
     local to_skip = (currentPage - 1) * perPage
 
     local a2z = false
@@ -237,6 +242,7 @@ function getFlowsFilter()
         ["a2zSortOrder"] = a2z,
         ["hostFilter"] = host,
         ["portFilter"] = port,
+        ["qoeFilter"] = qoe,
         ["LocalNetworkFilter"] = network_id,
         ["ifaceIndex"] = iface_index
     }

@@ -55,7 +55,9 @@ class Paginator {
   LocationPolicy client_mode;
   LocationPolicy server_mode;
   TcpFlowStateFilter tcp_flow_state_filter;
-
+#ifdef NTOPNG_PRO
+  u_int8_t qoe_filter;
+#endif
  public:
   Paginator();
   virtual ~Paginator();
@@ -328,6 +330,15 @@ class Paginator {
     }
     return false;
   }
+#ifdef NTOPNG_PRO
+  inline bool QoEFilter(u_int8_t *f) const {
+    if (qoe_filter != (u_int8_t)-1) {
+      (*f) = qoe_filter;
+      return true;
+    }
+    return false;
+  }
+#endif
 
   inline bool unidirectionalTraffic(bool *f) const {
     if (unidirectional_traffic != -1) {

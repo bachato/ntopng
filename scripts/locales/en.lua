@@ -3380,6 +3380,7 @@ local lang = {
     ["qoe_good_label"] = "Good",
     ["qoe_fair_label"] = "Acceptable",
     ["qoe_degraded_label"] = "Degraded",
+    ["qoe_unknown_label"] = "Unknown",
     ["qoe_poor_label"] = "Poor",
     ["r_factor"] = "R-Factor",
     ["reach_connection_label"] = "Reach Connection",

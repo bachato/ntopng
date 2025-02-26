@@ -675,6 +675,7 @@ public:
   u_int8_t computeQoEUDPscore(QoELimits *l, bool cli_to_srv, std::vector<std::string> *issues);
   u_int8_t getQoEScore();
   void getQoEInfo(ndpi_serializer *serializer);
+  u_int8_t getQoEType();
 #endif
   void endProtocolDissection();
   inline void setCustomApp(custom_app_t ca) {
