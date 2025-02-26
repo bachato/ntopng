@@ -5200,11 +5200,11 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
         f->getCli2SrvDSCP() != dscp_filter &&
         f->getSrv2CliDSCP() != dscp_filter)
         return (false);
-
+#ifdef NTOPNG_PRO
     if (retriever->pag && retriever->pag->QoEFilter(&qoe_filter) &&
         f->getQoEType() != qoe_filter)
         return (false);
-
+#endif
     if (retriever->pag && retriever->pag->portFilter(&port) &&
         f->get_cli_port() != port && f->get_srv_port() != port)
       return (false);
@@ -6208,6 +6208,7 @@ static bool flow_sum_stats(GenericHashEntry *flow, void *user_data,
 
 /* **************************************************** */
 
+#ifdef NTOPNG_PRO
 void NetworkInterface::lua_qoe_types(lua_State *vm, flowHostRetriever *retriever) {
     lua_newtable(vm);  
     
@@ -6257,6 +6258,7 @@ void NetworkInterface::lua_qoe_types(lua_State *vm, flowHostRetriever *retriever
     lua_insert(vm, -2);
     lua_settable(vm, -3);
 }
+#endif
 
 /* **************************************************** */
 
