@@ -43,6 +43,7 @@ class NetworkStats : public InterfaceMemberAlertableEntity,
   u_int32_t round_trip_time;
 
 #if defined(NTOPNG_PRO)
+  QoEStats qoe_stats;
   InOutTraffic *network_matrix;
   time_t nextMinPeriodicUpdate;
 #endif
@@ -141,6 +142,9 @@ class NetworkStats : public InterfaceMemberAlertableEntity,
   void updateSynAckAlertsCounter(time_t when, bool synack_sent);
   void updateRoundTripTime(u_int32_t rtt_msecs);
   void incNumFlows(time_t t, bool as_client);
+#ifdef NTOPNG_PRO
+  void incQoEStats(QoEType qoe_type) { qoe_stats.incQoEStats(qoe_type); };
+#endif
 };
 
 #endif /* _NETWORK_STATS_H_ */

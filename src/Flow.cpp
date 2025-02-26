@@ -480,6 +480,7 @@ Flow::~Flow() {
   */
   Host *cli_u = getViewSharedClient(), *srv_u = getViewSharedServer();
 
+
   if(getInterface()->isViewed()) /* Score decrements done here for 'viewed'
                                      interfaces to avoid races. */
     decAllFlowScores();
@@ -1884,6 +1885,44 @@ void Flow::incFlowDroppedCounters() {
   }
 }
 #endif
+
+/* *************************************** */
+
+/* This function is called when deleting the Flow, so if some counter/value
+ * needs to be updated on flow_end, it's possible to do it from here
+ */
+void Flow::flow_end_stats_update() {
+#ifdef NTOPNG_PRO
+  QoEType qoe_type = getQoEType();
+  Host *cli_u = getViewSharedClient(), *srv_u = getViewSharedServer();
+  AutonomousSystem *cli_as = cli_u ? cli_u->get_as() : NULL;
+  AutonomousSystem *srv_as = srv_u ? srv_u->get_as() : NULL;
+  int32_t cli_network_id = 0, srv_network_id = 0;
+  
+  if (cli_u) cli_u->incQoEStats(qoe_type);
+  if (srv_u) srv_u->incQoEStats(qoe_type);
+  if (cli_as) cli_as->incQoEStats(qoe_type);
+  if (srv_as) {
+    /* In case cli and srv ASN are the same do not increase, already increased above */
+    if (cli_as && (cli_as == srv_as)) { ; }
+    else { srv_as->incQoEStats(qoe_type); } 
+  }
+  if (cli_u) {
+    cli_network_id = cli_u->get_local_network_id();
+    NetworkStats *cli_network_stats = cli_u->getNetworkStats(cli_network_id);
+    if (cli_network_stats) cli_network_stats->incQoEStats(qoe_type);
+  }
+  if (srv_u) {
+    /* Same as ASN, increase only if they are different networks */
+    srv_network_id = srv_u->get_local_network_id();
+    if (srv_network_id != cli_network_id) {
+        NetworkStats *srv_network_stats = srv_u->getNetworkStats(srv_network_id);
+        if (srv_network_stats) srv_network_stats->incQoEStats(qoe_type);
+    }
+  }
+  if (iface) iface->incQoEStats(qoe_type);
+#endif
+}
 
 /* *************************************** */
 
@@ -4689,6 +4728,7 @@ void Flow::housekeep(time_t t) {
     }
 
     dumpCheck(t, true /* LAST dump before delete */);
+    flow_end_stats_update();
 
 #ifdef NTOPNG_PRO
     if(cli_host && srv_host) {

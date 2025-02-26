@@ -128,6 +128,21 @@ function ts_dump.asn_update_rrds(when, ifstats, verbose)
             end
         end
 
+        -- QoE Stats
+        if ntop.isEnterpriseL() then
+            local qoe_list = {}
+            for id, value in pairs(asn_stats.qoe or {}) do
+                local delta = delta_val(interface, "asn_qoe_stats." .. ifstats.id .. "." .. asn .. "." .. id, "5mins", value.num, true)
+                qoe_list[id] = delta
+            end
+    
+            if table.len(qoe_list) > 0 then
+                qoe_list.ifid = ifstats.id
+                qoe_list.asn = asn
+                ts_utils.append("asn:qoe_stats", qoe_list, when)
+            end
+        end
+
         -- Save ASN RTT stats
         if not ifstats.isViewed and not ifstats.isView then
             ts_utils.append("asn:rtt", {
@@ -538,6 +553,21 @@ function ts_dump.host_update_stats_rrds(when, hostname, host, ifstats, verbose)
                 bytes_sent = value["bytes.sent"],
                 bytes_rcvd = value["bytes.rcvd"]
             }, when)
+        end
+    end
+
+    -- QoE Stats
+    if ntop.isEnterpriseL() then
+        local qoe_list = {}
+        for id, value in pairs(host.qoe or {}) do
+            local delta = delta_val(interface, "host_qoe_stats." .. ifstats.id .. "." .. hostname .. "." .. id, "5mins", value.num, true)
+            qoe_list[id] = delta
+        end
+
+        if table.len(qoe_list) > 0 then
+            qoe_list.ifid = ifstats.id
+            qoe_list.host = hostname
+            ts_utils.append("host:qoe_stats", qoe_list, when)
         end
     end
 

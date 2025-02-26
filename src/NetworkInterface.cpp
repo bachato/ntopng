@@ -4879,8 +4879,9 @@ struct flowHostRetriever {
   u_int32_t maxNumEntries, actNumEntries;
   u_int64_t totBytesSent, totBytesRcvd, totThpt;
   struct flowHostRetrieveList *elems;
-  QoETypeNum qoe;
-
+#ifdef NTOPNG_PRO
+  QoEStats qoe;
+#endif
   bool only_traffic_stats;
   /* Used by getActiveFlowsStats */
   nDPIStats *ndpi_stats;
@@ -5202,7 +5203,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
         return (false);
 #ifdef NTOPNG_PRO
     if (retriever->pag && retriever->pag->QoEFilter(&qoe_filter) &&
-        f->getQoEType() != qoe_filter)
+        ((u_int8_t) f->getQoEType()) != qoe_filter)
         return (false);
 #endif
     if (retriever->pag && retriever->pag->portFilter(&port) &&
@@ -6154,29 +6155,6 @@ int NetworkInterface::sortFlows(u_int32_t *begin_slot, bool walk_all,
 
 /* **************************************************** */
 
-#ifdef NTOPNG_PRO
-/* This function adds the QoE specifics to the JSON field (dumped in the DB) */
-static void getQoEType(flowHostRetriever *retriever, Flow *f) {
-    if(retriever == NULL || f == NULL) return;
-    u_int8_t qoe_score = f->getQoEScore();
-    if (qoe_score > 90 && qoe_score <= 100) {
-        retriever->qoe.excellent++;
-    } else if (qoe_score > 75 && qoe_score <= 100) {
-        retriever->qoe.good++;
-    } else if (qoe_score > 60 && qoe_score <= 100) {
-        retriever->qoe.fair++;
-    } else if (qoe_score > 50 && qoe_score <= 100) {
-        retriever->qoe.degraded++;
-    } else if (qoe_score > 1 && qoe_score <= 100) {
-        retriever->qoe.poor++;
-    } else {
-        retriever->qoe.unknown++;
-    }
-}
-#endif
-
-/* **************************************************** */
-
 static bool flow_sum_stats(GenericHashEntry *flow, void *user_data,
                            bool *matched) {
   flowHostRetriever *retriever = (flowHostRetriever *)user_data;
@@ -6196,7 +6174,7 @@ static bool flow_sum_stats(GenericHashEntry *flow, void *user_data,
     retriever->totBytesRcvd += f->get_bytes_srv2cli();
     retriever->totThpt += f->get_bytes_thpt();
 #ifdef NTOPNG_PRO
-    getQoEType(retriever, f);
+    retriever->qoe.incQoEStats(f->getQoEType());
 #endif
     if (!retriever->only_traffic_stats) f->sumStats(ndpi_stats, stats);
 
@@ -6205,60 +6183,6 @@ static bool flow_sum_stats(GenericHashEntry *flow, void *user_data,
 
   return (false); /* false = keep on walking */
 }
-
-/* **************************************************** */
-
-#ifdef NTOPNG_PRO
-void NetworkInterface::lua_qoe_types(lua_State *vm, flowHostRetriever *retriever) {
-    lua_newtable(vm);  
-    
-    lua_newtable(vm);  
-    lua_push_uint64_table_entry(vm, "num", retriever->qoe.unknown);
-    lua_push_uint64_table_entry(vm, "id", unknown);
-    lua_pushstring(vm, "unknown");
-    lua_insert(vm, -2);
-    lua_settable(vm, -3);
-
-    lua_newtable(vm);  
-    lua_push_uint64_table_entry(vm, "num", retriever->qoe.poor);
-    lua_push_uint64_table_entry(vm, "id", poor);
-    lua_pushstring(vm, "poor");
-    lua_insert(vm, -2);
-    lua_settable(vm, -3);
-
-    lua_newtable(vm);  
-    lua_push_uint64_table_entry(vm, "num", retriever->qoe.degraded);
-    lua_push_uint64_table_entry(vm, "id", degraded);
-    lua_pushstring(vm, "degraded");
-    lua_insert(vm, -2);
-    lua_settable(vm, -3);
-
-    lua_newtable(vm);  
-    lua_push_uint64_table_entry(vm, "num", retriever->qoe.fair);
-    lua_push_uint64_table_entry(vm, "id", fair);
-    lua_pushstring(vm, "fair");
-    lua_insert(vm, -2);
-    lua_settable(vm, -3);
-
-    lua_newtable(vm);  
-    lua_push_uint64_table_entry(vm, "num", retriever->qoe.good);
-    lua_push_uint64_table_entry(vm, "id", good);
-    lua_pushstring(vm, "good");
-    lua_insert(vm, -2);
-    lua_settable(vm, -3);
-
-    lua_newtable(vm);  
-    lua_push_uint64_table_entry(vm, "num", retriever->qoe.excellent);
-    lua_push_uint64_table_entry(vm, "id", excellent);
-    lua_pushstring(vm, "excellent");
-    lua_insert(vm, -2);
-    lua_settable(vm, -3);
-
-    lua_pushstring(vm, "qoe");
-    lua_insert(vm, -2);
-    lua_settable(vm, -3);
-}
-#endif
 
 /* **************************************************** */
 
@@ -6288,12 +6212,6 @@ void NetworkInterface::getActiveFlowsStats(
   retriever.only_traffic_stats = only_traffic_stats;
   retriever.observationPointId = getLuaVMUservalue(vm, observationPointId);
   retriever.flow_info = flow_info;
-  retriever.qoe.unknown = 0;
-  retriever.qoe.poor = 0;
-  retriever.qoe.degraded = 0;
-  retriever.qoe.fair = 0;
-  retriever.qoe.good = 0;
-  retriever.qoe.excellent = 0;
 
   walker(&begin_slot, walk_all, walker_flows, flow_sum_stats, &retriever);
 
@@ -6305,7 +6223,7 @@ void NetworkInterface::getActiveFlowsStats(
 
 #ifdef NTOPNG_PRO
   /* Handle the QoE*/
-  lua_qoe_types(vm, &retriever);
+  retriever.qoe.lua_qoe_stats(vm);
 #endif
 
   if (!only_traffic_stats) {
@@ -7620,7 +7538,9 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
   lua_push_uint64_table_entry(vm, "traffic_rcvd_since_reset", _ethStats.getNumIngressBytes() - getCheckPointNumTrafficRcvd());
   lua_push_uint64_table_entry(vm, "packets_sent_since_reset", _ethStats.getNumEgressPackets() - getCheckPointNumPacketsSent());
   lua_push_uint64_table_entry(vm, "packets_rcvd_since_reset", _ethStats.getNumIngressPackets() - getCheckPointNumPacketsRcvd());
-
+#ifdef NTOPNG_PRO
+  qoe_stats.lua_qoe_stats(vm);
+#endif
 
   if(fullStats) {
     _pktStats.lua(vm, "pktSizeDistribution");

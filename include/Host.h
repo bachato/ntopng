@@ -43,6 +43,9 @@ class Host : public GenericHashEntry,
   u_int8_t num_remote_access;
   HostStats *stats, *stats_shadow;
   time_t last_stats_reset;
+#ifdef NTOPNG_PRO
+  QoEStats qoe_stats;
+#endif
   std::atomic<u_int32_t> active_alerted_flows;
   u_int8_t view_interface_mac[6];
 
@@ -976,6 +979,9 @@ class Host : public GenericHashEntry,
   virtual SPSCQueue<std::pair<u_int16_t, u_int16_t>> *getContactedServerPorts() { return (NULL);};
   virtual char *getSerializationKey(char *buf, u_int bufsize, bool short_format = false) { return (NULL); };
   virtual void setTCPfingerprint(char *tcp_fingerprint, enum operating_system_hint os) { ; }
+#ifdef NTOPNG_PRO
+  void incQoEStats(QoEType qoe_type) { qoe_stats.incQoEStats(qoe_type); };
+#endif
 };
 
 #endif /* _HOST_H_ */

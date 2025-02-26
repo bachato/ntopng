@@ -262,6 +262,7 @@ using namespace std;
 #include "HWCounter.h"
 #include "RSICounter.h"
 #ifdef NTOPNG_PRO
+#include "QoEStats.h"
 #include "BehaviorAnalysis.h"
 #endif
 #include "ThroughputStats.h"

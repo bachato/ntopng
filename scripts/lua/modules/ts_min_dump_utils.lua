@@ -138,6 +138,21 @@ function ts_dump.subnet_update_rrds(when, ifstats, verbose)
             scoreAsServer = sstats["score.as_server"]
         }, when)
 
+        -- QoE Stats
+        if ntop.isEnterpriseL() then
+            local qoe_list = {}
+            for id, value in pairs(sstats.qoe or {}) do
+                local delta = delta_val(interface, "subnet_qoe_stats.".. ifstats.id .. "." .. subnet .. "." .. id, "min", value.num, true)
+                qoe_list[id] = delta
+            end
+    
+            if table.len(qoe_list) > 0 then
+                qoe_list.ifid = ifstats.id
+                qoe_list.subnet = subnet
+                ts_utils.append("subnet:qoe_stats", qoe_list, when)
+            end
+        end
+
         if not ifstats.isSampledTraffic then
             ts_utils.append("subnet:tcp_retransmissions", {
                 ifid = ifstats.id,
@@ -205,6 +220,42 @@ function ts_dump.iface_update_general_stats(when, ifstats, verbose)
         ifid = ifstats.id,
         new_flows = ifstats.stats.new_flows
     }, when)
+
+    -- QoE Stats
+    if ntop.isEnterpriseL() then
+        local qoe_list = {}
+        -- In case of view interface this ts is emtpy, so get the info from the other interfaces
+        if ifstats.isView then
+            for ifid, ifname in pairs(interface.getIfNames() or {}) do
+                interface.select(ifname)
+                local stats = interface.getStats() or {}
+                if stats.isViewed then
+                    for id, value in pairs(stats.qoe or {}) do
+                        if not qoe_list[id] then
+                            qoe_list[id] = 0
+                        end
+                        qoe_list[id] = value.num + qoe_list[id]
+                    end
+                end
+            end
+            -- Go back to the view interface
+            interface.select(ifstats.id)
+            for id, value in pairs(qoe_list) do
+                local delta = delta_val(interface, "iface_qoe_stats.".. ifstats.id .. "." .. id, "min", value, true)
+                qoe_list[id] = delta
+            end
+        else
+            for id, value in pairs(ifstats.qoe or {}) do
+                local delta = delta_val(interface, "iface_qoe_stats.".. ifstats.id .. "." .. id, "min", value.num, true)
+                qoe_list[id] = delta
+            end
+        end
+
+        if table.len(qoe_list) > 0 then
+            qoe_list.ifid = ifstats.id
+            ts_utils.append("iface:qoe_stats", qoe_list, when)
+        end
+    end
 
     if not ifstats.isViewed then
         -- Viewed interfaces don't have hosts, their hosts stay in the view

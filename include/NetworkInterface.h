@@ -111,6 +111,9 @@ protected:
   ServiceMap *sMap;
   ACLFlow *acl_flow;
 #endif
+#ifdef NTOPNG_PRO
+  QoEStats qoe_stats;
+#endif
 
   UsedPorts usedPorts;
 
@@ -1371,7 +1374,6 @@ public:
 				   bool *matched);
 
 #ifdef NTOPNG_PRO
-  void lua_qoe_types(lua_State *vm, flowHostRetriever *retriever);
   static bool compute_client_server_flow_stats(GenericHashEntry *node,
                                                void *user_data, bool *matched);
   static bool compute_app_client_server_flow_stats(GenericHashEntry *node,
@@ -1390,6 +1392,9 @@ public:
 		    ndpi_protocol_category_t ndpi_category,
 		    u_int32_t bytes_sent, u_int32_t bytes_rcvd, 
         u_int32_t pkts_sent, u_int32_t pkts_rcvd);
+#ifdef NTOPNG_PRO
+  void incQoEStats(QoEType qoe_type) { qoe_stats.incQoEStats(qoe_type); };
+#endif
 };
 
 #endif /* _NETWORK_INTERFACE_H_ */

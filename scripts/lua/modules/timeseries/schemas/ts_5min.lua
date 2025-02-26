@@ -208,6 +208,23 @@ schema:addMetric("packets_rcvd")
 
 -- ##############################################
 
+if ntop.isEnterpriseL() then
+    schema = ts_utils.newSchema("asn:qoe_stats", {
+        step = 300,
+        metrics_type = ts_utils.metrics.gauge
+    })
+    schema:addTag("ifid")
+    schema:addTag("asn")
+    schema:addMetric("excellent")
+    schema:addMetric("good")
+    schema:addMetric("fair")
+    schema:addMetric("degraded")
+    schema:addMetric("poor")
+    schema:addMetric("unknown")
+end
+
+-- ##############################################
+
 -------------------------------------------------------
 -- COUNTRIES SCHEMAS
 -------------------------------------------------------
@@ -847,6 +864,23 @@ schema:addTag("host")
 schema:addTag("category")
 schema:addMetric("bytes_sent")
 schema:addMetric("bytes_rcvd")
+
+-- ##############################################
+
+if ntop.isEnterpriseL() then
+    schema = ts_utils.newSchema("host:qoe_stats", {
+        step = 300,
+        metrics_type = ts_utils.metrics.gauge
+    })
+    schema:addTag("ifid")
+    schema:addTag("host")
+    schema:addMetric("excellent")
+    schema:addMetric("good")
+    schema:addMetric("fair")
+    schema:addMetric("degraded")
+    schema:addMetric("poor")
+    schema:addMetric("unknown")
+end
 
 -- ##############################################
 

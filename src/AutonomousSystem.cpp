@@ -113,6 +113,9 @@ void AutonomousSystem::lua(lua_State *vm, DetailsLevel details_level,
       tcp_packet_stats_sent.lua(vm, "tcpPacketStats.sent");
       tcp_packet_stats_rcvd.lua(vm, "tcpPacketStats.rcvd");
     }
+#ifdef NTOPNG_PRO
+    qoe_stats.lua_qoe_stats(vm);
+#endif
   }
 
   lua_newtable(vm);

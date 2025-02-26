@@ -229,6 +229,25 @@ schema:addMetric("score")
 schema:addMetric("scoreAsClient")
 schema:addMetric("scoreAsServer")
 
+-- ##############################################
+
+if ntop.isEnterpriseL() then
+    schema = ts_utils.newSchema("subnet:qoe_stats", {
+        step = 300,
+        metrics_type = ts_utils.metrics.gauge
+    })
+    schema:addTag("ifid")
+    schema:addTag("subnet")
+    schema:addMetric("excellent")
+    schema:addMetric("good")
+    schema:addMetric("fair")
+    schema:addMetric("degraded")
+    schema:addMetric("poor")
+    schema:addMetric("unknown")
+end
+
+-- ##############################################
+
 -------------------------------------------------------
 -- INTERFACES SCHEMAS
 -------------------------------------------------------
@@ -551,6 +570,22 @@ schema = ts_utils.newSchema("iface:hosts_anomalies", {
 schema:addTag("ifid")
 schema:addMetric("num_loc_hosts_anom")
 schema:addMetric("num_rem_hosts_anom")
+
+-- ##############################################
+
+if ntop.isEnterpriseL() then
+    schema = ts_utils.newSchema("iface:qoe_stats", {
+        step = 300,
+        metrics_type = ts_utils.metrics.gauge
+    })
+    schema:addTag("ifid")
+    schema:addMetric("excellent")
+    schema:addMetric("good")
+    schema:addMetric("fair")
+    schema:addMetric("degraded")
+    schema:addMetric("poor")
+    schema:addMetric("unknown")
+end
 
 -- ##############################################
 

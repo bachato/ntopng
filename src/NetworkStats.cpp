@@ -147,7 +147,9 @@ void NetworkStats::lua(lua_State *vm, bool diff) {
   if (syn_recvd_last_min > synack_sent_last_min)
     hits = syn_recvd_last_min - synack_sent_last_min;
   if (hits) lua_push_uint64_table_entry(vm, "hits.syn_scan_victim", hits);
-
+#ifdef NTOPNG_PRO
+  qoe_stats.lua_qoe_stats(vm);
+#endif
   GenericTrafficElement::lua(vm, true);
   Score::lua_get_score(vm);
   Score::lua_get_score_breakdown(vm);

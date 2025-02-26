@@ -34,6 +34,9 @@ class AutonomousSystem : public GenericHashEntry,
   char *asname;
   u_int32_t round_trip_time;
   u_int32_t alerted_flows_as_client, alerted_flows_as_server;
+#ifdef NTOPNG_PRO
+  QoEStats qoe_stats;
+#endif
 
 #if defined(NTOPNG_PRO)
   time_t nextMinPeriodicUpdate;
@@ -97,6 +100,9 @@ class AutonomousSystem : public GenericHashEntry,
   inline u_int32_t getTotalAlertedNumFlowsAsServer() const {
     return (alerted_flows_as_server);
   };
+#ifdef NTOPNG_PRO
+  void incQoEStats(QoEType qoe_type) { qoe_stats.incQoEStats(qoe_type); };
+#endif
 };
 
 #endif /* _AUTONOMOUS_SYSTEM_H_ */

@@ -916,6 +916,9 @@ void Host::lua(lua_State *vm, AddressTree *ptree, bool host_details,
   lua_get_as(vm);
   lua_get_os(vm);
   lua_get_host_pool(vm);
+#ifdef NTOPNG_PRO
+  qoe_stats.lua_qoe_stats(vm);
+#endif
 
   if(stats)
     stats->lua(vm, mask_host, Utils::bool2DetailsLevel(verbose, host_details)),

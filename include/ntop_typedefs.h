@@ -1251,14 +1251,6 @@ typedef enum {
   DROP_REASON_DEV_NOT_ALLOW_PROTO_SRV
 } DropReason;
 
-typedef struct {
-    u_int32_t unknown;
-    u_int32_t poor;
-    u_int32_t degraded;
-    u_int32_t fair;
-    u_int32_t good;
-    u_int32_t excellent;
-} QoETypeNum;
 
 typedef enum {
     unknown = 0,

@@ -675,7 +675,7 @@ public:
   u_int8_t computeQoEUDPscore(QoELimits *l, bool cli_to_srv, std::vector<std::string> *issues);
   u_int8_t getQoEScore();
   void getQoEInfo(ndpi_serializer *serializer);
-  u_int8_t getQoEType();
+  QoEType getQoEType();
 #endif
   void endProtocolDissection();
   inline void setCustomApp(custom_app_t ca) {
@@ -937,6 +937,7 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
                                    bool first_partial,
                                    const struct timeval *tv);
   void periodic_stats_update(const struct timeval *tv);
+  void flow_end_stats_update();
   void set_hash_entry_id(u_int32_t assigned_hash_entry_id);
   u_int32_t get_hash_entry_id() const;
 
