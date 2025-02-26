@@ -99,9 +99,17 @@ function mattermost.dequeueRecipientAlerts(recipient, budget)
   local start_time = os.time()
   local sent = 0
   local more_available = true
+
   local budget_used = 0
   local max_alerts_per_request = 1 -- collapse up to X alerts per request
   local settings = readSettings(recipient)
+
+  local success = true
+  local error_message = nil
+  local delivered = 0
+  local discarded = 0
+  local failures = 0
+
   -- Dequeue alerts up to budget x max_alerts_per_request
   -- Note: in this case budget is the number of email to send
   while budget_used <= budget and more_available do
@@ -119,6 +127,8 @@ function mattermost.dequeueRecipientAlerts(recipient, budget)
         if alert_utils.filter_notification(notification, recipient.recipient_id) then
           notifications[#notifications + 1] = notification.alert
           i = i + 1
+        else
+          discarded = discarded + 1
         end
       else
         break
@@ -138,7 +148,12 @@ function mattermost.dequeueRecipientAlerts(recipient, budget)
 
     local res, msg = mattermost.sendMattermost(table.concat(alerts, "\n"), settings)
     if not res then
-      return { success = false, error_message = msg }
+      success = false
+      error_message = msg or "Unable to send alerts to the mattermost"
+      failures = failures + #notifications
+      goto done
+    else
+      delivered = delivered + #notifications
     end
 
     -- Remove the processed messages from the queue
@@ -146,7 +161,15 @@ function mattermost.dequeueRecipientAlerts(recipient, budget)
     sent = sent + 1
   end
 
-  return { success = true, more_available = more_available }
+ ::done::
+  return {
+    success = success,
+    error_message = error_message,
+    delivered = delivered,
+    discarded = discarded,
+    failures  = failures,
+    more_available = more_available,
+ }
 end
 
 -- ##############################################

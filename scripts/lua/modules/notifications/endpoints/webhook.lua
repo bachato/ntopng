@@ -119,11 +119,17 @@ end
 function webhook.dequeueRecipientAlerts(recipient, budget)
   local start_time = os.time()
   local sent = 0
-  local more_available = true
   local budget_used = 0
   local num_messages_dequeued = 0
   local debugme = false
   local settings = recipient2sendMessageSettings(recipient)
+
+  local more_available = true
+  local success = true
+  local error_message = nil
+  local delivered = 0
+  local discarded = 0
+  local failures = 0
 
   -- Dequeue alerts up to budget x MAX_ALERTS_PER_REQUEST
   -- Note: in this case budget is the number of webhook messages to send
@@ -142,6 +148,8 @@ function webhook.dequeueRecipientAlerts(recipient, budget)
         if alert_utils.filter_notification(notification, recipient.recipient_id) then
           notifications[#notifications + 1] = notification.alert
           i = i + 1
+        else
+          discarded = discarded + 1
         end
       else
         break
@@ -167,9 +175,13 @@ function webhook.dequeueRecipientAlerts(recipient, budget)
     
     if not webhook.sendMessage(alerts, settings) then
        if(debugme) then tprint("[FAILURE] Message delivery failed") end
-       return { success = false, error_message = "Unable to send alerts to the webhook" }
+       success = false
+       error_message = "Unable to send alerts to the webhook"
+       failures = failures + #notifications
+       goto done
     else
        if(debugme) then tprint("[OK] Message sent correctly") end
+       delivered = delivered + #notifications
     end
 
     -- Remove the processed messages from the queue
@@ -178,8 +190,16 @@ function webhook.dequeueRecipientAlerts(recipient, budget)
   end
 
   if(debugme) then tprint("[END] Sent "..num_messages_dequeued.." messages") end
-  
-  return { success = true, more_available = more_available }
+ 
+ ::done::
+  return {
+    success = success,
+    error_message = error_message,
+    delivered = delivered,
+    discarded = discarded,
+    failures  = failures,
+    more_available = more_available,
+  }
 end
 
 -- ##############################################

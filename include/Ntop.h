@@ -649,6 +649,7 @@ class Ntop {
   AlertFifoItem *recipient_dequeue(u_int16_t recipient_id);
   void recipient_stats(u_int16_t recipient_id, lua_State *vm);
   time_t recipient_last_use(u_int16_t recipient_id);
+  void inc_recipient_stats(u_int16_t recipient_id, u_int64_t delivered, u_int64_t filtered_out, u_int64_t delivery_failures);
   void recipient_delete(u_int16_t recipient_id);
   void recipient_register(u_int16_t recipient_id, AlertLevel minimum_severity,
                           Bitmap128 enabled_categories,

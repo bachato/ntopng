@@ -17,6 +17,9 @@
                                 <th>{{ i18n('endpoint_notifications.type') }}</th>
                                 <th>{{ i18n('endpoint_notifications.associated_to_endpoints') }}</th>
                                 <th>{{ i18n('endpoint_notifications.time_since_last_use') }}</th>
+                                <th>{{ i18n('endpoint_notifications.num_delivered') }}</th>
+                                <th>{{ i18n('endpoint_notifications.num_filtered_out') }}</th>
+                                <th>{{ i18n('endpoint_notifications.num_delivery_failures') }}</th>
                                 <th>{{ i18n('endpoint_notifications.num_uses') }}</th>
                                 <th>{{ i18n('endpoint_notifications.num_drops') }}</th>
                                 <th>{{ i18n('endpoint_notifications.fill_pct') }}</th>
@@ -316,6 +319,33 @@
                 className: "text-center",
                 width: "15%",
                 render: $.fn.dataTableExt.absoluteFormatSecondsToHHMMSS
+            },
+            {
+                data: "stats.num_delivered",
+                className: "text-right",
+                width: "10%",
+                render: function (data, type) {
+                    if (type === "display") return NtopUtils.fint(data);
+                    return data;
+                }
+            },
+            {
+                data: "stats.num_filtered_out",
+                className: "text-right",
+                width: "10%",
+                render: function (data, type) {
+                    if (type === "display") return NtopUtils.fint(data);
+                    return data;
+                }
+            },
+            {
+                data: "stats.num_failures",
+                className: "text-right",
+                width: "10%",
+                render: function (data, type) {
+                    if (type === "display") return NtopUtils.fint(data);
+                    return data;
+                }
             },
             {
                 data: "stats.num_uses",

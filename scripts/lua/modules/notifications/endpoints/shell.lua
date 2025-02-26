@@ -139,6 +139,12 @@ function shell.dequeueRecipientAlerts(recipient, budget)
     local MAX_ALERTS_PER_REQUEST = 1
     local return_msg = {}
 
+    local success = true
+    local error_message = nil
+    local delivered = 0
+    local discarded = 0
+    local failures = 0
+
     -- Dequeue alerts up to budget x MAX_ALERTS_PER_REQUEST
     -- Note: in this case budget is the number of script messages to send
     while budget_used <= budget and more_available do
@@ -157,6 +163,8 @@ function shell.dequeueRecipientAlerts(recipient, budget)
                 if alert_utils.filter_notification(notification, recipient.recipient_id) then
                     notifications[#notifications + 1] = notification.alert
                     i = i + 1
+                else
+                    discarded = discarded + 1
                 end
             else
                 break
@@ -176,10 +184,12 @@ function shell.dequeueRecipientAlerts(recipient, budget)
         end
 
         if (shell.runScript(alerts, settings) == false) then
-            return {
-                success = false,
-                error_message = "- unable to execute the script"
-            }
+            success = false
+            error_message = "- unable to execute the script"
+            failures = failures + #notifications
+            goto done
+        else
+            delivered = delivered + #notifications
         end
 
         -- Remove the processed messages from the queue
@@ -187,10 +197,15 @@ function shell.dequeueRecipientAlerts(recipient, budget)
         sent = sent + 1
     end
 
+  ::done::
     return {
-        success = true,
-        more_available = more_available
-    }
+        success = success,
+        error_message = error_message,
+        delivered = delivered,
+        discarded = discarded,
+        failures  = failures,
+        more_available = more_available,
+   }
 end
 
 -- ##############################################

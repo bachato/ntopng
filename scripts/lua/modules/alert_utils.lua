@@ -872,6 +872,7 @@ function alert_utils.filter_notification(notification, recipient_id)
     local alert_key = alert_info.alert_id
     local entity_id = alert_info.entity_id
     local entity_val = alert_info.entity_val
+
     if notification.score == 0 then
         return true
     end

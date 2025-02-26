@@ -84,29 +84,38 @@ end
 -- On success, it clears the queue.
 -- On error, it leaves the queue unchagned to retry on next round.
 function slack.dequeueRecipientAlerts(recipient, budget)
-   local notifications = {}
-   local i = 0
-    while i < budget do
-      local notification = ntop.recipient_dequeue(recipient.recipient_id)
-      if notification then 
-        if alert_utils.filter_notification(notification, recipient.recipient_id) then
-
-          notifications[#notifications + 1] = notification.alert
-          i = i + 1
-        end
-      else
-        break
-      end
-    end
-
-  if not notifications or #notifications == 0 then
-    return {success = true, more_available = false}
-  end
-
   local settings = recipient2sendMessageSettings(recipient)
+
+  local more_available = true
+  local success = true
+  local error_message = nil
+  local delivered = 0
+  local discarded = 0
+  local failures = 0
 
   -- Separate by severity and channel
   local alerts_by_types = {}
+
+  local notifications = {}
+  local i = 0
+  while i < budget do
+    local notification = ntop.recipient_dequeue(recipient.recipient_id)
+    if notification then 
+      if alert_utils.filter_notification(notification, recipient.recipient_id) then
+        notifications[#notifications + 1] = notification.alert
+        i = i + 1
+      else
+        discarded = discarded + 1
+      end
+    else
+      break
+    end
+  end
+
+  if #notifications == 0 then
+    more_available = false
+    goto done
+  end
 
   for _, json_message in ipairs(notifications) do
     local notif = json.decode(json_message)
@@ -147,13 +156,25 @@ function slack.dequeueRecipientAlerts(recipient, budget)
       messages = table.concat(messages, "\n")
 
       if not slack.sendMessage(entity_type, severity, messages, settings) then
-        -- Note: upon failure we'll possibly resend already sent messages
-        return {success=false, error_message="Unable to send slack messages"}
+        success = false
+        error_message = "Unable to send alerts to slack"
+        failures = failures + #notifications
+        goto done
+      else
+        delivered = delivered + #notifications
       end
     end
   end
 
-  return {success = true, more_available = true}
+ ::done::
+  return {
+    success = success,
+    error_message = error_message,
+    delivered = delivered,
+    discarded = discarded,
+    failures  = failures,
+    more_available = more_available,
+ }
 end
 
 -- ##############################################

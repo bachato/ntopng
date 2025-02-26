@@ -31,7 +31,8 @@ RecipientQueue::RecipientQueue(u_int16_t _recipient_id) {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   
   recipient_id = _recipient_id;
-  queue = NULL, drops = 0, uses = 0;
+  queue = NULL, drops = 0, enqueued = 0;
+  delivered = 0, delivery_failures = 0, filtered_out = 0;
   last_use = 0;
   match_alert_id = false;
   skip_alerts = false;
@@ -158,9 +159,9 @@ bool RecipientQueue::enqueue(const AlertFifoItem* const notification) {
 	Do not store flow alerts on ClickHouse as they are retrieved using a view on historical flows
 	(i.e. flow alerts are not stored but read from flows) But still increment the number of uses 
       */
-      uses++;
+      enqueued++;
 #ifdef DEBUG_RECIPIENT_QUEUE
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "Flow alert (no enqueue - clickhouse uses: %u)", uses);
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "Flow alert (no enqueue - clickhouse uses: %u)", enqueued);
 #endif
       return true;
     }
@@ -208,9 +209,9 @@ bool RecipientQueue::enqueue(const AlertFifoItem* const notification) {
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "Alert enqueue failed (drop)");
 #endif
     } else {
-      uses++;
+      enqueued++;
 #ifdef DEBUG_RECIPIENT_QUEUE
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "Alert enqueued successfully (uses: %u)", uses);
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "Alert enqueued successfully (enqueued: %u)", enqueued);
 #endif
     }
   } else {
@@ -225,9 +226,12 @@ bool RecipientQueue::enqueue(const AlertFifoItem* const notification) {
 void RecipientQueue::lua(lua_State* vm) {
   lua_newtable(vm);
   lua_push_uint64_table_entry(vm, "last_use", last_use);
+  lua_push_uint64_table_entry(vm, "num_uses", enqueued);
   lua_push_uint64_table_entry(vm, "num_drops", drops);
-  lua_push_uint64_table_entry(vm, "num_uses", uses);
-  lua_push_uint64_table_entry(vm, "fill_pct", queue ? queue->fillPct() : 0);
+  lua_push_uint64_table_entry(vm, "num_filtered_out", filtered_out);
+  lua_push_uint64_table_entry(vm, "num_delivered", delivered);
+  lua_push_uint64_table_entry(vm, "num_failures", delivery_failures);
+  lua_push_float_table_entry(vm, "fill_pct", queue ? queue->fillPct() : 0);
 }
 
 /* *************************************** */

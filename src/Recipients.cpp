@@ -209,6 +209,21 @@ time_t Recipients::last_use(u_int16_t recipient_id) {
 
 /* *************************************** */
 
+void Recipients::incStats(u_int16_t recipient_id,
+    u_int64_t delivered, u_int64_t filtered_out, u_int64_t delivery_failures) {
+
+  if (recipient_id >= MAX_NUM_RECIPIENTS) return;
+
+  m.lock(__FILE__, __LINE__);
+
+  if (recipient_queues[recipient_id])
+    recipient_queues[recipient_id]->incStats(delivered, filtered_out, delivery_failures);
+
+  m.unlock(__FILE__, __LINE__);
+}
+
+/* *************************************** */
+
 bool Recipients::empty() {
   bool res = true;
 

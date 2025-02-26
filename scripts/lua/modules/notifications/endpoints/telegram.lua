@@ -132,6 +132,12 @@ function telegram.dequeueRecipientAlerts(recipient, budget)
     local max_alerts_per_request = 1 -- collapse up to X alerts per request
     local alert_consts = require "alert_consts"
 
+    local success = true
+    local error_message = nil
+    local delivered = 0
+    local discarded = 0
+    local failures = 0
+
     -- Dequeue alerts up to budget x max_alerts_per_request
     -- Note: in this case budget is the number of email to send
     while budget_used <= budget and more_available do
@@ -149,6 +155,8 @@ function telegram.dequeueRecipientAlerts(recipient, budget)
                 if alert_utils.filter_notification(notification, recipient.recipient_id) then
                     notifications[#notifications + 1] = notification.alert
                     i = i + 1
+                else
+                    discarded = discarded + 1
                 end
             else
                 break
@@ -169,10 +177,12 @@ function telegram.dequeueRecipientAlerts(recipient, budget)
         local json_msg = table.concat(alerts, " | ")
 
         if not telegram.sendMessage(recipient, json_msg, settings) then
-            return {
-                success = false,
-                error_message = "- unable to send alerts to the telegram"
-            }
+            success = false
+            error_message = "- unable to send alerts to the telegram"
+            failures = failures + #notifications
+            goto done
+        else
+            delivered = delivered + #notifications
         end
 
         -- Remove the processed messages from the queue
@@ -180,10 +190,15 @@ function telegram.dequeueRecipientAlerts(recipient, budget)
         sent = sent + 1
     end
 
+  ::done::
     return {
-        success = true,
-        more_available = more_available
-    }
+      success = success,
+      error_message = error_message,
+      delivered = delivered,
+      discarded = discarded,
+      failures  = failures,
+      more_available = more_available,
+   }
 end
 
 -- ##############################################

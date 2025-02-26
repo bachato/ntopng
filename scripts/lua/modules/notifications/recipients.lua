@@ -1344,6 +1344,14 @@ local function process_notifications(ready_recipients, now, deadline, periodic_f
             if m.dequeueRecipientAlerts and (now > MIN_ERROR_DELAY + last_error_notification) then
                 local rv = m.dequeueRecipientAlerts(recipient, budget_per_iter)
 
+                -- Update recipient stats
+                local delivered = rv.delivered or 0
+                local discarded = rv.discarded or 0
+                local failures  = rv.failures  or 0
+                if delivered + discarded + failures > 0 then
+                    ntop.recipient_inc_stats(recipient.recipient_id, delivered, discarded, failures)
+                end
+
                 -- If the recipient has failed (not rv.success) or
                 -- if it has no more work to do (not rv.more_available)
                 -- it can be removed from the array of ready recipients.
@@ -1357,7 +1365,7 @@ local function process_notifications(ready_recipients, now, deadline, periodic_f
                         ntop.setCache(string.format(ERROR_KEY, recipient.recipient_name), now)
                         local msg = rv.error_message or "Unknown Error"
                         traceError(TRACE_ERROR, TRACE_CONSOLE,
-                            "Error while sending notifications via " .. recipient.recipient_name .. " " .. msg)
+                            "Error while sending notifications via " .. recipient.recipient_name .. ": " .. msg)
                     end
                 end
             end

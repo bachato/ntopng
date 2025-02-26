@@ -10,7 +10,7 @@ local alerts_api = require "alerts_api"
 local alert_consts = require "alert_consts"
 
 local alert_store_db = {
-   name = "Alert Store DB",
+   name = "DataBase",
    builtin = true, -- Whether this endpoint can be configured from the UI. Disabled for the builtin alert store
 
    endpoint_params = {
@@ -69,6 +69,12 @@ function alert_store_db.dequeueRecipientAlerts(recipient, budget)
    local more_available = true
    local budget_used = 0
 
+   local success = true
+   local error_message = nil
+   local delivered = 0
+   local discarded = 0
+   local failures = 0
+
    -- Now also check for alerts pushed by checks from Lua
    -- Dequeue alerts up to budget
    -- Note: in this case budget is the number of alert_store_db alerts to insert into the queue
@@ -98,7 +104,6 @@ function alert_store_db.dequeueRecipientAlerts(recipient, budget)
             local alert_store = get_alert_store(alert.entity_id)
             if alert_store then
 
-
                interface.select(string.format("%d", alert.ifid or 0))
 
                if alert.action == "engage" then
@@ -117,6 +122,8 @@ function alert_store_db.dequeueRecipientAlerts(recipient, budget)
                   if(debugme) then io.write("Stored alert in alert.entity_id "..alert.entity_id) end
                end
 
+               delivered = delivered + #notifications
+
             else
                if(debugme) then io.write("Unable to find alert.entity_id "..alert.entity_id) end
             end
@@ -127,7 +134,15 @@ function alert_store_db.dequeueRecipientAlerts(recipient, budget)
       budget_used = budget_used + #notifications
    end
 
-   return {success = true, more_available = more_available}
+ ::done::
+   return {
+      success = success,
+      error_message = error_message,
+      delivered = delivered,
+      discarded = discarded,
+      failures  = failures,
+      more_available = more_available,
+  }
 end
 
 -- ##############################################

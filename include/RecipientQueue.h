@@ -32,11 +32,20 @@ class RecipientQueue {
 
   AlertFifoQueue *queue;
 
+  /* Counters for the number of enqueues */
+  u_int64_t enqueued;
+
   /* Counters for the number of drops occurred when enqueuing */
   u_int64_t drops;
 
-  /* Counters for the number of enqueues */
-  u_int64_t uses;
+  /* Counters for the number of alerts filtered out (e.g. silenced) */
+  u_int64_t filtered_out;
+
+  /* Counters for the number of alerts delivered */
+  u_int64_t delivered;
+
+  /* Counters for the number of alerts not delivered due to an endpoint failure */
+  u_int64_t delivery_failures;
 
   /* Timestamp of the last dequeue, regardless of queue priority */
   time_t last_use;
@@ -182,7 +191,7 @@ class RecipientQueue {
   };
 
   /**
-   * @brief Returns queue status (drops and uses)
+   * @brief Returns queue status (drops and enqueued)
    * @param vm A Lua VM instance
    *
    * @return
@@ -202,6 +211,15 @@ class RecipientQueue {
    * @return An epoch with the last use, or 0 if never used.
    */
   inline time_t get_last_use() const { return last_use; };
+
+  /**
+   * @brief Inc recipient stats (used by lua recipients)
+   */
+  inline void incStats(u_int64_t _delivered, u_int64_t _filtered_out, u_int64_t _delivery_failures) {
+    delivered += _delivered;
+    filtered_out += _filtered_out;
+    delivery_failures += _delivery_failures;
+  }
 };
 
 #endif /* _RECIPIENT_QUEUES_ */

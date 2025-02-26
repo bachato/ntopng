@@ -148,6 +148,12 @@ function email.dequeueRecipientAlerts(recipient, budget)
   local more_available = true
   local budget_used = 0
 
+  local success = true
+  local error_message = nil
+  local delivered = 0
+  local discarded = 0
+  local failures = 0
+
   local settings = recipient2sendMessageSettings(recipient)
 
   -- Dequeue alerts up to budget x MAX_ALERTS_PER_EMAIL
@@ -170,7 +176,6 @@ function email.dequeueRecipientAlerts(recipient, budget)
         end
 
         if alert_utils.filter_notification(notification, recipient.recipient_id) then
-
           local notif = json.decode(notification.alert)
 
           if debug_endpoint then
@@ -178,14 +183,14 @@ function email.dequeueRecipientAlerts(recipient, budget)
           end
 
           notifications[#notifications + 1] = notif
-
           i = i + 1
 
           if not notif.score then
             -- Not an alert (e.g. report), send out
             goto send_out
           end
-
+        else
+          discarded = discarded + 1
         end
       else
         break
@@ -222,12 +227,17 @@ function email.dequeueRecipientAlerts(recipient, budget)
 
       if num_attemps >= MAX_NUM_SEND_ATTEMPTS then
         ntop.delCache(NUM_ATTEMPTS_KEY)
-        return {success=false, error_message="Unable to send mails"}
+        success = false
+        error_message = "Unable to send alerts by email"
+        failures = failures + #notifications
+        goto done
       else
         ntop.setCache(NUM_ATTEMPTS_KEY, tostring(num_attemps))
-        return {success=true}
+        goto done
       end
+
     else
+      delivered = delivered + #notifications
       ntop.delCache(NUM_ATTEMPTS_KEY)
     end
 
@@ -236,7 +246,15 @@ function email.dequeueRecipientAlerts(recipient, budget)
     sent = sent + 1
   end
 
-  return {success = true, more_available = more_available}
+ ::done::
+  return {
+    success = success,
+    error_message = error_message,
+    delivered = delivered,
+    discarded = discarded,
+    failures  = failures,
+    more_available = more_available,
+ }
 end
 
 -- ##############################################

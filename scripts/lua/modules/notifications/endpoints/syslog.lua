@@ -189,6 +189,13 @@ function syslog.dequeueRecipientAlerts(recipient, budget)
    local settings = readSettings(recipient)
    local notifications = {}
 
+   local more_available = true
+   local success = true
+   local error_message = nil
+   local delivered = 0
+   local discarded = 0
+   local failures = 0
+
    local i = 0
     while i < budget do
       local notification = ntop.recipient_dequeue(recipient.recipient_id)
@@ -196,22 +203,39 @@ function syslog.dequeueRecipientAlerts(recipient, budget)
         if alert_utils.filter_notification(notification, recipient.recipient_id) then
           notifications[#notifications + 1] = notification
           i = i + 1
+        else
+          discarded = discarded + 1
         end
       else
         break
       end
     end
 
-   if not notifications or #notifications == 0 then
-      return {success = true, more_available = false}
+   if #notifications == 0 then
+      more_available = false
    end
 
    -- Most recent notifications first
    for _, notification in ipairs(notifications) do
-      syslog.sendMessage(settings, notification.alert, map_score_to_severity(notification.score))
+      if not syslog.sendMessage(settings, notification.alert, map_score_to_severity(notification.score)) then
+         success = false
+         error_message = "Unable to send alerts to syslog"
+         failures = failures + #notifications
+         goto done
+      else
+         delivered = delivered + #notifications
+      end
    end
 
-   return {success = true,  more_available = true}
+ ::done::
+   return {
+      success = success,
+      error_message = error_message,
+      delivered = delivered,
+      discarded = discarded,
+      failures  = failures,
+      more_available = more_available,
+   }
 end
 
 -- ##############################################

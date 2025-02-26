@@ -114,6 +114,12 @@ class Recipients {
   time_t last_use(u_int16_t recipient_id);
 
   /**
+   * @brief Inc recipient stats (used by Lua recipients)
+   * @param recipient_id An integer recipient identifier
+   */
+  void incStats(u_int16_t recipient_id, u_int64_t delivered, u_int64_t filtered_out, u_int64_t delivery_failures);
+
+  /**
    * @brief Checks whether there are notifications queued in any of the
    * recipients
    *
