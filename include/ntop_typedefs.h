@@ -1260,4 +1260,13 @@ typedef struct {
     u_int32_t excellent;
 } QoETypeNum;
 
+typedef enum {
+    unknown = 0,
+    poor,
+    degraded,
+    fair,
+    good,
+    excellent
+} QoEType;
+
 #endif /* _NTOP_TYPEDEFS_H_ */

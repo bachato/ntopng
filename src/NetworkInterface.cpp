@@ -6214,42 +6214,42 @@ void NetworkInterface::lua_qoe_types(lua_State *vm, flowHostRetriever *retriever
     
     lua_newtable(vm);  
     lua_push_uint64_table_entry(vm, "num", retriever->qoe.unknown);
-    lua_push_uint64_table_entry(vm, "id", 0);
+    lua_push_uint64_table_entry(vm, "id", unknown);
     lua_pushstring(vm, "unknown");
     lua_insert(vm, -2);
     lua_settable(vm, -3);
 
     lua_newtable(vm);  
     lua_push_uint64_table_entry(vm, "num", retriever->qoe.poor);
-    lua_push_uint64_table_entry(vm, "id", 1);
+    lua_push_uint64_table_entry(vm, "id", poor);
     lua_pushstring(vm, "poor");
     lua_insert(vm, -2);
     lua_settable(vm, -3);
 
     lua_newtable(vm);  
     lua_push_uint64_table_entry(vm, "num", retriever->qoe.degraded);
-    lua_push_uint64_table_entry(vm, "id", 2);
+    lua_push_uint64_table_entry(vm, "id", degraded);
     lua_pushstring(vm, "degraded");
     lua_insert(vm, -2);
     lua_settable(vm, -3);
 
     lua_newtable(vm);  
     lua_push_uint64_table_entry(vm, "num", retriever->qoe.fair);
-    lua_push_uint64_table_entry(vm, "id", 3);
+    lua_push_uint64_table_entry(vm, "id", fair);
     lua_pushstring(vm, "fair");
     lua_insert(vm, -2);
     lua_settable(vm, -3);
 
     lua_newtable(vm);  
     lua_push_uint64_table_entry(vm, "num", retriever->qoe.good);
-    lua_push_uint64_table_entry(vm, "id", 4);
+    lua_push_uint64_table_entry(vm, "id", good);
     lua_pushstring(vm, "good");
     lua_insert(vm, -2);
     lua_settable(vm, -3);
 
     lua_newtable(vm);  
     lua_push_uint64_table_entry(vm, "num", retriever->qoe.excellent);
-    lua_push_uint64_table_entry(vm, "id", 5);
+    lua_push_uint64_table_entry(vm, "id", excellent);
     lua_pushstring(vm, "excellent");
     lua_insert(vm, -2);
     lua_settable(vm, -3);
