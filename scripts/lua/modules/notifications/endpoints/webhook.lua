@@ -30,7 +30,7 @@ local webhook = {
 
 webhook.EXPORT_FREQUENCY = 5
 webhook.API_VERSION = "0.2"
-webhook.REQUEST_TIMEOUT = 1
+webhook.REQUEST_TIMEOUT = 10
 webhook.ITERATION_TIMEOUT = 3
 webhook.prio = 400
 local MAX_ALERTS_PER_REQUEST = 10
@@ -121,7 +121,8 @@ function webhook.dequeueRecipientAlerts(recipient, budget)
   local sent = 0
   local more_available = true
   local budget_used = 0
-
+  local num_messages_dequeued = 0
+  local debugme = false
   local settings = recipient2sendMessageSettings(recipient)
 
   -- Dequeue alerts up to budget x MAX_ALERTS_PER_REQUEST
@@ -155,12 +156,20 @@ function webhook.dequeueRecipientAlerts(recipient, budget)
     local alerts = {}
 
     for _, json_message in ipairs(notifications) do
-      local alert = formatAlertMsg(json_message)
-      table.insert(alerts, alert)
+       local alert = formatAlertMsg(json_message)
+       if(debugme) then tprint("[ALERT] "..json_message) end
+       table.insert(alerts, alert)
     end
 
+    num_messages_dequeued = num_messages_dequeued + #notifications
+
+    if(debugme) then tprint("[PARTIAL] Sending ".. #notifications .." messages out of "..i.." messages dequeued") end
+    
     if not webhook.sendMessage(alerts, settings) then
-      return { success = false, error_message = "Unable to send alerts to the webhook" }
+       if(debugme) then tprint("[FAILURE] Message delivery failed") end
+       return { success = false, error_message = "Unable to send alerts to the webhook" }
+    else
+       if(debugme) then tprint("[OK] Message sent correctly") end
     end
 
     -- Remove the processed messages from the queue
@@ -168,6 +177,8 @@ function webhook.dequeueRecipientAlerts(recipient, budget)
     sent = sent + 1
   end
 
+  if(debugme) then tprint("[END] Sent "..num_messages_dequeued.." messages") end
+  
   return { success = true, more_available = more_available }
 end
 
