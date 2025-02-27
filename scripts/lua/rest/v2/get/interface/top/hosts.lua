@@ -69,9 +69,11 @@ for key, value in pairsByKeys(_hosts_stats, rev) do
    if(key < threshold) then
       break
    end
+   local host_info = hosts_stats[value];
+   local host_label = hostinfo2label(host_info, true, false, true)
 
    res[#res+1] = {
-      label = value,
+      label = host_label,
       value = key, 
       url = ntop.getHttpPrefix().."/lua/host_details.lua?"..hostinfo2url(value)
    }
