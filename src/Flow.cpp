@@ -1349,17 +1349,13 @@ void Flow::setExtraDissectionCompleted() {
   }
 
   if((protocol == IPPROTO_TCP) || (protocol == IPPROTO_UDP) ||
-      (protocol == IPPROTO_ICMP) || (protocol == IPPROTO_ICMPV6)) {
+     (protocol == IPPROTO_ICMP) || (protocol == IPPROTO_ICMPV6)) {
     /* nDPI is not allocated for non-TCP non-UDP flows so, in order to
-       make sure custom cateories are properly populated, function
-       ndpi_fill_ip_protocol_category must be called explicitly. */
-<<<<<<< HEAD
-    if(ndpiFlow) {
-=======
+              make sure custom cateories are properly populated, function
+	      ndpi_fill_ip_protocol_category must be called explicitly. */
     if (ndpiFlow) {
       u_int16_t p, *p_ptr;
 
->>>>>>> 326b651d3 (Fixes runtime errors)
       if(get_cli_ip_addr()->get_ipv4() /* && get_srv_ip_addr()->get_ipv4() */)
 	ndpi_fill_ip_protocol_category(iface->get_ndpi_struct(),
 				       ndpiFlow,
@@ -1373,22 +1369,10 @@ void Flow::setExtraDissectionCompleted() {
 					 (struct in6_addr *)get_srv_ip_addr()->get_ipv6(),
 					 &ndpiDetectedProtocol);
 
-<<<<<<< HEAD
-      /*
-	See Ntop::nDPILoadHostnameCategory
-	ndpiDetectedProtocol.category is divided in two bytes
-	- upper byte is the listId (see Ntop::getPersistentCustomListNameById)
-	- lower byte is the original category
-      */
-      category_list_name_shared_pointer =
-	(char*)ntop->getPersistentCustomListNameById((ndpiDetectedProtocol.category >> 8) & 0xFF);
-      ndpiDetectedProtocol.category = (ndpi_protocol_category_t)(ndpiDetectedProtocol.category & 0xFF);
-=======
       p_ptr = (u_int16_t*)&ndpiDetectedProtocol.category;
       p = (*p_ptr) & 0xFF; /* See Ntop::nDPILoadHostnameCategory */
 
       ndpiDetectedProtocol.category = (ndpi_protocol_category_t)p;
->>>>>>> 326b651d3 (Fixes runtime errors)
 
       /* We have used the trick to save in the protocolId both the list name and the protocol */
       if(ndpiDetectedProtocol.custom_category_userdata == NULL) {
@@ -1402,7 +1386,7 @@ void Flow::setExtraDissectionCompleted() {
       updateHostBlacklists();
     }
   }
-
+  
   if(ndpiFlow) {
     setErrorCode(ndpi_get_flow_error_code(ndpiFlow));
 
