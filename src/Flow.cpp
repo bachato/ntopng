@@ -259,6 +259,8 @@ Flow::Flow(NetworkInterface *_iface,
     initial_bytes_entropy.c2s = initial_bytes_entropy.s2c = NULL;
   }
 
+  c2sFirstGoodputTime.tv_sec = c2sFirstGoodputTime.tv_usec = 0;
+
 #ifdef NTOPNG_PRO
   modbus = NULL;
   lateral_movement = false;
@@ -8720,6 +8722,8 @@ void Flow::swap() {
     tcp->rtt.last_cli_ack = tcp->rtt.last_srv_ack;
     tcp->rtt.last_srv_ack = tmp;
   }
+
+  c2sFirstGoodputTime.tv_sec = 0;
 
   /*
     We do not swap L7 info as if it direction was wrong they were not computed
