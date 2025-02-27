@@ -472,7 +472,7 @@ if ((page == "overview") or (page == nil)) then
         end
         ifstats.zmqRecvStats = zmq_stats
         ifstats.exporters = exporters_stats
-        interface.select(ifstats.id)
+        interface.select(ifname) -- Go back to the View interface
     end
 
     local tot_num_nprobes = table.len(probes_stats or {})
@@ -911,6 +911,7 @@ if ((page == "overview") or (page == nil)) then
                     drops = v["num_drops"] + drops
                 end
             end
+            interface.select(ifname) -- Go back to the View interface
         elseif (ifstats) then
             drops = ifstats.stats_since_reset.drops
         end
