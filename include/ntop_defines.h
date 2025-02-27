@@ -136,7 +136,7 @@
 #define HOTSPOT_DETECT_URL "/hotspot-detect.html"        /* iOS    */
 #define KINDLE_WIFISTUB_URL "/kindle-wifi/wifistub.html" /* Kindle */
 #define HOTSPOT_DETECT_LUA_URL "/lua/hotspot-detect.lua"
-#define CHANGE_PASSWORD_ULR "/lua/change_password.lua"
+#define CHANGE_PASSWORD_URL "/lua/change_password.lua"
 #define LIVE_TRAFFIC_URL "/lua/rest/v2/get/pcap/live_traffic.lua"
 #define POOL_MEMBERS_ASSOC_URL "/lua/admin/manage_pool_members.lua"
 #define REST_API_PREFIX "/lua/rest/"

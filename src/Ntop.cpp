@@ -1615,7 +1615,7 @@ bool Ntop::isLocalAuthEnabled() const {
 /* ******************************************* */
 
 bool Ntop::checkLocalAuth(const char *user, const char *password,
-                                  char *group) const {
+			  char *group) const {
   char val[64], password_hash[33];
 
   if (!isLocalAuthEnabled()) return (false);
@@ -1924,12 +1924,19 @@ bool Ntop::checkRadiusAuth(const char *user, const char *password, char *group) 
 
 // Return 1 if username/password is allowed, 0 otherwise.
 bool Ntop::checkUserPassword(const char *user, const char *password,
-                             char *group, bool *localuser) const {
+                             char *group, bool *localuser,
+			     bool *redirect_to_change_pwd) const {
   *localuser = false;
 
   if (!user || user[0] == '\0' || !password || password[0] == '\0')
     return (false);
 
+  if((strcmp(user, "admin") == 0) && (strcmp(password, "admin") == 0)) {
+    /* Force user to change password */
+    ntop->getRedis()->set((char *)CONST_DEFAULT_PASSWORD_CHANGED, (char*)"0");
+    *redirect_to_change_pwd = true;
+  }
+  
   /* First of all let's check the local user authentication */
   if (checkHTTPAuth(user, password, group)) {
     return (true);
@@ -1983,17 +1990,18 @@ bool Ntop::isBlacklistedLogin(struct mg_connection *conn) const {
 
 bool Ntop::checkGuiUserPassword(struct mg_connection *conn, const char *user,
                                 const char *password, char *group,
-                                bool *localuser) const {
+                                bool *localuser, bool *redirect_to_change_pwd) const {
   char *remote_ip, ipbuf[64], key[128], val[16];
   int cur_attempts = 0;
   bool rv;
   IpAddress client_addr;
 
+  *redirect_to_change_pwd = false;
+  
   client_addr.set(mg_get_client_address(conn));
 
   if (ntop->isCaptivePortalUser(user)) {
-    ntop->getTrace()->traceEvent(
-        TRACE_WARNING, "User %s is not a gui user. Login is denied.", user);
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "User %s is not a gui user. Login is denied.", user);
     rv = false;
     goto failure;
   }
@@ -2007,7 +2015,7 @@ bool Ntop::checkGuiUserPassword(struct mg_connection *conn, const char *user,
     return false;
   }
 
-  rv = checkUserPassword(user, password, group, localuser);
+  rv = checkUserPassword(user, password, group, localuser, redirect_to_change_pwd);
   snprintf(key, sizeof(key), CONST_STR_FAILED_LOGIN_KEY, remote_ip);
 
   if (!rv) {
@@ -2016,10 +2024,9 @@ bool Ntop::checkGuiUserPassword(struct mg_connection *conn, const char *user,
     ntop->getRedis()->set(key, val, FAILED_LOGIN_ATTEMPTS_INTERVAL);
 
     if (cur_attempts >= MAX_FAILED_LOGIN_ATTEMPTS)
-      ntop->getTrace()->traceEvent(
-          TRACE_INFO, "IP %s is now blacklisted from login for %d seconds",
-          remote_ip, FAILED_LOGIN_ATTEMPTS_INTERVAL);
-
+      ntop->getTrace()->traceEvent(TRACE_INFO, "IP %s is now blacklisted from login for %d seconds",
+				   remote_ip, FAILED_LOGIN_ATTEMPTS_INTERVAL);
+    
   } else {
     ntop->getRedis()->del(key);
   }
@@ -2036,16 +2043,15 @@ bool Ntop::checkGuiUserPassword(struct mg_connection *conn, const char *user,
 bool Ntop::checkCaptiveUserPassword(const char *user, const char *password,
                                     char *group) const {
   bool localuser = false;
-  bool rv;
+  bool rv, redirect_to_change_pwd = false;
 
   if (!ntop->isCaptivePortalUser(user)) {
-    ntop->getTrace()->traceEvent(
-        TRACE_WARNING, "User %s is not a captive portal user. Login is denied.",
-        user);
+    ntop->getTrace()->traceEvent( TRACE_WARNING, "User %s is not a captive portal user. Login is denied.",
+				  user);
     return false;
   }
 
-  rv = checkUserPassword(user, password, group, &localuser);
+  rv = checkUserPassword(user, password, group, &localuser, &redirect_to_change_pwd);
 
   return (rv);
 }
@@ -2055,10 +2061,9 @@ bool Ntop::checkCaptiveUserPassword(const char *user, const char *password,
 bool Ntop::mustChangePassword(const char *user) {
   char val[8];
 
-  if ((strcmp(user, "admin") == 0) &&
-      (ntop->getRedis()->get((char *)CONST_DEFAULT_PASSWORD_CHANGED, val,
-                             sizeof(val)) < 0 ||
-       val[0] == '0'))
+  if ((strcmp(user, "admin") == 0)
+      && ((ntop->getRedis()->get((char *)CONST_DEFAULT_PASSWORD_CHANGED, val, sizeof(val)) < 0)
+	  || val[0] == '0'))
     return true;
 
   return false;
@@ -2074,10 +2079,10 @@ bool Ntop::resetUserPassword(char *username, char *old_password,
   char group[NTOP_GROUP_MAXLEN];
 
   if ((old_password != NULL) && (old_password[0] != '\0')) {
-    bool localuser = false;
+    bool localuser = false, redirect_to_change_pwd = false;
 
-    if (!checkUserPassword(username, old_password, group, &localuser))
-      return (false);
+    if (!checkUserPassword(username, old_password, group, &localuser, &redirect_to_change_pwd))
+      return(false);
 
     if (!localuser) return (false);
   }

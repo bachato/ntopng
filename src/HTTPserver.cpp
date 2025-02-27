@@ -21,7 +21,8 @@
 
 #include "ntop_includes.h"
 
-static void traceHTTP(const struct mg_connection *const conn, u_int16_t status_code); /* Forward */
+static void traceHTTP(const struct mg_connection *const conn,
+		      u_int16_t status_code); /* Forward */
 
 #define USE_LUA
 #include "../third-party/mongoose/mongoose.c"
@@ -191,6 +192,7 @@ bool HTTPserver::authorized_localhost_user_login(
   if (ntop->getPrefs()->is_localhost_users_login_disabled() &&
       (conn->request_info.remote_ip == 0x7F000001 /* 127.0.0.1 */))
     return true;
+
   return false;
 }
 
@@ -286,8 +288,7 @@ static void set_session_cookie(const struct mg_connection *const conn,
             "Location: %s\r\n\r\n",
             PACKAGE_VERSION, PACKAGE_MACHINE, session_key, session_id,
             session_duration,
-            get_secure_cookie_attributes(
-                mg_get_request_info((struct mg_connection *)conn)),
+            get_secure_cookie_attributes(mg_get_request_info((struct mg_connection *)conn)),
             referer ? referer : "/");
 
   traceHTTP(conn, 302);
@@ -375,7 +376,7 @@ static void checkInformativeCaptive(
 
 static int isWhitelistedURI(const char *uri) {
   /* URL whitelist */
-  if ((!strcmp(uri, LOGIN_URL)) 
+  if ((!strcmp(uri, LOGIN_URL))
       || (!strcmp(uri, AUTHORIZE_URL))
       || (!strcmp(uri, LOCALE_URL))
 #ifdef HAVE_NEDGE
@@ -464,6 +465,7 @@ static int getAuthorizedUser(struct mg_connection *conn,
   string auth_type = "", auth_string = "";
   bool user_login_disabled = !ntop->getPrefs()->is_users_login_enabled() ||
                              HTTPserver::authorized_localhost_user_login(conn);
+  bool redirect_to_change_pwd;
 
   /* Default */
   username[0] = '\0';
@@ -521,7 +523,7 @@ static int getAuthorizedUser(struct mg_connection *conn,
         success = (ntop->checkCaptiveUserPassword(username, password, group) &&
                    checkCaptive(conn, request_info, username, password, label));
 
-#ifdef DEBUG_CAPTIVE_PORTAL 
+#ifdef DEBUG_CAPTIVE_PORTAL
         ntop->getTrace()->traceEvent(TRACE_NORMAL, "Check Captive: %s",
           success ? "AUTHORIZED" : "NOT authorized");
 #endif
@@ -568,7 +570,7 @@ static int getAuthorizedUser(struct mg_connection *conn,
     strncpy(username, user_s.c_str(), NTOP_USERNAME_MAXLEN);
     username[NTOP_USERNAME_MAXLEN - 1] = '\0';
     return ntop->checkGuiUserPassword(conn, username, pword_s.c_str(), group,
-                                      localuser);
+                                      localuser, &redirect_to_change_pwd);
   } else if (auth_type == "Token") {
     getline(iss, auth_string, ' ');
 
@@ -609,7 +611,7 @@ static int getAuthorizedUser(struct mg_connection *conn,
 
     if (username[0] && password[0])
       return (ntop->checkGuiUserPassword(conn, username, password, group,
-                                         localuser));
+                                         localuser, &redirect_to_change_pwd));
   }
 
   /* Important: validate the session */
@@ -627,8 +629,7 @@ static int getAuthorizedUser(struct mg_connection *conn,
            NTOP_CSRF_TOKEN_LENGTH - 1);
 
   if (sscanf(val, key, username, group, csrf, &localuser_ch) != 4) {
-    ntop->getTrace()->traceEvent(
-        TRACE_INFO, "[HTTP] Old Session format %s not supported", session_id);
+    ntop->getTrace()->traceEvent(TRACE_INFO, "[HTTP] Old Session format %s not supported", session_id);
     return (0);
   }
 
@@ -792,7 +793,7 @@ static void redirect_to_login(struct mg_connection *conn,
     const char *wispr_data = ntop->get_HTTPserver()->getWisprCaptiveData(
         wispr_captive_data, sizeof(wispr_captive_data), captive_login_url);
 
-#ifdef DEBUG_CAPTIVE_PORTAL 
+#ifdef DEBUG_CAPTIVE_PORTAL
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "Redirect to login");
 #endif
 
@@ -919,8 +920,7 @@ int redirect_to_error_page(struct mg_connection *conn,
    updated. In the cookie, store the original URL we came from, so that after
    the authorization we could redirect back.
 */
-static void redirect_to_please_wait(
-    struct mg_connection *conn, const struct mg_request_info *request_info) {
+static void redirect_to_please_wait(struct mg_connection *conn, const struct mg_request_info *request_info) {
   char session_id[NTOP_SESSION_ID_LENGTH], buf[128];
   char referer[255], session_key[32];
   char *referer_enc = NULL;
@@ -951,8 +951,8 @@ static void redirect_to_please_wait(
 
 /* ****************************************** */
 
-static void redirect_to_password_change(
-    struct mg_connection *conn, const struct mg_request_info *request_info) {
+static void redirect_to_password_change(struct mg_connection *conn,
+					const struct mg_request_info *request_info) {
   char session_id[NTOP_SESSION_ID_LENGTH], buf[128];
   char referer[255], session_key[32];
   char *referer_enc = NULL;
@@ -971,7 +971,7 @@ static void redirect_to_password_change(
             PACKAGE_VERSION, PACKAGE_MACHINE, session_id,
             get_secure_cookie_attributes(request_info),
             ntop->getPrefs()->get_http_prefix(),
-            Utils::getURL((char *)CHANGE_PASSWORD_ULR, buf, sizeof(buf)),
+            Utils::getURL((char *)CHANGE_PASSWORD_URL, buf, sizeof(buf)),
             (referer[0] != '\0') ? (char *)"?referer=" : (char *)"",
             (referer[0] != '\0') ? (referer_enc = Utils::urlEncode(referer))
                                  : (char *)"");
@@ -988,7 +988,7 @@ static void authorize(struct mg_connection *conn,
                       const struct mg_request_info *request_info,
                       char *username, char *group, bool *localuser) {
   char user[32] = {'\0'}, password[129] = {'\0'}, referer[256] = {'\0'};
-  bool bad_user_pwd = false;
+  bool bad_user_pwd = false, redirect_to_change_pwd = false;
 
   if (!strcmp(request_info->request_method, "POST")) {
     char post_data[1024];
@@ -1020,12 +1020,12 @@ static void authorize(struct mg_connection *conn,
       isCaptiveConnection(conn) || ntop->isCaptivePortalUser(user) ||
 #endif
       (bad_user_pwd = (!ntop->checkGuiUserPassword(conn, user, password, group,
-                                                   localuser)))) {
+						   localuser, &redirect_to_change_pwd)))) {
     // Authentication failure, redirect to login
     const char *reason = NULL;
     if (bad_user_pwd) reason = "wrong-credentials";
-    redirect_to_login(conn, request_info, (referer[0] == '\0') ? NULL : referer,
-                      reason);
+
+    redirect_to_login(conn, request_info, (referer[0] == '\0') ? NULL : referer, reason);
   } else {
     /* Referer url must begin with '/' */
     if ((referer[0] != '/') || (strcmp(referer, AUTHORIZE_URL) == 0)) {
@@ -1077,7 +1077,7 @@ bool HTTPserver::create_api_token(const char *username, char *api_token,
    * or the same (authenticated) user is generating the session */
   if (ntop->existsUserLocal(username)) {
 
-    /* 
+    /*
       Delete the old token before creating the new one.
       */
     char old_api_token[NTOP_SESSION_ID_LENGTH];
@@ -1208,18 +1208,17 @@ static int handle_lua_request(struct mg_connection *conn) {
   } else
 #endif
   if (strcmp(request_info->uri, HOTSPOT_DETECT_URL) == 0) {
-    mg_printf(
-        conn,
-        "HTTP/1.1 302 Found\r\n"
-        "Server: ntopng %s (%s)\r\n"
-        "Expires: 0\r\n"
-        "Cache-Control: no-store, no-cache, must-revalidate\t\n"
-        "Pragma: no-cache\r\n"
-        "Location: http://%s%s%s%s\r\n\r\n",
-        PACKAGE_VERSION, PACKAGE_MACHINE,
-        mg_get_header(conn, "Host") ? mg_get_header(conn, "Host") : (char *)"",
-        HOTSPOT_DETECT_LUA_URL, request_info->query_string ? "?" : "",
-        request_info->query_string ? request_info->query_string : "");
+    mg_printf(conn,
+	      "HTTP/1.1 302 Found\r\n"
+	      "Server: ntopng %s (%s)\r\n"
+	      "Expires: 0\r\n"
+	      "Cache-Control: no-store, no-cache, must-revalidate\t\n"
+	      "Pragma: no-cache\r\n"
+	      "Location: http://%s%s%s%s\r\n\r\n",
+	      PACKAGE_VERSION, PACKAGE_MACHINE,
+	      mg_get_header(conn, "Host") ? mg_get_header(conn, "Host") : (char *)"",
+	      HOTSPOT_DETECT_LUA_URL, request_info->query_string ? "?" : "",
+	      request_info->query_string ? request_info->query_string : "");
     traceHTTP(conn, 302);
     return (1);
   } else if (strncmp(request_info->uri, NTOPNG_DATASOURCE_URL, 13) == 0) {
@@ -1403,17 +1402,15 @@ static int handle_lua_request(struct mg_connection *conn) {
     if ((!whitelisted) && (!authorized)) {
       if (strcmp(request_info->uri, INTERFACE_DATA_URL) == 0) {
         // avoid sending login redirect to allow js itself to redirect the user
-        return (send_error(conn, 403 /* Forbidden */, request_info->uri,
-                           "Login Required"));
+        return (send_error(conn, 403 /* Forbidden */, request_info->uri, "Login Required"));
       } else {
-        char referer[255];
+	char referer[255];
 
-        redirect_to_login(conn, request_info,
-                          make_referer(conn, referer, sizeof(referer)), NULL);
+	redirect_to_login(conn, request_info,
+			  make_referer(conn, referer, sizeof(referer)), NULL);
+	return (1);
       }
-
-      return (1);
-    } else if ((strcmp(request_info->uri, CHANGE_PASSWORD_ULR) != 0) &&
+    } else if ((strcmp(request_info->uri, CHANGE_PASSWORD_URL) != 0) &&
                (strcmp(request_info->uri, LOGOUT_URL) != 0) &&
                (strcmp(request_info->uri, LOCALE_URL) != 0) &&
                authorized &&
@@ -1449,7 +1446,7 @@ static int handle_lua_request(struct mg_connection *conn) {
       strstr(request_info->uri, "\r") || strstr(request_info->uri, "\n")) {
     char buf[64];
     char session_id[NTOP_SESSION_ID_LENGTH], session_key[32];
-    
+
     mg_get_cookie(conn, session_key, session_id, sizeof(session_id));
     ntop->getTrace()->traceEvent(TRACE_WARNING,
                                  "[HTTP] [%s][%s:%u][%s] The URL %s is invalid/dangerous",
@@ -1517,12 +1514,12 @@ static int handle_lua_request(struct mg_connection *conn) {
 	  default_landing_page = ntop->getPrefs()->getHttpIndexPage();
 	else
 	  default_landing_page = (char*)INDEX_URL;
-	
+
         snprintf(path, sizeof(path), "%s%s%s", httpserver->get_scripts_dir(),
                  Utils::getURL(len == 1 ? default_landing_page : request_info->uri, uri, sizeof(uri)),
                  len > 1 && request_info->uri[len - 1] == '/' ? (char *)"index.lua" : (char *)"");
       }
-      
+
       if (strlen(path) > 4 && strncmp(&path[strlen(path) - 4], ".lua", 4))
         snprintf(&path[strlen(path)], sizeof(path) - strlen(path) - 1, "%s",
                  (char *)".lua");
@@ -1580,7 +1577,7 @@ static int handle_lua_request(struct mg_connection *conn) {
       }
 
       bool attack_attempt;
-  
+
 
       // NOTE: username is stored into the engine context, so we must guarantee
       // that LuaEngine is destroyed after username goes out of context! Indeeed
@@ -1591,11 +1588,10 @@ static int handle_lua_request(struct mg_connection *conn) {
       if (attack_attempt) {
         char buf[32];
 
-        ntop->getTrace()->traceEvent(
-            TRACE_WARNING, "[HTTP] Potential attack from %s on %s",
-            Utils::intoaV4((unsigned int)conn->request_info.remote_ip, buf,
-                           sizeof(buf)),
-            request_info->uri);
+        ntop->getTrace()->traceEvent(TRACE_WARNING, "[HTTP] Potential attack from %s on %s",
+				     Utils::intoaV4((unsigned int)conn->request_info.remote_ip, buf,
+						    sizeof(buf)),
+				     request_info->uri);
       }
 
       delete l;
@@ -1613,8 +1609,7 @@ static int handle_lua_request(struct mg_connection *conn) {
     /* Prevent short URI or .inc files to be served */
     if ((len < 4) || (strncmp(&request_info->uri[len - 4], ".inc", 4) == 0) ||
         (strncmp(&request_info->uri[len - 4], ".pem", 4) == 0)) {
-      return (
-          redirect_to_error_page(conn, request_info, "forbidden", NULL, NULL));
+      return (redirect_to_error_page(conn, request_info, "forbidden", NULL, NULL));
     } else {
       char path[MAX_PATH + 8];
       struct stat s;
@@ -1811,7 +1806,7 @@ HTTPserver::HTTPserver(const char *_docs_dir, const char *_scripts_dir) {
   struct timeval tv;
 
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+
   memset(ports, 0, sizeof(ports)), memset(access_log_path, 0, sizeof(access_log_path));
   use_http = true;
 
@@ -1985,7 +1980,7 @@ void HTTPserver::startHttpServer() {
 
 HTTPserver::~HTTPserver() {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
-  
+
   if (httpd_v4) mg_stop(httpd_v4);
 #ifdef HAVE_NEDGE
   if (httpd_captive_v4) mg_stop(httpd_captive_v4);

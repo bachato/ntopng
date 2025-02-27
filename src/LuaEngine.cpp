@@ -1288,8 +1288,7 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
       if (post_data) free(post_data);
     }
   } else
-    *attack_attempt =
-        setParamsTable(L, request_info, "_POST", NULL /* Empty */);
+    *attack_attempt = setParamsTable(L, request_info, "_POST", NULL /* Empty */);
 
   if (send_redirect) {
     char buf[2048], uri[512];
@@ -1325,33 +1324,28 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
   const char *host = mg_get_header(conn, "Host");
 
   if (host) {
-    lua_pushfstring(L, "%s://%s", (request_info->is_ssl) ? "https" : "http",
-                    host);
+    lua_pushfstring(L, "%s://%s", (request_info->is_ssl) ? "https" : "http", host);
     lua_pushstring(L, "HTTP_HOST");
     lua_insert(L, -2);
     lua_settable(L, -3);
   }
 
   if (request_info->remote_user)
-    lua_push_str_table_entry(L, "REMOTE_USER",
-                             (char *)request_info->remote_user);
+    lua_push_str_table_entry(L, "REMOTE_USER", (char *)request_info->remote_user);
   if (request_info->query_string)
-    lua_push_str_table_entry(L, "QUERY_STRING",
-                             (char *)request_info->query_string);
+    lua_push_str_table_entry(L, "QUERY_STRING", (char *)request_info->query_string);
 
   /* Additional headers can be added eventually */
   origin_header = mg_get_header(conn, "Origin");
   if (origin_header) lua_push_str_table_entry(L, "Origin", origin_header);
 
   for (int i = 0; ((request_info->http_headers[i].name != NULL) &&
-                   request_info->http_headers[i].name[0] != '\0');
-       i++)
+                   request_info->http_headers[i].name[0] != '\0'); i++)
     lua_push_str_table_entry(L, request_info->http_headers[i].name,
                              (char *)request_info->http_headers[i].value);
 
   client_addr.set(mg_get_client_address(conn));
-  lua_push_str_table_entry(
-      L, "REMOTE_ADDR", (char *)client_addr.print(addr_buf, sizeof(addr_buf)));
+  lua_push_str_table_entry(L, "REMOTE_ADDR", (char *)client_addr.print(addr_buf, sizeof(addr_buf)));
 
   lua_setglobal(L, (char *)"_SERVER");
 

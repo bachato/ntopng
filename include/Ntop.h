@@ -173,7 +173,7 @@ class Ntop {
   bool checkLDAPAuth(const char *user, const char *password, char *group) const;
   bool checkRadiusAuth(const char *user, const char *password, char *group) const;
   bool checkUserPassword(const char *user, const char *password, char *group,
-                         bool *localuser) const;
+                         bool *localuser, bool *redirect_to_change_pwd) const;
 
   void checkReloadFlowChecks();
   void checkReloadHostChecks();
@@ -514,7 +514,7 @@ class Ntop {
                                 char *group) const;
   bool checkGuiUserPassword(struct mg_connection *conn, const char *user,
                             const char *password, char *group,
-                            bool *localuser) const;
+                            bool *localuser, bool *redirect_to_change_pwd) const;
   bool isBlacklistedLogin(struct mg_connection *conn) const;
   bool checkUserInterfaces(const char *user) const;
   bool resetUserPassword(char *username, char *old_password,
