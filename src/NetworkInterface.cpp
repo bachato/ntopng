@@ -5380,15 +5380,37 @@ static bool flow_search_walker(GenericHashEntry *h, void *user_data,
       retriever->elems[retriever->actNumEntries++].numericValue = f->get_duration();
       break;
     case column_score:
-      retriever->elems[retriever->actNumEntries++].numericValue = f->getScore();
+      {
+	u_int16_t s = f->getScore();;
+	
+	if(s == 0) {
+	  if(retriever->pag->a2zSortOrder())
+	    s = 0xFFFF;
+	  else
+	    s = 0;
+	}
+
+	retriever->elems[retriever->actNumEntries++].numericValue = s;
+      }
       break;
     case column_qoe:
-      retriever->elems[retriever->actNumEntries++].numericValue =
+      {
+	u_int8_t qoe =
 #ifdef NTOPNG_PRO
 	f->getQoEScore();
 #else
-	0;
+	NTOP_QOE_UNKNOWN;
 #endif
+
+	if(qoe == NTOP_QOE_UNKNOWN) {
+	  if(retriever->pag->a2zSortOrder())
+	    qoe = 0xFF;
+	  else
+	    qoe = 0;
+	}
+
+	retriever->elems[retriever->actNumEntries++].numericValue = qoe;
+      }
       break;
     case column_thpt:
       retriever->elems[retriever->actNumEntries++].numericValue = f->get_bytes_thpt();
@@ -6144,8 +6166,7 @@ int NetworkInterface::sortFlows(u_int32_t *begin_slot, bool walk_all,
   }
 
   // make sure the caller has disabled the purge!!
-  walker(begin_slot, walk_all, walker_flows, flow_search_walker,
-         (void *)retriever);
+  walker(begin_slot, walk_all, walker_flows, flow_search_walker, (void *)retriever);
 
   qsort(retriever->elems, retriever->actNumEntries,
         sizeof(struct flowHostRetrieveList), sorter);
@@ -6262,8 +6283,7 @@ int NetworkInterface::getFlows(lua_State *vm, u_int32_t *begin_slot,
   if (!p->getDetailsLevel(&highDetails))
     highDetails = p->detailedResults() ? details_high
       : (local_hosts || (p && p->maxHits() != CONST_MAX_NUM_HITS))
-      ? details_high
-      : details_normal;
+      ? details_high : details_normal;
 
   retriever.observationPointId = getLuaVMUservalue(vm, observationPointId);
   retriever.talking_with_host = talking_with_host;
@@ -6291,8 +6311,7 @@ int NetworkInterface::getFlows(lua_State *vm, u_int32_t *begin_slot,
       if (++num >= (int)p->maxHits()) break;
     }
   } else {
-    for (int i = (retriever.actNumEntries - 1 - p->toSkip()), num = 0; i >= 0;
-         i--) {
+    for (int i = (retriever.actNumEntries - 1 - p->toSkip()), num = 0; i >= 0; i--) {
       lua_newtable(vm);
 
       retriever.elems[i].flow->lua(vm, allowed_hosts, highDetails, true);
