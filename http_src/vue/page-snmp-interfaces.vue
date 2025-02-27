@@ -137,6 +137,12 @@ const map_table_def_columns = (columns) => {
             }
             return ''
         },
+        "out_errors": (value, row) => {
+            if (value > 0) {
+                return formatterUtils.getFormatter("full_number")(value)
+            }
+            return ''
+        },
         "in_discards": (value, row) => {
             if (value > 0) {
                 return formatterUtils.getFormatter("full_number")(value)

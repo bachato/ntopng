@@ -152,6 +152,16 @@
 			]
 		},
 		{
+			"title_i18n": "snmp.out_errors",
+			"data_field": "out_errors",
+			"min-width" : "100px",
+			"sortable": true,
+			"class": [
+				"text-nowrap",
+				"text-end"
+			]
+		},
+		{
 			"title_i18n": "interface_uplink_speed",
 			"data_field": "uplink_speed",
 			"min-width" : "135px",
