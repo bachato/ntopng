@@ -5892,6 +5892,9 @@ void Flow::updateTcpSeqNum(const struct bpf_timeval *when, u_int32_t seq_num,
     src2dst_direction ? ">" : "<", cnt_retx, cnt_ooo, cnt_lost, cnt_keep_alive);
 #endif
 
+  if (cnt_lost || cnt_ooo || cnt_retx)
+    tcp->last_network_issues = when->tv_sec;
+
   if(cnt_keep_alive || cnt_lost || cnt_ooo || cnt_retx) {
     stats.incTcpStats(src2dst_direction, cnt_retx, cnt_ooo, cnt_lost,
                       cnt_keep_alive);

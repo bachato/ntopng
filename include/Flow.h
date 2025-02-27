@@ -41,6 +41,8 @@ typedef struct {
   struct timeval synTime, synAckTime, ackTime; /* network Latency (3-way handshake) */
   float clientRTT3WH, serverRTT3WH; /* Computed at 3WH (msec) */
 
+  time_t last_network_issues; /* last time retr/ooo/lost has been observed */
+
   struct {
     struct ndpi_analyze_struct cli_to_srv, srv_to_cli;
     u_int8_t cli_to_srv_winscale, srv_to_cli_winscale; 
@@ -142,13 +144,22 @@ class Flow : public GenericHashEntry {
 
   u_int32_t hash_entry_id; /* Uniquely identify this flow inside the flows_hash hash table */
   u_int32_t periodicity; /* When is_periodic_flow is set, specifies how periodic (seconds) is this flow */
-  u_int16_t detection_completed : 1, extra_dissection_completed : 1,
-      twh_over : 1, dissect_next_http_packet : 1, passVerdict : 1,
-      flow_dropped_counts_increased : 1, quota_exceeded : 1, swap_done : 1,
-      swap_requested : 1, has_malicious_cli_signature : 1,
-      has_malicious_srv_signature : 1, src2dst_tcp_zero_window : 1,
-      dst2src_tcp_zero_window : 1, non_zero_payload_observed : 1,
-    is_periodic_flow : 1, ____notused:1;
+  u_int16_t detection_completed : 1,
+      extra_dissection_completed : 1,
+      twh_over : 1,
+      dissect_next_http_packet : 1,
+      passVerdict : 1,
+      flow_dropped_counts_increased : 1,
+      quota_exceeded : 1,
+      swap_done : 1,
+      swap_requested : 1,
+      has_malicious_cli_signature : 1,
+      has_malicious_srv_signature : 1,
+      src2dst_tcp_zero_window : 1,
+      dst2src_tcp_zero_window : 1,
+      non_zero_payload_observed : 1,
+      is_periodic_flow : 1,
+      __unused:1;
   u_int8_t iface_flow_accounted:1, _notused:7;
   DropReason dropVerdictReason;
 
@@ -903,6 +914,7 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
   u_int32_t get_packetsLost();
   u_int32_t get_packetsRetr();
   u_int32_t get_packetsOOO();
+  inline bool isUnderNetworkIssues(time_t now) { return tcp && tcp->last_network_issues >= now-1; };
 
   inline const struct timeval *get_current_update_time() const {
     return &last_update_time;
