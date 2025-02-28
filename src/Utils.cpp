@@ -4607,6 +4607,7 @@ int Utils::ntop_findalldevs(ntop_if_t **alldevsp) {
   while (pfdev != NULL) {
     /* merge with info from pcap */
     pdev = pdevs;
+    
     while (pdev != NULL) {
       if (pfdev->system_name && strcmp(pfdev->system_name, pdev->name) == 0)
         break;
@@ -4619,10 +4620,8 @@ int Utils::ntop_findalldevs(ntop_if_t **alldevsp) {
       cur = (ntop_if_t *)calloc(1, sizeof(ntop_if_t));
 
       if (cur) {
-        cur->name =
-            strdup(pfdev->system_name ? pfdev->system_name : pfdev->name);
-        cur->description =
-            strdup((pdev && pdev->description) ? pdev->description : "");
+        cur->name = strdup(pfdev->system_name ? pfdev->system_name : pfdev->name);
+        cur->description = strdup((pdev && pdev->description) ? pdev->description : "");
         cur->module = strdup(pfdev->module);
         cur->license = pfdev->license;
         cur->ifindex = pfdev->ifindex;
@@ -4632,7 +4631,7 @@ int Utils::ntop_findalldevs(ntop_if_t **alldevsp) {
         tail = cur;
       }
     }
-
+    
     pfdev = pfdev->next;
   }
 #endif
