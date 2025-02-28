@@ -3275,8 +3275,8 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
     if (dstMac) dstMac->incRcvdStats(h->ts.tv_sec, 1, len_on_wire);
 #endif
 
-    if ((eth_type == ETHERTYPE_ARP) &&
-	(h->caplen >= (sizeof(arp_header) + sizeof(struct ndpi_ethhdr)))) {
+    if ((eth_type == ETHERTYPE_ARP)
+	&& (h->caplen >= (ip_offset + sizeof(arp_header)))) {
       struct arp_header *arpp = (struct arp_header *)&packet[ip_offset];
       u_int16_t arp_opcode = ntohs(arpp->ar_op);
 
