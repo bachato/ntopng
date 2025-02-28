@@ -185,7 +185,7 @@ end
 function alert_store:_build_alert_status_condition(status, is_write)
     local status_field = 'alert_status'
     local require_attention_field = 'require_attention'
-
+    
     status_field = self:get_column_name(status_field, is_write)
     require_attention_field = self:get_column_name(require_attention_field, is_write)
 
@@ -1731,6 +1731,7 @@ end
 
 -- @brief Performs a query for the top alerts by alert count
 function alert_store:top_alert_id_historical_by_count()
+    self:add_request_filters()
     local table_name = self:get_table_name()
     -- Preserve all the filters currently set
     local where_clause = self:build_where_clause()
@@ -1756,19 +1757,19 @@ end
 
 -- @brief Performs a query for the top alerts by severity
 function alert_store:top_alert_id_historical_by_severity()
+    self:add_request_filters()
     local table_name = self:get_table_name()
     -- Preserve all the filters currently set
     local where_clause = self:build_where_clause()
     local limit = 10
-
     local q = string.format(
-        "SELECT alert_id, max(severity) severity, count(*) count FROM %s WHERE %s GROUP BY alert_id ORDER BY severity DESC, count DESC LIMIT %u",
+        "SELECT alert_id, max(severity) severity, count(*) count FROM %s WHERE %s GROUP BY alert_id ORDER BY max(severity) DESC, count DESC LIMIT %u",
         table_name, where_clause, limit)
 
     if not self._alert_entity then
         -- For the all view alert_entity is read from the database
         q = string.format(
-            "SELECT entity_id, alert_id, max(severity) severity, count(*) count FROM %s WHERE %s GROUP BY entity_id, alert_id ORDER BY severity DESC, count DESC LIMIT %u",
+            "SELECT entity_id, alert_id, max(severity) severity, count(*) count FROM %s WHERE %s GROUP BY entity_id, alert_id ORDER BY max(severity) DESC, count DESC LIMIT %u",
             table_name, where_clause, limit)
     end
 
@@ -1811,7 +1812,7 @@ end
 function alert_store:format_top_alerts(stats, count)
     local top_alerts = {}
 
-    for n, value in pairs(stats) do
+    for n, value in pairs(stats or {}) do
         if self._top_limit > 0 and n > self._top_limit then
             break
         end
