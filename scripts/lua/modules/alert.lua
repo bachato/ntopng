@@ -59,6 +59,7 @@ function Alert:_build_type_info()
         subtype = self.subtype,
         granularity = self.granularity,
         score = self.score,
+        require_attention = self.require_attention,
         device_type = self.device_type,
         device_name = self.device_name,
         -- Stuff added in subclasses :init
@@ -138,6 +139,12 @@ end
 
 function Alert:set_category(category)
     self.category = category
+end
+
+-- ##############################################
+
+function Alert:set_require_attention()
+    self.require_attention = true
 end
 
 -- ##############################################

@@ -64,6 +64,7 @@ local function report_host(params, ip, vlan, victim)
    local host_key = hostinfo2hostkey(hostinfo)
    alert:set_subtype(host_key)
    alert:set_score(score)
+   alert:set_require_attention()
    alert:set_category(checks.check_categories.security)
    alert:set_info(params)
    local alert_info = {
