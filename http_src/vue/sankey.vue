@@ -117,7 +117,7 @@ function initializeZoom() {
     if (!svg) return;
     zoomGroup = svg.select('.zoom-group');
     zoom = d3.zoom()
-        .scaleExtent([1, 3]) // Max 300% zoom
+        .scaleExtent([1, 5]) // Max 500% zoom
         .on("zoom", (event) => {
             currentScale.value = event.transform.k;
             isZoomed.value = currentScale.value > 1;
