@@ -71,6 +71,7 @@ local function report_host(params, ip, vlan, victim)
       entity_val = host_key,
       alert_entity = alert_entities.host
    }
+   alert:set_require_attention()
    alert:store(alert_info)
 end
 
@@ -80,7 +81,7 @@ end
 local function ports_check(params)
    -- Settings
    local threshold = tonumber(params.check_config.threshold) or script.default_value.threshold
-   local interval_size = 5 * 60 -- 5 min
+   local interval_size = 8 * 60 -- 8 min
 
    if not ntop.isClickHouseEnabled() then
       return
