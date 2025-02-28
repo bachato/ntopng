@@ -1,36 +1,22 @@
 <template>
-    <div class="sankey-container">
+    <div ref="sankey_div" class="d-flex flex-column flex-grow-1 position-relative">
         <!-- Zoom button group -->
-        <div class="btn-group-container">
-            <div class="btn-group" role="group">
-                <!-- Zoom Plus -->
+        <div class="mb-2">
+            <div class="btn-group btn-ontop" role="group">
                 <button type="button" class="btn zoom-btn" @click="zoomChart(0.5)">
                     <i class="fa-solid fa-magnifying-glass-plus"></i>
                 </button>
-                <!-- Zoom minus -->
                 <button type="button" class="btn zoom-btn" @click="zoomChart(-0.5)">
                     <i class="fa-solid fa-magnifying-glass-minus"></i>
                 </button>
             </div>
         </div>
-
+    
         <!-- no data -->
         <div v-if="no_data" class="alert alert-info" id="empty-message">
             {{ no_data_message || _i18n('flows_page.no_data') }}
         </div>
-
-        <div class="sankey-wrapper">
-            <div class="sankey-visualization">
-                <!-- Sankey -->
-                <svg ref="sankey_chart_ref" :width="sankey_size.width" :height="sankey_size.height" class="sankey-svg"
-                    v-bind:style="{ cursor: cursorIcon }">
-                    <g class="zoom-group">
-                        <g class="nodes" style="stroke: #000;strokeOpacity: 0.5;" />
-                        <g class="links" style="stroke: #000;strokeOpacity: 0.3;fill:none;" />
-                    </g>
-                </svg>
-            </div>
-        </div>
+        <div ref="sankey_wrapper"></div>
     </div>
 </template>
 
@@ -51,12 +37,12 @@ const props = defineProps({
     sankey_data: Object,
 });
 
-// Zoom cursor icon
-let cursorIcon = ref(`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='18px' height='18px'%3E%3Cpath d='M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM184 296c0 13.3 10.7 24 24 24s24-10.7 24-24l0-64 64 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-64 0 0-64c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 64-64 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l64 0 0 64z'/%3E%3C/svg%3E"), pointer`);
-const sankey_chart_ref = ref(null);
 const sankey_size = ref({});
-const no_data = ref(false)
+const no_data = ref(false);
+const sankey_wrapper = ref(null);
+const sankey_div = ref(null);
 
+let svg = null;
 let zoomGroup = null;
 let sankey = null;
 let sankeyData = null;
@@ -65,32 +51,39 @@ const currentScale = ref(1); // keep track of zzom
 
 let zoom = null;
 
+/* ******************************************** */
+
 onBeforeMount(async () => { });
 
+/* ******************************************** */
+
 onMounted(async () => {
-    set_sankey_data();
-    attach_events();
-    initializeZoom();
+    await draw_sankey();
 });
 
+/* ******************************************** */
+
 onBeforeUnmount(() => {
-    const svg = d3.select(sankey_chart_ref.value);
     if (svg) {
         svg.on('dblclick', null);
         svg.on('mousemove', null);
     }
 });
 
+/* ******************************************** */
+
 watch(() => props.sankey_data, (cur_value, old_value) => {
     set_sankey_data(true);
 });
+
+/* ******************************************** */
 
 /* ZOOM FUNCTIONS */
 
 // zoomValue must be float, 1.0 is 100% zoom, 1.5 is 150% and so on
 function zoomChart(zoomValue) {
     if (!zoom) return;
-    const svg = d3.select(sankey_chart_ref.value);
+    if (!svg) return; /* Check if the svg is defined */
     let newZoomValue = Math.max(currentScale.value + zoomValue, 1); // minimum 1x zoom
     currentScale.value = Math.min(newZoomValue, 3); // maximum 3x zoom
 
@@ -118,10 +111,11 @@ function zoomChart(zoomValue) {
     isZoomed.value = currentScale.value > 1;
 }
 
-function initializeZoom() {
-    const svg = d3.select(sankey_chart_ref.value);
-    zoomGroup = svg.select('.zoom-group');
+/* ******************************************** */
 
+function initializeZoom() {
+    if (!svg) return;
+    zoomGroup = svg.select('.zoom-group');
     zoom = d3.zoom()
         .scaleExtent([1, 3]) // Max 300% zoom
         .on("zoom", (event) => {
@@ -159,11 +153,11 @@ function initializeZoom() {
         .call(zoom.transform, d3.zoomIdentity);
 }
 
+/* ******************************************** */
+
 function resetZoom() {
     if (!zoom) return;
-
-    const svg = d3.select(sankey_chart_ref.value);
-
+    if (!svg) return; /* Check if the svg is created or not */
     svg.transition()
         .duration(750)
         .call(zoom.transform, d3.zoomIdentity);
@@ -174,27 +168,55 @@ function resetZoom() {
     zoomGroup.attr("transform", "translate(0,0) scale(1)");
 }
 
-/********************************************************************************/
+/* ******************************************** */
 
-function set_sankey_data(reset) {
-    if (reset) {
-        $(".nodes", sankey_chart_ref.value).empty();
-        $(".links", sankey_chart_ref.value).empty();
+async function set_sankey_data(reset) {
+    if (reset && svg) {
+        sankey_wrapper.value.replaceChildren();
     }
     if (props.sankey_data.nodes == null || props.sankey_data.links == null
         || props.sankey_data.length == 0 || props.sankey_data.links.length == 0) {
         return;
     }
-    draw_sankey();
+    await draw_sankey();
+    attach_events();
+    initializeZoom();
 }
 
+/* ******************************************** */
+
 function attach_events() {
-    window.addEventListener('resize', () => {
+    window.addEventListener('resize', async () => {
         set_sankey_data(true);
         initializeZoom();
     });
 }
 
+/* ******************************************** */
+
+function get_size() {
+    emit('update_width');
+    let width = props.width
+    if (width == undefined) { width = $(sankey_div.value).width() }
+
+    emit('update_height');
+    let height = props.height
+    if (height == undefined) { height = $(sankey_div.value).height() }
+
+    return { width, height };
+}
+
+/* ******************************************** */
+
+function create_sankey(width, height) {
+    return d3.sankey()
+        .nodeWidth(15)
+        .nodePadding(10)
+        .extent([[0, 0], [width, height]])
+        .nodeAlign(d3.sankeyJustify);
+}
+
+/* ******************************************** */
 
 async function draw_sankey() {
     const colors = d3.scaleOrdinal(d3.schemeCategory10);
@@ -202,12 +224,36 @@ async function draw_sankey() {
     const size = get_size();
     sankey_size.value = size;
     sankey = create_sankey(size.width, size.height);
+    let links, nodes;
+    if (Object.keys(data).length !== 0) {
+        sankeyData = sankey(data);
+        ({ links, nodes } = sankeyData);
+    }
 
-    sankeyData = sankey(data);
-    const { links, nodes } = sankeyData;
+    svg = d3.select(sankey_wrapper.value)
+        .append("svg")
+        .attr("height", size.height)
+        .attr("width", size.width)
 
-    let d3_nodes = d3.select(sankey_chart_ref.value)
-        .select("g.nodes")
+    if (!links || !nodes) return;
+
+    svg.style("cursor", "move"); /* Add the move cursor */
+
+    const zoomGroup = svg.append("g")
+        .attr("class", "zoom-group");
+
+    zoomGroup.append("g")
+        .attr("class", "nodes")
+        .style("stroke", "#000")
+        .style("stroke-opacity", 0.5);
+
+    zoomGroup.append("g")
+        .attr("class", "links")
+        .style("stroke", "#000")
+        .style("stroke-opacity", 0.3)
+        .style("fill", "none");
+
+    const d3_nodes = svg.select("g.nodes")
         .selectAll("g")
         .data(nodes)
         .join((enter) => enter.append("g"))
@@ -241,13 +287,12 @@ async function draw_sankey() {
         });
 
     // Draw links
-    const links_d3 = d3.select(sankey_chart_ref.value)
-        .select("g.links")
+    const links_d3 = svg.select("g.links")
         .selectAll("g")
         .data(links)
         .join((enter) => enter.append("g"));
 
-    let lg_d3 = links_d3.append("linearGradient");
+    const lg_d3 = links_d3.append("linearGradient");
     lg_d3.attr("id", (d) => `gradient-${d.index}`)
         .attr("gradientUnits", "userSpaceOnUse")
         .attr("x1", (d) => d.source.x1)
@@ -271,27 +316,7 @@ async function draw_sankey() {
         .attr("data-bs-placement", "top")
         .attr("title", (d) => `${d.label}`)
         .text((d) => `${d.label}`);
-}
-
-
-function get_size() {
-    emit('update_width');
-    let width = props.width
-    if (width == undefined) { width = $(sankey_chart_ref.value).parent().parent().width() * 0.95; }
-
-    emit('update_height');
-    let height = props.height
-    if (height == undefined) { height = $(sankey_chart_ref.value).parent().parent().height() * 0.75; }
-
-    return { width, height };
-}
-
-function create_sankey(width, height) {
-    return d3.sankey()
-        .nodeWidth(15)
-        .nodePadding(10)
-        .extent([[0, 0], [width, height]])
-        .nodeAlign(d3.sankeyJustify);
+    
 }
 
 defineExpose({ draw_sankey, set_no_data_flag });
@@ -299,26 +324,11 @@ defineExpose({ draw_sankey, set_no_data_flag });
 </script>
 
 <style scoped>
-.sankey-container {
-    width: 100%;
-    height: 100%;
-    position: relative;
-}
-
-.sankey-wrapper {
-    width: 100%;
-    height: 100%;
-}
-
-.sankey-visualization {
-    width: 100%;
-    height: 100%;
-    position: relative;
-}
-
-.sankey-svg {
-    width: 100%;
-    height: 100%;
+.btn-ontop {
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 10;
 }
 
 .alert {
@@ -353,13 +363,16 @@ defineExpose({ draw_sankey, set_no_data_flag });
     gap: 1rem;
 }
 
-.sankey-container {
-    flex: 1;
-}
-
 .btn-group-container {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 1rem;
+}
+
+.zoom-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
 }
 </style>

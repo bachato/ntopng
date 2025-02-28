@@ -1,6 +1,6 @@
 <template>
     <div class="m-2 mb-3">
-        <div class="mb-2" style="height: 30vh;">
+        <div class="mb-3 d-flex flex-column" style="height: 30vh;">
             <div class="d-flex align-items-center mb-2">
                 <div class="d-flex no-wrap">
                     <div class="m-1">
