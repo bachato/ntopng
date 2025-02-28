@@ -15,6 +15,9 @@ local script = {
    -- This script is only for alerts generation
    alert_id = flow_alert_keys.flow_alert_ndpi_periodic_flow,
 
+   -- This module is disabled by default
+   default_enabled = false,
+
    default_value = {
    },
 
@@ -22,6 +25,7 @@ local script = {
       i18n_title = "flow_checks_config.ndpi_periodic_flow",
       i18n_description = "flow_checks_config.ndpi_periodic_flow_description",
    }
+
 }
 
 -- #################################################################
