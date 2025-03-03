@@ -18,7 +18,6 @@ local rc = rest_utils.consts.success.ok
 local res = {
    -- An array of all the supported REST API versions
    supported_versions = {
-      { version = "1", root = string.format("%s/lua/rest/v1", ntop.getHttpPrefix())},
       { version = "2", root = string.format("%s/lua/rest/v2", ntop.getHttpPrefix())},
    },
    -- Current REST API version used by ntopng
