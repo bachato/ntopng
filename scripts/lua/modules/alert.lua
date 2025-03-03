@@ -60,6 +60,8 @@ function Alert:_build_type_info()
         granularity = self.granularity,
         score = self.score,
         require_attention = self.require_attention,
+        is_attacker = self.is_attacker,
+        is_victim = self.is_victim,
         device_type = self.device_type,
         device_name = self.device_name,
         -- Stuff added in subclasses :init
@@ -200,15 +202,28 @@ end
 
 -- ##############################################
 
+function Alert:set_as_attacker()
+    self.is_attacker = true
+end
+
+function Alert:set_as_victim()
+    self.is_victim = true
+end
+
+-- ##############################################
+
 function Alert:set_attacker(attacker)
     self.attacker = attacker
 end
+
 function Alert:set_victim(victim)
     self.victim = victim
 end
+
 function Alert:set_origin(origin)
     self.origin = origin
 end
+
 function Alert:set_target(target)
     self.target = target
 end
