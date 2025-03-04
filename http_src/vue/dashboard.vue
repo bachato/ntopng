@@ -870,6 +870,33 @@ function set_report_title() {
     document.title = title;
 }
 
+/* *************************************************** */
+
+/* This function returns true if the previous parameters and the current one
+ * are different. This is used in order to do not make the same request multiple times
+ * e.g. a component is not yet loaded and the same request is resent
+ */
+function check_diff_params(previous_params, current_params) {
+    /* Empty params, return true, they are different */
+    if (!previous_params || !current_params) 
+        return true;
+    /* Check the length, if it's different return true, a new/removed filter/param */
+    if (Object.keys(previous_params).length != Object.keys(current_params).length)
+        return true;
+
+    /* Same length, so check that all the key - value are present in both, if not, they are different */
+    for (const [key, value] of Object.entries(previous_params)) {
+        /* Check for different params */
+        if (!current_params[key] || (current_params[key] !== value))
+            return true;
+    }
+
+    /* The for is ended, meaning that all parameters were equal */
+    return false;
+}
+
+/* *************************************************** */
+
 /* Callback to request REST data from components */
 function get_component_data_func(component) {
     const get_component_data = async (url, query_params, post_params, refresh_epoch) => {
@@ -903,7 +930,7 @@ function get_component_data_func(component) {
 
             if (pending /* pending request from previous iteration (slow) */
                 /* or other component calling the same endpoint (same time slot) */
-                || (info.refresh_epoch && info.refresh_epoch == refresh_epoch)) {
+                || !check_diff_params(info.filters, query_params)) {
                 /* Use data from other/pending requests */
 
             } else {
@@ -934,7 +961,7 @@ function get_component_data_func(component) {
                     info.data = ntopng_utility.http_request(data_url);
                 }
 
-                info.refresh_epoch = refresh_epoch;
+                info.filters = query_params;
                 components_info[datasource_id] = info;
 
                 info.data.then(() => {
