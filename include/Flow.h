@@ -87,7 +87,7 @@ class FlowAlert;
 class FlowCheck;
 
 class Flow : public GenericHashEntry {
- private:
+private:
   time_t creation_time; /*** Epoch of the flow creation */
   int32_t iface_index;  /* Interface index on which this flow has been first observed */
   Host *cli_host, *srv_host; /* They are ALWAYS NULL on ViewInterfaces. For shared hosts see below viewFlowStats */
@@ -145,21 +145,26 @@ class Flow : public GenericHashEntry {
   u_int32_t hash_entry_id; /* Uniquely identify this flow inside the flows_hash hash table */
   u_int32_t periodicity; /* When is_periodic_flow is set, specifies how periodic (seconds) is this flow */
   u_int16_t detection_completed : 1,
-      extra_dissection_completed : 1,
-      twh_over : 1,
-      dissect_next_http_packet : 1,
-      passVerdict : 1,
-      flow_dropped_counts_increased : 1,
-      quota_exceeded : 1,
-      swap_done : 1,
-      swap_requested : 1,
-      has_malicious_cli_signature : 1,
-      has_malicious_srv_signature : 1,
-      src2dst_tcp_zero_window : 1,
-      dst2src_tcp_zero_window : 1,
-      non_zero_payload_observed : 1,
-      is_periodic_flow : 1,
-      __unused:1;
+    extra_dissection_completed : 1,
+    twh_over : 1,
+    dissect_next_http_packet : 1,
+    passVerdict : 1,
+    flow_dropped_counts_increased : 1,
+    quota_exceeded : 1,
+    swap_done : 1,
+    swap_requested : 1,
+    has_malicious_cli_signature : 1,
+    has_malicious_srv_signature : 1,
+    src2dst_tcp_zero_window : 1,
+    dst2src_tcp_zero_window : 1,
+    non_zero_payload_observed : 1,
+    is_periodic_flow : 1,
+    has_collected_qoe:1;
+
+  struct {
+    u_int8_t src_to_dst, dst_to_src;
+  } collected_qoe;
+  
   u_int8_t iface_flow_accounted:1, _notused:7;
   DropReason dropVerdictReason;
 
@@ -378,13 +383,13 @@ class Flow : public GenericHashEntry {
                           u_int64_t diff_rcvd_bytes) const;
   /*
     Check (and possibly enqueues) the flow for dump
-   */
+  */
   void dumpCheck(time_t t, bool last_dump_before_free);
   void updateCliJA4();
   void updateHASSH(bool as_client);
   void processExtraDissectedInformation();
   void processDetectedProtocol(
-      u_int8_t *payload, u_int16_t payload_len); /* nDPI detected protocol */
+    u_int8_t *payload, u_int16_t payload_len); /* nDPI detected protocol */
   void processDetectedProtocolData(); /* nDPI detected protocol data (e.g.,
                                          ndpiFlow->host_server_name) */
   void setExtraDissectionCompleted();
@@ -430,20 +435,20 @@ public:
   bool enqueueAlertToRecipients(FlowAlert *alert);
 
   /*
-     Called by FlowCheck subclasses to trigger a flow alert. Setting sync
-     will causes the alert (FlowAlert) to be immediatly enqueued to recipients.
-   */
+    Called by FlowCheck subclasses to trigger a flow alert. Setting sync
+    will causes the alert (FlowAlert) to be immediatly enqueued to recipients.
+  */
   bool triggerAlert(FlowAlert *alert, bool sync = false);
   /*
-     Alerts are not flushed immediatly as optimization (unless sync is set in
-     triggerAlert). If pending_alerts, they are enqueued to recipients, in a single
-     notification for the predominant one.
-   */
+    Alerts are not flushed immediatly as optimization (unless sync is set in
+    triggerAlert). If pending_alerts, they are enqueued to recipients, in a single
+    notification for the predominant one.
+  */
   void flushAlerts();
 
   /*
     Enqueues the predominant alert of the flow to all available flow recipients.
-   */
+  */
   void enqueuePredominantAlert();
 
   inline void setFlowVerdict(u_int8_t _flow_verdict) {
@@ -554,8 +559,8 @@ public:
   }
   inline bool isSrvDeviceAllowedProtocol() const {
     return !srv_host ||
-           get_bytes_srv2cli() == 0 /* Server must respond to be considered NOT allowed */
-           || srv_host->getDeviceAllowedProtocolStatus(get_detected_protocol(), false) == device_proto_allowed;
+      get_bytes_srv2cli() == 0 /* Server must respond to be considered NOT allowed */
+      || srv_host->getDeviceAllowedProtocolStatus(get_detected_protocol(), false) == device_proto_allowed;
   }
   inline bool isDeviceAllowedProtocol() const {
     return isCliDeviceAllowedProtocol() && isSrvDeviceAllowedProtocol();
@@ -564,13 +569,13 @@ public:
     DeviceProtoStatus cli_ps = cli_host->getDeviceAllowedProtocolStatus(get_detected_protocol(), true);
 
     return (cli_ps == device_proto_forbidden_app) ? ndpiDetectedProtocol.proto.app_protocol
-               : ndpiDetectedProtocol.proto.master_protocol;
+      : ndpiDetectedProtocol.proto.master_protocol;
   }
   inline u_int16_t getSrvDeviceDisallowedProtocol() const {
     DeviceProtoStatus srv_ps = srv_host->getDeviceAllowedProtocolStatus(get_detected_protocol(), false);
 
     return (srv_ps == device_proto_forbidden_app) ? ndpiDetectedProtocol.proto.app_protocol
-               : ndpiDetectedProtocol.proto.master_protocol;
+      : ndpiDetectedProtocol.proto.master_protocol;
   }
   inline bool isMaskedFlow() const {
     return (Utils::maskHost(get_cli_ip_addr()->isLocalHost())
@@ -630,8 +635,8 @@ public:
   inline void setL7JSON(std::string j) { l7_json = j; }
   inline char *getFlowServerInfo() {
     return (isTLS() && protos.tls.client_requested_server_name)
-               ? protos.tls.client_requested_server_name
-               : host_server_name;
+      ? protos.tls.client_requested_server_name
+      : host_server_name;
   }
   inline char *getBitTorrentHash() { return (bt_hash); };
   inline void setBTHash(char *h) {
@@ -707,14 +712,14 @@ public:
                     time_t last_seen);
 
   void addPrePostNATIPv4(u_int32_t _src_ip_addr_pre_nat,
-                          u_int32_t _dst_ip_addr_pre_nat,
-                          u_int32_t _src_ip_addr_post_nat,
-                          u_int32_t _dst_ip_addr_post_nat);
+			 u_int32_t _dst_ip_addr_pre_nat,
+			 u_int32_t _src_ip_addr_post_nat,
+			 u_int32_t _dst_ip_addr_post_nat);
 
   void addPrePostNATPort(u_int32_t _src_port_pre_nat,
-                          u_int32_t _dst_port_pre_nat,
-                          u_int32_t _src_port_post_nat,
-                          u_int32_t _dst_port_post_nat);
+			 u_int32_t _dst_port_pre_nat,
+			 u_int32_t _src_port_post_nat,
+			 u_int32_t _dst_port_post_nat);
   void check_swap();
 
   inline bool isThreeWayHandshakeOK() const { return (twh_over ? true : false); };
@@ -763,7 +768,7 @@ public:
 
   inline ndpi_protocol get_detected_protocol() const {
     return (isDetectionCompleted() ? ndpiDetectedProtocol
-                                   : ndpiUnknownProtocol);
+	    : ndpiUnknownProtocol);
   };
 
   inline struct ndpi_flow_struct *get_ndpi_flow() const { return (ndpiFlow); };
@@ -815,7 +820,7 @@ public:
   };
   inline u_int64_t get_partial_goodput_bytes() const {
     return last_db_dump.delta.get_cli2srv_goodput_bytes() +
-           last_db_dump.delta.get_srv2cli_goodput_bytes();
+      last_db_dump.delta.get_srv2cli_goodput_bytes();
   };
   inline u_int64_t get_partial_bytes_cli2srv() const {
     return last_db_dump.delta.get_cli2srv_bytes();
@@ -838,7 +843,7 @@ public:
   bool update_partial_traffic_stats_db_dump();
   inline float get_pkts_thpt() const { return (pkts_thpt);   };
   inline float get_bytes_thpt() const { return (bytes_thpt); };
-inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
+  inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
   inline float get_goodput_ratio() const {
     return ((float)(100 * get_goodput_bytes()) / ((float)get_bytes() + 1));
   };
@@ -868,7 +873,7 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
   inline void setICMPPayloadSize(u_int16_t size) {
     if (isICMP())
       protos.icmp.max_icmp_payload_size =
-          max(protos.icmp.max_icmp_payload_size, size);
+	max(protos.icmp.max_icmp_payload_size, size);
   };
   inline u_int16_t getICMPPayloadSize() const {
     return (isICMP() ? protos.icmp.max_icmp_payload_size : 0);
@@ -884,8 +889,8 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
   };
   inline ndpi_protocol_category_t get_protocol_category() const {
     return (ndpi_get_proto_category(
-        iface->get_ndpi_struct(),
-        isDetectionCompleted() ? ndpiDetectedProtocol : ndpiUnknownProtocol));
+	      iface->get_ndpi_struct(),
+	      isDetectionCompleted() ? ndpiDetectedProtocol : ndpiUnknownProtocol));
   };
   inline const char *get_protocol_category_name() const {
     return (ndpi_category_get_name(iface->get_ndpi_struct(),
@@ -904,11 +909,11 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
    * the subinterfaces of the same ViewInterface. */
   inline Host *getViewSharedClient() {
     return (viewFlowStats ? viewFlowStats->getViewSharedClient()
-                          : get_cli_host());
+	    : get_cli_host());
   };
   inline Host *getViewSharedServer() {
     return (viewFlowStats ? viewFlowStats->getViewSharedServer()
-                          : get_srv_host());
+	    : get_srv_host());
   };
 
   u_int32_t get_packetsLost();
@@ -934,7 +939,7 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
   /*
     Returns actual client and server, that is the client and server as
     determined after the swap heuristic that has taken place.
-   */
+  */
   inline void get_actual_peers(Host **actual_client,
                                Host **actual_server) const {
     if (is_swap_requested())
@@ -1033,10 +1038,10 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
     if (isICMP()) {
       if (src2dst_direction)
         protos.icmp.cli2srv.icmp_type = icmp_type,
-        protos.icmp.cli2srv.icmp_code = icmp_code;
+	  protos.icmp.cli2srv.icmp_code = icmp_code;
       else
         protos.icmp.srv2cli.icmp_type = icmp_type,
-        protos.icmp.srv2cli.icmp_code = icmp_code;
+	  protos.icmp.srv2cli.icmp_code = icmp_code;
       // if(get_cli_host()) get_cli_host()->incICMP(icmp_type, icmp_code,
       // src2dst_direction ? true : false, get_srv_host()); if(get_srv_host())
       // get_srv_host()->incICMP(icmp_type, icmp_code, src2dst_direction ? false
@@ -1046,15 +1051,15 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
   inline void getICMP(u_int8_t *_icmp_type, u_int8_t *_icmp_code) {
     if (isBidirectional())
       *_icmp_type = protos.icmp.srv2cli.icmp_type,
-      *_icmp_code = protos.icmp.srv2cli.icmp_code;
+	*_icmp_code = protos.icmp.srv2cli.icmp_code;
     else
       *_icmp_type = protos.icmp.cli2srv.icmp_type,
-      *_icmp_code = protos.icmp.cli2srv.icmp_code;
+	*_icmp_code = protos.icmp.cli2srv.icmp_code;
   }
   inline u_int8_t getICMPType() {
     if (isICMP()) {
       return isBidirectional() ? protos.icmp.srv2cli.icmp_type
-                               : protos.icmp.cli2srv.icmp_type;
+	: protos.icmp.cli2srv.icmp_type;
     }
 
     return 0;
@@ -1065,7 +1070,7 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
   }
   inline bool hasMaliciousSignature(bool as_client) const {
     return as_client ? has_malicious_cli_signature
-                     : has_malicious_srv_signature;
+      : has_malicious_srv_signature;
   }
 
   void setRisk(ndpi_risk r);
@@ -1082,8 +1087,8 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
   }
   inline char *getDGADomain() const {
     return (hasRisk(NDPI_SUSPICIOUS_DGA_DOMAIN) && suspicious_dga_domain
-                ? suspicious_dga_domain
-                : (char *)"");
+	    ? suspicious_dga_domain
+	    : (char *)"");
   }
   inline char *getDNSQuery() const {
     return (isDNS() ? protos.dns.last_query : (char *)"");
@@ -1143,7 +1148,7 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
   };
   inline const char *getHTTPMethod() const {
     return isHTTP() ? ndpi_http_method2str(protos.http.last_method)
-                    : (char *)"";
+      : (char *)"";
   };
 
   void setExternalAlert(json_object *a);
@@ -1172,7 +1177,7 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
       trafficProfile ? trafficProfile->getName() :
 #endif
       (char *)""
-    );
+      );
   }
 #endif
   /* http://bradhedlund.com/2008/12/19/how-to-calculate-tcp-throughput-for-long-distance-links/
@@ -1292,7 +1297,7 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
     ObservationPoint *obs_point;
 
     flow_device.device_ip = device_ip,
-    flow_device.observation_point_id = observation_point_id;
+      flow_device.observation_point_id = observation_point_id;
     flow_device.in_index = inidx, flow_device.out_index = outidx;
     if (cli_host) cli_host->setLastDeviceIp(device_ip);
     if (srv_host) srv_host->setLastDeviceIp(device_ip);
@@ -1328,10 +1333,10 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
                       TrafficShaper **shaper_egress) {
     if (src2dst_direction) {
       *shaper_ingress = flowShaperIds.cli2srv.ingress,
-      *shaper_egress = flowShaperIds.cli2srv.egress;
+	*shaper_egress = flowShaperIds.cli2srv.egress;
     } else {
       *shaper_ingress = flowShaperIds.srv2cli.ingress,
-      *shaper_egress = flowShaperIds.srv2cli.egress;
+	*shaper_egress = flowShaperIds.srv2cli.egress;
     }
   }
   bool updateDirectionShapers(bool src2dst_direction,
@@ -1406,8 +1411,8 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
 
   inline float getEntropy(bool src2dst_direction) {
     struct ndpi_analyze_struct *e = src2dst_direction
-                                        ? initial_bytes_entropy.c2s
-                                        : initial_bytes_entropy.s2c;
+      ? initial_bytes_entropy.c2s
+      : initial_bytes_entropy.s2c;
 
     return (e ? ndpi_data_entropy(e) : 0);
   }
@@ -1467,7 +1472,7 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
         (cli_ip_addr && cli_ip_addr->isMulticastAddress()))
       return 2;  // Multicast host
     else if ((cli_host && cli_host->isLocalHost()) ||
-            (cli_ip_addr && cli_ip_addr->isLocalHost()))
+	     (cli_ip_addr && cli_ip_addr->isLocalHost()))
       return 1;  // Local host
     else
       return 0;  // Remote host
@@ -1477,7 +1482,7 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
         (srv_ip_addr && srv_ip_addr->isMulticastAddress()))
       return 2;  // Multicast host
     else if ((srv_host && srv_host->isLocalHost()) ||
-            (srv_ip_addr && srv_ip_addr->isLocalHost()))
+	     (srv_ip_addr && srv_ip_addr->isLocalHost()))
       return 1;  // Local host
     else
       return 0;  // Remote host
@@ -1519,6 +1524,10 @@ inline float get_goodput_bytes_thpt() const { return (goodput_bytes_thpt); };
   inline void setFlowAccounted()       { iface_flow_accounted = 1;    };
   void accountFlowTraffic();
   void setICMPTypeCode(u_int16_t icmp_type_code);
+  inline void setQoE(u_int8_t c2s, u_int8_t s2c) {
+    if((c2s != NTOP_QOE_UNKNOWN)|| (s2c != NTOP_QOE_UNKNOWN))
+    collected_qoe.src_to_dst = c2s, collected_qoe.dst_to_src = s2c, has_collected_qoe = 1;
+  }
 };
 
 #endif /* _FLOW_H_ */

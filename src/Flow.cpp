@@ -53,7 +53,8 @@ Flow::Flow(NetworkInterface *_iface,
   flow_dropped_counts_increased = 0, protocolErrorCode = 0;
   srcAS = dstAS = 0, rttSec = 0;
   src2dst_tcp_flags = dst2src_tcp_flags = 0;
-  
+
+  collected_qoe.src_to_dst = collected_qoe.dst_to_src = NTOP_QOE_UNKNOWN, has_collected_qoe = 0;
   tcp = NULL;
   
 #ifdef NTOPNG_PRO

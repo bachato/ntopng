@@ -674,6 +674,8 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     if (zflow->next_adjacent_as)
       flow->setNextAdjacentAS(zflow->next_adjacent_as);
 
+    flow->setQoE(zflow->getQoESrc2Dst(), zflow->getQoEDst2Src());
+    
     if (zflow->getJA4cHash()) flow->updateJA4C(zflow->getJA4cHash());
 
     if (zflow->getRiskInfo()) {

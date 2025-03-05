@@ -57,6 +57,7 @@ ParsedFlow::ParsedFlow() : ParsedFlowCore(), ParsedeBPF() {
   memset(&wtp_mac_address, 0, sizeof(wtp_mac_address));
   l7_json = NULL;
   has_parsed_ebpf = false;
+  memset(&qoe, 0, sizeof(qoe));
 }
 
 /* *************************************** */
@@ -185,6 +186,8 @@ ParsedFlow::ParsedFlow(const ParsedFlow &pf) : ParsedFlowCore(pf), ParsedeBPF(pf
 
   memcpy(&custom_app, &pf.custom_app, sizeof(custom_app));
   has_parsed_ebpf = pf.has_parsed_ebpf;
+
+  memcpy(&qoe, &pf.qoe, sizeof(qoe));
 }
 
 /* *************************************** */
@@ -350,8 +353,13 @@ void ParsedFlow::freeMemory() {
 /* *************************************** */
 
 void ParsedFlow::swap() {
+  u_int8_t tmp_qoe_c2s, tmp_qoe_s2c;
+  
   ParsedFlowCore::swap();
   ParsedeBPF::swap();
+
+  tmp_qoe_c2s = qoe.src_to_dst, tmp_qoe_s2c = qoe.dst_to_src;
+  qoe.src_to_dst = tmp_qoe_s2c, qoe.dst_to_src = tmp_qoe_c2s;
   
   is_swapped = true;
 }

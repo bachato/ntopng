@@ -99,7 +99,7 @@ void ParsedFlowCore::swap() {
   struct timeval tmp_nw_latency;
   u_int32_t tmp_src_as, tmp_prev_adjacent_as;
   u_int16_t tmp_window;
-
+  
   memcpy(&tmp_mac, &src_mac, sizeof(tmp_mac));
   tmp_ip.set(&src_ip);
   tmp_port = src_port, tmp_index = inIndex;
@@ -111,7 +111,7 @@ void ParsedFlowCore::swap() {
   memcpy(&tmp_nw_latency, &tcp.clientNwLatency, sizeof(tcp.clientNwLatency));
   tmp_window = tcp.in_window;
   tmp_src_as = src_as, tmp_prev_adjacent_as = prev_adjacent_as;
-
+ 
   memcpy(&src_mac, &dst_mac, sizeof(src_mac));
   src_ip.set(&dst_ip);
   src_port = dst_port, inIndex = outIndex;

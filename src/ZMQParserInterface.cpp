@@ -1447,6 +1447,14 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow *const flow,
       flow->setSIPCallId(value->string);
     break;
 
+  case QOE_SRC_TO_DST:
+    flow->setQoESrc2Dst(value->int_num);
+    break;
+    
+  case QOE_DST_TO_SRC:
+    flow->setQoEDst2Src(value->int_num);
+    break;
+
   default:
     return false;
   }

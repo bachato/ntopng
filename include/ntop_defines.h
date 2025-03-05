@@ -1654,7 +1654,7 @@ extern NtopngLuaContext* getUserdata(struct lua_State *vm);
 #endif
 
 #define NTOP_QOE_MAX        100
-#define NTOP_QOE_UNKNOWN      0
+#define NTOP_QOE_UNKNOWN    255
 #define NTOP_QOE_EXCELLENT   90
 #define NTOP_QOE_GOOD        75
 #define NTOP_QOE_FAIR        65

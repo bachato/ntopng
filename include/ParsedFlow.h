@@ -56,6 +56,9 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   FlowSource flow_source;
   char *wlan_ssid;
   u_int8_t wtp_mac_address[6];
+  struct {
+    u_int8_t src_to_dst, dst_to_src;
+  } qoe;
   
  public:
   ParsedFlow();
@@ -181,6 +184,10 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   inline char* getRiskName() { return(ndpi_flow_risk_name); }
   inline bool isSwapped() { return(is_swapped); }
   inline FlowSource getFlowSource() { return(flow_source); }
+  inline u_int8_t getQoESrc2Dst()   { return(qoe.src_to_dst); }
+  inline u_int8_t getQoEDst2Src()   { return(qoe.dst_to_src); }
+  inline void setQoESrc2Dst(u_int8_t t)   { qoe.src_to_dst = t; }
+  inline void setQoEDst2Src(u_int8_t t)   { qoe.dst_to_src = t; }
 
   void print();
 };
