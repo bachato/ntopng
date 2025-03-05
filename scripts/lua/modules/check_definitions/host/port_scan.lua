@@ -68,6 +68,8 @@ local function report_host(params, ip, vlan, victim, num_victims)
    alert:set_require_attention()
    alert:set_category(checks.check_categories.security)
    alert:set_info(params)
+   alert:set_attacker(host_key)
+   alert:set_as_attacker()
    local alert_info = {
       entity_val = host_key,
       alert_entity = alert_entities.host

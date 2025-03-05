@@ -25,6 +25,7 @@ host_alert_port_scan.meta = {
 
    -- Mitre Att&ck Matrix values
   mitre_values = {},
+  has_attacker = true,
 }
 
 -- ##############################################

@@ -466,11 +466,26 @@ function alert_utils.getLinkToPastFlows(ifid, alert, alert_json)
 
         -- IP
         if not isEmptyString(alert["ip"]) then
-            filters[#filters + 1] = {
-                name = "ip",
-                op = "eq",
-                val = alert["ip"]
-            }
+            -- Check if it's an attacker or a victim
+            if not isEmptyString(alert["is_attacker"]) and alert["is_attacker"] ~= 0 then
+                filters[#filters + 1] = {
+                    name = "cli_ip",
+                    op = "eq",
+                    val = alert["ip"]
+                }
+            elseif not isEmptyString(alert["is_victim"]) and alert["is_victim"] ~= 0 then
+                filters[#filters + 1] = {
+                    name = "srv_ip",
+                    op = "eq",
+                    val = alert["ip"]
+                }
+            else
+                filters[#filters + 1] = {
+                    name = "ip",
+                    op = "eq",
+                    val = alert["ip"]
+                }
+            end
 
             -- Add the hostname here cause it's needed to check if the ip is equal to the name
             -- Hostname
