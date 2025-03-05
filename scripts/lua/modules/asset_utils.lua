@@ -274,7 +274,7 @@ end
 -- @brief insert assetkey
 function asset_utils.getLastVersion(ifid)
     local query = string.format("SELECT version FROM %s WHERE ifid=%d ORDER BY version DESC LIMIT 1", table_name, ifid)
-    local last_version = interface.alert_store_query(query)
+    local last_version = interface.alert_store_query(query) or {}
     if table.len(last_version) == 0 then
         last_version = 0
     else
