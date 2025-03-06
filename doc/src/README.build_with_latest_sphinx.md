@@ -14,7 +14,7 @@ pip install breathe sphinx sphinx-rtd-theme mock rst2pdf sphinxcontrib.swaggerdo
 ## Files to update
 - conf.py (doc/src/conf.py): 
   - replace line 303 from app.add_stylesheet to app.add_css_file (function changed the name);
-  - change line 296 from `intersphinx_mapping = {'https://docs.python.org/': None}` to `intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}`
+  - change line 293 from `intersphinx_mapping = {'https://docs.python.org/': None}` to `intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}`
 
 ## Generate
 
