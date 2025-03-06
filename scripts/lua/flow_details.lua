@@ -1012,7 +1012,11 @@ else
    end
    
    -- qoe_utils is defined only if ntop is Enterprise L
-   if (qoe_utils and (flow.qoe ~= nil) and (flow.qoe.score ~= nil)) then
+   if (qoe_utils and (flow.qoe ~= nil)
+      and (flow.qoe.score ~= nil)
+      and (qoe_utils.validQoE(flow.qoe.score.cli_to_srv)
+           or qoe_utils.validQoE(flow.qoe.score.srv_to_cli))
+      ) then
       print("<tr><th width=10%>" .. i18n("flow_details.qoe") .. "</th>")
       print("<td>" .. qoe_utils.formatQoE(flow.qoe.score.cli_to_srv) .. "</td>")
       print("<td>" .. qoe_utils.formatQoE(flow.qoe.score.srv_to_cli) .. "</td>")
