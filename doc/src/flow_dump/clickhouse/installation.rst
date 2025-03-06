@@ -50,7 +50,7 @@ For example:
 
 .. code:: bash
 
-    ./ntopng -F="clickhouse-cloud;my-cloud-host.clickhouse.org@9440,3306s;ntopng;ch-user,mysql-user;ch-password"
+    ./ntopng -F "clickhouse-cloud;my-cloud-host.clickhouse.org@9440,3306s;ntopng;ch-user,mysql-user;ch-password"
 
 .. note::
   The `s` after the ports, means to use a secured connection, see for more info.

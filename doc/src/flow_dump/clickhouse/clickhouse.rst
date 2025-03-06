@@ -36,7 +36,7 @@ To connect ntopng and ClickHouse, both running on the same machine, the followin
 
 .. code:: bash
 
-    ./ntopng -F="clickhouse;127.0.0.1;ntopng;default;default"
+    ./ntopng -F "clickhouse;127.0.0.1;ntopng;default;default"
 
 In the example above, `127.0.0.1` is used to connect using IPv4 (using the symbolic string :code:`localhost` could resolve to an IPv6 address). A user :code:`default`, identified with password :code:`default`, with read and write permissions on database :code:`ntopng` is indicated as well. As shortcut you can use :code:`-F clickhouse` for :code:`F="clickhouse;127.0.0.1;ntopng;default;default"`
 
@@ -44,7 +44,7 @@ The above example with a ClickHouse cluster would be:
 
 .. code:: bash
 
-    ./ntopng -F="clickhouse-cluster;127.0.0.1;ntopng;default;default;ntop_cluster"
+    ./ntopng -F "clickhouse-cluster;127.0.0.1;ntopng;default;default;ntop_cluster"
 
 
 
@@ -97,7 +97,7 @@ For example:
 
 .. code:: bash 
 
-    ./ntopng -F="clickhouse;127.0.0.1@9440s;ntopng;default;default`
+    ./ntopng -F "clickhouse;127.0.0.1@9440s;ntopng;default;default`
 
 Securing the Connection in ClickHouse Cloud
 ===========================================
@@ -108,7 +108,7 @@ For example:
 
 .. code:: bash 
 
-    ./ntopng -F="clickhouse-cloud;127.0.0.1@9440,3306s;ntopng;default,default;default`
+    ./ntopng -F "clickhouse-cloud;127.0.0.1@9440,3306s;ntopng;default,default;default`
 
 .. note::
 
