@@ -46,7 +46,7 @@ const DEFINED_EVENTS = {
     },
 }
 
-const DEFINED_TOOLTIP = {
+export const DEFINED_TOOLTIP = {
     /* On click event used by the flow analyze section, redirect to the current url + a single filter */
     "format_bytes" : function(value, { config, seriesIndex, dataPointIndex }) {
         return NtopUtils.bytesToSize(value);
@@ -352,6 +352,7 @@ export class ChartWidget extends Widget {
     }
 
     _buildTooltip(config, rsp) {
+        debugger;
         /* By default the areaChart tooltip[y] is overwritten */
         config["tooltip"]["y"] = {
             formatter: function(value, { series, seriesIndex, dataPointIndex, w }) {

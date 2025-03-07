@@ -4,6 +4,7 @@
 </template>
 
 <script>
+import { DEFINED_TOOLTIP } from "../components/widget/widgets";
 import { ntopng_utility, ntopng_url_manager, ntopng_events_manager } from "../services/context/ntopng_globals_services";
 
 export default {
@@ -110,6 +111,13 @@ export default {
 			let chart_options = await this.get_chart_options(url_request);
 			this.chart.drawChart(this.$refs["chart"], chart_options);
 		},
+		map_tooltip: async function(options) {
+			if (options?.tooltip?.y?.formatter) {
+				options.tooltip.y.formatter = DEFINED_TOOLTIP[options.tooltip.y.formatter] 
+					|| options.tooltip.y.formatter
+			}
+			return options;
+		},
 		update_chart: async function (url_request) {
 			if (url_request == null) {
 				url_request = this.get_url_request();
@@ -133,6 +141,8 @@ export default {
 			}
 			if (this.map_chart_options != null) {
 				chart_options = this.map_chart_options(chart_options);
+			} else {
+				chart_options = this.map_tooltip(chart_options);
 			}
 			this.$emit('chart_reloaded', chart_options);
 			return chart_options;
