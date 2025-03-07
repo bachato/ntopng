@@ -152,6 +152,8 @@ const row_render_functions = {
       return NtopUtils.formatASN(row[column.id], row);
     } else if (column.data_type == 'country') {
       return NtopUtils.formatCountry(row[column.id], row);
+    } else if (column.data_type == "l7_proto") {
+      return row[column.id].label;
     } else if (formatterUtils.types[column.data_type]) {
       // 'bytes', 'bps', 'pps', ...
       let formatter = formatterUtils.getFormatter(column.data_type);

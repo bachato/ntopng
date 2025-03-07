@@ -90,12 +90,35 @@
 	},
 	{
 		"component" : "table",
+		"id" : "top_l7_inout",
+		"i18n_name" : "report.top_l7_inout",
+		"width" : 12,
+		"height" : 4,
+		"params" : {
+			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
+			 "url_params" : {
+					"query_preset" : "l7_traffic_inout",
+					"aggregated" : true,
+					"start" : 0,
+					"length" : 20
+			 },
+			 "table_type" : "db_search",
+			 "columns" : [
+					{ "id" : "l7proto",	"data_type" : "l7_proto", "i18n_name" : "l7_proto" },
+					{ "id" : "ingress_packets", "data_type" : "number", "i18n_name" : "traffic_labels.ingress_packets" },
+					{ "id" : "egress_packets", "data_type" : "number", "i18n_name" : "traffic_labels.egress_packets" },
+					{ "id" : "ingress_bytes", "data_type" : "bytes", "i18n_name" : "traffic_labels.ingress_bytes" },
+					{ "id" : "egress_bytes", "data_type" : "bytes", "i18n_name" : "traffic_labels.egress_bytes" },
+					{ "id" : "total_bytes", "data_type" : "bytes", "i18n_name" : "traffic_labels.total_bytes" }
+			 ]
+		}
+	},
+	{
+		"component" : "table",
 		"id" : "top_local_talkers",
 		"i18n_name" : "report.top_local_hosts",
 		"width" : 6,
 		"height" : 4,
-		"time_window" : "day",
-		"time_offset" : "",
 		"params" : {
 			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
 			 "url_params" : {
@@ -117,8 +140,6 @@
 		"i18n_name" : "report.top_remote_hosts",
 		"width" : 6,
 		"height" : 4,
-		"time_window" : "day",
-		"time_offset" : "",
 		"params" : {
 			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
 			 "url_params" : {
@@ -140,8 +161,6 @@
 		"i18n_name" : "db_search.top_clients",
 		"width" : 6,
 		"height" : 4,
-		"time_window" : "day",
-		"time_offset" : "",
 		"params" : {
 			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
 			 "url_params" : {
@@ -163,8 +182,6 @@
 		"i18n_name" : "db_search.top_servers",
 		"width" : 6,
 		"height" : 4,
-		"time_window" : "day",
-		"time_offset" : "",
 		"params" : {
 			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
 			 "url_params" : {
@@ -186,8 +203,6 @@
 		"i18n_name" : "report.top_receiver_networks",
 		"width" : 6,
 		"height" : 4,
-		"time_window" : "day",
-		"time_offset" : "",
 		"params" : {
 			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
 			 "url_params" : {
@@ -209,8 +224,6 @@
 		"i18n_name" : "report.top_sender_networks",
 		"width" : 6,
 		"height" : 4,
-		"time_window" : "day",
-		"time_offset" : "",
 		"params" : {
 			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
 			 "url_params" : {
@@ -232,8 +245,6 @@
 		"i18n_name" : "report.top_receiver_as",
 		"width" : 6,
 		"height" : 4,
-		"time_window" : "day",
-		"time_offset" : "",
 		"params" : {
 			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
 			 "url_params" : {
@@ -255,8 +266,6 @@
 		"i18n_name" : "report.top_sender_as",
 		"width" : 6,
 		"height" : 4,
-		"time_window" : "day",
-		"time_offset" : "",
 		"params" : {
 			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
 			 "url_params" : {
@@ -278,8 +287,6 @@
 		"i18n_name" : "report.top_receiver_countries",
 		"width" : 6,
 		"height" : 4,
-		"time_window" : "day",
-		"time_offset" : "",
 		"params" : {
 			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
 			 "url_params" : {
@@ -301,8 +308,6 @@
 		"i18n_name" : "report.top_sender_countries",
 		"width" : 6,
 		"height" : 4,
-		"time_window" : "day",
-		"time_offset" : "",
 		"params" : {
 			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
 			 "url_params" : {

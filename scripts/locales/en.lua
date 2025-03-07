@@ -7613,6 +7613,7 @@ local lang = {
     ["top_asn"] = "Top Autonomous Systems",
     ["top_by_throughput"] = "Top Instances By Throughput",
     ["top_countries"] = "Top Countries",
+    ["top_l7_inout"] = "Top Applications Ingress/Egress",
     ["top_local_hosts"] = "Top Local Hosts",
     ["top_local_os"] = "Top Local OS",
     ["top_mitre_id_flows"] = "Top Mitre Attacks (Flows)",
