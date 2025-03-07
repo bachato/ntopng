@@ -275,7 +275,7 @@ end
 function asset_utils.getLastVersion(ifid)
     local query = string.format("SELECT version FROM %s WHERE ifid=%d ORDER BY version DESC LIMIT 1", table_name, ifid)
     local last_version = interface.alert_store_query(query) or {}
-    if table.len(last_version) == 0 then
+    if type(last_version) == "string" or table.len(last_version) == 0 then
         last_version = 0
     else
         last_version = last_version[1].version
