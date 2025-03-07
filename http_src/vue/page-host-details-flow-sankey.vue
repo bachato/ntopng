@@ -7,30 +7,9 @@
         <div class="col-md-12 col-lg-12">
             <div class="card card-shadow">
                 <Loading v-if="loading"></Loading>
-                <div class="card-body">
-                    <div class="align-items-center justify-content-end mb-3"
-                        :class="[loading ? 'ntopng-gray-out' : '']" style="height: 70vh;">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="d-flex no-wrap ms-auto">
-                                <div class="m-1">
-                                    <div style="min-width: 16rem;">
-                                        <label class="my-auto me-1">{{ _i18n('hosts') }}: </label>
-                                        <SelectSearch v-model:selected_option=" active_hosts_type "
-                                            :options=" sankey_format_list " @select_option=" update_sankey ">
-                                        </SelectSearch>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="my-auto me-1"></label>
-                                    <div>
-                                        <button class="btn btn-link m-1" tabindex="0" type="button" @click=" reload ">
-                                            <span><i class="fas fa-sync"></i></span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <Sankey ref="sankey_chart" @node_click=" on_node_click " :sankey_data="sankey_data">
+                <div class="card-body" style="height: 70vh;">
+                    <div class="d-flex" style="height: 100%">
+                        <Sankey ref="sankey_chart" @node_click="on_node_click" :sankey_data="sankey_data">
                         </Sankey>
                     </div>
                 </div>
@@ -385,9 +364,3 @@ function get_link_value(link) {
 }
 
 </script>
-
-
-
-
-
-
