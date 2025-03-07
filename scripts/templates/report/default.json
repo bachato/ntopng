@@ -37,6 +37,60 @@
 	],
 	"components" : [
 	{
+		"component" : "badge",
+		"id" : "total_bytes",
+		"color" : "info",
+		"inactive_color" : "secondary",
+		"width" : 4,
+		"height" : 2,
+		"params" : {
+			"url" : "/lua/rest/v2/get/db/stats.lua",
+			"url_params" : {
+				"type" : "summary"
+			},
+			"icon" : "fas fa-scale-balanced",
+			"i18n_name" : "total_bytes",
+			"counter_path" : "total_bytes",
+			"counter_formatter" : "bytes"
+		}
+	},
+	{
+		"component" : "badge",
+		"id" : "ingress_bytes",
+		"color" : "info",
+		"inactive_color" : "secondary",
+		"width" : 4,
+		"height" : 2,
+		"params" : {
+			"url" : "/lua/rest/v2/get/db/stats.lua",
+			"url_params" : {
+				"type" : "summary"
+			},
+			"icon" : "fas fa-scale-unbalanced",
+			"i18n_name" : "traffic_labels.ingress_bytes",
+			"counter_path" : "ingress_bytes",
+			"counter_formatter" : "bytes"
+		}
+	},
+	{
+		"component" : "badge",
+		"id" : "egress_bytes",
+		"color" : "info",
+		"inactive_color" : "secondary",
+		"width" : 4,
+		"height" : 2,
+		"params" : {
+			"url" : "/lua/rest/v2/get/db/stats.lua",
+			"url_params" : {
+				"type" : "summary"
+			},
+			"icon" : "fas fa-scale-unbalanced-flip",
+			"i18n_name" : "traffic_labels.egress_bytes",
+			"counter_path" : "egress_bytes",
+			"counter_formatter" : "bytes"
+		}
+	},
+	{
 		"component" : "pie",
 		"id" : "top_l7_categories",
 		"i18n_name" : "top_l7_cat",
