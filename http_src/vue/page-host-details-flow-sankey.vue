@@ -6,6 +6,13 @@
     <div class="row">
         <div class="col-md-12 col-lg-12">
             <div class="card card-shadow">
+                <div class="form-group d-flex align-items-end">
+                    <div class="dropdown mt-2 ms-3 d-inline-block">
+                        <SelectSearch v-model:selected_option="active_hosts_type" :options="sankey_format_list"
+                            @select_option="update_sankey">
+                        </SelectSearch>
+                    </div>
+                </div>
                 <Loading v-if="loading"></Loading>
                 <div class="card-body" style="height: 70vh;">
                     <div class="d-flex" style="height: 100%">
