@@ -261,7 +261,7 @@
 			]
 		},
 		{
-			"title_i18n": "traffic_labels.srv2cli_bytes",
+			"title_i18n": "traffic_labels.cli2srv_bytes",
 			"data_field": "cli2srv_bytes",
 			"sortable": true,
 			"min-width": "90px",
