@@ -158,7 +158,7 @@
 			 },
 			 "table_type" : "db_search",
 			 "columns" : [
-					{ "id" : "l7proto",	"data_type" : "l7_proto", "i18n_name" : "l7_proto" },
+					{ "id" : "l7proto", "data_type" : "l7_proto", "i18n_name" : "traffic_labels.app_proto" },
 					{ "id" : "ingress_packets", "data_type" : "number", "i18n_name" : "traffic_labels.ingress_packets" },
 					{ "id" : "egress_packets", "data_type" : "number", "i18n_name" : "traffic_labels.egress_packets" },
 					{ "id" : "ingress_bytes", "data_type" : "bytes", "i18n_name" : "traffic_labels.ingress_bytes" },

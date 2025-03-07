@@ -8474,6 +8474,7 @@ local lang = {
     ["undecided"] = "Undecided",
   },
   ["traffic_labels"] = {
+    ["app_proto"] = "Application Protocol",
     ["breakdown"] = "Breakdown",
     ["bytes_rcvd"] = "Bytes Received",
     ["bytes_sent"] = "Bytes Sent",
