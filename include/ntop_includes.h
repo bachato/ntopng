@@ -395,7 +395,9 @@ using namespace std;
 #include "PcapInterface.h"
 #include "sFlowPktInterface.h"
 #endif
+#if defined(NTOPNG_PRO) 
 #include "ViewInterface.h"
+#endif
 #ifdef HAVE_PF_RING
 #include "PF_RINGInterface.h"
 #endif
@@ -464,7 +466,9 @@ using namespace std;
 #include "MacStats.h"
 #include "Mac.h"
 #include "PartializableFlowTrafficStats.h"
+#if defined(NTOPNG_PRO) 
 #include "ViewInterfaceFlowStats.h"
+#endif
 #include "FlowTrafficStats.h"
 #include "HostStats.h"
 #include "HostChecksStatus.h"

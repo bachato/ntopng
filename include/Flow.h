@@ -328,9 +328,11 @@ private:
     bool in_progress; /* Set to true when the flow is enqueued to be dumped */
   } last_db_dump;
 
+#ifdef NTOPNG_PRO
   /* Lazily initialized and used by a possible view interface */
   ViewInterfaceFlowStats *viewFlowStats;
-
+#endif
+  
   /* Partial used to periodically update stats out of flows */
   PartializableFlowTrafficStats *periodic_stats_update_partial;
 
@@ -838,8 +840,9 @@ public:
   inline void set_dump_done() { last_db_dump.in_progress = false; };
   bool needsExtraDissection();
   bool hasDissectedTooManyPackets();
-  bool get_partial_traffic_stats_view(PartializableFlowTrafficStats *delta,
-                                      bool *first_partial);
+#ifdef NTOPNG_PRO
+  bool get_partial_traffic_stats_view(PartializableFlowTrafficStats *delta, bool *first_partial);
+#endif
   bool update_partial_traffic_stats_db_dump();
   inline float get_pkts_thpt() const { return (pkts_thpt);   };
   inline float get_bytes_thpt() const { return (bytes_thpt); };
@@ -904,18 +907,21 @@ public:
     return ndpiUnknownProtocol;
   };
 
+#ifdef NTOPNG_PRO
   /* NOTE: the caller must ensure that the hosts returned bxoy these methods are
    * not used concurrently by subinterfaces since hosts are shared between all
    * the subinterfaces of the same ViewInterface. */
   inline Host *getViewSharedClient() {
-    return (viewFlowStats ? viewFlowStats->getViewSharedClient()
-	    : get_cli_host());
+    return (viewFlowStats ? viewFlowStats->getViewSharedClient() : get_cli_host());
   };
   inline Host *getViewSharedServer() {
-    return (viewFlowStats ? viewFlowStats->getViewSharedServer()
-	    : get_srv_host());
+    return (viewFlowStats ? viewFlowStats->getViewSharedServer(): get_srv_host());
   };
-
+#else
+  inline Host *getViewSharedClient() { return(get_cli_host()); }
+  inline Host *getViewSharedServer() { return(get_srv_host()); }
+#endif
+  
   u_int32_t get_packetsLost();
   u_int32_t get_packetsRetr();
   u_int32_t get_packetsOOO();
@@ -1251,10 +1257,12 @@ public:
   inline void setPrevAdjacentAS(u_int32_t v) { allocateCollection(); if(collection) collection->prevAdjacentAS = v; }
   inline void setNextAdjacentAS(u_int32_t v) { allocateCollection(); if(collection) collection->nextAdjacentAS = v; }
 
+#ifdef NTOPNG_PRO
   inline ViewInterfaceFlowStats *getViewInterfaceFlowStats() {
     return (viewFlowStats);
   }
-
+#endif
+  
   inline double getFlowRTT(bool client) const {
     if(tcp == NULL)
       return(0.0);

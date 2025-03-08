@@ -89,7 +89,9 @@ extern "C" {
   char *core_id_s = NULL;
   int core_id;
   char path[2 * MAX_PATH];
+#ifdef NTOPNG_PRO
   bool has_view_all = false;
+#endif
   FILE *fd;
   ThreadedActivity *boot_activity;
 
@@ -321,9 +323,10 @@ extern "C" {
   } /* for */
 
   /* Instantiated deferred view interfaces */
+#ifdef NTOPNG_PRO
   for (int i = 0; i < MAX_NUM_INTERFACE_IDS; i++) {
     NetworkInterface *iface = NULL;
-
+    
     if ((ifName = ntop->get_if_name(i)) == NULL || strncmp(ifName, "view:", 5))
       continue;
 
@@ -343,7 +346,8 @@ extern "C" {
     if ((iface = new (std::nothrow) ViewInterface("view:all")))
       ntop->registerInterface(iface);
   }
-
+#endif
+  
   if (ntop->getFirstInterface() == NULL) {
 #ifdef WIN32
     ntop->getTrace()->traceEvent(TRACE_ERROR,

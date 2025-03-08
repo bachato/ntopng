@@ -466,8 +466,8 @@ void usage() {
 	 "\"/path/to/local_networks_file\"\n"
 	 "[--ppp-networks|-M] <local list>    | Disable detection of broadcast IP addresses\n"
 	 "                                    | for local networks (point-to-point addresses).\n"
-	 "[--ndpi-protocols|-p] <file>.protos | Specify a nDPI protocol file\n"
-	 "                                    | (eg. protos.txt)\n"
+	 "[--ndpi-protocols|-p] <file>|<URL>  | Specify a nDPI protocol file\n"
+	 "                                    | (e.g. protos.txt) or URL (e.g. https://localhost/protos.txt)\n"
 	 "[--redis|-r] <fmt>                  | Redis connection. <fmt> is "
 	 "specified as\n"
 	 "                                    | [h[:port[:pwd]]][@db-id] where "
@@ -1573,7 +1573,7 @@ int Prefs::setOption(int optkey, char *optarg) {
 
   case 'p':
     ndpi_proto_path = strdup(optarg);
-    ntop->setCustomnDPIProtos(ndpi_proto_path);
+    ntop->setCustomnDPIProtos(ndpi_proto_path);    
     break;
 
   case 'q':

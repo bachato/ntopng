@@ -139,7 +139,10 @@ Flow::Flow(NetworkInterface *_iface,
   alerts_json = NULL, alerts_json_shadow = NULL;
   end_reason = NULL;
   ndpiFlowRiskName = NULL;
-  viewFlowStats = NULL, suspicious_dga_domain = NULL;
+#ifdef NTOPNG_PRO
+  viewFlowStats = NULL;
+#endif
+  suspicious_dga_domain = NULL;
   flow_payload = NULL, flow_payload_len = 0;
 
   last_db_dump.partial = NULL;
@@ -165,6 +168,7 @@ Flow::Flow(NetworkInterface *_iface,
     flow_device.observation_point_id = _observation_point_id;
   }
 
+#ifdef NTOPNG_PRO
   if(_iface->isViewed()) {
     memset(view_cli_mac, 0, sizeof(view_cli_mac));
     memset(view_srv_mac, 0, sizeof(view_srv_mac));
@@ -175,7 +179,8 @@ Flow::Flow(NetworkInterface *_iface,
     if(_view_srv_mac)
       memcpy(view_srv_mac, _view_srv_mac, sizeof(view_srv_mac));
   }
-
+#endif
+  
   /*
     Standard Interface
     Increase the hosts counter or Init the IP Addresses in case hosts are NULL
@@ -484,10 +489,12 @@ Flow::~Flow() {
   Host *cli_u = getViewSharedClient(), *srv_u = getViewSharedServer();
 
 
+#ifdef NTOPNG_PRO
   if(getInterface()->isViewed()) /* Score decrements done here for 'viewed'
                                      interfaces to avoid races. */
     decAllFlowScores();
-
+#endif
+  
   if(cli_u) {
     cli_u->decUses(); /* Decrease the number of uses */
     cli_u->decNumFlows(get_last_seen(), true, isTCP(), twh_over);
@@ -557,7 +564,10 @@ Flow::~Flow() {
     free(collection);
   }
 
+#ifdef NTOPNG_PRO
   if(viewFlowStats) delete (viewFlowStats);
+#endif
+  
   if(periodic_stats_update_partial) delete (periodic_stats_update_partial);
   if(last_db_dump.partial) delete (last_db_dump.partial);
   if(json_info) json_object_put(json_info);
@@ -4428,9 +4438,12 @@ void Flow::alert2JSON(FlowAlert *alert, ndpi_serializer *s) {
     interface, thus giving the user a single point where to look at all the
     troubles.
   */
+#ifdef NTOPNG_PRO
   ndpi_serialize_string_int32(s, "ifid",
 			      iface->isViewed() ? iface->viewedBy()->get_id() : iface->get_id());
-
+#else
+  ndpi_serialize_string_int32(s, "ifid", iface->get_id());
+#endif
   ndpi_serialize_string_string(s, "action", "store");
   ndpi_serialize_string_int64(s, "first_seen", get_first_seen());
   ndpi_serialize_string_int32(s, "score", getScore());
@@ -4599,6 +4612,7 @@ void Flow::decAllFlowScores() {
     u_int16_t cli_score_val = stats.get_cli_score(score_category);
     u_int16_t srv_score_val = stats.get_srv_score(score_category);
 
+#ifdef NTOPNG_PRO
     if(getViewInterfaceFlowStats()) {
       /*
         If this flow belong to a view, the actual score value is the one
@@ -4607,7 +4621,8 @@ void Flow::decAllFlowScores() {
       cli_score_val = getViewInterfaceFlowStats()->getPartializableStats()->get_cli_score(score_category);
       srv_score_val = getViewInterfaceFlowStats()->getPartializableStats()->get_srv_score(score_category);
     }
-
+#endif
+    
     if(cli_u && cli_score_val)
       cli_u->decScoreValue(cli_score_val, score_category, true /* as client */);
 
@@ -4621,24 +4636,30 @@ void Flow::decAllFlowScores() {
   */
 
   if(isFlowAlerted()) {
-    iface->decNumAlertedFlows(
-			      this, Utils::mapScoreToSeverity(getPredominantAlertScore()));
+    bool dec_stats = false;
+    
+    iface->decNumAlertedFlows(this, Utils::mapScoreToSeverity(getPredominantAlertScore()));
 
-    if(!getInterface()
-	->isViewed() /* Always for non-viewed interfaces (increments are
-			always performed and in the same thread) */
-	/*
-	  For viewed interfaces, do the decrement only if previously
-	  incremented.                   A previous increment can fail when the
-	  view flows queue                   is full and enqueues fail.
-	*/
-        || (getViewInterfaceFlowStats() && getViewInterfaceFlowStats()
-	    ->getPartializableStats()
-	    ->get_is_flow_alerted())) {
+#ifdef NTOPNG_PRO
+    if(!getInterface()->isViewed() /* Always for non-viewed interfaces (increments are
+				      always performed and in the same thread) */
+       /*
+	 For viewed interfaces, do the decrement only if previously
+	 incremented.                   A previous increment can fail when the
+	 view flows queue                   is full and enqueues fail.
+       */
+       || (getViewInterfaceFlowStats() && getViewInterfaceFlowStats()->getPartializableStats()->get_is_flow_alerted())) {
+      dec_stats = true;
+    }
+#else
+    dec_stats = true;
+#endif
+    
+    if(dec_stats) {
       if(cli_u) cli_u->decNumAlertedFlows(true /* As client */);
       if(srv_u) srv_u->decNumAlertedFlows(false /* As server */);
     }
-
+    
 #ifdef ALERTED_FLOWS_DEBUG
     iface_alert_dec = true;
 #endif
@@ -4771,8 +4792,12 @@ void Flow::housekeep(time_t t) {
       checks execution where scores are increased. NOTE: for view interfaces,
       decrement are performed in ~Flow to avoid races.
     */
+#ifdef NTOPNG_PRO
     if(!getInterface()->isViewed()) decAllFlowScores();
-
+#else
+    decAllFlowScores();
+#endif
+    
     switch (protocol) {
     case IPPROTO_TCP:
       if(cli_host && ((getTcpFlagsCli2Srv() == TH_SYN) || (!non_zero_payload_observed)))
@@ -4832,6 +4857,7 @@ bool Flow::get_partial_traffic_stats(PartializableFlowTrafficStats **dst,
 /* *************************************** */
 
 /* NOTE: this is only called by the ViewInterface */
+#ifdef NTOPNG_PRO
 bool Flow::get_partial_traffic_stats_view(PartializableFlowTrafficStats *fts,
                                           bool *first_partial) {
   if(!fts) return (false);
@@ -4848,6 +4874,7 @@ bool Flow::get_partial_traffic_stats_view(PartializableFlowTrafficStats *fts,
 
   return (true);
 }
+#endif
 
 /* *************************************** */
 
@@ -8360,7 +8387,10 @@ bool Flow::setAlertsMap(FlowAlert *alert) {
   /* Check host filter and if such alert needs to be discarded
    * due to alert exclusions */
   Host *cli_h = get_cli_host(), *srv_h = get_srv_host();
+
+#ifdef NTOPNG_PRO
   ViewInterface *viewedBy = getInterface()->viewedBy();
+
   if(viewedBy) {
     Mac *srcMac = NULL, *dstMac = NULL;
     Host *cli_host, *srv_host;
@@ -8374,7 +8404,9 @@ bool Flow::setAlertsMap(FlowAlert *alert) {
       delete alert;
       return false;
     }
-  } else {
+  } else
+#endif
+    {
     if((cli_h && cli_h->isFlowAlertDisabled(alert_type)) ||
         (srv_h && srv_h->isFlowAlertDisabled(alert_type))) {
 #ifdef DEBUG_SCORE

@@ -2287,7 +2287,7 @@ bool Utils::httpGetPost(lua_State *vm, char *url,
 
     fillcURLProxy(curl);
 
-    memset(stats, 0, sizeof(HTTPTranferStats));
+    if(stats) memset(stats, 0, sizeof(HTTPTranferStats));
     curl_easy_setopt(curl, CURLOPT_URL, url);
 
     if (user_header_token != NULL) {
@@ -2468,7 +2468,7 @@ bool Utils::httpGetPost(lua_State *vm, char *url,
     }
 
     if (vm) {
-      readCurlStats(curl, stats, vm);
+      if(stats) readCurlStats(curl, stats, vm);
 
       if (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code) == CURLE_OK)
         lua_push_uint64_table_entry(vm, "RESPONSE_CODE", response_code);
@@ -2571,12 +2571,11 @@ long Utils::httpGet(const char *url,
     curl_easy_setopt(curl, CURLOPT_USERAGENT, ua);
 
     if (curl_easy_perform(curl) == CURLE_OK) {
-      if ((curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &content_type) !=
-           CURLE_OK) ||
-          (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code) !=
-           CURLE_OK))
+      if ((curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &content_type) != CURLE_OK) ||
+          (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code) != CURLE_OK))
         response_code = 0;
-    }
+    } else
+      response_code = -1;
 
     /* always cleanup */
     if (headers != NULL) curl_slist_free_all(headers);
@@ -2588,7 +2587,7 @@ long Utils::httpGet(const char *url,
 
 /* **************************************** */
 
-char *Utils::getURL(char *url, char *buf, u_int buf_len) {
+char* Utils::getURL(char *url, char *buf, u_int buf_len) {
   struct stat s;
 
   if (!ntop->getPrefs()->is_pro_edition()) return (url);

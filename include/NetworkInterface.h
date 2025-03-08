@@ -46,7 +46,6 @@ class CountriesHash;
 class DB;
 class Paginator;
 class NetworkInterfaceTsPoint;
-class ViewInterface;
 class FlowAlert;
 class HostAlert;
 class FlowChecksLoader;
@@ -56,6 +55,7 @@ class HostChecksLoader;
 class HostChecksExecutor;
 
 #ifdef NTOPNG_PRO
+class ViewInterface;
 class L7Policer;
 class FlowInterfacesStats;
 class TrafficShaper;
@@ -167,7 +167,9 @@ protected:
   RoundTripStats *download_stats, *upload_stats;
 
   bool is_view; /* Whether this is a view interface */
+#ifdef NTOPNG_PRO
   ViewInterface *viewed_by; /* Whether this interface is 'viewed' by a ViewInterface */
+#endif
   u_int8_t viewed_interface_id; /* When this is a 'viewed' interface, this id
                                    represents a unique interface identifier
                                    inside the view */
@@ -1071,9 +1073,11 @@ public:
   virtual bool areTrafficDirectionsSupported() { return (true); };
 
   inline bool isView() const { return is_view; };
+#ifdef NTOPNG_PRO
   inline ViewInterface *viewedBy() const { return viewed_by; };
   inline u_int8_t getViewedId() const { return viewed_interface_id; };
   inline bool isViewed() const { return viewedBy() != NULL; };
+
   /*
     Method called by a view interface on all its viewed interfaces.
     The view passes to this method both its pointer and the viewed interface id,
@@ -1085,7 +1089,10 @@ public:
     viewed_by = view_iface;
     viewed_interface_id = _viewed_interface_id;
   };
-
+#else
+  inline bool isViewed() const { return(false); }
+#endif
+  
   bool getMacInfo(lua_State *vm, char *mac);
   bool resetMacStats(lua_State *vm, char *mac, bool delete_data);
   bool setMacDeviceType(char *strmac, DeviceType dtype, bool alwaysOverwrite);

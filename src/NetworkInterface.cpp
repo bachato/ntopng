@@ -323,7 +323,9 @@ void NetworkInterface::init(const char *interface_name) {
   num_active_probes = 0;
 
   is_view = false;
+#ifdef NTOPNG_PRO
   viewed_by = NULL;
+#endif
   viewed_interface_id = 0;
   download_stats = upload_stats = NULL;
 
@@ -416,7 +418,7 @@ u_int16_t NetworkInterface::getnDPIProtoByName(const char *name) {
 struct ndpi_keys_struct {
   const char *proto, *key, *value;
 };
-  
+
 struct ndpi_detection_module_struct *NetworkInterface::initnDPIStruct() {
   struct ndpi_detection_module_struct *ndpi_s = ndpi_init_detection_module(NULL);
   ndpi_port_range d_port[MAX_DEFAULT_PORTS];
@@ -448,7 +450,7 @@ struct ndpi_detection_module_struct *NetworkInterface::initnDPIStruct() {
 
   for(int i=0; ndpi_keys[i].key != NULL; i++) {
     rc = ndpi_set_config(ndpi_s, ndpi_keys[i].proto, ndpi_keys[i].key, ndpi_keys[i].value);
-    
+
     if (rc != NDPI_CFG_OK)
       ntop->getTrace()->traceEvent(TRACE_ERROR, "Error ndpi_set_config(%s/%s/%s): %d",
 				   ndpi_keys[i].proto ? ndpi_keys[i].proto : "NULL",
@@ -461,7 +463,7 @@ struct ndpi_detection_module_struct *NetworkInterface::initnDPIStruct() {
 
     if (rc != NDPI_CFG_OK)
       ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to enable the DNS cache: %d", rc);
-  }  
+  }
 
   if (ntop->getCustomnDPIProtos() != NULL)
     ndpi_load_protocols_file(ndpi_s, ntop->getCustomnDPIProtos());
@@ -1450,7 +1452,7 @@ Flow *NetworkInterface::getFlow(int32_t if_index, Mac *src_mac, Mac *dst_mac, u_
 
 	/* We're changing host's special mac with a non-special one */
 	/* incNumHosts(srcHost, srcHost->isRxOnlyHost()); */
-	      
+
         srcHost->updateHostPool(true /* Inline */);
       }
     }
@@ -1661,7 +1663,10 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
   u_int16_t fragment_extra_overhead = 0;
 #endif
 #endif
-  u_int8_t tos, tcp_window_scale = 0;
+  u_int8_t tos;
+#ifdef NTOPNG_PRO
+  u_int8_t tcp_window_scale = 0;
+#endif
 
   *hostFlow = NULL;
 
@@ -1860,8 +1865,9 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
       tcp_flags = l4[13];
       tcp_len = min_val(4 * tcph->doff, trusted_l4_packet_len);
       payload = &l4[tcp_len];
-      trusted_payload_len = trusted_l4_packet_len - tcp_len;      
+      trusted_payload_len = trusted_l4_packet_len - tcp_len;
 
+#ifdef NTOPNG_PRO
       if(tcp_flags & TH_SYN) {
 	if(tcp_len > sizeof(struct ndpi_tcphdr)) {
 	  u_int8_t *options = (u_int8_t*)(&l4[sizeof(struct ndpi_tcphdr)]);
@@ -1882,8 +1888,8 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 		break;
 	      else if(kind == 3 /* Window Scale */) {
 		if(len == 3)
-		  tcp_window_scale = options[i+2];		
-		
+		  tcp_window_scale = options[i+2];
+
 		break;
 	      }
 
@@ -1892,7 +1898,8 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 	  } /* for */
 	}
       }
-      
+#endif
+
       // TODO: check if payload should be set to NULL when trusted_payload_len == 0
     } else {
       /* Packet too short: this is a faked packet */
@@ -2082,7 +2089,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
       flow->updateUDPTimestamp(src2dst_direction, &h->ts);
 #endif
       break;
-      
+
     case IPPROTO_ICMP:
     case IPPROTO_ICMPV6:
       if (trusted_l4_packet_len > 2) {
@@ -2428,7 +2435,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
       application protocol has nit been detected hence account
       traffic as Unknown. See Flow::~Flow()
     */
-    
+
     if(flow->isFlowAccounted()) {
       incnDPIStats(when->tv_sec,
 		   flow->getStatsProtocol(), flow->get_protocol_category(),
@@ -2436,7 +2443,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
     } else {
       incnDPIStats(when->tv_sec,
 		   flow->getStatsProtocol(), flow->get_protocol_category(),
-		   flow->get_bytes_cli2srv(), flow->get_bytes_srv2cli(), 
+		   flow->get_bytes_cli2srv(), flow->get_bytes_srv2cli(),
        flow->get_packets_cli2srv(), flow->get_packets_srv2cli());
       flow->setFlowAccounted(); /* Set the flow as accounted */
     }
@@ -2724,12 +2731,12 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 
       bos = (((u_int8_t)packet[ip_offset + 2]) & 0x1), ip_offset += 4;
       if (bos) {
-	if(h->caplen > (sizeof(struct ndpi_ethhdr) + ip_offset)) {	
+	if(h->caplen > (sizeof(struct ndpi_ethhdr) + ip_offset)) {
 	  u_int8_t is_ethernet;
-	  
+
 	  eth_type = guessEthType((const u_char *)&packet[ip_offset],
 				  h->caplen - ip_offset, &is_ethernet);
-	  
+
 	  if (is_ethernet) ip_offset += sizeof(struct ndpi_ethhdr);
 	  break;
 	} else {
@@ -2957,7 +2964,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 		     NDPI_PROTOCOL_UNKNOWN,
 		     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
 	    goto dissect_packet_end;
-	  }	  
+	  }
 	} else if ((sport == TZSP_PORT) || (dport == TZSP_PORT)) {
 	  /* https://en.wikipedia.org/wiki/TZSP */
 	  u_int offset = ip_offset + ip_len + sizeof(struct ndpi_udphdr);
@@ -3488,7 +3495,13 @@ void NetworkInterface::incNumQueueDroppedFlows(u_int32_t num) {
     For viewed interface, the dumper database is the one belonging to the
     overlying view interface.
   */
-  DB *dumper = isViewed() ? viewedBy()->getDB() : getDB();
+  DB *dumper;
+
+#ifdef NTOPNG_PRO
+  dumper = isViewed() ? viewedBy()->getDB() : getDB();
+#else
+  dumper = getDB();
+#endif
 
   if (dumper) dumper->incNumQueueDroppedFlows(num);
 };
@@ -3512,10 +3525,15 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
     For viewed interface, the dumper database is the one belonging to the
     overlying view interface.
   */
-  DB *dumper = isViewed() ? viewedBy()->getDB() : getDB();
+  DB *dumper;
   u_int64_t idle_flows_done = 0, active_flows_done = 0;
   time_t when = time(NULL);
 
+#ifdef NTOPNG_PRO
+  dumper = isViewed() ? viewedBy()->getDB() : getDB();
+#else
+  dumper = getDB();
+#endif
 
 #ifdef HAVE_ZMQ
 #ifndef HAVE_NEDGE
@@ -4061,8 +4079,10 @@ bool NetworkInterface::viewEnqueue(time_t t, Flow *f) {
     Enqueue is only performed when the interface is 'viewed'.
     Enqueue needs to know the viewed interface id.
   */
+#ifdef NTOPNG_PRO
   if (isViewed()) return viewedBy()->viewEnqueue(t, f, getViewedId());
-
+#endif
+  
   return false;
 }
 
@@ -5382,7 +5402,7 @@ static bool flow_search_walker(GenericHashEntry *h, void *user_data,
     case column_score:
       {
 	u_int16_t s = f->getScore();;
-	
+
 	if(s == 0) {
 	  if(retriever->pag->a2zSortOrder())
 	    s = 0xFFFF;
@@ -7552,7 +7572,7 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
   _ethStats.lua(vm);
   _localStats.lua(vm);
   _ndpiStats.lua(this, vm, true, false);
-  
+
   lua_push_uint64_table_entry(vm, "traffic_sent_since_reset", _ethStats.getNumEgressBytes() - getCheckPointNumTrafficSent());
   lua_push_uint64_table_entry(vm, "traffic_rcvd_since_reset", _ethStats.getNumIngressBytes() - getCheckPointNumTrafficRcvd());
   lua_push_uint64_table_entry(vm, "packets_sent_since_reset", _ethStats.getNumEgressPackets() - getCheckPointNumPacketsSent());
@@ -8441,7 +8461,7 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
 	  ases_hash = new AutonomousSystemHash(this, ndpi_min(num_hashes, 4096), 32768);
 	  if (!isPacketInterface())
 	    obs_hash = new ObservationPointHash(this, ndpi_min(num_hashes, 4096), 32768);
-	  
+
 	  countries_hash = new CountriesHash(this, ndpi_min(num_hashes, 1024), 32768);
 	  vlans_hash = new VLANHash(this, 1024, 2048);
 	  macs_hash = new MacHash(this, ndpi_min(num_hashes, 8192), 32768);
@@ -8540,9 +8560,11 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
 /* **************************************** */
 
 AlertsQueue *NetworkInterface::getAlertsQueue() const {
+#ifdef NTOPNG_PRO
   if (isViewed())
     return viewedBy()->getAlertsQueue();
   else
+#endif
     return alertsQueue;
 }
 
@@ -10970,9 +10992,9 @@ void NetworkInterface::incNumHosts(Host *host, bool rxOnlyHost) {
 
   if(!host->isUnicastHost())
     return; /* Account only unicast hosts */
-    
+
   local = host->isLocalHost();
-  
+
   /* Do not increase nor decrease hosts in case ntopng is shutting down, it's useless */
   if(isShuttingDown() || (!host->isUnicastHost()))
     return;
@@ -10982,12 +11004,12 @@ void NetworkInterface::incNumHosts(Host *host, bool rxOnlyHost) {
   totalNumHosts++;
   if(local)
     numLocalHosts++;
-  
+
   if(rxOnlyHost) {
     numTotalRxOnlyHosts++;
-    
+
     if (local)
-      numLocalRxOnlyHosts++;    
+      numLocalRxOnlyHosts++;
   }
 
 #ifdef DEBUG
@@ -11003,13 +11025,13 @@ void NetworkInterface::decNumHosts(Host *host, bool rxOnlyHost) {
 
   if(!host->isUnicastHost())
     return; /* Account only unicast hosts */
-  
+
   local = host->isLocalHost();
-  
+
   /* Do not increase nor decrease hosts in case ntopng is shutting down, it's useless */
   if(isShuttingDown() || (!host->isUnicastHost()))
     return;
-  
+
   //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Decreasing number of %s %s hosts", local ? "Local" : "Remote", rxOnlyHost ? "RX Only" : "Bidirectional");
 
   /* Decrease total number of hosts */
@@ -12668,7 +12690,7 @@ void NetworkInterface::getSFlowDevices(lua_State *vm, bool add_table) {
 
 void NetworkInterface::incnDPIStats(time_t when, u_int16_t ndpi_proto,
 				    ndpi_protocol_category_t ndpi_category,
-				    u_int32_t bytes_sent, u_int32_t bytes_rcvd, 
+				    u_int32_t bytes_sent, u_int32_t bytes_rcvd,
             u_int32_t pkts_sent, u_int32_t pkts_rcvd) {
   ndpiStats->incStats(when, ndpi_proto, pkts_sent, bytes_sent, pkts_rcvd, bytes_rcvd);
   ndpiStats->incCategoryStats(when, ndpi_category, bytes_sent, bytes_rcvd);

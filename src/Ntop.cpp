@@ -4402,3 +4402,35 @@ bool Ntop::isInLocalASN(IpAddress *ip) {
 }
 
 /* ******************************************* */
+
+#define TMP_PROTOS_FILE "/tmp/ntopng-ndpi-protocols-file"
+
+char* Ntop::getCustomnDPIProtos() {
+  if(custom_ndpi_protos != NULL) {
+    if(strcmp(custom_ndpi_protos, TMP_PROTOS_FILE) != 0) {
+      if((strncmp(custom_ndpi_protos, "http://", 7) == 0)
+	 || (strncmp(custom_ndpi_protos, "https://", 8) == 0)) {
+	/* This looks like an URL */
+	char fname[PATH_MAX];
+	bool rc;
+	
+	snprintf(fname, sizeof(fname), "%s", TMP_PROTOS_FILE);
+	
+	rc = Utils::httpGetPost(NULL, custom_ndpi_protos, NULL, NULL, NULL, 10, 30,
+				false, false, NULL, NULL, fname, true, 4, false);
+	
+	if(rc == false)
+	  ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to access URL %s: ignored", custom_ndpi_protos);
+	else {
+	  free(custom_ndpi_protos);
+	  custom_ndpi_protos = strdup(fname);
+	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Successfully downloaded nDPI protocols file from URL %s", custom_ndpi_protos);
+	}
+      }
+    } else {
+      /* Protocols file already downloaded */
+    }    
+  }
+  
+  return(custom_ndpi_protos);
+}

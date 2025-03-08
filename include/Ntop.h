@@ -235,7 +235,7 @@ class Ntop {
    *
    * @return The path of custom nDPI protocols file.
    */
-  inline char *getCustomnDPIProtos() { return (custom_ndpi_protos); };
+  char *getCustomnDPIProtos();
   /**
    * @brief Get the offset time.
    * @details ....

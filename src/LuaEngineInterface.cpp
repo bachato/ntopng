@@ -84,8 +84,7 @@ static int ntop_get_interface_names(lua_State *vm) {
 
       if (matches_allowed_ifname(allowed_ifname, ifname) &&
           (!exclude_viewed_interfaces || !iface->isViewed())) {
-        ntop->getTrace()->traceEvent(TRACE_DEBUG, "Returning name [%d][%s]", i,
-                                     ifname);
+        ntop->getTrace()->traceEvent(TRACE_DEBUG, "Returning name [%d][%s]", i, ifname);
         snprintf(num, sizeof(num), "%d", iface->get_id());
         lua_push_str_table_entry(vm, num, ifname);
       }
@@ -463,12 +462,16 @@ static int ntop_interface_is_view(lua_State *vm) {
 /* ****************************************** */
 
 static int ntop_interface_viewed_by(lua_State *vm) {
+#ifdef NTOPNG_PRO
   NetworkInterface *curr_iface = getCurrentInterface(vm);
-
+#endif
+  
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  if (curr_iface && curr_iface->isViewed())
+#ifdef NTOPNG_PRO
+  if (curr_iface && curr_iface->isViewed()) 
     lua_pushinteger(vm, curr_iface->viewedBy()->get_id());
   else
+#endif
     lua_pushnil(vm);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
