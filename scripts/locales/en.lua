@@ -6453,7 +6453,7 @@ local lang = {
   },
   ["network_configuration"] = {
     ["alert_note"] = "The Unexpected DNS/NTP/DHCP/SMTP/Gateway Server Checks are disabled. Please enable at least one of them <a href='" .. ntop.getHttpPrefix() .. "/lua/admin/edit_configset.lua?subdir=all#all'><i class='fas fa-cog'></i></a>.",
-    ["policy_note"] = "The Host Policy Check is disabled. Please enable it <a href='" .. ntop.getHttpPrefix() .. "/lua/admin/edit_configset.lua?subdir=all#all'><i class='fas fa-cog'></i></a>.",
+    ["policy_note"] = "The check 'Host Policy' is disabled. Please enable this flow check here <a href='" .. ntop.getHttpPrefix() .. "/lua/admin/edit_configset.lua?subdir=all#all'><i class='fas fa-cog'></i></a>.",
     ["dhcp_servers_title"] = "DHCP Servers",
     ["dns_servers_title"] = "DNS Servers",
     ["dns_servers_description"] = "A list of comma separated DNS Servers IPs",
