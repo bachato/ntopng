@@ -48,8 +48,7 @@ pfring *PF_RINGInterface::pfringSocketInit(const char *name) {
   else if (ntop->getPrefs()->are_vss_apcon_timestamps_enabled())
     flags |= PF_RING_VSS_APCON_TIMESTAMP;
 
-  if ((handle = pfring_open(name, ntop->getGlobals()->getSnaplen(name),
-                            flags)) == NULL)
+  if ((handle = pfring_open(name, ntop->getGlobals()->getSnaplen(name),  flags)) == NULL)
     return NULL;
 
   rc = pfring_version(handle, &version);
@@ -57,8 +56,8 @@ pfring *PF_RINGInterface::pfringSocketInit(const char *name) {
   rc = pfring_version(handle, &version);
 
   if (rc == -1) {
-    ntop->getTrace()->traceEvent(
-        TRACE_ERROR, "Unexpected socket error: unable to read PF_RING version");
+    ntop->getTrace()->traceEvent(TRACE_ERROR,
+				 "Unexpected socket error: unable to read PF_RING version");
     exit(0);
   }
 
@@ -104,12 +103,11 @@ pfring *PF_RINGInterface::pfringSocketInit(const char *name) {
   }
 
   if (pfring_set_direction(handle, direction) != 0) {
-    ntop->getTrace()->traceEvent(
-        TRACE_WARNING, "Unable to set packet capture direction on %s", name);
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to set packet capture direction on %s", name);
+    
     if (strstr(name, "zc:") && direction != rx_only_direction)
-      ntop->getTrace()->traceEvent(
-          TRACE_WARNING,
-          "ZC supports RX capture only, please use --capture-direction 1");
+      ntop->getTrace()->traceEvent(TRACE_WARNING,
+				   "ZC supports RX capture only, please use --capture-direction 1");
   }
 
   if (pfring_set_socket_mode(handle, recv_only_mode) != 0)
