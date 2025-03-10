@@ -1448,12 +1448,14 @@ Flow *NetworkInterface::getFlow(int32_t if_index, Mac *src_mac, Mac *dst_mac, u_
           }
         }
 
-        srcHost->set_mac(src_mac);
+#ifdef HANDLE_MAC_SWAP
+	srcHost->set_mac(src_mac);
 
 	/* We're changing host's special mac with a non-special one */
 	/* incNumHosts(srcHost, srcHost->isRxOnlyHost()); */
 
         srcHost->updateHostPool(true /* Inline */);
+#endif
       }
     }
   }
@@ -1473,12 +1475,14 @@ Flow *NetworkInterface::getFlow(int32_t if_index, Mac *src_mac, Mac *dst_mac, u_
 				     Utils::formatMac(primary_mac->get_mac(), bufm2, sizeof(bufm2)));
 #endif
 
+#ifdef HANDLE_MAC_SWAP
         dstHost->set_mac(dst_mac);
 
 	/* We're changing host's special mac with a non-special one */
 	/* incNumHosts(dstHost, dstHost->isRxOnlyHost()); */
 
         dstHost->updateHostPool(true /* Inline */);
+#endif
       }
     }
   }

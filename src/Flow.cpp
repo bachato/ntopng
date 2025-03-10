@@ -1717,18 +1717,25 @@ char *Flow::printTCPState(char *const buf, u_int buf_len) const {
 
 /* *************************************** */
 
-char *Flow::print(char *buf, u_int buf_len, bool full_report) const {
+char* Flow::print(char *buf, u_int buf_len, bool full_report) const {
   char buf1[32], buf2[32], buf3[32], buf4[32], buf5[32], pbuf[32], tcp_buf[64];
 
   buf[0] = '\0';
 
   if(!full_report) {
-    snprintf(buf, buf_len, "%s %s:%u <-> %s:%u",
+    Mac *cli_mac = get_cli_host()->getMac();
+    Mac *srv_mac = get_srv_host()->getMac();
+    char b1[32], b2[32];
+    
+    snprintf(buf, buf_len, "%s %s:%u [%s/%p] <-> %s:%u [%s/%p]",
 	     get_protocol_name(),
 	     get_cli_ip_addr() ? get_cli_ip_addr()->print(buf1, sizeof(buf1)) : "",
 	     ntohs(cli_port),
+	     cli_mac ? cli_mac->print(b1, sizeof(b1)) : "", cli_mac,
 	     get_srv_ip_addr() ? get_srv_ip_addr()->print(buf2, sizeof(buf2)) : "",
-	     ntohs(srv_port));
+	     ntohs(srv_port),
+	     srv_mac ? srv_mac->print(b2, sizeof(b2)) : "", srv_mac
+	     );
     return(buf);
   }
 

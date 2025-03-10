@@ -74,7 +74,6 @@ void FlowChecksExecutor::execChecks(Flow *f, FlowChecks c) {
       return;
   }
 
-  ntop->getTrace()->traceEvent(TRACE_ERROR, "--------------------");
   for (list<FlowCheck *>::iterator it = checks->begin(); it != checks->end(); ++it) {
     FlowCheck *fc = (*it);
 
@@ -82,7 +81,7 @@ void FlowChecksExecutor::execChecks(Flow *f, FlowChecks c) {
     t1 = Utils::getTimeNsec();
 #endif
 
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "[state: %u] %s", c, fc->getName().c_str());
+    // ntop->getTrace()->traceEvent(TRACE_ERROR, "[state: %u] %s", c, fc->getName().c_str());
 
     switch (c) {
       case flow_check_flow_begin:
