@@ -405,11 +405,11 @@ u_int GenericHash::purgeIdle(const struct timeval *tv, bool force_idle,
           case hash_entry_state_flow_protocoldetected:
             head->housekeep(now);
 
-            if (head_state == hash_entry_state_flow_protocoldetected)
-              /*
-                Transition to active if the protocol is detected
-               */
-              head->set_hash_entry_state_active();
+            if (head->get_state() == hash_entry_state_flow_protocoldetected) {
+              /* Transition to active if the protocol is detected */
+
+	      head->set_hash_entry_state_active();
+	    }
 
             if (force_idle) goto detach_idle_hash_entry;
             break;
