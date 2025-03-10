@@ -53,7 +53,7 @@ class Prefs {
     sniff_local_name_responses, pcap_file_purge_hosts_flows,
     categorization_enabled, resolve_all_host_ip, change_user, daemonize,
     enable_auto_logout, enable_auto_logout_at_runtime, use_promiscuous_mode,
-    enable_ixia_timestamps, enable_vss_apcon_timestamps, 
+    enable_ixia_timestamps,
     enable_interface_name_only, enable_users_login, disable_localhost_login,
     service_license_check, enable_sql_log, enable_access_log, log_to_file,
     enable_mac_ndpi_stats, enable_activities_debug, enable_behaviour_analysis,
@@ -293,9 +293,6 @@ class Prefs {
   };
   inline bool are_ixia_timestamps_enabled() {
     return (enable_ixia_timestamps);
-  };
-  inline bool are_vss_apcon_timestamps_enabled() {
-    return (enable_vss_apcon_timestamps);
   };
   inline char* get_user() { return (user); };
   inline void set_user(const char* u) {

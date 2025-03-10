@@ -200,7 +200,7 @@ Prefs::Prefs(Ntop *_ntop) {
   daemonize = false;
 #endif
   export_endpoint = NULL;
-  enable_ixia_timestamps = enable_vss_apcon_timestamps = false;
+  enable_ixia_timestamps = false;
 
   es_type = strdup((char *)"flows"),
     es_index = strdup((char *)"ntopng-%Y.%m.%d"),
@@ -710,15 +710,9 @@ void usage() {
 #endif
 	 "[--hw-timestamp-mode] <mode>        | Enable hw "
 	 "timestamping/stripping.\n"
-	 "                                    | Supported TS modes are:\n"
-	 "                                    | apcon - Timestamped pkts by "
-	 "apcon.com\n"
-	 "                                    |         hardware devices\n"
+	 "                                    | Supported TS modes:\n"
 	 "                                    | ixia  - Timestamped pkts by "
 	 "ixiacom.com\n"
-	 "                                    |         hardware devices\n"
-	 "                                    | vss   - Timestamped pkts by "
-	 "vssmonitoring.com\n"
 	 "                                    |         hardware devices\n"
 	 "[--capture-direction] <dir>         | Specify packet capture direction\n"
 	 "                                    | 0=RX+TX (default), 1=RX only, "
@@ -2262,8 +2256,6 @@ int Prefs::setOption(int optkey, char *optarg) {
   case 212:
     if(!strcmp(optarg, "ixia"))
       enable_ixia_timestamps = true;
-    else if((!strcmp(optarg, "vss")) || (!strcmp(optarg, "apcon")))
-      enable_vss_apcon_timestamps = true;
     else
       ntop->getTrace()->traceEvent(
 				   TRACE_WARNING,
