@@ -394,7 +394,7 @@ private:
     u_int8_t *payload, u_int16_t payload_len); /* nDPI detected protocol */
   void processDetectedProtocolData(); /* nDPI detected protocol data (e.g.,
                                          ndpiFlow->host_server_name) */
-  void setExtraDissectionCompleted();
+  void setExtraDissectionCompleted(bool src2dst_direction);
   void setProtocolDetectionCompleted(u_int8_t *payload, u_int16_t payload_len, time_t when_seen);
   void updateProtocol(ndpi_protocol proto_id);
   const char *cipher_weakness2str(ndpi_cipher_weakness w) const;
@@ -416,7 +416,7 @@ private:
   void updateServerPortsStats(Host *server_host, ndpi_protocol *proto, time_t when_seen);
   void updateClientContactedPorts(Host *client, ndpi_protocol *proto);
   void updateTCPHostServices(Host *cli_h, Host *srv_h);
-  void updateUDPHostServices();
+  void updateUDPHostServices(bool src2dst_direction);
   void updateServerName(Host *h);
   void allocateCollection();
 
@@ -671,7 +671,7 @@ public:
                        u_int16_t payload_len, bool src2dst_direction);
 
   void updateSeqNum(time_t when, u_int32_t sN, u_int32_t aN);
-  void setDetectedProtocol(ndpi_protocol proto_id);
+  void setDetectedProtocol(ndpi_protocol proto_id, bool src2dst_direction);
   void processPacket(bool src2dst_direction, const struct pcap_pkthdr *h, const u_char *ip_packet,
                      u_int16_t ip_len, u_int64_t packet_time, u_int8_t *payload,
                      u_int16_t payload_len, u_int16_t src_port);
@@ -695,7 +695,7 @@ public:
   void getQoEInfo(ndpi_serializer *serializer);
   QoEType getQoEType();
 #endif
-  void endProtocolDissection();
+  void endProtocolDissection(bool src2dst_direction);
   inline void setCustomApp(custom_app_t ca) {
     memcpy(&custom_app, &ca, sizeof(custom_app));
   };
@@ -1530,7 +1530,7 @@ public:
   inline u_int16_t getPostNATDstPort() { return(collection ? ntohs(collection->nat.dst_port_post_nat) : 0);    };
   inline bool isFlowAccounted()        { return iface_flow_accounted; };
   inline void setFlowAccounted()       { iface_flow_accounted = 1;    };
-  void accountFlowTraffic();
+  void accountFlowTraffic(bool src2dst_direction);
   void setICMPTypeCode(u_int16_t icmp_type_code);
   inline void setQoE(u_int8_t c2s, u_int8_t s2c) {
     if((c2s != NTOP_QOE_UNKNOWN)|| (s2c != NTOP_QOE_UNKNOWN))

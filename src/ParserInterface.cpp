@@ -611,7 +611,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 
     /* Here everything is setup and it is possible to set the actual protocol to
      * the flow */
-    flow->setDetectedProtocol(p);
+    flow->setDetectedProtocol(p, src2dst_direction);
 
     /*
       Parse flow info into the corresponding element (without overriding

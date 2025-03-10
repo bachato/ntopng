@@ -207,7 +207,7 @@ void PcapInterface::cleanupPcapDumpDir() {
 static bool idle_flow_account(GenericHashEntry *h, void *user_data, bool *matched) {
   Flow *f = (Flow*)h;
   
-  f->accountFlowTraffic();
+  f->accountFlowTraffic(true);
 
   return(false);
 }

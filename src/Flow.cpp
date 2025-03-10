@@ -311,7 +311,7 @@ Flow::Flow(NetworkInterface *_iface,
     break;
 
   default:
-    setDetectedProtocol(ndpi_guess_undetected_protocol(iface->get_ndpi_struct(), NULL, protocol));
+    setDetectedProtocol(ndpi_guess_undetected_protocol(iface->get_ndpi_struct(), NULL, protocol), true);
     break;
   }
 
@@ -465,7 +465,7 @@ Flow::~Flow() {
   for (std::map<FlowAlertTypeEnum, FlowAlert *>::iterator it = triggered_alerts.begin(); it != triggered_alerts.end(); it++)
     delete it->second;
 
-  accountFlowTraffic();
+  accountFlowTraffic(true);
 
 #ifdef ALERTED_FLOWS_DEBUG
   if(iface_alert_inc && !iface_alert_dec) {
@@ -1122,7 +1122,7 @@ void Flow::processPacket(bool src2dst_direction,
       Perform a giveup and finalize all additional operations such as
       the processing of extra dissection data.
     */
-    endProtocolDissection();
+    endProtocolDissection(src2dst_direction);
   }
 
 #ifdef NTOPNG_PRO
@@ -1177,7 +1177,7 @@ void Flow::processPacket(bool src2dst_direction,
 
   if(detection_completed) {
     if(!needsExtraDissection()) {
-      setExtraDissectionCompleted();
+      setExtraDissectionCompleted(src2dst_direction);
       updateProtocol(proto_id);
     }
   }
@@ -1185,13 +1185,16 @@ void Flow::processPacket(bool src2dst_direction,
 
 /* *************************************** */
 
+extern "C" {
+  int current_pkt_from_client_to_server(const struct ndpi_detection_module_struct *ndpi_str, const struct ndpi_flow_struct *flow);
+};
+
 /* Special handling of DNS which is always performed. */
 void Flow::processDNSPacket(const u_char *ip_packet, u_int16_t ip_len,
                             u_int64_t packet_time) {
   ndpi_protocol proto_id;
 
-  /* Exits if the flow isn't DNS or it the interface is not a packet-interface
-   */
+  /* Exits if the flow isn't DNS or it the interface is not a packet-interface */
   if((!isDNS())
       || (!getInterface()->isPacketInterface())
       || (ndpiFlow == NULL))
@@ -1211,7 +1214,7 @@ void Flow::processDNSPacket(const u_char *ip_packet, u_int16_t ip_len,
     a DNS.Google can become DNS.Facebook.
   */
   switch (ndpi_get_lower_proto(proto_id)) {
-  case NDPI_PROTOCOL_DNS:
+  case NDPI_PROTOCOL_DNS:    
     ndpiDetectedProtocol = proto_id; /* Override! */
 
     if(ndpiFlow->host_server_name[0] != '\0') {
@@ -1243,18 +1246,15 @@ void Flow::processDNSPacket(const u_char *ip_packet, u_int16_t ip_len,
 	/* this is a response... */
 	if(ntop->getPrefs()->is_dns_decoding_enabled()) {
 	  char delimiter = '@', *name = NULL;
-	  char *at = (char *)strchr((const char *)ndpiFlow->host_server_name,
-				    delimiter);
+	  char *at = (char *)strchr((const char *)ndpiFlow->host_server_name, delimiter);
 
 	  protos.dns.last_return_code = ndpiFlow->protos.dns.reply_code;
 
 	  /* Consider only positive DNS replies */
 	  if(at != NULL)
 	    name = &at[1], at[0] = '\0';
-	  else if((!strstr((const char *)ndpiFlow->host_server_name,
-			    ".in-addr.arpa")) &&
-		   (!strstr((const char *)ndpiFlow->host_server_name,
-			    ".ip6.arpa")))
+	  else if((!strstr((const char *)ndpiFlow->host_server_name,  ".in-addr.arpa")) &&
+		   (!strstr((const char *)ndpiFlow->host_server_name, ".ip6.arpa")))
 	    name = (char *)ndpiFlow->host_server_name;
 
 	  if(name) {
@@ -1317,7 +1317,7 @@ void Flow::processIEC60870Packet(bool tx_direction, const u_char *payload,
 
 /* End the nDPI dissection on a flow. Guess the protocol if not already
  * detected. It is safe to call endProtocolDissection() multiple times. */
-void Flow::endProtocolDissection() {
+void Flow::endProtocolDissection(bool src2dst_direction) {
   if(!detection_completed) {
     u_int8_t proto_guessed;
 
@@ -1327,23 +1327,23 @@ void Flow::endProtocolDissection() {
     setProtocolDetectionCompleted(NULL, 0, iface->getTimeLastPktRcvd());
   }
 
-  if(!extra_dissection_completed) setExtraDissectionCompleted();
+  if(!extra_dissection_completed) setExtraDissectionCompleted(src2dst_direction);
 }
 
 /* *************************************** */
 
 /* Manually set a protocol on the flow and terminate the dissection. */
-void Flow::setDetectedProtocol(ndpi_protocol proto_id) {
+void Flow::setDetectedProtocol(ndpi_protocol proto_id, bool src2dst_direction) {
   updateProtocol(proto_id);
   setProtocolDetectionCompleted(NULL, 0, iface->getTimeLastPktRcvd());
 
-  endProtocolDissection();
+  endProtocolDissection(src2dst_direction);
 }
 
 /* *************************************** */
 
 /* Called when the extra dissection on the flow is completed. */
-void Flow::setExtraDissectionCompleted() {
+void Flow::setExtraDissectionCompleted(bool src2dst_direction) {
   if(extra_dissection_completed) return;
 
   if(!detection_completed) {
@@ -1418,7 +1418,7 @@ void Flow::setExtraDissectionCompleted() {
     returns immediately the protocol name (e.g. with DNS) without
     waiting the response to be received
   */
-  if(protocol == IPPROTO_UDP) updateUDPHostServices();
+  if(protocol == IPPROTO_UDP) updateUDPHostServices(src2dst_direction);
 
   processExtraDissectedInformation();
 
@@ -4706,11 +4706,11 @@ void Flow::housekeep(time_t t) {
       if(likely(!getInterface()->read_from_pcap_dump())) {
 	/* NOT processing pcap files, at most 5 seconds since the last packet
 	 */
-	if((t - get_last_seen()) > 5 /* sec */) endProtocolDissection();
+	if((t - get_last_seen()) > 5 /* sec */) endProtocolDissection(true);
       } else {
 	/* pcap files - wait until all the file has been processed */
 	if(getInterface()->read_from_pcap_dump_done())
-	  endProtocolDissection();
+	  endProtocolDissection(true);
       }
     }
 
@@ -8846,7 +8846,7 @@ void Flow::updateTCPHostServices(Host *cli_h, Host *srv_h) {
 
 /* *************************************** */
 
-void Flow::updateUDPHostServices() {
+void Flow::updateUDPHostServices(bool src2dst_direction) {
   Host *cli_h, *srv_h;
   char *domain_name;
 
@@ -8883,14 +8883,50 @@ void Flow::updateUDPHostServices() {
     break;
 
   case NDPI_PROTOCOL_DNS:
-    /*
-      No need to swap as Flow::processDNSPacket()
-      takes care of directions
-    */
-    if(srv_h)
-      srv_h->setDnsServer(domain_name);
-    else if(srv_ip_addr)
-      srv_ip_addr->setDnsServer();
+    /* Swap check */
+    if(!swap_requested) {
+      if(ndpiFlow->protos.dns.is_query) {
+	if(src2dst_direction) {
+	  ;
+	} else {
+	  swap_requested = 1;
+	  // ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** SWAP ***");
+	}
+      } else {
+	/* Response */
+	if(src2dst_direction) {
+	  swap_requested = 1;
+	  // ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** SWAP ***");
+	} else {
+	  ;
+	}
+      }
+    }
+    
+    if(swap_requested) {
+#ifdef DEBUG
+      char buf[64];
+      
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** DNS: %s", cli_h->print(buf, sizeof(buf)));
+#endif
+      
+      if(cli_h)
+	cli_h->setDnsServer(domain_name);
+      else if(cli_ip_addr)
+	cli_ip_addr->setDnsServer();
+    } else {
+#ifdef DEBUG
+      char buf[64];
+      
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** DNS: %s [%u/%u]", srv_h->print(buf, sizeof(buf)),
+				   ndpiFlow->protos.dns.is_query, current_pkt_from_client_to_server(iface->get_ndpi_struct(), ndpiFlow));
+#endif
+      
+      if(srv_h)
+	srv_h->setDnsServer(domain_name);
+      else if(srv_ip_addr)
+	srv_ip_addr->setDnsServer();
+    }
     break;
 
   case NDPI_PROTOCOL_TOR:
@@ -9144,7 +9180,7 @@ void Flow::addPrePostNATPort(u_int32_t _src_port_pre_nat,
 /*
   Account flow traffic in interface traffic if not yet done
 */
-void Flow::accountFlowTraffic() {
+void Flow::accountFlowTraffic(bool src2dst_direction) {
   if(!isFlowAccounted()) {
 #ifdef DEBUG
     char buf[256];
@@ -9152,7 +9188,7 @@ void Flow::accountFlowTraffic() {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Account %s", print(buf, sizeof(buf)));
 #endif
 
-    endProtocolDissection();
+    endProtocolDissection(src2dst_direction);
 
     /*
       Increment interface counters for those flows that have not
