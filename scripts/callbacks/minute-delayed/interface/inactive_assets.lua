@@ -25,7 +25,7 @@ local num_keys = ntop.llenCache(redis_key)
 if num_keys > 0 then
     if hasClickHouseSupport() then
         version = asset_utils.getLastVersion(ifid)
-        if last_version == nil then
+        if version == nil then
             -- Error, no version found error in the db
             return
         end
