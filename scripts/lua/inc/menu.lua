@@ -268,17 +268,9 @@ else
                     interface.isLoopback() or ntop.limitResourcesUsage() or infrastructure_view,
                 url = "/lua/discover.lua"
             }, {
-                -- Old Report: Pro or Enterprise with clickhouse disabled
-                entry = page_utils.menu_entries.traffic_report,
-                hidden = not ((ntop.isPro() and not ntop.isEnterprise() and not ntop.isnEdgeEnterprise())
-                              or ((ntop.isEnterprise() or ntop.isnEdgeEnterprise()) and not is_clickhouse_enabled))
-                         or infrastructure_view,
-                url = "/lua/pro/report.lua"
-            }, {
-                -- New Report: Enterprise with clickhouse enabled
                 entry = page_utils.menu_entries.traffic_report,
                 hidden = not (ntop.isEnterprise() and is_clickhouse_enabled) or infrastructure_view,
-                url = "/lua/pro/reportng.lua"
+                url = "/lua/pro/report.lua"
             }
         }
     })
