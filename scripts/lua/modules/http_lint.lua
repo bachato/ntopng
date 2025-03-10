@@ -2814,6 +2814,8 @@ local special_parameters = { --[[Suffix validator]]
     ["dhcp_server_enabled_"] = {validateNetworkInterface, validateBool},
     ["dhcp_first_ip_"] = {validateNetworkInterface, validateIPV4},
     ["dhcp_last_ip_"] = {validateNetworkInterface, validateIPV4},
+    ["dhcp_option_114_"] = {validateNetworkInterface, validateUnquoted},
+    ["dhcp_option_160_"] = {validateNetworkInterface, validateUnquoted},
 
     -- Network Configuration
     ["iface_mode_"] = {validateNetworkInterface, validateInterfaceConfMode},
