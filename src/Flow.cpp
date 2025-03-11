@@ -7033,7 +7033,7 @@ void Flow::setPacketsBytes(time_t now, u_int32_t s2d_pkts, u_int32_t d2s_pkts,
        and that whose counters are updated by conntrack
     */
 
-    endProtocolDissection();
+    endProtocolDissection(true);
   }
 }
 #endif
