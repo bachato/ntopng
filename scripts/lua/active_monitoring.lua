@@ -82,6 +82,7 @@ if (page == "overview") then
         ifid = ifid,
         csrf = ntop.getRandomCSRFValue(),
         is_admin = isAdministrator(),
+        is_am_active = (ntop.getPref("ntopng.prefs.active_monitoring") or "") == "1",
         timeseries_enabled = areSystemTimeseriesEnabled()
     })
     template_utils.render("pages/vue_page.template", {
