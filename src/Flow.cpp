@@ -765,7 +765,8 @@ void Flow::processDetectedProtocolData() {
 
   switch (l7proto) {
   case NDPI_PROTOCOL_BITTORRENT:
-    if(!bt_hash) setBittorrentHash((char *)ndpiFlow->protos.bittorrent.hash);
+    if(!bt_hash) setBittorrentHash((char *)ndpiFlow->protos.bittorrent.hash,
+				   sizeof(ndpiFlow->protos.bittorrent.hash));
     break;
 
   case NDPI_PROTOCOL_MDNS:
@@ -6012,10 +6013,13 @@ bool Flow::match(AddressTree *ptree) {
 
 /* *************************************** */
 
-void Flow::setBittorrentHash(char *hash) {
+void Flow::setBittorrentHash(char *hash, u_int len) {
   int i, j, n = 0;
   char bittorrent_hash[41];
 
+  if(len < 20)
+    return;
+  
   for (i = 0, j = 0; i < 20; i++) {
     u_char c = hash[i] & 0xFF;
 
@@ -6039,7 +6043,7 @@ void Flow::dissectBittorrent(char *payload, u_int16_t payload_len) {
       u_int l = strnlen(bt_proto, 27);
 
       if(l >= 27)
-	setBittorrentHash(&bt_proto[27]);
+	setBittorrentHash(&bt_proto[27], payload_len-27);
     }
   }
 }

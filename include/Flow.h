@@ -367,7 +367,7 @@ private:
   char *intoaV4(unsigned int addr, char *buf, u_short bufLen);
   void allocDPIMemory();
   bool checkTor(char *hostname);
-  void setBittorrentHash(char *hash);
+  void setBittorrentHash(char *hash, u_int len);
   void updateThroughputStats(float tdiff_msec, u_int32_t diff_sent_packets,
                              u_int64_t diff_sent_bytes,
                              u_int64_t diff_sent_goodput_bytes,
