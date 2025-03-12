@@ -26,6 +26,18 @@ discover.osinfo = {
 
 -- #################################
 
+local function os_label_sort_fn(a, b)
+    return asc_insensitive(a[1], b[1])
+end
+
+-- #################################
+
+function discover.sortedOsTypeLabels()
+    return pairsByValues(discover.osinfo, os_label_sort_fn)
+end
+
+-- #################################
+
 function discover.getOsName(id)
     local info = discover.osinfo[tonumber(id)]
 

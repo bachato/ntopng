@@ -160,7 +160,7 @@
                 <Box style="min-width:20rem;" :color="(c.active && c.color) || c.inactive_color" :width="c.width"
                     :height="c.height" :id="c.id" class="drag-item">
                     <template v-slot:box_title>
-                        <div v-if="c.i18n_name" class="dashboard-component-title modal-header">
+                        <div v-if="c.i18n_name" class="mb-2 modal-header">
                             <h4 class="modal-title">
                                 {{ c.custom_name ? c.custom_name : _i18n(c.i18n_name) }}
                                 <span style="color: gray">
@@ -247,6 +247,9 @@ import { default as EmptyComponent } from "./dashboard-empty.vue";
 import { default as TableComponent } from "./dashboard-table.vue";
 import { default as BadgeComponent } from "./dashboard-badge.vue";
 import { default as PieComponent } from "./dashboard-pie.vue";
+import { default as BarComponent } from "./dashboard-bar.vue";
+import { default as LateralPieComponent } from "./dashboard-lateral-pie.vue";
+import { default as BoxOverview } from "./dashboard-box-overview.vue";
 import { default as TimeseriesComponent } from "./dashboard-timeseries.vue";
 import { default as SankeyComponent } from "./dashboard-sankey.vue";
 import { default as SelectSearch } from "./select-search.vue";
@@ -263,7 +266,10 @@ const components_dict = {
     "badge": BadgeComponent,
     "empty": EmptyComponent,
     "pie": PieComponent,
+    "lateral-pie": LateralPieComponent,
+    "box-overview": BoxOverview,
     "timeseries": TimeseriesComponent,
+    "bar": BarComponent,
     "table": TableComponent,
     "sankey": SankeyComponent,
 }
@@ -326,7 +332,7 @@ const enable_small_picker_actions = computed(() => {
 });
 
 const disable_date = computed(() => {
-    return selected_report_template.value?.toolbox?.time?.hide == true;
+    return (selected_report_template.value?.toolbox?.time?.hide == true) || props.context.disable_date;
 });
 
 const disable_date_time_picker = computed(() => {

@@ -189,6 +189,12 @@ page_utils.menu_entries = {
         section = "dashboard",
         help_link = "https://www.ntop.org/guides/ntopng/flow_dump/clickhouse/reports.html"
     },
+    assets_dashboard = {
+        key = "assets_dashboard",
+        i18n_title = "assets",
+        section = "dashboard",
+        help_link = "https://www.ntop.org/guides/ntopng/flow_dump/clickhouse/reports.html"
+    },
     traffic_analysis = {
         key = "traffic_analysis",
         i18n_title = "db_explorer.traffic_analysis",

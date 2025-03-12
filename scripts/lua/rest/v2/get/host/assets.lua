@@ -11,6 +11,7 @@ require "lua_utils_get"
 local format_utils = require "format_utils"
 local rest_utils = require "rest_utils"
 local asset_utils = require "asset_utils"
+local json = require "dkjson"
 
 local ifid = _GET["ifid"] or interface.getId()
 local start = _GET["start"] or 0
@@ -30,6 +31,7 @@ local gui_to_db_columns = {
     first_seen = "first_seen",
     last_seen = "last_seen",
     device_status = "device_status",
+    server_type = "server_type"
 }
 
 if sort == "status" then
@@ -42,7 +44,9 @@ local filters = {
     vlan = _GET["vlan"],
     device_type = _GET["device_type"],
     network = _GET["network"],
-    status = _GET["status"]
+    status = _GET["status"],
+    os_type = _GET["os_type"],
+    server_type = _GET["server_type"]
 }
 for key, value in pairs(filters) do
     if isEmptyString(value) then
@@ -55,6 +59,7 @@ local assets = asset_utils.getHostsAssets(ifid, order, gui_to_db_columns[sort], 
 
 for _, value in pairs(assets or {}) do
     local record = {}
+    local json_info = json.decode(value.json_info or "")
 
     local column_ip = {
         ip = value.ip
@@ -89,6 +94,24 @@ for _, value in pairs(assets or {}) do
     column_ip.localhost = true
     if value["is_blackhole"] then
         column_ip.is_blackhole = value["is_blackhole"]
+    end
+    if json_info["dns_server"] then
+        column_ip.is_dns_server = true
+    end
+    if json_info["dhcp_server"] then
+        column_ip.is_dhcp_server = true
+    end
+    if json_info["smtp_server"] then
+        column_ip.is_smtp_server = true
+    end
+    if json_info["imap_server"] then
+        column_ip.is_imap_server = true
+    end
+    if json_info["pop_server"] then
+        column_ip.is_pop_server = true
+    end
+    if json_info["ntp_server"] then
+        column_ip.is_ntp_server = true
     end
 
     column_ip["vlan"] = {

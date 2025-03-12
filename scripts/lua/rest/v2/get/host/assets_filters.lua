@@ -24,21 +24,13 @@ local rsp = {}
 local filters = {}
 
 for _, value in pairs(available_filters or {}) do
-    if not filters[value.filter] then
-        filters[value.filter] = {}
-    end
-    
-    if value.value then
-        filters[value.filter][value.value] = value.count
-    end
+    if not filters[value.filter] then filters[value.filter] = {} end
+
+    if value.value then filters[value.filter][value.value] = value.count end
 end
 
 for key, value in pairsByKeys(filters or {}, asc) do
-    local filter_list = {{
-        key = key,
-        value = "",
-        label = i18n("all")
-    }}
+    local filter_list = {{key = key, value = "", label = i18n("all")}}
 
     local formatter
     if key == "vlan" then
@@ -48,17 +40,11 @@ for key, value in pairsByKeys(filters or {}, asc) do
     end
     for name, count in pairsByKeys(value or {}) do
         local value = name
-        if isEmptyString(value) then
-            goto continue
-        end
-        if tonumber(name) then
-            value = tonumber(name)
-        end
+        if isEmptyString(value) then goto continue end
+        if tonumber(name) then value = tonumber(name) end
         if formatter then
             name = formatter(name)
-            if isEmptyString(name) then
-                name = value
-            end
+            if isEmptyString(name) then name = value end
         elseif key == "network" then -- special case
             local stats = interface.getNetworkStats(tonumber(name))
             local net_key
@@ -67,6 +53,11 @@ for key, value in pairsByKeys(filters or {}, asc) do
                 break
             end
             name = getFullLocalNetworkName(net_key)
+        elseif key == "os_type" then -- special case
+            if isEmptyString(name) then
+                name = 0
+            end
+            name = discover_utils.getOsName(name)
         end
         filter_list[#filter_list + 1] = {
             key = key,
@@ -86,25 +77,34 @@ for key, value in pairsByKeys(filters or {}, asc) do
     }
 end
 
-local status_filters = {{
-    key = "status",
-    value = "",
-    label = i18n("all")
-}, {
-    key = "status",
-    value = "0",
-    label = i18n('active')
-}, {
-    key = "status",
-    value = "1",
-    label = i18n('inactive')
-}}
+local status_filters = {
+    {key = "status", value = "", label = i18n("all")},
+    {key = "status", value = "0", label = i18n('asset_details.online')},
+    {key = "status", value = "1", label = i18n('asset_details.offline')}
+}
 
 rsp[#rsp + 1] = {
     action = "status",
     label = i18n("status"),
     name = "status",
     value = status_filters
+}
+
+local server_filters = {
+    {key = "server_type", value = "", label = i18n("all")},
+    {key = "server_type", value = "0", label = i18n('asset_details.dns_server')},
+    {key = "server_type", value = "1", label = i18n('asset_details.dhcp_server')},
+    {key = "server_type", value = "2", label = i18n('asset_details.smtp_server')},
+    {key = "server_type", value = "3", label = i18n('asset_details.ntp_server')},
+    {key = "server_type", value = "4", label = i18n('asset_details.imap_server')},
+    {key = "server_type", value = "5", label = i18n('asset_details.pop_server')},
+}
+
+rsp[#rsp + 1] = {
+    action = "server_type",
+    label = i18n("asset_details.server_type"),
+    name = "server_type",
+    value = server_filters
 }
 
 rest_utils.answer(rest_utils.consts.success.ok, rsp)

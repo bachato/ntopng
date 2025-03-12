@@ -664,6 +664,7 @@ function graph_utils.convert_pie_data(res, new_charts, js_formatter)
     local labels = {}
     local series = {}
     local colors = {}
+    local urls = {}
 
     for _, v in ipairs(res) do
         labels[#labels + 1] = v.label
@@ -675,7 +676,7 @@ function graph_utils.convert_pie_data(res, new_charts, js_formatter)
             value = v.value
         end
         series[#series + 1] = value
-
+        urls[#urls + 1] = v.url or ''
         colors[#colors + 1] = graph_utils.get_html_color(#colors)
     end
 
@@ -694,9 +695,57 @@ function graph_utils.convert_pie_data(res, new_charts, js_formatter)
                 formatter = js_formatter
             }
         },
+        urls = urls,
         extra_x_tooltip_label = 'None'
     }
 
+    return res
+end
+
+-- #################################################
+
+-- Convert to the format accepted by the vue Chart/Bar component
+-- js_formatter: render function (e.g. 'format_bytes')
+-- Input format (res):
+-- [ { label = 'xxx', count = yyy }, ... ]
+-- Output format:
+-- { series = [{ data = [ yyy, ... ] }], xaxis = { categories = [ 'xxx'] } }
+function graph_utils.convert_bar_data(res, new_charts, js_formatter)
+    if not new_charts then
+        return res
+    end
+
+    local labels = {}
+    local series = {}
+    local urls = {}
+
+    for _, v in ipairs(res) do
+        labels[#labels + 1] = v.label
+
+        local value = 0
+        if v.count then
+            value = v.count
+        elseif v.value then
+            value = v.value
+        end
+        urls[#urls + 1] = v.url or ''
+        series[#series + 1] = value
+    end
+
+    res = {
+        series = {{
+            data = series
+        }},
+        xaxis = {
+            categories = labels,
+        },
+        urls = urls,
+        tooltip = {
+            y = {
+                formatter = js_formatter
+            }
+        },
+    }
     return res
 end
 

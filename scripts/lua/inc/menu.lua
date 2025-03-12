@@ -262,11 +262,15 @@ else
             {
                 entry = page_utils.menu_entries.traffic_dashboard,
                 url = '/lua/index.lua'
-            }, {entry = page_utils.menu_entries.divider}, {
+            }, {
                 entry = page_utils.menu_entries.network_discovery,
                 hidden = not interface.isDiscoverableInterface() or
                     interface.isLoopback() or ntop.limitResourcesUsage() or infrastructure_view,
                 url = "/lua/discover.lua"
+            }, {
+                entry = page_utils.menu_entries.assets_dashboard,
+                hidden = not (ntop.isEnterpriseL() and is_clickhouse_enabled),
+                url = "/lua/pro/assets_dashboard.lua"
             }, {
                 entry = page_utils.menu_entries.traffic_report,
                 hidden = not (ntop.isEnterprise() and is_clickhouse_enabled) or infrastructure_view,

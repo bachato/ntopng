@@ -1,0 +1,82 @@
+{
+    "name": "Assets Dashboard",
+    "readonly": true,
+    "components": [
+        {
+            "component": "box-overview",
+            "id": "devices_list",
+            "i18n_name": "index_page.assets_overview",
+            "width": 4,
+            "height": 4,
+            "params": {
+                "url": "/lua/rest/v2/get/host/assets_dashboard/overview.lua",
+                "url_params": {}
+            }
+        },
+        {
+            "component": "lateral-pie",
+            "id": "manufacturer_distribution",
+            "i18n_name": "asset_details.manufacturer_distribution",
+            "width": 4,
+            "height": 4,
+            "params": {
+                "url": "/lua/rest/v2/get/host/assets_dashboard/manufacturer_distribution.lua",
+                "url_params": {}
+            }
+        },
+        {
+            "component": "bar",
+            "id": "devices_distribution",
+            "i18n_name": "asset_details.devices_distribution",
+            "width": 4,
+            "height": 4,
+            "params": {
+                "url": "/lua/rest/v2/get/host/assets_dashboard/devices_distribution.lua",
+                "url_params": {}
+            }
+        },
+        {
+            "component": "table",
+            "id": "servers_overview",
+            "i18n_name": "asset_details.servers_overview",
+            "width": 4,
+            "height": 4,
+            "time_window": "",
+            "time_offset": "",
+            "params": {
+                "url": "/lua/rest/v2/get/host/assets_dashboard/servers_overview.lua",
+                "url_params": {},
+                "table_type": "assets",
+                "columns": [
+                    {
+                        "id": "server",
+                        "i18n_name": ""
+                    },
+                    {
+                        "id": "online",
+                        "i18n_name": "asset_details.online",
+                        "style": "text-align: right",
+                        "class": "text-success"
+                    },
+                    {
+                        "id": "offline",
+                        "i18n_name": "asset_details.offline",
+                        "style": "text-align: right",
+                        "class": "text-secondary"
+                    }
+                ]
+            }
+        },
+        {
+            "component": "bar",
+            "id": "oses_distribution",
+            "i18n_name": "asset_details.os_distribution",
+            "width": 4,
+            "height": 4,
+            "params": {
+                "url": "/lua/rest/v2/get/host/assets_dashboard/oses_distribution.lua",
+                "url_params": {}
+            }
+        }
+    ]
+}
