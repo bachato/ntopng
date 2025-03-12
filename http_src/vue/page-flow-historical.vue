@@ -722,11 +722,19 @@ function click_button_historical_flows(event) {
     let filters_params_object = {};
     for (let key in flow) {
         let filter_key = key;
-        if (flow[key].tag_key != null && flow[key].tag_key != "") {
-            filter_key = flow[key].tag_key;
+        let filter_value = "";
+        if (typeof flow[key] === 'object') {
+            if (flow[key].value == null && flow[key].value != "") { continue; }
+            if (flow[key].tag_key != null && flow[key].tag_key != "") {
+                filter_key = flow[key].tag_key;
+            }
+            filter_value = flow[key].value;
+        } else {
+            // Skip field
+            continue;
         }
-        if (flow[key].value == null && flow[key].value != "") { continue; }
-        let filter = `${flow[key].value};eq`;
+
+        let filter = `${filter_value};eq`;
         filters_params_object[filter_key] = filter;
     }
     ntopng_url_manager.set_key_to_url("query_preset", "");

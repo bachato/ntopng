@@ -779,13 +779,13 @@ export class DataTableRenders {
             if (type !== "display") return obj.value;
             if (zero_is_null == true && obj?.value == 0) { return ""; }
             let formatted = '';
-            if (typeof row[field] === 'object') {
+            //if (typeof row[field] === 'object') {
                 formatted = DataTableRenders.filterize_2(field, row[field].value, row[field].label, row[field].label, row[field].label);
                 if (obj.reference !== undefined)
                     formatted = formatted + ' ' + obj.reference;
-            } else {
-                formatted = DataTableRenders.filterize_2(field, row[field], row[field], row[field], row[field]);
-            }
+            //} else {
+            //    formatted = DataTableRenders.filterize_2(field, row[field], row[field], row[field], row[field]);
+            //}
             return formatted;
         }
     }

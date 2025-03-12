@@ -155,6 +155,16 @@ end
 
 -- #####################################
 
+local function dt_format_generic(s)
+   return {
+      title = s,
+      label = s,
+      value = s,
+   } 
+end
+
+-- #####################################
+
 local function dt_format_info(info)
    if not isEmptyString(profile) then
       info = string.gsub(info, " ", "")
@@ -372,16 +382,6 @@ local function dt_format_mac_obj(mac)
    } 
 
    return formatted_mac
-end
-
--- #####################################
-
-local function dt_format_str_obj(s)
-   return {
-      title = s,
-      label = s,
-      value = s,
-   } 
 end
 
 -- #####################################
@@ -1147,7 +1147,7 @@ local flow_columns = {
    ['SRC_MAC'] =              { tag = "cli_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
    ['DST_MAC'] =              { tag = "srv_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
    ['COMMUNITY_ID'] =         { tag = "community_id", format_func = format_flow_info, i18n = i18n("flow_fields_description.community_id"), order = 10, db_type = "String", db_raw_type = "String" },
-   ['CLIENT_FINGERPRINT'] =   { tag = "cli_fingerprint", format_func = format_flow_info, order = 11, db_type = "String", db_raw_type = "String" },
+   ['CLIENT_FINGERPRINT'] =   { tag = "cli_fingerprint", dt_func = dt_format_generic, order = 11, db_type = "String", db_raw_type = "String" },
    ['SRC_ASN'] =              { tag = "cli_asn", simple_dt_func = simple_format_src_asn, db_type = "Number", db_raw_type = "Uint32" },
    ['DST_ASN'] =              { tag = "srv_asn", simple_dt_func = simple_format_dst_asn, db_type = "Number", db_raw_type = "Uint32" },
    ['PROBE_IP'] =             { tag = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", db_type = "Number", db_raw_type = "Uint32" },
@@ -1191,9 +1191,9 @@ local flow_columns = {
    ['POST_NAT_SRC_PORT']      = { tag = "post_nat_src_port", dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
    ['POST_NAT_IPV4_DST_ADDR'] = { tag = "post_nat_ipv4_dst_addr", dt_func = dt_format_nat_ip, select_func = "IPv4NumToString", db_type = "Number", db_raw_type = "Uint32"  },
    ['POST_NAT_DST_PORT']      = { tag = "post_nat_dst_port", dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
-   ['WLAN_SSID']              = { tag = "wlan_ssid", dt_func = dt_format_str_obj, db_type = "String", db_raw_type = "String" },
+   ['WLAN_SSID']              = { tag = "wlan_ssid", dt_func = dt_format_generic, db_type = "String", db_raw_type = "String" },
    ['WTP_MAC_ADDRESS']        = { tag = "apn_mac", dt_func = dt_format_mac_obj, db_type = "Number", db_raw_type = "Uint64" },
-   ['DOMAIN_NAME']            = { tag = "domain_name", dt_func = dt_format_str_obj, db_type = "String", db_raw_type = "String" },
+   ['DOMAIN_NAME']            = { tag = "domain_name", dt_func = dt_format_generic, db_type = "String", db_raw_type = "String" },
    
    --[[ TODO: this column is for the aggregated_flow_columns but the parsing Function
               only parses these columns, so a new logic to parse only the aggregated_flow_columns

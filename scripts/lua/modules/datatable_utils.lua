@@ -405,6 +405,7 @@ local all_datatable_columns_def_by_tag = {
    ['cli_country'] = build_datatable_column_def_country('cli_country', "db_search.tags.cli_country"),
    ['srv_country'] = build_datatable_column_def_country('srv_country', "db_search.tags.srv_country"),
    ['community_id'] = build_datatable_column_def_community_id('community_id', "db_search.tags.community_id"),
+   ['cli_fingerprint'] = build_datatable_column_def_obj('cli_fingerprint', "db_search.tags.cli_fingerprint"),
    ['mitre_id'] = {
       title_i18n = "db_search.tags.mitre_id",
       data_field = "mitre_data",
@@ -433,7 +434,7 @@ local all_datatable_columns_def_by_tag = {
       class = { "no-wrap" },
       render_type = "formatMitreSubTechnique",
    },
-   ['domain_name'] = build_datatable_column_def_obj('domain_name', "db_search.tags.domain_name")
+   ['domain_name'] = build_datatable_column_def_obj('domain_name', "db_search.tags.domain_name"),
 }
 
 -- #####################################
