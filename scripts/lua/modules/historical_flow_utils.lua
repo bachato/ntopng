@@ -1147,6 +1147,7 @@ local flow_columns = {
    ['SRC_MAC'] =              { tag = "cli_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
    ['DST_MAC'] =              { tag = "srv_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
    ['COMMUNITY_ID'] =         { tag = "community_id", format_func = format_flow_info, i18n = i18n("flow_fields_description.community_id"), order = 10, db_type = "String", db_raw_type = "String" },
+   ['CLIENT_FINGERPRINT'] =   { tag = "cli_fingerprint", format_func = format_flow_info, order = 11, db_type = "String", db_raw_type = "String" },
    ['SRC_ASN'] =              { tag = "cli_asn", simple_dt_func = simple_format_src_asn, db_type = "Number", db_raw_type = "Uint32" },
    ['DST_ASN'] =              { tag = "srv_asn", simple_dt_func = simple_format_dst_asn, db_type = "Number", db_raw_type = "Uint32" },
    ['PROBE_IP'] =             { tag = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", db_type = "Number", db_raw_type = "Uint32" },
@@ -1348,6 +1349,7 @@ historical_flow_utils.extra_where_tags = {
    ["srv_country"] = "DST_COUNTRY_CODE",
    ["vlan_id"] = "VLAN_ID",
    ["community_id"] = "COMMUNITY_ID",
+   ["cli_fingerprint"] = "CLIENT_FINGERPRINT",
    ["duration"] = "DURATION",
 }
 
@@ -1487,7 +1489,7 @@ function historical_flow_utils.get_tags()
    flow_defined_tags["snmp_interface"] = tag_utils.defined_tags["snmp_interface"]
    flow_defined_tags["country"] = tag_utils.defined_tags["country"]
    flow_defined_tags["l7_error_id"] = tag_utils.defined_tags["l7_error_id"]
-   flow_defined_tags["ja4_client"] = tag_utils.defined_tags["ja4_client"]
+   -- flow_defined_tags["ja4_client"] = tag_utils.defined_tags["ja4_client"]
    flow_defined_tags["issuer_dn"] = tag_utils.defined_tags["issuer_dn"]
    flow_defined_tags["http_method"] = tag_utils.defined_tags["http_method"]
    flow_defined_tags["http_url"] = tag_utils.defined_tags["http_url"]
@@ -2025,6 +2027,7 @@ function historical_flow_utils.convertFlowToAlert(flow)
          ip_version = flow.IP_PROTOCOL_VERSION,
          severity = flow.SEVERITY,
          community_id = flow.COMMUNITY_ID,
+         cli_fingerprint = flow.CLIENT_FINGERPRINT,
          srv_network = flow.DST_NETWORK_ID,
          is_cli_victim = flow.IS_CLI_VICTIM,
          l7_cat = flow.L7_CATEGORY,

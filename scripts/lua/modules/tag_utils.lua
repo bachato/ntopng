@@ -461,11 +461,16 @@ tag_utils.defined_tags = {
         i18n_label = i18n('db_search.tags.community_id'),
         operators = { 'eq', 'neq', 'in', 'nin' }
     },
-    ja4_client = {
+    cli_fingerprint = {
         value_type = 'text',
-        i18n_label = i18n('ja4_client_hash'),
+        i18n_label = i18n('db_search.tags.cli_fingerprint'),
         operators = { 'eq', 'neq' }
     },
+    --ja4_client = {
+    --    value_type = 'text',
+    --    i18n_label = i18n('ja4_client_hash'),
+    --    operators = { 'eq', 'neq' }
+    --},
     http_method = {
         type = tag_utils.input_types.select,
         value_type = 'http_method',

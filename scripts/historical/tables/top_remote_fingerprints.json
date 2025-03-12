@@ -1,0 +1,54 @@
+{
+	"name" : "Top Remote Fingerprints",
+	"i18n_name" : "top_remote_fingerprint",
+	"data_source" : "flows",
+	"show_in_page" : "overview",
+	"visualization_type" : "table",
+	"hourly": true,
+	"select" : {
+		"items" : [
+			{
+				"name" : "CLIENT_FINGERPRINT"
+			},
+			{
+				"name" : "count",
+				"func" : "COUNT",
+				"param" : "*",
+				"value_type" : "number"
+			}
+		]
+	},
+	"filters" : {
+		"items" : [
+			{
+				"name": "CLIENT_FINGERPRINT",
+				"op": "neq",
+				"value": "",
+				"value_type": "text",
+				"input": "fixed"
+			},
+			{
+				"name": "CLIENT_LOCATION",
+				"op": "eq",
+				"value": "0",
+				"value_type": "number",
+				"input": "fixed"
+			}
+		]
+	},
+	"groupby" : {
+		"items" : [
+			{
+				"name" : "CLIENT_FINGERPRINT"
+			}
+		]
+	},
+	"sortby" : {
+		"items" : [
+			{
+				"name" : "count",
+				"order" : "DESC"
+			}
+		]
+	}
+}

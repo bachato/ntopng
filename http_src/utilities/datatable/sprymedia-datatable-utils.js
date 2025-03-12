@@ -778,11 +778,15 @@ export class DataTableRenders {
         return function (obj, type, row) {
             if (type !== "display") return obj.value;
             if (zero_is_null == true && obj?.value == 0) { return ""; }
-            let html_ref = '';
-            if (obj.reference !== undefined)
-                html_ref = obj.reference
-            let label = DataTableRenders.filterize_2(field, row[field].value, row[field].label, row[field].label, row[field].label);
-            return label + ' ' + html_ref;
+            let formatted = '';
+            if (typeof row[field] === 'object') {
+                formatted = DataTableRenders.filterize_2(field, row[field].value, row[field].label, row[field].label, row[field].label);
+                if (obj.reference !== undefined)
+                    formatted = formatted + ' ' + obj.reference;
+            } else {
+                formatted = DataTableRenders.filterize_2(field, row[field], row[field], row[field], row[field]);
+            }
+            return formatted;
         }
     }
 

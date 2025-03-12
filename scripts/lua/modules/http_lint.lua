@@ -2022,6 +2022,7 @@ local known_parameters = {
     ["confidence"] = validateListOfTypeInline(validateFilters(validateNumber)), -- client/server
     ["acknowledged"] = validateListOfTypeInline(validateFilters(validateSingleWord)), -- acknowledged
     ["community_id"] = validateListOfTypeInline(validateFilters(validateSingleWord)), -- Community ID
+    ["cli_fingerprint"] = validateListOfTypeInline(validateFilters(validateSingleWord)),
     ["ja4_client"] = validateListOfTypeInline(validateFilters(validateSingleWord)),
     ["issuer_dn"] = validateListOfTypeInline(validateFilters(validateSingleWord)),
     ["last_server"] = validateListOfTypeInline(validateFilters(validateSingleWord)),

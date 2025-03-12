@@ -2352,6 +2352,7 @@ local lang = {
       ["bytes"] = "Bytes",
       ["cli_asn"] = "Client ASN",
       ["cli_country"] = "Client Country",
+      ["cli_fingerprint"] = "JA4 Client Fingerprint",
       ["cli_host_pool_id"] = "Client Pool",
       ["cli_ip"] = "Client IP",
       ["cli_ip_v4"] = "Client IPv4",

@@ -442,6 +442,16 @@
 			]
 		},
 		{
+			"title_i18n": "db_search.tags.cli_fingerprint",
+			"data_field": "cli_fingerprint",
+			"sortable": false,
+			"min-width": "100px",
+			"render_generic": "cli_fingerprint",
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
 			"title_i18n": "db_search.tags.cli_proc_name",
 			"data_field": "cli_proc_name",
 			"sortable": true,
