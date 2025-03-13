@@ -42,10 +42,10 @@ const props = defineProps({
 /* ************************************** */
 const time_preset_list = [
     { value: "10_min", label: i18n('show_alerts.presets.10_min'), currently_active: false },
-    { value: "30_min", label: i18n('show_alerts.presets.30_min'), currently_active: true },
+    { value: "30_min", label: i18n('show_alerts.presets.30_min'), currently_active: false },
     { value: "hour", label: i18n('show_alerts.presets.hour'), currently_active: false },
     { value: "2_hours", label: i18n('show_alerts.presets.2_hours'), currently_active: false },
-    { value: "6_hours", label: i18n('show_alerts.presets.6_hours'), currently_active: false },
+    { value: "6_hours", label: i18n('show_alerts.presets.6_hours'), currently_active: true },
     { value: "12_hours", label: i18n('show_alerts.presets.12_hours'), currently_active: false },
     { value: "day", label: i18n('show_alerts.presets.day'), currently_active: false },
     { value: "week", label: i18n('show_alerts.presets.week'), currently_active: false },
@@ -98,7 +98,7 @@ const map_table_def_columns = (columns) => {
         },
         "speed": (value, row) => {
             const formatted_speed = formatterUtils.getFormatter("speed")(value);
-            return `${formatted_speed} <a target="_blank" href='${create_config_url_link(row)}'><i class="fas fa-cog"></i></a>`
+            return `${formatted_speed} <a href='${create_config_url_link(row)}'><i class="fas fa-cog"></i></a>`
         },
         "min": (value, row) => {
             return formatter(value);
@@ -208,21 +208,21 @@ function click_button_timeseries(event) {
     const row = event.row;
     const epoch_begin = ntopng_url_manager.get_url_entry("epoch_begin");
     const epoch_end = ntopng_url_manager.get_url_entry("epoch_end");
-    window.open(`${http_prefix}/lua/pro/enterprise/snmp_interface_details.lua?host=${row.ip}&snmp_port_idx=${row.ifid}&page=historical&ifid=-1&epoch_end=${epoch_end}&epoch_begin=${epoch_begin}&timeseries_groups_mode=1_chart_x_metric&timeseries_groups=snmp_interface;-1%2B${row.ip}%2B${row.ifid};snmp_if:usage;uplink=true:false:false:false|downlink=true:false:false:false`);
+    window.location.href = `${http_prefix}/lua/pro/enterprise/snmp_interface_details.lua?host=${row.ip}&snmp_port_idx=${row.ifid}&page=historical&ifid=-1&epoch_end=${epoch_end}&epoch_begin=${epoch_begin}&timeseries_groups_mode=1_chart_x_metric&timeseries_groups=snmp_interface;-1%2B${row.ip}%2B${row.ifid};snmp_if:usage;uplink=true:false:false:false|downlink=true:false:false:false`;
 }
 
 /* ************************************** */
 
 function click_button_device_configuration(event) {
     const row = event.row;
-    window.open(`${http_prefix}/lua/pro/enterprise/snmp_device_details.lua?host=${row.ip}&page=config`);
+    window.location.href = `${http_prefix}/lua/pro/enterprise/snmp_device_details.lua?host=${row.ip}&page=config`;
 }
 
 /* ************************************** */
 
 function click_button_interface_configuration(event) {
     const row = event.row;
-    window.open(`${http_prefix}/lua/pro/enterprise/snmp_interface_details.lua?host=${row.ip}&snmp_port_idx=${row.ifid}&page=config`);
+    window.location.href = `${http_prefix}/lua/pro/enterprise/snmp_interface_details.lua?host=${row.ip}&snmp_port_idx=${row.ifid}&page=config`;
 }
 
 /* ************************************** */
