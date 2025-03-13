@@ -59,7 +59,7 @@ local assets = asset_utils.getHostsAssets(ifid, order, gui_to_db_columns[sort], 
 
 for _, value in pairs(assets or {}) do
     local record = {}
-    local json_info = json.decode(value.json_info or "")
+    local json_info = json.decode(value.json_info or "") or {}
 
     local column_ip = {
         ip = value.ip

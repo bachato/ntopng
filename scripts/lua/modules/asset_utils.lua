@@ -85,22 +85,6 @@ local function partiallyFormatInfo(res)
     for _, res_unformatted in pairs(res or {}) do
         local tmp = res_unformatted
         local json_info = json.decode(res_unformatted.json_info or "") or {}
-        tmp["is_dns_server"] = ((json_info["dns_server"] or "false") == "true")
-        tmp["is_dhcp_server"] =
-            ((json_info["dhcp_server"] or "false") == "true")
-        tmp["is_smtp_server"] =
-            ((json_info["smtp_server"] or "false") == "true")
-        tmp["is_ntp_server"] = ((json_info["ntp_server"] or "false") == "true")
-        tmp["is_imap_server"] =
-            ((json_info["imap_server"] or "false") == "true")
-        tmp["is_pop_server"] = ((json_info["pop_server"] or "false") == "true")
-
-        if tmp["is_dns_server"] then json_info["dns_server"] = nil end
-        if tmp["is_dhcp_server"] then json_info["dhcp_server"] = nil end
-        if tmp["is_smtp_server"] then json_info["smtp_server"] = nil end
-        if tmp["is_ntp_server"] then json_info["ntp_server"] = nil end
-        if tmp["is_imap_server"] then json_info["imap_server"] = nil end
-        if tmp["is_pop_server"] then json_info["pop_server"] = nil end
 
         if json_info["os_type"] then
             tmp["os_type"] = json_info["os_type"]
@@ -150,18 +134,20 @@ end
 
 -- ##############################################
 
-local function getAssetInfo(ifid, key, type)
+local function getAssetInfo(ifid, key, asset_type)
     if isEmptyString(key) then return nil end
-    local query = string.format(
-                      "SELECT type, key, ifid, ip, mac, vlan, network, name, device_type, manufacturer, %s , %s, gateway_mac, json_info %s FROM %s WHERE key='%s' AND ifid=%d AND type='%s'",
-                      ternary(hasClickHouseSupport(),
-                              "toUnixTimestamp(last_seen) as last_seen",
-                              "last_seen"),
-                      ternary(hasClickHouseSupport(),
-                              "toUnixTimestamp(first_seen) as first_seen",
-                              "first_seen"),
-                      ternary(hasClickHouseSupport(), ", version", ""),
-                      table_name, key, ifid, type)
+    local query = nil
+    if hasClickHouseSupport then
+        query = string.format(
+                    "SELECT * FROM (SELECT type, key, ifid, ip, mac, vlan, network, name, device_type, manufacturer, toUnixTimestamp(last_seen) as last_seen , toUnixTimestamp(first_seen) as first_seen, gateway_mac, json_info, argMax(version, version) AS version FROM %s WHERE key='%s' AND ifid=%d AND type='%s' GROUP BY type, key, ifid, ip, mac, vlan, network, name, device_type, manufacturer, first_seen, last_seen, gateway_mac, json_info) t ORDER BY version DESC LIMIT 1",
+                    table_name, key, ifid, asset_type)
+
+    else
+        query = string.format(
+                    "SELECT type, key, ifid, ip, mac, vlan, network, name, device_type, manufacturer, last_seen , first_seen, gateway_mac, json_info FROM %s WHERE key='%s' AND ifid=%d AND type='%s'",
+                    table_name, key, ifid, asset_type)
+
+    end
     local res = interface.alert_store_query(query)
     res = partiallyFormatInfo(res)
     return res
@@ -185,8 +171,12 @@ end
 -- e.g. in case an host was already into the DB just update those data
 local function updateData(entry, ifid, type)
     local data = getAssetInfo(ifid, entry.key, type)
+    local version = 1
     if data and table.len(data) > 0 then
         data = data[1]
+        if data.version and tonumber(data.version) then
+            version = tonumber(data.version) + 1
+        end
         entry.first_seen = data.first_seen -- Keep the old first_seen
         -- Merge the json_info field, note, that in case of duplicates, the data from
         -- entry table are used.
@@ -194,9 +184,10 @@ local function updateData(entry, ifid, type)
                                          entry.json_info or {})
         entry = cleanValues(entry)
         entry.json_info = json.encode(cleanValues(unified_json))
+        entry.version = version
     end
 
-    return entry
+    return version, entry
 end
 
 -- ##############################################
@@ -292,27 +283,10 @@ end
 -- ##############################################
 
 -- @brief insert assetkey
-function asset_utils.getLastVersion(ifid)
-    local query = string.format(
-                      "SELECT version FROM %s WHERE ifid=%d ORDER BY version DESC LIMIT 1",
-                      table_name, ifid)
-    local last_version = interface.alert_store_query(query) or {}
-    if type(last_version) == "string" then
-        last_version = nil
-    elseif table.len(last_version) == 0 then
-        last_version = 0
-    else
-        last_version = last_version[1].version
-    end
-    return last_version
-end
-
--- ##############################################
-
--- @brief insert assetkey
-function asset_utils.insertHost(entry, version, ifid)
+function asset_utils.insertHost(entry, ifid)
     local query = nil
-    entry = updateData(entry, ifid, "host")
+    local version = 1
+    version, entry = updateData(entry, ifid, "host")
     if not isIPv4(entry["ip"]) and not isIPv6(entry["ip"]) then
         traceError(TRACE_ERROR, TRACE_CONSOLE,
                    "Detected Asset without IP Address:\n")
@@ -358,9 +332,10 @@ function asset_utils.insertHost(entry, version, ifid)
     return interface.alert_store_query(query)
 end
 
-function asset_utils.insertMac(entry, version, ifid)
+function asset_utils.insertMac(entry, ifid)
     local query = nil
-    entry = updateData(entry, ifid, "mac")
+    local version = 1
+    version, entry = updateData(entry, ifid, "mac")
     if hasClickHouseSupport() then
         query = string.format("INSERT INTO %s " ..
                                   "(type, key, ifid, mac, manufacturer, vlan, device_type, first_seen, last_seen, version, json_info) " ..
@@ -434,8 +409,8 @@ function asset_utils.getFilters(ifid)
                           "FROM %s where type='host' AND ifid=%d GROUP BY device_type UNION ALL " ..
                           "SELECT 'vlan' AS filter, %s AS value, COUNT(*) AS count " ..
                           "FROM %s where type='host' AND ifid=%d GROUP BY vlan UNION ALL " ..
-                          "SELECT 'os_type' AS filter, JSONExtractString(json_info, 'os_type') AS value, COUNT(*) AS count " ..
-                          "FROM %s where type='host' AND ifid=%d GROUP BY value UNION ALL " ..
+                          "%s " ..
+                          "FROM %s where type='host' AND ifid=%d %s GROUP BY value UNION ALL " ..
                           "SELECT 'network' AS filter, %s AS value, COUNT(*) AS count " ..
                           "FROM %s where type='host' AND ifid=%d GROUP BY network",
                       table_name, ifid,
@@ -444,7 +419,11 @@ function asset_utils.getFilters(ifid)
                               "CAST(device_type AS CHAR)"), table_name, ifid,
                       ternary(hasClickHouseSupport(), "CAST(vlan, 'String')",
                               "CAST(vlan AS CHAR)"), table_name, ifid,
-                      table_name, ifid,
+                      ternary(hasClickHouseSupport(),
+                              "SELECT 'os_type' AS filter, JSONExtractString(json_info, 'os_type') AS value, COUNT(*) AS count",
+                              "SELECT 'os_type' AS filter, json_extract(json_info, '$.os_type') AS value, COUNT(*) AS count"),
+                      table_name, ifid, ternary(hasClickHouseSupport(), "",
+                                                "AND json_info IS NOT NULL AND json_info <> ''"),
                       ternary(hasClickHouseSupport(), "CAST(network, 'String')",
                               "CAST(network AS CHAR)"), table_name, ifid)
     local res = interface.alert_store_query(query)
@@ -484,8 +463,7 @@ function asset_utils.editMac(device, trigger_alert, mac_status, ifid)
                 trigger_alert = trigger_alert
             })
             if hasClickHouseSupport() then
-                asset_utils.insertMac(fields, tonumber(fields.version) + 1,
-                                      tonumber(ifid))
+                asset_utils.insertMac(fields, tonumber(ifid))
             else
                 local update_query = string.format(
                                          "UPDATE %s SET `json_info`='%s' WHERE type='mac' AND ifid=%d AND key='%s'",
@@ -624,8 +602,8 @@ function asset_utils.getManufacturers(ifid, filters)
         query = string.format(
                     "SELECT count(*) as count, " .. "manufacturer " ..
                         "FROM (SELECT type, manufacturer, key, MAX(version) AS max_version FROM %s WHERE type='%s' AND ifid=%d %s GROUP BY type, key, manufacturer) " ..
-                        "GROUP BY manufacturer ORDER BY count DESC", table_name,
-                    asset_type, -- Only hosts here
+                        "GROUP BY manufacturer ORDER BY count DESC, manufacturer ASC",
+                    table_name, asset_type, -- Only hosts here
             tonumber(ifid), where)
     end
 
@@ -644,7 +622,7 @@ function asset_utils.getDeviceTypes(ifid, filters)
     if hasClickHouseSupport() then
         query = string.format("SELECT count(*) as count, " .. "device_type " ..
                                   "FROM (SELECT type, device_type, key, MAX(version) AS max_version FROM %s WHERE type='%s' AND ifid=%d %s GROUP BY type, key, device_type) " ..
-                                  "GROUP BY device_type ORDER BY count DESC",
+                                  "GROUP BY device_type ORDER BY count DESC, device_type ASC",
                               table_name, asset_type, -- Only hosts here
         tonumber(ifid), where)
     end
@@ -666,8 +644,8 @@ function asset_utils.getOSes(ifid, filters)
                     "SELECT simpleJSONExtractInt(json_info, 'os_type') AS os_type, " ..
                         "COUNT(*) as count " ..
                         "FROM (SELECT type, json_info, key, MAX(version) AS max_version FROM %s WHERE type='%s' AND ifid=%d %s GROUP BY type, key, json_info) " ..
-                        "GROUP BY os_type ORDER BY count DESC", table_name,
-                    asset_type, -- Only hosts here
+                        "GROUP BY os_type ORDER BY count DESC, os_type ASC",
+                    table_name, asset_type, -- Only hosts here
             tonumber(ifid), where)
     end
 
