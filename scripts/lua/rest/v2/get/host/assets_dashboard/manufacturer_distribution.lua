@@ -29,7 +29,7 @@ if table.len(manufacturers) > 0 then
         if max_manufacturers >= 0 then
             max_manufacturers = max_manufacturers - 1
             rsp[#rsp + 1] = {
-                label = shortenString(value.manufacturer, 25) .. " (" ..  tostring(value.count) .. ")",
+                label = shortenString(value.manufacturer, 22) .. " (" ..  tostring(value.count) .. ")",
                 value = tonumber(value.count),
                 url = ntop.getHttpPrefix() .. '/lua/assets.lua?page=details&manufacturer=' .. value.manufacturer
             }
