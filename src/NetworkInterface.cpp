@@ -266,7 +266,7 @@ void NetworkInterface::init(const char *interface_name) {
   mtuWarningShown = false;
   purge_idle_flows_hosts = true;
   id = (u_int8_t)-1;
-  last_remote_pps = 0,last_remote_bps = 0, has_vlan_packets = false,
+  last_remote_pps = 0,last_remote_bps = 0, last_remote_update = 0, has_vlan_packets = false,
     cpu_affinity = -1 /* no affinity */,
     interfaceStats = NULL, has_too_many_hosts = has_too_many_flows = false,
     flow_dump_disabled_by_user = false, flow_dump_disabled_by_backend = false,
@@ -7544,6 +7544,8 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
 
   lua_push_uint64_table_entry(vm, "remote_pps", last_remote_pps);
   lua_push_uint64_table_entry(vm, "remote_bps", last_remote_bps);
+  lua_push_uint64_table_entry(vm, "remote_update", last_remote_update);
+  
   icmp_v4.lua(true, vm);
   icmp_v6.lua(false, vm);
   lua_push_uint64_table_entry(vm, "arp.requests", arp_requests);

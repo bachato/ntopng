@@ -82,6 +82,7 @@ function dumpInterfaceStats(ifid)
         for interface_name, _ in pairsByKeys(interface.getIfNames() or {}) do
             interface.select(interface_name)
             local tmp = interface.getStats()
+	    
             for k, v in pairs(tmp.zmqRecvStats or {}) do
                 zmq_stats[k] = (zmq_stats[k] or 0) + v
             end
@@ -92,7 +93,7 @@ function dumpInterfaceStats(ifid)
         ifstats.zmqRecvStats = zmq_stats
         interface.select(ifstats.id)
     elseif (ifstats) then
-        drops = ifstats.stats_since_reset.drops
+       drops = ifstats.stats_since_reset.drops
     end
 
     local res = {}
@@ -328,6 +329,8 @@ function dumpBriefInterfaceStats(ifid)
 
     local ifstats = interface.getStats()
 
+    --tprint(ifstats.remote_bps)
+    
     local res = {}
     if (ifstats ~= nil) then
         local uptime = ntop.getUptime()
@@ -409,9 +412,10 @@ function dumpBriefInterfaceStats(ifid)
 
         local ingress_thpt = ifstats["eth"]["ingress"]["throughput"]
         local egress_thpt = ifstats["eth"]["egress"]["throughput"]
+
         res["throughput"] = {
             download = ingress_thpt["bps"],
-            upload = egress_thpt["bps"]
+            upload = egress_thpt["bps"],
         }
 
         if recording_utils.isAvailable() then

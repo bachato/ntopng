@@ -280,7 +280,7 @@ protected:
   L4Stats l4Stats;
   SyslogStats syslogStats;
   FlowHash *flows_hash; /**< Hash used to store flows information. */
-  u_int32_t last_remote_pps, last_remote_bps;
+  u_int32_t last_remote_pps, last_remote_bps, last_remote_update;
   TimeseriesExporter *influxdb_ts_exporter, *rrd_ts_exporter;
 
   TcpFlowStats tcpFlowStats;

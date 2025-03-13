@@ -38,14 +38,36 @@ for i=1,num_runs do
          -- We check for ifstats.stats.bytes to start writing only when there's data. This
          -- prevents artificial and wrong peaks especially during the startup of ntopng.
          if ifstats.stats.bytes > 0 then
-            ts_utils.append("iface:traffic",          {ifid=ifstats.id, bytes=ifstats.stats.bytes}, when)
-            ts_utils.append("iface:throughput_bps",   {ifid=ifstats.id, bps=ifstats.stats.throughput_bps}, when)
-            ts_utils.append("iface:throughput_pps",   {ifid=ifstats.id, pps=ifstats.stats.throughput_pps}, when)
+	    local bps, pps
+	    local read_throughput = false	   
+
+	    if(ifstats.type == "zmq") then
+	       -- Check if a remote probe sent updates
+	       if((os.time() - ifstats.remote_update) <= 5) then
+		  pps = ifstats.remote_pps
+		  bps = ifstats.remote_bps
+	       else
+		  read_throughput = true
+	       end
+	    else
+	       read_throughput = true
+	    end
+	    
+	    if(read_throughput) then
+	       pps = ifstats.stats.throughput_pps
+	       bps = ifstats.stats.throughput_bps
+	    end
+
+            ts_utils.append("iface:throughput_bps",   {ifid=ifstats.id, bps=bps}, when)
+            ts_utils.append("iface:throughput_pps",   {ifid=ifstats.id, pps=pps}, when)
+	    ts_utils.append("iface:traffic",          {ifid=ifstats.id, bytes=ifstats.stats.bytes}, when)
             ts_utils.append("iface:packets_vs_drops", {ifid=ifstats.id, packets=ifstats.stats.packets, drops=ifstats.stats.drops or 0}, when)
+
             if ifstats.has_traffic_directions then
                ts_utils.append("iface:traffic_rxtx",  {ifid=ifstats.id, bytes_sent=ifstats.eth.egress.bytes, bytes_rcvd=ifstats.eth.ingress.bytes}, when)
             end
-            ts_utils.append("iface:traffic_ip",       {ifid=ifstats.id, bytes_ipv4=ifstats.eth.IPv4_bytes, bytes_ipv6=ifstats.eth.IPv6_bytes}, when)
+
+	    ts_utils.append("iface:traffic_ip",       {ifid=ifstats.id, bytes_ipv4=ifstats.eth.IPv4_bytes, bytes_ipv6=ifstats.eth.IPv6_bytes}, when)
          end
 
          -- ZMQ stats (only for non-packet interfaces)
