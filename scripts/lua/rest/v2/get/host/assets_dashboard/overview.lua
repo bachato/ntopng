@@ -62,7 +62,7 @@ if table.len(tot_assets_overview) > 0 then
         tmp_rsp[key] = { 
             text_color = text_color,
             text_width = text_width,
-            num_elements = num,
+            num_elements = num or "0",
             add_separator_above = add_separator_above,
             add_separator_below = add_separator_below,
             label = name 

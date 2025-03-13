@@ -59,6 +59,9 @@ function get_chart_options() {
             position: 'left',
             fontSize: '14px'
         }
+        response.chart = {
+            height: 300
+        }
         response.responsive = [
             {
                 breakpoint: 1800,
@@ -112,7 +115,7 @@ async function refresh_chart() {
 .apexcharts-legend-text {
     white-space: normal !important;
     overflow-wrap: break-word !important;
-    max-width: 180px;
+    max-width: 190px;
     display: block;
 }
 </style>

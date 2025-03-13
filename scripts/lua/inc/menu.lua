@@ -269,7 +269,7 @@ else
                 url = "/lua/discover.lua"
             }, {
                 entry = page_utils.menu_entries.assets_dashboard,
-                hidden = not (ntop.isEnterpriseL() and is_clickhouse_enabled),
+                hidden = not (ntop.isEnterpriseL() and is_clickhouse_enabled) or interface.isViewed(),
                 url = "/lua/pro/assets_dashboard.lua"
             }, {
                 entry = page_utils.menu_entries.traffic_report,
