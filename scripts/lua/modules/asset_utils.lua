@@ -137,7 +137,7 @@ end
 local function getAssetInfo(ifid, key, asset_type)
     if isEmptyString(key) then return nil end
     local query = nil
-    if hasClickHouseSupport then
+    if hasClickHouseSupport() then
         query = string.format(
                     "SELECT * FROM (SELECT type, key, ifid, ip, mac, vlan, network, name, device_type, manufacturer, toUnixTimestamp(last_seen) as last_seen , toUnixTimestamp(first_seen) as first_seen, gateway_mac, json_info, argMax(version, version) AS version FROM %s WHERE key='%s' AND ifid=%d AND type='%s' GROUP BY type, key, ifid, ip, mac, vlan, network, name, device_type, manufacturer, first_seen, last_seen, gateway_mac, json_info) t ORDER BY version DESC LIMIT 1",
                     table_name, key, ifid, asset_type)
