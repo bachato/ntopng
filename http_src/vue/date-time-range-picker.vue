@@ -222,6 +222,17 @@ export default {
             return d_local;
         },
         on_status_updated: function (status) {
+            if (!status.epoch_begin && !status.epoch_end) {
+                // First iteration, choose from the time_preset_list based on the currently_active parameter
+                const default_selected = this.time_preset_list.find((elem) => (elem.currently_active === true));
+                if (default_selected) {
+                    let s_values = this.get_timeframes_available();
+                    let interval_s = s_values[default_selected.value];
+                    status.epoch_end = this.get_utc_seconds(Date.now());
+                    status.epoch_begin = status.epoch_end - interval_s;
+                }
+            }
+
             let end_date_time_utc = Date.now();
             // default begin date time now - 30 minutes
             let begin_date_time_utc = end_date_time_utc - 30 * 60 * 1000;
