@@ -27,12 +27,11 @@ if table.len(tot_assets_overview) > 0 then
         local add_separator_below = false
         local key = nil
         if value == "online_asset" then
-            key = 8
             add_separator_above = true
+            key = 8
             text_color = "text-success"
             text_width = "6"
         elseif value == "offline_asset" then
-            add_separator_above = true
             key = 9
             text_color = "text-secondary"
             text_width = "6"
@@ -54,11 +53,9 @@ if table.len(tot_assets_overview) > 0 then
             key = 5
             text_width = "4"
         elseif value == "pop_server" then
-            add_separator_above = true
             key = 6
             text_width = "4"
         elseif value == "ntp_server" then
-            add_separator_above = true
             key = 7
             text_width = "4"
         end

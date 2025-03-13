@@ -3,20 +3,21 @@
 -->
 
 <template>
-    <div class="d-flex align-items-center flex-wrap">
+    <div class="row d-flex align-items-center flex-wrap">
         <template v-for="(data, index) in box_data">
-            <div class="text-center" :class="[data.text_color || '', data.text_width ? 'col-' + data.text_width : 'col-12']">
-                <template v-if="data.add_separator_above">
-                    <hr class="hr"/>
-                </template>
-                <h5 class="mb-1">{{ data.label }}</h5>
+            <template v-if="data.add_separator_above">
+                <hr class="hr col-sm-12 mt-2" />
+            </template>
+            <div class="text-center"
+                :class="[data.text_color || '', data.text_width ? 'col-sm-' + data.text_width : 'col-sm-12']">
+                <h5 class="responsive-title mb-1">{{ data.label }}</h5>
                 <template v-if="data.num_elements != null">
-                    <h5 class="mb-0">{{ data.num_elements }}</h5>
-                </template>
-                <template v-if="data.add_separator_below">
-                    <hr class="hr"/>
+                    <h5 class="responsive-title mb-0">{{ data.num_elements }}</h5>
                 </template>
             </div>
+            <template v-if="data.add_separator_below">
+                <hr class="hr col-sm-12 mt-2" />
+            </template>
         </template>
     </div>
 </template>
@@ -91,3 +92,10 @@ async function refresh_component() {
     }
 }
 </script>
+
+<style scoped>
+.responsive-title {
+    /* clamp(MIN, VALORE_FLUIDO, MAX) */
+    font-size: clamp(0.8rem, 2vw, 1.2rem);
+  }
+</style>

@@ -59,11 +59,24 @@ function get_chart_options() {
             position: 'left',
             fontSize: '14px'
         }
+        response.responsive = [
+            {
+                breakpoint: 1800,
+                options: {
+                    chart: {
+                        height: 200 // Reduce the height on small screens
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        ]
         response.chart = {
             events: {
                 dataPointSelection: function (event, chartContext, config) {
                     const selectedIndex = config.dataPointIndex;
-                    if(!dataUtils.isEmptyString(url_list.value[selectedIndex])) {
+                    if (!dataUtils.isEmptyString(url_list.value[selectedIndex])) {
                         window.location.href = url_list.value[selectedIndex];
                     }
                 }
@@ -94,3 +107,12 @@ async function refresh_chart() {
     chart.value.update_chart();
 }
 </script>
+
+<style>
+.apexcharts-legend-text {
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    max-width: 180px;
+    display: block;
+}
+</style>
