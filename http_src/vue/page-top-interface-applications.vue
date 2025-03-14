@@ -137,7 +137,7 @@ function columns_sorting(col, r0, r1) {
 
 const map_table_def_columns = (columns) => {
   const bytes_formatter = formatterUtils.getFormatter("bytes")
-  const packets_formatter = formatterUtils.getFormatter("packets")
+  const packets_formatter = NtopUtils.formatPackets
   let map_columns = {
     "application": (value, row) => {
       return value.name
