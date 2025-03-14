@@ -1075,8 +1075,13 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow *const flow,
    * (CLIENT_NW_LATENCY_MS) instead of field = 57595 (NTOP_BASE_ID + 123) */
   if (field < NTOP_BASE_ID) field += NTOP_BASE_ID;
 
-  /* ntop->getTrace()->traceEvent(TRACE_NORMAL, "[field %d][%s]", field, value->string ? value->string : ""); */
-
+#if 0
+  if(value->string)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[field %u.%d][%s]", NTOP_BASE_ID, field-NTOP_BASE_ID, value->string ? value->string : "");
+  else
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[field %u.%d][%u]", NTOP_BASE_ID, field-NTOP_BASE_ID, value->int_num);
+#endif
+  
   switch (field) {
   case L7_PROTO:
     if (value->string) {

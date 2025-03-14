@@ -3933,12 +3933,10 @@ void Flow::formatSyslogFlow(json_object *my_object) {
     json_object_object_add(
 			   my_object,
 			   Utils::jsonLabel(OUT_DST_MAC, "OUT_DST_MAC", jsonbuf, sizeof(jsonbuf)),
-			   json_object_new_string(Utils::formatMac(
-								   srv_host ? srv_host->get_mac() : NULL, buf, sizeof(buf))));
+			   json_object_new_string(Utils::formatMac(srv_host ? srv_host->get_mac() : NULL, buf, sizeof(buf))));
 
   if(isTLS() && protos.tls.ja4.client_hash)
-    json_object_object_add(
-			   my_object,
+    json_object_object_add(my_object,
 			   Utils::jsonLabel(JA4C_HASH, "JA4C_HASH", jsonbuf, sizeof(jsonbuf)),
 			   json_object_new_string(protos.tls.ja4.client_hash));
 
@@ -4556,8 +4554,7 @@ void Flow::alert2JSON(FlowAlert *alert, ndpi_serializer *s) {
 			       (char *)getCommunityId(community_id, sizeof(community_id)));
 
   if(protos.tls.ja4.client_hash)
-    ndpi_serialize_string_string(s, "ja4_client_hash",
-                                 protos.tls.ja4.client_hash);
+    ndpi_serialize_string_string(s, "ja4_client_hash", protos.tls.ja4.client_hash);
 
   if(getErrorCode() != 0)
     ndpi_serialize_string_uint32(s, "l7_error_code", getErrorCode());
@@ -7190,10 +7187,8 @@ void Flow::lua_get_status(lua_State *vm) const {
 
   if(isFlowAlerted()) {
     lua_push_bool_table_entry(vm, "flow.alerted", true);
-    lua_push_uint64_table_entry(vm, "predominant_alert",
-                                getPredominantAlert().id);
-    lua_push_uint64_table_entry(vm, "predominant_alert_score",
-                                getPredominantAlertScore());
+    lua_push_uint64_table_entry(vm, "predominant_alert", getPredominantAlert().id);
+    lua_push_uint64_table_entry(vm, "predominant_alert_score", getPredominantAlertScore());
   }
 }
 

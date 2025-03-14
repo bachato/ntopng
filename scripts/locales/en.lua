@@ -3455,7 +3455,7 @@ local lang = {
     ["tls_certificate_validity"] = "TLS Cert Validity",
     ["tls_old_protocol_version"] = "Obsolete TLS Version",
     ["tls_server_names"] = "Server Names",
-    ["tls_unsafe_ciphers"] = "Unsafe TLS Ciphers",
+    ["tls_unsafe_ciphers"] = "Weak TLS Ciphers",
     ["tos"] = "<A class='ntopng-external-link' target='_blank' href='https://en.wikipedia.org/wiki/Differentiated_services'>DSCP <i class='fas fa-external-link-alt'></i></A> / <A class='ntopng-external-link' target='_blank' href='https://en.wikipedia.org/wiki/Explicit_Congestion_Notification'>ECN <i class='fas fa-external-link-alt'></i></A> [ Client / Server ]",
     ["traffic_info"] = "Traffic Info",
     ["unidirectional_traffic"] = "Unidirectional Traffic",

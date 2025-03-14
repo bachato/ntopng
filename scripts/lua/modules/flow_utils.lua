@@ -411,84 +411,84 @@ end
 -- #######################
 
 function handleCustomFlowField(key, value, snmpdevice)
-    if key == 'TCP_FLAGS' then
-        return (formatTcpFlags(value))
-    elseif key == 'INPUT_SNMP' then
-        return (formatInterfaceId(value, "inIfIdx", snmpdevice))
-    elseif key == 'OUTPUT_SNMP' then
-        return (formatInterfaceId(value, "outIfIdx", snmpdevice))
-    elseif key == 'TOTAL_FLOWS_EXP' then
-        return (format_utils.formatValue(value))
-    elseif key == 'EXPORTER_IPV4_ADDRESS' or key == 'NPROBE_IPV4_ADDRESS' then
+   if key == 'TCP_FLAGS' then
+      return (formatTcpFlags(value))
+   elseif key == 'INPUT_SNMP' then
+      return (formatInterfaceId(value, "inIfIdx", snmpdevice))
+   elseif key == 'OUTPUT_SNMP' then
+      return (formatInterfaceId(value, "outIfIdx", snmpdevice))
+   elseif key == 'TOTAL_FLOWS_EXP' then
+      return (format_utils.formatValue(value))
+   elseif key == 'EXPORTER_IPV4_ADDRESS' or key == 'NPROBE_IPV4_ADDRESS' then
 
-        if ntop.isPro() then
-            return ("<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/pro/enterprise/flowdevice_details.lua?ip=" .. value ..
-                       "\">" .. value .. "</A>")
-        else
-            return (value)
-        end
-    elseif key == 'FLOW_USER_NAME' then
-        elems = string.split(value, ';')
+      if ntop.isPro() then
+	 return ("<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/pro/enterprise/flowdevice_details.lua?ip=" .. value ..
+		 "\">" .. value .. "</A>")
+      else
+	 return (value)
+      end
+   elseif key == 'FLOW_USER_NAME' then
+      elems = string.split(value, ';')
 
-        if ((elems ~= nil) and (#elems == 6)) then
-            r = '<table class="table table-bordered table-striped">'
-            imsi = elems[1]
-            mcc = string.sub(imsi, 1, 3)
+      if ((elems ~= nil) and (#elems == 6)) then
+	 r = '<table class="table table-bordered table-striped">'
+	 imsi = elems[1]
+	 mcc = string.sub(imsi, 1, 3)
 
-            if (flow_consts.mobile_country_code[mcc] ~= nil) then
-                mcc_name = " [" .. flow_consts.mobile_country_code[mcc] .. "]"
-            else
-                mcc_name = ""
-            end
+	 if (flow_consts.mobile_country_code[mcc] ~= nil) then
+	    mcc_name = " [" .. flow_consts.mobile_country_code[mcc] .. "]"
+	 else
+	    mcc_name = ""
+	 end
 
-            r = r .. "<th>" .. i18n("flow_details.imsi") .. "</th><td>" .. elems[1] .. mcc_name
-            r = r ..
-                    " <A HREF='http://www.numberingplans.com/?page=analysis&sub=imsinr'><i class='fas fa-info'></i></A></td></tr>"
-            r = r .. "<th>" .. i18n("flow_details.nsapi") .. "</th><td>" .. elems[2] .. "</td></tr>"
-            r = r .. "<th>" .. i18n("flow_details.gsm_cell_lac") .. "</th><td>" .. elems[3] .. "</td></tr>"
-            r = r .. "<th>" .. i18n("flow_details.gsm_cell_identifier") .. "</th><td>" .. elems[4] .. "</td></tr>"
-            r = r .. "<th>" .. i18n("flow_details.sac_service_area_code") .. "</th><td>" .. elems[5] .. "</td></tr>"
-            r = r .. "<th>" .. i18n("ip_address") .. "</th><td>" .. ntop.inet_ntoa(elems[6]) .. "</td></tr>"
-            r = r .. "</table>"
-            return (r)
-        else
-            return (value)
-        end
-    elseif key == 'SIP_TRYING_TIME' or key == 'SIP_RINGING_TIME' or key == 'SIP_INVITE_TIME' or key ==
-        'SIP_INVITE_OK_TIME' or key == 'SIP_INVITE_FAILURE_TIME' or key == 'SIP_BYE_TIME' or key == 'SIP_BYE_OK_TIME' or
-        key == 'SIP_CANCEL_TIME' or key == 'SIP_CANCEL_OK_TIME' then
-        if (value ~= '0') then
-            return (formatEpoch(value))
-        else
-            return "0"
-        end
-    elseif key == 'RTP_IN_JITTER' or key == 'RTP_OUT_JITTER' then
-        if (value ~= nil and value ~= '0') then
-            return (value / 1000)
-        else
-            return 0
-        end
-    elseif key == 'RTP_IN_MAX_DELTA' or key == 'RTP_OUT_MAX_DELTA' or key == 'RTP_MOS' or key == 'RTP_R_FACTOR' or key ==
-        'RTP_IN_MOS' or key == 'RTP_OUT_MOS' or key == 'RTP_IN_R_FACTOR' or key == 'RTP_OUT_R_FACTOR' or key ==
-        'RTP_IN_TRANSIT' or key == 'RTP_OUT_TRANSIT' then
-        if (value ~= nil and value ~= '0') then
-            return (value / 100)
-        else
-            return 0
-        end
-    end
+	 r = r .. "<th>" .. i18n("flow_details.imsi") .. "</th><td>" .. elems[1] .. mcc_name
+	 r = r ..
+	    " <A HREF='http://www.numberingplans.com/?page=analysis&sub=imsinr'><i class='fas fa-info'></i></A></td></tr>"
+	 r = r .. "<th>" .. i18n("flow_details.nsapi") .. "</th><td>" .. elems[2] .. "</td></tr>"
+	 r = r .. "<th>" .. i18n("flow_details.gsm_cell_lac") .. "</th><td>" .. elems[3] .. "</td></tr>"
+	 r = r .. "<th>" .. i18n("flow_details.gsm_cell_identifier") .. "</th><td>" .. elems[4] .. "</td></tr>"
+	 r = r .. "<th>" .. i18n("flow_details.sac_service_area_code") .. "</th><td>" .. elems[5] .. "</td></tr>"
+	 r = r .. "<th>" .. i18n("ip_address") .. "</th><td>" .. ntop.inet_ntoa(elems[6]) .. "</td></tr>"
+	 r = r .. "</table>"
+	 return (r)
+      else
+	 return (value)
+      end
+   elseif key == 'SIP_TRYING_TIME' or key == 'SIP_RINGING_TIME' or key == 'SIP_INVITE_TIME' or key ==
+      'SIP_INVITE_OK_TIME' or key == 'SIP_INVITE_FAILURE_TIME' or key == 'SIP_BYE_TIME' or key == 'SIP_BYE_OK_TIME' or
+      key == 'SIP_CANCEL_TIME' or key == 'SIP_CANCEL_OK_TIME' or key == 'TLS_CERT_AFTER' or  key == 'TLS_CERT_NOT_BEFORE' then
+      if (value ~= '0') then
+	 return (formatEpoch(value))
+      else
+	 return "0"
+      end
+   elseif key == 'RTP_IN_JITTER' or key == 'RTP_OUT_JITTER' then
+      if (value ~= nil and value ~= '0') then
+	 return (value / 1000)
+      else
+	 return 0
+      end
+   elseif key == 'RTP_IN_MAX_DELTA' or key == 'RTP_OUT_MAX_DELTA' or key == 'RTP_MOS' or key == 'RTP_R_FACTOR' or key ==
+      'RTP_IN_MOS' or key == 'RTP_OUT_MOS' or key == 'RTP_IN_R_FACTOR' or key == 'RTP_OUT_R_FACTOR' or key ==
+      'RTP_IN_TRANSIT' or key == 'RTP_OUT_TRANSIT' then
+      if (value ~= nil and value ~= '0') then
+	 return (value / 100)
+      else
+	 return 0
+      end
+   end
 
-    -- Unformatted value
+   -- Unformatted value
 
-    if (type(value) == "boolean") then
-        if (value) then
-            value = i18n("yes")
-        else
-            value = i18n("no")
-        end
-    end
+   if (type(value) == "boolean") then
+      if (value) then
+	 value = i18n("yes")
+      else
+	 value = i18n("no")
+      end
+   end
 
-    return value
+   return value
 end
 
 -- #######################

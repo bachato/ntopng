@@ -1392,7 +1392,7 @@ else
    local alerts_by_score = {} -- Table used to keep messages ordered by score
    local num_statuses = 0
    local first = true
-
+   
    for id, _ in pairs(flow["alerts_map"] or {}) do
       local is_predominant = id == flow["predominant_alert"]
       local alert_label = alert_consts.alertTypeLabel(id, true, alert_entities.flow.entity_id)
@@ -1403,6 +1403,7 @@ else
       if not alerts_by_score[alert_score] then
          alerts_by_score[alert_score] = {}
       end
+      
       alerts_by_score[alert_score][#alerts_by_score[alert_score] + 1] = {
          message = message,
          is_predominant = is_predominant,
@@ -1411,8 +1412,10 @@ else
          alert_risk = alert_risk, -- if risk is set, alert comes from nDPI
          score = alert_score
       }
+
       num_statuses = num_statuses + 1
    end
+
    -- ######################################
 
    -- Unhandled flow risk as 'fake' alerts with a 'fake' score of zero
