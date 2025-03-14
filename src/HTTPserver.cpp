@@ -407,17 +407,21 @@ static bool ssl_client_x509_auth(const struct mg_connection *const conn,
   char subject[256];
   char key[CONST_MAX_LEN_REDIS_KEY];
 
+  ntop->getTrace()->traceEvent(TRACE_INFO, "Client X.509 certificate auth: checking...");
+
   if ((cert = SSL_get_peer_certificate(conn->ssl))) {
     if ((subj = X509_get_subject_name(cert))) {
       X509_NAME_oneline(subj, subject, sizeof(subject));
+      
+      ntop->getTrace()->traceEvent(TRACE_INFO, "Client X.509 certificate subject name: '%s'", subject);
 
       if (SSL_get_verify_result(conn->ssl) == X509_V_OK &&
-          X509_NAME_get_text_by_NID(subj, NID_commonName, username,
-                                    NTOP_USERNAME_MAXLEN) >= 0) {
+          X509_NAME_get_text_by_NID(subj, NID_commonName, username, NTOP_USERNAME_MAXLEN) >= 0) {
         snprintf(key, sizeof(key), CONST_STR_USER_GROUP, username);
+      
+        ntop->getTrace()->traceEvent(TRACE_INFO, "Client X.509 certificate CN: '%s'", username);
 
-        bool group_exists =
-            ntop->getRedis()->get(key, group, NTOP_GROUP_MAXLEN) >= 0;
+        bool group_exists = ntop->getRedis()->get(key, group, NTOP_GROUP_MAXLEN) >= 0;
 
         if (ntop->existsUser(username) && group_exists) {
           *localuser = true;
@@ -427,20 +431,23 @@ static bool ssl_client_x509_auth(const struct mg_connection *const conn,
               username, group, subject);
 
           ret = true;
-        } else
-          ntop->getTrace()->traceEvent(
-              TRACE_INFO, "SSL user: not found [user: %s]", username);
-      } else
-        ntop->getTrace()->traceEvent(TRACE_INFO,
-                                     "SSL user: unknow certificate or missing "
-                                     "NID_commonName [subject: %s]",
-                                     subject);
+        } else {
+          ntop->getTrace()->traceEvent(TRACE_INFO, "Client X.509 certificate auth: user not found "
+                                       "[user: %s]", username);
+        }
+      } else {
+        ntop->getTrace()->traceEvent(TRACE_INFO, "Client X.509 certificate auth: "
+                                     "unknow certificate or missing NID_commonName "
+                                     "[subject: %s]", subject);
+      }
+    } else {
+      ntop->getTrace()->traceEvent(TRACE_INFO, "Client X.509 certificate auth: could not get subject name");
     }
 
     X509_free(cert);
-  } else
-    ntop->getTrace()->traceEvent(TRACE_INFO,
-                                 "SSL user: could not get certificate");
+  } else {
+    ntop->getTrace()->traceEvent(TRACE_INFO, "Client X.509 certificate auth: could not get certificate");
+  }
 
   if (!ret) username[0] = '\0', group[0] = '\0';
 
