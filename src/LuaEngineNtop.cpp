@@ -776,8 +776,10 @@ static int ntop_loadCustomCategoryHost(lua_State *vm) {
 
 static bool is_valid_host(char *_host, enum list_file_type t,
                           bool ignorePrivateIPs) {
-  char host[256], *div, *slash;
+  char host[256], *div, *slash = strchr(_host, '/');;
   int cidr = 128;
+
+  if(slash) slash[0] = '\0';
 
   snprintf(host, sizeof(host), "%s", _host);
 
@@ -944,10 +946,9 @@ static int ntop_loadCustomCategoryFile(lua_State *vm) {
 
         if (!loaded) {
           /* Silence Stratosphere Lab.txt (it has 2 possible formatting) */
-          if (strcmp(line, "ip,score") && strcmp(line, "Number,IP address,Rating")) { 
-            ntop->getTrace()->traceEvent(
-                TRACE_NORMAL, "Invalid line format %s%s [%s]",
-                ignorePrivateIPs ? "or private IP " : "", line, path);
+          if (strcmp(line, "ip,score") && strcmp(line, "Number,IP address,Rating")) {
+            ntop->getTrace()->traceEvent(TRACE_NORMAL, "Invalid line format %s%s [%s]",
+					 ignorePrivateIPs ? "or private IP " : "", line, path);
           }
         }
       } break;
@@ -972,12 +973,11 @@ static int ntop_loadCustomCategoryFile(lua_State *vm) {
         }
 
         if (!loaded)
-          ntop->getTrace()->traceEvent(
-              TRACE_ERROR, "Invalid line format %s [%s]", line, path);
+          ntop->getTrace()->traceEvent(TRACE_ERROR, "Invalid line format %s [%s]", line, path);
       } break;
 
-      default:
-        /* Not reached */
+    default:
+      /* Not reached */
         break;
     }
   } /* while */
@@ -1181,17 +1181,17 @@ bool check_network_entry(char *ip_addr, char* rsp, void *user_data) {
   AddressTree *at = (AddressTree*)user_data;
   char a[64], *slash;
   u_int8_t network_mask_bits;
-  
+
   snprintf(a, sizeof(a), "%s", ip_addr);
   slash = strchr(a, '/');
 
   if(slash != NULL)
     slash[0] = '\0'; /* Remove slash if present */
-  
+
   if(at->find(a, &network_mask_bits) != -1) {
     /* Overlapping address */
     bool ok = false;
-    
+
     if(slash != NULL) {
       if(atoi(&slash[1]) > network_mask_bits) {
 	/* This is smaller subnet, so we accept it */
@@ -1204,26 +1204,26 @@ bool check_network_entry(char *ip_addr, char* rsp, void *user_data) {
       return(false);
     }
   }
-  
+
   at->addAddress(ip_addr);
-  
+
   return true;
 }
 
 /*
-  This function is called whenever a new network configuration is is modified/defined.  
+  This function is called whenever a new network configuration is is modified/defined.
  */
 static int ntop_check_network_policy(lua_State *vm) {
   char *local_devices, *corporate_devices, *whitelisted_networks;
   char *rsp = NULL;
   AddressTree at;
-  
+
   lua_newtable(vm);
 
   if ((rsp = (char *)malloc(MAX_RSP_LEN)) == NULL) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   }
-  
+
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
@@ -1268,7 +1268,7 @@ static int ntop_check_network_policy(lua_State *vm) {
 
   lua_push_bool_table_entry(vm, "error", false);
   lua_push_str_table_entry(vm, "error_msg", "");
-  
+
 free:
   if(rsp) free(rsp);
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -3157,7 +3157,7 @@ static int ntop_http_fetch(lua_State *vm) {
 
 static int ntop_post_http_text_file(lua_State *vm) {
   char *username, *password, *url, *path;
-  bool delete_file_after_post = false;  
+  bool delete_file_after_post = false;
   int connection_timeout = 30, lifetime_timeout = 0;
   HTTPTranferStats stats;
 
@@ -3186,10 +3186,10 @@ static int ntop_post_http_text_file(lua_State *vm) {
 
   if (lua_type(vm, 6) == LUA_TNUMBER) {
     /* Optional */
-    connection_timeout = lua_tonumber(vm, 6);    
+    connection_timeout = lua_tonumber(vm, 6);
     if (connection_timeout < 1) connection_timeout = 1;
   }
-  
+
   if (Utils::postHTTPTextFile(vm, username, password, url, path,
 			      connection_timeout, lifetime_timeout,
                               &stats)) {
@@ -4679,7 +4679,7 @@ static int ntop_snmpv3_batch_get(lua_State *vm) {
   char value_types[SNMP_MAX_NUM_OIDS];
   SNMP *snmp;
   bool ret;
-  
+
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
   if (!curr_iface)
@@ -8548,7 +8548,7 @@ static luaL_Reg _ntop_reg[] = {
     {"readEthernetIPDeviceInfo", read_ether_ip_device_info},
 
     {"reloadServersConfiguration", reload_servers_configuration},
-  
+
 #if defined(NTOPNG_PRO)
     {"reloadNetworksPolicyConfiguration", reload_networks_policy_configuration},
 #endif
