@@ -11,6 +11,20 @@ local json = require "dkjson"
 
 -- ##############################################
 
+-- ##############      NOTES       ##############
+-- The asset table is a table containing the
+-- assets found by ntopng. Periodically uses a script
+-- to drop these data from C to Lua into the DB
+-- (Clickhouse or SQLite).
+-- The table is a single table, containing two types of data:
+--   - Hosts data: identified from the column, type = 'host'
+--   - MACs data: identified from the column, type = 'mac'
+-- Whenever a query is done, MUST be controlled if the data
+-- requested is for hosts or for macs and add the specific
+-- type filter.
+
+-- ##############################################
+
 local asset_utils = {}
 local table_name = "assets"
 
@@ -80,6 +94,7 @@ end
 
 -- ##############################################
 
+-- This function partially format the data retrieved from the query
 local function partiallyFormatInfo(res)
     local res_formatted = {}
     for _, res_unformatted in pairs(res or {}) do
@@ -134,6 +149,7 @@ end
 
 -- ##############################################
 
+-- This function retrieves the data of a specific asset given a unique key
 local function getAssetInfo(ifid, key, asset_type)
     if isEmptyString(key) then return nil end
     local query = nil
@@ -192,6 +208,8 @@ end
 
 -- ##############################################
 
+-- This function merges the json of old and new data,
+-- in case of duplicates, the new data are saved and old data lost
 local function updateJsonField(fields, new_fields)
     if fields then
         local json_info = json.decode(fields.json_info) or {}
@@ -205,22 +223,25 @@ end
 
 -- ##############################################
 
+-- This function retrieves the data from the db
 local function getAssetData(ifid, order, sort, start, length, filters,
                             asset_type, check_last_seen)
     if not ifid then ifid = interface.getId() end
 
     if sort == "ip" and hasClickHouseSupport() then sort = "toIPv6(ip)" end
     local where = build_where(ifid, filters)
-    local sort_query = ""
+    local sort_query = "ORDER BY key ASC" -- By default the sorting is done on the key
     local limit_query = ""
 
     if sort and order then
+        -- Here the ORDER BY key is still mantained, this is because when switching pages,
+        -- without an order, the same value could be found in the second page for example, ecc.
         if sort == "last_seen" then
             -- Set last seen = 0 at start or end
-            sort_query = string.format("ORDER BY (%s = 0) %s, %s %s", sort,
+            sort_query = string.format("ORDER BY (%s = 0) %s, %s %s, key ASC", sort,
                                        order, sort, order)
         else
-            sort_query = string.format("ORDER BY %s %s", sort, order)
+            sort_query = string.format("ORDER BY %s %s, key ASC", sort, order)
         end
     end
 
@@ -254,6 +275,8 @@ end
 
 -- ##############################################
 
+-- This function returns the number of assets
+-- This is used for the details table page
 local function getNumAssets(ifid, filters, asset_type, check_last_seen)
     if not ifid then ifid = interface.getId() end
     local where = build_where(ifid, filters)
@@ -282,7 +305,7 @@ end
 
 -- ##############################################
 
--- @brief insert assetkey
+-- Given a new host, adds the asset to the hosts asset
 function asset_utils.insertHost(entry, ifid)
     local query = nil
     local version = 1
@@ -332,6 +355,10 @@ function asset_utils.insertHost(entry, ifid)
     return interface.alert_store_query(query)
 end
 
+
+-- ##############################################
+
+-- Given a new mac, adds the asset to the macs asset
 function asset_utils.insertMac(entry, ifid)
     local query = nil
     local version = 1
