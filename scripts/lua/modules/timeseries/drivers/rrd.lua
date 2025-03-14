@@ -827,7 +827,7 @@ function driver:listSeries(schema, tags_filter, wildcard_tags, start_time, not_p
         local fpath = base .. "/" .. f
         if ((v ~= nil) and (#v == 1)) then
             local last_update = ntop.rrd_lastupdate(fpath)
-            if last_update ~= nil and last_update >= start_time then
+            if last_update ~= nil and start_time ~= nil and last_update >= start_time then
                 local value = v[1]
                 local toadd = false
 
