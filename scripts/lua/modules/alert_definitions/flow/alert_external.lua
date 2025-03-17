@@ -57,8 +57,13 @@ function external_alert.format(ifid, alert, alert_type_params)
       return res
    end
 
-   local info = alert_type_params.alerts[tostring(flow_alert_keys.flow_alert_external)]
-   if not info then
+   local info = alert_type_params
+
+   if not alert_type_params.source
+      and alert_type_params.alerts
+      and alert_type_params.alerts[tostring(flow_alert_keys.flow_alert_external)] then
+      info = alert_type_params.alerts[tostring(flow_alert_keys.flow_alert_external)]
+   else
       return res
    end
 

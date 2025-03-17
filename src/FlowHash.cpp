@@ -39,8 +39,14 @@ Flow *FlowHash::find(Mac *src_mac, Mac *dst_mac, IpAddress *src_ip,
                      u_int32_t private_flow_id, u_int8_t protocol,
                      const ICMPinfo *const icmp_info, bool *src2dst_direction,
                      bool is_inline_call, Flow **unswapped_flow) {
-  u_int32_t hash = ((src_ip->key() + dst_ip->key() + (icmp_info ? icmp_info->key() : 0) +
-		     private_flow_id + src_port + dst_port + vlanId + protocol) %
+  u_int32_t hash = ((src_ip->key() + 
+                     dst_ip->key() + 
+                     (icmp_info ? icmp_info->key() : 0) +
+		     private_flow_id + 
+                     src_port + 
+                     dst_port + 
+                     vlanId + 
+                     protocol) %
 		    num_hashes);
   Flow *head = (Flow *)table[hash];
   u_int16_t num_loops = 0;
@@ -48,8 +54,13 @@ Flow *FlowHash::find(Mac *src_mac, Mac *dst_mac, IpAddress *src_ip,
   *unswapped_flow = NULL;
 
 #if 0
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "%u:%u / %u:%u [icmp: %u][key: %u][icmp info key: %u][head: 0x%x]",
-			       src_ip->key(), src_port, dst_ip->key(), dst_port, icmp_info ? 1 : 0, hash, icmp_info ? icmp_info->key() : 0, head);
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] %u:%u / %u:%u [icmp key: %u]"
+    "[priv flow id: %u][vlan: %u][protocol: %u]"
+    "[hash: %u][head: 0x%x]",
+    iface->get_name(),
+    src_ip->key(), ntohs(src_port), dst_ip->key(), ntohs(dst_port),
+    icmp_info ? icmp_info->key() : 0,
+    private_flow_id, vlanId, protocol, hash, head);
 #endif
 
   if (!head) return (NULL);

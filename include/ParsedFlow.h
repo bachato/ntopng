@@ -45,7 +45,7 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   u_int8_t tls_unsafe_cipher, flow_verdict;
   u_int16_t tls_cipher;
   u_int16_t http_ret_code;
-  u_int16_t dns_query_type, dns_ret_code;
+  u_int16_t dns_query_type, dns_ret_code, dns_query_id;
   u_int32_t l7_error_code;
   u_int16_t src_port_pre_nat, dst_port_pre_nat,
             src_port_post_nat, dst_port_post_nat;
@@ -120,6 +120,7 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   inline void setHTTPRetCode(u_int16_t v) { http_ret_code = v; }
   inline void setDNSQueryType(u_int16_t v) { dns_query_type = v; }
   inline void setDNSRetCode(u_int16_t v) { dns_ret_code = v; }
+  inline void setDNSQueryId(u_int16_t v) { dns_query_id = v; }
   inline void setL7ErrorCode(u_int32_t v) { l7_error_code = v; }
   inline void setCustomApp(custom_app_t c) { custom_app = c; }
   inline void setConfidence(ndpi_confidence_t c) { confidence = c; }
@@ -177,6 +178,7 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   inline u_int16_t getHTTPRetCode() { return(http_ret_code); }
   inline u_int16_t getDNSQueryType() { return(dns_query_type); }
   inline u_int16_t getDNSRetCode() { return(dns_ret_code); }
+  inline u_int16_t getDNSQueryId() { return(dns_query_id); }
   inline u_int32_t getL7ErrorCode() { return(l7_error_code); }
   inline custom_app_t getCustomApp() { return(custom_app ); }
   inline ndpi_confidence_t getConfidence() { return(confidence); }

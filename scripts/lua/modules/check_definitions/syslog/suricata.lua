@@ -144,14 +144,27 @@ end
 
 local function parseDNSMetadata(event_dns, flow)
 
+   -- Backward compatibility
    if event_dns.type == "query" then
       flow.dns_query = event_dns.rrname
       flow.dns_query_type = get_dns_type(event_dns.rrtype)
+      flow.dns_query_id = event_dns.id
    end
 
-   -- Additional fields
-   flow.DNS_QUERY_ID = event_dns.id
-   flow.DNS_TX_ID = event_dns.tx_id
+   if event_dns.query 
+      and type(event_dns.query) == "table"
+      and table.len(event_dns.query) > 0 then
+
+      local query = event_dns.query[1]
+
+      if query.type == "query" then
+         flow.dns_query = query.rrname
+         flow.dns_query_type = get_dns_type(query.rrtype)
+      end
+
+      flow.dns_query_id = query.id
+   end
+
 end
 
 -- #################################################################
@@ -227,10 +240,20 @@ function syslog_module.hooks.handleEvent(syslog_conf, message, host, priority)
          if event.alert ~= nil then
             parseAlertMetadata(event.alert, flow)
             num_alerts = num_alerts + 1
+
+            if event.http ~= nil then
+               parseHTTPMetadata(event.http, flow)
+            elseif event.dns ~= nil then
+               parseDNSMetadata(event.dns, flow) 
+            elseif event.tls ~= nil then
+               parseTLSMetadata(event.tls, flow) 
+            end
+
          else
             num_unhandled = num_unhandled + 1
             flow = nil
          end
+
       else
          num_unhandled = num_unhandled + 1
          flow = nil

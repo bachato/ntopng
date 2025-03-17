@@ -38,7 +38,7 @@ ParsedFlow::ParsedFlow() : ParsedFlowCore(), ParsedeBPF() {
   external_alert = NULL;
   flow_risk_info = NULL;
   tls_cipher = tls_unsafe_cipher = http_ret_code = 0;
-  dns_query_type = dns_ret_code = 0;
+  dns_query_type = dns_ret_code = dns_query_id = 0;
   ndpi_flow_risk_bitmap = 0;
   ndpi_flow_risk_name = NULL;
   smtp_rcp_to = NULL;
@@ -171,6 +171,7 @@ ParsedFlow::ParsedFlow(const ParsedFlow &pf) : ParsedFlowCore(pf), ParsedeBPF(pf
   http_ret_code = pf.http_ret_code;
   dns_query_type = pf.dns_query_type;
   dns_ret_code = pf.dns_ret_code;
+  dns_query_id = pf.dns_query_id;
   
   /* Only IPv4 supported, in case the ipv4 is 0 it's already handled inside IpAddress class */
   src_ip_addr_pre_nat = pf.src_ip_addr_pre_nat;
@@ -288,6 +289,8 @@ void ParsedFlow::fromLua(lua_State *L, int index) {
           dns_query_type = lua_tonumber(L, -1);
         else if (!strcmp(key, "dns_ret_code"))
           dns_ret_code = lua_tonumber(L, -1);
+        else if (!strcmp(key, "dns_query_id"))
+          dns_query_id = lua_tonumber(L, -1);
         else if (!strcmp(key, "http_ret_code"))
           http_ret_code = lua_tonumber(L, -1);
         else {

@@ -222,7 +222,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
   if((zflow->src_ip.getVersion() == 0)
      || (zflow->dst_ip.getVersion() == 0)) {
     flow = NULL; /* Invalid IPs */
-  } else {  
+  } else { 
     srcIP.set(&zflow->src_ip), dstIP.set(&zflow->dst_ip);
     
     INTERFACE_PROFILING_SECTION_ENTER("NetworkInterface::processFlow: getFlow", 0);
@@ -231,8 +231,13 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
       size_t len = strlen(zflow->getSIPCallId());
 
       private_flow_id = ndpi_quick_hash((const unsigned char *)zflow->getSIPCallId(), len);
-    } else
+    } else if (zflow->getDNSQueryId()) {
+      private_flow_id = zflow->getDNSQueryId();
+    } else {
       private_flow_id = 0;
+    }
+
+    //ntop->getTrace()->traceEvent(TRACE_NORMAL, "private_flow_id = %u", private_flow_id);
 
     /* Updating Flow */
     flow = getFlow(UNKNOWN_PKT_IFACE_IDX, srcMac, dstMac, zflow->vlan_id,
