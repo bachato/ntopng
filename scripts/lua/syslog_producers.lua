@@ -345,7 +345,7 @@ print([[
               }, 15000);
           },
           ajax: {
-              url: `${http_prefix}/lua/rest/v2/get/syslog/producer/list.lua`,
+              url: `${http_prefix}/lua/rest/v2/get/syslog/producer/list.lua?ifid=]] .. ifid .. [[`,
               type: 'get',
               dataSrc: ''
           },
