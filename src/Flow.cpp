@@ -8876,10 +8876,12 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
     break;
 
   case NDPI_PROTOCOL_NTP:
-    if(srv_h)
-      srv_h->setNtpServer(domain_name);
-    else if(srv_ip_addr)
-      srv_ip_addr->setNtpServer();
+    if(isBidirectional()) {
+      if(srv_h)
+	srv_h->setNtpServer(domain_name);
+      else if(srv_ip_addr)
+	srv_ip_addr->setNtpServer();
+    }
     break;
 
   case NDPI_PROTOCOL_DNS:
@@ -8910,10 +8912,12 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** DNS: %s", cli_h->print(buf, sizeof(buf)));
 #endif
 
-      if(cli_h)
-	cli_h->setDnsServer(domain_name);
-      else if(cli_ip_addr)
-	cli_ip_addr->setDnsServer();
+      if(isBidirectional()) {
+	if(cli_h)
+	  cli_h->setDnsServer(domain_name);
+	else if(cli_ip_addr)
+	  cli_ip_addr->setDnsServer();
+      }
     } else {
 #ifdef DEBUG
       char buf[64];
@@ -8922,10 +8926,12 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
 				   ndpiFlow->protos.dns.is_query, current_pkt_from_client_to_server(iface->get_ndpi_struct(), ndpiFlow));
 #endif
 
-      if(srv_h)
-	srv_h->setDnsServer(domain_name);
-      else if(srv_ip_addr)
-	srv_ip_addr->setDnsServer();
+      if(isBidirectional()) {
+	if(srv_h)
+	  srv_h->setDnsServer(domain_name);
+	else if(srv_ip_addr)
+	  srv_ip_addr->setDnsServer();
+      }
     }
     break;
 
