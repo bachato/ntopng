@@ -8861,6 +8861,7 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
   case NDPI_PROTOCOL_DHCP:
     if(cli_port == htons(67)) {
       /* Server -> Client */
+
       if(cli_host && (!cli_host->isBroadcastHost())) {
 	cli_host->setDhcpServer(domain_name);
       } else if(cli_ip_addr && !cli_ip_addr->isBroadcastAddress()) {
@@ -8872,6 +8873,9 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
       } else if(srv_ip_addr && !srv_ip_addr->isBroadcastAddress()) {
 	srv_ip_addr->setDhcpServer();
       }
+
+      if(ndpiFlow)
+	cli_host->offlineSetDhcpFingerprint(ndpiFlow->protos.dhcp.fingerprint);
     }
     break;
 

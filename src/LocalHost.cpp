@@ -156,7 +156,7 @@ void LocalHost::initialize() {
     if (NetworkStats *ns = iface->getNetworkStats(local_network_id))
       ns->incNumHosts();
   }
-  
+
   iface->incNumHosts(this, true /* Initialization: bytes are 0, considered RX only */);
 
 #ifdef LOCALHOST_DEBUG
@@ -194,7 +194,7 @@ void LocalHost::dumpAssetInfo(bool include_last_seen) {
   if (!ntop->getPrefs()->isAssetsCollectionEnabled()) {
 #ifdef NTOPNG_DEBUG
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "Assets Collection Disabled, please enable it from the Preferences.");
-#endif  
+#endif
     return;
   }
   /* Remove the key from the hash, used to get the offline hosts */
@@ -231,7 +231,7 @@ void LocalHost::dumpAssetInfo(bool include_last_seen) {
 
   ndpi_serialize_string_uint64(&host_json, "first_seen", get_first_seen());
   if (include_last_seen) {
-    /* This is done in a way that when an host disappear and reapper in the net, it is not 
+    /* This is done in a way that when an host disappear and reapper in the net, it is not
      * going to be shown in the list of inactive hosts, the last seen is put to 0 again
      */
     ndpi_serialize_string_uint64(&host_json, "last_seen", get_last_seen());
@@ -434,7 +434,7 @@ void LocalHost::lua(lua_State *vm, AddressTree *ptree, bool host_details,
 
   if(inconsistent_host_os)
     lua_push_bool_table_entry(vm, "inconsistent_host_os", true);
-  
+
   if(tcp_fingerprint_host_os != os_hint_unknown) {
     lua_newtable(vm);
     lua_push_str_table_entry(vm, "os", ndpi_print_os_hint(tcp_fingerprint_host_os));
@@ -796,6 +796,13 @@ void LocalHost::offlineSetDHCPName(const char *dhcp_n) {
 
 /* *************************************** */
 
+void LocalHost::offlineSetDhcpFingerprint(char *fingerprint) {
+  /* Teoretically this info is bound to the MAC address and not to the host */
+  addDataToAssets((char *) "dhcp_fingerprint", fingerprint);
+}
+
+/* *************************************** */
+
 void LocalHost::offlineSetMDNSTXTName(const char *mdns_n_txt) {
   Host::offlineSetMDNSTXTName(mdns_n_txt);
   addDataToAssets((char *) "mdns_txt_name", (char *) mdns_n_txt);
@@ -857,7 +864,7 @@ void LocalHost::setTCPfingerprint(char *_tcp_fingerprint,
     if(tcp_fingerprint == NULL)
       tcp_fingerprint = strdup(_tcp_fingerprint);
 
-  } else if((os != os_hint_unknown) && (tcp_fingerprint_host_os != os)) {    
+  } else if((os != os_hint_unknown) && (tcp_fingerprint_host_os != os)) {
     char buf[64];
 
     ntop->getTrace()->traceEvent(TRACE_INFO, "Found OS inconsistency %s vs %s [%s][%s]",
@@ -879,7 +886,7 @@ void LocalHost::setOS(OSType _os, OSLearningMode mode) {
     char buf[8];
     snprintf(buf, sizeof(buf), "%d", _os);
     addDataToAssets((char *) "os_type", buf);
-    
+
     Host::setOS(_os, mode);
   }
 }
@@ -897,6 +904,7 @@ bool LocalHost::addDataToAssets(char *_field, char *_value) {
   if (_field && _field[0] != '\0' && _value && _value[0] != '\0') {
     std::string field = _field;
     std::string value = _value;
+
     asset_map[field] = value;
     asset_map_updated = true; /* Next time dump data */
     return true;
@@ -922,12 +930,13 @@ bool LocalHost::removeDataFromAssets(char *field) {
 
 void LocalHost::dumpAssetJson(ndpi_serializer *serializer) {
   /* Check for the map size */
-  if (asset_map.size() == 0) 
+  if (asset_map.size() == 0)
     return;
 
   ndpi_serialize_start_of_block(serializer, "json_info"); /* Custom fields block */
   for(std::map<std::string, std::string>::iterator it = asset_map.begin(); it != asset_map.end(); it++) {
     ndpi_serialize_string_string(serializer, it->first.c_str(), it->second.c_str());
   }
+
   ndpi_serialize_end_of_block(serializer);
 }

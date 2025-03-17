@@ -219,6 +219,7 @@ class LocalHost : public Host {
   void offlineSetMDNSInfo(char *const s);
   void offlineSetMDNSName(const char *n);
   void offlineSetDHCPName(const char *n);
+  void offlineSetDhcpFingerprint(char *fingerprint);
   void offlineSetMDNSTXTName(const char *n);
   void offlineSetNetbiosName(const char *n);
   void offlineSetTLSName(const char *n);
@@ -227,7 +228,7 @@ class LocalHost : public Host {
   void setResolvedName(const char *resolved_name);
   bool addDataToAssets(char *field, char *value);
   bool removeDataFromAssets(char *field);
-
+  
   virtual void setOS(OSType _os, OSLearningMode mode);
   void setTCPfingerprint(char *tcp_fingerprint, enum operating_system_hint os);
 };

@@ -235,7 +235,7 @@ class Host : public GenericHashEntry,
     return (host_services_bitmap & (1 << HOST_IS_DHCP_SERVER));
   }
   virtual void setDhcpServer(char *name);
-
+  
   inline bool isDnsServer() const {
     return (host_services_bitmap & (1 << HOST_IS_DNS_SERVER));
   }
@@ -772,6 +772,7 @@ class Host : public GenericHashEntry,
   virtual void offlineSetMDNSName(const char *n);
   virtual void offlineSetMDNSTXTName(const char *n);
   virtual void offlineSetDHCPName(const char *n);
+  virtual void offlineSetDhcpFingerprint(char *fingerprint) { ; }
   virtual void setServerName(const char *n);
   virtual void setResolvedName(const char *resolved_name);
   virtual Fingerprint *getJA4Fingerprint()   { return (NULL); }
