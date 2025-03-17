@@ -351,7 +351,7 @@ interface.select(getSystemInterfaceId())
 if(ntop.isPro()) then
    -- Clickhouse migration
    if ntop.isClickHouseEnabled() then
-      local query = "ALTER TABLE assets UPDATE manufacturer = 'unknown' WHERE manufacturer = ''"
+      local query = "ALTER TABLE assets UPDATE manufacturer = 'unknown' WHERE manufacturer = '' or manufacturer is NULL"
       local success = interface.execSQLQuery(query)
 
       traceError(TRACE_NORMAL, TRACE_CONSOLE, "Assets manufacturer migration completed for ClickHouse")
