@@ -57,12 +57,17 @@ function external_alert.format(ifid, alert, alert_type_params)
       return res
    end
 
-   -- Available fields:
-   -- alert_type_params.source (e.g. suricata)
-   -- alert_type_params.alert (alert metadata)
+   local info = alert_type_params.alerts[tostring(flow_alert_keys.flow_alert_external)]
+   if not info then
+      return res
+   end
 
-   if alert_type_params.source == "suricata" then
-      res = formatIDSAlert(alert_type_params.alert)
+   -- Available fields:
+   -- info.source (e.g. suricata)
+   -- info.alert (alert metadata)
+
+   if info.source == "suricata" and info.alert then
+      res = formatIDSAlert(info.alert)
    end
 
    return res
