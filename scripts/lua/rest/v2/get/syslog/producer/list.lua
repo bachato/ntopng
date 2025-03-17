@@ -17,10 +17,9 @@ local rc = rest_utils.consts.success.ok
 
 if ifid == nil then
   rest_utils.answer(rest_utils.consts.err.missing_parameters, {"Interface id (ifid) required"})
+  return
 end
 
-if ifid ~= nil then
-  res = syslog_utils.getProducers(ifid)
-end
-tprint(res)
+res = syslog_utils.getProducers(ifid)
+
 rest_utils.answer(rc, res)
