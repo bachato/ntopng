@@ -34,7 +34,8 @@ class ExternalAlertCheck : public FlowCheck {
                   false /* Don't exclude for nEdge */,
                   false /* NOT only for nEdge */,
                   true /* has_protocol_detected */,
-                  false /* has_periodic_update */, true /* has_flow_end */){};
+                  false, /* has_periodic_update */,
+                  true /* has_flow_end */){};
   ~ExternalAlertCheck(){};
 
   void protocolDetected(Flow *f);

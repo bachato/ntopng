@@ -22,6 +22,7 @@
 #include "ntop_includes.h"
 #include "flow_checks_includes.h"
 
+/* Note: this is overridden by ExternalAlertCheckPro::checkExternalAlert on Pro */
 void ExternalAlertCheck::checkExternalAlert(Flow *f) {
   if (f->hasExternalAlert()) {
     FlowAlertType alert_type = ExternalAlertCheckAlert::getClassType();
