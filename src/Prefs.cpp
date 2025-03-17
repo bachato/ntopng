@@ -1775,7 +1775,7 @@ int Prefs::setOption(int optkey, char *optarg) {
     break;
 
   case 'x':
-    max_num_hosts = max_val(atoi(optarg), 1024);
+    max_num_hosts = min_val(max_val(atoi(optarg), 1024), 4194304);
     break;
 
   case 'y':
@@ -2222,7 +2222,7 @@ int Prefs::setOption(int optkey, char *optarg) {
     break;
 
   case 'X':
-    max_num_flows = max_val(atoi(optarg), 1024);
+    max_num_flows = min_val(max_val(atoi(optarg), 1024), 4194304);
     break;
 
   case 206:
