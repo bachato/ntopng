@@ -4904,7 +4904,7 @@ struct flowHostRetriever {
   u_int64_t totBytesSent, totBytesRcvd, totThpt;
   struct flowHostRetrieveList *elems;
 #ifdef NTOPNG_PRO
-  QoEStats qoe;
+  QoEStats *qoe;
 #endif
   bool only_traffic_stats;
   /* Used by getActiveFlowsStats */
@@ -6219,7 +6219,7 @@ static bool flow_sum_stats(GenericHashEntry *flow, void *user_data,
     retriever->totBytesRcvd += f->get_bytes_srv2cli();
     retriever->totThpt += f->get_bytes_thpt();
 #ifdef NTOPNG_PRO
-    retriever->qoe.incQoEStats(f->getQoEType());
+    retriever->qoe->incQoEStats(f->getQoEType());
 #endif
     if (!retriever->only_traffic_stats) f->sumStats(ndpi_stats, stats);
 
@@ -6231,14 +6231,16 @@ static bool flow_sum_stats(GenericHashEntry *flow, void *user_data,
 
 /* **************************************************** */
 
-void NetworkInterface::getActiveFlowsStats(
-					   nDPIStats *ndpi_stats, FlowStats *stats, AddressTree *allowed_hosts,
+void NetworkInterface::getActiveFlowsStats(nDPIStats *ndpi_stats, FlowStats *stats, AddressTree *allowed_hosts,
 					   Host *h, Host *talking_with_host, Host *client, Host *server,
 					   char *flow_info, Paginator *p, lua_State *vm, bool only_traffic_stats) {
   flowHostRetriever retriever;
   u_int32_t begin_slot = 0;
   bool walk_all = true;
-
+#ifdef NTOPNG_PRO
+  QoEStats qoe;
+#endif
+  
   memset(&retriever, 0, sizeof(retriever));
 
   retriever.pag = p;
@@ -6248,6 +6250,9 @@ void NetworkInterface::getActiveFlowsStats(
   retriever.server = server;
   retriever.location = location_all;
   retriever.ndpi_proto = -1;
+#ifdef NTOPNG_PRO
+  retriever.qoe = &qoe;
+#endif
   retriever.actNumEntries = 0;
   retriever.maxNumEntries = getFlowsHashSize();
   retriever.allowed_hosts = allowed_hosts;
@@ -6268,7 +6273,7 @@ void NetworkInterface::getActiveFlowsStats(
 
 #ifdef NTOPNG_PRO
   /* Handle the QoE*/
-  retriever.qoe.lua_qoe_stats(vm);
+  retriever.qoe->lua_qoe_stats(vm);
 #endif
 
   if (!only_traffic_stats) {
@@ -6432,14 +6437,19 @@ int NetworkInterface::dropFlowsTraffic(AddressTree *allowed_hosts,
   struct flowHostRetriever retriever;
   u_int32_t begin_slot = 0;
   bool walk_all = true;
+#ifdef NTOPNG_PRO
+  QoEStats qoe;
+#endif
 
   memset(&retriever, 0, sizeof(retriever));
 
   retriever.allowed_hosts = allowed_hosts;
   retriever.pag = p;
-
-  walker(&begin_slot, walk_all, walker_flows, flow_drop_walker,
-         (void *)&retriever);
+#ifdef NTOPNG_PRO
+  retriever.qoe = &qoe;
+#endif
+  
+  walker(&begin_slot, walk_all, walker_flows, flow_drop_walker, (void *)&retriever);
 
   return (0);
 }
@@ -6839,6 +6849,10 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
 					 char *sortColumn, u_int32_t maxHits, u_int32_t toSkip, bool a2zSortOrder,
 					 bool useArrayFormat) {
   struct flowHostRetriever retriever;
+  int count = 1;
+#ifdef NTOPNG_PRO
+  QoEStats qoe;
+#endif
 
 #if DEBUG
   if (!walk_all)
@@ -6847,9 +6861,11 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
                                  __FUNCTION__, *begin_slot, walk_all);
 #endif
 
-  int count = 1;
   memset(&retriever, 0, sizeof(struct flowHostRetriever));
   retriever.observationPointId = getLuaVMUservalue(vm, observationPointId);
+#ifdef NTOPNG_PRO
+  retriever.qoe = &qoe;
+#endif
 
   if (sortHosts(begin_slot, walk_all, &retriever, bridge_iface_idx,
                 allowed_hosts, host_details, location, countryFilter,
