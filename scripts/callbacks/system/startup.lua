@@ -345,22 +345,23 @@ asset_utils.updateLastSeen()
 ntop.reloadServersConfiguration()
 
 -- Migrate assets table content. Change manufacturer from empty to unknown
-traceError(TRACE_NORMAL, TRACE_CONSOLE, "Migrating empty manufacturer column to unknown in assets table")
-interface.select(getSystemInterfaceId())
-
 if(ntop.isPro()) then
    -- Clickhouse migration
-   if ntop.isClickHouseEnabled() then
+   if ntop.isClickHouseEnabled() then      
       local query = "ALTER TABLE assets UPDATE manufacturer = 'unknown' WHERE manufacturer = '' or manufacturer is NULL"
-      local success = interface.execSQLQuery(query)
+      local success
 
-      traceError(TRACE_NORMAL, TRACE_CONSOLE, "Assets manufacturer migration completed for ClickHouse")
+      traceError(TRACE_NORMAL, TRACE_CONSOLE, "Migrating empty manufacturer column to unknown in assets table")
+      
+      interface.select(getSystemInterfaceId())      
+      success = interface.execSQLQuery(query)
+
+      if(success == false) then
+	 traceError(TRACE_ERROR, TRACE_CONSOLE, "Assets manufacturer migration failed for ClickHouse")
+      else
+	 traceError(TRACE_NORMAL, TRACE_CONSOLE, "Assets manufacturer migration completed for ClickHouse")
+      end
    end
-else
-   -- MySQL migration
-   local query = "UPDATE assets SET manufacturer = 'unknown' WHERE manufacturer = '' OR manufacturer IS NULL"
-   local success = interface.execSQLQuery(query)
-   traceError(TRACE_NORMAL, TRACE_CONSOLE, "Assets manufacturer migration completed for MySQL")
 end
 
 traceError(TRACE_NORMAL, TRACE_CONSOLE, "Completed startup.lua")
