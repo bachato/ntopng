@@ -49,7 +49,9 @@ class LocalHost : public Host {
   void initialize();
   void deferredInitialization();
   void freeLocalHostData();
-  void dumpAssetInfo(bool include_last_seen);
+#ifdef NTOPNG_PRO
+  void dumpAssetInfo();
+#endif
   virtual void deleteHostData();
   void dumpAssetJson(ndpi_serializer *serializer);
 
@@ -219,7 +221,7 @@ class LocalHost : public Host {
   void offlineSetMDNSInfo(char *const s);
   void offlineSetMDNSName(const char *n);
   void offlineSetDHCPName(const char *n);
-  void offlineSetDhcpFingerprint(char *fingerprint);
+  void offlineSetDhcpFingerprint(const char *fingerprint);
   void offlineSetMDNSTXTName(const char *n);
   void offlineSetNetbiosName(const char *n);
   void offlineSetTLSName(const char *n);

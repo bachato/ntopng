@@ -63,7 +63,7 @@ LocalHost::~LocalHost() {
   if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
 
-  dumpAssetInfo(true);
+  dumpAssetInfo();
 
   if (initial_ts_point) delete (initial_ts_point);
   freeLocalHostData();
@@ -177,7 +177,7 @@ void LocalHost::initialize() {
     fingerprints = NULL;
 
   tcp_fingerprint_host_os = os_hint_unknown;
-  dumpAssetInfo(false);
+  dumpAssetInfo();
   gettimeofday(&last_periodic_asset_update, NULL);
 }
 
@@ -189,9 +189,10 @@ void LocalHost::deferredInitialization() {
 
 /* *************************************** */
 
-void LocalHost::dumpAssetInfo(bool include_last_seen) {
+#ifdef NTOPNG_PRO
+void LocalHost::dumpAssetInfo() {
   /* Return in case the preference is disabled */
-  if (!ntop->getPrefs()->isAssetsCollectionEnabled()) {
+  if ((!ntop->getPrefs()->is_enterprise_m_edition()) || (!ntop->getPrefs()->isAssetsCollectionEnabled())) {
 #ifdef NTOPNG_DEBUG
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "Assets Collection Disabled, please enable it from the Preferences.");
 #endif
@@ -216,12 +217,11 @@ void LocalHost::dumpAssetInfo(bool include_last_seen) {
 #ifdef NTOPNG_DEBUG
   cur_mac->print(buf, sizeof(buf));
   ntop->getTrace()->traceEvent(TRACE_NORMAL,
-			       "Adding Host %s to Assets [Ifid: %d][VLAN: %d][MAC: %s][Status: %s]",
+			       "Adding Host %s to Assets [Ifid: %d][VLAN: %d][MAC: %s]",
 			       ip.print(buf, sizeof(buf)),
 			       iface->get_id(),
-             vlan_id,
-			       buf,
-             include_last_seen ? "Inactive" : "Active");
+			       vlan_id,
+			       buf);
 #endif
 
   ndpi_init_serializer(&host_json, ndpi_serialization_format_json);
@@ -230,12 +230,7 @@ void LocalHost::dumpAssetInfo(bool include_last_seen) {
   ndpi_serialize_string_string(&host_json, "ip", ip.print(buf, sizeof(buf)));
 
   ndpi_serialize_string_uint64(&host_json, "first_seen", get_first_seen());
-  if (include_last_seen) {
-    /* This is done in a way that when an host disappear and reapper in the net, it is not
-     * going to be shown in the list of inactive hosts, the last seen is put to 0 again
-     */
-    ndpi_serialize_string_uint64(&host_json, "last_seen", get_last_seen());
-  }
+  ndpi_serialize_string_uint64(&host_json, "last_seen", get_last_seen());
 
   if (cur_mac) {
     ndpi_serialize_string_uint32(&host_json, "device_type", cur_mac->getDeviceType());
@@ -258,24 +253,29 @@ void LocalHost::dumpAssetInfo(bool include_last_seen) {
   if ((json_str != NULL) && (json_str_len > 0)) {
     char redis_key[64];
 
+    /* Will be polled by pro/scripts/callbacks/minute-delayed/interface/assets.lua */
     snprintf(redis_key, sizeof(redis_key), OFFLINE_LOCAL_HOSTS_MACS_QUEUE_NAME, iface->get_id());
     ntop->getRedis()->lpush(redis_key, json_str, CONST_MAX_INACTIVE_HOSTS_MAC_QUEUE_LEN);
   }
 
   ndpi_term_serializer(&host_json);
 }
+#endif
 
 /* *************************************** */
 
 void LocalHost::periodic_stats_update(const struct timeval *tv) {
   checkGatewayInfo();
+
   /* If at least 5 minutes passed and the map was updated, dump the info */
   float diff = Utils::msTimevalDiff(tv, &last_periodic_asset_update) / 1000; /* in Sec */
+
   if ((diff > CONST_ASSETS_PERIODIC_UPDATE) && asset_map_updated) {
     memcpy(&last_periodic_asset_update, tv, sizeof(last_periodic_asset_update));
     asset_map_updated = false;
-    dumpAssetInfo(false);
+    dumpAssetInfo();
   }
+
   Host::periodic_stats_update(tv);
 }
 
@@ -796,9 +796,11 @@ void LocalHost::offlineSetDHCPName(const char *dhcp_n) {
 
 /* *************************************** */
 
-void LocalHost::offlineSetDhcpFingerprint(char *fingerprint) {
-  /* Teoretically this info is bound to the MAC address and not to the host */
-  addDataToAssets((char *) "dhcp_fingerprint", fingerprint);
+void LocalHost::offlineSetDhcpFingerprint(const char *fingerprint) {
+  Mac *mac = getMac();
+  
+  if(mac)
+    mac->setDHCPFingerprint(fingerprint);
 }
 
 /* *************************************** */

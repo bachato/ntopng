@@ -152,11 +152,27 @@ for _, value in pairs(assets or {}) do
         date = format_utils.formatPastEpochShort(value["first_seen"]),
         timestamp = value["first_seen"]
     }
+
+    local is_online = false
+    
+    if(in_memory_mac) then
+       if(interface.getMacInfo(value["mac"]) ~= nil) then
+	  is_online = true
+       end
+    else
+       if(interface.getHostInfo(value.ip, column_ip["vlan"].id) ~= nil) then
+	  is_online = true
+       end
+    end
+    
+    record["online"] = is_online
+    
     local last_seen = tonumber(value["last_seen"])
     local date = format_utils.formatPastEpochShort(last_seen)
     if last_seen == 0 then
         date = "-"
     end
+    
     record["last_seen"] = {
         date = date,
         timestamp = last_seen

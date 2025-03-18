@@ -40,7 +40,7 @@ class Mac : public GenericHashEntry {
     char *dhcp; /* Extracted from DHCP dissection */
   } names;
 
-  char *fingerprint;
+  char *fingerprint, *dhcp_fingerprint;
   char *model;
   char *ssid;
 
@@ -53,7 +53,7 @@ class Mac : public GenericHashEntry {
   /* END Mac data: */
 
 #ifdef NTOPNG_PRO
-  void dumpAssetInfo(bool dump_last_seen);
+  void dumpAssetInfo();
 #endif
   void checkDeviceTypeFromManufacturer();
   void readDHCPCache();
@@ -144,6 +144,7 @@ class Mac : public GenericHashEntry {
   void updateHostPool(bool isInlineCall, bool firstUpdate = false);
   void inlineSetModel(const char *m);
   bool inlineSetFingerprint(const char *f);
+  void setDHCPFingerprint(const char *f);
   void inlineSetSSID(const char *s);
   void inlineSetDHCPName(const char *dhcp_name);
   inline u_int16_t get_host_pool() { return (host_pool_id); }

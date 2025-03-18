@@ -92,7 +92,7 @@ const map_table_def_columns = (columns) => {
             let ip_address = host.ip
             let icons = ''
 
-            let is_asset_online = row.last_seen.timestamp == 0 ? true : false;
+            let is_asset_online = row.online;
         
             if (!dataUtils.isEmptyOrNull(host.vlan.name)) {
                 ip_address = `${ip_address}@${host.vlan.name}`
