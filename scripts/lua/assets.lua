@@ -3,6 +3,7 @@
 --
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
+package.path = dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" .. package.path
 
 require "lua_utils"
 local page_utils = require("page_utils")

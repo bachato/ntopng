@@ -389,7 +389,8 @@ else
                 entry = page_utils.menu_entries.devices,
                 hidden = not ifs.has_macs,
                 url = '/lua/macs_stats.lua'
-            }, {entry = page_utils.menu_entries.divider}, {
+	       }, {entry = page_utils.menu_entries.divider}, {
+	       hidden = not ntop.isEnterpriseM(),
                 entry = page_utils.menu_entries.assets,
                 url = '/lua/assets.lua'
             }

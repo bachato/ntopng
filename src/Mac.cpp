@@ -511,10 +511,10 @@ void Mac::dumpAssetInfo() {
   ndpi_serialize_string_uint32(&device_json, "first_seen", first_seen);
   ndpi_serialize_string_uint32(&device_json, "last_seen", last_seen);
   ndpi_serialize_string_string(&device_json, "key", getSerializationKey(redis_key, sizeof(redis_key), true));
-  ndpi_serialize_string_uint32(&device_json, "device_type", device_type);
-  if (model)       ndpi_serialize_string_string(&device_json, "model", model);
-  if (ssid)        ndpi_serialize_string_string(&device_json, "ssid", ssid);
-  if (fingerprint) ndpi_serialize_string_string(&device_json, "fingerprint", fingerprint);
+  if(device_type != 0) ndpi_serialize_string_uint32(&device_json, "device_type", device_type);
+  if(model)            ndpi_serialize_string_string(&device_json, "model", model);
+  if(ssid)             ndpi_serialize_string_string(&device_json, "ssid", ssid);
+  if(fingerprint)      ndpi_serialize_string_string(&device_json, "fingerprint", fingerprint);
 
   if(dhcp_fingerprint)
     ndpi_serialize_string_string(&device_json, "dhcp_fingerprint", dhcp_fingerprint);

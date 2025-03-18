@@ -233,7 +233,7 @@ void LocalHost::dumpAssetInfo() {
   ndpi_serialize_string_uint64(&host_json, "last_seen", get_last_seen());
 
   if (cur_mac) {
-    ndpi_serialize_string_uint32(&host_json, "device_type", cur_mac->getDeviceType());
+    // if(cur_mac->getDeviceType() != 0 /* Unknown */) ndpi_serialize_string_uint32(&host_json, "device_type", cur_mac->getDeviceType());
     ndpi_serialize_string_string(&host_json, "mac", cur_mac->print(buf, sizeof(buf)));
     ndpi_serialize_string_string(&host_json, "manufacturer", cur_mac->get_manufacturer());
   }

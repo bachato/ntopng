@@ -4,6 +4,7 @@
 
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
+package.path = dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" .. package.path
 
 require "lua_utils"
 require "mac_utils"
@@ -81,8 +82,6 @@ for _, host_details in pairs(list or {}) do
       }}
    }
 
-   tprint(discover_utils.devtype2string(host_details["device_type"]))
-   
    url = nil
 
    rsp["host_info"][#rsp["host_info"] + 1] = {
@@ -174,6 +173,10 @@ for _, host_details in pairs(list or {}) do
       end
    end
 
+
+
+
+   
    -- Now add the info inside the json_info
    for name, value in pairs(json_info or {}) do
       local formatted_name = i18n('asset_details.' .. name)
