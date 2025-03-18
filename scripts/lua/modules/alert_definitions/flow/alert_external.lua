@@ -63,8 +63,6 @@ function external_alert.format(ifid, alert, alert_type_params)
       and alert_type_params.alerts
       and alert_type_params.alerts[tostring(flow_alert_keys.flow_alert_external)] then
       info = alert_type_params.alerts[tostring(flow_alert_keys.flow_alert_external)]
-   else
-      return res
    end
 
    -- Available fields:
