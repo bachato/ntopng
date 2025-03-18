@@ -579,6 +579,7 @@
 #endif
 #define CONST_DEFAULT_USERS_FILE "ntopng-users.conf"
 #define CONST_DEFAULT_INSTALL_DIR (DATA_DIR "/ntopng")
+#define CONST_LOCAL_BIN_DIR "/usr/local/bin"
 #if defined(__FreeBSD__)
 #define CONST_BIN_DIR "/usr/local/bin"
 #define CONST_SHARE_DIR "/usr/local/share"
