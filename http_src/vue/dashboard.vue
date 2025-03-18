@@ -157,7 +157,7 @@
 
             <!-- Rendered Components -->
             <template v-for="c in components">
-                <Box style="min-width:20rem;" :color="(c.active && c.color) || c.inactive_color" :width="c.width"
+                <Box :color="(c.active && c.color) || c.inactive_color" :width="c.width"
                     :height="c.height" :id="c.id" class="drag-item">
                     <template v-slot:box_title>
                         <div v-if="c.i18n_name" class="mb-2 modal-header">

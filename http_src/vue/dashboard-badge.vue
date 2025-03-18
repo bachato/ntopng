@@ -7,7 +7,7 @@
     <div>
         <a :href="link_url">
             <h4 class="fw-normal text-white">{{ counter }}</h4>
-            <p class="subtitle text-white text-sm text mb-0 h5">{{ name }}</p>
+            <p class="subtitle text-white text-sm text mb-0" :class="label_size">{{ name }}</p>
         </a>
     </div>
     <div class="flex-shrink-0 ms-3">
@@ -28,6 +28,7 @@ const counter = ref('')
 const name = ref('')
 const icon = ref('')
 const link_url = ref('#')
+const label_size = ref('h5')
 
 const props = defineProps({
     id: String,          /* Component ID */
@@ -62,6 +63,10 @@ function init() {
 
   if (props.params.icon) {
     icon.value = props.params.icon + ' fa-2xl';
+  }
+
+  if (props.max_width && props.max_width <= 2) {
+    label_size.value = 'h6';
   }
 
   refresh_component();
