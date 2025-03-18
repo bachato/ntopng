@@ -25,6 +25,7 @@
             "params" : {
                 "url" : "/lua/rest/v2/get/host/assets_dashboard/overview.lua",
                 "url_params" : {},
+		"icon" : "fas fa-signal",
                 "i18n_name" : "asset_details.online",
                 "link" : { "url" : "", "url_params" : {} },
                 "counter_path" : "online_asset",
@@ -39,6 +40,7 @@
             "params" : {
                 "url" : "/lua/rest/v2/get/host/assets_dashboard/overview.lua",
                 "url_params" : {},
+		"icon" : "fas fa-plug-circle-xmark",
                 "i18n_name" : "asset_details.offline",
                 "link" : { "url" : "", "url_params" : {} },
                 "counter_path" : "offline_asset",
