@@ -369,6 +369,21 @@ void ParsedFlow::swap() {
 
 /* *************************************** */
 
+u_int32_t ParsedFlow::get_private_flow_id() {
+  u_int32_t private_flow_id = 0;
+
+  if (getSIPCallId()) {
+    size_t len = strlen(getSIPCallId());
+    private_flow_id = ndpi_quick_hash((const unsigned char *) getSIPCallId(), len);
+  } else if (getDNSQueryId()) {
+    private_flow_id = getDNSQueryId();
+  }
+
+  return private_flow_id;
+}
+
+/* *************************************** */
+
 void ParsedFlow::print() {
   char buf1[32], buf2[32];
 

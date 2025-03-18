@@ -59,7 +59,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
   bpf_timeval now_tv = {0};
   Mac *srcMac = NULL, *dstMac = NULL;
   IpAddress srcIP, dstIP;
-  u_int32_t private_flow_id, unique_source_id = zflow->unique_source_id;
+  u_int32_t unique_source_id = zflow->unique_source_id;
   u_int32_t in_pkts, in_bytes, out_pkts, out_bytes;
 
 #ifdef NTOPNG_PRO
@@ -227,21 +227,9 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     
     INTERFACE_PROFILING_SECTION_ENTER("NetworkInterface::processFlow: getFlow", 0);
     
-    if (zflow->getSIPCallId()) {
-      size_t len = strlen(zflow->getSIPCallId());
-
-      private_flow_id = ndpi_quick_hash((const unsigned char *)zflow->getSIPCallId(), len);
-    } else if (zflow->getDNSQueryId()) {
-      private_flow_id = zflow->getDNSQueryId();
-    } else {
-      private_flow_id = 0;
-    }
-
-    //ntop->getTrace()->traceEvent(TRACE_NORMAL, "private_flow_id = %u", private_flow_id);
-
     /* Updating Flow */
     flow = getFlow(UNKNOWN_PKT_IFACE_IDX, srcMac, dstMac, zflow->vlan_id,
-		   zflow->observationPointId, private_flow_id,
+		   zflow->observationPointId, zflow->get_private_flow_id(),
 		   zflow->exporter_device_ip, zflow->inIndex, zflow->outIndex,
 		   NULL /* ICMPinfo */, &srcIP, &dstIP, zflow->src_port,
 		   zflow->dst_port, zflow->l4_proto, &src2dst_direction,

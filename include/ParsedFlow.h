@@ -191,6 +191,8 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   inline void setQoESrc2Dst(u_int8_t t)   { qoe.src_to_dst = t; }
   inline void setQoEDst2Src(u_int8_t t)   { qoe.dst_to_src = t; }
 
+  u_int32_t get_private_flow_id();
+
   void print();
 };
 

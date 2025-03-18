@@ -3337,18 +3337,9 @@ void NetworkInterface::pollQueuedeCompanionEvents() {
     while (dequeueFlowFromCompanion(&dequeued)) {
       Flow *flow = NULL;
       bool src2dst_direction, new_flow;
-      u_int32_t private_flow_id = 0;
-
-      /*
-       * Note: private_flow_id (e.g. DNS transaction ID) and vlan_id need to be
-       * populated in case of flows/alerts coming from external sources as otherwise
-       * correlation does not work. This seems not possible with Suricata as the
-       * DNS transaction ID is not part of the metadata, thus we need another way
-       * to handle it (TODO)
-       */
 
       flow = getFlow(UNKNOWN_PKT_IFACE_IDX, NULL /* srcMac */, NULL /* dstMac */, dequeued->vlan_id,
-                     0 /* observationPointId */, private_flow_id,
+                     0 /* observationPointId */, dequeued->get_private_flow_id(),
                      0 /* deviceIP */, 0 /* inIndex */, 1 /* outIndex */,
                      NULL /* ICMPinfo */, &dequeued->src_ip, &dequeued->dst_ip,
                      dequeued->src_port, dequeued->dst_port, dequeued->l4_proto,
@@ -3356,14 +3347,6 @@ void NetworkInterface::pollQueuedeCompanionEvents() {
                      true /* create_if_missing */, NULL, NULL);
 
       if (flow) {
-#if 0
-	char buf[128];
-	flow->print(buf, sizeof(buf));
-	ntop->getTrace()->traceEvent(TRACE_NORMAL, "Updating flow process info: [new flow: %u][src2dst_direction: %u] %s",
-				     new_flow ? 1 : 0,
-				     src2dst_direction ? 1 : 0, buf);
-#endif
-
         if (new_flow) flow->updateSeen();
 
         if (dequeued->getAdditionalFieldsJSON()) {

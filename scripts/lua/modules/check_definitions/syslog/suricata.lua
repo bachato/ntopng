@@ -263,15 +263,17 @@ function syslog_module.hooks.handleEvent(syslog_conf, message, host, priority)
       parseNetflowMetadata(event.netflow, flow)
       num_collected_flows = num_collected_flows + 1
 
+      if event.http ~= nil then
+         parseHTTPMetadata(event.http, flow)
+      elseif event.dns ~= nil then
+         parseDNSMetadata(event.dns, flow) 
+      elseif event.tls ~= nil then
+         parseTLSMetadata(event.tls, flow) 
+      end
+
+   --[[
    elseif event.event_type == "http" and event.http ~= nil then
       parseHTTPMetadata(event.http, flow)
-      num_collected_flows = num_collected_flows + 1
-
-   elseif event.event_type == "fileinfo" then
-      if event.app_proto == "http" and event.http ~= nil then
-         parseHTTPMetadata(event.http, flow)
-      end
-      parseFileInfoMetadata(event.fileinfo, flow)
       num_collected_flows = num_collected_flows + 1
 
    elseif event.event_type == "dns" and event.dns ~= nil then
@@ -280,6 +282,14 @@ function syslog_module.hooks.handleEvent(syslog_conf, message, host, priority)
 
    elseif event.event_type == "tls" and event.tls ~= nil then
       parseTLSMetadata(event.tls, flow) 
+      num_collected_flows = num_collected_flows + 1
+   --]]
+
+   elseif event.event_type == "fileinfo" then
+      if event.app_proto == "http" and event.http ~= nil then
+         parseHTTPMetadata(event.http, flow)
+      end
+      parseFileInfoMetadata(event.fileinfo, flow)
       num_collected_flows = num_collected_flows + 1
 
    elseif event.event_type == "stats" and event.stats ~= nil then
