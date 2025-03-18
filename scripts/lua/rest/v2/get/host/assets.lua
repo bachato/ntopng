@@ -126,6 +126,8 @@ for _, value in pairs(assets or {}) do
         column_ip["vlan"]["id"] = value["vlan"]
     end
 
+    local name = value["name"]
+    
     record.host_name = {
         alt_name = "",
         name = value["name"]
@@ -141,12 +143,22 @@ for _, value in pairs(assets or {}) do
         in_memory_mac = true
     end
 
+    if(name == nil) then
+       name = getDeviceName(value["mac"], true)
+    end
+    
     record["mac"] = {
         value = value["mac"],
-        name = getDeviceName(value["mac"]),
+        --name = get_symbolic_mac(value["mac"], false),
+	name = value["mac"],
         is_in_memory = in_memory_mac
     }
 
+
+    if(name ~= nil) then
+       record.host_name.name = name
+    end
+    
     record["host"] = column_ip
     record["first_seen"] = {
         date = format_utils.formatPastEpochShort(value["first_seen"]),

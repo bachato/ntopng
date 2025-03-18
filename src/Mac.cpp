@@ -179,8 +179,9 @@ void Mac::lua(lua_State *vm, bool show_details, bool asListElement) {
 
   stats->lua(vm, show_details);
 
-  lua_push_str_table_entry(vm, "fingerprint",
-                           fingerprint ? fingerprint : (char *)"");
+  lua_push_str_table_entry(vm, "fingerprint", fingerprint ? fingerprint : (char *)"");
+  if(dhcp_fingerprint) lua_push_str_table_entry(vm, "dhcp_fingerprint", dhcp_fingerprint);
+  
   lua_push_uint64_table_entry(vm, "seen.first", first_seen);
   lua_push_uint64_table_entry(vm, "seen.last", last_seen);
   lua_push_uint64_table_entry(vm, "duration", get_duration());

@@ -28,7 +28,7 @@ page_utils.print_navbar(i18n("assets"), base_url .. "?", {
         label = "<i class=\"fas fa-lg fa-home\"></i>"
     },
     {   -- redirect to dashboard if clickhouse is enabled and ntopng is pro version
-        hidden = (not ntop.isClickHouseEnabled()) and (not ntop.isPro()),
+        hidden = not (ntop.isClickHouseEnabled() and ntop.isPro()),
         active = page == "dashboard",
         page_name = "dashboard",
         label = i18n("index_page.dashboard"),

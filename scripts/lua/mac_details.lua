@@ -162,7 +162,6 @@ page_utils.print_navbar(title, url,
 )
 
 if((page == "overview") or (page == nil)) then
-
    print("<table class=\"table table-bordered table-striped\">\n")
    print("<tr><th width=35%>"..i18n("mac_address").."</th><td> "..mac)
 
@@ -177,7 +176,6 @@ if((page == "overview") or (page == nil)) then
    end
    
    print("</td>")
-
    print("<td>")
 
    print(discover.devtype2icon(mac_info.devtype) .. " ")

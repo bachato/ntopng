@@ -107,6 +107,7 @@ local function partiallyFormatInfo(res)
       end
 
       local resolved_names = {}
+
       if table.len(json_info) > 0 then
 	 resolved_names["mdns_name"] = json_info["mdns_name"]
 	 resolved_names["dhcp_name"] = json_info["dhcp_name"]
@@ -334,38 +335,36 @@ function asset_utils.insertHost(entry, ifid)
    end
 
    if hasClickHouseSupport() then
+      -- NOTE: as the asset table has been defined as ReplacingMergeTree, in case of key clashes, the new entry ovewrites the old one
       query = string.format("INSERT INTO %s " ..
 			    "(type, key, ifid, ip, mac, vlan, network, name, device_type, manufacturer, first_seen, last_seen, version, json_info) " ..
 			    "VALUES ('%s','%s', %u, '%s', '%s', %u, %u, %s, %u, %s, %u, %u, %u, '%s')",
 			    table_name, entry["type"], entry["key"], ifid,
 			    entry["ip"] or "", entry["mac"] or "",
 			    entry["vlan"] or 0, entry["network"] or 0,
-			    ternary(not isEmptyString(entry["name"]),
-				    string.format("'%s'", entry["name"]),
-				    "NULL"), entry["device_type"],
-			    ternary(not isEmptyString(manufacturer),
-				    string.format("'%s'",
-						  manufacturer),
-				    "NULL"), entry["first_seen"],
+			    ternary(not isEmptyString(entry["name"]), string.format("'%s'", entry["name"]), "NULL"),
+			    entry["device_type"],
+			    ternary(not isEmptyString(manufacturer), string.format("'%s'", manufacturer), "NULL"), entry["first_seen"],
 			    entry["last_seen"] or 0, version,
 			    entry["json_info"] or "")
    else
+      -- TODO: merge data properly in case data is already present
       query = string.format("INSERT INTO %s " ..
 			    "(type, key, ifid, ip, mac, vlan, network, name, device_type, manufacturer, first_seen, last_seen, json_info) " ..
 			    "VALUES ('%s','%s', %u, '%s','%s', %u, %u, %s, %u, %s, %u, %u, '%s') " ..
-			    "ON CONFLICT(key) DO UPDATE SET last_seen = %u, first_seen = %u;",
+			    "ON CONFLICT(key) DO UPDATE SET last_seen = %u, device_type=%u, json_info='%s';",
 			    table_name, entry["type"], entry["key"], ifid,
 			    entry["ip"], entry["mac"] or "",
 			    entry["vlan"] or 0, entry["network"] or 0,
-			    ternary(not isEmptyString(entry["name"]),
-				    string.format("'%s'", entry["name"]),
-				    "NULL"), entry["device_type"],
-			    ternary(not isEmptyString(manufacturer),
-				    string.format("'%s'",
-						  manufacturer),
-				    "NULL"), entry["first_seen"],
+			    ternary(not isEmptyString(entry["name"]),  string.format("'%s'", entry["name"]), "NULL"),
+			    entry["device_type"],
+			    ternary(not isEmptyString(manufacturer),   string.format("'%s'", manufacturer), "NULL"),
+			    entry["first_seen"],
 			    entry["last_seen"] or 0, entry["json_info"] or "",
-			    entry["last_seen"] or 0, entry["first_seen"] or 0)
+			    -- ON CONFLICT
+			    entry["last_seen"] or 0,
+			    entry["device_type"],
+			    entry["json_info"] or "")
    end
 
    return interface.alert_store_query(query)

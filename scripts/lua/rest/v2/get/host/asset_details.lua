@@ -39,23 +39,12 @@ for _, host_details in pairs(list or {}) do
 
    local network_name = ""
    local json_info = host_details.json_info or {}
-   
+
    -- Convert first and last seen to number
    local first_seen_ts = tonumber(host_details["first_seen"])
-   local last_seen_ts = tonumber(host_details["last_seen"]) 
-   local last_seen
-
-   local first_seen = formatEpoch(first_seen_ts) .. " [" ..
-      secondsToTime(os.time() - first_seen_ts) .. " " .. i18n("details.ago") .. "]"
-
-   -- Host is online if last_seen_ts is 0 
-   if last_seen_ts == 0 then
-      last_seen = "<span class='badge bg-success'>Online</span>"   
-   else
-      last_seen = formatEpoch(last_seen_ts) .. " [" ..
-	 secondsToTime(os.time() - last_seen_ts) .. " " .. i18n("details.ago") .. "]"
-   end
-
+   local last_seen_ts  = tonumber(host_details["last_seen"])
+   local last_seen = formatEpoch(last_seen_ts) .. " [" .. secondsToTime(os.time() - last_seen_ts) .. " " .. i18n("details.ago") .. "]"
+   local first_seen = formatEpoch(first_seen_ts) .. " [" .. secondsToTime(os.time() - first_seen_ts) .. " " .. i18n("details.ago") .. "]"
    local url
 
    rsp["host_name"] = host_details["name"]
@@ -68,17 +57,32 @@ for _, host_details in pairs(list or {}) do
    if interface.getMacInfo(host_details["mac"]) then
       url = mac2url(host_details["mac"])
    end
+   
+   local s = get_symbolic_mac(host_details["mac"], true)
+   
+   if(s ~= host_details["mac"]) then 
+      s = " ("..s..")"
+   end
+
+   local dtype = ""
+
+   if(host_details["device_type"] ~= "0") then
+      dtype = discover_utils.devtype2icon(host_details["device_type"]) .. " " .. discover_utils.devtype2string(host_details["device_type"])
+   end
+   
 
    rsp["host_info"][#rsp["host_info"] + 1] = {
       name = i18n("mac_address_dev_type"),
       values = {{
-            name = mac2label(host_details["mac"]),
+            name = host_details["mac"] .. s,
             url = url
 		}, {
-            name = discover_utils.devtype2icon(host_details["device_type"]) .. " " .. discover_utils.devtype2string(host_details["device_type"])
+            name = dtype
       }}
    }
 
+   tprint(discover_utils.devtype2string(host_details["device_type"]))
+   
    url = nil
 
    rsp["host_info"][#rsp["host_info"] + 1] = {
@@ -101,13 +105,13 @@ for _, host_details in pairs(list or {}) do
 
    -- Host is online, redirect to hosts page
    if last_seen_ts == 0 then
-      ip = "<a href='/lua/host_details.lua?host=" .. ip .."' data-bs-toggle='tooltip' data-bs-placement='top' title='Host Details'> " .. ip .. " <i class='fas fa-laptop'></i></a>"        
+      ip = "<a href='/lua/host_details.lua?host=" .. ip .."' data-bs-toggle='tooltip' data-bs-placement='top' title='Host Details'> " .. ip .. " <i class='fas fa-laptop'></i></a>"
    end
-   
+
    if host_details["os_type"] then
       ip = ip .. " " .. discover_utils.getOsAndIcon(host_details["os_type"])
    end
-   
+
    if host_details.is_dns_server then
       ip = ip .. " <span class='badge bg-success'>" .. i18n('asset_details.dns_server') .. "</span>"
    end
@@ -138,7 +142,7 @@ for _, host_details in pairs(list or {}) do
    }
 
    local name = host_details["name"]
-   
+
    if isEmptyString(name) then
       name = host_details["ip"]
    end
