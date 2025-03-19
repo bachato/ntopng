@@ -73,7 +73,7 @@ async function formatMessage(_row) {
 
 /* This function runs the delete code, called when apply is clicked */
 async function delete_asset() {
-  const url = `${http_prefix}/lua/rest/v2/delete/host/asset.lua`;
+  const url = `${http_prefix}/lua/pro/rest/v2/delete/host/asset.lua`;
   let serial_key = 'all';
   if (row.value && row.value.key) {
     serial_key = row.value.key;

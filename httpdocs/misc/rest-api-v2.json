@@ -7364,7 +7364,7 @@
         }
       }
     },
-    "/lua/rest/v2/delete/host/asset.lua": {
+    "/lua/pro/rest/v2/delete/host/asset.lua": {
       "get": {
         "tags": [
           "Interfaces"
@@ -10863,7 +10863,7 @@
         }
       }
     },
-    "/lua/rest/v2/get/host/inactive_asset.lua": {
+    "/lua/pro/rest/v2/get/host/inactive_asset.lua": {
       "get": {
         "tags": [
           "Hosts"

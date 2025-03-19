@@ -1,6 +1,6 @@
 {
 	"id": "assets",
-	"data_url": "lua/rest/v2/get/host/assets.lua",
+	"data_url": "lua/pro/rest/v2/get/host/assets.lua",
 	"use_current_page": false,
 	"enable_search": false,
 	"paging": false,

@@ -285,7 +285,7 @@ async function add_table_filter(opt) {
 async function load_table_filters_array() {
     let extra_params = get_extra_params_obj();
     let url_params = ntopng_url_manager.obj_to_url_params(extra_params);
-    const url = `${http_prefix}/lua/rest/v2/get/host/assets_filters.lua?${url_params}`;
+    const url = `${http_prefix}/lua/pro/rest/v2/get/host/assets_filters.lua?${url_params}`;
     let res = await ntopng_utility.http_request(url);
     host_filters_key.value = host_filters_key.value + 1
 

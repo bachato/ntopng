@@ -72,7 +72,7 @@ function server_date_to_date(date, format) {
 }
 
 async function delete_host() {
-  const url = `${http_prefix}/lua/rest/v2/delete/host/asset.lua`;
+  const url = `${http_prefix}/lua/pro/rest/v2/delete/host/asset.lua`;
   const begin_date = server_date_to_date(flat_begin_date.value.selectedDates[0]);
   const epoch_begin = ntopng_utility.get_utc_seconds(begin_date.getTime());
   const params = {
