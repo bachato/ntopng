@@ -8874,7 +8874,7 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
 	srv_ip_addr->setDhcpServer();
       }
 
-      if(ndpiFlow)
+      if(ndpiFlow && cli_host)
 	cli_host->offlineSetDhcpFingerprint(ndpiFlow->protos.dhcp.fingerprint);
     }
     break;
