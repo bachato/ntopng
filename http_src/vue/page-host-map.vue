@@ -58,7 +58,7 @@ const props = defineProps({
 const currently_selected_chart = 0
 
 const chart_type = ntopChartApex.typeChart.BUBBLE
-const rest_url = `${http_prefix}/pro/lua/rest/v2/charts/host/map.lua`
+const rest_url = `${http_prefix}/lua/pro/rest/v2/charts/host/map.lua`
 const widget_name = 'alerts-map';
 const active_filter_list = {}
 const bubble_chart = ref(null)
