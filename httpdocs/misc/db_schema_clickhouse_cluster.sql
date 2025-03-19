@@ -247,87 +247,6 @@ CREATE TABLE `engaged_active_monitoring_alerts` (
 
 @
 
-CREATE TABLE IF NOT EXISTS `flow_alerts` ON CLUSTER '$CLUSTER' (
-`rowid` UUID,
-`alert_id` UInt32 NOT NULL,
-`alert_status` UInt8 NOT NULL,
-`interface_id` UInt16 NULL,
-`tstamp` DateTime NOT NULL,
-`tstamp_end` DateTime,
-`severity` UInt8 NOT NULL,
-`score` UInt16 NOT NULL,
-`counter` UInt32 NOT NULL,
-`json` String,
-`ip_version` UInt8 NOT NULL,
-`cli_ip` String NOT NULL,
-`srv_ip` String NOT NULL,
-`cli_port` UInt16 NOT NULL,
-`srv_port` UInt16 NOT NULL,
-`vlan_id` UInt16 NOT NULL,
-`is_cli_attacker` UInt8 NOT NULL,
-`is_cli_victim` UInt8 NOT NULL,
-`is_srv_attacker` UInt8 NOT NULL,
-`is_srv_victim` UInt8 NOT NULL,
-`proto` UInt8 NOT NULL,
-`l7_proto` UInt16 NOT NULL,
-`l7_master_proto` UInt16 NOT NULL,
-`l7_cat` UInt16 NOT NULL,
-`cli_name` String,
-`srv_name` String,
-`cli_country` String,
-`srv_country` String,
-`cli_blacklisted` UInt8 NOT NULL,
-`srv_blacklisted` UInt8 NOT NULL,
-`cli2srv_bytes` UInt8 NOT NULL,
-`srv2cli_bytes` UInt8 NOT NULL,
-`cli2srv_pkts` UInt8 NOT NULL,
-`srv2cli_pkts` UInt8 NOT NULL,
-`first_seen` DateTime NOT NULL,
-`community_id` String,
-`alerts_map` String, -- An HEX bitmap of all flow statuses
-`flow_risk_bitmap` UInt64 NOT NULL,
-`user_label` String,
-`user_label_tstamp` DateTime,
-`cli_host_pool_id` UInt16,
-`srv_host_pool_id` UInt16,
-`cli_network` UInt16,
-`srv_network` UInt16,
-`info` String,
-`cli_location` UInt8,
-`srv_location` UInt8,
-`probe_ip` String,
-`input_snmp` UInt32,
-`output_snmp` UInt32,
-`alert_category` UInt8,
-`require_attention` Boolean
-) ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{database}/{table}', '{replica}') PARTITION BY toYYYYMMDD(first_seen) ORDER BY (first_seen);
-@
-ALTER TABLE `flow_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS cli_host_pool_id UInt16;
-@
-ALTER TABLE `flow_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS srv_host_pool_id UInt16;
-@
-ALTER TABLE `flow_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS cli_network UInt16;
-@
-ALTER TABLE `flow_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS srv_network UInt16;
-@
-ALTER TABLE `flow_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS info String;
-@
-ALTER TABLE `flow_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS cli_location UInt8;
-@
-ALTER TABLE `flow_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS srv_location UInt8;
-@
-ALTER TABLE `flow_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS probe_ip String;
-@
-ALTER TABLE `flow_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS input_snmp UInt32;
-@
-ALTER TABLE `flow_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS output_snmp UInt32;
-@
-ALTER TABLE `flow_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS alert_category UInt8;
-@
-ALTER TABLE `flow_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS require_attention Boolean;
-
-@
-
 CREATE TABLE IF NOT EXISTS `host_alerts` ON CLUSTER '$CLUSTER' (
 `rowid` UUID,
 `alert_id` UInt32 NOT NULL,
@@ -982,6 +901,8 @@ ON
 
 @
 
+DROP TABLE IF EXISTS `flow_alerts` ON CLUSTER '$CLUSTER';
+@
 DROP VIEW IF EXISTS `flow_alerts_view` ON CLUSTER '$CLUSTER';
 @
 CREATE VIEW IF NOT EXISTS `flow_alerts_view` ON CLUSTER '$CLUSTER' AS
