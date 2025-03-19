@@ -63,8 +63,10 @@ LocalHost::~LocalHost() {
   if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
 
+#ifdef NTOPNG_PRO
   dumpAssetInfo();
-
+#endif
+  
   if (initial_ts_point) delete (initial_ts_point);
   freeLocalHostData();
 
@@ -177,7 +179,11 @@ void LocalHost::initialize() {
     fingerprints = NULL;
 
   tcp_fingerprint_host_os = os_hint_unknown;
+
+#ifdef NTOPNG_PRO
   dumpAssetInfo();
+#endif
+  
   gettimeofday(&last_periodic_asset_update, NULL);
 }
 
@@ -267,6 +273,7 @@ void LocalHost::dumpAssetInfo() {
 void LocalHost::periodic_stats_update(const struct timeval *tv) {
   checkGatewayInfo();
 
+#ifdef NTOPNG_PRO
   /* If at least 5 minutes passed and the map was updated, dump the info */
   float diff = Utils::msTimevalDiff(tv, &last_periodic_asset_update) / 1000; /* in Sec */
 
@@ -275,7 +282,8 @@ void LocalHost::periodic_stats_update(const struct timeval *tv) {
     asset_map_updated = false;
     dumpAssetInfo();
   }
-
+#endif
+  
   Host::periodic_stats_update(tv);
 }
 
