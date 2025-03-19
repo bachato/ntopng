@@ -8,7 +8,7 @@
             "i18n_name" : "", "color" : "primary", "inactive_color" : "secondary",
             "width" : 4, "height" : 2,
             "params" : {
-                "url" : "/lua/rest/v2/get/host/assets_dashboard/overview.lua",
+                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
                 "url_params" : {},
                 "icon" : "fas fa-house-laptop",
                 "i18n_name" : "assets",
@@ -23,7 +23,7 @@
             "i18n_name" : "", "color" : "success", "inactive_color" : "secondary",
             "width" : 4, "height" : 2,
             "params" : {
-                "url" : "/lua/rest/v2/get/host/assets_dashboard/overview.lua",
+                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
                 "url_params" : {},
 		"icon" : "fas fa-signal",
                 "i18n_name" : "asset_details.online",
@@ -38,7 +38,7 @@
             "i18n_name" : "", "color" : "warning", "inactive_color" : "secondary",
             "width" : 4, "height" : 2,
             "params" : {
-                "url" : "/lua/rest/v2/get/host/assets_dashboard/overview.lua",
+                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
                 "url_params" : {},
 		"icon" : "fas fa-plug-circle-xmark",
                 "i18n_name" : "asset_details.offline",
@@ -53,7 +53,7 @@
             "i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
             "width" : 2, "height" : 2,
             "params" : {
-                "url" : "/lua/rest/v2/get/host/assets_dashboard/overview.lua",
+                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
                 "url_params" : {},
                 "i18n_name" : "asset_details.dns_servers",
                 "link" : { "url" : "", "url_params" : {} },
@@ -67,7 +67,7 @@
             "i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
             "width" : 2, "height" : 2,
             "params" : {
-                "url" : "/lua/rest/v2/get/host/assets_dashboard/overview.lua",
+                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
                 "url_params" : {},
                 "i18n_name" : "asset_details.dhcp_servers",
                 "link" : { "url" : "", "url_params" : {} },
@@ -81,7 +81,7 @@
             "i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
             "width" : 2, "height" : 2,
             "params" : {
-                "url" : "/lua/rest/v2/get/host/assets_dashboard/overview.lua",
+                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
                 "url_params" : {},
                 "i18n_name" : "asset_details.smtp_servers",
                 "link" : { "url" : "", "url_params" : {} },
@@ -95,7 +95,7 @@
             "i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
             "width" : 2, "height" : 2,
             "params" : {
-                "url" : "/lua/rest/v2/get/host/assets_dashboard/overview.lua",
+                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
                 "url_params" : {},
                 "i18n_name" : "asset_details.imap_servers",
                 "link" : { "url" : "", "url_params" : {} },
@@ -109,7 +109,7 @@
             "i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
             "width" : 2, "height" : 2,
             "params" : {
-                "url" : "/lua/rest/v2/get/host/assets_dashboard/overview.lua",
+                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
                 "url_params" : {},
                 "i18n_name" : "asset_details.pop_servers",
                 "link" : { "url" : "", "url_params" : {} },
@@ -123,7 +123,7 @@
             "i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
             "width" : 2, "height" : 2,
             "params" : {
-                "url" : "/lua/rest/v2/get/host/assets_dashboard/overview.lua",
+                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
                 "url_params" : {},
                 "i18n_name" : "asset_details.ntp_servers",
                 "link" : { "url" : "", "url_params" : {} },
@@ -138,7 +138,7 @@
             "width": 4,
             "height": 4,
             "params": {
-                "url": "/lua/rest/v2/get/host/assets_dashboard/manufacturer_distribution.lua",
+                "url": "/lua/pro/rest/v2/get/host/assets_dashboard/manufacturer_distribution.lua",
                 "url_params": {}
             }
         },
@@ -149,7 +149,7 @@
             "width": 4,
             "height": 4,
             "params": {
-                "url": "/lua/rest/v2/get/host/assets_dashboard/devices_distribution.lua",
+                "url": "/lua/pro/rest/v2/get/host/assets_dashboard/devices_distribution.lua",
                 "url_params": {}
             }
         },
@@ -162,7 +162,7 @@
             "time_window": "",
             "time_offset": "",
             "params": {
-                "url": "/lua/rest/v2/get/host/assets_dashboard/servers_overview.lua",
+                "url": "/lua/pro/rest/v2/get/host/assets_dashboard/servers_overview.lua",
                 "url_params": {},
                 "table_type": "assets",
                 "columns": [
@@ -192,7 +192,7 @@
             "width": 4,
             "height": 4,
             "params": {
-                "url": "/lua/rest/v2/get/host/assets_dashboard/oses_distribution.lua",
+                "url": "/lua/pro/rest/v2/get/host/assets_dashboard/oses_distribution.lua",
                 "url_params": {}
             }
         }
