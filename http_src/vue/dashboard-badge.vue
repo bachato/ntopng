@@ -6,7 +6,7 @@
 <div class="d-flex align-items-center justify-content-between">
     <div>
         <a :href="link_url">
-            <h4 class="fw-normal text-white">{{ counter }}</h4>
+            <h4 class="fw-normal text-white">{{ counter }}<span v-if="secondary_counter"> / {{ secondary_counter }}</span></h4>
             <p class="subtitle text-white text-sm text mb-0" :class="label_size">{{ name }}</p>
         </a>
     </div>
@@ -25,6 +25,7 @@ import NtopUtils from "../utilities/ntop-utils";
 const _i18n = (t) => i18n(t);
 
 const counter = ref('')
+const secondary_counter = ref('')
 const name = ref('')
 const icon = ref('')
 const link_url = ref('#')
@@ -90,15 +91,29 @@ async function refresh_component() {
     /* TODO handle dot-separated path for non-flat json */
     let counter_value = data[props.params.counter_path];
 
+    let has_secondary_counter = false;
+    let secondary_counter_value = '';
+    if (props.params.secondary_counter_path) {
+      has_secondary_counter = true;
+      secondary_counter_value = data[props.params.secondary_counter_path];
+    }
+
     if(props.params.counter_formatter == "no_formatting") {
        counter.value = counter_value;
+       if (has_secondary_counter) {
+         secondary_counter.value = secondary_counter_value;
+       }
     } else {
       let counter_formatter = props.params.counter_formatter;
-      if (!counter_formatter)
+      if (!counter_formatter) {
         counter_formatter = "number";
+      }
 
       let formatCounter = formatterUtils.getFormatter(counter_formatter);
-      counter.value = formatCounter(counter_value)
+      counter.value = formatCounter(counter_value);
+      if (has_secondary_counter) {
+        secondary_counter.value = formatCounter(secondary_counter_value);
+      }
 
       if (counter_value) {
         props.set_component_attr('active', true);
