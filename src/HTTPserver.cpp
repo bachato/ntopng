@@ -1569,8 +1569,7 @@ static int handle_lua_request(struct mg_connection *conn) {
     if (found) {
       LuaEngine *l;
 
-      ntop->getTrace()->traceEvent(TRACE_INFO, "[HTTP] %s [%s]",
-                                   request_info->uri, path);
+      ntop->getTrace()->traceEvent(TRACE_INFO, "[HTTP] %s [%s]", request_info->uri, path);
 
       try {
         l = new LuaEngine();

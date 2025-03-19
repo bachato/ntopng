@@ -2592,9 +2592,14 @@ char* Utils::getURL(char *url, char *buf, u_int buf_len) {
 
   if (!ntop->getPrefs()->is_pro_edition()) return (url);
 
+#if 0
   snprintf(buf, buf_len, "%s/lua/pro%s",
            ntop->get_HTTPserver()->get_scripts_dir(), &url[4]);
-
+#else
+    snprintf(buf, buf_len, "%s/lua%s",
+           ntop->get_HTTPserver()->get_scripts_dir(), &url[4]);
+#endif
+    
   ntop->fixPath(buf);
   if ((stat(buf, &s) == 0) && (S_ISREG(s.st_mode))) {
     u_int l = strlen(ntop->get_HTTPserver()->get_scripts_dir());
@@ -2602,8 +2607,10 @@ char* Utils::getURL(char *url, char *buf, u_int buf_len) {
 
     // ntop->getTrace()->traceEvent(TRACE_NORMAL, "===>>> %s", new_url);
     return (new_url);
-  } else
+  } else {
+    /* ntop->getTrace()->traceEvent(TRACE_WARNING, "===>>> Missing %s [%s]", url, buf); */
     return (url);
+  }
 }
 
 /* **************************************************** */
