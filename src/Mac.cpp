@@ -53,12 +53,11 @@ Mac::Mac(NetworkInterface *_iface, u_int8_t _mac[6])
     manuf = NULL;
 
 #ifdef MANUF_DEBUG
-  ntop->getTrace()->traceEvent(
-      TRACE_NORMAL,
-      "Assigned manufacturer [mac: %02x:%02x:%02x:%02x:%02x:%02x] "
-      "[manufacturer: %s]",
-      mac[0], mac[1], mac[2], mac[3], mac[4], mac[5],
-      manuf ? manuf : "- not available -");
+  ntop->getTrace()->traceEvent(TRACE_NORMAL,
+			       "Assigned manufacturer [mac: %02x:%02x:%02x:%02x:%02x:%02x] "
+			       "[manufacturer: %s]",
+			       mac[0], mac[1], mac[2], mac[3], mac[4], mac[5],
+			       manuf ? manuf : "- not available -");
 #endif
 
 #ifdef DEBUG
@@ -70,7 +69,7 @@ Mac::Mac(NetworkInterface *_iface, u_int8_t _mac[6])
 #endif
 
 #ifdef NTOPNG_PRO
-  dumpAssetInfo();
+  /* dumpAssetInfo(); */
 #endif
 
   updateHostPool(true /* inline with packet processing */,
@@ -87,7 +86,7 @@ Mac::~Mac() {
   if ((!broadcast_mac) && (!special_mac)) dumpToRedis();
 
 #ifdef NTOPNG_PRO
-  dumpAssetInfo();
+  /* dumpAssetInfo(); */
 #endif
 
   if (model) free(model);
@@ -493,6 +492,24 @@ void Mac::dumpToRedis() {
 /* *************************************** */
 
 #ifdef NTOPNG_PRO
+
+void Mac::dumpAssetDetails(ndpi_serializer *serializer) {
+  char buf[24];
+  const char *man = get_manufacturer();
+  
+  ndpi_serialize_string_string(serializer, "mac", Utils::formatMac(mac, buf, sizeof(buf)));
+  if(man) ndpi_serialize_string_string(serializer, "manufacturer", man);
+
+  if(device_type != 0) ndpi_serialize_string_uint32(serializer, "device_type", device_type);
+  if(model)            ndpi_serialize_string_string(serializer, "model", model);
+  if(ssid)             ndpi_serialize_string_string(serializer, "ssid", ssid);
+  if(fingerprint)      ndpi_serialize_string_string(serializer, "fingerprint", fingerprint);
+  if(dhcp_fingerprint) ndpi_serialize_string_string(serializer, "dhcp_fingerprint", dhcp_fingerprint);
+}
+
+/* *************************************** */
+
+#if 0
 void Mac::dumpAssetInfo() {
   char mac_addr[64], *mac, *json_str;
   ndpi_serializer device_json;
@@ -506,19 +523,10 @@ void Mac::dumpAssetInfo() {
 
   ndpi_init_serializer(&device_json, ndpi_serialization_format_json);
   ndpi_serialize_string_string(&device_json, "type", "mac");
-  ndpi_serialize_string_string(&device_json, "mac", mac);
-  ndpi_serialize_string_string(&device_json, "manufacturer", get_manufacturer());
   ndpi_serialize_string_uint32(&device_json, "first_seen", first_seen);
   ndpi_serialize_string_uint32(&device_json, "last_seen", last_seen);
   ndpi_serialize_string_string(&device_json, "key", getSerializationKey(redis_key, sizeof(redis_key), true));
-  if(device_type != 0) ndpi_serialize_string_uint32(&device_json, "device_type", device_type);
-  if(model)            ndpi_serialize_string_string(&device_json, "model", model);
-  if(ssid)             ndpi_serialize_string_string(&device_json, "ssid", ssid);
-  if(fingerprint)      ndpi_serialize_string_string(&device_json, "fingerprint", fingerprint);
-
-  if(dhcp_fingerprint)
-    ndpi_serialize_string_string(&device_json, "dhcp_fingerprint", dhcp_fingerprint);
-  
+  dumpAssetDetails(&device_json);
   json_str = ndpi_serializer_get_buffer(&device_json, &json_str_len);
   
   if ((json_str != NULL) && (json_str_len > 0)) {
@@ -530,6 +538,8 @@ void Mac::dumpAssetInfo() {
 
   ndpi_term_serializer(&device_json);
 }
+#endif
+
 #endif
 
 /* *************************************** */

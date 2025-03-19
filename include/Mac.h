@@ -52,9 +52,6 @@ class Mac : public GenericHashEntry {
 
   /* END Mac data: */
 
-#ifdef NTOPNG_PRO
-  void dumpAssetInfo();
-#endif
   void checkDeviceTypeFromManufacturer();
   void readDHCPCache();
   void freeMacData();
@@ -199,6 +196,10 @@ class Mac : public GenericHashEntry {
 
   inline void incNumDHCPRequests() { stats->incNumDHCPRequests(); }
   inline void incNumDHCPReplies() { stats->incNumDHCPReplies(); }
+
+#ifdef NTOPNG_PRO
+  void dumpAssetDetails(ndpi_serializer *serializer);
+#endif
 };
 
 #endif /* _MAC_H_ */

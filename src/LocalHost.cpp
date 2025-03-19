@@ -238,11 +238,8 @@ void LocalHost::dumpAssetInfo() {
   ndpi_serialize_string_uint64(&host_json, "first_seen", get_first_seen());
   ndpi_serialize_string_uint64(&host_json, "last_seen", get_last_seen());
 
-  if (cur_mac) {
-    // if(cur_mac->getDeviceType() != 0 /* Unknown */) ndpi_serialize_string_uint32(&host_json, "device_type", cur_mac->getDeviceType());
-    ndpi_serialize_string_string(&host_json, "mac", cur_mac->print(buf, sizeof(buf)));
-    ndpi_serialize_string_string(&host_json, "manufacturer", cur_mac->get_manufacturer());
-  }
+  if(cur_mac)
+    cur_mac->dumpAssetDetails(&host_json);
 
   ndpi_serialize_string_uint32(&host_json, "vlan", (u_int16_t)get_vlan_id());
   ndpi_serialize_string_uint32(&host_json, "network", (u_int32_t)get_local_network_id());
@@ -261,6 +258,8 @@ void LocalHost::dumpAssetInfo() {
 
     /* Will be polled by pro/scripts/callbacks/minute-delayed/interface/assets.lua */
     snprintf(redis_key, sizeof(redis_key), OFFLINE_LOCAL_HOSTS_MACS_QUEUE_NAME, iface->get_id());
+
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", json_str);
     ntop->getRedis()->lpush(redis_key, json_str, CONST_MAX_INACTIVE_HOSTS_MAC_QUEUE_LEN);
   }
 
