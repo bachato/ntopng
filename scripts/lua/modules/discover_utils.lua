@@ -16,7 +16,7 @@ discover.osinfo = {
     [0] = {"Unknown", ''},
     [1] = {"Linux", '<i class=\'fab fa-linux fa-lg\'></i>'},
     [2] = {"Windows", '<i class=\'fab fa-windows fa-lg\'></i>'},
-    [3] = {"MacOS", '<i class=\'fab fa-apple fa-lg\'></i>'},
+    [3] = {"macOS", '<i class=\'fab fa-apple fa-lg\'></i>'},
     [4] = {"iOS", '<i class=\'fab fa-apple fa-lg\'></i>'},
     [5] = {"Android", '<i class=\'fab fa-android fa-lg\'></i>'},
     [6] = {"LaserJET", 'LasetJET'},
