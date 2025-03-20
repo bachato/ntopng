@@ -12,7 +12,7 @@
                 "url_params" : {},
                 "icon" : "fas fa-house-laptop",
                 "i18n_name" : "assets",
-                "link" : { "url" : "", "url_params" : {} },
+                "link" : { "url" : "/lua/assets.lua", "url_params" : { } },
                 "counter_path" : "assets",
                 "counter_formatter" : "number"
             }
@@ -27,7 +27,7 @@
                 "url_params" : {},
 		"icon" : "fas fa-signal",
                 "i18n_name" : "asset_details.online",
-                "link" : { "url" : "", "url_params" : {} },
+                "link" : { "url" : "/lua/assets.lua", "url_params" : { "status": 0 } },
                 "counter_path" : "online_asset",
                 "counter_formatter" : "number"
             }
@@ -42,7 +42,7 @@
                 "url_params" : {},
 		"icon" : "fas fa-plug-circle-xmark",
                 "i18n_name" : "asset_details.offline",
-                "link" : { "url" : "", "url_params" : {} },
+                "link" : { "url" : "/lua/assets.lua", "url_params" : { "status": 1 } },
                 "counter_path" : "offline_asset",
                 "counter_formatter" : "number"
             }
@@ -56,9 +56,11 @@
                 "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
                 "url_params" : {},
                 "i18n_name" : "asset_details.dns_servers",
-                "link" : { "url" : "", "url_params" : {} },
+                "link" : { "url" : "/lua/assets.lua", "url_params" : { "server_type" : 0 } },
                 "counter_path" : "online_dns_servers",
                 "secondary_counter_path" : "dns_servers",
+		"i18n_counter_title" : "asset_details.online",
+		"i18n_secondary_counter_title" : "total",
                 "counter_formatter" : "number"
             }
         },
@@ -71,54 +73,11 @@
                 "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
                 "url_params" : {},
                 "i18n_name" : "asset_details.dhcp_servers",
-                "link" : { "url" : "", "url_params" : {} },
+                "link" : { "url" : "/lua/assets.lua", "url_params" : { "server_type" : 1 } },
                 "counter_path" : "online_dhcp_servers",
                 "secondary_counter_path" : "dhcp_servers",
-                "counter_formatter" : "number"
-            }
-        },
-        {
-            "component" : "badge",
-            "id" : "smtp_server_count",
-            "i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
-            "width" : 2, "height" : 2,
-            "params" : {
-                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
-                "url_params" : {},
-                "i18n_name" : "asset_details.smtp_servers",
-                "link" : { "url" : "", "url_params" : {} },
-                "counter_path" : "online_smtp_servers",
-                "secondary_counter_path" : "smtp_servers",
-                "counter_formatter" : "number"
-            }
-        },
-        {
-            "component" : "badge",
-            "id" : "imap_server_count",
-            "i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
-            "width" : 2, "height" : 2,
-            "params" : {
-                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
-                "url_params" : {},
-                "i18n_name" : "asset_details.imap_servers",
-                "link" : { "url" : "", "url_params" : {} },
-                "counter_path" : "online_imap_servers",
-                "secondary_counter_path" : "imap_servers",
-                "counter_formatter" : "number"
-            }
-        },
-        {
-            "component" : "badge",
-            "id" : "pop_server_count",
-            "i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
-            "width" : 2, "height" : 2,
-            "params" : {
-                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
-                "url_params" : {},
-                "i18n_name" : "asset_details.pop_servers",
-                "link" : { "url" : "", "url_params" : {} },
-                "counter_path" : "online_pop_servers",
-                "secondary_counter_path" : "pop_servers",
+		"i18n_counter_title" : "asset_details.online",
+		"i18n_secondary_counter_title" : "total",
                 "counter_formatter" : "number"
             }
         },
@@ -131,9 +90,62 @@
                 "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
                 "url_params" : {},
                 "i18n_name" : "asset_details.ntp_servers",
-                "link" : { "url" : "", "url_params" : {} },
+                "link" : { "url" : "/lua/assets.lua", "url_params" : { "server_type" : 3 } },
                 "counter_path" : "online_ntp_servers",
                 "secondary_counter_path" : "ntp_servers",
+		"i18n_counter_title" : "asset_details.online",
+		"i18n_secondary_counter_title" : "total",
+                "counter_formatter" : "number"
+            }
+        },
+        {
+            "component" : "badge",
+            "id" : "smtp_server_count",
+            "i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
+            "width" : 2, "height" : 2,
+            "params" : {
+                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
+                "url_params" : {},
+                "i18n_name" : "asset_details.smtp_servers",
+                "link" : { "url" : "/lua/assets.lua", "url_params" : { "server_type" : 2 } },
+                "counter_path" : "online_smtp_servers",
+                "secondary_counter_path" : "smtp_servers",
+		"i18n_counter_title" : "asset_details.online",
+		"i18n_secondary_counter_title" : "total",
+                "counter_formatter" : "number"
+            }
+        },
+        {
+            "component" : "badge",
+            "id" : "imap_server_count",
+            "i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
+            "width" : 2, "height" : 2,
+            "params" : {
+                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
+                "url_params" : {},
+                "i18n_name" : "asset_details.imap_servers",
+                "link" : { "url" : "/lua/assets.lua", "url_params" : { "server_type" : 4 } },
+                "counter_path" : "online_imap_servers",
+                "secondary_counter_path" : "imap_servers",
+		"i18n_counter_title" : "asset_details.online",
+		"i18n_secondary_counter_title" : "total",
+                "counter_formatter" : "number"
+            }
+        },
+        {
+            "component" : "badge",
+            "id" : "pop_server_count",
+            "i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
+            "width" : 2, "height" : 2,
+            "params" : {
+                "url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
+                "url_params" : {},
+                "i18n_name" : "asset_details.pop_servers",
+                "link" : { "url" : "/lua/assets.lua", "url_params" : { "server_type" : 5 } },
+                "counter_path" : "online_pop_servers",
+                "secondary_counter_path" : "pop_servers",
+		"i18n_counter_title" : "asset_details.online",
+		"i18n_secondary_counter_title" : "total",
                 "counter_formatter" : "number"
             }
         },
