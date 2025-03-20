@@ -259,7 +259,7 @@ void LocalHost::dumpAssetInfo() {
     /* Will be polled by pro/scripts/callbacks/minute-delayed/interface/assets.lua */
     snprintf(redis_key, sizeof(redis_key), OFFLINE_LOCAL_HOSTS_MACS_QUEUE_NAME, iface->get_id());
 
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", json_str);
+    ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s", json_str);
     ntop->getRedis()->lpush(redis_key, json_str, CONST_MAX_INACTIVE_HOSTS_MAC_QUEUE_LEN);
   }
 
