@@ -233,6 +233,10 @@ class LocalHost : public Host {
   
   virtual void setOS(OSType _os, OSLearningMode mode);
   void setTCPfingerprint(char *tcp_fingerprint, enum operating_system_hint os);
+
+  inline bool isAssetUpdated() {
+    return(asset_map_updated || (mac && mac->isAssetUpdated()));
+  }  
 };
 
 #endif /* _LOCAL_HOST_H_ */

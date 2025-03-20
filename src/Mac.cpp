@@ -34,7 +34,7 @@ Mac::Mac(NetworkInterface *_iface, u_int8_t _mac[6])
   source_mac = false, fingerprint = NULL;
   bridge_seen_iface_id = 0, lockDeviceTypeChanges = false;
   memset(&names, 0, sizeof(names));
-  device_type = device_unknown;
+  device_type = device_unknown, asset_map_updated = true;
   host_pool_id = NO_HOST_POOL_ID;
 #ifdef NTOPNG_PRO
   captive_portal_notified = 0;
@@ -68,10 +68,6 @@ Mac::Mac(NetworkInterface *_iface, u_int8_t _mac[6])
                                iface->getNumL2Devices());
 #endif
 
-#ifdef NTOPNG_PRO
-  /* dumpAssetInfo(); */
-#endif
-
   updateHostPool(true /* inline with packet processing */,
                  true /* first inc */);
 }
@@ -84,10 +80,6 @@ Mac::~Mac() {
 
   /* Serialize Mac before shutdown */
   if ((!broadcast_mac) && (!special_mac)) dumpToRedis();
-
-#ifdef NTOPNG_PRO
-  /* dumpAssetInfo(); */
-#endif
 
   if (model) free(model);
   if (ssid) free(ssid);
@@ -359,6 +351,7 @@ void Mac::inlineSetModel(const char *the_model) {
 bool Mac::inlineSetFingerprint(const char *f) {
   if (!fingerprint && f) {
     fingerprint = strdup(f);
+    asset_map_updated = true;
     return (true);
   }
 
@@ -368,14 +361,15 @@ bool Mac::inlineSetFingerprint(const char *f) {
 /* *************************************** */
 
 void Mac::inlineSetSSID(const char *s) {
-  if (!ssid && s && (ssid = strdup(s))) setDeviceType(device_wifi);
+  if (!ssid && s && (ssid = strdup(s)))
+    setDeviceType(device_wifi);
 }
 
 /* *************************************** */
 
 void Mac::inlineSetDHCPName(const char *dhcp_name) {
   if (!names.dhcp && dhcp_name && (names.dhcp = strdup(dhcp_name)))
-    ;
+    asset_map_updated = true;
 }
 
 /* *************************************** */
@@ -493,52 +487,25 @@ void Mac::dumpToRedis() {
 
 #ifdef NTOPNG_PRO
 
-void Mac::dumpAssetDetails(ndpi_serializer *serializer) {
+void Mac::dumpAssetMac(ndpi_serializer *serializer) {
   char buf[24];
   const char *man = get_manufacturer();
   
   ndpi_serialize_string_string(serializer, "mac", Utils::formatMac(mac, buf, sizeof(buf)));
   if(man) ndpi_serialize_string_string(serializer, "manufacturer", man);
 
+}
+
+void Mac::dumpAssetInfo(ndpi_serializer *serializer) {
   if(device_type != 0) ndpi_serialize_string_uint32(serializer, "device_type", device_type);
   if(model)            ndpi_serialize_string_string(serializer, "model", model);
   if(ssid)             ndpi_serialize_string_string(serializer, "ssid", ssid);
   if(fingerprint)      ndpi_serialize_string_string(serializer, "fingerprint", fingerprint);
   if(dhcp_fingerprint) ndpi_serialize_string_string(serializer, "dhcp_fingerprint", dhcp_fingerprint);
+  if(names.dhcp)       ndpi_serialize_string_string(serializer, "dhcp_name", names.dhcp);
+
+  asset_map_updated = false;
 }
-
-/* *************************************** */
-
-#if 0
-void Mac::dumpAssetInfo() {
-  char mac_addr[64], *mac, *json_str;
-  ndpi_serializer device_json;
-  u_int32_t json_str_len = 0;
-  char redis_key[64];
-
-  if ((!special_mac) && ntop->getRedis() && ntop->getPrefs()->is_enterprise_m_edition())
-    return;
-      
-  mac = print(mac_addr, sizeof(mac_addr));
-
-  ndpi_init_serializer(&device_json, ndpi_serialization_format_json);
-  ndpi_serialize_string_string(&device_json, "type", "mac");
-  ndpi_serialize_string_uint32(&device_json, "first_seen", first_seen);
-  ndpi_serialize_string_uint32(&device_json, "last_seen", last_seen);
-  ndpi_serialize_string_string(&device_json, "key", getSerializationKey(redis_key, sizeof(redis_key), true));
-  dumpAssetDetails(&device_json);
-  json_str = ndpi_serializer_get_buffer(&device_json, &json_str_len);
-  
-  if ((json_str != NULL) && (json_str_len > 0)) {
-    /* Will be polled by pro/scripts/callbacks/minute-delayed/interface/assets.lua */
-    
-    snprintf(redis_key, sizeof(redis_key), OFFLINE_LOCAL_HOSTS_MACS_QUEUE_NAME, iface->get_id());
-    ntop->getRedis()->lpush(redis_key, json_str, CONST_MAX_INACTIVE_HOSTS_MAC_QUEUE_LEN);
-  }
-
-  ndpi_term_serializer(&device_json);
-}
-#endif
 
 #endif
 

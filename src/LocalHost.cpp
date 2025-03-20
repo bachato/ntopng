@@ -112,13 +112,12 @@ void LocalHost::set_hash_entry_state_idle() {
 
 /* *************************************** */
 
-/* NOTE: Host::initialize will be called by the constructor after the Host
- * initializator */
+/* NOTE: Host::initialize will be called by the constructor after the Host initialization */
 void LocalHost::initialize() {
   char buf[64], host[96], rsp[256];
+  
   stats = allocateStats();
-  updateHostPool(true /* inline with packet processing */,
-                 true /* first inc */);
+  updateHostPool(true /* inline with packet processing */, true /* first inc */);
 
   local_network_id = -1;
   os_detail = NULL;
@@ -129,8 +128,7 @@ void LocalHost::initialize() {
   systemHost = ip.isLocalInterfaceAddress();
 
   /* Clone the initial point. It will be written to the timeseries DB to
-   * address the first point problem
-   * (https://github.com/ntop/ntopng/issues/2184). */
+   * address the first point problem (https://github.com/ntop/ntopng/issues/2184). */
   initial_ts_point = new (std::nothrow) LocalHostStats(*(LocalHostStats *)stats);
   initialization_time = time(NULL);
 
@@ -138,9 +136,8 @@ void LocalHost::initialize() {
   snprintf(host, sizeof(host), "%s@%u", strIP, vlan_id);
 
   if (ntop->getPrefs()->is_dns_resolution_enabled()) {
-    if (isBroadcastHost() || isMulticastHost() ||
-        (isIPv6() &&
-         ((strncmp(strIP, "ff0", 3) == 0) || (strncmp(strIP, "fe80", 4) == 0))))
+    if (isBroadcastHost() || isMulticastHost()
+	|| (isIPv6() && ((strncmp(strIP, "ff0", 3) == 0) || (strncmp(strIP, "fe80", 4) == 0))))
       ;
     else {
       ntop->getRedis()->getAddress(strIP, rsp, sizeof(rsp), true);
@@ -195,90 +192,18 @@ void LocalHost::deferredInitialization() {
 
 /* *************************************** */
 
-#ifdef NTOPNG_PRO
-void LocalHost::dumpAssetInfo() {
-  /* Return in case the preference is disabled */
-  if ((!ntop->getPrefs()->is_enterprise_m_edition()) || (!ntop->getPrefs()->isAssetsCollectionEnabled())) {
-#ifdef NTOPNG_DEBUG
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Assets Collection Disabled, please enable it from the Preferences.");
-#endif
-    return;
-  }
-  /* Remove the key from the hash, used to get the offline hosts */
-  /* Exclude the multicast/broadcast addresses */
-  if (!ntop->getRedis() || !isLocalUnicastHost()) return;
-
-  /* Exclude local-link fe80::/10, marked as private */
-  if (isIPv6() && isPrivateHost()) return;
-
-  Mac *cur_mac = getMac();
-  /* In case the MAC is NULL or the MAC is a special */
-  /* address or a broadcast address do not include it */
-  if (!cur_mac || cur_mac->isSpecialMac() || cur_mac->isBroadcast()) return;
-
-  char key[128], buf[64], *serialization_key = NULL, *json_str = NULL;
-  ndpi_serializer host_json;
-  u_int32_t json_str_len = 0;
-
-#ifdef NTOPNG_DEBUG
-  cur_mac->print(buf, sizeof(buf));
-  ntop->getTrace()->traceEvent(TRACE_NORMAL,
-			       "Adding Host %s to Assets [Ifid: %d][VLAN: %d][MAC: %s]",
-			       ip.print(buf, sizeof(buf)),
-			       iface->get_id(),
-			       vlan_id,
-			       buf);
-#endif
-
-  ndpi_init_serializer(&host_json, ndpi_serialization_format_json);
-
-  ndpi_serialize_string_string(&host_json, "type", "host");
-  ndpi_serialize_string_string(&host_json, "ip", ip.print(buf, sizeof(buf)));
-
-  ndpi_serialize_string_uint64(&host_json, "first_seen", get_first_seen());
-  ndpi_serialize_string_uint64(&host_json, "last_seen", get_last_seen());
-
-  if(cur_mac)
-    cur_mac->dumpAssetDetails(&host_json);
-
-  ndpi_serialize_string_uint32(&host_json, "vlan", (u_int16_t)get_vlan_id());
-  ndpi_serialize_string_uint32(&host_json, "network", (u_int32_t)get_local_network_id());
-  ndpi_serialize_string_string(&host_json, "name", get_name(buf, sizeof(buf), false));
-
-  serialization_key = getSerializationKey(key, sizeof(key), true);
-
-  ndpi_serialize_string_string(&host_json, "key", serialization_key);
-
-  /* Now dump the json_info field */
-  dumpAssetJson(&host_json);
-
-  json_str = ndpi_serializer_get_buffer(&host_json, &json_str_len);
-  if ((json_str != NULL) && (json_str_len > 0)) {
-    char redis_key[64];
-
-    /* Will be polled by pro/scripts/callbacks/minute-delayed/interface/assets.lua */
-    snprintf(redis_key, sizeof(redis_key), OFFLINE_LOCAL_HOSTS_MACS_QUEUE_NAME, iface->get_id());
-
-    ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s", json_str);
-    ntop->getRedis()->lpush(redis_key, json_str, CONST_MAX_INACTIVE_HOSTS_MAC_QUEUE_LEN);
-  }
-
-  ndpi_term_serializer(&host_json);
-}
-#endif
-
-/* *************************************** */
-
 void LocalHost::periodic_stats_update(const struct timeval *tv) {
   checkGatewayInfo();
 
 #ifdef NTOPNG_PRO
-  /* If at least 5 minutes passed and the map was updated, dump the info */
+  /* If at least CONST_ASSETS_PERIODIC_UPDATE are past and the map was updated, dump the info */
   float diff = Utils::msTimevalDiff(tv, &last_periodic_asset_update) / 1000; /* in Sec */
+  Mac *cur_mac = getMac();
 
+  if(cur_mac) asset_map_updated |= cur_mac->isAssetUpdated();
+  
   if ((diff > CONST_ASSETS_PERIODIC_UPDATE) && asset_map_updated) {
     memcpy(&last_periodic_asset_update, tv, sizeof(last_periodic_asset_update));
-    asset_map_updated = false;
     dumpAssetInfo();
   }
 #endif
@@ -859,12 +784,16 @@ void LocalHost::setResolvedName(const char *resolved_name) {
 
 void LocalHost::setTCPfingerprint(char *_tcp_fingerprint,
 				  enum operating_system_hint os) {
+
+  if(tcp_fingerprint != NULL) return; /* Already set */
+  
   if (_tcp_fingerprint && _tcp_fingerprint[0] != '\0')
     addDataToAssets((char *) "tcp_fingerprint", (char *) _tcp_fingerprint);
+  
   if(tcp_fingerprint_host_os == os_hint_unknown) {
     /* Not yet set the host fingerprint */
     OSType os_type = Utils::OShint2OSType(os);
-
+    
     if(os_type != os_unknown)
       setOS(os_type, os_learning_tcp_fingerprint);
 
@@ -872,7 +801,6 @@ void LocalHost::setTCPfingerprint(char *_tcp_fingerprint,
 
     if(tcp_fingerprint == NULL)
       tcp_fingerprint = strdup(_tcp_fingerprint);
-
   } else if((os != os_hint_unknown) && (tcp_fingerprint_host_os != os)) {
     char buf[64];
 
@@ -890,12 +818,13 @@ void LocalHost::setTCPfingerprint(char *_tcp_fingerprint,
 
 void LocalHost::setOS(OSType _os, OSLearningMode mode) {
   if((_os != os_unknown) && (getOS() != _os)) {
-    os_learning[mode] = _os;
-
     char buf[8];
+    
+    os_learning[mode] = _os;
+    
     snprintf(buf, sizeof(buf), "%d", _os);
-    addDataToAssets((char *) "os_type", buf);
 
+    addDataToAssets((char *) "os_type", buf);
     Host::setOS(_os, mode);
   }
 }
@@ -913,11 +842,26 @@ bool LocalHost::addDataToAssets(char *_field, char *_value) {
   if (_field && _field[0] != '\0' && _value && _value[0] != '\0') {
     std::string field = _field;
     std::string value = _value;
+    std::map<std::string, std::string>::iterator it = asset_map.find(field);
 
+    if((it != asset_map.end()) && (it->second == value)) {
+#ifdef ASSET_TRACE
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "[ASSET] Skipping (already preent) %s=%s", _field, _value);
+#endif
+
+      return false;
+    }
+    
     asset_map[field] = value;
+
+#ifdef ASSET_TRACE
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[ASSET] Adding %s=%s", _field, _value);
+#endif
+
     asset_map_updated = true; /* Next time dump data */
     return true;
   }
+  
   return false;
 }
 
@@ -928,6 +872,10 @@ bool LocalHost::removeDataFromAssets(char *field) {
   if (!ntop->getPrefs()->isAssetsCollectionEnabled()) return false;
 
   if (asset_map.size() > 0 && field && field[0] != '\0') {
+#ifdef ASSET_TRACE
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[ASSET] Removing %s", field);
+#endif
+
     asset_map.erase(field);
     asset_map_updated = true; /* Next time dump data */
     return true;
@@ -938,14 +886,92 @@ bool LocalHost::removeDataFromAssets(char *field) {
 /* *************************************** */
 
 void LocalHost::dumpAssetJson(ndpi_serializer *serializer) {
-  /* Check for the map size */
-  if (asset_map.size() == 0)
-    return;
-
+  Mac *cur_mac = getMac();
+  
   ndpi_serialize_start_of_block(serializer, "json_info"); /* Custom fields block */
-  for(std::map<std::string, std::string>::iterator it = asset_map.begin(); it != asset_map.end(); it++) {
-    ndpi_serialize_string_string(serializer, it->first.c_str(), it->second.c_str());
-  }
 
+  for(std::map<std::string, std::string>::iterator it = asset_map.begin(); it != asset_map.end(); it++)
+    ndpi_serialize_string_string(serializer, it->first.c_str(), it->second.c_str());  
+
+  if(cur_mac) cur_mac->dumpAssetInfo(serializer);
+  
   ndpi_serialize_end_of_block(serializer);
 }
+
+/* *************************************** */
+
+#ifdef NTOPNG_PRO
+void LocalHost::dumpAssetInfo() {
+  /* Return in case the preference is disabled */
+  if ((!ntop->getPrefs()->is_enterprise_m_edition()) || (!ntop->getPrefs()->isAssetsCollectionEnabled())) {
+#ifdef NTOPNG_DEBUG
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Assets Collection Disabled, please enable it from the Preferences.");
+#endif
+    return;
+  }
+  /* Remove the key from the hash, used to get the offline hosts */
+  /* Exclude the multicast/broadcast addresses */
+  if (!ntop->getRedis() || !isLocalUnicastHost()) return;
+
+  /* Exclude local-link fe80::/10, marked as private */
+  if (isIPv6() && isPrivateHost()) return;
+
+  Mac *cur_mac = getMac();
+  /* In case the MAC is NULL or the MAC is a special */
+  /* address or a broadcast address do not include it */
+  if (!cur_mac || cur_mac->isSpecialMac() || cur_mac->isBroadcast()) return;
+
+  char key[128], buf[64], *serialization_key = NULL, *json_str = NULL;
+  ndpi_serializer host_json;
+  u_int32_t json_str_len = 0;
+
+#ifdef NTOPNG_DEBUG
+  cur_mac->print(buf, sizeof(buf));
+  ntop->getTrace()->traceEvent(TRACE_NORMAL,
+			       "Adding Host %s to Assets [Ifid: %d][VLAN: %d][MAC: %s]",
+			       ip.print(buf, sizeof(buf)),
+			       iface->get_id(),
+			       vlan_id,
+			       buf);
+#endif
+
+  ndpi_init_serializer(&host_json, ndpi_serialization_format_json);
+
+  ndpi_serialize_string_string(&host_json, "type", "host");
+  ndpi_serialize_string_string(&host_json, "ip", ip.print(buf, sizeof(buf)));
+
+  ndpi_serialize_string_uint64(&host_json, "first_seen", get_first_seen());
+  ndpi_serialize_string_uint64(&host_json, "last_seen", get_last_seen());
+
+  if(cur_mac) cur_mac->dumpAssetMac(&host_json);
+
+  ndpi_serialize_string_uint32(&host_json, "vlan", (u_int16_t)get_vlan_id());
+  ndpi_serialize_string_uint32(&host_json, "network", (u_int32_t)get_local_network_id());
+  ndpi_serialize_string_string(&host_json, "name", get_name(buf, sizeof(buf), false));
+
+  serialization_key = getSerializationKey(key, sizeof(key), true);
+
+  ndpi_serialize_string_string(&host_json, "key", serialization_key);
+
+  /* Now dump the json_info field */
+  dumpAssetJson(&host_json);
+
+  json_str = ndpi_serializer_get_buffer(&host_json, &json_str_len);
+  if ((json_str != NULL) && (json_str_len > 0)) {
+    char redis_key[64];
+
+    /* Will be polled by pro/scripts/callbacks/minute-delayed/interface/assets.lua */
+    snprintf(redis_key, sizeof(redis_key), OFFLINE_LOCAL_HOSTS_MACS_QUEUE_NAME, iface->get_id());
+
+#ifdef ASSET_TRACE
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s [updated: %s]", json_str, asset_map_updated ? "TRUE" : "FALSE");
+#endif
+    ntop->getRedis()->lpush(redis_key, json_str, CONST_MAX_INACTIVE_HOSTS_MAC_QUEUE_LEN);
+  }
+
+  ndpi_term_serializer(&host_json);
+
+  asset_map_updated = false;
+}
+#endif
+

@@ -429,6 +429,7 @@ local lang = {
     ["mail_server"] = "Mail Server",
     ["mail_servers"] = "Mail Servers",
     ["manufacturer_distribution"] = "Manufacturer Distribution",
+    ["model"] = "Model",
     ["mdns_name"] = "MDNS",
     ["mdns_txt_name"] = "MDNS TXT",
     ["netbios_name"] = "NETBios",

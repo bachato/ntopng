@@ -30,7 +30,7 @@ class Mac : public GenericHashEntry {
   u_int8_t mac[6];
   u_int16_t host_pool_id;
   u_int32_t bridge_seen_iface_id; /* != 0 for bridge interfaces only */
-  bool special_mac, lockDeviceTypeChanges, broadcast_mac;
+  bool special_mac, lockDeviceTypeChanges, broadcast_mac, asset_map_updated;
   bool stats_reset_requested, data_delete_requested;
   const char *manuf;
   MacStats *stats, *stats_shadow;
@@ -115,6 +115,7 @@ class Mac : public GenericHashEntry {
     /* Called by ntopng when it can guess a device type during normal packet
      * processing */
     if (!lockDeviceTypeChanges) device_type = devtype;
+    asset_map_updated = true;
   }
   inline void forceDeviceType(DeviceType devtype) {
     /* Called when a user, from the GUI, wants to change the device type and
@@ -195,10 +196,12 @@ class Mac : public GenericHashEntry {
   inline bool isBroadcast() { return (broadcast_mac); }
 
   inline void incNumDHCPRequests() { stats->incNumDHCPRequests(); }
-  inline void incNumDHCPReplies() { stats->incNumDHCPReplies(); }
+  inline void incNumDHCPReplies()  { stats->incNumDHCPReplies();  }
+  inline bool isAssetUpdated()     { return(asset_map_updated);   }
 
 #ifdef NTOPNG_PRO
-  void dumpAssetDetails(ndpi_serializer *serializer);
+  void dumpAssetMac(ndpi_serializer *serializer);
+  void dumpAssetInfo(ndpi_serializer *serializer);
 #endif
 };
 
