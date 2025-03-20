@@ -6,7 +6,7 @@
 <div class="d-flex align-items-center justify-content-between">
     <div>
         <a :href="link_url">
-            <h4 class="fw-normal text-white">{{ counter }}<span v-if="secondary_counter"> / {{ secondary_counter }}</span></h4>
+            <h4 class="fw-normal text-white"><span :title="counter_title">{{ counter }}</span><span v-if="secondary_counter" :title="secondary_counter_title"> / {{ secondary_counter }}</span></h4>
             <p class="subtitle text-white text-sm text mb-0" :class="label_size">{{ name }}</p>
         </a>
     </div>
@@ -26,6 +26,8 @@ const _i18n = (t) => i18n(t);
 
 const counter = ref('')
 const secondary_counter = ref('')
+const counter_title = ref('')
+const secondary_counter_title = ref('')
 const name = ref('')
 const icon = ref('')
 const link_url = ref('#')
@@ -90,12 +92,18 @@ async function refresh_component() {
 
     /* TODO handle dot-separated path for non-flat json */
     let counter_value = data[props.params.counter_path];
+    if (props.params.i18n_counter_title) {
+      counter_title.value = _i18n(props.params.i18n_counter_title);
+    }
 
     let has_secondary_counter = false;
     let secondary_counter_value = '';
     if (props.params.secondary_counter_path) {
       has_secondary_counter = true;
       secondary_counter_value = data[props.params.secondary_counter_path];
+      if (props.params.i18n_secondary_counter_title) {
+        secondary_counter_title.value = _i18n(props.params.i18n_secondary_counter_title);
+      }
     }
 
     if(props.params.counter_formatter == "no_formatting") {
