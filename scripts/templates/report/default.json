@@ -44,7 +44,7 @@
 		"width" : 4,
 		"height" : 2,
 		"params" : {
-			"url" : "/lua/rest/v2/get/db/stats.lua",
+			"url" : "/lua/pro/rest/v2/get/db/stats.lua",
 			"url_params" : {
 				"type" : "summary"
 			},
@@ -62,7 +62,7 @@
 		"width" : 4,
 		"height" : 2,
 		"params" : {
-			"url" : "/lua/rest/v2/get/db/stats.lua",
+			"url" : "/lua/pro/rest/v2/get/db/stats.lua",
 			"url_params" : {
 				"type" : "summary"
 			},
@@ -80,7 +80,7 @@
 		"width" : 4,
 		"height" : 2,
 		"params" : {
-			"url" : "/lua/rest/v2/get/db/stats.lua",
+			"url" : "/lua/pro/rest/v2/get/db/stats.lua",
 			"url_params" : {
 				"type" : "summary"
 			},
