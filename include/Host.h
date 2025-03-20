@@ -194,9 +194,7 @@ class Host : public GenericHashEntry,
   inline bool isBroadcastDomainHost() const {
     return (is_in_broadcast_domain ? true : false);
   };
-  inline bool serializeByMac() const {
-    return (isLocalHost() && iface->serializeLbdHostsAsMacs());
-  }
+  virtual bool serializeByMac() const { return(false); }
   inline bool isDHCPHost() const { return (is_dhcp_host ? true : false); };
   inline bool isCrawlerBotScannerHost() const {
     return (is_crawler_bot_scanner ? true : false);

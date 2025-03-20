@@ -62,19 +62,17 @@ bool BroadcastDomains::addAddress(IpAddress *ipa, int network_bits) {
   if (!inline_broadcast_domains) return (false);
 
   if (next_domain_id == ((u_int16_t)-1)) {
-    ntop->getTrace()->traceEvent(
-        TRACE_WARNING, "Too many broadcast domains defined on interface %s",
-        iface->get_name());
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Too many broadcast domains defined on interface %s",
+				 iface->get_name());
     return (false);
   }
 
-  if ((addr_node = inline_broadcast_domains->match(ipa, network_bits)) !=
-      NULL) {
+  if ((addr_node = inline_broadcast_domains->match(ipa, network_bits)) != NULL) {
     domain_id = ndpi_patricia_get_node_u64(addr_node);
-
+    
     /* Already exists, only increment the hits */
     domains_info[domain_id].hits++;
-
+    
 #ifdef DEBUG_BROADCAST_DOMAINS
     {
       char buf[128];
@@ -85,7 +83,7 @@ bool BroadcastDomains::addAddress(IpAddress *ipa, int network_bits) {
                                    domains_info[domain_id].hits);
     }
 #endif
-
+    
     return (false);
   }
 
@@ -170,8 +168,7 @@ bool BroadcastDomains::isLocalBroadcastDomain(IpAddress *ipa,
 
 bool BroadcastDomains::isLocalBroadcastDomainHost(Host *h,
                                                   bool isInlineCall) {
-  AddressTree *cur_tree =
-      isInlineCall ? inline_broadcast_domains : broadcast_domains;
+  AddressTree *cur_tree = isInlineCall ? inline_broadcast_domains : broadcast_domains;
 
   if (cur_tree && h && h->isIPv4() /* IPv6 not handled */)
     return h->match(cur_tree);

@@ -12,6 +12,7 @@ discover.debug = false
 
 discover.progress_string = "discovery.progess"
 
+-- Keep in sync with OSType (ntop_typedefs.h)
 discover.osinfo = {
     [0] = {"Unknown", ''},
     [1] = {"Linux", '<i class=\'fab fa-linux fa-lg\'></i>'},

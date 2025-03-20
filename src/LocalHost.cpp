@@ -785,7 +785,8 @@ void LocalHost::setResolvedName(const char *resolved_name) {
 void LocalHost::setTCPfingerprint(char *_tcp_fingerprint,
 				  enum operating_system_hint os) {
 
-  if(tcp_fingerprint != NULL) return; /* Already set */
+  if((tcp_fingerprint != NULL) && (strcmp(_tcp_fingerprint, tcp_fingerprint) == 0))
+    return; /* Already set */
   
   if (_tcp_fingerprint && _tcp_fingerprint[0] != '\0')
     addDataToAssets((char *) "tcp_fingerprint", (char *) _tcp_fingerprint);
@@ -843,10 +844,11 @@ bool LocalHost::addDataToAssets(char *_field, char *_value) {
     std::string field = _field;
     std::string value = _value;
     std::map<std::string, std::string>::iterator it = asset_map.find(field);
-
+    char buf[64];
+    
     if((it != asset_map.end()) && (it->second == value)) {
 #ifdef ASSET_TRACE
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "[ASSET] Skipping (already preent) %s=%s", _field, _value);
+      // ntop->getTrace()->traceEvent(TRACE_NORMAL, "[ASSET] Skipping (already preent) %s=%s", _field, _value);
 #endif
 
       return false;
@@ -855,7 +857,7 @@ bool LocalHost::addDataToAssets(char *_field, char *_value) {
     asset_map[field] = value;
 
 #ifdef ASSET_TRACE
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[ASSET] Adding %s=%s", _field, _value);
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[ASSET] [%s] Adding %s=%s", print(buf, sizeof(buf)), _field, _value);
 #endif
 
     asset_map_updated = true; /* Next time dump data */

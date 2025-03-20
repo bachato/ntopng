@@ -379,8 +379,7 @@ void Host::deferredInitialization() {
 
   setEntityValue(get_hostkey(buf, sizeof(buf), true));
 
-  is_in_broadcast_domain =
-      iface->isLocalBroadcastDomainHost(this, true /* Inline call */);
+  is_in_broadcast_domain = iface->isLocalBroadcastDomainHost(this, true /* Inline call */);
 
   reloadDhcpHost();
 }
@@ -2798,3 +2797,5 @@ void Host::toggleRxOnlyHost(bool rx_only) {
 
   is_rx_only = rx_only;
 }
+
+/* *************************************** */

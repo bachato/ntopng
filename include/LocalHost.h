@@ -75,7 +75,8 @@ class LocalHost : public Host {
     return (!(isBroadcastHost() || isMulticastHost()));
   };
   virtual bool isSystemHost() const { return (systemHost); };
-
+  virtual bool serializeByMac() const { return(iface->serializeLbdHostsAsMacs() || is_dhcp_host); }
+  
   virtual void updateNetworkRTT(u_int32_t rtt_msecs) {
     NetworkStats *network = iface->getNetworkStats(get_local_network_id());
     if (network) network->updateRoundTripTime(rtt_msecs);
