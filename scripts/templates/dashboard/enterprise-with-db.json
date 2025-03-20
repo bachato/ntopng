@@ -85,20 +85,20 @@
 			"width" : 12,
 			"height" : 3,
 			"params" : {
-			"url" : "/lua/pro/rest/v2/get/timeseries/ts_multi.lua",
-			"url_params" : { },
-			"post_params" : {
-				"limit" : 180,
-				"version" : 4,
-				"ts_requests": {
-					"$ANY_IFID$" : {
-						"ts_query": "ifid:$IFID$",
-						"ts_schema": "iface:traffic_rxtx",
-						"tskey": "$IFID$"
+				"url" : "/lua/pro/rest/v2/get/timeseries/ts_multi.lua",
+				"url_params" : { },
+				"post_params" : {
+					"limit" : 180,
+					"version" : 4,
+					"ts_requests": {
+						"$ANY_IFID$" : {
+							"ts_query": "ifid:$IFID$",
+							"ts_schema": "iface:traffic_rxtx",
+							"tskey": "$IFID$"
+						}
 					}
-				}
-			},
-			"source_type" : "interface"
+				},
+				"source_type" : "interface"
 			}
 		},
 		{
