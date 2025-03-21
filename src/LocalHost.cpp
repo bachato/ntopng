@@ -844,7 +844,9 @@ bool LocalHost::addDataToAssets(char *_field, char *_value) {
     std::string field = _field;
     std::string value = _value;
     std::map<std::string, std::string>::iterator it = asset_map.find(field);
+#ifdef ASSET_TRACE
     char buf[64];
+#endif
     
     if((it != asset_map.end()) && (it->second == value)) {
 #ifdef ASSET_TRACE
@@ -895,7 +897,9 @@ void LocalHost::dumpAssetJson(ndpi_serializer *serializer) {
   for(std::map<std::string, std::string>::iterator it = asset_map.begin(); it != asset_map.end(); it++)
     ndpi_serialize_string_string(serializer, it->first.c_str(), it->second.c_str());  
 
+#ifdef NTOPNG_PRO
   if(cur_mac) cur_mac->dumpAssetInfo(serializer);
+#endif
   
   ndpi_serialize_end_of_block(serializer);
 }
