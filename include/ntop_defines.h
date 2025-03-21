@@ -1192,8 +1192,7 @@
 #define STATS_UPDATE_SCRIPT_PATH "stats_update.lua"
 
 #define STARTUP_SCRIPT_PATH "startup.lua"
-#define BOOT_SCRIPT_PATH \
-  "boot.lua" /* Executed as root before networking is setup */
+#define BOOT_SCRIPT_PATH    "boot.lua" /* Executed as root before networking is setup */
 #define SHUTDOWN_SCRIPT_PATH "shutdown.lua"
 
 #define HOUSEKEEPING_SCRIPT_PATH "housekeeping.lua"
@@ -1386,6 +1385,8 @@
   DangerousHost Must stay in the jail.
 */
 #define DROP_HOST_POOL_HOST_IN_JAIL "ntopng.cache.jail.time.%s"
+
+#define LOCALHOST_ASSET_CACHE_HASH_KEY "ntopng.cache.localhost_asset_cache"
 
 /*
   A redis key keeping the pool associated to an host that is currently in the

@@ -49,16 +49,12 @@ class LocalHost : public Host {
   void initialize();
   void deferredInitialization();
   void freeLocalHostData();
-#ifdef NTOPNG_PRO
-  void dumpAssetInfo();
-#endif
   virtual void deleteHostData();
-  void dumpAssetJson(ndpi_serializer *serializer);
 
   char *getMacBasedSerializationKey(char *redis_key, size_t size, char *mac_key, bool short_format);
   char *getIPBasedSerializationKey(char *redis_key, size_t size, bool short_format);
   void luaDoHDot(lua_State *vm);
-  
+
  public:
   LocalHost(NetworkInterface *_iface, int32_t _iface_idx,
 	    Mac *_mac, u_int16_t _u_int16_t,
@@ -76,7 +72,7 @@ class LocalHost : public Host {
   };
   virtual bool isSystemHost() const { return (systemHost); };
   virtual bool serializeByMac() const { return(iface->serializeLbdHostsAsMacs() || is_dhcp_host); }
-  
+
   virtual void updateNetworkRTT(u_int32_t rtt_msecs) {
     NetworkStats *network = iface->getNetworkStats(get_local_network_id());
     if (network) network->updateRoundTripTime(rtt_msecs);
@@ -194,7 +190,7 @@ class LocalHost : public Host {
   inline void setContactedPort(bool isTCP, u_int16_t port,
                                ndpi_protocol *proto) {
     usedPorts.setContactedPort(isTCP, port, proto);
-  };  
+  };
   virtual inline void luaUsedPorts(lua_State *vm) { usedPorts.lua(vm, iface); };
   virtual inline std::unordered_map<u_int16_t, ndpi_protocol> getUDPServerPorts() { return(usedPorts.getUDPServerPorts()); };
   virtual inline std::unordered_map<u_int16_t, ndpi_protocol> getTCPServerPorts() { return(usedPorts.getTCPServerPorts()); };
@@ -229,15 +225,21 @@ class LocalHost : public Host {
   void offlineSetHTTPName(const char *n);
   void setServerName(const char *n);
   void setResolvedName(const char *resolved_name);
-  bool addDataToAssets(char *field, char *value);
-  bool removeDataFromAssets(char *field);
-  
+
   virtual void setOS(OSType _os, OSLearningMode mode);
   void setTCPfingerprint(char *tcp_fingerprint, enum operating_system_hint os);
 
   inline bool isAssetUpdated() {
     return(asset_map_updated || (mac && mac->isAssetUpdated()));
-  }  
+  }
+
+#ifdef NTOPNG_PRO
+  void loadAssetInfo();
+  void dumpAssetInfo();
+  bool addDataToAssets(char *field, char *value);
+  bool removeDataFromAssets(char *field);
+  void dumpAssetJson(ndpi_serializer *serializer);
+#endif
 };
 
 #endif /* _LOCAL_HOST_H_ */

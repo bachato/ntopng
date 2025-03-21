@@ -49,8 +49,7 @@ LocalHost::LocalHost(NetworkInterface *_iface, int32_t _iface_idx,
                      char *ipAddress, u_int16_t _vlanId,
                      u_int16_t _observation_point_id)
   : Host(_iface, _iface_idx, ipAddress, _vlanId, _observation_point_id),
-    contacted_server_ports(CONST_MAX_NUM_QUEUED_PORTS,
-			   "localhost-serverportsproto"),
+    contacted_server_ports(CONST_MAX_NUM_QUEUED_PORTS, "localhost-serverportsproto"),
     usedPorts(this) {
   if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
@@ -178,7 +177,7 @@ void LocalHost::initialize() {
   tcp_fingerprint_host_os = os_hint_unknown;
 
 #ifdef NTOPNG_PRO
-  dumpAssetInfo();
+  loadAssetInfo();
 #endif
   
   gettimeofday(&last_periodic_asset_update, NULL);
@@ -309,8 +308,7 @@ void LocalHost::lua_contacts_stats(lua_State *vm) const {
   lua_push_uint32_table_entry(vm, "imap", stats->getIMAPContactCardinality());
   lua_push_uint32_table_entry(vm, "pop", stats->getPOPContactCardinality());
   lua_push_uint32_table_entry(vm, "ntp", stats->getNTPContactCardinality());
-  lua_push_uint32_table_entry(vm, "domain_names",
-                              stats->getDomainNamesCardinality());
+  lua_push_uint32_table_entry(vm, "domain_names", stats->getDomainNamesCardinality());
 
   lua_pushstring(vm, "server_contacts");
   lua_insert(vm, -2);
@@ -868,116 +866,3 @@ bool LocalHost::addDataToAssets(char *_field, char *_value) {
   
   return false;
 }
-
-/* *************************************** */
-
-/* This function instead remove a field from the asset map */
-bool LocalHost::removeDataFromAssets(char *field) {
-  if (!ntop->getPrefs()->isAssetsCollectionEnabled()) return false;
-
-  if (asset_map.size() > 0 && field && field[0] != '\0') {
-#ifdef ASSET_TRACE
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[ASSET] Removing %s", field);
-#endif
-
-    asset_map.erase(field);
-    asset_map_updated = true; /* Next time dump data */
-    return true;
-  }
-  return false;
-}
-
-/* *************************************** */
-
-void LocalHost::dumpAssetJson(ndpi_serializer *serializer) {
-  Mac *cur_mac = getMac();
-  
-  ndpi_serialize_start_of_block(serializer, "json_info"); /* Custom fields block */
-
-  for(std::map<std::string, std::string>::iterator it = asset_map.begin(); it != asset_map.end(); it++)
-    ndpi_serialize_string_string(serializer, it->first.c_str(), it->second.c_str());  
-
-#ifdef NTOPNG_PRO
-  if(cur_mac) cur_mac->dumpAssetInfo(serializer);
-#endif
-  
-  ndpi_serialize_end_of_block(serializer);
-}
-
-/* *************************************** */
-
-#ifdef NTOPNG_PRO
-void LocalHost::dumpAssetInfo() {
-  /* Return in case the preference is disabled */
-  if ((!ntop->getPrefs()->is_enterprise_m_edition()) || (!ntop->getPrefs()->isAssetsCollectionEnabled())) {
-#ifdef NTOPNG_DEBUG
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Assets Collection Disabled, please enable it from the Preferences.");
-#endif
-    return;
-  }
-  /* Remove the key from the hash, used to get the offline hosts */
-  /* Exclude the multicast/broadcast addresses */
-  if (!ntop->getRedis() || !isLocalUnicastHost()) return;
-
-  /* Exclude local-link fe80::/10, marked as private */
-  if (isIPv6() && isPrivateHost()) return;
-
-  Mac *cur_mac = getMac();
-  /* In case the MAC is NULL or the MAC is a special */
-  /* address or a broadcast address do not include it */
-  if (!cur_mac || cur_mac->isSpecialMac() || cur_mac->isBroadcast()) return;
-
-  char key[128], buf[64], *serialization_key = NULL, *json_str = NULL;
-  ndpi_serializer host_json;
-  u_int32_t json_str_len = 0;
-
-#ifdef NTOPNG_DEBUG
-  cur_mac->print(buf, sizeof(buf));
-  ntop->getTrace()->traceEvent(TRACE_NORMAL,
-			       "Adding Host %s to Assets [Ifid: %d][VLAN: %d][MAC: %s]",
-			       ip.print(buf, sizeof(buf)),
-			       iface->get_id(),
-			       vlan_id,
-			       buf);
-#endif
-
-  ndpi_init_serializer(&host_json, ndpi_serialization_format_json);
-
-  ndpi_serialize_string_string(&host_json, "type", "host");
-  ndpi_serialize_string_string(&host_json, "ip", ip.print(buf, sizeof(buf)));
-
-  ndpi_serialize_string_uint64(&host_json, "first_seen", get_first_seen());
-  ndpi_serialize_string_uint64(&host_json, "last_seen", get_last_seen());
-
-  if(cur_mac) cur_mac->dumpAssetMac(&host_json);
-
-  ndpi_serialize_string_uint32(&host_json, "vlan", (u_int16_t)get_vlan_id());
-  ndpi_serialize_string_uint32(&host_json, "network", (u_int32_t)get_local_network_id());
-  ndpi_serialize_string_string(&host_json, "name", get_name(buf, sizeof(buf), false));
-
-  serialization_key = getSerializationKey(key, sizeof(key), true);
-
-  ndpi_serialize_string_string(&host_json, "key", serialization_key);
-
-  /* Now dump the json_info field */
-  dumpAssetJson(&host_json);
-
-  json_str = ndpi_serializer_get_buffer(&host_json, &json_str_len);
-  if ((json_str != NULL) && (json_str_len > 0)) {
-    char redis_key[64];
-
-    /* Will be polled by pro/scripts/callbacks/minute-delayed/interface/assets.lua */
-    snprintf(redis_key, sizeof(redis_key), OFFLINE_LOCAL_HOSTS_MACS_QUEUE_NAME, iface->get_id());
-
-#ifdef ASSET_TRACE
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s [updated: %s]", json_str, asset_map_updated ? "TRUE" : "FALSE");
-#endif
-    ntop->getRedis()->lpush(redis_key, json_str, CONST_MAX_INACTIVE_HOSTS_MAC_QUEUE_LEN);
-  }
-
-  ndpi_term_serializer(&host_json);
-
-  asset_map_updated = false;
-}
-#endif
-

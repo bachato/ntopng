@@ -253,6 +253,9 @@ static const FlowAlertTypeExtended risk_enum_to_alert_type[NDPI_MAX_RISK] {
 
     /* NDPI_PROBING_ATTEMPT */
     {{flow_alert_ndpi_probing_attempt, alert_category_security}, "ndpi_probing_attempt"},
+
+    /* NDPI_OBFUSCATED_TRAFFIC */
+    {{flow_alert_ndpi_obfuscated_traffic, alert_category_security}, "ndpi_obfuscated_traffic"},
 };
 
 /* **************************************************** */
@@ -272,9 +275,8 @@ bool FlowRiskAlerts::isRiskUndefined(ndpi_risk_enum risk) {
 void FlowRiskAlerts::checkUndefinedRisks() {
   for (int risk_id = 1; risk_id < NDPI_MAX_RISK; risk_id++) {
     if (risk_enum_to_alert_type[risk_id].alert_type.id == flow_alert_normal)
-      ntop->getTrace()->traceEvent(
-          TRACE_NORMAL, "[!] nDPI risk %u/%s has not been defined in ntopng",
-          risk_id, ndpi_risk2str((ndpi_risk_enum)risk_id));
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "[!] nDPI risk %u/%s has not been defined in ntopng",
+				   risk_id, ndpi_risk2str((ndpi_risk_enum)risk_id));
     else
       ntop->getTrace()->traceEvent(TRACE_INFO, "Risk %u/%s handled", risk_id,
                                    ndpi_risk2str((ndpi_risk_enum)risk_id));

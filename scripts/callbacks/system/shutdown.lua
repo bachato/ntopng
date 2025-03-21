@@ -40,6 +40,11 @@ end
 
 recipients.process_notifications(now, now + 1000 --[[ deadline ]], 3 --[[ periodicity ]], true)
 
+if ntop.isPro() then
+   package.path = dirs.installdir .. "/pro/scripts/callbacks/system/?.lua;" .. package.path
+   require("shutdown")
+end
+
 -- Unload all checks
 checks.loadUnloadUserScripts(false --[[ unload --]])
 

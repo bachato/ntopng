@@ -38,7 +38,7 @@ extern "C" {
 
 Prefs::Prefs(Ntop *_ntop) {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+
   num_deferred_interfaces_to_register = 0, cli = NULL;
   ntop = _ntop, pcap_file_purge_hosts_flows = false, ignore_vlans = false,
     simulate_vlans = false, simulate_macs = false, ignore_macs = false;
@@ -451,7 +451,7 @@ void usage() {
 	 "                                    | <local list> is a comma-separated "
 	 "list or a path to a file.\n"
 	 "                                    | Local networks in CIDR format and\n"
-	 "                                    | autonomous system in asn<number> format.\n" 
+	 "                                    | autonomous system in asn<number> format.\n"
 	 "                                    | The file accepts multiple lines with networks\n"
 	 "                                    | and as with specified format.\n"
 	 "                                    | An optional '=<alias>' is "
@@ -561,7 +561,7 @@ void usage() {
 #endif
 	 CONST_DEFAULT_DOCS_DIR, CONST_DEFAULT_SCRIPTS_DIR,
 	 CONST_DEFAULT_CALLBACKS_DIR, CONST_DEFAULT_DATA_DIR,
-	 CONST_DEFAULT_NTOP_PORT, CONST_DEFAULT_NTOP_PORT + 1,	 
+	 CONST_DEFAULT_NTOP_PORT, CONST_DEFAULT_NTOP_PORT + 1,
 	 CONST_DEFAULT_NTOP_USER, CONST_DEFAULT_TLS_CIPHERS,
 	 MAX_NUM_INTERFACE_HOSTS, MAX_NUM_INTERFACE_HOSTS,
 	 CONST_DEFAULT_USERS_FILE);
@@ -901,8 +901,8 @@ static TsDriver str2TsDriver(const char *driver) {
 void Prefs::reloadPrefsFromRedis() {
   char *aux = NULL;
   char *tmp = NULL;
-  
-  // sets to the default value in redis if no key is found  
+
+  // sets to the default value in redis if no key is found
 #ifdef PREFS_RELOAD_DEBUG
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "A preference has changed, reloading...");
 #endif
@@ -965,7 +965,7 @@ void Prefs::reloadPrefsFromRedis() {
 							       CONST_DEFAULT_IS_ACTIVE_LOCAL_HOSTS_CACHE_ENABLED),
     enable_tiny_flows_export = getDefaultBoolPrefsValue(CONST_IS_TINY_FLOW_EXPORT_ENABLED,
 							CONST_DEFAULT_IS_TINY_FLOW_EXPORT_ENABLED),
-    
+
     max_entity_alerts = getDefaultPrefsValue(CONST_MAX_ENTITY_ALERTS,
 					     ALERTS_MANAGER_MAX_ENTITY_ALERTS),
     max_num_secs_before_delete_alert = getDefaultPrefsValue(CONST_MAX_NUM_SECS_ALERTS_BEFORE_DEL,
@@ -996,7 +996,7 @@ void Prefs::reloadPrefsFromRedis() {
 
   ewma_alpha_percent = getDefaultPrefsValue(CONST_EWMA_ALPHA_PERCENT,
 					    CONST_DEFAULT_EWMA_ALPHA_PERCENT);
-    
+
   enable_captive_portal = getDefaultBoolPrefsValue(CONST_PREFS_CAPTIVE_PORTAL, false);
   mac_based_captive_portal = getDefaultBoolPrefsValue(CONST_PREFS_MAC_CAPTIVE_PORTAL, true);
   enable_informative_captive_portal = getDefaultBoolPrefsValue(CONST_PREFS_INFORM_CAPTIVE_PORTAL, false);
@@ -1082,7 +1082,7 @@ void Prefs::reloadPrefsFromRedis() {
   // reset value
   netbox_enabled = getDefaultPrefsValue(CONST_PREFS_NETBOX_ENABLED,
 					CONST_DEFAULT_NETBOX_ENABLED);
-  
+
 #if 1
   asset_inventory_enabled = false; /* FIX */
 #else
@@ -1567,7 +1567,7 @@ int Prefs::setOption(int optkey, char *optarg) {
 
   case 'p':
     ndpi_proto_path = strdup(optarg);
-    ntop->setCustomnDPIProtos(ndpi_proto_path);    
+    ntop->setCustomnDPIProtos(ndpi_proto_path);
     break;
 
   case 'q':
@@ -1646,8 +1646,7 @@ int Prefs::setOption(int optkey, char *optarg) {
 
   case 'Z':
     if(optarg[0] != '/') {
-      ntop->getTrace()->traceEvent(
-				   TRACE_WARNING,
+      ntop->getTrace()->traceEvent(TRACE_WARNING,
 				   "-Z argument (%s) must begin with '/' (example /ntopng): skipped",
 				   optarg);
     } else {
@@ -1755,18 +1754,14 @@ int Prefs::setOption(int optkey, char *optarg) {
     switch (atoi(optarg)) {
     case 0:
       disable_localhost_login = true;
-      ntop->getTrace()->traceEvent(TRACE_NORMAL,
-				   "Localhost HTTP user login disabled");
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "Localhost HTTP user login disabled");
       break;
     case 1:
       enable_users_login = false;
-      ntop->getTrace()->traceEvent(TRACE_NORMAL,
-				   "All HTTP user login disabled");
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "All HTTP user login disabled");
       break;
     default:
-      ntop->getTrace()->traceEvent(
-				   TRACE_ERROR, "Invalid '%s' value specified for -l: ignored",
-				   optarg);
+      ntop->getTrace()->traceEvent(TRACE_ERROR, "Invalid '%s' value specified for -l: ignored", optarg);
     }
     break;
 
@@ -1778,6 +1773,10 @@ int Prefs::setOption(int optkey, char *optarg) {
     max_num_hosts = min_val(max_val(atoi(optarg), 1024), 4194304);
     break;
 
+  case 'X':
+    max_num_flows = min_val(max_val(atoi(optarg), 1024), 4194304);
+    break;
+
   case 'y':
     other_cpu_affinity = strdup(optarg);
 #ifdef HAVE_LIBCAP
@@ -1787,17 +1786,16 @@ int Prefs::setOption(int optkey, char *optarg) {
 
   case 'v': {
     if(!optarg)
-      ntop->getTrace()->traceEvent(
-				   TRACE_ERROR, "No value specified for verbosity: ignored");
+      ntop->getTrace()->traceEvent(TRACE_ERROR, "No value specified for verbosity: ignored");
     else {
+      int8_t lvl = (int8_t)strtol(optarg, NULL, 10);
+
       has_cmdl_trace_lvl = true;
       errno = 0;
-      int8_t lvl = (int8_t)strtol(optarg, NULL, 10);
-      if(errno) {
-	ntop->getTrace()->traceEvent(
-				     TRACE_ERROR, "Invalid '%s' value specified for -v: ignored",
-				     optarg);
-      } else {
+
+      if(errno)
+	ntop->getTrace()->traceEvent(TRACE_ERROR, "Invalid '%s' value specified for -v: ignored", optarg);
+      else {
 	if(lvl < 0) lvl = 0;
 	ntop->getTrace()->set_trace_level((u_int8_t)lvl);
       }
@@ -1806,8 +1804,7 @@ int Prefs::setOption(int optkey, char *optarg) {
 
   case 'F':
     if(!optarg)
-      ntop->getTrace()->traceEvent(TRACE_ERROR,
-				   "No connection specified, -F ignored");
+      ntop->getTrace()->traceEvent(TRACE_ERROR, "No connection specified, -F ignored");
 
 #ifndef HAVE_NEDGE
     else if((strncmp(optarg, "es", 2) == 0) && (strlen(optarg) > 3)) {
@@ -1902,8 +1899,7 @@ int Prefs::setOption(int optkey, char *optarg) {
 
 	    if((kafka_brokers_list == NULL) || (kafka_topic == NULL)) {
 	      /* Out of memory */
-	      ntop->getTrace()->traceEvent(TRACE_WARNING,
-					   "Not enough memory");
+	      ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
 
 	      if(kafka_brokers_list) {
 		free(kafka_brokers_list);
@@ -1915,16 +1911,13 @@ int Prefs::setOption(int optkey, char *optarg) {
 	      }
 	    }
 	  } else
-	    ntop->getTrace()->traceEvent(
-					 TRACE_WARNING, "Unable to parse kafka topic: skipping -F");
+	    ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to parse kafka topic: skipping -F");
 	} else
-	  ntop->getTrace()->traceEvent(
-				       TRACE_WARNING, "Unable to parse brokers list: skipping -F");
+	  ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to parse brokers list: skipping -F");
 
 	free(conf);
       } else
-	ntop->getTrace()->traceEvent(
-				     TRACE_WARNING, "Discarding -F: unable to parse kafka options");
+	ntop->getTrace()->traceEvent(TRACE_WARNING, "Discarding -F: unable to parse kafka options");
     }
 #endif
 #endif /* HAVE_NEDGE */
@@ -1945,7 +1938,7 @@ int Prefs::setOption(int optkey, char *optarg) {
 
 	dump_flows_on_clickhouse = (optarg[0] == 'c') ? true : false;
 	use_clickhouse_cluster   = (strncmp(optarg, "clickhouse-cluster", 18) == 0) ? true : false;
-	use_clickhouse_cloud   = (strncmp(optarg, "clickhouse-cloud", 16) == 0) ? true : false;
+	use_clickhouse_cloud     = (strncmp(optarg, "clickhouse-cloud", 16) == 0) ? true : false;
 
 	if(dump_flows_on_clickhouse) {
 	  /* Check if CLICKHOUSE_CLIENT is present */
@@ -1966,7 +1959,7 @@ int Prefs::setOption(int optkey, char *optarg) {
 	      clickhouse_client = CONST_BIN_DIR "/" CLICKHOUSE_CLIENT;
 	    }
 	  }
-	  
+
 	  if(!client_found) {
 	    ntop->getTrace()->traceEvent(TRACE_WARNING,
 					 "-F clickhouse is not available "
@@ -2006,32 +1999,32 @@ int Prefs::setOption(int optkey, char *optarg) {
 	    }
 	  }
 
-    if(use_clickhouse_cloud) {      
+	  if(use_clickhouse_cloud) {
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO) && defined(HAVE_MYSQL)
-      char *comma;
-      char *tmp = mysql_user;
-      mysql_user = NULL;
-      if(tmp && (comma = strchr(tmp, ','))) {
-		    //ch_user = mysql_user;
-        *(comma++) = '\0';
-        mysql_user = strdup(comma);
-        ch_user = strdup(tmp);
-        free(tmp);
-      }
-      if(!ch_user || !mysql_user) {
-        /* Falling back to default values */
-        ntop->getTrace()->traceEvent(TRACE_WARNING,
-                  "Invalid MySQL or ClickHouse user, falling back to local ClickHouse [ClickHouse user: %s, MySQL user: %s]",
-                  ch_user ? ch_user : "", mysql_user ? mysql_user : "");
-                  
-        mysql_host = strdup((char *)"127.0.0.1");
-        mysql_dbname = strdup((char *)"ntopng");
-        mysql_user = strdup((char *)"default");
-        mysql_pw = strdup((char *)"");
-        ch_user = NULL; /* No CH user by default */
-      }
+	    char *comma;
+	    char *tmp = mysql_user;
+	    mysql_user = NULL;
+	    if(tmp && (comma = strchr(tmp, ','))) {
+	      //ch_user = mysql_user;
+	      *(comma++) = '\0';
+	      mysql_user = strdup(comma);
+	      ch_user = strdup(tmp);
+	      free(tmp);
+	    }
+	    if(!ch_user || !mysql_user) {
+	      /* Falling back to default values */
+	      ntop->getTrace()->traceEvent(TRACE_WARNING,
+					   "Invalid MySQL or ClickHouse user, falling back to local ClickHouse [ClickHouse user: %s, MySQL user: %s]",
+					   ch_user ? ch_user : "", mysql_user ? mysql_user : "");
+
+	      mysql_host = strdup((char *)"127.0.0.1");
+	      mysql_dbname = strdup((char *)"ntopng");
+	      mysql_user = strdup((char *)"default");
+	      mysql_pw = strdup((char *)"");
+	      ch_user = NULL; /* No CH user by default */
+	    }
 #endif
-    }
+	  }
 
 	  if(use_clickhouse_cluster &&
 	      ((clickhouse_cluster_name == NULL) ||
@@ -2190,13 +2183,13 @@ int Prefs::setOption(int optkey, char *optarg) {
   case 196:
     setCustomGeoIPDir(optarg);
     break;
-      
+
 #ifdef NTOPNG_PRO
   case 197:
     lic_mgr_config_file = strdup(optarg);
     break;
 #endif
-    
+
   case 198:
     ciphers_list = strdup(optarg);
     break;
@@ -2226,10 +2219,6 @@ int Prefs::setOption(int optkey, char *optarg) {
 
   case 205:
     print_version_json = true;
-    break;
-
-  case 'X':
-    max_num_flows = min_val(max_val(atoi(optarg), 1024), 4194304);
     break;
 
   case 206:
@@ -2781,7 +2770,7 @@ void Prefs::lua(lua_State *vm) {
   lua_push_bool_table_entry(vm, "auth_session_midnight_expiration",
                             get_auth_session_midnight_expiration());
 
-  lua_push_bool_table_entry(vm, "fingerprint_stats", 
+  lua_push_bool_table_entry(vm, "fingerprint_stats",
                             enableFingerprintStats());
   lua_push_uint64_table_entry(vm, "use_mac_in_flow_key",
                               useMacAddressInFlowKey());
@@ -2882,7 +2871,7 @@ void Prefs::lua(lua_State *vm) {
                             enable_external_auth_captive_portal);
 
   lua_push_uint64_table_entry(vm, "max_ui_strlen", max_ui_strlen);
-  
+
 
   lua_push_str_table_entry(vm, "config_file",
                            config_file_path ? config_file_path : (char *)"");
@@ -2902,7 +2891,7 @@ void Prefs::lua(lua_State *vm) {
   lua_push_str_table_entry(vm, "message_broker_url", message_broker_url ? message_broker_url : "");
   lua_push_str_table_entry(vm, "message_broker", message_broker ? message_broker : "");
   lua_push_bool_table_entry(vm, "toggle_message_broker", message_broker_enabled);
-  
+
   lua_push_str_table_entry(vm, "zmq_publish_events_url", zmq_publish_events_url);
   lua_push_bool_table_entry(vm, "limited_resources_mode", limited_resources_mode);
 }
@@ -3222,14 +3211,14 @@ void Prefs::setModbusAllowedFunctionCodes(const char *function_codes) {
 
     if(modbus_allowed_function_codes) {
       ndpi_bitmap_free(modbus_allowed_function_codes);
-      
+
       if((modbus_allowed_function_codes = ndpi_bitmap_alloc()) != NULL) {
 	p = strtok_r(buf, ",", &tmp);
 	while(p != NULL) {
 	  int f_code = atoi(p);
-	  
+
 	  ndpi_bitmap_set(modbus_allowed_function_codes, f_code);
-	  
+
 	  p = strtok_r(NULL, ",", &tmp);
 	}
       }
@@ -3258,7 +3247,7 @@ void Prefs::reloadServersConfiguration() {
 bool Prefs::reloadNetworksPolicyConfiguration() {
   AddressTree *new_tree=NULL;
   new_tree = new (std::nothrow) AddressTree;
-  
+
   if(new_tree == NULL) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to Load Configuration");
     return false;
@@ -3303,7 +3292,7 @@ bool Prefs::loadPolicyConfiguration(AddressTree *tree,
     /* Now iterate the string */
     std::stringstream ipList(ipStr);
     std::string ip;
-    
+
     while(std::getline(ipList, ip, ',')) {
       if(!tree->addAddress(ip.c_str(), id)) {
 	ntop->getTrace()->traceEvent(TRACE_WARNING,
@@ -3311,7 +3300,7 @@ bool Prefs::loadPolicyConfiguration(AddressTree *tree,
 				     (char *) ip.c_str());
 	return false;
       }
-      
+
       ntop->getTrace()->traceEvent(TRACE_DEBUG,
 				   "Added [Network: %s] to Redis %s list",
 				   (char *) ip.c_str(),key);
@@ -3319,7 +3308,7 @@ bool Prefs::loadPolicyConfiguration(AddressTree *tree,
 
     if(rsp) free(rsp);
   }
-  
+
   return true;
 }
 #endif
@@ -3367,7 +3356,7 @@ bool Prefs::isSMTPServer(IpAddress *ip, u_int16_t vlan_id) {
 void Prefs::setCustomGeoIPDir(char *d) {
   if(d != NULL) {
     if(custom_geoip_dir) free(custom_geoip_dir);
-    
+
     custom_geoip_dir = strdup(d);
   }
 }
