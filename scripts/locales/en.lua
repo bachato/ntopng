@@ -409,7 +409,7 @@ local lang = {
   ["increase_num_flows_hosts"] = "Increase Number",
   ["asset_details"] = {
     ["assets"] = "Asset",
-    ["count_snapshots"] = "Active Assets Count Snapshots",
+    ["count_snapshots"] = "Active Assets Snapshots",
     ["delete_asset_older_title"] = "Delete Older Than",
     ["delete_asset_older"] = "Please select a date. All Assets not seen since the selected date are going to be removed. This action cannot be undone.",
     ["delete_all_assets"] = "Are you sure to delete all Assets? This action cannot be undone.",
@@ -450,7 +450,7 @@ local lang = {
     ["smtp_servers"] = "SMTP Servers",
     ["tcp_fingerprint"] = "TCP Fingerprint",    
     ["tls_name"] = "TLS",
-    ["total_assets"] = "Total Assets Count",
+    ["total_assets"] = "Total Assets",
   },
   ["info"] = "Info",
   ["information"] = "Information",
