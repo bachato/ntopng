@@ -31,7 +31,6 @@ local ts_utils = require "ts_utils"
 local presets_utils = require "presets_utils"
 local blog_utils = require("blog_utils")
 local vs_utils = require "vs_utils"
-local asset_utils = require "asset_utils"
 local drop_host_pool_utils = require "drop_host_pool_utils"
 local json = require "dkjson"
 
@@ -339,29 +338,6 @@ ntop.delCache("ntopng.limits.exporters")
 local mitre_utils = require "mitre_utils"
 local mitre_table = mitre_utils.insertDBMitreInfo()
 
--- This is called in case of crashes, updates the last seen of all the hosts in the table
-asset_utils.updateLastSeen()
-
 ntop.reloadServersConfiguration()
-
--- Migrate assets table content. Change manufacturer from empty to unknown
-if(ntop.isPro()) then
-   -- Clickhouse migration
-   if ntop.isClickHouseEnabled() then      
-      local query = "ALTER TABLE assets UPDATE manufacturer = 'unknown' WHERE manufacturer = '' or manufacturer is NULL"
-      local success
-
-      traceError(TRACE_NORMAL, TRACE_CONSOLE, "Migrating empty manufacturer column to unknown in assets table")
-      
-      interface.select(getSystemInterfaceId())      
-      success = interface.execSQLQuery(query)
-
-      if(success == false) then
-	 traceError(TRACE_ERROR, TRACE_CONSOLE, "Assets manufacturer migration failed for ClickHouse")
-      else
-	 traceError(TRACE_NORMAL, TRACE_CONSOLE, "Assets manufacturer migration completed for ClickHouse")
-      end
-   end
-end
 
 traceError(TRACE_NORMAL, TRACE_CONSOLE, "Completed startup.lua")
