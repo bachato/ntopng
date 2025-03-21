@@ -1,5 +1,5 @@
 --
--- (C) 2019-24 - ntop.org
+-- (C) 2019-25 - ntop.org
 --
 
 -- ##############################################
@@ -62,7 +62,7 @@ function host_alert_scan.format(ifid, alert, alert_type_params)
       attack = alert_type_params.attack
     })
   elseif alert_type_params.attack == "Service Down" then
-    return i18n("alert_messages.host_alert_scan_servic_down", { 
+    return i18n("alert_messages.host_alert_scan_service_down", { 
       attacker = attacker,
       victim = victim,
       num_victims = alert_type_params.num_victims,
