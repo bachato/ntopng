@@ -12,7 +12,7 @@
 				"url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
 				"url_params" : {},
 				"icon" : "fas fa-house-laptop",
-				"i18n_name" : "assets",
+				"i18n_name" : "asset_details.total_assets",
 				"link" : { "url" : "/lua/assets.lua", "url_params" : { } },
 				"counter_path" : "assets",
 				"counter_formatter" : "number"
