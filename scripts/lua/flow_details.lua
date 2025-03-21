@@ -1017,7 +1017,7 @@ else
       and (qoe_utils.validQoE(flow.qoe.score.cli_to_srv)
            or qoe_utils.validQoE(flow.qoe.score.srv_to_cli))
       ) then
-      print("<tr><th width=10%>" .. i18n("flow_details.qoe") .. "</th>")
+      print("<tr><th width=10%>" .. i18n("flow_details.qoe_long") .. "</th>")
       print("<td>" .. qoe_utils.formatQoE(flow.qoe.score.cli_to_srv) .. "</td>")
       print("<td>" .. qoe_utils.formatQoE(flow.qoe.score.srv_to_cli) .. "</td>")
       print("</tr>")
