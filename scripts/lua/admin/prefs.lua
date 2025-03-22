@@ -670,8 +670,8 @@ if auth.has_capability(auth.capabilities.preferences) then
         print('<form method="post">')
         print('<table class="table">')
 
-        print('<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n("prefs.connectivity_check") ..
-            '</th></tr></thead>')
+
+	print('<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n("prefs.connectivity_check") .. '</th></tr></thead>')
 
         prefsInputFieldPrefs(subpage_active.entries["connectivity_check_url"].title,
             subpage_active.entries["connectivity_check_url"].description, "ntopng.prefs.", "connectivity_check_url", "",
@@ -1877,17 +1877,7 @@ if auth.has_capability(auth.capabilities.preferences) then
             pref = "enable_host_pools_log"
         })
 
-        if ntop.isEnterprise() or ntop.isnEdgeEnterprise() then
-            prefsToggleButton(subpage_active, {
-                field = "toggle_asset_inventory_log",
-                default = "0",
-                pref = "enable_asset_inventory_log"
-            })
-        end
-
-        print(
-            '<tr><th colspan=2 style="text-align:right;"><button type="submit" class="btn btn-primary" style="width:115px" disabled="disabled">' ..
-            i18n("save") .. '</button></th></tr>')
+	print('<tr><th colspan=2 style="text-align:right;"><button type="submit" class="btn btn-primary" style="width:115px" disabled="disabled">' .. i18n("save") .. '</button></th></tr>')
 
         print [[<input name="csrf" type="hidden" value="]]
         print(ntop.getRandomCSRFValue())
