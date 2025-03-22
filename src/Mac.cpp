@@ -496,8 +496,9 @@ void Mac::dumpAssetMac(ndpi_serializer *serializer) {
   
   ndpi_serialize_string_string(serializer, "mac", Utils::formatMac(mac, buf, sizeof(buf)));
   if(man) ndpi_serialize_string_string(serializer, "manufacturer", man);
-
 }
+
+/* *************************************** */
 
 void Mac::dumpAssetInfo(ndpi_serializer *serializer) {
   if(device_type != 0) ndpi_serialize_string_uint32(serializer, "device_type", device_type);
@@ -505,8 +506,9 @@ void Mac::dumpAssetInfo(ndpi_serializer *serializer) {
   if(ssid)             ndpi_serialize_string_string(serializer, "ssid", ssid);
   if(fingerprint)      ndpi_serialize_string_string(serializer, "fingerprint", fingerprint);
   if(dhcp_fingerprint) ndpi_serialize_string_string(serializer, "dhcp_fingerprint", dhcp_fingerprint);
-  if(names.dhcp)       ndpi_serialize_string_string(serializer, "dhcp_name", names.dhcp);
 
+  /* dhcp_name is set in LocalHost, no need to export it */
+  
   asset_map_updated = false;
 }
 
