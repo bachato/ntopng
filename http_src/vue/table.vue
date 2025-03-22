@@ -549,16 +549,15 @@ let isFirstDataLoad = true;
 // get and update rows data
 async function set_rows() {
     // show loading spinner
-    // isChangingRows.value = true;
     isLoading.value = true && !shouldDisableLoading;
 
     // get rows from backend
     let res = await props.get_rows(
         currentPage,                // current page
-        rowsPerPage.value,             // rows per page
-        processedColumns.value,         // columns definition
-        searchString.value,           // search term
-        isFirstDataLoad              // first load
+        rowsPerPage.value,          // rows per page
+        processedColumns.value,     // columns definition
+        searchString.value,         // search term
+        isFirstDataLoad             // first load
     );
 
     // update query info if available
@@ -568,6 +567,11 @@ async function set_rows() {
     }
 
     isFirstDataLoad = false;
+
+    // If we're not using server-side paging, we need to filter the rows client-side
+    if (props.paging !== true && searchString.value.trim() !== '') {
+        res.rows = filterRows(res.rows, searchString.value);
+    }
 
     // update total rows count
     totalRowCount.value = res.rows.length;
@@ -583,6 +587,47 @@ async function set_rows() {
     // wait for dom to update and emit event
     await nextTick();
     emit('rows_loaded', res);
+}
+
+// New function to filter rows based on search string
+function filterRows(rows, searchTerm) {
+    if (!searchTerm || searchTerm.trim() === '') {
+        return rows;
+    }
+    
+    searchTerm = searchTerm.toLowerCase();
+    
+    return rows.filter(row => {
+        // Check each visible column for the search term
+        return processedColumns.value.some(col => {
+            if (!col.visible) return false;
+            
+            let cellContent = '';
+            
+            // Get cell content based on how it's rendered
+            if (props.print_html_row && props.print_html_row(col.data, row, true) != null) {
+                // For HTML content, get the rendered text and strip HTML tags
+                const htmlContent = props.print_html_row(col.data, row);
+                cellContent = htmlContent ? stripHtmlTags(htmlContent).toLowerCase() : '';
+            } else if (props.print_vue_node_row && props.print_vue_node_row(col.data, row, vue_obj, true) != null) {
+                // For Vue nodes, we might need to extract text differently
+                // This is a simplification and might need adjustment based on your Vue node structure
+                const vueContent = props.print_vue_node_row(col.data, row, vue_obj);
+                cellContent = typeof vueContent === 'string' ? vueContent.toLowerCase() : '';
+            } else {
+                // Fallback: try to access the raw value from the row using column data
+                const rawValue = row[col.data];
+                cellContent = rawValue ? String(rawValue).toLowerCase() : '';
+            }
+            
+            return cellContent.includes(searchTerm);
+        });
+    });
+}
+
+function stripHtmlTags(html) {
+    if (!html) return '';
+    return html.replace(/<\/?[^>]+(>|$)/g, " ").replace(/\s+/g, " ").trim();
 }
 
 // determine if column is sortable
@@ -634,21 +679,29 @@ function get_column_to_sort() {
 // add timeout to search to prevent request flooding
 let map_search_change_timeout;
 async function on_change_map_search() {
-    let timeout = 1000;
+    let timeout = 300; // Reduced timeout for better responsiveness
 
     // clear existing timeouts
     if (map_search_change_timeout != null) {
         clearTimeout(map_search_change_timeout);
-    } else {
-        timeout = 0; // no delay for first search
     }
 
-
     map_search_change_timeout = setTimeout(async () => {
+        if (props.paging) {
+            // For server-side pagination, reset to first page when searching
+            currentPage = 0;
+            paginationRef.value.change_active_page(0, 0);
+        }
+        
         await set_rows(); // get filtered rows
+        
+        // Update pagination after search
+        if (!props.paging) {
+            redraw_select_pages();
+        }
+        
         map_search_change_timeout = null;
     }, timeout);
-
 }
 
 // set search value
