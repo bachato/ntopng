@@ -127,6 +127,7 @@ class Mac : public GenericHashEntry {
   }
   inline DeviceType getDeviceType() { return (device_type); }
   char *getDHCPName(char *const buf, ssize_t buf_size);
+  inline char* getDHCPNamePtr() { return(names.dhcp); }
   char *getDHCPNameNotLowerCase(char *const buf, ssize_t buf_size);
   void set_hash_entry_state_idle();
   void lua(lua_State *vm, bool show_details, bool asListElement);

@@ -70,6 +70,9 @@ Mac::Mac(NetworkInterface *_iface, u_int8_t _mac[6])
 
   updateHostPool(true /* inline with packet processing */,
                  true /* first inc */);
+
+
+  readDHCPCache();
 }
 
 /* *************************************** */

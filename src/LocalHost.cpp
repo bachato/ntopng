@@ -114,6 +114,7 @@ void LocalHost::set_hash_entry_state_idle() {
 /* NOTE: Host::initialize will be called by the constructor after the Host initialization */
 void LocalHost::initialize() {
   char buf[64], host[96], rsp[256];
+  Mac *cur_mac = getMac();
   
   stats = allocateStats();
   updateHostPool(true /* inline with packet processing */, true /* first inc */);
@@ -179,6 +180,9 @@ void LocalHost::initialize() {
 #ifdef NTOPNG_PRO
   loadAssetInfo();
 #endif
+  
+  if(cur_mac && cur_mac->getDHCPNamePtr())
+    offlineSetDHCPName(cur_mac->getDHCPNamePtr());
   
   gettimeofday(&last_periodic_asset_update, NULL);
 }
