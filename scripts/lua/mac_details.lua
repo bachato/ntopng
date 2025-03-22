@@ -172,7 +172,7 @@ if((page == "overview") or (page == nil)) then
    end
 
    if mac_info["num_hosts"] > 0 then
-      print(" [ <A HREF=\"".. ntop.getHttpPrefix().."/lua/hosts_stats.lua?mac="..mac.."\">"..i18n("details.show_hosts").."</A> ]")
+      print("<br>[ <A HREF=\"".. ntop.getHttpPrefix().."/lua/hosts_stats.lua?mac="..mac.."\">"..i18n("details.show_hosts").."</A> ]")
    end
    
    print("</td>")
