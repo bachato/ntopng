@@ -392,7 +392,7 @@ else
 	       }, {entry = page_utils.menu_entries.divider}, {
 	       hidden = not ntop.isEnterpriseM(),
                 entry = page_utils.menu_entries.assets,
-                url = '/lua/assets.lua'
+                url = '/lua/pro/assets.lua'
             }
         }
     })

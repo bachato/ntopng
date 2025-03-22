@@ -321,7 +321,7 @@ function create_historical_flows_url_link(row) {
 /* ************************************** */
 
 function create_button_host_details(row) {
-    let url = `/lua/asset_details.lua?ifid=${props.context.ifid}&serial_key=${row.key}`
+    let url = `/lua/pro/asset_details.lua?ifid=${props.context.ifid}&serial_key=${row.key}`
     
     return `${http_prefix}${url}`
 }
