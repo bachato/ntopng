@@ -240,6 +240,21 @@ The alert is sent whenever a RX-only host is under scan attack.
 *Not Enabled by Default*
 
 
+Scan
+~~~~~~~~~~~~~~
+Detects scanning activities targeting ports, networks, and services. This alert requires Clickhouse.
+
+- Port Scan: the number of contacted ports exceeds the configured threshold.
+- Service Scan: an attack targeting multiple hosts on a specific service.
+- Network Scan: communication with an unusually high number of hosts.
+
+*Interface: Packet & ZMQ*
+
+*Category: Cybersecurity*
+
+*Not Enabled by Default*
+
+
 Scan Detection
 ~~~~~~~~~~~~~~
 Checks for a scan detection.
