@@ -390,7 +390,7 @@ else
                 hidden = not ifs.has_macs,
                 url = '/lua/macs_stats.lua'
 	       }, {entry = page_utils.menu_entries.divider}, {
-	       hidden = not ntop.isEnterpriseM(),
+	       hidden = not (ntop.isEnterpriseM() and not ntop.isWindows()) ,
                 entry = page_utils.menu_entries.assets,
                 url = '/lua/pro/assets.lua'
             }
