@@ -74,7 +74,7 @@ void sFlowPktInterface::sflowPacketPollLoop() {
       struct sockaddr_in fromHostV4;
       size_t len = sizeof(fromHostV4);
       
-      rc = recvfrom(sock_fd, &buffer, sizeof(buffer),
+      rc = recvfrom(sock_fd, (char*) & buffer, sizeof(buffer),
 		    0, (struct sockaddr*)&fromHostV4, (socklen_t*)&len);
 
       // ntop->getTrace()->traceEvent(TRACE_NORMAL, "recvfrom() returned %d", rc);

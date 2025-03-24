@@ -686,6 +686,7 @@ day_of_the_year(struct tm *tm)
 		+ (tm->tm_mday - 1));
 }
 
+#if 0
 char *
 strptime_internal(const char *rp, const char *fmt, struct tm *tm,
 	enum locale_status *decided)
@@ -1068,9 +1069,6 @@ strptime(const char *buf, const char *format, struct tm *tm)
 	return strptime_internal(buf, format, tm, &decided);
 }
 
-
-
-#if 0
 /*
  * gettimeofday() --  gets the current time in elapsed seconds and
  *                     microsends since GMT Jan 1, 1970.

@@ -536,6 +536,10 @@ int Redis::_set(bool use_nx, const char *key, const char *value,
                                value, use_nx ? "NX " : "", expire_secs);
 #endif
   stats.num_set++;
+ 
+#ifdef WIN32
+  reply = (redisReply *)redisCommand(redis, "%s %s %s", cmd, key, value);
+#else
   if (use_nx) {
     reply = (redisReply *)redisCommand(redis, "%s %s %s NX EX %d", cmd, key,
                                        value, expire_secs);
@@ -547,6 +551,7 @@ int Redis::_set(bool use_nx, const char *key, const char *value,
       reply = (redisReply *)redisCommand(redis, "%s %s %s", cmd, key, value);
     }
   }
+ #endif
 
   if (!reply) reconnectRedis(true);
   if (reply && (reply->type == REDIS_REPLY_ERROR))
@@ -557,6 +562,13 @@ int Redis::_set(bool use_nx, const char *key, const char *value,
   } else {
     rc = -1;
   }
+
+#ifdef WIN32
+  if (expire_secs && (rc == 0)) {
+    reply = (redisReply *)redisCommand(redis, "EXPIRE %s %u", key, expire_secs);
+    if (reply) freeReplyObject(reply);
+  }
+#endif
 
   l->unlock(__FILE__, __LINE__);
 #ifdef DEBUG_REDIS_SET

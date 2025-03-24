@@ -434,11 +434,13 @@ void Ntop::registerPrefs(Prefs *_prefs, bool quick_registration) {
     }
   }
 
-  /* Initialize redis and populate some default values */
-  Utils::initRedis(&redis, prefs->get_redis_host(), prefs->get_redis_password(),
-                   prefs->get_redis_port(), prefs->get_redis_db_id(),
-                   quick_registration);
-  if (redis) redis->setDefaults();
+  if (!quick_registration) {
+    /* Initialize redis and populate some default values */
+    Utils::initRedis(&redis, prefs->get_redis_host(),
+                     prefs->get_redis_password(), prefs->get_redis_port(),
+                     prefs->get_redis_db_id(), quick_registration);
+    if (redis) redis->setDefaults();
+  }
 
   if((!quick_registration) && (!prefs->limitResourcesUsage())) {
     /* Initialize another redis instance for the trace of events */

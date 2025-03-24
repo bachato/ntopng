@@ -2378,14 +2378,15 @@ int Prefs::checkOptions() {
 
     printVersionInformation();
 
-#ifdef NTOPNG_PRO
-    ntop->getTrace()->set_trace_level((u_int8_t)0);
-    ntop->registerPrefs(this, true);
 
+#ifdef NTOPNG_PRO
+    
+    ntop->getTrace()->set_trace_level((u_int8_t)1);
+   ntop->registerPrefs(this, true);
     printf("Edition:\t%s\n", ntop->getPro()->get_edition());
     printf("License Type:\t%s\n",
            ntop->getPro()->get_license_type(buf, sizeof(buf)));
-
+    
     if(ntop->getPro()->demo_ends_at())
       printf("Validity:\t%s\n",
              ntop->getPro()->get_demo_expiration(buf, sizeof(buf)));

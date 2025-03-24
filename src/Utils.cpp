@@ -5169,6 +5169,14 @@ u_int64_t Utils::bitmapClear(u_int64_t bitmap, u_int8_t v) {
 
 /* ****************************************************** */
 
+#ifdef WIN32
+static inline int __builtin_ctzll(unsigned long long x) {
+  unsigned long ret;
+  _BitScanForward64(&ret, x);
+  return (int)ret;
+}
+#endif
+
 int Utils::bitmapGetNext(u_int64_t bitmap, u_int8_t start) {
   u_int64_t mask;
 
