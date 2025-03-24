@@ -6,7 +6,7 @@ const os = [
    { name: "Unknown", icon: '' },
    { name: "Linux", icon: '<i class=\'fab fa-linux fa-lg\'></i>' },
    { name: "Windows", icon: '<i class=\'fab fa-windows fa-lg\'></i>' },
-   { name: "MacOS", icon: '<i class=\'fab fa-apple fa-lg\'></i>' },
+   { name: "macOS", icon: '<i class=\'fab fa-apple fa-lg\'></i>' },
    { name: "iOS", icon: '<i class=\'fab fa-apple fa-lg\'></i>' },
    { name: "Android", icon: '<i class=\'fab fa-android fa-lg\'></i>' },
    { name: "LaserJET", icon: 'LasetJET' },
