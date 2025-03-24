@@ -668,6 +668,11 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
       flow->setNextAdjacentAS(zflow->next_adjacent_as);
 
     flow->setQoE(zflow->getQoESrc2Dst(), zflow->getQoEDst2Src());
+
+    if(zflow->getOSHint() != os_hint_unknown) {
+      if(flow->get_cli_host() != NULL)
+	flow->get_cli_host()->setnDPIOS(zflow->getOSHint());
+    }    
     
     if (zflow->getJA4cHash()) flow->updateJA4C(zflow->getJA4cHash());
 

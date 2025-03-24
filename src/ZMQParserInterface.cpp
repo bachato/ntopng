@@ -1464,6 +1464,10 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow *const flow,
     flow->setQoEDst2Src(value->int_num);
     break;
 
+  case L7_OS_HINT:
+    flow->setOSHint((enum operating_system_hint)value->int_num);;
+    break;
+    
   default:
     return false;
   }

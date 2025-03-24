@@ -2799,3 +2799,40 @@ void Host::toggleRxOnlyHost(bool rx_only) {
 }
 
 /* *************************************** */
+
+void Host::setnDPIOS(enum operating_system_hint hint) {
+  if(os_type != os_unknown)
+    return; /* Already set */
+  
+  switch(hint) {
+  case os_hint_windows:
+    os_type = os_windows;
+    break;
+    
+  case os_hint_macos:
+    os_type = os_macos;
+    break;
+    
+  case os_hint_ios_ipad_os:
+    os_type = os_ios;
+    break;
+    
+  case os_hint_android:
+    os_type = os_android;
+    break;
+    
+  case os_hint_linux:
+    os_type = os_linux;
+    break;
+    
+  case os_hint_freebsd:
+    os_type = os_freebsd;
+    break;
+
+  default:
+    /* nothing to do */
+    break;    
+  }
+}
+
+/* *************************************** */

@@ -981,6 +981,8 @@ class Host : public GenericHashEntry,
 #ifdef NTOPNG_PRO
   void incQoEStats(QoEType qoe_type) { qoe_stats.incQoEStats(qoe_type); };
 #endif
+
+  void setnDPIOS(enum operating_system_hint hint);
 };
 
 #endif /* _HOST_H_ */

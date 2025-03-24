@@ -722,6 +722,13 @@ void Flow::processDetectedProtocol(u_int8_t *payload, u_int16_t payload_len) {
       }
       break;
     }
+  } 
+  
+  if(ndpiFlow && (ndpiFlow->tcp.os_hint != os_hint_unknown)) {
+    Host *h = cli_h ? cli_h : getViewSharedClient() /* View interface */;
+    
+    if(h != NULL)
+      h->setnDPIOS(ndpiFlow->tcp.os_hint);
   }
 }
 
