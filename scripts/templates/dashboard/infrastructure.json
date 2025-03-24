@@ -22,7 +22,7 @@
 					"url_params" : {}
 				},
 				"counter_path" : "throughput_bps",
-				"counter_formatter" : "bps"
+				"counter_formatter" : "bps_no_scale"
 			}
 		},
 		{
