@@ -1869,6 +1869,24 @@ static int ntop_get_batched_interface_macs_info(lua_State *vm) {
 
 /* ****************************************** */
 
+static int ntop_is_mac_active(lua_State *vm) {
+  NetworkInterface *curr_iface = getCurrentInterface(vm);
+  char *mac = NULL;
+
+  if (!curr_iface)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  mac = (char *)lua_tostring(vm, 1);
+
+  lua_pushboolean(vm, curr_iface->isMacActive(mac));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_get_interface_mac_info(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
   char *mac = NULL;
@@ -2929,6 +2947,31 @@ static int ntop_get_interface_network_stats(lua_State *vm) {
   } else
     lua_pushnil(vm);
 
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
+static int ntop_is_host_active(lua_State *vm) {
+  NetworkInterface *curr_iface = getCurrentInterface(vm);
+  char *host_ip;
+  u_int16_t vlan_id = 0;
+  char buf[64];
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (!curr_iface)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+  get_host_vlan_info((char *)lua_tostring(vm, 1), &host_ip, &vlan_id, buf,
+                     sizeof(buf));
+
+  /* Optional VLAN id */
+  if (lua_type(vm, 2) == LUA_TNUMBER) vlan_id = (u_int16_t)lua_tonumber(vm, 2);
+
+  lua_pushboolean(vm, curr_iface->isHostActive(get_allowed_nets(vm), host_ip, vlan_id));
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
@@ -5592,6 +5635,7 @@ static luaL_Reg _ntop_interface_reg[] = {
     {"getBatchedRemoteHostsInfo", ntop_get_batched_interface_remote_hosts_info},
     {"getBatchedLocalHostsTs", ntop_get_batched_interface_local_hosts_ts},
     {"getInterfaceHosts", ntop_get_interface_hosts},
+    {"isHostActive", ntop_is_host_active},
     {"getHostInfo", ntop_get_interface_host_info},
     {"getHostMinInfo", ntop_get_interface_get_host_min_info},
     {"getHostCountry", ntop_get_interface_host_country},
@@ -5685,6 +5729,7 @@ static luaL_Reg _ntop_interface_reg[] = {
     {"getActiveMacs", ntop_get_interface_active_macs},
     {"getMacsInfo", ntop_get_interface_macs_info},
     {"getBatchedMacsInfo", ntop_get_batched_interface_macs_info},
+    {"isMacActive", ntop_is_mac_active},
     {"getMacInfo", ntop_get_interface_mac_info},
     {"getMacHosts", ntop_get_interface_mac_hosts},
     {"getMacManufacturers", ntop_get_interface_macs_manufacturers},

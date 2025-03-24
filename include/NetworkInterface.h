@@ -897,6 +897,7 @@ public:
                         u_int16_t observationPointId, bool is_inline_call);
   virtual Host *getHostByIP(IpAddress *ip, u_int16_t vlan_id,
                             u_int16_t observationPointId, bool is_inline_call);
+  bool isHostActive(AddressTree *allowed_hosts, char *host_ip, u_int16_t vlan_id);
   bool getHostInfo(lua_State *vm, AddressTree *allowed_hosts, char *host_ip,
                    u_int16_t vlan_id);
   void findPidFlows(lua_State *vm, u_int32_t pid);
@@ -1093,6 +1094,7 @@ public:
   inline bool isViewed() const { return(false); }
 #endif
   
+  bool isMacActive(char *mac);
   bool getMacInfo(lua_State *vm, char *mac);
   bool resetMacStats(lua_State *vm, char *mac, bool delete_data);
   bool setMacDeviceType(char *strmac, DeviceType dtype, bool alwaysOverwrite);

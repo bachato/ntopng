@@ -4744,6 +4744,17 @@ void NetworkInterface::updateFlowProfiles() {
 
 /* **************************************************** */
 
+bool NetworkInterface::isHostActive(AddressTree *allowed_hosts,
+                                    char *host_ip, u_int16_t vlan_id) {
+  Host *h;
+
+  h = findHostByIP(allowed_hosts, host_ip, vlan_id, 0 /* any observation point */);
+
+  return !!h;
+}
+
+/* **************************************************** */
+
 bool NetworkInterface::getHostInfo(lua_State *vm, AddressTree *allowed_hosts,
                                    char *host_ip, u_int16_t vlan_id) {
   Host *h;
@@ -9097,6 +9108,19 @@ int NetworkInterface::getActiveDeviceTypes(
   if (retriever.elems) free(retriever.elems);
 
   return (retriever.actNumEntries);
+}
+
+/* **************************************** */
+
+bool NetworkInterface::isMacActive(char *mac) {
+  struct mac_find_info info;
+
+  if (!macs_hash) return false;
+
+  memset(&info, 0, sizeof(info));
+  Utils::parseMac(info.mac, mac);
+
+  return !!macs_hash->get(info.mac, false /* Not an inline call */);
 }
 
 /* **************************************** */
