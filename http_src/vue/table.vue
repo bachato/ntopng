@@ -661,9 +661,12 @@ function set_active_rows() {
         let col_to_sort = get_column_to_sort();
 
         // sort rows if enabled
-        allRows = allRows.sort((r0, r1) => {
-            return f_sort(col_to_sort, r0, r1);
-        });
+
+        if (col_to_sort) {
+            allRows = allRows.sort((r0, r1) => {
+                return f_sort(col_to_sort, r0, r1);
+            });
+        }
     }
 
     // update displayed rows for current page
