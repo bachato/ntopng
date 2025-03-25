@@ -1812,4 +1812,16 @@ end
 
 -- ################################################################################
 
+function discover.get_model(value)
+   local m = discover.apple_products[value]
+
+   if(m ~= nil) then
+      return(m)
+   else
+      return(value)
+   end
+end
+
+-- ################################################################################
+
 return discover
