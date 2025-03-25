@@ -246,6 +246,10 @@ discover.apple_products = {
    ['Macmini9,1'] = 'Mac mini (M1, Late 2020)',
    ['MacBookAir10,1'] = 'MacBook Air (M1, 2020)',
    ['MacBookPro17,1'] = 'MacBook Pro (13-inch, M1, 2020)',
+   ['Mac14,12'] = 'Mac mini (M2 Pro, 2023)',
+   ['Mac14,3'] = 'Mac mini (M2, 2023)',
+   ['Mac16,10'] = 'Mac mini (M4, 2024)',
+   ['Mac16,11'] = 'Mac mini (M4 Pro, 2024)',
 }
 
 discover.asset_icons = {
