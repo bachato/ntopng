@@ -291,7 +291,7 @@ void Host::initialize(Mac *_mac, int32_t _iface_idx, u_int16_t _vlanId,
   last_stats_reset = ntop->getLastStatsReset(); /* assume fresh stats, may be
                                                    changed by deserialize */
   as = NULL, asn = 0, asname = NULL, obs_point = NULL;
-  os_type = os_unknown;
+  os_type = alt_os_type = os_unknown;
   ssdpLocation = NULL, blacklist_name = NULL, country = NULL;
 
   memset(&names, 0, sizeof(names));
@@ -2801,38 +2801,55 @@ void Host::toggleRxOnlyHost(bool rx_only) {
 /* *************************************** */
 
 void Host::setnDPIOS(enum operating_system_hint hint) {
-  if(os_type != os_unknown)
-    return; /* Already set */
+  OSType oh;
+
+  if(hint == os_hint_unknown)
+    return;
   
   switch(hint) {
   case os_hint_windows:
-    os_type = os_windows;
+    oh = os_windows;
     break;
     
   case os_hint_macos:
-    os_type = os_macos;
+    oh = os_macos;
     break;
     
   case os_hint_ios_ipad_os:
-    os_type = os_ios;
+    oh = os_ios;
     break;
     
   case os_hint_android:
-    os_type = os_android;
+    oh = os_android;
     break;
     
   case os_hint_linux:
-    os_type = os_linux;
+    oh = os_linux;
     break;
     
   case os_hint_freebsd:
-    os_type = os_freebsd;
+    oh = os_freebsd;
     break;
 
   default:
     /* nothing to do */
-    break;    
+    return;
   }
+  
+  if(os_type != os_unknown) {
+    /* Already set */
+
+    if(os_type == oh)
+      return; /* Nothing changed */
+    else {
+      /* ntop->getTrace()->traceEvent(TRACE_WARNING, "OS change detected [%u -> %u]", os_type, oh); */
+      
+      alt_os_type = os_type;
+      os_type = oh;
+    }
+  }
+
+  os_type = oh;
 }
 
 /* *************************************** */

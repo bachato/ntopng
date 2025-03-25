@@ -106,8 +106,8 @@ class Host : public GenericHashEntry,
   ObservationPoint *obs_point;
   ndpi_bitmap *tcp_udp_contacted_ports_no_tx; /* Ports of this host that have
                                                  been contacted by peers */
-  OSType os_type; /* Operating system type, equivalent to os->get_os_type(),
-                     used by operating system setters and getters */
+  OSType os_type, alt_os_type; /* Operating system type, equivalent to os->get_os_type(),
+				  used by operating system setters and getters */
 
   struct {
     u_int32_t numIngressFlows, numEgressFlows;
@@ -790,7 +790,8 @@ class Host : public GenericHashEntry,
   bool isFlowAlertDisabled(FlowAlertType alert_type);
 
   virtual void setOS(OSType _os, OSLearningMode mode);
-  OSType getOS() const { return os_type; }
+  OSType getOS() const    { return os_type; }
+  OSType getAltOS() const { return alt_os_type; }
 
   void incCliContactedHosts(IpAddress *peer) {
     stats->incCliContactedHosts(peer);
