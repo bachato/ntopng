@@ -93,7 +93,7 @@
 			"id": "status",
 			"title_i18n": "status",
 			"data_field": "status",
-			"sortable": true,
+			"sortable": false,
 			"min-width": "70px",
 			"class": [
 				"text-nowrap",
