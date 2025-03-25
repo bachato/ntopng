@@ -2056,6 +2056,8 @@ char *Host::get_mac_based_tskey(Mac *mac, char *buf, size_t bufsize,
 /* *************************************** */
 
 void Host::setOS(OSType _os, OSLearningMode mode) {
+  Mac *cur_mac;
+  
   if(_os == os_unknown)
     return;
   
@@ -2079,6 +2081,16 @@ void Host::setOS(OSType _os, OSLearningMode mode) {
   }
   
   os_type = _os;
+
+  cur_mac = getMac(); /* Cache macs as they can be swapped/updated */
+
+  /* In case the evice type is not set, we can infer it from the OS */
+  if((cur_mac != NULL) && (cur_mac->getDeviceType() == device_unknown)) {
+    DeviceType dt = Utils::osType2deviceType(os_type);
+
+    if(dt != device_unknown)
+      cur_mac->setDeviceType(dt);
+  }
 }
 
 /* *************************************** */
@@ -2849,7 +2861,7 @@ void Host::setnDPIOS(enum operating_system_hint hint) {
     }
   }
 
-  os_type = oh;
+  setOS(oh, os_learning_tcp_fingerprint);
 }
 
 /* *************************************** */

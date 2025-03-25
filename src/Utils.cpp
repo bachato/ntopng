@@ -7706,3 +7706,31 @@ bool Utils::checkNetworkList(char *network_list, char *rsp,
 
   return true;
 }
+
+/* ******************************************* */
+
+DeviceType Utils::osType2deviceType(OSType t) {
+  switch(t) {
+  case os_linux:
+  case os_freebsd:
+  case os_windows:
+  case os_macos:
+    return(device_workstation);
+    break;
+    
+  case os_ios:
+  case os_android:
+    return(device_phone);
+    break;
+    
+  case os_laserjet:
+    return(device_printer);
+    break;
+    
+  case os_apple_airport:
+    return(device_wifi);    
+    break;
+  }
+
+  return(device_unknown);
+}

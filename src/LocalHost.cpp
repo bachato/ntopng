@@ -77,8 +77,8 @@ LocalHost::~LocalHost() {
 /* *************************************** */
 
 void LocalHost::set_hash_entry_state_idle() {
-  if (ntop->getPrefs()->is_active_local_host_cache_enabled() &&
-      (!ip.isEmpty())) {
+  if (ntop->getPrefs()->is_active_local_host_cache_enabled()
+      && (!ip.isEmpty())) {
     Mac *mac = getMac();
 
     checkStatsReset();
@@ -795,10 +795,10 @@ void LocalHost::setTCPfingerprint(char *_tcp_fingerprint,
   
   if(tcp_fingerprint_host_os == os_hint_unknown) {
     /* Not yet set the host fingerprint */
-    OSType os_type = Utils::OShint2OSType(os);
+    OSType l_os_type = Utils::OShint2OSType(os);
     
-    if(os_type != os_unknown)
-      setOS(os_type, os_learning_tcp_fingerprint);
+    if(l_os_type != os_unknown)
+      setOS(l_os_type, os_learning_tcp_fingerprint);
 
     tcp_fingerprint_host_os = os;
 
@@ -831,4 +831,3 @@ void LocalHost::setOS(OSType _os, OSLearningMode mode) {
     Host::setOS(_os, mode);
   }
 }
-

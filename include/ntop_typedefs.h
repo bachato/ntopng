@@ -534,7 +534,7 @@ typedef enum {
   flow_alert_host_policy = 103,
   flow_alert_qoe_degraded = 104,
   flow_alert_ndpi_obfuscated_traffic = 105,
-  
+
   MAX_DEFINED_FLOW_ALERT_TYPE, /* Leave it as last member */
 
   MAX_FLOW_ALERT_TYPE =
@@ -936,8 +936,14 @@ typedef enum {
   interface_type_DB_VIEW
 } InterfaceType;
 
-/* Update Flow::dissectHTTP when extending the type below */
-/* Keep in sync with discover.os2label */
+/*
+  NOTE: Update
+   - Flow::dissectHTTP
+   - Utils::osType2deviceType
+   -  discover.os2label
+
+   when extending the type below
+*/
 typedef enum {
   os_unknown = 0,
   os_linux,
@@ -948,6 +954,7 @@ typedef enum {
   os_laserjet,
   os_apple_airport,
   os_freebsd,
+
   os_max_os, /* Keep as last element */
   os_any
 } OSType;
@@ -1215,7 +1222,7 @@ typedef enum {
 } MinorConnectionStates;
 
 typedef enum {
-  MAJOR_NO_STATE = 0, 
+  MAJOR_NO_STATE = 0,
   ATTEMPTED,
   ESTABLISHED,
   CLOSED = 3

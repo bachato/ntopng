@@ -250,6 +250,7 @@ discover.apple_products = {
    ['Mac14,3'] = 'Mac mini (M2, 2023)',
    ['Mac16,10'] = 'Mac mini (M4, 2024)',
    ['Mac16,11'] = 'Mac mini (M4 Pro, 2024)',
+   ['AirPort10,115'] = 'Airport Express'
 }
 
 discover.asset_icons = {

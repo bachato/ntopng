@@ -73,6 +73,9 @@ Mac::Mac(NetworkInterface *_iface, u_int8_t _mac[6])
 
 
   readDHCPCache();
+
+  if(device_type == device_unknown)
+    guessDeviceType();
 }
 
 /* *************************************** */
@@ -175,7 +178,7 @@ void Mac::lua(lua_State *vm, bool show_details, bool asListElement) {
 
   lua_push_str_table_entry(vm, "fingerprint", fingerprint ? fingerprint : (char *)"");
   if(dhcp_fingerprint) lua_push_str_table_entry(vm, "dhcp_fingerprint", dhcp_fingerprint);
-  
+
   lua_push_uint64_table_entry(vm, "seen.first", first_seen);
   lua_push_uint64_table_entry(vm, "seen.last", last_seen);
   lua_push_uint64_table_entry(vm, "duration", get_duration());
@@ -493,7 +496,7 @@ void Mac::dumpToRedis() {
 void Mac::dumpAssetMac(ndpi_serializer *serializer) {
   char buf[24];
   const char *man = get_manufacturer();
-  
+
   ndpi_serialize_string_string(serializer, "mac", Utils::formatMac(mac, buf, sizeof(buf)));
   if(man) ndpi_serialize_string_string(serializer, "manufacturer", man);
 }
@@ -508,7 +511,7 @@ void Mac::dumpAssetInfo(ndpi_serializer *serializer) {
   if(dhcp_fingerprint) ndpi_serialize_string_string(serializer, "dhcp_fingerprint", dhcp_fingerprint);
 
   /* dhcp_name is set in LocalHost, no need to export it */
-  
+
   asset_map_updated = false;
 }
 
@@ -517,8 +520,7 @@ void Mac::dumpAssetInfo(ndpi_serializer *serializer) {
 /* *************************************** */
 
 bool Mac::is_hash_entry_state_idle_transition_ready() {
-/*  ntop->getTrace()->traceEvent(
-      TRACE_NORMAL,
+/*  ntop->getTrace()->traceEvent(TRACE_NORMAL,
       "Is idle, current time, last seen, configured expiration: "
       "[ %s | %d | %d | %d ]",
       is_active_entry_now_idle(ntop->getPrefs()->macAddressCacheDuration())
@@ -536,4 +538,21 @@ void Mac::setDHCPFingerprint(const char *f) {
     free(dhcp_fingerprint);
 
   dhcp_fingerprint = strdup(f);
+}
+
+/* *************************************** */
+
+void Mac::guessDeviceType() {
+  if(manuf == NULL)
+    return;
+
+  /* ntop->getTrace()->traceEvent(TRACE_ERROR, "*** %s", manuf); */
+
+  if(strncasecmp(manuf, "Sonos", 5) == 0)
+    device_type = device_wifi;
+  else if((strncasecmp(manuf, "Tp-Link", 7) == 0)
+	  || (strncasecmp(manuf, "Technicolor", 11) == 0))
+    device_type = device_networking;
+  else if(strncasecmp(manuf, "ASUSTek", 7) == 0)
+    device_type = device_workstation;
 }

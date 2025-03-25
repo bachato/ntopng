@@ -59,7 +59,8 @@ class Mac : public GenericHashEntry {
   bool statsResetRequested();
   void checkStatsReset();
   void dumpToRedis();
-
+  void guessDeviceType();
+  
  public:
   Mac(NetworkInterface *_iface, u_int8_t _mac[6]);
   ~Mac();

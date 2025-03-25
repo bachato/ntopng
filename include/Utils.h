@@ -347,6 +347,8 @@ class Utils {
   static const char* learningMode2str(OSLearningMode mode);
   static bool checkNetworkList(char *network_list, char *rsp,
 			       bool (*callback)(char *, char *, void *user_data), void *user_data);
+
+  static DeviceType osType2deviceType(OSType t);
 };
 
 #endif /* _UTILS_H_ */
