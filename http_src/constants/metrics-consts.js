@@ -298,7 +298,7 @@ const sources_types = [
 	},
 	{
 		id: "profile",
-		regex_page_url: "lua\/profile_details",
+		regex_page_url: "lua\/pro\/profile_details",
 		label: i18n("page_stats.source_def.profile"),
 		query: "profile",
 		source_def_array: [{
