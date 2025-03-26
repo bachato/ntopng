@@ -161,7 +161,7 @@ const map_table_def_columns = (columns) => {
             const host_url = create_button_host_details(row);
 
             // If host is online show host details icon fas-laptop to jump to host details page
-            let host_icon = `<a href='/lua/host_details.lua?host=${row.host.ip}' data-bs-toggle='tooltip' data-bs-placement='top' title='Host Details'><i class='fas fa-laptop'></i></a>`;
+            let host_icon = `<a href='/lua/host_details.lua?host=${row.host.ip}&vlan=${row.host.vlan.id}' data-bs-toggle='tooltip' data-bs-placement='top' title='Host Details'><i class='fas fa-laptop'></i></a>`;
             
             if (is_asset_online) {
                 return `<a href="${host_url}">${ip_address}</a> ${host_icon} ${icons}`
