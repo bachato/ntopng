@@ -8807,7 +8807,7 @@ void Flow::updateTCPHostServices(Host *cli_h, Host *srv_h) {
   switch (ndpi_get_lower_proto(ndpiDetectedProtocol)) {
   case NDPI_PROTOCOL_MAIL_SMTPS:
   case NDPI_PROTOCOL_MAIL_SMTP:
-    if(isBidirectional()) {
+    if(isBidirectional() && isThreeWayHandshakeOK()) {
       if(srv_h)
 	srv_h->setSmtpServer(domain_name);
       else if(srv_ip_addr)
@@ -8817,7 +8817,7 @@ void Flow::updateTCPHostServices(Host *cli_h, Host *srv_h) {
 
   case NDPI_PROTOCOL_MAIL_IMAPS:
   case NDPI_PROTOCOL_MAIL_IMAP:
-    if(isBidirectional()) {
+    if(isBidirectional() && isThreeWayHandshakeOK()) {
       if(srv_h)
 	srv_h->setImapServer(domain_name);
       else if(srv_ip_addr)
@@ -8827,7 +8827,7 @@ void Flow::updateTCPHostServices(Host *cli_h, Host *srv_h) {
 
   case NDPI_PROTOCOL_MAIL_POPS:
   case NDPI_PROTOCOL_MAIL_POP:
-    if(isBidirectional()) {
+    if(isBidirectional() && isThreeWayHandshakeOK()) {
       if(srv_h)
 	srv_h->setPopServer(domain_name);
       else if(srv_ip_addr)
