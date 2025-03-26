@@ -81,7 +81,7 @@ function alert_profile_rule_threshold_crossed.format(ifid, alert, alert_type_par
     end
    
     return(i18n("alert_messages.traffic_profile_volume_alert", {
-        url = ntop.getHttpPrefix() .. "/lua/profile_details.lua?ifid="..ifid.."&profile=",
+        url = ntop.getHttpPrefix() .. "/lua/pro/profile_details.lua?ifid="..ifid.."&profile=",
         profile = alert_type_params.profile,
         metric = alert_type_params.metric,
         value = alert_type_params.value,

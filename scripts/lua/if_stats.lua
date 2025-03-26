@@ -1589,7 +1589,7 @@ elseif (page == "trafficprofiles") then
         local statschart_icon = ''
 
         if areInterfaceTimeseriesEnabled(ifid) then
-            statschart_icon = '<A HREF=\"' .. ntop.getHttpPrefix() .. '/lua/profile_details.lua?profile=' .. pname ..
+            statschart_icon = '<A HREF=\"' .. ntop.getHttpPrefix() .. '/lua/pro/profile_details.lua?profile=' .. pname ..
                 '\"><i class=\'fas fa-chart-area fa-lg\'></i></A>'
         end
 
