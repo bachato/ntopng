@@ -192,7 +192,7 @@ const map_table_def_columns = (columns) => {
 
             return result;
         },
-        "manufacturer": (value, row) => {
+        "model": (value, row) => {
             return value;
         },
         "status": (value, row) => {

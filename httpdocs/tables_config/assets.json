@@ -80,11 +80,21 @@
 			]
 		},
 		{
-			"id": "manufacturer",
-			"title_i18n": "manufacturer",
-			"data_field": "manufacturer",
+			"id": "model",
+			"title_i18n": "model",
+			"data_field": "model",
 			"sortable": true,
 			"min-width": "120px",
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
+			"id": "os",
+			"title_i18n": "os",
+			"data_field": "os",
+			"sortable": true,
+			"min-width": "60px",
 			"class": [
 				"text-nowrap"
 			]
