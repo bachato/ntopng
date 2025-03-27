@@ -2055,11 +2055,11 @@ char *Host::get_mac_based_tskey(Mac *mac, char *buf, size_t bufsize,
 
 /* *************************************** */
 
-void Host::setOS(OSType _os, OSLearningMode mode) {
+bool Host::setOS(OSType _os, OSLearningMode mode) {
   Mac *cur_mac;
   
   if(_os == os_unknown)
-    return;
+    return(false);
   
   if((os_type != os_unknown) && (os_type != _os)) {
 #if 0
@@ -2076,7 +2076,7 @@ void Host::setOS(OSType _os, OSLearningMode mode) {
 	as this information can be inconsistent/fake/wrong
       */
       
-      return; /* Don't overwrite the existing value */
+      return(false); /* Don't overwrite the existing value */
     }
   }
   
@@ -2084,13 +2084,15 @@ void Host::setOS(OSType _os, OSLearningMode mode) {
 
   cur_mac = getMac(); /* Cache macs as they can be swapped/updated */
 
-  /* In case the evice type is not set, we can infer it from the OS */
+  /* In case the device type is not set, we can infer it from the OS */
   if((cur_mac != NULL) && (cur_mac->getDeviceType() == device_unknown)) {
     DeviceType dt = Utils::osType2deviceType(os_type);
 
     if(dt != device_unknown)
       cur_mac->setDeviceType(dt);
   }
+
+  return(true); /* OS set */
 }
 
 /* *************************************** */

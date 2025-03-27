@@ -731,10 +731,12 @@ void LocalHost::offlineSetDHCPName(const char *dhcp_n) {
 /* *************************************** */
 
 void LocalHost::offlineSetDhcpFingerprint(const char *fingerprint) {
-  Mac *mac = getMac();
-  
-  if(mac)
-    mac->setDHCPFingerprint(fingerprint);
+  if(fingerprint && (fingerprint[0] != '\0')) {
+    Mac *mac = getMac();
+    
+    if(mac)
+      mac->setDHCPFingerprint(fingerprint);
+  }
 }
 
 /* *************************************** */
@@ -819,15 +821,19 @@ void LocalHost::setTCPfingerprint(char *_tcp_fingerprint,
 
 /* *************************************** */
 
-void LocalHost::setOS(OSType _os, OSLearningMode mode) {
+bool LocalHost::setOS(OSType _os, OSLearningMode mode) {
   if((_os != os_unknown) && (getOS() != _os)) {
-    char buf[8];
-    
-    os_learning[mode] = _os;
-    
-    snprintf(buf, sizeof(buf), "%d", _os);
-
-    addDataToAssets((char *) "os_type", buf);
-    Host::setOS(_os, mode);
+    if(Host::setOS(_os, mode)) {
+      char buf[8];
+      
+      os_learning[mode] = _os;
+      
+      snprintf(buf, sizeof(buf), "%d", _os);
+      
+      addDataToAssets((char *) "os_type", buf);
+      return(true);
+    }
   }
+
+  return(false);
 }

@@ -1899,7 +1899,9 @@ void Flow::incFlowDroppedCounters() {
   if(!flow_dropped_counts_increased) {
     if(cli_host) {
       cli_host->incNumDroppedFlows();
-      if(cli_host->getMac()) cli_host->getMac()->incNumDroppedFlows();
+
+      if(cli_host->getMac())
+	cli_host->getMac()->incNumDroppedFlows();
     }
 
 #ifdef NTOPNG_PRO
@@ -2917,7 +2919,8 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   bool has_json_info = false;
   u_char community_id[200];
   char buf[64];
-
+  Mac *cli_mac = get_cli_host()->getMac();
+  
   if(ptree) {
     if(src_ip) src_match = src_ip->match(ptree);
     if(dst_ip) dst_match = dst_ip->match(ptree);
@@ -3251,6 +3254,13 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   // this is used to dynamicall update entries in the GUI
   lua_push_uint64_table_entry(vm, "ntopng.key", key());  // Key
   lua_push_uint64_table_entry(vm, "hash_entry_id", get_hash_entry_id());
+
+  if(cli_mac != NULL) {
+    if(cli_mac->getDHCPfingerprint())
+      lua_push_str_table_entry(vm,
+			       "dhcp_fingerprint",
+			       cli_mac->getDHCPfingerprint());
+  }
 }
 
 /* *************************************** */

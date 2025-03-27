@@ -235,6 +235,7 @@ local lang = {
   ["device_type"] = "Device Type",
   ["device_type_filter"] = "Device Filter",
   ["devices"] = "Devices",
+  ["dhcp_fingerprint"] = "DHCP Fingerprint",
   ["difference"] = "Difference",
   ["disable"] = "Disable",
   ["disable_check_title"] = "Disable Selected Check",

@@ -789,7 +789,7 @@ class Host : public GenericHashEntry,
   bool isHostAlertDisabled(HostAlertType alert_type);
   bool isFlowAlertDisabled(FlowAlertType alert_type);
 
-  virtual void setOS(OSType _os, OSLearningMode mode);
+  virtual bool setOS(OSType _os, OSLearningMode mode);
   OSType getOS() const    { return os_type; }
   OSType getAltOS() const { return alt_os_type; }
 

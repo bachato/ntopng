@@ -1640,10 +1640,14 @@ else
    end
 
    if ((flow.community_id ~= nil) and (flow.community_id ~= "")) then
-      print(
-         "<tr><th width=10%><A class='ntopng-external-link' href=\"https://github.com/corelight/community-id-spec\">CommunityId <i class=\"fas fa-external-link-alt\"></i></A></th><td colspan=2>" ..
-         flow.community_id)
+      print("<tr><th width=10%><A class='ntopng-external-link' href=\"https://github.com/corelight/community-id-spec\">CommunityId <i class=\"fas fa-external-link-alt\"></i></A></th><td colspan=2>" .. flow.community_id)
       print_copy_button('community_id', flow.community_id)
+      print("</td></tr>\n")
+   end
+
+   if ((flow.dhcp_fingerprint ~= nil) and (flow.dhcp_fingerprint ~= "")) then
+      print("<tr><th width=10%>" .. i18n("dhcp_fingerprint") .."</th><td colspan=2>" .. flow.dhcp_fingerprint)
+      print_copy_button('dhcp_fingerprint', flow.dhcp_fingerprint)
       print("</td></tr>\n")
    end
 

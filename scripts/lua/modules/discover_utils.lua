@@ -109,6 +109,7 @@ discover.apple_products = {
    ['Macmini1,1'] = 'Mac mini "Core Duo" 1.83',
    ['iMac12,2'] = 'iMac "Core i7" 3.4 27-Inch (Mid-2011)',
    ['iMac6,1'] = 'iMac "Core 2 Duo" 2.33 24-Inch',
+   ['MacPro7,1'] = 'Mac Pro "Eight Core" 3.5 (2019)',
    ['MacBookPro5,1'] = 'MacBook Pro "Core 2 Duo" 2.93 15" (Unibody)',
    ['MacBookPro11,5'] = 'MacBook Pro "Core i7" 2.8 15" Mid-2015 (DG)',
    ['MacBookPro11,4'] = 'MacBook Pro "Core i7" 2.8 15" Mid-2015 (IG)',

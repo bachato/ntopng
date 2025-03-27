@@ -226,7 +226,7 @@ class LocalHost : public Host {
   void setServerName(const char *n);
   void setResolvedName(const char *resolved_name);
 
-  virtual void setOS(OSType _os, OSLearningMode mode);
+  virtual bool setOS(OSType _os, OSLearningMode mode);
   void setTCPfingerprint(char *tcp_fingerprint, enum operating_system_hint os);
 
   inline bool isAssetUpdated() {

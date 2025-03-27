@@ -205,6 +205,8 @@ class Mac : public GenericHashEntry {
   void dumpAssetMac(ndpi_serializer *serializer);
   void dumpAssetInfo(ndpi_serializer *serializer);
 #endif
+
+  inline char* getDHCPfingerprint() { return(dhcp_fingerprint); }
 };
 
 #endif /* _MAC_H_ */
