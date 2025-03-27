@@ -760,9 +760,16 @@ CREATE TABLE IF NOT EXISTS `assets` (
 `last_seen` DateTime NOT NULL,
 `gateway_mac` String NULL,
 `json_info` String NULL, -- A json containing all other info
-`version` UInt64 -- Used to not have duplicates
+`version` UInt64, -- Used to not have duplicates
+`os_type` String NULL,
+`model` String NULL
 ) ENGINE = ReplacingMergeTree(version) PRIMARY KEY (`type`, `key`) ORDER BY (`type`, `key`);
 @
+ALTER TABLE assets ADD COLUMN IF NOT EXISTS `os_type` String;
+@
+ALTER TABLE assets ADD COLUMN IF NOT EXISTS `model` String;
+@
+
 
 /* VIEWS */
 

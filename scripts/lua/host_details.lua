@@ -387,7 +387,7 @@ else
     local periodicity_map_link = ntop.getHttpPrefix() ..
                                      "/lua/pro/enterprise/network_maps.lua?map=periodicity_map&ifid=" .. ifId ..
                                      "&host=" .. host_ip
-    local historical_flow_link = ntop.getHttpPrefix() .. "/lua/db_search.lua?ifid=" .. ifId .. "&ip=" .. host_ip .. ";eq"
+    local historical_flow_link = ntop.getHttpPrefix() .. "/lua/pro/db_search.lua?ifid=" .. ifId .. "&ip=" .. host_ip .. ";eq"
 
     service_map_available, periodicity_map_available = behavior_utils.mapsAvailable()
 

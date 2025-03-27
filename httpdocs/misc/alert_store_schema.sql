@@ -459,9 +459,14 @@ manufacturer TEXT NULL,
 first_seen DATETIME NOT NULL DEFAULT 0,
 last_seen DATETIME NOT NULL DEFAULT 0,
 gateway_mac TEXT NULL,
-json_info TEXT NULL -- A json containing all other info
+json_info TEXT NULL, -- A json containing all other info
+os_type TEXT NULL,
+model TEXT NULL
 );
-
+@
+ALTER TABLE assets ADD os_type TEXT NULL;
+@
+ALTER TABLE assets ADD model TEXT NULL;
 @
 
 -- -----------------------------------------------------
