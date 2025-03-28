@@ -509,8 +509,14 @@ function get_ts_compare(status) {
 }
 
 function get_top_table_url(ts_group, table_value, table_view, table_source_def_value_dict, status) {
-    if (status == null) {
+    if (!status) {
         status = ntopng_status_manager.get_status();
+    }
+    if (!status.epoch_begin) {
+        status.epoch_begin = ntopng_url_manager.get_url_entry("epoch_begin");
+    }
+    if (!status.epoch_end) {
+        status.epoch_end = ntopng_url_manager.get_url_entry("epoch_end");
     }
     let ts_query = timeseriesUtils.getTsQuery(ts_group, true, table_source_def_value_dict);
     let v = table_value;
@@ -539,7 +545,6 @@ async function refresh_top_table() {
     top_table_ref.value.update_url(data_url);
     top_table_ref.value.reload();
     // NtopUtils.hideOverlays();
-
 }
 
 const top_table_options = ref([]);

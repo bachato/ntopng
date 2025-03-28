@@ -279,7 +279,7 @@ export const ntopng_status_manager = function() {
     let subscribers = {}; // dictionary of { [id: string]: f_on_ntopng_status_change() }
     const clone = (e) => ntopng_utility.clone(e);
 
-    const relplace_global_status = function(status) {
+    const replace_global_status = function(status) {
         global_status = status;
     }
 
@@ -334,7 +334,7 @@ export const ntopng_status_manager = function() {
          * @param {string} skip_id if != null doesn't notify the subscribers with skip_id identifier.
          */
         replace_status: function(status, skip_id) {
-            relplace_global_status(status);
+            replace_global_status(status);
             notify_subscribers(status, skip_id);
         },
 
@@ -543,11 +543,11 @@ export const ntopng_events = {
 
 const ntopng_events_compare = {
   EPOCH_CHANGE: function(new_status, old_status) {
-return new_status.epoch_begin != old_status.epoch_begin
+    return new_status.epoch_begin != old_status.epoch_begin
     || new_status.epoch_end != old_status.epoch_end;
   },
   FILTERS_CHANGE: function(new_status, old_status) {	
-return (new_status.filters == null && old_status.filters != null)
+    return (new_status.filters == null && old_status.filters != null)
     || (new_status.filters != null && old_status.filters == null)
     || (new_status.filters != null && old_status.filters != null &&
   (
@@ -571,7 +571,6 @@ export const ntopng_custom_events = {
     GET_INTERFACE_FATA: "get_interface_data", // object returned by /lua/rest/v2/get/interface/data.lua
     COMPONENT_EPOCH_INTERVAL_CHANGE: "component_epoch_interval_change", // { epoch_begin: number, epoch_end: number }
 };
-
 
 /**
 * A global events service that allows to manage the application global status.
