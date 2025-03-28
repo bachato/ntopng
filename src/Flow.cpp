@@ -2919,7 +2919,7 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   bool has_json_info = false;
   u_char community_id[200];
   char buf[64];
-  Mac *cli_mac = get_cli_host()->getMac();
+  Mac *cli_mac = get_cli_host() ? get_cli_host()->getMac() : NULL;
   
   if(ptree) {
     if(src_ip) src_match = src_ip->match(ptree);
