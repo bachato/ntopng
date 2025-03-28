@@ -40,6 +40,8 @@ end
 -- #################################
 
 function discover.getOsName(id)
+    if not id then return "" end
+
     local info = discover.osinfo[tonumber(id)]
 
     if (info) then
@@ -1819,6 +1821,8 @@ end
 -- ################################################################################
 
 function discover.get_model(value)
+   if not value then return "" end
+
    local m = discover.apple_products[value]
 
    if(m ~= nil) then
