@@ -7730,6 +7730,10 @@ DeviceType Utils::osType2deviceType(OSType t) {
   case os_apple_airport:
     return(device_wifi);    
     break;
+  case os_unknown:
+  case os_max_os:
+  case os_any:
+    break;
   }
 
   return(device_unknown);
