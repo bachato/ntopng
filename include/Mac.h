@@ -40,7 +40,7 @@ class Mac : public GenericHashEntry {
     char *dhcp; /* Extracted from DHCP dissection */
   } names;
 
-  char *fingerprint, *dhcp_fingerprint;
+  char *fingerprint, *dhcpv4_fingerprint;
   char *model;
   char *ssid;
 
@@ -206,7 +206,7 @@ class Mac : public GenericHashEntry {
   void dumpAssetInfo(ndpi_serializer *serializer);
 #endif
 
-  inline char* getDHCPfingerprint() { return(dhcp_fingerprint); }
+  inline char* getDHCPfingerprint() { return(dhcpv4_fingerprint); }
 };
 
 #endif /* _MAC_H_ */

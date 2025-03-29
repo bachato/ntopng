@@ -888,9 +888,18 @@ void Host::lua(lua_State *vm, AddressTree *ptree, bool host_details,
   char buf[64], buf_id[64], *host_id = buf_id;
   char ip_buf[64], *ipaddr = NULL;
   bool mask_host = Utils::maskHost(isLocalHost());
-
+  
   if((ptree && (!match(ptree))) || mask_host) return;
 
+  /* Some checks first... */
+  if(!is_dhcp_host) {
+    Mac *cur_mac = getMac();
+    
+    if(cur_mac && cur_mac->getDHCPfingerprint()) {
+      is_dhcp_host = 1;
+    }
+  }
+  
   lua_newtable(vm);
 
   lua_push_str_table_entry(vm, "ip",

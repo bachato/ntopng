@@ -39,7 +39,7 @@ Mac::Mac(NetworkInterface *_iface, u_int8_t _mac[6])
 #ifdef NTOPNG_PRO
   captive_portal_notified = 0;
 #endif
-  model = NULL, ssid = NULL, dhcp_fingerprint = NULL;
+  model = NULL, ssid = NULL, dhcpv4_fingerprint = NULL;
   stats_reset_requested = data_delete_requested = false;
   stats = new (std::nothrow) MacStats(_iface);
   stats_shadow = NULL;
@@ -89,7 +89,7 @@ Mac::~Mac() {
 
   if (model) free(model);
   if (ssid) free(ssid);
-  if(dhcp_fingerprint) free(dhcp_fingerprint);
+  if(dhcpv4_fingerprint) free(dhcpv4_fingerprint);
   if (fingerprint) free(fingerprint);
   freeMacData();
   if (stats) delete (stats);
@@ -177,7 +177,7 @@ void Mac::lua(lua_State *vm, bool show_details, bool asListElement) {
   stats->lua(vm, show_details);
 
   lua_push_str_table_entry(vm, "fingerprint", fingerprint ? fingerprint : (char *)"");
-  if(dhcp_fingerprint) lua_push_str_table_entry(vm, "dhcp_fingerprint", dhcp_fingerprint);
+  if(dhcpv4_fingerprint) lua_push_str_table_entry(vm, "dhcp_fingerprint", dhcpv4_fingerprint);
 
   lua_push_uint64_table_entry(vm, "seen.first", first_seen);
   lua_push_uint64_table_entry(vm, "seen.last", last_seen);
@@ -508,7 +508,7 @@ void Mac::dumpAssetInfo(ndpi_serializer *serializer) {
   if(model)            ndpi_serialize_string_string(serializer, "model", model);
   if(ssid)             ndpi_serialize_string_string(serializer, "ssid", ssid);
   if(fingerprint)      ndpi_serialize_string_string(serializer, "fingerprint", fingerprint);
-  if(dhcp_fingerprint) ndpi_serialize_string_string(serializer, "dhcp_fingerprint", dhcp_fingerprint);
+  if(dhcpv4_fingerprint) ndpi_serialize_string_string(serializer, "dhcp_fingerprint", dhcpv4_fingerprint);
 
   /* dhcp_name is set in LocalHost, no need to export it */
 
@@ -534,10 +534,13 @@ bool Mac::is_hash_entry_state_idle_transition_ready() {
 /* *************************************** */
 
 void Mac::setDHCPFingerprint(const char *f) {
-  if(dhcp_fingerprint != NULL)
-    free(dhcp_fingerprint);
+  if((f == NULL) || (f[0] == '\0'))
+    return;
+  
+  if(dhcpv4_fingerprint != NULL)
+    free(dhcpv4_fingerprint);
 
-  dhcp_fingerprint = strdup(f);
+  dhcpv4_fingerprint = strdup(f);
 }
 
 /* *************************************** */
