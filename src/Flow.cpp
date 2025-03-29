@@ -8834,7 +8834,7 @@ void Flow::updateTCPHostServices(Host *cli_h, Host *srv_h) {
   switch (ndpi_get_lower_proto(ndpiDetectedProtocol)) {
   case NDPI_PROTOCOL_MAIL_SMTPS:
   case NDPI_PROTOCOL_MAIL_SMTP:
-    if(isBidirectional() && isThreeWayHandshakeOK()) {
+    if(isBidirectional() && isThreeWayHandshakeOK() && (getConfidence() == NDPI_CONFIDENCE_DPI)) {
       if(srv_h)
 	srv_h->setSmtpServer(domain_name);
       else if(srv_ip_addr)
@@ -8844,7 +8844,7 @@ void Flow::updateTCPHostServices(Host *cli_h, Host *srv_h) {
 
   case NDPI_PROTOCOL_MAIL_IMAPS:
   case NDPI_PROTOCOL_MAIL_IMAP:
-    if(isBidirectional() && isThreeWayHandshakeOK()) {
+    if(isBidirectional() && isThreeWayHandshakeOK() && (getConfidence() == NDPI_CONFIDENCE_DPI)) {
       if(srv_h)
 	srv_h->setImapServer(domain_name);
       else if(srv_ip_addr)
@@ -8854,7 +8854,7 @@ void Flow::updateTCPHostServices(Host *cli_h, Host *srv_h) {
 
   case NDPI_PROTOCOL_MAIL_POPS:
   case NDPI_PROTOCOL_MAIL_POP:
-    if(isBidirectional() && isThreeWayHandshakeOK()) {
+    if(isBidirectional() && isThreeWayHandshakeOK() && (getConfidence() == NDPI_CONFIDENCE_DPI)) {
       if(srv_h)
 	srv_h->setPopServer(domain_name);
       else if(srv_ip_addr)
@@ -8893,28 +8893,30 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
 
   switch (ndpi_get_lower_proto(ndpiDetectedProtocol)) {
   case NDPI_PROTOCOL_DHCP:
-    if(cli_port == htons(67)) {
-      /* Server -> Client */
+    if(getConfidence() == NDPI_CONFIDENCE_DPI) {
+      if(cli_port == htons(67)) {
+	/* Server -> Client */
 
-      if(cli_host && (!cli_host->isBroadcastHost())) {
-	cli_host->setDhcpServer(domain_name);
-      } else if(cli_ip_addr && !cli_ip_addr->isBroadcastAddress()) {
-	cli_ip_addr->setDhcpServer();
-      }
-    } else {
-      if(srv_host && (!srv_host->isBroadcastHost())) {
-	srv_host->setDhcpServer(domain_name);
-      } else if(srv_ip_addr && !srv_ip_addr->isBroadcastAddress()) {
-	srv_ip_addr->setDhcpServer();
-      }
+	if(cli_host && (!cli_host->isBroadcastHost())) {
+	  cli_host->setDhcpServer(domain_name);
+	} else if(cli_ip_addr && !cli_ip_addr->isBroadcastAddress()) {
+	  cli_ip_addr->setDhcpServer();
+	}
+      } else {
+	if(srv_host && (!srv_host->isBroadcastHost())) {
+	  srv_host->setDhcpServer(domain_name);
+	} else if(srv_ip_addr && !srv_ip_addr->isBroadcastAddress()) {
+	  srv_ip_addr->setDhcpServer();
+	}
 
-      if(ndpiFlow && cli_host)
-	cli_host->offlineSetDhcpFingerprint(ndpiFlow->protos.dhcp.fingerprint);
+	if(ndpiFlow && cli_host)
+	  cli_host->offlineSetDhcpFingerprint(ndpiFlow->protos.dhcp.fingerprint);
+      }
     }
     break;
 
   case NDPI_PROTOCOL_NTP:
-    if(isBidirectional()) {
+    if(isBidirectional() && (getConfidence() == NDPI_CONFIDENCE_DPI)) {
       if(srv_h)
 	srv_h->setNtpServer(domain_name);
       else if(srv_ip_addr)
@@ -8942,33 +8944,34 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
 	}
       }
     }
-
-    if(swap_requested) {
+    if(getConfidence() == NDPI_CONFIDENCE_DPI) {
+      if(swap_requested) {
 #ifdef DEBUG
-      char buf[64];
-
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** DNS: %s", cli_h->print(buf, sizeof(buf)));
+	char buf[64];
+	
+	ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** DNS: %s", cli_h->print(buf, sizeof(buf)));
 #endif
-
-      if(isBidirectional()) {
-	if(cli_h)
-	  cli_h->setDnsServer(domain_name);
-	else if(cli_ip_addr)
-	  cli_ip_addr->setDnsServer();
-      }
-    } else {
+	
+	if(isBidirectional()) {
+	  if(cli_h)
+	    cli_h->setDnsServer(domain_name);
+	  else if(cli_ip_addr)
+	    cli_ip_addr->setDnsServer();
+	}
+      } else {
 #ifdef DEBUG
-      char buf[64];
-
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** DNS: %s [%u/%u]", srv_h->print(buf, sizeof(buf)),
-				   ndpiFlow->protos.dns.is_query, current_pkt_from_client_to_server(iface->get_ndpi_struct(), ndpiFlow));
+	char buf[64];
+	
+	ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** DNS: %s [%u/%u]", srv_h->print(buf, sizeof(buf)),
+				     ndpiFlow->protos.dns.is_query, current_pkt_from_client_to_server(iface->get_ndpi_struct(), ndpiFlow));
 #endif
-
-      if(isBidirectional()) {
-	if(srv_h)
-	  srv_h->setDnsServer(domain_name);
-	else if(srv_ip_addr)
-	  srv_ip_addr->setDnsServer();
+	
+	if(isBidirectional()) {
+	  if(srv_h)
+	    srv_h->setDnsServer(domain_name);
+	  else if(srv_ip_addr)
+	    srv_ip_addr->setDnsServer();
+	}
       }
     }
     break;
