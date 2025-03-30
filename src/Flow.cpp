@@ -8916,17 +8916,25 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
     break;
 
   case NDPI_PROTOCOL_NTP:
-    if(isBidirectional() && (getConfidence() == NDPI_CONFIDENCE_DPI)) {
-      if(srv_h)
+    if(isBidirectional()
+       /* && (getConfidence() == NDPI_CONFIDENCE_DPI) */
+       && isTCPEstablished()
+       ) {
+      //char buf[256];
+      
+      if(srv_h) {
 	srv_h->setNtpServer(domain_name);
-      else if(srv_ip_addr)
+	// ntop->getTrace()->traceEvent(TRACE_NORMAL, "[NTP] %s", print(buf, sizeof(buf)));
+      } else if(srv_ip_addr) {
 	srv_ip_addr->setNtpServer();
+	// ntop->getTrace()->traceEvent(TRACE_NORMAL, "[NTP] %s", print(buf, sizeof(buf)));
+      }
     }
     break;
 
   case NDPI_PROTOCOL_DNS:
     /* Swap check */
-    if((!swap_requested) && (ndpiFlow != NULL)) {
+    if((!swap_requested) && (ndpiFlow != NULL)) {      
       if(ndpiFlow->protos.dns.is_query) {
 	if(src2dst_direction) {
 	  ;
@@ -8944,7 +8952,14 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
 	}
       }
     }
-    if(getConfidence() == NDPI_CONFIDENCE_DPI) {
+    
+    if(isBidirectional()
+       && ((getConfidence() == NDPI_CONFIDENCE_DPI) /* Packet */
+	   || (ntohs(srv_port) == 53) /* nProbe case: let's be conservative */
+	   )
+       ) {
+      // char buf[256];
+      
       if(swap_requested) {
 #ifdef DEBUG
 	char buf[64];
@@ -8953,10 +8968,13 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
 #endif
 	
 	if(isBidirectional()) {
-	  if(cli_h)
+	  if(cli_h) {
 	    cli_h->setDnsServer(domain_name);
-	  else if(cli_ip_addr)
+	    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "[DNS] %s", print(buf, sizeof(buf)));
+	  } else if(cli_ip_addr) {
 	    cli_ip_addr->setDnsServer();
+	    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "[DNS] %s", print(buf, sizeof(buf)));
+	  }
 	}
       } else {
 #ifdef DEBUG
@@ -8967,10 +8985,13 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
 #endif
 	
 	if(isBidirectional()) {
-	  if(srv_h)
+	  if(srv_h) {
 	    srv_h->setDnsServer(domain_name);
-	  else if(srv_ip_addr)
+	    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "[DNS] %s", print(buf, sizeof(buf)));
+	  } else if(srv_ip_addr) {
 	    srv_ip_addr->setDnsServer();
+	    //ntop->getTrace()->traceEvent(TRACE_NORMAL, "[DNS] %s", print(buf, sizeof(buf)));
+	  }
 	}
       }
     }
