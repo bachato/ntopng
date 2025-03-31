@@ -125,7 +125,7 @@ Flow::Flow(NetworkInterface *_iface,
   bt_hash = NULL, ebpf = NULL, iec104 = NULL, stun_mapped_address = NULL;
   twh_over_view = false;
   flow_verdict = 0;
-  operating_system = os_unknown;
+  operating_system = ndpi_os_unknown;
   last_update_time.tv_sec = 0, last_update_time.tv_usec = 0;
   bytes_thpt = 0, goodput_bytes_thpt = 0;
   pkts_thpt = 0;
@@ -425,15 +425,14 @@ void Flow::freeDPIMemory() {
 				     vlanId);
 #endif
 
-	h->setTCPfingerprint(ndpiFlow->tcp.fingerprint,
-			     (enum operating_system_hint)ndpiFlow->tcp.os_hint);
+	h->setTCPfingerprint(ndpiFlow->tcp.fingerprint, ndpiFlow->tcp.os_hint);
 
-	if((ndpiFlow->tcp.os_hint == os_hint_unknown) && h->isLocalHost()) {
+	if((ndpiFlow->tcp.os_hint == ndpi_os_unknown) && h->isLocalHost()) {
 	  char buf[64], log[128];
 
 	  snprintf(log, sizeof(log), "%s,%s",
 		   h->get_ip()->print(buf, sizeof(buf)),
-		   Utils::OSType2Str(h->getOS()));
+		   Utils::OS2Str(h->getOS()));
 
 	  ntop->getTrace()->traceEvent(TRACE_DEBUG, "** Unknown TCP fingerprint %s [%s]",
 				       ndpiFlow->tcp.fingerprint, log);
@@ -725,7 +724,7 @@ void Flow::processDetectedProtocol(u_int8_t *payload, u_int16_t payload_len) {
     }
   } 
   
-  if(ndpiFlow && (ndpiFlow->tcp.os_hint != os_hint_unknown)) {
+  if(ndpiFlow && (ndpiFlow->tcp.os_hint != ndpi_os_unknown)) {
     Host *h = cli_h ? cli_h : getViewSharedClient() /* View interface */;
     
     if(h != NULL)
@@ -2233,7 +2232,7 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
       srv_host->getHTTPstats()->incStats(false /* Server */,
 					 partial->get_flow_http_stats());
 
-    if(operating_system != os_unknown) {
+    if(operating_system != ndpi_os_unknown) {
       if(cli_host && !(get_cli_ip_addr()->isBroadcastAddress() ||
 			get_cli_ip_addr()->isMulticastAddress()))
 	cli_host->setOS(operating_system, os_learning_http_user_agent);
@@ -6396,15 +6395,15 @@ void Flow::dissectHTTP(bool src2dst_direction, char *payload,
 	      char *end = strchr(buf, ')');
 
 	      if(end) {
-		enum operating_system_hint hint;
+		ndpi_os hint;
 
 		end[0] = '\0';
 		ua++;
 
 		Utils::getDeviceTypeFromOsDetail(ua, &hint);
 
-		if(hint != os_hint_unknown)
-		  operating_system = Utils::OShint2OSType(hint);
+		if(hint != ndpi_os_unknown)
+		  operating_system = hint;
 	      }
 	    }
 	  }

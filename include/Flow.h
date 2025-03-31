@@ -205,7 +205,7 @@ private:
 #endif
   char *suspicious_dga_domain; /* Stores the suspicious DGA domain for flows
                                   with NDPI_SUSPICIOUS_DGA_DOMAIN */
-  OSType operating_system;
+  ndpi_os operating_system;
 #ifdef HAVE_NEDGE
   u_int32_t last_conntrack_update;
   u_int32_t marker;

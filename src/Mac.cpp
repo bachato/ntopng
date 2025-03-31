@@ -31,11 +31,12 @@ Mac::Mac(NetworkInterface *_iface, u_int8_t _mac[6])
 
   broadcast_mac = Utils::isBroadcastMac(mac);
   special_mac = Utils::isSpecialMac(mac);
-  source_mac = false, fingerprint = NULL;
+  source_mac = false;
   bridge_seen_iface_id = 0, lockDeviceTypeChanges = false;
   memset(&names, 0, sizeof(names));
   device_type = device_unknown, asset_map_updated = true;
   host_pool_id = NO_HOST_POOL_ID;
+  device_os = ndpi_os_unknown;
 #ifdef NTOPNG_PRO
   captive_portal_notified = 0;
 #endif
@@ -90,7 +91,6 @@ Mac::~Mac() {
   if (model) free(model);
   if (ssid) free(ssid);
   if(dhcpv4_fingerprint) free(dhcpv4_fingerprint);
-  if (fingerprint) free(fingerprint);
   freeMacData();
   if (stats) delete (stats);
   if (stats_shadow) delete (stats_shadow);
@@ -176,7 +176,6 @@ void Mac::lua(lua_State *vm, bool show_details, bool asListElement) {
 
   stats->lua(vm, show_details);
 
-  lua_push_str_table_entry(vm, "fingerprint", fingerprint ? fingerprint : (char *)"");
   if(dhcpv4_fingerprint) lua_push_str_table_entry(vm, "dhcp_fingerprint", dhcpv4_fingerprint);
 
   lua_push_uint64_table_entry(vm, "seen.first", first_seen);
@@ -354,18 +353,6 @@ void Mac::inlineSetModel(const char *the_model) {
 }
 /* *************************************** */
 
-bool Mac::inlineSetFingerprint(const char *f) {
-  if (!fingerprint && f) {
-    fingerprint = strdup(f);
-    asset_map_updated = true;
-    return (true);
-  }
-
-  return (false);
-}
-
-/* *************************************** */
-
 void Mac::inlineSetSSID(const char *s) {
   if (!ssid && s && (ssid = strdup(s)))
     setDeviceType(device_wifi);
@@ -471,8 +458,6 @@ void Mac::dumpToRedis() {
   ndpi_serialize_string_uint32(&mac_json, "devtype", device_type);
   if (model) ndpi_serialize_string_string(&mac_json, "model", model);
   if (ssid) ndpi_serialize_string_string(&mac_json, "ssid", ssid);
-  if (fingerprint)
-    ndpi_serialize_string_string(&mac_json, "fingerprint", fingerprint);
 
   if (stats) ((GenericTrafficElement *)stats)->serialize(&mac_json);
 
@@ -488,34 +473,6 @@ void Mac::dumpToRedis() {
 
   ndpi_term_serializer(&mac_json);
 }
-
-/* *************************************** */
-
-#ifdef NTOPNG_PRO
-
-void Mac::dumpAssetMac(ndpi_serializer *serializer) {
-  char buf[24];
-  const char *man = get_manufacturer();
-
-  ndpi_serialize_string_string(serializer, "mac", Utils::formatMac(mac, buf, sizeof(buf)));
-  if(man) ndpi_serialize_string_string(serializer, "manufacturer", man);
-}
-
-/* *************************************** */
-
-void Mac::dumpAssetInfo(ndpi_serializer *serializer) {
-  if(device_type != 0) ndpi_serialize_string_uint32(serializer, "device_type", device_type);
-  if(model)            ndpi_serialize_string_string(serializer, "model", model);
-  if(ssid)             ndpi_serialize_string_string(serializer, "ssid", ssid);
-  if(fingerprint)      ndpi_serialize_string_string(serializer, "fingerprint", fingerprint);
-  if(dhcpv4_fingerprint) ndpi_serialize_string_string(serializer, "dhcp_fingerprint", dhcpv4_fingerprint);
-
-  /* dhcp_name is set in LocalHost, no need to export it */
-
-  asset_map_updated = false;
-}
-
-#endif
 
 /* *************************************** */
 
@@ -541,6 +498,10 @@ void Mac::setDHCPFingerprint(const char *f) {
     free(dhcpv4_fingerprint);
 
   dhcpv4_fingerprint = strdup(f);
+
+#ifdef NTOPNG_PRO
+  analyzeDevice();
+#endif
 }
 
 /* *************************************** */
