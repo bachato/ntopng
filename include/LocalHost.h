@@ -54,7 +54,8 @@ class LocalHost : public Host {
   char *getMacBasedSerializationKey(char *redis_key, size_t size, char *mac_key, bool short_format);
   char *getIPBasedSerializationKey(char *redis_key, size_t size, bool short_format);
   void luaDoHDot(lua_State *vm);
-
+  void syncMACMetadata(bool force_update);
+  
  public:
   LocalHost(NetworkInterface *_iface, int32_t _iface_idx,
 	    Mac *_mac, u_int16_t _u_int16_t,

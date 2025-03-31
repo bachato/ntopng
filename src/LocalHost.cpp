@@ -114,7 +114,6 @@ void LocalHost::set_hash_entry_state_idle() {
 /* NOTE: Host::initialize will be called by the constructor after the Host initialization */
 void LocalHost::initialize() {
   char buf[64], host[96], rsp[256];
-  Mac *cur_mac = getMac();
   
   stats = allocateStats();
   updateHostPool(true /* inline with packet processing */, true /* first inc */);
@@ -181,14 +180,7 @@ void LocalHost::initialize() {
   loadAssetInfo();
 #endif
   
-  if(cur_mac) {
-    if(cur_mac->getDHCPNamePtr())
-      offlineSetDHCPName(cur_mac->getDHCPNamePtr());
-
-    if(cur_mac->getDeviceOS() != ndpi_os_unknown)
-      setOS(cur_mac->getDeviceOS(), os_learning_mac_address);
-  }
-  
+  syncMACMetadata(true);
   gettimeofday(&last_periodic_asset_update, NULL);
 }
 
@@ -200,9 +192,24 @@ void LocalHost::deferredInitialization() {
 
 /* *************************************** */
 
+void LocalHost::syncMACMetadata(bool force_update) {
+  Mac *cur_mac = getMac();
+  
+  if(cur_mac && (force_update || cur_mac->isAssetUpdated())) {
+    if(cur_mac->getDHCPNamePtr())
+      offlineSetDHCPName(cur_mac->getDHCPNamePtr());
+    
+    if(cur_mac->getDeviceOS() != ndpi_os_unknown)
+      setOS(cur_mac->getDeviceOS(), os_learning_mac_address);
+  }
+}
+
+/* *************************************** */
+
 void LocalHost::periodic_stats_update(const struct timeval *tv) {
   checkGatewayInfo();
-
+  syncMACMetadata(false);
+  
 #ifdef NTOPNG_PRO
   /* If at least CONST_ASSETS_PERIODIC_UPDATE are past and the map was updated, dump the info */
   float diff = Utils::msTimevalDiff(tv, &last_periodic_asset_update) / 1000; /* in Sec */
@@ -792,7 +799,6 @@ void LocalHost::setResolvedName(const char *resolved_name) {
 /* *************************************** */
 
 void LocalHost::setTCPfingerprint(char *_tcp_fingerprint, ndpi_os os) {
-
   if((tcp_fingerprint != NULL) && (strcmp(_tcp_fingerprint, tcp_fingerprint) == 0))
     return; /* Already set */
   

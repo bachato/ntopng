@@ -9156,11 +9156,13 @@ void Flow::accountBidirectionalTCPProtocolServices() {
     case NDPI_PROTOCOL_MAIL_SMTPS:
     case NDPI_PROTOCOL_MAIL_SMTP:
       if(isBidirectional() && isThreeWayHandshakeOK()
-	 // && (getConfidence() == NDPI_CONFIDENCE_DPI)
+	 // && (getConfidence() 2== NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
 	 ) {
 	if(srv_h) {
-	  srv_h->setSmtpServer();
-	  ntop->trackAssetChange("SMTP", "setSmtpServer-1", NULL, srv_h, this, NULL);
+	  if(!srv_h->isSmtpServer()) {
+	    srv_h->setSmtpServer();
+	    ntop->trackAssetChange("SMTP", "setSmtpServer-1", NULL, srv_h, this, NULL);
+	  }
 	} else if(srv_ip_addr) {
 	  srv_ip_addr->setSmtpServer();
 	  ntop->trackAssetChange("SMTP", "setSmtpServer-2", NULL, NULL, this, NULL);
@@ -9171,11 +9173,13 @@ void Flow::accountBidirectionalTCPProtocolServices() {
     case NDPI_PROTOCOL_MAIL_IMAPS:
     case NDPI_PROTOCOL_MAIL_IMAP:
       if(isBidirectional() && isThreeWayHandshakeOK()
-	 // && (getConfidence() == NDPI_CONFIDENCE_DPI)
+	 // && (getConfidence() == NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
 	 ) {
 	if(srv_h) {
-	  srv_h->setImapServer();
-	  ntop->trackAssetChange("IMAP", "setImapServer-1", NULL, srv_h, this, NULL);
+	  if(!srv_h->isImapServer()) {
+	    srv_h->setImapServer();
+	    ntop->trackAssetChange("IMAP", "setImapServer-1", NULL, srv_h, this, NULL);
+	  }
 	} else if(srv_ip_addr) {
 	  srv_ip_addr->setImapServer();
 	  ntop->trackAssetChange("IMAP", "setImapServer-2", NULL, NULL, this, NULL);
@@ -9186,11 +9190,13 @@ void Flow::accountBidirectionalTCPProtocolServices() {
     case NDPI_PROTOCOL_MAIL_POPS:
     case NDPI_PROTOCOL_MAIL_POP:
       if(isBidirectional() && isThreeWayHandshakeOK()
-	 // && (getConfidence() == NDPI_CONFIDENCE_DPI)
+	 // && (getConfidence() == NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
 	 ) {
 	if(srv_h) {
-	  srv_h->setPopServer();
-	  ntop->trackAssetChange("POP", "setPopServer-1", NULL, srv_h, this, NULL);
+	  if(!srv_h->isPopServer()) {
+	    srv_h->setPopServer();
+	    ntop->trackAssetChange("POP", "setPopServer-1", NULL, srv_h, this, NULL);
+	  }
 	} else if(srv_ip_addr) {
 	  srv_ip_addr->setPopServer();
 	  ntop->trackAssetChange("POP", "setPopServer-2", NULL, NULL, this, NULL);

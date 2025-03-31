@@ -543,7 +543,7 @@ void Mac::setDeviceOS(ndpi_os _os) {
   if(device_os == _os)
     return;
   
-  device_os = _os;
+  device_os = _os, asset_map_updated = true;
   ntop->trackAssetChange("MAC", "setDeviceOS",
 			 this, NULL, NULL,
 			 (char*)Utils::OS2Str(_os));

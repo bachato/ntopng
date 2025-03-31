@@ -2053,11 +2053,12 @@ char *Host::get_mac_based_tskey(Mac *mac, char *buf, size_t bufsize,
 
 bool Host::setOS(ndpi_os _os, OSLearningMode mode) {
   Mac *cur_mac;
+  char msg[64];
   
   if(_os == ndpi_os_unknown)
     return(false);
   
-  if((os_type != ndpi_os_unknown) && (os_type != _os)) {
+  if((os_type != ndpi_os_unknown) && (os_type != _os)) {    
 #if 0
     char buf[64];
     
@@ -2079,6 +2080,11 @@ bool Host::setOS(ndpi_os _os, OSLearningMode mode) {
   os_type = _os;
 
   cur_mac = getMac(); /* Cache macs as they can be swapped/updated */
+
+  snprintf(msg, sizeof(msg), "%s (%s)",
+	   Utils::OS2Str(_os), Utils::learningMode2str(mode));
+  
+  ntop->trackAssetChange("Host", "setOS", NULL, this, NULL, msg);
 
   /* In case the device type is not set, we can infer it from the OS */
   if((cur_mac != NULL) && (cur_mac->getDeviceType() == device_unknown)) {
@@ -2821,10 +2827,10 @@ void Host::setnDPIOS(ndpi_os _os) {
       
       alt_os_type = os_type;
       os_type = _os;
+
+      setOS(_os, os_learning_tcp_fingerprint);
     }
   }
-
-  setOS(_os, os_learning_tcp_fingerprint);
 }
 
 /* *************************************** */
