@@ -673,43 +673,43 @@ void LocalHost::lua_get_fingerprints(lua_State *vm) {
 
 /* *************************************** */
 
-void LocalHost::setDhcpServer(char *name) {
-  Host::setDhcpServer(name);
+void LocalHost::setDhcpServer() {
+  Host::setDhcpServer();
   addDataToAssets((char *) "dhcp_server", (char *) "true");
 }
 
 /* *************************************** */
 
-void LocalHost::setDnsServer(char *name) {
-  Host::setDnsServer(name);
+void LocalHost::setDnsServer() {
+  Host::setDnsServer();
   addDataToAssets((char *) "dns_server", (char *) "true");
 }
 
 /* *************************************** */
 
-void LocalHost::setSmtpServer(char *name) {
-  Host::setSmtpServer(name);
+void LocalHost::setSmtpServer() {
+  Host::setSmtpServer();
   addDataToAssets((char *) "smtp_server", (char *) "true");
 }
 
 /* *************************************** */
 
-void LocalHost::setNtpServer(char *name) {
-  Host::setNtpServer(name);
+void LocalHost::setNtpServer() {
+  Host::setNtpServer();
   addDataToAssets((char *) "ntp_server", (char *) "true");
 }
 
 /* *************************************** */
 
-void LocalHost::setImapServer(char *name) {
-  Host::setImapServer(name);
+void LocalHost::setImapServer() {
+  Host::setImapServer();
   addDataToAssets((char *) "imap_server", (char *) "true");
 }
 
 /* *************************************** */
 
-void LocalHost::setPopServer(char *name) {
-  Host::setPopServer(name);
+void LocalHost::setPopServer() {
+  Host::setPopServer();
   addDataToAssets((char *) "pop_server", (char *) "true");
 }
 

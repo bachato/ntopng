@@ -843,6 +843,8 @@ class Ntop {
   u_int32_t getNumberHostPoolsMembers();
   u_int8_t getNumberProfiles();
   bool isInLocalASN(IpAddress *ip);
+
+  void trackAssetChange(const char *protocol, const char *action, Mac *mac, Host *target, Flow *flow, char *note);
 };
 
 extern Ntop *ntop;

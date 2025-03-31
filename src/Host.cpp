@@ -2635,42 +2635,42 @@ void Host::visit(std::vector<ActiveHostWalkerInfo> *v, HostWalkMode mode) {
 
 /* *************************************** */
 
-void Host::setDhcpServer(char *name) {
+void Host::setDhcpServer() {
   if(!isDhcpServer())
     host_services_bitmap |= 1 << HOST_IS_DHCP_SERVER;
 }
 
 /* *************************************** */
 
-void Host::setDnsServer(char *name) {
+void Host::setDnsServer() {
   if(!isDnsServer())
     host_services_bitmap |= 1 << HOST_IS_DNS_SERVER;
 }
 
 /* *************************************** */
 
-void Host::setSmtpServer(char *name) {
+void Host::setSmtpServer() {
   if(!isSmtpServer())
     host_services_bitmap |= 1 << HOST_IS_SMTP_SERVER;
 }
 
 /* *************************************** */
 
-void Host::setNtpServer(char *name) {
+void Host::setNtpServer() {
   if(!isNtpServer())
     host_services_bitmap |= 1 << HOST_IS_NTP_SERVER;
 }
 
 /* *************************************** */
 
-void Host::setImapServer(char *name) {
+void Host::setImapServer() {
   if(!isImapServer())
     host_services_bitmap |= 1 << HOST_IS_IMAP_SERVER;
 }
 
 /* *************************************** */
 
-void Host::setPopServer(char *name) {
+void Host::setPopServer() {
   if(!isPopServer())
     host_services_bitmap |= 1 << HOST_IS_POP_SERVER;
 }

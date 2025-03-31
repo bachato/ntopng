@@ -67,6 +67,7 @@ class Mac : public GenericHashEntry {
   ~Mac();
 
   inline u_int16_t getNumHosts() { return getUses(); }
+  void setDeviceType(DeviceType devtype);
   inline void incUses() {
     GenericHashEntry::incUses();
 
@@ -94,7 +95,7 @@ class Mac : public GenericHashEntry {
 
   u_int64_t get_mac64();
 
-  inline const char *get_manufacturer() { return manuf ? manuf : NULL; }
+  inline const char* get_manufacturer() { return manuf ? manuf : NULL; }
   bool isNull() const;
 
   bool equal(const u_int8_t _mac[6]);
@@ -110,17 +111,9 @@ class Mac : public GenericHashEntry {
     bridge_seen_iface_id = idx;
     setSourceMac();
   }
-  inline u_int32_t getSeenIface() { return (bridge_seen_iface_id); }
-  inline void setDeviceType(DeviceType devtype) {
-    if (isNull()) return;
-
-    /* Called by ntopng when it can guess a device type during normal packet
-     * processing */
-    if (!lockDeviceTypeChanges) device_type = devtype;
-    asset_map_updated = true;
-  }
-  inline void setDeviceOS(ndpi_os _os) { device_os = _os;   }
-  inline ndpi_os getDeviceOS()         { return(device_os); }
+  inline u_int32_t getSeenIface()      { return (bridge_seen_iface_id); }
+  void setDeviceOS(ndpi_os _os);
+  inline ndpi_os getDeviceOS()         { return(device_os);             }
   
   inline void forceDeviceType(DeviceType devtype) {
     /* Called when a user, from the GUI, wants to change the device type and

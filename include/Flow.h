@@ -420,6 +420,8 @@ private:
   void updateServerName(Host *h);
   void allocateCollection();
   void computeKey();
+  void accountBidirectionalTCPProtocolServices();
+  void accountBidirectionalUDPProtocolServices();
   
 public:
   Flow(NetworkInterface *_iface, int32_t iface_idx,

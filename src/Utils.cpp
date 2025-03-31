@@ -7640,3 +7640,51 @@ DeviceType Utils::osType2deviceType(ndpi_os t) {
 
   return(device_unknown);
 }
+
+/* ******************************************* */
+
+const char* Utils::deviceType2str(DeviceType devtype) {
+  switch(devtype) {
+  case device_printer:
+    return("Printer");
+    
+  case device_video:
+    return("Video");
+    
+  case device_workstation:
+    return("Workstation");
+    
+  case device_laptop:
+    return("Laptop");
+    
+  case device_tablet:
+    return("Tablet");
+    
+  case device_phone:
+    return("Phone");
+    
+  case device_tv:
+    return("TV");
+    
+  case device_networking:
+    return("Networking");
+    
+  case device_wifi:
+    return("WiFi");
+    
+  case device_nas:
+    return("NAS");
+    
+  case device_multimedia:
+    return("Multimedia");
+    
+  case device_iot:
+    return("IoT");
+    
+  case device_unknown:
+  case device_max_type:
+    return("Unknown");
+  }
+
+  return("Unknown (internal error)"); /* NOTREACHED */
+}

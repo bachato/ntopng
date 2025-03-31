@@ -465,6 +465,11 @@ Flow::~Flow() {
   for (std::map<FlowAlertTypeEnum, FlowAlert *>::iterator it = triggered_alerts.begin(); it != triggered_alerts.end(); it++)
     delete it->second;
 
+  if(isTCP())
+    accountBidirectionalTCPProtocolServices();
+  else if(isUDP())
+    accountBidirectionalUDPProtocolServices();
+  
   accountFlowTraffic(true);
 
 #ifdef ALERTED_FLOWS_DEBUG
@@ -487,8 +492,7 @@ Flow::~Flow() {
     It is fundamental to only call
   */
   Host *cli_u = getViewSharedClient(), *srv_u = getViewSharedServer();
-
-
+  
 #ifdef NTOPNG_PRO
   if(getInterface()->isViewed()) /* Score decrements done here for 'viewed'
                                      interfaces to avoid races. */
@@ -1427,7 +1431,8 @@ void Flow::setExtraDissectionCompleted(bool src2dst_direction) {
     returns immediately the protocol name (e.g. with DNS) without
     waiting the response to be received
   */
-  if(protocol == IPPROTO_UDP) updateUDPHostServices(src2dst_direction);
+  if(protocol == IPPROTO_UDP)
+    updateUDPHostServices(src2dst_direction);
 
   processExtraDissectedInformation();
 
@@ -8823,50 +8828,7 @@ void Flow::swap() {
 /* *************************************** */
 
 void Flow::updateTCPHostServices(Host *cli_h, Host *srv_h) {
-  char *domain_name;
-
-  if(ndpiFlow)
-    domain_name = ndpi_get_flow_name(ndpiFlow);
-  else
-    domain_name = NULL;
-
   switch (ndpi_get_lower_proto(ndpiDetectedProtocol)) {
-  case NDPI_PROTOCOL_MAIL_SMTPS:
-  case NDPI_PROTOCOL_MAIL_SMTP:
-    if(isBidirectional() && isThreeWayHandshakeOK()
-       // && (getConfidence() == NDPI_CONFIDENCE_DPI)
-       ) {
-      if(srv_h)
-	srv_h->setSmtpServer(domain_name);
-      else if(srv_ip_addr)
-	srv_ip_addr->setSmtpServer();
-    }
-    break;
-
-  case NDPI_PROTOCOL_MAIL_IMAPS:
-  case NDPI_PROTOCOL_MAIL_IMAP:
-    if(isBidirectional() && isThreeWayHandshakeOK()
-       // && (getConfidence() == NDPI_CONFIDENCE_DPI)
-       ) {
-      if(srv_h)
-	srv_h->setImapServer(domain_name);
-      else if(srv_ip_addr)
-	srv_ip_addr->setImapServer();
-    }
-    break;
-
-  case NDPI_PROTOCOL_MAIL_POPS:
-  case NDPI_PROTOCOL_MAIL_POP:
-    if(isBidirectional() && isThreeWayHandshakeOK()
-       // && (getConfidence() == NDPI_CONFIDENCE_DPI)
-       ) {
-      if(srv_h)
-	srv_h->setPopServer(domain_name);
-      else if(srv_ip_addr)
-	srv_ip_addr->setPopServer();
-    }
-    break;
-
   case NDPI_PROTOCOL_SSH:
   case NDPI_PROTOCOL_TLS:
     if(tcp) {
@@ -8887,12 +8849,6 @@ void Flow::updateTCPHostServices(Host *cli_h, Host *srv_h) {
 
 void Flow::updateUDPHostServices(bool src2dst_direction) {
   Host *cli_h, *srv_h;
-  char *domain_name;
-
-  if(ndpiFlow)
-    domain_name = ndpi_get_flow_name(ndpiFlow);
-  else
-    domain_name = NULL;
 
   get_actual_peers(&cli_h, &srv_h);
 
@@ -8903,36 +8859,19 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
 	/* Server -> Client */
 
 	if(cli_host && (!cli_host->isBroadcastHost())) {
-	  cli_host->setDhcpServer(domain_name);
+	  cli_host->setDhcpServer();
 	} else if(cli_ip_addr && !cli_ip_addr->isBroadcastAddress()) {
 	  cli_ip_addr->setDhcpServer();
 	}
       } else {
 	if(srv_host && (!srv_host->isBroadcastHost())) {
-	  srv_host->setDhcpServer(domain_name);
+	  srv_host->setDhcpServer();
 	} else if(srv_ip_addr && !srv_ip_addr->isBroadcastAddress()) {
 	  srv_ip_addr->setDhcpServer();
 	}
 
 	if(ndpiFlow && cli_host)
 	  cli_host->offlineSetDhcpFingerprint(ndpiFlow->protos.dhcp.fingerprint);
-      }
-    }
-    break;
-
-  case NDPI_PROTOCOL_NTP:
-    if(isBidirectional()
-       /* && (getConfidence() == NDPI_CONFIDENCE_DPI) */
-       && isTCPEstablished()
-       ) {
-      //char buf[256];
-      
-      if(srv_h) {
-	srv_h->setNtpServer(domain_name);
-	// ntop->getTrace()->traceEvent(TRACE_NORMAL, "[NTP] %s", print(buf, sizeof(buf)));
-      } else if(srv_ip_addr) {
-	srv_ip_addr->setNtpServer();
-	// ntop->getTrace()->traceEvent(TRACE_NORMAL, "[NTP] %s", print(buf, sizeof(buf)));
       }
     }
     break;
@@ -8956,50 +8895,7 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
 	  ;
 	}
       }
-    }
-    
-    if(isBidirectional()
-       && ((getConfidence() == NDPI_CONFIDENCE_DPI) /* Packet */
-	   || (ntohs(srv_port) == 53) /* nProbe case: let's be conservative */
-	   )
-       ) {
-      // char buf[256];
-      
-      if(swap_requested) {
-#ifdef DEBUG
-	char buf[64];
-	
-	ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** DNS: %s", cli_h->print(buf, sizeof(buf)));
-#endif
-	
-	if(isBidirectional()) {
-	  if(cli_h) {
-	    cli_h->setDnsServer(domain_name);
-	    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "[DNS] %s", print(buf, sizeof(buf)));
-	  } else if(cli_ip_addr) {
-	    cli_ip_addr->setDnsServer();
-	    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "[DNS] %s", print(buf, sizeof(buf)));
-	  }
-	}
-      } else {
-#ifdef DEBUG
-	char buf[64];
-	
-	ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** DNS: %s [%u/%u]", srv_h->print(buf, sizeof(buf)),
-				     ndpiFlow->protos.dns.is_query, current_pkt_from_client_to_server(iface->get_ndpi_struct(), ndpiFlow));
-#endif
-	
-	if(isBidirectional()) {
-	  if(srv_h) {
-	    srv_h->setDnsServer(domain_name);
-	    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "[DNS] %s", print(buf, sizeof(buf)));
-	  } else if(srv_ip_addr) {
-	    srv_ip_addr->setDnsServer();
-	    //ntop->getTrace()->traceEvent(TRACE_NORMAL, "[DNS] %s", print(buf, sizeof(buf)));
-	  }
-	}
-      }
-    }
+    }    
     break;
 
   case NDPI_PROTOCOL_TOR:
@@ -9245,6 +9141,116 @@ void Flow::addPrePostNATPort(u_int32_t _src_port_pre_nat,
     collection->nat.dst_port_pre_nat = _dst_port_pre_nat;
     collection->nat.src_port_post_nat = _src_port_post_nat;
     collection->nat.dst_port_post_nat = _dst_port_post_nat;
+  }
+}
+
+/* *************************************** */
+
+void Flow::accountBidirectionalTCPProtocolServices() {
+  if(isBidirectional()) {
+    Host *cli_h, *srv_h;
+
+    get_actual_peers(&cli_h, &srv_h);
+
+    switch (ndpi_get_lower_proto(ndpiDetectedProtocol)) {
+    case NDPI_PROTOCOL_MAIL_SMTPS:
+    case NDPI_PROTOCOL_MAIL_SMTP:
+      if(isBidirectional() && isThreeWayHandshakeOK()
+	 // && (getConfidence() == NDPI_CONFIDENCE_DPI)
+	 ) {
+	if(srv_h) {
+	  srv_h->setSmtpServer();
+	  ntop->trackAssetChange("SMTP", "setSmtpServer-1", NULL, srv_h, this, NULL);
+	} else if(srv_ip_addr) {
+	  srv_ip_addr->setSmtpServer();
+	  ntop->trackAssetChange("SMTP", "setSmtpServer-2", NULL, NULL, this, NULL);
+	}
+      }
+      break;
+
+    case NDPI_PROTOCOL_MAIL_IMAPS:
+    case NDPI_PROTOCOL_MAIL_IMAP:
+      if(isBidirectional() && isThreeWayHandshakeOK()
+	 // && (getConfidence() == NDPI_CONFIDENCE_DPI)
+	 ) {
+	if(srv_h) {
+	  srv_h->setImapServer();
+	  ntop->trackAssetChange("IMAP", "setImapServer-1", NULL, srv_h, this, NULL);
+	} else if(srv_ip_addr) {
+	  srv_ip_addr->setImapServer();
+	  ntop->trackAssetChange("IMAP", "setImapServer-2", NULL, NULL, this, NULL);
+	}
+      }
+      break;
+
+    case NDPI_PROTOCOL_MAIL_POPS:
+    case NDPI_PROTOCOL_MAIL_POP:
+      if(isBidirectional() && isThreeWayHandshakeOK()
+	 // && (getConfidence() == NDPI_CONFIDENCE_DPI)
+	 ) {
+	if(srv_h) {
+	  srv_h->setPopServer();
+	  ntop->trackAssetChange("POP", "setPopServer-1", NULL, srv_h, this, NULL);
+	} else if(srv_ip_addr) {
+	  srv_ip_addr->setPopServer();
+	  ntop->trackAssetChange("POP", "setPopServer-2", NULL, NULL, this, NULL);
+	}
+      }
+      break;
+    }
+  }
+}
+
+/* *************************************** */
+
+void Flow::accountBidirectionalUDPProtocolServices() {
+  if(isBidirectional()) {
+    Host *cli_h, *srv_h;
+
+    get_actual_peers(&cli_h, &srv_h);
+
+    switch (ndpi_get_lower_proto(ndpiDetectedProtocol)) {
+    case NDPI_PROTOCOL_NTP:
+      if((getConfidence() == NDPI_CONFIDENCE_DPI)
+	 || (isTCP() && isTCPEstablished())
+	 || isUDP()) {
+	//char buf[256];
+      
+	if(srv_h) {
+	  if(!srv_h->isNtpServer()) {
+	    srv_h->setNtpServer();
+	    ntop->trackAssetChange("NTP", "setNtpServer-1", NULL, srv_h, this, NULL);
+	  }
+	} else if(srv_ip_addr) {
+	  if(!srv_ip_addr->isNtpServer()) {
+	    srv_ip_addr->setNtpServer();
+	    ntop->trackAssetChange("NTP", "setNtpServer-2", NULL, NULL, this, NULL);
+	  }
+	}
+      }
+      break;
+
+
+    case NDPI_PROTOCOL_DNS:
+      if((getConfidence() == NDPI_CONFIDENCE_DPI) /* Packet */
+	 || (ntohs(srv_port) == 53) /* nProbe case: let's be conservative */	 
+	 ) {
+	// char buf[256];
+	
+	if(srv_h) {
+	  if(!srv_h->isDnsServer()) {
+	    srv_h->setDnsServer();
+	    ntop->trackAssetChange("DNS", "setDnsServer-3", NULL, srv_h, this, NULL);
+	  }
+	} else if(srv_ip_addr) {
+	  if(!srv_ip_addr->isDnsServer()) {
+	    srv_ip_addr->setDnsServer();
+	    ntop->trackAssetChange("DNS", "setDnsServer-4", NULL, NULL, this, NULL);
+	  }
+	}
+      }
+      break;
+    }
   }
 }
 

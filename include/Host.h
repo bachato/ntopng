@@ -232,32 +232,32 @@ class Host : public GenericHashEntry,
   inline bool isDhcpServer() const {
     return (host_services_bitmap & (1 << HOST_IS_DHCP_SERVER));
   }
-  virtual void setDhcpServer(char *name);
+  virtual void setDhcpServer();
   
   inline bool isDnsServer() const {
     return (host_services_bitmap & (1 << HOST_IS_DNS_SERVER));
   }
-  virtual void setDnsServer(char *name);
+  virtual void setDnsServer();
 
   inline bool isSmtpServer() const {
     return (host_services_bitmap & (1 << HOST_IS_SMTP_SERVER));
   }
-  virtual void setSmtpServer(char *name);
+  virtual void setSmtpServer();
 
   inline bool isImapServer() const {
     return (host_services_bitmap & (1 << HOST_IS_IMAP_SERVER));
   }
-  virtual void setImapServer(char *name);
+  virtual void setImapServer();
 
   inline bool isPopServer() const {
     return (host_services_bitmap & (1 << HOST_IS_POP_SERVER));
   }
-  virtual void setPopServer(char *name);
+  virtual void setPopServer();
 
   inline bool isNtpServer() const {
     return (host_services_bitmap & (1 << HOST_IS_NTP_SERVER));
   }
-  virtual void setNtpServer(char *name);
+  virtual void setNtpServer();
 
   inline u_int16_t getServicesMap() { return (host_services_bitmap); }
   /*
