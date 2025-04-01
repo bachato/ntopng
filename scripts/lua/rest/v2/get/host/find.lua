@@ -83,7 +83,8 @@ local query_info = hostkey2hostinfo(query)
 local is_full_ip = isIPv4(query_info['host']) or isIPv6(query_info['host'])
 
 -- Report if a perfect host match was found (full ip)
-local exact_match = false
+local exact_ip_match = false
+local partial_ip_match = false
 
 --- Links
 
@@ -469,7 +470,8 @@ if not is_system_interface then
             add_historical_flows_link(links, 'name', host_key)
          end
 
-         exact_match = is_full_ip and host_info['host'] == query_info['host']
+         partial_ip_match = true
+         exact_ip_match = is_full_ip and host_info['host'] == query_info['host']
 
          hosts[k] = {
             label = label,
@@ -587,7 +589,7 @@ if not is_system_interface then
       return r
    end
 
-   if is_full_ip and not exact_match then
+   if is_full_ip and partial_ip_match and not exact_ip_match then
       what = "ip"
       label = i18n("db_search.no_exact_match", {what=what, query=query})
       query = query .. tag_utils.SEPARATOR .. "eq"
