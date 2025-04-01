@@ -469,7 +469,7 @@ Flow::~Flow() {
     accountBidirectionalTCPProtocolServices();
   else if(isUDP())
     accountBidirectionalUDPProtocolServices();
-  
+
   accountFlowTraffic(true);
 
 #ifdef ALERTED_FLOWS_DEBUG
@@ -492,7 +492,7 @@ Flow::~Flow() {
     It is fundamental to only call
   */
   Host *cli_u = getViewSharedClient(), *srv_u = getViewSharedServer();
-  
+
 #ifdef NTOPNG_PRO
   if(getInterface()->isViewed()) /* Score decrements done here for 'viewed'
                                      interfaces to avoid races. */
@@ -714,23 +714,37 @@ void Flow::processDetectedProtocol(u_int8_t *payload, u_int16_t payload_len) {
   /* NOTE: UDP flows are updated when the flow ends */
   if(tcp != NULL)
     updateTCPHostServices(cli_h, srv_h);
-  else {
-    switch (l7proto) {
-    case NDPI_PROTOCOL_NTP:
-      /* Check direction first */
-      if(payload && (payload_len > 1)) {
-	u_int8_t mode = payload[0] & 0x07;
+  else if(isUDP()) {
+    /* Check direction first */
+    if(payload && (get_packets() == 1)) {
+      switch (l7proto) {
+      case NDPI_PROTOCOL_NTP:
+	if(payload_len > 1) {
+	  u_int8_t mode = payload[0] & 0x07;
 
-	if(mode == 2 /* server -> client */)
-	  swap_requested = 1; /* This flow will be swapped */
+	  if(mode == 4 /* server -> client */) {
+	    swap_requested = 1; /* This flow will be swapped */
+	    swap();
+	  }
+	}
+	break;
+
+      case NDPI_PROTOCOL_DNS:
+	if(payload_len > 4) {
+	  if((payload[3] & 0x80) == 0x80) {
+	    /* server -> client */
+	    swap_requested = 1; /* This flow will be swapped */
+	    swap();
+	  }
+	}
+	break;
       }
-      break;
     }
-  } 
-  
+  }
+
   if(ndpiFlow && (ndpiFlow->tcp.os_hint != ndpi_os_unknown)) {
     Host *h = cli_h ? cli_h : getViewSharedClient() /* View interface */;
-    
+
     if(h != NULL)
       h->setnDPIOS(ndpiFlow->tcp.os_hint);
   }
@@ -2748,7 +2762,7 @@ bool Flow::equal(const Mac *_src_pkt_mac, const Mac *_dst_pkt_mac,
   const IpAddress *cli_ip = get_cli_ip_addr(), *srv_ip = get_srv_ip_addr();
   const Mac *src_mac, *dst_mac;
   bool useMacAddressInFlowKey = ntop->getPrefs()->useMacAddressInFlowKey();
-  
+
 #if 0
   if(ntohs(_cli_port) == 17446) {
     char buf1[64],buf2[64],buf3[64],buf4[64];
@@ -2795,7 +2809,7 @@ bool Flow::equal(const Mac *_src_pkt_mac, const Mac *_dst_pkt_mac,
   if((cli_ip->key() == 0) && (srv_ip->key() == 0xFFFFFFFF)) {
     useMacAddressInFlowKey = true;
   }
-  
+
   if(useMacAddressInFlowKey) {
     if(cli_host && src_mac) {
       Mac *cli_mac = cli_host->getMac();
@@ -3400,7 +3414,7 @@ void Flow::computeKey() {
       /* Add the MAC address of the source host (dst_mac is not necessary as it's FF:FF:FF:FF:FF:FF) */
       if(get_cli_host() != NULL) {
 	Mac *cli_mac = get_cli_host()->getMac();
-	
+
 	if(cli_mac != NULL)
 	  k += cli_mac->key();
       }
@@ -6592,9 +6606,9 @@ void Flow::dissectMDNS(u_int8_t *payload, u_int16_t payload_len) {
       Mac *m = cli_host->getMac();
 
       cli_host->setDeviceType(dtype);
-      
+
       if(m->getDeviceType() == device_unknown)
-	m->setDeviceType(dtype);      
+	m->setDeviceType(dtype);
     }
 
     switch (rsp_type) {
@@ -8886,7 +8900,7 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
 
   case NDPI_PROTOCOL_DNS:
     /* Swap check */
-    if((!swap_requested) && (ndpiFlow != NULL)) {      
+    if((!swap_requested) && (ndpiFlow != NULL)) {
       if(ndpiFlow->protos.dns.is_query) {
 	if(src2dst_direction) {
 	  ;
@@ -8903,7 +8917,7 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
 	  ;
 	}
       }
-    }    
+    }
     break;
 
   case NDPI_PROTOCOL_TOR:
@@ -9229,7 +9243,7 @@ void Flow::accountBidirectionalUDPProtocolServices() {
 	 || (isTCP() && isTCPEstablished())
 	 || isUDP()) {
 	//char buf[256];
-      
+
 	if(srv_h) {
 	  if(!srv_h->isNtpServer()) {
 	    srv_h->setNtpServer();
@@ -9244,13 +9258,12 @@ void Flow::accountBidirectionalUDPProtocolServices() {
       }
       break;
 
-
     case NDPI_PROTOCOL_DNS:
       if((getConfidence() == NDPI_CONFIDENCE_DPI) /* Packet */
-	 || (ntohs(srv_port) == 53) /* nProbe case: let's be conservative */	 
+	 || (ntohs(srv_port) == 53) /* nProbe case: let's be conservative */
 	 ) {
 	// char buf[256];
-	
+
 	if(srv_h) {
 	  if(!srv_h->isDnsServer()) {
 	    srv_h->setDnsServer();
