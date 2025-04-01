@@ -1741,15 +1741,17 @@ char* Flow::print(char *buf, u_int buf_len, bool full_report) const {
     Mac *srv_mac = get_srv_host()->getMac();
     char b1[32], b2[32];
 
-    snprintf(buf, buf_len, "%s %s:%u [%s/%p] <-> %s:%u [%s/%p]",
+    snprintf(buf, buf_len, "%s %s:%u [%s] <-> %s:%u [%s][%u/%u pkts][%llu/%llu bytes]",
 	     get_protocol_name(),
 	     get_cli_ip_addr() ? get_cli_ip_addr()->print(buf1, sizeof(buf1)) : "",
 	     ntohs(cli_port),
-	     cli_mac ? cli_mac->print(b1, sizeof(b1)) : "", cli_mac,
+	     cli_mac ? cli_mac->print(b1, sizeof(b1)) : "",
 	     get_srv_ip_addr() ? get_srv_ip_addr()->print(buf2, sizeof(buf2)) : "",
 	     ntohs(srv_port),
-	     srv_mac ? srv_mac->print(b2, sizeof(b2)) : "", srv_mac
-	     );
+	     srv_mac ? srv_mac->print(b2, sizeof(b2)) : "",
+	     get_packets_cli2srv(), get_packets_srv2cli(),
+	     (long long unsigned)get_bytes_cli2srv(),
+	     (long long unsigned)get_bytes_srv2cli());
     return(buf);
   }
 
