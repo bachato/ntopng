@@ -11,6 +11,10 @@
       "description": "Everything about interfaces"
     },
     {
+      "name": "Users",
+      "description": "Everything about nEdge users"
+    },
+    {
       "name": "Policy",
       "description": "Traffic enforcement policies"
     }
@@ -39,6 +43,72 @@
           },
           "-3": {
             "description": "NOT_GRANTED"
+          }
+        }
+      }
+    },
+    "/lua/pro/rest/v2/get/nedge/gateways/status.lua": {
+      "get": {
+        "tags": [
+          "Interfaces"
+        ],
+        "summary": "Get gateways status information",
+        "description": "Read information about gateways",
+        "operationId": "get_nedge_gateways_status",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+        ],
+        "responses": {
+          "0": {
+            "description": "OK"
+          },
+          "-3": {
+            "description": "NOT_GRANTED"
+          }
+        }
+      }
+    },
+    "/lua/pro/rest/v2/set/nedge/interface/state.lua": {
+      "post": {
+        "tags": [
+          "Policy"
+        ],
+        "summary": "Enable or disable a WAN interface",
+        "description": "Set the state (enabled or disabled) of a WAN interface",
+        "operationId": "set_nedge_interface_state",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "interface",
+            "in": "formData",
+            "description": "WAN interface name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "enabled",
+            "in": "formData",
+            "description": "New interface enable state: 'true' or 'false'",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "0": {
+            "description": "OK"
+          },
+          "-5": {
+            "description": "INVALID_ARGUMENTS"
+          },
+          "-6": {
+            "description": "INTERNAL_ERROR"
+          },
+          "-7": {
+            "description": "BAD_FORMAT"
           }
         }
       }
@@ -85,6 +155,29 @@
         "summary": "Get DHCP leases",
         "description": "Read active DHCP elases",
         "operationId": "get_nedge_dhcp_active_leases",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+        ],
+        "responses": {
+          "0": {
+            "description": "OK"
+          },
+          "-3": {
+            "description": "NOT_GRANTED"
+          }
+        }
+      }
+    },
+    "/lua/pro/rest/v2/get/nedge/gateways/status.lua": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get users stats",
+        "description": "Read traffic stats about users",
+        "operationId": "get_nedge_users_status",
         "produces": [
           "application/json"
         ],
