@@ -79,6 +79,12 @@ end
 
 local ifid = interface.getId()
 
+local query_info = hostkey2hostinfo(query)
+local is_full_ip = isIPv4(query_info['host']) or isIPv6(query_info['host'])
+
+-- Report if a perfect host match was found (full ip)
+local exact_match = false
+
 --- Links
 
 local function build_flow_alerts_url(key, value)
@@ -438,7 +444,8 @@ if not is_system_interface then
          local ip = nil
          local mac = nil
 
-         local label = hostinfo2label(hostkey2hostinfo(host_key), true)
+         local host_info = hostkey2hostinfo(host_key)
+         local label = hostinfo2label(host_info, true)
          if host_key ~= k then
             label = label .. " · " .. k
          end
@@ -461,6 +468,8 @@ if not is_system_interface then
             add_host_link(links)
             add_historical_flows_link(links, 'name', host_key)
          end
+
+         exact_match = is_full_ip and host_info['host'] == query_info['host']
 
          hosts[k] = {
             label = label,
@@ -576,6 +585,13 @@ if not is_system_interface then
       r[value_type] = value
 
       return r
+   end
+
+   if is_full_ip and not exact_match then
+      what = "ip"
+      label = i18n("db_search.no_exact_match", {what=what, query=query})
+      query = query .. tag_utils.SEPARATOR .. "eq"
+      results[#results + 1] = build_result(label, query, what, nil, nil, "historical")
    end
 
    for k, v in pairsByField(hosts, 'name', asc) do
