@@ -241,6 +241,8 @@ class LocalHost : public Host {
   bool removeDataFromAssets(char *field);
   void dumpAssetJson(ndpi_serializer *serializer);
 #endif
+
+  void setDeviceType(DeviceType devtype);
 };
 
 #endif /* _LOCAL_HOST_H_ */

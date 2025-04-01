@@ -1737,8 +1737,8 @@ char* Flow::print(char *buf, u_int buf_len, bool full_report) const {
   buf[0] = '\0';
 
   if(!full_report) {
-    Mac *cli_mac = get_cli_host()->getMac();
-    Mac *srv_mac = get_srv_host()->getMac();
+    Mac *cli_mac = get_cli_host() ? get_cli_host()->getMac() : NULL;
+    Mac *srv_mac = get_srv_host() ? get_srv_host()->getMac() : NULL;
     char b1[32], b2[32];
 
     snprintf(buf, buf_len, "%s %s:%u [%s] <-> %s:%u [%s][%u/%u pkts][%llu/%llu bytes]",
@@ -3398,9 +3398,12 @@ void Flow::computeKey() {
   if(get_cli_ip_addr() && get_srv_ip_addr()) {
     if((get_cli_ip_addr()->key() == 0) && (get_srv_ip_addr()->key() == 0xFFFFFFFF)) {
       /* Add the MAC address of the source host (dst_mac is not necessary as it's FF:FF:FF:FF:FF:FF) */
-      Mac *cli_mac = get_cli_host()->getMac();
-      
-      if(cli_mac != NULL) k += cli_mac->key();
+      if(get_cli_host() != NULL) {
+	Mac *cli_mac = get_cli_host()->getMac();
+	
+	if(cli_mac != NULL)
+	  k += cli_mac->key();
+      }
     }
   }
 
@@ -6588,7 +6591,10 @@ void Flow::dissectMDNS(u_int8_t *payload, u_int16_t payload_len) {
     if((dtype != device_unknown) && cli_host && cli_host->getMac()) {
       Mac *m = cli_host->getMac();
 
-      if(m->getDeviceType() == device_unknown) m->setDeviceType(dtype);
+      cli_host->setDeviceType(dtype);
+      
+      if(m->getDeviceType() == device_unknown)
+	m->setDeviceType(dtype);      
     }
 
     switch (rsp_type) {

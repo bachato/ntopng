@@ -368,6 +368,8 @@ void Host::initialize(Mac *_mac, int32_t _iface_idx, u_int16_t _vlanId,
       obs_point->incUses();
   }
 
+  device_type = device_unknown;
+  
   /* Increase the number of active hosts */
   reloadHostBlacklist();
 }
@@ -2090,8 +2092,12 @@ bool Host::setOS(ndpi_os _os, OSLearningMode mode) {
   if((cur_mac != NULL) && (cur_mac->getDeviceType() == device_unknown)) {
     DeviceType dt = Utils::osType2deviceType(os_type);
 
-    if(dt != device_unknown)
+    if(dt != device_unknown) {
+      if(getDeviceType() == device_unknown)
+	setDeviceType(dt);      
+	  
       cur_mac->setDeviceType(dt);
+    }
   }
 
   return(true); /* OS set */
@@ -2834,3 +2840,11 @@ void Host::setnDPIOS(ndpi_os _os) {
 }
 
 /* *************************************** */
+
+void Host::setDeviceType(DeviceType devtype) {
+  if(device_type == devtype)
+    return;
+  else
+    device_type = devtype;
+}
+ 

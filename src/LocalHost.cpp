@@ -437,7 +437,12 @@ void LocalHost::inlineSetOSDetail(const char *_os_detail) {
     // TODO set mac device type
     DeviceType devtype = Utils::getDeviceTypeFromOsDetail(os_detail, &hint);
 
-    if (devtype != device_unknown) mac->setDeviceType(devtype);
+    if (devtype != device_unknown) {
+      if(getDeviceType() == device_unknown)
+	setDeviceType(devtype); 
+      
+      mac->setDeviceType(devtype);
+    }
   }
 }
 
@@ -847,3 +852,17 @@ bool LocalHost::setOS(ndpi_os _os, OSLearningMode mode) {
 
   return(false);
 }
+
+/* *************************************** */
+
+void LocalHost::setDeviceType(DeviceType devtype) {
+  if(device_type == devtype)
+    return;
+  
+  device_type = devtype;
+  asset_map_updated = true;
+  ntop->trackAssetChange("Host", "setDeviceType",
+			 NULL, this, NULL,
+			 (char*)Utils::deviceType2str(devtype));
+}
+ 

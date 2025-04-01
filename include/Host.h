@@ -104,11 +104,18 @@ class Host : public GenericHashEntry,
   Country *country;
   VLAN *vlan;
   ObservationPoint *obs_point;
-  ndpi_bitmap *tcp_udp_contacted_ports_no_tx; /* Ports of this host that have
-                                                 been contacted by peers */
-  ndpi_os os_type, alt_os_type; /* Operating system type, equivalent to os->get_os_type(),
-					used by operating system setters and getters */
+  ndpi_bitmap *tcp_udp_contacted_ports_no_tx; /* Ports of this host that have been contacted by peers */
 
+  /*
+    Both OS and device type are duplicated in MAC and host as
+    for a device begind a router, the device type must be on the host
+    (e.g. a laptop) otherwise the device type would be wrongly set
+    to a router
+  */
+  ndpi_os os_type, alt_os_type; /* Operating system type, equivalent to os->get_os_type(),
+				   used by operating system setters and getters */
+  DeviceType device_type;
+  
   struct {
     u_int32_t numIngressFlows, numEgressFlows;
   } unidirectionalTCPUDPFlows;
@@ -385,9 +392,15 @@ class Host : public GenericHashEntry,
     return (mac ? mac->get_mac() : NULL);
   }
   inline Mac *getMac() const { return (mac); }
+  virtual void setDeviceType(DeviceType devtype);
   inline DeviceType getDeviceType() const {
-    Mac *m = mac;
-    return (isBroadcastDomainHost() && m ? m->getDeviceType() : device_unknown);
+    if(device_type != device_unknown)
+      return(device_type);
+    else {
+      Mac *m = mac;
+
+      return (isBroadcastDomainHost() && m ? m->getDeviceType() : device_unknown);
+    }
   }
   char *getResolvedName(char *const buf, ssize_t buf_len);
   char *getServerName(char *const buf, ssize_t buf_len);
