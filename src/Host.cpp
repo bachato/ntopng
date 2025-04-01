@@ -2086,7 +2086,7 @@ bool Host::setOS(ndpi_os _os, OSLearningMode mode) {
   snprintf(msg, sizeof(msg), "%s (%s)",
 	   Utils::OS2Str(_os), Utils::learningMode2str(mode));
   
-  ntop->trackAssetChange("Host", "setOS", NULL, this, NULL, msg);
+  ntop->trackAssetChange("Host", "setOS", NULL, NULL, this, NULL, msg);
 
   /* In case the device type is not set, we can infer it from the OS */
   if((cur_mac != NULL) && (cur_mac->getDeviceType() == device_unknown)) {

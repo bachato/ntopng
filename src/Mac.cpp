@@ -532,7 +532,7 @@ void Mac::setDeviceType(DeviceType devtype) {
     device_type = devtype;
     asset_map_updated = true;
     ntop->trackAssetChange("MAC", "setDeviceType",
-			   this, NULL, NULL,
+			   this, NULL, NULL, NULL,
 			   (char*)Utils::deviceType2str(devtype));
   }
 }
@@ -545,6 +545,6 @@ void Mac::setDeviceOS(ndpi_os _os) {
   
   device_os = _os, asset_map_updated = true;
   ntop->trackAssetChange("MAC", "setDeviceOS",
-			 this, NULL, NULL,
+			 this, NULL, NULL, NULL,
 			 (char*)Utils::OS2Str(_os));
 }

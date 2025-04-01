@@ -9169,11 +9169,11 @@ void Flow::accountBidirectionalTCPProtocolServices() {
 	if(srv_h) {
 	  if(!srv_h->isSmtpServer()) {
 	    srv_h->setSmtpServer();
-	    ntop->trackAssetChange("SMTP", "setSmtpServer-1", NULL, srv_h, this, NULL);
+	    ntop->trackAssetChange("SMTP", "setSmtpServer-1", NULL, NULL, srv_h, this, NULL);
 	  }
 	} else if(srv_ip_addr) {
 	  srv_ip_addr->setSmtpServer();
-	  ntop->trackAssetChange("SMTP", "setSmtpServer-2", NULL, NULL, this, NULL);
+	  ntop->trackAssetChange("SMTP", "setSmtpServer-2", NULL, srv_ip_addr, NULL, this, NULL);
 	}
       }
       break;
@@ -9186,11 +9186,11 @@ void Flow::accountBidirectionalTCPProtocolServices() {
 	if(srv_h) {
 	  if(!srv_h->isImapServer()) {
 	    srv_h->setImapServer();
-	    ntop->trackAssetChange("IMAP", "setImapServer-1", NULL, srv_h, this, NULL);
+	    ntop->trackAssetChange("IMAP", "setImapServer-1", NULL, NULL, srv_h, this, NULL);
 	  }
 	} else if(srv_ip_addr) {
 	  srv_ip_addr->setImapServer();
-	  ntop->trackAssetChange("IMAP", "setImapServer-2", NULL, NULL, this, NULL);
+	  ntop->trackAssetChange("IMAP", "setImapServer-2", NULL, srv_ip_addr, NULL, this, NULL);
 	}
       }
       break;
@@ -9203,11 +9203,11 @@ void Flow::accountBidirectionalTCPProtocolServices() {
 	if(srv_h) {
 	  if(!srv_h->isPopServer()) {
 	    srv_h->setPopServer();
-	    ntop->trackAssetChange("POP", "setPopServer-1", NULL, srv_h, this, NULL);
+	    ntop->trackAssetChange("POP", "setPopServer-1", NULL, NULL, srv_h, this, NULL);
 	  }
 	} else if(srv_ip_addr) {
 	  srv_ip_addr->setPopServer();
-	  ntop->trackAssetChange("POP", "setPopServer-2", NULL, NULL, this, NULL);
+	  ntop->trackAssetChange("POP", "setPopServer-2", NULL, srv_ip_addr, NULL, this, NULL);
 	}
       }
       break;
@@ -9233,12 +9233,12 @@ void Flow::accountBidirectionalUDPProtocolServices() {
 	if(srv_h) {
 	  if(!srv_h->isNtpServer()) {
 	    srv_h->setNtpServer();
-	    ntop->trackAssetChange("NTP", "setNtpServer-1", NULL, srv_h, this, NULL);
+	    ntop->trackAssetChange("NTP", "setNtpServer-1", NULL, NULL, srv_h, this, NULL);
 	  }
 	} else if(srv_ip_addr) {
 	  if(!srv_ip_addr->isNtpServer()) {
 	    srv_ip_addr->setNtpServer();
-	    ntop->trackAssetChange("NTP", "setNtpServer-2", NULL, NULL, this, NULL);
+	    ntop->trackAssetChange("NTP", "setNtpServer-2", NULL, srv_ip_addr, NULL, this, NULL);
 	  }
 	}
       }
@@ -9254,12 +9254,12 @@ void Flow::accountBidirectionalUDPProtocolServices() {
 	if(srv_h) {
 	  if(!srv_h->isDnsServer()) {
 	    srv_h->setDnsServer();
-	    ntop->trackAssetChange("DNS", "setDnsServer-3", NULL, srv_h, this, NULL);
+	    ntop->trackAssetChange("DNS", "setDnsServer-3", NULL, NULL, srv_h, this, NULL);
 	  }
 	} else if(srv_ip_addr) {
 	  if(!srv_ip_addr->isDnsServer()) {
 	    srv_ip_addr->setDnsServer();
-	    ntop->trackAssetChange("DNS", "setDnsServer-4", NULL, NULL, this, NULL);
+	    ntop->trackAssetChange("DNS", "setDnsServer-4", NULL, srv_ip_addr, NULL, this, NULL);
 	  }
 	}
       }

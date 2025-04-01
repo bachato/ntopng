@@ -4438,13 +4438,15 @@ char* Ntop::getCustomnDPIProtos() {
 /* ******************************************* */
 
 void Ntop::trackAssetChange(const char *protocol, const char *action,
-			    Mac *mac, Host *target, Flow *flow, char *note) {
+			    Mac *mac, IpAddress *target_ip,
+			    Host *target, Flow *flow, char *note) {
 #ifdef TRACK_ASSET_CHANGE
   char buf[64], buf1[256], buf2[256];
   
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] %s [%s][%s][%s][%s]",
 			       protocol, action,
 			       mac ? mac->print(buf, sizeof(buf)) : "",
+			       target_ip ? target_ip->print(buf1, sizeof(buf1)) : "",
 			       target ? target->print(buf1, sizeof(buf1)) : "",
 			       flow   ? flow->print(buf2, sizeof(buf2), false) : "",
 			       note ? note : "");

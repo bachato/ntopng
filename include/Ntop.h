@@ -844,7 +844,9 @@ class Ntop {
   u_int8_t getNumberProfiles();
   bool isInLocalASN(IpAddress *ip);
 
-  void trackAssetChange(const char *protocol, const char *action, Mac *mac, Host *target, Flow *flow, char *note);
+  void trackAssetChange(const char *protocol, const char *action,
+			Mac *mac, IpAddress *target_ip,
+			Host *target, Flow *flow, char *note);
 };
 
 extern Ntop *ntop;

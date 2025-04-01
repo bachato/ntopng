@@ -862,7 +862,7 @@ void LocalHost::setDeviceType(DeviceType devtype) {
   device_type = devtype;
   asset_map_updated = true;
   ntop->trackAssetChange("Host", "setDeviceType",
-			 NULL, this, NULL,
+			 NULL, NULL, this, NULL,
 			 (char*)Utils::deviceType2str(devtype));
 }
  
