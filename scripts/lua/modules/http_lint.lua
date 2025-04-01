@@ -1932,7 +1932,7 @@ local known_parameters = {
 
     -- OTHER
     ["rsp_format"] = validateBool,
-    ["interface"] = validateSingleWord,
+    ["interface"] = validateNetworkInterface,
     ["showjson"] = validateBool,
     ["hostinfotype"] = validateHostInfoType,
     ["interfacetype"] = validateHostInfoType,
@@ -2122,6 +2122,7 @@ local known_parameters = {
     ["metric_label"] = validateUnquoted,
     ["flows_page_type"] = validateSingleWord,
     ["view"] = validateSingleWord,
+    ["enabled"] = validateBool,
 
     -- VULNERABILITY SCAN
     ["scan_type"] = validateSingleWord,
