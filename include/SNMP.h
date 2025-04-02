@@ -52,7 +52,8 @@ class SNMP {
   bool send_snmp_request(char *agent_host, u_int version, char *community,
                          char *level, char *username, char *auth_protocol,
                          char *auth_passphrase, char *privacy_protocol,
-                         char *privacy_passphrase, snmp_pdu_primitive pduType,
+                         char *privacy_passphrase, char *contextName,
+			 snmp_pdu_primitive pduType,
                          char *oid[SNMP_MAX_NUM_OIDS],
                          char value_types[SNMP_MAX_NUM_OIDS],
                          char *values[SNMP_MAX_NUM_OIDS], bool _batch_mode);
@@ -79,6 +80,7 @@ class SNMP {
   bool send_snmpv3_request(char *agent_host, char *level, char *username,
                            char *auth_protocol, char *auth_passphrase,
                            char *privacy_protocol, char *privacy_passphrase,
+			   char *contextName,
                            snmp_pdu_primitive pduType,
                            char *oid[SNMP_MAX_NUM_OIDS],
                            char value_types[SNMP_MAX_NUM_OIDS],

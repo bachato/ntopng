@@ -371,6 +371,7 @@ bool SNMP::send_snmpv1v2c_request(char *agent_host, char *community,
 bool SNMP::send_snmpv3_request(char *agent_host, char *level, char *username,
                                char *auth_protocol, char *auth_passphrase,
                                char *privacy_protocol, char *privacy_passphrase,
+			       char *contextName,
                                snmp_pdu_primitive pduType,
                                char *oid[SNMP_MAX_NUM_OIDS],
                                char value_types[SNMP_MAX_NUM_OIDS],
@@ -378,7 +379,8 @@ bool SNMP::send_snmpv3_request(char *agent_host, char *level, char *username,
                                bool _batch_mode) {
   return(send_snmp_request(agent_host, 2 /* SNMPv3 */, NULL, level, username,
 			   auth_protocol, auth_passphrase, privacy_protocol,
-			   privacy_passphrase, pduType, oid, value_types, values,
+			   privacy_passphrase, contextName,
+			   pduType, oid, value_types, values,
 			   _batch_mode));
 }
 
@@ -388,6 +390,7 @@ bool SNMP::send_snmp_request(char *agent_host, u_int version, char *community,
                              char *level, char *username, char *auth_protocol,
                              char *auth_passphrase, char *privacy_protocol,
                              char *privacy_passphrase,
+			     char *contextName,
                              snmp_pdu_primitive pduType,
                              char *_oid[SNMP_MAX_NUM_OIDS],
                              char value_types[SNMP_MAX_NUM_OIDS],
@@ -435,21 +438,15 @@ bool SNMP::send_snmp_request(char *agent_host, u_int version, char *community,
       /* SNMP v3 */
       snmpSession->session.version = SNMP_VERSION_3;
 
+      if(username && (username[0] == '\0'))
+	username = NULL;
+
       if(!strcasecmp(level, "noAuthNoPriv")) {
-        snmpSession->session.securityLevel = SNMP_SEC_LEVEL_NOAUTH;
-        username = NULL;
         auth_protocol = NULL;
         privacy_protocol = NULL;
-      } else {
-        /* set the SNMPv3 user name */
-        if(username) {
-          snmpSession->session.securityName = strdup(username);
-          snmpSession->session.securityNameLen = strlen(snmpSession->session.securityName);
-        } else {
-          ntop->getTrace()->traceEvent(TRACE_WARNING, "SNMP PDU no username specified");
-          return(false);
-        }
 
+	snmpSession->session.securityModel = SNMP_SEC_MODEL_USM;  /* User-based Security Model (USM) */
+      } else {
         if((!strcasecmp(level, "authNoPriv")) ||
 	   (!strcasecmp(level, "authPriv"))) {
           if(!strcasecmp(auth_protocol, "md5")) {
@@ -509,7 +506,7 @@ bool SNMP::send_snmp_request(char *agent_host, u_int version, char *community,
 		snmpSession->session.securityPrivProto = snmp_duplicate_objid(usmAESPrivProtocol, USM_PRIV_PROTO_AES128_LEN);
 		snmpSession->session.securityPrivProtoLen = USM_PRIV_PROTO_AES128_LEN;
 #ifdef USM_PRIV_PROTO_AES256_LEN /* Just in case one day it twill be supported */
-		/* 
+		/*
 		   Note AES-256 is not supported by net-snmp
 		   See also https://snmp.com/snmpv3/snmpv3_aes256.shtml
 		*/
@@ -534,6 +531,20 @@ bool SNMP::send_snmp_request(char *agent_host, u_int version, char *community,
             snmpSession->session.securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
         }
       }
+
+      if(username) {
+	/* SNMPv3 user name */
+	snmpSession->session.securityName = strdup(username);
+	snmpSession->session.securityNameLen = strlen(snmpSession->session.securityName);
+      }
+
+      if(snmpSession->session.securityLevel == 0)
+	snmpSession->session.securityLevel = SNMP_SEC_LEVEL_NOAUTH;
+    }
+
+    if((contextName != NULL) && (contextName[0] != '\0')) {
+      snmpSession->session.contextName = contextName;
+      snmpSession->session.contextNameLen = strlen(contextName);
     }
 
     snmpSession->session.callback = asynch_response;
@@ -969,7 +980,7 @@ int SNMP::set(lua_State *vm, bool skip_first_param) {
 int SNMP::snmpv3_get_fctn(lua_State *vm, snmp_pdu_primitive pduType,
                           bool skip_first_param, bool _batch_mode) {
   char *agent_host, *level, *username, *auth_protocol, *auth_passphrase,
-    *privacy_protocol, *privacy_passphrase;
+    *privacy_protocol, *privacy_passphrase, *context_name;
   u_int timeout = 5, oid_idx = 0, idx = skip_first_param ? 2 : 1;
   char *oid[SNMP_MAX_NUM_OIDS] = {NULL},
     value_types[SNMP_MAX_NUM_OIDS] = {'\0'},
@@ -1002,6 +1013,10 @@ int SNMP::snmpv3_get_fctn(lua_State *vm, snmp_pdu_primitive pduType,
   if(ntop_lua_check(vm, __FUNCTION__, idx, LUA_TSTRING) != CONST_LUA_OK)
     return (CONST_LUA_ERROR);
   privacy_passphrase = (char *)lua_tostring(vm, idx++);
+
+  if(ntop_lua_check(vm, __FUNCTION__, idx, LUA_TSTRING) != CONST_LUA_OK)
+    return (CONST_LUA_ERROR);
+  context_name = (char *)lua_tostring(vm, idx++);
 
   if(ntop_lua_check(vm, __FUNCTION__, idx, LUA_TNUMBER) != CONST_LUA_OK)
     return (CONST_LUA_ERROR);
@@ -1040,7 +1055,7 @@ int SNMP::snmpv3_get_fctn(lua_State *vm, snmp_pdu_primitive pduType,
 
   send_snmpv3_request(agent_host, level, username, auth_protocol,
                       auth_passphrase, privacy_protocol, privacy_passphrase,
-                      pduType, oid, value_types, values, _batch_mode);
+                      context_name, pduType, oid, value_types, values, _batch_mode);
 
   if(skip_first_param)
     return (CONST_LUA_OK); /* This is an async call */

@@ -4701,8 +4701,10 @@ static int ntop_snmpv3_batch_get(lua_State *vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
   if (ntop_lua_check(vm, __FUNCTION__, 8, LUA_TSTRING) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if (ntop_lua_check(vm, __FUNCTION__, 9, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
 
-  oid[0] = (char *)lua_tostring(vm, 8);
+  oid[0] = (char *)lua_tostring(vm, 9);
 
   snmp = getLuaVMUserdata(vm, snmpBatch);
 
@@ -4721,6 +4723,7 @@ static int ntop_snmpv3_batch_get(lua_State *vm) {
 				  (char *)lua_tostring(vm, 5), /* auth_passphrase */
 				  (char *)lua_tostring(vm, 6), /* privacy_protocol */
 				  (char *)lua_tostring(vm, 7), /* privacy_passphrase */
+				  (char *)lua_tostring(vm, 8), /* context_name */
 				  snmp_get_pdu, oid,           /* oid */
 				  value_types, NULL, true /* batch */);
 
