@@ -66,19 +66,6 @@
 
                 <!-- SNMP V3 -->
                 <template v-if="enable_v3_options">
-                    <!-- SNMP Username -->
-                    <div class="form-group ms-2 me-2 mt-3 row">
-                        <label class="col-form-label col-sm-4">
-                            <b>{{ _i18n("snmp.snmp_username") }}</b>
-                        </label>
-                        <div class="col-sm-5">
-                            <input v-model="snmp_username" class="form-control" type="text"
-                                autocomplete="current-username" @input="check_username" required
-                                :class="{ 'invalid': !is_username_valid }" />
-                            <small class="text-muted">{{ _i18n("snmp.descriptions.username") }}</small>
-                        </div>
-                    </div>
-
                     <!-- SNMP Context -->
                     <div class="form-group ms-2 me-2 mt-3 row">
                         <label class="col-form-label col-sm-4">
@@ -87,7 +74,7 @@
                         <div class="col-sm-5">
                             <input v-model="snmp_context" class="form-control" type="text" />
                             <small class="text-muted">{{ _i18n("snmp.descriptions.context")
-                            }}</small>
+                                }}</small>
                         </div>
                     </div>
 
@@ -105,6 +92,19 @@
                     </div>
 
                     <template v-if="with_auth">
+                        <!-- SNMP Username -->
+                        <div class="form-group ms-2 me-2 mt-3 row">
+                            <label class="col-form-label col-sm-4">
+                                <b>{{ _i18n("snmp.snmp_username") }}</b>
+                            </label>
+                            <div class="col-sm-5">
+                                <input v-model="snmp_username" class="form-control" type="text"
+                                    autocomplete="current-username" @input="check_username" required
+                                    :class="{ 'invalid': !is_username_valid }" />
+                                <small class="text-muted">{{ _i18n("snmp.descriptions.username") }}</small>
+                            </div>
+                        </div>
+
                         <!-- SNMP Auth Protocol -->
                         <div class="form-group ms-2 me-2 mt-3 row">
                             <label class="col-form-label col-sm-4">
@@ -115,7 +115,7 @@
                                     :options="snmp_auth_protocols">
                                 </SelectSearch>
                                 <small class="text-muted">{{ _i18n("snmp.descriptions.authentication_protocol")
-                                }}</small>
+                                    }}</small>
                             </div>
                         </div>
 
@@ -129,7 +129,7 @@
                                     autocomplete="current-password" required @input="check_snmp_auth_passphrase"
                                     :class="{ 'invalid': !is_snmp_auth_passphrase_valid }" />
                                 <small class="text-muted">{{ _i18n("snmp.descriptions.authentication_passphrase")
-                                }}</small>
+                                    }}</small>
                             </div>
                         </div>
                     </template>
