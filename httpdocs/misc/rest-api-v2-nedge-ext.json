@@ -170,7 +170,7 @@
         }
       }
     },
-    "/lua/pro/rest/v2/get/nedge/gateways/status.lua": {
+    "/lua/pro/rest/v2/get/nedge/users/status.lua": {
       "get": {
         "tags": [
           "Users"
