@@ -8107,6 +8107,7 @@ local lang = {
     ["all_snmp_statuses"] = "All Statuses",
     ["and_one_more_interface"] = "and <a href='%{url}'>1 more interface</a>",
     ["authentication_passphrase"] = "Authentication PassPhrase",
+    ["context"] = "Context",
     ["authentication_protocol"] = "Authentication Protocol",
     ["average_downlink"] = "Average Downlink (In)",
     ["average_uplink"] = "Average Uplink (Out)",
@@ -8281,6 +8282,7 @@ local lang = {
     ["descriptions"] = {
       ["add_pool"] = "New SNMP Pool",
       ["authentication_passphrase"] = "SNMPv3 authentication passphrase",
+      ["context"] = "SNMPv3 context",
       ["authentication_protocol"] = "SNMPv3 authentication protocol",
       ["host"] = "SNMP agent IP address",
       ["level"] = "SNMPv3 security level",
