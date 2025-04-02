@@ -2466,6 +2466,7 @@ local known_parameters = {
     ["reason"] = validateSingleWord,
 
     --
+    ["assets"] = validateMessage,
 
     -- LIVE CAPTURE
     ["capture_id"] = validateNumber, -- Live capture id

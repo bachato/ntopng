@@ -7,8 +7,8 @@
         </template>
         <div :class="[(!props.context.is_assets_collection_enabled) ? 'ntopng-gray-out' : '']">
             <TableWithConfig ref="table_assets" :table_id="table_id" :csrf="context.csrf"
-             :f_map_columns="map_table_def_columns" :get_extra_params_obj="get_extra_params_obj"
-                @custom_event= "on_table_custom_event">
+                :f_map_columns="map_table_def_columns" :get_extra_params_obj="get_extra_params_obj"
+                @custom_event="on_table_custom_event">
                 <template v-slot:custom_header>
                     <div class="dropdown me-3 d-inline-block" v-for="item in filter_table_array">
                         <span class="no-wrap d-flex align-items-center my-auto me-2 filters-label"><b>{{
@@ -27,6 +27,16 @@
                 </template> <!-- Dropdown filters -->
             </TableWithConfig>
             <div class="card-footer mt-3">
+                <button class="btn btn-primary me-1" type="button" @click="import_assets">
+                    <i class="fa-solid fa-file-arrow-up" data-bs-toggle="tooltip" data-bs-placement="top"
+                        :title="_i18n('asset_details.import')"></i> {{
+                            _i18n('asset_details.import') }}
+                </button>
+                <a class="btn btn-primary" download="assets.csv" :href="export_assets_url">
+                    <i class="fa-solid fa-file-arrow-down" data-bs-toggle="tooltip" data-bs-placement="top"
+                        :title="_i18n('asset_details.export')"></i> {{
+                            _i18n('asset_details.export') }}
+                </a>
                 <button v-if="props.context.is_admin" type="button" @click="delete_assets()"
                     class="btn btn-danger ms-1">
                     <i class="fas fa fa-trash"></i>
@@ -40,6 +50,9 @@
             </div>
         </div>
     </div>
+
+    <ModalImportAssets ref="modal_import_assets" :context="context" @add="import_assets_rest">
+    </ModalImportAssets>
     <ModalDeleteAssets ref="modal_delete_assets" :context="context" @delete="refresh_table">
     </ModalDeleteAssets>
     <ModalDeleteAssetsEpoch ref="modal_delete_assets_epoch" :context="context" @delete="refresh_table">
@@ -54,10 +67,14 @@ import { default as dataUtils } from "../utilities/data-utils.js";
 import { default as osUtils } from "../utilities/map/os-utils.js";
 import { default as ModalDeleteAssets } from "./modal-delete-assets.vue";
 import { default as ModalDeleteAssetsEpoch } from "./modal-delete-assets-epoch.vue";
+import { default as ModalImportAssets } from "./modal-import-assets.vue"
 import { ntopng_url_manager } from "../services/context/ntopng_globals_services.js";
-import { default as sortingFunctions } from "../utilities/sorting-utils.js";
 
 const _i18n = (t) => i18n(t);
+
+const import_assets_url = `${http_prefix}/lua/pro/rest/v2/add/assets/assets.lua`;
+const export_assets_url = `${http_prefix}/lua/pro/rest/v2/export/assets/assets.lua`;
+const modal_import_assets = ref();
 
 const host_filters_key = ref(0);
 const table_id = ref('assets');
@@ -94,7 +111,7 @@ const map_table_def_columns = (columns) => {
             let icons = ''
 
             let is_asset_online = row.online;
-        
+
             if (!dataUtils.isEmptyOrNull(host.vlan.name)) {
                 ip_address = `${ip_address}@${host.vlan.name}`
             }
@@ -132,7 +149,7 @@ const map_table_def_columns = (columns) => {
             if (!dataUtils.isEmptyOrNull(host.is_multicast)) {
                 icons = `${icons} ${multicast_icon}`
             }
-            
+
             if (!dataUtils.isEmptyOrNull(host.remotehost)) {
                 icons = `${icons} ${remotehost_icon}`
             }
@@ -157,12 +174,12 @@ const map_table_def_columns = (columns) => {
             if (!dataUtils.isEmptyOrNull(host.is_pop_server)) {
                 icons = `${icons} <span class="badge bg-success">${i18n("details.label_pop_server")}</span>`
             }
-            
+
             const host_url = create_button_host_details(row);
 
             // If host is online show host details icon fas-laptop to jump to host details page
             let host_icon = `<a href='/lua/host_details.lua?host=${row.host.ip}&vlan=${row.host.vlan.id}' data-bs-toggle='tooltip' data-bs-placement='top' title='Host Details'><i class='fas fa-laptop'></i></a>`;
-            
+
             if (is_asset_online) {
                 return `<a href="${host_url}">${ip_address}</a> ${host_icon} ${icons}`
             }
@@ -322,7 +339,7 @@ function create_historical_flows_url_link(row) {
 
 function create_button_host_details(row) {
     let url = `/lua/pro/asset_details.lua?ifid=${props.context.ifid}&serial_key=${row.key}`
-    
+
     return `${http_prefix}${url}`
 }
 
@@ -365,6 +382,28 @@ function on_table_custom_event(event) {
 
 function refresh_table() {
     table_assets.value.refresh_table();
+}
+
+/* ************************************** */
+
+function import_assets() {
+    modal_import_assets.value.show();
+}
+
+/* ************************************** */
+
+const import_assets_rest = async function (params) {
+    const url = import_assets_url;
+    const result = await ntopng_utility.http_post_request(url, { ...{ csrf: props.context.csrf }, ...params }, false, true);
+
+    if (result == null) {
+        modal_import_assets.value.show_bad_feedback(_i18n("asset_details.import_error"));
+    } else if (result.rc < 0) {
+        modal_import_assets.value.show_bad_feedback(result.rsp.feedback);
+        refresh_table();
+    } else {
+        setTimeout(() => { modal_import_assets.value.close(); refresh_table(); }, 1000);
+    }
 }
 
 /* ************************************** */
