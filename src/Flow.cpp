@@ -9392,3 +9392,13 @@ void Flow::allocateCollection() {
 }
 
 /* *************************************** */
+
+/* Quick check that both sides have (likely) done a 3WH */
+bool Flow::isThreeWayHandshakeOK() const {
+  u_int16_t mask = TH_SYN | TH_ACK;
+
+  if(((src2dst_tcp_flags & mask) == mask) && ((dst2src_tcp_flags & mask) == mask))
+    return(true);
+  else
+    return(false);
+};

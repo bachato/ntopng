@@ -727,7 +727,7 @@ public:
 			 u_int32_t _dst_port_post_nat);
   void check_swap();
 
-  inline bool isThreeWayHandshakeOK() const { return (twh_over ? true : false); };
+  bool isThreeWayHandshakeOK() const;
   inline bool isDetectionCompleted() const {
     return (detection_completed ? true : false);
   };
