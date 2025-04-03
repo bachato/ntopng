@@ -2349,11 +2349,10 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 				     trusted_payload_len);
       break;
 
+    case NDPI_PROTOCOL_ZOOM:
     case NDPI_PROTOCOL_RTP:
     case NDPI_PROTOCOL_SRTP:
       if (flow->isZoomRTP()) {
-	/* ntop->getTrace()->traceEvent(TRACE_NORMAL, "XXX [%d]", payload[0]); */
-
 	if (payload[0] == 5 /* RTCP/RTP */) {
 	  u_int8_t encoding_type = payload[8];
 
@@ -2379,6 +2378,12 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 	  flow->setRTPStreamType(flow->get_ndpi_flow()->flow_multimedia_types);
 	}
       }
+
+#ifdef NTOPNG_PRO
+      if ((trusted_payload_len > 0) && payload) {
+	flow->processRTPPacket(payload, trusted_payload_len, h, src2dst_direction);
+      }
+#endif
       break;
     }
 

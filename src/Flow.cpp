@@ -152,7 +152,12 @@ Flow::Flow(NetworkInterface *_iface,
   memset(&protos, 0, sizeof(protos));
   memset(&flow_device, 0, sizeof(flow_device));
 
-  flow_score = 0, rtp_stream_type = ndpi_multimedia_unknown_flow;
+  flow_score = 0;
+
+  rtp_stream_type = ndpi_multimedia_unknown_flow;
+#ifdef NTOPNG_PRO
+  rtp = NULL;
+#endif
 
   cli_ip_addr = srv_ip_addr = NULL;
   cli_host = srv_host = NULL;
@@ -456,6 +461,13 @@ Flow::~Flow() {
   bool is_oneway_tcp_udp_flow =
     (((protocol == IPPROTO_TCP) || (protocol == IPPROTO_UDP)) && isOneWay()) ? true : false;
 
+#ifdef NTOPNG_PRO
+#if 0  // DEBUG
+  if (rtp)
+    rtp->computeMOS(this);
+#endif
+#endif
+
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
   if(getUses() != 0 && !ntop->getGlobals()->isShutdown())
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] Deleting flow [%u]",
@@ -558,6 +570,10 @@ Flow::~Flow() {
     free(udp);
     udp = NULL;
   }
+#endif
+
+#ifdef NTOPNG_PRO
+  if (rtp) delete(rtp);
 #endif
 
   if(riskInfo) free(riskInfo);
@@ -4860,25 +4876,18 @@ void Flow::housekeep(time_t t) {
 #endif
 
     switch (protocol) {
-    case IPPROTO_TCP:
+      case IPPROTO_TCP:
       if(cli_host && ((getTcpFlagsCli2Srv() == TH_SYN) || (!non_zero_payload_observed)))
 	cli_host->incIncompleteFlows();
       break;
 
-    case IPPROTO_UDP:
+      case IPPROTO_UDP:
       if(cli_host && (get_packets_srv2cli() == 0) /* unidirectional flow */
 	  && srv_ip_addr && srv_ip_addr->isNonEmptyUnicastAddress())
 	cli_host->incIncompleteFlows();
       break;
     }
 
-#ifdef DEBUG_SCAN_DETECTION
-    char buf[64];
-
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "IDLE %s",
-				 print(buf, sizeof(buf)));
-    break;
-#endif
     break;
 
   default:

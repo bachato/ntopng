@@ -479,6 +479,7 @@ using namespace std;
 #include "LocalHost.h"
 #include "RemoteHost.h"
 #ifdef NTOPNG_PRO
+#include "FlowRTP.h"
 #include "ModbusStats.h"
 #include "MessageBroker.h"
 #include "NatsBroker.h"

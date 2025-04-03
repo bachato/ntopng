@@ -95,6 +95,7 @@ private:
   FlowTCP *tcp;
 #ifdef NTOPNG_PRO
   FlowUDP *udp;
+  FlowRTP *rtp;
 #endif
   u_int32_t flow_key;
   FlowCollectionInfo *collection;
@@ -687,6 +688,8 @@ public:
   void processModbusPacket(bool is_query, const u_char *payload,
 			   u_int16_t payload_len,
 			   const struct pcap_pkthdr *h);
+  void processRTPPacket(const u_char *payload, u_int16_t payload_len,
+			const struct pcap_pkthdr *h, bool src2dst_direction);
   void updateQUICStats(bool src2dst_direction, const struct timeval *tv,
 		       u_int8_t *payload, u_int16_t payload_len);
   void updateUDPTimestamp(bool src2dst_direction, const struct timeval *tv);
