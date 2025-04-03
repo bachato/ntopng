@@ -87,6 +87,10 @@ if isEmptyString(device_ip) then
     device_ip = nil
 end
 
+if isEmptyString(mac) then
+    mac = nil
+end
+
 local rsp = {}
 
 local mapping_column_lua_c = {

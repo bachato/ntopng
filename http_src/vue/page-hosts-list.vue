@@ -9,9 +9,15 @@
                     <span class="no-wrap d-flex align-items-center my-auto me-2 filters-label"><b>{{ item["basic_label"] }}</b></span>
                     <!-- :key="host_filters_key" -->
                     <SelectSearch v-model:selected_option="item['current_option']" theme="bootstrap-5" 
-                        dropdown_size="small" :options="item['options']"
+                        dropdown_size="small" :disabled="loading" :options="item['options']"
                         @select_option="add_table_filter">
                     </SelectSearch>
+                </div>
+                <div class="d-flex justify-content-center align-items-center">
+                    <div class="btn btn-sm btn-primary mt-2 me-3" type="button" @click="reset_filters">
+                        {{ _i18n('reset') }}
+                    </div>
+                    <Spinner :show="loading" size="1rem" class="me-1"></Spinner>
                 </div>
             </template> <!-- Dropdown filters -->
         </TableWithConfig>
@@ -23,17 +29,20 @@ import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as SelectSearch } from "./select-search.vue";
 import { default as osUtils } from "../utilities/map/os-utils.js";
 import { default as dataUtils } from "../utilities/data-utils.js";
+import { default as Spinner } from "./spinner.vue";
 import formatterUtils from "../utilities/formatter-utils";
 import NtopUtils from "../utilities/ntop-utils.js";
 
 /* ************************************** */
 
+const _i18n = (t) => i18n(t);
 const props = defineProps({
     context: Object,
 });
 
 /* ************************************** */
 
+const loading = ref(false);
 const host_filters_key = ref(0);
 const as_filters_key = ref(0);
 const table_id = props.context?.has_vlans ? ref('hosts_list_with_vlans') : ref('hosts_list');
@@ -258,12 +267,14 @@ async function load_table_filters(filter, filter_index) {
 /* ************************************** */
 
 async function load_table_filters_array() {
+    loading.value = true;
     let extra_params = get_extra_params_obj();
     let url_params = ntopng_url_manager.obj_to_url_params(extra_params);
     const url = `${http_prefix}/lua/rest/v2/get/host/host_filters.lua?${url_params}`;
     let res = await ntopng_utility.http_request(url);
     host_filters_key.value = host_filters_key.value + 1
     as_filters_key.value = as_filters_key.value + 1
+    loading.value = false;
 
     return res.map((t) => {
         const key_in_url = ntopng_url_manager.get_url_entry(t.name);
@@ -278,6 +289,17 @@ async function load_table_filters_array() {
             hidden: (t.value.length == 1)
         };
     });
+}
+
+/* ************************************** */
+
+function reset_filters() {
+    filter_table_array.value.forEach((el, index) => {
+        /* Getting the currently selected filter */
+        ntopng_url_manager.set_key_to_url(el.id, ``);
+    })
+    load_table_filters_array();
+    refresh_table();
 }
 
 /* ************************************** */
