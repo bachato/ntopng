@@ -63,6 +63,18 @@ end
 
 -- #################################
 
+function discover.getOsId(name)
+   for i=0,table.len(discover.osinfo)-1 do
+      if(discover.osinfo[i][1] == name) then
+	 return i
+      end
+   end
+
+   return 0
+end
+
+-- #################################
+
 function discover.getOsAndIcon(id)
     local name = discover.getOsName(id)
 
