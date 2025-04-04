@@ -1,16 +1,15 @@
 /*
-  (C) 2013-24 - ntop.org
- */
+  (C) 2013-25 - ntop.org
+*/
 
 const os = [
    { name: "Unknown", icon: '' },
-   { name: "Linux", icon: '<i class=\'fab fa-linux fa-lg\'></i>' },
    { name: "Windows", icon: '<i class=\'fab fa-windows fa-lg\'></i>' },
    { name: "macOS", icon: '<i class=\'fab fa-apple fa-lg\'></i>' },
    { name: "iOS", icon: '<i class=\'fab fa-apple fa-lg\'></i>' },
    { name: "Android", icon: '<i class=\'fab fa-android fa-lg\'></i>' },
-   { name: "LaserJET", icon: 'LasetJET' },
-   { name: "AppleAirport", icon: 'Apple Airport' }
+   { name: "Linux", icon: '<i class=\'fab fa-linux fa-lg\'></i>' },
+   { name: "FreeBSD", icon: '' }
 ]
 
 const asset_icons = [
