@@ -18,7 +18,7 @@ leveraging on *n2disk*, an optimized traffic recording application part of the
 
 In order to be able to enable this feature:
 
-1. both *ntopng* and *n2disk* need to be installed from packages.
+1. both *ntopng* and *n2disk* need to be installed from packages on the same host. This is supported on physical hosts or VM. Containers are not yet supported.
 
 2. *n2disk* should be licensed according to the required dump speed. There is an ntopng Bundle license that allows you to license both with a single, convenient license.
 
