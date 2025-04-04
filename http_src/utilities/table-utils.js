@@ -124,13 +124,13 @@ function get_f_print_html_row(table_def) {
 function get_f_print_v_node_buttons(list_or_array) {
     return (col, row, vue_obj) => {
 	const on_click = (id) => {
-	    return (e) => {
+        return (e) => {
 		e.stopPropagation();
 		let event = {event_id: id, row, col};
 		vue_obj.emit('custom_event', event);
 	    }
 	};
-	let v_nodes = col.button_def_array.map((b_def) => {
+    let v_nodes = col.button_def_array.map((b_def) => {
 	    let attributes = {};
 	    if (b_def.attributes != null) {
 		attributes = b_def.attributes;

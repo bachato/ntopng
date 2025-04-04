@@ -13,21 +13,22 @@
 <!--   </Dropdown> <\!-- Dropdown columns -\-> -->
 
 <template>
-<div class="dropdown" ref="dropdown" style="display:inline-block;">
-  <button class="btn dropdown-toggle" :class="button_class_2" :style="button_style" type="button" :id="id" ref="dropdown_button"  aria-expanded="false" data-bs-toggle="dropdown">
-    <slot name="title"></slot>
-  </button>
-  <ul class="dropdown-menu" :aria-labelledby="id" style=" max-height: 25rem;overflow:auto">
-    <!-- <slot name="menu"></slot> -->
+    <div class="dropdown" ref="dropdown" style="display:inline-block;">
+        <button class="btn dropdown-toggle" :class="button_class_2" :style="button_style" type="button" :id="id"
+            ref="dropdown_button" aria-expanded="false" data-bs-toggle="dropdown">
+            <slot name="title"></slot>
+        </button>
+        <ul class="dropdown-menu" :aria-labelledby="id" style=" max-height: 25rem;overflow:auto">
+            <!-- <slot name="menu"></slot> -->
 
-    <!-- <li class="dropdown-item" v-for="(opt, i) in options" :ref="el => { menu[i] = el }"> -->
-    <!--   asd -->
-      <!--   </li> -->
-      <li v-for="(opt, i) in menu_options" class="dropdown-item">
-	<VNode :content="opt"></VNode>
-      </li>
-  </ul>
-</div>
+            <!-- <li class="dropdown-item" v-for="(opt, i) in options" :ref="el => { menu[i] = el }"> -->
+            <!--   asd -->
+            <!--   </li> -->
+            <li v-for="(opt, i) in menu_options" class="dropdown-item">
+                <VNode :content="opt"></VNode>
+            </li>
+        </ul>
+    </div>
 </template>
 
 <script setup>
@@ -59,22 +60,28 @@ const props = defineProps({
 
 let default_overflow = null;
 onMounted(() => {
-    default_overflow = 	$(dropdown.value).parent().closest('div').css('overflow');
+    default_overflow = $(dropdown.value).parent().closest('div').css('overflow');
     if (props.auto_load == true) {
-	load_menu();
+        load_menu();
     }
     let el = { dropdown: dropdown.value, dropdown_button: dropdown_button.value };
     $(dropdown.value).on('show.bs.dropdown', function () {
-	$(dropdown.value).parent().closest('div').css('overflow', "visible");
-	if (props.f_on_open != null) {
-	    props.f_on_open(el);
-	}
+        $(dropdown.value).parent().closest('div').css('overflow', "visible");
+        $(dropdown.value).parent().closest('div').css('z-index', 'auto');
+        $(dropdown.value).parent().closest('div')[0].style.setProperty('overflow', 'visible', 'important');
+        $(dropdown.value).parent().closest('div')[0].style.setProperty('z-index', 'auto', 'important');
+        if (props.f_on_open != null) {
+            props.f_on_open(el);
+        }
     });
     $(dropdown.value).on('hide.bs.dropdown', function () {
-	$(dropdown.value).parent().closest('div').css('overflow', default_overflow);
-	if (props.f_on_close != null) {
-	    props.f_on_close(el);
-	}
+        $(dropdown.value).parent().closest('div').css('overflow', default_overflow);
+        $(dropdown.value).parent().closest('div').css('z-index', '1');
+        $(dropdown.value).parent().closest('div')[0].style.setProperty('overflow', default_overflow, 'important');
+        $(dropdown.value).parent().closest('div')[0].style.setProperty('z-index', '1', 'important');
+        if (props.f_on_close != null) {
+            props.f_on_close(el);
+        }
     });
 });
 
@@ -104,15 +111,15 @@ async function load_menu() {
     let m_options = slots.menu();
     if (m_options == null || m_options.length == 0) { return; }
     if (typeof m_options[0].type === 'symbol') {
-	m_options = m_options[0].children;
+        m_options = m_options[0].children;
     }
     menu_options.value = [];
     m_options.forEach((opt_slot) => {
-	let node = opt_slot;
-	menu_options.value.push(node);
-	// let element = $("<div></div>")[0];
-	// const { vNode, el } = render_component(node, { app:  instance?.appContext?.app, element });
-	// options.value.push(el);
+        let node = opt_slot;
+        menu_options.value.push(node);
+        // let element = $("<div></div>")[0];
+        // const { vNode, el } = render_component(node, { app:  instance?.appContext?.app, element });
+        // options.value.push(el);
     });
     await nextTick();
     // nextTick(() => {
@@ -126,3 +133,9 @@ async function load_menu() {
 defineExpose({ load_menu });
 
 </script>
+
+<style scoped>
+.dropdown-item {
+    cursor: pointer;
+}
+</style>
