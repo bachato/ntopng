@@ -26,9 +26,6 @@
 #include "host_alerts/CustomHostLuaScriptAlert.h"
 #include "host_alerts/FlowHitsAlert.h"
 #include "host_alerts/FlowFloodAlert.h"
-#include "host_alerts/SYNScanAlert.h"
-#include "host_alerts/FINScanAlert.h"
-#include "host_alerts/RSTScanAlert.h"
 #include "host_alerts/SYNFloodAlert.h"
 #include "host_alerts/ServerContactsAlert.h"
 #include "host_alerts/DNSServerContactsAlert.h"
@@ -44,10 +41,10 @@
 #include "host_alerts/UnexpectedGatewayAlert.h"
 #include "host_alerts/ScoreAnomalyAlert.h"
 #include "host_alerts/DomainNamesContactsAlert.h"
-#include "host_alerts/ScanDetectionAlert.h"
 #include "host_alerts/TrafficVolumeAlert.h"
 #include "host_alerts/HostScannerAlert.h"
 #include "host_alerts/NATDetectedAlert.h"
+#include "host_alerts/ScanRealtimeAlert.h"
 
 /* Pro Alerts - do NOT use #ifdef as alerts must always be available */
 
