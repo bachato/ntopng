@@ -199,6 +199,7 @@ class Mac : public GenericHashEntry {
 #ifdef NTOPNG_PRO
   void dumpAssetMac(ndpi_serializer *serializer);
   void dumpAssetInfo(ndpi_serializer *serializer);  
+  void dumpMacInfo(bool add_last_seen);
   void analyzeDevice();
 #endif
 

@@ -77,6 +77,10 @@ Mac::Mac(NetworkInterface *_iface, u_int8_t _mac[6])
 
   if(device_type == device_unknown)
     guessDeviceType();
+
+#ifdef NTOPNG_PRO
+    dumpMacInfo(false /* Do not add last seen */);
+#endif
 }
 
 /* *************************************** */
@@ -84,6 +88,10 @@ Mac::Mac(NetworkInterface *_iface, u_int8_t _mac[6])
 Mac::~Mac() {
   if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+
+#ifdef NTOPNG_PRO
+    dumpMacInfo(true /* Add last seen */);
+#endif
 
   /* Serialize Mac before shutdown */
   if ((!broadcast_mac) && (!special_mac)) dumpToRedis();
