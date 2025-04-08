@@ -449,7 +449,6 @@ const filterCategories = (event) => {
 /**************************** GRAPH FUNCTIONS ******************************* */
 async function draw_graph(redraw = false, centerIP = null) {
     loading.value = true;
-    debugger;-
     // remove old tooltips
     $('.tooltip').remove();
     $('[data-toggle="tooltip"]').tooltip('dispose');
