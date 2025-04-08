@@ -41,32 +41,33 @@
 
                         <div class="btn-group">
                             <button :disabled="disabled_date_picker" @click="jump_time_back()" type="button"
-                                class="btn btn-sm btn-link" ref="btn-jump-time-back"
-                                :title="i18n('date_time_range_picker.btn_move_left')">
+                                class="btn btn-sm btn-link" ref="btn-jump-time-back" data-bs-toggle="tooltip"
+                                data-bs-placement="top" :title="i18n('date_time_range_picker.btn_move_left')">
                                 <i class="fas fa-long-arrow-alt-left"></i>
                             </button>
                             <button :disabled="disabled_date_picker" @click="jump_time_ahead()" type="button"
-                                class="btn btn-sm btn-link me-2" ref="btn-jump-time-ahead"
-                                :title="i18n('date_time_range_picker.btn_move_right')">
+                                class="btn btn-sm btn-link me-2" ref="btn-jump-time-ahead" data-bs-toggle="tooltip"
+                                data-bs-placement="top" :title="i18n('date_time_range_picker.btn_move_right')">
                                 <i class="fas fa-long-arrow-alt-right"></i>
                             </button>
                             <button :disabled="disabled_date_picker" @click="zoom(2)" type="button"
-                                class="btn btn-sm btn-link" ref="btn-zoom-in"
-                                :title="i18n('date_time_range_picker.btn_zoom_in')">
+                                class="btn btn-sm btn-link" ref="btn-zoom-in" data-bs-toggle="tooltip"
+                                data-bs-placement="top" :title="i18n('date_time_range_picker.btn_zoom_in')">
                                 <i class="fas fa-search-plus"></i>
                             </button>
                             <button :disabled="disabled_date_picker" @click="zoom(0.5)" type="button"
-                                class="btn btn-sm btn-link" ref="btn-zoom-out"
-                                :title="i18n('date_time_range_picker.btn_zoom_out')">
+                                class="btn btn-sm btn-link" ref="btn-zoom-out" data-bs-toggle="tooltip"
+                                data-bs-placement="top" :title="i18n('date_time_range_picker.btn_zoom_out')">
                                 <i class="fas fa-search-minus"></i>
                             </button>
                             <button :disabled="history_last_status == null || disabled_date_picker" type="button"
-                                @click="apply_status_by_history()" class="btn btn-sm btn-link"
-                                :title="i18n('date_time_range_picker.btn_undo')">
+                                @click="apply_status_by_history()" class="btn btn-sm btn-link" data-bs-toggle="tooltip"
+                                data-bs-placement="top" :title="i18n('date_time_range_picker.btn_undo')">
                                 <i class="fas fa-undo"></i>
                             </button>
                             <button :disabled="select_time_value == 'custom' || disabled_date_picker"
                                 @click="change_select_time()" type="button" class="btn btn-sm btn-link"
+                                data-bs-toggle="tooltip" data-bs-placement="top"
                                 :title="i18n('date_time_range_picker.btn_refresh')">
                                 <i class="fas fa-sync"></i>
                             </button>

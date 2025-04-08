@@ -2,6 +2,41 @@
     <div class="dashboard-container bg-light">
         <!-- Main Content -->
         <div class="row g-4">
+            <!-- Filters Card - Vertically stacked -->
+            <div class="range-container d-flex flex-wrap">
+                <div class="card-body w-100 range-picker d-flex m-auto flex-wrap">
+                    <RangePicker ref="range_picker" id="range-picker" :enable_refresh="true"
+                        :disabled_date_picker="false" min_time_interval_id="5_min" :round_time="true">
+                        <template v-slot:extra_range_buttons>
+                            <div class="ms-4 d-flex align-items-center ms-2">
+                                <label class="text-nowrap form-label fw-semibold me-1"> {{
+                                    _i18n("alert.graph.maximum_alerts")
+                                    }} </label>
+                                <input ref="slider_max_alerts" type="range" class="form-range" min="10" max="10000"
+                                    v-model="maxAlerts" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    :title="maxAlerts" />
+                            </div>
+                            <div class="ms-4 d-flex align-items-center ms-2">
+                                <label class="text-nowrap form-label fw-semibold me-1"> {{
+                                    _i18n("alert.graph.minimum_score") }} </label>
+                                <input ref="slider_min_score" type="range" class="form-range" min="0" max="500"
+                                    v-model="minScore" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    :title="minScore" />
+                            </div>
+                        </template>
+                    </RangePicker>
+                    <!--
+
+                        <div class="d-flex justify-content-end mt-3">
+                            <button class="btn btn-outline-secondary me-2" @click="reset_filters">
+                                <i class="fa-solid fa-clock-rotate-left"></i> {{ _i18n("alert.graph.reset") }}
+                            </button>
+                            <button class="btn btn-primary" @click="applyFilters">
+                                <i class="fa-solid fa-magnifying-glass"></i> {{ _i18n("alert.graph.apply") }}
+                            </button>
+                        </div>-->
+                </div>
+            </div>
             <!-- Graph Visualization Section - Full width when no node selected -->
             <div class="col-lg-8">
                 <div class="card shadow-sm h-100">
@@ -12,7 +47,9 @@
                         </button>
                     </div>
                     <div class="card-body p-0">
-                        <div ref="alerts_graph" class="graph-content">
+                        <div ref="alerts_graph" class="graph-content d-flex justify-content-center align-items-center"
+                            :class="[(loading) ? 'ntopng-gray-out' : '']">
+                            <Loading v-if="loading" :class="'mt-1'"></Loading>
                             <div v-if="no_data" class="d-flex justify-content-center align-items-center h-100">
                                 <p class="text-center text-muted">{{ _i18n("alert.graph.no_data") }}</p>
                             </div>
@@ -23,59 +60,8 @@
 
             <!-- Node Details Section - Only shown when a node is selected -->
             <div class="col-lg-4">
-                <!-- Filters Card - Vertically stacked -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="card-title mb-0 fw-bold">{{ _i18n("alert.graph.filters") }}</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <DateTimeRangePicker id="my-picker" :enable_refresh="true" :disabled_date_picker="false"
-                                min_time_interval_id="5_min" :round_time="true">
-                            </DateTimeRangePicker>
-                            <label for="alertCategory" class="form-label fw-semibold">{{
-                                _i18n("alert.graph.alert_categories") }}</label>
-                            <div class="dropdown" ref="dropdownRef">
-                                <input type="text" id="alertCategory" v-model="selectedAlertCategory"
-                                    class="form-control" placeholder="Select or search categories"
-                                    @input="filterCategories" @focus="showAlertCategoriesDropdown = true" />
-                                <ul class="dropdown-menu w-100 shadow-sm position-absolute"
-                                    :class="{ show: showAlertCategoriesDropdown }">
-                                    <li v-for="category in filteredAlertCategories" :key="category.category_id">
-                                        <a class="dropdown-item" href="#"
-                                            @click.prevent="selectAlertCategory(category)">
-                                            {{ category.alert_category }} ({{ category.alerts_count }})
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">{{ _i18n("alert.graph.minimum_score") }} {{ minScore
-                            }}</label>
-                            <input type="range" class="form-range" min="0" max="350" v-model="minScore" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">{{ _i18n("alert.graph.maximum_alerts") }} {{ maxAlerts
-                            }}</label>
-                            <input type="range" class="form-range" min="10" max="2000" v-model="maxAlerts" />
-                        </div>
-
-                        <div class="d-flex justify-content-end mt-3">
-                            <button class="btn btn-outline-secondary me-2" @click="reset_filters">
-                                <i class="fa-solid fa-clock-rotate-left"></i> {{ _i18n("alert.graph.reset") }}
-                            </button>
-                            <button class="btn btn-primary" @click="applyFilters">
-                                <i class="fa-solid fa-magnifying-glass"></i> {{ _i18n("alert.graph.apply") }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Node or Alert Details Card -->
-                <div class="card shadow-sm h-100">
+                <div class="card shadow-sm h-100" :class="[(hostDataLoading) ? 'ntopng-gray-out' : '']">
                     <!-- Conditional header based on what was clicked -->
                     <div class="card-header bg-white py-3">
                         <h5 class="card-title mb-0 fw-bold">
@@ -90,7 +76,8 @@
                         <div v-if="lastClickedElementIsNode" class="node-details">
                             <div class="mb-4">
                                 <h6 class="fw-bold fs-5">
-                                    <i class='fas fa-laptop'></i> {{ selectedNodeData?.host_info?.info?.ip || 'N/A' }}
+                                    <i class='fas fa-laptop'></i> {{ selectedNodeData?.host_info?.info?.ip || 'N/A'
+                                    }}
                                 </h6>
                                 <div class="row g-3">
                                     <div class="col-12">
@@ -117,15 +104,17 @@
                                     <div class="col-12">
                                         <a :href="hist_flows_url" target="_blank" class="fw-bold">
                                             <i class="fas fa-lg fa-chart-area"> </i>
-                                            <span class="detail-label text-primary">{{ _i18n("alert.graph.hist_flows")
-                                                }}</span>
+                                            <span class="detail-label text-primary">{{
+                                                _i18n("alert.graph.hist_flows")
+                                            }}</span>
                                         </a>
                                     </div>
                                     <div class="col-12">
                                         <a :href="hist_alerts_url" target="_blank" class="text-danger fw-bold">
                                             <i class="fa-solid fa-triangle-exclamation"> </i>
-                                            <span class="detail-label text-primary">{{ _i18n("alert.graph.hist_alerts")
-                                                }}</span>
+                                            <span class="detail-label text-primary">{{
+                                                _i18n("alert.graph.hist_alerts")
+                                            }}</span>
                                         </a>
                                     </div>
                                 </div>
@@ -152,13 +141,15 @@
                                         <div
                                             v-if="selectedNodeData && selectedNodeData.host_info && selectedNodeData.host_info[role]">
                                             <div class="detail-row">
-                                                <span class="detail-label">{{ _i18n("alert.graph.first_seen") }}</span>
+                                                <span class="detail-label">{{ _i18n("alert.graph.first_seen")
+                                                }}</span>
                                                 <span class="detail-value">{{
                                                     selectedNodeData.host_info[role]?.first_seen
                                                     || '-' }}</span>
                                             </div>
                                             <div class="detail-row">
-                                                <span class="detail-label">{{ _i18n("alert.graph.last_seen") }}</span>
+                                                <span class="detail-label">{{ _i18n("alert.graph.last_seen")
+                                                }}</span>
                                                 <span class="detail-value">{{
                                                     selectedNodeData.host_info[role]?.last_seen ||
                                                     '-' }}</span>
@@ -171,7 +162,8 @@
                                                     || '-' }}</span>
                                             </div>
                                             <div class="detail-row">
-                                                <span class="detail-label">{{ _i18n("alert.graph.total_score") }}</span>
+                                                <span class="detail-label">{{ _i18n("alert.graph.total_score")
+                                                }}</span>
                                                 <span class="detail-value">{{
                                                     formatterUtils.getFormatter("number")(selectedNodeData.host_info[role]?.total_score)
                                                     || '-' }}</span>
@@ -337,11 +329,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch, computed, nextTick } from "vue";
+import { ref, onMounted, onBeforeMount, onBeforeUnmount, watch, computed, nextTick } from "vue";
 import { ntopng_utility, ntopng_url_manager } from "../services/context/ntopng_globals_services.js";
-import { default as DateTimeRangePicker } from "./date-time-range-picker.vue";
+import { default as RangePicker } from "./range-picker.vue";
 import formatterUtils from "../utilities/formatter-utils";
 import { default as Loading } from "./loading.vue";
+import { default as Spinner } from "./spinner.vue";
 
 const _i18n = (t) => i18n(t);
 const d3 = d3v7;
@@ -352,11 +345,16 @@ const props = defineProps({
 
 // State data
 const ifid = String(props.context.ifid);
-const hostDataLoading = ref(false);
+const hostDataLoading = ref(true);
 const alerts_graph = ref(null);
+const range_picker = ref(null);
 const dropdownRef = ref(null);
+const loading = ref(true);
 const maxAlerts = ref(10000); // max numebr of alerts
 const no_data = ref(false);
+const slider_max_alerts = ref(null);
+const slider_min_score = ref(null);
+const last_url = ref();
 const minScore = ref(0); // filter alerts with a minimum score of >= 0
 
 // Selected node information (right div next to graph)
@@ -420,7 +418,10 @@ const handleClickOutside = (event) => {
 
 
 const applyFilters = async () => {
+    // Security check in order to not reload the component if the filters are the same
+    if (last_url.value === window.location.href) return;
     let center_graph_on_ip = null;
+    last_url.value = window.location.href;
 
     // Empty links and nodes to make request to backend
     links = [];
@@ -447,6 +448,8 @@ const filterCategories = (event) => {
 /******************************************************************************/
 /**************************** GRAPH FUNCTIONS ******************************* */
 async function draw_graph(redraw = false, centerIP = null) {
+    loading.value = true;
+    debugger;-
     // remove old tooltips
     $('.tooltip').remove();
     $('[data-toggle="tooltip"]').tooltip('dispose');
@@ -952,6 +955,7 @@ async function draw_graph(redraw = false, centerIP = null) {
         svg.transition().duration(750)
             .call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
     }
+    loading.value = false;
 }
 
 // Function to center the graph on a specific node
@@ -1211,6 +1215,31 @@ onMounted(async () => {
             new bootstrap.Tooltip(tooltipTriggerEl);
         });
     });
+
+    const tooltipTriggerMaxAlerts = new bootstrap.Tooltip(slider_max_alerts.value, { trigger: 'manual' });
+    slider_max_alerts.value.addEventListener('input', () => {
+        $(".tooltip-inner").text(maxAlerts.value)
+        slider_max_alerts.value.setAttribute('data-bs-original-title', maxAlerts.value);
+        tooltipTriggerMaxAlerts.show();
+    });
+    slider_max_alerts.value.addEventListener('mouseup', () => {
+        applyFilters()
+    })
+    tooltipTriggerMaxAlerts.show();
+
+    const tooltipTriggerMinScore = new bootstrap.Tooltip(slider_min_score.value, { trigger: 'manual' });
+    slider_min_score.value.addEventListener('input', () => {
+        $(".tooltip-inner").text(minScore.value)
+        slider_min_score.value.setAttribute('data-bs-original-title', minScore.value);
+        tooltipTriggerMinScore.show();
+    });
+    slider_min_score.value.addEventListener('mouseup', () => {
+        applyFilters()
+    })
+    tooltipTriggerMinScore.show();
+    last_url.value = window.location.href;
+    ntopng_events_manager.on_event_change('range_picker', ntopng_events.FILTERS_CHANGE, (new_status) => { applyFilters(); }, true);
+    ntopng_events_manager.on_event_change('range_picker', ntopng_events.EPOCH_CHANGE, (new_status) => { applyFilters(); }, true);
 });
 
 onBeforeUnmount(() => {
