@@ -1224,7 +1224,6 @@ onMounted(async () => {
     slider_max_alerts.value.addEventListener('mouseup', () => {
         applyFilters()
     })
-    tooltipTriggerMaxAlerts.show();
 
     const tooltipTriggerMinScore = new bootstrap.Tooltip(slider_min_score.value, { trigger: 'manual' });
     slider_min_score.value.addEventListener('input', () => {
@@ -1235,7 +1234,6 @@ onMounted(async () => {
     slider_min_score.value.addEventListener('mouseup', () => {
         applyFilters()
     })
-    tooltipTriggerMinScore.show();
     last_url.value = window.location.href;
     ntopng_events_manager.on_event_change('range_picker', ntopng_events.FILTERS_CHANGE, (new_status) => { applyFilters(); }, true);
     ntopng_events_manager.on_event_change('range_picker', ntopng_events.EPOCH_CHANGE, (new_status) => { applyFilters(); }, true);
@@ -1388,11 +1386,6 @@ function resetGraph() {
 .detail-label {
     color: #6c757d;
     font-weight: bold;
-}
-
-.detail-value {
-    color: #212529;
-    font-weight: normal;
 }
 
 

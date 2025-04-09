@@ -1056,3 +1056,13 @@ select:focus {
 .badge.bg-secondary:hover {
   background-color: #444 !important;
 }
+
+.detail-value {
+    color: #e2e2e2;
+    font-weight: normal;
+}
+
+.text-muted {
+    color: #6c757d !important;
+    --bs-text-opacity: 1;    
+}
