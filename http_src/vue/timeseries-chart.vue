@@ -1,6 +1,6 @@
 <!-- (C) 2022 - ntop.org     -->
 <template>
-	<div style="width:100% height:380px;" class="text-end mb-2">
+	<div class="mb-2 d-flex ms-auto">
 		<label class="form-check-label form-control-sm" v-for="(item, i) in  timeseries_list ">
 			<input type="checkbox" class="form-check-input align-middle mt-0" @click="change_visibility(!item.checked, i)"
 				:checked="item.checked" style="border-color: #0d6efd;" :style="{ backgroundColor: item.color }">
