@@ -1999,7 +1999,7 @@ bool Utils::postHTTPTextFile(lua_State *vm, char *username, char *password,
 bool Utils::sendMail(lua_State *vm, char *from, char *to, char *cc,
                      char *message, char *smtp_server, char *username,
                      char *password, bool use_proxy, bool verbose) {
-  bool ret = true, canRetry = false;
+  bool ret = true;
   const char *ret_str = "";
   u_int8_t num_runs = 0;
 
@@ -2034,14 +2034,14 @@ bool Utils::sendMail(lua_State *vm, char *from, char *to, char *cc,
     curl_easy_setopt(curl, CURLOPT_URL, smtp_server);
 
     if (strncmp(smtp_server, "smtps://", 8) == 0)
-      curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
     else if (strncmp(smtp_server, "smtp://", 7) == 0) {
-      if(canRetry == false)
-	curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY), canRetry = true;
-      else
-	curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_NONE), canRetry = false;
+        if(ntop->getPrefs()->enable_email_starttls())
+	        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
+        else
+	        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_NONE);
     } else /* Try using SSL */
-      curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
+        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
 
     if (ntop->getPrefs()->do_insecure_tls()) {
       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -2088,7 +2088,7 @@ bool Utils::sendMail(lua_State *vm, char *from, char *to, char *cc,
     ret_str = curl_easy_strerror(res);
 
     if (res != CURLE_OK) {
-      if((num_runs == 1) && (canRetry == true)) {
+      if((num_runs == 1) && (ntop->getPrefs()->enable_email_starttls())) {
 	/*
 	  Some mailservers have TLS misconfigured and thus STARTTLS will fail
 	  so as last resort let's try in plain text

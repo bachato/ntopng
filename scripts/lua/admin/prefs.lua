@@ -502,7 +502,7 @@ if auth.has_capability(auth.capabilities.preferences) then
             i18n("prefs.email_notification") .. '</th></tr></thead>')
         prefsToggleButton(subpage_active, {
             field = "toggle_starttls",
-            default = "0",
+            default = "1",
             pref = "starttls"
         })
 
