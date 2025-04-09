@@ -1209,10 +1209,7 @@ onMounted(async () => {
 
     // Init bootstrap tooltip
     nextTick(() => {
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.forEach((tooltipTriggerEl) => {
-            new bootstrap.Tooltip(tooltipTriggerEl);
-        });
+        NtopUtils.reloadBSTooltips();
     });
 
     const tooltipTriggerMaxAlerts = new bootstrap.Tooltip(slider_max_alerts.value, { trigger: 'manual' });
