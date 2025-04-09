@@ -1933,11 +1933,13 @@ bool Ntop::checkUserPassword(const char *user, const char *password,
   if (!user || user[0] == '\0' || !password || password[0] == '\0')
     return (false);
 
+#if 0
   if((strcmp(user, "admin") == 0) && (strcmp(password, "admin") == 0)) {
     /* Force user to change password */
     ntop->getRedis()->set((char *)CONST_DEFAULT_PASSWORD_CHANGED, (char*)"0");
     *redirect_to_change_pwd = true;
   }
+#endif
   
   /* First of all let's check the local user authentication */
   if (checkHTTPAuth(user, password, group)) {
