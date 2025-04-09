@@ -178,6 +178,19 @@ The alert is sent when the number of sent/received ICMP Flows/sec exceeds the th
 *Not Enabled by Default*
 
 
+NAT Detected
+~~~~~~~~~~~~~~~~~~~
+Checks for devices operating behind a NAT. 
+
+The alert is sent when a device is detected behind a NAT.
+
+*Interface: Packet & ZMQ*
+
+*Category: Network*
+
+*Not Enabled by Default*
+
+
 NTP Server Contacts
 ~~~~~~~~~~~~~~~~~~~
 
@@ -210,36 +223,6 @@ The alert is sent whenever an host has at least one active flow using a remote a
 *Not Enabled by Default*
 
 
-RST Scan
-~~~~~~~~
-
-Checks for RESET flag.
-
-An high number of RESET flags in a network could mean some issue with it. 
-
-The alert is sent whenever an host exceed the configurable threshold of RST per minute.
-
-*Interface: Packet & ZMQ*
-
-*Category: Network*
-
-*Not Enabled by Default*
-
-
-RX-only Host Scan
-~~~~~~~~~~~~~~~~~
-
-Checks for scan towards RX-only hosts.
-
-The alert is sent whenever a RX-only host is under scan attack.
-
-*Interface: Packet & ZMQ*
-
-*Category: Network*
-
-*Not Enabled by Default*
-
-
 Scan
 ~~~~~~~~~~~~~~
 Detects scanning activities targeting ports, networks, and services. This alert requires Clickhouse.
@@ -247,6 +230,7 @@ Detects scanning activities targeting ports, networks, and services. This alert 
 - Port Scan: the number of contacted ports exceeds the configured threshold.
 - Service Scan: an attack targeting multiple hosts on a specific service.
 - Network Scan: communication with an unusually high number of hosts.
+- Service Down: a host made an excessive number of attempts to contact another host on a specific port, but the target did not respond. This behavior may indicate that the destination service is down or unreachable.
 
 *Interface: Packet & ZMQ*
 
@@ -255,11 +239,15 @@ Detects scanning activities targeting ports, networks, and services. This alert 
 *Not Enabled by Default*
 
 
-Scan Detection
+Scan Realtime
 ~~~~~~~~~~~~~~
-Checks for a scan detection.
+A collection of checks to identify hosts performing scanning activities.
 
-Host and network scanning cannot go unnoticed because they are usually a symptom of possible exploits and attacks.TCP/UDP flows exceeds the specified standard > 32 Flows (Minute) 
+- RX-only Host Scan: Detects scans targeting RX-only hosts. An alert is triggered whenever an RX-only host is subject to a scanning attempt.
+- Incomplete Flows Scan: Detects hosts generating an unusually high number of incomplete TCP/UDP flows. These patterns are often indicative of host or network scanning, which can be a precursor to exploits or attacks.
+- SYN Scan: Detects SYN scanning activity. In a SYN scan, similar to port scanning, a threat actor attempts to initiate a TCP connection with each port on a target server by sending a SYN (synchronization) packet. If a port responds with a SYN/ACK, it indicates the port is open. The attacker then sends an RST to avoid completing the handshake.
+- FIN Scan: Detects FIN scan activity. This technique is used by attackers or security analysts to identify open ports by sending packets with only the FIN (finish) flag set. Open ports typically do not respond, while closed ports send a RST.
+- RST Scan: Detects an unusually high number of packets with the RST (reset) flag. A spike in RESET flags can indicate scanning behavior or potential issues within the network.
 
 *Interface: Packet & ZMQ*
 
@@ -356,38 +344,6 @@ SYN Flood Alert
 A SYN flood DDoS attack exploits a weakness in the TCP connection (the “three-way handshake”), a SYN request to initiate a TCP connection with a host must be answered by a SYN-ACK response from that host, and then confirmed by an ACK response from the requester. In a SYN flood scenario, the requester sends multiple SYN requests, but does not respond to the host’s SYN-ACK response, or sends the SYN requests from a spoofed IP address. The host system continues to wait for acknowledgement for each of the requests, resulting in denial of service.
 
 The alert is sent when the number of sent/received SYNs/sec exceeds the threshold.
-
-*Interface: Packet & ZMQ*
-
-*Category: Cybersecurity*
-
-*Not Enabled by Default*
-
-SYN Scan
-~~~~~~~~
-
-Checks for SYN Scan.
-
-Syn scan alert In SYN scanning, similar to port scanning, the threat actor attempts to set up a (TCP/IP) connection with a server on every possible port. This is done by sending a SYN (synchronization) packet, as if to initiate a three-way handshake, to every port on the server.
-If the server replies with an ACK (acknowledgement)response or SYN/ACK (synchronization acknowledged) packet from a particular port, it means that the port is open. Then, the malicious actor sends an RST.
-
-The alert is sent when the number of sent/received SYNs/min exceeds the threshold.
-
-*Interface: Packet & ZMQ*
-
-*Category: Network*
-
-*Not Enabled by Default*
-
-
-TCP FIN Scan
-~~~~~~~~~~~~
-
-Checks for TCP FIN Scan.
-
-A TCP FIN scan is a technique used by attackers or security professionals to probe a network or a device to discover open ports and services.
-
-The alert is sent when the number of sent/received FINs/min exceeds the threshold.
 
 *Interface: Packet & ZMQ*
 
