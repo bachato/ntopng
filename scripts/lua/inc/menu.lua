@@ -329,7 +329,7 @@ else
             }, {
                 entry = page_utils.menu_entries.alerts_graph,
                 url = "/lua/pro/alerts_graph.lua",
-                hidden = true--(not ntop.isEnterprise())
+                hidden = (not ntop.isEnterpriseL() and not ntop.isnEdgeEnterprise())
             },
             {
                 entry = page_utils.menu_entries.alerts_analysis,
