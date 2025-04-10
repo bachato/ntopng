@@ -12241,12 +12241,12 @@ bool NetworkInterface::get_hosts_by_service(GenericHashEntry *node,
   }
 
   LocalHost *lh = (LocalHost*) h;
-  std::unordered_map<u_int16_t, ndpi_protocol> ports_list = l4_proto == 6 ? lh->getTCPServerPorts() : lh->getUDPServerPorts();
+  std::unordered_map<u_int16_t, ndpi_protocol> *ports_list = l4_proto == 6 ? lh->getTCPServerPorts() : lh->getUDPServerPorts();
   std::unordered_map<u_int16_t, ndpi_protocol>::iterator port_finder;
   u_int16_t port_found = 0;
-  port_finder = ports_list.begin();
+  port_finder = ports_list->begin();
 
-  while (port_finder != ports_list.end() && port_found == 0) {
+  while (port_finder != ports_list->end() && port_found == 0) {
     if(port_finder->second.proto.app_protocol == l7_proto) {
       port_found = port_finder->first;
     }

@@ -32,7 +32,7 @@ class LocalHost : public Host {
   LocalHostStats *initial_ts_point;
   /* contacted_server_ports it's a buffer used by the "Server Port Detected" check */
   SPSCQueue<std::pair<u_int16_t, u_int16_t>> contacted_server_ports;
-  UsedPorts usedPorts;
+  UsedPorts usedPorts; /* List of server+client-contacted ports */
   ndpi_os tcp_fingerprint_host_os; /* Learnt from TCP Fingerprinting */
   HostFingerprints *fingerprints; /* Application fingerprints */
   std::unordered_map<u_int32_t, DoHDoTStats *> doh_dot_map;
@@ -193,18 +193,17 @@ class LocalHost : public Host {
     usedPorts.setContactedPort(isTCP, port, proto);
   };
   virtual inline void luaUsedPorts(lua_State *vm) { usedPorts.lua(vm, iface); };
-  virtual inline std::unordered_map<u_int16_t, ndpi_protocol> getUDPServerPorts() { return(usedPorts.getUDPServerPorts()); };
-  virtual inline std::unordered_map<u_int16_t, ndpi_protocol> getTCPServerPorts() { return(usedPorts.getTCPServerPorts()); };
+  virtual inline std::unordered_map<u_int16_t, ndpi_protocol>* getUDPServerPorts() { return(usedPorts.getUDPServerPorts()); };
+  virtual inline std::unordered_map<u_int16_t, ndpi_protocol>* getTCPServerPorts() { return(usedPorts.getTCPServerPorts()); };
 
-  virtual inline std::unordered_map<u_int16_t, ndpi_protocol> *getServerPorts(
-      bool isTCP) {
+  virtual inline std::unordered_map<u_int16_t, ndpi_protocol>* getServerPorts(bool isTCP) {
     return (usedPorts.getServerPorts(isTCP));
   };
 
   void periodic_stats_update(const struct timeval *tv);
   void checkGatewayInfo();
-  inline Fingerprint *getJA4Fingerprint()   { return (fingerprints ? &fingerprints->ja4  : NULL); }
-  inline Fingerprint *getHASSHFingerprint() { return (fingerprints ? &fingerprints->hassh: NULL); }
+  inline Fingerprint* getJA4Fingerprint()   { return (fingerprints ? &fingerprints->ja4  : NULL); }
+  inline Fingerprint* getHASSHFingerprint() { return (fingerprints ? &fingerprints->hassh: NULL); }
   void lua_get_fingerprints(lua_State *vm);
 
   SPSCQueue<std::pair<u_int16_t, u_int16_t>> *getContactedServerPorts() { return (&contacted_server_ports);};
@@ -240,6 +239,7 @@ class LocalHost : public Host {
   bool addDataToAssets(char *field, char *value);
   bool removeDataFromAssets(char *field);
   void dumpAssetJson(ndpi_serializer *serializer);
+  void dumpAssetPortsJson(ndpi_serializer *serializer);
 #endif
 
   void setDeviceType(DeviceType devtype);

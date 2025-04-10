@@ -25,30 +25,24 @@
 #include "ntop_includes.h"
  
 class ScanRealtimeAlert : public HostAlert {
-  private:
-    ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
-    std::vector<ScanAlertType> alerts;
-    // Scan Detention
-    u_int32_t num_incomplete_flows; u_int32_t num_incomplete_flows_threshold;
-    // Rx only
-    u_int16_t num_server_ports; u_int32_t as_server; u_int32_t as_server_threshold;
-    // SFR
-    u_int16_t hits; u_int64_t sfr_threshold; bool attacker;
+private:
+  ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
+  std::vector<ScanAlertType> alerts;
 
-  public:
-    static HostAlertType getClassType() {
-      return {host_alert_scan_realtime, alert_category_security};
-    }
+public:
+  static HostAlertType getClassType() {
+    return {host_alert_scan_realtime, alert_category_security};
+  }
     
-    u_int8_t getAlertScore() const { return SCORE_LEVEL_WARNING; };
+  u_int8_t getAlertScore() const { return SCORE_LEVEL_WARNING; };
 
-    ScanRealtimeAlert(HostCheck* c, Host* h,risk_percentage cli_pctg, std::vector<ScanAlertType> _alerts)
-        : HostAlert(c, h, cli_pctg) {
-      alerts = _alerts;
-    };
-    ~ScanRealtimeAlert(){};
+  ScanRealtimeAlert(HostCheck* c, Host* h,risk_percentage cli_pctg, std::vector<ScanAlertType> _alerts)
+    : HostAlert(c, h, cli_pctg) {
+    alerts = _alerts;
+  };
+  ~ScanRealtimeAlert(){};
 
-    HostAlertType getAlertType() const { return getClassType(); }
+  HostAlertType getAlertType() const { return getClassType(); }
 };
  
   #endif /* _SCAN_REATIME_ALERT_H_ */
