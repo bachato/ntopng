@@ -142,20 +142,62 @@ function inline_select_form(name, keys, values, curval)
     print [[</select>]]
 end
 
+function override_stats(stats, overr_stats)
+    local new_stats = stats
+    -- override stats with the values calculated from the latest user reset
+    for k, v in pairs(overr_stats) do
+        new_stats[k] = v
+    end
+    return new_stats
+end
+
 -- this is a user-browseable page, so we must return counters from
 -- the latest reset as the user may have chosen to reset statistics at some point
 if ifstats.stats and ifstats.stats_since_reset then
-    -- override stats with the values calculated from the latest user reset
-    for k, v in pairs(ifstats.stats_since_reset) do
-        ifstats.stats[k] = v
-    end
+    ifstats.stats = override_stats(ifstats.stats, ifstats.stats_since_reset)
+end
+if ifstats.zmqRecvStats and ifstats.zmqRecvStats_since_reset then
+    ifstats.zmqRecvStats = override_stats(ifstats.zmqRecvStats, ifstats.zmqRecvStats_since_reset)
 end
 
-if ifstats.zmqRecvStats and ifstats.zmqRecvStats_since_reset then
-    -- override stats with the values calculated from the latest user reset
-    for k, v in pairs(ifstats.zmqRecvStats_since_reset) do
-        ifstats.zmqRecvStats[k] = v
+local probes_stats = ifstats.probes or {}
+
+if interface.isView() then
+    local zmq_stats = {}
+    local exporters_stats = {}
+    for interface_name, _ in pairsByKeys(interface.getIfNames() or {}) do
+
+        interface.select(interface_name)
+
+        local tmp = interface.getStats()
+
+        if tmp.stats and tmp.stats_since_reset then
+            tmp.stats = override_stats(tmp.stats, tmp.stats_since_reset)
+        end
+        if tmp.zmqRecvStats and tmp.zmqRecvStats_since_reset then
+            tmp.zmqRecvStats = override_stats(tmp.zmqRecvStats, tmp.zmqRecvStats_since_reset)
+        end
+
+        for k, v in pairs(tmp.probes or {}) do
+            probes_stats[k] = v
+        end
+        for k, v in pairs(tmp.exporters or {}) do
+            if not exporters_stats[k] then
+                exporters_stats[k] = {}
+            end
+            for key_stat, value_stat in pairs(v) do
+                exporters_stats[k][key_stat] = value_stat + (exporters_stats[k][key_stat] or 0)
+            end
+        end
+        for k, v in pairs(tmp.zmqRecvStats or {}) do
+            zmq_stats[k] = (zmq_stats[k] or 0) + v
+        end
     end
+
+    ifstats.zmqRecvStats = zmq_stats
+    ifstats.exporters = exporters_stats
+
+    interface.select(ifname) -- Go back to the View interface
 end
 
 local ext_interfaces = {}
@@ -447,33 +489,6 @@ if ((page == "overview") or (page == nil)) then
 
     local nprobe_interface, nprobe_version, nprobe_probe_ip, nprobe_probe_public_ip, nprobe_edition, nprobe_license,
     nprobe_maintenance = {}, {}, {}, {}, {}, {}, {}
-    local probes_stats = ifstats.probes or {}
-
-    if interface.isView() then
-        local zmq_stats = {}
-        local exporters_stats = {}
-        for interface_name, _ in pairsByKeys(interface.getIfNames() or {}) do
-            interface.select(interface_name)
-            local tmp = interface.getStats()
-            for k, v in pairs(tmp.probes or {}) do
-                probes_stats[k] = v
-            end
-            for k, v in pairs(tmp.exporters or {}) do
-                if not exporters_stats[k] then
-                    exporters_stats[k] = {}
-                end
-                for key_stat, value_stat in pairs(v) do
-                    exporters_stats[k][key_stat] = value_stat + (exporters_stats[k][key_stat] or 0)
-                end
-            end
-            for k, v in pairs(tmp.zmqRecvStats or {}) do
-                zmq_stats[k] = (zmq_stats[k] or 0) + v
-            end
-        end
-        ifstats.zmqRecvStats = zmq_stats
-        ifstats.exporters = exporters_stats
-        interface.select(ifname) -- Go back to the View interface
-    end
 
     local tot_num_nprobes = table.len(probes_stats or {})
     local max_num_nprobes = 4
