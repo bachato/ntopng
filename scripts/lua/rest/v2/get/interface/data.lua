@@ -79,6 +79,7 @@ function dumpInterfaceStats(ifid)
 
     if interface.isView() then
         local zmq_stats = {}
+        local zmq_stats_since_reset = {}
         for interface_name, _ in pairsByKeys(interface.getIfNames() or {}) do
             interface.select(interface_name)
             local tmp = interface.getStats()
@@ -86,14 +87,26 @@ function dumpInterfaceStats(ifid)
             for k, v in pairs(tmp.zmqRecvStats or {}) do
                 zmq_stats[k] = (zmq_stats[k] or 0) + v
             end
+            for k, v in pairs(tmp.zmqRecvStats_since_reset or {}) do
+                zmq_stats_since_reset[k] = (zmq_stats_since_reset[k] or 0) + v
+            end
             for k, v in pairs(tmp.exporters or {}) do
                 drops = v["num_drops"] + drops
             end
         end
         ifstats.zmqRecvStats = zmq_stats
+        ifstats.zmqRecvStats_since_reset = zmq_stats_since_reset
         interface.select(ifstats.id)
     elseif (ifstats) then
        drops = ifstats.stats_since_reset.drops
+    end
+
+    if ifstats.zmqRecvStats and ifstats.zmqRecvStats_since_reset then
+        -- override stats with the values calculated from the latest user reset
+        -- for consistency with if_stats.lua
+        for k, v in pairs(ifstats.zmqRecvStats_since_reset) do
+            ifstats.zmqRecvStats[k] = v
+        end
     end
 
     local res = {}
@@ -248,14 +261,6 @@ function dumpInterfaceStats(ifid)
         end
 
         if (ifstats.zmqRecvStats ~= nil) then
-            if ifstats.zmqRecvStats_since_reset then
-                -- override stats with the values calculated from the latest user reset
-                -- for consistency with if_stats.lua
-                for k, v in pairs(ifstats.zmqRecvStats_since_reset) do
-                    ifstats.zmqRecvStats[k] = v
-                end
-            end
-
             res["zmqRecvStats"] = {}
             res["zmqRecvStats"]["flows"] = ifstats.zmqRecvStats.flows
             res["zmqRecvStats"]["dropped_flows"] = ifstats.zmqRecvStats.dropped_flows
