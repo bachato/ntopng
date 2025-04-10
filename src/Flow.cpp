@@ -374,10 +374,10 @@ void Flow::allocDPIMemory() {
 void Flow::freeDPIMemory() {
   if(ndpiFlow) {
     if(isDNS()) {
-      if(ndpiFlow) {
+      if(ndpiFlow && iface->isPacketInterface()) {
 	if((stats.get_cli2srv_packets() > 0) && (stats.get_srv2cli_packets() == 0)
 	   && (ndpiFlow->protos.dns.is_query == 0)) {
-	  swap_requested = 1;
+	  request_swap();
 	}
       }
     } else if(/* !isDNS() */ ntop->getPrefs()->is_dns_cache_enabled()) {
@@ -739,7 +739,7 @@ void Flow::processDetectedProtocol(u_int8_t *payload, u_int16_t payload_len) {
 	  u_int8_t mode = payload[0] & 0x07;
 
 	  if(mode == 4 /* server -> client */) {
-	    swap_requested = 1; /* This flow will be swapped */
+	    request_swap(); /* This flow will be swapped */
 	    swap();
 	  }
 	}
@@ -749,7 +749,7 @@ void Flow::processDetectedProtocol(u_int8_t *payload, u_int16_t payload_len) {
 	if(payload_len > 4) {
 	  if((payload[3] & 0x80) == 0x80) {
 	    /* server -> client */
-	    swap_requested = 1; /* This flow will be swapped */
+	    request_swap(); /* This flow will be swapped */
 	    swap();
 	  }
 	}
@@ -5599,7 +5599,7 @@ void Flow::updateTcpFlags(const struct bpf_timeval *when, u_int8_t flags,
 
 	if((src2dst_tcp_flags & (TH_SYN | TH_ACK)) == (TH_SYN | TH_ACK)) {
 	  /* SYN|ACK arrived before SYN */
-	  swap_requested = 1;
+	  request_swap();
 	}
       } else if(flags_3wh == (TH_SYN | TH_ACK)) {
         if((tcp->synAckTime.tv_sec == 0) && (tcp->synTime.tv_sec > 0)) {
@@ -8665,7 +8665,7 @@ void Flow::check_swap()
       /* We disable UDP swap that might be wrong in particular for probing attempts */
       ; /* Don't do anything: this might be RTP or similar */
     } else {
-      swap_requested = 1; /* This flow will be swapped */
+      request_swap(); /* This flow will be swapped */
     }
   }
 }
@@ -8866,7 +8866,7 @@ void Flow::updateTCPHostServices(Host *cli_h, Host *srv_h) {
       if((((src2dst_tcp_flags & TH_SYN) == 0) && ((dst2src_tcp_flags & TH_SYN) != 0))
 	 || ((((src2dst_tcp_flags|dst2src_tcp_flags) & TH_SYN) == 0) /* No SYN observed */
 	     && (get_cli_port() < get_srv_port()))) {
-	swap_requested = 1;
+	request_swap();
       }
     }
     break;
@@ -8909,18 +8909,20 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
 
   case NDPI_PROTOCOL_DNS:
     /* Swap check */
-    if((!swap_requested) && (ndpiFlow != NULL)) {
+    if((!swap_requested)
+       && (ndpiFlow != NULL)
+       && iface->isPacketInterface()) {
       if(ndpiFlow->protos.dns.is_query) {
 	if(src2dst_direction) {
 	  ;
 	} else {
-	  swap_requested = 1;
+	  request_swap();
 	  // ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** SWAP ***");
 	}
       } else {
 	/* Response */
 	if(src2dst_direction) {
-	  swap_requested = 1;
+	  request_swap();
 	  // ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** SWAP ***");
 	} else {
 	  ;

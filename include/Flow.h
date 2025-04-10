@@ -943,7 +943,7 @@ public:
   u_int64_t get_current_goodput_bytes_srv2cli() const;
   u_int64_t get_current_packets_cli2srv() const;
   u_int64_t get_current_packets_srv2cli() const;
-
+  inline void request_swap()            { swap_requested = true; }
   inline bool is_swap_requested() const {
     return (swap_requested ? true : false);
   };
