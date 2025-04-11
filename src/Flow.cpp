@@ -477,11 +477,6 @@ Flow::~Flow() {
   for (std::map<FlowAlertTypeEnum, FlowAlert *>::iterator it = triggered_alerts.begin(); it != triggered_alerts.end(); it++)
     delete it->second;
 
-  if(isTCP())
-    accountBidirectionalTCPProtocolServices();
-  else if(isUDP())
-    accountBidirectionalUDPProtocolServices();
-
   accountFlowTraffic(true);
 
 #ifdef ALERTED_FLOWS_DEBUG
@@ -1966,6 +1961,11 @@ void Flow::incFlowDroppedCounters() {
  * needs to be updated on flow_end, it's possible to do it from here
  */
 void Flow::flow_end_stats_update() {
+  if(isTCP()) {
+    accountBidirectionalTCPProtocolServices();
+  } else if(isUDP()) {
+    accountBidirectionalUDPProtocolServices();
+  }  
 #ifdef NTOPNG_PRO
   QoEType qoe_type = getQoEType();
   Host *cli_u = getViewSharedClient(), *srv_u = getViewSharedServer();
@@ -4794,7 +4794,7 @@ void Flow::housekeep(time_t t) {
   case hash_entry_state_flow_protocoldetected:
     if(!is_swap_requested()) /* The flow will be swapped, hook execution will
 				 occur on the swapped flow. */
-      iface->execProtocolDetectedChecks(this);
+        iface->execProtocolDetectedChecks(this);
     break;
 
   case hash_entry_state_active:
@@ -4830,8 +4830,8 @@ void Flow::housekeep(time_t t) {
     if(!is_swap_requested() /* Swap not requested */
 	|| (is_swap_requested() &&
 	    !is_swap_done())) /* Or requested but never performed (no more
-				 packets seen) */ {
-      iface->execFlowEndChecks(this);
+				 packets seen) */ {  
+        iface->execFlowEndChecks(this);
     }
 
     dumpCheck(t, true /* LAST dump before delete */);
