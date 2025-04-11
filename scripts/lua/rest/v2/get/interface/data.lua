@@ -364,6 +364,8 @@ function dumpBriefInterfaceStats(ifid)
             res["engaged_alerts"] = ifstats["num_alerts_engaged"] or 0
             res["engaged_alerts_warning"] = ifstats["num_alerts_engaged_by_severity"]["warning"]
             res["engaged_alerts_error"] = ifstats["num_alerts_engaged_by_severity"]["error"]
+                + ifstats["num_alerts_engaged_by_severity"]["critical"]
+                + ifstats["num_alerts_engaged_by_severity"]["emergency"]
 
             res["alerted_flows"] = ifstats["num_alerted_flows"] or 0
             res["alerted_flows_warning"] = ifstats["num_alerted_flows_warning"] or 0
