@@ -333,8 +333,6 @@ function dumpBriefInterfaceStats(ifid)
     interface.select(ifid .. '')
 
     local ifstats = interface.getStats()
-
-    --tprint(ifstats.remote_bps)
     
     local res = {}
     if (ifstats ~= nil) then
@@ -361,11 +359,28 @@ function dumpBriefInterfaceStats(ifid)
         end
 
         if auth.has_capability(auth.capabilities.alerts) then
-            res["engaged_alerts"] = ifstats["num_alerts_engaged"] or 0
-            res["engaged_alerts_warning"] = ifstats["num_alerts_engaged_by_severity"]["warning"]
-            res["engaged_alerts_error"] = ifstats["num_alerts_engaged_by_severity"]["error"]
-                + ifstats["num_alerts_engaged_by_severity"]["critical"]
-                + ifstats["num_alerts_engaged_by_severity"]["emergency"]
+            -- Here in case we are not in the System interface, we have to add the system interface alerts
+            -- because we show the system alerts even in the other interfaces
+            local system_interface_stats = {}
+            local system_engaged_alerts = 0
+            local system_engaged_warnings = 0
+            local system_engaged_errors = 0
+            if tonumber(getSystemInterfaceId()) ~= tonumber(ifid) then
+                interface.select(getSystemInterfaceId())
+                system_interface_stats = interface.getStats()
+                system_engaged_alerts = (system_interface_stats["num_alerts_engaged"] or 0)
+                system_engaged_warnings = (system_interface_stats["num_alerts_engaged_by_severity"]["warning"] or 0)
+                system_engaged_errors = (system_interface_stats["num_alerts_engaged_by_severity"]["error"] or 0)
+                    + (system_interface_stats["num_alerts_engaged_by_severity"]["critical"] or 0)
+                    + (system_interface_stats["num_alerts_engaged_by_severity"]["emergency"] or 0)
+                interface.select(ifid)
+            end
+            res["engaged_alerts"] = (ifstats["num_alerts_engaged"] or 0) + (system_engaged_alerts)
+            res["engaged_alerts_warning"] = (ifstats["num_alerts_engaged_by_severity"]["warning"] or 0) + (system_engaged_warnings) 
+            res["engaged_alerts_error"] = (ifstats["num_alerts_engaged_by_severity"]["error"] or 0)
+                + (ifstats["num_alerts_engaged_by_severity"]["critical"] or 0)
+                + (ifstats["num_alerts_engaged_by_severity"]["emergency"] or 0)
+                + system_engaged_errors
 
             res["alerted_flows"] = ifstats["num_alerted_flows"] or 0
             res["alerted_flows_warning"] = ifstats["num_alerted_flows_warning"] or 0
