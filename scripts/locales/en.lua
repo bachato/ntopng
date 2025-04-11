@@ -2651,6 +2651,7 @@ local lang = {
     ["sent_vs_received_traffic_breakdown"] = "Sent vs Received Traffic Breakdown",
     ["server_contacts"] = "Contacted Servers",
     ["server_contacts_tcp_unresponsive"] = "TCP/UDP Unresponsive Flows (Peer IP and Server Port)",
+    ["server_ports"] = "Server Ports",
     ["show_hosts"] = "Show Hosts",
     ["source"] = "Source",
     ["source_id"] = "Source Id",
