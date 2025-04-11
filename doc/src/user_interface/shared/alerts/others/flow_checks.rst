@@ -899,6 +899,20 @@ The alert notifies that the website domain name was written in non latin script.
 *Enabled by Default*
 
 
+QoE Issues
+~~~~~~~~~~~~~~~~
+
+Checks for QoE status.
+
+The alert is triggered when a flow has a Degraded or Poor QoE status.
+
+*Interface: Packet & ZMQ*
+
+*Category: Cybersecurity*
+
+*Disabled by Default*
+
+
 Rare Destination
 ~~~~~~~~~~~~~~~~
 
