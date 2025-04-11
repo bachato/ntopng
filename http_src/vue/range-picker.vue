@@ -77,7 +77,7 @@ async function get_filter_const(is_alert_stats_url, page) {
     if (is_alert_stats_url) {
         url_request = `${http_prefix}/lua/rest/v2/get/alert/filter/consts.lua?page=${page}&query_preset=${query_preset}`;
     } else {
-        let aggregated = ntopng_url_manager.get_url_entry("aggregated");
+        let aggregated = ntopng_url_manager.get_url_entry("aggregated") || "";
         url_request = `${http_prefix}/lua/pro/rest/v2/get/db/filter/consts.lua?page=${page}&query_preset=${query_preset}&aggregated=${aggregated}`;
     }
     let filter_consts = await ntopng_utility.http_request(url_request);
