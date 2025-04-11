@@ -1965,7 +1965,7 @@ void Flow::flow_end_stats_update() {
     accountBidirectionalTCPProtocolServices();
   } else if(isUDP()) {
     accountBidirectionalUDPProtocolServices();
-  }  
+  }
 #ifdef NTOPNG_PRO
   QoEType qoe_type = getQoEType();
   Host *cli_u = getViewSharedClient(), *srv_u = getViewSharedServer();
@@ -2821,11 +2821,13 @@ bool Flow::equal(const Mac *_src_pkt_mac, const Mac *_dst_pkt_mac,
   } else
     return (false);
 
+#if USE_MAC_IN_KEY_WITH_DHCP
   /* Check if MAC address needs to be used in flow key */
   if((cli_ip->key() == 0) && (srv_ip->key() == 0xFFFFFFFF)) {
     useMacAddressInFlowKey = true;
   }
-
+#endif
+  
   if(useMacAddressInFlowKey) {
     if(cli_host && src_mac) {
       Mac *cli_mac = cli_host->getMac();
@@ -3425,6 +3427,7 @@ void Flow::computeKey() {
   if(get_srv_ip_addr()) k += get_srv_ip_addr()->key();
   if(icmp_info) k += icmp_info->key();
 
+#if USE_MAC_IN_KEY_WITH_DHCP
   if(get_cli_ip_addr() && get_srv_ip_addr()) {
     if((get_cli_ip_addr()->key() == 0) && (get_srv_ip_addr()->key() == 0xFFFFFFFF)) {
       /* Add the MAC address of the source host (dst_mac is not necessary as it's FF:FF:FF:FF:FF:FF) */
@@ -3436,6 +3439,7 @@ void Flow::computeKey() {
       }
     }
   }
+#endif
 
   flow_key = k;
 }
@@ -4830,7 +4834,7 @@ void Flow::housekeep(time_t t) {
     if(!is_swap_requested() /* Swap not requested */
 	|| (is_swap_requested() &&
 	    !is_swap_done())) /* Or requested but never performed (no more
-				 packets seen) */ {  
+				 packets seen) */ {
         iface->execFlowEndChecks(this);
     }
 
