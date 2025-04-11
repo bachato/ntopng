@@ -16,7 +16,7 @@
             <template v-slot:custom_header>
                 <div class="dropdown me-3 d-inline-block" v-for="item in filter_table_array">
                     <span class="no-wrap d-flex align-items-center my-auto me-2 filters-label"><b>{{ item["basic_label"]
-                    }}</b></span>
+                            }}</b></span>
                     <SelectSearch v-model:selected_option="item['current_option']" theme="bootstrap-5"
                         dropdown_size="small" :options="item['options']" @select_option="add_table_filter">
                     </SelectSearch>
@@ -105,7 +105,7 @@ const map_table_def_columns = (columns) => {
             if (row.metadata.is_alerted) {
                 is_alerted = ' <i class="fas fa-exclamation-triangle" style="color: #f0ad4e;"></i> '
             }
-            return `${value.name}${is_infrastructure_instance}${is_alerted}${interface_name}`;
+            return `<span data-bs-toggle='tooltip' data-bs-placement='bottom' title='${(row.ip_address !== value.name) ? row.ip_address : ''}'>${value.name}${is_infrastructure_instance}${is_alerted}${interface_name}</span>`;
         },
         "ip_address": (value, row) => {
             return value;

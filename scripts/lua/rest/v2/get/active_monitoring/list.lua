@@ -67,6 +67,10 @@ for key, info in pairs(active_monitoring_hosts) do
         end
     end
 
+    if ip_address == info.label then
+        info.label = ip2label(ip_address)
+    end
+
     res[#res + 1] = {
         key = key,
         ip_address = ip_address,
