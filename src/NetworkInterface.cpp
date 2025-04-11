@@ -10432,7 +10432,9 @@ u_int32_t NetworkInterface::getNumEngagedAlerts() const {
   for (int i = 0; i < ALERT_ENTITY_MAX_NUM_ENTITIES; i++)
     tot_engaged_alerts += num_alerts_engaged_notice[i] +
       num_alerts_engaged_warning[i] +
-      num_alerts_engaged_error[i];
+      num_alerts_engaged_error[i] +
+      num_alerts_engaged_critical[i] +
+      num_alerts_engaged_emergency[i];
 
   return tot_engaged_alerts;
 };
@@ -10481,7 +10483,9 @@ void NetworkInterface::luaNumEngagedAlerts(lua_State *vm) const {
   for (int i = 0; i < ALERT_ENTITY_MAX_NUM_ENTITIES; i++) {
     u_int32_t num_alerts = num_alerts_engaged_notice[i] +
       num_alerts_engaged_warning[i] +
-      num_alerts_engaged_error[i];
+      num_alerts_engaged_error[i] +
+      num_alerts_engaged_critical[i] +
+      num_alerts_engaged_emergency[i];
 
     if (num_alerts)
       /* Use string keys for entity id to avoid confusing lua and treating the
