@@ -209,6 +209,20 @@ Flow::Flow(NetworkInterface *_iface,
     srv_host->incSrvPortsContacts(htons(_cli_port));
     srv_host->incSrvHostContacts(_cli_ip);
     srv_ip_addr = srv_host->get_ip();
+
+    if(cli_host) {
+      if(srv_ip_addr->isBroadcastAddress() || srv_ip_addr->isMulticastAddress()) {
+	cli_host->setMACmeaningful();
+      } else {
+	if(cli_ip_addr->isIPv4()) {
+	  u_int32_t c_ip = cli_ip_addr->get_ipv4();
+	  u_int32_t d_ip = srv_ip_addr->get_ipv4();
+
+	  if((ntohl(c_ip) & 0xFFFFFF00) == (ntohl(d_ip) & 0xFFFFFF00))
+	    cli_host->setMACmeaningful(), srv_host->setMACmeaningful();
+	}
+      }
+    }
   } else {
     /*
       View Interface
@@ -2837,8 +2851,7 @@ bool Flow::equal(const Mac *_src_pkt_mac, const Mac *_dst_pkt_mac,
         Mac *srv_mac = srv_host->getMac();
         char buf[64], buf0[64], buf1[64], buf2[64], buf3[64], buf4[64];
 
-        ntop->getTrace()->traceEvent(
-				     TRACE_NORMAL, "%s (%s) <-> %s (%s) [%s / %s]",
+        ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s (%s) <-> %s (%s) [%s / %s]",
 				     cli_ip->print(buf, sizeof(buf)), cli_mac->print(buf0, sizeof(buf0)),
 				     srv_ip->print(buf1, sizeof(buf1)),
 				     srv_mac->print(buf2, sizeof(buf2)),

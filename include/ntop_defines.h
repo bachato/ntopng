@@ -347,9 +347,9 @@
 #define CONST_INTERFACE_TYPE_DB "db"
 #define CONST_INTERFACE_TYPE_UNKNOWN "unknown"
 
-#define CONST_ASSETS_PERIODIC_UPDATE  30      /* 10 min */
+#define CONST_ASSETS_PERIODIC_UPDATE  60      /* 1 min  */
 #define CONST_DEMO_MODE_DURATION     600      /* 10 min */
-#define CONST_MAX_DUMP_DURATION      300      /* 5 min */
+#define CONST_MAX_DUMP_DURATION      300      /* 5 min  */
 #define CONST_MAX_NUM_PACKETS_PER_LIVE 100000 /* live captures via HTTP */
 #define CONST_MAX_DUMP 500000000
 

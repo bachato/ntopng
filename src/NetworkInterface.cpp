@@ -10935,8 +10935,7 @@ static bool walkerSort(const ActiveHostWalkerInfo &a,
 
 /* *************************************** */
 
-int NetworkInterface::walkActiveHosts(
-				      lua_State *vm, HostWalkMode mode, u_int32_t maxHits,
+int NetworkInterface::walkActiveHosts(lua_State *vm, HostWalkMode mode, u_int32_t maxHits,
 				      int32_t networkIdFilter, /* -1 = means any network */
 				      bool localHostsOnly, bool treeMapMode) {
   u_int32_t begin_slot = 0;

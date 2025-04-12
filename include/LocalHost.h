@@ -229,6 +229,8 @@ class LocalHost : public Host {
   virtual bool setOS(ndpi_os _os, OSLearningMode mode);
   void setTCPfingerprint(char *tcp_fingerprint, ndpi_os os);
 
+  virtual inline void setAssetUpdated() { asset_map_updated = 1; }
+  void setMACmeaningful();
   inline bool isAssetUpdated() {
     return(asset_map_updated || (mac && mac->isAssetUpdated()));
   }

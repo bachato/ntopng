@@ -973,6 +973,7 @@ class Host : public GenericHashEntry,
   void setUnidirectionalTCPUDPNoTXIngressFlow(IpAddress *ip, u_int16_t port);
 
   /* Currently used only by LocalHost */
+  virtual void setAssetUpdated() { ; }
   bool addDataToAssets(char *field, char *value) { return false; };
   bool removeDataFromAssets(char *field) { return false; };
 
@@ -998,7 +999,8 @@ class Host : public GenericHashEntry,
 #endif
 
   void setnDPIOS(ndpi_os hint);
-  inline void setMACmeaningful() { is_mac_meaningful = true; }
+  virtual void setMACmeaningful() { is_mac_meaningful = true; }
+  inline bool isMACmeaningful()   { return(is_mac_meaningful || isSystemHost()); }
 };
 
 #endif /* _HOST_H_ */

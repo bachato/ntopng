@@ -914,7 +914,7 @@ void Host::lua(lua_State *vm, AddressTree *ptree, bool host_details,
   lua_push_uint64_table_entry(vm, "ipkey", ip.key());
   lua_push_str_table_entry(vm, "iphex", ip.get_ip_hex(buf_id, sizeof(buf_id)));
   lua_push_str_table_entry(vm, "tskey", get_tskey(buf_id, sizeof(buf_id)));
-
+  lua_push_bool_table_entry(vm, "mac_meaningful", isMACmeaningful());
   lua_push_str_table_entry(vm, "name", get_visual_name(buf, sizeof(buf)));
 
   lua_get_min_info(vm);

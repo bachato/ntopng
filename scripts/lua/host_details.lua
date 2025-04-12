@@ -103,6 +103,8 @@ end
 local host = interface.getHostInfo(host_info["host"], host_vlan)
 local tskey
 
+-- if(host) then tprint(host.mac_meaningful) end
+
 if _GET["tskey"] then
     tskey = _GET["tskey"]
 elseif host then

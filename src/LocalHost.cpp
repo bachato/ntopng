@@ -865,4 +865,12 @@ void LocalHost::setDeviceType(DeviceType devtype) {
 			 NULL, NULL, this, NULL,
 			 (char*)Utils::deviceType2str(devtype));
 }
- 
+
+/* *************************************** */
+
+void LocalHost::setMACmeaningful() {
+  if(!is_mac_meaningful) {
+    is_mac_meaningful = true;
+    asset_map_updated = true;
+  }
+}
