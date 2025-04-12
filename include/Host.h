@@ -48,7 +48,8 @@ class Host : public GenericHashEntry,
 #endif
   std::atomic<u_int32_t> active_alerted_flows;
   u_int8_t view_interface_mac[6];
-
+  bool is_mac_meaningful; /* True if the MAC associated is the one of the host and not of a router */
+  
   /*
     The check below makes sense for TCP as with UDP unidirectional flows
     (e.g. RTP or syslog) could be legitimate. However in general UDP flows
@@ -997,6 +998,7 @@ class Host : public GenericHashEntry,
 #endif
 
   void setnDPIOS(ndpi_os hint);
+  inline void setMACmeaningful() { is_mac_meaningful = true; }
 };
 
 #endif /* _HOST_H_ */
