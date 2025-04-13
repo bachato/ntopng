@@ -3281,7 +3281,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
        * this ARP that glues together L2 and L3 */
       updateBroadcastDomains(vlan_id, ethernet->h_source, ethernet->h_dest,
 			     ntohl(arpp->arp_spa), ntohl(arpp->arp_tpa));
-
+      
       if (srcMac && dstMac && (!srcMac->isNull() || !dstMac->isNull())) {
 	setSeenMacAddresses();
 	srcMac->setSourceMac();
@@ -4636,8 +4636,7 @@ Host *NetworkInterface::getHostByIP(IpAddress *ip, u_int16_t vlan_id,
   Host *h;
 
   h = hosts_hash ? hosts_hash->get(vlan_id, ip, NULL, isInlineCall,
-                                   observation_point_id)
-    : NULL;
+                                   observation_point_id) : NULL;
 
   return (h);
 }
@@ -4664,20 +4663,14 @@ Host *NetworkInterface::getHost(char *host_ip, u_int16_t vlan_id,
     memset(&info, 0, sizeof(info));
     info.host_to_find = host_ip, info.vlan_id = vlan_id;
     info.observationPointId = observation_point_id;
-    walker(&begin_slot, walk_all, walker_hosts, find_host_by_name,
-           (void *)&info);
+    walker(&begin_slot, walk_all, walker_hosts, find_host_by_name, (void *)&info);
 
     h = info.h;
   } else {
-    IpAddress *ip = new (std::nothrow) IpAddress();
+    IpAddress ip;
 
-    if (ip) {
-      ip->set(host_ip);
-
-      h = getHostByIP(ip, vlan_id, observation_point_id, isInlineCall);
-
-      delete ip;
-    }
+    ip.set(host_ip);    
+    h = getHostByIP(&ip, vlan_id, observation_point_id, isInlineCall);
   }
 
   return (h);
@@ -9385,7 +9378,17 @@ void NetworkInterface::updateBroadcastDomains(u_int16_t vlan_id,
   u_int32_t net = src & dst;
   u_int32_t diff;
   IpAddress cur_bcast_domain;
+  IpAddress search_ip;
+  Host *h;
 
+  search_ip.set(htonl(src));
+  h = getHostByIP(&search_ip, vlan_id, 0 /* observation_point_id */, true /* isInlineCall */);
+  if(h != NULL) h->setMACmeaningful();
+
+  search_ip.set(htonl(dst));
+  h = getHostByIP(&search_ip, vlan_id, 0 /* observation_point_id */, true /* isInlineCall */);
+  if(h != NULL) h->setMACmeaningful();
+  
   /* Smaller address in src */
   if (src > dst) {
     u_int32_t r = src;
@@ -9448,6 +9451,7 @@ void NetworkInterface::updateBroadcastDomains(u_int16_t vlan_id,
         } else {
           if (ntop->getPrefs()->isBroadcastDomainTooLargeEnabled()) {
             AlertsQueue *q = getAlertsQueue();
+
             if (q) q->pushBroadcastDomainTooLargeAlert(src_mac, dst_mac, src, dst, vlan_id);
           }
         }

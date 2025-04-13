@@ -271,6 +271,7 @@ void Host::initialize(Mac *_mac, int32_t _iface_idx, u_int16_t _vlanId,
   /* stats = NULL; useless initi, it will be instantiated by specialized classes
    */
   stats = stats_shadow = NULL;
+  is_mac_meaningful = false;
 #ifndef HAVE_NEDGE
   listening_ports = listening_ports_shadow = NULL;
 #endif
@@ -582,8 +583,8 @@ void Host::lua_get_mac(lua_State *vm) const {
 
   const u_int8_t *mac = cur_mac ? cur_mac->get_mac() : view_interface_mac;
 
-  lua_push_str_table_entry(
-      vm, "mac", Utils::formatMac(mac ? mac : NULL, buf, sizeof(buf)));
+  lua_push_str_table_entry(vm, "mac", Utils::formatMac(mac ? mac : NULL, buf, sizeof(buf)));
+  lua_push_bool_table_entry(vm, "mac_meaningful", is_mac_meaningful);
   lua_push_uint64_table_entry(vm, "devtype", getDeviceType());
 }
 
