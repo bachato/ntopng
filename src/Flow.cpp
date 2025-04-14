@@ -8391,7 +8391,6 @@ void Flow::updateAlertsJSON() {
 
   std::string json_map = "{";
   bool first = true;
-  bool print_json = false;
   for (std::map<FlowAlertTypeEnum, FlowAlert *>::iterator it = triggered_alerts.begin(); it != triggered_alerts.end(); it++) {
     FlowAlert *a = it->second;
     const char *j = a->getSerializedAlert();
