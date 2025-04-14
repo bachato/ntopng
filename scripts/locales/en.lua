@@ -3379,6 +3379,8 @@ local lang = {
     ["dtmf_tones_sent"] = "DTMF tones sent during the call",
     ["dump_flow_traffic"] = "Dump Flow Traffic",
     ["elephant_exceeded"] = "[Local to remote: %{l2r}][Remote to Local: %{r2l}]",
+    ["elephant_exceeded_l2r"] = "[Local to remote: %{value} > %{threshold}]",
+    ["elephant_exceeded_r2l"] = "[Remote to Local: %{value} > %{threshold}]",
     ["elephant_flow"] = "Elephant Flow",
     ["elephant_flow_descr"] = "Elephant flows are those that transfer more than a certain configured amount of data. Administrators can configure elephant flows from the preferences.",
     ["elephant_flow_l2r"] = "Elephant Flow (Local to Remote Traffic)",
@@ -7654,6 +7656,7 @@ local lang = {
     ["raw_flows_records"] = "Flows (Num. Flows Chart)",
     ["raw_flows_score"] = "Flows (Score Chart)",
     ["raw_flows_thpt"] = "Flows (Throughput Chart)",
+    ["raw_flows_thpt_dir"] = "Flows (Throughput RX/TX Chart)",
   },
   ["queue"] = {
     ["activeFlowsToDump"] = "Active flows dump",

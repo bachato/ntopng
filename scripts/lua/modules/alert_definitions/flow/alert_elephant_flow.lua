@@ -15,6 +15,7 @@ local alert = require "alert"
 local json = require "dkjson"
 -- Import Mitre Att&ck utils
 local mitre = require "mitre_utils"
+local format_utils = require "format_utils"
 
 -- ##############################################
 
@@ -59,27 +60,26 @@ function alert_elephant_flow.format(ifid, alert, alert_type_params)
    local res = ""
 
    if alert_type_params and (alert_type_params["l2r_bytes"] or alert_type_params["r2l_bytes"]) then
-      local l2r_bytes = bytesToSize(alert_type_params["l2r_bytes"])
-      local r2l_bytes = bytesToSize(alert_type_params["r2l_bytes"])
+
+      res = string.format("%s<sup><i class='fas fa-info-circle' aria-hidden='true' title='"..i18n("flow_details.elephant_flow_descr").."'></i></sup>", res)
 
       if alert_type_params["l2r_bytes"] and 
          alert_type_params["l2r_threshold"] and
          alert_type_params["l2r_threshold"] > 0 and
          alert_type_params["l2r_bytes"] > alert_type_params["l2r_threshold"] then
+         local l2r_bytes = bytesToSize(alert_type_params["l2r_bytes"])
          local l2r_threshold = bytesToSize(alert_type_params["l2r_threshold"]) 
-	 l2r_bytes = l2r_bytes .." > "..l2r_threshold
+	 res = res .. " " .. i18n("flow_details.elephant_exceeded_l2r", {value = l2r_bytes, threshold = l2r_threshold}) 
       end
 
       if alert_type_params["r2l_bytes"] and
          alert_type_params["r2l_threshold"] and
          alert_type_params["l2r_threshold"] > 0 and
          alert_type_params["r2l_bytes"] > alert_type_params["r2l_threshold"] then
+         local r2l_bytes = bytesToSize(alert_type_params["r2l_bytes"])
          local r2l_threshold = bytesToSize(alert_type_params["r2l_threshold"])
-	 r2l_bytes = r2l_bytes .. " > "..r2l_threshold
+	 res = res .. " " .. i18n("flow_details.elephant_exceeded_r2l", {value = r2l_bytes, threshold = r2l_threshold}) 
       end
-
-      res = string.format("%s<sup><i class='fas fa-info-circle' aria-hidden='true' title='"..i18n("flow_details.elephant_flow_descr").."'></i></sup>", res)
-      res = string.format("%s %s", res, i18n("flow_details.elephant_exceeded", {l2r = l2r_bytes, r2l = r2l_bytes}))
    end
 
    if alert["json"] then
