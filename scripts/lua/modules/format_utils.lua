@@ -22,7 +22,8 @@ function format_utils.round(num, idp)
       -- This is an infinite, e.g., 1/0 or -1/0
       res = num
 --   elseif num == math.floor(num) then
-   elseif string.find(tostring(num), 'e') == nil then
+   elseif string.find(tostring(num), 'e') == nil and
+          math.floor(num) == num then
       -- This is an integer, so represent it
       -- without decimals
       res = string.format("%d", math.floor(num))
@@ -143,25 +144,26 @@ function format_utils.bytesToSize(bytes)
       return("0")
    else
       local precision = 2
-      local kilobyte = 1024;
-      local megabyte = kilobyte * 1024;
-      local gigabyte = megabyte * 1024;
-      local terabyte = gigabyte * 1024;
+      local kilobyte = 1024
+      local megabyte = kilobyte * 1024
+      local gigabyte = megabyte * 1024
+      local terabyte = gigabyte * 1024
 
       bytes = tonumber(bytes)
-      if bytes == 1 then return "1 Byte"
+      if bytes == 1
+         then return "1 Byte"
       elseif((bytes >= 0) and (bytes < kilobyte)) then
-	 return round(bytes, precision) .. " Bytes";
+	 return round(bytes, precision) .. " Bytes"
       elseif((bytes >= kilobyte) and (bytes < megabyte)) then
-	 return round(bytes / kilobyte, precision) .. ' KB';
+	 return round(bytes / kilobyte, precision) .. ' KB'
       elseif((bytes >= megabyte) and (bytes < gigabyte)) then
-	 return round(bytes / megabyte, precision) .. ' MB';
+	 return round(bytes / megabyte, precision) .. ' MB'
       elseif((bytes >= gigabyte) and (bytes < terabyte)) then
-	 return round(bytes / gigabyte, precision) .. ' GB';
+	 return round(bytes / gigabyte, precision) .. ' GB'
       elseif(bytes >= terabyte) then
-	 return round(bytes / terabyte, precision) .. ' TB';
+	 return round(bytes / terabyte, precision) .. ' TB'
       else
-	 return round(bytes, precision) .. ' Bytes';
+	 return round(bytes, precision) .. ' Bytes'
       end
    end
 end
