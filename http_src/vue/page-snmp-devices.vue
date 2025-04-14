@@ -20,7 +20,7 @@
           :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event" @rows_loaded="change_filter_labels">
           <template v-slot:custom_buttons>
             <ModalDeleteSNMPDevice ref="modal_delete_snmp_device" @delete="delete_row" @ping_all="exec_ping_all"
-              @prune="delete_unresponsive">
+              @prune="delete_unresponsive" @delete_all="delete_all">
             </ModalDeleteSNMPDevice>
             <button class="btn btn-link" type="button" ref="add_snmp_device" @click="add_snmp_device">
               <i class="fas fa-plus"></i>
@@ -65,11 +65,16 @@
           {{ _i18n("snmp.ping_devices") }}
         </button>
       </template>
-      <template v-if="props.context.buttonsVisibility.pruneDevices">
+      <template v-if="props.context.buttonsVisibility.isAdministrator">
         <button type="button" ref="delete_all_unresponsive" @click="delete_all_unresponsive_devices"
-          class="btn btn-danger ms-1" :class="{ disabled: total_rows == 0 }">
+          class="btn btn-danger ms-1" :class="{ disabled: props.context.buttonsVisibility.pruneDevices == 0 }">
           <i class="fas fa-trash"></i>
           {{ _i18n("snmp.delete_unresponsive_devices") }}
+        </button>
+        <button type="button" ref="delete_all" @click="delete_all_devices"
+          class="btn btn-danger ms-1" :class="{ disabled: total_rows == 0 }">
+          <i class="fas fa-trash"></i>
+          {{ _i18n("snmp.delete_all_devices") }}
         </button>
       </template>
     </div>
@@ -126,6 +131,7 @@ const edit_snmp_device_url = `${http_prefix}/lua/pro/rest/v2/edit/snmp/device/de
 const manage_config_url = `${http_prefix}/lua/admin/manage_configurations.lua?item=snmp`;
 const ping_all_devices_url = `${http_prefix}/lua/pro/rest/v2/check/snmp/ping_all_devices.lua`;
 const delete_snmp_unresponsive_devices_url = `${http_prefix}/lua/pro/rest/v2/delete/snmp/unresponsive_devices.lua`;
+const delete_all_snmp_devices_url = `${http_prefix}/lua/pro/rest/v2/delete/snmp/all_devices.lua`;
 const active_alert_text = _i18n('enable_snmp_polling_warning').replace("%{base_prefix}", `${http_prefix}`);
 const max_num_reached_alert_text = _i18n('snmp_max_num_devices_configured').replace("%{max_num}", props.context.max_devices).replace("%{configured_devices}", props.context.devices_configured);
 
@@ -448,7 +454,11 @@ const exec_ping_all = async function () {
 // function to open modal
 function delete_all_unresponsive_devices() {
   modal_delete_snmp_device.value.show(3);
+}
 
+// function to open modal
+function delete_all_devices() {
+  modal_delete_snmp_device.value.show(4);
 }
 
 // function to exec command
@@ -456,7 +466,13 @@ const delete_unresponsive = async function () {
   const url = delete_snmp_unresponsive_devices_url;
   await ntopng_utility.http_post_request(url, rest_params);
   table_snmp_devices.value.refresh_table();
+}
 
+// function to exec command
+const delete_all = async function () {
+  const url = delete_all_snmp_devices_url;
+  await ntopng_utility.http_post_request(url, rest_params);
+  table_snmp_devices.value.refresh_table();
 }
 
 // function to periodically refresh table content
