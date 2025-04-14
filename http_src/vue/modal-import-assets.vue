@@ -8,8 +8,8 @@
                 <label class='form-label' for='import-input'>
                     {{ _i18n("asset_details.browse_assets", {}) }}
                 </label>
-                <input required class="custom-file-input form-control" ref="import_input" id="import-input" name="JSON"
-                    type="file" @change="handleFileUpload" accept=".json" />
+                <input required class="custom-file-input form-control" ref="import_input" id="import-input" name="CSV"
+                    type="file" @change="handleFileUpload" accept=".csv" />
 
             </div>
 
