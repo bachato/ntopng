@@ -902,13 +902,13 @@ The alert notifies that the website domain name was written in non latin script.
 QoE Issues
 ~~~~~~~~~~~~~~~~
 
-Checks for QoE status.
+Checks for flow QoE (Quality of Experience).
 
-The alert is triggered when a flow has a Degraded or Poor QoE status.
+The alert is triggered when a flow has a degraded or Poor QoE.
 
 *Interface: Packet & ZMQ*
 
-*Category: Cybersecurity*
+*Category: Network*
 
 *Disabled by Default*
 
