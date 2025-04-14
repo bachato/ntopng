@@ -96,7 +96,7 @@ Flow::Flow(NetworkInterface *_iface,
     alert_info.is_srv_attacker =
     alert_info.is_srv_victim = 0;
   alert_info.auto_acknowledge = 1;
-  pending_alerts = false;
+  pending_alerts = refresh_triggered_alerts = false;
   category_list_name_shared_pointer = NULL;
   ndpiAddressFamilyProtocol = NULL;
   ndpi_confidence = NDPI_CONFIDENCE_UNKNOWN;
@@ -8391,6 +8391,7 @@ void Flow::updateAlertsJSON() {
 
   std::string json_map = "{";
   bool first = true;
+  bool print_json = false;
   for (std::map<FlowAlertTypeEnum, FlowAlert *>::iterator it = triggered_alerts.begin(); it != triggered_alerts.end(); it++) {
     FlowAlert *a = it->second;
     const char *j = a->getSerializedAlert();
@@ -8556,8 +8557,12 @@ bool Flow::setAlertsMap(FlowAlert *alert) {
 
 /* *************************************** */
 
-/* Trigger an alert.
- * alert is released then the flow is released * do NOT free on the caller * */
+/*
+  Trigger an alert.
+  Called by FlowCheck subclasses to trigger a flow alert. Setting sync
+  will causes the alert (FlowAlert) to be immediatly enqueued to recipients.
+  Note: alert is released then the flow is released * do NOT free on the caller *
+*/
 bool Flow::triggerAlert(FlowAlert *alert, bool sync) {
   bool res;
 
@@ -8575,13 +8580,33 @@ bool Flow::triggerAlert(FlowAlert *alert, bool sync) {
 
 /* *************************************** */
 
+/*
+  Refresh alert stored in flows (rebuild JSON) as the content of some
+  of them have been updated (e.g. re-triggered) and the value may be changed
+  (e.g. the value that exceeded a threshold has increased further)
+*/
+void Flow::refreshAlert(FlowAlertTypeEnum alert_type) {
+  FlowAlert *alert = getTriggeredAlert(alert_type);
+  if (alert) {
+    alert->refreshAlert();
+    refresh_triggered_alerts = true;
+  }
+}
+
+/* *************************************** */
+
+/*
+  Alerts are not flushed immediatly as optimization (unless sync is set in
+  triggerAlert). If pending_alerts, they are enqueued to recipients, in a single
+  notification for the predominant one.
+*/
 void Flow::flushAlerts() {
-  if (!pending_alerts) return;
+  if (!pending_alerts && !refresh_triggered_alerts) return;
 
   /* Update JSON */
   updateAlertsJSON();
 
-  if (!ntop->getPrefs()->dontEmitFlowAlerts()) {
+  if (pending_alerts && !ntop->getPrefs()->dontEmitFlowAlerts()) {
     /* Always enqueue the predominant alert, with json info for all alerts */
     FlowAlert *alert = triggered_alerts[predominant_alert.id];
 
@@ -8589,7 +8614,7 @@ void Flow::flushAlerts() {
     iface->enqueueFlowAlert(alert);
   }
 
-  pending_alerts = false;
+  pending_alerts = refresh_triggered_alerts = false;
 }
 
 /* *************************************** */

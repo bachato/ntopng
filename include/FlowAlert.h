@@ -33,6 +33,7 @@ class FlowAlert {
   u_int8_t cli_score, srv_score;
   u_int8_t alert_score;
   char *json_alert;
+  bool refresh_json_alert;
   
   /*
      Adds to the passed `serializer` (generated with `getAlertSerializer`)
@@ -85,6 +86,7 @@ class FlowAlert {
      with the alert.
   */
   const char *getSerializedAlert();
+  inline void refreshAlert() { refresh_json_alert = true; };
 };
 
 #endif /* _FLOW_ALERT_H_ */

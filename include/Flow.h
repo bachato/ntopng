@@ -130,6 +130,7 @@ private:
   FlowAlertType predominant_alert;   /* This is the predominant alert */
   u_int16_t predominant_alert_score; /* The score associated to the predominant alert */
   bool pending_alerts; /* alerts triggered with triggerAlert but waiting to be enqueued */
+  bool refresh_triggered_alerts; /* updated alerts previously triggered */
   FlowSource flow_source;
 
   struct {
@@ -445,12 +446,26 @@ public:
     will causes the alert (FlowAlert) to be immediatly enqueued to recipients.
   */
   bool triggerAlert(FlowAlert *alert, bool sync = false);
+
+  inline FlowAlert *getTriggeredAlert(FlowAlertTypeEnum alert_type) const {
+    std::map<FlowAlertTypeEnum, FlowAlert *>::const_iterator it;
+    it = triggered_alerts.find(alert_type);
+    return (it != triggered_alerts.end()) ? it->second : NULL;
+  }
+
   /*
     Alerts are not flushed immediatly as optimization (unless sync is set in
     triggerAlert). If pending_alerts, they are enqueued to recipients, in a single
     notification for the predominant one.
   */
   void flushAlerts();
+
+  /*
+    Refresh alert stored in flows (rebuild JSON) as the content of some
+    of them have been updated (e.g. re-triggered) and the value may be changed
+    (e.g. the value that exceeded a threshold has increased further)
+  */
+  void refreshAlert(FlowAlertTypeEnum alert_type);
 
   /*
     Enqueues the predominant alert of the flow to all available flow recipients.

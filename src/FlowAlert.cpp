@@ -32,6 +32,7 @@ FlowAlert::FlowAlert(FlowCheck *c, Flow *f) {
   if (c) check_name = c->getName();
   alert_score = SCORE_LEVEL_INFO;
   json_alert = NULL;
+  refresh_json_alert = false;
 }
 
 /* **************************************************** */
@@ -47,6 +48,13 @@ const char *FlowAlert::getSerializedAlert() {
   ndpi_serializer serializer;
   char *json;
   u_int32_t json_len; 
+
+  if (refresh_json_alert) {
+    if (json_alert) {
+      free(json_alert);
+      json_alert = NULL;
+    }
+  }
 
   if (json_alert)
     return json_alert;
