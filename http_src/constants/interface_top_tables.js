@@ -300,7 +300,10 @@ const top_senders = {
 		},
 	}, {
 		columnName: i18n("page_stats.top.sent"), name: 'sent', className: 'text-end', data: 'traffic', orderable: true,
-		render: (data) => {
+		render: (data, type) => {
+            if (type === 'sort' || type === 'type' ) {
+                return data
+            } 
 			return bytesToSizeFormatter(data);
 		},
 	}],
@@ -411,7 +414,10 @@ const top_receivers = {
 		},
 	}, {
 		columnName: i18n("page_stats.top.received"), name: 'received', className: 'text-end', data: 'traffic', orderable: true,
-		render: (data) => {
+		render: (data, type) => {
+            if (type === 'sort' || type === 'type' ) {
+                return data
+            } 
 			return bytesToSizeFormatter(data);
 		},
 	}],
