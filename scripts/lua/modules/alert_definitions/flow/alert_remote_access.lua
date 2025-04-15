@@ -48,7 +48,8 @@ function alert_remote_access.format(ifid, alert, alert_type_params)
    if(alert.tstamp) then
       local now = os.time()
       local tstamp_end = alert["tstamp_end"] or now
-      local time = tstamp_end - alert["tstamp"]
+      local tstamp = alert["tstamp"] or tstamp_end
+      local time = tstamp_end - tstamp
 
       if time == 0 then
 	 time = "< 1"
