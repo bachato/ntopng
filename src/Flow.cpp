@@ -4791,8 +4791,7 @@ void Flow::housekeep(time_t t) {
     */
     if(iface->get_ndpi_struct() && get_ndpi_flow()) {
       if(likely(!getInterface()->read_from_pcap_dump())) {
-	/* NOT processing pcap files, at most 5 seconds since the last packet
-	 */
+	/* NOT processing pcap files, at most 5 seconds since the last packet */
 	if((t - get_last_seen()) > 5 /* sec */) endProtocolDissection(true);
       } else {
 	/* pcap files - wait until all the file has been processed */
@@ -6670,6 +6669,8 @@ void Flow::dissectMDNS(u_int8_t *payload, u_int16_t payload_len) {
 	    if(txt_len > 0) {
 	      char *model = NULL;
 	      u_int txt_buf_len = ndpi_min(txt_len, sizeof(txt_buf)-1);
+
+	      txt_buf_len = ndpi_min(txt_buf_len, (u_int)(data_len-off-base_off));
 
 	      strncpy(txt_buf, &txt[off], txt_buf_len);
 	      txt_buf[txt_buf_len] = '\0';
