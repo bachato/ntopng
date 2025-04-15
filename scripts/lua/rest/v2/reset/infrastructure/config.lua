@@ -24,7 +24,7 @@ if not isAdministratorOrPrintErr() then
     return
 end
 
-if not ntop.isEnterpriseL() then
+if not ntop.isEnterpriseL() and not ntop.isnEdgeEnterprise() then
    rest_utils.answer(rest_utils.consts.err.not_granted)
    return
 end
