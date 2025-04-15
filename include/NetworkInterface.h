@@ -416,7 +416,8 @@ protected:
                      u_int32_t size, u_int *num, bool set_resp);
   void build_protocol_flow_stats_lua_rsp(lua_State *vm, AggregatedFlowsStats *fs,
                                          u_int32_t size, u_int *num);
-
+  bool dumpFlowOut(DB *dumper, time_t when, Flow *f);
+  
 public:
   /**
    * @brief A Constructor

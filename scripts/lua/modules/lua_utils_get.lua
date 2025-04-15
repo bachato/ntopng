@@ -616,6 +616,22 @@ local magic_short_macs = {
 -- ###############################################
 
 -- get_symbolic_mac
+function get_symbolic_mac_rev(mac_address)
+   if (magic_macs[mac_address] ~= nil) then
+      return (magic_macs[mac_address])
+   else
+      local m = string.sub(mac_address, 1, 8)
+      local s = get_mac_classification(m)
+
+      if ((s ~= nil) and (s ~= m)) then
+	 return(mac_address.. " [".. trimSpace(s) .."]")
+      end
+   end
+
+   return(mac_address)
+end
+
+-- get_symbolic_mac
 function get_symbolic_mac(mac_address, no_href, add_extra_info)
    if (magic_macs[mac_address] ~= nil) then
       return (magic_macs[mac_address])

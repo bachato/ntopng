@@ -81,8 +81,7 @@ Flow* FlowHash::find(Mac *src_mac, Mac *dst_mac, IpAddress *src_ip,
                     vlanId, observation_point_id, private_flow_id, protocol,
                     icmp_info, src2dst_direction)) {
       if (num_loops > max_num_loops) {
-        ntop->getTrace()->traceEvent(
-            TRACE_INFO, "DEBUG: [Num loops: %u][hashId: %u]", num_loops, hash);
+        ntop->getTrace()->traceEvent(TRACE_INFO, "DEBUG: [Num loops: %u][hashId: %u]", num_loops, hash);
         max_num_loops = num_loops;
       }
 
@@ -102,8 +101,7 @@ Flow* FlowHash::find(Mac *src_mac, Mac *dst_mac, IpAddress *src_ip,
   }
 
   if (num_loops > max_num_loops) {
-    ntop->getTrace()->traceEvent(
-        TRACE_INFO, "DEBUG: [Num loops: %u][hashId: %u]", num_loops, hash);
+    ntop->getTrace()->traceEvent(TRACE_INFO, "DEBUG: [Num loops: %u][hashId: %u]", num_loops, hash);
     max_num_loops = num_loops;
   }
 

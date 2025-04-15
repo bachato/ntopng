@@ -1009,7 +1009,7 @@ NetworkInterface::~NetworkInterface() {
 
   deleteDataStructures();
 
-  if (idleFlowsToDump) delete idleFlowsToDump;
+  if (idleFlowsToDump)   delete idleFlowsToDump;
   if (activeFlowsToDump) delete activeFlowsToDump;
 
   if (db) {
@@ -1161,7 +1161,7 @@ bool NetworkInterface::enqueueHostAlert(HostAlert *alert) {
 
 int NetworkInterface::dumpFlow(time_t when, Flow *f) {
   int rc = -1;
-
+  
   /* Asynchronous dump via a thread */
   if (f->get_state() == hash_entry_state_idle) {
     /* Last flow dump before delete
@@ -2489,8 +2489,7 @@ void NetworkInterface::purgeIdle(time_t when, bool force_idle, bool full_scan) {
     ntop->getTrace()->traceEvent(TRACE_DEBUG, "Purged %u idle ASs, MAC, Countries, VLANs... on %s",
 				 o, ifname);
 
-  for (std::map<u_int64_t, NetworkInterface *>::iterator it =
-	 flowHashing.begin();
+  for (std::map<u_int64_t, NetworkInterface *>::iterator it = flowHashing.begin();
        it != flowHashing.end(); ++it)
     it->second->purgeIdle(when, force_idle, full_scan);
 
@@ -2597,7 +2596,10 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
   setTimeLastPktRcvd(h->ts.tv_sec);
 
   if (last_purge_idle != (u_int32_t)h->ts.tv_sec) {
-    if (!read_from_pcap_dump()) purgeIdle(h->ts.tv_sec);
+    /* Purge idle flows unless read from a pcap interface */
+    if (!read_from_pcap_dump())
+      purgeIdle(h->ts.tv_sec);
+
     last_purge_idle = h->ts.tv_sec;
   }
 
@@ -3281,7 +3283,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
        * this ARP that glues together L2 and L3 */
       updateBroadcastDomains(vlan_id, ethernet->h_source, ethernet->h_dest,
 			     ntohl(arpp->arp_spa), ntohl(arpp->arp_tpa));
-      
+
       if (srcMac && dstMac && (!srcMac->isNull() || !dstMac->isNull())) {
 	setSeenMacAddresses();
 	srcMac->setSourceMac();
@@ -3514,52 +3516,17 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
 #endif
 #endif
     if (dumper == NULL) {
-      ntop->getTrace()->traceEvent(
-				   TRACE_INFO, "WARNING: Something is broken with flow dump");
+      ntop->getTrace()->traceEvent(TRACE_INFO, "WARNING: Something is broken with flow dump");
       return (0);
     }
 
   /*
-    Process high-priority idle flows (they're high priority as an idle flow not
-    dumped is lost)
+    Process high-priority idle flows (they're high priority as an idle flow not dumped is lost)
   */
   while (idleFlowsToDump->isNotEmpty()) {
     Flow *f = idleFlowsToDump->dequeue();
-    char *json = NULL;
-    bool rc = true;
 
-    f->update_partial_traffic_stats_db_dump(); /* Checkpoint flow traffic
-                                                  counters for the dump */
-
-    /* Prepare the JSON - if requested */
-    if (flows_dump_json) {
-      json = f->serialize(true /* Use JSON labels */);
-
-      // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", json);
-    }
-
-
-#ifdef HAVE_ZMQ
-#ifndef HAVE_NEDGE
-    if (ntop->get_export_interface() && (json != NULL))
-      ntop->get_export_interface()->export_data(json);
-#endif
-#endif
-
-    if (dumper != NULL) {
-      if (f->get_partial_bytes()) /* Make sure data is not at zero */
-        rc = dumper->dumpFlow(when, f, json); /* Finally dump this flow */
-    }
-
-    if (json) free(json);
-
-#if DEBUG_FLOW_DUMP
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Dumped idle flow");
-#endif
-    if (dumper && (!rc)) incDBNumDroppedFlows(dumper);
-
-    f->decUses(); /* Job has been done, decrease the reference counter */
-    f->set_dump_done();
+    dumpFlowOut(dumper, when, f);
     // delete f;
     idle_flows_done++;
 
@@ -3575,31 +3542,10 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
     */
     while (activeFlowsToDump->isNotEmpty()) {
       Flow *f = activeFlowsToDump->dequeue();
-      char *json = NULL;
-      bool rc = true;
 
-      f->update_partial_traffic_stats_db_dump(); /* Checkpoint flow traffic
-                                                    counters for the dump */
+      if(dumpFlowOut(dumper, when, f))
+	active_flows_done++;
 
-      /* Prepare the JSON - if requested */
-      if (flows_dump_json) {
-        json = f->serialize(true /* Use JSON labels */);
-
-        // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", json);
-      }
-
-      if (f->get_partial_bytes()) /* Make sure data is not at zero */
-        rc = dumper->dumpFlow(when, f, json); /* Finally dump this flow */
-
-      if (json) free(json);
-
-#if DEBUG_FLOW_DUMP
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "Dumped active flow");
-#endif
-      if (!rc) incDBNumDroppedFlows(dumper);
-      f->decUses(); /* Job has been done, decrease the reference counter */
-      f->set_dump_done();
-      active_flows_done++;
       if (active_flows_budget > 0 /* Budget requested */
           && active_flows_done >= active_flows_budget /* Budget exceeded */)
         break;
@@ -3639,6 +3585,59 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
   if (dumper) dumper->checkIdle(when);
 
   return (num_done);
+}
+
+/* **************************************************** */
+
+/* Thos method finally dumps a flow */
+bool NetworkInterface::dumpFlowOut(DB *dumper, time_t when, Flow *f) {
+  char *json = NULL;
+  bool rc = true;
+  
+  if(dumper == NULL) {
+#ifdef NTOPNG_PRO
+    dumper = isViewed() ? viewedBy()->getDB() : getDB();
+#else
+    dumper = getDB();
+#endif
+
+    if(dumper == NULL)
+      return(false);    
+  }
+
+  /* Checkpoint flow traffic counters for the dump */
+  f->update_partial_traffic_stats_db_dump();
+
+  /* Prepare the JSON - if requested */
+  if (flows_dump_json) {
+    json = f->serialize(true /* Use JSON labels */);
+
+    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", json);
+  }
+
+#ifdef HAVE_ZMQ
+#ifndef HAVE_NEDGE
+  if (ntop->get_export_interface() && (json != NULL))
+    ntop->get_export_interface()->export_data(json);
+#endif
+#endif
+
+  if (f->get_partial_bytes()) /* Make sure data is not at zero */
+    rc = dumper->dumpFlow(when, f, json); /* Finally dump this flow */
+
+  if (json) free(json);
+
+#if DEBUG_FLOW_DUMP
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Dumped active flow");
+#endif
+
+  if (!rc)
+    incDBNumDroppedFlows(dumper);
+
+  f->decUses(); /* Add done, decrease the reference counter */
+  f->set_dump_done();
+
+  return(true);
 }
 
 /* **************************************************** */
@@ -3770,8 +3769,7 @@ void NetworkInterface::dumpFlowLoop() {
   snprintf(buf, sizeof(buf), "ntopng-%d-fdump", get_id());
   Utils::setThreadName(buf);
 
-  ntop->getTrace()->traceEvent(
-			       TRACE_NORMAL, "Started flow dump loop on interface %s [id: %u]...",
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Started flow dump loop on interface %s [id: %u]...",
 			       get_description(), get_id());
 
   /* Wait until it starts up */
@@ -3833,6 +3831,7 @@ static void *flowDumper(void *ptr) {
   NetworkInterface *_if = (NetworkInterface *)ptr;
 
   _if->dumpFlowLoop();
+
   return (NULL);
 }
 
@@ -4055,7 +4054,7 @@ bool NetworkInterface::viewEnqueue(time_t t, Flow *f) {
 #ifdef NTOPNG_PRO
   if (isViewed()) return viewedBy()->viewEnqueue(t, f, getViewedId());
 #endif
-  
+
   return false;
 }
 
@@ -4669,7 +4668,7 @@ Host *NetworkInterface::getHost(char *host_ip, u_int16_t vlan_id,
   } else {
     IpAddress ip;
 
-    ip.set(host_ip);    
+    ip.set(host_ip);
     h = getHostByIP(&ip, vlan_id, observation_point_id, isInlineCall);
   }
 
@@ -6213,7 +6212,7 @@ void NetworkInterface::getActiveFlowsStats(nDPIStats *ndpi_stats, FlowStats *sta
 #ifdef NTOPNG_PRO
   QoEStats qoe;
 #endif
-  
+
   memset(&retriever, 0, sizeof(retriever));
 
   retriever.pag = p;
@@ -6421,7 +6420,7 @@ int NetworkInterface::dropFlowsTraffic(AddressTree *allowed_hosts,
 #ifdef NTOPNG_PRO
   retriever.qoe = &qoe;
 #endif
-  
+
   walker(&begin_slot, walk_all, walker_flows, flow_drop_walker, (void *)&retriever);
 
   return (0);
@@ -7534,7 +7533,7 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
   lua_push_uint64_table_entry(vm, "remote_pps", last_remote_pps);
   lua_push_uint64_table_entry(vm, "remote_bps", last_remote_bps);
   lua_push_uint64_table_entry(vm, "remote_update", last_remote_update);
-  
+
   icmp_v4.lua(true, vm);
   icmp_v6.lua(false, vm);
   lua_push_uint64_table_entry(vm, "arp.requests", arp_requests);
@@ -8484,21 +8483,20 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
       if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
 #ifdef NTOPNG_PRO
 #if defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
-        /* Allocate only the DB connection, not any thread or queue for the
-         * export */
-        try {
-          db = new ClickHouseFlowDB(this);
-        } catch (const std::invalid_argument &e) {
-          db = NULL;
-          ntop->getTrace()->traceEvent(
+	/* Allocate only the DB connection, not any thread or queue for the export */
+	try {
+	  db = new ClickHouseFlowDB(this);
+	} catch (const std::invalid_argument &e) {
+	  db = NULL;
+	  ntop->getTrace()->traceEvent(
 				       TRACE_WARNING, "Leaving due to failed ClickHouse initialization");
-          exit(-1);
-        }
+	  exit(-1);
+	}
 #endif
 #endif
-      }
+      }      
     }
-
+    
     if (!isViewed() && !disable_dump) {
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
       if (ntop->getPrefs()->do_dump_alerts_on_clickhouse())
@@ -9388,7 +9386,7 @@ void NetworkInterface::updateBroadcastDomains(u_int16_t vlan_id,
   search_ip.set(htonl(dst));
   h = getHostByIP(&search_ip, vlan_id, 0 /* observation_point_id */, true /* isInlineCall */);
   if(h != NULL) h->setMACmeaningful();
-  
+
   /* Smaller address in src */
   if (src > dst) {
     u_int32_t r = src;
@@ -9500,13 +9498,12 @@ bool NetworkInterface::initFlowDump(u_int8_t num_dump_interfaces) {
 
   if (db == NULL) {
     try {
-    if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
+    if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {	
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
       db = new (std::nothrow) ClickHouseFlowDB(this);
 
       if ((db == NULL) || (db->isDbCreated() == false)) {
-        ntop->getTrace()->traceEvent(
-				     TRACE_WARNING, "Leaving due to failed ClickHouse initialization");
+        ntop->getTrace()->traceEvent(TRACE_WARNING, "Leaving due to failed ClickHouse initialization");
         exit(-1);
       }
 #endif

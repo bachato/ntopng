@@ -2036,7 +2036,7 @@ bool Utils::sendMail(lua_State *vm, char *from, char *to, char *cc,
     if (strncmp(smtp_server, "smtps://", 8) == 0)
         curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
     else if (strncmp(smtp_server, "smtp://", 7) == 0) {
-        if(ntop->getPrefs()->enable_email_starttls())
+        if(ntop->getPrefs()->email_starttls_enabled())
 	        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
         else
 	        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_NONE);
@@ -2088,7 +2088,7 @@ bool Utils::sendMail(lua_State *vm, char *from, char *to, char *cc,
     ret_str = curl_easy_strerror(res);
 
     if (res != CURLE_OK) {
-      if((num_runs == 1) && (ntop->getPrefs()->enable_email_starttls())) {
+      if((num_runs == 1) && (ntop->getPrefs()->email_starttls_enabled())) {
 	/*
 	  Some mailservers have TLS misconfigured and thus STARTTLS will fail
 	  so as last resort let's try in plain text
