@@ -1202,14 +1202,7 @@ li.select2-selection__choice {
     font-weight: normal;
 }
 
-
-/* remove table borders in th */
-.ntopng-table tbody tr td {
-  border: 1px solid #dee2e6 !important; /* Standard Bootstrap border */
-}
-
-/* Ensure table has standard Bootstrap bordered styling */
-.table-bordered,
-.table-bordered > :not(caption) > * > * {
-  border: 1px solid #dee2e6 !important;
+.link-button {
+    cursor: pointer;
+    color: var(--bs-dropdown-link-color) !important;
 }
