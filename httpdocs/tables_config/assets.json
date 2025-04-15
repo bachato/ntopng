@@ -74,7 +74,7 @@
 			"title_i18n": "mac_address",
 			"data_field": "mac",
 			"min-width": "120px",
-			"sortable": false,
+			"sortable": true,
 			"class": [
 				"text-nowrap"
 			]
