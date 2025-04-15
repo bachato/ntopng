@@ -683,15 +683,15 @@ function get_manufacturer_mac(mac_address)
    local m = string.sub(mac_address, 1, 8)
    local ret = get_mac_classification(m, true --[[ extended name --]] )
 
-   if (ret == m) then
-      ret = "n/a"
+   if ret == m then
+      ret = ""
    end
 
-   if ret and ret ~= "" then
+   if not isEmptyString(ret) then
       ret = ret:gsub("'", " ")
    end
 
-   return ret or "n/a"
+   return ret
 end
 
 -- ##############################################

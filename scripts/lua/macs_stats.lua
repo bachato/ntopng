@@ -81,7 +81,7 @@ if((devices_mode == "inactive_macs_only") and ntop.isEnterpriseL()) then
       if(active_macs[mac] == None) then
         local m = get_manufacturer_mac(mac)
 
-        if(m ~= "") then
+        if not isEmptyString(m) then
          if(manufacturers[m] == None) then
            manufacturers[m] = 1
          else

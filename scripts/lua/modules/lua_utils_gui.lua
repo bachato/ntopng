@@ -489,7 +489,12 @@ local guess_icon_keys = {
 -- #############################################
 
 function guessHostIcon(key)
-    local m = string.lower(get_manufacturer_mac(key))
+    local m = get_manufacturer_mac(key)
+    if isEmptyString(m) then
+        return ""
+    end
+
+    m = string.lower(get_manufacturer_mac(key))
     local icon = guess_icon_keys[m]
 
     if ((icon ~= nil) and (icon ~= "")) then
