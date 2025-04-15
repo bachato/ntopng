@@ -85,7 +85,7 @@
 		"width" : 6,
 		"height" : 4,
 		"params" : {
-			"url" : "/lua/pro/rest/v2/get/host/alert/top.lua",
+			"url" : "/lua/pro/rest/v2/get/flow/alert/top.lua",
 			"url_params" : {
 				"action" : "top_mitre_tactic",
 				"status" : "any",
@@ -100,7 +100,7 @@
 		"width" : 6,
 		"height" : 4,
 		"params" : {
-			"url" : "/lua/pro/rest/v2/get/flow/alert/top.lua",
+			"url" : "/lua/pro/rest/v2/get/host/alert/top.lua",
 			"url_params" : {
 				"action" : "top_mitre_tactic",
 				"status" : "any",
@@ -115,7 +115,7 @@
 		"width" : 6,
 		"height" : 4,
 		"params" : {
-			"url" : "/lua/pro/rest/v2/get/host/alert/top.lua",
+			"url" : "/lua/pro/rest/v2/get/flow/alert/top.lua",
 			"url_params" : {
 				"action" : "top_mitre_technique",
 				"status" : "any",
@@ -130,7 +130,7 @@
 		"width" : 6,
 		"height" : 4,
 		"params" : {
-			"url" : "/lua/pro/rest/v2/get/flow/alert/top.lua",
+			"url" : "/lua/pro/rest/v2/get/host/alert/top.lua",
 			"url_params" : {
 				"action" : "top_mitre_technique",
 				"status" : "any",
