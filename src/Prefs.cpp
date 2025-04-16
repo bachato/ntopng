@@ -1199,6 +1199,7 @@ static const struct option long_options[] = {
   {"http-port",               required_argument, NULL, 'w'},
   {"max-num-hosts",           required_argument, NULL, 'x'},
   {"other-core-affinity",     required_argument, NULL, 'y'},
+  {"pcap-reforge-timestamps", no_argument,       NULL, 'z'},
   {"packet-filter",           required_argument, NULL, 'B'},
   {"dump-hosts",              required_argument, NULL, 'D'},
   {"dump-flows",              required_argument, NULL, 'F'},
