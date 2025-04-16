@@ -6,7 +6,7 @@
         <Loading v-if="isLoading"></Loading>
         <div class="button-group mb-2 d-flex align-items-center"> <!-- TableHeader -->
             <div class="form-group d-flex align-items-end" style="flex-wrap: wrap;">
-                <!-- Slot for custom header--> 
+                <!-- Slot for custom header-->
                 <slot name="custom_header"></slot>
             </div>
 
@@ -16,30 +16,31 @@
                     <div class="me-2">
                         <label>
                             <select v-model="rowsPerPage" @change="change_per_page">
-                                <option v-for="rowsPerPage in rowsPerPageOptions" :value="rowsPerPage">{{ rowsPerPage }}</option>
+                                <option v-for="rowsPerPage in rowsPerPageOptions" :value="rowsPerPage">{{ rowsPerPage }}
+                                </option>
                             </select>
                         </label>
                     </div>
 
                     <!-- Custom buttons slot -->
                     <slot name="custom_buttons"></slot>
-                    
+
                     <!-- Reset columns size-->
                     <button class="btn btn-link" type="button" @click="reset_column_size">
                         <i class="fas fa-columns" data-bs-toggle="tooltip" data-bs-placement="top"
                             :title="_i18n('reset_column')"></i>
                     </button>
-                    
+
                     <!-- Refresh table -->
                     <button class="btn btn-link" type="button" @click="refresh_table()">
                         <i class="fas fa-refresh" data-bs-toggle="tooltip" data-bs-placement="top"
                             :title="_i18n('refresh')"></i>
                     </button>
-                    
+
                     <!-- Autorefresh toggle -->
                     <div v-if="show_autorefresh > 0" class="d-inline-block">
-                        <Switch v-model:value="isAutoRefreshEnabled" class="me-2 mt-1" :title="autorefresh_title" style=""
-                            @change_value="update_autorefresh">
+                        <Switch v-model:value="isAutoRefreshEnabled" class="me-2 mt-1" :title="autorefresh_title"
+                            style="" @change_value="update_autorefresh">
                         </Switch>
                     </div>
 
@@ -83,11 +84,12 @@
                     <tr>
                         <!-- Column Headers -->
                         <template v-for="(col, col_index) in processedColumns">
-                            <th v-if="col.visible" scope="col"
-                                :class="{ 'pointer': col.sortable, 'unset': !col.sortable, }"
-                                style="white-space: nowrap;"
-                                :style="[(col.min_width ? 'min-width: ' + col.min_width + ';' : '')]"
-                                @click="change_column_sort(col, col_index)"
+                            <th v-if="col.visible" scope="col" :class="[
+                                { 'pointer': col.sortable, 'unset': !col.sortable, },
+                                { 'sticky-column-th': col.sticky }
+                            ]" style="white-space: nowrap;" :style="[
+                                (col.min_width ? 'min-width: ' + col.min_width + ';' : ''),
+                            ]" @click="change_column_sort(col, col_index)"
                                 :data-resizable-column-id="get_column_id(col.data)">
                                 <div style="display:flex;">
                                     <!-- Print column name -->
@@ -106,13 +108,15 @@
                     <!-- Data rows -->
                     <tr v-if="!isChangingColumnVisibility && !isChangingRows" v-for="row in displayedRows">
                         <template v-for="(col, col_index) in processedColumns">
-                            <td v-if="col.visible" scope="col" class="">
+                            <td v-if="col.visible" scope="col" :class="[
+                                { 'sticky-column-td': col.sticky }
+                            ]">
                                 <!-- HTML content if provided -->
                                 <div v-if="print_html_row != null && print_html_row(col.data, row, true) != null"
-                                :class="col.classes" class="wrap-column" :style="col.style"
-                                v-html="print_html_row(col.data, row)">
-                            </div>
-                            <div :style="col.style" style="" class="wrap-column margin-sm" :class="col.classes">
+                                    :class="col.classes" class="wrap-column" :style="col.style"
+                                    v-html="print_html_row(col.data, row)">
+                                </div>
+                                <div :style="col.style" style="" class="wrap-column margin-sm" :class="col.classes">
                                     <!-- Vue node if provided -->
                                     <VueNode :key="row"
                                         v-if="print_vue_node_row != null && print_vue_node_row(col.data, row, vue_obj, true) != null"
@@ -136,8 +140,8 @@
 
         <div>
             <!-- Pagination component, bottom right -->
-            <SelectTablePage ref="paginationRef" :key="searchDelay" :total_rows="totalRowCount"
-                :per_page="rowsPerPage" @change_active_page="change_active_page">
+            <SelectTablePage ref="paginationRef" :key="searchDelay" :total_rows="totalRowCount" :per_page="rowsPerPage"
+                @change_active_page="change_active_page">
             </SelectTablePage>
         </div>
 
@@ -150,10 +154,9 @@
             <div class="text-start">
                 <small id="historical_flows_table-query-time" style="" class="query">Query performed in <span
                         class="seconds">{{
-        (query_info.query_duration_msec / 1000).toFixed(3) }}</span> seconds. <span
+                            (query_info.query_duration_msec / 1000).toFixed(3) }}</span> seconds. <span
                         id="historical_flows_table-query" style="cursor: pointer;" class="badge bg-secondary"
-                        :title=query_info.query @click="copy_query_into_clipboard"
-                        ref="sqlButtonRef">SQL</span></small>
+                        :title=query_info.query @click="copy_query_into_clipboard" ref="sqlButtonRef">SQL</span></small>
             </div>
         </div>
     </div>
@@ -223,7 +226,7 @@ const rowsPerPageOptions = [10, 20, 40, 50, 80, 100];  // Available rows per pag
 const rowsPerPage = ref(get_num_pages());               // Current rows per page setting
 const columnWidthStore = window.store;                          // Store for column width persistence
 const searchString = ref("");                          // Search term
-             
+
 const paginationRef = ref(null);                 // Reference to pagination component
 const isLoading = ref(false);                          // Loading state flag
 const query_info = ref(null);                        // Query execution info (time, records, SQL)
@@ -265,12 +268,25 @@ function get_col_id(col) {
     }
 }
 
+function set_dropdown_listener() {
+    document.querySelectorAll('.dropdown').forEach(dropdown => {
+        dropdown.addEventListener('show.bs.dropdown', function () {
+            this.closest('td').classList.add('dropdown-active');
+        });
+
+        dropdown.addEventListener('hide.bs.dropdown', function () {
+            this.closest('td').classList.remove('dropdown-active');
+        });
+    });
+}
+
 // init table with columns and rows
 async function load_table() {
     await set_columns_wrap();       // Prepare column definitions
     await set_rows();               // Fetch initial rows
     set_columns_resizable();        // Initialize resizable columns
     dropdownRef.value.load_menu();     // Initialize dropdown menu
+    set_dropdown_listener();
     emit("loaded");                 // Emit loaded event
 }
 
@@ -409,6 +425,7 @@ async function set_columns_wrap() {
             sortable: is_column_sortable(c),
             min_width: column_min_width(c),
             order: col_opt?.order || i,
+            sticky: c?.sticky,
             classes,
             style,
             data: c,
@@ -594,16 +611,16 @@ function filterRows(rows, searchTerm) {
     if (!searchTerm || searchTerm.trim() === '') {
         return rows;
     }
-    
+
     searchTerm = searchTerm.toLowerCase();
-    
+
     return rows.filter(row => {
         // Check each visible column for the search term
         return processedColumns.value.some(col => {
             if (!col.visible) return false;
-            
+
             let cellContent = '';
-            
+
             // Get cell content based on how it's rendered
             if (props.print_html_row && props.print_html_row(col.data, row, true) != null) {
                 // For HTML content, get the rendered text and strip HTML tags
@@ -619,7 +636,7 @@ function filterRows(rows, searchTerm) {
                 const rawValue = row[col.data];
                 cellContent = rawValue ? String(rawValue).toLowerCase() : '';
             }
-            
+
             return cellContent.includes(searchTerm);
         });
     });
@@ -695,14 +712,14 @@ async function on_change_map_search() {
             currentPage = 0;
             paginationRef.value.change_active_page(0, 0);
         }
-        
+
         await set_rows(); // get filtered rows
-        
+
         // Update pagination after search
         if (!props.paging) {
             redraw_select_pages();
         }
-        
+
         map_search_change_timeout = null;
     }, timeout);
 }
@@ -733,4 +750,12 @@ defineExpose({ load_table, refresh_table, get_columns_defs, get_rows_num, search
 
 </script>
 
-<style scoped></style>
+<style scoped>
+/* Used just for the action column in case of dropdowns, otherwise the
+ * visualization stack is incorrect, need to increment the z-index of the
+ * selected td
+ */
+td.sticky-column-td.dropdown-active {
+    z-index: 3 !important;
+}
+</style>
