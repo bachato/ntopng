@@ -48,7 +48,7 @@ Flow* FlowHash::find(Mac *src_mac, Mac *dst_mac, IpAddress *src_ip,
     private_flow_id +
     src_port + dst_port + vlanId +  protocol;
 
-#if USE_MAC_IN_KEY_WITH_DHCP
+#ifdef USE_MAC_IN_KEY_WITH_DHCP
   if((src_ip->key() == 0) && (dst_ip->key() == 0xFFFFFFFF)) {
     /* Add the MAC address of the source host (dst_mac is not necessary as it's FF:FF:FF:FF:FF:FF) */
     if(src_mac != NULL) hash += src_mac->key();

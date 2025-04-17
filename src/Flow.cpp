@@ -2835,7 +2835,7 @@ bool Flow::equal(const Mac *_src_pkt_mac, const Mac *_dst_pkt_mac,
   } else
     return (false);
 
-#if USE_MAC_IN_KEY_WITH_DHCP
+#ifdef USE_MAC_IN_KEY_WITH_DHCP
   /* Check if MAC address needs to be used in flow key */
   if((cli_ip->key() == 0) && (srv_ip->key() == 0xFFFFFFFF)) {
     useMacAddressInFlowKey = true;
