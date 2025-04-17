@@ -536,3 +536,38 @@ extern "C" {
 #ifdef WIN32
 }
 #endif
+
+/* ******************************** */
+/* ******************************** */
+
+#ifdef CUSTOM_ALLOCATOR
+
+static std::map <void*, std::size_t> _allocator;
+static u_int64_t _tot_memory = 0;
+
+void *operator new[](std::size_t s) {
+  void *m = (void*)malloc(s);
+
+  _allocator[m] = s, _tot_memory += s;
+
+  printf("[NEW] [size: %u][tot: %lu]\n", (unsigned int)s, (unsigned long)_tot_memory);
+  return m;
+ }
+
+void operator delete[](void *p) throw() {
+  std::map <void*, std::size_t>::iterator i = _allocator.find(p);
+
+  if(i == _allocator.end()) {
+    /* Not found */
+  } else {
+    _tot_memory -= i->second;
+    
+    printf("[DELETE] [size: %u][tot: %lu]\n",
+	   (unsigned int)i->second, (unsigned long)_tot_memory);
+
+    _allocator.erase(i);
+    free(p);
+  }
+ }
+
+#endif
