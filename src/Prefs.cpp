@@ -2722,6 +2722,9 @@ void Prefs::lua(lua_State *vm) {
   lua_push_uint64_table_entry(vm, "max_num_hosts", max_num_hosts);
   lua_push_uint64_table_entry(vm, "max_num_flows", max_num_flows);
 
+  lua_push_uint64_table_entry(vm, "flows_limit", MAX_NUM_ACTIVE_FLOWS);
+  lua_push_uint64_table_entry(vm, "hosts_limit", MAX_NUM_ACTIVE_HOSTS);
+
   lua_push_bool_table_entry(vm, "is_dump_flows_enabled", do_dump_flows());
   lua_push_bool_table_entry(vm, "is_dump_flows_runtime_enabled",
                             is_runtime_flows_dump_enabled());
