@@ -26,18 +26,41 @@
 /* *************************************** */
 
 BroadcastDomains::BroadcastDomains(NetworkInterface *_iface) {
+  char buf[256], key[64];
+  
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   iface = _iface;
   inline_broadcast_domains = new (std::nothrow) AddressTree(false);
   broadcast_domains = broadcast_domains_shadow = NULL;
   next_update = last_update = 0;
   next_domain_id = 0;
+
+  snprintf(key, sizeof(key), IFACE_BROADCAST_DOMAINS_KEY, iface->get_id());
+  if(ntop->getRedis()->get(key, buf, sizeof(buf)) == 0) {    
+    broadcast_domains = new (std::nothrow) AddressTree();
+
+    if(broadcast_domains != NULL) {
+      ntop->getTrace()->traceEvent(TRACE_INFO, "Broadcast domains: %s", buf);
+      broadcast_domains->deserialize(buf);
+    }
+  }
 }
 
 /* *************************************** */
 
-BroadcastDomains::~BroadcastDomains() {
+BroadcastDomains::~BroadcastDomains() { 
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+
+  if(broadcast_domains) {
+    char buf[256], *j, key[64];
+
+    j = broadcast_domains->serialize(buf, sizeof(buf));
+      
+    ntop->getTrace()->traceEvent(TRACE_INFO, "Broadcast domains: %s", j);
+
+    snprintf(key, sizeof(key), IFACE_BROADCAST_DOMAINS_KEY, iface->get_id());
+    ntop->getRedis()->set(key, j);
+  }
   
   if (inline_broadcast_domains) {
     delete (inline_broadcast_domains);
@@ -140,8 +163,7 @@ void BroadcastDomains::reloadBroadcastDomains(bool force_immediate_reload) {
       if (broadcast_domains_shadow) delete broadcast_domains_shadow;
 
       broadcast_domains_shadow = broadcast_domains;
-      broadcast_domains =
-          new (std::nothrow) AddressTree(*inline_broadcast_domains);
+      broadcast_domains = new (std::nothrow) AddressTree(*inline_broadcast_domains);
 
       last_update = now;
       next_update = 0;

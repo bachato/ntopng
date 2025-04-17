@@ -938,7 +938,7 @@ typedef enum {
   os_learning_tcp_fingerprint,
   os_learning_http_user_agent,
   os_learning_user_set_via_lua,
-  os_learning_mac_address
+  os_learning_dhcp
 } OSLearningMode;
 
 /* Keep in sync with hosts_map_utils.lua */

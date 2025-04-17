@@ -31,7 +31,7 @@ static void free_ptree_data(void *data) {
 
 AddressTree::AddressTree(bool handleIPv6, ndpi_void_fn_t data_free_func) {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+
   if (data_free_func)
     free_func = data_free_func;
   else
@@ -98,7 +98,7 @@ ndpi_patricia_node_t *AddressTree::addAddress(const IpAddress *const ipa) {
     ndpi_patricia_node_t *res;
 
     updateLock.wrlock(__FILE__, __LINE__);
-    
+
     res = Utils::ptree_match(cur_ptree, cur_family, cur_addr, cur_bits);
 
     if (!res) {
@@ -167,7 +167,7 @@ ndpi_patricia_node_t *AddressTree::addAddress(const IpAddress *const ipa,
                            : (void *)&ipa->getIP()->ipType.ipv6;
 
     updateLock.wrlock(__FILE__, __LINE__);
-    
+
     res = Utils::ptree_match(cur_ptree, cur_family, cur_addr, cur_bits);
 
     if (!res) {
@@ -199,13 +199,13 @@ bool AddressTree::addAddressAndData(const char *_what, void *user_data,
 				    bool fail_if_already_present) {
   ndpi_patricia_node_t *node;
   bool ret;
-  
+
   if (fail_if_already_present && match((char *) _what)) {
     return false;
   }
 
   updateLock.wrlock(__FILE__, __LINE__);
-  
+
   node = Utils::ptree_add_rule(strchr(_what, '.') ? ptree_v4 : ptree_v6, _what);
 
   if (node) {
@@ -215,7 +215,7 @@ bool AddressTree::addAddressAndData(const char *_what, void *user_data,
     ret = false;
 
   updateLock.unlock(__FILE__, __LINE__);
-  
+
   return(ret);
 }
 
@@ -225,7 +225,7 @@ bool AddressTree::addAddress(const char *_what, const int64_t user_data) {
   u_int32_t _mac[6];
   int64_t id = (user_data == -1) ? numAddresses : user_data;
   bool ret = true;
-  
+
   if (sscanf(_what, "%02X:%02X:%02X:%02X:%02X:%02X", &_mac[0], &_mac[1],
              &_mac[2], &_mac[3], &_mac[4], &_mac[5]) == 6) {
     u_int8_t mac[6];
@@ -237,9 +237,9 @@ bool AddressTree::addAddress(const char *_what, const int64_t user_data) {
     macs[mac_num] = id;
   } else {
     ndpi_patricia_node_t *node;
-    
+
     updateLock.wrlock(__FILE__, __LINE__);
-    
+
     node = Utils::ptree_add_rule(strchr(_what, '.') ? ptree_v4 : ptree_v6, _what);
 
     if (node) {
@@ -309,7 +309,7 @@ ndpi_patricia_node_t *AddressTree::matchAndGetNode(const char *addr) {
     node = Utils::ptree_match(ptree_v6, AF_INET6,
                               (void *)&address.getIP()->ipType.ipv6, bits);
   updateLock.unlock(__FILE__, __LINE__);
-  
+
   return node;
 }
 
@@ -332,14 +332,14 @@ bool AddressTree::match(char *addr) { return !!matchAndGetNode(addr); }
 
 ndpi_patricia_node_t* AddressTree::match(IpAddress *ipa, int network_bits) {
   ndpi_patricia_node_t *rc;
-  
+
   if (!ipa) return (NULL);
 
   bool is_v4 = ipa->isIPv4();
   if (!is_v4 && !ptree_v6) return (NULL);
 
   updateLock.rdlock(__FILE__, __LINE__);
-  
+
   if (is_v4)
     rc = Utils::ptree_match(ptree_v4, AF_INET, &ipa->getIP()->ipType.ipv4,
                               network_bits);
@@ -347,7 +347,7 @@ ndpi_patricia_node_t* AddressTree::match(IpAddress *ipa, int network_bits) {
     rc = Utils::ptree_match(ptree_v6, AF_INET6, &ipa->getIP()->ipType.ipv6,
 			    network_bits);
   updateLock.unlock(__FILE__, __LINE__);
-  
+
   return(rc);
 }
 
@@ -355,7 +355,7 @@ ndpi_patricia_node_t* AddressTree::match(IpAddress *ipa, int network_bits) {
 
 void *AddressTree::matchAndGetData(IpAddress *ipa) {
   ndpi_patricia_node_t *node = match(ipa, ipa->isIPv4() ? 32 : 128);
-  
+
   if (node)
     return ndpi_patricia_get_node_data(node);
   else
@@ -455,11 +455,28 @@ static void address_tree_dump_funct(ndpi_patricia_node_t *node, void *data,
 
 /* **************************************************** */
 
+static void address_tree_serialize_funct(ndpi_patricia_node_t *node, void *data,
+					 void *user_data) {
+  char address[128];
+  ndpi_prefix_t *prefix;
+
+  if (!node || !(prefix = ndpi_patricia_get_node_prefix(node))) return;
+
+  if (!Utils::ptree_prefix_print(prefix, address, sizeof(address))) return;
+
+  if (user_data)
+    ndpi_serialize_string_uint64((ndpi_serializer*)user_data, address, ndpi_patricia_get_node_u64(node));
+  else
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[AddressTree] %s", address);
+}
+
+/* **************************************************** */
+
 void AddressTree::getAddresses(lua_State *vm) {
   std::map<u_int64_t, int64_t>::const_iterator it;
 
   updateLock.rdlock(__FILE__, __LINE__);
-  
+
   ndpi_patricia_walk_tree_inorder(ptree_v4, address_tree_dump_funct, vm);
 
   if (ptree_v6)
@@ -479,6 +496,7 @@ void AddressTree::getAddresses(lua_State *vm) {
 
   updateLock.unlock(__FILE__, __LINE__);
 }
+
 /* **************************************************** */
 
 void AddressTree::removePrefix(bool isV4, ndpi_prefix_t *prefix) {
@@ -528,7 +546,7 @@ void AddressTree::dump() {
   std::map<u_int64_t, int64_t>::iterator it;
 
   updateLock.rdlock(__FILE__, __LINE__);
-  
+
   ndpi_patricia_walk_tree_inorder(ptree_v4, address_tree_dump_funct, NULL);
 
   if (ptree_v6)
@@ -568,3 +586,86 @@ void AddressTree::cleanup(ndpi_void_fn_t _free_func) {
 void AddressTree::cleanup() { cleanup(free_func); }
 
 /* **************************************************** */
+
+char* AddressTree::serialize(char *buf, u_int buf_len) {
+  ndpi_serializer serializer;
+  u_int32_t buflen;
+  char *json;
+
+  if(ndpi_init_serializer(&serializer, ndpi_serialization_format_json) <  0)
+    return(NULL);
+
+  updateLock.rdlock(__FILE__, __LINE__);
+
+  ndpi_serialize_start_of_block(&serializer, "ip");
+  ndpi_patricia_walk_tree_inorder(ptree_v4, address_tree_serialize_funct, &serializer);
+
+  if (ptree_v6)
+    ndpi_patricia_walk_tree_inorder(ptree_v6, address_tree_serialize_funct, &serializer);
+
+  ndpi_serialize_end_of_block(&serializer);
+
+  ndpi_serialize_start_of_list(&serializer, "mac");
+  for (std::map<u_int64_t, int64_t>::iterator it = macs.begin(); it != macs.end(); ++it) {
+    char key[32], val[8];
+    u_int8_t *mac = (u_int8_t *)&it->first;
+
+    snprintf(key, sizeof(key), "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1],
+             mac[2], mac[3], mac[4], mac[5]);
+
+    snprintf(val, sizeof(val), "%llu", (long long unsigned int)it->second);
+
+    ndpi_serialize_string_string(&serializer, "mac", val);
+  }
+
+  ndpi_serialize_end_of_list(&serializer);
+
+  updateLock.unlock(__FILE__, __LINE__);
+
+  json = ndpi_serializer_get_buffer(&serializer, &buflen);
+
+  buf_len = ndpi_min(buf_len-1, buflen);
+  strncpy(buf, json, buf_len);
+  buf[buf_len] = '\0';
+
+  ndpi_term_serializer(&serializer);
+
+  return(buf);
+}
+
+/* **************************************************** */
+
+bool AddressTree:: deserialize(char *json) {
+  json_object *o, *obj;
+  enum json_tokener_error jerr = json_tokener_success;
+
+  if (!json) return(false);
+
+  if((o = json_tokener_parse_verbose(json, &jerr)) == NULL)
+    return(false);
+
+  cleanup();
+
+  if(json_object_object_get_ex(o, "ip", &obj)) {
+    json_object_object_foreach(obj, key, val) {
+      ntop->getTrace()->traceEvent(TRACE_INFO, "Network: %s, Value: %d\n", key, json_object_get_int(val));
+      addAddress(key, json_object_get_int(val));
+    }
+  }
+
+  if(json_object_object_get_ex(o, "mac", &obj)) {
+    int array_len = json_object_array_length(obj);
+
+    if (array_len > 0) {
+      for (int i = 0; i < array_len; i++) {
+	json_object *mac_item = json_object_array_get_idx(obj, i);
+
+	addAddress(json_object_get_string(mac_item), -1);
+      }
+    }
+  }
+
+  json_object_put(o);
+
+  return(true);
+}

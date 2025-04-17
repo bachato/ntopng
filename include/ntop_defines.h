@@ -265,6 +265,7 @@
 #define LOCALHOST_SERVER_PORT_BITMAP "ntopng.cache.localhost_srv_port_bitmap.%d%s" 
 #define HOST_LABEL_NAMES_KEY          "ntopng.cache.host_labels.%s"
 #define IFACE_DHCP_RANGE_KEY          "ntopng.prefs.ifid_%u.dhcp_ranges"
+#define IFACE_BROADCAST_DOMAINS_KEY   "ntopng.prefs.ifid_%u.broadcast_domains"
 #define HOST_SERIALIZED_KEY           "ntopng.serialized_hosts.ifid_%u_%s@%d"
 #define HOST_SERIALIZED_SHORT_KEY     "%u_%s@%d"
 #define MAC_SERIALIZED_KEY            "ntopng.serialized_macs.ifid_%u_%s" /* /lua/enterprise/get_inactive_macs_data.lua */

@@ -34,7 +34,7 @@ class AddressTree {
   std::map<u_int64_t, int64_t> macs;
   ndpi_void_fn_t free_func;
   RwLock updateLock;
-  
+
   void removePrefix(bool isV4, ndpi_prefix_t *prefix);
   static void walk(ndpi_patricia_tree_t *ptree, ndpi_void_fn3_t func,
                    void *const user_data);
@@ -54,7 +54,7 @@ class AddressTree {
   inline u_int32_t getNumAddressesIPv6() const { return (numAddressesIPv6); }
 
   inline bool isEmpty() { return(getNumAddresses() == 0); }
-  
+
   inline ndpi_patricia_tree_t *getTree(bool isV4) const {
     return (isV4 ? ptree_v4 : ptree_v6);
   }
@@ -86,6 +86,9 @@ class AddressTree {
 
   void dump();
   void walk(ndpi_void_fn3_t func, void *const user_data);
+
+  char* serialize(char *buf, u_int buf_len);
+  bool  deserialize(char *json);
 };
 
 #endif /* _ADDRESS_TREE_H_ */

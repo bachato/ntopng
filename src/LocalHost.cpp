@@ -200,7 +200,7 @@ void LocalHost::syncMACMetadata(bool force_update) {
       offlineSetDHCPName(cur_mac->getDHCPNamePtr());
     
     if(cur_mac->getDeviceOS() != ndpi_os_unknown)
-      setOS(cur_mac->getDeviceOS(), os_learning_mac_address);
+      setOS(cur_mac->getDeviceOS(), os_learning_dhcp);
   }
 }
 
