@@ -114,6 +114,7 @@ void LocalHost::set_hash_entry_state_idle() {
 /* NOTE: Host::initialize will be called by the constructor after the Host initialization */
 void LocalHost::initialize() {
   char buf[64], host[96], rsp[256];
+  BroadcastDomains *bd = iface->getBroadcastDomains();
   
   stats = allocateStats();
   updateHostPool(true /* inline with packet processing */, true /* first inc */);
@@ -182,6 +183,12 @@ void LocalHost::initialize() {
   
   syncMACMetadata(true);
   gettimeofday(&last_periodic_asset_update, NULL);
+
+
+  if(bd) {
+    if(bd->isLocalBroadcastDomainHost(this, true))
+      setMACmeaningful();
+  }  
 }
 
 /* *************************************** */
@@ -870,7 +877,9 @@ void LocalHost::setDeviceType(DeviceType devtype) {
 
 void LocalHost::setMACmeaningful() {
   if(!is_mac_meaningful) {
-    is_mac_meaningful = true;
-    asset_map_updated = true;
+    if(iface->isPacketInterface()) {
+      is_mac_meaningful = true;
+      asset_map_updated = true;
+    }
   }
 }
