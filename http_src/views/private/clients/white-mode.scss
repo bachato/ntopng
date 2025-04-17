@@ -1225,3 +1225,13 @@ table th.sticky-column-th {
   /* Aggiungi un'ombra sottile per evidenziare il bordo */
   box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.2) !important;
 }
+
+.search-container {
+  position: relative;
+  width: 250px;
+  transition: width 0.3s ease;
+}
+
+.search-container.expanded {
+  width: 400px;
+}
