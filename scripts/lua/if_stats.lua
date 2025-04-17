@@ -121,27 +121,6 @@ function inline_input_form(name, placeholder, tooltip, value, can_edit, input_op
     end
 end
 
-function inline_select_form(name, keys, values, curval)
-    print [[<select class="form-select" style="width:12em; display:inline;" name="]]
-    print(name)
-    print [[">]]
-    for idx, k in ipairs(keys) do
-        local v = values[idx]
-        print [[<option value="]]
-        print(v)
-        print [[" ]]
-
-        if curval == v then
-            print("selected")
-        end
-
-        print [[>]]
-        print(k)
-        print [[</option>]]
-    end
-    print [[</select>]]
-end
-
 function override_stats(stats, overr_stats)
     local new_stats = stats
     -- override stats with the values calculated from the latest user reset
@@ -1844,15 +1823,21 @@ elseif (page == "config") then
     local serialize_by_mac_key = string.format("ntopng.prefs.ifid_%u.serialize_local_broadcast_hosts_as_macs",
         interface.getId())
 
-    if (_POST["lbd_hosts_as_macs"] ~= nil) then
-        serialize_by_mac = _POST["lbd_hosts_as_macs"]
+    if not (is_mirrored_traffic) and not interface.isZMQInterface() then
+        if (_POST["lbd_hosts_as_macs"] ~= nil) then
+            serialize_by_mac = _POST["lbd_hosts_as_macs"]
 
-        if ntop.getPref(serialize_by_mac_key) ~= serialize_by_mac then
-            ntop.setPref(serialize_by_mac_key, serialize_by_mac)
-            interface.updateLbdIdentifier()
+            if ntop.getPref(serialize_by_mac_key) ~= serialize_by_mac then
+                ntop.setPref(serialize_by_mac_key, serialize_by_mac)
+                interface.updateLbdIdentifier()
+            end
+        else
+            serialize_by_mac = ntop.getPref(serialize_by_mac_key)
         end
     else
-        serialize_by_mac = ntop.getPref(serialize_by_mac_key)
+        -- In case of mirrored traffic or ZMQ Interface, force the key to IP
+        ntop.setPref(serialize_by_mac_key, false)
+        interface.updateLbdIdentifier()
     end
 
     -- LBD identifier
@@ -1864,8 +1849,41 @@ elseif (page == "config") then
     print(i18n("prefs.toggle_host_tskey_description"))
     print [["></i></th>
            <td>]]
-    inline_select_form("lbd_hosts_as_macs", { i18n("ip_address"), i18n("mac_address") }, { "0", "1" }, serialize_by_mac)
+    print [[<select class="form-select" style="width:12em; display:inline;" name="]]
+    print("lbd_hosts_as_macs")
+    print("\"")
+    if (is_mirrored_traffic) or interface.isZMQInterface() then
+        print[[ disabled ]]
+    end
+    print(">")
+    local values = { "0", "1" }
+    for idx, k in ipairs({ i18n("ip_address"), i18n("mac_address") }) do
+        local v = values[idx]
+        print [[<option value="]]
+        print(v)
+        print [[" ]]
+
+        if serialize_by_mac == v then
+            print("selected")
+        end
+
+        print [[>]]
+        print(k)
+        print [[</option>]]
+    end
+    print [[</select>]]
     print [[
+        <small>
+        <details class='mt-2'>
+         <summary>
+            <span class="ntop_notes" data-bs-toggle="tooltip" data-placement="right" title=']] 
+            print(i18n("click_to_expand")) print [['>
+               ]] print(i18n("notes")) print [[ <i class='fas fa-question-circle '></i>
+            </span>
+         </summary>
+         <p>]] print(i18n("if_stats_config.local_broadcast_notes")) print [[</p>
+        </details>
+        </small>
            </td>
         </tr>]]
 

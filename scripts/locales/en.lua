@@ -5360,6 +5360,7 @@ local lang = {
     ["generic_notes_3"] = "To remove a rule, click on the 'Actions' column button and then click onto 'Delete' on the row you want to remove",
     ["gw_macs"] = "MAC Address Based Traffic Directions",
     ["gw_macs_description"] = "This is used to compute traffic direction (ingress or egress) based on the provided MAC address(es) (comma-separated list) as in some case (when capturing traffic from a traffic mirror or PCAP) it is not possible to know the traffic direction. Traffic directed to the configured MAC address(es) is considered as egress traffic.<br><b>Note:</b><br>In case no MAC address is configured, the traffic direction is set using local vs remote hosts traffic (-m).",
+    ["local_broadcast_notes"] = "In case of Mirrored Traffic or ZMQ Interfaces, this preference is forced to IP Address.",
     ["gw_macs_example"] = "e.g. %{example}",
     ["hide_from_top_networks"] = "Hide from Top Networks",
     ["hide_from_top_networks_descr"] = "e.g. %{example}",

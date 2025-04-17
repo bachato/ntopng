@@ -1,15 +1,16 @@
 --
 -- (C) 2013-24 - ntop.org
 --
-
 --
 -- This script is executed once at startup similar to /etc/rc.local on Unix
 --
-
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
-package.path = dirs.installdir .. "/scripts/lua/modules/pools/?.lua;" .. package.path
-package.path = dirs.installdir .. "/scripts/lua/modules/vulnerability_scan/?.lua;" .. package.path
+package.path = dirs.installdir .. "/scripts/lua/modules/pools/?.lua;" ..
+                   package.path
+package.path = dirs.installdir ..
+                   "/scripts/lua/modules/vulnerability_scan/?.lua;" ..
+                   package.path
 
 -- Important: load this before any other alert related module
 require "prefs_utils"
@@ -36,94 +37,101 @@ local json = require "dkjson"
 
 -- ##################################################################
 
-traceError(TRACE_NORMAL, TRACE_CONSOLE, "Processing startup.lua: please hold on...")
+traceError(TRACE_NORMAL, TRACE_CONSOLE,
+           "Processing startup.lua: please hold on...")
 
 if ntop.isPro() then
-   package.path = dirs.installdir .. "/pro/scripts/callbacks/system/?.lua;" .. package.path
-   require("startup")
+    package.path = dirs.installdir .. "/pro/scripts/callbacks/system/?.lua;" ..
+                       package.path
+    require("startup")
 end
 
 -- ##################################################################
 
 local function migrate_script_config(conf, proto_name)
-   local config = conf.config.flow["unexpected_"..proto_name]
-   local ret = false
+    local config = conf.config.flow["unexpected_" .. proto_name]
+    local ret = false
 
-   if(config ~= nil) then
-      if(config.all.enabled) then
-	 local value = config.all.script_conf.items
+    if (config ~= nil) then
+        if (config.all.enabled) then
+            local value = config.all.script_conf.items
 
-	 if(value ~= nil) then
-	    -- tprint(value)
-	    local new_key = "ntopng.prefs.nw_config_" .. proto_name .. "_list"
-	    local new_value = ""
+            if (value ~= nil) then
+                -- tprint(value)
+                local new_key = "ntopng.prefs.nw_config_" .. proto_name ..
+                                    "_list"
+                local new_value = ""
 
-	    for k,v in pairs(value) do
-	       if(k == 1) then
-		  new_value = v
-	       else
-		  new_value = new_value .. "," .. v
-	       end
-	    end
+                for k, v in pairs(value) do
+                    if (k == 1) then
+                        new_value = v
+                    else
+                        new_value = new_value .. "," .. v
+                    end
+                end
 
-	    if(new_value ~= "") then
-	      --  tprint(new_key.." = "..new_value)
-	       ntop.setCache("ntopng.prefs.nw_config_"..proto_name.."_list", new_value)
-	       ret = true
-	    end
+                if (new_value ~= "") then
+                    --  tprint(new_key.." = "..new_value)
+                    ntop.setCache("ntopng.prefs.nw_config_" .. proto_name ..
+                                      "_list", new_value)
+                    ret = true
+                end
 
-	    config.all.script_conf.items = nil -- remove value from config
-	 end
-      end
-   end
+                config.all.script_conf.items = nil -- remove value from config
+            end
+        end
+    end
 
-   return ret
+    return ret
 end
 
 local function migrate_unexpected_proto_config()
-   local key = "ntopng.prefs.checks.configset_v1"
-   local conf = json.decode(ntop.getCache(key))
-   local modified
-   local rc = false
+    local key = "ntopng.prefs.checks.configset_v1"
+    local conf = json.decode(ntop.getCache(key))
+    local modified
+    local rc = false
 
-   rc = rc or migrate_script_config(conf, "dns")
-   rc = rc or migrate_script_config(conf, "ntp")
-   rc = rc or migrate_script_config(conf, "dhcp")
-   rc = rc or migrate_script_config(conf, "smtp")
+    rc = rc or migrate_script_config(conf, "dns")
+    rc = rc or migrate_script_config(conf, "ntp")
+    rc = rc or migrate_script_config(conf, "dhcp")
+    rc = rc or migrate_script_config(conf, "smtp")
 
-   if(rc == true) then
-      -- something has been migrated
-      ntop.setCache(key, json.encode(conf))
-   end
+    if (rc == true) then
+        -- something has been migrated
+        ntop.setCache(key, json.encode(conf))
+    end
 end
 
 -- ##################################################################
 
 if ntop.isAppliance() then
-   package.path = dirs.installdir .. "/scripts/lua/modules/system_config/?.lua;" .. package.path
+    package.path = dirs.installdir ..
+                       "/scripts/lua/modules/system_config/?.lua;" ..
+                       package.path
 
-   -- Discard any pending, unfinished, unsaved configuration
-   local appliance_config = require("appliance_config"):create(true):discard()
+    -- Discard any pending, unfinished, unsaved configuration
+    local appliance_config = require("appliance_config"):create(true):discard()
 
-   -- Load the actual valid configuration
-   appliance_config = require("appliance_config"):create(false)
+    -- Load the actual valid configuration
+    appliance_config = require("appliance_config"):create(false)
 
-   -- Apply some config prefs
-   local vlan_trunk = appliance_config:isBridgeOverVLANTrunkEnabled()
-   ntop.setPref("ntopng.prefs.enable_vlan_trunk_bridge", ternary(vlan_trunk, "1", "0"))
+    -- Apply some config prefs
+    local vlan_trunk = appliance_config:isBridgeOverVLANTrunkEnabled()
+    ntop.setPref("ntopng.prefs.enable_vlan_trunk_bridge",
+                 ternary(vlan_trunk, "1", "0"))
 
-   -- Load possibly changed prefs
-   ntop.reloadPreferences()
+    -- Load possibly changed prefs
+    ntop.reloadPreferences()
 end
 
 if ntop.isnEdge() then
-   host_pools_nedge.initPools()
-   radius_handler.deleteAllKeys()
+    host_pools_nedge.initPools()
+    radius_handler.deleteAllKeys()
 end
 
-if(ntop.isPro()) then
-   shaper_utils = require "shaper_utils"
-   shaper_utils.initShapers()
+if (ntop.isPro()) then
+    shaper_utils = require "shaper_utils"
+    shaper_utils.initShapers()
 end
 
 -- ##################################################################
@@ -131,31 +139,50 @@ end
 local has_pcap_dump_interface = false
 
 local function cleanupIfname(ifname, ifid)
-   interface.select(ifname)
-   local ifid = getInterfaceId(ifname)
+    interface.select(ifname)
+    local ifid = getInterfaceId(ifname)
 
-   if interface.isPcapDumpInterface() then
-      has_pcap_dump_interface = true
-   end
+    if interface.isPcapDumpInterface() then has_pcap_dump_interface = true end
 
-   local alerts_status_path = os_utils.fixPath(dirs.workingdir .. "/" .. ifid .. "/json/")
-   ntop.rmdir(alerts_status_path)
+    local alerts_status_path = os_utils.fixPath(
+                                   dirs.workingdir .. "/" .. ifid .. "/json/")
+    ntop.rmdir(alerts_status_path)
 
-   -- Remove network discovery request on startup
-   discover_utils.clearNetworkDiscovery(ifid)
+    -- Remove network discovery request on startup
+    discover_utils.clearNetworkDiscovery(ifid)
 
-   -- Clean old InfluxDB export cache
-   local export_dir = os_utils.fixPath(dirs.workingdir .. "/".. ifid .."/ts_export")
-   ntop.rmdir(export_dir)
+    -- Clean old InfluxDB export cache
+    local export_dir = os_utils.fixPath(dirs.workingdir .. "/" .. ifid ..
+                                            "/ts_export")
+    ntop.rmdir(export_dir)
 
-   -- Clean redis queue used to push host filters to pfring
-   ntop.delCache("pfring." .. ifname .. ".filter.host.queue")
+    -- Clean redis queue used to push host filters to pfring
+    ntop.delCache("pfring." .. ifname .. ".filter.host.queue")
+
+    -- Check the preference if the interface is mirrored or not
+    -- In case it is, force the serialization key to IP
+    local is_mirrored_traffic = false
+    if not ntop.isnEdge() and is_packet_interface then
+        local is_mirrored_traffic_pref = string.format(
+                                             "ntopng.prefs.ifid_%d.is_traffic_mirrored",
+                                             interface.getId())
+        is_mirrored_traffic = ternary(ntop.getPref(is_mirrored_traffic_pref) ==
+                                          '1', true, false)
+    end
+
+    -- If it's mirrored or if it's a ZMQ Interface, force the serialization key to IP
+    if is_mirrored_traffic or interface.isZMQInterface() then
+        local serialize_by_mac_key = string.format(
+                                        "ntopng.prefs.ifid_%u.serialize_local_broadcast_hosts_as_macs",
+                                        interface.getId())
+        -- In case of mirrored traffic, force the key to IP
+        ntop.setPref(serialize_by_mac_key, false)
+        interface.updateLbdIdentifier()
+    end
 end
 
 -- Remove the json dumps previously needed for alerts generation
-for ifid, ifname in pairs(interface.getIfNames()) do
-   cleanupIfname(ifname, ifid)
-end
+for ifid, ifname in pairs(interface.getIfNames()) do cleanupIfname(ifname, ifid) end
 
 cleanupIfname(getSystemInterfaceName(), getSystemInterfaceId())
 
@@ -193,15 +220,16 @@ presets_utils.reloadAllDevicePolicies()
 
 -- this will retrieve host pools and policers configurtions via HTTP if enabled
 if ntop.isnEdge() then
-   local http_bridge_conf_utils = require "http_bridge_conf_utils"
-   http_bridge_conf_utils.configureBridge()
+    local http_bridge_conf_utils = require "http_bridge_conf_utils"
+    http_bridge_conf_utils.configureBridge()
 end
 
 traceError(TRACE_NORMAL, TRACE_CONSOLE, "Initializing alerts...")
 alert_utils.notify_ntopng_start()
 
 if not recovery_utils.check_clean_shutdown() then
-   package.path = dirs.installdir .. "/scripts/callbacks/system/?.lua;" .. package.path
+    package.path = dirs.installdir .. "/scripts/callbacks/system/?.lua;" ..
+                       package.path
 end
 
 recovery_utils.unmark_clean_shutdown()
@@ -211,114 +239,128 @@ traceError(TRACE_NORMAL, TRACE_CONSOLE, "Initializing timeseries...")
 ts_utils.setupAgain()
 
 -- Migrate "iface:ndpi_categories" under the correct folder
-if(ntop.getCache("ntopng.cache.rrd_category_migration") ~= "1") then
-   for ifid, ifname in pairs(delete_data_utils.list_all_interfaces()) do
-      ntop.mkdir(dirs.workingdir .. "/" .. ifid .. "/rrd/ndpi_categories")
+if (ntop.getCache("ntopng.cache.rrd_category_migration") ~= "1") then
+    for ifid, ifname in pairs(delete_data_utils.list_all_interfaces()) do
+        ntop.mkdir(dirs.workingdir .. "/" .. ifid .. "/rrd/ndpi_categories")
 
-      for cat_name, cat_id in pairs(interface.getnDPICategories()) do
-         local old_path = os_utils.fixPath(dirs.workingdir .. "/" .. ifid .. "/rrd/"..cat_name..".rrd")
+        for cat_name, cat_id in pairs(interface.getnDPICategories()) do
+            local old_path = os_utils.fixPath(
+                                 dirs.workingdir .. "/" .. ifid .. "/rrd/" ..
+                                     cat_name .. ".rrd")
 
-         if ntop.exists(old_path) then
-            local new_path = os_utils.fixPath(dirs.workingdir .. "/" .. ifid .. "/rrd/ndpi_categories/"..cat_name..".rrd")
+            if ntop.exists(old_path) then
+                local new_path = os_utils.fixPath(
+                                     dirs.workingdir .. "/" .. ifid ..
+                                         "/rrd/ndpi_categories/" .. cat_name ..
+                                         ".rrd")
 
-            traceError(TRACE_INFO, TRACE_CONSOLE, "Migrating Category RRD: " .. old_path)
-            os.rename(old_path, new_path)
-         end
-      end
-   end
+                traceError(TRACE_INFO, TRACE_CONSOLE,
+                           "Migrating Category RRD: " .. old_path)
+                os.rename(old_path, new_path)
+            end
+        end
+    end
 
-   -- do not perform migration again
-   ntop.setCache("ntopng.cache.rrd_category_migration", "1")
+    -- do not perform migration again
+    ntop.setCache("ntopng.cache.rrd_category_migration", "1")
 end
 
 -- Clear the unused DHCP cache keys
 for ifid, ifname in pairs(delete_data_utils.list_all_interfaces()) do
-   ntop.delCache("ntopng.dhcp."..ifid..".cache")
+    ntop.delCache("ntopng.dhcp." .. ifid .. ".cache")
 end
 
 -- Remove notification cache
-local notifications = ntop.getKeysCache("ntopng.cache.alerts.notification.*") or {}
-for k, _ in pairs(notifications) do
-  ntop.delCache(k)
-end
+local notifications = ntop.getKeysCache("ntopng.cache.alerts.notification.*") or
+                          {}
+for k, _ in pairs(notifications) do ntop.delCache(k) end
 
-if(has_pcap_dump_interface) then
-  -- Load the lists at the very beginning in order to avoid misclassification
-  -- when reading from PCAP dump. This can take some time.
-  traceError(TRACE_NORMAL, TRACE_CONSOLE, "Loading category lists...")
-  lists_utils.checkReloadLists()
-  traceError(TRACE_NORMAL, TRACE_CONSOLE, "Loading category lists done")
+if (has_pcap_dump_interface) then
+    -- Load the lists at the very beginning in order to avoid misclassification
+    -- when reading from PCAP dump. This can take some time.
+    traceError(TRACE_NORMAL, TRACE_CONSOLE, "Loading category lists...")
+    lists_utils.checkReloadLists()
+    traceError(TRACE_NORMAL, TRACE_CONSOLE, "Loading category lists done")
 end
 
 -- Show the warning at most 1 time per run
 ntop.delCache("ntopng.cache.rrd_format_change_warning_shown")
 
 -- Check if there is a local file to run
-local local_startup_file = "/usr/share/ntopng/local/scripts/callbacks/system/startup.lua"
-if(ntop.exists(local_startup_file)) then
-   traceError(TRACE_NORMAL, TRACE_CONSOLE, "Running "..local_startup_file)
-   dofile(local_startup_file)
+local local_startup_file =
+    "/usr/share/ntopng/local/scripts/callbacks/system/startup.lua"
+if (ntop.exists(local_startup_file)) then
+    traceError(TRACE_NORMAL, TRACE_CONSOLE, "Running " .. local_startup_file)
+    dofile(local_startup_file)
 end
 
-if(ntop.isPro()) then
-   if ntop.isClickHouseEnabled() then
+if (ntop.isPro()) then
+    if ntop.isClickHouseEnabled() then
 
-      -- Check if DB column types are good or need to be fixed
-      interface.select(getSystemInterfaceId())
-      local db_migration_required = false
-      local res = interface.execSQLQuery("DESCRIBE flows")
-      for _, row in ipairs(res) do
-         if row['name'] == 'SRC_NETWORK_ID' or
-            row['name'] == 'DST_NETWORK_ID' then
-            if row['type'] ~= 'UInt32' then
-               db_migration_required = true
+        -- Check if DB column types are good or need to be fixed
+        interface.select(getSystemInterfaceId())
+        local db_migration_required = false
+        local res = interface.execSQLQuery("DESCRIBE flows")
+        for _, row in ipairs(res) do
+            if row['name'] == 'SRC_NETWORK_ID' or row['name'] ==
+                'DST_NETWORK_ID' then
+                if row['type'] ~= 'UInt32' then
+                    db_migration_required = true
+                end
             end
-         end
-      end
-      if db_migration_required then
-         traceError(TRACE_NORMAL, TRACE_CONSOLE, "Migrating DB column types...")
-         interface.execSQLQuery("ALTER TABLE flows MODIFY COLUMN SRC_NETWORK_ID UInt32")
-         interface.execSQLQuery("ALTER TABLE flows MODIFY COLUMN DST_NETWORK_ID UInt32")
-         interface.execSQLQuery("ALTER TABLE hourly_flows MODIFY COLUMN SRC_NETWORK_ID UInt32")
-         interface.execSQLQuery("ALTER TABLE hourly_flows MODIFY COLUMN DST_NETWORK_ID UInt32")
-         interface.execSQLQuery("ALTER TABLE flows UPDATE SRC_NETWORK_ID = 4294967295 WHERE SRC_NETWORK_ID = 65535")
-         interface.execSQLQuery("ALTER TABLE flows UPDATE DST_NETWORK_ID = 4294967295 WHERE DST_NETWORK_ID = 65535")
-         interface.execSQLQuery("ALTER TABLE hourly_flows UPDATE SRC_NETWORK_ID = 4294967295 WHERE SRC_NETWORK_ID = 65535")
-         interface.execSQLQuery("ALTER TABLE hourly_flows UPDATE DST_NETWORK_ID = 4294967295 WHERE DST_NETWORK_ID = 65535")
-      end
+        end
+        if db_migration_required then
+            traceError(TRACE_NORMAL, TRACE_CONSOLE,
+                       "Migrating DB column types...")
+            interface.execSQLQuery(
+                "ALTER TABLE flows MODIFY COLUMN SRC_NETWORK_ID UInt32")
+            interface.execSQLQuery(
+                "ALTER TABLE flows MODIFY COLUMN DST_NETWORK_ID UInt32")
+            interface.execSQLQuery(
+                "ALTER TABLE hourly_flows MODIFY COLUMN SRC_NETWORK_ID UInt32")
+            interface.execSQLQuery(
+                "ALTER TABLE hourly_flows MODIFY COLUMN DST_NETWORK_ID UInt32")
+            interface.execSQLQuery(
+                "ALTER TABLE flows UPDATE SRC_NETWORK_ID = 4294967295 WHERE SRC_NETWORK_ID = 65535")
+            interface.execSQLQuery(
+                "ALTER TABLE flows UPDATE DST_NETWORK_ID = 4294967295 WHERE DST_NETWORK_ID = 65535")
+            interface.execSQLQuery(
+                "ALTER TABLE hourly_flows UPDATE SRC_NETWORK_ID = 4294967295 WHERE SRC_NETWORK_ID = 65535")
+            interface.execSQLQuery(
+                "ALTER TABLE hourly_flows UPDATE DST_NETWORK_ID = 4294967295 WHERE DST_NETWORK_ID = 65535")
+        end
 
-      -- Import ClickHouse dumps if any
-      local silence_import_warnings = true
-      traceError(TRACE_NORMAL, TRACE_CONSOLE, "Importing ClickHouse dumps...")
-      ntop.importClickHouseDumps(silence_import_warnings)
-   end
-   -- In case of the alert enabled, clean the list of all the elements
-   drop_host_pool_utils.clean_list()
+        -- Import ClickHouse dumps if any
+        local silence_import_warnings = true
+        traceError(TRACE_NORMAL, TRACE_CONSOLE, "Importing ClickHouse dumps...")
+        ntop.importClickHouseDumps(silence_import_warnings)
+    end
+    -- In case of the alert enabled, clean the list of all the elements
+    drop_host_pool_utils.clean_list()
 end
 
 -- Fetch latest ntop blog posts
 if not ntop.isnEdge() then
-  -- Note: On nEdge they are fetched in a dayly/delayed callback as connectivity
-  -- may be not yet up at this stage
-  blog_utils.fetchLatestPosts()
+    -- Note: On nEdge they are fetched in a dayly/delayed callback as connectivity
+    -- may be not yet up at this stage
+    blog_utils.fetchLatestPosts()
 end
-
 
 -- Cleanup old influxdb files (if any)
 local influxdb_dir = dirs.workingdir .. "/tmp/influxdb"
-if(ntop.exists(influxdb_dir)) then
-   local files = ntop.readdir(influxdb_dir)
+if (ntop.exists(influxdb_dir)) then
+    local files = ntop.readdir(influxdb_dir)
 
-   if(files ~= nil) then
-      for _, name in pairs(files) do
-	 if (ends(name, ".tmp") == true) then
-	    local fname = influxdb_dir .. "/" .. name
+    if (files ~= nil) then
+        for _, name in pairs(files) do
+            if (ends(name, ".tmp") == true) then
+                local fname = influxdb_dir .. "/" .. name
 
-	    -- io.write("[InfluxDB] Deleting file "..fname.."\n")
-	    ntop.unlink(fname)
-	 end
-      end
-   end
+                -- io.write("[InfluxDB] Deleting file "..fname.."\n")
+                ntop.unlink(fname)
+            end
+        end
+    end
 end
 
 -- Vulnerability scan activities
