@@ -7583,8 +7583,8 @@ const char* Utils::learningMode2str(OSLearningMode mode) {
   case os_learning_user_set_via_lua:
     return("Set by User via Lua");
     
-  case os_learning_mac_address:
-    return("Learnt from MAC address");
+  case os_learning_dhcp:
+    return("Learnt from DHCP");
   }
 
   return("Unknown");
