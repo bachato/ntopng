@@ -1772,11 +1772,11 @@ int Prefs::setOption(int optkey, char *optarg) {
     break;
 
   case 'x':
-    max_num_hosts = min_val(max_val(atoi(optarg), 1024), 4194304);
+    max_num_hosts = atoi(optarg);
     break;
 
   case 'X':
-    max_num_flows = min_val(max_val(atoi(optarg), 1024), 4194304);
+    max_num_flows = atoi(optarg);
     break;
 
   case 'y':
@@ -2382,11 +2382,10 @@ int Prefs::checkOptions() {
 
     printVersionInformation();
 
-
 #ifdef NTOPNG_PRO
     
     ntop->getTrace()->set_trace_level((u_int8_t)1);
-   ntop->registerPrefs(this, true);
+    ntop->registerPrefs(this, true);
     printf("Edition:\t%s\n", ntop->getPro()->get_edition());
     printf("License Type:\t%s\n",
            ntop->getPro()->get_license_type(buf, sizeof(buf)));
@@ -3136,6 +3135,10 @@ void Prefs::validate() {
 				 "-F clickhouse is available only on Enterprise");
     dump_flows_on_clickhouse = dump_flows_on_mysql = false;
   }
+
+  /* Check hash size here, after detecting the model (and setting the limits) */
+  max_num_hosts = max_val(min_val(max_num_hosts, MAX_NUM_ACTIVE_HOSTS*2), 1024);
+  max_num_flows = max_val(min_val(max_num_flows, MAX_NUM_ACTIVE_FLOWS*2), 1024);
 }
 
 /* *************************************** */

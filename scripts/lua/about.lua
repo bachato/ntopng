@@ -16,6 +16,8 @@ sendHTTPContentTypeHeader('text/html')
 page_utils.print_header_and_set_active_menu_entry(page_utils.menu_entries.about, { product=info.product })
 dofile(dirs.installdir .. "/scripts/lua/inc/menu.lua")
 
+local prefs = ntop.getPrefs()
+
 print("<div class='row'>")
 print("<div class='col-12'>")
 
@@ -49,6 +51,8 @@ end
 
 print("<tr><th nowrap>"..i18n("about.startup_line").."</th><td colspan=2>".. info["product"] .." "..info["command_line"].."</td></tr>\n")
 print("<tr><th nowrap>"..i18n("about.timezone").."</th><td colspan=2>".. info.zoneinfo.."</td></tr>\n")
+print("<tr><th nowrap>"..i18n("about.hosts_hash_size").."</th><td colspan=2>".. prefs.max_num_hosts.."</td></tr>\n")
+print("<tr><th nowrap>"..i18n("about.flows_hash_size").."</th><td colspan=2>".. prefs.max_num_flows.."</td></tr>\n")
 --print("<tr><th colspan=2 align=center>&nbsp;</th></tr>\n")
 
 ndpi_ver = info["version.ndpi"]
