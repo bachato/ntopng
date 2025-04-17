@@ -136,13 +136,37 @@ end
 
 -- ###############################################################
 
+local function create_flows_limit_exceeded_toast(toast, level)
+    local info = ntop.getInfo()
+    local title = i18n("about.flows_limit_exceeded")
+    local desc = i18n("about.flows_limit_exceeded_descr", {
+        product = info["product"]
+    })
+
+    return toast_ui:new(toast.id, title, desc, level, action, toast.dismissable)
+end
+
+-- ###############################################################
+
+local function create_hosts_limit_exceeded_toast(toast, level)
+    local info = ntop.getInfo()
+    local title = i18n("about.hosts_limit_exceeded")
+    local desc = i18n("about.hosts_limit_exceeded_descr", {
+        product = info["product"]
+    })
+
+    return toast_ui:new(toast.id, title, desc, level, action, toast.dismissable)
+end
+
+-- ###############################################################
+
 local function create_too_many_flows_toast(toast, level, is_db_view)
     local info = ntop.getInfo()
     local title = i18n("too_many_flows")
 
     local desc
     if is_db_view then
-        desc = i18n("about.flows_limit_reached", { product = info["product"] })
+        desc = i18n("about.you_have_too_many_flows_db", { product = info["product"] })
     else
         desc = i18n("about.you_have_too_many_flows", { product = info["product"] })
     end
@@ -427,6 +451,54 @@ function predicates.emergency_recipient(toast, container)
 end
 
 -- ###############################################
+
+--- @param toast table The toast is the logic model defined in defined_toasts
+--- @param container table Is the table where to put the new toast ui
+function predicates.flows_limit_exceeded(toast, container)
+    if not IS_ADMIN then
+        return
+    end
+
+    -- In System Interface we can't get the flows number from `interface.getNumFlows()`
+    if (IS_SYSTEM_INTERFACE) then
+        return
+    end
+
+    local level = nil
+    local flows = interface.getNumFlows()
+
+    if flows > prefs.flows_limit then
+        level = ToastLevel.WARNING
+    end
+
+    if (level ~= nil) then
+        table.insert(container, create_flows_limit_exceeded_toast(toast, level))
+    end
+end
+
+--- @param toast table The toast is the logic model defined in defined_toasts
+--- @param container table Is the table where to put the new toast ui
+function predicates.hosts_limit_exceeded(toast, container)
+    if not IS_ADMIN then
+        return
+    end
+
+    -- In System Interface we can't get the hosts number from `interface.getNumHosts()`
+    if (IS_SYSTEM_INTERFACE) then
+        return
+    end
+
+    local level = nil
+    local hosts = interface.getNumHosts()
+
+    if hosts > prefs.hosts_limit then
+        level = ToastLevel.WARNING
+    end
+
+    if (level ~= nil) then
+        table.insert(container, create_hosts_limit_exceeded_toast(toast, level))
+    end
+end
 
 --- @param toast table The toast is the logic model defined in defined_toasts
 --- @param container table Is the table where to put the new toast ui
