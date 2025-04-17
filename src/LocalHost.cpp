@@ -65,7 +65,7 @@ LocalHost::~LocalHost() {
 #ifdef NTOPNG_PRO
   dumpAssetInfo();
 #endif
-  
+
   if (initial_ts_point) delete (initial_ts_point);
   freeLocalHostData();
 
@@ -115,7 +115,7 @@ void LocalHost::set_hash_entry_state_idle() {
 void LocalHost::initialize() {
   char buf[64], host[96], rsp[256];
   BroadcastDomains *bd = iface->getBroadcastDomains();
-  
+
   stats = allocateStats();
   updateHostPool(true /* inline with packet processing */, true /* first inc */);
 
@@ -180,15 +180,16 @@ void LocalHost::initialize() {
 #ifdef NTOPNG_PRO
   loadAssetInfo();
 #endif
-  
+
   syncMACMetadata(true);
   gettimeofday(&last_periodic_asset_update, NULL);
 
 
   if(bd) {
-    if(bd->isLocalBroadcastDomainHost(this, true))
+    if(bd->isLocalBroadcastDomainHost(this, true)
+       || iface->getInterfaceNetworks()->match(&ip, ip.isIPv4() ? 32 : 128))
       setMACmeaningful();
-  }  
+  }
 }
 
 /* *************************************** */
@@ -201,11 +202,11 @@ void LocalHost::deferredInitialization() {
 
 void LocalHost::syncMACMetadata(bool force_update) {
   Mac *cur_mac = getMac();
-  
+
   if(cur_mac && (force_update || cur_mac->isAssetUpdated())) {
     if(cur_mac->getDHCPNamePtr())
       offlineSetDHCPName(cur_mac->getDHCPNamePtr());
-    
+
     if(cur_mac->getDeviceOS() != ndpi_os_unknown)
       setOS(cur_mac->getDeviceOS(), os_learning_dhcp);
   }
@@ -216,20 +217,20 @@ void LocalHost::syncMACMetadata(bool force_update) {
 void LocalHost::periodic_stats_update(const struct timeval *tv) {
   checkGatewayInfo();
   syncMACMetadata(false);
-  
+
 #ifdef NTOPNG_PRO
   /* If at least CONST_ASSETS_PERIODIC_UPDATE are past and the map was updated, dump the info */
   float diff = Utils::msTimevalDiff(tv, &last_periodic_asset_update) / 1000; /* in Sec */
   Mac *cur_mac = getMac();
 
   if(cur_mac) asset_map_updated |= cur_mac->isAssetUpdated();
-  
+
   if ((diff > CONST_ASSETS_PERIODIC_UPDATE) && asset_map_updated) {
     memcpy(&last_periodic_asset_update, tv, sizeof(last_periodic_asset_update));
     dumpAssetInfo();
   }
 #endif
-  
+
   Host::periodic_stats_update(tv);
 }
 
@@ -446,8 +447,8 @@ void LocalHost::inlineSetOSDetail(const char *_os_detail) {
 
     if (devtype != device_unknown) {
       if(getDeviceType() == device_unknown)
-	setDeviceType(devtype); 
-      
+	setDeviceType(devtype);
+
       mac->setDeviceType(devtype);
     }
   }
@@ -757,7 +758,7 @@ void LocalHost::offlineSetDHCPName(const char *dhcp_n) {
 void LocalHost::offlineSetDhcpFingerprint(const char *fingerprint) {
   if(fingerprint && (fingerprint[0] != '\0')) {
     Mac *mac = getMac();
-    
+
     if(mac)
       mac->setDHCPFingerprint(fingerprint);
   }
@@ -813,14 +814,14 @@ void LocalHost::setResolvedName(const char *resolved_name) {
 void LocalHost::setTCPfingerprint(char *_tcp_fingerprint, ndpi_os os) {
   if((tcp_fingerprint != NULL) && (strcmp(_tcp_fingerprint, tcp_fingerprint) == 0))
     return; /* Already set */
-  
+
   if (_tcp_fingerprint && _tcp_fingerprint[0] != '\0')
     addDataToAssets((char *) "tcp_fingerprint", (char *) _tcp_fingerprint);
-  
+
   if(tcp_fingerprint_host_os == ndpi_os_unknown) {
     /* Not yet set the host fingerprint */
     ndpi_os l_os_type = os;
-    
+
     if(l_os_type != ndpi_os_unknown)
       setOS(l_os_type, os_learning_tcp_fingerprint);
 
@@ -847,11 +848,11 @@ bool LocalHost::setOS(ndpi_os _os, OSLearningMode mode) {
   if((_os != ndpi_os_unknown) && (getOS() != _os)) {
     if(Host::setOS(_os, mode)) {
       char buf[8];
-      
+
       os_learning[mode] = _os;
-      
+
       snprintf(buf, sizeof(buf), "%d", _os);
-      
+
       addDataToAssets((char *) "os_type", buf);
       return(true);
     }
@@ -865,7 +866,7 @@ bool LocalHost::setOS(ndpi_os _os, OSLearningMode mode) {
 void LocalHost::setDeviceType(DeviceType devtype) {
   if(device_type == devtype)
     return;
-  
+
   device_type = devtype;
   asset_map_updated = true;
   ntop->trackAssetChange("Host", "setDeviceType",
@@ -877,7 +878,7 @@ void LocalHost::setDeviceType(DeviceType devtype) {
 
 void LocalHost::setMACmeaningful() {
   if(!is_mac_meaningful) {
-    if(iface->isPacketInterface()) {
+    if(iface->isPacketInterface() && (!iface->isTrafficMirrored())) {
       is_mac_meaningful = true;
       asset_map_updated = true;
     }
