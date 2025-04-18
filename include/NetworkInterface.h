@@ -1406,6 +1406,8 @@ public:
   void incQoEStats(QoEType qoe_type) { qoe_stats.incQoEStats(qoe_type); };
 #endif
   inline BroadcastDomains* getBroadcastDomains() { return(bcast_domains); }
+
+  void resetBroacastDomains();
 };
 
 #endif /* _NETWORK_INTERFACE_H_ */

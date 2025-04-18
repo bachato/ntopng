@@ -66,11 +66,13 @@ BroadcastDomains::~BroadcastDomains() {
     delete (inline_broadcast_domains);
     inline_broadcast_domains = NULL;
   }
+  
   if (broadcast_domains) {
     delete (broadcast_domains);
     broadcast_domains = NULL;
   }
-  if (broadcast_domains_shadow) {
+
+  if(broadcast_domains_shadow) {
     delete (broadcast_domains_shadow);
     broadcast_domains_shadow = NULL;
   }
@@ -118,8 +120,7 @@ bool BroadcastDomains::addAddress(IpAddress *ipa, int network_bits) {
   }
 #endif
 
-  addr_node = inline_broadcast_domains->addAddress(
-      ipa, network_bits, true /* Compact after add */);
+  addr_node = inline_broadcast_domains->addAddress(ipa, network_bits, true /* Compact after add */);
 
   if (addr_node) {
     struct bcast_domain_info info;
@@ -163,8 +164,12 @@ void BroadcastDomains::reloadBroadcastDomains(bool force_immediate_reload) {
       if (broadcast_domains_shadow) delete broadcast_domains_shadow;
 
       broadcast_domains_shadow = broadcast_domains;
-      broadcast_domains = new (std::nothrow) AddressTree(*inline_broadcast_domains);
 
+      if(inline_broadcast_domains)
+	broadcast_domains = new (std::nothrow) AddressTree(*inline_broadcast_domains);
+      else
+	broadcast_domains = new (std::nothrow) AddressTree(false);
+	
       last_update = now;
       next_update = 0;
     }
@@ -252,4 +257,15 @@ void BroadcastDomains::lua(lua_State *vm) {
   lua_pushstring(vm, "bcast_domains");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
+}
+
+/* *************************************** */
+
+void BroadcastDomains::reset() {
+  if(inline_broadcast_domains) {
+    delete inline_broadcast_domains;
+    inline_broadcast_domains = NULL;
+  }
+
+  reloadBroadcastDomains(true);
 }

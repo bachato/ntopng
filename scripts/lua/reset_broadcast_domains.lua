@@ -20,7 +20,7 @@ local function reset_broadcast_domains(ifids)
    interface.select(ifids)
       
    if isAdministrator() then
-	   interface.resetBroadcastDomains()
+      interface.resetBroadcastDomains()
    else
       res["status"] = "unauthorized to reset broadcast domains: " .. ifids
    end

@@ -12714,3 +12714,10 @@ void NetworkInterface::incnDPIStats(time_t when, u_int16_t ndpi_proto,
   ndpiStats->incStats(when, ndpi_proto, pkts_sent, bytes_sent, pkts_rcvd, bytes_rcvd);
   ndpiStats->incCategoryStats(when, ndpi_category, bytes_sent, bytes_rcvd);
 }
+
+/* **************************************************** */
+
+void NetworkInterface::resetBroacastDomains() {
+  if(bcast_domains != NULL)
+    bcast_domains->reset();  
+}

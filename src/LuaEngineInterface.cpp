@@ -831,6 +831,8 @@ static int ntop_interface_reset_broadcast_domains(lua_State *vm) {
   if (!curr_iface)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
+  curr_iface->resetBroacastDomains();
+  
   lua_pushnil(vm);
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }

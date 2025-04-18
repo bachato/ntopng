@@ -1329,7 +1329,7 @@ elseif page == "networks" and is_packet_interface then
         end
         print(
             '<button id="btn_reset_broadcast" type="button" class="btn btn-danger" onclick="resetBroadcastDomains();">' ..
-            i18n("reset") .. '</button>&nbsp;')
+            i18n("reset_bd") .. '</button>&nbsp;')
         print("</td></tr>")
     else
         print("<tr><th width=250>" .. i18n("broadcast_domain") .. "</th><td colspan=5>")
