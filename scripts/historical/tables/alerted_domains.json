@@ -1,6 +1,6 @@
 {
 	"name" : "Alerted Domains",
-	"i18n_name" : "alerted_domains",
+	"i18n_name" : "queries.alerted_domains",
 	"data_source" : "flows",
 	"show_in_page" : "overview",
 	"hourly": false,
