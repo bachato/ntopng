@@ -40,6 +40,8 @@ class FlowTrafficStats : public PartializableFlowTrafficStats {
                         u_int64_t payloads_bytes);
 
   const ndpi_analyze_struct* get_analize_struct(bool cli2srv_direction) const;
+
+  void swap();
 };
 
 #endif /* FLOW_TRAFFIC_STATS_H_ */

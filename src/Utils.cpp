@@ -5923,18 +5923,28 @@ bool Utils::fromHex(char *in, u_int in_len, char *out, u_int out_len) {
 
 void Utils::swap8(u_int8_t *a, u_int8_t *b) {
   u_int8_t c = *a;
+  
   *a = *b;
   *b = c;
 }
 
 void Utils::swap16(u_int16_t *a, u_int16_t *b) {
   u_int16_t c = *a;
+  
   *a = *b;
   *b = c;
 }
 
 void Utils::swap32(u_int32_t *a, u_int32_t *b) {
   u_int32_t c = *a;
+  
+  *a = *b;
+  *b = c;
+}
+
+void Utils::swap64(u_int64_t *a, u_int64_t *b) {
+  u_int64_t c = *a;
+  
   *a = *b;
   *b = c;
 }
@@ -5943,6 +5953,19 @@ void Utils::swapfloat(float *a, float *b) {
   float c = *a;
   *a = *b;
   *b = c;
+}
+
+void Utils::swapLen(void *a, void *b, u_int len) {
+  char buf[512];
+
+  if(len > sizeof(buf)) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "swapLen(%u) failed", len);
+    return;
+  }
+  
+  memcpy(buf, a, len);
+  memcpy(a, b, len);
+  memcpy(b, buf, len);
 }
 
 /* ******************************************* */

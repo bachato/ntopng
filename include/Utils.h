@@ -337,7 +337,9 @@ class Utils {
   static void swap8(u_int8_t *a, u_int8_t *b);
   static void swap16(u_int16_t *a, u_int16_t *b);
   static void swap32(u_int32_t *a, u_int32_t *b);
+  static void swap64(u_int64_t *a, u_int64_t *b);
   static void swapfloat(float *a, float *b);
+  static void swapLen(void *a, void *b, u_int len);
   static char* createRandomString(char *buf, size_t buf_len);
   static IpAddress* parseHostString(char *host_ip, u_int16_t *vlan_id /* out */);
   static bool nwInterfaceExists(char *if_name);

@@ -25,7 +25,7 @@
 #include "ntop_includes.h"
 
 class PartializableFlowTrafficStats {
- private:
+ protected:
   ndpi_protocol ndpiDetectedProtocol;
   u_int32_t cli2srv_packets, srv2cli_packets;
   u_int64_t cli2srv_bytes, srv2cli_bytes;
@@ -55,16 +55,16 @@ class PartializableFlowTrafficStats {
   void incScore(u_int16_t score, ScoreCategory score_category, bool as_client);
   void setFlowAlerted();
 
-  inline void incHTTPReqPOST() { protos.http.num_post++; };
-  inline void incHTTPReqPUT() { protos.http.num_put++; };
-  inline void incHTTPReqGET() { protos.http.num_get++; };
-  inline void incHTTPReqHEAD() { protos.http.num_head++; };
+  inline void incHTTPReqPOST()  { protos.http.num_post++;  };
+  inline void incHTTPReqPUT()   { protos.http.num_put++;   };
+  inline void incHTTPReqGET()   { protos.http.num_get++;   };
+  inline void incHTTPReqHEAD()  { protos.http.num_head++;  };
   inline void incHTTPReqOhter() { protos.http.num_other++; };
-  inline void incHTTPResp1xx() { protos.http.num_1xx++; };
-  inline void incHTTPResp2xx() { protos.http.num_2xx++; };
-  inline void incHTTPResp3xx() { protos.http.num_3xx++; };
-  inline void incHTTPResp4xx() { protos.http.num_4xx++; };
-  inline void incHTTPResp5xx() { protos.http.num_5xx++; };
+  inline void incHTTPResp1xx()  { protos.http.num_1xx++;   };
+  inline void incHTTPResp2xx()  { protos.http.num_2xx++;   };
+  inline void incHTTPResp3xx()  { protos.http.num_3xx++;   };
+  inline void incHTTPResp4xx()  { protos.http.num_4xx++;   };
+  inline void incHTTPResp5xx()  { protos.http.num_5xx++;   };
 
   void incDNSQuery(u_int16_t query_type);
   void incDNSResp(u_int16_t resp_code);

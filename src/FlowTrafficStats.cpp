@@ -84,3 +84,14 @@ void FlowTrafficStats::setStats(bool cli2srv_direction, u_int32_t num_pkts,
     ndpi_data_add_value(&srv2cli_bytes_stats, pkts_bytes);
   }
 }
+
+/* *************************************** */
+
+void FlowTrafficStats::swap() {
+  Utils::swapLen(&cli2srv_bytes_stats, &srv2cli_bytes_stats, sizeof(ndpi_analyze_struct));
+  Utils::swap32(&cli2srv_packets, &srv2cli_packets);
+  Utils::swap64(&cli2srv_bytes, &srv2cli_bytes);
+  Utils::swap64(&cli2srv_goodput_bytes, &srv2cli_goodput_bytes);
+  Utils::swapLen(&cli2srv_tcp_stats, &srv2cli_tcp_stats, sizeof(FlowTCPPacketStats));
+  Utils::swapLen(cli_host_score, srv_host_score, sizeof(u_int16_t)*MAX_NUM_SCORE_CATEGORIES);  
+}

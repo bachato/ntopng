@@ -391,7 +391,8 @@ void Flow::freeDPIMemory() {
       if(ndpiFlow && iface->isPacketInterface()) {
 	if((stats.get_cli2srv_packets() > 0) && (stats.get_srv2cli_packets() == 0)
 	   && (ndpiFlow->protos.dns.is_query == 0)) {
-	  request_swap();
+	  request_swap(); /* This flow will be swapped */
+	  swap();
 	}
       }
     } else if(/* !isDNS() */ ntop->getPrefs()->is_dns_cache_enabled()) {
@@ -8853,6 +8854,8 @@ void Flow::swap() {
   memcpy(view_cli_mac, view_srv_mac, 6);
   memcpy(view_srv_mac, m, 6);
 
+  stats.swap();
+  
   alert_info.is_cli_attacker = alert_info.is_srv_attacker,
     alert_info.is_cli_victim = alert_info.is_srv_victim;
   alert_info.is_srv_attacker = f1,
