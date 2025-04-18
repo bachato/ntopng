@@ -293,48 +293,6 @@
 	},
 	{
 		"component" : "table",
-		"id" : "top_receiver_as",
-		"i18n_name" : "report.top_receiver_as",
-		"width" : 6,
-		"height" : 4,
-		"params" : {
-			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
-			 "url_params" : {
-					"query_preset" : "top_receiver_as",
-					"aggregated" : true,
-					"start" : 0,
-					"length" : 20
-			 },
-			 "table_type" : "db_search",
-			 "columns" : [
-					{ "id" : "asn",		"data_type" : "asn",	 "i18n_name" : "as" },
-					{ "id" : "total_bytes", "data_type" : "bytes", "i18n_name" : "volume" }
-			 ]
-		}
-	},
-	{
-		"component" : "table",
-		"id" : "top_sender_as",
-		"i18n_name" : "report.top_sender_as",
-		"width" : 6,
-		"height" : 4,
-		"params" : {
-			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
-			 "url_params" : {
-					"query_preset" : "top_sender_as",
-					"aggregated" : true,
-					"start" : 0,
-					"length" : 20
-			 },
-			 "table_type" : "db_search",
-			 "columns" : {
-					{ "id" : "asn",		"data_type" : "asn",	 "i18n_name" : "as" },
-					{ "id" : "total_bytes", "data_type" : "bytes", "i18n_name" : "volume" }
-			 }
-		}
-	},
-	{
-		"component" : "table",
 		"id" : "top_receiver_countries",
 		"i18n_name" : "report.top_receiver_countries",
 		"width" : 6,
