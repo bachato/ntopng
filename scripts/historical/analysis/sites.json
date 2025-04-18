@@ -12,7 +12,7 @@
 		"max-height" : "35rem",
 		"min-height" : "35rem",
 	    },
-	    "chart_endpoint" : "/lua/rest/v2/get/db/charts/l7_proto_per_flow.lua",
+	    "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/l7_proto_per_flow.lua",
 	    "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
 	    },
@@ -33,7 +33,7 @@
 		"max-height" : "35rem",
 		"min-height" : "35rem",
 	    },
-	    "chart_endpoint" : "/lua/rest/v2/get/db/charts/l7_proto_per_flow.lua",
+	    "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/l7_proto_per_flow.lua",
 	    "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
 	    },

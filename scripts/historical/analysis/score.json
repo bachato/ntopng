@@ -12,7 +12,7 @@
 		"max-height" : "25rem",
 		"min-height" : "25rem",
 	    },
-	    "chart_endpoint" : "/lua/rest/v2/get/db/charts/score_src_addr_pie.lua",
+	    "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/score_src_addr_pie.lua",
 	    "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
 	    },
@@ -32,7 +32,7 @@
 		"max-height" : "25rem",
 		"min-height" : "25rem",
 	    },
-	    "chart_endpoint" : "/lua/rest/v2/get/db/charts/score_dst_addr_pie.lua",
+	    "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/score_dst_addr_pie.lua",
 	    "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
 	    },
@@ -52,7 +52,7 @@
 		"max-height" : "25rem",
 		"min-height" : "25rem",
             },
-            "chart_endpoint" : "/lua/rest/v2/get/db/charts/highest_avg_score.lua",
+            "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/highest_avg_score.lua",
             "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
             },
@@ -70,7 +70,7 @@
 		"max-height" : "25rem",
 		"min-height" : "25rem",
             },
-            "chart_endpoint" : "/lua/rest/v2/get/db/charts/highest_avg_score.lua",
+            "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/highest_avg_score.lua",
             "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
             },
@@ -88,7 +88,7 @@
 		"max-height" : "25rem",
 		"min-height" : "25rem",
             },
-            "chart_endpoint" : "/lua/rest/v2/get/db/charts/highest_avg_score.lua",
+            "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/highest_avg_score.lua",
             "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
             },
@@ -106,7 +106,7 @@
 		"max-height" : "25rem",
 		"min-height" : "25rem",
             },
-            "chart_endpoint" : "/lua/rest/v2/get/db/charts/highest_avg_score.lua",
+            "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/highest_avg_score.lua",
             "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
             },
@@ -124,7 +124,7 @@
 		"max-height" : "25rem",
 		"min-height" : "25rem",
 	    },
-	    "chart_endpoint" : "/lua/rest/v2/get/db/charts/score_histogram_bar.lua",
+	    "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/score_histogram_bar.lua",
 	    "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
 	    },

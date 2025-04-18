@@ -136,6 +136,7 @@ const ntopChartApex = function () {
                     enabled: false,
                     type: "x",
                 },
+                clipMarkers: false
             },
             tooltip: {
                 // shared: true,
@@ -169,6 +170,11 @@ const ntopChartApex = function () {
             fill: {
                 type: "solid"
             },
+            plotOptions: {
+                area: {
+                    stacked: true
+                }
+            }
         };
         ntopng_utility.copy_object_keys(TS_STACKED_ChartOptions, chartOptions, true);
         return chartOptions;

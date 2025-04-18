@@ -7,7 +7,7 @@
     {
         "chart_id" : "top_src_flow_status", // Each id MUST be different
         "chart_i18n_name" : "top_src_flow_status",
-        "chart_endpoint" : "/lua/rest/v2/get/db/charts/default_rest.lua",
+        "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/default_rest.lua",
         "chart_events" : { // JS Events, optional feature
             "dataPointSelection" : "db_analyze"
         },
@@ -22,7 +22,7 @@
     },{
         "chart_id" : "top_proto_per_flow_status", // Each id MUST be different
         "chart_i18n_name" : "top_proto_per_flow_status",
-        "chart_endpoint" : "/lua/rest/v2/get/db/charts/default_rest.lua",
+        "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/default_rest.lua",
         "chart_events" : { // JS Events, optional feature
             "dataPointSelection" : "db_analyze"
         },
@@ -37,7 +37,7 @@
     },{
         "chart_id" : "top_dst_flow_status", // Each id MUST be different
         "chart_i18n_name" : "top_dst_flow_status",
-        "chart_endpoint" : "/lua/rest/v2/get/db/charts/default_rest.lua",
+        "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/default_rest.lua",
         "chart_events" : { // JS Events, optional feature
             "dataPointSelection" : "db_analyze"
         },
@@ -52,7 +52,7 @@
     },{
         "chart_id" : "geomap_per_status", // Each id MUST be different
         "chart_i18n_name" : "geomap_per_status",
-        "chart_endpoint" : "/lua/rest/v2/get/db/charts/default_rest.lua",
+        "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/default_rest.lua",
         "chart_events" : { // JS Events, optional feature
             "dataPointSelection" : "db_analyze"
         },
@@ -70,7 +70,7 @@
     },{
         "chart_id" : "flow_count_per_status", // Each id MUST be different
         "chart_i18n_name" : "flow_count_per_status",
-        "chart_endpoint" : "/lua/rest/v2/get/db/charts/default_rest.lua",
+        "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/default_rest.lua",
         "chart_events" : { // JS Events, optional feature
             "dataPointSelection" : "db_analyze"
         },
@@ -85,7 +85,7 @@
     },{
         "chart_id" : "avg_bytes_volume_per_status", // Each id MUST be different
         "chart_i18n_name" : "avg_bytes_volume_per_status",
-        "chart_endpoint" : "/lua/rest/v2/get/db/charts/default_rest.lua",
+        "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/default_rest.lua",
         "chart_events" : { // JS Events, optional feature
             "dataPointSelection" : "db_analyze"
         },

@@ -12,7 +12,7 @@
                 "max-height" : "25rem",
                 "min-height" : "25rem",
             },
-            "chart_endpoint" : "/lua/rest/v2/get/db/charts/example_asn_pie.lua",
+            "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/example_asn_pie.lua",
             "chart_events" : { // JS Events, optional feature
                 "dataPointSelection" : "db_analyze"
             },
@@ -31,7 +31,7 @@
                 "max-height" : "25rem",
                 "min-height" : "25rem",
             },
-            "chart_endpoint" : "/lua/rest/v2/get/db/charts/example_asn_pie.lua",
+            "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/example_asn_pie.lua",
             "chart_events" : { // JS Events, optional feature
                 "dataPointSelection" : "db_analyze"
             },

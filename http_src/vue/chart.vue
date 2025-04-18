@@ -109,7 +109,7 @@ export default {
 				me.on_zoomed(chart_context, axis);
 			});
 			let chart_options = await this.get_chart_options(url_request);
-			this.chart.drawChart(this.$refs["chart"], chart_options);
+            this.chart.drawChart(this.$refs["chart"], chart_options);
 		},
 		map_tooltip: async function(options) {
 			if (options?.tooltip?.y?.formatter) {

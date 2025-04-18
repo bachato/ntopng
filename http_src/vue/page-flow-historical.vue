@@ -205,9 +205,6 @@ const href_analyse_records = computed(() => {
 let chart_data_url = `${http_prefix}/lua/pro/rest/v2/get/db/ts.lua`;
 
 const chart_style = computed(() => {
-    if (props.context?.chart_type == "topk-timeseries") {
-        return "height:450px!important";
-    }
     return "height:300px!important";
 
 });

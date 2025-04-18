@@ -7664,10 +7664,10 @@ local lang = {
     ["l7_contacts"] = "L7 Contacts",
     ["queries"] = "Queries",
     ["raw_flows"] = "Flows",
-    ["raw_flows_bytes"] = "Flows (Bytes Chart)",
+    ["raw_flows_bytes"] = "Flows (Bytes)",
     ["raw_flows_records"] = "Flows (Num. Flows Chart)",
-    ["raw_flows_score"] = "Flows (Score Chart)",
-    ["raw_flows_thpt"] = "Flows (Throughput Chart)",
+    ["raw_flows_score"] = "Flows (Score)",
+    ["raw_flows_thpt"] = "Flows (Throughput)",
     ["raw_flows_thpt_dir"] = "Flows (Throughput RX/TX Chart)",
   },
   ["queue"] = {

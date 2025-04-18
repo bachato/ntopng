@@ -10,6 +10,7 @@ local format_utils = require "format_utils"
 local flow_risk_utils = require "flow_risk_utils"
 local country_codes = require "country_codes"
 local network_consts = require "network_consts"
+local historical_ts_definitions = require "historical_ts_definitions"
 local qoe_utils
 if ntop.isEnterpriseL() then
     package.path = dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" .. package.path
@@ -1383,25 +1384,11 @@ historical_flow_utils.builtin_presets = {
             {
                unit_measure = "bps",
                params = {
-                  count = "THROUGHPUT"
+                  count = historical_ts_definitions.get_available_query_types()[1]
                }
             }
          },
    },
---[[   {
-      id = "raw_flows_records",
-      i18n_name = "queries.raw_flows_records",
-      name = i18n("queries.raw_flows_records"),
-      chart =
-         {
-            {
-               unit_measure = "number",
-               params = {
-                  COUNT = "NUM_FLOWS"
-               }
-            }
-         },
-   },]]
    {
       id = "raw_flows_bytes",
       i18n_name = "queries.raw_flows_bytes",
@@ -1411,7 +1398,7 @@ historical_flow_utils.builtin_presets = {
             {
                unit_measure = "bytes",
                params = {
-                  count = "TOTAL_BYTES"
+                  count = historical_ts_definitions.get_available_query_types()[2]
                }
             }
          },
@@ -1424,7 +1411,7 @@ historical_flow_utils.builtin_presets = {
          {
             {
                params = {
-                  count = "SCORE"
+                    count = historical_ts_definitions.get_available_query_types()[3]
                }
             }
          },
@@ -1626,13 +1613,13 @@ end
 
 -- Return the javascript formatter for chart Y
 function historical_flow_utils.get_js_chart_formatter(field)
-   local db_columns = historical_flow_utils.get_flow_columns()
+    local db_columns = historical_flow_utils.get_flow_columns()
 
-   if db_columns[field] and db_columns[field].js_chart_func then
-      return db_columns[field].js_chart_func
-   end
+    if db_columns[field] and db_columns[field].js_chart_func then
+        return db_columns[field].js_chart_func
+    end
 
-   return "formatValue" --default
+    return "formatValue" --default
 end
 
 ------------------------------------------------------------------------

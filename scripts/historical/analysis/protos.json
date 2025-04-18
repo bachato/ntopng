@@ -12,7 +12,7 @@
 		"max-height" : "25rem",
 		"min-height" : "25rem",
 	    },
-	    "chart_endpoint" : "/lua/rest/v2/get/db/charts/top_l7_categories.lua",
+	    "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/top_l7_categories.lua",
 	    "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
 	    },
@@ -32,7 +32,7 @@
 		"max-height" : "25rem",
 		"min-height" : "25rem",
 	    },
-	    "chart_endpoint" : "/lua/rest/v2/get/db/charts/top_l7_proto.lua",
+	    "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/top_l7_proto.lua",
 	    "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
 	    },
@@ -52,7 +52,7 @@
 		"max-height" : "25rem",
 		"min-height" : "25rem",
 	    },
-	    "chart_endpoint" : "/lua/rest/v2/get/db/charts/top_l4_proto.lua",
+	    "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/top_l4_proto.lua",
 	    "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
 	    },
@@ -72,7 +72,7 @@
 		"max-height" : "25rem",
 		"min-height" : "25rem",
 	    },
-	    "chart_endpoint" : "/lua/rest/v2/get/db/charts/qoe_score.lua",
+	    "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/qoe_score.lua",
 	    "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
 	    },
@@ -92,7 +92,7 @@
 		"max-height" : "25rem",
 		"min-height" : "25rem",
 	    },
-	    "chart_endpoint" : "/lua/rest/v2/get/db/charts/l7_proto_per_flow.lua",
+	    "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/l7_proto_per_flow.lua",
 	    "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
 	    },
@@ -112,7 +112,7 @@
 		"max-height" : "35rem",
 		"min-height" : "35rem",
 	    },
-	    "chart_endpoint" : "/lua/rest/v2/get/db/charts/l7_proto_per_flow.lua",
+	    "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/l7_proto_per_flow.lua",
 	    "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze"
 	    },
@@ -132,7 +132,7 @@
 		"max-height" : "35rem",
 		"min-height" : "35rem",
 	    },
-	    "chart_endpoint" : "/lua/rest/v2/get/db/charts/top_cli_per_proto.lua",
+	    "chart_endpoint" : "/lua/pro/rest/v2/get/db/charts/top_cli_per_proto.lua",
 	    "chart_events" : { // JS Events, optional feature
 		"dataPointSelection" : "db_analyze_multiple_filters"
 	    },
