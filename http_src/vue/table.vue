@@ -487,6 +487,7 @@ async function change_active_page(new_active_page) {
         set_active_rows();
     }
     refresh_table_content();
+    set_dropdown_listener();
 }
 
 // handle column sort
