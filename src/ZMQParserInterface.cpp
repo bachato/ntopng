@@ -812,6 +812,10 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow *const flow,
 	flow->src_port = ntohs((u_int32_t)value->int_num);
 
       flow->setPreNATSrcPort(flow->src_port);
+
+#ifdef DEBUG
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "L4_SRC_PORT %u", htons(flow->src_port));
+#endif
     }
     break;
   case L4_DST_PORT:
@@ -822,6 +826,10 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow *const flow,
 	flow->dst_port = ntohs((u_int32_t)value->int_num);
 
       flow->setPreNATDstPort(flow->dst_port);
+
+#ifdef DEBUG
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "L4_DST_PORT %u", htons(flow->dst_port));
+#endif
     }
     break;
   case SRC_VLAN:
@@ -860,11 +868,15 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow *const flow,
   case INITIATOR_OCTETS:
     flow->absolute_packet_octet_counters = true;
     /* Don't break */
-  case IN_BYTES:
+  case IN_BYTES: /* Byte sent */
     if (value->string != NULL)
       flow->in_bytes = atol(value->string);
     else
       flow->in_bytes = value->int_num;
+
+#ifdef DEBUG
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "IN_BYTES (sent) %u", flow->in_bytes);
+#endif
     break;
   case RESPONDER_PKTS:
     flow->absolute_packet_octet_counters = true;
@@ -878,11 +890,15 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow *const flow,
   case RESPONDER_OCTETS:
     flow->absolute_packet_octet_counters = true;
     /* Don't break */
-  case OUT_BYTES:
+  case OUT_BYTES: /* Bytes received */
     if (value->string != NULL)
       flow->out_bytes = atol(value->string);
     else
       flow->out_bytes = value->int_num;
+
+#ifdef DEBUG
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "OUT_BYTES (rcvd) %u", flow->out_bytes);
+#endif
     break;
   case FIRST_SWITCHED:
     if (value->string != NULL)
@@ -959,8 +975,7 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow *const flow,
       total_flows_exp = atol(value->string);
       else
       total_flows_exp = value->int_num;
-      ntop->getTrace()->traceEvent(TRACE_INFO,
-      "Total Exported Flows %u", total_flows_exp);
+      ntop->getTrace()->traceEvent(TRACE_INFO, "Total Exported Flows %u", total_flows_exp);
     */
     break;
   case INPUT_SNMP:

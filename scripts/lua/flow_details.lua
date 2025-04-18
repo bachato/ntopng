@@ -829,7 +829,7 @@ else
       print("<tr><td nowrap>" .. i18n("client") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("server") ..
 	    ": <span id=cli2srv>" .. formatPackets(flow["cli2srv.packets"]) .. " / " ..
 	    bytesToSize(flow["cli2srv.bytes"]) .. "</span> <span id=sent_trend></span></td><td nowrap>" ..
-	    i18n("client") .. " <i class=\"fas fa-long-arrow-alt-left\"></i> " .. i18n("server") ..
+	    i18n("server") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("client") ..
 	    ": <span id=srv2cli>" .. formatPackets(flow["srv2cli.packets"]) .. " / " ..
 	    bytesToSize(flow["srv2cli.bytes"]) .. "</span> <span id=rcvd_trend></span></td></tr>\n")
       
@@ -1613,12 +1613,11 @@ else
    -- ######################################
 
    if (flow.entropy and flow.entropy.client and flow.entropy.server) then
-      print(
-         "<tr><th width=10%><A class='ntopng-external-link' href=\"https://en.wikipedia.org/wiki/Entropy_(information_theory)\">" ..
+      print("<tr><th width=10%><A class='ntopng-external-link' href=\"https://en.wikipedia.org/wiki/Entropy_(information_theory)\">" ..
          i18n("flow_details.entropy") .. " <i class=\"fas fa-external-link-alt\"></i></A></th>")
       print("<td>" .. i18n("client") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("server") .. ": " ..
          string.format("%.3f", flow.entropy.client) .. "</td>")
-      print("<td>" .. i18n("client") .. " <i class=\"fas fa-long-arrow-alt-left\"></i> " .. i18n("server") .. ": " ..
+      print("<td>" .. i18n("server") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("client") .. ": " ..
          string.format("%.3f", flow.entropy.server) .. "</td>")
       print("</tr>\n")
 
