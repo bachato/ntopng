@@ -3136,9 +3136,11 @@ void Prefs::validate() {
     dump_flows_on_clickhouse = dump_flows_on_mysql = false;
   }
 
-  /* Check hash size here, after detecting the model (and setting the limits) */
-  max_num_hosts = max_val(min_val(max_num_hosts, MAX_NUM_ACTIVE_HOSTS*2), 1024);
-  max_num_flows = max_val(min_val(max_num_flows, MAX_NUM_ACTIVE_FLOWS*2), 1024);
+  /* Use max num flows as upper limit for flows/hosts cache size to avoid configuration mistakes */
+  /* Note: check the size here, after detecting the model (and setting the corresponding limits) */
+  u_int32_t limit = MAX_NUM_ACTIVE_FLOWS*2;
+  max_num_hosts = max_val(min_val(max_num_hosts, limit), 1024);
+  max_num_flows = max_val(min_val(max_num_flows, limit), 1024);
 }
 
 /* *************************************** */
