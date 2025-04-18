@@ -489,7 +489,7 @@ function predicates.hosts_limit_exceeded(toast, container)
     end
 
     local level = nil
-    local hosts = interface.getNumHosts()
+    local hosts = interface.getNumLocalHosts()
 
     if hosts > prefs.hosts_limit then
         level = ToastLevel.WARNING
