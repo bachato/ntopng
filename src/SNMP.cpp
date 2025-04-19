@@ -456,24 +456,18 @@ bool SNMP::send_snmp_request(char *agent_host, u_int version, char *community,
             snmpSession->session.securityAuthProtoLen = len;
             snmpSession->session.securityAuthKeyLen = USM_AUTH_KU_LEN;
           } else if(!strcasecmp(auth_protocol, "sha")) {
-            const int len = sizeof(usmHMACSHA1AuthProtocol) / sizeof(oid);
-            snmpSession->session.securityAuthProto =
-              static_cast<oid *>(netsnmp_memdup(usmHMACSHA1AuthProtocol, len));
-            snmpSession->session.securityAuthProtoLen = len;
-            snmpSession->session.securityAuthKeyLen = USM_AUTH_KU_LEN; /* CHECK */
+	    snmpSession->session.securityAuthProto = usmHMACSHA1AuthProtocol;
+	    snmpSession->session.securityAuthProtoLen = sizeof(usmHMACSHA1AuthProtocol) / sizeof(oid);
 #ifdef usmHMAC192SHA256AuthProtocol
           } else if(!strcasecmp(auth_protocol, "sha256")) {
             snmpSession->session.securityAuthProto = usmHMAC192SHA256AuthProtocol;
             snmpSession->session.securityAuthProtoLen = sizeof(usmHMAC192SHA256AuthProtocol) / sizeof(oid);
-            snmpSession->session.securityAuthKeyLen = USM_AUTH_KU_LEN; /* CHECK */
           } else if(!strcasecmp(auth_protocol, "sha384")) {
             snmpSession->session.securityAuthProto = usmHMAC256SHA384AuthProtocol;
             snmpSession->session.securityAuthProtoLen = sizeof(usmHMAC256SHA384AuthProtocol) / sizeof(oid);
-            snmpSession->session.securityAuthKeyLen = USM_AUTH_KU_LEN; /* CHECK */
           } else if(!strcasecmp(auth_protocol, "sha512")) {
             snmpSession->session.securityAuthProto = usmHMAC384SHA512AuthProtocol;
             snmpSession->session.securityAuthProtoLen = sizeof(usmHMAC384SHA512AuthProtocol) / sizeof(oid);
-            snmpSession->session.securityAuthKeyLen = USM_AUTH_KU_LEN; /* CHECK */
 #endif
           } else {
             ntop->getTrace()->traceEvent(TRACE_WARNING, "SNMP PDU invalid authentication protocol [%s]",
@@ -481,11 +475,14 @@ bool SNMP::send_snmp_request(char *agent_host, u_int version, char *community,
             return(false);
           }
 
+	  snmpSession->session.securityAuthKeyLen = USM_AUTH_KU_LEN; /* CHECK */
+
           if(generate_Ku(snmpSession->session.securityAuthProto,
 			 snmpSession->session.securityAuthProtoLen,
 			 (u_char *)auth_passphrase, strlen(auth_passphrase),
 			 snmpSession->session.securityAuthKey,
 			 &snmpSession->session.securityAuthKeyLen) != SNMPERR_SUCCESS) {
+	    /* snmp_perror(""); */
             ntop->getTrace()->traceEvent(TRACE_WARNING, "SNMP PDU authentication pass phrase error");
             return(false);
           }
