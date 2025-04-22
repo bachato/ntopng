@@ -452,6 +452,10 @@ end
 
 -- ###############################################
 
+local function hide_warn_on_limit_exceeeded()
+    return ntop.getCache("ntopng.prefs.ignore_limit_exceeded") == "1"
+end
+
 --- @param toast table The toast is the logic model defined in defined_toasts
 --- @param container table Is the table where to put the new toast ui
 function predicates.flows_limit_exceeded(toast, container)
@@ -461,6 +465,10 @@ function predicates.flows_limit_exceeded(toast, container)
 
     -- In System Interface we can't get the flows number from `interface.getNumFlows()`
     if (IS_SYSTEM_INTERFACE) then
+        return
+    end
+
+    if hide_warn_on_limit_exceeeded() then
         return
     end
 
@@ -485,6 +493,10 @@ function predicates.hosts_limit_exceeded(toast, container)
 
     -- In System Interface we can't get the hosts number from `interface.getNumHosts()`
     if (IS_SYSTEM_INTERFACE) then
+        return
+    end
+
+    if hide_warn_on_limit_exceeeded() then
         return
     end
 
