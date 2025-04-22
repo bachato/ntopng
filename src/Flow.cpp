@@ -8699,18 +8699,24 @@ void Flow::check_swap()
       || (get_cli_port() == 0) || (get_srv_port() == 0))
     return;
 
-  if(!(get_cli_ip_addr()->isNonEmptyUnicastAddress() &&
-        (!get_srv_ip_addr()->isNonEmptyUnicastAddress())) /* Everything that is NOT
-							     unicast-to-non-unicast needs to
-							     be checked */
+  if(!(get_cli_ip_addr()->isNonEmptyUnicastAddress()
+       /* Everything that is NOT unicast-to-non-unicast needs to be checked */
+       && (!get_srv_ip_addr()->isNonEmptyUnicastAddress()))
       // && get_cli_port() < 1024 /* Relax this constraint and also apply to
       // non-well-known ports such as 8080 */
-      && (get_cli_port() < get_srv_port())) {
-    if(protocol == IPPROTO_UDP) /* && (get_cli_port() > 32768) && (get_srv_port() > 32768) */ {
-      /* We disable UDP swap that might be wrong in particular for probing attempts */
-      ; /* Don't do anything: this might be RTP or similar */
+     ) {
+     
+    if(get_cli_port() < get_srv_port()) {
+      if(protocol == IPPROTO_UDP) /* && (get_cli_port() > 32768) && (get_srv_port() > 32768) */ {
+	/* We disable UDP swap that might be wrong in particular for probing attempts */
+	; /* Don't do anything: this might be RTP or similar */
+      } else {
+	request_swap(); /* This flow will be swapped */
+      }
     } else {
-      request_swap(); /* This flow will be swapped */
+      /* The RDP port is > 1024 hence we need this extra logic */
+      if((ndpiDetectedProtocol.proto.app_protocol == NDPI_PROTOCOL_RDP) && (get_cli_port() == 3389))
+	request_swap(); /* This flow will be swapped */
     }
   }
 }

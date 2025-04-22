@@ -2109,8 +2109,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 
     default:
       /*
-	NOTE: for non TCP-flows, the swap heuristic is always checked on the
-	first packet
+	NOTE: for non TCP-flows, the swap heuristic is always checked on the first packet
       */
       if (new_flow) flow->check_swap();
       break;
