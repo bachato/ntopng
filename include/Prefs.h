@@ -760,7 +760,7 @@ class Prefs {
   ServerConfiguration* getConfiguredDHCPServers() { return(dhcp_servers); }
 
   inline bool useMacAddressInFlowKey()     { return (use_mac_in_flow_key);  }
-  inline bool enableFingerprintStats()     { return (fingerprint_stats);    }
+  inline bool areFingerprintStatsEnabled() { return (fingerprint_stats);    }
   inline bool doReforgeTimestamps()        { return(do_reforge_timestamps); }
   inline void enableVLANCloudToExporters() { add_vlan_tags_to_cloud_exporters = true;  }
   inline bool addVLANCloudToExporters()    { return(add_vlan_tags_to_cloud_exporters); }

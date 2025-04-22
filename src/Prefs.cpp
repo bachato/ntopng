@@ -2778,7 +2778,7 @@ void Prefs::lua(lua_State *vm) {
                             get_auth_session_midnight_expiration());
 
   lua_push_bool_table_entry(vm, "fingerprint_stats",
-                            enableFingerprintStats());
+                            areFingerprintStatsEnabled());
   lua_push_uint64_table_entry(vm, "use_mac_in_flow_key",
                               useMacAddressInFlowKey());
   lua_push_uint64_table_entry(vm, "housekeeping_frequency",

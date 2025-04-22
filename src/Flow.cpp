@@ -447,7 +447,9 @@ void Flow::freeDPIMemory() {
 
 	h->setTCPfingerprint(ndpiFlow->tcp.fingerprint, ndpiFlow->tcp.os_hint);
 
-	if((ndpiFlow->tcp.os_hint == ndpi_os_unknown) && h->isLocalHost()) {
+	if((ndpiFlow->tcp.os_hint == ndpi_os_unknown)
+	   && h->isLocalHost()
+	   && ntop->getPrefs()->areFingerprintStatsEnabled()) {
 	  char buf[64], log[128];
 
 	  snprintf(log, sizeof(log), "%s,%s",

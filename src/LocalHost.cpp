@@ -170,7 +170,7 @@ void LocalHost::initialize() {
   drop_all_host_traffic = 0;
 #endif
 
-  if (ntop->getPrefs()->enableFingerprintStats())
+  if (ntop->getPrefs()->areFingerprintStatsEnabled())
     fingerprints = new (std::nothrow) HostFingerprints();
   else
     fingerprints = NULL;
