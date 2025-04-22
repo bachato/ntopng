@@ -133,7 +133,7 @@ void SNMP::handle_async_response(struct snmp_pdu *pdu, const char *agent_ip) {
       for (i = 0; i < len; i++) {
 	if((!isprint(vp->val.string[i]))
 	   && (!isspace(vp->val.string[i]))
-	   && (vp->val.string[i] < 191) /* Windows-1252 */
+	   // && (vp->val.string[i] < 191) /* Windows-1252 */
 	   ) {
 	  is_printable = false;
 	}
@@ -153,9 +153,9 @@ void SNMP::handle_async_response(struct snmp_pdu *pdu, const char *agent_ip) {
 	  int rc;
 
 	  if(left <= 2) break;
-	  rc = snprintf(&buf[idx], left, "%s%02X", (i == 0) ? "" : " ",
-			vp->val.string[i] & 0xFF);
 
+	  //rc = snprintf(&buf[idx], left, "%s%02X", (i == 0) ? "" : " ", vp->val.string[i] & 0xFF);
+	  rc = snprintf(&buf[idx], left, "%02X", vp->val.string[i] & 0xFF);
 	  if(rc <= 0)
 	    break;
 	  else
