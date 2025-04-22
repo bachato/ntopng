@@ -7937,6 +7937,17 @@ static int ntop_toggle_new_delete_trace(lua_State *vm) {
 /* **************************************************************** */
 
 static int ntop_get_license_limits(lua_State *vm) {
+  u_int32_t num_hosts = 0, num_flows = 0;
+
+  for (int i = 0; i < ntop->get_num_interfaces(); i++) {
+    NetworkInterface *curr_iface = ntop->getInterface(i);
+
+    if (curr_iface) {
+      num_flows += curr_iface->getNumFlows();
+      num_hosts += curr_iface->getNumLocalHosts();
+    }
+  }
+
   lua_newtable(vm);
 
   lua_newtable(vm);
@@ -7947,6 +7958,8 @@ static int ntop_get_license_limits(lua_State *vm) {
   lua_push_uint32_table_entry(vm, "num_host_pools", ntop->getNumberHostPools());
   lua_push_uint32_table_entry(vm, "num_pool_members", ntop->getNumberHostPoolsMembers());
   lua_push_uint32_table_entry(vm, "num_profiles", ntop->getNumberProfiles());
+  lua_push_uint32_table_entry(vm, "num_hosts", num_hosts);
+  lua_push_uint32_table_entry(vm, "num_flows", num_flows);
   lua_pushstring(vm, "current");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
@@ -7961,6 +7974,8 @@ static int ntop_get_license_limits(lua_State *vm) {
 #endif
   lua_push_uint32_table_entry(vm, "num_host_pools", MAX_NUM_HOST_POOLS);
   lua_push_uint32_table_entry(vm, "num_pool_members", MAX_NUM_POOL_MEMBERS);
+  lua_push_uint32_table_entry(vm, "num_hosts", MAX_NUM_ACTIVE_HOSTS);
+  lua_push_uint32_table_entry(vm, "num_flows", MAX_NUM_ACTIVE_FLOWS);
   lua_pushstring(vm, "max");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
