@@ -106,8 +106,7 @@ local mac_info = interface.getMacInfo(mac)
 
 local only_historical = (mac_info == nil) and (page == "historical")
 local serialize_by_mac = ntop.getPref(string.format("ntopng.prefs.ifid_" .. ifId .. ".serialize_local_broadcast_hosts_as_macs")) == "1"
-local historical_flow_link = ntop.getHttpPrefix() .. "/lua/db_search.lua?ifid=" .. ifId .. ";eq&mac=" .. mac ..
-                                     ";eq"
+local historical_flow_link = ntop.getHttpPrefix() .. "/lua/pro/db_search.lua?ifid=" .. ifId .. "&mac=" .. mac .. ";eq"
 if(mac_info == nil) and not only_historical then
    print('<div class=\"alert alert-danger\"><i class="fas fa-exclamation-triangle fa-lg fa-ntopng-warning"></i>'..' '..i18n("mac_details.mac_cannot_be_found_message",{mac=mac}))
    print("</div>")
@@ -146,7 +145,7 @@ page_utils.print_navbar(title, url,
 			      label = "<i class='fas fa-lg fa-chart-area'></i>",
 			   },
 			   {
-			      hidden = not ntop.isClickHouseEnabled() or page == "historical",
+			      hidden = not ntop.isClickHouseEnabled(),
 			      active = page == "db_search",
 			      page_name = "db_search",
 			      label = "<i class=\"fas fa-search-plus\" title='" .. i18n("db_explorer.historical_data_explorer") .. "'\"></i>",
