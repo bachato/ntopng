@@ -9,7 +9,7 @@
                         :disabled_date_picker="false" min_time_interval_id="5_min" :round_time="true">
                         <template v-slot:extra_range_buttons>
                             <div class="ms-4 d-flex align-items-center ms-2">
-                                <label class="text-nowrap form-label fw-semibold me-1"> {{
+                                <label class="text-nowrap fw-semibold me-1"> {{
                                     _i18n("map_page.asset_in_edges")
                                 }} </label>
                                 <input ref="slider_min_incoming_edges" type="range" class="form-range" min="0"
@@ -17,7 +17,7 @@
                                     data-bs-placement="top" :title="minIncomingEdges" />
                             </div>
                             <div class="ms-4 d-flex align-items-center ms-2">
-                                <label class="text-nowrap form-label fw-semibold me-1"> {{
+                                <label class="text-nowrap fw-semibold me-1"> {{
                                     _i18n("map_page.asset_out_edges") }} </label>
                                 <input ref="slider_min_outgoing_edges" type="range" class="form-range" min="0"
                                     max="10000" v-model="minOutgoingEdges" data-bs-toggle="tooltip"
