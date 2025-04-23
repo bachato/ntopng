@@ -145,13 +145,13 @@ page_utils.print_navbar(title, url,
 			      page_name = "historical",
 			      label = "<i class='fas fa-lg fa-chart-area'></i>",
 			   },
-            {
-               hidden = not ntop.isClickHouseEnabled() or page == "historical",
-               active = page == "db_search",
-               page_name = "db_search",
-               label = "<i class=\"fas fa-search-plus\" title='" .. i18n("db_explorer.historical_data_explorer") .. "'\"></i>",
-               url = historical_flow_link
-            },
+			   {
+			      hidden = not ntop.isClickHouseEnabled() or page == "historical",
+			      active = page == "db_search",
+			      page_name = "db_search",
+			      label = "<i class=\"fas fa-search-plus\" title='" .. i18n("db_explorer.historical_data_explorer") .. "'\"></i>",
+			      url = historical_flow_link
+			   },
 			   {
 			      hidden = not isAdministrator() or interface.isPcapDumpInterface(),
 			      active = page == "config",
