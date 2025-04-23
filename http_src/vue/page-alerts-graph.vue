@@ -646,8 +646,7 @@ async function draw_graph(redraw = false, centerIP = null) {
             .attr("transform", d => `translate(${d.x}, ${d.y})`)
             .call(drag())
             .style("pointer-events", "all")
-            .on("click", async (event, clicked_node) => {
-
+            .on("pointerup", async (event, clicked_node) => {
                 event.stopPropagation();
                 event.preventDefault();
 
