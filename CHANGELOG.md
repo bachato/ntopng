@@ -1,5 +1,255 @@
 # Changelog
 
+#### ntopng 6.4 (April 2025)
+
+## Breakthroughs
+- Added alert graph to visualize alerts graphically
+- Added ability to determine when a host has a meaningful IP (IPv4 hosts only)
+- Added support for STARTTLS when sending emails (also added a preference)
+- Improved flow swap
+- Added SNMPv3 context and support for SHA256, SHA384, SHA512, and AES128 authentication protocols
+- Implemented nDPI OS hint support
+- Ported many charts to the D3.js library, improving performance
+- Added JA4 client fingerprint
+- Implemented network and service scan alerts (merged with port scan alerts)
+- Added Quality of Experience (QoE) score
+- Implemented assets map and dashboard
+- Added --geoip-dir `<dir>` for loading GeoIP files from a custom location
+- Reworked documentation
+- Added infrastructure monitoring
+- Added access control list (alert only, no blocking)
+- Added in-memory tables and aggregated views for all alert families
+- Introduced ntopng Guru on Gurubase.io
+- Added custom field mapping (nProbe) in historical flows
+- Added SNMP_MSG_REPORT support
+
+## Improvements
+- Added autonomous systems report
+- Improved localhost MAC detection
+- Changed dashboard layout
+- Implemented custom allocator
+- Changed MAC serialization key based on mirrored traffic
+- Implemented broadcast domain serialization/deserialization
+- Reworked flows dump; conditionally enabled ClickHouse flows dump based on preferences
+- Improved flow alerts and added ability to refresh already-triggered alerts
+- Improved alert descriptions
+- Improved host MAC address learning
+- Unified Bootstrap table style with custom tables for dark mode
+- Reworked three-way handshake implementation
+- Improved search for full IPs with partial match
+- Improved service detection reliability
+- Implemented NAT detected alert
+- Added Homebrew installation documentation
+- Updated MAC address models list
+- Added service down check to scan alert
+- Improved label visibility
+- Cleaned up old flow_alerts table schema
+- Improved formatting for Redis total call stats
+- Added DHCP fingerprint support
+- Ignored DNS/NTP service mapping when flows are unidirectional
+- Reworked remote throughput collection
+- Added ApexCharts responsiveness
+- Reworked DNS flow direction handling
+- Added new custom queries to historical flows
+- Improved retransmission/out-of-order computation
+- Added support for curl connection and max duration timeouts
+- Fixed Webhook timeout, added tracing, and improved messages
+- Optimized drop counter
+- Added local vs remote traffic report
+- Began REST documentation and Postman collection improvements
+- Extended conversation custom query with per-direction packets/bytes
+- Implemented alert for anomalous Redis read/write counts
+- Added decoding hardening checks
+- Added MDNS buffer length check
+- Improved TCP window handling
+- Reworked RTT calculation
+- Added Redis operations timeseries
+- Added support for labels and ext_labels in timeseries
+- Improved hostname resolution
+- Updated to VueJS 3.5 with reworked observation point ID
+- Improved infrastructure dashboard
+- Improved host label formatting (MAC hidden when IP is present)
+- Improved formatting for large numbers
+- Enhanced OS detection
+- Various active monitoring improvements
+- Reworked TCP flags handling
+- Added support for nDPI address cache
+- Improved domain logging
+- Integrated domain collection code
+- Displayed APN MAC and SSID in historical flows
+- Dumped WLAN_SSID and WTP_MAC_ADDRESS in historical flows
+- Extended ZMQ decompression buffer
+- Added active exporters/interfaces count in log when limits exceeded
+- Implemented mechanism to retain old-dated collected flows longer
+- Added per-minute NetFlow timeseries
+- Supported local/static hiredis
+- Improved host MAC address learning
+- Implemented QUIC RTT calculation
+- Improved host policy check
+- Migrated device/MAC tracking list to database
+- Improved SNMPv3 polling
+
+## Changes
+- Checked -x/-X option limits and showed hash size in About page
+- Showed toasts when the flows/hosts limit is exceeded
+- Defined limits for hosts and flows
+- Added sticky action column
+- Added option to dump pcap flows into ClickHouse
+- Added SNMP delete-all button and fixed unresponsive delete button
+- Extended number of interfaces in view interface
+- Reworked DHCP flow key
+- Changed table styling for dark and white modes
+- Reworked active monitoring page
+- Removed obsolete TLS suspicious ESNI usage and improved device type guessing
+- Implemented host OS change detection
+- Prepared for Net-SNMP release 5.10
+- Added Lucide as internal library
+- Added support for partially invalid list file lines
+- Disabled hourly on unsupported queries
+- Removed old reports
+- Deprecated apcon/VSS timestamps
+- Removed packets from in/out traffic (unsupported for hourly)
+- Added out errors to SNMP polling
+- Added recipient stats for all endpoints
+- Retried smtp:// without STARTTLS on failure
+- Added per-direction packets/bytes in historical flows table
+- Supported Linux interface aliases (altnames)
+- Changed WebHook export frequency to 5s (timeout 3s)
+- Added LDAP preference to enable extended user capabilities
+- Cleaned up code
+- Added server/client TCP flags to syslog
+- Used SNMP aliases instead of names when available
+- Added L7 (nDPI) JSON collection
+- Increased ntopng password max length to 128 characters
+- Implemented ICMP type/code support
+- Collected ICMP_TYPE
+- Cleaned up ClickHouse schema
+- Cleaned SQLite schema (removed problematic backticks, indentation fixes)
+- Added ZMQ mapping at startup and shutdown
+- Reworked alert serialization and changed alert info format
+- Removed obsolete flow serializers
+- Modified nDPI defaults for RTP stream handling
+- Merged TCP probing and probing attempt
+- Added manufacturer to historical flows
+- Added native sFlow (packet sample only) collector
+- Added preference to exclude new interfaces from SNMP usage automatically
+- Updated OPNsense/pfSense installation instructions
+- Added SNMP data import/export support
+- Added HTTP index page regex check
+- Added C++ support for network server configuration
+- Supported IPv6 address formatting with brackets
+- Added MAC address cache duration preference
+- Used capabilities for enabling SNMP trap collection
+- Removed JA3 leftovers and unused MIBs
+- Added support for XXL product ID
+- Added MITRE table and alerts view on ClickHouse cluster
+- Added remediations for nDPI alerts
+- Supported enabling/disabling ClickHouse flow dump (alerts always dumped with -F clickhouse)
+- Added RTT/Jitter table
+- Updated API version and cleaned up code
+- Enabled filtering by custom fields sent from nProbe
+- Increased XL networks limit to 32K
+- Added license limits page
+- Increased exporter limit for XXL
+
+## Fixes
+- Fixed various issues on historical flow charts
+- Fixed invalid flow swap
+- Fixed call to get local hosts
+- Fixed hash size limit
+- Fixed SNMP page alert
+- Fixed link button color
+- Fixed format_utils.round function
+- Fixed top senders/receivers sorting on timeseries page
+- Fixed incorrect alerts counter on top of page
+- Fixed force password change check
+- Fixed various dark mode style issues
+- Fixed server types in view interface
+- Fixed live stats reset on view interface
+- Fixed ClickHouse health page not found
+- Fixed resizable columns
+- Fixed broken links
+- Fixed JS table crash on missing sort column
+- Fixed multiple crashes
+- Fixed asset link and last seen formatting
+- Fixed Suricata-DNS alert correlation
+- Fixed packet formatter on interface page
+- Fixed DNS flows crash
+- Fixed random crash on interface timeseries page
+- Fixed various SQL queries
+- Fixed default date-time values
+- Fixed buffer overflow
+- Fixed suspicious DGA domain alert
+- Fixed ClickHouse sample CLI
+- Fixed ClickHouse schema update
+- Fixed missing WHERE condition in queries
+- Fixed host pool import and duplicate alert suppression
+- Fixed segfaults
+- Fixed name display bugs
+- Fixed memory leaks
+- Fixed incorrect retransmission stats
+- Fixed runtime errors
+- Fixed host details flow table
+- Fixed IEC104 REST and added error messages
+- Fixed Speedtest issues
+- Fixed Sankey chart overflow
+- Fixed application editing without proto files
+- Fixed historical flow detail bug
+- Fixed time label in timeseries
+- Fixed documentation link issues
+- Fixed exporter timeseries for sub-interfaces
+- Fixed segfault on view interfaces
+- Fixed http_prefix missing in some pages
+- Fixed Modbus alert behavior
+- Fixed BS5 tooltip stacking
+- Fixed overlapping address handling in network policy
+- Fixed typos
+- Fixed early flow expiration with netfilter
+- Fixed TCP retransmission handling with ZMQ
+- Fixed crash from ClickHouse health check
+- Fixed incorrect alert scores
+- Fixed alert score in CustomFlowLuaScript
+- Fixed flow deallocation with failed/disabled alert
+- Fixed L7 timeseries direction
+- Fixed usage calculation error
+- Fixed InfluxDB top timeseries
+- Split SQLite schema to prevent long queries
+- Fixed InfluxDB timeseries step issues
+- Added Speedtest timeseries
+- Fixed Kafka issues
+- Fixed WebHook JSON error
+- Fixed missing user agent info in historical flow
+- Fixed JSON in WebHook notifications
+- Fixed TLS info column in flow logs
+- Fixed localnet trace reporting
+- Added missing time multiplier
+- Fixed counter overflow
+- Minor fixes to dygraph plotters
+- Fixed OPNsense package install
+- Added curl dependency
+- Fixed approximation issues in values
+- Prevented double probe count in disaggregation
+- Fixed SMTP/SMTPS STARTSSL handling
+- Fixed OS rendering
+- Fixed LDAP extended user capabilities
+- Fixed InfluxDB local hosts report
+- Fixed default ifid selection
+
+## nEdge
+- Fixed compilation on nEdge
+- Disabled shaper for 'Not Assigned' hosts when other host has a pool
+- Added gateway alert and configuration
+- Fixed nEdge compilation issue
+- Removed pools limit from about page and default host pool counter
+- Fixed limits sorting
+- Potential fix for invalid nEdge update handling
+- Added enterprise checks for nEdge
+- Enabled infrastructure endpoint for nEdge
+- Fixed netfilter counters direction
+- Fixed unexpected Modbus alert behavior
+- Implemented MC/BC restricted interface forwarding
+- Implemented restricted network support with smcroute
+
 #### ntopng 6.2 (August 2024)
 
 ## Breakthroughs
