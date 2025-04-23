@@ -503,6 +503,11 @@ function predicates.hosts_limit_exceeded(toast, container)
     local level = nil
     local hosts = interface.getNumLocalHosts()
 
+    local rxonly_hosts = interface.getNumLocalRxOnlyHosts()
+    if hosts >= rxonly_hosts then -- Safety check
+        hosts = hosts - rxonly_hosts -- Do not consider non-existing hosts
+    end
+
     if hosts > prefs.hosts_limit then
         level = ToastLevel.WARNING
     end

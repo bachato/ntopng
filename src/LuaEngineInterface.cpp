@@ -2014,6 +2014,19 @@ static int ntop_get_num_local_hosts(lua_State *vm) {
 
 /* ****************************************** */
 
+static int ntop_get_num_local_rxonly_hosts(lua_State *vm) {
+  NetworkInterface *curr_iface = getCurrentInterface(vm);
+
+  if (!curr_iface)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  lua_pushinteger(vm, curr_iface->getNumLocalRxOnlyHosts());
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_get_num_hosts(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
 
@@ -5708,6 +5721,7 @@ static luaL_Reg _ntop_interface_reg[] = {
     {"setHostOperatingSystem", ntop_set_host_operating_system},
     {"setHostResolvedName", ntop_set_host_resolved_name},
     {"getNumLocalHosts", ntop_get_num_local_hosts},
+    {"getNumLocalRxOnlyHosts", ntop_get_num_local_rxonly_hosts},
     {"getNumHosts", ntop_get_num_hosts},
     {"getNumFlows", ntop_get_num_flows},
     {"periodicityMap", ntop_get_interface_periodicity_map},
