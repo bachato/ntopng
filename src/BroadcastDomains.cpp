@@ -27,7 +27,7 @@
 
 BroadcastDomains::BroadcastDomains(NetworkInterface *_iface) {
   char buf[256], key[64];
-  
+
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   iface = _iface;
   inline_broadcast_domains = new (std::nothrow) AddressTree(false);
@@ -36,7 +36,7 @@ BroadcastDomains::BroadcastDomains(NetworkInterface *_iface) {
   next_domain_id = 0;
 
   snprintf(key, sizeof(key), IFACE_BROADCAST_DOMAINS_KEY, iface->get_id());
-  if(ntop->getRedis()->get(key, buf, sizeof(buf)) == 0) {    
+  if(ntop->getRedis() && (ntop->getRedis()->get(key, buf, sizeof(buf)) == 0)) {
     broadcast_domains = new (std::nothrow) AddressTree();
 
     if(broadcast_domains != NULL) {
@@ -48,25 +48,25 @@ BroadcastDomains::BroadcastDomains(NetworkInterface *_iface) {
 
 /* *************************************** */
 
-BroadcastDomains::~BroadcastDomains() { 
+BroadcastDomains::~BroadcastDomains() {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
 
   if(broadcast_domains) {
     char buf[256], *j, key[64];
 
     j = broadcast_domains->serialize(buf, sizeof(buf));
-      
+
     ntop->getTrace()->traceEvent(TRACE_INFO, "Broadcast domains: %s", j);
 
     snprintf(key, sizeof(key), IFACE_BROADCAST_DOMAINS_KEY, iface->get_id());
     ntop->getRedis()->set(key, j);
   }
-  
+
   if (inline_broadcast_domains) {
     delete (inline_broadcast_domains);
     inline_broadcast_domains = NULL;
   }
-  
+
   if (broadcast_domains) {
     delete (broadcast_domains);
     broadcast_domains = NULL;
@@ -94,10 +94,10 @@ bool BroadcastDomains::addAddress(IpAddress *ipa, int network_bits) {
 
   if ((addr_node = inline_broadcast_domains->match(ipa, network_bits)) != NULL) {
     domain_id = ndpi_patricia_get_node_u64(addr_node);
-    
+
     /* Already exists, only increment the hits */
     domains_info[domain_id].hits++;
-    
+
 #ifdef DEBUG_BROADCAST_DOMAINS
     {
       char buf[128];
@@ -108,7 +108,7 @@ bool BroadcastDomains::addAddress(IpAddress *ipa, int network_bits) {
                                    domains_info[domain_id].hits);
     }
 #endif
-    
+
     return (false);
   }
 
@@ -169,7 +169,7 @@ void BroadcastDomains::reloadBroadcastDomains(bool force_immediate_reload) {
 	broadcast_domains = new (std::nothrow) AddressTree(*inline_broadcast_domains);
       else
 	broadcast_domains = new (std::nothrow) AddressTree(false);
-	
+
       last_update = now;
       next_update = 0;
     }
