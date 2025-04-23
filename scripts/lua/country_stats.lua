@@ -27,7 +27,8 @@ page_utils.print_navbar(i18n("countries"), ntop.getHttpPrefix() .. "/lua/country
 }})
 
 local context = {
-    ifid = interface.getId()
+    ifid = interface.getId(),
+    show_historical = areCountryTimeseriesEnabled(interface.getId())
 }
 
 local json_context = json.encode(context)

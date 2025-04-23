@@ -196,6 +196,8 @@ local lang = {
   ["count"] = "Count",
   ["countries"] = "Countries",
   ["country"] = "Country",
+  ["country_historical_enabled"] = "Historical countries charts",
+  ["country_historical_disabled"] = "Historical countries charts disabled by preferences, please enable it <a href='" .. ntop.getHttpPrefix() .. "/lua/admin/prefs.lua?tab=on_disk_ts'><i class='fas fa-cog fa-sm'></i></a>",
   ["create"] = "Create",
   ["create_new_pcap_iface"] = "Open On New Network Interface",
   ["create_new_pcap_iface_descr"] = "Open the pcap on a new network interface (or load it on this interface).",

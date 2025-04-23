@@ -1,4 +1,8 @@
 <template>
+    <template v-if="(!props.context.show_historical)">
+        <div class="alert alert-warning" role="alert" id='error-alert' v-html:="error_message">
+        </div>
+    </template>
     <div class="m-2 mb-3">
         <TableWithConfig ref="table_countries_stats" :table_id="table_id" :csrf="csrf"
             :f_map_columns="map_table_def_columns" 
@@ -21,6 +25,7 @@ const props = defineProps({
     context: Object,
 });
 
+const error_message = ref(i18n('country_historical_disabled'))
 const table_id = ref('countries_stats');
 const table_countries_stats = ref(null);
 const csrf = props.context.csrf;
@@ -36,7 +41,7 @@ const map_table_def_columns = (columns) => {
         "charts_enabled": (value, row) => {
             // redirect to country details historical
             const url = `${http_prefix}/lua/country_details.lua?country=${row["name"]}&page=historical`
-            return `<a href=${url}><i class="fas fa-chart-area fa-lg"></i></a>`
+            return `<a class='btn btn-sm btn-info ${(props.context.show_historical) ? '' : 'disabled'}' data-bs-toggle='tooltip' data-bs-placement='bottom' title="${(props.context.show_historical) ? i18n('country_historical_enabled') : i18n('country_historical_disabled')}" href=${url}><i class="fas fa-chart-area fa-lg"></i></a>`
         },
         "hosts": (value, row) => {
             return formatterUtils.getFormatter("number")(value);
@@ -63,11 +68,13 @@ const map_table_def_columns = (columns) => {
 
     columns.forEach((c) => {
         c.render_func = map_columns[c.data_field];
-        if (c.id === "actions") {
+        if (c.id === "charts_enabled") {
             const visible_dict = {
-                historical_data: props.show_historical,
+                historical_data: props.context.show_historical,
             };
+            debugger;
             c.button_def_array.forEach((b) => {
+                debugger;
                 if (!visible_dict[b.id]) {
                     b.class.push("disabled");
                 }

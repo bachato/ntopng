@@ -7,22 +7,22 @@
 	"display_empty_rows": true,
 	"columns": [
 		{
-			"id": "name",
-			"title_i18n": "name",
-			"data_field": "name",
-			"sortable": true,
-			"sticky": true,
-			"class": [
-				"text-nowrap"
-			]
-		},
-		{
 			"title_i18n": "chart",
 			"data_field": "charts_enabled",
 			"sortable": false,
 			"sticky": true,
 			"class": [
 				"text-center",
+				"text-nowrap"
+			]
+		},
+		{
+			"id": "name",
+			"title_i18n": "name",
+			"data_field": "name",
+			"sortable": true,
+			"sticky": false,
+			"class": [
 				"text-nowrap"
 			]
 		},
