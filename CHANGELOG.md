@@ -3,31 +3,28 @@
 #### ntopng 6.4 (April 2025)
 
 ## Breakthroughs
+- New Asset Inventory / Digital Twin and Assets Dashboard
+- New Infrastructure Dashboard to oversee multiple regions
+- New Autonomous Systems (AS) report
+- New Quality of Experience (QoE) indicators
 - Add alert graph to visualize alerts graphically
+- Add SNMPv3 context and support for SHA256, SHA384, SHA512, and AES128 authentication protocols
+- Detect network and service scan by inspecting historical data to find slow scans
+- Aggregate engaged/historical alerts implementing in-memory tables
+- Add access control list (ACL) and alerting (no blocking)
+
+## Improvements
+- Add JA4 client fingerprint
 - Add ability to determine when a host has a meaningful IP (IPv4 hosts only)
 - Add support for STARTTLS when sending emails (also added a preference)
-- Improve flow swap
-- Add SNMPv3 context and support for SHA256, SHA384, SHA512, and AES128 authentication protocols
+- Improve flow swap euristic
 - Implement nDPI OS hint support
-- Port many charts to the D3.js library, improving performance
-- Add JA4 client fingerprint
-- Implement network and service scan alerts (merged with port scan alerts)
-- Add Quality of Experience (QoE) score
-- Implement assets map and dashboard
 - Add --geoip-dir `<dir>` for loading GeoIP files from a custom location
-- Rework documentation
-- Add infrastructure monitoring
-- Add access control list (alert only, no blocking)
-- Add in-memory tables and aggregate views for all alert families
 - Introduce ntopng Guru on Gurubase.io
 - Add custom field mapping (nProbe) in historical flows
 - Add SNMP_MSG_REPORT support
-
-## Improvements
-- Add autonomous systems report
 - Improve localhost MAC detection
-- Change dashboard layout
-- Implement custom allocator
+- Improve Dashboards layout
 - Change MAC serialization key based on mirrored traffic
 - Implement broadcast domain serialization/deserialization
 - Rework flows dump; conditionally enabled ClickHouse flows dump based on preferences
@@ -151,6 +148,7 @@
 - Increase XL networks limit to 32K
 - Add license limits page
 - Increase exporter limit for XXL
+- Add Speedtest timeseries
 
 ## Fixes
 - Fix various issues on historical flow charts
@@ -213,22 +211,18 @@
 - Fix L7 timeseries direction
 - Fix usage calculation error
 - Fix InfluxDB top timeseries
-- Split SQLite schema to prevent long queries
 - Fix InfluxDB timeseries step issues
-- Add Speedtest timeseries
 - Fix Kafka issues
 - Fix WebHook JSON error
 - Fix missing user agent info in historical flow
 - Fix JSON in WebHook notifications
 - Fix TLS info column in flow logs
 - Fix localnet trace reporting
-- Add missing time multiplier
+- Fix time multipliers
 - Fix counter overflow
-- Minor fixes to dygraph plotters
 - Fix OPNsense package install
-- Add curl dependency
 - Fix approximation issues in values
-- Prevent double probe count in disaggregation
+- Fix double probe count in disaggregation
 - Fix SMTP/SMTPS STARTSSL handling
 - Fix OS rendering
 - Fix LDAP extended user capabilities
