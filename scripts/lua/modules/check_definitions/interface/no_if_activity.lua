@@ -24,6 +24,9 @@ local script = {
 -- #################################################################
 
 local function check_interface_activity(params)
+   if ntop.getUptime() < 300 then
+      return -- Uptime less then 5 minutes, return, maybe it's still updating
+   end
 
    if interface.isPcapDumpInterface() or interface.isDatabaseViewInterface() then
       return -- Not a live interface, skip this check
