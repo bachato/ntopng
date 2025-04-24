@@ -10,8 +10,11 @@ local format_utils = require "format_utils"
 local flow_risk_utils = require "flow_risk_utils"
 local country_codes = require "country_codes"
 local network_consts = require "network_consts"
-local historical_ts_definitions = require "historical_ts_definitions"
 local qoe_utils
+local historical_ts_definitions
+if ntop.isPro() then
+    historical_ts_definitions = require "historical_ts_definitions"
+end
 if ntop.isEnterpriseL() then
     package.path = dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" .. package.path
     qoe_utils = require "qoe_utils"
@@ -1384,7 +1387,7 @@ historical_flow_utils.builtin_presets = {
             {
                unit_measure = "bps",
                params = {
-                  count = historical_ts_definitions.get_available_query_types()[1]
+                  count = historical_ts_definitions and historical_ts_definitions.get_available_query_types()[1]
                }
             }
          },
@@ -1398,7 +1401,7 @@ historical_flow_utils.builtin_presets = {
             {
                unit_measure = "bytes",
                params = {
-                  count = historical_ts_definitions.get_available_query_types()[2]
+                  count = historical_ts_definitions and historical_ts_definitions.get_available_query_types()[2]
                }
             }
          },
@@ -1411,7 +1414,7 @@ historical_flow_utils.builtin_presets = {
          {
             {
                params = {
-                    count = historical_ts_definitions.get_available_query_types()[3]
+                    count = historical_ts_definitions and historical_ts_definitions.get_available_query_types()[3]
                }
             }
          },
