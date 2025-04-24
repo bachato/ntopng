@@ -140,6 +140,12 @@ DefaultEnvironment="http_proxy=http://127.0.0.1:1234"
 DefaultEnvironment="https_proxy=http://127.0.0.1:1235"
 ```
 
+Then run systemctl daemon-reexec to apply the change:
+
+```
+sudo systemctl daemon-reexec
+```
+
 Alternatively, proxy information can be added the the ntopng service only
 by configuring /etc/systemd/system/ntopng.service as below:
 
@@ -148,5 +154,17 @@ by configuring /etc/systemd/system/ntopng.service as below:
 Type=simple
 Environment="http_proxy=http://127.0.0.1:1234"
 Environment="https_proxy=http://127.0.0.1:1235"
+```
+
+Then run systemctl daemon-reload to apply the change
+
+```
+sudo systemctl daemon-reload
+```
+
+Then restart ntopng
+
+```
+sudo systemctl restart ntopng
 ```
 
