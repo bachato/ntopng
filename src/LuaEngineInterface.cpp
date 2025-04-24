@@ -46,7 +46,13 @@ NetworkInterface *getCurrentInterface(lua_State *vm) {
 
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
-  return (curr_iface ? curr_iface : handle_null_interface(vm));
+  if (curr_iface && !curr_iface->isEnabled())
+    curr_iface = NULL;
+
+  if (!curr_iface)
+    curr_iface =  handle_null_interface(vm);
+
+  return (curr_iface);
 }
 
 /* ****************************************** */
@@ -81,6 +87,8 @@ static int ntop_get_interface_names(lua_State *vm) {
 
     if ((iface = ntop->getInterface(i)) != NULL) {
       char num[8], *ifname = iface->get_name();
+
+      if (!iface->isEnabled()) continue;
 
       if (matches_allowed_ifname(allowed_ifname, ifname) &&
           (!exclude_viewed_interfaces || !iface->isViewed())) {

@@ -2774,6 +2774,7 @@ NetworkInterface *Ntop::getInterfaceById(int if_id) {
   if (if_id == SYSTEM_INTERFACE_ID) return (system_interface);
 
   for (int i = 0; i < num_defined_interfaces; i++) {
+    if (!iface[i]->isEnabled()) continue;
     if (iface[i] && iface[i]->get_id() == if_id) return (iface[i]);
   }
 
@@ -2786,6 +2787,7 @@ bool Ntop::isExistingInterface(const char *name) const {
   if (name == NULL) return (false);
 
   for (int i = 0; i < num_defined_interfaces; i++) {
+    if (!iface[i]->isEnabled()) continue;
     if (!strcmp(iface[i]->get_name(), name)) return (true);
   }
 
@@ -2824,6 +2826,7 @@ NetworkInterface *Ntop::getNetworkInterface(const char *name, lua_State *vm) {
 
   /* if here, name is a string */
   for (int i = 0; i < num_defined_interfaces; i++) {
+    if (!iface[i]->isEnabled()) continue;
     if (!strcmp(name, iface[i]->get_name())) {
       NetworkInterface *ret_iface = isInterfaceAllowed(vm, iface[i]->get_name()) ? iface[i] : NULL;
 

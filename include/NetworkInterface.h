@@ -474,6 +474,7 @@ public:
   virtual void startPacketPolling();
   virtual void startFlowDumping();
   virtual bool isLoading() { return false; };
+  virtual bool isEnabled() { return true; };
   virtual void shutdown();
   virtual void cleanup();
   virtual char *getEndpoint(u_int8_t id) { return NULL; };
