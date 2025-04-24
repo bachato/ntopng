@@ -21,12 +21,16 @@
         <TableWithConfig ref="table_probes" :table_id="table_id" :csrf="csrf" :f_map_columns="map_table_def_columns"
             :f_sort_rows="columns_sorting" :get_extra_params_obj="get_extra_params_obj">
         </TableWithConfig>
+        <div class="card-footer">
+            <NoteList :note_list="note_list"> </NoteList>
+        </div>
     </div>
 </template>
 
 
 <script setup>
 import { ref, onMounted, onBeforeMount } from "vue";
+import { default as NoteList } from "./note-list.vue";
 import { default as Loading } from "./loading.vue"
 import { default as Sankey } from "./sankey.vue";
 import { default as SelectSearch } from "./select-search.vue";
@@ -55,6 +59,10 @@ const sankey_format_list = [
     { key: "criteria", value: 'flow_volume_criteria', label: _i18n('exporters_page.flow_volume_criteria') },
     { key: "criteria", value: 'flow_drops_criteria', label: _i18n('exporters_page.flow_drops_criteria') },
 ];
+const note_list = [
+_i18n("exporters_page.failed_exports_descr"),
+_i18n("exporters_page.dropped_packets_descr"),
+]
 
 /* ************************************** */
 
@@ -194,7 +202,7 @@ const map_table_def_columns = (columns) => {
         },
         "captured_packets": (value, row) => {
             let diff_value = value
-            if(!first_open.value) {
+            if (!first_open.value) {
                 const old_value = localStorage.getItem("exporter_captured_packets." + row.exporter_uuid + row.ip)
                 diff_value = (value - Number(old_value)) / 10
             }
@@ -202,9 +210,9 @@ const map_table_def_columns = (columns) => {
             if (!value)
                 return '';
             let formatted_value = formatterUtils.formatAccounting(Math.abs(value))
-            if(!first_open.value) {
+            if (!first_open.value) {
                 let updated_counter = ''
-                if(diff_value > 0 ) {
+                if (diff_value > 0) {
                     updated_counter = '<i class="fas fa-arrow-up"></i>'
                 } else {
                     updated_counter = "<i class='fas fa-minus'></i>"
@@ -215,7 +223,7 @@ const map_table_def_columns = (columns) => {
         },
         "dropped_packets": (value, row) => {
             let diff_value = value
-            if(!first_open.value) {
+            if (!first_open.value) {
                 const old_value = localStorage.getItem("exporter_dropped_packets." + row.exporter_uuid + row.ip)
                 diff_value = (value - Number(old_value)) / 10
             }
@@ -223,9 +231,9 @@ const map_table_def_columns = (columns) => {
             if (!value)
                 return '';
             let formatted_value = formatterUtils.formatAccounting(Math.abs(value))
-            if(!first_open.value) {
+            if (!first_open.value) {
                 let updated_counter = ''
-                if(diff_value > 0 ) {
+                if (diff_value > 0) {
                     updated_counter = '<i class="fas fa-arrow-up"></i>'
                 } else {
                     updated_counter = "<i class='fas fa-minus'></i>"
@@ -261,10 +269,10 @@ const map_table_def_columns = (columns) => {
             return value
         },
         "probe_last_update": (value, row) => {
-	    if (!value)
-               return '';
-     	    else
-	       return (NtopUtils.secondsToTime((Math.round(new Date().getTime() / 1000)) - value) + " ago");
+            if (!value)
+                return '';
+            else
+                return (NtopUtils.secondsToTime((Math.round(new Date().getTime() / 1000)) - value) + " ago");
         },
         "probe_license": (value, row) => {
             return value

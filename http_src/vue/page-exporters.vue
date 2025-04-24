@@ -59,7 +59,8 @@ let note_snmp_device_url = note_snmp_i18n.replace("%{url}", `${http_prefix}/lua/
 
 
 const note_list = [
-    note_snmp_device_url
+    note_snmp_device_url,
+    _i18n("exporters_page.failed_exports_descr")
 ]
 
 const first_open = ref(true);
