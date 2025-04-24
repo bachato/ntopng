@@ -12,7 +12,7 @@ local country_codes = require "country_codes"
 local network_consts = require "network_consts"
 local qoe_utils
 local historical_ts_definitions
-if ntop.isPro() then
+if ntop.isEnterpriseM() then
     historical_ts_definitions = require "historical_ts_definitions"
 end
 if ntop.isEnterpriseL() then
