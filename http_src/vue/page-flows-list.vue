@@ -209,7 +209,7 @@ const map_table_def_columns = (columns) => {
                 let danger_icon = ''
                 let severity = alertSeverities.mapScoreToSeverity(value)
                 let score_color = alertSeverities.getSeverityColor(severity)
-                return `<span style="text-color:${score_color} !important">${formatterUtils.getFormatter("full_number")(value)}${danger_icon}</span>`
+                return `<span style="color:${score_color} !important">${formatterUtils.getFormatter("full_number")(value)}${danger_icon}</span>`
             }
             return ''
         },
