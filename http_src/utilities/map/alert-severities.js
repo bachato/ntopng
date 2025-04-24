@@ -82,9 +82,9 @@ const alert_severities = {
 
 /* *********************************** */
 
-const getSeverityIcon = function(severity_id) {
+const getSeverityIcon = function (severity_id) {
     for (const [_, value] of Object.entries(alert_severities)) {
-        if(Number(severity_id) == Number(value.severity_id)) {
+        if (Number(severity_id) == Number(value.severity_id)) {
             return value.icon
         }
     }
@@ -92,9 +92,39 @@ const getSeverityIcon = function(severity_id) {
 
 /* *********************************** */
 
+const getSeverityColor = function (severity_id) {
+    for (const [_, value] of Object.entries(alert_severities)) {
+        if (Number(severity_id) == Number(value.severity_id)) {
+            return value.color
+        }
+    }
+}
+
+/* *********************************** */
+
+const mapScoreToSeverity = function (score) {
+    if (score < 1)
+        return alert_severities.none.severity_id;
+    else if (score < 10)
+        return alert_severities.info.severity_id;
+    else if (score < 50)
+        return alert_severities.notice.severity_id;
+    else if (score < 100)
+        return alert_severities.warning.severity_id;
+    else if (score < 150)
+        return alert_severities.error.severity_id;
+    else if (score < 200)
+        return alert_severities.critical.severity_id;
+    else
+        return alert_severities.emergency.severity_id;
+}
+
+/* *********************************** */
+
 const alertSeverities = function () {
     return {
-        getSeverityIcon
+        getSeverityIcon,
+        mapScoreToSeverity
     };
 }();
 
