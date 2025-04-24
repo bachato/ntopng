@@ -127,44 +127,44 @@ should be configured into standard environment variables to let ntopng detect th
 and connect to the internet (e.g. for downloading blacklists). Both HTTP and HTTPS
 are supported.
 
-Example from CLI:
+.. code:: bash
 
-- `export HTTP_PROXY=http://127.0.0.1:1234`
-- `ntopng -i eth0`
+   export HTTP_PROXY=http://127.0.0.1:3128
+   ntopng -i eth0
 
 When ntopng runs as a service from systemd, environment variables should be configured
 in /etc/systemd/system.conf as below:
 
-```
-DefaultEnvironment="http_proxy=http://127.0.0.1:1234"
-DefaultEnvironment="https_proxy=http://127.0.0.1:1235"
-```
+.. code:: text
+
+   DefaultEnvironment="http_proxy=http://127.0.0.1:3128"
+   DefaultEnvironment="https_proxy=http://127.0.0.1:3128"
 
 Then run systemctl daemon-reexec to apply the change:
 
-```
-sudo systemctl daemon-reexec
-```
+.. code:: bash
+
+   sudo systemctl daemon-reexec
 
 Alternatively, proxy information can be added the the ntopng service only
 by configuring /etc/systemd/system/ntopng.service as below:
 
-```
-[Service]
-Type=simple
-Environment="http_proxy=http://127.0.0.1:1234"
-Environment="https_proxy=http://127.0.0.1:1235"
-```
+.. code:: text
+
+   [Service]
+   Type=simple
+   Environment="http_proxy=http://127.0.0.1:3128"
+   Environment="https_proxy=http://127.0.0.1:3128"
 
 Then run systemctl daemon-reload to apply the change
 
-```
-sudo systemctl daemon-reload
-```
+.. code:: bash
+
+   sudo systemctl daemon-reload
 
 Then restart ntopng
 
-```
-sudo systemctl restart ntopng
-```
+.. code:: bash
+
+   sudo systemctl restart ntopng
 
