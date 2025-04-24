@@ -113,3 +113,40 @@ In order to start daemons on boot, it is necessary to enable them as
 Daemons which have been :code:`enable` d, will be automatically
 restarted after each ntopng update. Note that backup and restore of
 ntopng configuration is not supported when multiple daemons are in use.
+
+Accessing ntopng behind a Reverse Proxy
+---------------------------------------
+If you have many ntopng instances that you want to mask behind a proxy the
+`-Z` option is what you look for. See the man page for more information.
+
+Using ntopng with a HTTP(S) Proxy
+---------------------------------
+
+If ntopng is behind a proxy which is used to access the Internet, proxy information
+should be configured into standard environment variables to let ntopng detect them
+and connect to the internet (e.g. for downloading blacklists). Both HTTP and HTTPS
+are supported.
+
+Example from CLI:
+
+- `export HTTP_PROXY=http://127.0.0.1:1234`
+- `ntopng -i eth0`
+
+When ntopng runs as a service from systemd, environment variables should be configured
+in /etc/systemd/system.conf as below:
+
+```
+DefaultEnvironment="http_proxy=http://127.0.0.1:1234"
+DefaultEnvironment="https_proxy=http://127.0.0.1:1235"
+```
+
+Alternatively, proxy information can be added the the ntopng service only
+by configuring /etc/systemd/system/ntopng.service as below:
+
+```
+[Service]
+Type=simple
+Environment="http_proxy=http://127.0.0.1:1234"
+Environment="https_proxy=http://127.0.0.1:1235"
+```
+

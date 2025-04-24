@@ -93,36 +93,6 @@ If you also need an aggregated view of both interfaces you can start ntopng
 as `ntopng -i eth0 -i eth1 -i view:eth0,eth1` so ntopng will create a virtual interface
 that merges information from the two physical interfaces.
 
-Accessing ntopng behind a Reverse Proxy
----------------------------------------
-If you have many ntopng instances that you want to mask behind a proxy the
-`-Z` option is what you look for. See the man page for more information.
-
-Using ntopng with a HTTP(S) Proxy
----------------------------------
-If in your network you need to use a proxy to access the Internet, you need
-to set in your environment the HTTP_PROXY to use and ntopng will use it. Both
-HTTP and HTTPS URLs are supported.
-
-Example:
-- `export HTTP_PROXY=http://127.0.0.1:1234`
-- `ntopng -i eth0`
-
-If you start ntopng from systemd you need to edit /etc/systemd/system.conf and set:
-- `DefaultEnvironment="http_proxy=http://127.0.0.1:1234"`
-- `DefaultEnvironment="https_proxy=http://127.0.0.1:1235"`
-
-If you do not wanto to configure a proxy globally, you can do it for a specific service editing ntopng.service as follows:
-
-```
-[Service]
-Type=simple
-Environment="http_proxy=http://127.0.0.1:1234"
-Environment="https_proxy=http://127.0.0.1:1235"
-.....
-```
-
-
 Traffic with sampling rate
 --------------------------
 If you apply a sampling rate to capture traffic on an interface, say x100, the
