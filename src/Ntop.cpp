@@ -129,7 +129,7 @@ Ntop::Ntop(const char *appName) {
     ntop_if_t *devpointer, *cur;
     if (Utils::ntop_findalldevs(&devpointer) == 0) {
       for (cur = devpointer; cur; cur = cur->next)
-        if (cur->name) 
+        if (cur->name)
           getPing(cur->name);
       Utils::ntop_freealldevs(devpointer);
     }
@@ -933,6 +933,23 @@ void Ntop::loadLocalInterfaceAddress() {
   char buf_orig[bufsize + 32];
   char net_buf[bufsize + 32];
   int sock = Utils::openSocket(AF_INET, SOCK_STREAM, 0, "loadLocalInterfaceAddress");
+  std::map<std::string, int> ifaces;
+  std::map<std::string, int>::iterator it;
+
+  for (int i = 0; i < num_defined_interfaces; i++) {
+    char ifbuf[256], *tok, *tmp;
+
+    snprintf(ifbuf, sizeof(ifbuf), "%s", iface[i]->get_name());
+    tok = strtok_r(ifbuf, ",", &tmp);
+
+    while(tok != NULL) {
+      if(strchr(tok, ':') != NULL)
+	continue;
+
+      ifaces[std::string(tok)] = i;
+      tok = strtok_r(NULL, ",", &tmp);
+    }
+  }
 
   if (getifaddrs(&local_addresses) != 0) {
     ntop->getTrace()->traceEvent(TRACE_ERROR,
@@ -952,14 +969,11 @@ void Ntop::loadLocalInterfaceAddress() {
         ((ifa->ifa_flags & IFF_UP) == 0))
       continue;
 
-    for (int i = 0; i < num_defined_interfaces; i++) {
-      if (strstr(iface[i]->get_name(), ifa->ifa_name)) {
-        ifId = i;
-        break;
-      }
-    }
-
-    if (ifId == -1) continue;
+    it = ifaces.find(ifa->ifa_name);
+    if(it != ifaces.end())
+      ifId = it->second;
+    else
+      continue;
 
     if (ifa->ifa_addr->sa_family == AF_INET) {
       struct sockaddr_in *s4 = (struct sockaddr_in *)(ifa->ifa_addr);
@@ -984,15 +998,13 @@ void Ntop::loadLocalInterfaceAddress() {
 
         snprintf(buf_orig2, sizeof(buf_orig2), "%s/%d", buf, 32);
         ntop->getTrace()->traceEvent(TRACE_NORMAL, "Adding %s as IPv4 interface address for %s",
-            buf_orig2, iface[ifId]->get_name());
+				     buf_orig2, iface[ifId]->get_name());
         local_interface_addresses.addAddress(buf_orig2);
         iface[ifId]->addInterfaceAddress(buf_orig2);
 
         /* Set to zero non network bits */
-        s4->sin_addr.s_addr =
-            htonl(ntohl(s4->sin_addr.s_addr) & ntohl(netmask));
-        inet_ntop(ifa->ifa_addr->sa_family, (void *)&(s4->sin_addr), buf,
-                  sizeof(buf));
+        s4->sin_addr.s_addr = htonl(ntohl(s4->sin_addr.s_addr) & ntohl(netmask));
+        inet_ntop(ifa->ifa_addr->sa_family, (void *)&(s4->sin_addr), buf, sizeof(buf));
         snprintf(net_buf, sizeof(net_buf), "%s/%d", buf, cidr);
         ntop->getTrace()->traceEvent(TRACE_NORMAL,
                                      "Adding %s as IPv4 local network for %s",
@@ -1190,7 +1202,7 @@ void Ntop::recipient_stats(u_int16_t recipient_id, lua_State *vm) {
 time_t Ntop::recipient_last_use(u_int16_t recipient_id) {
   return recipients.last_use(recipient_id);
 }
-  
+
 /* ******************************************* */
 
 void Ntop::inc_recipient_stats(u_int16_t recipient_id,
@@ -1999,7 +2011,7 @@ bool Ntop::checkGuiUserPassword(struct mg_connection *conn, const char *user,
   IpAddress client_addr;
 
   *redirect_to_change_pwd = false;
-  
+
   client_addr.set(mg_get_client_address(conn));
 
   if (ntop->isCaptivePortalUser(user)) {
@@ -2028,7 +2040,7 @@ bool Ntop::checkGuiUserPassword(struct mg_connection *conn, const char *user,
     if (cur_attempts >= MAX_FAILED_LOGIN_ATTEMPTS)
       ntop->getTrace()->traceEvent(TRACE_INFO, "IP %s is now blacklisted from login for %d seconds",
 				   remote_ip, FAILED_LOGIN_ATTEMPTS_INTERVAL);
-    
+
   } else {
     ntop->getRedis()->del(key);
   }
@@ -2975,9 +2987,9 @@ u_int32_t Ntop::getNumberHostPoolsMembers() {
     NetworkInterface *iface;
     u_int32_t pool_member_number = 0;
 
-    if ((iface = ntop->getInterface(i)) != NULL) 
+    if ((iface = ntop->getInterface(i)) != NULL)
       pool_member_number = iface->getNumberHostPoolsMembers();
-      
+
     if (pool_member_number > max_members_number)
       max_members_number = pool_member_number;
   }
@@ -2993,12 +3005,12 @@ u_int8_t Ntop::getNumberProfiles() {
   for (int i = 0; i < get_num_interfaces(); i++) {
     NetworkInterface *iface;
 
-    if ((iface = ntop->getInterface(i)) != NULL) 
+    if ((iface = ntop->getInterface(i)) != NULL)
       num_profiles = iface->getNumProfiles();
   }
 #endif
 #endif
-  
+
   return num_profiles;
 }
 
@@ -3377,7 +3389,7 @@ bool Ntop::isATrackerHost(char *host) {
 void Ntop::initAllowedProtocolPresets() {
   for (u_int i = 0; i < device_max_type; i++) {
     DeviceProtocolBitmask *b = getDeviceAllowedProtocols((DeviceType)i);
-    
+
     NDPI_BITMASK_SET_ALL(b->clientAllowed);
     NDPI_BITMASK_SET_ALL(b->serverAllowed);
   }
@@ -3714,15 +3726,15 @@ bool Ntop::addLocalNetwork(char *_net) {
   if (strncmp(_net, "asn", 3) == 0){
     /* ASN */
     u_int32_t asn = (u_int32_t) atoi(&_net[3]);
-    
+
     if(local_asn.find(asn) == local_asn.end()) {
       local_asn[asn] = true;
       ntop->getTrace()->traceEvent(TRACE_INFO, "Added Autonomous System %u", asn);
       return (true);
     } else
-      return(false); /* Already present */      
+      return(false); /* Already present */
   } else {
-    /* Network */   
+    /* Network */
     char *net, *position_ptr;
     char alias[64] = "";
     u_int32_t id = local_network_tree.getNumAddresses();
@@ -3815,7 +3827,7 @@ void Ntop::addLocalNetworkList(const char *rule) {
       ntop->getTrace()->traceEvent(TRACE_INFO, "Unable to parse network %s or already defined: skipping it", net);
     else
       ntop->getTrace()->traceEvent(TRACE_INFO, "Added network %s", net);
-    
+
     net = strtok_r(NULL, ",", &tmp);
   }
 }
@@ -3970,7 +3982,7 @@ Ping *Ntop::getPing(char *ifname) {
       Ping *pinger = NULL;
       if (Utils::readIPv4(ifname)
         || Utils::readIPv6(ifname, &sin6.sin6_addr)) {
-        
+
         /* Create pinger for the interface */
         try {
           pinger = new Ping(ifname);
@@ -3981,7 +3993,7 @@ Ping *Ntop::getPing(char *ifname) {
 
         if(pinger)
           ping[std::string(ifname)] = pinger;
-    } 
+    }
     return (pinger);
   } else
     return (it->second);
@@ -4251,7 +4263,7 @@ bool Ntop::createRuntimeInterface(char *name, char *source, int *iface_id) {
                              source, err, strerror(err));
       return false;
     }
-  
+
   } else if (strncmp(source, "db:", 3) == 0) {
     source = &source[3];
 
@@ -4265,7 +4277,7 @@ bool Ntop::createRuntimeInterface(char *name, char *source, int *iface_id) {
                                source);
         return false;
       }
-    } else 
+    } else
 #endif
     {
       getTrace()->traceEvent(TRACE_WARNING, "Unable to create runtime interface on database (database support not enabled)");
@@ -4289,7 +4301,7 @@ bool Ntop::createRuntimeInterface(char *name, char *source, int *iface_id) {
   new_iface->allocateStructures(true /* disable flow dump to db */);
   new_iface->startPacketPolling();
 
-  if (old_iface != NULL) { 
+  if (old_iface != NULL) {
     m.lock(__FILE__, __LINE__);
 
     iface[slot_id] = new_iface; /* Swap interfaces */
@@ -4351,7 +4363,7 @@ void Ntop::reloadMessageBroker() {
 
 bool Ntop::incNumFlowExporters() {
   bool ok = (num_flow_exporters < get_max_num_flow_exporters());
-  
+
   if (ok) num_flow_exporters++;
   return ok;
 }
@@ -4376,10 +4388,10 @@ u_int32_t Ntop::getMaxNumFlowExportersInterfaces() {
   return get_max_num_flow_exporters_interfaces();
 }
 #endif /* NTOPNG_PRO */
-  
+
 /* ******************************************* */
 
-u_int32_t Ntop::getMaxNumLocalNetworks() { 
+u_int32_t Ntop::getMaxNumLocalNetworks() {
 #ifdef NTOPNG_PRO
   return get_max_num_local_networks();
 #else
@@ -4392,7 +4404,7 @@ u_int32_t Ntop::getMaxNumLocalNetworks() {
 bool Ntop::isInLocalASN(IpAddress *ip) {
   u_int32_t asn;
   char *asname;
-  
+
   if((geo == NULL) || (local_asn.size() == 0 /* No ASN defined */))
     return(false);
 
@@ -4416,12 +4428,12 @@ char* Ntop::getCustomnDPIProtos() {
 	/* This looks like an URL */
 	char fname[PATH_MAX];
 	bool rc;
-	
+
 	snprintf(fname, sizeof(fname), "%s", TMP_PROTOS_FILE);
-	
+
 	rc = Utils::httpGetPost(NULL, custom_ndpi_protos, NULL, NULL, NULL, 10, 30,
 				false, false, NULL, NULL, fname, true, 4, false);
-	
+
 	if(rc == false)
 	  ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to access URL %s: ignored", custom_ndpi_protos);
 	else {
@@ -4432,9 +4444,9 @@ char* Ntop::getCustomnDPIProtos() {
       }
     } else {
       /* Protocols file already downloaded */
-    }    
+    }
   }
-  
+
   return(custom_ndpi_protos);
 }
 
@@ -4445,7 +4457,7 @@ void Ntop::trackAssetChange(const char *protocol, const char *action,
 			    Host *target, Flow *flow, char *note) {
 #ifdef TRACK_ASSET_CHANGE
   char buf[64], buf1[256], buf2[256];
-  
+
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] %s [%s][%s][%s][%s]",
 			       protocol, action,
 			       mac ? mac->print(buf, sizeof(buf)) : "",
@@ -4455,4 +4467,3 @@ void Ntop::trackAssetChange(const char *protocol, const char *action,
 			       note ? note : "");
 #endif
 }
-  
