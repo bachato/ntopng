@@ -3076,8 +3076,8 @@ local lang = {
   ["exporters_page"] = {
     ["flow_drops_criteria"] = "Total Drops",
     ["flow_volume_criteria"] = "Total Flows",
-    ["failed_exports_descr"] = "Failed Exports, are failed exports from nProbe side, meaning that nProbe dropped some flows and was not able to send those to ntopng (these info are sent from nProbe).",
-    ["dropped_packets_descr"] = "Capture Drops, are packets dropped from nProbe (these info are sent from nProbe).",
+    ["failed_exports_descr"] = "Failed Exports (collector mode): nProbe dropped some collected flows or was unable to deliver all collected flows to ntopng (drops are reported by nProbe).",
+    ["dropped_packets_descr"] = "Capture Drops (probe mode): nProbe packet drops hence not accounted in exported flows (drops are reported by nProbe).",
   },
   ["external_stats"] = {
     ["capture_drops"] = "Dropped Packets",
