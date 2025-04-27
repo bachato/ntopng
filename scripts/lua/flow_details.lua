@@ -1367,9 +1367,12 @@ else
    -- ######################################
 
    if (isScoreEnabled() and (flow.score.flow_score > 0)) then
+      local severity = alert_consts.alertSeverityById(map_score_to_severity(flow.score.flow_score))
+
       print("\n<tr><th width=10%>" .. i18n("flow_details.flow_score") .. " / " ..
-         i18n("flow_details.flow_score_breakdown") .. "</th><td>" ..
-         format_utils.formatValue(flow.score.flow_score) .. "</td>\n")
+	    i18n("flow_details.flow_score_breakdown") .. "</th><td>" ..
+	    '<span style="color:' .. severity.color .. '">'..
+	    format_utils.formatValue(flow.score.flow_score) .. "</span></td>\n")
 
       local score_category_network = flow.score.host_categories_total["0"]
       local score_category_security = flow.score.host_categories_total["1"]
