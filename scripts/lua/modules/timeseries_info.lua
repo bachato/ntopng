@@ -1654,7 +1654,7 @@ local community_timeseries = { {
         id = timeseries_id.hash_state,
         label = i18n("about.cpu_load"),
         priority = 0,
-        measure_unit = "number",
+        measure_unit = "percentage",
         chart_type = "bar",
         ts_query = "CountriesHash",
         scale = i18n('graphs.metric_labels.hash_entries'),
@@ -2881,7 +2881,7 @@ local function add_snmp_interfaces_timeseries(tags, timeseries)
         id = timeseries_id.snmp_device,
         label = i18n("about.cpu_load"),
         priority = 0,
-        measure_unit = "number",
+        measure_unit = "percentage",
         scale = i18n('graphs.metric_labels.load'),
         timeseries = {
             user_pct = {
@@ -2913,37 +2913,37 @@ local function add_snmp_interfaces_timeseries(tags, timeseries)
     }, {
         schema = "snmp_dev:swap_memory",
         id = timeseries_id.snmp_device,
-        label = i18n("snmp.memTotalReal"),
+        label = i18n("snmp.memTotalSwap"),
         priority = 0,
         measure_unit = "bytes",
         scale = i18n('graphs.metric_labels.memory'),
         timeseries = {
             swap_bytes = {
-                label = i18n("snmp.memTotalReal"),
+                label = i18n("snmp.memTotalSwap"),
                 color = timeseries_info.get_timeseries_color('default')
             }
         }
     }, {
         schema = "snmp_dev:total_memory",
         id = timeseries_id.snmp_device,
-        label = i18n("snmp.memTotalSwap"),
+        label = i18n("snmp.memTotalReal"),
         priority = 0,
         measure_unit = "bytes",
         scale = i18n('graphs.metric_labels.memory'),
         timeseries = {
             total_bytes = {
-                label = i18n("snmp.memTotalSwap"),
+                label = i18n("snmp.memTotalReal"),
                 color = timeseries_info.get_timeseries_color('default')
             }
         }
     } }
 
     for _, timeserie in pairs(snmp_dev_ts) do
-        if table.len(ts_utils.listSeries(timeserie.schema, table.clone(tags), os.time() - 1800) or {}) > 0 then
+        if table.len(ts_utils.listSeries(timeserie.schema, table.clone(tags), tags.epoch_begin, tags.epoch_end) or {}) > 0 then
             timeseries[#timeseries + 1] = timeserie
         end
     end
-
+    
     if not table.empty(cached_device) and cached_device["interfaces"] then
         for interface_index, interface_info in pairs(cached_device["interfaces"] or {}) do
             local ifname = snmp_utils.get_snmp_interface_label(interface_info)
