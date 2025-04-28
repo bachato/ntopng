@@ -943,10 +943,9 @@ void Ntop::loadLocalInterfaceAddress() {
     tok = strtok_r(ifbuf, ",", &tmp);
 
     while(tok != NULL) {
-      if(strchr(tok, ':') != NULL)
-	continue;
-
-      ifaces[std::string(tok)] = i;
+      if(strchr(tok, ':') == NULL)
+	ifaces[std::string(tok)] = i;
+      
       tok = strtok_r(NULL, ",", &tmp);
     }
   }
