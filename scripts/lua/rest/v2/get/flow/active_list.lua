@@ -17,6 +17,7 @@ local icmp_utils       = require("icmp_utils")
 -- Trick to handle the application and the categories togheter
 local application = _GET["application"]
 local ip_version_or_host = _GET["flowhosts_type"]
+local ifid = _GET["ifid"] or interface.getId()
 
 if not isEmptyString(application) then
     if string.starts(application, "cat_") then
@@ -41,7 +42,6 @@ if not isEmptyString(ip_version_or_host) then
 end
 
 local throughput_type = getThroughputType()
-local ifid = interface.getId()
 local flows_filter = getFlowsFilter()
 
 local mapping_column_lua_c = {

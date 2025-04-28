@@ -961,12 +961,23 @@ tag_utils.formatters = {
 
 -- ######################################
 
-function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filters)
+function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filters, ifid)
     local alert_utils = require "alert_utils"
     local tag = tag_utils.defined_tags[id]
+    local changed_ifid = false
+    local current_ifid = interface.getId()
     if tag == nil then
         -- traceError(TRACE_WARNING, TRACE_CONSOLE, "Tag " .. id .. " not found")
         return nil
+    end
+
+    if not ifid then
+        ifid = interface.getId()
+    else
+        if tonumber(current_ifid) ~= tonumber(ifid) then
+            changed_ifid = true
+            interface.select(ifid)
+        end
     end
 
     local filter = {
@@ -1482,6 +1493,10 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 snmp_filter_options_cache = filter.options
             end
         end
+    end
+    
+    if changed_ifid then
+        interface.select(current_ifid)
     end
 
     return filter
