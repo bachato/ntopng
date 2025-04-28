@@ -2902,7 +2902,7 @@ local function add_snmp_interfaces_timeseries(tags, timeseries)
         id = timeseries_id.snmp_device,
         label = i18n("snmp.memAvailReal"),
         priority = 0,
-        measure_unit = "number",
+        measure_unit = "bytes",
         scale = i18n('graphs.metric_labels.memory'),
         timeseries = {
             avail_bytes = {
@@ -2915,7 +2915,7 @@ local function add_snmp_interfaces_timeseries(tags, timeseries)
         id = timeseries_id.snmp_device,
         label = i18n("snmp.memTotalReal"),
         priority = 0,
-        measure_unit = "number",
+        measure_unit = "bytes",
         scale = i18n('graphs.metric_labels.memory'),
         timeseries = {
             swap_bytes = {
@@ -2928,7 +2928,7 @@ local function add_snmp_interfaces_timeseries(tags, timeseries)
         id = timeseries_id.snmp_device,
         label = i18n("snmp.memTotalSwap"),
         priority = 0,
-        measure_unit = "number",
+        measure_unit = "bytes",
         scale = i18n('graphs.metric_labels.memory'),
         timeseries = {
             total_bytes = {
