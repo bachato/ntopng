@@ -216,8 +216,7 @@ void Host::updateICMPAlertsCounter(time_t when, bool icmp_sent) {
 /* *************************************** */
 
 void Host::updateDNSAlertsCounter(time_t when, bool dns_sent) {
-  AlertCounter *counter =
-      dns_sent ? dns_flood.attacker_counter : dns_flood.victim_counter;
+  AlertCounter *counter = dns_sent ? dns_flood.attacker_counter : dns_flood.victim_counter;
 
   counter->inc(when, this);
 }
@@ -718,12 +717,15 @@ void Host::lua_get_services(lua_State *vm) const {
   lua_newtable(vm);
 
   if(isDhcpServer()) lua_push_bool_table_entry(vm, "dhcp", true);
-  if(isDnsServer()) lua_push_bool_table_entry(vm, "dns", true);
+  if(isDnsServer())  lua_push_bool_table_entry(vm, "dns", true);
   if(isSmtpServer()) lua_push_bool_table_entry(vm, "smtp", true);
-  if(isPopServer()) lua_push_bool_table_entry(vm, "pop", true);
+  if(isPopServer())  lua_push_bool_table_entry(vm, "pop", true);
   if(isImapServer()) lua_push_bool_table_entry(vm, "imap", true);
-  if(isNtpServer()) lua_push_bool_table_entry(vm, "ntp", true);
-
+  if(isNtpServer())  lua_push_bool_table_entry(vm, "ntp", true);
+  if(isHttpServer()) lua_push_bool_table_entry(vm, "http", true);
+  if(isSshServer())  lua_push_bool_table_entry(vm, "ssh", true);
+  if(isRdpServer())  lua_push_bool_table_entry(vm, "rdp", true);
+  
   lua_pushstring(vm, "services");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
@@ -2686,6 +2688,27 @@ void Host::setImapServer() {
 void Host::setPopServer() {
   if(!isPopServer())
     host_services_bitmap |= 1 << HOST_IS_POP_SERVER;
+}
+
+/* *************************************** */
+
+void Host::setHttpServer() {
+  if(!isHttpServer())
+    host_services_bitmap |= 1 << HOST_IS_HTTP_SERVER;
+}
+
+/* *************************************** */
+
+void Host::setSshServer() {
+  if(!isSshServer())
+    host_services_bitmap |= 1 << HOST_IS_SSH_SERVER;
+}
+
+/* *************************************** */
+
+void Host::setRdpServer() {
+  if(!isRdpServer())
+    host_services_bitmap |= 1 << HOST_IS_RDP_SERVER;
 }
 
 /* *************************************** */

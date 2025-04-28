@@ -267,6 +267,21 @@ class Host : public GenericHashEntry,
   }
   virtual void setNtpServer();
 
+  inline bool isHttpServer() const {
+    return (host_services_bitmap & (1 << HOST_IS_HTTP_SERVER));
+  }
+  virtual void setHttpServer();
+
+  inline bool isSshServer() const {
+    return (host_services_bitmap & (1 << HOST_IS_SSH_SERVER));
+  }
+  virtual void setSshServer();
+
+  inline bool isRdpServer() const {
+    return (host_services_bitmap & (1 << HOST_IS_RDP_SERVER));
+  }
+  virtual void setRdpServer();
+
   inline u_int16_t getServicesMap() { return (host_services_bitmap); }
   /*
     NOTE: update the fucntion below when a new isXXXServer is added

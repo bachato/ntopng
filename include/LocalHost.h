@@ -214,7 +214,10 @@ class LocalHost : public Host {
   void setNtpServer();
   void setImapServer();
   void setPopServer();
-
+  void setHttpServer();
+  void setSshServer();
+  void setRdpServer();
+  
   void offlineSetMDNSInfo(char *const s);
   void offlineSetMDNSName(const char *n);
   void offlineSetDHCPName(const char *n);

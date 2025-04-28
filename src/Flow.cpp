@@ -968,8 +968,7 @@ void Flow::processExtraDissectedInformation() {
 		if(addr->equal(ipv4_addr))
 		  srv_host->setResolvedName((char *)ndpiFlow->protos.dns.ptr_domain_name);
 		else {
-		  /* This is not the right IPv4 host: let's cache it for later
-		   */
+		  /* This is not the right IPv4 host: let's cache it for later */
 
 		  ntop->getRedis()->setResolvedAddress(buf, (char *)ndpiFlow->protos.dns.ptr_domain_name);
 		}
@@ -1895,7 +1894,7 @@ char* Flow::print(char *buf, u_int buf_len, bool full_report) const {
 
 bool Flow::dump(time_t t, bool last_dump_before_free) {
   bool rc = false;
-  
+
   if(!ntop->getPrefs()->is_tiny_flows_export_enabled() && isTiny()) {
 #ifdef TINY_FLOWS_DEBUG
     char buf[256];
@@ -2311,14 +2310,13 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 
   case NDPI_PROTOCOL_DNS:
     if(cli_host && cli_host->getDNSstats())
-      cli_host->getDNSstats()->incStats(true /* Client */,
-					partial->get_flow_dns_stats());
+      cli_host->getDNSstats()->incStats(true /* Client */,  partial->get_flow_dns_stats());
+
     if(srv_host && srv_host->getDNSstats())
-      srv_host->getDNSstats()->incStats(false /* Server */,
-					partial->get_flow_dns_stats());
-    if(cli_host && srv_host) {
+      srv_host->getDNSstats()->incStats(false /* Server */, partial->get_flow_dns_stats());
+
+    if(cli_host && srv_host)
       cli_host->incDNSContactCardinality(srv_host);
-    }
     break;
 
   case NDPI_PROTOCOL_MDNS:
@@ -2844,7 +2842,7 @@ bool Flow::equal(const Mac *_src_pkt_mac, const Mac *_dst_pkt_mac,
     useMacAddressInFlowKey = true;
   }
 #endif
-  
+
   if(useMacAddressInFlowKey) {
     if(cli_host && src_mac) {
       Mac *cli_mac = cli_host->getMac();
@@ -8705,7 +8703,7 @@ void Flow::check_swap()
       // && get_cli_port() < 1024 /* Relax this constraint and also apply to
       // non-well-known ports such as 8080 */
      ) {
-     
+
     if(get_cli_port() < get_srv_port()) {
       if(protocol == IPPROTO_UDP) /* && (get_cli_port() > 32768) && (get_srv_port() > 32768) */ {
 	/* We disable UDP swap that might be wrong in particular for probing attempts */
@@ -8863,7 +8861,7 @@ void Flow::swap() {
   memcpy(view_srv_mac, m, 6);
 
   stats.swap();
-  
+
   alert_info.is_cli_attacker = alert_info.is_srv_attacker,
     alert_info.is_cli_victim = alert_info.is_srv_victim;
   alert_info.is_srv_attacker = f1,
@@ -9286,6 +9284,56 @@ void Flow::accountBidirectionalTCPProtocolServices() {
 	} else if(srv_ip_addr) {
 	  srv_ip_addr->setPopServer();
 	  ntop->trackAssetChange("POP", "setPopServer-2", NULL, srv_ip_addr, NULL, this, NULL);
+	}
+      }
+      break;
+
+    case NDPI_PROTOCOL_HTTP:
+    case NDPI_PROTOCOL_HTTP_CONNECT:
+    case NDPI_PROTOCOL_HTTP_PROXY:
+      if(isBidirectional() && isThreeWayHandshakeOK()
+	 // && (getConfidence() == NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
+	 ) {
+	if(srv_h) {
+	  if(!srv_h->isHttpServer()) {
+	    srv_h->setHttpServer();
+	    ntop->trackAssetChange("HTTP", "setHttpServer-1", NULL, NULL, srv_h, this, NULL);
+	  }
+	} else if(srv_ip_addr) {
+	  srv_ip_addr->setHttpServer();
+	  ntop->trackAssetChange("HTTP", "setHttpServer-2", NULL, srv_ip_addr, NULL, this, NULL);
+	}
+      }
+      break;
+
+    case NDPI_PROTOCOL_SSH:
+      if(isBidirectional() && isThreeWayHandshakeOK()
+	 // && (getConfidence() == NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
+	 ) {
+	if(srv_h) {
+	  if(!srv_h->isSshServer()) {
+	    srv_h->setSshServer();
+	    ntop->trackAssetChange("SSH", "setSshServer-1", NULL, NULL, srv_h, this, NULL);
+	  }
+	} else if(srv_ip_addr) {
+	  srv_ip_addr->setSshServer();
+	  ntop->trackAssetChange("SSH", "setSshServer-2", NULL, srv_ip_addr, NULL, this, NULL);
+	}
+      }
+      break;
+
+    case NDPI_PROTOCOL_RDP:
+      if(isBidirectional() && isThreeWayHandshakeOK()
+	 // && (getConfidence() == NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
+	 ) {
+	if(srv_h) {
+	  if(!srv_h->isRdpServer()) {
+	    srv_h->setRdpServer();
+	    ntop->trackAssetChange("RDP", "setRdpServer-1", NULL, NULL, srv_h, this, NULL);
+	  }
+	} else if(srv_ip_addr) {
+	  srv_ip_addr->setRdpServer();
+	  ntop->trackAssetChange("RDP", "setRdpServer-2", NULL, srv_ip_addr, NULL, this, NULL);
 	}
       }
       break;

@@ -798,7 +798,16 @@ else
                 if (host.services.pop) then
                     print(' <span class="badge bg-success">' .. i18n("details.label_pop_server") .. '</span>')
                 end
-            end
+                if (host.services.http) then
+                    print(' <span class="badge bg-success">' .. i18n("details.label_http_server") .. '</span>')
+                end
+                if (host.services.ssh) then
+                    print(' <span class="badge bg-success">' .. i18n("details.label_ssh_server") .. '</span>')
+                end
+                if (host.services.rdp) then
+                    print(' <span class="badge bg-success">' .. i18n("details.label_rdp_server") .. '</span>')
+                end
+	    end
 
             if (host["dhcp_server"] == true) then
                 print(' <span class="badge bg-success" style="cursor: help;">' .. i18n("details.label_dhcp_server") ..

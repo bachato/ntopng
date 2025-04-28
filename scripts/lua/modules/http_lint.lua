@@ -622,7 +622,7 @@ local function validatePolicyPreset(mode)
 end
 
 local function validateAssetFamily(mode)
-    local modes = {"gateway", "dns", "ntp", "imap", "smtp", "pop"}
+    local modes = {"gateway", "dns", "ntp", "imap", "smtp", "pop", "http", "ssh", "rdp"}
 
     return validateChoice(modes, mode)
 end

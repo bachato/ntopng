@@ -735,6 +735,27 @@ void LocalHost::setPopServer() {
 
 /* *************************************** */
 
+void LocalHost::setHttpServer() {
+  Host::setHttpServer();
+  addDataToAssets((char *) "http_server", (char *) "true");
+}
+
+/* *************************************** */
+
+void LocalHost::setSshServer() {
+  Host::setSshServer();
+  addDataToAssets((char *) "ssh_server", (char *) "true");
+}
+
+/* *************************************** */
+
+void LocalHost::setRdpServer() {
+  Host::setRdpServer();
+  addDataToAssets((char *) "rdp_server", (char *) "true");
+}
+
+/* *************************************** */
+
 void LocalHost::offlineSetMDNSInfo(char *const str) {
   Host::offlineSetMDNSInfo(str);
 }
