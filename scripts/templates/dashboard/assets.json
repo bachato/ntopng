@@ -65,19 +65,88 @@
 		},
 		{
 			"component" : "badge",
-			"id" : "mail_server_count",
+			"id" : "imap_server_count",
 			"i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
 			"width" : 2, "height" : 2,
 			"datasource_id" : "assets_overview",
 			"params" : {
 				"url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
 				"url_params" : {},
-				"i18n_name" : "asset_details.mail_servers",
+				"i18n_name" : "asset_details.imap_servers",
 				"link" : { "url" : "/lua/pro/assets.lua", "url_params" : { "server_type" : 4 } },
 				"counter_path" : "imap_servers",
 				"counter_formatter" : "number"
 			}
 		},
+		{
+			"component" : "badge",
+			"id" : "http_server_count",
+			"i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
+			"width" : 4, "height" : 2,
+			"datasource_id" : "assets_overview",
+			"params" : {
+				"url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
+				"url_params" : {},
+				"i18n_name" : "asset_details.http_servers",
+				"link" : { "url" : "/lua/pro/assets.lua", "url_params" : { "server_type" : 6 } },
+				"counter_path" : "http_servers",
+				"counter_formatter" : "number"
+			}
+		},
+		{
+			"component" : "badge",
+			"id" : "ssh_server_count",
+			"i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
+			"width" : 4, "height" : 2,
+			"datasource_id" : "assets_overview",
+			"params" : {
+				"url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
+				"url_params" : {},
+				"i18n_name" : "asset_details.ssh_servers",
+				"link" : { "url" : "/lua/pro/assets.lua", "url_params" : { "server_type" : 7 } },
+				"counter_path" : "ssh_servers",
+				"counter_formatter" : "number"
+			}
+		},
+		{
+			"component" : "badge",
+			"id" : "rdp_server_server_count",
+			"i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
+			"width" : 2, "height" : 2,
+			"datasource_id" : "assets_overview",
+			"params" : {
+				"url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
+				"url_params" : {},
+				"i18n_name" : "asset_details.rdp_servers",
+				"link" : { "url" : "/lua/pro/assets.lua", "url_params" : { "server_type" : 8 } },
+				"counter_path" : "rdp_servers",
+				"counter_formatter" : "number"
+			}
+		},
+		{
+			"component" : "badge",
+			"id" : "pop_server_server_count",
+			"i18n_name" : "", "color" : "info", "inactive_color" : "secondary",
+			"width" : 2, "height" : 2,
+			"datasource_id" : "assets_overview",
+			"params" : {
+				"url" : "/lua/pro/rest/v2/get/host/assets_dashboard/overview.lua",
+				"url_params" : {},
+				"i18n_name" : "asset_details.pop_servers",
+				"link" : { "url" : "/lua/pro/assets.lua", "url_params" : { "server_type" : 5 } },
+				"counter_path" : "pop_servers",
+				"counter_formatter" : "number"
+			}
+		},
+
+
+
+
+
+
+
+
+	    
 		{
 			"component": "lateral-pie",
 			"id": "manufacturer_distribution",
