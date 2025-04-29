@@ -1,6 +1,12 @@
 #!/bin/sh
 
-LUAC=`which luac`
+if test -f /usr/sbin/pkg; then
+    # FreeBSD
+    LUAC=`which luac53`
+else
+    LUAC=`which luac`
+fi
+
 MV=`which mv`
 TMP_FILE="/tmp/luac.out"
 

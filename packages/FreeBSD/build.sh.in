@@ -61,6 +61,8 @@ find ${STAGEDIR}/usr/local/share/ntopng/pro -name "*.lua" -type f -exec ${NTOPNG
 find ${STAGEDIR}/usr/local/share/ntopng/pro -name "*.lua" -type f -exec /bin/rm  {} ';';
 find ${STAGEDIR}/usr/local/share/ntopng/pro/scripts -name "*.luar" | xargs renamex -s/.luar/.lua/s;
 
+# find ${STAGEDIR}/usr/local/share/ntopng/scripts/lua -name "*.lua" -type f -exec  ${NTOPNG_HOME}/tools/luac.sh {} ';'
+
 # Vulscan
 \mkdir -p ${STAGEDIR}/usr/local/share/nmap/scripts/vulscan
 curl -o ${STAGEDIR}/usr/local/share/nmap/scripts/vulscan/vulscan.nse https://raw.githubusercontent.com/scipag/vulscan/master/vulscan.nse
