@@ -533,22 +533,20 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
       nprobe.
     */
     if (zflow->src_ip.isIPv4()) {
-      guessed_protocol = ndpi_guess_undetected_protocol_v4(
-          get_ndpi_struct(), flow->get_ndpi_flow(), flow->get_protocol(),
-          ntohl(zflow->src_ip.get_ipv4()), ntohs(zflow->src_port),
-          ntohl(zflow->dst_ip.get_ipv4()), ntohs(zflow->dst_port));
+      guessed_protocol = ndpi_guess_undetected_protocol_v4(get_ndpi_struct(), flow->get_ndpi_flow(), flow->get_protocol(),
+							   ntohl(zflow->src_ip.get_ipv4()), ntohs(zflow->src_port),
+							   ntohl(zflow->dst_ip.get_ipv4()), ntohs(zflow->dst_port));
     } else {
       /* IPv6: use protcol guess only based on ports/protocol */
 
-      guessed_protocol = ndpi_guess_undetected_protocol_v4(
-          get_ndpi_struct(), flow->get_ndpi_flow(), flow->get_protocol(), 0,
-          ntohs(zflow->src_port), 0, ntohs(zflow->dst_port));
+      guessed_protocol = ndpi_guess_undetected_protocol_v4(get_ndpi_struct(), flow->get_ndpi_flow(),
+							   flow->get_protocol(), 0,
+							   ntohs(zflow->src_port), 0,
+							   ntohs(zflow->dst_port));
     }
 
-    guessed_protocol.proto.app_protocol = ndpi_map_ndpi_id_to_user_proto_id(
-        get_ndpi_struct(), guessed_protocol.proto.app_protocol);
-    guessed_protocol.proto.master_protocol = ndpi_map_ndpi_id_to_user_proto_id(
-        get_ndpi_struct(), guessed_protocol.proto.master_protocol);
+    guessed_protocol.proto.app_protocol = ndpi_map_ndpi_id_to_user_proto_id(get_ndpi_struct(), guessed_protocol.proto.app_protocol);
+    guessed_protocol.proto.master_protocol = ndpi_map_ndpi_id_to_user_proto_id(get_ndpi_struct(), guessed_protocol.proto.master_protocol);
 
     flow->setFlowVerdict(zflow->getFlowVerdict());
     flow->setJSONInfo(zflow->getAdditionalFieldsJSON());
