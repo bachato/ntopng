@@ -3,7 +3,6 @@
 --
 
 local ts_utils = require("ts_utils")
-local test_utils = require("test_utils")
 local rrd = require("rrd")
 
 -- ##############################################
