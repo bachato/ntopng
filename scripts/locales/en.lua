@@ -1347,7 +1347,7 @@ local lang = {
     ["traffic_vlan_volume_alert"] = "[VLAN: <a href=\"%{url}%{vlan_id}\">%{vlan}</a>] [Metric: %{metric}] [Condition: %{value} %{threshold_sign} %{threshold}] [Check Frequency: %{frequency}]",
     ["traffic_volume_alert"] = "[Metric: %{metric}] [Condition: %{value} %{sign} %{threshold}] [Check Frequency: %{frequency}]",
     ["unknown_contacted_peers"] = "Too many Peers contacted by %{host} %{host_category}.",
-    ["vlan_bidirectional_traffic"] = "Detected bidirectional traffic flow on VLAN %{vlan} [RX : %{rx} > 0 & TX : %{tx}]",
+    ["vlan_bidirectional_traffic"] = "Detected bidirectional traffic flow on VLAN %{vlan} [RX : %{rx}] [TX : %{tx}]",
     ["x_alerts"] = "%{num} alerts",
   },
   ["alerts_analysis_page"] = {

@@ -1502,7 +1502,7 @@ else
                         alert_json = alert_json.alerts[tostring(alert_risk)]
                      end
                      flow.alert_id = alert_risk
-                     riskLabel = alert_utils.formatFlowAlertMessage(ifid, flow, alert_json, false, true, true)
+                     riskLabel = alert_utils.formatFlowAlertMessage(ifid, alert_utils.formatAlertFromFlow(flow), alert_json, false, true, true)
                   end
                end
 
@@ -1520,7 +1520,6 @@ else
 
                local additional = ""
                local severity = alert_consts.alertSeverityById(map_score_to_severity(score_alert.score))
-
                local msg = string.format('<td> %s </td><td style=\"text-align: center;\"> %s </td><td> %s %s %s</td>',
                   score_alert.message .. alert_source,
                   '<span style="color:' .. severity.color .. '">' .. score_alert.score .. '</span>',

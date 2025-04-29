@@ -379,6 +379,21 @@ end
 
 -- #################################
 
+function alert_utils.formatAlertFromFlow(alert)
+    local alert_tmp = table.clone(alert)
+    alert_tmp.vlan_id = alert.vlan
+    alert_tmp.packets = alert.packets
+    alert_tmp.total_bytes = alert.bytes
+    alert_tmp.cli2srv_pkts = alert["cli2srv.packets"]
+    alert_tmp.srv2cli_pkts = alert["srv2cli.packets"]
+    alert_tmp.cli2srv_bytes = alert["cli2srv.bytes"]
+    alert_tmp.srv2cli_bytes = alert["srv2cli.bytes"]
+
+    return alert_tmp
+end
+
+-- #################################
+
 function alert_utils.formatFlowAlertMessage(ifid, alert, alert_json, add_score, local_explorer, exclude_remediation_link)
     local msg
     local alert_risk
@@ -436,11 +451,6 @@ function alert_utils.formatFlowAlertMessage(ifid, alert, alert_json, add_score, 
         msg = string.format("%s %s",
             msg, flow_risk_utils.get_remediation_documentation_link(alert_risk, alert_src))
         local info_msg = alert_utils.get_flow_risk_info(alert_risk, alert_json)
-
-        -- Add check info_msg ~= alert.info to avoid duplicated in description msg
-        --[[if (not isEmptyString(info_msg) and info_msg ~= alert.info) then
-         msg = string.format("%s", msg, info_msg)
-	 end--]]
     end
 
     return msg or ""
