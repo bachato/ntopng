@@ -49,9 +49,6 @@ mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d
 mkdir -p $RPM_BUILD_ROOT/etc/sudoers.d/
 mkdir -p $RPM_BUILD_ROOT/etc/rsyslog.d/
 mkdir -p $RPM_BUILD_ROOT/etc/cron.d/
-%if 0%{?centos_ver} == 6
-mkdir -p $RPM_BUILD_ROOT/etc/init.d 
-%endif
 cp $HOME/ntopng/ntopng $RPM_BUILD_ROOT/usr/bin
 strip $RPM_BUILD_ROOT/usr/bin/ntopng
 cp $HOME/ntopng/ntopng.8 $RPM_BUILD_ROOT/usr/share/man/man8/ 
@@ -82,7 +79,10 @@ if test -d "$HOME/ntopng/pro"; then
    find $RPM_BUILD_ROOT/usr/share/ntopng/pro -name "*.luar" | xargs rename .luar .lua
 fi
 
+# For some reason the command below makes the packaging fail on RH8
+%if 0%{?centos_ver} > 8
 find $RPM_BUILD_ROOT/usr/share/ntopng/scripts/lua -name "*.lua" -type f -exec $HOME/ntopng/tools/luac.sh {} ';'
+%endif
  
 if hash systemctl 2>/dev/null; then
    mkdir -p $RPM_BUILD_ROOT/usr/lib/systemd/system/
@@ -119,12 +119,8 @@ rm -fr $RPM_BUILD_ROOT
 /usr/share/man/man8/ntopng.8.gz
 %config(noreplace) /etc/ntopng/ntopng.conf
 /etc/ntopng/ntopng.conf.nprobe.sample
-%if 0%{?centos_ver} != 6
 /usr/lib/systemd/system/ntopng.service
 /usr/lib/systemd/system/ntopng@.service
-%else
-/etc/init.d/ntopng
-%endif
 /etc/logrotate.d/ntopng
 /etc/sudoers.d/ntopng
 /etc/rsyslog.d/20-ntopng.conf
@@ -182,24 +178,7 @@ if [ $(getent group systemd-journal) ] && [ $(getent passwd ntopng) ]; then
     fi
 fi
 
-%if 0%{?centos_ver} == 6
-case "$1" in
-  1)
-    # install
-  ;;
-  2)
-    # upgrade
-    /etc/init.d/ntopng stop
-  ;;
-esac
-%endif
-
 %post
-%if 0%{?centos_ver} == 6
-# systemd takes care of this on centos 7 and newer
-echo 'Setting up redis auto startup'
-/sbin/chkconfig redis on
-%endif
 
 /bin/chown ntopng:ntopng /usr/bin/ntopng-config
 /bin/chmod gou+s /usr/bin/ntopng-config
@@ -207,12 +186,8 @@ echo 'Setting up redis auto startup'
 
 CMDLINE=$(tr -d '\0' < /proc/1/cmdline) 
 if [ -z "${CMDLINE##*system*}" ] || [ -z "${CMDLINE##*init*}" ]; then # init/systemd (not a container)
-%if 0%{?centos_ver} != 6
 /bin/systemctl daemon-reload
 %systemd_post ntopng.service
-%else
-/sbin/chkconfig --add ntopng
-%endif
 fi
 
 TLS_DIR="/usr/share/ntopng/httpdocs/ssl"
@@ -246,29 +221,11 @@ esac
 
 CMDLINE=$(tr -d '\0' < /proc/1/cmdline) 
 if [ -z "${CMDLINE##*system*}" ] || [ -z "${CMDLINE##*init*}" ]; then # init/systemd (not a container)
-%if 0%{?centos_ver} == 6
-case "$1" in
-  0)
-    # un-install
-    /etc/init.d/ntopng stop
-  ;;
-  1)
-    # upgrade
-  ;;
-esac
-%endif
-
-%if 0%{?centos_ver} != 6
   %systemd_preun ntopng.service
-%else
-  /sbin/chkconfig --del ntopng
-%endif
 fi
 
 %postun
 CMDLINE=$(tr -d '\0' < /proc/1/cmdline) 
 if [ -z "${CMDLINE##*system*}" ] || [ -z "${CMDLINE##*init*}" ]; then # init/systemd (not a container)
-%if 0%{?centos_ver} != 6
   %systemd_postun_with_restart ntopng.service
-%endif
 fi
