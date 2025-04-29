@@ -11,6 +11,8 @@ local template_utils = require("template_utils")
 local active_monitoring_utils = require "am_utils"
 local json = require("dkjson")
 
+local prefs = ntop.getPrefs()
+
 -- ###########################################
 
 if not isAllowedSystemInterface() then
@@ -82,7 +84,7 @@ if (page == "overview") then
         ifid = ifid,
         csrf = ntop.getRandomCSRFValue(),
         is_admin = isAdministrator(),
-        is_am_active = (ntop.getPref("ntopng.prefs.active_monitoring") or "") == "1",
+        is_am_active = prefs.active_monitoring,
         timeseries_enabled = areSystemTimeseriesEnabled()
     })
     template_utils.render("pages/vue_page.template", {

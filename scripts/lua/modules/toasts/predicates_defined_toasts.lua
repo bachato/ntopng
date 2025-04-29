@@ -270,7 +270,16 @@ end
 --- @param toast table The toast is the logic model defined in defined_toasts
 --- @param container table Is the table where to put the new toast ui
 function predicates.restart_required(toast, container)
-    if not IS_ADMIN or not ntop.isPackage() or ntop.isWindows() then
+
+    if not IS_ADMIN then
+        return
+    end
+
+    if prefs.active_monitoring_pref and not prefs.active_monitoring then
+        table.insert(container, create_restart_required_toast(toast, i18n("prefs.restart_needed", { product = info.product })))
+    end
+
+    if not ntop.isPackage() or ntop.isWindows() then
         return
     end
 
@@ -291,7 +300,6 @@ function predicates.restart_required(toast, container)
             product = ntop.getInfo()["product"]
         })))
     end
-
 end
 
 --- @param toast table The toast is the logic model defined in defined_toasts

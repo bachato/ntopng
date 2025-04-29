@@ -4679,7 +4679,7 @@ local lang = {
     ["VlanHash"] = "VLANs",
   },
   ["host_config"] = {
-    ["active_monitor_enable"] = "Active Monitoring is currently disabled. It can be enabled <a href=\"" .. ntop.getHttpPrefix() .. "/lua/admin/prefs.lua?tab=active_monitoring\">here</a>.",
+    ["active_monitor_enable"] = "Active Monitoring is currently disabled, it can be enabled from <a href=\"" .. ntop.getHttpPrefix() .. "/lua/admin/prefs.lua?tab=active_monitoring\">Preferences</a> (Restart required)",
     ["custom_name"] = "Custom Name",
     ["custom_notes"] = "Custom Notes",
     ["drop_all_host_traffic"] = "Drop All Host Traffic",

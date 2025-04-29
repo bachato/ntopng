@@ -111,30 +111,13 @@ Ntop::Ntop(const char *appName) {
 #endif /* NTOPNG_PRO */
 #ifndef WIN32
   cping = NULL, default_ping = NULL;
+  ping_initialized = false;
 #endif
   privileges_dropped = false;
   can_send_icmp = Utils::isPingSupported();
 
   for (int i = 0; i < CONST_MAX_NUM_NETWORKS; i++)
     local_network_names[i] = local_network_aliases[i] = NULL;
-
-#ifndef WIN32
-  if (can_send_icmp) {
-    cping = new (std::nothrow) ContinuousPing();
-
-    /* Default */
-    default_ping = new (std::nothrow) Ping(NULL /* System interface */);
-
-    /* Pinger per interface */
-    ntop_if_t *devpointer, *cur;
-    if (Utils::ntop_findalldevs(&devpointer) == 0) {
-      for (cur = devpointer; cur; cur = cur->next)
-        if (cur->name)
-          getPing(cur->name);
-      Utils::ntop_freealldevs(devpointer);
-    }
-  }
-#endif
 
   internal_alerts_queue = new (std::nothrow) FifoSerializerQueue(INTERNAL_ALERTS_QUEUE_SIZE);
 
@@ -944,8 +927,8 @@ void Ntop::loadLocalInterfaceAddress() {
 
     while(tok != NULL) {
       if(strchr(tok, ':') == NULL)
-	ifaces[std::string(tok)] = i;
-      
+        ifaces[std::string(tok)] = i;
+
       tok = strtok_r(NULL, ",", &tmp);
     }
   }
@@ -4003,6 +3986,24 @@ Ping *Ntop::getPing(char *ifname) {
 
 void Ntop::initPing() {
   if (!can_send_icmp) return;
+
+  if (ntop->getPrefs()->get_active_monitoring_pref()) {
+    cping = new (std::nothrow) ContinuousPing();
+
+    /* Default */
+    default_ping = new (std::nothrow) Ping(NULL /* System interface */);
+
+    /* Pinger per interface */
+    ntop_if_t *devpointer, *cur;
+    if (Utils::ntop_findalldevs(&devpointer) == 0) {
+      for (cur = devpointer; cur; cur = cur->next)
+        if (cur->name)
+          getPing(cur->name);
+      Utils::ntop_freealldevs(devpointer);
+    }
+
+    ping_initialized = true;
+  }
 
   for (int i = 0; i < num_defined_interfaces; i++) {
     switch (iface[i]->getIfType()) {

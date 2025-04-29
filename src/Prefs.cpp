@@ -869,6 +869,12 @@ bool Prefs::getDefaultBoolPrefsValue(const char *pref_key,
     return (default_value);
   }
 }
+/* ******************************************* */
+
+bool Prefs::do_active_monitoring(){ 
+  return get_active_monitoring_pref() &&
+         ntop->isPingInitialized();
+};
 
 /* ******************************************* */
 
@@ -2747,7 +2753,8 @@ void Prefs::lua(lua_State *vm) {
 			                      vs_max_num_scans);
   lua_push_bool_table_entry(vm, "vs_slow_scan", vs_slow_scan);
   lua_push_bool_table_entry(vm, "snmp_polling", snmp_polling);
-  lua_push_bool_table_entry(vm, "active_monitoring", active_monitoring);
+  lua_push_bool_table_entry(vm, "active_monitoring", do_active_monitoring());
+  lua_push_bool_table_entry(vm, "active_monitoring_pref", get_active_monitoring_pref());
   lua_push_bool_table_entry(vm, "network_discovery", network_discovery);
   lua_push_bool_table_entry(vm, "starttls", starttls);
   lua_push_bool_table_entry(vm, "dump_pcap_to_clickhouse", dump_pcap_to_clickhouse);
