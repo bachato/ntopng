@@ -149,7 +149,7 @@ const format_host = function (value) {
     if (!dataUtils.isEmptyOrNull(value.process.name)) {
         process = ` <a href="${http_prefix}/lua/process_details.lua?host=${value.ip}&vlan=${value.vlan}&pid_name=${value.process.pid_name}&pid=${value.process.pid}"><i class='fas fa-terminal'></i> ${value.process.process_name}</a>`
     }
-    if (!dataUtils.isEmptyOrNull(value.container.id)) {
+    if (!dataUtils.isEmptyOrNull(value.container.id) && (value.container.id !== 0) && (value.container.id !== '')) {
         container = ` <a href="${http_prefix}/lua/flows_stats.lua?container=${value.container.id}"><i class='fas fa-ship'></i> ${value.container.name}</a>`
     }
     if (props.context.is_viewed) {
