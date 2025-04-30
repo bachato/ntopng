@@ -6,11 +6,6 @@ local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 
 local ifstats = interface.getStats()
-if (ifstats.has_seen_pods or ifstats.has_seen_containers) then
-    -- Use a different flows page
-    dofile(dirs.installdir .. "/scripts/lua/inc/ebpf_flows_stats.lua")
-    return
-end
 
 require "lua_utils"
 require "flow_utils"
