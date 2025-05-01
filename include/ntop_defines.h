@@ -1062,7 +1062,8 @@
 #define HAVE_EMBEDDED_SUPPORT 1
 #endif
 
-#define NUM_MINUTES_PER_DAY 1440  // == 60 * 24
+#define NUM_MINUTES_PER_DAY             1440  // == 60 * 24
+#define NUM_MIN_TCP_PKTS_PER_DIRECTION  4
 
 #define DUMP_MAC_SIZE 6
 #define MAC_SIZE DUMP_MAC_SIZE

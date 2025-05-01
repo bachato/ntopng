@@ -759,6 +759,18 @@ public:
     return (get_packets_cli2srv() && get_packets_srv2cli());
   };
 
+  /*
+    Find a simple criteria to ignore probing attempts selecting
+    only flows with real data exchanged both ways
+  */
+  inline bool isTCPReallyBidirectional() const {
+    return((get_packets_cli2srv() > NUM_MIN_TCP_PKTS_PER_DIRECTION)
+	   && (src2dst_tcp_flags & TH_PUSH)
+	   && (get_packets_srv2cli() > NUM_MIN_TCP_PKTS_PER_DIRECTION)
+	   && (dst2src_tcp_flags & TH_PUSH)
+	   );
+  };
+
   inline bool isRemoteToRemote() const {
     return (cli_host && srv_host && !cli_host->isLocalHost() &&
             !srv_host->isLocalHost());

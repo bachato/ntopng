@@ -1979,11 +1979,14 @@ void Flow::incFlowDroppedCounters() {
  * needs to be updated on flow_end, it's possible to do it from here
  */
 void Flow::flow_end_stats_update() {
-  if(isTCP()) {
-    accountBidirectionalTCPProtocolServices();
-  } else if(isUDP()) {
-    accountBidirectionalUDPProtocolServices();
+  if(isBidirectional()) {
+    if(isTCP()) {
+      accountBidirectionalTCPProtocolServices();
+    } else if(isUDP()) {
+      accountBidirectionalUDPProtocolServices();
+    }
   }
+  
 #ifdef NTOPNG_PRO
   QoEType qoe_type = getQoEType();
   Host *cli_u = getViewSharedClient(), *srv_u = getViewSharedServer();
@@ -9233,7 +9236,9 @@ void Flow::addPrePostNATPort(u_int32_t _src_port_pre_nat,
 /* *************************************** */
 
 void Flow::accountBidirectionalTCPProtocolServices() {
-  if(isBidirectional()) {
+  if(isThreeWayHandshakeOK()
+     // && (getConfidence() == NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
+     && isTCPReallyBidirectional()) {
     Host *cli_h, *srv_h;
 
     get_actual_peers(&cli_h, &srv_h);
@@ -9242,9 +9247,7 @@ void Flow::accountBidirectionalTCPProtocolServices() {
       switch (i == 0 ? ndpi_get_lower_proto(ndpiDetectedProtocol) : ndpi_get_upper_proto(ndpiDetectedProtocol)) {
       case NDPI_PROTOCOL_MAIL_SMTPS:
       case NDPI_PROTOCOL_MAIL_SMTP:
-	if(isThreeWayHandshakeOK()
-	   // && (getConfidence() 2== NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
-	   ) {
+	{
 	  if(srv_h) {
 	    if(!srv_h->isSmtpServer()) {
 	      srv_h->setSmtpServer();
@@ -9262,9 +9265,7 @@ void Flow::accountBidirectionalTCPProtocolServices() {
 
       case NDPI_PROTOCOL_MAIL_IMAPS:
       case NDPI_PROTOCOL_MAIL_IMAP:
-	if(isThreeWayHandshakeOK()
-	   // && (getConfidence() == NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
-	   ) {
+	{
 	  if(srv_h) {
 	    if(!srv_h->isImapServer()) {
 	      srv_h->setImapServer();
@@ -9282,9 +9283,7 @@ void Flow::accountBidirectionalTCPProtocolServices() {
 
       case NDPI_PROTOCOL_MAIL_POPS:
       case NDPI_PROTOCOL_MAIL_POP:
-	if(isThreeWayHandshakeOK()
-	   // && (getConfidence() == NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
-	   ) {
+	{
 	  if(srv_h) {
 	    if(!srv_h->isPopServer()) {
 	      srv_h->setPopServer();
@@ -9314,9 +9313,7 @@ void Flow::accountBidirectionalTCPProtocolServices() {
       case NDPI_PROTOCOL_HTTP:
       case NDPI_PROTOCOL_HTTP_CONNECT:
       case NDPI_PROTOCOL_HTTP_PROXY:
-	if(isThreeWayHandshakeOK()
-	   // && (getConfidence() == NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
-	   ) {
+	{
 	  if(srv_h) {
 	    if(!srv_h->isHttpServer()) {
 	      srv_h->setHttpServer();
@@ -9333,9 +9330,7 @@ void Flow::accountBidirectionalTCPProtocolServices() {
 	break;
 
       case NDPI_PROTOCOL_SSH:
-	if(isThreeWayHandshakeOK()
-	   // && (getConfidence() == NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
-	   ) {
+	{
 	  if(srv_h) {
 	    if(!srv_h->isSshServer()) {
 	      srv_h->setSshServer();
@@ -9352,9 +9347,7 @@ void Flow::accountBidirectionalTCPProtocolServices() {
 	break;
 
       case NDPI_PROTOCOL_RDP:
-	if(isThreeWayHandshakeOK()
-	   // && (getConfidence() == NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
-	   ) {
+	{
 	  if(srv_h) {
 	    if(!srv_h->isRdpServer()) {
 	      srv_h->setRdpServer();
@@ -9377,75 +9370,73 @@ void Flow::accountBidirectionalTCPProtocolServices() {
 /* *************************************** */
 
 void Flow::accountBidirectionalUDPProtocolServices() {
-  if(isBidirectional()) {
-    Host *cli_h, *srv_h;
+  Host *cli_h, *srv_h;
 
-    get_actual_peers(&cli_h, &srv_h);
+  get_actual_peers(&cli_h, &srv_h);
 
-    switch (ndpi_get_lower_proto(ndpiDetectedProtocol)) {
-    case NDPI_PROTOCOL_NTP:
-      if((getConfidence() == NDPI_CONFIDENCE_DPI)
-	 || (isTCP() && isTCPEstablished())
-	 || isUDP()) {
-	//char buf[256];
+  switch (ndpi_get_lower_proto(ndpiDetectedProtocol)) {
+  case NDPI_PROTOCOL_NTP:
+    if((getConfidence() == NDPI_CONFIDENCE_DPI)
+       || (isTCP() && isTCPEstablished())
+       || isUDP()) {
+      //char buf[256];
 
-	if(srv_h) {
-	  if(!srv_h->isNtpServer()) {
-	    srv_h->setNtpServer();
-	    ntop->trackAssetChange("NTP", "setNtpServer-1", NULL, NULL, srv_h, this, NULL);
-	  }
-	} else if(srv_ip_addr) {
-	  if(!srv_ip_addr->isNtpServer()) {
-	    srv_ip_addr->setNtpServer();
-	    ntop->trackAssetChange("NTP", "setNtpServer (view)", NULL, srv_ip_addr, NULL, this, NULL);
-	  }
+      if(srv_h) {
+	if(!srv_h->isNtpServer()) {
+	  srv_h->setNtpServer();
+	  ntop->trackAssetChange("NTP", "setNtpServer-1", NULL, NULL, srv_h, this, NULL);
+	}
+      } else if(srv_ip_addr) {
+	if(!srv_ip_addr->isNtpServer()) {
+	  srv_ip_addr->setNtpServer();
+	  ntop->trackAssetChange("NTP", "setNtpServer (view)", NULL, srv_ip_addr, NULL, this, NULL);
 	}
       }
-      break;
-
-    case NDPI_PROTOCOL_DNS:
-      if((getConfidence() == NDPI_CONFIDENCE_DPI) /* Packet */
-	 || (ntohs(srv_port) == 53) /* nProbe case: let's be conservative */
-	 ) {
-	// char buf[256];
-
-	if(srv_h) {
-	  if(!srv_h->isDnsServer()) {
-	    srv_h->setDnsServer();
-	    ntop->trackAssetChange("DNS", "setDnsServer-3", NULL, NULL, srv_h, this, NULL);
-	  }
-	} else if(srv_ip_addr) {
-	  if(!srv_ip_addr->isDnsServer()) {
-	    srv_ip_addr->setDnsServer();
-	    ntop->trackAssetChange("DNS", "setDnsServer-4", NULL, srv_ip_addr, NULL, this, NULL);
-	  }
-	}
-      }
-      break;
-
-    case NDPI_PROTOCOL_QUIC:
-      /*
-	QUIC on port 443 is considered HTTPS
-
-	TODO: check ALPN to double check
-      */
-      if(get_srv_port() == 443) {
-	if(isBidirectional()
-	   // && (getConfidence() == NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
-	   ) {
-	  if(srv_h) {
-	    if(!srv_h->isHttpServer()) {
-	      srv_h->setHttpServer();
-	      ntop->trackAssetChange("HTTP", "setHttpServer-1", NULL, NULL, srv_h, this, NULL);
-	    }
-	  } else if(srv_ip_addr) {
-	    srv_ip_addr->setHttpServer();
-	    ntop->trackAssetChange("HTTP", "setHttpServer (view)", NULL, srv_ip_addr, NULL, this, NULL);
-	  }
-	}
-      }
-      break;
     }
+    break;
+
+  case NDPI_PROTOCOL_DNS:
+    if((getConfidence() == NDPI_CONFIDENCE_DPI) /* Packet */
+       || (ntohs(srv_port) == 53) /* nProbe case: let's be conservative */
+       ) {
+      // char buf[256];
+
+      if(srv_h) {
+	if(!srv_h->isDnsServer()) {
+	  srv_h->setDnsServer();
+	  ntop->trackAssetChange("DNS", "setDnsServer-3", NULL, NULL, srv_h, this, NULL);
+	}
+      } else if(srv_ip_addr) {
+	if(!srv_ip_addr->isDnsServer()) {
+	  srv_ip_addr->setDnsServer();
+	  ntop->trackAssetChange("DNS", "setDnsServer-4", NULL, srv_ip_addr, NULL, this, NULL);
+	}
+      }
+    }
+    break;
+
+  case NDPI_PROTOCOL_QUIC:
+    /*
+      QUIC on port 443 is considered HTTPS
+
+      TODO: check ALPN to double check
+    */
+    if(get_srv_port() == 443) {
+      if(isBidirectional()
+	 // && (getConfidence() == NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
+	 ) {
+	if(srv_h) {
+	  if(!srv_h->isHttpServer()) {
+	    srv_h->setHttpServer();
+	    ntop->trackAssetChange("HTTP", "setHttpServer-1", NULL, NULL, srv_h, this, NULL);
+	  }
+	} else if(srv_ip_addr) {
+	  srv_ip_addr->setHttpServer();
+	  ntop->trackAssetChange("HTTP", "setHttpServer (view)", NULL, srv_ip_addr, NULL, this, NULL);
+	}
+      }
+    }
+    break;
   }
 }
 
