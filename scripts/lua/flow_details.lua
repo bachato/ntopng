@@ -804,6 +804,9 @@ else
    print("<tr><th width=33%>" .. i18n("details.duration") .. "</th><td nowrap colspan=2<div id=duration>" ..
       secondsToTime(flow["seen.last"] - flow["seen.first"]) .. "</div></td>\n")
 
+   local client_to_server_label = i18n("client") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("server")
+   local server_to_client_label = i18n("server") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("client")
+
    if flow["bytes"] > 0 then
       print("<tr><th width=10% rowspan=3>" .. i18n("details.total_traffic") .. "</th><td>" .. i18n("total") ..
          ": <span id=volume>" .. bytesToSize(flow["bytes"]) .. "</span> <span id=volume_trend></span></td>")
@@ -826,10 +829,10 @@ else
          print("<td>&nbsp;</td></tr>\n")
       end
 
-      print("<tr><td nowrap>" .. i18n("client") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("server") ..
+      print("<tr><td nowrap>" .. client_to_server_label ..
 	    ": <span id=cli2srv>" .. formatPackets(flow["cli2srv.packets"]) .. " / " ..
 	    bytesToSize(flow["cli2srv.bytes"]) .. "</span> <span id=sent_trend></span></td><td nowrap>" ..
-	    i18n("server") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("client") ..
+            server_to_client_label ..
 	    ": <span id=srv2cli>" .. formatPackets(flow["srv2cli.packets"]) .. " / " ..
 	    bytesToSize(flow["srv2cli.bytes"]) .. "</span> <span id=rcvd_trend></span></td></tr>\n")
       
@@ -1069,8 +1072,8 @@ else
          if (flow["flow.idle"] == true) then
             print(" rowspan=2")
          end
-         print(">" .. i18n("flow_details.packet_inter_arrival_time") .. "</th><td nowrap>" .. i18n("client") ..
-            " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("server") .. ": ")
+         print(">" .. i18n("flow_details.packet_inter_arrival_time") .. "</th><td nowrap>" .. 
+            client_to_server_label .. ": ")
          print(msToTime(flow["interarrival.cli2srv"]["min"]) .. " / " ..
             msToTime(flow["interarrival.cli2srv"]["avg"]) .. " / " ..
             msToTime(flow["interarrival.cli2srv"]["max"]))
@@ -1078,8 +1081,7 @@ else
          if (flow["srv2cli.packets"] < 2) then
             print("<td>&nbsp;")
          else
-            print("<td nowrap>" .. i18n("client") .. " <i class=\"fas fa-long-arrow-alt-left\"></i> " ..
-               i18n("server") .. ": ")
+            print("<td nowrap>" .. server_to_client_label .. ": ")
             print(msToTime(flow["interarrival.srv2cli"]["min"]) .. " / " ..
                msToTime(flow["interarrival.srv2cli"]["avg"]) .. " / " ..
                msToTime(flow["interarrival.srv2cli"]["max"]))
@@ -1094,9 +1096,7 @@ else
       if ((flow["cli2srv.fragments"] + flow["srv2cli.fragments"]) > 0) then
          rowspan = 2
          print("<tr><th width=10% rowspan=" .. rowspan .. ">" .. i18n("flow_details.ip_packet_analysis") .. "</th>")
-         print("<th>&nbsp;</th><th>" .. i18n("client") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " ..
-            i18n("server") .. " / " .. i18n("client") .. " <i class=\"fas fa-long-arrow-alt-left\"></i> " ..
-            i18n("server") .. "</th></tr>\n")
+         print("<th>&nbsp;</th><th>" .. client_to_server_label .. " / " .. server_to_client_label .. "</th></tr>\n")
          print("<tr><th>" .. i18n("details.fragments") .. "</th><td align=right><span id=c2sFrag>" ..
             formatPackets(flow["cli2srv.fragments"]) .. "</span> / <span id=s2cFrag>" ..
             formatPackets(flow["srv2cli.fragments"]) .. "</span></td></tr>\n")
