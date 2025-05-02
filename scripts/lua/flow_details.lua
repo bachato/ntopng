@@ -1120,11 +1120,8 @@ else
          if rowspan > 0 then
             rowspan = rowspan + 1
          
-            print("<tr><th width=10% rowspan=" .. rowspan .. ">" .. i18n("flow_details.tcp_packet_analysis") ..
-                  "</th>")
-            print("<th></th><th>" .. i18n("client") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " ..
-                  i18n("server") .. " / " .. i18n("client") .. " <i class=\"fas fa-long-arrow-alt-left\"></i> " ..
-                  i18n("server") .. "</th></tr>\n")
+            print("<tr><th width=10% rowspan=" .. rowspan .. ">" .. i18n("flow_details.tcp_packet_analysis") .. "</th>")
+            print("<th></th><th>" .. client_to_server_label .. " / " .. server_to_client_label .. "</th></tr>\n")
 
             if (((flow["cli2srv.retransmissions"] or 0) + (flow["srv2cli.retransmissions"] or 0)) > 0) then
                print("<tr><th>" .. i18n("details.retransmissions") .. "</th><td align=right><span id=c2sretr>" ..
@@ -1239,11 +1236,9 @@ else
       print("<tr><th width=10%>" ..
          '<a class="ntopng-external-link" style="max-width:300px"  data-bs-toggle="tooltip" href="https://en.wikipedia.org/wiki/TCP_tuning">' ..
          i18n("flow_details.max_estimated_tcp_throughput") ..
-         " <i class=\"fas fa-external-link-alt\"></i></a><td nowrap> " .. i18n("client") ..
-         " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("server") .. ": ")
+         " <i class=\"fas fa-external-link-alt\"></i></a><td nowrap> " .. client_to_server_label .. ": ")
       print(bitsToSize(flow["tcp.max_thpt.cli2srv"]))
-      print("</td><td> " .. i18n("client") .. " <i class=\"fas fa-long-arrow-alt-left\"></i> " .. i18n("server") ..
-         ": ")
+      print("</td><td> " .. server_to_client_label .. ": ")
       print(bitsToSize(flow["tcp.max_thpt.srv2cli"]))
       print("</td></tr>\n")
    end
@@ -1267,16 +1262,14 @@ else
    end
 
    if ((flags ~= nil) and (flags > 0)) then
-      print("<tr><th width=10% rowspan=2>" .. i18n("tcp_flags") .. "</th><td nowrap>" .. i18n("client") ..
-         " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("server") .. ": ")
+      print("<tr><th width=10% rowspan=2>" .. i18n("tcp_flags") .. "</th><td nowrap>" .. client_to_server_label .. ": ")
       if (json_flags ~= nil) then
          printTCPFlags(json_flags["CLIENT_TCP_FLAGS"])
       else
          printTCPFlags(flow["cli2srv.tcp_flags"])
       end
       print(
-         "</td><td nowrap>" .. i18n("client") .. " <i class=\"fas fa-long-arrow-alt-left\"></i> " .. i18n("server") ..
-         ": ")
+         "</td><td nowrap>" .. server_to_client_label .. ": ")
       if (json_flags ~= nil) then
          printTCPFlags(json_flags["SERVER_TCP_FLAGS"])
       else
@@ -1617,9 +1610,9 @@ else
    if (flow.entropy and flow.entropy.client and flow.entropy.server) then
       print("<tr><th width=10%><A class='ntopng-external-link' href=\"https://en.wikipedia.org/wiki/Entropy_(information_theory)\">" ..
          i18n("flow_details.entropy") .. " <i class=\"fas fa-external-link-alt\"></i></A></th>")
-      print("<td>" .. i18n("client") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("server") .. ": " ..
+      print("<td>" .. client_to_server_label .. ": " ..
          string.format("%.3f", flow.entropy.client) .. "</td>")
-      print("<td>" .. i18n("server") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("client") .. ": " ..
+      print("<td>" .. server_to_client_label .. ": " ..
          string.format("%.3f", flow.entropy.server) .. "</td>")
       print("</tr>\n")
 
