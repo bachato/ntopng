@@ -99,26 +99,29 @@ for _, subdir in ipairs(subdirs) do
         severity.icon =  script.severity.icon
       end
 
-
-      local input_handler = script.gui.input_builder
-
-      result[#result + 1] = {
-        key = script_name,
-        title = i18n(script.gui.i18n_title) or script.gui.i18n_title,
-        description = i18n(script.gui.i18n_description) or script.gui.i18n_description,
-        severity = severity,
-        category_title = i18n(script.category.i18n_title),
-        category_icon = script.category.icon,
-        enabled_hooks = enabled_hooks,
-        all_hooks = all_hooks,
-        packet_interface_only = script.packet_interface_only == true,
-        is_enabled = not table.empty(enabled_hooks),
-        edit_url = checks.getScriptEditorUrl(script),
-        input_handler = input_handler,
-        value_description = script.template:describeConfig(hooks),
-        subdir = subdir,
-        subdir_title = i18n("config_scripts.granularities."..subdir),
-	    }
+      if(string.starts(script.gui.i18n_title, "FREE")) then
+	 -- traceError(TRACE_WARNING, TRACE_CONSOLE, "Skipping unused check "..script_name)
+      else      
+	 local input_handler = script.gui.input_builder
+	 
+	 result[#result + 1] = {
+	    key = script_name,
+	    title = i18n(script.gui.i18n_title) or script.gui.i18n_title,
+	    description = i18n(script.gui.i18n_description) or script.gui.i18n_description,
+	    severity = severity,
+	    category_title = i18n(script.category.i18n_title),
+	    category_icon = script.category.icon,
+	    enabled_hooks = enabled_hooks,
+	    all_hooks = all_hooks,
+	    packet_interface_only = script.packet_interface_only == true,
+	    is_enabled = not table.empty(enabled_hooks),
+	    edit_url = checks.getScriptEditorUrl(script),
+	    input_handler = input_handler,
+	    value_description = script.template:describeConfig(hooks),
+	    subdir = subdir,
+	    subdir_title = i18n("config_scripts.granularities."..subdir),
+	 }
+      end
     end
 
     ::continue::
