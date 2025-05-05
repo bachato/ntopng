@@ -7,7 +7,7 @@ We recommend you to [read this document](https://clickhouse.com/docs/en/operatio
 
 
 # Clickhouse Is Eating All My Disk/Memory
-You can instruct ntopng to limit disk space usage by setting data retention in preferences to a low value. By default we store 30 days but that can take a lot of disk soace on large networks In this case you can reduce it a bit (e.g. to 7 days).
+You can instruct ntopng to limit disk space usage by setting data retention in preferences to a low value. By default we store 30 days but that can take a lot of disk space on large networks In this case you can reduce it a bit (e.g. to 7 days).
 
 However clickhouse is also using a lot of disk with system tables. You can check how much disk they use with:
 
