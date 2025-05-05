@@ -236,6 +236,7 @@ end
 -- ##############################################
 
 function hasClickHouseSupport()
+    local has_dump_pcap_to_ch_enabled = (ntop.getPref("ntopng.prefs.dump_pcap_to_clickhouse") == '1')
     if not ntop.isClickHouseEnabled() then
         return false
     end
