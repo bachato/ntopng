@@ -11,7 +11,7 @@ In order to connect ntopng to ClickHouse use option :code:`-F`. The format of th
 
 .. code:: bash
 
-    clickhouse;<host[@mysqlport]|unix-socket;<dbname>;<user>;<pw>
+    clickhouse;<host[@mysqlport]|unix-socket>;<dbname>;<user>;<pw>
 
 or 
 
