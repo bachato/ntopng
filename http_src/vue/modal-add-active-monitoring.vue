@@ -141,7 +141,7 @@ watch(() => [props.interfaces], (cur_value, old_value) => {
       title: t.name,
     };
   })
-  selected_interface.value = interfaces_list.value[0];
+  selected_interface.value = interfaces_list.value[0] || [];
   disable_interface.value = (interfaces_list.value.length <= 1)
 }, { flush: 'pre', deep: true });
 
@@ -162,7 +162,7 @@ function reset_modal_form() {
   disable_add.value = true;
   update_lists(measurements_list.value[0]);
   host.value.value = ''
-  selected_interface.value = interfaces_list.value[0];
+  selected_interface.value = interfaces_list.value[0] || [];
   threshold.value.value = '99'
   row.value = null;
   add_button_title.value = i18n('add')
@@ -208,7 +208,7 @@ const add_ = async () => {
     granularity: selected_granularity.value.id,
     measurement: selected_measurement.value.id,
     threshold: threshold.value.value,
-    ifname: selected_interface.value.id
+    ifname: selected_interface.value?.id
   }
   /* Handle the edit */
   if (row.value) {
