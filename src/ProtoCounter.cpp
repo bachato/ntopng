@@ -27,20 +27,14 @@ ProtoCounter::ProtoCounter(u_int16_t _proto_id, bool enable_throughput_stats,
                            bool enable_behavior_stats) {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   proto_id = _proto_id;
-  duration = last_epoch_update = total_flows = 0;
-
+  
   if (enable_throughput_stats)
     bytes_thpt = new (std::nothrow) ThroughputStats();
   else
     bytes_thpt = NULL;
-/*
-#ifdef NTOPNG_PRO
-  if (enable_behavior_stats)
-    behavior_bytes_traffic = new (std::nothrow) BehaviorAnalysis();
-  else
-    behavior_bytes_traffic = NULL;
-#endif
-*/}
+
+  resetStats();
+}
 
 /* *************************************************/
 
@@ -257,5 +251,5 @@ void ProtoCounter::resetStats() {
   if (bytes_thpt) bytes_thpt->resetStats();
 
   packets.resetStats(), bytes.resetStats();
-  duration = last_epoch_update = total_flows;
+  duration = last_epoch_update = total_flows = 0;
 }
