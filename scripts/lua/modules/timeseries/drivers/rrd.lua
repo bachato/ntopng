@@ -301,7 +301,7 @@ local function number_to_rrd_string(what, schema)
     traceError(TRACE_ERROR, TRACE_CONSOLE, string.format("%s [%s]", err_msg, schema_name))
     traceError(TRACE_ERROR, TRACE_CONSOLE, debug.traceback())
     tprint(what)
-    tprint(schema)
+    -- tprint(schema)
     
     return ("0")
 end
