@@ -696,7 +696,7 @@ function checks.load(ifid, script_type, subdir, options)
       end
 
       local check = loadAndCheckScript(mod_fname, full_path, script, script_type, subdir, return_all, scripts_filter, hook_filter)
-
+      
       if (not check) then
 	 goto next_module
       end

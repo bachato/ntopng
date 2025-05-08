@@ -99,10 +99,7 @@ for _, subdir in ipairs(subdirs) do
         severity.icon =  script.severity.icon
       end
 
-      if(string.starts(script.gui.i18n_title, "FREE")) then
-	 -- traceError(TRACE_WARNING, TRACE_CONSOLE, "Skipping unused check "..script_name)
-      else      
-	 local input_handler = script.gui.input_builder
+      	 local input_handler = script.gui.input_builder
 	 
 	 result[#result + 1] = {
 	    key = script_name,
@@ -121,7 +118,6 @@ for _, subdir in ipairs(subdirs) do
 	    subdir = subdir,
 	    subdir_title = i18n("config_scripts.granularities."..subdir),
 	 }
-      end
     end
 
     ::continue::
