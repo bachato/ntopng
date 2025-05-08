@@ -33,6 +33,7 @@ ProtoCounter::ProtoCounter(u_int16_t _proto_id, bool enable_throughput_stats,
   else
     bytes_thpt = NULL;
 
+  /* Stats init */
   resetStats();
 }
 
