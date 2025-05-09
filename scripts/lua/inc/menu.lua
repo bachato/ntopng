@@ -1332,7 +1332,7 @@ if secs_to_first_data > 5 then
 </script>
 ]]
 end
-if interface.getNumLocalHosts() == 0 and interface.getNumHosts() > 5 and ntop.getUptime() > 60 then
+if not interface.isPcapDumpInterface() and interface.getNumLocalHosts() == 0 and interface.getNumHosts() > 5 and ntop.getUptime() > 60 then
     print(
         '<div id="influxdb-error-msg" class="alert alert-danger alert-dismissable" role="alert"><i class="fas fa-exclamation-triangle fa-lg" id="alerts-menu-triangle"></i> <span id="influxdb-error-msg-text"></span>')
     print(i18n("configured_localhost"))
