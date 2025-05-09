@@ -378,7 +378,7 @@ end
 
 function rest_utils.sendHTTPHeaderIfName(mime, ifname, maxage,
                                          content_disposition, extra_headers,
-                                         status_code)
+                                         status_code, status_descr)
     local info = ntop.getInfo(false)
     local http_status_code_map = {
         [200] = "OK",
@@ -454,7 +454,7 @@ function rest_utils.sendHTTPHeaderIfName(mime, ifname, maxage,
 
     if not status_code then status_code = 200 end
 
-    local status_descr = http_status_code_map[status_code]
+    if not status_descr then status_descr = http_status_code_map[status_code] end
     if not status_descr then status_descr = "Unknown" end
 
     -- Buffer the HTTP reply and write it in one "print" to avoid fragmenting
@@ -472,9 +472,9 @@ end
 -- ##############################################
 
 function rest_utils.sendHTTPHeader(mime, content_disposition, extra_headers,
-                                   status_code)
+                                   status_code, status_descr)
     rest_utils.sendHTTPHeaderIfName(mime, nil, 3600, content_disposition,
-                                    extra_headers, status_code)
+                                    extra_headers, status_code, status_descr)
 end
 
 -- Configure the module to return the REST answer locally
@@ -521,10 +521,10 @@ function rest_utils.rc(ret_const, payload, additional_response_param, format)
     end
 end
 
-function rest_utils.answer(ret_const, payload, extra_headers)
+function rest_utils.answer(ret_const, payload, extra_headers, status_descr)
     if not rest_utils.direct_mode then
         rest_utils.sendHTTPHeader('application/json', nil, extra_headers,
-                                  ret_const.http_code)
+                                  ret_const.http_code, status_descr)
     end
 
     local rsp = rest_utils.rc(ret_const, payload)

@@ -2136,8 +2136,8 @@ if auth.has_capability(auth.capabilities.preferences) then
 
         prefsInputFieldPrefs(subpage_active.entries["flow_data_retention"].title,
             subpage_active.entries["flow_data_retention"].description, "ntopng.prefs.",
-            "flows_and_alerts_data_retention_days", data_retention_utils.getDefaultRetention(), "number", nil, nil, nil,
-            {
+            "flows_and_alerts_data_retention_days", data_retention_utils.getDefaultRetention(), "number", 
+            ntop.isClickHouseEnabled(), nil, nil, {
                 min = 1,
                 max = 365 * 10
             })

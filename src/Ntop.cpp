@@ -4229,6 +4229,7 @@ void Ntop::speedtest(lua_State *vm) {
 
 bool Ntop::createRuntimeInterface(char *name, char *source, int *iface_id) {
   bool ret = false;
+  bool disable_dump = true;
 #ifndef HAVE_NEDGE
   NetworkInterface *new_iface, *old_iface = NULL;
   int slot_id = -1;
@@ -4264,6 +4265,12 @@ bool Ntop::createRuntimeInterface(char *name, char *source, int *iface_id) {
       return false;
     }
 
+    /* In case the preference is enabled, 
+     * dump the flows from the pcap into clickhouse
+     */
+    if (ntop->getPrefs()->dump_pcap_to_clickhouse_enabled()) {
+      disable_dump = false;
+    }
   } else if (strncmp(source, "db:", 3) == 0) {
     source = &source[3];
 
@@ -4295,7 +4302,7 @@ bool Ntop::createRuntimeInterface(char *name, char *source, int *iface_id) {
       return false;
   }
 
-  initInterface(new_iface, true /* disable flow dump to db */);
+  initInterface(new_iface, disable_dump /* disable flow dump to db */);
   new_iface->reloadFlowChecks(flow_checks_loader);
   new_iface->reloadHostChecks(host_checks_loader);
   new_iface->allocateStructures(true /* disable flow dump to db */);

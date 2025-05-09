@@ -2756,6 +2756,8 @@ local known_parameters = {
     ["params"] = {jsonCleanup, validateJSON},
     ["msg"] = {jsonCleanup, validateJSON},
 
+    ["create_new_interface"] = validateBool,
+
     -- server side Datatables
     ["start"] = validateNumber,
     ["sort"] = validateSingleWord,

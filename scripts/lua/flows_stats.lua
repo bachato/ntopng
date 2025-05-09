@@ -31,6 +31,11 @@ local server = _GET["server"]
 local flow_info = _GET["flow_info"]
 local aggregation_criteria = _GET["aggregation_criteria"] or "client_server_srv_port_app_proto"
 local base_url = ntop.getHttpPrefix() .. "/lua/flows_stats.lua"
+local ifid = _GET["ifid"]
+if not isEmptyString(ifid) then
+    interface.select(ifid)
+end
+
 local page_params = {
     ifid = interface.getId(),
     client = client,

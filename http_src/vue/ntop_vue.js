@@ -59,6 +59,7 @@ import { default as PageHistoricalFlow } from "./page-historical-flow-details.vu
 import { default as PageSNMPQoS } from "./page-snmp-qos.vue"
 import { default as PageGeoMap } from "./hosts-geomap.vue"
 import { default as PageCountryStats } from "./page-country-stats.vue"
+import { default as PageUploadPcap } from "./page-upload-pcap.vue"
 import { default as PageRedisStats } from "./page-redis-stats.vue"
 import { default as PageAsStats } from "./page-as-stats.vue"
 import { default as PageProbes } from "./page-probes.vue"
@@ -211,6 +212,7 @@ let ntopVue = {
     PageGeoMap: PageGeoMap,
     PageHostConfig: PageHostConfig,
     PageCountryStats: PageCountryStats,
+    PageUploadPcap: PageUploadPcap,
     PageRedisStats: PageRedisStats,
     PageExporters: PageExporters,
     PageAggregatedLiveFlows: PageAggregatedLiveFlows,

@@ -18,6 +18,9 @@ local icmp_utils       = require("icmp_utils")
 local application = _GET["application"]
 local ip_version_or_host = _GET["flowhosts_type"]
 local ifid = _GET["ifid"] or interface.getId()
+local current_ifid = interface.getId()
+
+interface.select(ifid)
 
 if not isEmptyString(application) then
     if string.starts(application, "cat_") then
@@ -292,6 +295,10 @@ for _, value in ipairs(flows_stats.flows) do
     end
 
     rsp[#rsp + 1] = record
+end
+
+if tostring(current_ifid) ~= tostring(ifid) then
+    interface.select(current_ifid)
 end
 
 rest_utils.extended_answer(rest_utils.consts.success.ok, rsp, {
