@@ -5047,9 +5047,7 @@ DeviceType Utils::getDeviceTypeFromOsDetail(const char *os, ndpi_os *hint) {
 /* Bitmap functions */
 bool Utils::bitmapIsSet(u_int64_t bitmap, u_int8_t v) {
   if (v > 64) {
-    ntop->getTrace()->traceEvent(
-        TRACE_WARNING, "INTERNAL ERROR: bitmapIsSet out of range (%u > %u)", v,
-        sizeof(bitmap));
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "INTERNAL ERROR: bitmapIsSet out of range (%u > %u)", v, sizeof(bitmap));
     return (false);
   }
 

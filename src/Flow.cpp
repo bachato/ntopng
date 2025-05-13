@@ -3386,8 +3386,7 @@ void Flow::lua_get_risk_info(lua_State *vm) {
       lua_newtable(vm);
 
       for (u_int i = 0; i < NDPI_MAX_RISK; i++)
-        if(hasRisk((ndpi_risk_enum)i) &&
-            NDPI_ISSET_BIT(unhandled_ndpi_risks, (ndpi_risk_enum)i))
+        if(hasRisk((ndpi_risk_enum)i) && NDPI_ISSET_BIT(unhandled_ndpi_risks, (ndpi_risk_enum)i))
           lua_push_uint64_table_entry(vm, ndpi_risk2str((ndpi_risk_enum)i), i);
 
       lua_pushstring(vm, "unhandled_flow_risk");
@@ -5314,8 +5313,7 @@ void Flow::incStats(bool cli2srv_direction, u_int pkt_len, u_int8_t *payload,
       Need to reset this bit as nDPI might "forget" to do it in case of
       protocol detection with only one packet
     */
-    ndpi_flow_risk_bitmap &=
-      ~(1UL << NDPI_UNIDIRECTIONAL_TRAFFIC); /* Clear bit */
+    ndpi_flow_risk_bitmap &= ~(1UL << NDPI_UNIDIRECTIONAL_TRAFFIC); /* Clear bit */
   }
 
   if(payload_len > 0) {
