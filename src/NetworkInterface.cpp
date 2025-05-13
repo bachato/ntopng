@@ -9506,8 +9506,14 @@ bool NetworkInterface::initFlowDump(u_int8_t num_dump_interfaces) {
       db = new (std::nothrow) ClickHouseFlowDB(this);
 
       if ((db == NULL) || (db->isDbCreated() == false)) {
+#ifdef HAVE_NEDGE
+        /* On nEdge do not exit on CH failure to avoid outage due to db */
+        ntop->getTrace()->traceEvent(TRACE_WARNING, "Running without ClickHouse support, please check the clickhouse service");
+        ntop->getPrefs()->dontUseClickHouse();
+#else
         ntop->getTrace()->traceEvent(TRACE_WARNING, "Leaving due to failed ClickHouse initialization");
         exit(-1);
+#endif
       }
 #endif
     }
