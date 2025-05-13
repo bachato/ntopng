@@ -47,7 +47,7 @@ const is_data_not_ok = ref(false);
 const is_not_empty_file = ref(false);
 let title = _i18n('asset_details.import');
 let message = "";
-const max_size = 131072;
+const max_size = 2000000;
 const json_file = ref(null);
 const import_input = ref(null);
 
@@ -84,7 +84,7 @@ const show = (row) => {
 const handleFileUpload = (event) => {
     json_file.value = event.target.files[0];
     const size = json_file.value.size;
-    is_not_empty_file.value = json_file.value != null && size < max_size; //128KB
+    is_not_empty_file.value = json_file.value != null && size < max_size; //2MB
     if (size > max_size) {
         is_data_not_ok.value = true;
         message = _i18n("file_to_large")
