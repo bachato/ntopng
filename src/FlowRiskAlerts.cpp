@@ -121,6 +121,9 @@ static const FlowAlertTypeExtended risk_enum_to_alert_type[NDPI_MAX_RISK] {
     {{flow_alert_ndpi_smb_insecure_version, alert_category_security},
      "ndpi_smb_insecure_version"},
 
+    /* NDPI_FREE_21 - DUMMY LINE BELOW */
+    {{flow_alert_ndpi_smb_insecure_version, alert_category_security}, "ndpi_smb_insecure_version"},
+
     /* NDPI_UNSAFE_PROTOCOL */
     {{flow_alert_ndpi_unsafe_protocol, alert_category_security},
      "ndpi_unsafe_protocol"},
@@ -233,6 +236,9 @@ static const FlowAlertTypeExtended risk_enum_to_alert_type[NDPI_MAX_RISK] {
      "ndpi_minor_issues"},
 
     /* NDPI_TCP_ISSUES */
+    {{flow_alert_ndpi_tcp_issues, alert_category_network}, "ndpi_tcp_issues"},
+
+    /* NDPI_FREE_51 - DUMMY LINE BELOW */
     {{flow_alert_ndpi_tcp_issues, alert_category_network}, "ndpi_tcp_issues"},
 
     /* NDPI_TLS_ALPN_SNI_MISMATCH */
