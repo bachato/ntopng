@@ -4,12 +4,6 @@
 	"data_source" : "flows",
 	"show_in_page" : "overview",
 	"hourly": true,
-	"chart" : [{
-		"chart_id" : "server_ports",
-		"chart_type" : "topk-timeseries",
-		"params" : {
-		}
-	}],
 	"visualization_type" : "table",
 	"select" : {
 		"items" : [

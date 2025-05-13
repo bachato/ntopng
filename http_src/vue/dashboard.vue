@@ -525,7 +525,11 @@ async function load_filters(filters_available, res, show_second_load) {
             extra_params = `${key}=${value}&${extra_params}`
         }
         retrieve_filters = retrieve_filters.slice(0, -1);
-        res = await ntopng_utility.http_request(`${props.context.report_filters_endpoint}?hide_exporters_name=true&filters_to_display=${retrieve_filters}&${extra_params}`);
+        /* Being a mix of flows, historical/hourly, keep in mind
+         * that not all the filters are available in the hourly, so retrieve only the
+         * ones available in both
+         */
+        res = await ntopng_utility.http_request(`${props.context.report_filters_endpoint}?hide_exporters_name=true&filters_to_display=${retrieve_filters}&aggregated=true&${extra_params}`);
     }
     filters_available.forEach((element) => {
         const id = element?.name || "";
