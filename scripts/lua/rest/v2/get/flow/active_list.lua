@@ -245,7 +245,7 @@ for _, value in ipairs(flows_stats.flows) do
     record["last_seen"] = value["seen.last"]
     record["key"] = string.format("%u", value["ntopng.key"])
     record["hash_id"] = string.format("%u", value["hash_entry_id"])
-    record["verdict"] = not (value["verdict.pass"] ~= nil and value["verdict.pass"] == false)
+    record["verdict"] = value["verdict.pass"] == nil or value["verdict.pass"] == true
     record["duration"] = value["duration"]
     if(
        ((record.l4_proto.id == 58) or (record.l4_proto.id == 1)) -- ICMP or ICMPv6
