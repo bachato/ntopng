@@ -65,7 +65,7 @@ Prefs::Prefs(Ntop *_ntop) {
   fail_on_invalid_license = false;
   zmq_publish_events_url = NULL;
   custom_geoip_dir = NULL;
-  enable_access_log = false, enable_sql_log = false;
+  enable_access_log = false, enable_assets_log = false, enable_sql_log = false;
   enable_flow_device_port_rrd_creation =
     enable_observation_points_rrd_creation =
     enable_intranet_traffic_rrd_creation = false;
@@ -927,6 +927,7 @@ void Prefs::reloadPrefsFromRedis() {
 #endif
   // alert preferences
   enable_access_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ACCESS_LOG, false);
+  enable_assets_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false);
   enable_sql_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_SQL_LOG, false);
   use_mac_in_flow_key = getDefaultPrefsValue(CONST_PREFS_USE_MAC_IN_FLOW_KEY, false);
   fingerprint_stats = getDefaultPrefsValue(CONST_PREFS_FINGERPRINT_STATS, false);
@@ -951,6 +952,7 @@ void Prefs::reloadPrefsFromRedis() {
 							     MAX_MAC_IDLE),
     enable_assets_collection = getDefaultPrefsValue(CONST_RUNTIME_ENABLE_ASSETS_COLLECTION,
 							     true),
+    enable_assets_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false);
 
     log_to_file = getDefaultBoolPrefsValue(CONST_RUNTIME_PREFS_LOG_TO_FILE, false);
   intf_rrd_raw_days = getDefaultPrefsValue(CONST_INTF_RRD_RAW_DAYS, INTF_RRD_RAW_DAYS),
@@ -2859,6 +2861,8 @@ void Prefs::lua(lua_State *vm) {
                               mac_address_cache_duration);
   lua_push_bool_table_entry(vm, "enable_assets_collection",
                               enable_assets_collection);
+  lua_push_bool_table_entry(vm, "enable_assets_log",
+                              enable_assets_log);
   lua_push_uint64_table_entry(vm, "devices_learning_period",
                               devices_learning_period);
   lua_push_uint64_table_entry(vm, "host_port_learning_period",

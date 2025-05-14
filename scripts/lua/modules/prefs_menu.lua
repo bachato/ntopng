@@ -292,6 +292,12 @@ local menu_subpages = {{
                 product = info["product"]
             })
         },
+        toggle_assets_log = {
+            title = i18n("prefs.toggle_assets_log_title"),
+            description = i18n("prefs.toggle_assets_log_description", {
+                product = info["product"]
+            })
+        },
         toggle_access_log = {
             title = i18n("prefs.toggle_access_log_title"),
             description = i18n("prefs.toggle_access_log_description", {

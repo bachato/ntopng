@@ -2284,6 +2284,7 @@ local known_parameters = {
     ["toggle_access_log"] = validateBool,
     ["toggle_host_pools_log"] = validateBool,
     ["toggle_log_to_file"] = validateBool,
+    ["toggle_assets_log"] = validateBool,
     ["toggle_snmp_rrds"] = validateBool,
     ["toggle_snmp_polling"] = validateBool,
     ["toggle_active_monitoring"] = validateBool,

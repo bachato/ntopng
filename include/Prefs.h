@@ -55,7 +55,7 @@ class Prefs {
     enable_auto_logout, enable_auto_logout_at_runtime, use_promiscuous_mode,
     enable_ixia_timestamps,
     enable_interface_name_only, enable_users_login, disable_localhost_login,
-    service_license_check, enable_sql_log, enable_access_log, log_to_file,
+    service_license_check, enable_sql_log, enable_access_log, enable_assets_log, log_to_file,
     enable_mac_ndpi_stats, enable_activities_debug, enable_behaviour_analysis,
     enable_asn_behaviour_analysis, enable_network_behaviour_analysis,
     enable_iface_l7_behaviour_analysis, emit_flow_alerts, emit_host_alerts,
@@ -287,6 +287,10 @@ class Prefs {
   inline bool is_access_log_enabled() { return (enable_access_log); };
   inline void do_enable_access_log(bool state = true) {
     enable_access_log = state;
+  };
+  inline bool is_assets_log_enabled() { return (enable_assets_log); };
+  inline void do_enable_assets_log(bool state = true) {
+    enable_assets_log = state;
   };
   inline bool are_ixia_timestamps_enabled() {
     return (enable_ixia_timestamps);

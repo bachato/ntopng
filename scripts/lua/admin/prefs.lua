@@ -1430,11 +1430,13 @@ if auth.has_capability(auth.capabilities.preferences) then
             })
 
 
-        prefsToggleButton(subpage_active, {
-            field = "toggle_assets_collection",
-            default = "1",
-            pref = "enable_assets_collection"
-        })
+        if ntop.isEnterpriseM() then
+            prefsToggleButton(subpage_active, {
+                field = "toggle_assets_collection",
+                default = "1",
+                pref = "enable_assets_collection"
+            })
+        end
 
         prefsInputFieldPrefs(subpage_active.entries["mac_address_cache_duration"].title,
             subpage_active.entries["mac_address_cache_duration"].description, "ntopng.prefs.",
@@ -1912,6 +1914,14 @@ if auth.has_capability(auth.capabilities.preferences) then
             pref = "enable_access_log"
         })
 
+        if ntop.isEnterpriseM() then
+            prefsToggleButton(subpage_active, {
+                field = "toggle_assets_log",
+                default = "0",
+                pref = "enable_assets_log"
+            })
+        end
+
         prefsToggleButton(subpage_active, {
             field = "toggle_host_pools_log",
             default = "0",
@@ -2302,115 +2312,6 @@ if auth.has_capability(auth.capabilities.preferences) then
         end_table()
     end
 
-    function printAssetsInventory()
-        if not ntop.isPro() then
-            return
-        end
-        local disabled = not info["version.enterprise_edition"]
-        local netbox_activation_url = ntop.getPref("ntopng.prefs.netbox_activation_url")
-        local netbox_default_site = ntop.getPref("ntopng.prefs.netbox_default_site")
-
-        if isEmptyString(netbox_activation_url) then
-            netbox_activation_url = "http://localhost:8000"
-        end
-        if isEmptyString(netbox_default_site) then
-            netbox_default_site = "Default"
-        end
-
-        print('<form id="assetsInventory" method="post">')
-        print('<table class="table">')
-        print('<thead class="table-primary"><tr><th colspan=2 class="info">Assets Inventory</th></tr></thead>')
-
-        -- show or not show table entries for netbox configuration
-        local showNetboxConfiguration = false
-
-        if ntop.getPref("ntopng.prefs.toggle_netbox") == "1" then
-            showNetboxConfiguration = true
-        end
-        if (_POST["toggle_netbox"]) then
-            showNetboxConfiguration = (_POST["toggle_netbox"] == "1")
-
-            if (showNetboxConfiguration == true) then
-                package.path = dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" .. package.path
-                local netbox_manager = require("netbox_manager")
-
-                traceError(TRACE_NORMAL, TRACE_CONSOLE, "[NetBox] Initializing...\n")
-                if (netbox_manager.netbox_initialization() == true) then
-                    traceError(TRACE_NORMAL, TRACE_CONSOLE, "[NetBox] Initialization completed")
-                else
-                    traceError(TRACE_NORMAL, TRACE_CONSOLE, "[NetBox] Initialization failed")
-                end
-            end
-        end
-
-        -- ntop asset inventory
-        --[[
-            prefsToggleButton(subpage_active, {
-                field = "toggle_ntopng_assets_inventory",
-                default = "0",
-                pref = "toggle_ntopng_assets_inventory",
-                to_switch = {}
-            })
-        ]]
-
-        -- Netbox toggle
-        prefsToggleButton(subpage_active, {
-            field = "toggle_netbox",
-            default = "0",
-            pref = "toggle_netbox",
-            to_switch = { "netbox_activation_url", "netbox_default_site", "netbox_personal_access_token" }
-        })
-
-        -- (label, comment, prekey, key, default_value, _input_type, showEnabled, disableAutocomplete, allowURLs, extra)
-        -- Netbox Activation URL
-        -- tprint(prefs)
-        -- Render the NetBox Activation URL input field
-        prefsInputFieldPrefs(subpage_active.entries["netbox_activation_url"].title,
-            subpage_active.entries["netbox_activation_url"].description, "ntopng.prefs.", "netbox_activation_url",
-            netbox_activation_url, false, showNetboxConfiguration, nil, nil, {
-                attributes = {
-                    spellcheck = "false"
-                },
-                required = true,
-                disabled = disabled
-            })
-
-        -- Render the NetBox Default Site input field
-        prefsInputFieldPrefs(subpage_active.entries["netbox_default_site"].title,
-            subpage_active.entries["netbox_default_site"].description, "ntopng.prefs.", "netbox_default_site",
-            netbox_default_site, false, showNetboxConfiguration, nil, nil, {
-                attributes = {
-                    spellcheck = "false"
-                },
-                required = true,
-                disabled = disabled
-            })
-
-        -- Netbox Personal Access token
-        prefsInputFieldPrefs(subpage_active.entries["netbox_personal_access_token"].title,
-            subpage_active.entries["netbox_personal_access_token"].description, "ntopng.prefs.",
-            "netbox_personal_access_token", ntop.getPref("ntopng.prefs.netbox_personal_access_token") or "", "text",
-            showNetboxConfiguration, nil, nil, {
-                required = true,
-                inputBoxWidth = "24em",
-                disabled = disabled
-            })
-
-        if (disabled) then
-            prefsInformativeField(i18n("notes"), i18n("enterpriseOnly"))
-        end
-
-        print(
-            '<tr><th colspan=2 style="text-align:right;"><button type="submit" class="btn btn-primary" style="width:115px" disabled="disabled">' ..
-            i18n("save") .. '</button></th></tr>')
-
-        print [[<input name="csrf" type="hidden" value="]]
-        print(ntop.getRandomCSRFValue())
-        print [[" />
-  </form>
-  </table>]]
-    end
-
     function printReportsOptions()
         print('<form method="post">')
         print('<table class="table">')
@@ -2575,12 +2476,6 @@ if auth.has_capability(auth.capabilities.preferences) then
     if (tab == "vulnerability_scan") then
         printVulnerabilityScan()
     end
-
-    --[[
-        if (tab == "assets_inventory") then
-            printAssetsInventory()
-        end
-    ]]
 
     print [[
         </td></tr>
