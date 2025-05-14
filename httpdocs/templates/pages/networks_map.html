@@ -4,53 +4,50 @@
    
 var url = `{* url *}`;
 
-  $.getJSON(url, function(response) {
-     var options = {
-     series:  response.rsp ,
+$.getJSON(url, function(response) {
+    var options = {
+        series:  response.rsp,
             legend: {
-	          show: false
-	          },
-            chart: {
-                height: 150,
-                toolbar: {
-	          show: false
-	        },
-		animations: {
-		    enabled: false
-		},
-                type: 'treemap',
-		events: {
-		    click: function(event, chartContext, config) {
-				let obj = config.config.series[config.seriesIndex]?.data[config.dataPointIndex]
-				if(obj) {
-					let location = '{* prefix *}/lua/host_details.lua?host='+obj.host;
-					window.location.href = location;
-				}			
-		    }
-		}
+            show: false
+        },
+        chart: {
+            height: 150,
+            toolbar: {
+                show: false
             },
-	 tooltip: {
-	     enabled: true,
-	     
-	     x: {
-		 show: true
-	     },
-	     y: {
-		 formatter: function(value, { series, seriesIndex, dataPointIndex, w }) {
-		     return value+" %"
-		 }
-	     }
-	     
+            animations: {
+                enabled: false
+            },
+            type: 'treemap',
+            events: {
+                click: function(event, chartContext, config) {
+                    let obj = config.config.series[config.seriesIndex]?.data[config.dataPointIndex]
+                    if(obj) {
+                        let location = '{* prefix *}/lua/host_details.lua?host='+obj.host;
+                        window.location.href = location;
+                    }            
+                }
+            }
+        },
+        tooltip: {
+            enabled: true,
+            x: {
+                show: true
+            },
+            y: {
+                formatter: function(value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value+" %"
+                }
+            }
+        },
+        title: {
+            text: 'Networks Score'
+        }
+    };
 
-	 },
-             title: {
-		 text: 'Networks Score'
-             }
-      };
-
-      var treechart = new ApexCharts(document.querySelector("#treechart"), options);
-      treechart.render();
-  });
+    var treechart = new ApexCharts(document.querySelector("#treechart"), options);
+    treechart.render();
+});
 
 </script>
 
