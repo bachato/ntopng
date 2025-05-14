@@ -542,6 +542,7 @@ typedef enum {
 } FlowAlertTypeEnum;
 
 typedef struct {
+  ndpi_risk_enum ndpi_risk_id;
   FlowAlertTypeEnum id;
   AlertCategory category;
 } FlowAlertType;

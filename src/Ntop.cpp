@@ -219,6 +219,12 @@ Ntop::Ntop(const char *appName) {
 #ifdef HAVE_SNMP_TRAP
   trap_collector = NULL;
 #endif
+
+  /* Internal chec to make sure everything is in order */
+  if(!FlowRiskAlerts::checkConsistency()) {
+    ntop->getTrace()->traceEvent(TRACE_ERROR, "Fatal error: nDPI risk alerts are out of sync with ntopng");
+    exit(0);
+  }
 }
 
 /* ******************************************* */

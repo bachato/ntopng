@@ -28,6 +28,7 @@ class FlowRiskAlerts {
   static bool isRiskUndefined(ndpi_risk_enum risk);
 
  public:
+  static bool checkConsistency();
   static inline u_int8_t getFlowRiskScore(ndpi_risk_enum risk) {
     if (risk < NDPI_MAX_RISK) {
       ndpi_risk r = 0;

@@ -31,7 +31,7 @@ class HostPolicyAlert : public FlowAlert {
 
  public:
   static FlowAlertType getClassType() {
-    return {flow_alert_host_policy, alert_category_network};
+    return {NDPI_NO_RISK, flow_alert_host_policy, alert_category_network};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_CRITICAL; };
 

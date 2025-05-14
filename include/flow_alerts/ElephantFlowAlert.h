@@ -32,7 +32,7 @@ class ElephantFlowAlert : public FlowAlert {
 
  public:
   static FlowAlertType getClassType() {
-    return {flow_alert_elephant_flow, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_elephant_flow, alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_WARNING; };
 

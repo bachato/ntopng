@@ -29,7 +29,7 @@ class QoEDegradedAlert : public FlowAlert {
     ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
   public:
     static FlowAlertType getClassType() {
-      return {flow_alert_qoe_degraded, alert_category_network};
+      return {NDPI_NO_RISK, flow_alert_qoe_degraded, alert_category_network};
     }
     static u_int8_t getDefaultScore() { return SCORE_LEVEL_WARNING; };
  

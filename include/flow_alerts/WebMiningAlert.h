@@ -28,7 +28,7 @@ class WebMiningAlert : public FlowAlert {
  private:
  public:
   static FlowAlertType getClassType() {
-    return {flow_alert_web_mining_detected, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_web_mining_detected, alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_WARNING; };
 

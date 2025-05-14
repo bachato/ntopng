@@ -28,7 +28,7 @@ class NotPurgedAlert : public FlowAlert {
  private:
  public:
   static FlowAlertType getClassType() {
-    return {flow_alert_internals, alert_category_internals};
+    return {NDPI_NO_RISK, flow_alert_internals, alert_category_internals};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_WARNING; };
 
