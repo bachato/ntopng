@@ -1332,7 +1332,7 @@ historical_flow_utils.extra_db_columns = {
 
 historical_flow_utils.ordering_special_columns = {
    ["srv_ip"]   = {[4] = "IPv4NumToString(IPV4_DST_ADDR)", [6] = "IPv6NumToString(IPV6_DST_ADDR)"},
-   ["cli_ip"]   = {[4] = "IPv4NumToString(IPV4_SRC_ADDR)", [6] = "IPv6NumToString(IPV6_SRC_ADDRc)"},
+   ["cli_ip"]   = {[4] = "IPv4NumToString(IPV4_SRC_ADDR)", [6] = "IPv6NumToString(IPV6_SRC_ADDR)"},
    ["l7proto"]  = "L7_PROTO_MASTER",
    ["throughput"] = "THROUGHPUT"
 }
