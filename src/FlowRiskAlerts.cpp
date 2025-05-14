@@ -61,7 +61,7 @@ static const FlowAlertTypeExtended risk_enum_to_alert_type[NDPI_MAX_RISK] {
   { { NDPI_SSH_OBSOLETE_CLIENT_VERSION_OR_CIPHER, flow_alert_ndpi_ssh_obsolete_client, alert_category_security}, "ndpi_ssh_obsolete_client"},
   { { NDPI_SSH_OBSOLETE_SERVER_VERSION_OR_CIPHER, flow_alert_ndpi_ssh_obsolete_server, alert_category_security}, "ndpi_ssh_obsolete_server"},
   { { NDPI_SMB_INSECURE_VERSION, flow_alert_ndpi_smb_insecure_version, alert_category_security}, "ndpi_smb_insecure_version"},
-  { { NDPI_FREE_21 /* DUMMY LINE */, flow_alert_normal, alert_category_other}, "ndpi_free_21"},
+  { { NDPI_FREE_21 /* DUMMY LINE */, flow_alert_normal, alert_category_other}, ""},
   { { NDPI_UNSAFE_PROTOCOL, flow_alert_ndpi_unsafe_protocol, alert_category_security}, "ndpi_unsafe_protocol"},
   { { NDPI_DNS_SUSPICIOUS_TRAFFIC, flow_alert_ndpi_dns_suspicious_traffic, alert_category_security}, "ndpi_dns_suspicious_traffic"},
   { { NDPI_TLS_MISSING_SNI, flow_alert_ndpi_tls_missing_sni, alert_category_security}, "ndpi_tls_missing_sni"},
@@ -91,7 +91,7 @@ static const FlowAlertTypeExtended risk_enum_to_alert_type[NDPI_MAX_RISK] {
   { { NDPI_PERIODIC_FLOW, flow_alert_ndpi_periodic_flow, alert_category_network}, "ndpi_periodic_flow"},
   { { NDPI_MINOR_ISSUES, flow_alert_ndpi_minor_issues, alert_category_network}, "ndpi_minor_issues"},
   { { NDPI_TCP_ISSUES, flow_alert_ndpi_tcp_issues, alert_category_network}, "ndpi_tcp_issues"},
-  { { NDPI_FREE_51 /* DUMMY LINE */, flow_alert_normal, alert_category_other}, "ndpi_free_51"},
+  { { NDPI_FREE_51 /* DUMMY LINE */, flow_alert_normal, alert_category_other}, ""},
   { { NDPI_TLS_ALPN_SNI_MISMATCH, flow_alert_ndpi_tls_alpn_sni_mismatch, alert_category_security}, "ndpi_tls_alpn_sni_mismatch"},
   { { NDPI_MALWARE_HOST_CONTACTED, flow_alert_ndpi_malware_host_contacted, alert_category_security}, "ndpi_malware_host_contacted"},
   { { NDPI_BINARY_DATA_TRANSFER, flow_alert_ndpi_binary_data_transfer, alert_category_security}, "ndpi_binary_data_transfer"},
@@ -115,10 +115,11 @@ bool FlowRiskAlerts::isRiskUndefined(ndpi_risk_enum risk) {
 
 void FlowRiskAlerts::checkUndefinedRisks() {
   for (int risk_id = 1; risk_id < NDPI_MAX_RISK; risk_id++) {
-    if (risk_enum_to_alert_type[risk_id].alert_type.id == flow_alert_normal)
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "[!] nDPI risk %u/%s has not been defined in ntopng",
-				   risk_id, ndpi_risk2str((ndpi_risk_enum)risk_id));
-    else
+    if(risk_enum_to_alert_type[risk_id].alert_type.id == flow_alert_normal) {
+      if(risk_enum_to_alert_type[risk_id].alert_lua_name == NULL)	
+	ntop->getTrace()->traceEvent(TRACE_NORMAL, "[!] nDPI risk %u/%s has not been defined in ntopng",
+				     risk_id, ndpi_risk2str((ndpi_risk_enum)risk_id));
+    } else
       ntop->getTrace()->traceEvent(TRACE_INFO, "Risk %u/%s handled", risk_id,
                                    ndpi_risk2str((ndpi_risk_enum)risk_id));
   }
