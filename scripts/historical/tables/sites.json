@@ -25,15 +25,7 @@
 		]
 	},
 	"filters" : {
-		"items" : [
-			{
-				"name": "INFO",
-				"op": "neq",
-				"value": "",
-				"value_type": "text",
-				"input": "fixed"
-			}
-		]
+		"sql" : "(L7_PROTO = 7 OR L7_PROTO_MASTER = 7 OR L7_PROTO = 91 OR L7_PROTO_MASTER = 91) AND (INFO != '')"
 	},
 	"groupby" : {
 		"items" : [
