@@ -8746,6 +8746,7 @@ local lang = {
     ["srv2cli_bytes"] = "Srv to Cli Bytes",
     ["srv2cli_packets"] = "Srv to Cli Packets",
     ["sent_bytes"] = "Sent Bytes",
+    ["avg_thpt"] = "Avg. Throughput",
     ["rcvd_bytes"] = "Rcvd Bytes",
     ["sent_packets"] = "Sent Packets",
     ["rcvd_packets"] = "Rcvd Packets",
