@@ -683,6 +683,7 @@ local function dt_format_probe(probe_ip)
    if isEmptyString(probe_ip) or probe_ip == "0.0.0.0" or probe_ip == "0" then
       probe_info["title"] = ""
       probe_info["label"] = ""
+      probe_info["value"] = ""
    else
       probe_info["label"] = getProbeName(probe_ip)
       if (probe_info["label"]
