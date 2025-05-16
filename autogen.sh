@@ -80,11 +80,6 @@ git submodule update --remote
 
 # git submodule update --init --recursive
 
-cd third-party/clickhouse-cpp
-cmake -B build .
-cmake --build build
-cd ../../
-
 echo "Wait please..."
 autoreconf -if
 echo ""
