@@ -41,7 +41,7 @@ local function check_redis_reads_writes_exceeded(params)
    }
    local ts = ts_utils.timeseries_query(options)
    -- Check if the day target is nan
-   if not (ts.series[1].data[7] == ts.series[1].data[7]) then
+   if not ts or not (ts.series[1].data[7] == ts.series[1].data[7]) then
       return
    end
    local sumr = 0
