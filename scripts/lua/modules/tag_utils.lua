@@ -110,7 +110,8 @@ tag_utils.defined_tags = {
         type = tag_utils.input_types.select,
         value_type = 'ip_version',
         i18n_label = i18n('db_search.tags.ip_version'),
-        operators = { 'eq', 'neq' }
+        operators = { 'eq', 'neq' },
+        hourly_available = true,
     },
     ip = {
         value_type = 'ip,cidr', -- Set to 'ip' to accept IP only

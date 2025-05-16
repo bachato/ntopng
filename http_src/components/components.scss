@@ -1,8 +1,8 @@
-@import './charts/bubble-chart.scss';
-@import './charts/cal-heatmap.scss';
-@import './charts/heatmap.scss';
-@import './charts/pie-chart.scss';
-@import './charts/host/cubism.scss';
+@use './charts/bubble-chart.scss';
+@use './charts/cal-heatmap.scss';
+@use './charts/heatmap.scss';
+@use './charts/pie-chart.scss';
+@use './charts/host/cubism.scss';
 
-@import './sidebar/sidebar.scss';
+@use './sidebar/sidebar.scss';
 
