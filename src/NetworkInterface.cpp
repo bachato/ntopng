@@ -3781,9 +3781,7 @@ void NetworkInterface::dumpFlowLoop() {
     u_int64_t n = dequeueFlowsForDump(idle_flows_budget, active_flows_budget);
 
     if (n == 0) {
-#ifdef WIN32
       _usleep(10000);
-#endif
     }
   }
 
