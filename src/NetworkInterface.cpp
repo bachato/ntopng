@@ -1161,7 +1161,7 @@ bool NetworkInterface::enqueueHostAlert(HostAlert *alert) {
 
 int NetworkInterface::dumpFlow(time_t when, Flow *f) {
   int rc = -1;
-  
+
   /* Asynchronous dump via a thread */
   if (f->get_state() == hash_entry_state_idle) {
     /* Last flow dump before delete
@@ -3525,9 +3525,10 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
   while (idleFlowsToDump->isNotEmpty()) {
     Flow *f = idleFlowsToDump->dequeue();
 
-    dumpFlowOut(dumper, when, f);
-    // delete f;
-    idle_flows_done++;
+    if(dumpFlowOut(dumper, when, f)) {
+      // delete f;
+      idle_flows_done++;
+    }
 
     if (idle_flows_budget > 0 /* Budget requested */
         && idle_flows_done >= idle_flows_budget /* Budget exceeded */)
@@ -3592,7 +3593,7 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
 bool NetworkInterface::dumpFlowOut(DB *dumper, time_t when, Flow *f) {
   char *json = NULL;
   bool rc = true;
-  
+
   if(dumper == NULL) {
 #ifdef NTOPNG_PRO
     dumper = isViewed() ? viewedBy()->getDB() : getDB();
@@ -3601,7 +3602,7 @@ bool NetworkInterface::dumpFlowOut(DB *dumper, time_t when, Flow *f) {
 #endif
 
     if(dumper == NULL)
-      return(false);    
+      return(false);
   }
 
   /* Checkpoint flow traffic counters for the dump */
@@ -3764,6 +3765,8 @@ void NetworkInterface::hostAlertsDequeueLoop() {
 
 void NetworkInterface::dumpFlowLoop() {
   char buf[16];
+  const u_int idle_flows_budget = 65536;
+  const u_int active_flows_budget = idle_flows_budget / 3; /* lower priority */
 
   snprintf(buf, sizeof(buf), "ntopng-%d-fdump", get_id());
   Utils::setThreadName(buf);
@@ -3786,8 +3789,7 @@ void NetworkInterface::dumpFlowLoop() {
       high-priority and thus we want to keep processing them if they're in the
       queue.
     */
-    u_int64_t n = dequeueFlowsForDump(0 /* Unlimited budget for idle flows */,
-				      MAX_ACTIVE_FLOW_QUEUE_LEN /* Limited budged for active flows */);
+    u_int64_t n = dequeueFlowsForDump(idle_flows_budget, active_flows_budget);
 
     if (n == 0) {
 #ifdef WIN32
@@ -8493,9 +8495,9 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
 	}
 #endif
 #endif
-      }      
+      }
     }
-    
+
     if (!isViewed() && !disable_dump) {
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
       if (ntop->getPrefs()->do_dump_alerts_on_clickhouse())
@@ -9346,12 +9348,12 @@ void NetworkInterface::checkDhcpIPRange(Mac *sender_mac,
 
   if ((ipv4 != 0) && (mac != 0) && (mac != 0xFFFFFFFFFFFF)) {
     IpAddress ip;
-    
+
     ip.set(ipv4);
 
     if (!isInDhcpRange(&ip)) {
       AlertsQueue *q = getAlertsQueue();
-      
+
       if (q) q->pushOutsideDhcpRangeAlert(_mac, sender_mac,
 					  ntohl(ipv4), ntohl(dhcp_reply->siaddr),
 					  vlan_id);
@@ -9501,7 +9503,7 @@ bool NetworkInterface::initFlowDump(u_int8_t num_dump_interfaces) {
 
   if (db == NULL) {
     try {
-    if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {	
+    if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
       db = new (std::nothrow) ClickHouseFlowDB(this);
 
@@ -12728,5 +12730,5 @@ void NetworkInterface::incnDPIStats(time_t when, u_int16_t ndpi_proto,
 
 void NetworkInterface::resetBroacastDomains() {
   if(bcast_domains != NULL)
-    bcast_domains->reset();  
+    bcast_domains->reset();
 }
