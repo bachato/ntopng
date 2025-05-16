@@ -2762,6 +2762,9 @@ void Prefs::lua(lua_State *vm) {
   lua_push_bool_table_entry(vm, "network_discovery", network_discovery);
   lua_push_bool_table_entry(vm, "starttls", starttls);
   lua_push_bool_table_entry(vm, "dump_pcap_to_clickhouse", dump_pcap_to_clickhouse);
+#ifdef HAVE_CLICKHOUSE_LIB
+  lua_push_bool_table_entry(vm, "native_clickhouse_client_supported", true);
+#endif
   lua_push_bool_table_entry(vm, "native_clickhouse_client_enabled", use_native_clickhouse_client);
   lua_push_bool_table_entry(vm, "tls_quic_hostnaming", tls_quic_hostnaming);
 

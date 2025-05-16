@@ -2179,7 +2179,7 @@ if auth.has_capability(auth.capabilities.preferences) then
             field = "toggle_use_native_clickhouse_client",
             default = "0",
             pref = "use_native_clickhouse_client",
-            hidden = not showAggregateFlowsPrefs
+            hidden = not showAggregateFlowsPrefs or not prefs.native_clickhouse_client_supported
         })
 
         prefsToggleButton(subpage_active, {
