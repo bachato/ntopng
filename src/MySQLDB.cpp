@@ -1468,8 +1468,10 @@ done:
 
   if (debug_performance) {
     gettimeofday(&end, NULL);
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Query completed in %.3f sec (err=%d) [%s]",
-        Utils::usecTimevalDiff(&end, &begin) / 1000000., rc, sql);
+    u_int32_t diff_usec =  Utils::usecTimevalDiff(&end, &begin);
+    if (diff_usec > 1000000) /* >1s TODO add a pref */
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "Query completed in %.3f sec (err=%d) [%s]",
+        diff_usec / 1000000., rc, sql);
   }
 
   return rc;
