@@ -678,6 +678,8 @@
   NTOPNG_PREFS_PREFIX ".dump_pcap_to_clickhouse"
 #define CONST_PREFS_ENABLE_NATIVE_CLICKHOUSE_CLIENT \
   NTOPNG_PREFS_PREFIX ".use_native_clickhouse_client"
+#define CONST_PREFS_ENABLE_QUERY_PERFORMANCE_LOG \
+  NTOPNG_PREFS_PREFIX ".enable_query_performance_log"
 #define CONST_PREFS_ENABLE_ACCESS_LOG NTOPNG_PREFS_PREFIX ".enable_access_log"
 #define CONST_PREFS_ENABLE_ASSETS_LOG NTOPNG_PREFS_PREFIX ".enable_assets_log"
 #define CONST_PREFS_ENABLE_SQL_LOG NTOPNG_PREFS_PREFIX ".enable_sql_log"

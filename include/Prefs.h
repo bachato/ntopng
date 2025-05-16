@@ -211,6 +211,7 @@ class Prefs {
   bool active_monitoring, network_discovery, starttls;
   bool dump_pcap_to_clickhouse; /* Dump pcap-interface flows to ClickHouse */
   bool use_native_clickhouse_client;
+  bool query_performance_log;
 
   InterfacesSet lan_interfaces, wan_interfaces;
 
@@ -409,6 +410,7 @@ class Prefs {
   inline bool email_starttls_enabled()          { return (starttls); };
   inline bool dump_pcap_to_clickhouse_enabled() { return (dump_pcap_to_clickhouse); };
   inline bool native_clickhouse_client_enabled() { return (use_native_clickhouse_client); };
+  inline bool query_performance_log_enabled() { return (query_performance_log); };
   inline char* get_cpu_affinity() { return (cpu_affinity); };
   inline char* get_other_cpu_affinity() { return (other_cpu_affinity); };
 #ifdef __linux__

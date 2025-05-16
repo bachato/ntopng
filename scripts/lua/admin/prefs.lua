@@ -1928,6 +1928,8 @@ if auth.has_capability(auth.capabilities.preferences) then
             pref = "enable_host_pools_log"
         })
 
+
+
 	print('<tr><th colspan=2 style="text-align:right;"><button type="submit" class="btn btn-primary" style="width:115px" disabled="disabled">' .. i18n("save") .. '</button></th></tr>')
 
         print [[<input name="csrf" type="hidden" value="]]
@@ -2193,6 +2195,13 @@ if auth.has_capability(auth.capabilities.preferences) then
             field = "toggle_dump_pcap_to_clickhouse",
             default = "0",
             pref = "dump_pcap_to_clickhouse"
+        })
+
+        prefsToggleButton(subpage_active, {
+            field = "toggle_query_performance_log",
+            default = "0",
+            pref = "enable_query_performance_log",
+            hidden = not showAggregateFlowsPrefs
         })
 
         print(

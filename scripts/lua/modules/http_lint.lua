@@ -2302,6 +2302,7 @@ local known_parameters = {
     ["toggle_starttls"] = validateBool,
     ["toggle_dump_pcap_to_clickhouse"] = validateBool,
     ["toggle_use_native_clickhouse_client"] = validateBool,
+    ["toggle_query_performance_log"] = validateBool,
     ["behaviour_analysis_learning_period"] = validateNumber,
     ["behaviour_analysis_learning_status_during_learning"] = validateNumber,
     ["behaviour_analysis_learning_status_post_learning"] = validateNumber,

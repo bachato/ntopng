@@ -1353,6 +1353,7 @@ int MySQLDB::exec_sql_query(lua_State *vm, char *sql, bool limitRows,
   MYSQL_RES *result;
   int rc, num_fields;
   struct timeval begin, end;
+  bool debug_performance = enable_db_traces || ntop->getPrefs()->query_performance_log_enabled();
 
   if (!ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
     if (wait_for_db_created &&
@@ -1374,7 +1375,7 @@ int MySQLDB::exec_sql_query(lua_State *vm, char *sql, bool limitRows,
     if (!connectToDB(&mysql, true)) return (-3);
   }
 
-  if (enable_db_traces) {
+  if (debug_performance) {
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", sql);
     gettimeofday(&begin, NULL);
   }
@@ -1416,7 +1417,7 @@ int MySQLDB::exec_sql_query(lua_State *vm, char *sql, bool limitRows,
     if ((result = mysql_store_result(&mysql)) == NULL) {
       if (mysql_field_count(&mysql) == 0) {
         /* If mysql_field_count() == 0 this was an INSERT so it's normal that
-         * tha result is NULL */
+         * the result is NULL */
         if (vm) lua_pushnil(vm);
         m.unlock(__FILE__, __LINE__);
         return (0);
@@ -1445,7 +1446,7 @@ int MySQLDB::exec_sql_query(lua_State *vm, char *sql, bool limitRows,
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "num_fields=%d", num_fields);
 #endif
 
-  if (enable_db_traces) {
+  if (debug_performance) {
     gettimeofday(&end, NULL);
     ntop->getTrace()->traceEvent(
         TRACE_NORMAL, "Query completed in %.3f sec",

@@ -238,6 +238,10 @@ local menu_subpages = {{
             title = i18n("prefs.toggle_use_native_clickhouse_client_title"),
             description = i18n("prefs.toggle_use_native_clickhouse_client_description")
         }
+        toggle_query_performance_log = {
+            title = i18n("prefs.toggle_query_performance_log_title"),
+            description = i18n("prefs.toggle_query_performance_log_description")
+        }
     }
 }, {
     id = "dump_settings",
