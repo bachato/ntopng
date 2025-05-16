@@ -290,7 +290,7 @@ using namespace std;
 #endif
 
 #ifdef NTOPNG_PRO
-#include "Profile.h"
+#include "GenericProfile.h"
 #include "Profiles.h"
 #include "CountMinSketch.h"
 #include "AlertExclusionsInfo.h"
@@ -418,6 +418,12 @@ using namespace std;
 #endif
 #endif
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
+
+/* clickhouse-cpp */
+#include <clickhouse/client.h>
+#include <iomanip> /* std::setfill */
+using namespace clickhouse;
+
 #include "ClickHouseImport.h"
 #include "ClickHouseFlowDB.h"
 #include "ClickHouseAlertStore.h"

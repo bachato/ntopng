@@ -233,6 +233,10 @@ local menu_subpages = {{
         toggle_dump_pcap_to_clickhouse = {
             title = i18n("prefs.toggle_dump_pcap_to_clickhouse_title"),
             description = i18n("prefs.toggle_dump_pcap_to_clickhouse_description")
+        },
+        toggle_use_native_clickhouse_client = {
+            title = i18n("prefs.toggle_use_native_clickhouse_client_title"),
+            description = i18n("prefs.toggle_use_native_clickhouse_client_description")
         }
     }
 }, {

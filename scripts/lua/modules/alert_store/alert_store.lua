@@ -1101,6 +1101,8 @@ end
 
 -- NOTE noLimit should be used only with small deltas between epoch_end - epoch_begin to not overload the db
 function alert_store:select_historical(filter, fields, download --[[ Available only with ClickHouse ]], noLimit)
+    local prefs = ntop.getPrefs()
+
     local table_name = self:get_table_name()
     local res = {}
     local where_clause = ''
@@ -1203,12 +1205,10 @@ function alert_store:select_historical(filter, fields, download --[[ Available o
         return ""
     end
 
-    -- tprint(q)
-
     -- res = interface.alert_store_query(q, true)
     res = interface.alert_store_query(q, true, true) -- Limit results to the max set in the backend
 
-    if ntop.isClickHouseEnabled() then
+    if ntop.isClickHouseEnabled() and not prefs.native_clickhouse_client_enabled then
         -- convert DATETIME to epoch
         for _, record in ipairs(res or {}) do
             if record.tstamp_epoch then

@@ -68,6 +68,9 @@ class MySQLDB : public DB {
                      void *cb_user_data = NULL);
   int exec_sql_query(lua_State *vm, char *sql, bool limitRows,
                      bool wait_for_db_created);
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
+  int exec_sql_query_ch(lua_State *vm, char *sql, bool limitRows);
+#endif
   virtual bool startQueryLoop();
   void shutdown();
   int exec_single_query(lua_State *vm, char *sql);
