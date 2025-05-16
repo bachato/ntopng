@@ -1109,7 +1109,7 @@ int MySQLDB::exec_sql_query(const char *sql, bool doReconnect,
 
 /* ******************************************* */
 
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_CLICKHOUSE_LIB)
 
 std::string uuid_to_string_ch(const std::pair<uint64_t, uint64_t>& uuid) {
     uint8_t bytes[16];
@@ -1363,7 +1363,7 @@ int MySQLDB::exec_sql_query(lua_State *vm, char *sql, bool limitRows,
     }
   }
 
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_CLICKHOUSE_LIB)
   if (ntop->getPrefs()->do_dump_flows_on_clickhouse() &&
       ntop->getPrefs()->native_clickhouse_client_enabled()) {
     return exec_sql_query_ch(vm, sql, limitRows);
