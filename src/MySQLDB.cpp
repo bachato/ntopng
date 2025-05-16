@@ -1364,20 +1364,23 @@ int MySQLDB::exec_sql_query(lua_State *vm, char *sql, bool limitRows,
     }
   }
 
+  if (debug_performance) {
+    gettimeofday(&begin, NULL);
+  }
+
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_CLICKHOUSE_LIB)
   if (ntop->getPrefs()->do_dump_flows_on_clickhouse() &&
       ntop->getPrefs()->native_clickhouse_client_enabled()) {
-    return exec_sql_query_ch(vm, sql, limitRows);
+    rc = exec_sql_query_ch(vm, sql, limitRows);
+    goto done;
   }
 #endif
 
   if (!db_operational) {
-    if (!connectToDB(&mysql, true)) return (-3);
-  }
-
-  if (debug_performance) {
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", sql);
-    gettimeofday(&begin, NULL);
+    if (!connectToDB(&mysql, true)) {
+      rc = -1;
+      goto done;
+    }
   }
 
   m.lock(__FILE__, __LINE__);
@@ -1407,7 +1410,10 @@ int MySQLDB::exec_sql_query(lua_State *vm, char *sql, bool limitRows,
     m.unlock(__FILE__, __LINE__);
     connectToDB(&mysql, true);
 
-    if (!db_operational) return (-2);
+    if (!db_operational) {
+      rc = -2;
+      goto done;
+    }
 
     m.lock(__FILE__, __LINE__);
     rc = mysql_query(&mysql, sql);
@@ -1420,7 +1426,8 @@ int MySQLDB::exec_sql_query(lua_State *vm, char *sql, bool limitRows,
          * the result is NULL */
         if (vm) lua_pushnil(vm);
         m.unlock(__FILE__, __LINE__);
-        return (0);
+        rc = 0;
+        goto done;
       } else
         rc = -1;
     } else {
@@ -1439,19 +1446,12 @@ int MySQLDB::exec_sql_query(lua_State *vm, char *sql, bool limitRows,
     if (vm) lua_pushstring(vm, get_last_db_error(&mysql));
     printFailure(sql, rc);
     m.unlock(__FILE__, __LINE__);
-    return (rc);
+    goto done;
   }
 
 #ifdef QUERY_TRACE
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "num_fields=%d", num_fields);
 #endif
-
-  if (debug_performance) {
-    gettimeofday(&end, NULL);
-    ntop->getTrace()->traceEvent(
-        TRACE_NORMAL, "Query completed in %.3f sec",
-        Utils::usecTimevalDiff(&end, &begin) / 1000000.);
-  }
 
   if ((result == NULL) || (num_fields == 0)) {
     if (vm) lua_pushnil(vm);
@@ -1462,7 +1462,17 @@ int MySQLDB::exec_sql_query(lua_State *vm, char *sql, bool limitRows,
 
   m.unlock(__FILE__, __LINE__);
 
-  return (0);
+  rc = 0;
+
+done:
+
+  if (debug_performance) {
+    gettimeofday(&end, NULL);
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Query completed in %.3f sec (err=%d) [%s]",
+        Utils::usecTimevalDiff(&end, &begin) / 1000000., rc, sql);
+  }
+
+  return rc;
 }
 
 /* ******************************************* */
