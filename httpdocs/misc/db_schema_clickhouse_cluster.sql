@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `flows` ON CLUSTER '$CLUSTER' (
 `WTP_MAC_ADDRESS` UInt64,
 `DOMAIN_NAME` String,
 `REQUIRE_ATTENTION` Boolean
-) ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{database}/{table}', '{replica}') PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (IPV4_SRC_ADDR, IPV4_DST_ADDR, FIRST_SEEN);
+) ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{database}/{table}', '{replica}') PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (FIRST_SEEN, IPV4_SRC_ADDR, IPV4_DST_ADDR);
 @
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `FLOW_ID` UInt64;
 @
