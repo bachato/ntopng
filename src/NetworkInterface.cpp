@@ -3495,20 +3495,10 @@ void NetworkInterface::incNumQueueDroppedFlows(u_int32_t num) {
 */
 u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
                                                 u_int active_flows_budget) {
-  /*
-    For viewed interface, the dumper database is the one belonging to the
-    overlying view interface.
-  */
-  DB *dumper;
+  DB *dumper = getDB();
   u_int64_t idle_flows_done = 0, active_flows_done = 0;
   time_t when = time(NULL);
-
-#ifdef NTOPNG_PRO
-  dumper = isViewed() ? viewedBy()->getDB() : getDB();
-#else
-  dumper = getDB();
-#endif
-
+  
 #ifdef HAVE_ZMQ
 #ifndef HAVE_NEDGE
   if (ntop->get_export_interface() == NULL)
@@ -3633,7 +3623,7 @@ bool NetworkInterface::dumpFlowOut(DB *dumper, time_t when, Flow *f) {
 
   if (!rc)
     incDBNumDroppedFlows(dumper);
-
+  
   f->decUses(); /* Add done, decrease the reference counter */
   f->set_dump_done();
 
@@ -3757,8 +3747,7 @@ void NetworkInterface::hostAlertsDequeueLoop() {
   /* Make sure all alerts have been dequeued and processed */
   dequeueHostAlertsFromChecks(0 /* unlimited budged */);
 
-  ntop->getTrace()->traceEvent(
-			       TRACE_NORMAL, "Host alerts dump thread terminated for %s", get_name());
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Host alerts dump thread terminated for %s", get_name());
 }
 
 /* **************************************************** */
@@ -7509,10 +7498,15 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
   lua_push_uint64_table_entry(vm, "throughput_trend_pps", pkts_thpt.getTrend());
   l4Stats.luaStats(vm);
 
-
   if(fullStats) {
-    if (db) db->lua(vm, false /* Overall */);
-
+    if (!isView()) {
+      /* Standard non-view interface */
+      if (db) db->lua(vm, false /* Overall */);
+    } else {
+      /* View interfaces we need to merge the number of drops/exports */
+      (dynamic_cast<ViewInterface*>(this))->dumpDBStats(vm, false /* Overall */);
+    }
+    
     usedPorts.lua(vm, this);
   }
 
@@ -7525,8 +7519,14 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
   lua_push_uint64_table_entry(vm, "bytes", getNumBytesSinceReset());
   lua_push_uint64_table_entry(vm, "drops", getNumPacketDropsSinceReset());
 
-  if (db) db->lua(vm, true /* Since last checkpoint */);
-
+  if (!isView()) {
+    /* Standard non-view interface */
+    if (db) db->lua(vm, true /* Since last checkpoint */);
+  } else {
+    /* View interfaces we need to merge the number of drops/exports */
+    (dynamic_cast<ViewInterface*>(this))->dumpDBStats(vm, true /* Since last checkpoint */);
+  }
+  
   lua_pushstring(vm, "stats_since_reset");
   lua_insert(vm, -2);
   lua_settable(vm, -3);

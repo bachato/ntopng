@@ -42,16 +42,27 @@ void DB::shutdown() { running = false; }
 
 /* ******************************************* */
 
-void DB::lua(lua_State *vm, bool since_last_checkpoint) const {
-  lua_push_uint64_table_entry(vm, "flow_export_count",
-			      exportedFlows - (since_last_checkpoint ? checkpointExportedFlows : 0));
-  lua_push_int32_table_entry(vm, "flow_export_drops",
-			     getNumDroppedFlows() -
-			     (since_last_checkpoint
-			      ? (checkpointDroppedFlows + checkpointQueueDroppedFlows)
-			      : 0));
-  lua_push_float_table_entry(vm, "flow_export_rate",
-                             exportRate >= 0 ? exportRate : 0);
+void DB::getStats(u_int64_t *flow_export_count,
+		  u_int64_t *flow_export_drops,
+		  u_int64_t *flow_export_rate,
+		  bool since_last_checkpoint) {
+
+  *flow_export_count = exportedFlows - (since_last_checkpoint ? checkpointExportedFlows : 0);
+  *flow_export_drops = getNumDroppedFlows() - (since_last_checkpoint  ? (checkpointDroppedFlows + checkpointQueueDroppedFlows) : 0);
+  *flow_export_rate  = exportRate >= 0 ? exportRate : 0;
+}
+
+/* ******************************************* */
+
+void DB::lua(lua_State *vm, bool since_last_checkpoint) {
+  u_int64_t a, b, c;
+
+  getStats(&a, &b, &c, since_last_checkpoint);
+
+  /* Keep in sync with ViewInterface::dumpDBStats() */
+  lua_push_uint64_table_entry(vm, "flow_export_count", a);
+  lua_push_int32_table_entry(vm, "flow_export_drops", b);
+  lua_push_float_table_entry(vm, "flow_export_rate", c);
 }
 
 /* ******************************************* */

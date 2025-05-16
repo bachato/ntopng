@@ -81,9 +81,11 @@ class DB {
   virtual bool isDbCreated() { return (true); };
   virtual void shutdown();
   virtual void flush(){};
-  virtual void lua(lua_State *vm, bool since_last_checkpoint) const;
+  virtual void lua(lua_State *vm, bool since_last_checkpoint);
   virtual int select_database(char *dbname) { return (-1); }
   virtual void checkIdle(time_t when) { ; }
+  virtual void getStats(u_int64_t *flow_export_count, u_int64_t *flow_export_drops,
+			u_int64_t *flow_export_rate, bool since_last_checkpoint);  
 };
 
 #endif /* _DB_CLASS_H_ */

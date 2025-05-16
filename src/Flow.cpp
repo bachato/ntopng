@@ -4820,12 +4820,13 @@ void Flow::housekeep(time_t t) {
       detected state, don't break, continue so to execute detection completed
       checks.
     */
-    if(get_state() != hash_entry_state_flow_protocoldetected) break;
+    if(get_state() != hash_entry_state_flow_protocoldetected)
+      break;
 
   case hash_entry_state_flow_protocoldetected:
     if(!is_swap_requested()) /* The flow will be swapped, hook execution will
-				 occur on the swapped flow. */
-        iface->execProtocolDetectedChecks(this);
+				occur on the swapped flow. */
+      iface->execProtocolDetectedChecks(this);
     break;
 
   case hash_entry_state_active:
@@ -4844,8 +4845,8 @@ void Flow::housekeep(time_t t) {
       this reason, the callbacks are executed on the original flow that should
       have been swapped but actually it is not.
     */
-    if(getInterface()->read_from_pcap_dump_done() && is_swap_requested() &&
-	!is_swap_done())
+    if(getInterface()->read_from_pcap_dump_done()
+       && is_swap_requested() && !is_swap_done())
       iface->execProtocolDetectedChecks(this);
     break;
 
