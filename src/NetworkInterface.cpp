@@ -7497,6 +7497,9 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
   l4Stats.luaStats(vm);
 
   if(fullStats) {
+#if !defined(NTOPNG_PRO)
+    if (db) db->lua(vm, false /* Overall */);
+#else
     if (!isView()) {
       /* Standard non-view interface */
       if (db) db->lua(vm, false /* Overall */);
@@ -7504,6 +7507,7 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
       /* View interfaces we need to merge the number of drops/exports */
       (dynamic_cast<ViewInterface*>(this))->dumpDBStats(vm, false /* Overall */);
     }
+#endif
     
     usedPorts.lua(vm, this);
   }
@@ -7517,6 +7521,9 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
   lua_push_uint64_table_entry(vm, "bytes", getNumBytesSinceReset());
   lua_push_uint64_table_entry(vm, "drops", getNumPacketDropsSinceReset());
 
+#if !defined(NTOPNG_PRO)
+  if (db) db->lua(vm, true /* Since last checkpoint */);
+#else
   if (!isView()) {
     /* Standard non-view interface */
     if (db) db->lua(vm, true /* Since last checkpoint */);
@@ -7524,6 +7531,7 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
     /* View interfaces we need to merge the number of drops/exports */
     (dynamic_cast<ViewInterface*>(this))->dumpDBStats(vm, true /* Since last checkpoint */);
   }
+#endif
   
   lua_pushstring(vm, "stats_since_reset");
   lua_insert(vm, -2);
