@@ -466,7 +466,13 @@ PRO_HEADERS='$(wildcard pro/include/*.h) $(wildcard pro/include/flow_checks/*.h)
 PRO_MAKEFILE_INC="include ./pro/inc.Makefile"
 dnl> Remove heading spaces
 AC_DEFINE_UNQUOTED(NTOPNG_PRO, 1, [Building ntopng professional])
-AC_DEFINE_UNQUOTED(HAVE_CLICKHOUSE, 1, [Building with ClickHouse support])
+
+if test "$MACHINE" = "aarch64"; then
+ echo "Native ClickHouse support diabled on this architecture"
+else
+ AC_DEFINE_UNQUOTED(HAVE_CLICKHOUSE, 1, [Building with ClickHouse support])
+fi
+
 AC_DEFINE_UNQUOTED(NTOPNG_PRO_GIT_RELEASE, "r${PRO_GIT_RELEASE}", [ntopng professional release])
 AC_DEFINE_UNQUOTED(NTOPNG_PRO_GIT_DATE, "${PRO_GIT_DATE}", [ntopng professional date])
 DUMMY=`cd ./pro; ${MAKE} build`
