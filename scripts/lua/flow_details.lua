@@ -633,10 +633,6 @@ else
          print(" [" .. i18n("ndpi_confidence") .. ": " .. format_confidence_badge(flow.confidence) .. "]")
       end
 
-      if (flow.tcp_fingerprint) then
-         print(' <span class="badge bg-secondary">TCP Fingerprint: ' .. flow.tcp_fingerprint .. '</span>')
-      end
-
       -- See FlowSource in ntop_typedefs.h
       if (flow.flow_source == 0) then
          -- packet to flow
@@ -800,9 +796,13 @@ else
       i18n("details.ago") .. "]" .. "</div></td>\n")
    print("<td nowrap><div id=last_seen>" .. formatEpoch(flow["seen.last"]) .. " [" ..
       secondsToTime(os.time() - flow["seen.last"]) .. " " .. i18n("details.ago") .. "]" .. "</div></td></tr>\n")
-
+   
    print("<tr><th width=33%>" .. i18n("details.duration") .. "</th><td nowrap colspan=2<div id=duration>" ..
       secondsToTime(flow["seen.last"] - flow["seen.first"]) .. "</div></td>\n")
+
+   if (flow.tcp_fingerprint) then
+      print("<tr><th width=33%>" .. i18n("details.tcp_fingerprint") .. "</th><td nowrap colspan=2<div id=duration>" .. flow.tcp_fingerprint .. "</div></td>\n")
+   end
 
    local client_to_server_label = i18n("client") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("server")
    local server_to_client_label = i18n("server") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("client")
@@ -1012,7 +1012,7 @@ else
       print("<tr><th>" .. i18n("download") .. "&nbsp;<i class=\"fas fa-download fa-lg\"></i></th><td><A HREF=\"" ..
          url .. "\" download=\"iec104-" .. flow_key .. ".json\">JSON</A></td></tr>")
    end
-   
+
    -- qoe_utils is defined only if ntop is Enterprise L
    if (qoe_utils and (flow.qoe ~= nil)
       and (flow.qoe.score ~= nil)
