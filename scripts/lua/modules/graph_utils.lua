@@ -91,14 +91,16 @@ function generateColorPalette(n, alpha)
     -- If requested colors are fewer than our base set, return a subset
     if n <= #baseColors then
         for i = 1, n do
-            table.insert(colors, hexToRgba(baseColors[i], alpha))
+            -- table.insert(colors, hexToRgba(baseColors[i], alpha))
+            table.insert(colors, hexToHexAlpha(baseColors[i], alpha))
         end
         return colors
     end
 
     -- Get base colors
     for i = 1, #baseColors do 
-        table.insert(colors, hexToRgba(baseColors[i], alpha))
+        -- table.insert(colors, hexToRgba(baseColors[i], alpha))
+        table.insert(colors, hexToHexAlpha(baseColors[i], alpha))
     end
 
     local saturation = 75
@@ -127,13 +129,18 @@ function generateColorPalette(n, alpha)
             b = hue2rgb(p, q, h - 1 / 3)
         end
 
-        local rgba = string.format("rgba(%d, %d, %d, %.2f)", 
-                                 math.floor(r * 255 + 0.5),
-                                 math.floor(g * 255 + 0.5),
-                                 math.floor(b * 255 + 0.5),
-                                 alpha)
+        local r_int = math.floor(r * 255 + 0.5)
+        local g_int = math.floor(g * 255 + 0.5)
+        local b_int = math.floor(b * 255 + 0.5)
 
-        table.insert(colors, rgba)
+        local rgba = string.format("rgba(%d, %d, %d, %.2f)", 
+                                   r_int, g_int, b_int,
+                                   alpha)
+
+        local hex = string.format("#%02X%02X%02X", r_int, g_int, b_int)
+        hex = hexToHexAlpha(hex, alpha)
+
+        table.insert(colors, hex)
     end
 
     return colors

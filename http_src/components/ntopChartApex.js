@@ -144,7 +144,7 @@ const ntopChartApex = function () {
             },
             xaxis: {
                 labels: {
-                    show: true,
+                    show: false,
                     datetimeUTC: false,
                 },
                 axisTicks: {
