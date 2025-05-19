@@ -1382,8 +1382,24 @@ historical_flow_utils.topk_tags_v6 = {
 historical_flow_utils.builtin_presets = {
    {
       id = "",
+      i18n_name = "queries.raw_flows",
+      name = i18n("queries.raw_flows"),
+      chart_type = "heatmap",
+      chart =
+         {
+            {
+               unit_measure = "",
+               params = {
+                  count = historical_ts_definitions and historical_ts_definitions.get_available_query_types()[4]
+               }
+            }
+         },
+   },
+   {
+      id = "raw_flows_thpt",
       i18n_name = "queries.raw_flows_thpt",
       name = i18n("queries.raw_flows_thpt"),
+      chart_type = "histogram",
       chart =
          {
             {
@@ -1398,6 +1414,7 @@ historical_flow_utils.builtin_presets = {
       id = "raw_flows_bytes",
       i18n_name = "queries.raw_flows_bytes",
       name = i18n("queries.raw_flows_bytes"),
+      chart_type = "histogram",
       chart =
          {
             {
@@ -1412,6 +1429,7 @@ historical_flow_utils.builtin_presets = {
       id = "raw_flows_score",
       i18n_name = "queries.raw_flows_score",
       name = i18n("queries.raw_flows_score"),
+      chart_type = "histogram",
       chart =
          {
             {
