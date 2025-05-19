@@ -304,6 +304,9 @@ async function init_url_params() {
     if (ntopng_url_manager.get_url_entry("aggregated") == null) {
         ntopng_url_manager.set_key_to_url("aggregated", "false");
     }
+    if (ntopng_url_manager.get_url_entry("count") == null) {
+        ntopng_url_manager.set_key_to_url("count", "traffic_presence");
+    }
 
 }
 
