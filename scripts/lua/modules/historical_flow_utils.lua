@@ -1385,6 +1385,7 @@ historical_flow_utils.builtin_presets = {
       i18n_name = "queries.raw_flows",
       name = i18n("queries.raw_flows"),
       chart_type = "heatmap",
+      chart_height = 100,
       chart =
          {
             {
