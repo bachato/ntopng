@@ -123,7 +123,11 @@ export default {
 				url_request = this.get_url_request();
 			}
 			let chart_options = await this.get_chart_options(url_request);
-			this.chart.updateChart(chart_options);
+            if (chart_options?.series) {
+                this.update_chart_series(chart_options.series)
+            } else {
+			    this.chart.updateChart(chart_options);
+            }
 		},
 		update_chart_options: function (chart_options) {
 			this.chart.updateChart(chart_options);
