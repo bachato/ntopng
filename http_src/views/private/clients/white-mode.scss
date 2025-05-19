@@ -1214,7 +1214,6 @@ table th.sticky-column-th {
   position: sticky !important;
   left: 0 !important;
   z-index: 2 !important;
-  /* Aggiungi un'ombra sottile per evidenziare il bordo */
   box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.2) !important;
 }
 
@@ -1222,7 +1221,6 @@ table th.sticky-column-th {
   position: sticky !important;
   left: 0 !important;
   z-index: 2 !important;
-  /* Aggiungi un'ombra sottile per evidenziare il bordo */
   box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.2) !important;
 }
 
@@ -1234,4 +1232,10 @@ table th.sticky-column-th {
 
 .search-container.expanded {
   width: 400px;
+}
+
+#chart-vue .card {
+  overflow: visible !important;
+  position: relative;
+  z-index: 0;
 }

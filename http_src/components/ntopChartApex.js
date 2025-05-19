@@ -138,9 +138,17 @@ const ntopChartApex = function () {
             },
             tooltip: {
                 x: {
+                    show: true,
                     format: "dd MMM yyyy HH:mm"
                 },
-                y: {}
+                y: {
+                    formatter: (serieName) => {
+                        if (serieName && serieName == 1) {
+                            return "Flows Available";
+                        }
+                        return "Flows not Available"
+                    }
+                }
             },
             xaxis: {
                 labels: {
