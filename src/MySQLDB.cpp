@@ -1127,58 +1127,10 @@ std::string uuid_to_string_ch(const std::pair<uint64_t, uint64_t>& uuid) {
 
 /* ******************************************* */
 
-void print_block_ch(const Block& block) {
-  size_t rows = block.GetRowCount();
-  size_t cols = block.GetColumnCount();
-
-  for (size_t i = 0; i < rows; ++i) {
-    std::cout << "#" << i << " ";
-    for (size_t j = 0; j < cols; ++j) {
-      auto col = block[j];
-      if (!col) {
-        std::cout << "(null)";
-        continue;
-      }
-
-      Type::Code type_code = col->Type()->GetCode();
-      switch (type_code) {
-        case Type::Code::UInt64: {
-          auto c = col->As<ColumnUInt64>();
-          std::cout << block.GetColumnName(j) << "=" << (*c)[i];
-          break;
-        }
-        case Type::Code::Int64: {
-          auto c = col->As<ColumnInt64>();
-          std::cout << block.GetColumnName(j) << "=" << (*c)[i];
-          break;
-        }
-        case Type::Code::Float64: {
-          auto c = col->As<ColumnFloat64>();
-          std::cout << block.GetColumnName(j) << "=" << (*c)[i];
-          break;
-        }
-        case Type::Code::String: {
-          auto c = col->As<ColumnString>();
-          std::cout << block.GetColumnName(j) << "=" << c->At(i);
-          break;
-        }
-        default:
-          std::cout << "[unsupported " << block.GetColumnName(j) << " type]";
-          break;
-      }
-
-      if (j != cols - 1)
-        std::cout << ", ";
-    }
-    std::cout << "\n";
-  }
-}
-
-/* ******************************************* */
-
 void result_to_lua_ch(lua_State *vm, const Block& block, bool limitRows, int& count) {
   size_t rows = block.GetRowCount();
   size_t cols = block.GetColumnCount();
+  bool log_records = false;
 
   if (count >= MYSQL_MAX_NUM_ROWS)
     return;
@@ -1198,67 +1150,87 @@ void result_to_lua_ch(lua_State *vm, const Block& block, bool limitRows, int& co
 
     lua_newtable(vm);
 
+    if (log_records) {
+      std::cout << "#" << i << " ";
+    }
+
     for (size_t j = 0; j < cols; ++j) {
       auto col = block[j];
       std::string value;
+      const char *column_type = "Unknown";
 
-      if (!col)
+      if (!col) {
+        if (log_records) {
+          std::cout << "(null)";
+        }
         continue;
+      }
 
       Type::Code type_code = col->Type()->GetCode();
       switch (type_code) {
         case Type::Code::UInt8: {
           /* Note: Boolean is stored as UInt8 */
+          column_type = "UInt8";
           auto c = col->As<ColumnUInt8>();
           value = std::to_string((*c)[i]);
           break;
         }
         case Type::Code::UInt16: {
+          column_type = "UInt16";
           auto c = col->As<ColumnUInt16>();
           value = std::to_string((*c)[i]);
           break;
         }
         case Type::Code::UInt32: {
+          column_type = "UInt32";
           auto c = col->As<ColumnUInt32>();
           value = std::to_string((*c)[i]);
           break;
         }
         case Type::Code::UInt64: {
+          column_type = "UInt64";
           auto c = col->As<ColumnUInt64>();
           value = std::to_string((*c)[i]);
           break;
         }
         case Type::Code::Int8: {
+          column_type = "Int8";
           auto c = col->As<ColumnInt8>();
           value = std::to_string((*c)[i]);
           break;
         }
         case Type::Code::Int16: {
+          column_type = "Int16";
           auto c = col->As<ColumnInt16>();
           value = std::to_string((*c)[i]);
           break;
         }
         case Type::Code::Int32: {
+          column_type = "Int32";
           auto c = col->As<ColumnInt32>();
           value = std::to_string((*c)[i]);
           break;
         }
         case Type::Code::Int64: {
+          column_type = "Int64";
           auto c = col->As<ColumnInt64>();
           value = std::to_string((*c)[i]);
           break;
         }
         case Type::Code::Float64: {
+          column_type = "Float64";
           auto c = col->As<ColumnFloat64>();
           value = std::to_string((*c)[i]);
           break;
         }
         case Type::Code::String: {
+          column_type = "String";
           auto c = col->As<ColumnString>();
           value = std::string(c->At(i));
           break;
         }
         case Type::Code::DateTime: {
+          column_type = "DateTime";
 #if 1
           /* Return as epoch (same as mysql) */
           auto c = col->As<ColumnDateTime>();
@@ -1275,12 +1247,14 @@ void result_to_lua_ch(lua_State *vm, const Block& block, bool limitRows, int& co
           break;
         }
         case Type::Code::UUID: {
+          column_type = "UUID";
           auto c = col->As<ColumnUUID>();
           clickhouse::UUID uuid = (*c)[i];
           value = uuid_to_string_ch(uuid);
           break;
         }
         case Type::Code::IPv6: {
+          column_type = "IPv6";
           auto c = col->As<ColumnIPv6>();
           in6_addr ipv6 = (*c)[i];
           char str[INET6_ADDRSTRLEN];
@@ -1289,11 +1263,20 @@ void result_to_lua_ch(lua_State *vm, const Block& block, bool limitRows, int& co
           break;
         }
         case Type::Code::Nullable: {
+          column_type = "Null";
           break;
         }
         default:
+          column_type = "Unsupported";
           std::cout << "Unsupported " << block.GetColumnName(j) << " type in record\n";
           break;
+      }
+
+      if (log_records) {
+        std::cout << block.GetColumnName(j) << " = " << value << " (" << column_type << ")";
+
+        if (j != cols - 1)
+          std::cout << ", ";
       }
 
       lua_push_str_table_entry(vm, (const char *) block.GetColumnName(j).c_str(), value.c_str());
@@ -1302,6 +1285,10 @@ void result_to_lua_ch(lua_State *vm, const Block& block, bool limitRows, int& co
     lua_pushinteger(vm, ++count);
     lua_insert(vm, -2);
     lua_settable(vm, -3);
+
+    if (log_records) {
+      std::cout << "\n";
+    }
   }
 }
 
@@ -1327,13 +1314,8 @@ int MySQLDB::exec_sql_query_ch(lua_State *vm, char *sql, bool limitRows) {
     );
 
     client.Select(sql, [vm, limitRows, &count](const Block& block) {
-
-      /* Print records to console (debug) */
-      //print_block_ch(block);
-
       /* Convert records to lua table */
       result_to_lua_ch(vm, block, limitRows, count);
-
     });
 
     rc = 0;
