@@ -179,31 +179,6 @@
 				"url": "/lua/pro/rest/v2/get/host/assets_dashboard/oses_distribution.lua",
 				"url_params": {}
 			}
-		},
-		{
-			"component" : "timeseries",
-			"id" : "hosts_ts",
-			"i18n_name" : "asset_details.count_snapshots",
-			"width" : 12,
-			"height" : 3,
-			"time_window" : "month",
-			"time_offset" : "",
-			"params" : {
-				"url" : "/lua/pro/rest/v2/get/timeseries/ts_multi.lua",
-				"url_params" : { },
-				"post_params" : {
-					"limit" : 180,
-					"version" : 4,
-					"ts_requests": {
-						"$IFID$" : {
-							"ts_query": "ifid:$IFID$",
-							"ts_schema": "iface:local_hosts",
-							"tskey": "$IFID$"
-						}
-					}
-				},
-				"source_type" : "interface"
-			}
 		}
 	]
 }
