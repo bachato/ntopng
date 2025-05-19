@@ -126,6 +126,54 @@ const ntopChartApex = function () {
     }();
 
     // define default chartOptions for area chart type.
+    const _default_HEATMAP_ChartOptions = function () {
+        let chartOptions = ntopng_utility.clone(_default_BASE_ChartOptions);
+        let HEATMAP_ChartOptions = {
+            chart: {
+                type: "heatmap",
+                zoom: {
+                    enabled: false,
+                    type: "x",
+                },
+            },
+            tooltip: {
+                x: {
+                    format: "dd MMM yyyy HH:mm"
+                },
+                y: {}
+            },
+            xaxis: {
+                labels: {
+                    show: true,
+                    datetimeUTC: false,
+                },
+                axisTicks: {
+                    show: false,
+                },
+                type: "datetime",
+                axisBorder: {
+                    show: true,
+                },
+                convertedCatToNumeric: false
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                show: false,
+                curve: "smooth"
+            },
+            colors: ["#008FFB"],
+            fill: {
+                type: "solid"
+            }
+        };
+
+        ntopng_utility.copy_object_keys(HEATMAP_ChartOptions, chartOptions, true);
+        return chartOptions;
+    }();
+
+    // define default chartOptions for area chart type.
     const _default_TS_STACKED_ChartOptions = function () {
         let chartOptions = ntopng_utility.clone(_default_BASE_ChartOptions);
         let TS_STACKED_ChartOptions = {
@@ -595,6 +643,7 @@ const ntopChartApex = function () {
             PIE: "PIE",
             DONUT: "DONUT",
             RADIALBAR: "RADIALBAR",
+            HEATMAP: "HEATMAP",
             RADAR: "RADAR",
             BUBBLE: "BUBBLE",
             BASE: "BASE",
@@ -613,6 +662,9 @@ const ntopChartApex = function () {
                 _setXTimeFormatter(_chartOptions);
             } else if (type == this.typeChart.TS_COLUMN) {
                 _chartOptions = ntopng_utility.clone(_default_TS_COLUMN_ChartOptions);
+                _setXTimeFormatter(_chartOptions);
+            } else if (type == this.typeChart.HEATMAP) {
+                _chartOptions = ntopng_utility.clone(_default_HEATMAP_ChartOptions);
                 _setXTimeFormatter(_chartOptions);
             } else if (type == this.typeChart.PIE) {
                 _chartOptions = ntopng_utility.clone(_default_TS_PIE_ChartOptions);

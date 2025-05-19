@@ -205,13 +205,15 @@ const href_analyse_records = computed(() => {
 let chart_data_url = `${http_prefix}/lua/pro/rest/v2/get/db/ts.lua`;
 
 const chart_style = computed(() => {
-    return "height:300px!important";
+    return `height:${props.context?.chart_height ? props.context.chart_height : "300"}px!important`;
 
 });
 const chart_type = computed(() => {
     /* Chart type defined the json template (defaults in db_search.lua) */
     if (props.context?.chart_type == "topk-timeseries") {
         return ntopChartApex.typeChart.TS_STACKED;
+    } else if (props.context?.chart_type == "heatmap") {
+        return ntopChartApex.typeChart.HEATMAP;
     }
     return ntopChartApex.typeChart.TS_COLUMN;
 });
@@ -760,7 +762,7 @@ function click_button_flows(event) {
     const input_snmp = row_data?.input_snmp?.value;
 
     let url = `${http_prefix}/lua/pro/db_search.lua?epoch_begin=${epoch_begin}&epoch_end=${epoch_end}`;
-    
+
     if (instance_name) {
         url = url + `&instance_name=${instance_name}`;
     }
