@@ -146,7 +146,7 @@ const ntopChartApex = function () {
                         if (serieName && serieName == 1) {
                             return "Flows Available";
                         }
-                        return "Flows not Available"
+                        return "No Flows"
                     }
                 }
             },
