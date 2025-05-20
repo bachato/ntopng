@@ -1167,6 +1167,34 @@ void result_to_lua_ch(lua_State *vm, const Block& block, bool limitRows, int& co
       }
 
       Type::Code type_code = col->Type()->GetCode();
+
+#if 1 /* Handle Nullable (NULL in schema) columns */
+      bool is_null = false;
+
+      bool is_nullable = (type_code == Type::Code::Nullable);
+      if (is_nullable) {
+        /* Get the null mask column */
+        const ColumnNullable *nullable = static_cast<const ColumnNullable*>(col.get());
+
+        /* Get the type of the wrapped (real) column */
+        const Column *unwrapped_col = nullable->Nested().get();
+        type_code = unwrapped_col->Type()->GetCode();
+
+        /* Check if the value is null */
+        auto null_mask_col = nullable->Nulls();
+        auto null_mask_c = null_mask_col->As<ColumnUInt8>();
+        is_null = (*null_mask_c)[i];
+
+        if (!is_null) {
+          /* Not null: Get the actual wrapped (real) column */
+          col = nullable->Nested();
+        }
+      }
+
+      if (is_null)
+        column_type = "Null";
+      else
+#endif
       switch (type_code) {
         case Type::Code::UInt8: {
           /* Note: Boolean is stored as UInt8 */
