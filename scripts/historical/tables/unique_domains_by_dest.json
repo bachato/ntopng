@@ -1,5 +1,5 @@
 {
-	"name" : "Num Unique Domains By Destination",
+	"name" : "Num Domains By Destination",
 	"data_source" : "flows",
 	"show_in_page" : "overview",
 	"hourly": false,
