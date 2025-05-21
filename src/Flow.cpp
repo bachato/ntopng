@@ -636,7 +636,7 @@ Flow::~Flow() {
   if(initial_bytes_entropy.s2c)
     ndpi_free_data_analysis(initial_bytes_entropy.s2c, 1);
 #endif
-  
+
   if(flow_payload) free(flow_payload);
 
   if(isHTTP() || isHTTP_PROXY()) {
@@ -781,7 +781,7 @@ void Flow::processDetectedProtocol(u_int8_t *payload, u_int16_t payload_len) {
   } else if(isICMP()) {
     if(payload_len > 0) {
       u_int8_t icmp_type = payload[0];
-      
+
       if(icmp_type == 0 /* ICMP Echo Reply */) {
 	/* server -> client */
 	request_swap(); /* This flow will be swapped */
@@ -789,7 +789,7 @@ void Flow::processDetectedProtocol(u_int8_t *payload, u_int16_t payload_len) {
       }
     }
   }
-  
+
   if(ndpiFlow && (ndpiFlow->tcp.os_hint != ndpi_os_unknown)) {
     Host *h = cli_h ? cli_h : getViewSharedClient() /* View interface */;
 
@@ -822,18 +822,23 @@ void Flow::processDetectedProtocolData() {
       && (l7proto != NDPI_PROTOCOL_DHCP) /* host_server_name in DHCP is for the
 					    client name, not the server */
       && (ndpiFlow->host_server_name[0] != '\0') && (!host_server_name)) {
+    bool skip_host_server_name = false;
+
     Utils::sanitizeHostName((char *)ndpiFlow->host_server_name);
 
     if(ndpi_is_proto(ndpiDetectedProtocol.proto, NDPI_PROTOCOL_HTTP)) {
-      char *double_column = strrchr((char *)ndpiFlow->host_server_name, ':');
+      if(ndpiFlow->http.response_status_code == 200) {
+	char *double_column = strrchr((char *)ndpiFlow->host_server_name, ':');
 
-      if(double_column) double_column[0] = '\0';
+	if(double_column) double_column[0] = '\0';
+      } else
+	skip_host_server_name = true;
     }
 
-    /*
-      Host server name equals the Host: HTTP header field.
-    */
-    host_server_name = strdup((char *)ndpiFlow->host_server_name);
+    if(!skip_host_server_name) {
+      /* Host server name equals the Host: HTTP header field. */
+      host_server_name = strdup((char *)ndpiFlow->host_server_name);
+    }
   }
 
   switch (l7proto) {
@@ -1918,7 +1923,7 @@ bool Flow::dump(time_t t, bool last_dump_before_free) {
   if(!ntop->getPrefs()->is_tiny_flows_export_enabled() && isTiny()) {
 #ifdef TINY_FLOWS_DEBUG
     char buf[256];
-    
+
     ntop->getTrace()->traceEvent(TRACE_NORMAL,
 				 "Skipping tiny flow dump [flow key: %u]"
 				 "[packets current/max: %i/%i] "
@@ -2003,7 +2008,7 @@ void Flow::flow_end_stats_update() {
       accountBidirectionalUDPProtocolServices();
     }
   }
-  
+
 #ifdef NTOPNG_PRO
   QoEType qoe_type = getQoEType();
   Host *cli_u = getViewSharedClient(), *srv_u = getViewSharedServer();
@@ -5301,7 +5306,7 @@ void Flow::incStats(bool cli2srv_direction, u_int pkt_len, u_int8_t *payload,
     ndpi_free_data_analysis(&e, 0);
   }
 #endif
-  
+
   updatePacketStats(cli2srv_direction ? getCli2SrvIATStats() : getSrv2CliIATStats(), when,
 		    update_iat);
 
@@ -5333,7 +5338,7 @@ void Flow::incStats(bool cli2srv_direction, u_int pkt_len, u_int8_t *payload,
         updateEntropy(initial_bytes_entropy.s2c, payload, payload_len);
     }
 #endif
-    
+
     if(applLatencyMsec == 0) {
       if(cli2srv_direction) {
         memcpy(&c2sFirstGoodputTime, when, sizeof(struct timeval));
@@ -5624,7 +5629,7 @@ void Flow::updateTcpFlags(const struct bpf_timeval *when, u_int8_t flags,
     }
 
     /* *** */
-    
+
     if(src2dst_direction)
       src2dst_tcp_flags |= flags;
     else
@@ -5637,7 +5642,7 @@ void Flow::updateTcpFlags(const struct bpf_timeval *when, u_int8_t flags,
         if(tcp != NULL) {
 	  if(tcp->synTime.tv_sec == 0) memcpy(&tcp->synTime, when, sizeof(struct timeval));
 	}
-	
+
 	if((src2dst_tcp_flags & (TH_SYN | TH_ACK)) == (TH_SYN | TH_ACK)) {
 	  /* SYN|ACK arrived before SYN */
 	  request_swap();
@@ -5646,11 +5651,11 @@ void Flow::updateTcpFlags(const struct bpf_timeval *when, u_int8_t flags,
         if(tcp != NULL) {
 	  if((tcp->synAckTime.tv_sec == 0) && (tcp->synTime.tv_sec > 0)) {
 	    struct timeval t;
-	    
+
 	    memcpy(&tcp->synAckTime, when, sizeof(struct timeval));
 	    timeval_diff(&tcp->synTime, (struct timeval *)when, &t, 0);
 	    tcp->serverRTT3WH = Utils::timeval2ms(&t);
-	    
+
 	    /* Coherence check */
 	    if(tcp->serverRTT3WH > 5000 /* 5 sec */ )
 	      tcp->serverRTT3WH = 0;
@@ -5687,7 +5692,7 @@ void Flow::updateTcpFlags(const struct bpf_timeval *when, u_int8_t flags,
 	    iface->getTcpFlowStats()->incEstablished();
 	  }
 	}
-	
+
         goto not_yet;
       } else {
       not_yet:
@@ -5925,7 +5930,7 @@ void Flow::updateTcpSeqNum(const struct bpf_timeval *when, u_int32_t seq_num,
 #endif
 
   if(tcp == NULL) return;
-  
+
   next_seq_num = getNextTcpSeq(flags, seq_num, payload_Len);
 
   if(debug)
@@ -6361,9 +6366,7 @@ void Flow::setHTTPMethod(const char *method, ssize_t method_len) {
 
 void Flow::dissectHTTP(bool src2dst_direction, char *payload,
                        u_int16_t payload_len) {
-  ssize_t host_server_name_len = host_server_name && host_server_name[0] != '\0'
-    ? strlen(host_server_name)
-    : 0;
+  ssize_t host_server_name_len = host_server_name && (host_server_name[0] != '\0') ? strlen(host_server_name) : 0;
 
   if((payload == NULL) || (payload_len == 0)) return;
 
@@ -8894,7 +8897,7 @@ void Flow::swap() {
   initial_bytes_entropy.c2s = initial_bytes_entropy.s2c;
   initial_bytes_entropy.s2c = s;
 #endif
-  
+
   memcpy(m, view_cli_mac, 6);
   memcpy(view_cli_mac, view_srv_mac, 6);
   memcpy(view_srv_mac, m, 6);
@@ -9343,7 +9346,7 @@ void Flow::accountBidirectionalTCPProtocolServices() {
 	  return;
 	}
 	/* No break here ! */
-      
+
       case NDPI_PROTOCOL_HTTP:
       case NDPI_PROTOCOL_HTTP_CONNECT:
       case NDPI_PROTOCOL_HTTP_PROXY:
