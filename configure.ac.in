@@ -77,7 +77,7 @@ return 0;
 ])
 
 AC_ARG_WITH(hiredis, AS_HELP_STRING([--without-hiredis], [Build without hiredis integration]), [with_hiredis=no], [with_hiredis=yes])
-
+AC_ARG_WITH(dynamic_ndpi, AS_HELP_STRING([--with-dynamic-ndpi], [Build with dynamic ndpi]), [with_dynamic_ndpi=yes], [with_dynamic_ndpi=no])
 
 dnl> CLANG_STDLIB="-stdlib=libc++"
 
@@ -321,6 +321,7 @@ NDPI_INC=`echo $NDPI_CFLAGS | sed -e "s/[ ]*$//"`
 NDPI_LIB=
 NDPI_LIB_DEP=
 
+AS_VAR_IF(with_dynamic_ndpi, no, [
 AC_MSG_CHECKING(for nDPI source)
       if test -d "./nDPI" ; then :
          NDPI_HOME=./nDPI
@@ -346,7 +347,12 @@ AC_MSG_CHECKING(for nDPI source)
       else
          AC_MSG_RESULT(not found)
       fi
+])
 
+AS_VAR_IF(with_dynamic_ndpi, yes, [
+      NDPI_LIB="-lndpi"
+      NDPI_LIB_DEP=$NDPI_LIB
+])
 
 if test ! -z "$NDPI_CUST_INC" ; then :
   NDPI_INC=$NDPI_CUST_INC
@@ -356,7 +362,7 @@ if test ! -z "$NDPI_CUST_LIB" ; then :
   NDPI_LIB=$NDPI_CUST_LIB
 fi
 
-if test -z "$NDPI_INC" || test -z "$NDPI_LIB" ; then :
+if test -z "$NDPI_LIB" ; then :
   echo "Could not find nDPI"
   echo "Please do cd ..; git clone https://github.com/ntop/nDPI.git; cd nDPI; ./autogen.sh; ${MAKE}; cd ../ntopng"
   echo "and try again"
