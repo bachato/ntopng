@@ -343,6 +343,12 @@ function alerts_api.trigger(entity_info, type_info, when, cur_alerts)
     local params = {alert_key_name, granularity_id, type_info.score, type_info.alert_type.alert_key, subtype,
                     alert_json, device_ip, device_name, port}
 
+    -- Trigger the alert
+    --
+    -- Note: alerts are stored as engaged in class OtherAlertableEntity and are automatically
+    -- released after each (periodic) iteration of the checks if they are not triggered again.
+    -- See runInterfaceChecks (checks.lua) and releaseEntityAlerts (alert_management.lua)
+    --
     if (entity_info.alert_entity.entity_id == alert_consts.alertEntity("interface")) then
         if interface.checkContext(entity_info.entity_val) then
             triggered = interface.storeTriggeredAlert(table.unpack(params))
