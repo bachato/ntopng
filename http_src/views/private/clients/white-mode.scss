@@ -1237,5 +1237,10 @@ table th.sticky-column-th {
 #chart-vue .card {
   overflow: visible !important;
   position: relative;
-  z-index: 0;
+  z-index: 99;
+}
+
+a.disabled{
+    pointer-events: none;
+    cursor: default;
 }
