@@ -44,7 +44,6 @@ class UnexpectedDNSServer : public UnexpectedServer {
     alert->setCliAttacker();
     return alert;
   }
-//  bool loadConfiguration(json_object *config);
 
   std::string getName() const { return (std::string("unexpected_dns")); }
 };

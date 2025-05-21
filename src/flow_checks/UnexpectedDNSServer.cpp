@@ -21,7 +21,7 @@
 
 #include "ntop_includes.h"
 #include "flow_checks_includes.h"
-//#define DEBUG_DNS_SERVER 1
+//#define DEBUG_DNS_SERVER
 
 /* ***************************************************** */
 
