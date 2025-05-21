@@ -2018,7 +2018,7 @@ local function runInterfaceChecks(granularity, checks_var, do_trace)
    local granularity_id = alert_granularities[granularity].granularity_id
 
    local info = interface.getStats()
-   local cur_alerts = interface.getAlerts(granularity_id)
+   local pre_alerts = interface.getAlerts(granularity_id)
    local entity_info = alert_entity_builders.interfaceAlertEntity(checks_var.ifid)
 
    if (do_trace) then
@@ -2034,18 +2034,18 @@ local function runInterfaceChecks(granularity, checks_var, do_trace)
 			     granularity = granularity,
 			     alert_entity = entity_info,
 			     entity_info = info,
-			     cur_alerts = cur_alerts,
+			     cur_alerts = pre_alerts,
 			     check_config = conf.script_conf,
 			     check = check
 	 })
       end
    end
 
-   -- cur_alerts now contains unprocessed triggered alerts, that is,
+   -- pre_alerts now contains unprocessed triggered alerts, that is,
    -- those alerts triggered but then disabled or unconfigured (e.g., when
    -- the user removes a threshold from the gui)
-   if #cur_alerts > 0 then
-      alert_management.releaseEntityAlerts(entity_info, cur_alerts)
+   if #pre_alerts > 0 then
+      alert_management.releaseEntityAlerts(entity_info, pre_alerts)
    end
 end
 
