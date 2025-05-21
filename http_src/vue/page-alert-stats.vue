@@ -432,7 +432,7 @@ const map_table_def_columns = async (columns) => {
                     {
                         "id": "expand",
                         "icon": "fas fa fa-search-plus",
-                        "class": ["link-button"],
+                        "class": [],
                         "title_i18n": "db_search.expand_button",
                         "event_id": "click_button_expand"
                     },
@@ -450,23 +450,23 @@ const map_table_def_columns = async (columns) => {
             };
             c.button_def_array.forEach((b) => {
                 if (!visible_dict[b.id]) {
-                    b.class.push("link-disabled");
+                    b.class.push("disabled");
                     return;
                 }
                 if (b.id == "snmp_info") {
                     b.f_map_class = (current_class, row) => {
-                        current_class = current_class.filter((class_item) => class_item != "link-disabled");
+                        current_class = current_class.filter((class_item) => class_item != "disabled");
                         if (row.disable_info) {
-                            current_class.push("link-disabled");
+                            current_class.push("disabled");
                         }
                         return current_class;
                     }
                 } else if (b.id == "acknowledge" || b.id == "remove") {
                     /* Engaged alerts have no acknowledge nor remove */
                     b.f_map_class = (current_class, row) => {
-                        current_class = current_class.filter((class_item) => class_item != "link-disabled");
+                        current_class = current_class.filter((class_item) => class_item != "disabled");
                         if (row.is_engaged) {
-                            current_class.push("link-disabled");
+                            current_class.push("disabled");
                         }
                         return current_class;
                     }
