@@ -188,9 +188,9 @@ function historical_flow_details_formatter.format_historical_client_server_bytes
                 formatValue(flow['SRC2DST_PACKETS'] or flow["cli2srv_packets"]) ..
                 " " .. i18n("pkts") .. " / " ..
                 bytesToSize(flow['SRC2DST_BYTES'] or flow["cli2srv_bytes"]),
-            [2] = i18n("client") ..
-                " <i class=\"fas fa-long-arrow-alt-left\"></i> " ..
-                i18n("server") .. ": " ..
+            [2] = i18n("server") ..
+                " <i class=\"fas fa-long-arrow-alt-right\"></i> " ..
+                i18n("client") .. ": " ..
                 formatValue(flow['DST2SRC_PACKETS'] or flow["srv2cli_packets"]) ..
                 " " .. i18n("pkts") .. " / " ..
                 bytesToSize(flow['DST2SRC_BYTES'] or flow["srv2cli_bytes"])
@@ -258,9 +258,9 @@ local function format_historical_tcp_flags(flow, info)
             [1] = i18n("client") ..
                 " <i class=\"fas fa-long-arrow-alt-right\"></i> " ..
                 i18n("server") .. ": " .. info.src2dst_tcp_flags.label,
-            [2] = i18n("client") ..
-                " <i class=\"fas fa-long-arrow-alt-left\"></i> " ..
-                i18n("server") .. ": " .. info.dst2src_tcp_flags.label
+            [2] = i18n("server") ..
+                " <i class=\"fas fa-long-arrow-alt-right\"></i> " ..
+                i18n("client") .. ": " .. info.dst2src_tcp_flags.label
         }
     }
 end
