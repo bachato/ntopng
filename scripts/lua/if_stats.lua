@@ -964,7 +964,7 @@ if ((page == "overview") or (page == nil)) then
             formatValue(tx_pkts) .. " " .. label .. "</span>] <span id=pkts_out_trend></span></td>")
         print("<th nowrap>" .. i18n("http_page.traffic_received") .. ternary(charts_available, " <A HREF='" .. url ..
                 "&page=historical&ts_schema=iface:traffic_rxtx'><i class='fas fa-chart-area fa-sm'></i></A>", "") ..
-            "</th><td width=20%><span id=if_in_bytes>" .. bytesToSize(rx) .. "</span> [<span id=if_in_pkts>" ..
+            "</th><td width=20% nowrap><span id=if_in_bytes>" .. bytesToSize(rx) .. "</span> [<span id=if_in_pkts>" ..
             formatValue(rx_pkts) .. " " .. label .. "</span>] <span id=pkts_in_trend></span></td>")
 
         print('<td colspan=2><div class="progress"><div class="progress-bar bg-warning" style="width: ' ..
