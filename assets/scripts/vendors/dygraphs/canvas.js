@@ -18,6 +18,8 @@
  * See: http://cavorite.com/labs/js/dygraphs-export/
  */
 
+import Dygraph from 'dygraphs';
+
 Dygraph.Export = {};
 
 Dygraph.Export.DEFAULT_ATTRS = {

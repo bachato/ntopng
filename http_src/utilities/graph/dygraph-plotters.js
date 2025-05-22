@@ -2,6 +2,8 @@
     (C) 2023 - ntop.org
 */
 
+import Dygraph from 'dygraphs';
+
 /* *********************************************** */
 
 const MAX_BAR_WIDTH = 90; /* 100 px */

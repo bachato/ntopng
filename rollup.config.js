@@ -5,6 +5,8 @@ import minimist from 'minimist';
 import vue from 'rollup-plugin-vue';
 import alias from 'rollup-plugin-alias';
 import PostCSS from 'rollup-plugin-postcss';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 // import css from 'rollup-plugin-css-only';
 //import nodeResolve from '@rollup/plugin-node-resolve';
 
@@ -19,27 +21,29 @@ if (argv && argv.prod) {
 let buildFormat = {
     input: './http_src/ntopng.js',
     plugins: [
-	// nodeResolve(),
-	replace({
-	    'process.env.NODE_ENV': JSON.stringify( 'production' )
-	}),
-	// vue({ css: true }),
-	// css({ output: "test.css"}),
-	// Process only `<style module>` blocks.
-	vue(),
-	PostCSS({
+        // nodeResolve(),
+        replace({
+            'process.env.NODE_ENV': JSON.stringify('production')
+        }),
+        // vue({ css: true }),
+        // css({ output: "test.css"}),
+        // Process only `<style module>` blocks.
+        vue(),
+        PostCSS({
             modules: {
-		generateScopedName: '[local]___[hash:base64:5]',
+                generateScopedName: '[local]___[hash:base64:5]',
             },
             include: /&module=.*\.css$/,
-	}),
-	// Process all `<style>` blocks except `<style module>`.
-	PostCSS({ include: /(?<!&module=.*)\.css$/ }),
-	alias({
-	    entries: [
-		{ find: "vue", replacement: vue_path }
-	    ]
-	}),
+        }),
+        // Process all `<style>` blocks except `<style module>`.
+        PostCSS({ include: /(?<!&module=.*)\.css$/ }),
+        alias({
+            entries: [
+                { find: "vue", replacement: vue_path }
+            ]
+        }),
+        resolve(),
+        commonjs(),
 
     ],
     // external: ["vue", "Vue"],
@@ -48,24 +52,24 @@ let buildFormat = {
         file: './httpdocs/dist/ntopng.js',
         format: 'iife',
         name: 'ntopng',
-	// globals: { vue: "Vue", },
-	// exports: "auto",
-	sourcemap: argv && argv.prod ? "inline" : false,
+        // globals: { vue: "Vue", },
+        // exports: "auto",
+        sourcemap: argv && argv.prod ? "inline" : false,
     },
     watch: {
-	chokidar: {
-	},
-	exclude: ['node_modules/**']
+        chokidar: {
+        },
+        exclude: ['node_modules/**']
     }
 };
 if (argv && argv.prod) {
     let babelPlugin = babel({
-	extensions: ['.js', '.jsx', '.ts', '.tsx', '.vue'],
-	babelHelpers: 'bundled'
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.vue'],
+        babelHelpers: 'bundled'
     });
     let terserPlugin = terser({
         output: {
-	    ecma: 5,
+            ecma: 5,
         },
     });
 

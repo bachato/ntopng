@@ -2,8 +2,7 @@
 		(C) 2022 - ntop.org
 */
 
-import './graph/dygraph-extension.js';
-import dygraphFormat from "./graph/dygraph-format.js";
+import { dygraphFormat } from "./graph/dygraph.js";
 import { ntopng_utility, ntopng_url_manager } from "../services/context/ntopng_globals_services.js";
 
 function getSerieId(serie) {

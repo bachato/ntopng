@@ -2,6 +2,7 @@
     (C) 2023 - ntop.org
 */
 
+import Dygraph from 'dygraphs';
 import colorsInterpolation from "../colors/colors-interpolation";
 import formatterUtils from "../formatter-utils";
 

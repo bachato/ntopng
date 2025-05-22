@@ -1,6 +1,7 @@
 /**
 		(C) 2023 - ntop.org
 */
+import Dygraph from 'dygraphs';
 
 /* Override Dygraph plugins to have a better legend */
 Dygraph.Plugins.Legend.prototype.select = function (e) {

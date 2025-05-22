@@ -12,6 +12,7 @@
 </template>
 
 <script>
+import { Dygraph } from '../utilities/graph/dygraph';
 export default {
 	components: {
 	},

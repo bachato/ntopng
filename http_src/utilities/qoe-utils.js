@@ -7,6 +7,8 @@
   e.g. functions that check if a string is null or empty
  */
 
+import "lucide"
+
 /* This function check if value is not set (null or empty).
  * Do not check for 0 as it may be a valid value. */
 const QoEQualityBadge = (value) => {
