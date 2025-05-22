@@ -1,43 +1,43 @@
 /**
-    (C) 2022 - ntop.org    
+    (C) 2022 - ntop.org
 */
 
-import { ntopng_utility } from "../../services/context/ntopng_globals_services.js";
+import {ntopng_utility} from '../../services/context/ntopng_globals_services.js';
 
 
 /* ***************************************** */
 
 function transformColors(colors) {
-    let colorsPositionDict = {};
-    colors.forEach((c, i) => {
-	if (colorsPositionDict[c] == null) {
+  const colorsPositionDict = {};
+  colors.forEach((c, i) => {
+    if (colorsPositionDict[c] == null) {
 	    colorsPositionDict[c] = [i];
-	} else {
+    } else {
 	    colorsPositionDict[c].push(i);
-	}
-    });
-    // clone colors
-    let newColors = ntopng_utility.clone(colors);
-    
-    for (let color in colorsPositionDict) {
-	let colorsPosition = colorsPositionDict[color];
-	let n = colorsPosition.length;
-	// colorsGenerated.length == colorsPosition.length always true
-	let colorsGenerated = getColorsFromColor(color, n);
-	colorsGenerated.forEach((c, i) => {
-	    let cPosition = colorsPosition[i];
-	    newColors[cPosition] = c;
-	});
     }
-    return newColors;
+  });
+  // clone colors
+  const newColors = ntopng_utility.clone(colors);
+
+  for (const color in colorsPositionDict) {
+    const colorsPosition = colorsPositionDict[color];
+    const n = colorsPosition.length;
+    // colorsGenerated.length == colorsPosition.length always true
+    const colorsGenerated = getColorsFromColor(color, n);
+    colorsGenerated.forEach((c, i) => {
+	    const cPosition = colorsPosition[i];
+	    newColors[cPosition] = c;
+    });
+  }
+  return newColors;
 }
 
 /* ***************************************** */
 
 function getColorsFromColor(color, n) {
-    return [...Array(n).keys()].map((c, i) => {
-	return generateColor(color, i + 1, n);
-    });
+  return [...Array(n).keys()].map((c, i) => {
+    return generateColor(color, i + 1, n);
+  });
 }
 
 /* ***************************************** */
@@ -49,52 +49,52 @@ function getColorsFromColor(color, n) {
  * @param {n} total number of colors to generate
 **/
 function generateColor(baseColor, index, n) {
-    let sourceColor = baseColor.replace("#", "");
+  const sourceColor = baseColor.replace('#', '');
 
-    let redSource = parseInt(sourceColor.substring(0, 2), 16);
-    let greenSource = parseInt(sourceColor.substring(2, 4), 16);
-    let blueSource = parseInt(sourceColor.substring(4, 6), 16);
+  const redSource = parseInt(sourceColor.substring(0, 2), 16);
+  const greenSource = parseInt(sourceColor.substring(2, 4), 16);
+  const blueSource = parseInt(sourceColor.substring(4, 6), 16);
 
-    let cRed = getColorInterpolation(redSource, index, n);
-    let cGreen = getColorInterpolation(greenSource, index, n);
-    let cBlue = getColorInterpolation(blueSource, index, n);
+  const cRed = getColorInterpolation(redSource, index, n);
+  const cGreen = getColorInterpolation(greenSource, index, n);
+  const cBlue = getColorInterpolation(blueSource, index, n);
 
-    return rgbToHex(cRed, cGreen, cBlue);
+  return rgbToHex(cRed, cGreen, cBlue);
 }
 
 /* ***************************************** */
 
-function getColorInterpolation(colorSource, i, n) {    
-    if (n <= 1) {
-	return colorSource;
-    }
-    let colorStart = Math.trunc(colorSource / 2);
-    let colorEnd = Math.trunc(colorSource + ((255 - colorSource) / 2));
-    let interval = Math.trunc((colorEnd - colorStart) / n);
+function getColorInterpolation(colorSource, i, n) {
+  if (n <= 1) {
+    return colorSource;
+  }
+  const colorStart = Math.trunc(colorSource / 2);
+  const colorEnd = Math.trunc(colorSource + ((255 - colorSource) / 2));
+  const interval = Math.trunc((colorEnd - colorStart) / n);
 
-    return colorStart + i * interval;
-    // return colorStart + (n - i) * interval;
+  return colorStart + i * interval;
+  // return colorStart + (n - i) * interval;
 }
 
 /* ***************************************** */
 
 function rgbToHex(r, g, b) {
-    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+  return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
 /* ***************************************** */
 
 function componentToHex(c) {
-    let hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
+  const hex = c.toString(16);
+  return hex.length == 1 ? '0' + hex : hex;
 }
 
 /* ***************************************** */
 
 const colorsInterpolation = function() {
-    return {
+  return {
 	    transformColors,
-    };
+  };
 }();
 
 export default colorsInterpolation;

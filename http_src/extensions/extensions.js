@@ -1,1 +1,1 @@
-import "./chart_colors";
+import './chart_colors';

@@ -3,7 +3,6 @@
     <Navbar id="navbar" :main_title="context.navbar.main_title" :base_url="context.navbar.base_url"
         :help_link="context.navbar.help_link" :items_table="context.navbar.items_table" @click_item="click_navbar_item">
     </Navbar>
-
     <div class='row'>
         <div class='col-12'>
             <div class="mb-2">

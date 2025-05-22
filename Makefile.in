@@ -283,7 +283,7 @@ dist:
 	npm run build
 
 dist-ntopng:
-	npm run build:ntopngjs
+	npm run build
 
 dev-dist:
 	npm run build:dev

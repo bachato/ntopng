@@ -1,11 +1,6 @@
 
-@import 'vendors/flatpickr/flatpickr.min.css';
-@import 'vendors/d3-sunburst/sequence_sunburst.css';
-@import 'vendors/tagify/tagify.css';
-@import 'vendors/flagsprites/flags.scss';
-@import 'vendors/select2/select2-bootstrap-5-theme.min.css';
-
-/* TODO: Remove bs3 import! */
-@import 'vendors/bootstrap3/tempusdominus/css/tempusdominus-bootstrap-4.css';
-@import 'vendors/nvd3/nv.d3.min.css';
-@import 'vendors/bootstrap-select/bootstrap-select.min.css';
+@use 'vendors/flatpickr/flatpickr.min.css';
+@use 'vendors/d3-sunburst/sequence_sunburst.css';
+@use 'vendors/tagify/tagify.css';
+@use 'vendors/flagsprites/flags.scss';
+@use 'vendors/select2/select2-bootstrap-5-theme.min.css';

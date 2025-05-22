@@ -1,1 +1,1 @@
-import './white-mode.scss'
+import './white-mode.scss';

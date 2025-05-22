@@ -2,303 +2,311 @@
     (C) 2022-24 - ntop.org
 */
 const types = {
-    no_formatting: {
-        id: "no_formatting",
-        um: null,
-        step: null,
-        decimal: null,
-        scale_values: null,
-    },
-    number: {
-        id: "number",
-        um: ["", "K", "M", "B", "T"],
-        step: 1000,
-        decimal: null,
-        scale_values: null,
-    },
-    full_number: {
-        id: "number",
-        um: ["", "K", "M", "B", "T"],
-        step: 1000,
-        decimal: null,
-        scale_values: null,
-        thousands_sep: ",", /* Comment this to enable "um" scaled style */
-    },
-    bytes: {
-        id: "bytes",
-        um: ["B", "KB", "MB", "GB", "TB", "PB", "EB"],
-        step: 1024,
-        decimal: 2,
-        scale_values: null,
-        absolute_value: true,
-    },
-    bps: {
-        id: "bps",
-        um: ["bps", "Kbps", "Mbps", "Gbps", "Tbps", "Pbps"],
-        step: 1000,
-        decimal: 2,
-        scale_values: 8,
-        absolute_value: true,
-    },
-    bps_no_scale: {
-        id: "bps_no_scale",
-        um: ["bps", "Kbps", "Mbps", "Gbps", "Tbps", "Pbps"],
-        step: 1000,
-        decimal: 2,
-        scale_values: null,
-        absolute_value: true,
-    },
-    speed: {
-        id: "speed",
-        um: ["bit", "Kbit", "Mbit", "Gbit", "Tbit", "Pbit"],
-        step: 1000,
-        decimal: 0,
-        scale_values: null,
-        absolute_value: true,
-    },
-    flows: {
-        id: "flows",
-        um: ["flows", "Kflows", "Mflows", "Gflows"],
-        step: 1000,
-        decimal: 2,
-        scale_values: null,        
-        absolute_value: true,
-    },
-    fps: {
-        id: "fps",
-        um: ["flows/s", "Kflows/s", "Mflows/s", "Gflows/s"],
-        step: 1000,
-        decimal: 2,
-        scale_values: null,        
-        absolute_value: true,
-    },
-    fps_short: {
-        id: "fps_short",
-        um: ["fps", "Kfps", "Mfps", "Gfps"],
-        step: 1000,
-        decimal: 2,
-        scale_values: null,        
-        absolute_value: true,
-    },
-    alerts: {
-        id: "alerts",
-        um: ["alerts", "Kalerts", "Malerts", "Galerts"],
-        step: 1000,
-        decimal: 2,
-        scale_values: null,
-        absolute_value: true,
-    },
-    alertps: {
-        id: "alertps",
-        um: ["alerts/s", "Kalerts/s", "Malerts/s", "Galerts/s"],
-        step: 1000,
-        decimal: 2,
-        scale_values: null,
-        absolute_value: true,
-    },
-    hits: {
-        id: "hits",
-        um: ["hits", "Khits", "Mhits", "Ghits"],
-        step: 1000,
-        decimal: 2,
-        scale_values: null,        
-        absolute_value: true,
-    },
-    hitss: {
-        id: "hitss",
-        um: ["hits/s", "Khits/s", "Mhits/s", "Ghits/s"],
-        step: 1000,
-        decimal: 2,
-        scale_values: null,        
-        absolute_value: true,
-    },
-    packets: {
-        id: "packets",
-        um: ["packets", "Kpackets", "Mpackets", "Gpackets", "Tpackets"],
-        step: 1000,
-        decimal: 0,
-        scale_values: null,        
-        absolute_value: true,
-    },
-    pps: {
-        id: "pps",
-        um: ["pps", "Kpps", "Mpps", "Gpps", "Tpps"],
-        step: 1000,
-        decimal: 2,
-        scale_values: null,        
-        absolute_value: true,
-    },
-    ms: {
-        id: "ms",
-        um: ["ms", "s"],
-        step: 1000,
-        decimal: 2,
-        scale_values: null,        
-        absolute_value: true,
-    },
-    drops: {
-        id: "drops",
-        um: ["dps", "Kdps", "Mdps", "Gdps", "Tdps"],
-        step: 1000,
-        decimal: 2,
-        scale_values: null,        
-        absolute_value: true,
-    },
-    percentage: {
-        id: "percentage",
-        um: ["%"],
-        step: 101,
-        decimal: 1,
-        scale_values: null,        
-        max_value: 100,
-        absolute_value: true,
-    },
-    ratio: {
-        id: "ratio",
-        um: [""],
-        step: 101,
-        decimal: 2,
-        scale_values: null,        
-        max_value: 100,
-        absolute_value: true,
-    },
+  no_formatting: {
+    id: 'no_formatting',
+    um: null,
+    step: null,
+    decimal: null,
+    scale_values: null,
+  },
+  number: {
+    id: 'number',
+    um: ['', 'K', 'M', 'B', 'T'],
+    step: 1000,
+    decimal: null,
+    scale_values: null,
+  },
+  full_number: {
+    id: 'number',
+    um: ['', 'K', 'M', 'B', 'T'],
+    step: 1000,
+    decimal: null,
+    scale_values: null,
+    thousands_sep: ',', /* Comment this to enable "um" scaled style */
+  },
+  bytes: {
+    id: 'bytes',
+    um: ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'],
+    step: 1024,
+    decimal: 2,
+    scale_values: null,
+    absolute_value: true,
+  },
+  bps: {
+    id: 'bps',
+    um: ['bps', 'Kbps', 'Mbps', 'Gbps', 'Tbps', 'Pbps'],
+    step: 1000,
+    decimal: 2,
+    scale_values: 8,
+    absolute_value: true,
+  },
+  bps_no_scale: {
+    id: 'bps_no_scale',
+    um: ['bps', 'Kbps', 'Mbps', 'Gbps', 'Tbps', 'Pbps'],
+    step: 1000,
+    decimal: 2,
+    scale_values: null,
+    absolute_value: true,
+  },
+  speed: {
+    id: 'speed',
+    um: ['bit', 'Kbit', 'Mbit', 'Gbit', 'Tbit', 'Pbit'],
+    step: 1000,
+    decimal: 0,
+    scale_values: null,
+    absolute_value: true,
+  },
+  flows: {
+    id: 'flows',
+    um: ['flows', 'Kflows', 'Mflows', 'Gflows'],
+    step: 1000,
+    decimal: 2,
+    scale_values: null,
+    absolute_value: true,
+  },
+  fps: {
+    id: 'fps',
+    um: ['flows/s', 'Kflows/s', 'Mflows/s', 'Gflows/s'],
+    step: 1000,
+    decimal: 2,
+    scale_values: null,
+    absolute_value: true,
+  },
+  fps_short: {
+    id: 'fps_short',
+    um: ['fps', 'Kfps', 'Mfps', 'Gfps'],
+    step: 1000,
+    decimal: 2,
+    scale_values: null,
+    absolute_value: true,
+  },
+  alerts: {
+    id: 'alerts',
+    um: ['alerts', 'Kalerts', 'Malerts', 'Galerts'],
+    step: 1000,
+    decimal: 2,
+    scale_values: null,
+    absolute_value: true,
+  },
+  alertps: {
+    id: 'alertps',
+    um: ['alerts/s', 'Kalerts/s', 'Malerts/s', 'Galerts/s'],
+    step: 1000,
+    decimal: 2,
+    scale_values: null,
+    absolute_value: true,
+  },
+  hits: {
+    id: 'hits',
+    um: ['hits', 'Khits', 'Mhits', 'Ghits'],
+    step: 1000,
+    decimal: 2,
+    scale_values: null,
+    absolute_value: true,
+  },
+  hitss: {
+    id: 'hitss',
+    um: ['hits/s', 'Khits/s', 'Mhits/s', 'Ghits/s'],
+    step: 1000,
+    decimal: 2,
+    scale_values: null,
+    absolute_value: true,
+  },
+  packets: {
+    id: 'packets',
+    um: ['packets', 'Kpackets', 'Mpackets', 'Gpackets', 'Tpackets'],
+    step: 1000,
+    decimal: 0,
+    scale_values: null,
+    absolute_value: true,
+  },
+  pps: {
+    id: 'pps',
+    um: ['pps', 'Kpps', 'Mpps', 'Gpps', 'Tpps'],
+    step: 1000,
+    decimal: 2,
+    scale_values: null,
+    absolute_value: true,
+  },
+  ms: {
+    id: 'ms',
+    um: ['ms', 's'],
+    step: 1000,
+    decimal: 2,
+    scale_values: null,
+    absolute_value: true,
+  },
+  drops: {
+    id: 'drops',
+    um: ['dps', 'Kdps', 'Mdps', 'Gdps', 'Tdps'],
+    step: 1000,
+    decimal: 2,
+    scale_values: null,
+    absolute_value: true,
+  },
+  percentage: {
+    id: 'percentage',
+    um: ['%'],
+    step: 101,
+    decimal: 1,
+    scale_values: null,
+    max_value: 100,
+    absolute_value: true,
+  },
+  ratio: {
+    id: 'ratio',
+    um: [''],
+    step: 101,
+    decimal: 2,
+    scale_values: null,
+    max_value: 100,
+    absolute_value: true,
+  },
 };
 
 function getUnitMeasureLen(type) {
-    // 000.00
-    let t = types[type];
-    let spaceValue = 3;
-    if (t.decimal != null && t.decimal > 0) {        
-        spaceValue = 6;
-    }
-    let spaceUm = 0;
-    if (t.um != null) {
-        spaceUm = Math.max(...t.um.map((um) => um.length));
-    }
-    return (spaceValue + 1 + spaceUm);
+  // 000.00
+  const t = types[type];
+  let spaceValue = 3;
+  if (t.decimal != null && t.decimal > 0) {
+    spaceValue = 6;
+  }
+  let spaceUm = 0;
+  if (t.um != null) {
+    spaceUm = Math.max(...t.um.map((um) => um.length));
+  }
+  return (spaceValue + 1 + spaceUm);
 }
 
 function getScaleFactorIndex(type, value) {
-    let typeOptions = types[type];
-    if (type == types.no_formatting.id || value == null) {
-        return null;
-    }
-    if (typeOptions.scale_values != null) {
-        value *= typeOptions.scale_values;
-    }
-    let step = typeOptions.step;
-    let negativeValue = value < 0;
-    if (negativeValue) { value *= -1; }
-    let i = 0;
-    let measures = typeOptions.um;
-    while (value >= step && i < measures.length) {
-        value = value / step;
-        i += 1;
-    }
-    return i;
+  const typeOptions = types[type];
+  if (type == types.no_formatting.id || value == null) {
+    return null;
+  }
+  if (typeOptions.scale_values != null) {
+    value *= typeOptions.scale_values;
+  }
+  const step = typeOptions.step;
+  const negativeValue = value < 0;
+  if (negativeValue) {
+    value *= -1;
+  }
+  let i = 0;
+  const measures = typeOptions.um;
+  while (value >= step && i < measures.length) {
+    value = value / step;
+    i += 1;
+  }
+  return i;
 }
 
-function formatAccounting(amount, decimalCount = 0, decimal = ".", thousands = "'") {
-    try {
-	decimalCount = Math.abs(decimalCount);
-	decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+function formatAccounting(amount, decimalCount = 0, decimal = '.', thousands = '\'') {
+  try {
+    decimalCount = Math.abs(decimalCount);
+    decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
 
-	const negativeSign = amount < 0 ? "-" : "";
+    const negativeSign = amount < 0 ? '-' : '';
 
-	let i = parseInt(amount = Math.abs(Number(amount) || 0).toFixed(decimalCount)).toString();
-	let j = (i.length > 3) ? i.length % 3 : 0;
+    const i = parseInt(amount = Math.abs(Number(amount) || 0).toFixed(decimalCount)).toString();
+    const j = (i.length > 3) ? i.length % 3 : 0;
 
-	return negativeSign +
+    return negativeSign +
 	    (j ? i.substr(0, j) + thousands : '') +
-	    i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) +
-	    (decimalCount ? decimal + Math.abs(amount - i).toFixed(decimalCount).slice(2) : "");
-    } catch (e) {
-	console.log(e)
-    }
+	    i.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + thousands) +
+	    (decimalCount ? decimal + Math.abs(amount - i).toFixed(decimalCount).slice(2) : '');
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 function getFormatter(type, absoluteValue, scaleFactorIndex) {
-    let typeOptions = types[type];
-    if (typeOptions == null) { return null; }
-    
-    absoluteValue |= typeOptions.absolute_value; 
-    let formatter = function(value) {
-        if (value == null) {
-            return '';
-        }
-        if (type == types.no_formatting.id) {
-            return value;
-        }
-        if (typeOptions.scale_values != null) {
-            value *= typeOptions.scale_values;
-        }
-        let negativeValue = value < 0;
-        if (negativeValue) { value *= -1; }
+  const typeOptions = types[type];
+  if (typeOptions == null) {
+    return null;
+  }
 
-        if (typeOptions.max_value != null && value > typeOptions.max_value) {
-            value = typeOptions.max_value;
-        }
-
-        if (typeOptions.thousands_sep) {
-            value = value + '';
-            var x = value.split('.');
-            var x1 = x[0];
-            var x2 = (x.length > 1) ? ('.' + x[1]) : '';
-            var rgx = /(\d+)(\d{3})/;
-            while (rgx.test(x1)) {
-                x1 = x1.replace(rgx, '$1' + ',' + '$2');
-            }
-            return x1 + x2;
-        }
-        
-        let step = typeOptions.step;
-        let decimal = typeOptions.decimal;
-        let measures = typeOptions.um;
-        let i = 0;
-
-        while ((value >= step && i < measures.length && !scaleFactorIndex) || (scaleFactorIndex != null && i < scaleFactorIndex)) {
-            value = value / step;
-            i += 1;
-        }
-
-        if (decimal != null && decimal > 0) {            
-            value = value * Math.pow(10, decimal);
-            value = Math.round(value);
-            value = value / Math.pow(10, decimal);
-            value = value.toFixed(decimal);
-        } else {
-            if (i > 0) {
-                /* Has a decimal number due to the step */
-                value = Number(value.toFixed(1));
-            } else {
-                /* Has a decimal number */
-                value = Math.round(value);
-            }
-        }
-        
-        if (negativeValue && !absoluteValue) { value *= -1; }
-        let valString = `${value}`;
-        // if (valString.length < maxLenValue) {
-        //     valString = valString.padEnd(maxLenValue - valString.length, " ");
-        // }
-        let mString = `${measures[i]}`;
-        // if (mString.length < maxLenUm) {
-        //     mString = mString.padStart(maxLenUm - mString.length, "_");
-        // }
-        let text = `${valString} ${mString}`;
-        return text;
+  absoluteValue |= typeOptions.absolute_value;
+  const formatter = function(value) {
+    if (value == null) {
+      return '';
     }
-    return formatter;
+    if (type == types.no_formatting.id) {
+      return value;
+    }
+    if (typeOptions.scale_values != null) {
+      value *= typeOptions.scale_values;
+    }
+    const negativeValue = value < 0;
+    if (negativeValue) {
+      value *= -1;
+    }
+
+    if (typeOptions.max_value != null && value > typeOptions.max_value) {
+      value = typeOptions.max_value;
+    }
+
+    if (typeOptions.thousands_sep) {
+      value = value + '';
+      const x = value.split('.');
+      let x1 = x[0];
+      const x2 = (x.length > 1) ? ('.' + x[1]) : '';
+      const rgx = /(\d+)(\d{3})/;
+      while (rgx.test(x1)) {
+        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+      }
+      return x1 + x2;
+    }
+
+    const step = typeOptions.step;
+    const decimal = typeOptions.decimal;
+    const measures = typeOptions.um;
+    let i = 0;
+
+    while ((value >= step && i < measures.length && !scaleFactorIndex) || (scaleFactorIndex != null && i < scaleFactorIndex)) {
+      value = value / step;
+      i += 1;
+    }
+
+    if (decimal != null && decimal > 0) {
+      value = value * Math.pow(10, decimal);
+      value = Math.round(value);
+      value = value / Math.pow(10, decimal);
+      value = value.toFixed(decimal);
+    } else {
+      if (i > 0) {
+        /* Has a decimal number due to the step */
+        value = Number(value.toFixed(1));
+      } else {
+        /* Has a decimal number */
+        value = Math.round(value);
+      }
+    }
+
+    if (negativeValue && !absoluteValue) {
+      value *= -1;
+    }
+    const valString = `${value}`;
+    // if (valString.length < maxLenValue) {
+    //     valString = valString.padEnd(maxLenValue - valString.length, " ");
+    // }
+    const mString = `${measures[i]}`;
+    // if (mString.length < maxLenUm) {
+    //     mString = mString.padStart(maxLenUm - mString.length, "_");
+    // }
+    const text = `${valString} ${mString}`;
+    return text;
+  };
+  return formatter;
 }
 
 const formatterUtils = function() {
-    return {
-        types,
-        getUnitMeasureLen,
-        getFormatter,
-        getScaleFactorIndex,
-	formatAccounting
-    };
+  return {
+    types,
+    getUnitMeasureLen,
+    getFormatter,
+    getScaleFactorIndex,
+    formatAccounting,
+  };
 }();
 
 export default formatterUtils;
