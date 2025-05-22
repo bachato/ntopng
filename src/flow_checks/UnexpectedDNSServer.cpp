@@ -21,29 +21,33 @@
 
 #include "ntop_includes.h"
 #include "flow_checks_includes.h"
-//#define DEBUG_DNS_SERVER
+// #define DEBUG_DNS_SERVER
 
 /* ***************************************************** */
 
 bool UnexpectedDNSServer::isAllowedHost(Flow *f) {
-  if(ntop->getPrefs()->getConfiguredDNSServers()->isEmptyConfiguration())
-    return(true);
+  if (ntop->getPrefs()->getConfiguredDNSServers()->isEmptyConfiguration())
+    return (true);
   else {
     IpAddress *ip = (IpAddress *)getServerIP(f);
-    
-    if(ip != NULL) {
+
+    if (ip != NULL) {
 #ifdef DEBUG_DNS_SERVER
       char buf[64];
-      
-      ntop->getTrace()->traceEvent(TRACE_NORMAL,
-				   "Checking Unexpected DNS Server [IP %s] [Is DNS: %s] [Is Configured DNS: %s]",
-				   ip->print(buf, sizeof(buf)), ip->isDnsServer() ? "Yes" : "No",
-				   ntop->getPrefs()->isDNSServer(ip, f->get_vlan_id()) ? "Yes" : "No");
+
+      ntop->getTrace()->traceEvent(
+          TRACE_NORMAL,
+          "Checking Unexpected DNS Server [IP %s] [Is DNS: %s] [Is Configured "
+          "DNS: %s]",
+          ip->print(buf, sizeof(buf)), ip->isDnsServer() ? "Yes" : "No",
+          ntop->getPrefs()->isDNSServer(ip, f->get_vlan_id()) ? "Yes" : "No");
 #endif
-      
-      return(ntop->getPrefs()->isDNSServer(ip, f->get_vlan_id()));    
+
+      return (ntop->getPrefs()->isDNSServer(ip, f->get_vlan_id()) ||
+              ntop->getPrefs()->isDNSServer(
+                  ip, 0 /* Check for the VLAN 0 (no vlan) too */));
     } else
-      return(true);
+      return (true);
   }
 }
 
