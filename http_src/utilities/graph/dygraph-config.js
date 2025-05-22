@@ -2,8 +2,8 @@
     (C) 2023 - ntop.org
 */
 
-import colorsInterpolation from '../colors/colors-interpolation';
-import formatterUtils from '../formatter-utils';
+import colorsInterpolation from "../colors/colors-interpolation";
+import formatterUtils from "../formatter-utils";
 
 /* ***************************************** */
 
@@ -11,7 +11,7 @@ import formatterUtils from '../formatter-utils';
 function getDefaultConfig() {
   return {
     labelsSeparateLines: true,
-    legend: 'follow',
+    legend: "follow",
     connectSeparatedPoints: true,
     includeZero: true,
     drawPoints: true,
@@ -24,8 +24,8 @@ function getDefaultConfig() {
     axisLabelFontSize: 12,
     axes: {
       x: {
-        axisLabelWidth: 90,
-      },
+        axisLabelWidth: 90
+      }
     },
   };
 }
@@ -63,14 +63,14 @@ function getHighlightColor() {
 function getAxisConfiguration(formatter) {
   return {
     axisLabelFormatter: formatter,
-    valueFormatter: function(num_or_millis, opts, seriesName, dygraph, row, col) {
+    valueFormatter: function (num_or_millis, opts, seriesName, dygraph, row, col) {
       const serie_point = dygraph?.rawData_?.[row][col];
       let data = '';
-      if (typeof (serie_point) == 'object') {
+      if (typeof (serie_point) == "object") {
         /* This is the case for the serie with bounds */
         serie_point.forEach((el) => {
           data = `${data} / ${formatter(el || 0)}`;
-        });
+        })
         data = data.substring(3); /* Remove the first three characters ' / ' */
       } else {
         /* This is the standard case */
@@ -79,7 +79,7 @@ function getAxisConfiguration(formatter) {
       return (data);
     },
     axisLabelWidth: 80,
-  };
+  }
 }
 
 /* ***************************************** */
@@ -119,7 +119,7 @@ function formatSerieProperties(type) {
       return {
         fillGraph: false,
         customBars: false,
-        strokePattern: Dygraph.DASHED_LINE,
+        strokePattern: Dygraph.DASHED_LINE
       };
     case 'point':
       return {
@@ -133,7 +133,7 @@ function formatSerieProperties(type) {
         fillGraph: false,
         strokeWidth: 1.0,
         pointSize: 1.5,
-        fillAlpha: 0.5,
+        fillAlpha: 0.5
       };
     case 'line':
       return {
@@ -148,17 +148,17 @@ function formatSerieProperties(type) {
         customBars: false,
         strokeWidth: 1.0,
         pointSize: 1.5,
-        fillAlpha: 0.5,
+        fillAlpha: 0.5
       };
   }
 }
 
 /* ***************************************** */
 
-const dygraphConfig = function() {
+const dygraphConfig = function () {
   return {
     buildChartOptions,
-    formatSerieProperties,
+    formatSerieProperties
   };
 }();
 

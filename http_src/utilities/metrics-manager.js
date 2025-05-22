@@ -1,159 +1,157 @@
 /**
     (C) 2022 - ntop.org
 */
-import {ntopng_utility, ntopng_url_manager} from '../services/context/ntopng_globals_services.js';
-import metricsConsts from '../constants/metrics-consts.js';
-import NtopUtils from './ntop-utils.js';
+import { ntopng_utility, ntopng_url_manager } from "../services/context/ntopng_globals_services.js";
+import metricsConsts from "../constants/metrics-consts.js"
+import NtopUtils from "./ntop-utils.js";
 
 const set_timeseries_groups_in_url = (timeseries_groups) => {
-  const params_timeseries_groups = [];
-  timeseries_groups.forEach((ts_group) => {
-    const param = get_ts_group_url_param(ts_group);
-    params_timeseries_groups.push(param);
-  });
-  const url_timeseries_groups = params_timeseries_groups.join(';;');
-  ntopng_url_manager.set_key_to_url('timeseries_groups', url_timeseries_groups);
+    let params_timeseries_groups = [];
+    timeseries_groups.forEach((ts_group) => {
+        let param = get_ts_group_url_param(ts_group);
+        params_timeseries_groups.push(param);
+    });
+    let url_timeseries_groups = params_timeseries_groups.join(";;");
+    ntopng_url_manager.set_key_to_url("timeseries_groups", url_timeseries_groups);
 };
 
 function get_ts_group_url_param(ts_group) {
-  const timeseries = [];
-  ts_group.timeseries.forEach((ts) => {
-    timeseries.push(`${ts.id}=${ts.raw}:${ts.past}:${ts.avg}:${ts.perc_95}`);
-  });
-  let metric_schema_query = ts_group.metric.schema;
-  if (ts_group.metric.query != null) {
-    metric_schema_query = `${metric_schema_query}+${ts_group.metric.query}`;
-  }
-  const timeseries_param = timeseries.join('|');
-  const source_value_array_query = ts_group.source_array.map((source) => source.value).join('+');
-  const param = `${ts_group.source_type.id};${source_value_array_query};${metric_schema_query};${timeseries_param}`;
-  return param;
+    let timeseries = [];
+    ts_group.timeseries.forEach((ts) => {
+        timeseries.push(`${ts.id}=${ts.raw}:${ts.past}:${ts.avg}:${ts.perc_95}`);
+    });
+    let metric_schema_query = ts_group.metric.schema;
+    if (ts_group.metric.query != null) {
+        metric_schema_query = `${metric_schema_query}+${ts_group.metric.query}`;
+    }
+    let timeseries_param = timeseries.join("|");
+    let source_value_array_query = ts_group.source_array.map((source) => source.value).join("+");
+    let param = `${ts_group.source_type.id};${source_value_array_query};${metric_schema_query};${timeseries_param}`;
+    return param;
 }
 
 const get_timeseries_groups_from_url = async (http_prefix, url_timeseries_groups) => {
-  if (url_timeseries_groups == null) {
-    url_timeseries_groups = ntopng_url_manager.get_url_entry('timeseries_groups');
-  }
-  if (url_timeseries_groups == null || url_timeseries_groups == '') {
-    return null;
-  }
-  const groups = url_timeseries_groups.split(';;');
-  groups.map(async (g) => {
-    const ts_group = await get_url_param_from_ts_group(g);
-    return ts_group;
-  });
-  const timeseries_groups = Promise.all(groups.map(async (g) => {
-    const ts_group = await get_url_param_from_ts_group(g);
-    return ts_group;
-  }));
-  return timeseries_groups;
+    if (url_timeseries_groups == null) {
+        url_timeseries_groups = ntopng_url_manager.get_url_entry("timeseries_groups");
+    }
+    if (url_timeseries_groups == null || url_timeseries_groups == "") {
+        return null;
+    }
+    let groups = url_timeseries_groups.split(";;");
+    groups.map(async (g) => {
+        let ts_group = await get_url_param_from_ts_group(g);
+        return ts_group;
+    });
+    let timeseries_groups = Promise.all(groups.map(async (g) => {
+        let ts_group = await get_url_param_from_ts_group(g);
+        return ts_group;
+    }));
+    return timeseries_groups;
 };
 
 const get_ts_group = (source_type, source_array, metric, customized_ts) => {
-  const ts_config = {
-    raw: true,
-    past: true, /* By default enable the past serie */
-    avg: false,
-    perc_95: false,
-  };
+    let ts_config = {
+        raw: true,
+        past: true, /* By default enable the past serie */
+        avg: false,
+        perc_95: false,
+    }
 
-  if (customized_ts && customized_ts.raw != null) ts_config.raw = customized_ts.raw;
-  if (customized_ts && customized_ts.past != null) ts_config.past = customized_ts.past;
-  if (customized_ts && customized_ts.avg != null) ts_config.avg = customized_ts.avg;
-  if (customized_ts && customized_ts.perc_95 != null) ts_config.perc_95 = customized_ts.perc_95;
+    if(customized_ts && customized_ts.raw != null) ts_config.raw = customized_ts.raw;
+    if(customized_ts && customized_ts.past != null) ts_config.past = customized_ts.past;
+    if(customized_ts && customized_ts.avg != null) ts_config.avg = customized_ts.avg;
+    if(customized_ts && customized_ts.perc_95 != null) ts_config.perc_95 = customized_ts.perc_95;
 
-  const id = get_ts_group_id(source_type, source_array, metric);
-  const timeseries = [];
-  for (const key in metric.timeseries) {
-    const ts = metric.timeseries[key];
-    ts_config.id = key;
-    ts_config.label = ts.label;
-    timeseries.push(ts_config);
-  }
-  return {
-    id, source_type, source_array, metric, timeseries,
-  };
+    let id = get_ts_group_id(source_type, source_array, metric);
+    let timeseries = [];
+    for (let key in metric.timeseries) {
+        let ts = metric.timeseries[key];
+        ts_config.id = key;
+        ts_config.label = ts.label;
+        timeseries.push(ts_config);
+    }
+    return {
+        id, source_type, source_array, metric, timeseries,
+    };
 };
 
 const get_default_timeseries_groups = async (http_prefix, metric_ts_schema, metric_query) => {
-  const source_type = get_current_page_source_type();
-  const source_array = await get_default_source_array(http_prefix, source_type);
-  const metrics = await get_metrics(http_prefix, source_type, source_array);
-  const metric = get_default_metric(metrics, metric_ts_schema, metric_query);
-  const ts_group = get_ts_group(source_type, source_array, metric);
-  return [ts_group];
+    let source_type = get_current_page_source_type();
+    let source_array = await get_default_source_array(http_prefix, source_type);
+    let metrics = await get_metrics(http_prefix, source_type, source_array);
+    let metric = get_default_metric(metrics, metric_ts_schema, metric_query);
+    let ts_group = get_ts_group(source_type, source_array, metric);
+    return [ts_group];
 };
 
 async function get_url_param_from_ts_group(ts_group_url_param) {
-  const g = ts_group_url_param;
-  const info = g.split(';');
-  const source_type_id = info[0];
-  const source_value_query = info[1];
-  const source_value_array = source_value_query.split('+');
+    let g = ts_group_url_param;
+    let info = g.split(";");
+    let source_type_id = info[0];
+    let source_value_query = info[1];
+    let source_value_array = source_value_query.split("+");
 
-  const metric_schema_query = info[2];
-  const metric_schema_query_array = metric_schema_query.split('+');
-  if (metric_schema_query_array.length < 2) {
-    metric_schema_query_array.push(null);
-  }
+    let metric_schema_query = info[2];
+    let metric_schema_query_array = metric_schema_query.split("+");
+    if (metric_schema_query_array.length < 2) {
+        metric_schema_query_array.push(null);
+    }
 
-  const timeseries_url = info[3];
+    let timeseries_url = info[3];
 
-  const source_type = get_source_type_from_id(source_type_id);
-  const source_array = await get_source_array_from_value_array(http_prefix, source_type, source_value_array);
-  const metric = await get_metric_from_schema(http_prefix, source_type, source_array, metric_schema_query_array[0], metric_schema_query_array[1]);
-  const timeseries = get_timeseries(timeseries_url, metric);
-  return {
-    id: get_ts_group_id(source_type, source_array, metric),
-    source_type,
-    source_array,
-    metric,
-    timeseries,
-  };
+    let source_type = get_source_type_from_id(source_type_id);
+    let source_array = await get_source_array_from_value_array(http_prefix, source_type, source_value_array);
+    let metric = await get_metric_from_schema(http_prefix, source_type, source_array, metric_schema_query_array[0], metric_schema_query_array[1]);
+    let timeseries = get_timeseries(timeseries_url, metric);
+    return {
+        id: get_ts_group_id(source_type, source_array, metric),
+        source_type,
+        source_array,
+        metric,
+        timeseries,
+    };
 }
 
 const get_ts_group_id = (source_type, source_array, metric, enable_source_def_value_dict, set_source_type_id_group) => {
-  let metric_id = '';
-  if (metric != null) {
-    metric_id = metric.schema;
-    if (metric.query != null) {
-      metric_id = `${metric_id} - ${metric.query}`;
+    let metric_id = "";
+    if (metric != null) {
+        metric_id = metric.schema;
+        if (metric.query != null) {
+            metric_id = `${metric_id} - ${metric.query}`;
+        }
     }
-  }
-  const source_def_array = source_type.source_def_array;
-  const source_value_array = source_array.map((source, i) => {
-    const source_def_value = source_def_array[i].value;
-    if (enable_source_def_value_dict != null && !enable_source_def_value_dict[source_def_value]) {
-      return null;
+    let source_def_array = source_type.source_def_array;
+    let source_value_array = source_array.map((source, i) => {
+        let source_def_value = source_def_array[i].value;
+        if (enable_source_def_value_dict != null && !enable_source_def_value_dict[source_def_value]) { return null; }
+        return source.value;
+    }).filter((s) => s != null).join("_");
+    let source_type_id = source_type.id;
+    if (set_source_type_id_group && source_type.id_group != null) {
+        source_type_id = source_type.id_group;
     }
-    return source.value;
-  }).filter((s) => s != null).join('_');
-  let source_type_id = source_type.id;
-  if (set_source_type_id_group && source_type.id_group != null) {
-    source_type_id = source_type.id_group;
-  }
-  return `${source_type_id} - ${source_value_array} - ${metric_id}`;
+    return `${source_type_id} - ${source_value_array} - ${metric_id}`;
 };
 
 function get_timeseries(timeseries_url, metric) {
-  const ts_url_array = timeseries_url.split('|');
-  const r = /(.+)=(.+):(.+):(.+):(.+)/;
-  const timeseries = [];
-  ts_url_array.forEach((ts_url) => {
-    const values = r.exec(ts_url);
-    if (values.length > 0) {
-      const id = values[1];
-      const label = metric.timeseries[id].label;
-      const raw = JSON.parse(values[2]);
-      const past = JSON.parse(values[3]);
-      const avg = JSON.parse(values[4]);
-      const perc_95 = JSON.parse(values[5]);
-      timeseries.push({
-        id, label, raw, past, avg, perc_95,
-      });
-    }
-  });
-  return timeseries;
+    let ts_url_array = timeseries_url.split("|");
+    let r = /(.+)=(.+):(.+):(.+):(.+)/;
+    let timeseries = [];
+    ts_url_array.forEach((ts_url) => {
+        let values = r.exec(ts_url);
+        if(values.length > 0) {
+            let id = values[1];
+            let label = metric.timeseries[id].label;
+            let raw = JSON.parse(values[2]);
+            let past = JSON.parse(values[3]);
+            let avg = JSON.parse(values[4]);
+            let perc_95 = JSON.parse(values[5]);
+            timeseries.push({
+                id, label, raw, past, avg, perc_95,
+            });    
+        }
+    });
+    return timeseries;
 }
 
 const ui_types = metricsConsts.ui_types;
@@ -165,241 +163,237 @@ const sources_types = metricsConsts.sources_types;
 const sources_types_tables = metricsConsts.sources_types_tables;
 
 const get_source_type_from_id = (source_type_id) => {
-  return sources_types.find((st) => st.id == source_type_id);
+    return sources_types.find((st) => st.id == source_type_id);
 };
 
 const get_default_source_array = async (http_prefix, source_type) => {
-  const source_value_array = get_default_source_value_array(source_type);
-  const source_array = await get_source_array_from_value_array(http_prefix, source_type, source_value_array);
-  return source_array;
+    let source_value_array = get_default_source_value_array(source_type);
+    let source_array = await get_source_array_from_value_array(http_prefix, source_type, source_value_array);
+    return source_array;
 };
 
 async function get_source_array_from_value_dict(http_prefix, source_type, source_value_dict) {
-  const source_value_array = source_type.source_def_array.map((source_def) => source_value_dict[source_def.value]);
-  const source_array = await get_source_array_from_value_array(http_prefix, source_type, source_value_array);
-  return source_array;
+    let source_value_array = source_type.source_def_array.map((source_def) => source_value_dict[source_def.value]);
+    let source_array = await get_source_array_from_value_array(http_prefix, source_type, source_value_array);
+    return source_array;
 }
 
 const get_source_array_from_value_array = async (http_prefix, source_type, source_value_array) => {
-  if (source_type == null) {
-    source_type = get_current_page_source_type();
-  }
-  const source_array = [];
-  let source;
-  for (let i = 0; i < source_value_array.length; i++) {
-    const source_value = source_value_array[i];
-    const source_def = source_type.source_def_array[i];
-    if (source_def.sources_url || source_def.sources_function) {
-      let sources = [];
-      sources = await get_sources(http_prefix, source_type.id, source_def, source_value_array);
-      source = sources.find((s) => s.value == source_value);
-      if (source == null) {
-        source = sources[0];
-      }
-    } else {
-      source = {label: source_value, value: source_value};
+    if (source_type == null) {
+        source_type = get_current_page_source_type();
     }
-    source_array.push(source);
-  }
-  return source_array;
+    let source_array = [];
+    let source;
+    for (let i = 0; i < source_value_array.length; i++) {
+        let source_value = source_value_array[i];
+        let source_def = source_type.source_def_array[i];
+        if (source_def.sources_url || source_def.sources_function) {
+            let sources = [];
+            sources = await get_sources(http_prefix, source_type.id, source_def, source_value_array);
+            source = sources.find((s) => s.value == source_value);
+            if (source == null) {
+                source = sources[0];
+            }
+        } else {
+            source = { label: source_value, value: source_value };
+        }
+        source_array.push(source);
+    }
+    return source_array;
 };
 
-const cache_sources = {};
+let cache_sources = {};
 
 function get_source_def_key(id, source_def, selected_source_value_array) {
-  let key = `${id}_${source_def.value}`;
-  if (!source_def.refresh_on_sources_change) {
+    let key = `${id}_${source_def.value}`;
+    if (!source_def.refresh_on_sources_change) {
+        return key;
+    }
+    const value_array = selected_source_value_array.join("_");
+    key = `${key}_${value_array}`;
     return key;
-  }
-  const value_array = selected_source_value_array.join('_');
-  key = `${key}_${value_array}`;
-  return key;
 }
 
 const get_sources = async (http_prefix, id, source_def, selected_source_value_array) => {
-  const key = get_source_def_key(id, source_def, selected_source_value_array);
-  if (cache_sources[key] == null) {
+    let key = get_source_def_key(id, source_def, selected_source_value_array);
+    if (cache_sources[key] == null) {
+        if (source_def.sources_url) {
+            let url = `${http_prefix}/${source_def.sources_url}`;
+            cache_sources[key] = ntopng_utility.http_request(url);
+        } else if (source_def.sources_function) {
+            cache_sources[key] = source_def.sources_function(selected_source_value_array);
+        } else {
+            return [];
+        }
+    }
+    let sources = await cache_sources[key];
     if (source_def.sources_url) {
-      const url = `${http_prefix}/${source_def.sources_url}`;
-      cache_sources[key] = ntopng_utility.http_request(url);
-    } else if (source_def.sources_function) {
-      cache_sources[key] = source_def.sources_function(selected_source_value_array);
-    } else {
-      return [];
+        let f_map_source_element = sources_url_el_to_source[source_def.value_map_sources_res];
+        if (f_map_source_element == null) {
+            f_map_source_element = sources_url_el_to_source[source_def.value];
+        }
+        if (f_map_source_element == null) {
+            throw `:Error: metrics-manager.js, missing sources_url_to_source ${source_def.value} key`;
+        }
+        sources = sources.map((s) => f_map_source_element(s));
     }
-  }
-  let sources = await cache_sources[key];
-  if (source_def.sources_url) {
-    let f_map_source_element = sources_url_el_to_source[source_def.value_map_sources_res];
-    if (f_map_source_element == null) {
-      f_map_source_element = sources_url_el_to_source[source_def.value];
-    }
-    if (f_map_source_element == null) {
-      throw `:Error: metrics-manager.js, missing sources_url_to_source ${source_def.value} key`;
-    }
-    sources = sources.map((s) => f_map_source_element(s));
-  }
-  return sources.sort(NtopUtils.sortAlphabetically);
+    return sources.sort(NtopUtils.sortAlphabetically);
 };
 
 function set_source_value_object_in_url(source_type, source_value_object) {
-  source_type.source_def_array.forEach((source_def) => {
-    const source_value = source_value_object[source_def.value];
-    if (source_value == null) {
-      return;
-    }
-    if (source_def.f_set_value_url != null) {
-      source_def.f_set_value_url();
-    } else if (source_def.value_url != null) {
-      ntopng_url_manager.set_key_to_url(source_def.value_url, source_value);
-    } else {
-      ntopng_url_manager.set_key_to_url(source_def.value, source_value);
-    }
-  });
+    source_type.source_def_array.forEach((source_def) => {
+        let source_value = source_value_object[source_def.value];
+        if (source_value == null) { return; }
+        if (source_def.f_set_value_url != null) {
+            source_def.f_set_value_url();
+        } else if (source_def.value_url != null) {
+            ntopng_url_manager.set_key_to_url(source_def.value_url, source_value);
+        } else {
+            ntopng_url_manager.set_key_to_url(source_def.value, source_value);
+        }
+    });
 }
 
 const get_default_source_value_array = (source_type) => {
-  if (source_type == null) {
-    source_type = get_current_page_source_type();
-  }
-  const source_value_array = source_type.source_def_array.map((source_def) => {
-    if (source_def.f_get_value_url != null) {
-      return source_def.f_get_value_url();
+    if (source_type == null) {
+        source_type = get_current_page_source_type();
     }
-    let source_def_value = source_def.value_url;
-    if (source_def_value == null) {
-      source_def_value = source_def.value;
-    }
-    const source_value = ntopng_url_manager.get_url_entry(source_def_value);
-    return source_value;
-  });
-  return source_value_array;
+    let source_value_array = source_type.source_def_array.map((source_def) => {
+        if (source_def.f_get_value_url != null) {
+            return source_def.f_get_value_url();
+        }
+        let source_def_value = source_def.value_url;
+        if (source_def_value == null) {
+            source_def_value = source_def.value;
+        }
+        let source_value = ntopng_url_manager.get_url_entry(source_def_value);
+        return source_value;
+    });
+    return source_value_array;
 };
 
 function get_metrics_url(http_prefix, source_type, source_array, epoch) {
-  const params = source_type.source_def_array.map((source_def, i) => {
-    return `${source_def.value}=${source_array[i].value}`;
-  }).join('&');
-  let epoch_string = ``;
-  if (epoch != null) {
-    epoch_string = `epoch_end=${epoch.epoch_end}&epoch_begin=${epoch.epoch_begin}`;
-  }
-  const url = `${http_prefix}/lua/rest/v2/get/timeseries/type/consts.lua?query=${source_type.query}&${params}&${epoch_string}`;
-  return url;
+    let params = source_type.source_def_array.map((source_def, i) => {
+        return `${source_def.value}=${source_array[i].value}`;
+    }).join("&");
+    let epoch_string = ``;
+    if (epoch != null) {
+        epoch_string = `epoch_end=${epoch.epoch_end}&epoch_begin=${epoch.epoch_begin}`
+    }
+    let url = `${http_prefix}/lua/rest/v2/get/timeseries/type/consts.lua?query=${source_type.query}&${params}&${epoch_string}`;
+    return url;
 }
 
 function get_metric_key(source_type, source_array) {
-  const source_array_key = source_array.map((source) => source.value).join('_');
-  const key = `${source_type.id}_${source_array_key}`;
-  return key;
+    let source_array_key = source_array.map((source) => source.value).join("_");
+    let key = `${source_type.id}_${source_array_key}`;
+    return key;
 }
 
-const cache_metrics = {};
+let cache_metrics = {};
 let last_metrics_time_interval = null;
 const get_metrics = async (http_prefix, source_type, source_array, status) => {
-  const epoch_begin = status?.epoch_begin || ntopng_url_manager.get_url_entry('epoch_begin');
-  const epoch_end = status?.epoch_end || ntopng_url_manager.get_url_entry('epoch_end');
-  const current_last_metrics_time_interval = `${epoch_begin}_${epoch_end}`;
-  if (source_type == null) {
-    source_type = get_current_page_source_type();
-  }
-  if (source_array == null) {
-    source_array = await get_default_source_array(http_prefix, source_type);
-  }
-  // let url = `${http_prefix}/lua/rest/v2/get/timeseries/type/consts.lua?query=${source_type.value}`;
-  const url = get_metrics_url(http_prefix, source_type, source_array, {epoch_begin: epoch_begin, epoch_end: epoch_end});
-  const key = get_metric_key(source_type, source_array);
-  if (current_last_metrics_time_interval != last_metrics_time_interval) {
-    cache_metrics[key] = null;
-    last_metrics_time_interval = current_last_metrics_time_interval;
-  }
-  if (cache_metrics[key] == null) {
-    cache_metrics[key] = ntopng_utility.http_request(url);
-  }
-  const metrics = await cache_metrics[key];
-  if (metrics == null || metrics.length == 0) {
-    return [{}];
-  }
-  if (metrics.some((m) => m.default_visible == true) == false) {
-    metrics[0].default_visible = true;
-  }
-  return ntopng_utility.clone(metrics);
+    let epoch_begin = status?.epoch_begin || ntopng_url_manager.get_url_entry("epoch_begin");
+    let epoch_end = status?.epoch_end || ntopng_url_manager.get_url_entry("epoch_end");
+    let current_last_metrics_time_interval = `${epoch_begin}_${epoch_end}`;
+    if (source_type == null) {
+        source_type = get_current_page_source_type();
+    }
+    if (source_array == null) {
+        source_array = await get_default_source_array(http_prefix, source_type);
+    }
+    // let url = `${http_prefix}/lua/rest/v2/get/timeseries/type/consts.lua?query=${source_type.value}`;
+    let url = get_metrics_url(http_prefix, source_type, source_array, { epoch_begin: epoch_begin, epoch_end: epoch_end });
+    let key = get_metric_key(source_type, source_array);
+    if (current_last_metrics_time_interval != last_metrics_time_interval) {
+        cache_metrics[key] = null;
+        last_metrics_time_interval = current_last_metrics_time_interval;
+    }
+    if (cache_metrics[key] == null) {
+        cache_metrics[key] = ntopng_utility.http_request(url);
+    }
+    let metrics = await cache_metrics[key];
+    if (metrics == null || metrics.length == 0) { return [{}]; }
+    if (metrics.some((m) => m.default_visible == true) == false) {
+        metrics[0].default_visible = true;
+    }
+    return ntopng_utility.clone(metrics);
 };
 
 const get_current_page_source_type = () => {
-  const pathname = window.location.pathname;
-  for (let i = 0; i < sources_types.length; i += 1) {
-    const regExp = new RegExp(sources_types[i].regex_page_url);
-    if (regExp.test(pathname) == true) {
-      return sources_types[i];
+    let pathname = window.location.pathname;
+    for (let i = 0; i < sources_types.length; i += 1) {
+        let regExp = new RegExp(sources_types[i].regex_page_url);
+        if (regExp.test(pathname) == true) {
+            return sources_types[i];
+        }
     }
-  }
-  throw `source_type not found for ${pathname}`;
+    throw `source_type not found for ${pathname}`;
 };
 
 const get_metric_from_schema = async (http_prefix, source_type, source_array, metric_schema, metric_query, status) => {
-  const metrics = await get_metrics(http_prefix, source_type, source_array, status);
-  return metrics.find((m) => m.schema == metric_schema && m.query == metric_query);
+    let metrics = await get_metrics(http_prefix, source_type, source_array, status);
+    return metrics.find((m) => m.schema == metric_schema && m.query == metric_query);
 };
 
 const get_metric_query_from_ts_query = (ts_query, source_type) => {
-  if (source_type == null) {
-    source_type = get_current_page_source_type();
-  }
-  const source_def_dict = {};
-  source_type.source_def_array.forEach((s_def) => source_def_dict[s_def.value] = true);
-  const ts_query_array = ts_query.split(',');
-  for (let i = 0; i < ts_query_array.length; i += 1) {
-    const ts_val_key = ts_query_array[i].split(':')[0];
-    if (source_def_dict[ts_val_key] == null) {
-      return ts_query_array[i];
+    if (source_type == null) {
+        source_type = get_current_page_source_type();
     }
-  }
-  return null;
+    let source_def_dict = {};
+    source_type.source_def_array.forEach((s_def) => source_def_dict[s_def.value] = true);
+    let ts_query_array = ts_query.split(",");
+    for (let i = 0; i < ts_query_array.length; i += 1) {
+        let ts_val_key = ts_query_array[i].split(":")[0];
+        if (source_def_dict[ts_val_key] == null) {
+            return ts_query_array[i];
+        }
+    }
+    return null;
 };
 
 const get_default_metric = (metrics, metric_ts_schema, metric_query) => {
-  let default_metric;
-  if (metric_ts_schema != null) {
-    default_metric = metrics.find((m) => m.schema == metric_ts_schema && (metric_query == null || m.query == metric_query));
-  }
-  if (default_metric == null) {
-    default_metric = metrics.find((m) => m.default_visible == true);
-  }
-  if (default_metric != null) {
-    return default_metric;
-  }
-  return metrics[0];
+    let default_metric;
+    if (metric_ts_schema != null) {
+        default_metric = metrics.find((m) => m.schema == metric_ts_schema && (metric_query == null || m.query == metric_query));
+    }
+    if (default_metric == null) {
+        default_metric = metrics.find((m) => m.default_visible == true);
+    }
+    if (default_metric != null) {
+        return default_metric;
+    }
+    return metrics[0];
 };
 
-const metricsManager = function() {
-  return {
-    set_timeseries_groups_in_url,
-    get_timeseries_groups_from_url,
-    get_default_timeseries_groups,
-    get_ts_group,
-    get_ts_group_id,
+const metricsManager = function () {
+    return {
+        set_timeseries_groups_in_url,
+        get_timeseries_groups_from_url,
+        get_default_timeseries_groups,
+        get_ts_group,
+        get_ts_group_id,
 
-    sources_types,
-    sources_types_tables,
-    get_source_type_from_id,
-    get_current_page_source_type,
+        sources_types,
+        sources_types_tables,
+        get_source_type_from_id,
+        get_current_page_source_type,
 
-    get_sources,
-    get_default_source_array,
-    get_source_array_from_value_dict,
-    get_source_array_from_value_array,
-    get_default_source_value_array,
+        get_sources,
+        get_default_source_array,
+        get_source_array_from_value_dict,
+        get_source_array_from_value_array,
+        get_default_source_value_array,
 
-    get_metrics,
-    get_metric_from_schema,
-    get_metric_query_from_ts_query,
-    get_default_metric,
+        get_metrics,
+        get_metric_from_schema,
+        get_metric_query_from_ts_query,
+        get_default_metric,
 
-    set_source_value_object_in_url,
+        set_source_value_object_in_url,
 
-    ui_types,
-  };
+        ui_types,
+    };
 }();
 
 export default metricsManager;

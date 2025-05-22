@@ -626,6 +626,12 @@
                 dynamicExp += "return 0; ";
                 dynamicExp += "}; ";
 
+                if (table.config.debug) {
+                    benchmark("Evaling expression:" + dynamicExp, new Date());
+                }
+
+                eval(dynamicExp);
+
                 cache.normalized.sort(sortWrapper);
 
                 if (table.config.debug) {

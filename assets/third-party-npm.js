@@ -83,9 +83,6 @@ window.ToastUtils = ToastUtils
 
 import '../http_src/utilities/datatable/datatable-plugins/api-extension'
 import '../http_src/utilities/datatable/datatable-plugins/jquery-extension'
-import { nv } from 'nvd3/build/nv.d3.min.js';
-import '@yaireo/tagify';
-window.nv = nv
 
 import './third-party-npm.scss'
 
