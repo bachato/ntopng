@@ -1002,13 +1002,21 @@ int MySQLDB::exec_single_query(lua_State *vm, char *sql) {
 
 /* ******************************************* */
 
+int MySQLDB::exec_sql_query(const char *sql, bool doReconnect,
+                            bool ignoreErrors, bool doLock,
+                            db_result_row_callback *cb, void *cb_user_data) {
+  return exec_sql_query_mysql(sql, doReconnect, ignoreErrors, doLock, cb, cb_user_data);
+}
+
+/* ******************************************* */
+
 /*
   Locking is necessary when multiple queries are executed
   simultaneously (e.g. via Lua)
 */
-int MySQLDB::exec_sql_query(const char *sql, bool doReconnect,
-                            bool ignoreErrors, bool doLock,
-                            db_result_row_callback *cb, void *cb_user_data) {
+int MySQLDB::exec_sql_query_mysql(const char *sql, bool doReconnect,
+                                  bool ignoreErrors, bool doLock,
+                                  db_result_row_callback *cb, void *cb_user_data) {
   MYSQL *conn = &mysql;
   MYSQL_RES *result;
   struct timeval begin, end;
@@ -1106,260 +1114,17 @@ int MySQLDB::exec_sql_query(const char *sql, bool doReconnect,
 
   return (rc);
 }
-
-/* ******************************************* */
-
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_CLICKHOUSE_LIB)
-
-std::string uuid_to_string_ch(const std::pair<uint64_t, uint64_t>& uuid) {
-    uint8_t bytes[16];
-    std::memcpy(bytes, &uuid.first, 8);
-    std::memcpy(bytes + 8, &uuid.second, 8);
-
-    std::ostringstream ss;
-    ss << std::hex << std::setfill('0');
-    for (int i = 0; i < 16; ++i) {
-        ss << std::setw(2) << static_cast<int>(bytes[i]);
-        if (i == 3 || i == 5 || i == 7 || i == 9) ss << "-";
-    }
-    return ss.str();
-}
-
-/* ******************************************* */
-
-void result_to_lua_ch(lua_State *vm, const Block& block, bool limitRows, int& count) {
-  size_t rows = block.GetRowCount();
-  size_t cols = block.GetColumnCount();
-  bool log_records = false;
-
-  if (count >= MYSQL_MAX_NUM_ROWS)
-    return;
-
-  if (count + rows > MYSQL_MAX_NUM_ROWS) {
-    static bool warning_shown = false;
-    if (!warning_shown) {
-      ntop->getTrace()->traceEvent(TRACE_WARNING,
-            "Too many results returned from ClickHouse, reduce query result set");
-      warning_shown = true;
-    }
-
-    if (limitRows) rows = MYSQL_MAX_NUM_ROWS - count;
-  }
-
-  for (size_t i = 0; i < rows; ++i) {
-
-    lua_newtable(vm);
-
-    if (log_records) {
-      std::cout << "#" << i << " ";
-    }
-
-    for (size_t j = 0; j < cols; ++j) {
-      auto col = block[j];
-      std::string value;
-      const char *column_type = "Unknown";
-
-      if (!col) {
-        if (log_records) {
-          std::cout << "(null)";
-        }
-        continue;
-      }
-
-      Type::Code type_code = col->Type()->GetCode();
-
-#if 1 /* Handle Nullable (NULL in schema) columns */
-      bool is_null = false;
-
-      bool is_nullable = (type_code == Type::Code::Nullable);
-      if (is_nullable) {
-        /* Get the null mask column */
-        const ColumnNullable *nullable = static_cast<const ColumnNullable*>(col.get());
-
-        /* Get the type of the wrapped (real) column */
-        const Column *unwrapped_col = nullable->Nested().get();
-        type_code = unwrapped_col->Type()->GetCode();
-
-        /* Check if the value is null */
-        auto null_mask_col = nullable->Nulls();
-        auto null_mask_c = null_mask_col->As<ColumnUInt8>();
-        is_null = (*null_mask_c)[i];
-
-        if (!is_null) {
-          /* Not null: Get the actual wrapped (real) column */
-          col = nullable->Nested();
-        }
-      }
-
-      if (is_null)
-        column_type = "Null";
-      else
-#endif
-      switch (type_code) {
-        case Type::Code::UInt8: {
-          /* Note: Boolean is stored as UInt8 */
-          column_type = "UInt8";
-          auto c = col->As<ColumnUInt8>();
-          value = std::to_string((*c)[i]);
-          break;
-        }
-        case Type::Code::UInt16: {
-          column_type = "UInt16";
-          auto c = col->As<ColumnUInt16>();
-          value = std::to_string((*c)[i]);
-          break;
-        }
-        case Type::Code::UInt32: {
-          column_type = "UInt32";
-          auto c = col->As<ColumnUInt32>();
-          value = std::to_string((*c)[i]);
-          break;
-        }
-        case Type::Code::UInt64: {
-          column_type = "UInt64";
-          auto c = col->As<ColumnUInt64>();
-          value = std::to_string((*c)[i]);
-          break;
-        }
-        case Type::Code::Int8: {
-          column_type = "Int8";
-          auto c = col->As<ColumnInt8>();
-          value = std::to_string((*c)[i]);
-          break;
-        }
-        case Type::Code::Int16: {
-          column_type = "Int16";
-          auto c = col->As<ColumnInt16>();
-          value = std::to_string((*c)[i]);
-          break;
-        }
-        case Type::Code::Int32: {
-          column_type = "Int32";
-          auto c = col->As<ColumnInt32>();
-          value = std::to_string((*c)[i]);
-          break;
-        }
-        case Type::Code::Int64: {
-          column_type = "Int64";
-          auto c = col->As<ColumnInt64>();
-          value = std::to_string((*c)[i]);
-          break;
-        }
-        case Type::Code::Float64: {
-          column_type = "Float64";
-          auto c = col->As<ColumnFloat64>();
-          value = std::to_string((*c)[i]);
-          break;
-        }
-        case Type::Code::String: {
-          column_type = "String";
-          auto c = col->As<ColumnString>();
-          value = std::string(c->At(i));
-          break;
-        }
-        case Type::Code::DateTime: {
-          column_type = "DateTime";
-#if 1
-          /* Return as epoch (same as mysql) */
-          auto c = col->As<ColumnDateTime>();
-          value = std::to_string((*c)[i]);
-#else
-          /* Return as Y-m-d J:M:S */
-          auto c = col->As<ColumnDateTime>();
-          std::time_t t = (*c)[i];
-          std::tm* tm_ptr = std::gmtime(&t); // UTC time
-          char buf[20];
-          std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", tm_ptr);
-          value = std::string(buf);
-#endif
-          break;
-        }
-        case Type::Code::UUID: {
-          column_type = "UUID";
-          auto c = col->As<ColumnUUID>();
-          clickhouse::UUID uuid = (*c)[i];
-          value = uuid_to_string_ch(uuid);
-          break;
-        }
-        case Type::Code::IPv6: {
-          column_type = "IPv6";
-          auto c = col->As<ColumnIPv6>();
-          in6_addr ipv6 = (*c)[i];
-          char str[INET6_ADDRSTRLEN];
-          inet_ntop(AF_INET6, &ipv6, str, sizeof(str));
-          value = std::string(str);
-          break;
-        }
-        case Type::Code::Nullable: {
-          column_type = "Null";
-          break;
-        }
-        default:
-          column_type = "Unsupported";
-          std::cout << "Unsupported " << block.GetColumnName(j) << " type in record\n";
-          break;
-      }
-
-      if (log_records) {
-        std::cout << block.GetColumnName(j) << " = " << value << " (" << column_type << ")";
-
-        if (j != cols - 1)
-          std::cout << ", ";
-      }
-
-      lua_push_str_table_entry(vm, (const char *) block.GetColumnName(j).c_str(), value.c_str());
-    }
-
-    lua_pushinteger(vm, ++count);
-    lua_insert(vm, -2);
-    lua_settable(vm, -3);
-
-    if (log_records) {
-      std::cout << "\n";
-    }
-  }
-}
-
-/* ******************************************* */
-
-int MySQLDB::exec_sql_query_ch(lua_State *vm, char *sql, bool limitRows) {
-  char *user = ntop->getPrefs()->get_ch_user() ? 
-                ntop->getPrefs()->get_ch_user() : /* Using CH Cloud */
-                ntop->getPrefs()->get_mysql_user(); /* Using standard CH */
-  int count = 0;
-  int rc = -1;
-
-  lua_newtable(vm);
-
-  try {
-
-    Client client(ClientOptions()
-      .SetHost(ntop->getPrefs()->get_mysql_host())
-      .SetPort(ntop->getPrefs()->get_clickhouse_tcp_port())
-      .SetUser(user)
-      .SetPassword(ntop->getPrefs()->get_mysql_pw())
-      .SetDefaultDatabase(ntop->getPrefs()->get_mysql_dbname()) 
-    );
-
-    client.Select(sql, [vm, limitRows, &count](const Block& block) {
-      /* Convert records to lua table */
-      result_to_lua_ch(vm, block, limitRows, count);
-    });
-
-    rc = 0;
-
-  } catch (...) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "Clickhouse select exception");
-  }
-
-  return rc;
-}
-#endif
-
 /* ******************************************* */
 
 int MySQLDB::exec_sql_query(lua_State *vm, char *sql, bool limitRows,
                             bool wait_for_db_created) {
+  return exec_sql_query_mysql(vm, sql, limitRows, wait_for_db_created);
+}
+
+/* ******************************************* */
+
+int MySQLDB::exec_sql_query_mysql(lua_State *vm, char *sql, bool limitRows,
+                                  bool wait_for_db_created) {
   MYSQL_RES *result;
   int rc, num_fields;
   struct timeval begin, end;
@@ -1377,14 +1142,6 @@ int MySQLDB::exec_sql_query(lua_State *vm, char *sql, bool limitRows,
   if (debug_performance) {
     gettimeofday(&begin, NULL);
   }
-
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_CLICKHOUSE_LIB)
-  if (ntop->getPrefs()->do_dump_flows_on_clickhouse() &&
-      ntop->getPrefs()->native_clickhouse_client_enabled()) {
-    rc = exec_sql_query_ch(vm, sql, limitRows);
-    goto done;
-  }
-#endif
 
   if (!db_operational) {
     if (!connectToDB(&mysql, true)) {
