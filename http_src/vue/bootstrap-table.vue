@@ -3,7 +3,7 @@
 -->
 <template>
   <!-- Normal table -->
-  <table v-if="!(horizontal) || (horizontal == false)" class="ntopng-table">
+  <table v-if="!(horizontal) || (horizontal == false)" class="table table-bordered table-striped">
     <thead v-if="!hide_head">
       <tr>
         <th v-for="col in columns" scope="col" :class="col.class" v-html="print_html_column(col)"></th>
@@ -20,7 +20,7 @@
       </tr>
     </tbody>
   </table>
-  <table v-else class="ntopng-table">
+  <table v-else class="table table-bordered table-striped">
     <tbody>
       <tr v-for="row in rows">
         <th v-if="head_width" :class="'col-' + head_width" v-html="print_html_title(row.name)"></th>
