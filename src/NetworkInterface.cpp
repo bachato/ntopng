@@ -9517,6 +9517,10 @@ bool NetworkInterface::initFlowDump(u_int8_t num_dump_interfaces) {
         /* On nEdge do not exit on CH failure to avoid outage due to db */
         ntop->getTrace()->traceEvent(TRACE_WARNING, "Running without ClickHouse support, please check the clickhouse service");
         ntop->getPrefs()->dontUseClickHouse();
+        if (db) {
+          delete db;
+          db = NULL;
+        }
 #else
         ntop->getTrace()->traceEvent(TRACE_WARNING, "Leaving due to failed ClickHouse initialization");
         exit(-1);
