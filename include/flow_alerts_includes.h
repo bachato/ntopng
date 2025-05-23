@@ -106,7 +106,6 @@
 #include "flow_alerts/LongLivedFlowAlert.h"
 #include "flow_alerts/DNSDataExfiltrationAlert.h"
 #include "flow_alerts/TCPConnectionNoAnswerAlert.h"
-#include "flow_alerts/TCPConnectionRefusedAlert.h"
 #include "flow_alerts/NedgeBlockedFlowAlert.h"
 #include "flow_alerts/InvalidDNSQueryAlert.h"
 #include "flow_alerts/HostPolicyAlert.h"

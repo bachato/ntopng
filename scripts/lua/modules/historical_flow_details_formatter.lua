@@ -296,6 +296,7 @@ local function format_historical_issue_description(alert, alert_id, score,
     end
     -- If alert risk is 0 then it comes from ntonpg, else nDPI
     local alert_risk = ntop.getFlowAlertRisk(tonumber(alert_id))
+    local check_risk = true
     local alert_src
     local riskLabel = ""
 
@@ -305,6 +306,7 @@ local function format_historical_issue_description(alert, alert_id, score,
         if isEmptyString(msg) and not isEmptyString(info) then msg = info end
         -- Adapting to the new alerts format
         if alert_info and alert then
+            check_risk = false
             alert.alert_id = alert_id
             info = alert_utils.formatFlowAlertMessage(interface.getId(), alert,
                                                       alert_info, false, true,
@@ -314,7 +316,7 @@ local function format_historical_issue_description(alert, alert_id, score,
         alert_src = "nDPI"
     end
 
-    if riskInfo then
+    if riskInfo and check_risk then
         if type(riskInfo) == "string" then -- backward compatibility
             riskInfo = json.decode(riskInfo)
         end

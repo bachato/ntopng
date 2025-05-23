@@ -101,7 +101,6 @@
 #include "flow_checks/ModbusTooManyExceptions.h"
 #include "flow_checks/ModbusInvalidTransition.h"
 #include "flow_checks/TCPConnectionFailed.h"
-#include "flow_checks/TCPConnectionRefused.h"
 #include "flow_checks/FlowRiskTLSCertValidityTooLong.h"
 #include "flow_checks/FlowRiskTLSCertificateExpired.h"
 #include "flow_checks/FlowRiskTLSCertificateSelfSigned.h"
