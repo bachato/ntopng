@@ -248,13 +248,17 @@ const map_table_def_columns = (columns) => {
                 if (row.application.http_method) {
                     let span_mode = "warning"
                     let color_class = "badge bg-danger"
+                    let status_code = ''
                     if (row.application.http_method == "GET") {
                         span_mode = "success"
                     }
                     if (row.application.return_code < 400) {
                         color_class = "badge bg-success"
                     }
-                    info = `<span class="badge bg-${span_mode}">${row.application.http_method}</span> <span class="${color_class}">${row.application.rsp_status_code}</span> ${info}`
+                    if (row.application.return_code > 0) {
+                        status_code = `<span class="${color_class}">${row.application.rsp_status_code}</span>`
+                    }
+                    info = `<span class="badge bg-${span_mode}">${row.application.http_method}</span> ${status_code} ${info}`
                 }
             }
             return info
