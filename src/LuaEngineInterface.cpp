@@ -4925,6 +4925,7 @@ static int ntop_interface_get_host_attributes(lua_State *vm) {
         char *attr = NULL;
         u_int32_t attr_len;
 
+        h->serializeAttributes(serializer);
         attr = ndpi_serializer_get_buffer(serializer, &attr_len);
         lua_pushstring(vm, attr);
 
