@@ -127,6 +127,8 @@ static size_t write_data(void* ptr, size_t size, size_t nmemb, void *stream)
     pthread_mutex_unlock(&p_thread->lock);
 #endif
   }
+
+  /* printf("Upload: %u\n", size * nmemb); */
   return size * nmemb;
 }
 
@@ -649,8 +651,8 @@ static void* do_upload(void *p) {
 
 /* ***************************************** */
 
-static double test_upload(char *p_url, int num_thread, long size,
-		       char *p_ext, char init)
+static double test_upload(char *p_url, int num_thread, long ul_size,
+			  char *p_ext, char init)
 {
   struct timeval s_time;
   int i;
@@ -658,6 +660,7 @@ static double test_upload(char *p_url, int num_thread, long size,
   double sum = 0, speed = 0;
   double *instant_speed = NULL;
   int    speed_num = 0;
+
   gettimeofday(&s_time, NULL);
 
   init_instant_speed(&instant_speed, &speed_num);
@@ -667,7 +670,7 @@ static double test_upload(char *p_url, int num_thread, long size,
     snprintf(paras[i].url, sizeof(paras[i].url), "%s/speedtest/upload.%s", p_url, p_ext);
     paras[i].result = 0;
     paras[i].finish = 0;
-    paras[i].upload_size = size/num_thread;
+    paras[i].upload_size = ul_size/num_thread;
 #ifdef DEBUG_SPEEDTEST
     printf("[thread %u] Upload size: %lu\n", i, paras[i].upload_size);
 #endif
@@ -1046,11 +1049,13 @@ json_object* speedtest() {
   }
 
 #ifdef FULL_REPORT
+  if(speed == 0) speed = download_speed;
   speed = test_upload(server_url, num_thread, speed, ext, 0);
 
 #ifdef DEBUG_SPEEDTEST
   fprintf(stderr, "Testing upload speed\n");
 #endif
+  if(speed == 0) speed = download_speed;
   upload_speed = test_upload(server_url, num_thread, speed*SPEEDTEST_TIME_MAX, ext, 1);
 
 #ifdef DEBUG_SPEEDTEST
