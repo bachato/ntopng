@@ -151,6 +151,7 @@ ZMQParserInterface::ZMQParserInterface(const char *endpoint,
   addMapping("SMTP_MAIL_FROM", SMTP_MAIL_FROM, NTOP_PEN);
   addMapping("SMTP_RCPT_TO", SMTP_RCPT_TO, NTOP_PEN);
   addMapping("UNIQUE_SOURCE_ID", UNIQUE_SOURCE_ID, NTOP_PEN);
+  addMapping("TCP_FINGERPRINT", TCP_FINGERPRINT, NTOP_PEN);
 
   /* eBPF / Process */
   addMapping("SRC_PROC_PID", SRC_PROC_PID, NTOP_PEN);
@@ -1250,6 +1251,11 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow *const flow,
   case JA4C_HASH:
     if (value->string && value->string[0])
       flow->setJA4cHash(value->string);
+    break;
+
+  case TCP_FINGERPRINT:
+    if (value->string && value->string[0])
+      flow->setTCPFingerprint(value->string);
     break;
 
   case TLS_CIPHER:

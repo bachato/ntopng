@@ -33,8 +33,6 @@ typedef struct {
 } TCPSeqNum;
 
 typedef struct {
-  char *tcp_fingerprint;
-
   /* TCP stats */
   TCPSeqNum tcp_seq_s2d, tcp_seq_d2s;
   u_int16_t cli2srv_window, srv2cli_window;
@@ -44,9 +42,9 @@ typedef struct {
 
   struct {
     struct ndpi_analyze_struct cli_to_srv, srv_to_cli;
-    u_int8_t cli_to_srv_winscale, srv_to_cli_winscale; 
+    u_int8_t cli_to_srv_winscale, srv_to_cli_winscale;
   } tcpWin;
-  
+
   struct {
     u_int32_t last_cli_ack, last_srv_ack;
     struct bpf_timeval last_cli_ts, last_srv_ts;
@@ -145,7 +143,7 @@ private:
     struct ndpi_analyze_struct *c2s, *s2c;
   } initial_bytes_entropy;
 #endif
-  
+
   u_int32_t hash_entry_id; /* Uniquely identify this flow inside the flows_hash hash table */
   u_int32_t periodicity; /* When is_periodic_flow is set, specifies how periodic (seconds) is this flow */
   u_int16_t detection_completed : 1,
@@ -168,7 +166,7 @@ private:
   struct {
     u_int8_t src_to_dst, dst_to_src;
   } collected_qoe;
-  
+
   u_int8_t iface_flow_accounted:1, _notused:7;
   DropReason dropVerdictReason;
 
@@ -218,6 +216,8 @@ private:
     char *source;
     json_object *json;
   } external_alert;
+
+  char *tcp_fingerprint;
   bool trigger_immediate_periodic_update; /* needed to process external alerts */
   time_t next_call_periodic_update; /* The time at which the periodic lua script
                                        on this flow shall be called */
@@ -301,7 +301,6 @@ private:
       char * mail_from;
       char * rcpt_to;
     } smtp;
-
   } protos;
 
   struct {
@@ -336,7 +335,7 @@ private:
   /* Lazily initialized and used by a possible view interface */
   ViewInterfaceFlowStats *viewFlowStats;
 #endif
-  
+
   /* Partial used to periodically update stats out of flows */
   PartializableFlowTrafficStats *periodic_stats_update_partial;
 
@@ -371,7 +370,6 @@ private:
   char *intoaV4(unsigned int addr, char *buf, u_short bufLen);
   void allocDPIMemory();
   bool checkTor(char *hostname);
-  void setBittorrentHash(char *hash, u_int len);
   void updateThroughputStats(float tdiff_msec, u_int32_t diff_sent_packets,
                              u_int64_t diff_sent_bytes,
                              u_int64_t diff_sent_goodput_bytes,
@@ -426,7 +424,7 @@ private:
   void computeKey();
   void accountBidirectionalTCPProtocolServices();
   void accountBidirectionalUDPProtocolServices();
-  
+
 public:
   Flow(NetworkInterface *_iface, int32_t iface_idx,
        u_int16_t _vlanId,
@@ -957,7 +955,7 @@ public:
   inline Host *getViewSharedClient() { return(get_cli_host()); }
   inline Host *getViewSharedServer() { return(get_srv_host()); }
 #endif
-  
+
   u_int32_t get_packetsLost();
   u_int32_t get_packetsRetr();
   u_int32_t get_packetsOOO();
@@ -1209,7 +1207,7 @@ public:
 		    bool src2dst_direction, u_int32_t ack_id);
   void updateTCPWinScale(bool src2dst_direction, u_int8_t winscale);
   void updateTCPWin(bool src2dst_direction, u_int16_t win);
-  
+
 #if !defined(HAVE_NEDGE)
   inline void updateProfile() { trafficProfile = iface->getFlowProfile(this); }
 #endif
@@ -1298,7 +1296,7 @@ public:
     return (viewFlowStats);
   }
 #endif
-  
+
   inline double getFlowRTT(bool client) const {
     if(tcp == NULL)
       return(0.0);
@@ -1363,7 +1361,7 @@ public:
   inline void setFlowDeviceInIndex(u_int32_t idx)  { if(idx != 0) flow_device.in_index = idx; };
   inline void setFlowDeviceOutIndex(u_int32_t idx) { if(idx != 0) flow_device.out_index = idx; };
 
-  inline const u_int16_t getScore() const { return (flow_score); };  
+  inline const u_int16_t getScore() const { return (flow_score); };
 
 #ifdef HAVE_NEDGE
   inline void setLastConntrackUpdate(u_int32_t when) {
@@ -1440,6 +1438,10 @@ public:
     if (protos.tls.issuerDN) free(protos.tls.issuerDN);
     protos.tls.issuerDN = strdup(issuer);
   }
+  inline void setTCPFingerprint(char *fp) {
+    if (tcp_fingerprint) free(tcp_fingerprint);
+    tcp_fingerprint = strdup(fp);
+  }
   inline void setTOS(u_int8_t tos, bool is_cli_tos) {
     if (is_cli_tos) cli2srv_tos = tos; else srv2cli_tos = tos;
   }
@@ -1461,12 +1463,12 @@ public:
     return (e ? ndpi_data_entropy(e) : 0);
   }
 #endif
-  
+
   inline float getICMPPacketsEntropy() {
     return (protos.icmp.client_to_server.max_entropy -
             protos.icmp.client_to_server.min_entropy);
   }
-  
+
   inline bool timeToPeriodicDump(u_int sec) {
     return ((sec - get_first_seen() >= CONST_DB_DUMP_FREQUENCY) &&
             (sec - get_partial_last_seen() >= CONST_DB_DUMP_FREQUENCY));
@@ -1565,6 +1567,7 @@ public:
   inline u_int16_t getPreNATDstPort()  { return(collection ? ntohs(collection->nat.dst_port_pre_nat) : 0);     };
   inline u_int16_t getPostNATSrcPort() { return(collection ? ntohs(collection->nat.src_port_post_nat) : 0);    };
   inline u_int16_t getPostNATDstPort() { return(collection ? ntohs(collection->nat.dst_port_post_nat) : 0);    };
+  void setBittorrentHash(char *hash, u_int len);
   inline bool isFlowAccounted()        { return iface_flow_accounted; };
   inline void setFlowAccounted()       { iface_flow_accounted = 1;    };
   void accountFlowTraffic(bool src2dst_direction);
@@ -1573,6 +1576,7 @@ public:
     if((c2s != NTOP_QOE_UNKNOWN)|| (s2c != NTOP_QOE_UNKNOWN))
     collected_qoe.src_to_dst = c2s, collected_qoe.dst_to_src = s2c, has_collected_qoe = 1;
   }
+  void setHostTCPFingerprint(char *fp, ndpi_os os_hint);
 };
 
 #endif /* _FLOW_H_ */

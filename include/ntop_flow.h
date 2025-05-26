@@ -567,7 +567,10 @@
 #define MAJOR_CONNECTION_STATE NTOP_BASE_ID + 535
 #define MINOR_CONNECTION_STATE NTOP_BASE_ID + 536
 #define L7_SERVICE NTOP_BASE_ID+582
-#define UNIQUE_SOURCE_ID NTOP_BASE_ID+589 /* Unique nProbe + exporter flow source identifier */
+#define UNIQUE_SOURCE_ID      NTOP_BASE_ID+589 /* Unique nProbe + exporter flow source identifier */
+#define NPROBE_UUID           NTOP_BASE_ID+590
+#define L7_DOMAIN_INFO        NTOP_BASE_ID+591
+#define TCP_FINGERPRINT       NTOP_BASE_ID+597
 
 /* sFlow Counter Fields */
 #define SFLOW_DEVICE_IP 0

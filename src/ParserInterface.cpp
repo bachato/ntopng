@@ -222,11 +222,11 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
   if((zflow->src_ip.getVersion() == 0)
      || (zflow->dst_ip.getVersion() == 0)) {
     flow = NULL; /* Invalid IPs */
-  } else { 
+  } else {
     srcIP.set(&zflow->src_ip), dstIP.set(&zflow->dst_ip);
-    
+
     INTERFACE_PROFILING_SECTION_ENTER("NetworkInterface::processFlow: getFlow", 0);
-    
+
     /* Updating Flow */
     flow = getFlow(UNKNOWN_PKT_IFACE_IDX, srcMac, dstMac, zflow->vlan_id,
 		   zflow->observationPointId, zflow->get_private_flow_id(),
@@ -238,7 +238,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 
     INTERFACE_PROFILING_SECTION_EXIT(0);
   }
-  
+
   if(flow) {
     /* Fix interaface Id (if zero) */
 
@@ -380,13 +380,13 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     zflow->tcp.clientNwLatency.tv_sec *= 2, zflow->tcp.clientNwLatency.tv_usec *= 2;
     flow->setFlowRTT(&zflow->tcp.clientNwLatency, src2dst_direction);
   }
-  
+
   if (zflow->tcp.serverNwLatency.tv_sec || zflow->tcp.serverNwLatency.tv_usec) {
     /* As nProbe divides RTT by 2, we need to double it */
     zflow->tcp.serverNwLatency.tv_sec *= 2, zflow->tcp.serverNwLatency.tv_usec *= 2;
     flow->setFlowRTT(&zflow->tcp.serverNwLatency, !src2dst_direction);
   }
-  
+
   flow->setEndReason(zflow->getEndReason());
   if (zflow->tcp.in_window)
     flow->setFlowTcpWindow(zflow->tcp.in_window, src2dst_direction);
@@ -505,7 +505,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 			zflow->first_switched, zflow->last_switched) == false) {
     if(update_seen) {
       flow->updateSeen(zflow->last_switched);
-      flow->callFlowUpdate(zflow->last_switched);    
+      flow->callFlowUpdate(zflow->last_switched);
     }
   }
 
@@ -634,7 +634,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 
     if(flow->get_protocol() == IPPROTO_ICMP)
       flow->setICMPTypeCode(zflow->icmp_type_code);
-    
+
     if (flow->isDNS()) flow->updateDNS(zflow);
     if (flow->isHTTP()) flow->updateHTTP(zflow);
     if (flow->isTLS()) flow->updateTLS(zflow);
@@ -670,9 +670,18 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     if(zflow->getOSHint() != ndpi_os_unknown) {
       if(flow->get_cli_host() != NULL)
 	flow->get_cli_host()->setnDPIOS(zflow->getOSHint());
-    }    
-    
-    if (zflow->getJA4cHash()) flow->updateJA4C(zflow->getJA4cHash());
+    }
+
+    if (zflow->getTCPFingerprint()) {
+      flow->setTCPFingerprint(zflow->getTCPFingerprint());
+      flow->setHostTCPFingerprint(zflow->getTCPFingerprint(),
+				  ndpi_get_os_from_tcp_fingerprint(get_ndpi_struct(),
+								   zflow->getTCPFingerprint()));
+    }
+
+    if (zflow->getJA4cHash())       flow->updateJA4C(zflow->getJA4cHash());
+    if (zflow->getBittorrentHash()) flow->setBittorrentHash(zflow->getBittorrentHash(),
+							    strlen(zflow->getBittorrentHash()));
 
     if (zflow->getRiskInfo()) {
       json_object *o, *obj;
@@ -691,11 +700,11 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
         /* NOTE: keep in sync with  FlowRisk::ignoreRisk() */
         if (json_object_object_get_ex(o, "6" /* NDPI_TLS_SELFSIGNED_CERTIFICATE */, &obj)) {
           const char *issuerDN = json_object_get_string(obj);
-	  
+
           if (flow->isTLS()) flow->setTLSCertificateIssuerDN((char *)issuerDN);
         } else if (json_object_object_get_ex(o, "16" /* NDPI_SUSPICIOUS_DGA_DOMAIN */, &obj)) {
           const char *dgaDomain = json_object_get_string(obj);
-	  
+
           flow->setDGADomain((char *)dgaDomain);
         }
 

@@ -46,7 +46,7 @@ ParsedFlow::ParsedFlow() : ParsedFlowCore(), ParsedeBPF() {
   flow_verdict = 0; /* Unknown */
   src_port_pre_nat = dst_port_pre_nat =
     src_port_post_nat = dst_port_post_nat = 0;
-  bittorrent_hash = NULL;
+  tcp_fingerprint = bittorrent_hash = NULL;
   l7_error_code = 0;
   confidence = NDPI_CONFIDENCE_UNKNOWN;
   flow_source = packet_to_flow;
@@ -112,6 +112,11 @@ ParsedFlow::ParsedFlow(const ParsedFlow &pf) : ParsedFlowCore(pf), ParsedeBPF(pf
     bittorrent_hash = strdup(pf.bittorrent_hash);
   else
     bittorrent_hash = NULL;
+
+  if (pf.tcp_fingerprint)
+    tcp_fingerprint = strdup(pf.tcp_fingerprint);
+  else
+    tcp_fingerprint = NULL;
 
   if (pf.ja4c_hash)
     ja4c_hash = strdup(pf.ja4c_hash);
@@ -230,6 +235,12 @@ void ParsedFlow::fromLua(lua_State *L, int index) {
         } else if (!strcmp(key, "ja4c_hash")) {
           if (ja4c_hash) free(ja4c_hash);
           ja4c_hash = strdup(lua_tostring(L, -1));
+        } else if (!strcmp(key, "tcp_fingerprint")) {
+          if (tcp_fingerprint) free(tcp_fingerprint);
+          tcp_fingerprint = strdup(lua_tostring(L, -1));
+        } else if (!strcmp(key, "bittorrent_hash")) {
+          if (bittorrent_hash) free(bittorrent_hash);
+          bittorrent_hash = strdup(lua_tostring(L, -1));
         } else if (!strcmp(key, "external_alert")) {
           if (external_alert) free(external_alert);
           external_alert = strdup(lua_tostring(L, -1));
@@ -341,6 +352,7 @@ void ParsedFlow::freeMemory() {
   if (end_reason)           { free(end_reason); end_reason = NULL; }
   if (tls_server_name)      { free(tls_server_name); tls_server_name = NULL; }
   if (bittorrent_hash)      { free(bittorrent_hash); bittorrent_hash = NULL; }
+  if (tcp_fingerprint)      { free(tcp_fingerprint); tcp_fingerprint = NULL; }
   if (ja4c_hash)            { free(ja4c_hash); ja4c_hash = NULL; }
   if (external_alert)       { free(external_alert); external_alert = NULL; }
   if (flow_risk_info)       { free(flow_risk_info); flow_risk_info = NULL; }

@@ -87,7 +87,7 @@ Flow::Flow(NetworkInterface *_iface,
   }
 
   collection = NULL;
-
+  tcp_fingerprint = NULL;
   predominant_alert.id = flow_alert_normal,
     predominant_alert.category = alert_category_other,
     predominant_alert_score = 0;
@@ -436,42 +436,8 @@ void Flow::freeDPIMemory() {
     setRisk(ndpi_flow_risk_bitmap | ndpiFlow->risk);
     ndpi_confidence = ndpiFlow->confidence;
 
-    if(tcp != NULL) {
-      if((tcp->tcp_fingerprint == NULL) && ndpiFlow->tcp.fingerprint
-	 && (cli_host || getViewSharedClient())) {
-	Host *h = cli_host ? cli_host : getViewSharedClient();
-
-#if 0
-	char buf[64];
-
-	ntop->getTrace()->traceEvent(TRACE_WARNING, "->> %s [%s][%s@%d]",
-				     ndpiFlow->tcp.fingerprint,
-				     ndpi_print_os_hint(ndpiFlow->tcp.os_hint),
-				     h->get_ip()->print(buf, sizeof(buf)),
-				     vlanId);
-#endif
-
-	h->setTCPfingerprint(ndpiFlow->tcp.fingerprint, ndpiFlow->tcp.os_hint);
-
-	if((ndpiFlow->tcp.os_hint == ndpi_os_unknown)
-	   && h->isLocalHost()
-	   && ntop->getPrefs()->areFingerprintStatsEnabled()) {
-	  char buf[64], log[128];
-
-	  snprintf(log, sizeof(log), "%s,%s",
-		   h->get_ip()->print(buf, sizeof(buf)),
-		   Utils::OS2Str(h->getOS()));
-
-	  ntop->getTrace()->traceEvent(TRACE_DEBUG, "** Unknown TCP fingerprint %s [%s]",
-				       ndpiFlow->tcp.fingerprint, log);
-
-	  ntop->getRedis()->hashSet(CONST_STR_UNKNOWN_TCP_FINGERPRINTS,
-				    ndpiFlow->tcp.fingerprint, log);
-	}
-
-	tcp->tcp_fingerprint = strdup(ndpiFlow->tcp.fingerprint);
-      }
-    }
+    if((tcp_fingerprint == NULL) && ndpiFlow->tcp.fingerprint)
+      setHostTCPFingerprint(ndpiFlow->tcp.fingerprint, ndpiFlow->tcp.os_hint);
 
     ndpi_free_flow(ndpiFlow);
     ndpiFlow = NULL;
@@ -576,8 +542,6 @@ Flow::~Flow() {
     ndpi_free_data_analysis(&tcp->rtt.cli_to_srv, 0);
     ndpi_free_data_analysis(&tcp->rtt.srv_to_cli, 0);
 
-    if(tcp->tcp_fingerprint) free(tcp->tcp_fingerprint);
-
     free(tcp);
     tcp = NULL;
   }
@@ -596,8 +560,9 @@ Flow::~Flow() {
   if (rtp) delete(rtp);
 #endif
 
-  if(riskInfo) free(riskInfo);
-  if(end_reason) free(end_reason);
+  if(tcp_fingerprint) free(tcp_fingerprint);
+  if(riskInfo)               free(riskInfo);
+  if(end_reason)             free(end_reason);
 
   if(collection) {
     if(collection->wifi.wlan_ssid) free(collection->wifi.wlan_ssid);
@@ -3032,8 +2997,8 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   if (json) lua_push_str_table_entry(vm, "json_alert", json);
 
   if(details_level >= details_high) {
-    if(tcp && tcp->tcp_fingerprint)
-      lua_push_str_table_entry(vm, "tcp_fingerprint", tcp->tcp_fingerprint);
+    if(tcp_fingerprint)
+      lua_push_str_table_entry(vm, "tcp_fingerprint", tcp_fingerprint);
 
     if(swap_done) lua_push_bool_table_entry(vm, "flow_swapped", true);
     lua_push_uint32_table_entry(vm, "flow_source", flow_source);
@@ -9598,3 +9563,40 @@ bool Flow::isThreeWayHandshakeOK() const {
   else
     return(false);
 };
+
+/* *************************************** */
+
+void Flow::setHostTCPFingerprint(char *fp, ndpi_os os_hint) {
+  if((fp != NULL) && (cli_host || getViewSharedClient())) {
+    Host *h = cli_host ? cli_host : getViewSharedClient();
+
+#if 0
+    char buf[64];
+
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "->> %s [%s][%s@%d]",
+				 fp, ndpi_print_os_hint(os_hint),
+				 h->get_ip()->print(buf, sizeof(buf)),
+				 vlanId);
+#endif
+
+    h->setTCPfingerprint(fp, os_hint);
+
+    if((os_hint == ndpi_os_unknown)
+       && h->isLocalHost()
+       && ntop->getPrefs()->areFingerprintStatsEnabled()) {
+      char buf[64], log[128];
+
+      snprintf(log, sizeof(log), "%s,%s",
+	       h->get_ip()->print(buf, sizeof(buf)),
+	       Utils::OS2Str(h->getOS()));
+
+      ntop->getTrace()->traceEvent(TRACE_DEBUG, "** Unknown TCP fingerprint %s [%s]",
+				   fp, log);
+
+      ntop->getRedis()->hashSet(CONST_STR_UNKNOWN_TCP_FINGERPRINTS,
+				fp, log);
+    }
+
+    setTCPFingerprint(fp);
+  }
+}

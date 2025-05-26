@@ -722,12 +722,6 @@ else
 		      "/lua/hosts_stats.lua?os=" .. host["os"] .. "'>" .. discover.getOsAndIcon(host["os"]) ..
 		      "</A>" .. os_detail)
 
-		if(false) then
-		   if(host["tcp_fingerprint"] ~= nil) then
-		      print(" <span class=\"badge bg-success\">TCP Fingerprint: "..host["tcp_fingerprint"].. "</span>")
-		   end
-		end
-		
 		print("</td><td></td>\n")
             else
                 print("<th></th><td></td>\n")
@@ -835,27 +829,13 @@ else
                           '" target=_blank><small>AbuseIP DB</small> <i class=\"fas fa-external-link-alt\"></i></A>')
             end
 	    
-	    if (host["os"] == 0) then
-	       -- Print the TCP Fingerprint when the OS is Unknown
-	       if(host["tcp_fingerprint"] ~= nil) then
-		  print(" <span class=\"badge bg-secondary\">TCP Fingerprint: "..host["tcp_fingerprint"].. "</span>")
-	       end
-	    end
-
-	    if(false) then
-	       if(host.fingerprint ~= nil) then
-		  if(host.fingerprint.os ~= "Unknown") then
-		     print(' <span class="badge bg-success">OS: '.. host.fingerprint.os .. '</span>')
-		  else
-		     print(' <span class="badge bg-warning">TCP Fingerprint: '.. host.fingerprint.tcp .. '</span>')
-		  end
-	       end
-	    end
-	    
             print("</td>\n")
         end
 	
-	
+	if (host.tcp_fingerprint) then
+	   print("<tr><th width=33%>" .. i18n("details.tcp_fingerprint") .. "</th><td nowrap colspan=2<div id=duration>" .. host.tcp_fingerprint .. "</div></td>\n")
+	end
+
         local h_notes = getHostNotes(host_info) or ''
 
         if (not isEmptyString(h_notes)) then
