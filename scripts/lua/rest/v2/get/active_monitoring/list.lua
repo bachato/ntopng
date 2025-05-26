@@ -10,6 +10,7 @@ require "http_lint"
 require "check_redis_prefs"
 local am_utils = require "am_utils"
 local rest_utils = require "rest_utils"
+local format_utils = require "format_utils"
 
 local rc = rest_utils.consts.success.ok
 local ifid = _GET["ifid"]
@@ -57,6 +58,10 @@ for key, info in pairs(active_monitoring_hosts) do
         last_measurement_time = last_update.when
         last_mean = last_update.mean
         last_jitter = last_update.jitter
+
+        if info.measurement == "speedtest" then
+            measurement_value = format_utils.bytesToBPS(measurement_value)
+        end
     end
 
     -- Clean the IP Address in case of http

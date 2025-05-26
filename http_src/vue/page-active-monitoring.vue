@@ -129,7 +129,7 @@ const map_table_def_columns = (columns) => {
         "measurement_value": (value, row) => {
             let measurement = row.last_measurement.measurement_value;
             if (!dataUtils.isEmptyString(measurement)) {
-                measurement = measurement + " " + i18n(row.metadata.unit);
+                measurement = measurement + " " + (row.last_measurement.measurement_type == "speedtest" ? "" : i18n(row.metadata.unit));
             }
             return measurement;
         },
