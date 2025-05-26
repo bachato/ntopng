@@ -4896,40 +4896,6 @@ static int ntop_interface_release_engaged_alerts(lua_State *vm) {
 
 /* ****************************************** */
 
-static int ntop_interface_inc_total_host_alerts(lua_State *vm) {
-  NetworkInterface *iface = getCurrentInterface(vm);
-  u_int16_t vlan_id = 0;
-#ifdef UNUSED
-  AlertType alert_type;
-#endif
-  char buf[64], *host_ip;
-  Host *h;
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  if (!iface) return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  get_host_vlan_info((char *)lua_tostring(vm, 1), &host_ip, &vlan_id, buf,
-                     sizeof(buf));
-
-#ifdef UNUSED
-  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  alert_type = (AlertType)lua_tonumber(vm, 2);
-#endif
-
-  h = iface->findHostByIP(get_allowed_nets(vm), host_ip, vlan_id,
-                          getLuaVMUservalue(vm, observationPointId));
-
-  if (h) h->incTotalAlerts();
-
-  lua_pushboolean(vm, h ? true : false);
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
-}
-
-/* ****************************************** */
-
 static int ntop_interface_get_host_attributes(lua_State *vm) {
   NetworkInterface *iface = getCurrentInterface(vm);
   u_int16_t vlan_id = 0;
@@ -5925,7 +5891,6 @@ static luaL_Reg _ntop_interface_reg[] = {
     {"getEngagedAlerts", ntop_interface_get_engaged_alerts},
     {"getAlerts", ntop_interface_get_alerts},
     {"releaseEngagedAlerts", ntop_interface_release_engaged_alerts},
-    {"incTotalHostAlerts", ntop_interface_inc_total_host_alerts},
     {"updateIPReassignment", ntop_interface_update_ip_reassignment},
     {"triggerTrafficAlert", ntop_interface_trigger_traffic_alert},
     {"getHostAttributes", ntop_interface_get_host_attributes },
