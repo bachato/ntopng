@@ -44,7 +44,6 @@ class MySQLDB : public DB {
   virtual bool createDBSchema();
   bool createNprobeDBView();
   MYSQL *mysql_try_connect(MYSQL *conn, const char *dbname);
-  int exec_quick_sql_query(char *sql, char *out, u_int out_len);
   void mysql_result_to_lua(lua_State *vm, MYSQL_RES *result, int num_fields,
                            bool limitRows);
   const char *getEngineName();
