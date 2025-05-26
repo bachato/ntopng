@@ -2179,6 +2179,32 @@ bool Host::isFlowAlertDisabled(FlowAlertType alert_type) {
 
 /* *************************************** */
 
+/* Serialize host info to json (used by HostAlert::getSerializedAlert) */
+void Host::serializeAttributes(ndpi_serializer *serializer) {
+  char buf[64];
+
+  ndpi_serialize_start_of_block(serializer, "host_info");
+
+  ndpi_serialize_string_string(serializer, "name", get_visual_name(buf, sizeof(buf)));
+  ndpi_serialize_string_boolean(serializer, "localhost", isLocalHost());
+  ndpi_serialize_string_boolean(serializer, "systemhost", isSystemHost());
+  ndpi_serialize_string_boolean(serializer, "privatehost", isPrivateHost());
+  ndpi_serialize_string_boolean(serializer, "broadcast_domain_host", isBroadcastDomainHost());
+  ndpi_serialize_string_boolean(serializer, "dhcpHost", isDHCPHost());
+  ndpi_serialize_string_boolean(serializer, "is_blacklisted", isBlacklisted());
+  ndpi_serialize_string_boolean(serializer, "is_broadcast", isBroadcastHost());
+  ndpi_serialize_string_boolean(serializer, "is_multicast", isMulticastHost());
+
+#ifdef HAVE_NEDGE
+  ndpi_serialize_string_boolean(serializer, "childSafe", isChildSafe());
+  ndpi_serialize_string_boolean(serializer, "drop_all_host_traffic", dropAllTraffic());
+#endif
+
+  ndpi_serialize_end_of_block(serializer); /* host_info */
+}
+
+/* *************************************** */
+
 /* Create a JSON in the alerts format */
 void Host::alert2JSON(HostAlert *alert, bool released, ndpi_serializer *s) {
   char ip_buf[128], buf[128];

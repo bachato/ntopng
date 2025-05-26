@@ -874,6 +874,9 @@ class Host : public GenericHashEntry,
   bool enqueueAlertToRecipients(HostAlert *alert, bool released);
   void alert2JSON(HostAlert *alert, bool released, ndpi_serializer *serializer);
 
+  /* Serialize host info to json (used by HostAlert::getSerializedAlert) */
+  void serializeAttributes(ndpi_serializer *serializer);
+
   /* Checks API */
   bool triggerAlert(HostAlert *alert);
   void releaseAlert(HostAlert *alert);
