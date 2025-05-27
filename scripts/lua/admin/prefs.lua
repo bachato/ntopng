@@ -2184,13 +2184,6 @@ if auth.has_capability(auth.capabilities.preferences) then
             })
 
         prefsToggleButton(subpage_active, {
-            field = "toggle_use_native_clickhouse_client",
-            default = "0",
-            pref = "use_native_clickhouse_client",
-            hidden = not showAggregateFlowsPrefs or not prefs.native_clickhouse_client_supported
-        })
-
-        prefsToggleButton(subpage_active, {
             field = "toggle_flow_aggregated_alerted_flows",
             default = "0",
             pref = "include_alerted_flows_in_aggregated_flows",
@@ -2204,10 +2197,16 @@ if auth.has_capability(auth.capabilities.preferences) then
         })
 
         prefsToggleButton(subpage_active, {
+            field = "toggle_use_native_clickhouse_client",
+            default = "0",
+            pref = "use_native_clickhouse_client",
+            hidden = not prefs.native_clickhouse_client_supported
+        })
+
+        prefsToggleButton(subpage_active, {
             field = "toggle_query_performance_log",
             default = "0",
-            pref = "enable_query_performance_log",
-            hidden = not showAggregateFlowsPrefs
+            pref = "enable_query_performance_log"
         })
 
         print(
