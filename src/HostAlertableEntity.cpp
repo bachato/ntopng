@@ -152,8 +152,9 @@ void HostAlertableEntity::luaAlert(lua_State *vm, HostAlert *alert) {
   /*
     NOTE: Keep in sync with Host::alert2JSON
   */
-  lua_push_int32_table_entry(vm, "alert_id", alert->getAlertType().id);
+  lua_push_int32_table_entry(vm, "ifid", getAlertInterface()->get_id());
   lua_push_str_table_entry(vm, "action", "engage");
+  lua_push_int32_table_entry(vm, "alert_id", alert->getAlertType().id);
   lua_push_int32_table_entry(vm, "alert_category", alert->getAlertType().category);
   lua_push_bool_table_entry(vm, "require_attention", !alert->autoAck());
   lua_push_str_table_entry(vm, "subtype", "" /* No subtype for hosts */);

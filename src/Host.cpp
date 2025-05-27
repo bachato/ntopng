@@ -2214,10 +2214,10 @@ void Host::alert2JSON(HostAlert *alert, bool released, ndpi_serializer *s) {
 
   /* rowid is used by engaged (in-memory) alerts only to delete them when disengaged */
   ndpi_serialize_string_int64(s, "rowid", alert->getRowID());
-  ndpi_serialize_string_int32(s, "ifid", getInterface()->get_id());
 
-  ndpi_serialize_string_int32(s, "alert_id", alert->getAlertType().id);
+  ndpi_serialize_string_int32(s, "ifid", getInterface()->get_id());
   ndpi_serialize_string_string(s, "action", released ? "release" : "engage");
+  ndpi_serialize_string_int32(s, "alert_id", alert->getAlertType().id);
   ndpi_serialize_string_int32(s, "alert_category", alert->getAlertType().category);
   ndpi_serialize_string_boolean(s, "require_attention", !alert->autoAck());
   ndpi_serialize_string_string(s, "subtype", "" /* No subtype for hosts */);
