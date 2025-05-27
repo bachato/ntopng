@@ -124,22 +124,35 @@ end
 
 -- ##############################################
 
-function alerts_api.addAlertGenerationInfo(alert_type_params, current_script)
-    if alert_type_params and current_script then
+-- NOTE: keep in sync with HostAlert::getSerializedAlert
+function alerts_api.addAlertGenerationInfo(alert_type_params, entity_info, current_script)
+
+    alert_type_params = alert_type_params or {}
+
+    -- NOTE: there are currently some internally generated alerts which
+    -- do not use the checks api (e.g. the ntopng startup)
+
+    if current_script then
         -- Add information about the script who generated this alert
         alert_type_params.alert_generation = {
             script_key = current_script.key,
             subdir = current_script.subdir
         }
-    else
-        -- NOTE: there are currently some internally generated alerts which
-        -- do not use the checks api (e.g. the ntopng startup)
-        -- tprint(debug.traceback())
+    end
+
+    alert_type_params.alert_generation = alert_type_params.alert_generation or {}
+
+    if entity_info.alert_entity.entity_id == alert_consts.alertEntity("host") then
+        local hostkey = entity_info.entity_val
+        local attributes_json = interface.getHostAttributes(hostkey)
+        if attributes_json then
+            alert_type_params.alert_generation.host_info = json.decode(attributes_json)
+        end
     end
 end
 
-local function addAlertGenerationInfo(alert_type_params)
-    alerts_api.addAlertGenerationInfo(alert_type_params, current_script)
+local function addAlertGenerationInfo(alert_type_params, entity_info)
+    alerts_api.addAlertGenerationInfo(alert_type_params, entity_info, current_script)
 end
 
 -- ##############################################
@@ -200,7 +213,7 @@ function alerts_api.store(entity_info, type_info, when)
     local granularity_id = type_info.granularity and type_info.granularity.granularity_id or -1
 
     type_info.alert_type_params = type_info.alert_type_params or {}
-    addAlertGenerationInfo(type_info.alert_type_params)
+    addAlertGenerationInfo(type_info.alert_type_params, entity_info)
 
     local alert_json = json.encode(type_info.alert_type_params)
     local subtype = type_info.subtype or ""
@@ -209,7 +222,7 @@ function alerts_api.store(entity_info, type_info, when)
     -- Here the alert is considered stored. The actual store will be performed
     -- asynchronously
 
-    -- NOTE: keep in sync with SQLite alert format in AlertsManager.cpp
+    -- NOTE: keep in sync with Host::alert2JSON
     local alert_to_store = {
         ifid = ifid,
         action = "store",
@@ -313,7 +326,7 @@ function alerts_api.trigger(entity_info, type_info, when, cur_alerts)
     when = when or os.time()
 
     type_info.alert_type_params = type_info.alert_type_params or {}
-    addAlertGenerationInfo(type_info.alert_type_params)
+    addAlertGenerationInfo(type_info.alert_type_params, entity_info)
 
     if (cur_alerts and already_triggered(cur_alerts, type_info.alert_type.alert_key, granularity_sec, subtype, true) ==
         true) then
@@ -421,6 +434,10 @@ function alerts_api.release(entity_info, type_info, when, cur_alerts)
     end
 
     when = when or os.time()
+
+    type_info.alert_type_params = type_info.alert_type_params or {}
+    addAlertGenerationInfo(type_info.alert_type_params, entity_info)
+
     local alert_key_name = get_alert_triggered_key(type_info.alert_type.alert_key, subtype)
     local ifid = interface.getId()
     local params = {alert_key_name, granularity_id, when}

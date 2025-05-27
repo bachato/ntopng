@@ -61,6 +61,7 @@ HostAlert::~HostAlert() {
 
 /* ***************************************************** */
 
+/* NOTE: keep in sync with alerts_api.lua (addAlertGenerationInfo) */
 ndpi_serializer *HostAlert::getSerializedAlert() {
   ndpi_serializer *serializer =
       (ndpi_serializer *)malloc(sizeof(ndpi_serializer));
@@ -80,7 +81,9 @@ ndpi_serializer *HostAlert::getSerializedAlert() {
   ndpi_serialize_string_string(serializer, "subdir", "host");
 
   /* Add information relative to the host */
+  ndpi_serialize_start_of_block(serializer, "host_info");
   host->serializeAttributes(serializer);
+  ndpi_serialize_end_of_block(serializer); /* host_info */
 
   ndpi_serialize_end_of_block(serializer); /* alert_generation */
 

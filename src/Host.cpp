@@ -2179,11 +2179,11 @@ bool Host::isFlowAlertDisabled(FlowAlertType alert_type) {
 
 /* *************************************** */
 
-/* Serialize host info to json (used by HostAlert::getSerializedAlert) */
+/* Serialize host info to json (used by HostAlert::getSerializedAlert)
+ * NOTE: keep in sync with alerts_api.lua (getHostAttributes)
+ */
 void Host::serializeAttributes(ndpi_serializer *serializer) {
   char buf[64];
-
-  ndpi_serialize_start_of_block(serializer, "host_info");
 
   ndpi_serialize_string_string(serializer, "name", get_visual_name(buf, sizeof(buf)));
   ndpi_serialize_string_boolean(serializer, "localhost", isLocalHost());
@@ -2199,13 +2199,13 @@ void Host::serializeAttributes(ndpi_serializer *serializer) {
   ndpi_serialize_string_boolean(serializer, "childSafe", isChildSafe());
   ndpi_serialize_string_boolean(serializer, "drop_all_host_traffic", dropAllTraffic());
 #endif
-
-  ndpi_serialize_end_of_block(serializer); /* host_info */
 }
 
 /* *************************************** */
 
-/* Create a JSON in the alerts format */
+/* Create a JSON in the alerts format 
+ * NOTE: keep in sync with alerts_api.lua
+ */
 void Host::alert2JSON(HostAlert *alert, bool released, ndpi_serializer *s) {
   char ip_buf[128], buf[128];
   ndpi_serializer *alert_json_serializer = NULL;
