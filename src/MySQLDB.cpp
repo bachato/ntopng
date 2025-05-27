@@ -957,51 +957,6 @@ bool MySQLDB::connectToDB(MYSQL *conn, bool select_db) {
 
 /* ******************************************* */
 
-int MySQLDB::exec_single_query(lua_State *vm, char *sql) {
-  MYSQL conn;
-  MYSQL_RES *result;
-  bool result_ok = false;
-  struct timeval begin, end;
-
-  if (enable_db_traces) {
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", sql);
-    gettimeofday(&begin, NULL);
-  }
-
-  if (mysql_init(&conn) != NULL) {
-    if ((mysql_try_connect(&conn, NULL /* no db */) != NULL) &&
-        (mysql_query(&conn, sql) == 0) &&
-        ((result = mysql_store_result(&conn)) != NULL)) {
-      int num_fields = mysql_field_count(&conn);
-
-      if (num_fields != 0) {
-        mysql_result_to_lua(vm, result, num_fields, false);
-        result_ok = true;
-      }
-
-      mysql_free_result(result);
-    }
-
-    mysql_close(&conn);
-  }
-
-  if (enable_db_traces) {
-    gettimeofday(&end, NULL);
-    ntop->getTrace()->traceEvent(
-        TRACE_NORMAL, "Query completed in %.3f sec",
-        Utils::usecTimevalDiff(&end, &begin) / 1000000.);
-  }
-
-  if (!result_ok) {
-    lua_pushnil(vm);
-    return (-1);
-  }
-
-  return (0);
-}
-
-/* ******************************************* */
-
 int MySQLDB::exec_sql_query(const char *sql, bool doReconnect,
                             bool ignoreErrors, bool doLock,
                             db_result_row_callback *cb, void *cb_user_data) {

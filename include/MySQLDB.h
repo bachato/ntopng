@@ -78,7 +78,6 @@ class MySQLDB : public DB {
 
   virtual bool startQueryLoop();
   void shutdown();
-  int exec_single_query(lua_State *vm, char *sql);
   int select_database(char *dbname);
 };
 

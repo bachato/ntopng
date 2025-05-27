@@ -17,7 +17,6 @@ local prefs = ntop.getPrefs()
 local dbname = (prefs.mysql_dbname or '')
 
 -- read the db activities to notify the user about what is going on in the database
-local res = ntop.execSingleSQLQuery("show full processlist")
 
 print [[
   <div class="container-narrow">
@@ -58,52 +57,12 @@ print[[
 <br>
 ]]
 
-if(ntop.isClickHouseEnabled()) then
- print(" "..i18n("please_wait_page.waiting_for_clickhouse_msg", {dbname=dbname}))
-else
- print(" "..i18n("please_wait_page.waiting_for_db_msg", {dbname=dbname}))
-end
+print(" "..i18n("please_wait_page.waiting_for_db_msg", {dbname=dbname}))
 
 print[[
   </div>
 <br>
   <div>]]
-
-if res == nil then res = {} end
-if #res >= 1 then
-   print[[
-<br>
-]] print(i18n("please_wait_page.operations_on_database_msg")) print [[
-<small>
-<br><br>
-<table class="table table-bordered table-striped" width=100%>
-  <thead>
-    <tr>
-      <th>]] print(i18n("please_wait_page.database")) print[[</th><th>]] print(i18n("please_wait_page.state")) print[[</th><th>]] print(i18n("please_wait_page.command")) print[[</th><th>]] print(i18n("please_wait_page.id")) print[[</th><th>]] print(i18n("please_wait_page.user")) print[[</th><th>]] print(i18n("please_wait_page.time")) print[[</th><th>]] print(i18n("please_wait_page.info")) print[[</th><th>]] print(i18n("please_wait_page.host")) print[[</th>
-    </tr>
-  </thead>
-  <tbody>
-]]
-   for i,p in ipairs(res) do
-    if p["Command"] ~= "Sleep" then
-      print('<tr>')
-      print('<td>'..(p["db"] or '')..'</td><td>'..(p["State"] or '')..'</td><td>'..(p["Command"] or '')..'</td><td>'..(p["Id"] or '')..'</td>')
-      print('<td>'..(p["User"] or '')..'</td><td>'..secondsToTime(tonumber((p["Time"] or '')))..'</td>')
-      print('<td title="'..(p["Info"] or '')..'">'..shortenString((p["Info"] or ''))..'</td><td>'..(p["Host"] or '')..'</td>')
-      print('</tr>')
-      local msg = ""
-      for k, v in pairs(p) do
-	 msg = msg..k..": "..v.." "
-      end
-    end
-   end
-
-   print[[
-  </tbody>
-</table>
-</small>
-]]
-end
 
 local host
 

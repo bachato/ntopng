@@ -7573,30 +7573,6 @@ static int ndpi_is_custom_application(lua_State *vm) {
 
 /* ****************************************** */
 
-static int ntop_exec_single_sql_query(lua_State *vm) {
-  char *sql;
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
-  if ((sql = (char *)lua_tostring(vm, 1)) == NULL)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
-
-#ifdef HAVE_MYSQL
-  NetworkInterface *curr_iface = getCurrentInterface(vm);
-  MySQLDB db(curr_iface);
-
-  db.exec_single_query(vm, sql);
-
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
-#else
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-#endif
-}
-
-/* ****************************************** */
-
 static int ntop_exec_cmd(lua_State *vm) {
   char *cmd;
   std::string out;
@@ -8141,7 +8117,6 @@ static luaL_Reg _ntop_reg[] = {
     {"md5", ntop_md5},
     {"hasRadiusSupport", ntop_has_radius_support},
     {"hasLdapSupport", ntop_has_ldap_support},
-    {"execSingleSQLQuery", ntop_exec_single_sql_query},
     {"resetStats", ntop_reset_stats},
     {"getCurrentScriptsDir", ntop_get_current_scripts_dir},
     {"getDropPoolInfo", ntop_get_drop_pool_info},
