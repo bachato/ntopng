@@ -54,7 +54,14 @@ local function report_alert(params, attacker, vlan, victim, num_victims, is_vict
          vlan = vlan
       }
    end
-   local descr = ""
+
+   local host_key = hostinfo2hostkey(hostinfo)
+
+   if isEmptyString(host_key) then
+      traceError(TRACE_ERROR, TRACE_CONSOLE, string.format("Trying to trigger a scan alert with an empty IP address, please report."))
+      return
+   end
+
    local score = 100
 
    local alert = alert_consts.alert_types.host_alert_scan.new(
@@ -64,7 +71,6 @@ local function report_alert(params, attacker, vlan, victim, num_victims, is_vict
       num_victims,
       attack
    )
-   local host_key = hostinfo2hostkey(hostinfo)
    alert:set_subtype(host_key)
    alert:set_score(score)
    alert:set_require_attention()
