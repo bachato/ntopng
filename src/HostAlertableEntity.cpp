@@ -153,34 +153,37 @@ void HostAlertableEntity::luaAlert(lua_State *vm, HostAlert *alert) {
     NOTE: Keep in sync with Host::alert2JSON
   */
   lua_push_int32_table_entry(vm, "alert_id", alert->getAlertType().id);
+  lua_push_str_table_entry(vm, "action", "engage");
+  lua_push_int32_table_entry(vm, "alert_category", alert->getAlertType().category);
+  lua_push_bool_table_entry(vm, "require_attention", !alert->autoAck());
   lua_push_str_table_entry(vm, "subtype", "" /* No subtype for hosts */);
   lua_push_int32_table_entry(vm, "score", alert->getAlertScore());
-  lua_push_int32_table_entry(vm, "severity",
-                             Utils::mapScoreToSeverity(alert->getAlertScore()));
   lua_push_int32_table_entry(vm, "entity_id", alert_entity_host);
   lua_push_str_table_entry(vm, "entity_val", alert->getHost()->getEntityValue().c_str());
   lua_push_uint64_table_entry(vm, "tstamp", alert->getEngageTime());
-  lua_push_uint64_table_entry(vm, "tstamp_end",
-			      alert->isReleased() ? alert->getReleaseTime() : time(NULL));
-
+  lua_push_uint64_table_entry(vm, "tstamp_end", alert->isReleased() ? alert->getReleaseTime() : time(NULL));
+  lua_push_uint64_table_entry(vm, "vlan_id", alert->getHost()->get_vlan_id());
   lua_push_str_table_entry(vm, "ip", alert->getHost()->get_ip()->print(ip_buf, sizeof(ip_buf)));
+  lua_push_int32_table_entry(vm, "ip_version", alert->getHost()->get_ip()->getVersion());
+  lua_push_uint64_table_entry(vm, "pool_id", alert->getHost()->get_host_pool());
+  lua_push_int32_table_entry(vm, "host_pool_id", alert->getHost()->get_host_pool());
   alert->getHost()->get_name(buf, sizeof(buf), false);
   lua_push_str_table_entry(vm, "name", buf);
-  lua_push_uint64_table_entry(vm, "vlan_id", alert->getHost()->get_vlan_id());
   lua_push_bool_table_entry(vm, "is_attacker", alert->isAttacker());
   lua_push_bool_table_entry(vm, "is_victim", alert->isVictim());
   lua_push_bool_table_entry(vm, "is_client", alert->isClient());
   lua_push_bool_table_entry(vm, "is_server", alert->isServer());
+
   lua_push_uint64_table_entry(vm, "is_local", alert->getHost()->isLocalHost() ? 1 : 0);
   lua_push_uint64_table_entry(vm, "is_multicast", alert->getHost()->isMulticastHost() ? 1 : 0);
+  lua_push_int32_table_entry(vm, "severity", Utils::mapScoreToSeverity(alert->getAlertScore()));
 
   HostCheck *cb = getAlertInterface()->getCheck(alert->getCheckType());
   lua_push_int32_table_entry(vm, "granularity", cb ? cb->getPeriod() : 0);
 
   alert_json_serializer = alert->getSerializedAlert();
   if (alert_json_serializer)
-    alert_json =
-      ndpi_serializer_get_buffer(alert_json_serializer, &alert_json_len);
+    alert_json = ndpi_serializer_get_buffer(alert_json_serializer, &alert_json_len);
 
   lua_push_str_table_entry(vm, "json", alert_json ? alert_json : "");
 
@@ -192,6 +195,7 @@ void HostAlertableEntity::luaAlert(lua_State *vm, HostAlert *alert) {
 
 /* ****************************************** */
 
+/* Return engaged alerts to Lua (used by alert_store) */
 void HostAlertableEntity::getAlerts(lua_State *vm,
                                     ScriptPeriodicity p /* not used */,
                                     AlertType type_filter,

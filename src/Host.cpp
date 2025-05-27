@@ -2204,7 +2204,7 @@ void Host::serializeAttributes(ndpi_serializer *serializer) {
 /* *************************************** */
 
 /* Create a JSON in the alerts format 
- * NOTE: keep in sync with alerts_api.lua
+ * NOTE: keep in sync with HostAlertableEntity::luaAlert and alerts_api.lua
  */
 void Host::alert2JSON(HostAlert *alert, bool released, ndpi_serializer *s) {
   char ip_buf[128], buf[128];
@@ -2214,49 +2214,44 @@ void Host::alert2JSON(HostAlert *alert, bool released, ndpi_serializer *s) {
 
   /* rowid is used by engaged (in-memory) alerts only to delete them when disengaged */
   ndpi_serialize_string_int64(s, "rowid", alert->getRowID());
-
   ndpi_serialize_string_int32(s, "ifid", getInterface()->get_id());
-  ndpi_serialize_string_uint64(s, "pool_id", get_host_pool());
 
-  /* See AlertableEntity::luaAlert */
-  ndpi_serialize_string_string(s, "action", released ? "release" : "engage");
   ndpi_serialize_string_int32(s, "alert_id", alert->getAlertType().id);
-  ndpi_serialize_string_int32(s, "alert_category",
-                              alert->getAlertType().category);
-  ndpi_serialize_string_int32(s, "score", alert->getAlertScore());
+  ndpi_serialize_string_string(s, "action", released ? "release" : "engage");
+  ndpi_serialize_string_int32(s, "alert_category", alert->getAlertType().category);
   ndpi_serialize_string_boolean(s, "require_attention", !alert->autoAck());
   ndpi_serialize_string_string(s, "subtype", "" /* No subtype for hosts */);
-  ndpi_serialize_string_int32(s, "ip_version", ip.getVersion());
-  ndpi_serialize_string_string(s, "ip", ip.print(ip_buf, sizeof(ip_buf)));
-  get_name(buf, sizeof(buf), false);
-  ndpi_serialize_string_string(s, "name", buf);
-  ndpi_serialize_string_int32(s, "vlan_id", get_vlan_id());
-  ndpi_serialize_string_int32(s, "observation_point_id",
-                              get_observation_point_id());
+  ndpi_serialize_string_int32(s, "score", alert->getAlertScore());
   ndpi_serialize_string_int32(s, "entity_id", alert_entity_host);
   ndpi_serialize_string_string(s, "entity_val", getEntityValue().c_str());
   ndpi_serialize_string_uint32(s, "tstamp", alert->getEngageTime());
   ndpi_serialize_string_uint32(s, "tstamp_end", alert->getReleaseTime());
+  ndpi_serialize_string_int32(s, "vlan_id", get_vlan_id());
+  ndpi_serialize_string_string(s, "ip", ip.print(ip_buf, sizeof(ip_buf)));
+  ndpi_serialize_string_int32(s, "ip_version", ip.getVersion());
+  ndpi_serialize_string_uint64(s, "pool_id", get_host_pool());
+  ndpi_serialize_string_int32(s, "host_pool_id", get_host_pool());
+  get_name(buf, sizeof(buf), false);
+  ndpi_serialize_string_string(s, "name", buf);
   ndpi_serialize_string_boolean(s, "is_attacker", alert->isAttacker());
   ndpi_serialize_string_boolean(s, "is_victim", alert->isVictim());
   ndpi_serialize_string_boolean(s, "is_client", alert->isClient());
   ndpi_serialize_string_boolean(s, "is_server", alert->isServer());
-  ndpi_serialize_string_int32(s, "host_pool_id", get_host_pool());
-  ndpi_serialize_string_uint32(s, "network", (u_int32_t)get_local_network_id());
 
+  ndpi_serialize_string_uint32(s, "network", (u_int32_t)get_local_network_id());
+  ndpi_serialize_string_int32(s, "observation_point_id", get_observation_point_id());
   serialize_geocoordinates(s, "");
 
   HostCheck *cb = getInterface()->getCheck(alert->getCheckType());
   ndpi_serialize_string_int32(s, "granularity", cb ? cb->getPeriod() : 0);
 
   alert_json_serializer = alert->getSerializedAlert();
-
-  if(alert_json_serializer)
+  if (alert_json_serializer)
     alert_json = ndpi_serializer_get_buffer(alert_json_serializer, &alert_json_len);
 
   ndpi_serialize_string_string(s, "json", alert_json ? alert_json : "");
 
-  if(alert_json_serializer) {
+  if (alert_json_serializer) {
     ndpi_term_serializer(alert_json_serializer);
     free(alert_json_serializer);
   }
