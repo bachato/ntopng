@@ -113,6 +113,7 @@ local function schema_get_path(schema, tags)
     local host_or_network = nil
     local parts = string.split(schema.name, ":")
 
+
     if ((string.find(schema.name, "iface:") ~= 1) and -- interfaces are only identified by the first tag
     (#schema._tags >= 1)) then -- some schema do not have any tag, e.g. "process:*" schemas
         local prefix = HOST_PREFIX_MAP[parts[1]] or (parts[1] .. ":")
@@ -125,6 +126,7 @@ local function schema_get_path(schema, tags)
             host_or_network = prefix .. ""
         end
     end
+
 
     -- Some exceptions to avoid conflicts / keep compatibility
     if parts[1] == "snmp_if" then
@@ -175,7 +177,8 @@ local function schema_get_path(schema, tags)
         elseif parts[2] == "dscp" then
             suffix = suffix .. "dscp/"
         end
-
+    elseif parts[2] == "ndpi_full" then
+        suffix = "l7protos/"
     elseif parts[2] == "ndpi_categories" then
         suffix = "ndpi_categories/"
     elseif parts[2] == "ndpi_flows" then
