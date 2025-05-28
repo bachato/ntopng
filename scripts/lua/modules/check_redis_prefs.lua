@@ -223,8 +223,7 @@ end
 -- This function returns true if the ndpi timeseries for the interface
 -- are requested with bytes_sent and rcvd, otherwise returns false
 function ifaceFullnDPITs()
-    return (ntop.getPref("ntopng.prefs.flow_device_port_rrd_creation") or
-               "total" == "rx_tx")
+    return (ntop.getPref("ntopng.prefs.split_ts_direction") == "rx_tx")
 end
 
 function getIfacenDPITsName()

@@ -1678,8 +1678,7 @@ if auth.has_capability(auth.capabilities.preferences) then
         
         local split_ts_direction_labels = { i18n("total"), i18n("prefs.rx_tx") }
         local split_ts_direction_values = { "total", "rx_tx" }
-        tprint(prefs.split_ts_direction)
-
+        
         retVal = multipleTableButtonPrefs(subpage_active.entries["toggle_split_ts_direction"].title,
             subpage_active.entries["toggle_split_ts_direction"].description, split_ts_direction_labels, split_ts_direction_values,
             "total", "primary", "split_ts_direction",
