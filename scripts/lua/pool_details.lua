@@ -39,7 +39,7 @@ end
 if ifname == "__system__" then
    -- Someone jumped from the users to the quotas in the System interface, redirect to a Network interface (e.g. nf:0)
    local available_interfaces = interface.getIfNames()
-   ifnamee = available_interfaces["0"]
+   ifname = available_interfaces["0"]
 end
 
 interface.select(ifname)
