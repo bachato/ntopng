@@ -249,9 +249,7 @@ function getMinTSConfig()
     config.is_dump_flows_enabled = ntop.getPrefs()["is_dump_flows_enabled"]
     config.flow_devices_rrd_creation = ntop.getPref(
                                            "ntopng.prefs.flow_device_port_rrd_creation")
-    config.interface_ndpi_timeseries_full = (ntop.getPref(
-                                                "ntopng.prefs.flow_device_port_rrd_creation") or
-                                                "total" == "rx_tx")
+    config.interface_ndpi_timeseries_full = ifaceFullnDPITs()
 
     -- Interface RRD creation is on, with per-protocol nDPI
     if isEmptyString(config.interface_ndpi_timeseries_creation) then

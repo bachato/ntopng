@@ -3629,8 +3629,7 @@ function timeseries_info.get_traffic_rules_schema(rule_type)
 
         if has_top_protocols then
             local full_ndpi_ts = ifacenDPITsFull()
-            local id = 'top:iface:ndpi'
-            if full_ndpi_ts then id = 'top:iface:ndpi_full' end
+            local id = getIfacenDPITsName()
             local application_list = interface.getnDPIProtocols()
             for application, _ in pairsByKeys(application_list or {}, asc) do
                 metric_list[#metric_list + 1] = {

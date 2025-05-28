@@ -24,9 +24,10 @@ local ts_dump = {}
 -- ########################################################
 
 function ts_dump.iface_update_ndpi_rrds(when, _ifname, ifstats, verbose, config)
+    local ts_id = getIfacenDPITsName()
     for k in pairs(ifstats["ndpi"]) do
         if config.interface_ndpi_timeseries_full then
-            ts_utils.append("iface:ndpi_full", {
+            ts_utils.append(ts_id, {
                 ifid = ifstats.id,
                 protocol = k,
                 bytes_sent = ifstats["ndpi"][k]["bytes.sent"],
@@ -38,7 +39,7 @@ function ts_dump.iface_update_ndpi_rrds(when, _ifname, ifstats, verbose, config)
                 print("[" .. __FILE__() .. ":" .. __LINE__() .. "] " .. _ifname .. ": " .. k .. "=" .. v .. "\n")
             end
 
-            ts_utils.append("iface:ndpi", {
+            ts_utils.append(ts_id, {
                 ifid = ifstats.id,
                 protocol = k,
                 bytes = v
