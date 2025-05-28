@@ -35,8 +35,7 @@ static bool enable_db_traces = false;
 /* **************************************************** */
 
 const char *MySQLDB::getEngineName() {
-  return ntop->getPrefs()->do_dump_flows_on_clickhouse() ? "ClickHouse"
-                                                         : "MySQL";
+  return "MySQL";
 }
 
 /* **************************************************** */

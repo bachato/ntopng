@@ -59,6 +59,7 @@ class DB {
   void checkPointCounters(bool drops_only);
 
   /* Pure Virtual Functions of a DB flow exporter */
+  virtual const char *getEngineName() { return "Unknown"; };
   virtual bool dumpFlow(time_t when, Flow *f, char *json) = 0;
   virtual bool startQueryLoop() { return (false); }
 

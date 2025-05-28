@@ -46,12 +46,13 @@ class MySQLDB : public DB {
   MYSQL *mysql_try_connect(MYSQL *conn, const char *dbname);
   void mysql_result_to_lua(lua_State *vm, MYSQL_RES *result, int num_fields,
                            bool limitRows);
-  const char *getEngineName();
   void printFailure(const char *query, int status);
 
  public:
   MySQLDB(NetworkInterface *_iface);
   virtual ~MySQLDB();
+
+  virtual const char *getEngineName();
 
   virtual void *queryLoop();
   virtual bool dumpFlow(time_t when, Flow *f, char *json);
