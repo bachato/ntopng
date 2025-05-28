@@ -568,9 +568,9 @@ local menu_subpages = {{
             title = i18n("prefs.toggle_traffic_rrd_creation_title"),
             description = i18n("prefs.toggle_traffic_rrd_creation_description")
         },
-        toggle_ts_direction_split = {
-            title = i18n("prefs.toggle_ts_direction_split_title"),
-            description = i18n("prefs.toggle_ts_direction_split_description")
+        toggle_split_ts_direction = {
+            title = i18n("prefs.toggle_split_ts_direction_title"),
+            description = i18n("prefs.toggle_split_ts_direction_description")
         },
         toggle_local_hosts_ts_creation = {
             title = i18n("prefs.toggle_local_hosts_ts_creation_title"),

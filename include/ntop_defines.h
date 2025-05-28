@@ -854,7 +854,7 @@
 #define CONST_VS_SLOW_SCAN NTOPNG_PREFS_PREFIX ".vs.vs_slow_scan"
 #define CONST_RUNTIME_MAX_UI_STRLEN NTOPNG_PREFS_PREFIX ".max_ui_strlen"
 #define CONST_RUNTIME_PREFS_TS_DRIVER NTOPNG_PREFS_PREFIX ".timeseries_driver"
-#define CONST_RUNTIME_PREFS_TS_DIRECTION_SPLIT NTOPNG_PREFS_PREFIX ".timeseries_direction_split"
+#define CONST_RUNTIME_PREFS_SPLIT_TS_DIRECTION NTOPNG_PREFS_PREFIX ".split_ts_direction"
 #define CONST_RUNTIME_IS_AUTOLOGOUT_ENABLED \
   NTOPNG_PREFS_PREFIX ".is_autologon_enabled"
 #define CONST_RUNTIME_IS_INTERFACE_NAME_ONLY \
@@ -1166,6 +1166,9 @@
 /* ********************* */
 #define DEFAULT_DATE_TYPE "middle_endian"
 #define DEFAULT_SAFE_SEARCH_DNS "208.67.222.123" /* OpenDNS Family Shield */
+
+/* ********************* */
+#define DEFAULT_SPLIT_TS_DIRECTION "total" /* Split Interface Timeseries l7 traffic */
 
 #define ALERTS_MANAGER_MAX_AGGR_SECS \
   300 /* Aggregate equal alerts if generated within this interval */

@@ -141,7 +141,7 @@ Prefs::Prefs(Ntop *_ntop) {
   https_binding_address2 = NULL;
   enable_client_x509_auth = false;
   timeseries_driver = ts_driver_rrd;
-  timeseries_direction_split = ts_direction_split_total;
+  split_ts_direction = false;
   cpu_affinity = other_cpu_affinity = NULL;
   flow_table_time = flow_table_probe_order = false;
 #ifdef HAVE_LIBCAP
@@ -908,14 +908,6 @@ static TsDriver str2TsDriver(const char *driver) {
 
 /* ******************************************* */
 
-static TsDirectionSplit str2TsDirectionSplit(const char *driver) {
-  if(!strcmp(driver, "rx_tx"))
-    return (ts_direction_split_rx_tx);
-  return (ts_direction_split_total);
-}
-
-/* ******************************************* */
-
 void Prefs::reloadPrefsFromRedis() {
   char *aux = NULL;
   char *tmp = NULL;
@@ -1043,9 +1035,9 @@ void Prefs::reloadPrefsFromRedis() {
     free(aux);
   }
 
-  getDefaultStringPrefsValue(CONST_RUNTIME_PREFS_TS_DIRECTION_SPLIT, &aux, (char *)"total");
+  getDefaultStringPrefsValue(CONST_RUNTIME_PREFS_SPLIT_TS_DIRECTION, &aux, DEFAULT_SPLIT_TS_DIRECTION);
   if(aux) {
-    timeseries_direction_split = str2TsDirectionSplit(aux);
+    split_ts_direction = strncmp(aux, DEFAULT_SPLIT_TS_DIRECTION, 5);
     free(aux);
   }
 
@@ -2940,6 +2932,7 @@ void Prefs::lua(lua_State *vm) {
 
   lua_push_str_table_entry(vm, "zmq_publish_events_url", zmq_publish_events_url);
   lua_push_bool_table_entry(vm, "limited_resources_mode", limited_resources_mode);
+  lua_push_str_table_entry(vm, "split_ts_direction", split_ts_direction ? "rx_tx" : "total");
 }
 
 /* *************************************** */

@@ -1676,13 +1676,14 @@ if auth.has_capability(auth.capabilities.preferences) then
             "per_protocol", "primary", "interfaces_ndpi_timeseries_creation",
             "ntopng.prefs.interface_ndpi_timeseries_creation", nil, elementToSwitch, showElementArray, nil, showElement)
         
-        local ts_direction_split_labels = { i18n("total"), i18n("prefs.rx_tx") }
-        local ts_direction_split_values = { "total", "rx_tx" }
+        local split_ts_direction_labels = { i18n("total"), i18n("prefs.rx_tx") }
+        local split_ts_direction_values = { "total", "rx_tx" }
+        tprint(prefs.split_ts_direction)
 
-        retVal = multipleTableButtonPrefs(subpage_active.entries["toggle_ts_direction_split"].title,
-            subpage_active.entries["toggle_ts_direction_split"].description, ts_direction_split_labels, ts_direction_split_values,
-            "total", "primary", "timeseries_direction_split",
-            "ntopng.prefs.timeseries_direction_split", nil, elementToSwitch, showElementArray, nil, showElement)
+        retVal = multipleTableButtonPrefs(subpage_active.entries["toggle_split_ts_direction"].title,
+            subpage_active.entries["toggle_split_ts_direction"].description, split_ts_direction_labels, split_ts_direction_values,
+            "total", "primary", "split_ts_direction",
+            "ntopng.prefs.split_ts_direction", nil, elementToSwitch, showElementArray, nil, showElement)
         
         print('<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n('prefs.local_hosts_timeseries') ..
             '</th></tr></thead>')

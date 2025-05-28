@@ -1437,7 +1437,8 @@ elseif (page == "ndpi") then
         historical_available = hasClickHouseSupport(),
         csrf = ntop.getRandomCSRFValue(),
         uptime = ntop.getUptime(),
-        l7_timeseries_enabled = areInterfaceL7TimeseriesEnabled(ifid)
+        l7_timeseries_enabled = areInterfaceL7TimeseriesEnabled(ifid),
+        iface_ts_id = getIfacenDPITsName()
     }
 
     local json_context = json.encode(context)

@@ -205,7 +205,7 @@ function create_live_flows_url_link(row) {
 
 function create_timeseries_url_link(row) {
   const epoch_begin = Math.floor(new Date().getTime() / 1000) - props.context.uptime
-  return `${http_prefix}/lua/if_stats.lua?ifid=${props.context.ifid}&page=historical&epoch_begin=${epoch_begin}&epoch_end=${Math.floor(new Date().getTime() / 1000)}&timeseries_groups_mode=1_chart_x_metric&timeseries_groups=interface;${props.context.ifid};top:iface:ndpi%2bprotocol:${row.application.name};bytes%3Dtrue:true:false:false`
+  return `${http_prefix}/lua/if_stats.lua?ifid=${props.context.ifid}&page=historical&epoch_begin=${epoch_begin}&epoch_end=${Math.floor(new Date().getTime() / 1000)}&timeseries_groups_mode=1_chart_x_metric&timeseries_groups=interface;${props.context.ifid};top:${props.context.iface_ts_id}%2bprotocol:${row.application.name};bytes%3Dtrue:true:false:false`
 }
 
 /* ************************************** */

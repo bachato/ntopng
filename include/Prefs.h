@@ -75,7 +75,6 @@ class Prefs {
   ServiceAcceptance behaviour_analysis_learning_status_during_learning,
       behaviour_analysis_learning_status_post_learning;
   TsDriver timeseries_driver;
-  TsDirectionSplit timeseries_direction_split;
   u_int64_t iec104_allowed_typeids[2];
   u_int32_t auth_session_duration;
   bool auth_session_midnight_expiration;
@@ -89,7 +88,7 @@ class Prefs {
       other_rrd_1d_days;
   u_int32_t housekeeping_frequency;
   bool disable_alerts, enable_top_talkers, enable_sites_collection, 
-      enable_active_local_hosts_cache, enable_dns_cache;
+      enable_active_local_hosts_cache, enable_dns_cache, split_ts_direction;
   bool enable_flow_device_port_rrd_creation,
       enable_observation_points_rrd_creation,
       enable_intranet_traffic_rrd_creation;
@@ -637,8 +636,6 @@ class Prefs {
   }
 #endif
   const TsDriver getTimeseriesDriver() const { return (timeseries_driver); }
-  const TsDirectionSplit getTimeseriesDirectionSplit() const { return (timeseries_direction_split); }
-
   inline u_int8_t getDefaultl7Policy() { return (default_l7policy); }
 
   inline u_int32_t get_dump_frequency() const { return (dump_frequency); };

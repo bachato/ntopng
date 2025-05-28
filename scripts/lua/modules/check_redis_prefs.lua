@@ -14,7 +14,8 @@ end
 
 function areInterfaceL7TimeseriesEnabled(ifid)
     return (areInterfaceTimeseriesEnabled(ifid) and
-               (ntop.getPref("ntopng.prefs.interface_ndpi_timeseries_creation") ~= "per_category"))
+               (ntop.getPref("ntopng.prefs.interface_ndpi_timeseries_creation") ~=
+                   "per_category"))
 end
 
 -- ###########################################
@@ -23,16 +24,15 @@ function areInterfaceCategoriesTimeseriesEnabled(ifid)
     local rv = ntop.getPref("ntopng.prefs.interface_ndpi_timeseries_creation")
 
     -- note: categories are disabled by default
-    return (areInterfaceTimeseriesEnabled(ifid) and ((rv == "per_category") or (rv == "both")))
+    return (areInterfaceTimeseriesEnabled(ifid) and
+               ((rv == "per_category") or (rv == "both")))
 end
 
 -- ###########################################
 
 function areHostTimeseriesEnabled()
     local rv = ntop.getPref("ntopng.prefs.hosts_ts_creation")
-    if isEmptyString(rv) then
-        rv = "light"
-    end
+    if isEmptyString(rv) then rv = "light" end
 
     return ((rv == "light") or (rv == "full"))
 end
@@ -43,7 +43,8 @@ function areHostL7TimeseriesEnabled(ifid)
     local rv = ntop.getPref("ntopng.prefs.host_ndpi_timeseries_creation")
 
     -- note: host protocols are disabled by default
-    return ((ntop.getPref("ntopng.prefs.hosts_ts_creation") == "full") and ((rv == "per_protocol") or (rv == "both")))
+    return ((ntop.getPref("ntopng.prefs.hosts_ts_creation") == "full") and
+               ((rv == "per_protocol") or (rv == "both")))
 end
 
 -- ###########################################
@@ -52,7 +53,8 @@ function areHostCategoriesTimeseriesEnabled(ifid)
     local rv = ntop.getPref("ntopng.prefs.host_ndpi_timeseries_creation")
 
     -- note: host protocols are disabled by default
-    return ((ntop.getPref("ntopng.prefs.hosts_ts_creation") == "full") and ((rv == "per_category") or (rv == "both")))
+    return ((ntop.getPref("ntopng.prefs.hosts_ts_creation") == "full") and
+               ((rv == "per_category") or (rv == "both")))
 end
 
 -- ###########################################
@@ -64,13 +66,15 @@ end
 -- ###########################################
 
 function areExportersTimeseriesPerApplicationEnabled()
-    return ((ntop.getPref("ntopng.prefs.exporters_ndpi_ts_creation") or "") == "per_protocol")
+    return ((ntop.getPref("ntopng.prefs.exporters_ndpi_ts_creation") or "") ==
+               "per_protocol")
 end
 
 -- ###########################################
 
 function areHostPoolsTimeseriesEnabled(ifid)
-    return (ntop.isPro() and (ntop.getPref("ntopng.prefs.host_pools_rrd_creation") == "1"))
+    return (ntop.isPro() and
+               (ntop.getPref("ntopng.prefs.host_pools_rrd_creation") == "1"))
 end
 
 -- ###########################################
@@ -141,7 +145,8 @@ function areAlertsEnabled()
     if (__alert_enabled == nil) then
         -- Not too nice as changes will be read periodically as new VMs are reloaded
         -- but at least we avoid breaking up the performance
-        __alert_enabled = (ntop.getPref("ntopng.prefs.disable_alerts_generation") ~= "1")
+        __alert_enabled =
+            (ntop.getPref("ntopng.prefs.disable_alerts_generation") ~= "1")
     end
 
     return (__alert_enabled)
@@ -153,27 +158,39 @@ function get5MinTSConfig()
     local config = {}
 
     config.host_ts_creation = ntop.getPref("ntopng.prefs.hosts_ts_creation")
-    config.host_ndpi_timeseries_creation = ntop.getPref("ntopng.prefs.host_ndpi_timeseries_creation")
-    config.l2_device_rrd_creation = ntop.getPref("ntopng.prefs.l2_device_rrd_creation")
-    config.l2_device_ndpi_timeseries_creation = ntop.getPref("ntopng.prefs.l2_device_ndpi_timeseries_creation")
-    config.flow_devices_rrd_creation = ntop.getPref("ntopng.prefs.flow_device_port_rrd_creation")
-    config.host_pools_rrd_creation = ntop.getPref("ntopng.prefs.host_pools_rrd_creation")
-    config.snmp_devices_rrd_creation = ntop.getPref("ntopng.prefs.snmp_devices_rrd_creation")
+    config.host_ndpi_timeseries_creation = ntop.getPref(
+                                               "ntopng.prefs.host_ndpi_timeseries_creation")
+    config.l2_device_rrd_creation = ntop.getPref(
+                                        "ntopng.prefs.l2_device_rrd_creation")
+    config.l2_device_ndpi_timeseries_creation = ntop.getPref(
+                                                    "ntopng.prefs.l2_device_ndpi_timeseries_creation")
+    config.flow_devices_rrd_creation = ntop.getPref(
+                                           "ntopng.prefs.flow_device_port_rrd_creation")
+    config.host_pools_rrd_creation = ntop.getPref(
+                                         "ntopng.prefs.host_pools_rrd_creation")
+    config.snmp_devices_rrd_creation = ntop.getPref(
+                                           "ntopng.prefs.snmp_devices_rrd_creation")
     config.asn_rrd_creation = ntop.getPref("ntopng.prefs.asn_rrd_creation")
-    config.obs_point_rrd_creation = ntop.getPref("ntopng.prefs.observation_points_rrd_creation")
-    config.country_rrd_creation = ntop.getPref("ntopng.prefs.country_rrd_creation")
+    config.obs_point_rrd_creation = ntop.getPref(
+                                        "ntopng.prefs.observation_points_rrd_creation")
+    config.country_rrd_creation = ntop.getPref(
+                                      "ntopng.prefs.country_rrd_creation")
     config.os_rrd_creation = ntop.getPref("ntopng.prefs.os_rrd_creation")
     config.vlan_rrd_creation = ntop.getPref("ntopng.prefs.vlan_rrd_creation")
-    config.ndpi_flows_timeseries_creation = ntop.getPref("ntopng.prefs.ndpi_flows_rrd_creation")
-    config.interface_ndpi_timeseries_creation = ntop.getPref("ntopng.prefs.interface_ndpi_timeseries_creation")
+    config.ndpi_flows_timeseries_creation = ntop.getPref(
+                                                "ntopng.prefs.ndpi_flows_rrd_creation")
+    config.interface_ndpi_timeseries_creation = ntop.getPref(
+                                                    "ntopng.prefs.interface_ndpi_timeseries_creation")
 
     -- ########################################################
     -- Populate some defaults
-    if (tostring(config.flow_devices_rrd_creation) == "1" and ntop.isEnterpriseM() == false) then
+    if (tostring(config.flow_devices_rrd_creation) == "1" and
+        ntop.isEnterpriseM() == false) then
         config.flow_devices_rrd_creation = "0"
     end
 
-    if (tostring(config.snmp_devices_rrd_creation) == "1" and not (ntop.isEnterpriseM() or ntop.isnEdgeEnterprise())) then
+    if (tostring(config.snmp_devices_rrd_creation) == "1" and
+        not (ntop.isEnterpriseM() or ntop.isnEdgeEnterprise())) then
         config.snmp_devices_rrd_creation = "0"
     end
 
@@ -203,16 +220,40 @@ end
 
 -- ###########################################
 
+-- This function returns true if the ndpi timeseries for the interface
+-- are requested with bytes_sent and rcvd, otherwise returns false
+function ifaceFullnDPITs()
+    return (ntop.getPref("ntopng.prefs.flow_device_port_rrd_creation") or
+               "total" == "rx_tx")
+end
+
+function getIfacenDPITsName()
+    local full_ts = ifaceFullnDPITs()
+    local id = 'iface:ndpi'
+    if full_ts then id = 'iface:ndpi_full' end
+    return id
+end
+
+-- ###########################################
+
 function getMinTSConfig()
     local config = {}
     local prefs = ntop.getPrefs() -- runtime ntopng preferences
 
-    config.interface_ndpi_timeseries_creation = ntop.getPref("ntopng.prefs.interface_ndpi_timeseries_creation")
-    config.ndpi_flows_timeseries_creation = ntop.getPref("ntopng.prefs.ndpi_flows_rrd_creation")
-    config.internals_rrd_creation = ntop.getPref("ntopng.prefs.internals_rrd_creation") == "1"
+    config.interface_ndpi_timeseries_creation = ntop.getPref(
+                                                    "ntopng.prefs.interface_ndpi_timeseries_creation")
+    config.ndpi_flows_timeseries_creation = ntop.getPref(
+                                                "ntopng.prefs.ndpi_flows_rrd_creation")
+    config.internals_rrd_creation = ntop.getPref(
+                                        "ntopng.prefs.internals_rrd_creation") ==
+                                        "1"
     config.is_dump_flows_enabled = ntop.getPrefs()["is_dump_flows_enabled"]
-    config.flow_devices_rrd_creation = ntop.getPref("ntopng.prefs.flow_device_port_rrd_creation")
-    
+    config.flow_devices_rrd_creation = ntop.getPref(
+                                           "ntopng.prefs.flow_device_port_rrd_creation")
+    config.interface_ndpi_timeseries_full = (ntop.getPref(
+                                                "ntopng.prefs.flow_device_port_rrd_creation") or
+                                                "total" == "rx_tx")
+
     -- Interface RRD creation is on, with per-protocol nDPI
     if isEmptyString(config.interface_ndpi_timeseries_creation) then
         config.interface_ndpi_timeseries_creation = "per_protocol"
@@ -226,9 +267,7 @@ end
 -- Get from redis the throughput type bps or pps
 function getThroughputType()
     local throughput_type = ntop.getCache("ntopng.prefs.thpt_content")
-    if throughput_type == "" then
-        throughput_type = "bps"
-    end
+    if throughput_type == "" then throughput_type = "bps" end
 
     return throughput_type
 end
@@ -236,9 +275,7 @@ end
 -- ##############################################
 
 function hasClickHouseSupport()
-    if not ntop.isClickHouseEnabled() then
-        return false
-    end
+    if not ntop.isClickHouseEnabled() then return false end
 
     local auth = require "auth"
 
@@ -271,8 +308,7 @@ end
 -- ##############################################
 
 function areNewInterfacesExcludedFromUsage()
-    local excluded = ntop.getCache("ntopng.prefs.toggle_snmp_excluded_from_usage")
-    if not isEmptyString(excluded) or excluded == "0" then
-        return true
-    end
+    local excluded = ntop.getCache(
+                         "ntopng.prefs.toggle_snmp_excluded_from_usage")
+    if not isEmptyString(excluded) or excluded == "0" then return true end
 end

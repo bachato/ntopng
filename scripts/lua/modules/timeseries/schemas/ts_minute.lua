@@ -316,6 +316,15 @@ schema:addTag("ifid")
 schema:addTag("protocol")
 schema:addMetric("bytes")
 
+schema = ts_utils.newSchema("iface:ndpi_full", {
+    step = 60,
+    is_critical_ts = true
+})
+schema:addTag("ifid")
+schema:addTag("protocol")
+schema:addMetric("bytes_sent")
+schema:addMetric("bytes_rcvd")
+
 -- ##############################################
 
 schema = ts_utils.newSchema("iface:ndpi_categories", {

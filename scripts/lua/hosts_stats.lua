@@ -445,8 +445,9 @@ if page == 'active_hosts' and ntop.isnEdge() then
         end
 
         if not isEmptyString(protocol_name) then
+            local iface_ts_id = getIfacenDPITsName() 
             charts_icon = " <a href='" .. ntop.getHttpPrefix() .. "/lua/if_stats.lua?ifid=" .. ifstats.id ..
-                              "&page=historical&ts_schema=iface:ndpi&protocol=" .. protocol_name ..
+                              "&page=historical&ts_schema=" .. iface_ts_id .. "&protocol=" .. protocol_name ..
                               "'><i class='fas fa-sm fa-chart-area'></i></a>"
         end
 
