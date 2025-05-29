@@ -149,13 +149,13 @@ If anonymous binding is enabled:
 
 .. code:: bash
 
-  ldapsearch -x -h ldap_server_ip -b 'dc=mydomain,dc=org' -s sub "(objectclass=*)"
+  ldapsearch -H <ldap_server_ip> -x -b 'dc=mydomain,dc=org' -s sub "(objectclass=*)"
 
 otherwise:
 
 .. code:: bash
 
-  ldapsearch -h ldap_server_ip -D 'cn=binding_user,dc=mydomain,dc=org' -w binding_password -b 'dc=mydomain,dc=org' -s sub "(objectclass=*)"
+  ldapsearch -H <ldap_server_ip> -D 'cn=binding_user,dc=mydomain,dc=org' -w binding_password -b 'dc=mydomain,dc=org' -s sub "(objectclass=*)"
 
 The parameters above should be modified according to the actual configuration in use.
 It is important to configure the LDAP server properly in order to correctly expose the necessary
