@@ -11,13 +11,15 @@ sudo apt install slapd ldap-utils -y
 sudo dpkg-reconfigure slapd
 ```
 
-Omit OpenLDAP server configuration? No
-DNS domain name: example.com
-Organization name: Example Corp
-Admin password: password
-Database backend: mdb
-Remove database when slapd is purged? No
-Move old database? Yes
+Recommended answers to the propt:
+
+ - Omit OpenLDAP server configuration? No
+ - DNS domain name: example.com
+ - Organization name: Example Corp
+ - Admin password: password
+ - Database backend: mdb
+ - Remove database when slapd is purged? No
+ - Move old database? Yes
 
 Create 01-add-ous.ldif:
 
@@ -29,6 +31,7 @@ dn: ou=groups,dc=example,dc=com
 objectClass: organizationalUnit
 ou: groups
 ```
+Add the OUs:
 
 ```
 ldapadd -x -D "cn=admin,dc=example,dc=com" -W -f 01-add-ous.ldif
