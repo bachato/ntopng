@@ -301,11 +301,12 @@ if (ntop.isPro()) then
         interface.select(getSystemInterfaceId())
         local db_migration_required = false
         local res = interface.execSQLQuery("DESCRIBE flows")
-        for _, row in ipairs(res) do
-            if row['name'] == 'SRC_NETWORK_ID' or row['name'] ==
-                'DST_NETWORK_ID' then
-                if row['type'] ~= 'UInt32' then
-                    db_migration_required = true
+        if res and type(res) == "table" then
+            for _, row in ipairs(res) do
+                if row['name'] == 'SRC_NETWORK_ID' or row['name'] == 'DST_NETWORK_ID' then
+                    if row['type'] ~= 'UInt32' then
+                        db_migration_required = true
+                    end
                 end
             end
         end

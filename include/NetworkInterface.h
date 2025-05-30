@@ -987,8 +987,8 @@ public:
   void addInterfaceAddress(char *const addr);
   void addInterfaceNetwork(char *const net, char *addr);
   bool isInterfaceNetwork(IpAddress *ipa, int network_bits);
-  inline int select_database(char *dbname) {
-    return (db ? db->select_database(dbname) : -1);
+  inline bool select_database(char *dbname) {
+    return (db ? db->select_database(dbname) : false);
   };
   inline int exec_sql_query(lua_State *vm, char *sql, bool limit_rows,
                             bool wait_for_db_created = false) {

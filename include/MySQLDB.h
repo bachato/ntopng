@@ -27,26 +27,29 @@
 #ifdef HAVE_MYSQL
 
 class MySQLDB : public DB {
- protected:
+ private:
   MYSQL mysql;
-  bool db_operational;
-  FILE *log_fd;
-  u_int32_t mysqlEnqueuedFlows;
-  Mutex m;
-
-  volatile bool db_created;
   pthread_t queryThreadLoop;
+  u_int32_t mysqlEnqueuedFlows;
+  FILE *log_fd;
 
   bool connectToDB(MYSQL *conn, bool select_db);
   void open_log();
   char *get_last_db_error(MYSQL *conn) { return ((char *)mysql_error(conn)); }
   void try_exec_sql_query(char *sql);
-  virtual bool createDBSchema();
-  bool createNprobeDBView();
   MYSQL *mysql_try_connect(MYSQL *conn, const char *dbname);
-  void mysql_result_to_lua(lua_State *vm, MYSQL_RES *result, int num_fields,
-                           bool limitRows);
+  void mysql_result_to_lua(lua_State *vm, MYSQL_RES *result, int num_fields, bool limitRows);
+
   void printFailure(const char *query, int status);
+
+ protected:
+  bool db_operational;
+  volatile bool db_created;
+  time_t last_message;
+  Mutex m;
+
+  virtual bool createDBSchema();
+  bool suppressMessage();
 
  public:
   MySQLDB(NetworkInterface *_iface);
@@ -79,7 +82,7 @@ class MySQLDB : public DB {
 
   virtual bool startQueryLoop();
   void shutdown();
-  int select_database(char *dbname);
+  bool select_database(char *dbname);
 };
 
 #endif

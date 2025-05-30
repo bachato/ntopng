@@ -38,9 +38,48 @@ const char *MySQLDB::getEngineName() {
   return "MySQL";
 }
 
+/* ******************************************* */
+
+MySQLDB::MySQLDB(NetworkInterface *_iface) : DB(_iface) {
+  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  mysqlEnqueuedFlows = 0;
+  log_fd = NULL;
+  open_log();
+  db_created = false;
+  last_message = 0;
+
+  connectToDB(&mysql, false);
+}
+
+/* ******************************************* */
+
+MySQLDB::~MySQLDB() {
+  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  
+  shutdown();
+  disconnectFromDB(&mysql);
+
+  if (log_fd) fclose(log_fd);
+}
+
+/* **************************************************** */
+
+/* Used to rate-limit failure messages */
+bool MySQLDB::suppressMessage() {
+  time_t now = time(NULL);
+  if (last_message < now) {
+    last_message = now;
+    return false;
+  } else {
+    return true;
+  }
+}
+
 /* **************************************************** */
 
 void MySQLDB::printFailure(const char *query, int status) {
+  if (suppressMessage()) return;
+
   ntop->getTrace()->traceEvent(TRACE_ERROR, "SQL query: %s", query);
   ntop->getTrace()->traceEvent(TRACE_ERROR, "SQL error (%d): %s", status,
                                get_last_db_error(&mysql));
@@ -505,29 +544,6 @@ bool MySQLDB::createDBSchema() {
 
 /* ******************************************* */
 
-MySQLDB::MySQLDB(NetworkInterface *_iface) : DB(_iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  mysqlEnqueuedFlows = 0;
-  log_fd = NULL;
-  open_log();
-  db_created = false;
-
-  connectToDB(&mysql, false);
-}
-
-/* ******************************************* */
-
-MySQLDB::~MySQLDB() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
-  
-  shutdown();
-  disconnectFromDB(&mysql);
-
-  if (log_fd) fclose(log_fd);
-}
-
-/* ******************************************* */
-
 void MySQLDB::open_log() {
   char sql_log_path[512];
 
@@ -897,8 +913,9 @@ bool MySQLDB::connectToDB(MYSQL *conn, bool select_db) {
   rc = mysql_try_connect(conn, dbname);
 
   if (rc == NULL) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "Failed to connect to %s: %s [%s@%s:%i]\n",
-				 getEngineName(), mysql_error(conn), user, host, port);
+    if (!suppressMessage())
+      ntop->getTrace()->traceEvent(TRACE_ERROR, "Failed to connect to %s: %s [%s@%s:%i]\n",
+				   getEngineName(), mysql_error(conn), user, host, port);
 
     m.unlock(__FILE__, __LINE__);
     return (db_operational);
@@ -1200,7 +1217,7 @@ done:
 
 /* ******************************************* */
 
-int MySQLDB::select_database(char *dbname) {
+bool MySQLDB::select_database(char *dbname) {
   int rc = mysql_select_db(&mysql, (const char *)dbname);
 
   if (rc) {
@@ -1208,7 +1225,7 @@ int MySQLDB::select_database(char *dbname) {
                                  get_last_db_error(&mysql), rc, dbname);
   }
 
-  return (rc);
+  return (rc == 0);
 }
 
 #endif

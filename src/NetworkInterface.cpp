@@ -8489,17 +8489,15 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
 
     if (db == NULL && !disable_dump) {
       if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
-#ifdef NTOPNG_PRO
-#if defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
 	/* Allocate only the DB connection, not any thread or queue for the export */
 	try {
 	  db = new ClickHouseFlowDB(this);
 	} catch (const std::invalid_argument &e) {
 	  db = NULL;
-	  ntop->getTrace()->traceEvent(TRACE_WARNING, "Leaving due to failed ClickHouse initialization");
-	  exit(-1);
+          ntop->getTrace()->traceEvent(TRACE_WARNING, "ClickHouse initialization failure!");
+          exit(-1);
 	}
-#endif
 #endif
       }
     }
@@ -9512,26 +9510,20 @@ bool NetworkInterface::initFlowDump(u_int8_t num_dump_interfaces) {
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
       db = new (std::nothrow) ClickHouseFlowDB(this);
 
-      if ((db == NULL) || (db->isDbCreated() == false)) {
-#ifdef HAVE_NEDGE
-        /* On nEdge do not exit on CH failure to avoid outage due to db */
-        ntop->getTrace()->traceEvent(TRACE_WARNING, "Running without ClickHouse support, please check the clickhouse service");
+      if (db == NULL || db->isDbCreated() == false) {
+        ntop->getTrace()->traceEvent(TRACE_ERROR, "Running without ClickHouse support, please check the clickhouse service");
         ntop->getPrefs()->dontUseClickHouse();
         if (db) {
           delete db;
           db = NULL;
         }
-#else
-        ntop->getTrace()->traceEvent(TRACE_WARNING, "Leaving due to failed ClickHouse initialization");
-        exit(-1);
-#endif
       }
 #endif
     }
 #ifdef HAVE_MYSQL
     else if (ntop->getPrefs()->do_dump_flows_on_mysql()) {
       db = new (std::nothrow) MySQLDB(this);
-      if (!db) throw "Not enough memory";
+      if (db == NULL) ntop->getTrace()->traceEvent(TRACE_WARNING, "Running without MySQL export (initialization failure)");
     }
 #endif
 #ifndef HAVE_NEDGE
