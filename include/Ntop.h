@@ -59,7 +59,6 @@ class Ntop {
   NetworkInterface *system_interface; /** The system interface */
   NetworkInterface *old_iface_to_purge;
   u_int8_t num_defined_interfaces; /**< Number of defined interfaces. */
-  u_int8_t num_dump_interfaces;
   std::atomic<u_int16_t> num_active_lua_vms;
   HTTPserver *httpd;    /**< Pointer of httpd server. */
   NtopGlobals *globals; /**< Pointer of Ntop globals info and variables. */

@@ -73,7 +73,6 @@ Ntop::Ntop(const char *appName) {
   trackers_automa = NULL;
   num_cpus = -1;
   num_defined_interfaces = 0;
-  num_dump_interfaces = 0;
   iface = NULL;
   start_time = last_modified_static_file_epoch = 0,
   epoch_buf[0] = '\0'; /* It will be initialized by start() */
@@ -2906,7 +2905,7 @@ void Ntop::initInterface(NetworkInterface *_if, bool disable_dump) {
 #endif
       #endif
   ) && !disable_dump) {
-    if (_if->initFlowDump(num_dump_interfaces)) num_dump_interfaces++;
+    _if->initFlowDump();
     _if->startDBLoop();
   }
 

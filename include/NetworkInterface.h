@@ -304,7 +304,18 @@ protected:
   /* Hosts */
   HostHash *hosts_hash; /**< Hash used to store hosts information. */
   bool purge_idle_flows_hosts, inline_interface;
+
   DB *db;
+#ifndef HAVE_NEDGE
+  DB *el_exporter;
+#if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
+  DB *kafka_exporter;
+#endif
+#if !defined(WIN32) && !defined(__APPLE__)
+  DB *syslog_exporter;
+#endif
+#endif
+
   StatsManager *statsManager;
   AlertStore *alertStore;
   HostPools *host_pools;
@@ -410,7 +421,7 @@ protected:
                      u_int32_t size, u_int *num, bool set_resp);
   void build_protocol_flow_stats_lua_rsp(lua_State *vm, AggregatedFlowsStats *fs,
                                          u_int32_t size, u_int *num);
-  bool dumpFlowOut(DB *dumper, time_t when, Flow *f);
+  bool dumpFlowOut(Flow *f, time_t when);
   
 public:
   /**
@@ -427,7 +438,7 @@ public:
   bool initFlowChecksLoop(); /* Initialize the loop to dequeue flows for the
                                 execution of user script hooks */
   bool initHostChecksLoop(); /* Same as above but for hosts */
-  bool initFlowDump(u_int8_t num_dump_interfaces);
+  void initFlowDump();
   u_int32_t getASesHashSize();
   u_int32_t getObsHashSize();
   u_int32_t getCountriesHashSize();
@@ -1020,8 +1031,8 @@ public:
   inline void startDBLoop() {
     if (db) db->startDBLoop();
   };
-  inline void incDBNumDroppedFlows(DB *dumper, u_int num = 1) {
-    if (dumper) dumper->incNumDroppedFlows(num);
+  inline void incDBNumDroppedFlows(DB *actual_db, u_int num = 1) {
+    if (actual_db) actual_db->incNumDroppedFlows(num);
   };
 #ifdef NTOPNG_PRO
   void updateBehaviorStats(const struct timeval *tv);

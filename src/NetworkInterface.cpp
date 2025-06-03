@@ -329,6 +329,16 @@ void NetworkInterface::init(const char *interface_name) {
   download_stats = upload_stats = NULL;
 
   db = NULL;
+#ifndef HAVE_NEDGE
+  el_exporter = NULL;
+#if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
+  kafka_exporter = NULL;
+#endif
+#if !defined(WIN32) && !defined(__APPLE__)
+  syslog_exporter = NULL;
+#endif
+#endif
+
 #ifdef NTOPNG_PRO
   custom_app_stats = NULL;
   flow_interfaces_stats = NULL;
@@ -3460,8 +3470,8 @@ u_int64_t NetworkInterface::dequeueHostAlertsFromChecks(u_int budget) {
 
 void NetworkInterface::incNumQueueDroppedFlows(u_int32_t num) {
   /*
-    For viewed interface, the dumper database is the one belonging to the
-    overlying view interface.
+    For viewed interface, the database instance (actual_db) is the one belonging
+    to the overlying view interface.
   */
   DB *actual_db;
 
@@ -3493,15 +3503,11 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
   u_int64_t idle_flows_done = 0, active_flows_done = 0;
   time_t when = time(NULL);
   
-#ifdef HAVE_ZMQ
-#ifndef HAVE_NEDGE
-  if (ntop->get_export_interface() == NULL)
-#endif
-#endif
-    if (actual_db == NULL) {
-      ntop->getTrace()->traceEvent(TRACE_INFO, "WARNING: Something is broken with flow dump");
-      return (0);
-    }
+  if ((ntop->getPrefs()->do_dump_flows_on_clickhouse() || ntop->getPrefs()->do_dump_flows_on_mysql())
+      && actual_db == NULL) {
+    ntop->getTrace()->traceEvent(TRACE_INFO, "WARNING: Something is broken with flow dump");
+    return (0);
+  }
 
   /*
     Process high-priority idle flows (they're high priority as an idle flow not dumped is lost)
@@ -3509,7 +3515,7 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
   while (idleFlowsToDump->isNotEmpty()) {
     Flow *f = idleFlowsToDump->dequeue();
 
-    if(dumpFlowOut(actual_db, when, f)) {
+    if(dumpFlowOut(f, when)) {
       // delete f;
       idle_flows_done++;
     }
@@ -3519,21 +3525,19 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
       break;
   }
 
-  if (actual_db) {
-    /*
-      Process low-priority active flows (they're low priority there can still be
-      chances of dumping active flows later)
-    */
-    while (activeFlowsToDump->isNotEmpty()) {
-      Flow *f = activeFlowsToDump->dequeue();
+  /*
+    Process low-priority active flows (they're low priority there can still be
+    chances of dumping active flows later)
+  */
+  while (activeFlowsToDump->isNotEmpty()) {
+    Flow *f = activeFlowsToDump->dequeue();
 
-      if(dumpFlowOut(actual_db, when, f))
-	active_flows_done++;
+    if(dumpFlowOut(f, when))
+      active_flows_done++;
 
-      if (active_flows_budget > 0 /* Budget requested */
-          && active_flows_done >= active_flows_budget /* Budget exceeded */)
-        break;
-    }
+    if (active_flows_budget > 0 /* Budget requested */
+        && active_flows_done >= active_flows_budget /* Budget exceeded */)
+      break;
   }
 
   /*
@@ -3574,47 +3578,75 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
 /* **************************************************** */
 
 /* Thos method finally dumps a flow */
-bool NetworkInterface::dumpFlowOut(DB *actual_db, time_t when, Flow *f) {
+bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
+  DB *actual_db = getDB();
   char *json = NULL;
   bool rc = true;
-  ExportFormat format = export_format_GENERIC;
 
-  if(actual_db == NULL) {
 #ifdef NTOPNG_PRO
-    actual_db = isViewed() ? viewedBy()->getDB() : getDB();
-#else
-    actual_db = getDB();
+  //actual_db = isViewed() ? viewedBy()->getDB() : getDB();
 #endif
-
-    if(actual_db == NULL)
-      return(false);
-  }
 
   /* Checkpoint flow traffic counters for the dump */
   f->update_partial_traffic_stats_db_dump();
 
-  if (ntop->getPrefs()->do_dump_flows_on_es())
-    format = export_format_ECS;
-  else if (ntop->getPrefs()->do_dump_flows_on_syslog())
-    format = export_format_SYSLOG;
+  if (f->get_partial_bytes()) /* Make sure data is not at zero */ {
 
-  json = f->serialize(format);
-
-#ifdef HAVE_ZMQ
-#ifndef HAVE_NEDGE
-  if (ntop->get_export_interface() && (json != NULL))
-    ntop->get_export_interface()->export_data(json);
+    if (actual_db
+#if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
+        || kafka_exporter
 #endif
+#if defined(HAVE_ZMQ) && !defined(HAVE_NEDGE)
+        || ntop->get_export_interface()
+#endif
+       ) {
+
+      json = f->serialize(export_format_GENERIC);
+      if (json) {
+
+        if (actual_db)
+          rc = actual_db->dumpFlow(when, f, json);
+
+#if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
+        if (kafka_exporter)
+          kafka_exporter->dumpFlow(when, f, json);
 #endif
 
-  if (f->get_partial_bytes()) /* Make sure data is not at zero */
-    rc = actual_db->dumpFlow(when, f, json); /* Finally dump this flow */
+#if defined(HAVE_ZMQ) && !defined(HAVE_NEDGE)
+        if (ntop->get_export_interface())
+          ntop->get_export_interface()->export_data(json);
+#endif
 
-  if (json) free(json);
+        free(json);
 
 #if DEBUG_FLOW_DUMP
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Dumped active flow");
+        ntop->getTrace()->traceEvent(TRACE_NORMAL, "Dumped active flow");
 #endif
+
+      } /* json != NULL */
+    }
+
+#ifndef HAVE_NEDGE
+    if (el_exporter) {
+      json = f->serialize(export_format_ECS);
+      if (json) {
+        el_exporter->dumpFlow(when, f, json);
+        free(json);
+      }
+    }
+
+#if !defined(WIN32) && !defined(__APPLE__)
+    if (syslog_exporter) {
+      json = f->serialize(export_format_SYSLOG);
+      if (json) {
+        syslog_exporter->dumpFlow(when, f, json);
+        free(json);
+      }
+    }
+#endif
+#endif
+
+  } /* get_partial_bytes > 0 */
 
   if (!rc)
     incDBNumDroppedFlows(actual_db);
@@ -3823,8 +3855,6 @@ static void *flowDumper(void *ptr) {
 void NetworkInterface::startFlowDumping() {
   idleFlowsToDump   = new (std::nothrow)SPSCQueue<Flow *>(MAX_IDLE_FLOW_QUEUE_LEN, "idleFlowsToDump");
   activeFlowsToDump = new (std::nothrow)SPSCQueue<Flow *>(MAX_ACTIVE_FLOW_QUEUE_LEN, "activeFlowsToDump");
-
-  ntop->getPrefs()->do_dump_flows_on_es() || ntop->getPrefs()->do_dump_flows_on_syslog();
 
   if (!isViewed()) {
     /* Do not spawn the dumper thread for viewed interfaces -
@@ -9490,59 +9520,67 @@ bool NetworkInterface::initHostChecksLoop() {
   Put here all the code that is executed when the NIC initialization
   is successful
 */
-bool NetworkInterface::initFlowDump(u_int8_t num_dump_interfaces) {
+void NetworkInterface::initFlowDump() {
   startFlowDumping();
 
   /* Flows are dumped by the view only */
   if (isViewed()) /* No need to allocate databases on view interfaces */
-    return (true);
+    return;
 
-  if (db == NULL) {
-    try {
-    if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
+  try {
+
+    if (db == NULL) {
+
+      if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
-      db = new (std::nothrow) ClickHouseFlowDB(this);
+        db = new (std::nothrow) ClickHouseFlowDB(this);
 
-      if (db == NULL || db->isDbCreated() == false) {
-        ntop->getTrace()->traceEvent(TRACE_ERROR, "Running without ClickHouse support, please check the clickhouse service");
-        ntop->getPrefs()->dontUseClickHouse();
-        if (db) {
-          delete db;
-          db = NULL;
+        if (db == NULL || db->isDbCreated() == false) {
+          ntop->getTrace()->traceEvent(TRACE_ERROR, "Running without ClickHouse support, please check the clickhouse service");
+          ntop->getPrefs()->dontUseClickHouse();
+          if (db) {
+            delete db;
+            db = NULL;
+          }
         }
+#endif
+      }
+#ifdef HAVE_MYSQL
+      else if (ntop->getPrefs()->do_dump_flows_on_mysql()) {
+        db = new (std::nothrow) MySQLDB(this);
+        if (db == NULL) ntop->getTrace()->traceEvent(TRACE_WARNING, "Running without MySQL export (initialization failure)");
       }
 #endif
     }
-#ifdef HAVE_MYSQL
-    else if (ntop->getPrefs()->do_dump_flows_on_mysql()) {
-      db = new (std::nothrow) MySQLDB(this);
-      if (db == NULL) ntop->getTrace()->traceEvent(TRACE_WARNING, "Running without MySQL export (initialization failure)");
-    }
-#endif
+
 #ifndef HAVE_NEDGE
-    else if (ntop->getPrefs()->do_dump_flows_on_es()) {
-      db = new (std::nothrow) ElasticSearch(this);
+    if (el_exporter == NULL) {
+      if (ntop->getPrefs()->do_dump_flows_on_es()) {
+        el_exporter = new (std::nothrow) ElasticSearch(this);
+      }
     }
+
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
-    else if ((ntop->getPrefs()->getKakfaBrokersList() != NULL)) {
+    if (kafka_exporter == NULL) {
+      if (ntop->getPrefs()->do_dump_flows_on_kafka()) {
 	kafka = new (std::nothrow) KafkaProducer(this, ntop->getPrefs()->getKakfaBrokersList(),
 						 ntop->getPrefs()->getKafkaTopic(),
 						 ntop->getPrefs()->getKafkaOptions());
-	db = kafka;
+	kafka_exporter = kafka;
       }
-#endif
-#if !defined(WIN32) && !defined(__APPLE__)
-    else if (ntop->getPrefs()->do_dump_flows_on_syslog()) {
-      db = new (std::nothrow) SyslogDump(this);
     }
 #endif
-#endif
-    } catch (...) {
-      ;
-    }
-  }
 
-  return (db != NULL);
+#if !defined(WIN32) && !defined(__APPLE__)
+    if (syslog_exporter == NULL) {
+      if (ntop->getPrefs()->do_dump_flows_on_syslog()) {
+        syslog_exporter = new (std::nothrow) SyslogDump(this);
+      }
+    }
+#endif
+#endif
+
+  } catch (...) {}
 }
 
 /* *************************************** */
