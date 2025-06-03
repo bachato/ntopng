@@ -150,12 +150,6 @@ protected:
   SPSCQueue<FlowAlert *> *flowAlertsQueue;
   SPSCQueue<HostAlertReleasedPair> *hostAlertsQueue;
 
-  /*
-    Flag to indicate whether a flow JSON should be dumped along with the flow.
-    Flow JSON contain additional fields not placed inside database columns.
-  */
-  bool flows_dump_json;
-
   /* External alerts contain alertable entities other than
    * host/interface/network which are dynamically allocated when an alert for
    * them occurs. A lock is necessary to guard the insert/delete operations from

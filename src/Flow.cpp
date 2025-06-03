@@ -3560,29 +3560,25 @@ void Flow::sumStats(nDPIStats *ndpi_stats, FlowStats *status_stats) {
 
 /* *************************************** */
 
-char* Flow::serialize(bool use_labels) {
+char* Flow::serialize(ExportFormat format) {
   json_object *my_object;
+  const char *json;
   char *rsp = NULL;
 
-  ntop->getPrefs()->set_json_symbolic_labels_format(use_labels);
+  my_object = flow2JSON(format);
+  if (my_object == NULL)
+    return NULL;
 
-  my_object = flow2JSON();
-  // ntop->getTrace()->traceEvent(TRACE_WARNING, "Flow Length: %d",
-  // json_object_object_length(my_object));
+  /* JSON string */
+  json = json_object_to_json_string(my_object);
 
-  if(my_object != NULL) {
-    /* JSON string */
-    const char *json = json_object_to_json_string(my_object);
+  // ntop->getTrace()->traceEvent(TRACE_WARNING, "Emitting Flow: %s", json);
 
-    // ntop->getTrace()->traceEvent(TRACE_WARNING, "Emitting Flow: %s", json);
+  if (json)
+    rsp = strdup(json);
 
-    if(json) {
-      rsp = json ? strdup(json) : NULL;
-
-      /* Free memory */
-      json_object_put(my_object);
-    }
-  }
+  /* Free memory */
+  json_object_put(my_object);
 
   return (rsp);
 }
@@ -4455,16 +4451,21 @@ void Flow::formatGenericFlow(json_object *my_object) {
 
 /* *************************************** */
 
-json_object *Flow::flow2JSON() {
+json_object *Flow::flow2JSON(ExportFormat format) {
   json_object *my_object;
 
-  if((my_object = json_object_new_object()) == NULL) return (NULL);
+  my_object = json_object_new_object();
+  if (my_object == NULL)
+    return NULL;
 
-  if(ntop->getPrefs()->do_dump_flows_on_es()) {
+  if (format == export_format_ECS) {
+    /* Format for ElasticSearch */
     formatECSFlow(my_object);
-  } else if(ntop->getPrefs()->do_dump_flows_on_syslog()) {
+  } else if (format == export_format_SYSLOG) {
+    /* Format for Syslog */
     formatSyslogFlow(my_object);
   } else {
+    /* Format for DB */
     formatGenericFlow(my_object);
   }
 

@@ -602,10 +602,10 @@ public:
     return (Utils::maskHost(get_cli_ip_addr()->isLocalHost())
             || Utils::maskHost(get_srv_ip_addr()->isLocalHost()));
   };
-  char *serialize(bool use_labels = false);
+  char *serialize(ExportFormat format = export_format_GENERIC);
   /* Prepares an alert JSON and puts int in the resulting `serializer`. */
   void alert2JSON(FlowAlert *alert, ndpi_serializer *serializer);
-  json_object *flow2JSON();
+  json_object *flow2JSON(ExportFormat format);
   json_object *flow2es(json_object *flow_object);
   void formatECSInterface(json_object *my_object);
   void formatECSNetwork(json_object *my_object, const IpAddress *addr);

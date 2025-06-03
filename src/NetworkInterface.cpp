@@ -97,7 +97,6 @@ NetworkInterface::NetworkInterface(const char *name,
   influxdb_ts_exporter = rrd_ts_exporter = NULL;
   flow_checks_executor = prev_flow_checks_executor = NULL;
   host_checks_executor = prev_host_checks_executor = NULL;
-  flows_dump_json = true; /* Too early will be set by NetworkInterface::startFlowDumping() */
   memset(ifMac, 0, sizeof(ifMac));
 
 #ifdef WIN32
@@ -3464,15 +3463,15 @@ void NetworkInterface::incNumQueueDroppedFlows(u_int32_t num) {
     For viewed interface, the dumper database is the one belonging to the
     overlying view interface.
   */
-  DB *dumper;
+  DB *actual_db;
 
 #ifdef NTOPNG_PRO
-  dumper = isViewed() ? viewedBy()->getDB() : getDB();
+  actual_db = isViewed() ? viewedBy()->getDB() : getDB();
 #else
-  dumper = getDB();
+  actual_db = getDB();
 #endif
 
-  if (dumper) dumper->incNumQueueDroppedFlows(num);
+  if (actual_db) actual_db->incNumQueueDroppedFlows(num);
 };
 
 /* **************************************************** */
@@ -3490,7 +3489,7 @@ void NetworkInterface::incNumQueueDroppedFlows(u_int32_t num) {
 */
 u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
                                                 u_int active_flows_budget) {
-  DB *dumper = getDB();
+  DB *actual_db = getDB();
   u_int64_t idle_flows_done = 0, active_flows_done = 0;
   time_t when = time(NULL);
   
@@ -3499,7 +3498,7 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
   if (ntop->get_export_interface() == NULL)
 #endif
 #endif
-    if (dumper == NULL) {
+    if (actual_db == NULL) {
       ntop->getTrace()->traceEvent(TRACE_INFO, "WARNING: Something is broken with flow dump");
       return (0);
     }
@@ -3510,7 +3509,7 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
   while (idleFlowsToDump->isNotEmpty()) {
     Flow *f = idleFlowsToDump->dequeue();
 
-    if(dumpFlowOut(dumper, when, f)) {
+    if(dumpFlowOut(actual_db, when, f)) {
       // delete f;
       idle_flows_done++;
     }
@@ -3520,7 +3519,7 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
       break;
   }
 
-  if (dumper) {
+  if (actual_db) {
     /*
       Process low-priority active flows (they're low priority there can still be
       chances of dumping active flows later)
@@ -3528,7 +3527,7 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
     while (activeFlowsToDump->isNotEmpty()) {
       Flow *f = activeFlowsToDump->dequeue();
 
-      if(dumpFlowOut(dumper, when, f))
+      if(dumpFlowOut(actual_db, when, f))
 	active_flows_done++;
 
       if (active_flows_budget > 0 /* Budget requested */
@@ -3567,7 +3566,7 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
   // flushFlowDump();
 #endif
 
-  if (dumper) dumper->checkIdle(when);
+  if (actual_db) actual_db->checkIdle(when);
 
   return (num_done);
 }
@@ -3575,30 +3574,31 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
 /* **************************************************** */
 
 /* Thos method finally dumps a flow */
-bool NetworkInterface::dumpFlowOut(DB *dumper, time_t when, Flow *f) {
+bool NetworkInterface::dumpFlowOut(DB *actual_db, time_t when, Flow *f) {
   char *json = NULL;
   bool rc = true;
+  ExportFormat format = export_format_GENERIC;
 
-  if(dumper == NULL) {
+  if(actual_db == NULL) {
 #ifdef NTOPNG_PRO
-    dumper = isViewed() ? viewedBy()->getDB() : getDB();
+    actual_db = isViewed() ? viewedBy()->getDB() : getDB();
 #else
-    dumper = getDB();
+    actual_db = getDB();
 #endif
 
-    if(dumper == NULL)
+    if(actual_db == NULL)
       return(false);
   }
 
   /* Checkpoint flow traffic counters for the dump */
   f->update_partial_traffic_stats_db_dump();
 
-  /* Prepare the JSON - if requested */
-  if (flows_dump_json) {
-    json = f->serialize(true /* Use JSON labels */);
+  if (ntop->getPrefs()->do_dump_flows_on_es())
+    format = export_format_ECS;
+  else if (ntop->getPrefs()->do_dump_flows_on_syslog())
+    format = export_format_SYSLOG;
 
-    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", json);
-  }
+  json = f->serialize(format);
 
 #ifdef HAVE_ZMQ
 #ifndef HAVE_NEDGE
@@ -3608,7 +3608,7 @@ bool NetworkInterface::dumpFlowOut(DB *dumper, time_t when, Flow *f) {
 #endif
 
   if (f->get_partial_bytes()) /* Make sure data is not at zero */
-    rc = dumper->dumpFlow(when, f, json); /* Finally dump this flow */
+    rc = actual_db->dumpFlow(when, f, json); /* Finally dump this flow */
 
   if (json) free(json);
 
@@ -3617,7 +3617,7 @@ bool NetworkInterface::dumpFlowOut(DB *dumper, time_t when, Flow *f) {
 #endif
 
   if (!rc)
-    incDBNumDroppedFlows(dumper);
+    incDBNumDroppedFlows(actual_db);
   
   f->decUses(); /* Add done, decrease the reference counter */
   f->set_dump_done();
@@ -3780,7 +3780,7 @@ void NetworkInterface::dumpFlowLoop() {
     }
   }
 
-  /* Make sure all flows have been dumper */
+  /* Make sure all flows have been dumped */
   dequeueFlowsForDump(0 /* Unlimited budget for idle flows */,
                       0 /* Unlimited budged for active flows */);
 

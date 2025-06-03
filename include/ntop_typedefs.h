@@ -935,6 +935,12 @@ typedef enum {
 } InterfaceType;
 
 typedef enum {
+  export_format_GENERIC = 0,
+  export_format_SYSLOG,
+  export_format_ECS
+} ExportFormat;
+
+typedef enum {
   os_learning_unknown = 0,
   os_learning_tcp_fingerprint,
   os_learning_http_user_agent,
