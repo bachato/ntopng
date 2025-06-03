@@ -422,7 +422,6 @@ struct ndpi_keys_struct {
 struct ndpi_detection_module_struct *NetworkInterface::initnDPIStruct() {
   struct ndpi_detection_module_struct *ndpi_s = ndpi_init_detection_module(NULL);
   ndpi_port_range d_port[MAX_DEFAULT_PORTS];
-  NDPI_PROTOCOL_BITMASK all;
   ndpi_cfg_error rc;
   const char* dirs[] = {
     "/usr/share/ndpi/public_suffix_list.dat",
@@ -443,10 +442,6 @@ struct ndpi_detection_module_struct *NetworkInterface::initnDPIStruct() {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to initialize nDPI");
     exit(-1);
   }
-
-  // enable all protocols
-  NDPI_BITMASK_SET_ALL(all);
-  ndpi_set_protocol_detection_bitmask2(ndpi_s, &all);
 
   for(int i=0; ndpi_keys[i].key != NULL; i++) {
     rc = ndpi_set_config(ndpi_s, ndpi_keys[i].proto, ndpi_keys[i].key, ndpi_keys[i].value);
@@ -7254,8 +7249,7 @@ void NetworkInterface::getnDPIProtocols(lua_State *vm,
                                         ndpi_protocol_category_t filter,
                                         bool skip_critical) {
   int i;
-  u_int num_supported_protocols =
-    ndpi_get_ndpi_num_supported_protocols(get_ndpi_struct());
+  u_int num_supported_protocols = ndpi_get_num_protocols(get_ndpi_struct());
   ndpi_proto_defaults_t *proto_defaults = ndpi_get_proto_defaults(get_ndpi_struct());
 
   lua_newtable(vm);
@@ -7351,8 +7345,7 @@ void NetworkInterface::getnDPIFlowsCount(lua_State *vm) {
   u_int32_t *num_flows;
   u_int32_t begin_slot = 0;
   bool walk_all = true;
-  u_int num_supported_protocols =
-    ndpi_get_ndpi_num_supported_protocols(get_ndpi_struct());
+  u_int num_supported_protocols = ndpi_get_num_protocols(get_ndpi_struct());
   ndpi_proto_defaults_t *proto_defaults =
     ndpi_get_proto_defaults(get_ndpi_struct());
 

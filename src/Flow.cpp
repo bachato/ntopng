@@ -671,7 +671,7 @@ u_int16_t Flow::getStatsProtocol() const {
   u_int16_t stats_protocol;
 
   if(ndpiDetectedProtocol.proto.app_protocol != NDPI_PROTOCOL_UNKNOWN &&
-      !ndpi_is_subprotocol_informative(ndpiDetectedProtocol.proto.master_protocol))
+     !ndpi_is_subprotocol_informative(iface->get_ndpi_struct(), ndpiDetectedProtocol.proto.master_protocol))
     stats_protocol = ndpiDetectedProtocol.proto.app_protocol;
   else
     stats_protocol = ndpiDetectedProtocol.proto.master_protocol;
@@ -2711,7 +2711,7 @@ void Flow::update_pools_stats(NetworkInterface *iface, Host *cli_host,
 
       /* Overall host pool stats */
       if(ndpiDetectedProtocol.proto.app_protocol != NDPI_PROTOCOL_UNKNOWN &&
-          !ndpi_is_subprotocol_informative(ndpiDetectedProtocol.proto.master_protocol))
+	 !ndpi_is_subprotocol_informative(iface->get_ndpi_struct(), ndpiDetectedProtocol.proto.master_protocol))
         hp->incPoolStats(tv->tv_sec, cli_host_pool_id,
                          ndpiDetectedProtocol.proto.app_protocol, category_id,
                          diff_sent_packets, diff_sent_bytes, diff_rcvd_packets,
@@ -2747,7 +2747,7 @@ void Flow::update_pools_stats(NetworkInterface *iface, Host *cli_host,
        * pool */
       if(!cli_host || (srv_host_pool_id != cli_host_pool_id)) {
         if(ndpiDetectedProtocol.proto.app_protocol != NDPI_PROTOCOL_UNKNOWN &&
-            !ndpi_is_subprotocol_informative(ndpiDetectedProtocol.proto.master_protocol))
+	   !ndpi_is_subprotocol_informative(iface->get_ndpi_struct(), ndpiDetectedProtocol.proto.master_protocol))
           hp->incPoolStats(tv->tv_sec, srv_host_pool_id,
                            ndpiDetectedProtocol.proto.app_protocol, category_id,
                            diff_rcvd_packets, diff_rcvd_bytes,
@@ -7297,9 +7297,10 @@ void Flow::lua_get_protocols(lua_State *vm) const {
     lua_push_uint64_table_entry(vm, "proto.ndpi_id",
                                 ndpiDetectedProtocol.proto.app_protocol);
     lua_push_uint64_table_entry(vm, "proto.ndpi_informative_proto",
-                                (!ndpi_is_subprotocol_informative(ndpiDetectedProtocol.proto.master_protocol)
+                                (!ndpi_is_subprotocol_informative(iface->get_ndpi_struct(),
+								  ndpiDetectedProtocol.proto.master_protocol))
 				 ? ndpiDetectedProtocol.proto.app_protocol
-				 : ndpiDetectedProtocol.proto.master_protocol));
+				 : ndpiDetectedProtocol.proto.master_protocol);
     lua_push_uint64_table_entry(vm, "proto.master_ndpi_id",
                                 ndpiDetectedProtocol.proto.master_protocol);
   } else {

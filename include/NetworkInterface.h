@@ -519,7 +519,7 @@ public:
   inline TcpFlowStats *getTcpFlowStats() { return (&tcpFlowStats); }
   virtual bool is_ndpi_enabled() const { return (true); }
   inline u_int getNumnDPIProtocols() {
-    return (ndpi_get_num_supported_protocols(get_ndpi_struct()));
+    return (ndpi_get_num_protocols(get_ndpi_struct()));
   };
   inline time_t getTimeLastPktRcvdRemote() { return (last_pkt_rcvd_remote); };
   inline time_t getTimeLastPktRcvd() {

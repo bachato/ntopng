@@ -349,12 +349,7 @@ Prefs::~Prefs() {
 /* C-binding needed by Win32 service call */
 void nDPIusage() {
   NDPI_PROTOCOL_BITMASK all;
-  struct ndpi_detection_module_struct *ndpi_struct =
-    ndpi_init_detection_module(NULL);
-
-  // enable all protocols
-  NDPI_BITMASK_SET_ALL(all);
-  ndpi_set_protocol_detection_bitmask2(ndpi_struct, &all);
+  struct ndpi_detection_module_struct *ndpi_struct = ndpi_init_detection_module(NULL);
 
   printf("\nnDPI detected protocols:\n");
   ndpi_dump_protocols(ndpi_struct, stdout);
