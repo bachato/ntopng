@@ -430,7 +430,6 @@ struct ndpi_keys_struct {
 
 struct ndpi_detection_module_struct *NetworkInterface::initnDPIStruct() {
   struct ndpi_detection_module_struct *ndpi_s = ndpi_init_detection_module(NULL);
-  ndpi_port_range d_port[MAX_DEFAULT_PORTS];
   ndpi_cfg_error rc;
   const char* dirs[] = {
     "/usr/share/ndpi/public_suffix_list.dat",
@@ -485,13 +484,6 @@ struct ndpi_detection_module_struct *NetworkInterface::initnDPIStruct() {
       break;
     }
   }
-
-  memset(d_port, 0, sizeof(d_port));
-  ndpi_set_proto_defaults(ndpi_s, 0, 0, NDPI_PROTOCOL_UNRATED,
-                          NTOPNG_NDPI_OS_PROTO_ID, (char *)"Operating System",
-                          NDPI_PROTOCOL_CATEGORY_SYSTEM_OS,
-			  NDPI_PROTOCOL_QOE_CATEGORY_UNSPECIFIED,
-			  d_port, d_port);
 
   // load custom protocols
   loadProtocolsAssociations(ndpi_s);
