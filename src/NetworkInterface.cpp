@@ -3585,7 +3585,7 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
   if (f->get_partial_bytes()) /* Make sure data is not at zero */ {
 
     if (actual_db
-#if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
+#if defined(HAVE_KAFKA) && defined(NTOPNG_PRO) && !defined(HAVE_NEDGE)
         || kafka_exporter
 #endif
 #if defined(HAVE_ZMQ) && !defined(HAVE_NEDGE)
@@ -3599,7 +3599,7 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
         if (actual_db)
           rc = actual_db->dumpFlow(when, f, json);
 
-#if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
+#if defined(HAVE_KAFKA) && defined(NTOPNG_PRO) && !defined(HAVE_NEDGE)
         if (kafka_exporter)
           kafka_exporter->dumpFlow(when, f, json);
 #endif
