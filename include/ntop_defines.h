@@ -575,9 +575,6 @@
   "ntopng.cache.top_sites_hour_done"
 #define HASHKEY_LOCAL_HOSTS_TOP_SITES_DAY_KEYS_PUSHED \
   "ntopng.cache.top_sites_day_done"
-#define HASHKEY_IFACE_TOP_OS "ntopng.cache.top_os"
-#define HASHKEY_IFACE_TOP_OS_HOUR_KEYS_PUSHED "ntopng.cache.top_os_hour_done"
-#define HASHKEY_IFACE_TOP_OS_DAY_KEYS_PUSHED "ntopng.cache.top_os_day_done"
 
 #define CONST_DEFAULT_DOCS_DIR "httpdocs"
 #define CONST_DEFAULT_SCRIPTS_DIR "scripts"
