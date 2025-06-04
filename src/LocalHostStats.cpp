@@ -132,16 +132,15 @@ void LocalHostStats::updateStats(const struct timeval *tv) {
 
     if (ntop->getPrefs()->are_top_talkers_enabled()) {
       if (top_sites && host) {
-        char additional_key_info[128];
+        char additional_key_info[128], buf[100];
         if (!host->get_mac() && !host->get_ip()) return;
 
         /* String like `_1.1.1.1@2` */
-        snprintf(
-            additional_key_info, sizeof(additional_key_info), "_%s",
-            host->get_tskey(additional_key_info, sizeof(additional_key_info)));
-        top_sites->saveOldData(
-            host->getInterface()->get_id(), additional_key_info,
-            (char *)HASHKEY_LOCAL_HOSTS_TOP_SITES_HOUR_KEYS_PUSHED);
+        snprintf(additional_key_info, sizeof(additional_key_info), "_%s",
+		 host->get_tskey(buf, sizeof(buf)));
+	
+        top_sites->saveOldData(host->getInterface()->get_id(), additional_key_info,
+			       (char *)HASHKEY_LOCAL_HOSTS_TOP_SITES_HOUR_KEYS_PUSHED);
       }
     }
 
