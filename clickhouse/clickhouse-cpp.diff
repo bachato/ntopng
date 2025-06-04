@@ -1,0 +1,56 @@
+diff --git a/clickhouse/base/platform.h b/clickhouse/base/platform.h
+index f6d896b..2bd15e4 100644
+--- a/clickhouse/base/platform.h
++++ b/clickhouse/base/platform.h
+@@ -24,6 +24,10 @@
+ #   define _unix_
+ #endif
+ 
++#ifdef __FreeBSD__
++#define _unix_
++#endif
++
+ #if defined(_MSC_VER)
+ #   undef NOMINMAX
+ #   define NOMINMAX
+diff --git a/clickhouse/base/socket.cpp b/clickhouse/base/socket.cpp
+index 3bb1aa5..dad6e4d 100644
+--- a/clickhouse/base/socket.cpp
++++ b/clickhouse/base/socket.cpp
+@@ -18,6 +18,10 @@
+ #   include <unistd.h>
+ #endif
+ 
++#if defined(__FreeBSD__)
++#include <netinet/in.h>
++#endif
++
+ namespace clickhouse {
+ 
+ #if defined(_win_)
+@@ -355,7 +359,7 @@ void Socket::SetTcpKeepAlive(int idle, int intvl, int cnt) noexcept {
+ 
+ #if defined(_unix_)
+     setsockopt(handle_, SOL_SOCKET, SO_KEEPALIVE, &val, sizeof(val));
+-#   if defined(_linux_)
++#   if defined(_linux_) || defined(__FreeBSD__)
+         setsockopt(handle_, IPPROTO_TCP, TCP_KEEPIDLE, &idle, sizeof(idle));
+ #   elif defined(_darwin_)
+         setsockopt(handle_, IPPROTO_TCP, TCP_KEEPALIVE, &idle, sizeof(idle));
+diff --git a/clickhouse/columns/ip6.cpp b/clickhouse/columns/ip6.cpp
+index 55ba2d4..96fd2a2 100644
+--- a/clickhouse/columns/ip6.cpp
++++ b/clickhouse/columns/ip6.cpp
+@@ -4,6 +4,12 @@
+ 
+ #include <stdexcept>
+ 
++#if defined(__FreeBSD__)
++  #include <sys/types.h>
++  #include <sys/socket.h>
++  #include <netinet/in.h>
++#endif
++
+ namespace clickhouse {
+ 
+ static_assert(sizeof(struct in6_addr) == 16, "sizeof in6_addr should be 16 bytes");
