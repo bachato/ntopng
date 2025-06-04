@@ -3576,6 +3576,7 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
   bool rc = true;
 
 #ifdef NTOPNG_PRO
+  /* Note: on viewed interfaces the DB is not initialized (see initFlowDump) */
   //actual_db = isViewed() ? viewedBy()->getDB() : getDB();
 #endif
 
@@ -9519,60 +9520,50 @@ void NetworkInterface::initFlowDump() {
   if (isViewed()) /* No need to allocate databases on view interfaces */
     return;
 
-  try {
-
-    if (db == NULL) {
-
-      if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
+  if ((ntop->getPrefs()->do_dump_flows_on_clickhouse() || ntop->getPrefs()->do_dump_flows_on_mysql())
+      && db == NULL) {
+    if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
-        db = new (std::nothrow) ClickHouseFlowDB(this);
+      db = new (std::nothrow) ClickHouseFlowDB(this);
 
-        if (db == NULL || db->isDbCreated() == false) {
-          ntop->getTrace()->traceEvent(TRACE_ERROR, "Running without ClickHouse support, please check the clickhouse service");
-          ntop->getPrefs()->dontUseClickHouse();
-          if (db) {
-            delete db;
-            db = NULL;
-          }
+      if (db == NULL || db->isDbCreated() == false) {
+        ntop->getTrace()->traceEvent(TRACE_ERROR, "Running without ClickHouse support, please check the clickhouse service");
+        ntop->getPrefs()->dontUseClickHouse();
+        if (db) {
+          delete db;
+          db = NULL;
         }
-#endif
-      }
-#ifdef HAVE_MYSQL
-      else if (ntop->getPrefs()->do_dump_flows_on_mysql()) {
-        db = new (std::nothrow) MySQLDB(this);
-        if (db == NULL) ntop->getTrace()->traceEvent(TRACE_WARNING, "Running without MySQL export (initialization failure)");
       }
 #endif
     }
+#ifdef HAVE_MYSQL
+    else {
+      db = new (std::nothrow) MySQLDB(this);
+      if (db == NULL) ntop->getTrace()->traceEvent(TRACE_WARNING, "Running without MySQL export (initialization failure)");
+    }
+#endif
+  }
 
 #ifndef HAVE_NEDGE
-    if (el_exporter == NULL) {
-      if (ntop->getPrefs()->do_dump_flows_on_es()) {
-        el_exporter = new (std::nothrow) ElasticSearch(this);
-      }
-    }
+  if (ntop->getPrefs()->do_dump_flows_on_es() && el_exporter == NULL) {
+    el_exporter = new (std::nothrow) ElasticSearch(this);
+  }
 
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
-    if (kafka_exporter == NULL) {
-      if (ntop->getPrefs()->do_dump_flows_on_kafka()) {
-	kafka = new (std::nothrow) KafkaProducer(this, ntop->getPrefs()->getKakfaBrokersList(),
-						 ntop->getPrefs()->getKafkaTopic(),
-						 ntop->getPrefs()->getKafkaOptions());
-	kafka_exporter = kafka;
-      }
-    }
+  if (ntop->getPrefs()->do_dump_flows_on_kafka() && kafka_exporter == NULL) {
+    kafka = new (std::nothrow) KafkaProducer(this, ntop->getPrefs()->getKakfaBrokersList(),
+					     ntop->getPrefs()->getKafkaTopic(),
+					     ntop->getPrefs()->getKafkaOptions());
+    kafka_exporter = kafka;
+  }
 #endif
 
 #if !defined(WIN32) && !defined(__APPLE__)
-    if (syslog_exporter == NULL) {
-      if (ntop->getPrefs()->do_dump_flows_on_syslog()) {
-        syslog_exporter = new (std::nothrow) SyslogDump(this);
-      }
-    }
+  if (ntop->getPrefs()->do_dump_flows_on_syslog() && syslog_exporter == NULL) {
+    syslog_exporter = new (std::nothrow) SyslogDump(this);
+  }
 #endif
 #endif
-
-  } catch (...) {}
 }
 
 /* *************************************** */
