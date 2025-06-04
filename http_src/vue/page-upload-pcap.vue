@@ -109,6 +109,7 @@ const upload_pcap = async function () {
         disable_save.value = true;
         error.value = '';
         show_loading.value = true;
+        console.log(pcap_file)
         // Create a Form object to send the data.
         // The Files are no more sent correctly if not used a form
         // due to HTML5, hiding the file while sending normally over a connection
