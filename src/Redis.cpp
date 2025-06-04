@@ -474,11 +474,18 @@ int Redis::hashSet(const char *key, const char *field, const char *value) {
   stats.num_hset++;
   reply = (redisReply *)redisCommand(redis, "HSET %s %s %s", key, field, value);
   if (!reply) reconnectRedis(true);
-  if (reply && (reply->type == REDIS_REPLY_ERROR))
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "%s [HSET %s %s %s]",
-                                 reply->str ? reply->str : "???", key, field,
-                                 value),
-        rc = -1;
+
+  if (reply) {
+    if(reply->type == REDIS_REPLY_ERROR) {
+      ntop->getTrace()->traceEvent(TRACE_ERROR, "%s [HSET %s %s %s]",
+				   reply->str ? reply->str : "???", key, field,
+				   value);
+      rc = -1;
+    } else {
+      rc = (int)reply->integer;
+    }
+  }
+  
   if (reply) freeReplyObject(reply);
   l->unlock(__FILE__, __LINE__);
 

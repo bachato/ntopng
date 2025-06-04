@@ -420,6 +420,8 @@ void Flow::freeDPIMemory() {
           && (ndpi_strrstr(domain, ".local") == NULL)
           && (ndpi_strrstr(domain, ".arpa") == NULL)
           ) {
+	  int rc;
+	  
 #ifdef DEBUG
           const char *ja4r = ndpiFlow->protos.tls_quic.ja4_client_raw ? ndpiFlow->protos.tls_quic.ja4_client_raw : "";
           char buf[64];
@@ -428,8 +430,23 @@ void Flow::freeDPIMemory() {
           ntop->getTrace()->traceEvent(TRACE_INFO, "%s\t%s [%s] [%s]", client, domain, host_server_name, ja4r);
 #endif
 
-          ntop->getRedis()->hashSet("ntopng.domains", domain, host_server_name);
-        }
+	  rc = ntop->getRedis()->hashSet("ntopng.domains", domain, host_server_name);
+
+#ifdef NTOPNG_PRO
+	  if((rc == 1 /* new domain name */)
+	     && ((ndpiDetectedProtocol.category == NDPI_PROTOCOL_CATEGORY_UNSPECIFIED)
+		 || (ndpiDetectedProtocol.category == NDPI_PROTOCOL_CATEGORY_WEB))
+	     ) {
+	    ntop->getTrace()->traceEvent(TRACE_INFO, "[rc: %d][category: %d/%s][%s]",
+					 rc, ndpiDetectedProtocol.category,
+					 ndpi_category_get_name(iface->get_ndpi_struct(),
+								ndpiDetectedProtocol.category),
+					 host_server_name);
+	    
+	    ntop->getPro()->classifyDomain((char*)domain, host_server_name);
+	  }
+#endif
+	}
       }
     }
 
@@ -1538,7 +1555,8 @@ void Flow::updateProtocol(ndpi_protocol proto_id) {
     *a = *b; /* trick to avoid runtime errors with custom categories */
   }
 
-  ptr16 = (u_int16_t*)&ndpiDetectedProtocol.category;  /* trick to avoid runtime errors with custom categories */
+  /* trick to avoid runtime errors with custom categories */
+  ptr16 = (u_int16_t*)&ndpiDetectedProtocol.category;
 
   if ((*ptr16 > 1024) && ((*ptr16 - 1024) == CUSTOM_CATEGORY_MALWARE))
     ndpiDetectedProtocol.category = CUSTOM_CATEGORY_MALWARE;
