@@ -1030,6 +1030,15 @@ public:
   void getFlowsStatus(lua_State *vm);
   inline void startDBLoop() {
     if (db) db->startDBLoop();
+#ifndef HAVE_NEDGE
+    if (el_exporter) el_exporter->startDBLoop();
+#if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
+    if (kafka_exporter) kafka_exporter->startDBLoop();
+#endif
+#if !defined(WIN32) && !defined(__APPLE__)
+    if (syslog_exporter) syslog_exporter->startDBLoop();
+#endif
+#endif    
   };
   inline void incDBNumDroppedFlows(DB *actual_db, u_int num = 1) {
     if (actual_db) actual_db->incNumDroppedFlows(num);
