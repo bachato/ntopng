@@ -408,48 +408,6 @@ void Flow::freeDPIMemory() {
       }
     }
 
-    if(ntop->getPrefs()->are_sites_collection_enabled() && (host_server_name != NULL)) {
-      if(strchr(host_server_name, ':') == NULL /* No IPv6 or IP:port */) {
-        const char *domain = ndpi_get_host_domain(iface->get_ndpi_struct(), host_server_name);
-        int len = strlen(domain);
-
-        if((len > 0)
-          && (!isdigit(domain[len-1]))
-          && (domain[0] != '_')
-          && (strchr(domain, '.') != NULL)
-          && (ndpi_strrstr(domain, ".local") == NULL)
-          && (ndpi_strrstr(domain, ".arpa") == NULL)
-          ) {
-	  int rc;
-	  
-#ifdef DEBUG
-          const char *ja4r = ndpiFlow->protos.tls_quic.ja4_client_raw ? ndpiFlow->protos.tls_quic.ja4_client_raw : "";
-          char buf[64];
-          char *client = get_cli_host()->get_ip()->printMask(buf, sizeof(buf), true);
-
-          ntop->getTrace()->traceEvent(TRACE_INFO, "%s\t%s [%s] [%s]", client, domain, host_server_name, ja4r);
-#endif
-
-	  rc = ntop->getRedis()->hashSet("ntopng.domains", domain, host_server_name);
-
-#ifdef NTOPNG_PRO
-	  if((rc == 1 /* new domain name */)
-	     && ((ndpiDetectedProtocol.category == NDPI_PROTOCOL_CATEGORY_UNSPECIFIED)
-		 || (ndpiDetectedProtocol.category == NDPI_PROTOCOL_CATEGORY_WEB))
-	     ) {
-	    ntop->getTrace()->traceEvent(TRACE_INFO, "[rc: %d][category: %d/%s][%s]",
-					 rc, ndpiDetectedProtocol.category,
-					 ndpi_category_get_name(iface->get_ndpi_struct(),
-								ndpiDetectedProtocol.category),
-					 host_server_name);
-	    
-	    ntop->getPro()->classifyDomain((char*)domain, host_server_name);
-	  }
-#endif
-	}
-      }
-    }
-
     setRisk(ndpi_flow_risk_bitmap | ndpiFlow->risk);
     ndpi_confidence = ndpiFlow->confidence;
 
@@ -819,7 +777,7 @@ void Flow::processDetectedProtocolData() {
 
     if(!skip_host_server_name) {
       /* Host server name equals the Host: HTTP header field. */
-      host_server_name = strdup((char *)ndpiFlow->host_server_name);
+      setServerName(strdup((char *)ndpiFlow->host_server_name));
     }
   }
 
@@ -9618,5 +9576,46 @@ void Flow::setHostTCPFingerprint(char *fp, ndpi_os os_hint) {
     }
 
     setTCPFingerprint(fp);
+  }
+}
+
+/* *************************************** */
+
+void Flow::setServerName(char *value /* Allocated by caller */) {
+  if(value == NULL) return;
+
+  if (host_server_name) free(host_server_name);
+  host_server_name = value;
+  
+  if(ntop->getPrefs()->are_sites_collection_enabled() && (host_server_name != NULL)) {
+    if(strchr(host_server_name, ':') == NULL /* No IPv6 or IP:port */) {
+      const char *domain = ndpi_get_host_domain(iface->get_ndpi_struct(), host_server_name);
+      int len = strlen(domain);
+
+      if((len > 0)
+	 && (!isdigit(domain[len-1]))
+	 && (domain[0] != '_')
+	 && (strchr(domain, '.') != NULL)
+	 && (ndpi_strrstr(domain, ".local") == NULL)
+	 && (ndpi_strrstr(domain, ".arpa") == NULL)
+	 ) {
+	int rc = ntop->getRedis()->hashSet("ntopng.domains", domain, host_server_name);
+
+#ifdef NTOPNG_PRO
+	if((rc == 1 /* new domain name */)
+	   && ((ndpiDetectedProtocol.category == NDPI_PROTOCOL_CATEGORY_UNSPECIFIED)
+	       || (ndpiDetectedProtocol.category == NDPI_PROTOCOL_CATEGORY_WEB))
+	   ) {
+	  ntop->getTrace()->traceEvent(TRACE_INFO, "[rc: %d][category: %d/%s][%s]",
+				       rc, ndpiDetectedProtocol.category,
+				       ndpi_category_get_name(iface->get_ndpi_struct(),
+							      ndpiDetectedProtocol.category),
+				       host_server_name);
+	    
+	  ntop->getPro()->classifyDomain((char*)domain, host_server_name);
+	}
+#endif
+      }
+    }
   }
 }
