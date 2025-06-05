@@ -78,7 +78,11 @@ rm -f config.h config.h.in *~ #*
 git submodule init
 git submodule update --remote
 
-cd third-party/clickhouse-cpp/; cat ../../clickhouse/clickhouse-cpp.diff | patch -p1 ; cd ../..
+N=`grep __FreeBSD__ third-party/clickhouse-cpp/clickhouse/base/platform.h|wc -l`
+
+if test "${N}" = "0"; then
+ cd third-party/clickhouse-cpp/; cat ../../clickhouse/clickhouse-cpp.diff | patch -p1 ; cd ../..
+fi
 
 # git submodule update --init --recursive
 
