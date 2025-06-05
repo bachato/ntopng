@@ -45,6 +45,8 @@ class Prefs {
   char *http_binding_address1, *http_binding_address2;
   char *https_binding_address1, *https_binding_address2;
   char *http_index_page;
+  char *influx_internal_db_name;
+  bool influx_internal_available;
   bool enable_client_x509_auth, reproduce_at_original_speed, disable_purge;
   char* zmq_publish_events_url, *http_log_path;
   const char *clickhouse_client, *clickhouse_cluster_name;
@@ -362,6 +364,10 @@ class Prefs {
   inline char* get_docs_dir() { return (docs_dir); };  // HTTP docs
   inline const char* get_scripts_dir() { return (scripts_dir); };
   inline const char* get_callbacks_dir() { return (callbacks_dir); };
+  inline char* get_influx_internal_db_name() { return (influx_internal_db_name); };
+  void set_influx_internal_db_name(char *internal_name);
+  inline bool get_influx_internal_available() { return (influx_internal_available); };
+  inline void set_influx_internal_available(bool available) { influx_internal_available = available; };
   void set_callback_dir(char* path) { callbacks_dir = path; };
   inline const char* get_pcap_dir() { return (pcap_dir); };
 #ifdef NTOPNG_PRO

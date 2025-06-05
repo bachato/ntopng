@@ -1353,4 +1353,3 @@ print("</div>")
 if (not is_admin) then
     dofile(dirs.installdir .. "/scripts/lua/inc/password_dialog.lua")
 end
-
