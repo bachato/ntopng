@@ -3495,8 +3495,7 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
   u_int64_t idle_flows_done = 0, active_flows_done = 0;
   time_t when = time(NULL);
   
-  if ((ntop->getPrefs()->do_dump_flows_on_clickhouse() || ntop->getPrefs()->do_dump_flows_on_mysql())
-      && actual_db == NULL) {
+  if (ntop->getPrefs()->do_dump_flows_on_clickhouse() && actual_db == NULL) {
     ntop->getTrace()->traceEvent(TRACE_INFO, "WARNING: Something is broken with flow dump");
     return (0);
   }
@@ -4137,7 +4136,7 @@ void NetworkInterface::periodicStatsUpdate() {
   if (ntop->getGlobals()->isShutdownRequested()) return;
 
 #ifdef PERIODIC_STATS_UPDATE_DEBUG_TIMING
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "MySQL dump took %d seconds",
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Dump took %d seconds",
                                time(NULL) - tdebug.tv_sec);
   gettimeofday(&tdebug, NULL);
 #endif
@@ -9520,8 +9519,7 @@ void NetworkInterface::initFlowDump() {
   if (isViewed()) /* No need to allocate databases on view interfaces */
     return;
 
-  if ((ntop->getPrefs()->do_dump_flows_on_clickhouse() || ntop->getPrefs()->do_dump_flows_on_mysql())
-      && db == NULL) {
+  if (ntop->getPrefs()->do_dump_flows_on_clickhouse() && db == NULL) {
     if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
       db = new (std::nothrow) ClickHouseFlowDB(this);
@@ -9536,12 +9534,6 @@ void NetworkInterface::initFlowDump() {
       }
 #endif
     }
-#ifdef HAVE_MYSQL
-    else {
-      db = new (std::nothrow) MySQLDB(this);
-      if (db == NULL) ntop->getTrace()->traceEvent(TRACE_WARNING, "Running without MySQL export (initialization failure)");
-    }
-#endif
   }
 
 #ifndef HAVE_NEDGE

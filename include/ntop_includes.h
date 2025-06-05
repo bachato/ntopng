@@ -347,9 +347,6 @@ using namespace std;
 #include "KafkaProducer.h"
 #include "KafkaClient.h"
 #endif
-#ifdef HAVE_MYSQL
-#include "MySQLDB.h"
-#endif
 #include "InterfaceStatsHash.h"
 #include "GenericHash.h"
 #include "GenericHashEntry.h"

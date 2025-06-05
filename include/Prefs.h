@@ -123,7 +123,7 @@ class Prefs {
   u_int16_t auto_assigned_pool_id;
   u_int8_t vs_max_num_scans;
   bool vs_slow_scan; 
-  bool dump_flows_on_es, dump_flows_on_mysql, dump_flows_on_syslog,
+  bool dump_flows_on_es, dump_flows_on_syslog,
       dump_json_flows_on_disk, dump_ext_json;
 #ifdef NTOPNG_PRO
   bool dump_flows_direct;
@@ -169,7 +169,10 @@ class Prefs {
   int dns_mode;
   bool json_labels_string_format;
   char *es_type, *es_index, *es_url, *es_user, *es_pwd, *es_host;
-  char *mysql_host, *mysql_dbname, *mysql_user, *mysql_pw;
+  char *mysql_host;
+  char *mysql_dbname;
+  char *mysql_user;
+  char *mysql_pw;
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO) && defined(HAVE_MYSQL)
   char *ch_user; /* In case of ch cloud, 2 users are needed, 
                     one for mysql and one for ch */
@@ -178,8 +181,10 @@ class Prefs {
 #if !defined(WIN32) && !defined(__APPLE__)
   int flows_syslog_facility;
 #endif
-  int mysql_port, clickhouse_tcp_port;
-  bool mysql_port_secure, clickhouse_tcp_port_secure;
+  int mysql_port;
+  int clickhouse_tcp_port;
+  bool mysql_port_secure;
+  bool clickhouse_tcp_port_secure;
   char *ls_host, *ls_port, *ls_proto;
   bool has_cmdl_trace_lvl; /**< Indicate whether a verbose level
                               has been provided on the command line.*/
@@ -313,7 +318,6 @@ class Prefs {
     return (num_interfaces);
   };
   inline bool do_dump_flows_on_es() { return (dump_flows_on_es); };
-  inline bool do_dump_flows_on_mysql() { return (dump_flows_on_mysql); };
   inline bool do_dump_flows_on_clickhouse() {
     return ((is_enterprise_m_edition() || is_nedge_enterprise_edition()) && dump_flows_on_clickhouse);
   };
@@ -331,10 +335,11 @@ class Prefs {
     return (dump_json_flows_on_disk);
   };
   inline bool do_dump_flows() {
-    return (do_dump_flows_on_es() || do_dump_flows_on_mysql() ||
-            do_dump_flows_on_clickhouse() || do_dump_flows_on_syslog()
+    return (do_dump_flows_on_es()
+         || do_dump_flows_on_clickhouse()
+         || do_dump_flows_on_syslog()
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
-            || do_dump_flows_on_kafka()
+         || do_dump_flows_on_kafka()
 #endif
     );
   };
@@ -738,7 +743,7 @@ class Prefs {
     return (disable_alerts || !emit_host_alerts);
   };
   inline void dontUseClickHouse() {
-    dump_flows_on_clickhouse = dump_flows_on_mysql = false;
+    dump_flows_on_clickhouse = false;
   };
   inline char* getZMQPublishEventsURL() { return (zmq_publish_events_url); };
   inline const char* getClickHouseClientPath() { return (clickhouse_client); };

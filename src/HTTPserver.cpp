@@ -1424,16 +1424,6 @@ static int handle_lua_request(struct mg_connection *conn) {
                ntop->mustChangePassword(username)) {
       redirect_to_password_change(conn, request_info);
       return (1);
-#ifdef HAVE_MYSQL
-    } else if (!whitelisted /* e.g. login.lua */
-               &&
-               (ntop->getPrefs()->do_dump_flows_on_mysql() &&
-                (ntop->getPrefs()->do_dump_flows_on_clickhouse() == false)) &&
-               (!ntop->isDbCreated()) &&
-               strcmp(request_info->uri, PLEASE_WAIT_URL)) {
-      redirect_to_please_wait(conn, request_info);
-      return (1);
-#endif
     } else if (strcmp(request_info->uri, AUTHORIZE_URL) == 0) {
       authorize(conn, request_info, username, group, &localuser);
       return (1);

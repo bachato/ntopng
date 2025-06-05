@@ -162,7 +162,7 @@ Prefs::Prefs(Ntop *_ntop) {
   num_interfaces = 0, enable_auto_logout = true,
     enable_auto_logout_at_runtime = true;
   enable_interface_name_only = false, dump_flows_on_clickhouse = false;
-  dump_flows_on_es = dump_flows_on_mysql = dump_flows_on_syslog = false;
+  dump_flows_on_es = dump_flows_on_syslog = false;
   dump_json_flows_on_disk = dump_ext_json = false;
   routing_mode_enabled = false;
   global_dns_forging_enabled = false;
@@ -219,7 +219,7 @@ Prefs::Prefs(Ntop *_ntop) {
   ch_user = NULL;
   ntopng_assets_inventory_enabled = true;
 #endif
-  mysql_port = CONST_DEFAULT_MYSQL_PORT;
+  mysql_port = CONST_DEFAULT_CLICKHOUSE_MYSQL_PORT;
   clickhouse_tcp_port = CONST_DEFAULT_CLICKHOUSE_TCP_PORT;
   mysql_port_secure = clickhouse_tcp_port_secure = false; /* No TLS */
 #if !defined(WIN32) && !defined(__APPLE__)
@@ -639,8 +639,8 @@ void usage() {
 	 "                                    |   -F "
 	 "\"clickhouse-cluster;127.0.0.1@%u,%u;ntopng;default;ntop_cluster\"\n"
 	 "                                    | NOTE:\n"
-	 "                                    | - tcp-port used by clickhouse-client\n"
-	 "                                    | - mysql-port used for queries\n"
+	 "                                    | - tcp-port used by the clickhouse API\n"
+	 "                                    | - mysql-port used by the mysql API\n"
 	 "                                    |\n"
 #endif
 	 "                                    | clickhouse-cloud    Dump in "
@@ -653,9 +653,9 @@ void usage() {
 	 "clickhouse-cloud;europe-east15.clickhouse.cloud@9440,3306s;ntopng;default,mysql-user;mych-password\n"
 	 "                                    | NOTE:\n"
 	 "                                    | - clickhouse-user used by clickhouse-client\n"
-	 "                                    | - mysql-user used for queries\n"
-	 "                                    | - tcp-port used by clickhouse-client\n"
-	 "                                    | - mysql-port used for queries\n"
+	 "                                    | - mysql-user by the mysql API\n"
+	 "                                    | - tcp-port used by the clickhouse API\n"
+	 "                                    | - mysql-port used by the mysql API\n"
 	 "                                    |\n"
 	 ,
 	 CONST_DEFAULT_CLICKHOUSE_TCP_PORT, CONST_DEFAULT_CLICKHOUSE_MYSQL_PORT
@@ -684,20 +684,6 @@ void usage() {
 	 "                                    |   \n"
 	 "                                    |   See at the bottom of this help "
 	 "the list of (comma separated) supported kafka configuration options.\n"
-	 "                                    |\n"
-#endif
-#endif
-
-#ifndef HAVE_NEDGE
-#ifdef HAVE_MYSQL
-	 "                                    | mysql         Dump in MySQL "
-	 "database\n"
-	 "                                    |   Format:\n"
-	 "                                    |   "
-	 "mysql;<host[@port]|socket>;<dbname>;<user>;<pw>\n"
-	 "                                    |   mysql;127.0.0.1;ntopng;root;\n"
-	 "                                    |   \"mysql;127.0.0.1@3306;ntopng;root;\" [Cleartext (no TLS)]\n"
-	 "                                    |   \"mysql;127.0.0.1@3306s;ntopng;root;\" [TLS]\n"
 	 "                                    |\n"
 #endif
 #endif
@@ -1942,59 +1928,51 @@ int Prefs::setOption(int optkey, char *optarg) {
 #endif
 #endif /* HAVE_NEDGE */
 
-    else if((!strncmp(optarg, "mysql", 5)) ||
-	     (!strncmp(optarg, "clickhouse", 10)) ||
-	     (!strncmp(optarg, "clickhouse-cluster", 18)) ||
-       (!strncmp(optarg, "clickhouse-cloud", 16))) {
+    else if((!strncmp(optarg, "clickhouse", 10)) ||
+	    (!strncmp(optarg, "clickhouse-cluster", 18)) ||
+            (!strncmp(optarg, "clickhouse-cloud", 16))) {
 #ifdef HAVE_MYSQL
-      char *sep = strchr(optarg, ';');
+        char *sep = strchr(optarg, ';');
 
-      if((!sep) && (optarg[0] != 'c')) {
-	ntop->getTrace()->traceEvent(TRACE_WARNING, "Invalid --mysql/--clickhouse format: ignored");
-      } else {
 	bool all_good = true;
 	bool use_clickhouse_cluster;
 	bool use_clickhouse_cloud;
 
-	dump_flows_on_clickhouse = (optarg[0] == 'c') ? true : false;
+	dump_flows_on_clickhouse = true;
 	use_clickhouse_cluster   = (strncmp(optarg, "clickhouse-cluster", 18) == 0) ? true : false;
 	use_clickhouse_cloud     = (strncmp(optarg, "clickhouse-cloud", 16) == 0) ? true : false;
 
-	if(dump_flows_on_clickhouse) {
-	  /* Check if CLICKHOUSE_CLIENT is present */
-	  struct stat buf;
-	  bool client_found =((stat(CONST_BIN_DIR "/" CLICKHOUSE_CLIENT, &buf) == 0)
-			      && (S_ISREG(buf.st_mode))) ? true : false;
+	/* Check if CLICKHOUSE_CLIENT is present */
+	struct stat buf;
+	bool client_found = ((stat(CONST_BIN_DIR "/" CLICKHOUSE_CLIENT, &buf) == 0)
+			    && (S_ISREG(buf.st_mode))) ? true : false;
 
+	if(!client_found) {
+	  client_found = ((stat(CONST_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT, &buf) == 0) &&
+			  (S_ISREG(buf.st_mode))) ? true : false;
+	  if(client_found) clickhouse_client = CONST_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT_CMD;
+	} else {
 	  if(!client_found) {
-	    client_found = ((stat(CONST_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT, &buf) == 0) &&
+	    client_found = ((stat(CONST_LOCAL_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT, &buf) == 0) &&
 			    (S_ISREG(buf.st_mode))) ? true : false;
-	    if(client_found) clickhouse_client = CONST_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT_CMD;
+	    if(client_found) clickhouse_client = CONST_LOCAL_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT_CMD;
 	  } else {
-	    if(!client_found) {
-	      client_found = ((stat(CONST_LOCAL_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT, &buf) == 0) &&
-			      (S_ISREG(buf.st_mode))) ? true : false;
-	      if(client_found) clickhouse_client = CONST_LOCAL_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT_CMD;
-	    } else {
-	      clickhouse_client = CONST_BIN_DIR "/" CLICKHOUSE_CLIENT;
-	    }
+	    clickhouse_client = CONST_BIN_DIR "/" CLICKHOUSE_CLIENT;
 	  }
+	}
 
-	  if(!client_found) {
-	    ntop->getTrace()->traceEvent(TRACE_WARNING,
+	if(!client_found) {
+	  ntop->getTrace()->traceEvent(TRACE_WARNING,
 					 "-F clickhouse is not available "
 					 "(ClickHouse client not found)");
-	    ntop->getTrace()->traceEvent(TRACE_WARNING, "Expected %s or %s",
+	  ntop->getTrace()->traceEvent(TRACE_WARNING, "Expected %s or %s",
 					 CONST_BIN_DIR "/" CLICKHOUSE_CLIENT,
 					 CONST_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT);
-	    all_good = dump_flows_on_clickhouse = false;
-	  }
+	  all_good = dump_flows_on_clickhouse = false;
 	}
 
 	if(all_good) {
 	  u_int num_semicolumns = 0;
-
-	  dump_flows_on_mysql = true;
 
 	  for (u_int i = 0; optarg[i] != '\0'; i++)
 	    if(optarg[i] == ';') num_semicolumns++;
@@ -2072,9 +2050,6 @@ int Prefs::setOption(int optkey, char *optarg) {
 	    clickhouse_tcp_port = CONST_DEFAULT_CLICKHOUSE_TCP_PORT;
 	    mysql_port_secure = clickhouse_tcp_port_secure = false; /* No TLS */
 
-	    if(!dump_flows_on_clickhouse)
-	      mysql_port = CONST_DEFAULT_MYSQL_PORT;
-
 	    /* Configured ports, if any */
 	    if((mysql_port_str = strchr(mysql_host, '@'))) {
 	      char *comma, *clickhouse_tcp_port_str;
@@ -2131,25 +2106,23 @@ int Prefs::setOption(int optkey, char *optarg) {
 		mysql_port = (int)l;
 	    }
 
-	    if(dump_flows_on_clickhouse && mysql_host) {
+	    if(mysql_host) {
 	      if(strcmp(mysql_host, "localhost") == 0) {
 		/* Clickhouse does not like localhost */
 		free(mysql_host);
 		mysql_host = strdup("127.0.0.1");
 	      }
 	    }
-	  } else
-	    ntop->getTrace()->traceEvent(TRACE_WARNING, "Invalid format for -F %s;....",
-					 dump_flows_on_clickhouse ? "clickhouse" : "mysql");
+	  } else {
+	    ntop->getTrace()->traceEvent(TRACE_WARNING, "Invalid format for -F clickhouse;....");
+          }
 	} /* all_good */
-      }
 
-      if(dump_flows_on_clickhouse) dump_flows_on_mysql = false;
 #else
-      ntop->getTrace()->traceEvent(TRACE_WARNING,
-				   "-F mysql/-F clickhouse not available: missing MySQL support in ntopng");
+        ntop->getTrace()->traceEvent(TRACE_WARNING,
+				     "-F clickhouse not available: missing support");
 #endif
-    }
+    } /* "clickhouse" */
 
 #ifndef HAVE_NEDGE
 #if !defined(WIN32) && !defined(__APPLE__)
@@ -2754,8 +2727,6 @@ void Prefs::lua(lua_State *vm) {
 			     max_aggregated_flows_traffic_upperbound);
 #endif
 
-  lua_push_bool_table_entry(vm, "is_dump_flows_to_mysql_enabled",
-                            dump_flows_on_mysql);
   if(mysql_dbname) lua_push_str_table_entry(vm, "mysql_dbname", mysql_dbname);
   lua_push_bool_table_entry(vm, "is_dump_flows_to_es_enabled",
                             dump_flows_on_es);
@@ -3162,7 +3133,7 @@ void Prefs::validate() {
     ntop->getTrace()->traceEvent(
 				 TRACE_WARNING,
 				 "-F clickhouse is available only on Enterprise");
-    dump_flows_on_clickhouse = dump_flows_on_mysql = false;
+    dump_flows_on_clickhouse = false;
   }
 
   /* Use max num flows as upper limit for flows/hosts cache size to avoid configuration mistakes */

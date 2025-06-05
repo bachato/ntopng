@@ -26,65 +26,6 @@
 
 #ifdef HAVE_MYSQL
 
-class MySQLDB : public DB {
- private:
-  MYSQL mysql;
-  pthread_t queryThreadLoop;
-  u_int32_t mysqlEnqueuedFlows;
-  FILE *log_fd;
-
-  bool connectToDB(MYSQL *conn, bool select_db);
-  void open_log();
-  char *get_last_db_error(MYSQL *conn) { return ((char *)mysql_error(conn)); }
-  void try_exec_sql_query(char *sql);
-  MYSQL *mysql_try_connect(MYSQL *conn, const char *dbname);
-  void mysql_result_to_lua(lua_State *vm, MYSQL_RES *result, int num_fields, bool limitRows);
-
-  void printFailure(const char *query, int status);
-
- protected:
-  bool db_operational;
-  volatile bool db_created;
-  time_t last_message;
-  Mutex m;
-
-  virtual bool createDBSchema();
-  bool suppressMessage();
-
- public:
-  MySQLDB(NetworkInterface *_iface);
-  virtual ~MySQLDB();
-
-  virtual const char *getEngineName();
-
-  virtual void *queryLoop();
-  virtual bool dumpFlow(time_t when, Flow *f, char *json);
-
-  void disconnectFromDB(MYSQL *conn);
-  virtual bool isDbCreated() { return db_created; };
-  char *escapeAphostrophes(const char *unescaped);
-  int flow2InsertValues(Flow *f, char *json, char *values_buf,
-                        size_t values_buf_len);
-
-  virtual int exec_sql_query(const char *sql, bool doReconnect = true,
-                     bool ignoreErrors = false, bool doLock = true,
-                     db_result_row_callback *cb = NULL,
-                     void *cb_user_data = NULL);
-  int exec_sql_query_mysql(const char *sql, bool doReconnect = true,
-                     bool ignoreErrors = false, bool doLock = true,
-                     db_result_row_callback *cb = NULL,
-                     void *cb_user_data = NULL);
-
-  virtual int exec_sql_query(lua_State *vm, char *sql, bool limitRows,
-                             bool wait_for_db_created);
-  int exec_sql_query_mysql(lua_State *vm, char *sql, bool limitRows,
-                     bool wait_for_db_created);
-
-  virtual bool startQueryLoop();
-  void shutdown();
-  bool select_database(char *dbname);
-};
-
 #endif
 
 #endif /* _MYSQL_DB_CLASS_H_ */
