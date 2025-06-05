@@ -425,6 +425,7 @@ private:
   void accountBidirectionalTCPProtocolServices();
   void accountBidirectionalUDPProtocolServices();
   void setServerName(char *value);
+  void processHostName(char *host_name);
   
 public:
   Flow(NetworkInterface *_iface, int32_t iface_idx,
