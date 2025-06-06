@@ -9600,6 +9600,7 @@ void Flow::processHostName(char *host_name) {
     if((strchr(host_name, ':') == NULL /* No IPv6 or IP:port */)
        && (strchr(host_name, '*') == NULL /* No wildcard or similar */)
        && (strchr(host_name, ',') == NULL /* No comma */)
+       && (strchr(host_name, '?') == NULL /* No junk  */)
       ) {
       const char *domain = ndpi_get_host_domain(iface->get_ndpi_struct(), host_name);
       int len = strlen(domain);
