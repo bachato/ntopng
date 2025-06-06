@@ -36,10 +36,10 @@ class TrafficCounter {
   inline u_int64_t getSent() { return (sent); }
   inline u_int64_t getRcvd() { return (rcvd); }
   /* Generic traffic counter, used for both bytes and packets */
-  inline void setSent(u_int64_t sent) { sent = sent; }
-  inline void setRcvd(u_int64_t rcvd) { rcvd = rcvd; }
-  inline void incStats(u_int64_t sent, u_int64_t rcvd) {
-    rcvd += rcvd, sent += sent;
+  inline void setSent(u_int64_t v) { sent = v; }
+  inline void setRcvd(u_int64_t v) { rcvd = v; }
+  inline void incStats(u_int64_t s, u_int64_t r) {
+    rcvd += r, sent += s;
   }
 };
 
