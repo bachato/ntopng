@@ -984,13 +984,6 @@ void Flow::processExtraDissectedInformation() {
 
       /* ntop->getTrace()->traceEvent(TRACE_NORMAL, "-->>> %s", ndpiFlow->protos.mining.currency); */
     } else if(isHTTP() || isHTTP_PROXY()) {
-      if(protos.http.last_url) {
-	ndpi_risk_enum risk = ndpi_validate_url(protos.http.last_url);
-
-	if((risk != NDPI_NO_RISK) && (risk < NDPI_MAX_RISK))
-	  addRisk(((ndpi_risk)2) << (risk - 1));
-      }
-
       if(protos.http.last_server == NULL &&
           !Utils::isEmptyString(ndpiFlow->http.server))
 	protos.http.last_server = strdup(ndpiFlow->http.server);
