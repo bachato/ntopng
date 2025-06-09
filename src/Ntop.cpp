@@ -392,6 +392,10 @@ Ntop::~Ntop() {
 #ifdef HAVE_SNMP_TRAP
   if (trap_collector) delete trap_collector;
 #endif
+
+  for(u_int i=0; i<device_max_type; i++)
+    ndpi_bitmask_free(&deviceProtocolPresets[i].clientAllowed),
+      ndpi_bitmask_free(&deviceProtocolPresets[i].serverAllowed);
 }
 
 /* ******************************************* */
@@ -3375,10 +3379,15 @@ bool Ntop::isATrackerHost(char *host) {
 
 void Ntop::initAllowedProtocolPresets() {
   for (u_int i = 0; i < device_max_type; i++) {
-    DeviceProtocolBitmask *b = getDeviceAllowedProtocols((DeviceType)i);
+    DeviceProtocolBitmask *b;
 
-    NDPI_BITMASK_SET_ALL(b->clientAllowed);
-    NDPI_BITMASK_SET_ALL(b->serverAllowed);
+    ndpi_bitmask_alloc(&deviceProtocolPresets[i].clientAllowed, ndpi_get_num_internal_protocols()),
+      ndpi_bitmask_alloc(&deviceProtocolPresets[i].serverAllowed, ndpi_get_num_internal_protocols());
+    
+    b = getDeviceAllowedProtocols((DeviceType)i);
+
+    ndpi_bitmask_set_all(&b->clientAllowed);
+    ndpi_bitmask_set_all(&b->serverAllowed);
   }
 }
 
@@ -3393,9 +3402,9 @@ void Ntop::refreshAllowedProtocolPresets(DeviceType device_type, bool client,
   if (b == NULL) return;
 
   if (client)
-    NDPI_BITMASK_RESET(b->clientAllowed);
+    ndpi_bitmask_reset(&b->clientAllowed);
   else
-    NDPI_BITMASK_RESET(b->serverAllowed);
+    ndpi_bitmask_reset(&b->serverAllowed);
 
   while (lua_next(L, index) != 0) {
     u_int key_proto = lua_tointeger(L, -2);
@@ -3418,9 +3427,9 @@ void Ntop::refreshAllowedProtocolPresets(DeviceType device_type, bool client,
 					 mapped_key_proto, NDPI_NUM_BITS-1);
 	  } else {
 	    if (client)
-	      NDPI_BITMASK_ADD(b->clientAllowed, mapped_key_proto);
+	      ndpi_bitmask_set(&b->clientAllowed, mapped_key_proto);
 	    else
-	      NDPI_BITMASK_ADD(b->serverAllowed, mapped_key_proto);
+	      ndpi_bitmask_set(&b->serverAllowed, mapped_key_proto);
 	  }
 	}
       }
@@ -3472,8 +3481,7 @@ DeviceProtoStatus Ntop::getDeviceAllowedProtocolStatus(DeviceType dev_type,
   /* Check if this application protocol is allowd for the specified device type
    */
   DeviceProtocolBitmask *bitmask = getDeviceAllowedProtocols(dev_type);
-  NDPI_PROTOCOL_BITMASK *direction_bitmask =
-      as_client ? (&bitmask->clientAllowed) : (&bitmask->serverAllowed);
+  struct ndpi_bitmask *direction_bitmask = as_client ? (&bitmask->clientAllowed) : (&bitmask->serverAllowed);
   u_int16_t master_proto = ndpi_map_user_proto_id_to_ndpi_id(iface[0]->get_ndpi_struct(), proto.proto.master_protocol);
   u_int16_t app_proto = ndpi_map_user_proto_id_to_ndpi_id(iface[0]->get_ndpi_struct(), proto.proto.app_protocol);
 
@@ -3489,9 +3497,9 @@ DeviceProtoStatus Ntop::getDeviceAllowedProtocolStatus(DeviceType dev_type,
     return device_proto_allowed;
 
   if ((master_proto != NDPI_PROTOCOL_UNKNOWN) &&
-      (!NDPI_ISSET(direction_bitmask, master_proto))) {
+      (!ndpi_bitmask_is_set(direction_bitmask, master_proto))) {
     return device_proto_forbidden_master;
-  } else if ((!NDPI_ISSET(direction_bitmask, app_proto))) {
+  } else if ((!ndpi_bitmask_is_set(direction_bitmask, app_proto))) {
     /* We consider NDPI_PROTOCOL_UNKNOWN as a protocol to be allowed */
     return device_proto_forbidden_app;
   }

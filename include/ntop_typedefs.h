@@ -884,7 +884,7 @@ typedef enum {
 } DeviceType;
 
 typedef struct {
-  NDPI_PROTOCOL_BITMASK clientAllowed, serverAllowed;
+  struct ndpi_bitmask clientAllowed, serverAllowed;
 } DeviceProtocolBitmask;
 
 class SNMP;

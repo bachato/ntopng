@@ -22,6 +22,9 @@
 #include "ntop_includes.h"
 #include "flow_checks_includes.h"
 
+#define NDPI_RISK_CLR_BIT(num, n)    num &= ~(1ULL << ( n ))
+#define NDPI_RISK_ISSET_BIT(num, n)  (num & (1ULL << ( n )))
+
 /* **************************************************** */
 
 FlowChecksLoader::FlowChecksLoader() : ChecksLoader() {
@@ -30,8 +33,9 @@ FlowChecksLoader::FlowChecksLoader() : ChecksLoader() {
     checks will be set to zero during checks registration.
    */
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  NDPI_BITMASK_SET_ALL(unhandled_ndpi_risks);
-  NDPI_CLR_BIT(unhandled_ndpi_risks, NDPI_NO_RISK);
+
+  memset(&unhandled_ndpi_risks, 0xFF, sizeof(unhandled_ndpi_risks)); /* Set all bits */
+  NDPI_RISK_CLR_BIT(unhandled_ndpi_risks, NDPI_NO_RISK);
 }
 
 /* **************************************************** */
@@ -61,7 +65,7 @@ void FlowChecksLoader::registerCheck(FlowCheck *cb) {
     the corresponding risk is cleared in the unhandled risks bitmap
    */
   FlowRisk *fr = dynamic_cast<FlowRisk *>(cb);
-  if (fr) NDPI_CLR_BIT(unhandled_ndpi_risks, fr->handledRisk());
+  if (fr) NDPI_RISK_CLR_BIT(unhandled_ndpi_risks, fr->handledRisk());
 }
 /* **************************************************** */
 
@@ -329,7 +333,7 @@ void FlowChecksLoader::printChecks() {
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "Unhandled Risks:");
 
     for (int i = 0; i < NDPI_MAX_RISK; i++)
-      if (NDPI_ISSET_BIT(unhandled_ndpi_risks, (ndpi_risk_enum)i))
+      if (NDPI_RISK_ISSET_BIT(unhandled_ndpi_risks, (ndpi_risk_enum)i))
         ntop->getTrace()->traceEvent(TRACE_NORMAL, "\t%s [%u]",
                                      ndpi_risk2str((ndpi_risk_enum)i), i);
   }
