@@ -63,15 +63,14 @@ class DB {
   virtual bool dumpFlow(time_t when, Flow *f, char *json) = 0;
   virtual bool startQueryLoop() { return (false); }
 
-  virtual int exec_sql_query(const char *sql, bool doReconnect = true,
-                     bool ignoreErrors = false, bool doLock = true,
-                     db_result_row_callback *cb = NULL,
-                     void *cb_user_data = NULL) {
+  virtual int execSQLQuery(const char *dbname, const char *sql,
+                           bool doReconnect = true, bool ignoreErrors = false, bool doLock = true,
+                           db_result_row_callback *cb = NULL, void *cb_user_data = NULL) {
     return (-1);
   }
 
-  virtual int exec_sql_query(lua_State *vm, char *sql, bool limitRows,
-                             bool wait_for_db_created) {
+  virtual int execSQLQuery(lua_State *vm, const char *dbname, const char *sql,
+                           bool limitRows, bool wait_for_db_created) {
     return (-1);
   }
 
@@ -83,7 +82,6 @@ class DB {
   virtual void shutdown();
   virtual void flush(){};
   virtual void lua(lua_State *vm, bool since_last_checkpoint);
-  virtual bool select_database(char *dbname) { return false; }
   virtual void checkIdle(time_t when) { ; }
   virtual void getStats(u_int64_t *flow_export_count, u_int64_t *flow_export_drops,
 			u_int64_t *flow_export_rate, bool since_last_checkpoint);  

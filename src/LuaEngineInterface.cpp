@@ -953,6 +953,7 @@ static int ntop_interface_delete_mac_data(lua_State *vm) {
 
 static int ntop_interface_exec_sql_query(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
+  const char *dbname = ntop->getPrefs()->get_mysql_dbname();
   bool limit_rows = true;  // honour the limit by default
   bool wait_for_db_created = true;
   char *sql;
@@ -985,7 +986,7 @@ static int ntop_interface_exec_sql_query(lua_State *vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
   }
 
-  if (curr_iface->exec_sql_query(vm, sql, limit_rows, wait_for_db_created) < 0)
+  if (curr_iface->execSQLQuery(vm, dbname, sql, limit_rows, wait_for_db_created) < 0)
     lua_pushnil(vm);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -5478,7 +5479,7 @@ static int ntop_clickhouse_exec_csv_query(lua_State *vm) {
   if (lua_type(vm, 2) == LUA_TBOOLEAN) /* optional */
     use_json = lua_toboolean(vm, 2) ? true : false;
 
-  curr_iface->exec_csv_query(sql, use_json, conn);
+  curr_iface->execSQLQuery2CSV(sql, use_json, conn);
 #endif
 
   lua_pushnil(vm); /* Data is pushed via the HTTP server */

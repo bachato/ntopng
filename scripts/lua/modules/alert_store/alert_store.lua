@@ -1208,31 +1208,6 @@ function alert_store:select_historical(filter, fields, download --[[ Available o
     -- res = interface.alert_store_query(q, true)
     res = interface.alert_store_query(q, true, true) -- Limit results to the max set in the backend
 
-    if ntop.isClickHouseEnabled() and not prefs.native_clickhouse_client_enabled then
-        -- convert DATETIME to epoch
-        for _, record in ipairs(res or {}) do
-            if record.tstamp_epoch then
-                record.tstamp = record.tstamp_epoch
-            elseif record.tstamp then
-                record.tstamp = format_utils.parseDateTime(record.tstamp)
-            end
-
-            if record.tstamp_end_epoch then
-                record.tstamp_end = record.tstamp_end_epoch
-            elseif record.tstamp_end then
-                record.tstamp_end = format_utils.parseDateTime(record.tstamp_end)
-            end
-
-            -- first_seen is only used in where conditions as it is indexed,
-            -- using tstamp in select as it is commong to all alert tables
-            -- if record.first_seen then record.first_seen = format_utils.parseDateTime(record.first_seen) end
-
-            if record.user_label_tstamp then
-                record.user_label_tstamp = format_utils.parseDateTime(record.user_label_tstamp)
-            end
-        end
-    end
-
     -- count records
     local count_res = 0
     if isEmptyString(group_by_clause) then

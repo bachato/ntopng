@@ -175,7 +175,6 @@ Prefs::Prefs(Ntop *_ntop) {
   snmp_polling = true;
   active_monitoring = network_discovery = starttls = false;
   dump_pcap_to_clickhouse = false;
-  use_native_clickhouse_client = false;
   query_performance_log = false;
   vs_max_num_scans = 4;
   vs_slow_scan = false;
@@ -976,7 +975,6 @@ void Prefs::reloadPrefsFromRedis() {
   network_discovery = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_NETWORK_DISCOVERY, false);
   starttls = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_STARTTLS, false);
   dump_pcap_to_clickhouse = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_DUMP_PCAP_TO_CLICKHOUSE, false);
-  use_native_clickhouse_client = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_NATIVE_CLICKHOUSE_CLIENT, false);
   query_performance_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_QUERY_PERFORMANCE_LOG, false);
 
   enable_arp_matrix_generation =
@@ -2741,10 +2739,6 @@ void Prefs::lua(lua_State *vm) {
   lua_push_bool_table_entry(vm, "network_discovery", network_discovery);
   lua_push_bool_table_entry(vm, "starttls", starttls);
   lua_push_bool_table_entry(vm, "dump_pcap_to_clickhouse", dump_pcap_to_clickhouse);
-#ifdef HAVE_CLICKHOUSE_LIB
-  lua_push_bool_table_entry(vm, "native_clickhouse_client_supported", true);
-#endif
-  lua_push_bool_table_entry(vm, "native_clickhouse_client_enabled", use_native_clickhouse_client);
   lua_push_bool_table_entry(vm, "query_performance_log_enabled", query_performance_log);
   lua_push_bool_table_entry(vm, "tls_quic_hostnaming", tls_quic_hostnaming);
 

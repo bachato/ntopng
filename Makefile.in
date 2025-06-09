@@ -39,7 +39,7 @@ CLICKHOUSE_INC=
 CLICKHOUSE_LIB=
 CLICKHOUSE_DEP_LIBS=
 #ifeq ($(OS),Linux)
-CLICKHOUSE_INC=-I$(CLICKHOUSE_HOME) -I$(CLICKHOUSE_HOME)/contrib/absl -DHAVE_CLICKHOUSE_LIB
+CLICKHOUSE_INC=-I$(CLICKHOUSE_HOME) -I$(CLICKHOUSE_HOME)/contrib/absl
 CLICKHOUSE_LIB=$(CLICKHOUSE_HOME)/build/clickhouse/libclickhouse-cpp-lib.a
 CLICKHOUSE_DEP_LIBS=$(CLICKHOUSE_HOME)/build/contrib/cityhash/cityhash/libcityhash.a $(CLICKHOUSE_HOME)/build/contrib/lz4/lz4/liblz4.a
 #endif

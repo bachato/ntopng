@@ -10907,10 +10907,11 @@ void NetworkInterface::addRedisSitesKey() {
 
 /* *************************************** */
 
-int NetworkInterface::exec_csv_query(const char *sql, bool dump_in_json_format,
+int NetworkInterface::execSQLQuery2CSV(const char *sql, bool dump_in_json_format,
                                      struct mg_connection *conn) {
 #if defined(NTOPNG_PRO) && defined(HAVE_MYSQL) && defined(HAVE_CLICKHOUSE)
-  ((ClickHouseFlowDB *)db)->execCSVQuery(sql, dump_in_json_format, conn);
+  const char *dbname = ntop->getPrefs()->get_mysql_dbname();
+  ((ClickHouseFlowDB *)db)->execSQLQuery2CSV(dbname, sql, dump_in_json_format, conn);
 
   return (0);
 #endif

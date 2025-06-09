@@ -673,8 +673,6 @@
   NTOPNG_PREFS_PREFIX ".starttls"
 #define CONST_PREFS_ENABLE_DUMP_PCAP_TO_CLICKHOUSE \
   NTOPNG_PREFS_PREFIX ".dump_pcap_to_clickhouse"
-#define CONST_PREFS_ENABLE_NATIVE_CLICKHOUSE_CLIENT \
-  NTOPNG_PREFS_PREFIX ".use_native_clickhouse_client"
 #define CONST_PREFS_ENABLE_QUERY_PERFORMANCE_LOG \
   NTOPNG_PREFS_PREFIX ".enable_query_performance_log"
 #define CONST_PREFS_ENABLE_ACCESS_LOG NTOPNG_PREFS_PREFIX ".enable_access_log"

@@ -992,15 +992,12 @@ public:
   void addInterfaceAddress(char *const addr);
   void addInterfaceNetwork(char *const net, char *addr);
   bool isInterfaceNetwork(IpAddress *ipa, int network_bits);
-  inline bool select_database(char *dbname) {
-    return (db ? db->select_database(dbname) : false);
-  };
-  inline int exec_sql_query(lua_State *vm, char *sql, bool limit_rows,
+  inline int execSQLQuery(lua_State *vm, const char *dbname, const char *sql, bool limit_rows,
                             bool wait_for_db_created = false) {
-    return (db ? db->exec_sql_query(vm, sql, limit_rows, wait_for_db_created)
+    return (db ? db->execSQLQuery(vm, dbname, sql, limit_rows, wait_for_db_created)
 	    : -1);
   };
-  int exec_csv_query(const char *sql, bool dump_in_json_format,
+  int execSQLQuery2CSV(const char *sql, bool dump_in_json_format,
                      struct mg_connection *conn);
 
   NetworkStats *getNetworkStats(u_int32_t networkId) const;

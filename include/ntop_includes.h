@@ -420,12 +420,11 @@ using namespace std;
 #endif
 #endif
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-#ifdef HAVE_CLICKHOUSE_LIB
 /* clickhouse-cpp */
 #include <clickhouse/client.h>
+#include <cstring> /* std::memcpy*/
 #include <iomanip> /* std::setfill */
 using namespace clickhouse;
-#endif
 #include "ClickHouseImport.h"
 #include "ClickHouseFlowDB.h"
 #include "ClickHouseAlertStore.h"
