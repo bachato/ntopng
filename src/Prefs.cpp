@@ -213,14 +213,13 @@ Prefs::Prefs(Ntop *_ntop) {
     es_user = strdup((char *)""), es_pwd = strdup((char *)""),
     es_host = strdup((char *)"");
 
-  mysql_host = mysql_dbname = mysql_user = mysql_pw = NULL;
+  clickhouse_host = clickhouse_dbname = clickhouse_user = clickhouse_pw = NULL;
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO) && defined(HAVE_MYSQL)
-  ch_user = NULL;
+  clickhouse_cluster_user = NULL;
   ntopng_assets_inventory_enabled = true;
 #endif
-  mysql_port = CONST_DEFAULT_CLICKHOUSE_MYSQL_PORT;
   clickhouse_tcp_port = CONST_DEFAULT_CLICKHOUSE_TCP_PORT;
-  mysql_port_secure = clickhouse_tcp_port_secure = false; /* No TLS */
+  clickhouse_tcp_port_secure = false; /* No TLS */
 #if !defined(WIN32) && !defined(__APPLE__)
   flows_syslog_facility = CONST_DEFAULT_DUMP_SYSLOG_FACILITY;
 #endif
@@ -310,13 +309,13 @@ Prefs::~Prefs() {
   if(redis_password) free(redis_password);
   if(cli) free(cli);
   if(ciphers_list) free(ciphers_list);
-  if(mysql_host) free(mysql_host);
-  if(mysql_dbname) free(mysql_dbname);
-  if(mysql_user) free(mysql_user);
+  if(clickhouse_host) free(clickhouse_host);
+  if(clickhouse_dbname) free(clickhouse_dbname);
+  if(clickhouse_user) free(clickhouse_user);
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO) && defined(HAVE_MYSQL)
-  if(ch_user) free(ch_user);
+  if(clickhouse_cluster_user) free(clickhouse_cluster_user);
 #endif
-  if(mysql_pw) free(mysql_pw);
+  if(clickhouse_pw) free(clickhouse_pw);
   if(ls_host) free(ls_host);
   if(ls_port) free(ls_port);
   if(ls_proto) free(ls_proto);
@@ -652,7 +651,7 @@ void usage() {
 	 "clickhouse-cloud;europe-east15.clickhouse.cloud@9440,3306s;ntopng;default,mysql-user;mych-password\n"
 	 "                                    | NOTE:\n"
 	 "                                    | - clickhouse-user used by clickhouse-client\n"
-	 "                                    | - mysql-user by the mysql API\n"
+	 "                                    | - mysql-user used by the mysql API\n"
 	 "                                    | - tcp-port used by the clickhouse API\n"
 	 "                                    | - mysql-port used by the mysql API\n"
 	 "                                    |\n"
@@ -1976,21 +1975,21 @@ int Prefs::setOption(int optkey, char *optarg) {
 	    if(optarg[i] == ';') num_semicolumns++;
 
 	  if((num_semicolumns == 0) && dump_flows_on_clickhouse) {
-	    mysql_host = strdup((char *)"127.0.0.1");
-	    mysql_dbname = strdup((char *)"ntopng");
-	    mysql_user = strdup((char *)"default");
-	    mysql_pw = strdup((char *)"");
+	    clickhouse_host = strdup((char *)"127.0.0.1");
+	    clickhouse_dbname = strdup((char *)"ntopng");
+	    clickhouse_user = strdup((char *)"default");
+	    clickhouse_pw = strdup((char *)"");
 
 	    if(use_clickhouse_cluster)
 	      clickhouse_cluster_name = strdup((char *)DEFAULT_CLICKHOUSE_CLUSTER);
 	  } else {
-	    optarg = Utils::tokenizer(sep + 1, ';', &mysql_host);
-	    optarg = Utils::tokenizer(optarg, ';', &mysql_dbname);
-	    optarg = Utils::tokenizer(optarg, ';', &mysql_user);
-	    mysql_pw = strdup(optarg ? optarg : "");
+	    optarg = Utils::tokenizer(sep + 1, ';', &clickhouse_host);
+	    optarg = Utils::tokenizer(optarg, ';', &clickhouse_dbname);
+	    optarg = Utils::tokenizer(optarg, ';', &clickhouse_user);
+	    clickhouse_pw = strdup(optarg ? optarg : "");
 
 	    if(use_clickhouse_cluster) {
-	      optarg = Utils::tokenizer(optarg, ';', &mysql_pw);
+	      optarg = Utils::tokenizer(optarg, ';', &clickhouse_pw);
 	      if(optarg) clickhouse_cluster_name = strdup(optarg);
 	    }
 	  }
@@ -1998,26 +1997,26 @@ int Prefs::setOption(int optkey, char *optarg) {
 	  if(use_clickhouse_cloud) {
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO) && defined(HAVE_MYSQL)
 	    char *comma;
-	    char *tmp = mysql_user;
-	    mysql_user = NULL;
+	    char *tmp = clickhouse_user;
+	    clickhouse_user = NULL;
 	    if(tmp && (comma = strchr(tmp, ','))) {
-	      //ch_user = mysql_user;
+	      //clickhouse_cluster_user = clickhouse_user;
 	      *(comma++) = '\0';
-	      mysql_user = strdup(comma);
-	      ch_user = strdup(tmp);
+	      clickhouse_user = strdup(comma);
+	      clickhouse_cluster_user = strdup(tmp);
 	      free(tmp);
 	    }
-	    if(!ch_user || !mysql_user) {
+	    if(!clickhouse_cluster_user || !clickhouse_user) {
 	      /* Falling back to default values */
 	      ntop->getTrace()->traceEvent(TRACE_WARNING,
 					   "Invalid MySQL or ClickHouse user, falling back to local ClickHouse [ClickHouse user: %s, MySQL user: %s]",
-					   ch_user ? ch_user : "", mysql_user ? mysql_user : "");
+					   clickhouse_cluster_user ? clickhouse_cluster_user : "", clickhouse_user ? clickhouse_user : "");
 
-	      mysql_host = strdup((char *)"127.0.0.1");
-	      mysql_dbname = strdup((char *)"ntopng");
-	      mysql_user = strdup((char *)"default");
-	      mysql_pw = strdup((char *)"");
-	      ch_user = NULL; /* No CH user by default */
+	      clickhouse_host = strdup((char *)"127.0.0.1");
+	      clickhouse_dbname = strdup((char *)"ntopng");
+	      clickhouse_user = strdup((char *)"default");
+	      clickhouse_pw = strdup((char *)"");
+	      clickhouse_cluster_user = NULL; /* No CH user by default */
 	    }
 #endif
 	  }
@@ -2034,22 +2033,25 @@ int Prefs::setOption(int optkey, char *optarg) {
 	      strdup((char *)DEFAULT_CLICKHOUSE_CLUSTER);
 	  }
 
-	  if(mysql_host && mysql_user) {
-	    if((mysql_dbname == NULL) || (mysql_dbname[0] == '\0'))
-	      mysql_dbname = strdup("ntopng");
+	  if(clickhouse_host && clickhouse_user) {
+	    if((clickhouse_dbname == NULL) || (clickhouse_dbname[0] == '\0'))
+	      clickhouse_dbname = strdup("ntopng");
 
-	    if(mysql_pw == NULL) mysql_pw = strdup("");
+	    if(clickhouse_pw == NULL) clickhouse_pw = strdup("");
 
 	    /* Check for non-default SQL port on -F line */
+
+            /* mysql deprecated and not used (still parsed for backward compatibility) */
 	    char *mysql_port_str;
+            int mysql_port = CONST_DEFAULT_CLICKHOUSE_MYSQL_PORT;
+            bool mysql_port_secure = false;
 
 	    /* Default ports */
-	    mysql_port = CONST_DEFAULT_CLICKHOUSE_MYSQL_PORT;
 	    clickhouse_tcp_port = CONST_DEFAULT_CLICKHOUSE_TCP_PORT;
-	    mysql_port_secure = clickhouse_tcp_port_secure = false; /* No TLS */
+	    clickhouse_tcp_port_secure = false; /* No TLS */
 
 	    /* Configured ports, if any */
-	    if((mysql_port_str = strchr(mysql_host, '@'))) {
+	    if((mysql_port_str = strchr(clickhouse_host, '@'))) {
 	      char *comma, *clickhouse_tcp_port_str;
 	      long l;
 	      int len;
@@ -2104,11 +2106,11 @@ int Prefs::setOption(int optkey, char *optarg) {
 		mysql_port = (int)l;
 	    }
 
-	    if(mysql_host) {
-	      if(strcmp(mysql_host, "localhost") == 0) {
+	    if(clickhouse_host) {
+	      if(strcmp(clickhouse_host, "localhost") == 0) {
 		/* Clickhouse does not like localhost */
-		free(mysql_host);
-		mysql_host = strdup("127.0.0.1");
+		free(clickhouse_host);
+		clickhouse_host = strdup("127.0.0.1");
 	      }
 	    }
 	  } else {
@@ -2725,7 +2727,7 @@ void Prefs::lua(lua_State *vm) {
 			     max_aggregated_flows_traffic_upperbound);
 #endif
 
-  if(mysql_dbname) lua_push_str_table_entry(vm, "mysql_dbname", mysql_dbname);
+  if(clickhouse_dbname) lua_push_str_table_entry(vm, "clickhouse_dbname", clickhouse_dbname);
   lua_push_bool_table_entry(vm, "is_dump_flows_to_es_enabled",
                             dump_flows_on_es);
   lua_push_bool_table_entry(vm, "is_dump_flows_to_syslog_enabled",

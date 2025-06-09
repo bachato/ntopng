@@ -14,7 +14,7 @@ page_utils.print_header_minimal()
 
 local prefs = ntop.getPrefs()
 
-local dbname = (prefs.mysql_dbname or '')
+local dbname = (prefs.clickhouse_dbname or '')
 
 -- read the db activities to notify the user about what is going on in the database
 

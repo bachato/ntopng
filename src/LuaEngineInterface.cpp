@@ -953,7 +953,7 @@ static int ntop_interface_delete_mac_data(lua_State *vm) {
 
 static int ntop_interface_exec_sql_query(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
-  const char *dbname = ntop->getPrefs()->get_mysql_dbname();
+  const char *dbname = ntop->getPrefs()->get_clickhouse_dbname();
   bool limit_rows = true;  // honour the limit by default
   bool wait_for_db_created = true;
   char *sql;

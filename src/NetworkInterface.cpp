@@ -10910,7 +10910,7 @@ void NetworkInterface::addRedisSitesKey() {
 int NetworkInterface::execSQLQuery2CSV(const char *sql, bool dump_in_json_format,
                                      struct mg_connection *conn) {
 #if defined(NTOPNG_PRO) && defined(HAVE_MYSQL) && defined(HAVE_CLICKHOUSE)
-  const char *dbname = ntop->getPrefs()->get_mysql_dbname();
+  const char *dbname = ntop->getPrefs()->get_clickhouse_dbname();
   ((ClickHouseFlowDB *)db)->execSQLQuery2CSV(dbname, sql, dump_in_json_format, conn);
 
   return (0);

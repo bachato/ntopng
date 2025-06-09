@@ -169,21 +169,19 @@ class Prefs {
   int dns_mode;
   bool json_labels_string_format;
   char *es_type, *es_index, *es_url, *es_user, *es_pwd, *es_host;
-  char *mysql_host;
-  char *mysql_dbname;
-  char *mysql_user;
-  char *mysql_pw;
+  char *clickhouse_host;
+  char *clickhouse_dbname;
+  char *clickhouse_user;
+  char *clickhouse_pw;
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO) && defined(HAVE_MYSQL)
-  char *ch_user; /* In case of ch cloud, 2 users are needed, 
+  char *clickhouse_cluster_user; /* In case of ch cloud, 2 users are needed, 
                     one for mysql and one for ch */
   bool ntopng_assets_inventory_enabled;
 #endif
 #if !defined(WIN32) && !defined(__APPLE__)
   int flows_syslog_facility;
 #endif
-  int mysql_port;
   int clickhouse_tcp_port;
-  bool mysql_port_secure;
   bool clickhouse_tcp_port_secure;
   char *ls_host, *ls_port, *ls_proto;
   bool has_cmdl_trace_lvl; /**< Indicate whether a verbose level
@@ -511,19 +509,18 @@ class Prefs {
   inline bool shutdownWhenDone() { return (shutdown_when_done); }
   inline void set_promiscuous_mode(bool mode) { use_promiscuous_mode = mode; };
   inline bool use_promiscuous() { return (use_promiscuous_mode); };
-  inline char* get_mysql_host() { return (mysql_host); };
-  inline int get_mysql_port() { return (mysql_port); };
+
+  inline char* get_clickhouse_host() { return (clickhouse_host); };
   inline int get_clickhouse_tcp_port() { return (clickhouse_tcp_port); };
-  inline bool is_mysql_port_secure() { return (mysql_port_secure); };
   inline bool is_clickhouse_tcp_port_secure() { return (clickhouse_tcp_port_secure); };
-  inline char* get_mysql_dbname() { return (mysql_dbname); };
-  inline char* get_mysql_tablename() { return ((char*)"flows"); };
-  inline char* get_mysql_user() { return (mysql_user); };
+  inline char* get_clickhouse_dbname() { return (clickhouse_dbname); };
+  inline char* get_clickhouse_user() { return (clickhouse_user); };
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO) && defined(HAVE_MYSQL)
   /* If this is not NULL, it means that the user is using CH Cloud */
-  inline char* get_ch_user() { return (ch_user); };
+  inline char* get_clickhouse_cluster_user() { return (clickhouse_cluster_user); };
 #endif
-  inline char* get_mysql_pw() { return (mysql_pw); };
+  inline char* get_clickhouse_pw() { return (clickhouse_pw); };
+
 #if !defined(WIN32) && !defined(__APPLE__)
   inline int get_flows_syslog_facility() { return (flows_syslog_facility); };
 #endif
