@@ -18,7 +18,6 @@ Prerequisites
 - libglib2.0-dev
 - libsqlite3-dev
 - libcurl-dev
-- libmysqlclient-dev
 - uglify-es
 - npm (optional - JS/CSS compilation)
 - curl jq (optional)
@@ -52,56 +51,32 @@ If you plan to build ntopng dependencies you should also install:
 if you plan to use Kafka you can also install
 - apt install librdkafka-dev
 
-MySQL (or MariaDB)
-------------------
-ntopng can be compiled with both MySQL and MariaDB client libraries. 
-
-Tipically, ntopng is compiled with the MySQL library,
-on Ubuntu/Debian:
-- apt-get install libmysqlclient-dev
-
-Optionally, MariaDB can also be used:
-- apt install libmariadbd-dev
-
-By default, MySQL programs attempt to connect using encryption if the server supports
-encrypted connections, falling back to an unencrypted connection if an encrypted
-connection cannot be established (see Configuring MySQL to Use Encrypted Connections). 
-
-[https://dev.mysql.com/doc/c-api/8.2/en/c-api-encrypted-connections.html]
-
-
 On Ubuntu 16/18
 ~~~~~~~~~~~~~~~
 
 You also need to do "apt install libtool-bin"
-You can decide to use MariaDB (instead of MySQL) do "apt install libmariadb-client-lgpl-dev" instead.
 
 On Ubuntu20
 ~~~~~~~~~~~~~~
 
-You also need to do "apt install libmysqlclient-dev libzmq3-dev"
-
-On Ubuntu 22/24
-~~~~~~~~~~~~~~~
-
-You need to do "apt install libmariadb-dev"
+You also need to do "apt install libzmq3-dev"
 
 On Debian 9/10/11/12
 ~~~~~~~~~~~~~~~~~~~~
 
 You need to do add the `contrib` component to /etc/apt/sources.list entries, then
 
-apt install libpng-dev libzmq5-dev default-libmysqlclient-dev libgcrypt20-dev
+apt install libpng-dev libzmq5-dev libgcrypt20-dev
 
 On Other Debian
 ~~~~~~~~~~~~~~~
 
-apt install libmysqlclient-dev libzmq3-dev libgcrypt20-dev
+apt install libzmq3-dev libgcrypt20-dev
 
 On Raspbian 10
 ~~~~~~~~~~~~~~
 
-apt install libmariadb-dev libzmq3-dev
+apt install libzmq3-dev
 
 On CentOS Stream (8)
 ~~~~~~~~~~~~~~~~~~~~
@@ -112,7 +87,7 @@ dnf config-manager --set-enabled remi
 dnf group install "Development Tools"
 dnf clean all
 dnf update
-dnf install openldap-devel libpcap-devel openssl-devel libcurl-devel libmaxminddb-devel sqlite-devel mysql-devel radcli-devel librdkafka-devel libcap-devel zeromq-devel rrdtool-devel json-c-devel expect hiredis-devel readline-devel expat-devel npm net-snmp-devel
+dnf install openldap-devel libpcap-devel openssl-devel libcurl-devel libmaxminddb-devel sqlite-devel radcli-devel librdkafka-devel libcap-devel zeromq-devel rrdtool-devel json-c-devel expect hiredis-devel readline-devel expat-devel npm net-snmp-devel
 npm install -g uglify-es
 
 On CentOS/Rocky 8
@@ -126,7 +101,7 @@ yum install http://rpms.remirepo.net/enterprise/remi-release-8.rpm
 yum config-manager --set-enabled remi
 yum clean all
 yum update
-yum install openldap-devel libpcap-devel openssl-devel libcurl-devel libmaxminddb-devel sqlite-devel mysql-devel radcli-devel librdkafka-devel libcap-devel zeromq-devel rrdtool-devel json-c-devel expect expat-devel npm net-snmp-devel
+yum install openldap-devel libpcap-devel openssl-devel libcurl-devel libmaxminddb-devel sqlite-devel radcli-devel librdkafka-devel libcap-devel zeromq-devel rrdtool-devel json-c-devel expect expat-devel npm net-snmp-devel
 npm install -g uglify-es
 
 Then list the streams which provide Redis (dnf module list redis) and install it. For example, to install it from stream 5 run: sudo dnf module install redis:5
@@ -142,7 +117,7 @@ yum install http://rpms.remirepo.net/enterprise/remi-release-9.rpm
 yum config-manager --set-enabled remi
 dnf config-manager --set-enabled crb
 yum clean all
-yum install openldap-devel libpcap-devel openssl-devel libcurl-devel libmaxminddb-devel sqlite-devel mysql-devel radcli-devel librdkafka-devel libcap-devel zeromq-devel rrdtool-devel json-c-devel expect expat-devel npm numactl-devel net-snmp-devel
+yum install openldap-devel libpcap-devel openssl-devel libcurl-devel libmaxminddb-devel sqlite-devel radcli-devel librdkafka-devel libcap-devel zeromq-devel rrdtool-devel json-c-devel expect expat-devel npm numactl-devel net-snmp-devel
 yum update
 npm install -g uglify-es
 
@@ -153,21 +128,21 @@ On Fedora 30/31/32
 dnf install libtool m4
 dnf install autoconf automake
 dnf group install "Development Tools"
-dnf install libpcap-devel openssl-devel libcurl-devel libmaxminddb-devel sqlite-devel mariadb-devel radcli-devel librdkafka-devel libcap-devel zeromq-devel rrdtool-devel json-c-devel expect readline-devel net-snmp-devel
+dnf install libpcap-devel openssl-devel libcurl-devel libmaxminddb-devel sqlite-devel radcli-devel librdkafka-devel libcap-devel zeromq-devel rrdtool-devel json-c-devel expect readline-devel net-snmp-devel
 dnf install redis
 
 On (Older) Fedora/CentOS 6-7
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 yum groupinstall "Development tools"
-yum install git autoconf automake autogen bison flex libpcap-devel libmaxminddb-devel hiredis-devel redis glib2-devel libxml2-devel sqlite-devel gcc-c++ libtool wget libcurl-devel pango-devel cairo-devel libpng-devel mysql-devel libnetfilter_queue-devel zlib-devel which libcap-devel readline-devel zeromq-devel json-c-devel net-snmp-devel
+yum install git autoconf automake autogen bison flex libpcap-devel libmaxminddb-devel hiredis-devel redis glib2-devel libxml2-devel sqlite-devel gcc-c++ libtool wget libcurl-devel pango-devel cairo-devel libpng-devel libnetfilter_queue-devel zlib-devel which libcap-devel readline-devel zeromq-devel json-c-devel net-snmp-devel
 
 On MacOS
 ~~~~~~~~
 
 Using Brew (http://brew.sh):
 
-brew install redis hiredis autoconf automake libtool rrdtool wget pkg-config git mysql json-c libmaxminddb zmq openssl
+brew install redis hiredis autoconf automake libtool rrdtool wget pkg-config git son-c libmaxminddb zmq openssl
 
 Using MacPorts:
 
@@ -177,13 +152,13 @@ On FreeBSD
 ~~~~~~~~~~
 
 All versions:
-sudo pkg install gcc git autoconf automake libtool pkgconf gmake sudo libmaxminddb libsodium mysql56-client rrdtool lua53 zip json-c libzmq4 sqlite3 libgcrypt librdkafka bison flex libpcap rename cmake redis hiredis mysql80-client bash
+sudo pkg install gcc git autoconf automake libtool pkgconf gmake sudo libmaxminddb libsodium rrdtool lua53 zip json-c libzmq4 sqlite3 libgcrypt librdkafka bison flex libpcap rename cmake redis hiredis bash
 
 
 On OpenSuse
 ~~~~~~~~~~~
 
-zypper install flex bison libpcap-devel libmaxminddb-devel libsqlite3-0-devel sqlite3-devel libmysqlclient-devel czmq-devel
+zypper install flex bison libpcap-devel libmaxminddb-devel libsqlite3-0-devel sqlite3-devel czmq-devel
 
 On Windows
 ~~~~~~~~~~

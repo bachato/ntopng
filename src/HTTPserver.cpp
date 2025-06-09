@@ -922,42 +922,6 @@ int redirect_to_error_page(struct mg_connection *conn,
 
 /* ****************************************** */
 
-#ifdef HAVE_MYSQL
-/* Redirect user to a courtesy page that is used when database schema is being
-   updated. In the cookie, store the original URL we came from, so that after
-   the authorization we could redirect back.
-*/
-static void redirect_to_please_wait(struct mg_connection *conn, const struct mg_request_info *request_info) {
-  char session_id[NTOP_SESSION_ID_LENGTH], buf[128];
-  char referer[255], session_key[32];
-  char *referer_enc = NULL;
-
-  make_referer(conn, referer, sizeof(referer));
-  Utils::make_session_key(session_key, sizeof(session_key));
-  mg_get_cookie(conn, session_key, session_id, sizeof(session_id));
-  ntop->getTrace()->traceEvent(TRACE_INFO, "[HTTP] %s(%s)", __FUNCTION__,
-                               session_id);
-
-  mg_printf(conn,
-            "HTTP/1.1 302 Found\r\n"
-            "Server: ntopng %s (%s)\r\n"
-            // "HTTP/1.1 401 Unauthorized\r\n"
-            // "WWW-Authenticate: Basic\r\n"
-            "Location: %s%s%s%s\r\n\r\n",
-            PACKAGE_VERSION, PACKAGE_MACHINE,
-            ntop->getPrefs()->get_http_prefix(),
-            Utils::getURL((char *)PLEASE_WAIT_URL, buf, sizeof(buf)),
-            (referer[0] != '\0') ? (char *)"?referer=" : (char *)"",
-            (referer[0] != '\0') ? (referer_enc = Utils::urlEncode(referer))
-                                 : (char *)"");
-
-  traceHTTP(conn, 302);
-  if (referer_enc) free(referer_enc);
-}
-#endif
-
-/* ****************************************** */
-
 static void redirect_to_password_change(struct mg_connection *conn,
 					const struct mg_request_info *request_info) {
   char session_id[NTOP_SESSION_ID_LENGTH], buf[128];

@@ -143,7 +143,7 @@ class Ntop {
   bool alertExclusionsReloadInProgress;
   AlertExclusions *alert_exclusions, *alert_exclusions_shadow;
 #endif
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
   ClickHouseImport *clickhouseImport;
 #endif
 
@@ -803,7 +803,7 @@ class Ntop {
 #if defined(NTOPNG_PRO)
   MessageBroker* getMessageBroker() { return(message_broker); };
 #endif
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
   inline u_int importClickHouseDumps(bool silence_warnings) {
     return (clickhouseImport ? clickhouseImport->importDumps(silence_warnings)
                              : 0);

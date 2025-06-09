@@ -8504,7 +8504,7 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
 
     if (db == NULL && !disable_dump) {
       if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
 	/* Allocate only the DB connection, not any thread or queue for the export */
 	try {
 	  db = new ClickHouseFlowDB(this);
@@ -8518,7 +8518,7 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
     }
 
     if (!isViewed() && !disable_dump) {
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
       if (ntop->getPrefs()->do_dump_alerts_on_clickhouse())
         alertStore = new ClickHouseAlertStore(this);
 #endif
@@ -9521,7 +9521,7 @@ void NetworkInterface::initFlowDump() {
 
   if (ntop->getPrefs()->do_dump_flows_on_clickhouse() && db == NULL) {
     if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
       db = new (std::nothrow) ClickHouseFlowDB(this);
 
       if (db == NULL || db->isDbCreated() == false) {
@@ -10909,7 +10909,7 @@ void NetworkInterface::addRedisSitesKey() {
 
 int NetworkInterface::execSQLQuery2CSV(const char *sql, bool dump_in_json_format,
                                      struct mg_connection *conn) {
-#if defined(NTOPNG_PRO) && defined(HAVE_MYSQL) && defined(HAVE_CLICKHOUSE)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
   const char *dbname = ntop->getPrefs()->get_clickhouse_dbname();
   ((ClickHouseFlowDB *)db)->execSQLQuery2CSV(dbname, sql, dump_in_json_format, conn);
 

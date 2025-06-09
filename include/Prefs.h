@@ -173,7 +173,7 @@ class Prefs {
   char *clickhouse_dbname;
   char *clickhouse_user;
   char *clickhouse_pw;
-#if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO) && defined(HAVE_MYSQL)
+#if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
   char *clickhouse_cluster_user; /* In case of ch cloud, 2 users are needed, 
                     one for mysql and one for ch */
   bool ntopng_assets_inventory_enabled;
@@ -515,7 +515,7 @@ class Prefs {
   inline bool is_clickhouse_tcp_port_secure() { return (clickhouse_tcp_port_secure); };
   inline char* get_clickhouse_dbname() { return (clickhouse_dbname); };
   inline char* get_clickhouse_user() { return (clickhouse_user); };
-#if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO) && defined(HAVE_MYSQL)
+#if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
   /* If this is not NULL, it means that the user is using CH Cloud */
   inline char* get_clickhouse_cluster_user() { return (clickhouse_cluster_user); };
 #endif

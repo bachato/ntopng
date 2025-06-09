@@ -775,43 +775,6 @@ else
   exit 1
 fi
 
-if test $SYSTEM != "FreeBSD"; then
-  AC_CHECK_TOOL(MARIADB, mariadb_config)
-  if test "x$ac_cv_prog_ac_ct_MARIADB" = "xmariadb_config"; then
-    MYSQLTOOL="mariadb_config"
-  else
-    PATH=$PATH:/usr/local/mysql/bin
-    AC_CHECK_TOOL(MYSQL, mysql_config)
-    if test "x$ac_cv_prog_ac_ct_MYSQL" = "xmysql_config"; then
-      MYSQLTOOL="mysql_config"
-    else
-      MYSQLTOOL=""
-    fi
-  fi
-
-  if test -n "$MYSQLTOOL"; then
-    MYSQLLIBS="`$MYSQLTOOL --libs_r`"
-    if test ".$MYSQLLIBS" != "."; then
-      MYSQL_LIB="`$MYSQLTOOL --libs`"
-    else
-      MYSQL_LIB="`$MYSQLTOOL --libs_r`"
-    fi
-
-    MYSQL_INC="`$MYSQLTOOL --include`"
-    AC_DEFINE_UNQUOTED(HAVE_MYSQL, 1, [use mysql])
-    AC_CHECK_LIB([wrap], [main])
-  else
-    echo "Building without support for MySQL libraries."
-  fi
-else
-   dnl> FreeBSD
-   if test -f "/usr/local/lib/mysql/libmysqlclient.a"; then
-     MYSQL_LIB=/usr/local/lib/mysql/libmysqlclient.a
-     MYSQL_INC="-I /usr/local/include/mysql/"
-     AC_DEFINE_UNQUOTED(HAVE_MYSQL, 1, [use mysql])
-   fi
-fi
-
 AC_CHECK_LIB([expat], [XML_ParserCreate], expat=true)
 if test x$expat = xtrue; then
   AC_DEFINE_UNQUOTED(HAVE_EXPAT, 1, [Expath present, needed by speedtest])
@@ -838,14 +801,6 @@ if test -f /usr/bin/lsb_release; then
   LINUX_OS_RELEASE=`lsb_release -r | cut -f 2|cut -d '.' -f 1`
 else
   LINUX_OS_RELEASE=0
-fi
-
-if test "${with_nedge+set}" != set; then
-  if test $LINUX_OS_RELEASE -eq 7; then
-    MYSQL_DEP="mariadb-libs >= 5.5 tcp_wrappers-libs >= 7.6"
-  else
-    MYSQL_DEP="mysql-libs >= 5.1.0 tcp_wrappers-libs >= 7.6"
-  fi
 fi
 
 AC_DEFINE_UNQUOTED(_CRT_SECURE_NO_WARNINGS, 1, [Disable warning on windows])
@@ -878,10 +833,6 @@ fi
 STABLE_SUFFIX=""
 if test $GIT_BRANCH != "dev"; then
   STABLE_SUFFIX="-stable"
-fi
-
-if test $SYSTEM = "Darwin"; then
-   MYSQL_LIB=`echo $MYSQL_LIB | sed 's/openssl@1.1/openssl@1.1/g'`
 fi
 
 PWD=${HERE}
@@ -929,9 +880,6 @@ AC_SUBST(PRO_LIBS)
 AC_SUBST(PRO_INCS)
 AC_SUBST(LICENSE_DEP)
 AC_SUBST(REVISION)
-AC_SUBST(MYSQL_LIB)
-AC_SUBST(MYSQL_INC)
-AC_SUBST(MYSQL_DEP)
 AC_SUBST(SNMP_INC)
 AC_SUBST(SNMP_LIB)
 AC_SUBST(NTOPCLOUD_LIB)
@@ -1007,7 +955,6 @@ SSL Lib:            : ${SSL_LIB}
 SNMP Lib            : ${SNMP_LIB}
 Expat Lib           : ${EXPAT_LIB}
 SQLite Lib          : ${SQLITE_LIB}
-MySQL Lib           : ${MYSQL_LIB}
 PCAP Lib            : ${LIBPCAP}
 ZMQ Lib             : ${ZMQ_LIBS}
 libprotobuf-mutator : ${LIBPROTOBUF_MUTATOR_LIBS}

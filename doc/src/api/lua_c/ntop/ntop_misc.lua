@@ -120,10 +120,10 @@ function ntop.getMacManufacturer(string mac)
 --! @return the computed string MD5.
 function ntop.md5(string s)
 
---! @brief Execute a MySQL query and get the result
+--! @brief Execute a historical query and get the result
 --! @param query the query to execute
 --! @return the query result
---! @note This only works when ntopng is configured with "-F=mysql"
+--! @note This only works when ntopng is configured with "-F=clickhouse"
 function ntop.exec_sql_query(string query)
 
 --! @brief Resets multiple stats in ntopng, which include the hosts and mac traffic counters.

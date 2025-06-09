@@ -45,7 +45,7 @@ Historical Profiles Statistics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Profiles are not only available in realtime. Their traffic statistics are sampled every minute and stored in
-RRDs. Similarly, if ntopng was started with the -F modifier, flows will be exported to MySQL or ElasticSearch
+RRDs. Similarly, if ntopng was started with the -F modifier, flows will be exported to ClickHouse or ElasticSearch
 together with their profiles. Historical charts and tables are available in the ‘Profile Details’ page,
 reachable from the ‘Interface’ contextual toolbar. By clicking on the doctor ! icon, it is possible to see the
 full list of profiles detected for the selected interface, together with their traffic and throughput trend. Profile

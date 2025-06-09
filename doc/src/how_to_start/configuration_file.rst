@@ -26,8 +26,8 @@ An example of a configuration file is the following
    --max-num-flows=200000
    --max-num-hosts=250000
 
-   # Dump flows to MySQL
-   --dump-flows=mysql;localhost;ntopng;flows;ntopng;xxx
+   # Dump flows to ClickHouse
+   --dump-flows=clickhouse
 
    #--verbose
 

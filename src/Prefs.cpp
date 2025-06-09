@@ -214,7 +214,7 @@ Prefs::Prefs(Ntop *_ntop) {
     es_host = strdup((char *)"");
 
   clickhouse_host = clickhouse_dbname = clickhouse_user = clickhouse_pw = NULL;
-#if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO) && defined(HAVE_MYSQL)
+#if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
   clickhouse_cluster_user = NULL;
   ntopng_assets_inventory_enabled = true;
 #endif
@@ -312,7 +312,7 @@ Prefs::~Prefs() {
   if(clickhouse_host) free(clickhouse_host);
   if(clickhouse_dbname) free(clickhouse_dbname);
   if(clickhouse_user) free(clickhouse_user);
-#if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO) && defined(HAVE_MYSQL)
+#if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
   if(clickhouse_cluster_user) free(clickhouse_cluster_user);
 #endif
   if(clickhouse_pw) free(clickhouse_pw);
@@ -608,7 +608,7 @@ void usage() {
 #endif
 	 );
 
-#if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO) && defined(HAVE_MYSQL)
+#if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
   printf(
 	 "                                    | clickhouse    Dump in ClickHouse "
 	 "(Enterprise M/L/XL/XXL)\n"
@@ -1094,7 +1094,7 @@ void Prefs::reloadPrefsFromRedis() {
   snmp_trap_enabled = getDefaultPrefsValue(CONST_PREFS_SNMP_TRAP_ENABLED,
 					   CONST_DEFAULT_SNMP_TRAP_ENABLED);
 #endif
-#if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO) && defined(HAVE_MYSQL)
+#if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
   ntopng_assets_inventory_enabled = getDefaultPrefsValue(CONST_PREFS_NTOPNG_ASSETS_INVENTORY_ENABLED,
 							    CONST_DEFAULT_NTOPNG_ASSETS_INVENTORY_ENABLED);
 #endif
@@ -1928,7 +1928,7 @@ int Prefs::setOption(int optkey, char *optarg) {
     else if((!strncmp(optarg, "clickhouse", 10)) ||
 	    (!strncmp(optarg, "clickhouse-cluster", 18)) ||
             (!strncmp(optarg, "clickhouse-cloud", 16))) {
-#ifdef HAVE_MYSQL
+#if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
         char *sep = strchr(optarg, ';');
 
 	bool all_good = true;
@@ -1995,7 +1995,6 @@ int Prefs::setOption(int optkey, char *optarg) {
 	  }
 
 	  if(use_clickhouse_cloud) {
-#if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO) && defined(HAVE_MYSQL)
 	    char *comma;
 	    char *tmp = clickhouse_user;
 	    clickhouse_user = NULL;
@@ -2009,7 +2008,7 @@ int Prefs::setOption(int optkey, char *optarg) {
 	    if(!clickhouse_cluster_user || !clickhouse_user) {
 	      /* Falling back to default values */
 	      ntop->getTrace()->traceEvent(TRACE_WARNING,
-					   "Invalid MySQL or ClickHouse user, falling back to local ClickHouse [ClickHouse user: %s, MySQL user: %s]",
+					   "Invalid ClickHouse user, falling back to local ClickHouse [ClickHouse user: %s / %s]",
 					   clickhouse_cluster_user ? clickhouse_cluster_user : "", clickhouse_user ? clickhouse_user : "");
 
 	      clickhouse_host = strdup((char *)"127.0.0.1");
@@ -2018,7 +2017,6 @@ int Prefs::setOption(int optkey, char *optarg) {
 	      clickhouse_pw = strdup((char *)"");
 	      clickhouse_cluster_user = NULL; /* No CH user by default */
 	    }
-#endif
 	  }
 
 	  if(use_clickhouse_cluster &&
@@ -2044,7 +2042,6 @@ int Prefs::setOption(int optkey, char *optarg) {
             /* mysql deprecated and not used (still parsed for backward compatibility) */
 	    char *mysql_port_str;
             int mysql_port = CONST_DEFAULT_CLICKHOUSE_MYSQL_PORT;
-            bool mysql_port_secure = false;
 
 	    /* Default ports */
 	    clickhouse_tcp_port = CONST_DEFAULT_CLICKHOUSE_TCP_PORT;
@@ -2091,7 +2088,7 @@ int Prefs::setOption(int optkey, char *optarg) {
 		len--;
 
 		if(mysql_port_str[len] == 's') {
-		  mysql_port_secure = true;
+		  //mysql_port_secure = true;
 		  mysql_port_str[len] = '\0';
 		}
 	      }

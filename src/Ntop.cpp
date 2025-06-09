@@ -356,7 +356,7 @@ Ntop::~Ntop() {
   }
 #endif
 
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
   if (clickhouseImport) delete clickhouseImport;
 #endif
 
@@ -493,7 +493,7 @@ void Ntop::registerPrefs(Prefs *_prefs, bool quick_registration) {
   pa = new (std::nothrow) PeriodicActivities();
 #endif
 
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
   if (prefs->do_dump_flows_on_clickhouse())
     clickhouseImport = new (std::nothrow) ClickHouseImport();
   else
@@ -3213,7 +3213,7 @@ void Ntop::checkShutdownWhenDone() {
 
     /* Make sure all flushed flows are also dumped to the database for post
      * analysis (e.g. historical data) */
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
     if (clickhouseImport) importClickHouseDumps(true);
 #endif
 
@@ -3304,7 +3304,7 @@ void Ntop::shutdownAll() {
     delete shutdown_activity;
   }
 
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
   /* Dump flows flushed during shutdown */
   /* Commented out: this is done on restart to speed up the shutdown
   if(clickhouseImport)
@@ -3839,7 +3839,7 @@ bool Ntop::luaFlowCheckInfo(lua_State *vm, std::string check_name) const {
 /* ******************************************* */
 
 void Ntop::luaClickHouseStats(lua_State *vm) const {
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
   if (clickhouseImport) {
     clickhouseImport->lua(vm);
     return;
@@ -4287,7 +4287,7 @@ bool Ntop::createRuntimeInterface(char *name, char *source, int *iface_id) {
   } else if (strncmp(source, "db:", 3) == 0) {
     source = &source[3];
 
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE) && defined(HAVE_MYSQL)
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
     if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
       try {
         new_iface = new ClickHouseInterface((const char *) source, (const char *) name);

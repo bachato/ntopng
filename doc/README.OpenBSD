@@ -15,7 +15,7 @@ Let's start with GNU build tools:
 Then we have to install client libraries, llvm compiler, and of course git.
 
 # pkg_add wget
-# pkg_add json-c-0.12p1 mysqlcc GeoIP rrdtool llvm git
+# pkg_add json-c-0.12p1 GeoIP rrdtool llvm git
 
 
 git clone and build

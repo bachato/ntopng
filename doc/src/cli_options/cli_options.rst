@@ -184,13 +184,6 @@ ntopng supports a large number of command line parameters. To see what they are,
                                         |   
                                         |   See at the bottom of this help the list of supported kafka configuration options.
                                         |
-                                        | mysql         Dump in MySQL database
-                                        |   Format:
-                                        |   mysql;<host[@port]|socket>;<dbname>;<user>;<pw>
-                                        |   mysql;127.0.0.1;ntopng;root;
-                                        |   "mysql;127.0.0.1@3306;ntopng;root;" [Cleartext (no TLS)]
-                                        |   "mysql;127.0.0.1@3306s;ntopng;root;" [TLS]
-                                        |
     [--export-flows|-I] <endpoint>      | Export flows with the specified endpoint
                                         | See https://wp.me/p1LxdS-O5 for a -I use case.
     [--zmq-encryption-key <key>]        | ZMQ (export) encryption public key (-I only) 
