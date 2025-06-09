@@ -6084,15 +6084,28 @@ void Flow::setBittorrentHash(char *hash, u_int len) {
 void Flow::dissectBittorrent(char *payload, u_int16_t payload_len) {
   /* This dissector is called only for uTP/UDP protocol */
 
-  if(payload_len > 47) {
-    char *bt_proto = ndpi_strnstr((const char *)&payload[20],
-                                  "BitTorrent protocol", payload_len - 20);
+  if(payload_len <= 27 + 20)
+    return;
 
-    if(bt_proto) {
-      u_int l = strnlen(bt_proto, 27);
+  char *data = &payload[20];
+  u_int16_t data_len = payload_len - 20;
 
-      if(l >= 27)
-	setBittorrentHash(&bt_proto[27], payload_len-27);
+  char *bt_proto = ndpi_strnstr((const char *) data, "BitTorrent protocol",
+                                data_len);
+
+  if(bt_proto) {
+    u_int16_t bt_proto_offset = bt_proto - data;
+    data = bt_proto;
+    data_len = data_len - bt_proto_offset;
+
+    if(data_len >= 27 + 20) {
+      u_int l = strnlen(data, 27);
+
+      if(l >= 27) {
+        data = &data[27];
+        data_len = data_len - 27;
+        setBittorrentHash(data, data_len);
+      }
     }
   }
 }
