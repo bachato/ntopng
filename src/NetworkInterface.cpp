@@ -8505,7 +8505,7 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
 	/* Allocate only the DB connection, not any thread or queue for the export */
 	try {
-	  db = new ClickHouseFlowDB(this);
+	  db = new ClickHouseDB(this);
 	} catch (const std::invalid_argument &e) {
 	  db = NULL;
           ntop->getTrace()->traceEvent(TRACE_WARNING, "ClickHouse initialization failure!");
@@ -9520,7 +9520,7 @@ void NetworkInterface::initFlowDump() {
   if (ntop->getPrefs()->do_dump_flows_on_clickhouse() && db == NULL) {
     if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-      db = new (std::nothrow) ClickHouseFlowDB(this);
+      db = new (std::nothrow) ClickHouseDB(this);
 
       if (db == NULL || db->isDbCreated() == false) {
         ntop->getTrace()->traceEvent(TRACE_ERROR, "Running without ClickHouse support, please check the clickhouse service");
@@ -10909,7 +10909,7 @@ int NetworkInterface::execSQLQuery2CSV(const char *sql, bool dump_in_json_format
                                      struct mg_connection *conn) {
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
   const char *dbname = ntop->getPrefs()->get_clickhouse_dbname();
-  ((ClickHouseFlowDB *)db)->execSQLQuery2CSV(dbname, sql, dump_in_json_format, conn);
+  ((ClickHouseDB *)db)->execSQLQuery2CSV(dbname, sql, dump_in_json_format, conn);
 
   return (0);
 #endif

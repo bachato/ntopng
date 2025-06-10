@@ -1110,7 +1110,7 @@ end
 
 -- List of flow columns in the database
 --
--- Keep in sync with ClickHouseFlowDB.cpp and tag_utils.lua
+-- Keep in sync with ClickHouseDB.cpp and tag_utils.lua
 --
 -- - select_func is used in SELECT clause to convert DB-to-Lua the value (e.g. IP addresses)
 -- - where_func is used in WHERE clause to convert Lua-to-DB the value
