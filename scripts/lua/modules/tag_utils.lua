@@ -778,8 +778,9 @@ tag_utils.defined_tags = {
         hourly_available = false,
     },
     wlan_ssid = {
-        type = tag_utils.input_types.select,
-        value_type = 'wlan_ssid',
+        -- type = tag_utils.input_types.select,
+        -- value_type = 'wlan_ssid',
+        value_type = 'text',
         i18n_label = i18n('db_search.tags.wlan_ssid'),
         operators = { 'eq', 'neq', 'in', 'nin' }
     },
@@ -1148,6 +1149,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = info.mitre_id,
             }
         end
+    --[[ Temporary commented out to reduce overhead (using open 'text' as value_type)
     elseif tag.value_type == "wlan_ssid" then
         local flows_stats = interface.getActiveFlowsStats()
         filter.value_type = 'array'
@@ -1163,7 +1165,6 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                     label = key
                 }
             end
-
             for key, _ in pairsByKeys(tmp_list, asc) do
                 filter.options[#filter.options + 1] = {
                     value = key,
@@ -1171,6 +1172,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 }
             end
         end
+    --]]
     elseif tag.value_type == "mitre_tactic" then
         filter.value_type = 'array'
         filter.options = {}
