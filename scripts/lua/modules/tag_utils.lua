@@ -1083,7 +1083,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
     end
 
     if not ifid then
-        ifid = interface.getId()
+        ifid = current_ifid
     else
         if tonumber(current_ifid) ~= tonumber(ifid) then
             changed_ifid = true
