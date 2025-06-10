@@ -2807,37 +2807,19 @@ local function add_top_interface_timeseries(tags, timeseries)
                     }
                 end
             end
-            local ts = {
-                bytes = {
-                    label = i18n('top_l7_proto'),
-                    color = timeseries_info.get_timeseries_color('bytes')
-                }
-            }
-            if is_full_ts then
-                ts = {
-                    bytes_sent = {
-                        label = i18n('top_l7_proto') .. " " ..
-                            i18n('graphs.metric_labels.sent'),
-                        color = timeseries_info.get_timeseries_color(
-                            'bytes_sent')
-                    },
-                    bytes_rcvd = {
-                        invert_direction = true,
-                        label = i18n('top_l7_proto') .. " " ..
-                            i18n('graphs.metric_labels.rcvd'),
-                        color = timeseries_info.get_timeseries_color(
-                            'bytes_rcvd')
-                    }
-                }
-            end
-
             timeseries[#timeseries + 1] = {
                 schema = "top:" .. id,
                 priority = 2,
                 label = i18n('top_l7_proto'),
                 measure_unit = "bps",
                 scale = i18n('graphs.metric_labels.traffic'),
-                timeseries = ts
+                disable_default_ago_ts = true,
+                timeseries = {
+                    bytes = {
+                        label = i18n('top_l7_proto'),
+                        color = timeseries_info.get_timeseries_color('bytes')
+                    }
+                }
             }
         end
     end
