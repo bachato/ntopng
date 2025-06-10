@@ -24,7 +24,7 @@
 
 #include "ntop_includes.h"
 
-typedef int db_result_row_callback(char *row[], char *fields[], int num_fields, void *user_data);
+typedef int db_result_row_callback(std::vector<std::string> *row, std::vector<std::string> *columns, void *user_data);
 
 class DB {
  private:

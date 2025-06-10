@@ -930,7 +930,6 @@
 #define CONST_MAX_INACTIVE_HOSTS_MAC_QUEUE_LEN 32768
 
 #define CONST_MAX_ES_MSG_QUEUE_LEN 8192
-#define CONST_MAX_MYSQL_QUEUE_LEN 8192
 #define CONST_MAX_NUM_READ_ALERTS 32
 #define CONST_MAX_ACTIVITY_DURATION 86400 /* sec */
 #define CONST_TREND_TIME_GRANULARITY 1    /* sec */
@@ -1080,59 +1079,8 @@
 #define MAX_NUM_CATEGORIES 3
 #define NTOP_UNKNOWN_CATEGORY_STR "???"
 #define NTOP_UNKNOWN_CATEGORY_ID 0
-// MySQL-related defined
-#define MYSQL_MAX_NUM_FIELDS 255
-#define MYSQL_MAX_NUM_ROWS 1000
-#define MYSQL_MAX_QUEUE_LEN 2048
 
-#ifdef NTOPNG_PRO
-#define MYSQL_TOP_TALKERS_CONSOLIDATION_FREQ 20
-#define MYSQL_TOP_TALKERS_TRIGGER_NAME "trigger_talkersv4"
-#define MYSQL_TOP_TALKERS_CACHE_TABLE "cache_talkersv4"
-#define MYSQL_TOP_TALKERS_5MIN_TABLE "talkersv4"
-#define MYSQL_TOP_TALKERS_HOUR_TABLE "talkersv4_hour"
-#define MYSQL_TOP_TALKERS_DAY_TABLE "talkersv4_day"
-
-#define MYSQL_INSERT_PROFILE ",PROFILE"
-#define MYSQL_PROFILE_VALUE ",'%s'"
-#else
-#define MYSQL_INSERT_PROFILE ""
-#define MYSQL_PROFILE_VALUE ""
-#endif
-
-#define MYSQL_DROP_NPROBE_VIEW "DROP VIEW IF EXISTS `flowsv%hu`"
-#define MYSQL_CREATE_NPROBE_VIEW                                              \
-  "CREATE VIEW `flowsv%hu` AS "                                               \
-  "SELECT idx, "                                                              \
-  "SRC_VLAN AS VLAN_ID, L7_PROTO, "                                           \
-  "IPV%hu_SRC_ADDR AS IP_SRC_ADDR, L4_SRC_PORT, "                             \
-  "IPV%hu_DST_ADDR AS IP_DST_ADDR, L4_DST_PORT, "                             \
-  "PROTOCOL, IN_BYTES, OUT_BYTES, (IN_PKTS+OUT_PKTS) AS PACKETS, "            \
-  "FIRST_SWITCHED, LAST_SWITCHED, "                                           \
-  "'' AS INFO, '' AS `JSON`, '' AS `PROFILE`, NULL AS NTOPNG_INSTANCE_NAME, " \
-  "%u AS INTERFACE_ID "                                                       \
-  "FROM `%sflows` "                                                           \
-  "WHERE IP_PROTOCOL_VERSION=%hu "
-
-#define MYSQL_INSERT_FIELDS                                                   \
-  "(VLAN_ID,L7_PROTO,IP_SRC_ADDR,L4_SRC_PORT,IP_DST_ADDR,L4_DST_PORT,"        \
-  "PROTOCOL,"                                                                 \
-  "IN_BYTES,OUT_BYTES,PACKETS,FIRST_SWITCHED,LAST_SWITCHED,INFO,JSON,NTOPNG_" \
-  "INSTANCE_NAME,INTERFACE_ID" MYSQL_INSERT_PROFILE ")"
-#define MYSQL_INSERT_VALUES_V4                             \
-  "('%u','%u','%u','%u','%u','%u','%u',"                   \
-  "'%ju','%ju','%u','%u','%u','%s',COMPRESS('%s'), '%s', " \
-  "'%u'" MYSQL_PROFILE_VALUE ")"
-#define MYSQL_INSERT_VALUES_V6                             \
-  "('%u','%u','%s','%u','%s','%u','%u',"                   \
-  "'%ju','%ju','%u','%u','%u','%s',COMPRESS('%s'), '%s', " \
-  "'%u'" MYSQL_PROFILE_VALUE ")"
-
-#define NSERIES_DATA_RETENTION 365 /* 1 year */
-#define NSERIES_ID_SECOND 0
-#define NSERIES_ID_MINUTE 1
-#define NSERIES_ID_5_MINUTES 2
-#define NUM_NSERIES (NSERIES_ID_5_MINUTES + 1)
+#define CLICKHOUSE_MAX_NUM_ROWS_TO_LUA 1000
 
 // sqlite (StoreManager and subclasses) related fields
 #define STORE_MANAGER_MAX_QUERY 2048
