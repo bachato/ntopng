@@ -3378,11 +3378,21 @@ bool Ntop::isATrackerHost(char *host) {
 /* ******************************************* */
 
 void Ntop::initAllowedProtocolPresets() {
+  struct ndpi_detection_module_struct *ndpi_struct = ndpi_init_detection_module(NULL);
+  u_int num_protocols;
+
+  if(ndpi_struct) {
+    ndpi_finalize_initialization(ndpi_struct);
+    num_protocols = ndpi_get_num_protocols(ndpi_struct);
+    ndpi_exit_detection_module(ndpi_struct);
+  } else
+    num_protocols = ndpi_get_num_internal_protocols();
+
   for (u_int i = 0; i < device_max_type; i++) {
     DeviceProtocolBitmask *b;
 
-    ndpi_bitmask_alloc(&deviceProtocolPresets[i].clientAllowed, ndpi_get_num_internal_protocols()),
-      ndpi_bitmask_alloc(&deviceProtocolPresets[i].serverAllowed, ndpi_get_num_internal_protocols());
+    ndpi_bitmask_alloc(&deviceProtocolPresets[i].clientAllowed, num_protocols),
+      ndpi_bitmask_alloc(&deviceProtocolPresets[i].serverAllowed, num_protocols);
     
     b = getDeviceAllowedProtocols((DeviceType)i);
 
