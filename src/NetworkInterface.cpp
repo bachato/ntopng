@@ -7056,9 +7056,7 @@ void NetworkInterface::getFlowsStats(lua_State *vm) {
   lua_newtable(vm);
   for (int i = 0; i < NUM_BREEDS; i++) {
     if (stats.breeds_bytes[i] > 0)
-      lua_push_uint64_table_entry(
-				  vm,
-				  ndpi_get_proto_breed_name((ndpi_protocol_breed_t)i),
+      lua_push_uint64_table_entry(vm, ndpi_get_proto_breed_name((ndpi_protocol_breed_t)i),
 				  stats.breeds_bytes[i]);
   }
 
