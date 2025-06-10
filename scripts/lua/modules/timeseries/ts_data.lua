@@ -77,6 +77,13 @@ function ts_data.get_timeseries(http_context)
     local extended_times = http_context.extended
     local ts_aggregation = http_context.ts_aggregation
 
+    -- Resolve the iface:ndpi to the correct one, there are 2:
+    --  - iface:ndpi, with bytes
+    --  - iface:ndpi_full, with bytes sent and bytes rcvd
+    if ts_schema == "top:iface:ndpi" then
+        ts_schema = "top:" .. getIfacenDPITsName()
+    end
+
     local options = {
         min_num_points = 2,
         max_num_points = tonumber(http_context.limit) or 60,

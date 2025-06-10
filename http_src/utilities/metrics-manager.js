@@ -333,6 +333,10 @@ const get_current_page_source_type = () => {
 
 const get_metric_from_schema = async (http_prefix, source_type, source_array, metric_schema, metric_query, status) => {
     let metrics = await get_metrics(http_prefix, source_type, source_array, status);
+    if (metric_schema === 'top:iface:ndpi') {
+        return metrics.find((m) => m.schema == metric_schema && m.query == metric_query) ||
+            metrics.find((m) => m.schema == 'top:iface:ndpi_full' && m.query == metric_query)
+    }
     return metrics.find((m) => m.schema == metric_schema && m.query == metric_query);
 };
 
