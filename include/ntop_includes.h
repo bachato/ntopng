@@ -417,9 +417,12 @@ using namespace std;
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
 /* clickhouse-cpp */
 #include <clickhouse/client.h>
+#include <clickhouse/columns/numeric.h>
+#include <clickhouse/columns/string.h>
 #include <cstring> /* std::memcpy*/
 #include <iomanip> /* std::setfill */
 using namespace clickhouse;
+#include "FlowsTable.h"
 #include "ClickHouseImport.h"
 #include "ClickHouseDB.h"
 #include "ClickHouseAlertStore.h"
