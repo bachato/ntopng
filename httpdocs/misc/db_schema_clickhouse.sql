@@ -1,3 +1,7 @@
+/* Keep flows columns definition in sync with: */
+/* - httpdocs/misc/db_schema_clickhouse_cluster.sql */
+/* - pro/include/FlowsTable.h */
+/* - pro/src/ClickHouseDB.cpp -> ClickHouseDB::dumpFlow() */
 CREATE TABLE IF NOT EXISTS `flows` (
 `FLOW_ID` UInt64,
 `IP_PROTOCOL_VERSION` UInt8,

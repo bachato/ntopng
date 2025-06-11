@@ -1475,6 +1475,9 @@ extern NtopngLuaContext* getUserdata(struct lua_State *vm);
 #define CLICKHOUSE_MAX_NUM_DUMPED_LINES 50000
 #define CLICKHOUSE_PREFIX "clickhouse"
 
+#define CLICKHOUSE_MAX_DUMP_BLOCKS 120
+#define CLICKHOUSE_MAX_DUMP_ROWS_PER_BLOCK 50000
+
 /* Trailers must have the same lenght */
 #define CSV_TRAILER ".csv"
 #define TMP_TRAILER ".tmp"
