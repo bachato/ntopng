@@ -46,19 +46,19 @@ PcapInterface::PcapInterface(const char *name, u_int8_t ifIdx,
   memset(&last_pcap_stat, 0, sizeof(last_pcap_stat));
   emulate_traffic_directions = false;
   read_pkts_from_pcap_dump = read_pkts_from_pcap_dump_done = false,
-    read_from_stdin_pipe = false;
+    read_pkts_from_directory = false, read_from_stdin_pipe = false;
 
   firstPktTS.tv_sec = 0;
   pcap_path = NULL;
   iface_datalink[0] = DLT_EN10MB; /* default */
 
-  if ((stat(name, &buf) == 0) || (name[0] == '-') ||
-      !strncmp(name, "stdin", 5)) {
-    /*
-      The file exists so we need to check if it's a
-      text file or a pcap file
-    */
+  if ((stat(name, &buf) == 0)
+      || (name[0] == '-')
+      || (!strncmp(name, "stdin", 5))) {
+    /* The file exists so we need to check if it's a text file or a pcap file */
 
+    num_ifaces = 1;
+    
     if (strcmp(name, "-") == 0 || !strncmp(name, "stdin", 5)) {
       /* stdin */
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "Reading packets from stdin...");
@@ -69,7 +69,6 @@ PcapInterface::PcapInterface(const char *name, u_int8_t ifIdx,
       is_traffic_mirrored = true;
       emulate_traffic_directions = true;
       read_from_stdin_pipe = true;
-      num_ifaces = 1;
     } else if ((pcap_handle[0] = pcap_open_offline(ifname, pcap_error_buffer)) != NULL) {
       char *slash = strrchr(ifname, '/');
 
@@ -84,17 +83,51 @@ PcapInterface::PcapInterface(const char *name, u_int8_t ifIdx,
       read_pkts_from_pcap_dump = true,
 	purge_idle_flows_hosts = ntop->getPrefs()->purgeHostsFlowsOnPcapFiles();
       iface_datalink[0] = pcap_datalink(pcap_handle[0]);
-      num_ifaces = 1;
     } else {
-      /* Trying to open a playlist */
-      if ((pcap_list = fopen(name, "r")) != NULL) {
-        read_pkts_from_pcap_dump = true;
+      bool is_dir = ((stat(ifname, &buf) == 0) && (S_ISDIR(buf.st_mode))) ? true : false;
+
+      if(is_dir) {
+	read_pkts_from_pcap_dump = true, read_pkts_from_directory = true;
+	loadPcapFilesFromDir();
       } else {
-        ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to open file %s", name);
-        exit(0);
+	/* Trying to open a playlist */
+	if ((pcap_list = fopen(ifname, "r")) != NULL) {
+	  if (pcap_list != NULL) {
+	    char path[256], *fname;
+
+	    while ((fname = fgets(path, sizeof(path), pcap_list)) != NULL) {
+	      int l = (int)strlen(path) - 1;
+
+	      if ((l <= 1) || (path[0] == '#')) continue;
+	      path[l--] = '\0';
+
+	      /* Remove trailer white spaces */
+	      while ((l > 0) && (path[l] == ' ')) path[l--] = '\0';
+
+	      while (l > 0) {
+		if (!isascii(path[l--])) {
+		  /* This looks like a bad file */
+		  fname = NULL;
+		  break;
+		}
+	      }
+
+	      pcap_files_queue.push_back(std::string(path));
+	      // ntop->getTrace()->traceEvent(TRACE_NORMAL, "****** Will read from %s", path);
+	    }
+
+	    fclose(pcap_list);
+	  }
+
+	  read_pkts_from_pcap_dump = true;
+	} else {
+	  ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to open file %s", name);
+	  exit(0);
+	}
       }
     }
   } else {
+    /* Multiple interface, example lo0,en0 */
     char dev_names[64], *dev;
 
     snprintf(dev_names, sizeof(dev_names), "%s", ifname);
@@ -102,7 +135,8 @@ PcapInterface::PcapInterface(const char *name, u_int8_t ifIdx,
 
     while(dev != NULL) {
       if(num_ifaces == MAX_NUM_PCAP_INTERFACES) {
-	ntop->getTrace()->traceEvent(TRACE_WARNING, "Too many interfaces (%d) in %s: skipping", num_ifaces, ifname);
+	ntop->getTrace()->traceEvent(TRACE_WARNING, "Too many interfaces (%d) in %s: skipping",
+				     num_ifaces, ifname);
 	break;
       }
 
@@ -216,9 +250,11 @@ static bool idle_flow_account(GenericHashEntry *h, void *user_data, bool *matche
 
 static void *packetPollLoop(void *ptr) {
   PcapInterface *iface = (PcapInterface *)ptr;
-  FILE *pcap_list = iface->get_pcap_list();
+  std::vector<std::string> *pcap_files_queue = iface->get_pcap_files_queue();
   int fds[MAX_NUM_PCAP_INTERFACES] = { -1 };
-
+  std::string curr_file;
+  const char *fname;
+  
   /* Wait until the initialization completes */
   while (iface->isStartingUp()) sleep(1);
 
@@ -244,49 +280,45 @@ static void *packetPollLoop(void *ptr) {
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "Processing pcap file");
   }
 
-  do {
-    if (pcap_list != NULL) {
-      char path[256], *fname;
-      pcap_t *file_pcap_handle;
+  while(iface->isRunning() && (!ntop->getGlobals()->isShutdown())) {
+    if(iface->readFromPcapDump() && (pcap_files_queue != NULL)) {
+      if(pcap_files_queue->size() == 0) {
+	if(iface->readFromPcapDir()) {
+	  if(iface->loadPcapFilesFromDir() == false) {
+	    /* No file to process */
+	    sleep(1);
+	  } else {
+	    /* Some new file to process */
+	  }
 
-      while ((fname = fgets(path, sizeof(path), pcap_list)) != NULL) {
-        char pcap_error_buffer[PCAP_ERRBUF_SIZE];
-        int l = (int)strlen(path) - 1;
+	  continue;
+	} else {
+	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "No more pcap files to read");
+	  break;
+	}
+      } else {
+	curr_file = pcap_files_queue->front();
+	fname = curr_file.c_str();
 
-        if ((l <= 1) || (path[0] == '#')) continue;
-        path[l--] = '\0';
-
-        /* Remove trailer white spaces */
-        while ((l > 0) && (path[l] == ' ')) path[l--] = '\0';
-
-        while (l > 0) {
-          if (!isascii(path[l--])) {
-            /* This looks like a bad file */
-            fname = NULL;
-            break;
-          }
-        }
-
+	pcap_files_queue->erase(pcap_files_queue->begin()); /* Remove head */
+	
         if (fname != NULL) {
-          if ((file_pcap_handle = pcap_open_offline(path, pcap_error_buffer)) ==  NULL) {
+	  char pcap_error_buffer[PCAP_ERRBUF_SIZE];
+	  pcap_t *file_pcap_handle;
+	  
+          if ((file_pcap_handle = pcap_open_offline(fname, pcap_error_buffer)) ==  NULL) {
             ntop->getTrace()->traceEvent(TRACE_ERROR,
-                                         "Unable to open file '%s': %s", path,
+                                         "Unable to open file '%s': %s", fname,
                                          pcap_error_buffer);
+	    continue;
           } else {
-            ntop->getTrace()->traceEvent(TRACE_NORMAL, "Reading packets from pcap file %s", path);
+            ntop->getTrace()->traceEvent(TRACE_NORMAL, "Reading packets from pcap file %s", fname);
             iface->set_pcap_handle(file_pcap_handle, 0);
-            break;
+	    iface->set_datalink(pcap_datalink(file_pcap_handle));
           }
         } else
-          break;
+          continue;
       }
-
-      if (fname == NULL) {
-        ntop->getTrace()->traceEvent(TRACE_NORMAL, "No more pcap files to read");
-        fclose(pcap_list);
-        break;
-      } else
-        iface->set_datalink(pcap_datalink(file_pcap_handle));
     }
 
     /* Wait until the interface is active */
@@ -316,104 +348,93 @@ static void *packetPollLoop(void *ptr) {
 #endif
 
     while (iface->isRunning() && (!ntop->getGlobals()->isShutdown())) {
-	int max_fd = 0;
+      int max_fd = 0;
 #ifndef WIN32
-	fd_set rset;
-	struct timeval tv;
-	bool do_break = false;
+      fd_set rset;
+      struct timeval tv;
+      bool do_break = false;
 #ifdef DEBUG_POLLING
-	bool found = false;
+      bool found = false;
 #endif
 
-	FD_ZERO(&rset);
+      FD_ZERO(&rset);
 
-	for(u_int8_t i=0; i < iface->get_num_ifaces(); i++) {
-	  FD_SET(fds[i], &rset);
+      for(u_int8_t i=0; i < iface->get_num_ifaces(); i++) {
+	FD_SET(fds[i], &rset);
 
-	  if(fds[i] > max_fd) max_fd = fds[i];
-	}
+	if(fds[i] > max_fd) max_fd = fds[i];
+      }
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
-	/*
-	  On some, but not all, platforms, if a packet buffer timeout was specified,
-	  the wait will terminate after the packet buffer timeout expires; applications
-	  should be prepared for this, as it happens on some platforms, but should not
-	  rely on it, as it does not happen on other platforms. Note that the wait might,
-	  or might not, terminate even if no packets are available; applications should
-	  be prepared for this to happen, but must not rely on it happening.
+      /*
+	On some, but not all, platforms, if a packet buffer timeout was specified,
+	the wait will terminate after the packet buffer timeout expires; applications
+	should be prepared for this, as it happens on some platforms, but should not
+	rely on it, as it does not happen on other platforms. Note that the wait might,
+	or might not, terminate even if no packets are available; applications should
+	be prepared for this to happen, but must not rely on it happening.
 
-	  A handle can be put into ``non-blocking mode'', so that those routines will,
-	  rather than blocking, return an indication that no packets are available to read.
-	  Call pcap_setnonblock() to put a handle into non-blocking mode or to take it out
-	  of non-blocking mode; call pcap_getnonblock() to determine whether a
-	  handle is in non-blocking mode.
-	*/
-	tv.tv_sec = 0, tv.tv_usec = 10000 /* it must be < pcap_open_live() timeout */;
+	A handle can be put into ``non-blocking mode'', so that those routines will,
+	rather than blocking, return an indication that no packets are available to read.
+	Call pcap_setnonblock() to put a handle into non-blocking mode or to take it out
+	of non-blocking mode; call pcap_getnonblock() to determine whether a
+	handle is in non-blocking mode.
+      */
+      tv.tv_sec = 0, tv.tv_usec = 10000 /* it must be < pcap_open_live() timeout */;
 #else
-	tv.tv_sec = 1, tv.tv_usec = 0;
+      tv.tv_sec = 1, tv.tv_usec = 0;
 #endif
 
-	if(select(max_fd + 1, &rset, NULL, NULL, &tv) == 0) {
-#ifdef DEBUG_POLLING
-	  ntop->getTrace()->traceEvent(TRACE_WARNING, "No packet to process");
-#endif
-
-	  for(u_int8_t i=0; i < iface->get_num_ifaces(); i++) {
-	    if(!iface->read_from_stdin() &&
-               !Utils::nwInterfaceExists(iface->getPcapIfaceName(i))) {
-	      ntop->getTrace()->traceEvent(TRACE_WARNING,
-					   "Network Interface %s (id %d) disappeared (is it is down ?)",
-					   iface->getPcapIfaceName(i), i);
-	      iface->reopen(i); /* Try to reopen the interface that disappeared */
-	    }
-
-	    iface->purgeIdle(time(NULL));
-	  } /* for */
-
-#if !(defined(__APPLE__) || defined(__FreeBSD__))
-	  continue;
-#endif
-	}
-
-	if(iface->idle())
-	  continue;
-
+      if(select(max_fd + 1, &rset, NULL, NULL, &tv) == 0) {
 	for(u_int8_t i=0; i < iface->get_num_ifaces(); i++) {
-#if !(defined(__APPLE__) || defined(__FreeBSD__))
-	  if(FD_ISSET(fds[i], &rset))
-#endif
-	    {
-#ifdef DEBUG_POLLING
-	    ntop->getTrace()->traceEvent(TRACE_WARNING, "processNextPacket(%d)", i);
-#endif
+	  if(!iface->read_from_stdin() &&
+	     !Utils::nwInterfaceExists(iface->getPcapIfaceName(i))) {
+	    ntop->getTrace()->traceEvent(TRACE_WARNING,
+					 "Network Interface %s (id %d) disappeared (is it is down ?)",
+					 iface->getPcapIfaceName(i), i);
+	    iface->reopen(i); /* Try to reopen the interface that disappeared */
+	  }
 
+	  iface->purgeIdle(time(NULL));
+	} /* for */
+
+#if !(defined(__APPLE__) || defined(__FreeBSD__))
+	continue;
+#endif
+      }
+
+      if(iface->idle())
+	continue;
+
+      for(u_int8_t i=0; i < iface->get_num_ifaces(); i++) {
+#if !(defined(__APPLE__) || defined(__FreeBSD__))
+	if(FD_ISSET(fds[i], &rset))
+#endif
+	  {
 	    if(iface->processNextPacket(iface->get_pcap_handle(i),
 					iface->get_ifindex(i),
 					iface->get_ifdatalink(i)) == false) {
 	      do_break = true;
 	      break;
 	    }
-#ifdef DEBUG_POLLING
-	    found = true;
-#endif
 	  }
-	}
+      }
 
-#ifdef DEBUG_POLLING
-	if(!found)
-	  ntop->getTrace()->traceEvent(TRACE_WARNING, "**** NO packet");
-#endif
-	if(do_break)
-	  break;
+      if(do_break) {
+	if(iface->readFromPcapDir()) {
+	  /* Delete the processed file */
+	  ::unlink(fname);
+	}
+	break;
+      }
 #else
-	if(iface->processNextPacket(iface->get_pcap_handle(0),
-				     iface->get_ifindex(0),
-				     iface->get_ifdatalink(0)) == false)
-	  break;
+      if(iface->processNextPacket(iface->get_pcap_handle(0),
+				  iface->get_ifindex(0),
+				  iface->get_ifdatalink(0)) == false)
+	break;
 #endif
     } /* while */
-
-  } while (pcap_list != NULL);
+  } /* while */
 
   if(iface->read_from_pcap_dump()) {
     FlowHash *fh = iface->get_flows_hash();
@@ -581,7 +602,7 @@ bool PcapInterface::reproducePcapOriginalSpeed() const {
 
 bool PcapInterface::reopen(u_int8_t iface_id) {
   pcap_close(pcap_handle[iface_id]);
-
+  
   Utils::gainWriteCapabilities();
 
   while(!ntop->getGlobals()->isShutdown()) {
@@ -721,3 +742,53 @@ bool PcapInterface::processNextPacket(pcap_t *pd, int32_t if_index, int datalink
 }
 
 #endif
+
+/* *********************************************** */
+
+static int alphasort_case_insensitive(const struct dirent ** a,
+				      const struct dirent **b) {
+  return(strcasecmp((*(const struct dirent **)a)->d_name,
+		    (*(const struct dirent **)b)->d_name));
+}
+
+/* **************************************************** */
+
+bool PcapInterface::loadPcapFilesFromDir() {
+  int fnum;
+  struct dirent **pent;
+  const char *pcap_extn = ".pcap";
+  
+  ntop->getTrace()->traceEvent(TRACE_INFO, "Scanning %s", ifname);
+
+  fnum = scandir(ifname, &pent, NULL, alphasort_case_insensitive);
+
+  if(fnum <= 0) {
+    return(0);
+  } else {
+    int i;
+
+    for(i = 0; i < fnum; i++) {
+      char buf[600];
+      struct stat st;
+      struct dirent *dp = pent[i];
+
+      snprintf(buf, sizeof(buf)-1, "%s/%s", ifname, dp->d_name);
+
+      if(dp->d_name[0] != '.') {
+	if(strcmp(&dp->d_name[strlen(dp->d_name)-strlen(pcap_extn)], pcap_extn) == 0) {
+	  pcap_files_queue.push_back(std::string(buf));
+	} else if(stat(buf, &st) == 0 /* OK */) {	  
+	  ntop->getTrace()->traceEvent(TRACE_INFO, "Skipping file %s: invalid extension", dp->d_name);
+	} else {
+	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Skipping file %s", dp->d_name);
+	}
+      }
+
+      free(dp);
+    } /* for() */
+
+    free(pent);
+  }
+
+  return(pcap_files_queue.size() > 0 ? true : false);
+}

@@ -33,12 +33,12 @@ class PcapInterface : public NetworkInterface {
   int iface_datalink[MAX_NUM_PCAP_INTERFACES];
   char *pcap_path;
   bool read_pkts_from_pcap_dump, read_pkts_from_pcap_dump_done,
-    emulate_traffic_directions, read_from_stdin_pipe,
+    read_pkts_from_directory, emulate_traffic_directions, read_from_stdin_pipe,
     delete_pcap_when_done;
   ProtoStats prev_stats_in, prev_stats_out;
   FILE *pcap_list;
   struct timeval startTS, firstPktTS;
-  
+  std::vector<std::string> pcap_files_queue;
   pcap_stat last_pcap_stat;
   u_int32_t getNumDroppedPackets();
   void cleanupPcapDumpDir();
@@ -74,7 +74,7 @@ class PcapInterface : public NetworkInterface {
     return (emulate_traffic_directions);
   };
   inline void set_pcap_handle(pcap_t *p, u_int8_t id) { if(id < num_ifaces) pcap_handle[id] = p; };
-  inline FILE *get_pcap_list() { return (pcap_list); };
+  inline std::vector<std::string>* get_pcap_files_queue() { return (&pcap_files_queue); };
   void startPacketPolling();
   bool set_packet_filter(char *filter);
   bool read_from_stdin() const { return (read_from_stdin_pipe); };
@@ -92,6 +92,9 @@ class PcapInterface : public NetworkInterface {
   unsigned int get_ifindex(int i) { return(ifname_indexes[i]); }
   int get_ifdatalink(int i)       { return(iface_datalink[i]); }
   char* getPcapIfaceName(int i)   { return(pcap_ifaces[i]);    }
+  inline bool readFromPcapDump()  { return(read_pkts_from_pcap_dump); }
+  inline bool readFromPcapDir()   { return(read_pkts_from_directory); }
+  bool loadPcapFilesFromDir();
 };
 
 #endif /* _PCAP_INTERFACE_H_ */
