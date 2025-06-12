@@ -293,8 +293,7 @@ static void *packetPollLoop(void *ptr) {
 
 	  continue;
 	} else {
-	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "No more pcap files to read");
-	  break;
+	  /* We're reading a pcap file */
 	}
       } else {
 	curr_file = pcap_files_queue->front();
