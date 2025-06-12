@@ -1649,7 +1649,8 @@ static int ntop_get_interface_hosts(lua_State *vm) {
 
 static int ntop_get_batched_interface_hosts(lua_State *vm,
                                             LocationPolicy location,
-                                            bool tsLua = false) {
+                                            bool tsLua = false,
+                                            bool get_checkpoint_only = false) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
   bool show_details = true, filtered_hosts = false, blacklisted_hosts = false;
   char *sortColumn = (char *)"column_ip", *country = NULL, *mac_filter = NULL;
@@ -1692,7 +1693,7 @@ static int ntop_get_batched_interface_hosts(lua_State *vm,
 					 traffic_type_filter, 0 /* probe ip */,
 					 tsLua /* host->tsLua | host->lua */, anomalousOnly, dhcpOnly,
 					 NULL /* cidr filter */, sortColumn, maxHits, toSkip,
-					 a2zSortOrder, false) < 0)
+					 a2zSortOrder, false, get_checkpoint_only) < 0)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -4215,20 +4216,20 @@ static int ntop_get_rxonly_hosts_list(lua_State *vm) {
 /* ****************************************** */
 
 static int ntop_get_batched_interface_hosts_info(lua_State *vm) {
-  return (ntop_get_batched_interface_hosts(vm, location_all));
+  return (ntop_get_batched_interface_hosts(vm, location_all, false, true));
 }
 
 static int ntop_get_batched_interface_local_hosts_info(lua_State *vm) {
-  return (ntop_get_batched_interface_hosts(vm, location_local_only));
+  return (ntop_get_batched_interface_hosts(vm, location_local_only, false, false));
 }
 
 static int ntop_get_batched_interface_remote_hosts_info(lua_State *vm) {
-  return (ntop_get_batched_interface_hosts(vm, location_remote_only));
+  return (ntop_get_batched_interface_hosts(vm, location_remote_only, false, false));
 }
 
 static int ntop_get_batched_interface_local_hosts_ts(lua_State *vm) {
   return (ntop_get_batched_interface_hosts(vm, location_local_only,
-                                           true /* timeseries */));
+                                           true /* timeseries */, false));
 }
 
 /* ****************************************** */
@@ -4578,36 +4579,6 @@ static int ntop_rrd_queue_length(lua_State *vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
   lua_pushinteger(vm, ts_exporter->queueLength());
-
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
-}
-
-/* ****************************************** */
-
-static int ntop_checkpoint_host_talker(lua_State *vm) {
-  int ifid;
-  NetworkInterface *iface = NULL;
-  char *host_ip;
-  u_int16_t vlan_id = 0;
-  char buf[64];
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-
-  ifid = (int)lua_tointeger(vm, 1);
-  iface = ntop->getInterfaceById(ifid);
-
-  get_host_vlan_info((char *)lua_tostring(vm, 2), &host_ip, &vlan_id, buf,
-                     sizeof(buf));
-
-  if (iface && !iface->isViewed())
-    iface->checkPointHostTalker(vm, host_ip, vlan_id);
-  else
-    lua_pushnil(vm);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
@@ -5697,7 +5668,6 @@ static luaL_Reg _ntop_interface_reg[] = {
     {"getNetworksStats", ntop_get_interface_networks_stats},
     {"getLocalServerPorts", ntop_get_local_server_ports},
     {"getNetworkStats", ntop_get_interface_network_stats},
-    {"checkpointHostTalker", ntop_checkpoint_host_talker},
     {"getFlowsInfo", ntop_get_interface_flows_info},
     {"getGroupedFlows", ntop_get_interface_get_grouped_flows},
     {"getFlowsStats", ntop_get_interface_flows_stats},

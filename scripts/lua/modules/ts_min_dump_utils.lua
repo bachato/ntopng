@@ -592,23 +592,6 @@ end
 
 -- ########################################################
 
-local function dumpTopTalkers(_ifname, ifstats, verbose)
-    local top_talkers_utils = require "top_talkers_utils"
-    -- Dump topTalkers every minute
-    local talkers = top_talkers_utils.makeTopJson(_ifname)
-
-    if talkers then
-        if (verbose) then
-            print("Computed talkers for interfaceId " .. ifstats.id .. "/" .. ifstats.name .. "\n")
-            print(talkers)
-        end
-
-        ntop.insertMinuteSampling(ifstats.id, talkers)
-    end
-end
-
--- ########################################################
-
 function ts_dump.iface_update_anomalies(when, ifstats, verbose)
     if not ifstats.isViewed then
         ts_utils.append("iface:hosts_anomalies", {
@@ -623,7 +606,6 @@ end
 
 function ts_dump.run_min_dump(_ifname, ifstats, when, verbose)
     local config = getMinTSConfig()
-    dumpTopTalkers(_ifname, ifstats, verbose)
 
     local iface_rrd_creation_enabled = areInterfaceTimeseriesEnabled(ifstats.id)
 

@@ -213,31 +213,6 @@ function callback_utils.foreachHost(ifname, callback)
    return true
 end
 
--- ########################################################
-
--- Iterates each active host on the ifname interface.
--- Each host is passed to the callback with some more information.
-function callback_utils.foreachLocalHost(ifname, callback)
-   interface.select(ifname)
-
-   local iterator = callback_utils.getLocalHostsIterator(false --[[ no details ]])
-
-   for hostname, hoststats in iterator do
-      if(ntop.isShuttingDown()) then return true end
-
-      if ntop.isDeadlineApproaching() then
-	 -- Out of time
-	 return false
-      end
-
-      if callback(hostname, hoststats) == false then
-	 return false
-      end
-   end
-
-   return true
-end
-
 -- Iterates each device on the ifname interface.
 -- Each device is passed to the callback with some more information.
 function callback_utils.foreachDevice(ifname, callback)

@@ -399,6 +399,7 @@ async function set_template(report_template) {
         /* Report name provided - open a report backup */
         await open_report(report_name);
     } else {
+        debugger;
         /* Load a template and build a new report */
         await load_components(epoch_interval, selected_report_template.value.value);
     }
@@ -448,6 +449,7 @@ async function set_templates_list(report_template) {
         ntopng_url_manager.get_url_entry("report_template") ||
         props.context.template;
 
+        debugger;
     props.context.template = report_template_value;
     selected_report_template.value = reports_templates.value.find((t) => t.value == report_template_value);
 

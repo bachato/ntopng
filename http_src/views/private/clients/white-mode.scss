@@ -11,6 +11,16 @@
   --ntop-blue-dark: #101F27;
 }
 
+/* White-Mode */
+:root[data-theme='light'] {
+  --ntop-text-color: #111111;
+}
+
+/* Dark-Mode */
+:root[data-theme='dark'] {
+  --ntop-text-color: #e2e2e2;
+}
+
 a,
 .btn-link {
   text-decoration: none;

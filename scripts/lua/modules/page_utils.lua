@@ -1043,6 +1043,10 @@ function page_utils.print_header(title, addLoginJS)
     const http_prefix = "]]
     print(ntop.getHttpPrefix())
     print [[";
+    const mode = "]]
+    print(dark_mode and "dark" or "light")
+    print [[";
+    document.documentElement.setAttribute('data-theme', mode);
     </script>
     </head>]]
     print([[

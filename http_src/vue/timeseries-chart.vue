@@ -164,6 +164,7 @@ export default {
 </script>
 
 <style>
+
 .dygraph-legend {
 	color: #111111;
 	background-color: #FFFFFF !important;
@@ -189,5 +190,12 @@ export default {
 
 .dygraph-legend>span:first-child {
 	margin-top: 2px;
+}
+
+.dygraph-axis-label {
+  z-index: 10;
+  line-height: normal;
+  overflow: hidden;
+  color: var(--ntop-text-color);
 }
 </style>

@@ -5311,48 +5311,37 @@ static int ntop_stats_get_minute_samplings_interval(lua_State *vm) {
  * otherwise.
  */
 static int ntop_stats_get_samplings_of_minutes_from_epoch(lua_State *vm) {
-  time_t epoch_start, epoch_end;
-  int num_minutes;
-  int ifid;
-  NetworkInterface *iface;
-  StatsManager *sm;
-  struct statsManagerRetrieval retvals;
+    time_t epoch_start, epoch_end;
+    NetworkInterface *iface = getCurrentInterface(vm);
+    StatsManager *sm;
+    struct statsManagerRetrieval retvals;
 
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+    ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  ifid = lua_tointeger(vm, 1);
-  if (ifid < 0)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
+        return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    epoch_end = lua_tointeger(vm, 1);
+    /* Round at the closest hour */
+    epoch_end -= (epoch_end % 60);
 
-  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  epoch_end = lua_tointeger(vm, 2);
-  epoch_end -= (epoch_end % 60);
-  if (epoch_end < 0)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  if (ntop_lua_check(vm, __FUNCTION__, 3, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  num_minutes = lua_tointeger(vm, 3);
-  if (num_minutes < 0)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TNUMBER) != CONST_LUA_OK)
+        return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    epoch_start = lua_tointeger(vm, 2);
+    /* Round at the closest hour */
+    epoch_start -= (epoch_start % 60);
 
-  if (!(iface = ntop->getInterfaceById(ifid)) ||
-      !(sm = iface->getStatsManager()))
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    if (!(sm = iface->getStatsManager()))
+        return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
-  epoch_start = epoch_end - (60 * num_minutes);
+    if (sm->retrieveMinuteStatsInterval(epoch_start, epoch_end, &retvals))
+        return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
-  if (sm->retrieveMinuteStatsInterval(epoch_start, epoch_end, &retvals))
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    lua_newtable(vm);
 
-  lua_newtable(vm);
+    for (unsigned i = 0; i < retvals.rows.size(); i++)
+        lua_push_str_table_entry(vm, retvals.rows[i].c_str(), (char *)"");
 
-  for (unsigned i = 0; i < retvals.rows.size(); i++)
-    lua_push_str_table_entry(vm, retvals.rows[i].c_str(), (char *)"");
-
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
 /* ****************************************** */
@@ -5369,48 +5358,37 @@ static int ntop_stats_get_samplings_of_minutes_from_epoch(lua_State *vm) {
  * otherwise.
  */
 static int ntop_stats_get_samplings_of_hours_from_epoch(lua_State *vm) {
-  time_t epoch_start, epoch_end;
-  int num_hours;
-  int ifid;
-  NetworkInterface *iface;
-  StatsManager *sm;
-  struct statsManagerRetrieval retvals;
+    time_t epoch_start, epoch_end;
+    NetworkInterface *iface = getCurrentInterface(vm);
+    StatsManager *sm;
+    struct statsManagerRetrieval retvals;
 
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+    ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  ifid = lua_tointeger(vm, 1);
-  if (ifid < 0)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
+        return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    epoch_end = lua_tointeger(vm, 1);
+    /* Round at the closest hour */
+    epoch_end -= (epoch_end % 60);
 
-  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  epoch_end = lua_tointeger(vm, 2);
-  epoch_end -= (epoch_end % 60);
-  if (epoch_end < 0)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  if (ntop_lua_check(vm, __FUNCTION__, 3, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  num_hours = lua_tointeger(vm, 3);
-  if (num_hours < 0)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TNUMBER) != CONST_LUA_OK)
+        return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    epoch_start = lua_tointeger(vm, 2);
+    /* Round at the closest hour */
+    epoch_start -= (epoch_start % 60);
 
-  if (!(iface = ntop->getInterfaceById(ifid)) ||
-      !(sm = iface->getStatsManager()))
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    if (!(sm = iface->getStatsManager()))
+        return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
-  epoch_start = epoch_end - (num_hours * 60 * 60);
+    if (sm->retrieveHourStatsInterval(epoch_start, epoch_end, &retvals))
+        return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
-  if (sm->retrieveHourStatsInterval(epoch_start, epoch_end, &retvals))
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    lua_newtable(vm);
 
-  lua_newtable(vm);
+    for (unsigned i = 0; i < retvals.rows.size(); i++)
+        lua_push_str_table_entry(vm, retvals.rows[i].c_str(), (char *)"");
 
-  for (unsigned i = 0; i < retvals.rows.size(); i++)
-    lua_push_str_table_entry(vm, retvals.rows[i].c_str(), (char *)"");
-
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
 /* ****************************************** */
@@ -5427,48 +5405,37 @@ static int ntop_stats_get_samplings_of_hours_from_epoch(lua_State *vm) {
  * otherwise.
  */
 static int ntop_stats_get_samplings_of_days_from_epoch(lua_State *vm) {
-  time_t epoch_start, epoch_end;
-  int num_days;
-  int ifid;
-  NetworkInterface *iface;
-  StatsManager *sm;
-  struct statsManagerRetrieval retvals;
+    time_t epoch_start, epoch_end;
+    NetworkInterface *iface = getCurrentInterface(vm);
+    StatsManager *sm;
+    struct statsManagerRetrieval retvals;
 
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+    ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  ifid = lua_tointeger(vm, 1);
-  if (ifid < 0)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
+        return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    epoch_end = lua_tointeger(vm, 1);
+    /* Round at the closest hour */
+    epoch_end -= (epoch_end % 60);
 
-  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  epoch_end = lua_tointeger(vm, 2);
-  epoch_end -= (epoch_end % 60);
-  if (epoch_end < 0)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  if (ntop_lua_check(vm, __FUNCTION__, 3, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  num_days = lua_tointeger(vm, 3);
-  if (num_days < 0)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TNUMBER) != CONST_LUA_OK)
+        return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    epoch_start = lua_tointeger(vm, 2);
+    /* Round at the closest hour */
+    epoch_start -= (epoch_start % 60);
 
-  if (!(iface = ntop->getInterfaceById(ifid)) ||
-      !(sm = iface->getStatsManager()))
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    if (!(sm = iface->getStatsManager()))
+        return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
-  epoch_start = epoch_end - (num_days * 24 * 60 * 60);
+    if (sm->retrieveDayStatsInterval(epoch_start, epoch_end, &retvals))
+        return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
-  if (sm->retrieveDayStatsInterval(epoch_start, epoch_end, &retvals))
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    lua_newtable(vm);
 
-  lua_newtable(vm);
+    for (unsigned i = 0; i < retvals.rows.size(); i++)
+        lua_push_str_table_entry(vm, retvals.rows[i].c_str(), (char *)"");
 
-  for (unsigned i = 0; i < retvals.rows.size(); i++)
-    lua_push_str_table_entry(vm, retvals.rows[i].c_str(), (char *)"");
-
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
 /* ****************************************** */

@@ -4534,7 +4534,7 @@ static bool find_host_by_name(GenericHashEntry *h, void *user_data,
   ntop->getTrace()->traceEvent(
 			       TRACE_WARNING, "[%s][%s][%s]",
 			       host->get_ip() ? host->get_ip()->print(buf, sizeof(buf)) : "",
-			       host->get_name(), info->host_to_find);
+			       host->get_name(buf, sizeof(buf), false), info->host_to_find);
 #endif
 
   if ((info->h == NULL)
@@ -4656,6 +4656,10 @@ Host *NetworkInterface::getHost(char *host_ip, u_int16_t vlan_id,
 
   if (!host_ip) return (NULL);
 
+ntop->getTrace()->traceEvent(TRACE_WARNING,
+            "[%s][%d][%d]",
+            host_ip, vlan_id,
+            observation_point_id);
   /* Check if address is invalid */
   if ((inet_pton(AF_INET, (const char *)host_ip, &a4) == 0) &&
       (inet_pton(AF_INET6, (const char *)host_ip, &a6) == 0)) {
@@ -4791,20 +4795,6 @@ void NetworkInterface::checkReloadHostsBroadcastDomain() {
       hosts_bcast_domain_last_update = bcast_domains_last_update;
   else if (reload_hosts_bcast_domain)
     reload_hosts_bcast_domain = false;
-}
-
-/* **************************************************** */
-
-void NetworkInterface::checkPointHostTalker(lua_State *vm, char *host_ip,
-                                            u_int16_t vlan_id) {
-  Host *h;
-
-  if (host_ip &&
-      (h = getHost(host_ip, vlan_id, getLuaVMUservalue(vm, observationPointId),
-                   false /* Not an inline call */)))
-    h->checkpoint(vm);
-  else
-    lua_pushnil(vm);
 }
 
 /* **************************************************** */
@@ -6824,7 +6814,7 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
 					 TrafficType traffic_type_filter, u_int32_t device_ip, bool tsLua,
 					 bool anomalousOnly, bool dhcpOnly, const AddressTree *const cidr_filter,
 					 char *sortColumn, u_int32_t maxHits, u_int32_t toSkip, bool a2zSortOrder,
-					 bool useArrayFormat) {
+					 bool useArrayFormat, bool getCheckpointOnly) {
   struct flowHostRetriever retriever;
   int count = 1;
 #ifdef NTOPNG_PRO
@@ -6874,14 +6864,15 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
       if (h != NULL) {
         if (!tsLua) {
           if(useArrayFormat) {
-            h->lua(vm, NULL /* Already checked */, host_details, false, false,
-                 false);
+            h->lua(vm, NULL /* Already checked */, host_details, false, false, false);
             lua_pushinteger(vm, count++);
             lua_insert(vm, -2);
             lua_settable(vm, -3);
           } else {
-            h->lua(vm, NULL /* Already checked */, host_details, false, false,
-                 true);
+            (getCheckpointOnly) ? 
+                h->checkpoint(vm) :
+                h->lua(vm, NULL /* Already checked */, host_details, false, false,
+                    true);
           }
         }
         else
@@ -6896,14 +6887,15 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
       if(h != NULL) {
         if (!tsLua) {
           if(useArrayFormat) {
-            h->lua(vm, NULL /* Already checked */, host_details, false, false,
-                 false);
+            h->lua(vm, NULL /* Already checked */, host_details, false, false, false);
             lua_pushinteger(vm, count++);
             lua_insert(vm, -2);
             lua_settable(vm, -3);
           } else {
-            h->lua(vm, NULL /* Already checked */, host_details, false, false,
-                 true);
+            (getCheckpointOnly) ? 
+                h->checkpoint(vm) :
+                h->lua(vm, NULL /* Already checked */, host_details, false, false,
+                    true);
           }
         }
         else

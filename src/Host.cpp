@@ -2911,4 +2911,22 @@ void Host::setDeviceType(DeviceType devtype) {
   else
     device_type = devtype;
 }
+
+/* *************************************** */
  
+void Host::checkpoint(lua_State *vm) {
+    /* Just push the info needed by scripts/lua/modules/top_talkers_utils.lua */
+    if (stats) {
+        char buf_id[64], *host_id;
+        lua_newtable(vm);
+        lua_push_str_table_entry(vm, "tskey", get_tskey(buf_id, sizeof(buf_id)));
+        lua_push_bool_table_entry(vm, "localhost", isLocalHost());
+        lua_get_ip(vm);
+        lua_get_as(vm);
+        stats->checkpoint(vm);
+        host_id = get_hostkey(buf_id, sizeof(buf_id));
+        lua_pushstring(vm, host_id);
+        lua_insert(vm, -2);
+        lua_settable(vm, -3);
+    }
+};

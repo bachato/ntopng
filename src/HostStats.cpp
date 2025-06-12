@@ -251,7 +251,6 @@ void HostStats::checkpoint(lua_State* vm) {
   u_int64_t new_val;
 
   lua_newtable(vm);
-  lua_newtable(vm);
 
   lua_push_uint64_table_entry(
       vm, "sent", (new_val = getNumBytesSent()) - checkpoints.sent_bytes);

@@ -591,7 +591,6 @@ public:
 #ifdef NTOPNG_PRO
   void flushFlowDump();
 #endif
-  void checkPointHostTalker(lua_State *vm, char *host_ip, u_int16_t vlan_id);
   inline void incRetransmittedPkts(u_int32_t num) {
     tcpPacketStats.incRetr(num);
   };
@@ -813,7 +812,8 @@ public:
 			 bool blacklisted_hosts, u_int8_t ipver_filter, int proto_filter,
 			 TrafficType traffic_type_filter, u_int32_t device_ip, bool tsLua,
 			 bool anomalousOnly, bool dhcpOnly, const AddressTree *const cidr_filter,
-			 char *sortColumn, u_int32_t maxHits, u_int32_t toSkip, bool a2zSortOrder, bool useArrayFormat);
+			 char *sortColumn, u_int32_t maxHits, u_int32_t toSkip, bool a2zSortOrder, bool useArrayFormat, 
+             bool getCheckpointOnly = false);
   int getActiveASList(lua_State *vm, const Paginator *p, bool diff = false);
   int getActiveObsPointsList(lua_State *vm, const Paginator *p);
   int getActiveCountriesList(lua_State *vm, const Paginator *p);

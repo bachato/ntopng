@@ -373,8 +373,7 @@ end
 local function get_top_talkers(schema_id, tags, tstart, tend, options)
     package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
     local top_utils = require "top_utils"
-    local num_minutes = math.floor((tend - tstart) / 60)
-    local top_talkers = top_utils.getAggregatedTop(getInterfaceName(ifId), tend, num_minutes)
+    local top_talkers = top_utils.getAggregatedTop(tags.ifid, tend, tstart)
     local top_series = {}
     local top_hosts = {}
     local direction = nil

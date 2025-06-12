@@ -13,9 +13,9 @@ end
 -- ###########################################
 
 function areInterfaceL7TimeseriesEnabled(ifid)
+    local l7proto_ts = ntop.getPref("ntopng.prefs.interface_ndpi_timeseries_creation")
     return (areInterfaceTimeseriesEnabled(ifid) and
-               (ntop.getPref("ntopng.prefs.interface_ndpi_timeseries_creation") ~=
-                   "per_category"))
+               (l7proto_ts ~= "per_category" and l7proto_ts ~= "none"))
 end
 
 -- ###########################################

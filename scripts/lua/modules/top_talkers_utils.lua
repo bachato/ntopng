@@ -205,39 +205,31 @@ function top_talkers_utils.makeTopJson(_ifname)
     if not top_talkers_utils.areTopEnabled(ifid) then
         return nil
     end
+    
+    if (false) then
+        print("Calculating talkers for interfaceId " .. ifid .. "\n")
+    end
 
     local in_time = callback_utils.foreachHost(_ifname, function(hostname, hoststats)
-        local checkpoint = interface.checkpointHostTalker(ifid, hostname)
         local tskey = hoststats["tskey"]
         local vlan = hoststats["vlan"]
-
+        
         updateCache(hostname_cache, tskey, hoststats["name"])
         updateCache(localhost_cache, tskey, hoststats["localhost"])
         updateCache(ipaddr_cache, tskey, hostname)
         updateCache(asname_cache, hoststats["asn"], hoststats["asname"])
 
-        if ((checkpoint == nil) or (checkpoint["delta"] == nil)) then
+        if (not hoststats["delta"] == nil) then
             goto continue
         end
 
         for _, direction in pairs({"sent", "rcvd"}) do
-            local delta = checkpoint["delta"][direction]
+            local delta = hoststats["delta"][direction]
 
             vlan_totals[vlan] = (vlan_totals[vlan] or 0) + delta
 
-            local os_key = "non-local os"
-            if hoststats["localhost"] then
-                os_key = "local os"
-            end
-
-            local country = interface.getHostCountry(hostname)
-
             for what_key, what_value in pairs({
-                ["hosts"] = tskey,
-                ["asn"] = hoststats["asn"],
-                [os_key] = hoststats["os"],
-                ["countries"] = ternary(not isEmptyString(country), country, nil),
-                ["networks"] = hoststats["local_network_id"]
+                ["hosts"] = tskey
             }) do
                 if hoststats.hiddenFromTop then
                     what_value = "Hidden Hosts"
