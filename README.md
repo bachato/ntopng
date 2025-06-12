@@ -23,7 +23,7 @@ Enjoy.
 
 ### Documentation
 
-If you want to learn more about ntopng please visit the [User's Guide](https://www.ntop.org/guides/ntopng/) and the [API Documentation](https://www.ntop.org/guides/ntopng/api/index.html).
+If you want to learn more about ntopng please visit the [User's Guide](https://www.ntop.org/guides/ntopng/) and the [API Documentation](https://www.ntop.org/guides/ntopng/api/index.html) or watch our [latest webinar](https://www.youtube.com/watch?v=dtLrax-_ZNs).
 
 ### Details
 For more information about ntopng, please visit [http://ntop.org](https://www.ntop.org/products/traffic-analysis/ntop/)
