@@ -24,6 +24,8 @@
 
 #include "ntop_includes.h"
 
+#ifndef HAVE_NEDGE
+
 class PcapInterface : public NetworkInterface {
  private:
   u_int8_t num_ifaces;
@@ -96,5 +98,7 @@ class PcapInterface : public NetworkInterface {
   inline bool readFromPcapDir()   { return(read_pkts_from_directory); }
   bool loadPcapFilesFromDir();
 };
+
+#endif /* HAVE_NEDGE */
 
 #endif /* _PCAP_INTERFACE_H_ */

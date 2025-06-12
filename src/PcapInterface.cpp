@@ -741,8 +741,6 @@ bool PcapInterface::processNextPacket(pcap_t *pd, int32_t if_index, int datalink
   return(true);
 }
 
-#endif
-
 /* *********************************************** */
 
 static int alphasort_case_insensitive(const struct dirent ** a,
@@ -792,3 +790,5 @@ bool PcapInterface::loadPcapFilesFromDir() {
 
   return(pcap_files_queue.size() > 0 ? true : false);
 }
+
+#endif /* HAVE_NEDGE */
