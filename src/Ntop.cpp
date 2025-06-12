@@ -4252,8 +4252,8 @@ void Ntop::speedtest(lua_State *vm) {
 
 bool Ntop::createRuntimeInterface(char *name, char *source, int *iface_id) {
   bool ret = false;
-  bool disable_dump = true;
 #ifndef HAVE_NEDGE
+  bool disable_dump = true;
   NetworkInterface *new_iface, *old_iface = NULL;
   int slot_id = -1;
 
