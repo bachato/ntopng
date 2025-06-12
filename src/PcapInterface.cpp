@@ -253,7 +253,7 @@ static void *packetPollLoop(void *ptr) {
   std::vector<std::string> *pcap_files_queue = iface->get_pcap_files_queue();
   int fds[MAX_NUM_PCAP_INTERFACES] = { -1 };
   std::string curr_file;
-  const char *fname;
+  const char *fname = NULL;
   
   /* Wait until the initialization completes */
   while (iface->isStartingUp()) sleep(1);
@@ -423,7 +423,8 @@ static void *packetPollLoop(void *ptr) {
       if(do_break) {
 	if(iface->readFromPcapDir()) {
 	  /* Delete the processed file */
-	  ::unlink(fname);
+          if (fname)
+            ::unlink(fname);
 	}
 	break;
       }
