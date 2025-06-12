@@ -59,6 +59,8 @@ class Ntop {
   NetworkInterface *system_interface; /** The system interface */
   NetworkInterface *old_iface_to_purge;
   u_int8_t num_defined_interfaces; /**< Number of defined interfaces. */
+  bool flow_id_initialized;
+  std::atomic<u_int64_t> flow_id;
   std::atomic<u_int16_t> num_active_lua_vms;
   HTTPserver *httpd;    /**< Pointer of httpd server. */
   NtopGlobals *globals; /**< Pointer of Ntop globals info and variables. */
@@ -808,9 +810,9 @@ class Ntop {
     return (clickhouseImport ? clickhouseImport->importDumps(silence_warnings)
                              : 0);
   }
-  u_int64_t getNextFlowId() {
-    return (clickhouseImport ? clickhouseImport->getNextFlowId() : 0);
-  }
+  void setFlowId(u_int64_t id) { flow_id = id; flow_id_initialized = true; }
+  bool isFlowIdInitialized() { return flow_id_initialized; }
+  u_int64_t getNextFlowId() { return (flow_id++); }
   inline ClickHouseImport *getClickHouseImport() { return (clickhouseImport); }
 #endif
   inline char *getTZname() { return (myTZname); }

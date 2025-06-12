@@ -63,13 +63,13 @@ class DB {
   virtual bool dumpFlow(time_t when, Flow *f, char *json) = 0;
   virtual bool startQueryLoop() { return (false); }
 
-  virtual int execSQLQuery(const char *dbname, const char *sql,
-                           bool doReconnect = true, bool ignoreErrors = false, bool doLock = true,
+  virtual int execSQLQuery(const char *sql,
+                           bool doReconnect = true, bool ignoreErrors = false,
                            db_result_row_callback *cb = NULL, void *cb_user_data = NULL) {
     return (-1);
   }
 
-  virtual int execSQLQuery(lua_State *vm, const char *dbname, const char *sql,
+  virtual int execSQLQuery(lua_State *vm, const char *sql,
                            bool limitRows, bool wait_for_db_created) {
     return (-1);
   }

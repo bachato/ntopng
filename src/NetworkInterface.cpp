@@ -8490,22 +8490,11 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
 
     top_sites = new (std::nothrow) MostVisitedList(HOST_SITES_TOP_NUMBER);
 
-    if (disable_dump) flow_dump_disabled_by_backend = true;
-
-    if (db == NULL && !disable_dump) {
-      if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-	/* Allocate only the DB connection, not any thread or queue for the export */
-	try {
-	  db = new ClickHouseDB(this);
-	} catch (const std::invalid_argument &e) {
-	  db = NULL;
-          ntop->getTrace()->traceEvent(TRACE_WARNING, "ClickHouse initialization failure!");
-          exit(-1);
-	}
-#endif
-      }
-    }
+    /* Allocate only the DB connection, not any thread or queue for the export */
+    if (!disable_dump)
+      initDB();
+    else 
+      flow_dump_disabled_by_backend = true;
 
     if (!isViewed() && !disable_dump) {
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
@@ -9498,6 +9487,31 @@ bool NetworkInterface::initHostChecksLoop() {
 
 /* *************************************** */
 
+bool NetworkInterface::initDB() {
+#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
+  if (!ntop->getPrefs()->do_dump_flows_on_clickhouse())
+    return false;
+
+  if (db != NULL)
+    return true;
+
+  db = new (std::nothrow) ClickHouseDB(this);
+
+  if (db == NULL || db->isDbCreated() == false) {
+    ntop->getTrace()->traceEvent(TRACE_ERROR, "Running without ClickHouse support, please check the clickhouse service");
+    ntop->getPrefs()->dontUseClickHouse();
+    if (db) {
+      delete db;
+      db = NULL;
+    }
+  }
+#endif
+
+  return db != NULL;
+}
+
+/* *************************************** */
+
 /*
   Put here all the code that is executed when the NIC initialization
   is successful
@@ -9509,22 +9523,7 @@ void NetworkInterface::initFlowDump() {
   if (isViewed()) /* No need to allocate databases on view interfaces */
     return;
 
-  if (ntop->getPrefs()->do_dump_flows_on_clickhouse() && db == NULL) {
-    if (ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-      db = new (std::nothrow) ClickHouseDB(this);
-
-      if (db == NULL || db->isDbCreated() == false) {
-        ntop->getTrace()->traceEvent(TRACE_ERROR, "Running without ClickHouse support, please check the clickhouse service");
-        ntop->getPrefs()->dontUseClickHouse();
-        if (db) {
-          delete db;
-          db = NULL;
-        }
-      }
-#endif
-    }
-  }
+  initDB();
 
 #ifndef HAVE_NEDGE
   if (ntop->getPrefs()->do_dump_flows_on_es() && el_exporter == NULL) {
@@ -10900,8 +10899,7 @@ void NetworkInterface::addRedisSitesKey() {
 int NetworkInterface::execSQLQuery2CSV(const char *sql, bool dump_in_json_format,
                                      struct mg_connection *conn) {
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-  const char *dbname = ntop->getPrefs()->get_clickhouse_dbname();
-  ((ClickHouseDB *)db)->execSQLQuery2CSV(dbname, sql, dump_in_json_format, conn);
+  ((ClickHouseDB *)db)->execSQLQuery2CSV(sql, dump_in_json_format, conn);
 
   return (0);
 #endif

@@ -422,6 +422,7 @@ protected:
   void build_protocol_flow_stats_lua_rsp(lua_State *vm, AggregatedFlowsStats *fs,
                                          u_int32_t size, u_int *num);
   bool dumpFlowOut(Flow *f, time_t when);
+  bool initDB();
   
 public:
   /**
@@ -992,9 +993,9 @@ public:
   void addInterfaceAddress(char *const addr);
   void addInterfaceNetwork(char *const net, char *addr);
   bool isInterfaceNetwork(IpAddress *ipa, int network_bits);
-  inline int execSQLQuery(lua_State *vm, const char *dbname, const char *sql, bool limit_rows,
+  inline int execSQLQuery(lua_State *vm, const char *sql, bool limit_rows,
                             bool wait_for_db_created = false) {
-    return (db ? db->execSQLQuery(vm, dbname, sql, limit_rows, wait_for_db_created)
+    return (db ? db->execSQLQuery(vm, sql, limit_rows, wait_for_db_created)
 	    : -1);
   };
   int execSQLQuery2CSV(const char *sql, bool dump_in_json_format,

@@ -79,6 +79,8 @@ Ntop::Ntop(const char *appName) {
   last_stats_reset = 0;
   old_iface_to_purge = NULL;
   broadcast_ip_disabled = false;
+  flow_id = 0;
+  flow_id_initialized = false;
 
   setZoneInfo();
 
@@ -493,6 +495,8 @@ void Ntop::registerPrefs(Prefs *_prefs, bool quick_registration) {
   pa = new (std::nothrow) PeriodicActivities();
 #endif
 
+  prefs->loadInstanceNameDefaults();
+
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
   if (prefs->do_dump_flows_on_clickhouse())
     clickhouseImport = new (std::nothrow) ClickHouseImport();
@@ -586,8 +590,6 @@ void Ntop::start() {
 #endif
 
   FlowRiskAlerts::checkUndefinedRisks();
-
-  prefs->loadInstanceNameDefaults();
 
   loadLocalInterfaceAddress();
 
