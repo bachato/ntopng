@@ -1248,18 +1248,16 @@ void Flow::processDNSPacket(const u_char *ip_packet, u_int16_t ip_len,
 	addresses += buf;
       }
 
-      setDNSQuery(ndpiFlow->host_server_name, (char*)addresses.c_str(), true);
-
       if(ndpiFlow->protos.dns.query_type != 0)
 	protos.dns.last_query_type = ndpiFlow->protos.dns.query_type;
 
+      protos.dns.last_return_code = ndpiFlow->protos.dns.reply_code;
+      
       if(!ndpiFlow->protos.dns.is_query) {
 	/* this is a response... */
 	if(ntop->getPrefs()->is_dns_decoding_enabled()) {
 	  char delimiter = '@', *name = NULL;
 	  char *at = (char *)strchr((const char *)ndpiFlow->host_server_name, delimiter);
-
-	  protos.dns.last_return_code = ndpiFlow->protos.dns.reply_code;
 
 	  /* Consider only positive DNS replies */
 	  if(at != NULL)
@@ -1289,6 +1287,9 @@ void Flow::processDNSPacket(const u_char *ip_packet, u_int16_t ip_len,
 	    }
 	  }
 	}
+
+	if(protos.dns.last_return_code == 0 /* NOERROR */)
+	  setDNSQuery(ndpiFlow->host_server_name, (char*)addresses.c_str(), true);	
       }
     }
 
@@ -6128,7 +6129,10 @@ bool Flow::setDNSQuery(char *query_value, char *rsp_addresses, bool copy_memory)
       protos.dns.last_query_shadow = protos.dns.last_query;
       protos.dns.last_query = copy_memory ? strdup(query_value) : query_value;
 
-      processHostName(protos.dns.last_query);
+#ifdef NTOPNG_PRO
+      if(getDNSRetCode() == 0 /* NOERROR */)
+	processHostName(protos.dns.last_query);
+#endif
       
       if(protos.dns.last_rsp_shadow) free(protos.dns.last_rsp_shadow);
       protos.dns.last_rsp_shadow = protos.dns.last_rsp;
@@ -6183,7 +6187,9 @@ void Flow::updateTLS(ParsedFlow *zflow) {
       && isTLS()
       && (!protos.tls.client_requested_server_name)) {
     protos.tls.client_requested_server_name = zflow->getTLSserverName(true);
+#ifdef NTOPNG_PRO
     processHostName(protos.tls.client_requested_server_name);
+#endif
   }
 }
 
@@ -9596,45 +9602,7 @@ void Flow::setServerName(char *value /* Allocated by caller */) {
   if (host_server_name) free(host_server_name);
   host_server_name = value;
 
-  processHostName(host_server_name);
-}
-
-/* *************************************** */
-
-void Flow::processHostName(char *host_name) {
-  if(ntop->getPrefs()->are_sites_collection_enabled() && (host_name != NULL)) {
-    if((strchr(host_name, ':') == NULL /* No IPv6 or IP:port */)
-       && (strchr(host_name, '*') == NULL /* No wildcard or similar */)
-       && (strchr(host_name, ',') == NULL /* No comma */)
-       && (strchr(host_name, '?') == NULL /* No junk  */)
-      ) {
-      const char *domain = ndpi_get_host_domain(iface->get_ndpi_struct(), host_name);
-      int len = strlen(domain);
-
-      if((len > 0)
-	 && (!isdigit(domain[len-1]))
-	 && (domain[0] != '_')
-	 && (strchr(domain, '.') != NULL)
-	 && (ndpi_strrstr(domain, ".local") == NULL)
-	 && (ndpi_strrstr(domain, ".arpa") == NULL)
-	 ) {
-	int rc = ntop->getRedis()->hashSet("ntopng.domains", domain, host_name);
-
 #ifdef NTOPNG_PRO
-	if((rc == 1 /* new domain name */)
-	   && ((ndpiDetectedProtocol.category == NDPI_PROTOCOL_CATEGORY_UNSPECIFIED)
-	       || (ndpiDetectedProtocol.category == NDPI_PROTOCOL_CATEGORY_WEB))
-	   ) {
-	  ntop->getTrace()->traceEvent(TRACE_INFO, "[rc: %d][category: %d/%s][%s]",
-				       rc, ndpiDetectedProtocol.category,
-				       ndpi_category_get_name(iface->get_ndpi_struct(),
-							      ndpiDetectedProtocol.category),
-				       host_name);
-	    
-	  ntop->getPro()->classifyDomain((char*)domain, host_name);
-	}
+  processHostName(host_server_name);
 #endif
-      }
-    }
-  }
 }
