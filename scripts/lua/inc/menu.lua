@@ -716,7 +716,7 @@ page_utils.add_menubar_section({
         }, {
             entry = page_utils.menu_entries.asn_configuration,
             section = page_utils.menu_sections.admin,
-            hidden = true --not is_admin or
+            hidden = true, --not is_admin or
                 --not auth.has_capability(auth.capabilities.checks),
             url = '/lua/admin/asn_configuration.lua'
         }, {
