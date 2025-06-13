@@ -55,14 +55,14 @@ void DB::getStats(u_int64_t *flow_export_count,
 /* ******************************************* */
 
 void DB::lua(lua_State *vm, bool since_last_checkpoint) {
-  u_int64_t a, b, c;
+  u_int64_t drops, rate, count;
 
-  getStats(&a, &b, &c, since_last_checkpoint);
+  getStats(&drops, &rate, &count, since_last_checkpoint);
 
   /* Keep in sync with ViewInterface::dumpDBStats() */
-  lua_push_uint64_table_entry(vm, "flow_export_count", a);
-  lua_push_int32_table_entry(vm, "flow_export_drops", b);
-  lua_push_float_table_entry(vm, "flow_export_rate", c);
+  lua_push_uint64_table_entry(vm, "flow_export_count", drops);
+  lua_push_int32_table_entry(vm, "flow_export_drops", rate);
+  lua_push_float_table_entry(vm, "flow_export_rate", count);
 }
 
 /* ******************************************* */
