@@ -24,16 +24,16 @@
 
 /* ***************************************************** */
 
-ASNConfiguration::ASNConfiguration() { }
+ASNConfiguration::ASNConfiguration() {}
 
 /* ***************************************************** */
 
-ASNConfiguration::~ASNConfiguration() { }
+ASNConfiguration::~ASNConfiguration() {}
 
 /* ***************************************************** */
 
 void ASNConfiguration::reloadASNConfiguration(char *key) {
-  std::set<std::string> new_tree;
+  std::set<u_int32_t> new_tree;
   loadConfiguration(&new_tree, key);
 
   /* Swap address trees */
@@ -45,11 +45,11 @@ void ASNConfiguration::reloadASNConfiguration(char *key) {
 
 /* ***************************************************** */
 
-bool ASNConfiguration::findASN(char *asn) {
-  std::set<std::string> cur_tree (tree); /* must use this as tree can be swapped */
-  std::set<std::string>::iterator it;
+bool ASNConfiguration::findASN(u_int32_t asn) {
+  std::set<u_int32_t> cur_tree(tree); /* must use this as tree can be swapped */
+  std::set<u_int32_t>::iterator it;
 
-  if (cur_tree.find(std::string(asn)) != cur_tree.end()) {
+  if (cur_tree.find(asn) != cur_tree.end()) {
     return (true);
   }
 
@@ -58,7 +58,7 @@ bool ASNConfiguration::findASN(char *asn) {
 
 /* ***************************************************** */
 
-void ASNConfiguration::loadConfiguration(std::set<std::string> *tree, char *key) {
+void ASNConfiguration::loadConfiguration(std::set<u_int32_t> *tree, char *key) {
   char *rsp = NULL;
   Redis *redis = ntop->getRedis();
   u_int actual_len = redis->len(key);
@@ -71,17 +71,21 @@ void ASNConfiguration::loadConfiguration(std::set<std::string> *tree, char *key)
     char charToRemove = ' ';
 
     /* Remove the spaces between the IPs */
-    asnStr.erase(std::remove(asnStr.begin(), asnStr.end(), charToRemove), asnStr.end());
+    asnStr.erase(std::remove(asnStr.begin(), asnStr.end(), charToRemove),
+                 asnStr.end());
 
     /* Now iterate the string */
     std::stringstream asnList(asnStr);
     std::string asn;
     while (std::getline(asnList, asn, ',')) {
-      std::pair<std::set<std::string>::iterator,bool> ret;
+      std::pair<std::set<u_int32_t>::iterator, bool> ret;
 
-      ret = tree->insert(asn);
+      u_int32_t asn_value = static_cast<u_int32_t>(std::stoul(asn));
+      ret = tree->insert(asn_value);
       if (!ret.second) {
-        ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to add ASN in ASNConfiguration [ASN: %s]", asn.c_str());
+        ntop->getTrace()->traceEvent(
+            TRACE_WARNING, "Unable to add ASN in ASNConfiguration [ASN: %d]",
+            asn_value);
       }
     }
 
@@ -92,8 +96,9 @@ void ASNConfiguration::loadConfiguration(std::set<std::string> *tree, char *key)
 /* ***************************************************** */
 
 void ASNConfiguration::debugPrint(char *list_name) {
-  for (const std::string& str : tree) {
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] ASN Element: %s", list_name, (char *) str.c_str());
+  for (const u_int32_t &asn_id : tree) {
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] ASN Element: %d",
+                                 list_name, asn_id);
   }
 }
 

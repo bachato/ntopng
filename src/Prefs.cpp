@@ -3386,19 +3386,19 @@ bool Prefs::isSMTPServer(IpAddress *ip, u_int16_t vlan_id) {
 
 /* *************************************** */
 
-bool Prefs::isCustomerASN(char *asn) {
+bool Prefs::isCustomerASN(u_int32_t asn) {
   return(customer_asn->findASN(asn));
 }
 
 /* *************************************** */
 
-bool Prefs::isSubCustomerASN(char *asn) {
+bool Prefs::isSubCustomerASN(u_int32_t asn) {
   return(sub_customer_asn->findASN(asn));
 }
 
 /* *************************************** */
 
-bool Prefs::isRemoteASN(char *asn) {
+bool Prefs::isRemoteASN(u_int32_t asn) {
   return(remote_asn->findASN(asn));
 }
 

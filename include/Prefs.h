@@ -769,9 +769,9 @@ class Prefs {
   bool isSMTPServer(IpAddress *ip, u_int16_t vlan_id);
   bool isDHCPServer(IpAddress *ip, u_int16_t vlan_id);
   
-  bool isCustomerASN(char *asn);
-  bool isSubCustomerASN(char *asn);
-  bool isRemoteASN(char *asn);
+  bool isCustomerASN(u_int32_t asn);
+  bool isSubCustomerASN(u_int32_t asn);
+  bool isRemoteASN(u_int32_t asn);
   
   ServerConfiguration* getConfiguredGateways()    { return(gateway);      }
   ServerConfiguration* getConfiguredDNSServers()  { return(dns_servers);  }

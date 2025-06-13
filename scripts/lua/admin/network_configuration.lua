@@ -31,6 +31,10 @@ page_utils.print_navbar(i18n("checks.network_configuration"),
         page_name = "policy",
         hidden = not ntop.isEnterpriseL(),
         label = i18n("network_configuration.network_policy")
+    }, {
+        active = (page == "asn_config"),
+        page_name = "asn_config",
+        label = i18n("checks.asn_configuration")
     }})
 
 local context = {
@@ -63,7 +67,7 @@ if (page == nil or page == 'assets_inventory') then
         page_context = json_context
 
     })
-else
+elseif (page == "policy") then
     local checks_config = checks.getConfigset()["config"]
     local interface_config = checks_config["interface"]
     local flow_config = checks_config["flow"]
@@ -82,6 +86,34 @@ else
     template_utils.render("pages/vue_page.template", {
         vue_page_name = "PageNetworkPolicy",
         page_context = json_context
+    })
+else
+    local context = {ifid = interface.getId(), csrf = ntop.getRandomCSRFValue()}
+
+    local checks_config = checks.getConfigset()["config"]
+    local interface_config = checks_config["interface"]
+    local flow_config = checks_config["flow"]
+    local is_check_enabled = true
+
+    --[[
+        if (flow_config) then
+            -- Interface alerts
+            if (flow_config["unexpected_dns"]) and (flow_config["unexpected_dns"]["all"]["enabled"]) or
+                (flow_config["unexpected_ntp"]) and (flow_config["unexpected_ntp"]["all"]["enabled"]) or
+                (flow_config["unexpected_smtp"]) and (flow_config["unexpected_smtp"]["all"]["enabled"]) or
+                (flow_config["unexpected_gateway"]) and (flow_config["unexpected_gateway"]["all"]["enabled"]) or
+                (flow_config["unexpected_dhcp"]) and (flow_config["unexpected_dhcp"]["all"]["enabled"]) then
+                is_check_enabled = true
+            end
+        end
+    ]]
+    context.is_check_enabled = is_check_enabled
+    local json_context = json.encode(context)
+
+    template_utils.render("pages/vue_page.template", {
+        vue_page_name = "PageASNConfiguration",
+        page_context = json_context
+
     })
 end
 

@@ -714,12 +714,6 @@ page_utils.add_menubar_section({
                 not ntop.isEnterpriseM() or not devices_exclusion_enabled,
             url = '/lua/pro/admin/edit_device_exclusions.lua'
         }, {
-            entry = page_utils.menu_entries.asn_configuration,
-            section = page_utils.menu_sections.admin,
-            hidden = true, --not is_admin or
-                --not auth.has_capability(auth.capabilities.checks),
-            url = '/lua/admin/asn_configuration.lua'
-        }, {
             entry = page_utils.menu_entries.network_config,
             section = page_utils.menu_sections.admin,
             hidden = not is_admin or

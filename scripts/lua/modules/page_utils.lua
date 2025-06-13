@@ -505,11 +505,6 @@ page_utils.menu_entries = {
         i18n_title = "access_control_list",
         section = "policies"
     },
-    asn_configuration = {
-        key = "asn_configuration",
-        i18n_title = "checks.asn_configuration",
-        section = "policies"
-    },
     network_config = {
         key = "network_config",
         i18n_title = "checks.network_configuration",

@@ -6694,12 +6694,12 @@ local lang = {
     ["trigger_network_alerts"] = "Trigger Network Alerts",
   },
   ["asn_configuration"] = {
-    ["alert_note"] = "The ---- Checks are disabled. Please enable at least one of them <a href='" .. ntop.getHttpPrefix() .. "/lua/admin/edit_configset.lua?subdir=all#all'><i class='fas fa-cog'></i></a>.",
-    ["customer_asn_title"] = "Customer ASN",
-    ["sub_customer_asn_title"] = "Sub-Customer ASN",
+    ["notes"] = "A list of comma separated ASN IDs is needed; e.g. 10,2404,4044",
+    ["customer_asn_title"] = "My ASN",
+    ["sub_customer_asn_title"] = "My Customer ASN",
     ["remote_asn_title"] = "Remote ASN",
-    ["customer_asn_description"] = "A list of comma separated Customer ASN",
-    ["sub_customer_asn_description"] = "A list of comma separated Sub-Customer ASN",
+    ["customer_asn_description"] = "A list of comma separated ASN, these ASN represents My ASN",
+    ["sub_customer_asn_description"] = "A list of comma separated Customer ASN, these ASN my Customer ASN",
     ["remote_asn_description"] = "A list of comma separated Remote ASN",
   },
   ["network_configuration"] = {

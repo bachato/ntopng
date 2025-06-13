@@ -17,7 +17,7 @@
                                 </div>
                                 <div class="ms-4 me-4">
                                     <textarea v-model="asnList[key]" class="form-control rounded"
-                                        :placeholder="`Enter an ASN list (Comma Separated)`"
+                                        :placeholder="`Enter an ASN IDs list (Comma Separated)`"
                                         @input="markAsModified(key)" rows="2"></textarea>
                                     <small>{{ _i18n(value.i18n_description) }}</small>
                                     <div v-if="validationErrors[key]" class="text-danger mt-1">
@@ -53,7 +53,9 @@ const props = defineProps({
     context: Object
 });
 
-const notes = []
+const notes = [
+    i18n('asn_configuration.notes')
+]
 
 const loading = ref(false);
 const asnList = reactive({});
@@ -68,9 +70,9 @@ const isSaving = ref(false);
 const saveSuccess = ref(false);
 
 const check_name = {
-    "customer_asn": { "i18n_title": "asn_configuration.customer_asn_title", "request_param": "customer_asn", "i18n_description": "asn_configuration.customer_asn_descr" },
-    "sub_customer_asn": { "i18n_title": "asn_configuration.sub_customer_asn_title", "request_param": "sub_customer_asn", "i18n_description": "asn_configuration.sub_customer_asn_descr" },
-    "remote_asn": { "i18n_title": "asn_configuration.remote_asn_title", "request_param": "remote_asn", "i18n_description": "asn_configuration.remote_asn_descr" },
+    "customer_asn": { "i18n_title": "asn_configuration.customer_asn_title", "request_param": "customer_asn", "i18n_description": "asn_configuration.customer_asn_description" },
+    "sub_customer_asn": { "i18n_title": "asn_configuration.sub_customer_asn_title", "request_param": "sub_customer_asn", "i18n_description": "asn_configuration.sub_customer_asn_description" },
+    "remote_asn": { "i18n_title": "asn_configuration.remote_asn_title", "request_param": "remote_asn", "i18n_description": "asn_configuration.remote_asn_description" },
 }
 
 Object.keys(check_name).forEach(key => {
@@ -107,10 +109,6 @@ const markAsModified = (key) => {
     disable_save.value = false
 };
 
-const validator = (value) => {
-    return (regexValidation.validateSingleWord(value) || regexValidation.validateNumber(value))
-}
-
 /* ************************************** */
 
 // Function to validate ASN inserted in text area
@@ -120,7 +118,7 @@ const validateASN = () => {
         const all_asn = asnList[key].split(',').map(asn => asn.trim()).filter(asn => asn !== '');
         if (all_asn.length === 0) {
             validationErrors[key] = '';
-        } else if (!all_asn.every(validator)) {
+        } else if (!all_asn.every(regexValidation.validateUInt32)) {
             validationErrors[key] = 'Invalid ASN format';
             isValid = false;
         } else {
@@ -143,8 +141,11 @@ const saveConfig = async () => {
         for (const asn of modifiedInputs.value) {
             const value = asnList[asn];
             const key = check_name[asn].request_param
+            const cleaned_value = Array.from(new Set(
+                value.split(',').map(s => s.trim())
+            )).join(',').replace(/\s*,\s*/g, ',');
             data = {
-                [key]: value.replace(/\s*,\s*/g, ','),
+                [key]: cleaned_value,
                 ...data
             }
         }

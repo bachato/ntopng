@@ -10,7 +10,7 @@ const regexes = {
     mac_address: String.raw`^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$`,
     comma_separted_port_regex: String.raw`^(\d{1,5})(,\s*\d{1,5})*$`,
     port_range_regex: String.raw`^(\d{1,5})-(\d{1,5})$`,
-	host_name: String.raw`^(?!\s*$)[a-zA-Z0-9._: \-\/]{1,250}|^[a-zA-Z0-9._: \-\/]{1,250}@[0-9]{0,5}`,
+    host_name: String.raw`^(?!\s*$)[a-zA-Z0-9._: \-\/]{1,250}|^[a-zA-Z0-9._: \-\/]{1,250}@[0-9]{0,5}`,
     singleword: String.raw`^(?=[a-zA-Z0-9._:\-]{3,253}$)(?!.*[_.:\-]{2})[^_.:\-].*[^_.:\-]$`,
     url: String.raw`^(https?\:\/\/[^\/\s]+(\/.*)?)$`,
 }
@@ -19,6 +19,13 @@ const regexes = {
 
 const validateIP = (ip) => {
     return (validateIPv4(ip) || validateIPv6(ip));
+}
+
+/* ****************************************************** */
+
+function validateUInt32(number) {
+    const val = Number(number);
+    return Number.isInteger(val) && val >= 0 && val <= 0xFFFFFFFF;
 }
 
 /* ****************************************************** */
@@ -67,9 +74,9 @@ const validateIPv6 = (ip) => {
 }
 
 const validateHostName = (host_name) => {
-	const host_name_regexp = new RegExp(regexes.host_name);
+    const host_name_regexp = new RegExp(regexes.host_name);
 
-	return host_name_regexp.test(host_name);
+    return host_name_regexp.test(host_name);
 }
 
 /* ****************************************************** */
@@ -157,14 +164,15 @@ const regexValidation = function () {
         validateIP,
         validateIPv4,
         validateIPv6,
-		validateHostName,
+        validateHostName,
         validateCommaSeparatedPortList,
         validatePortRange,
         validateSingleWord,
         validateURL,
         validateCIDR,
         validateMAC,
-        validateNumber
+        validateNumber,
+        validateUInt32,
     };
 }();
 
