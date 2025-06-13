@@ -346,6 +346,11 @@ if not ntop.isnEdge() then
     -- may be not yet up at this stage
     blog_utils.fetchLatestPosts()
 end
+if ntop.isnEdge() then
+    interface.select(tostring(interface.getFirstInterfaceId()))
+    host_pools_nedge.startupCheckResetPoolsQuotas()
+    interface.select(getSystemInterfaceId())
+end
 
 -- Cleanup old influxdb files (if any)
 local influxdb_dir = dirs.workingdir .. "/tmp/influxdb"
