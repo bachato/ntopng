@@ -23,6 +23,12 @@ const validateIP = (ip) => {
 
 /* ****************************************************** */
 
+const validateNumber = (number) => {
+    return (!isNaN(parseFloat(number)) && isFinite(number));
+}
+
+/* ****************************************************** */
+
 const validateCIDR = (network) => {
     const network_split = network.split('/');
     if (network_split.length == 2) {
@@ -157,7 +163,8 @@ const regexValidation = function () {
         validateSingleWord,
         validateURL,
         validateCIDR,
-        validateMAC
+        validateMAC,
+        validateNumber
     };
 }();
 

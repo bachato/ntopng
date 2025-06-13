@@ -233,6 +233,10 @@ Prefs::Prefs(Ntop *_ntop) {
   ntp_servers  = new (std::nothrow) ServerConfiguration();
   dhcp_servers = new (std::nothrow) ServerConfiguration();
   smtp_servers = new (std::nothrow) ServerConfiguration();
+  
+  customer_asn = new (std::nothrow) ASNConfiguration();
+  sub_customer_asn = new (std::nothrow) ASNConfiguration();
+  remote_asn = new (std::nothrow) ASNConfiguration();
 #ifdef NTOPNG_PRO
   networks_policy_configuration = NULL;
   networks_policy_configuration_shadow = NULL;
@@ -339,6 +343,11 @@ Prefs::~Prefs() {
   if(ntp_servers)  delete ntp_servers;
   if(dhcp_servers) delete dhcp_servers;
   if(smtp_servers) delete smtp_servers;
+
+  if(customer_asn)     delete customer_asn;
+  if(sub_customer_asn) delete sub_customer_asn;
+  if(remote_asn)       delete remote_asn;
+  
 #ifdef NTOPNG_PRO
   if(networks_policy_configuration) delete networks_policy_configuration;
   if(networks_policy_configuration_shadow) delete networks_policy_configuration_shadow;
@@ -3253,6 +3262,19 @@ void Prefs::reloadServersConfiguration() {
 
 /* *************************************** */
 
+void Prefs::reloadASNConfiguration() {
+  customer_asn->reloadASNConfiguration((char *) CONST_CUSTOMER_ASN_CONFIGURATION_REDIS_KEY);
+  sub_customer_asn->reloadASNConfiguration((char *) CONST_SUB_CUSTOMER_ASN_CONFIGURATION_REDIS_KEY);
+  remote_asn->reloadASNConfiguration((char *) CONST_REMOTE_ASN_CONFIGURATION_REDIS_KEY);
+/*  
+  customer_asn->debugPrint("customer_asn");
+  sub_customer_asn->debugPrint("sub_customer_asn");
+  remote_asn->debugPrint("remote_asn");
+*/
+}
+
+/* *************************************** */
+
 #ifdef NTOPNG_PRO
 
 bool Prefs::reloadNetworksPolicyConfiguration() {
@@ -3360,6 +3382,24 @@ bool Prefs::isDHCPServer(IpAddress *ip, u_int16_t vlan_id) {
 
 bool Prefs::isSMTPServer(IpAddress *ip, u_int16_t vlan_id) {
   return(smtp_servers->findAddress(ip, vlan_id));
+}
+
+/* *************************************** */
+
+bool Prefs::isCustomerASN(char *asn) {
+  return(customer_asn->findASN(asn));
+}
+
+/* *************************************** */
+
+bool Prefs::isSubCustomerASN(char *asn) {
+  return(sub_customer_asn->findASN(asn));
+}
+
+/* *************************************** */
+
+bool Prefs::isRemoteASN(char *asn) {
+  return(remote_asn->findASN(asn));
 }
 
 /* *************************************** */

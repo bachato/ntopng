@@ -8092,6 +8092,14 @@ static int reload_servers_configuration(lua_State *vm) {
 
 /* **************************************************************** */
 
+static int reload_asn_configuration(lua_State *vm) {
+  ntop->getPrefs()->reloadASNConfiguration();
+  lua_pushnil(vm);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* **************************************************************** */
+
 #ifdef NTOPNG_PRO
 
 static int reload_networks_policy_configuration(lua_State *vm) {
@@ -8561,6 +8569,7 @@ static luaL_Reg _ntop_reg[] = {
     {"readEthernetIPDeviceInfo", read_ether_ip_device_info},
 
     {"reloadServersConfiguration", reload_servers_configuration},
+    {"reloadASNConfiguration", reload_asn_configuration},
 
 #if defined(NTOPNG_PRO)
     {"reloadNetworksPolicyConfiguration", reload_networks_policy_configuration},

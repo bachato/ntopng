@@ -191,6 +191,7 @@ class Prefs {
 #endif
 
   ServerConfiguration *gateway, *dns_servers, *ntp_servers, *smtp_servers, *dhcp_servers;
+  ASNConfiguration *customer_asn, *sub_customer_asn, *remote_asn;
 
 #ifdef NTOPNG_PRO
   AddressTree *networks_policy_configuration;
@@ -756,6 +757,7 @@ class Prefs {
   char* getKafkaOptions() { return (kafka_options); }
 #endif
   void reloadServersConfiguration();
+  void reloadASNConfiguration();
 #ifdef NTOPNG_PRO
   bool reloadNetworksPolicyConfiguration();
   bool loadPolicyConfiguration(AddressTree *tree, char *key, NetworkConfigurationId id);
@@ -766,12 +768,20 @@ class Prefs {
   bool isNTPServer(IpAddress *ip, u_int16_t vlan_id);
   bool isSMTPServer(IpAddress *ip, u_int16_t vlan_id);
   bool isDHCPServer(IpAddress *ip, u_int16_t vlan_id);
-
+  
+  bool isCustomerASN(char *asn);
+  bool isSubCustomerASN(char *asn);
+  bool isRemoteASN(char *asn);
+  
   ServerConfiguration* getConfiguredGateways()    { return(gateway);      }
   ServerConfiguration* getConfiguredDNSServers()  { return(dns_servers);  }
   ServerConfiguration* getConfiguredNTPServers()  { return(ntp_servers);  }
   ServerConfiguration* getConfiguredSMTPServers() { return(smtp_servers); }
   ServerConfiguration* getConfiguredDHCPServers() { return(dhcp_servers); }
+
+  ASNConfiguration* getCustomerASN() { return(customer_asn); }
+  ASNConfiguration* getSubCustomerASN() { return(sub_customer_asn); }
+  ASNConfiguration* getRemoteASN() { return(remote_asn); }
 
   inline bool useMacAddressInFlowKey()     { return (use_mac_in_flow_key);  }
   inline bool areFingerprintStatsEnabled() { return (fingerprint_stats);    }

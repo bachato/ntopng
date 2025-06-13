@@ -1941,6 +1941,7 @@ local lang = {
     ["factory_reset_all_message"] = "Do you want to reset the checks configuration to the default?",
     ["long_lived_flows_descr"] = "> %{duration}",
     ["network_configuration"] = "Network Configuration",
+    ["asn_configuration"] = "ASN Configuration",
     ["network_discovery_alert_description"] = "Periodic Network Discovery executed",
     ["network_discovery_description"] = "Trigger an alert when a Network Discovery is detected",
     ["network_discovery_title"] = "Network Discovery",
@@ -6691,6 +6692,15 @@ local lang = {
   ["network_alert_config"] = {
     ["trigger_alerts_for_network"] = "Trigger alerts for Network %{network}",
     ["trigger_network_alerts"] = "Trigger Network Alerts",
+  },
+  ["asn_configuration"] = {
+    ["alert_note"] = "The ---- Checks are disabled. Please enable at least one of them <a href='" .. ntop.getHttpPrefix() .. "/lua/admin/edit_configset.lua?subdir=all#all'><i class='fas fa-cog'></i></a>.",
+    ["customer_asn_title"] = "Customer ASN",
+    ["sub_customer_asn_title"] = "Sub-Customer ASN",
+    ["remote_asn_title"] = "Remote ASN",
+    ["customer_asn_description"] = "A list of comma separated Customer ASN",
+    ["sub_customer_asn_description"] = "A list of comma separated Sub-Customer ASN",
+    ["remote_asn_description"] = "A list of comma separated Remote ASN",
   },
   ["network_configuration"] = {
     ["alert_note"] = "The Unexpected DNS/NTP/DHCP/SMTP/Gateway Server Checks are disabled. Please enable at least one of them <a href='" .. ntop.getHttpPrefix() .. "/lua/admin/edit_configset.lua?subdir=all#all'><i class='fas fa-cog'></i></a>.",
