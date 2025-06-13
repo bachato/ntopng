@@ -48,8 +48,8 @@ void ASNConfiguration::reloadASNConfiguration(char *key) {
 bool ASNConfiguration::findASN(char *asn) {
   std::set<std::string> cur_tree (tree); /* must use this as tree can be swapped */
   std::set<std::string>::iterator it;
-  
-  if (cur_tree.find(std::string(asn)) != cur_tree.end()) { 
+
+  if (cur_tree.find(std::string(asn)) != cur_tree.end()) {
     return (true);
   }
 
@@ -78,12 +78,10 @@ void ASNConfiguration::loadConfiguration(std::set<std::string> *tree, char *key)
     std::string asn;
     while (std::getline(asnList, asn, ',')) {
       std::pair<std::set<std::string>::iterator,bool> ret;
-        
+
       ret = tree->insert(asn);
       if (!ret.second) {
-        ntop->getTrace()->traceEvent(
-            TRACE_WARNING, "Unable to add ASN in ASNConfiguration [ASN: %s]", 
-               asn);
+        ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to add ASN in ASNConfiguration [ASN: %s]", asn.c_str());
       }
     }
 
@@ -94,9 +92,9 @@ void ASNConfiguration::loadConfiguration(std::set<std::string> *tree, char *key)
 /* ***************************************************** */
 
 void ASNConfiguration::debugPrint(char *list_name) {
-    for (const std::string& str : tree) {
-        ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] ASN Element: %s", list_name, (char *) str.c_str());
-    }
+  for (const std::string& str : tree) {
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] ASN Element: %s", list_name, (char *) str.c_str());
+  }
 }
 
 /* ***************************************************** */
