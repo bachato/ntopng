@@ -585,12 +585,12 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
         /* If the protocol is greater than NDPI_MAX_SUPPORTED_PROTOCOLS, it
            means it is a custom protocol so the application protocol received
            from nprobe can be overridden */
-        (guessed_protocol.proto.app_protocol >= NDPI_MAX_SUPPORTED_PROTOCOLS)) {
+        isCustomDPIProtocol(guessed_protocol.proto.app_protocol)) {
       p = guessed_protocol;
     }
 
     if (zflow->hasParsedeBPF()) {
-      /* nProbe Agent does not perform nDPI detection*/
+      /* nProbe Agent does not perform nDPI detection */
       p.proto.master_protocol = guessed_protocol.proto.master_protocol;
       p.proto.app_protocol = guessed_protocol.proto.app_protocol;
     }

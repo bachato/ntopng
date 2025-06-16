@@ -7003,11 +7003,8 @@ static bool flow_stats_walker(GenericHashEntry *h, void *user_data,
   if(iface) {
     u_int32_t proto_id = ndpi_map_user_proto_id_to_ndpi_id(
         iface->get_ndpi_struct(), flow->get_detected_protocol().proto.app_protocol);
-    stats->num_flows++,
-      stats->ndpi_bytes[proto_id] +=
-      (u_int32_t)flow->get_bytes(),
-      stats->breeds_bytes[flow->get_protocol_breed()] +=
-      (u_int32_t)flow->get_bytes();
+    stats->num_flows++, stats->ndpi_bytes[proto_id] += (u_int32_t)flow->get_bytes(),
+      stats->breeds_bytes[flow->get_protocol_breed()] += (u_int32_t)flow->get_bytes();
 
     *matched = true;
 
@@ -7020,18 +7017,24 @@ static bool flow_stats_walker(GenericHashEntry *h, void *user_data,
 
 void NetworkInterface::getFlowsStats(lua_State *vm) {
   struct active_flow_stats stats;
-  u_int32_t begin_slot = 0;
+  u_int32_t begin_slot = 0, num_protos = getNumDPIProtocols();
   bool walk_all = true;
 
   memset(&stats, 0, sizeof(stats));
-  walker(&begin_slot, walk_all, walker_flows, flow_stats_walker,
-         (void *)&stats);
+  stats.ndpi_bytes = (u_int32_t*)calloc(num_protos, sizeof(u_int32_t));
+
+  if(stats.ndpi_bytes == NULL) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Out of memory :-(");
+    return;
+  }
+  
+  walker(&begin_slot, walk_all, walker_flows, flow_stats_walker, (void *)&stats);
 
   lua_newtable(vm);
   lua_push_uint64_table_entry(vm, "num_flows", stats.num_flows);
   lua_newtable(vm);
-  for (int i = 0;
-       i < NDPI_MAX_SUPPORTED_PROTOCOLS + NDPI_MAX_NUM_CUSTOM_PROTOCOLS; i++) {
+
+  for (u_int i = 0; i < num_protos; i++) {
     if (stats.ndpi_bytes[i] > 0)
       lua_push_uint64_table_entry(vm, ndpi_get_proto_name(get_ndpi_struct(), i),
                                   stats.ndpi_bytes[i]);
@@ -7051,6 +7054,8 @@ void NetworkInterface::getFlowsStats(lua_State *vm) {
   lua_pushstring(vm, "breeds");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
+  
+  free(stats.ndpi_bytes);
 }
 
 /* **************************************************** */

@@ -3428,15 +3428,10 @@ void Ntop::refreshAllowedProtocolPresets(DeviceType device_type, bool client,
 
 	  /* ntop->getTrace()->traceEvent(TRACE_INFO, "%u -> %u", key_proto, mapped_key_proto); */
 
-	  if(mapped_key_proto >= NDPI_NUM_BITS) {
-	    ntop->getTrace()->traceEvent(TRACE_WARNING, "Protocol %u out of range [0...%u]",
-					 mapped_key_proto, NDPI_NUM_BITS-1);
-	  } else {
-	    if (client)
-	      ndpi_bitmask_set(&b->clientAllowed, mapped_key_proto);
-	    else
-	      ndpi_bitmask_set(&b->serverAllowed, mapped_key_proto);
-	  }
+	  if (client)
+	    ndpi_bitmask_set(&b->clientAllowed, mapped_key_proto);
+	  else
+	    ndpi_bitmask_set(&b->serverAllowed, mapped_key_proto);	  
 	}
       }
       break;

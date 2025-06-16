@@ -400,9 +400,7 @@ struct vm_ptree {
 };
 
 struct active_flow_stats {
-  u_int32_t num_flows,
-      ndpi_bytes[NDPI_MAX_SUPPORTED_PROTOCOLS + NDPI_MAX_NUM_CUSTOM_PROTOCOLS],
-      breeds_bytes[NUM_BREEDS];
+  u_int32_t num_flows, *ndpi_bytes, breeds_bytes[NUM_BREEDS];
 };
 
 struct grev1_header {

@@ -7527,13 +7527,16 @@ static int ntop_recipient_register(lua_State *vm) {
 /* **************************************************************** */
 
 static int ndpi_is_custom_application(lua_State *vm) {
-  int app_id;
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
+  u_int16_t app_id;
+  NetworkInterface *iface = getCurrentInterface(vm);
+  
+  if((iface == NULL)
+     || (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK))
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  app_id = lua_tonumber(vm, 1);
 
-  lua_pushboolean(vm, app_id >= NDPI_MAX_SUPPORTED_PROTOCOLS);
+  app_id = (u_int16_t)lua_tonumber(vm, 1);
+
+  lua_pushboolean(vm, iface->isCustomDPIProtocol(app_id));
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
