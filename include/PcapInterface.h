@@ -97,6 +97,9 @@ class PcapInterface : public NetworkInterface {
   inline bool readFromPcapDump()  { return(read_pkts_from_pcap_dump); }
   inline bool readFromPcapDir()   { return(read_pkts_from_directory); }
   bool loadPcapFilesFromDir();
+  virtual bool is_purge_idle_interface() {
+    return(purge_idle_flows_hosts || NetworkInterface::is_purge_idle_interface());
+  }
 };
 
 #endif /* HAVE_NEDGE */

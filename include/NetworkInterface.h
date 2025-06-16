@@ -575,7 +575,7 @@ public:
   inline void setSeenContainers() { has_seen_containers = true; }
   inline bool hasSeenExternalAlerts() const { return (has_external_alerts); }
   inline void setSeenExternalAlerts() { has_external_alerts = true; }
-  inline bool is_purge_idle_interface() { return (purge_idle_flows_hosts); };
+  virtual bool is_purge_idle_interface() { return (purge_idle_flows_hosts); };
   int dumpFlow(time_t when, Flow *f);
   bool getHostMinInfo(lua_State *vm, AddressTree *allowed_hosts, char *host_ip,
                       u_int16_t vlan_id, bool only_ndpi_stats);

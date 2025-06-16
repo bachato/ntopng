@@ -287,6 +287,7 @@ static void *packetPollLoop(void *ptr) {
 	  if(iface->loadPcapFilesFromDir() == false) {
 	    /* No file to process */
 	    sleep(1);
+	    iface->purgeIdle(time(NULL));
 	  } else {
 	    /* Some new file to process */
 	  }
@@ -393,18 +394,19 @@ static void *packetPollLoop(void *ptr) {
 					 iface->getPcapIfaceName(i), i);
 	    iface->reopen(i); /* Try to reopen the interface that disappeared */
 	  }
-
-	  iface->purgeIdle(time(NULL));
 	} /* for */
 
 #if !(defined(__APPLE__) || defined(__FreeBSD__))
 	continue;
 #endif
+
+	iface->purgeIdle(time(NULL));
       }
 
-      if(iface->idle())
+      if(iface->idle()) {
 	continue;
-
+      }
+      
       for(u_int8_t i=0; i < iface->get_num_ifaces(); i++) {
 #if !(defined(__APPLE__) || defined(__FreeBSD__))
 	if(FD_ISSET(fds[i], &rset))
@@ -425,6 +427,8 @@ static void *packetPollLoop(void *ptr) {
           if (fname)
             ::unlink(fname);
 	}
+
+	iface->purgeIdle(time(NULL));
 	break;
       }
 #else
@@ -726,8 +730,10 @@ bool PcapInterface::processNextPacket(pcap_t *pd, int32_t if_index, int datalink
 	       0, hdr->len, 1);
     }
   } else if (rc < 0) {
-    if (read_from_pcap_dump())
+    if (read_from_pcap_dump()) {
+      set_read_from_pcap_dump_done();
       return(false);
+    }
   } else {
     /* No packet received before the timeout */
     purgeIdle(time(NULL));
