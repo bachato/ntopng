@@ -51,8 +51,6 @@ pfring *PF_RINGInterface::pfringSocketInit(const char *name) {
 
   rc = pfring_version(handle, &version);
 
-  rc = pfring_version(handle, &version);
-
   if (rc == -1) {
     ntop->getTrace()->traceEvent(TRACE_ERROR,
 				 "Unexpected socket error: unable to read PF_RING version");
