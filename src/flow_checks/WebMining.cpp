@@ -23,7 +23,7 @@
 #include "flow_checks_includes.h"
 
 void WebMining::protocolDetected(Flow *f) {
-  if (f->get_protocol_category() == CUSTOM_CATEGORY_MINING) {
+  if (f->get_protocol_category() == NDPI_PROTOCOL_CATEGORY_MINING) {
     FlowAlertType alert_type = WebMiningAlert::getClassType();
     u_int8_t c_score, s_score;
     risk_percentage cli_score_pctg = CLIENT_HIGH_RISK_PERCENTAGE;

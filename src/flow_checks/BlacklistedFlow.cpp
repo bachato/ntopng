@@ -25,7 +25,7 @@
 /* ***************************************************** */
 
 void BlacklistedFlow::protocolDetected(Flow *f) {
-  if ((f->get_protocol_category() == CUSTOM_CATEGORY_MALWARE) &&
+  if ((f->get_protocol_category() == NDPI_PROTOCOL_CATEGORY_MALWARE) &&
       !(f->isBlacklistedServer()) &&
       !(f->isBlacklistedClient())) {
     FlowAlertType alert_type = BlacklistedFlowAlert::getClassType();

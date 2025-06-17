@@ -56,8 +56,8 @@ void RemoteToLocalInsecureFlow::protocolDetected(Flow *f) {
 
     if (!unsafe) {
       switch (f->get_protocol_category()) {
-        case CUSTOM_CATEGORY_MALWARE:
-        case CUSTOM_CATEGORY_BANNED_SITE:
+        case NDPI_PROTOCOL_CATEGORY_MALWARE:
+        case NDPI_PROTOCOL_CATEGORY_BANNED_SITE:
           cli_score_pctg = CLIENT_LOW_RISK_PERCENTAGE;
           unsafe = true;
           break;

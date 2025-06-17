@@ -91,7 +91,7 @@ void IpAddress::reloadBlacklist(ndpi_detection_module_struct *ndpi_struct) {
 				    (ndpi_protocol_category_t*)&id) == 0) {
     ndpi_protocol_category_t category = (ndpi_protocol_category_t)(((u_int16_t)id) & 0xFF); /* See Ntop::nDPILoadHostnameCategory */
     
-    if(category == CUSTOM_CATEGORY_MALWARE)
+    if(category == NDPI_PROTOCOL_CATEGORY_MALWARE)
       addr.blacklistedIP = true;
   }
 }

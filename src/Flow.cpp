@@ -1510,8 +1510,8 @@ void Flow::updateProtocol(ndpi_protocol proto_id) {
   /* trick to avoid runtime errors with custom categories */
   ptr16 = (u_int16_t*)&ndpiDetectedProtocol.category;
 
-  if ((*ptr16 > 1024) && ((*ptr16 - 1024) == CUSTOM_CATEGORY_MALWARE))
-    ndpiDetectedProtocol.category = CUSTOM_CATEGORY_MALWARE;
+  if ((*ptr16 > 1024) && ((*ptr16 - 1024) == NDPI_PROTOCOL_CATEGORY_MALWARE))
+    ndpiDetectedProtocol.category = NDPI_PROTOCOL_CATEGORY_MALWARE;
 }
 
 /* *************************************** */
@@ -1545,7 +1545,7 @@ void Flow::setProtocolDetectionCompleted(u_int8_t *payload,
   }
 
 #ifdef BLACKLISTED_FLOWS_DEBUG
-  if(ndpiDetectedProtocol.category == CUSTOM_CATEGORY_MALWARE) {
+  if(ndpiDetectedProtocol.category == NDPI_PROTOCOL_CATEGORY_MALWARE) {
     char buf[512];
 
     print(buf, sizeof(buf));
@@ -4954,7 +4954,7 @@ void Flow::updatePacketStats(InterarrivalStats *stats,
 
 bool Flow::isBlacklistedFlow() const {
   bool res = (isBlacklistedClient() || isBlacklistedServer() ||
-              get_protocol_category() == CUSTOM_CATEGORY_MALWARE);
+              get_protocol_category() == NDPI_PROTOCOL_CATEGORY_MALWARE);
 
 #ifdef BLACKLISTED_FLOWS_DEBUG
   if(res) {
