@@ -45,11 +45,12 @@ class DB {
   DB(NetworkInterface *_iface);
   virtual ~DB(){};
 
-  inline void incNumExportedFlows(u_int64_t num = 1) { exportedFlows += num; };
-  inline void incNumDroppedFlows(u_int32_t num = 1) { droppedFlows += num; };
-  inline void incNumQueueDroppedFlows(u_int32_t num = 1) {
-    queueDroppedFlows += num;
-  };
+  /* Failures enqueueing flows for export (NetworkInterface) */
+  inline void incNumQueueDroppedFlows(u_int32_t num = 1) { queueDroppedFlows += num; };
+  /* Failures dumping flows to the database (ClickHouseDB) */
+  inline void incNumDroppedFlows(u_int32_t num = 1)      { droppedFlows += num;      };
+  /* Flows successfully dumped */
+  inline void incNumExportedFlows(u_int64_t num = 1)     { exportedFlows += num;     };
 
   inline u_int64_t getNumExportedFlows() const { return (exportedFlows); }
   inline u_int32_t getNumDroppedFlows() const {
