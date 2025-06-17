@@ -9599,8 +9599,16 @@ bool NetworkInterface::initDB() {
 void NetworkInterface::initFlowDump() {
   startFlowDumping();
 
-  /* Note: dump on all non-view interfaces to dump in parallel,
-   * but still initialize db on the view interface for running queries */
+  /* Note: 
+   * Database is initialized both on standard interfaces and views, however
+   * startDBLoop is not called on view. This way:
+   * - Flows are dumped on standard (non-view) interfaces only, in case of
+   *   a view this allows us to dump in parallel from all viewed interfaces
+   * - Queries are executed on the interface in case of no view, or on the 
+   *   view interface in case there is a view
+   * Other exporters (ES, Kafka, Syslog) are initialized on interfaces only
+   * as there is no explorer for them (no need to run queries)
+   */
 
   initDB();
 
