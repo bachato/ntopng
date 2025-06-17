@@ -3467,11 +3467,11 @@ void NetworkInterface::incNumQueueDroppedFlows(u_int32_t num) {
   */
   DB *actual_db;
 
+  actual_db = 
 #ifdef NTOPNG_PRO
-  actual_db = isViewed() ? viewedBy()->getDB() : getDB();
-#else
-  actual_db = getDB();
+    isViewed() ? viewedBy()->getDB() : 
 #endif
+    getDB();
 
   if (actual_db) actual_db->incNumQueueDroppedFlows(num);
 };
@@ -3495,11 +3495,6 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
   u_int64_t idle_flows_done = 0, active_flows_done = 0;
   time_t when = time(NULL);
   
-  if (ntop->getPrefs()->do_dump_flows_on_clickhouse() && actual_db == NULL) {
-    ntop->getTrace()->traceEvent(TRACE_INFO, "WARNING: Something is broken with flow dump");
-    return (0);
-  }
-
   /*
     Process high-priority idle flows (they're high priority as an idle flow not dumped is lost)
   */
@@ -3507,7 +3502,6 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
     Flow *f = idleFlowsToDump->dequeue();
 
     if(dumpFlowOut(f, when)) {
-      // delete f;
       idle_flows_done++;
     }
 
@@ -3574,10 +3568,7 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
   char *json = NULL;
   bool rc = true;
 
-#ifdef NTOPNG_PRO
   /* Note: on viewed interfaces the DB is not initialized (see initFlowDump) */
-  //actual_db = isViewed() ? viewedBy()->getDB() : getDB();
-#endif
 
   /* Checkpoint flow traffic counters for the dump */
   f->update_partial_traffic_stats_db_dump();
