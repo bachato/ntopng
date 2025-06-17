@@ -85,7 +85,7 @@ const gradient_color = [
 async function click_button_hide_host(event) {
   const row = event.row;
   const params = {
-    host: row.ip,
+    host: row.host,
     hide: true
   }
   const url_params = ntopng_url_manager.obj_to_url_params(params);
@@ -213,8 +213,13 @@ const map_table_def_columns = (columns) => {
             if (b.id != "hide_host") {
               current_class.push("disabled");
             }
-          } else {
+          } else if (visibility == "hidden") {
             if (b.id != "show_host") {
+              current_class.push("disabled");
+            }
+          } else {
+            /* By default only show Hide Host */
+            if (b.id != "hide_host") {
               current_class.push("disabled");
             }
           }
