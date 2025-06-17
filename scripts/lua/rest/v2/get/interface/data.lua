@@ -370,7 +370,7 @@ function dumpBriefInterfaceStats(ifid)
             local total, total_in_progress = vs_utils.check_in_progress_status()
             res["vs_in_progress"] = total_in_progress or 0
         end
-        if ntop.isClickHouseEnabled() then
+        if ntop.isClickHouseEnabled() and ifstats.stats_since_reset["db"] then
             local s = {}
             s["flow_export_count"] = ifstats.stats_since_reset["db"].flow_export_count
             s["flow_export_drops"] = ifstats.stats_since_reset["db"].flow_export_drops
