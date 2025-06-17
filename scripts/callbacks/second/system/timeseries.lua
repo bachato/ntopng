@@ -60,11 +60,13 @@ for i=1,num_runs do
 
             ts_utils.append("iface:throughput_bps",   {ifid=ifstats.id, bps=bps}, when)
             ts_utils.append("iface:throughput_pps",   {ifid=ifstats.id, pps=pps}, when)
-	    ts_utils.append("iface:traffic",          {ifid=ifstats.id, bytes=ifstats.stats.bytes}, when)
+	        ts_utils.append("iface:traffic",          {ifid=ifstats.id, bytes=ifstats.stats.bytes}, when)
+            ts_utils.append("iface:packets",          {ifid=ifstats.id, packets=ifstats.stats.packets}, when)
             ts_utils.append("iface:packets_vs_drops", {ifid=ifstats.id, packets=ifstats.stats.packets, drops=ifstats.stats.drops or 0}, when)
 
             if ifstats.has_traffic_directions then
                ts_utils.append("iface:traffic_rxtx",  {ifid=ifstats.id, bytes_sent=ifstats.eth.egress.bytes, bytes_rcvd=ifstats.eth.ingress.bytes}, when)
+               ts_utils.append("iface:packets_rxtx",  {ifid=ifstats.id, packets_sent=ifstats.eth.egress.packets, packets_rcvd=ifstats.eth.ingress.packets}, when)
             end
 
 	    ts_utils.append("iface:traffic_ip",       {ifid=ifstats.id, bytes_ipv4=ifstats.eth.IPv4_bytes, bytes_ipv6=ifstats.eth.IPv6_bytes}, when)

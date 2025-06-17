@@ -317,6 +317,8 @@ void HostStats::luaStats(lua_State* vm, NetworkInterface* iface,
    * access Host data and push it directly here! */
   lua_push_uint64_table_entry(vm, "bytes.sent", sent.getNumBytes());
   lua_push_uint64_table_entry(vm, "bytes.rcvd", rcvd.getNumBytes());
+  lua_push_uint64_table_entry(vm, "packets.sent", sent.getNumPkts());
+  lua_push_uint64_table_entry(vm, "packets.rcvd", rcvd.getNumPkts());
   lua_push_uint64_table_entry(vm, "total_flows.as_client",
                               total_num_flows_as_client);
   lua_push_uint64_table_entry(vm, "total_flows.as_server",

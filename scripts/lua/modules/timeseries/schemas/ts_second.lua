@@ -16,10 +16,23 @@ schema:addMetric("bytes")
 
 -- ##############################################
 
+schema = ts_utils.newSchema("iface:packets", {step=1, rrd_fname="packets", is_critical_ts=true})
+schema:addTag("ifid")
+schema:addMetric("packets")
+
+-- ##############################################
+
 schema = ts_utils.newSchema("iface:traffic_rxtx", {step=1, is_critical_ts=true})
 schema:addTag("ifid")
 schema:addMetric("bytes_sent")
 schema:addMetric("bytes_rcvd")
+
+-- ##############################################
+
+schema = ts_utils.newSchema("iface:packets_rxtx", {step=1, is_critical_ts=true})
+schema:addTag("ifid")
+schema:addMetric("packets_sent")
+schema:addMetric("packets_rcvd")
 
 -- ##############################################
 
@@ -49,12 +62,6 @@ schema = ts_utils.newSchema("iface:throughput_pps", {
 })
 schema:addTag("ifid")
 schema:addMetric("pps")
-
--- ##############################################
-
-schema = ts_utils.newSchema("iface:packets", {step=1, rrd_fname="packets", is_critical_ts=true})
-schema:addTag("ifid")
-schema:addMetric("packets")
 
 -- ##############################################
 

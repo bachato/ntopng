@@ -451,75 +451,27 @@ schema:addMetric("num_hosts")
 
 -- ##############################################
 
-schema = ts_utils.newSchema("iface:tcp_retransmissions", {
+schema = ts_utils.newSchema("iface:tcp_stats", {
     step = 60,
-    rrd_fname = "tcp_retransmissions"
+    rrd_fname = "tcp_stats"
 })
 schema:addTag("ifid")
-schema:addMetric("packets")
+schema:addMetric("retransmissions")
+schema:addMetric("out_of_order")
+schema:addMetric("lost")
+schema:addMetric("keep_alive")
 
 -- ##############################################
 
-schema = ts_utils.newSchema("iface:tcp_out_of_order", {
+schema = ts_utils.newSchema("iface:tcp_flags", {
     step = 60,
-    rrd_fname = "tcp_ooo"
+    rrd_fname = "tcp_flags"
 })
 schema:addTag("ifid")
-schema:addMetric("packets")
-
--- ##############################################
-
-schema = ts_utils.newSchema("iface:tcp_lost", {
-    step = 60,
-    rrd_fname = "tcp_lost"
-})
-schema:addTag("ifid")
-schema:addMetric("packets")
-
--- ##############################################
-
-schema = ts_utils.newSchema("iface:tcp_keep_alive", {
-    step = 60,
-    rrd_fname = "tcp_keepalive"
-})
-schema:addTag("ifid")
-schema:addMetric("packets")
-
--- ##############################################
-
-schema = ts_utils.newSchema("iface:tcp_syn", {
-    step = 60,
-    rrd_fname = "tcp_syn"
-})
-schema:addTag("ifid")
-schema:addMetric("packets")
-
--- ##############################################
-
-schema = ts_utils.newSchema("iface:tcp_synack", {
-    step = 60,
-    rrd_fname = "tcp_synack"
-})
-schema:addTag("ifid")
-schema:addMetric("packets")
-
--- ##############################################
-
-schema = ts_utils.newSchema("iface:tcp_finack", {
-    step = 60,
-    rrd_fname = "tcp_finack"
-})
-schema:addTag("ifid")
-schema:addMetric("packets")
-
--- ##############################################
-
-schema = ts_utils.newSchema("iface:tcp_rst", {
-    step = 60,
-    rrd_fname = "tcp_rst"
-})
-schema:addTag("ifid")
-schema:addMetric("packets")
+schema:addMetric("fin_ack")
+schema:addMetric("syn_ack")
+schema:addMetric("syn")
+schema:addMetric("rst")
 
 -- ##############################################
 

@@ -601,6 +601,17 @@ schema:addMetric("bytes_rcvd")
 
 -- ##############################################
 
+schema = ts_utils.newSchema("host:packets", {
+    step = 300,
+    rrd_fname = "packets"
+})
+schema:addTag("ifid")
+schema:addTag("host")
+schema:addMetric("packets_sent")
+schema:addMetric("packets_rcvd")
+
+-- ##############################################
+
 schema = ts_utils.newSchema("host:score", {
     step = 300,
     metrics_type = ts_utils.metrics.gauge
@@ -759,26 +770,6 @@ schema:addTag("host")
 schema:addMetric("retran_pkts")
 schema:addMetric("out_of_order_pkts")
 schema:addMetric("lost_packets")
-
--- ##############################################
-
-schema = ts_utils.newSchema("host:tcp_packets", {
-    step = 300
-})
-schema:addTag("ifid")
-schema:addTag("host")
-schema:addMetric("packets_sent")
-schema:addMetric("packets_rcvd")
-
--- ##############################################
-
-schema = ts_utils.newSchema("host:udp_pkts", {
-    step = 300
-})
-schema:addTag("ifid")
-schema:addTag("host")
-schema:addMetric("packets_sent")
-schema:addMetric("packets_rcvd")
 
 -- ##############################################
 

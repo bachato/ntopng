@@ -400,14 +400,6 @@ function ts_dump.host_update_stats_rrds(when, hostname, host, ifstats, verbose)
 						 }, when)
    end
 
-   -- Number of udp packets
-   ts_utils.append("host:udp_pkts", {
-		      ifid = ifstats.id,
-		      host = hostname,
-		      packets_sent = host["udp.packets.sent"],
-		      packets_rcvd = host["udp.packets.rcvd"]
-				    }, when)
-
    -- Tcp RX Stats
    ts_utils.append("host:tcp_rx_stats", {
 		      ifid = ifstats.id,
@@ -425,14 +417,6 @@ function ts_dump.host_update_stats_rrds(when, hostname, host, ifstats, verbose)
 		      out_of_order_pkts = host["tcpPacketStats.sent"]["out_of_order"],
 		      lost_packets = host["tcpPacketStats.sent"]["lost"]
 					}, when)
-
-   -- Number of TCP packets
-   ts_utils.append("host:tcp_packets", {
-		      ifid = ifstats.id,
-		      host = hostname,
-		      packets_sent = host["tcp.packets.sent"],
-		      packets_rcvd = host["tcp.packets.rcvd"]
-				       }, when)
 
    -- Contacts
    if host["contacts.as_client"] then
@@ -641,6 +625,12 @@ function ts_dump.light_host_update_rrd(when, hostname, host, ifstats, verbose)
 		      host = hostname,
 		      bytes_sent = host["bytes.sent"],
 		      bytes_rcvd = host["bytes.rcvd"]
+				   }, when)
+   ts_utils.append("host:packets", {
+		      ifid = ifstats.id,
+		      host = hostname,
+		      packets_sent = host["packets.sent"],
+		      packets_rcvd = host["packets.rcvd"]
 				   }, when)
 
    -- Score

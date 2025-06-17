@@ -380,40 +380,22 @@ function ts_dump.iface_update_flow_dump_stats(when, ifstats, verbose)
 end
 
 function ts_dump.iface_update_tcp_stats(when, ifstats, verbose)
-    ts_utils.append("iface:tcp_retransmissions", {
+    ts_utils.append("iface:tcp_stats", {
         ifid = ifstats.id,
-        packets = ifstats.tcpPacketStats.retransmissions
-    }, when)
-    ts_utils.append("iface:tcp_out_of_order", {
-        ifid = ifstats.id,
-        packets = ifstats.tcpPacketStats.out_of_order
-    }, when)
-    ts_utils.append("iface:tcp_lost", {
-        ifid = ifstats.id,
-        packets = ifstats.tcpPacketStats.lost
-    }, when)
-    ts_utils.append("iface:tcp_keep_alive", {
-        ifid = ifstats.id,
-        packets = ifstats.tcpPacketStats.keep_alive
+        retransmissions = ifstats.tcpPacketStats.retransmissions,
+        out_of_order = ifstats.tcpPacketStats.out_of_order,
+        lost = ifstats.tcpPacketStats.lost,
+        keep_alive = ifstats.tcpPacketStats.keep_alive
     }, when)
 end
 
 function ts_dump.iface_update_tcp_flags(when, ifstats, verbose)
-    ts_utils.append("iface:tcp_syn", {
+    ts_utils.append("iface:tcp_flags", {
         ifid = ifstats.id,
-        packets = ifstats.pktSizeDistribution.tcp_flags.syn
-    }, when)
-    ts_utils.append("iface:tcp_synack", {
-        ifid = ifstats.id,
-        packets = ifstats.pktSizeDistribution.tcp_flags.synack
-    }, when)
-    ts_utils.append("iface:tcp_finack", {
-        ifid = ifstats.id,
-        packets = ifstats.pktSizeDistribution.tcp_flags.finack
-    }, when)
-    ts_utils.append("iface:tcp_rst", {
-        ifid = ifstats.id,
-        packets = ifstats.pktSizeDistribution.tcp_flags.rst
+        fin_ack = ifstats.pktSizeDistribution.tcp_flags.finack,
+        syn_ack = ifstats.pktSizeDistribution.tcp_flags.synack,
+        syn = ifstats.pktSizeDistribution.tcp_flags.syn,
+        rst = ifstats.pktSizeDistribution.tcp_flags.rst,
     }, when)
 end
 

@@ -99,6 +99,26 @@ local community_timeseries = {
         always_visibile = true,
         default_visible = true
     }, {
+        schema = "iface:packets_rxtx",
+        id = timeseries_id.iface,
+        label = i18n("graphs.packets_rxtx"),
+        description = i18n("graphs.metric_descr.iface_packets_rxtx"),
+        priority = 0,
+        measure_unit = "pps",
+        scale = i18n("graphs.metric_labels.traffic"),
+        timeseries = {
+            packets_sent = {
+                label = i18n('graphs.metric_labels.sent'),
+                color = timeseries_info.get_timeseries_color('bytes_sent')
+            },
+            packets_rcvd = {
+                invert_direction = true,
+                label = i18n('graphs.metric_labels.rcvd'),
+                color = timeseries_info.get_timeseries_color('bytes_rcvd')
+            }
+        },
+        always_visibile = true
+    }, {
         schema = "iface:traffic_ip",
         id = timeseries_id.iface,
         label = i18n("graphs.traffic_ip"),
@@ -289,6 +309,21 @@ local community_timeseries = {
         timeseries = {
             bytes = {
                 label = i18n('graphs.metric_labels.traffic'),
+                color = timeseries_info.get_timeseries_color('bytes')
+            }
+        },
+        nedge_exclude = true
+    }, {
+        schema = "iface:packets",
+        id = timeseries_id.iface,
+        label = i18n("graphs.packets"),
+        description = i18n("graphs.metric_descr.iface_packets"),
+        priority = 0,
+        measure_unit = "bps",
+        scale = i18n("graphs.metric_labels.packets"),
+        timeseries = {
+            packets = {
+                label = i18n('graphs.metric_labels.packets'),
                 color = timeseries_info.get_timeseries_color('bytes')
             }
         },
@@ -485,106 +520,57 @@ local community_timeseries = {
         },
         nedge_exclude = true
     }, {
-        schema = "iface:tcp_lost",
+        schema = "iface:tcp_stats",
         id = timeseries_id.iface,
-        label = i18n("graphs.tcp_packets_lost"),
-        description = i18n("graphs.metric_descr.iface_tcp_packets_lost"),
+        label = i18n("graphs.tcp_stats"),
+        description = i18n("graphs.tcp_stats"),
         priority = 0,
         measure_unit = "number",
         scale = i18n('graphs.metric_labels.packets'),
+        disable_default_ago_ts = true,
         timeseries = {
-            packets = {
+            keep_alive = {
+                label = i18n('graphs.tcp_packets_keep_alive'),
+                color = timeseries_info.get_timeseries_color('packets')
+            },
+            retransmissions = {
+                label = i18n('graphs.tcp_packets_retr'),
+                color = timeseries_info.get_timeseries_color('packets')
+            },      
+            out_of_order = {
+                label = i18n('graphs.tcp_packets_ooo'),
+                color = timeseries_info.get_timeseries_color('packets')
+            },      
+            lost = {
                 label = i18n('graphs.tcp_packets_lost'),
                 color = timeseries_info.get_timeseries_color('packets')
             }
         },
         nedge_exclude = true
     }, {
-        schema = "iface:tcp_out_of_order",
+        schema = "iface:tcp_flags",
         id = timeseries_id.iface,
-        label = i18n("graphs.tcp_packets_ooo"),
-        description = i18n("graphs.metric_descr.iface_tcp_packets_ooo"),
+        label = i18n("graphs.tcp_flags"),
+        description = i18n("graphs.metric_descr.iface_tcp_flags"),
         priority = 0,
+        disable_default_ago_ts = true,
         measure_unit = "number",
         scale = i18n('graphs.metric_labels.packets'),
         timeseries = {
-            packets = {
-                label = i18n('graphs.tcp_packets_ooo'),
-                color = timeseries_info.get_timeseries_color('packets')
-            }
-        },
-        nedge_exclude = true
-    }, {
-        schema = "iface:tcp_retransmissions",
-        id = timeseries_id.iface,
-        label = i18n("graphs.tcp_packets_retr"),
-        description = i18n("graphs.metric_descr.iface_tcp_packets_retr"),
-        priority = 0,
-        measure_unit = "number",
-        scale = i18n('graphs.metric_labels.packets'),
-        timeseries = {
-            packets = {
-                label = i18n('graphs.tcp_packets_retr'),
-                color = timeseries_info.get_timeseries_color('packets')
-            }
-        },
-        nedge_exclude = true
-    }, {
-        schema = "iface:tcp_keep_alive",
-        id = timeseries_id.iface,
-        label = i18n("graphs.tcp_packets_keep_alive"),
-        description = i18n("graphs.metric_descr.iface_tcp_packets_keep_alive"),
-        priority = 0,
-        measure_unit = "number",
-        scale = i18n('graphs.metric_labels.packets'),
-        timeseries = {
-            packets = {
-                label = i18n('graphs.tcp_packets_keep_alive'),
-                color = timeseries_info.get_timeseries_color('packets')
-            }
-        },
-        nedge_exclude = true
-    }, {
-        schema = "iface:tcp_syn",
-        id = timeseries_id.iface,
-        label = i18n("graphs.tcp_syn_packets"),
-        description = i18n("graphs.metric_descr.iface_tcp_syn_packets"),
-        priority = 0,
-        measure_unit = "number",
-        scale = i18n('graphs.metric_labels.packets'),
-        timeseries = {
-            packets = {
-                label = i18n('graphs.tcp_syn_packets'),
-                color = timeseries_info.get_timeseries_color('packets')
-            }
-        },
-        nedge_exclude = true
-    }, {
-        schema = "iface:tcp_synack",
-        id = timeseries_id.iface,
-        label = i18n("graphs.tcp_synack_packets"),
-        description = i18n("graphs.metric_descr.iface_tcp_synack_packets"),
-        priority = 0,
-        measure_unit = "number",
-        scale = i18n('graphs.metric_labels.packets'),
-        timeseries = {
-            packets = {
-                label = i18n('graphs.tcp_syn_packets'),
-                color = timeseries_info.get_timeseries_color('packets')
-            }
-        },
-        nedge_exclude = true
-    }, {
-        schema = "iface:tcp_finack",
-        id = timeseries_id.iface,
-        label = i18n("graphs.tcp_finack_packets"),
-        description = i18n("graphs.metric_descr.iface_tcp_finack_packets"),
-        priority = 0,
-        measure_unit = "number",
-        scale = i18n('graphs.metric_labels.packets'),
-        timeseries = {
-            packets = {
+            fin_ack = {
                 label = i18n('graphs.tcp_finack_packets'),
+                color = timeseries_info.get_timeseries_color('packets')
+            },
+            syn_ack = {
+                label = i18n('graphs.tcp_synack_packets'),
+                color = timeseries_info.get_timeseries_color('packets')
+            },
+            syn = {
+                label = i18n('graphs.tcp_syn_packets'),
+                color = timeseries_info.get_timeseries_color('packets')
+            },
+            rst = {
+                label = i18n('graphs.tcp_rst_packets'),
                 color = timeseries_info.get_timeseries_color('packets')
             }
         },
@@ -615,21 +601,6 @@ local community_timeseries = {
                 color = timeseries_info.get_timeseries_color('default')
             }
         }
-    }, {
-        schema = "iface:tcp_rst",
-        id = timeseries_id.iface,
-        label = i18n("graphs.tcp_rst_packets"),
-        description = i18n("graphs.metric_descr.iface_tcp_rst_packets"),
-        priority = 0,
-        measure_unit = "number",
-        scale = i18n('graphs.metric_labels.packets'),
-        timeseries = {
-            packets = {
-                label = i18n('graphs.tcp_rst_packets'),
-                color = timeseries_info.get_timeseries_color('packets')
-            }
-        },
-        nedge_exclude = true
     }, -- host_details.lua (HOST): --
     {
         schema = "host:traffic",
@@ -652,6 +623,26 @@ local community_timeseries = {
         },
         always_visibile = true,
         default_visible = true
+    }, {
+        schema = "host:packets",
+        id = timeseries_id.host,
+        label = i18n("graphs.packets_rxtx"),
+        description = i18n("graphs.metric_descr.iface_packets_rxtx"),
+        priority = 0,
+        measure_unit = "pps",
+        scale = i18n("graphs.metric_labels.traffic"),
+        timeseries = {
+            packets_sent = {
+                label = i18n('graphs.metric_labels.sent'),
+                color = timeseries_info.get_timeseries_color('bytes_sent')
+            },
+            packets_rcvd = {
+                invert_direction = true,
+                label = i18n('graphs.metric_labels.rcvd'),
+                color = timeseries_info.get_timeseries_color('bytes_rcvd')
+            }
+        },
+        always_visibile = true
     }, {
         schema = "host:score",
         id = timeseries_id.host,
@@ -938,24 +929,6 @@ local community_timeseries = {
             }
         }
     }, {
-        schema = "host:udp_pkts",
-        id = timeseries_id.host,
-        label = i18n("graphs.udp_packets"),
-        description = i18n("graphs.metric_descr.host_udp_packets"),
-        priority = 0,
-        measure_unit = "pps",
-        scale = i18n('graphs.metric_labels.packets'),
-        timeseries = {
-            packets_sent = {
-                label = i18n('graphs.metric_labels.sent'),
-                color = timeseries_info.get_timeseries_color('packets')
-            },
-            packets_rcvd = {
-                label = i18n('graphs.metric_labels.rcvd'),
-                color = timeseries_info.get_timeseries_color('packets')
-            }
-        }
-    }, {
         schema = "host:echo_reply_packets",
         id = timeseries_id.host,
         label = i18n("graphs.echo_reply_packets"),
@@ -978,24 +951,6 @@ local community_timeseries = {
         id = timeseries_id.host,
         label = i18n("graphs.echo_request_packets"),
         description = i18n("graphs.metric_descr.host_echo_request_packets"),
-        priority = 0,
-        measure_unit = "pps",
-        scale = i18n('graphs.metric_labels.packets'),
-        timeseries = {
-            packets_sent = {
-                label = i18n('graphs.metric_labels.sent'),
-                color = timeseries_info.get_timeseries_color('packets')
-            },
-            packets_rcvd = {
-                label = i18n('graphs.metric_labels.rcvd'),
-                color = timeseries_info.get_timeseries_color('packets')
-            }
-        }
-    }, {
-        schema = "host:tcp_packets",
-        id = timeseries_id.host,
-        label = i18n("graphs.tcp_packets"),
-        description = i18n("graphs.metric_descr.host_tcp_packets"),
         priority = 0,
         measure_unit = "pps",
         scale = i18n('graphs.metric_labels.packets'),
