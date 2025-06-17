@@ -358,6 +358,11 @@ page_utils.menu_entries = {
         i18n_title = "prefs.snmp",
         section = "pollers"
     },
+    assets_snmp = {
+        key = "assets_snmp",
+        i18n_title = "assets_snmp",
+        section = "pollers"
+    },
     snmp_monitoring = {
         key = "snmp_monitoring",
         i18n_title = "prefs.snmp",

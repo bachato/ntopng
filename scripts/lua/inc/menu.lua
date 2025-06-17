@@ -394,7 +394,7 @@ else
                 hidden = not ifs.has_macs,
                 url = '/lua/macs_stats.lua'
 	       }, {entry = page_utils.menu_entries.divider}, {
-	       hidden = not (ntop.isEnterpriseM() and not ntop.isWindows()) ,
+	            hidden = not (ntop.isEnterpriseM() and not ntop.isWindows()) ,
                 entry = page_utils.menu_entries.assets,
                 url = '/lua/pro/assets.lua'
             }
@@ -552,6 +552,12 @@ page_utils.add_menubar_section({
 -- System interface menu
 
 local poller_entries = {
+    {
+        entry = page_utils.menu_entries.divider}, {
+        hidden = not (ntop.isEnterpriseM() and not ntop.isWindows()) ,
+        entry = page_utils.menu_entries.assets_snmp,
+        url = '/lua/pro/assets.lua'
+    },
     {
         entry = page_utils.menu_entries.snmp,
         hidden = not is_system_interface or
