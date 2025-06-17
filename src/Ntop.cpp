@@ -2914,7 +2914,6 @@ void Ntop::initInterface(NetworkInterface *_if, bool disable_dump) {
       #endif
   ) && !disable_dump) {
     _if->initFlowDump();
-    _if->startDBLoop();
   }
 
   /* Other initialization activities */

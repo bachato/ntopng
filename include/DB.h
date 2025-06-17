@@ -62,7 +62,7 @@ class DB {
   /* Pure Virtual Functions of a DB flow exporter */
   virtual const char *getEngineName() { return "Unknown"; };
   virtual bool dumpFlow(time_t when, Flow *f, char *json) = 0;
-  virtual bool startQueryLoop() { return (false); }
+  virtual bool startDumpLoop() { return (false); }
 
   virtual int execSQLQuery(const char *sql,
                            bool doReconnect = true, bool ignoreErrors = false,
@@ -75,9 +75,7 @@ class DB {
     return (-1);
   }
 
-  inline void startDBLoop() {
-    if (startQueryLoop()) running = true;
-  };
+  inline void startDBLoop() { if (startDumpLoop()) running = true; };
   inline int isRunning() { return (running); };
   virtual bool isDbCreated() { return (true); };
   virtual void shutdown();

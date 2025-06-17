@@ -61,7 +61,7 @@ class ElasticSearch : public DB {
   void indexESdata();
 
   virtual bool dumpFlow(time_t when, Flow *f, char *json);
-  virtual bool startQueryLoop();
+  virtual bool startDumpLoop();
 };
 
 #endif /* _ELASTIC_SEARCH_H_ */

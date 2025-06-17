@@ -130,7 +130,7 @@ bool ElasticSearch::dumpFlow(time_t when, Flow *f, char *msg) {
 
 /* **************************************** */
 
-bool ElasticSearch::startQueryLoop() {
+bool ElasticSearch::startDumpLoop() {
   if (ntop->getPrefs()->do_dump_flows_on_es()) {
     pthread_create(&esThreadLoop, NULL, esLoop, (void *)this);
 

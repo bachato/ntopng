@@ -3461,19 +3461,7 @@ u_int64_t NetworkInterface::dequeueHostAlertsFromChecks(u_int budget) {
 /* **************************************************** */
 
 void NetworkInterface::incNumQueueDroppedFlows(u_int32_t num) {
-  /*
-    For viewed interface, the database instance (actual_db) is the one belonging
-    to the overlying view interface.
-  */
-  DB *actual_db;
-
-  actual_db = 
-#ifdef NTOPNG_PRO
-    isViewed() ? viewedBy()->getDB() : 
-#endif
-    getDB();
-
-  if (actual_db) actual_db->incNumQueueDroppedFlows(num);
+  if (db) db->incNumQueueDroppedFlows(num);
 };
 
 /* **************************************************** */
@@ -3491,7 +3479,6 @@ void NetworkInterface::incNumQueueDroppedFlows(u_int32_t num) {
 */
 u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
                                                 u_int active_flows_budget) {
-  DB *actual_db = getDB();
   u_int64_t idle_flows_done = 0, active_flows_done = 0;
   time_t when = time(NULL);
   
@@ -3555,7 +3542,7 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
   // flushFlowDump();
 #endif
 
-  if (actual_db) actual_db->checkIdle(when);
+  if (db) db->checkIdle(when);
 
   return (num_done);
 }
@@ -3564,18 +3551,15 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
 
 /* Thos method finally dumps a flow */
 bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
-  DB *actual_db = getDB();
   char *json = NULL;
   bool rc = true;
-
-  /* Note: on viewed interfaces the DB is not initialized (see initFlowDump) */
 
   /* Checkpoint flow traffic counters for the dump */
   f->update_partial_traffic_stats_db_dump();
 
   if (f->get_partial_bytes()) /* Make sure data is not at zero */ {
 
-    if (actual_db
+    if (db
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO) && !defined(HAVE_NEDGE)
         || kafka_exporter
 #endif
@@ -3587,8 +3571,8 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
       json = f->serialize(export_format_GENERIC);
       if (json) {
 
-        if (actual_db)
-          rc = actual_db->dumpFlow(when, f, json);
+        if (db)
+          rc = db->dumpFlow(when, f, json);
 
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO) && !defined(HAVE_NEDGE)
         if (kafka_exporter)
@@ -3632,7 +3616,7 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
   } /* get_partial_bytes > 0 */
 
   if (!rc)
-    incDBNumDroppedFlows(actual_db);
+    incDBNumDroppedFlows(db);
   
   f->decUses(); /* Add done, decrease the reference counter */
   f->set_dump_done();
@@ -3878,7 +3862,7 @@ void NetworkInterface::startPacketPolling() {
 #endif
   }
 
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Started packet polling on interface '%s' [id: %u]...",
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Started polling on interface '%s' [id: %u]...",
 			       get_description(), get_id());
 
   running = true;
@@ -9615,15 +9599,21 @@ bool NetworkInterface::initDB() {
 void NetworkInterface::initFlowDump() {
   startFlowDumping();
 
-  /* Flows are dumped by the view only */
-  if (isViewed()) /* No need to allocate databases on view interfaces */
-    return;
+  /* Note: dump on all non-view interfaces to dump in parallel,
+   * but still initialize db on the view interface for running queries */
 
   initDB();
+
+  if (isView())
+    return;
+
+  if (db)
+    db->startDBLoop();
 
 #ifndef HAVE_NEDGE
   if (ntop->getPrefs()->do_dump_flows_on_es() && es_exporter == NULL) {
     es_exporter = new (std::nothrow) ElasticSearch(this);
+    if (es_exporter) es_exporter->startDBLoop();
   }
 
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
@@ -9632,12 +9622,14 @@ void NetworkInterface::initFlowDump() {
 					     ntop->getPrefs()->getKafkaTopic(),
 					     ntop->getPrefs()->getKafkaOptions());
     kafka_exporter = kafka;
+    if (kafka_exporter) kafka_exporter->startDBLoop();
   }
 #endif
 
 #if !defined(WIN32) && !defined(__APPLE__)
   if (ntop->getPrefs()->do_dump_flows_on_syslog() && syslog_exporter == NULL) {
     syslog_exporter = new (std::nothrow) SyslogDump(this);
+    if (syslog_exporter) syslog_exporter->startDBLoop();
   }
 #endif
 #endif
