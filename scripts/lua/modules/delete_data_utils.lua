@@ -96,7 +96,7 @@ end
 
 -- ################################################################
 
-local function delete_host_mysql_flows(interface_id, host_info)
+local function delete_host_db_flows(interface_id, host_info)
    local status = "OK"
    local addr = host_info["host"]
    local vlan = host_info["vlan"] or 0
@@ -122,20 +122,6 @@ local function delete_host_mysql_flows(interface_id, host_info)
       if not dry_run and q then
          interface.execSQLQuery(q)
       end
-
-   elseif ntop.getPrefs()["is_dump_flows_to_mysql_enabled"] then
-
-      if isIPv4(addr) then
-         q = string.format("DELETE FROM %s WHERE (IP_SRC_ADDR = INET_ATON('%s') OR IP_DST_ADDR = INET_ATON('%s')) AND VLAN_ID = %u and INTERFACE_ID = %d",
-            "flowsv4", addr, addr, vlan, interface_id)
-      elseif isIPv6(addr) then
-         q = string.format("DELETE FROM %s WHERE (IP_SRC_ADDR = '%s' OR IP_DST_ADDR = '%s') AND VLAN_ID = %u AND INTERFACE_ID = %d",
-            "flowsv6", addr, addr, vlan, interface_id)
-      end
-
-      if not dry_run and q then
-         interface.execSQLQuery(q)
-      end
    end
 
    return {status = status}
@@ -156,10 +142,10 @@ local function _delete_host(interface_id, host_info)
 
    local h_ts = delete_host_timeseries_data(interface_id, host_info)
    local h_rk = delete_host_redis_keys(interface_id, host_info)
-   local h_db = delete_host_mysql_flows(interface_id, host_info)
+   local h_db = delete_host_db_flows(interface_id, host_info)
 
    interface.select(old_ifname)
-   return {delete_host_timeseries_data = h_ts, delete_host_redis_keys = h_rk, delete_host_mysql_flows = h_db}
+   return {delete_host_timeseries_data = h_ts, delete_host_redis_keys = h_rk, delete_host_db_flows = h_db}
 end
 
 -- ################################################################
@@ -334,11 +320,9 @@ local function delete_interfaces_db_flows(interfaces_list)
    local prefs = ntop.getPrefs()
 
    for if_id, if_name in pairs(interfaces_list) do
-      -- this deletes MySQL
-      if prefs.is_dump_flows_to_mysql_enabled == true and not dry_run then
-	 db_utils.harverstExpiredMySQLFlows(if_id, os.time() + 86400 --[[ go 1d in the future to make sure everything is deleted --]])
+      if ntop.isClickHouseEnabled() and not dry_run then
+         -- TODO: delete flows from clickhouse for if_id
       end
-      -- TODO: add delete for nIndex
    end
 
    return {status = status}

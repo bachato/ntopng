@@ -42,11 +42,6 @@ local menu_subpages = {{
             title = i18n("prefs.max_num_secs_before_delete_alert_title"),
             description = i18n("prefs.max_num_secs_before_delete_alert_description")
         },
-        toggle_mysql_check_open_files_limit = {
-            title = i18n("prefs.toggle_mysql_check_open_files_limit_title"),
-            description = i18n("prefs.toggle_mysql_check_open_files_limit_description"),
-            hidden = (prefs.is_dump_flows_to_mysql_enabled == false)
-        },
         toggle_emit_flow_alerts = {
             title = i18n("prefs.toggle_emit_flow_alerts_title"),
             description = i18n("prefs.toggle_emit_flow_alerts_description")

@@ -773,32 +773,6 @@ end
 
 -- ########################################################
 
-local function _harvest_expired_mysql_flows(ifname, mysql_retention, verbose)
-   local dbtables = {"flowsv4", "flowsv6"}
-
-   if tonumber(ifname) == nil then
-      ifname = getInterfaceId(ifname)
-   end
-
-   for _, tb in pairs(dbtables) do
-      local sql = "DELETE FROM "..tb.." where FIRST_SWITCHED < "..mysql_retention
-      sql = sql.." AND (INTERFACE_ID = "..ifname..")"
-      sql = sql.." AND (NTOPNG_INSTANCE_NAME='"..ntop.getPrefs()["instance_name"].."' OR NTOPNG_INSTANCE_NAME IS NULL OR NTOPNG_INSTANCE_NAME='')"
-      interface.execSQLQuery(sql)
-      if(verbose) then io.write(sql.."\n") end
-   end
-end
-
--- ########################################################
-
-function db_utils.harverstExpiredMySQLFlows(ifname, mysql_retention, verbose)
-   if not ntop.isClickHouseEnabled() then
-      return _harvest_expired_mysql_flows(ifname, mysql_retention, verbose)
-   end
-end
-
--- ########################################################
-
 function db_utils.populateExtraTables()
    for _, info in pairs(extra_tables) do
       if info.populate_table then

@@ -2740,9 +2740,9 @@ void Prefs::lua(lua_State *vm) {
   lua_push_str_table_entry(vm, "clickhouse_import_mode", "file");
 #endif
   lua_push_bool_table_entry(vm, "is_dump_flows_to_es_enabled",
-                            dump_flows_on_es);
+                            do_dump_flows_on_es());
   lua_push_bool_table_entry(vm, "is_dump_flows_to_syslog_enabled",
-                            dump_flows_on_syslog);
+                            do_dump_flows_on_syslog());
   lua_push_int32_table_entry(vm, "host_to_scan_max_num_scans",
 			                      vs_max_num_scans);
   lua_push_bool_table_entry(vm, "vs_slow_scan", vs_slow_scan);

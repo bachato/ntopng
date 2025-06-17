@@ -2222,7 +2222,6 @@ local known_parameters = {
     ["push_host_filters"] = validateBool,
     ["interface_network_discovery"] = validateBool,
     ["dynamic_iface_vlan_creation"] = validateBool,
-    ["toggle_mysql_check_open_files_limit"] = validateBool,
     ["disable_alerts_generation"] = validateBool,
     ["alert_page_refresh_rate_enabled"] = validateBool,
     ["enable_score"] = validateBool,

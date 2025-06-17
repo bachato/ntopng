@@ -1028,8 +1028,6 @@ if ((page == "overview") or (page == nil)) then
 
         if ntop.isClickHouseEnabled() then
             dump_to = "ClickHouse"
-        elseif prefs.is_dump_flows_to_mysql_enabled then
-            dump_to = "MySQL"
         elseif prefs.is_dump_flows_to_es_enabled == true then
             dump_to = "ElasticSearch"
         elseif prefs.is_dump_flows_to_syslog_enabled == true then
