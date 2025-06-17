@@ -307,7 +307,7 @@ protected:
 
   DB *db;
 #ifndef HAVE_NEDGE
-  DB *el_exporter;
+  DB *es_exporter;
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
   DB *kafka_exporter;
 #endif
@@ -670,6 +670,15 @@ public:
                         RoundTripStats *_downloadStats,
                         RoundTripStats *_uploadStats) const;
   inline DB *getDB() const { return db; };
+#ifndef HAVE_NEDGE
+  inline DB *getESExporter() const { return es_exporter; };
+#if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
+  inline DB *getKafkaExporter() const { return kafka_exporter; };
+#endif
+#if !defined(WIN32) && !defined(__APPLE__)
+  inline DB *getSyslogExporter() const { return syslog_exporter; };
+#endif
+#endif
   inline EthStats* getStats() { return (&ethStats); };
   inline int get_datalink() { return (pcap_datalink_type); };
   inline void set_datalink(int l) { pcap_datalink_type = l; };
@@ -1029,7 +1038,7 @@ public:
   inline void startDBLoop() {
     if (db) db->startDBLoop();
 #ifndef HAVE_NEDGE
-    if (el_exporter) el_exporter->startDBLoop();
+    if (es_exporter) es_exporter->startDBLoop();
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
     if (kafka_exporter) kafka_exporter->startDBLoop();
 #endif

@@ -1023,20 +1023,10 @@ if ((page == "overview") or (page == nil)) then
         end
     end
 
-    if prefs.is_dump_flows_enabled and not ifstats.isViewed then
-        local dump_to = ""
-
-        if ntop.isClickHouseEnabled() then
-            dump_to = "ClickHouse"
-        elseif prefs.is_dump_flows_to_es_enabled == true then
-            dump_to = "ElasticSearch"
-        elseif prefs.is_dump_flows_to_syslog_enabled == true then
-            dump_to = "Syslog"
-        end
-
-        local export_count = ifstats.stats_since_reset.flow_export_count or 0
-        local export_rate = ifstats.stats_since_reset.flow_export_rate or 0
-        local export_drops = ifstats.stats_since_reset.flow_export_drops or 0
+    local function printExportStats(db_type, db_label)
+        local export_count = ifstats.stats_since_reset[db_type].flow_export_count or 0
+        local export_rate = ifstats.stats_since_reset[db_type].flow_export_rate or 0
+        local export_drops = ifstats.stats_since_reset[db_type].flow_export_drops or 0
         local export_drops_pct = 0
 
         if export_drops > 0 or export_count > 0 then
@@ -1045,22 +1035,22 @@ if ((page == "overview") or (page == nil)) then
 
         print("<tr><th colspan=7 nowrap>")
         if prefs.is_dump_flows_runtime_enabled then
-            print(dump_to .. " " .. i18n("if_stats_overview.flows_export_statistics"))
+            print(db_label .. " " .. i18n("if_stats_overview.flows_export_statistics"))
         else
             print(i18n("if_stats_overview.export_disabled"))
         end
         print("</th></tr>\n")
 
         print("<tr>")
-        print("<th nowrap>" .. i18n("if_stats_overview.dumped_flows_to_db") ..
+        print("<th nowrap>" .. i18n("if_stats_overview.dumped_flows") ..
             ternary(charts_available, " <A HREF='" .. url ..
                 "&page=historical&ts_schema=iface:dumped_flows'><i class='fas fa-chart-area fa-sm'></i></A>", "") ..
             "</th>")
-        print("<td><span id=exported_flows>" .. formatValue(export_count) .. "</span>")
+        print("<td><span id=" .. db_type .. "_exported_flows>" .. formatValue(export_count) .. "</span>")
         if export_rate == nil then
             export_rate = 0
         end
-        print("&nbsp;[<span id=exported_flows_rate>" .. formatValue(round(export_rate, 2)) .. " fps</span>]</td>")
+        print("&nbsp;[<span id=" .. db_type .. "_exported_flows_rate>" .. formatValue(round(export_rate, 2)) .. " fps</span>]</td>")
 
         print("<th><span id='if_flow_drops_drop'<i class='fas fa-tint' aria-hidden='true'></i></span> ")
         print(i18n("if_stats_overview.dropped_export_to_db") .. ternary(charts_available, " <A HREF='" .. url ..
@@ -1071,8 +1061,8 @@ if ((page == "overview") or (page == nil)) then
             span_danger = ' class="badge bg-danger"'
         end
 
-        print("<td><span id=exported_flows_drops " .. span_danger .. ">" .. formatValue(export_drops) .. "</span>&nbsp;")
-        print("<span id=exported_flows_drops_pct " .. span_danger .. ">[" .. formatValue(round(export_drops_pct, 2)) ..
+        print("<td><span id=" .. db_type .. "_exported_flows_drops " .. span_danger .. ">" .. formatValue(export_drops) .. "</span>&nbsp;")
+        print("<span id=" .. db_type .. "_exported_flows_drops_pct " .. span_danger .. ">[" .. formatValue(round(export_drops_pct, 2)) ..
             "%]</span></td>")
 
         if not is_packet_interface then
@@ -1083,6 +1073,21 @@ if ((page == "overview") or (page == nil)) then
         end
 
         print("</tr>")
+    end
+
+    if not ifstats.isViewed then
+      if ntop.isClickHouseEnabled() then
+        printExportStats('db', 'ClickHouse')
+      end
+      if prefs.is_dump_flows_to_es_enabled then
+        printExportStats('es', 'ElasticSearch')
+      end
+      if prefs.is_dump_flows_to_kafka_enabled then
+        printExportStats('kafka', 'Kafka')
+      end
+      if prefs.is_dump_flows_to_syslog_enabled then
+        printExportStats('syslog', 'Syslog')
+      end
     end
 
     local an = ifstats.anomalies.tot_num_anomalies or {}
@@ -1217,11 +1222,6 @@ if ((page == "overview") or (page == nil)) then
     if isAdministrator() then
         print("<tr><th width=250>" .. i18n("if_stats_overview.reset_counters") .. "</th>")
         print("<td colspan=5>")
-
-        local tot = ifstats.stats.bytes + ifstats.stats.packets + ifstats.stats.drops
-        if (ifstats.stats_since_reset.flow_export_count ~= nil) then
-            tot = tot + ifstats.stats_since_reset.flow_export_count + ifstats.stats_since_reset.flow_export_drops
-        end
 
         print(
             '<button id="btn_reset_all" type="button" class="btn btn-danger" onclick="resetInterfaceCounters(false);">' ..
@@ -2784,27 +2784,46 @@ if page == 'overview' or isEmptyString(page) then
         $('#if_probe_packet_drops').html(pctg);
         $('#dropped_probe_packets_trend').html(NtopUtils.get_trend(pctg, last_if_probe_packet_drops));
         last_if_probe_packet_drops = pctg;
+    ]]
 
+    local function printJSExportStats(db_type, db_label)
+        print [[
             /* ************************************ */
 
-            $('#exported_flows').html(NtopUtils.fint(rsp.flow_export_count));
-            $('#exported_flows_rate').html(NtopUtils.fflows(rsp.flow_export_rate));
-            if(rsp.flow_export_drops > 0) {
-            $('#exported_flows_drops')
-                .addClass("badge bg-danger")
-                .html(NtopUtils.fint(rsp.flow_export_drops));
-            if(rsp.flow_export_count > 0) {
-                $('#exported_flows_drops_pct')
-                .addClass("badge bg-danger")
-                .html("[" + NtopUtils.fpercent(rsp.flow_export_drops / (rsp.flow_export_count + rsp.flow_export_drops + 1) * 100) + "]");
+            $('#]] print(db_type) print[[_exported_flows').html(NtopUtils.fint(rsp.]] print(db_type) print[[.flow_export_count));
+            $('#]] print(db_type) print[[_exported_flows_rate').html(NtopUtils.fflows(rsp.]] print(db_type) print[[.flow_export_rate));
+            if(rsp.]] print(db_type) print[[.flow_export_drops > 0) {
+                $('#]] print(db_type) print[[_exported_flows_drops')
+                    .addClass("badge bg-danger")
+                    .html(NtopUtils.fint(rsp.]] print(db_type) print[[.flow_export_drops));
+                if(rsp.]] print(db_type) print[[.flow_export_count > 0) {
+                    $('#]] print(db_type) print[[_exported_flows_drops_pct')
+                    .addClass("badge bg-danger")
+                    .html("[" + NtopUtils.fpercent(rsp.]] print(db_type) print[[.flow_export_drops / (rsp.]] print(db_type) print[[.flow_export_count + rsp.flow_export_drops + 1) * 100) + "]");
+                } else {
+                    $('#]] print(db_type) print[[_exported_flows_drops_pct').addClass("badge bg-danger").html("[100%]");
+                }
             } else {
-                $('#exported_flows_drops_pct').addClass("badge bg-danger").html("[100%]");
+                $('#]] print(db_type) print[[_exported_flows_drops').removeClass().html("0");
+                $('#]] print(db_type) print[[_exported_flows_drops_pct').removeClass().html("[0%]");
             }
-            } else {
-            $('#exported_flows_drops').removeClass().html("0");
-            $('#exported_flows_drops_pct').removeClass().html("[0%]");
-            }
-    ]]
+        ]]
+    end
+
+    if not ifstats.isViewed then
+      if ntop.isClickHouseEnabled() then
+        printJSExportStats('db', 'ClickHouse')
+      end
+      if prefs.is_dump_flows_to_es_enabled then
+        printJSExportStats('es', 'ElasticSearch')
+      end
+      if prefs.is_dump_flows_to_kafka_enabled then
+        printJSExportStats('kafka', 'Kafka')
+      end
+      if prefs.is_dump_flows_to_syslog_enabled then
+        printJSExportStats('syslog', 'Syslog')
+      end
+    end
 
     if interface.isSyslogInterface() then
         print [[

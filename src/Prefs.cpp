@@ -2741,6 +2741,10 @@ void Prefs::lua(lua_State *vm) {
 #endif
   lua_push_bool_table_entry(vm, "is_dump_flows_to_es_enabled",
                             do_dump_flows_on_es());
+#if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
+  lua_push_bool_table_entry(vm, "is_dump_flows_to_kafka_enabled",
+                            do_dump_flows_on_kafka());
+#endif
   lua_push_bool_table_entry(vm, "is_dump_flows_to_syslog_enabled",
                             do_dump_flows_on_syslog());
   lua_push_int32_table_entry(vm, "host_to_scan_max_num_scans",

@@ -374,8 +374,8 @@ end
 function ts_dump.iface_update_flow_dump_stats(when, ifstats, verbose)
     ts_utils.append("iface:dumped_flows", {
         ifid = ifstats.id,
-        dumped_flows = ifstats.stats.flow_export_count or 0,
-        dropped_flows = ifstats.stats.flow_export_drops or 0
+        dumped_flows = ifstats.stats.db and ifstats.stats.db.flow_export_count or 0,
+        dropped_flows = ifstats.stats.db and ifstats.stats.db.flow_export_drops or 0
     }, when)
 end
 

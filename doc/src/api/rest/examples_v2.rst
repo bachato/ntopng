@@ -33,7 +33,6 @@ Response:
      "num_local_hosts": 3,
      "remote_bps": 0,
      "localtime": "17:14:42 +0200",
-     "flow_export_rate": 0.0,
      "throughput": {
       "download": {
        "pps": 0.79980963468552002,
@@ -48,7 +47,6 @@ Response:
      "has_alerts": true,
      "num_flows": 4,
      "throughput_bps": 149.56440734863,
-     "flow_export_drops": 0,
      "drops": 0,
      "bytes_upload": 103734,
      "alerted_flows": 0,
@@ -102,7 +100,11 @@ Response:
      "num_hosts": 3,
      "macs_pctg": 1,
      "flows_pctg": 1,
-     "flow_export_count": 0,
+     "db": {
+      "flow_export_count": 0,
+      "flow_export_drops": 0,
+      "flow_export_rate": 0.0
+     },
      "packets": 612,
      "engaged_alerts": 0,
      "remote_pps": 0,

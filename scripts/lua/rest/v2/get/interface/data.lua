@@ -150,10 +150,27 @@ function dumpInterfaceStats(ifid)
         res["throughput_bps"] = ifstats.stats.throughput_bps;
         res["throughput_pps"] = ifstats.stats.throughput_pps;
 
-        if prefs.is_dump_flows_enabled == true then
-            res["flow_export_drops"] = ifstats.stats_since_reset.flow_export_drops
-            res["flow_export_rate"] = ifstats.stats_since_reset.flow_export_rate
-            res["flow_export_count"] = ifstats.stats_since_reset.flow_export_count
+        local function getExportStats(db_type)
+            local s = {}
+            s["flow_export_count"] = ifstats.stats_since_reset[db_type].flow_export_count
+            s["flow_export_drops"] = ifstats.stats_since_reset[db_type].flow_export_drops
+            s["flow_export_rate"] = ifstats.stats_since_reset[db_type].flow_export_rate
+            return s;
+        end
+
+        if not ifstats.isViewed then
+            if ntop.isClickHouseEnabled() then
+                res["db"] = getExportStats("db")
+            end
+            if prefs.is_dump_flows_to_es_enabled then
+                res["es"] = getExportStats("es")
+            end
+            if prefs.is_dump_flows_to_kafka_enabled then
+                res["kafka"] = getExportStats("kafka")
+            end
+            if prefs.is_dump_flows_to_syslog_enabled then
+                res["syslog"] = getExportStats("syslog")
+            end
         end
 
         if auth.has_capability(auth.capabilities.alerts) then
@@ -353,9 +370,11 @@ function dumpBriefInterfaceStats(ifid)
             local total, total_in_progress = vs_utils.check_in_progress_status()
             res["vs_in_progress"] = total_in_progress or 0
         end
-        if prefs.is_dump_flows_enabled == true then
-            res["flow_export_drops"] = ifstats.stats_since_reset.flow_export_drops
-            res["flow_export_count"] = ifstats.stats_since_reset.flow_export_count
+        if ntop.isClickHouseEnabled() then
+            local s = {}
+            s["flow_export_count"] = ifstats.stats_since_reset["db"].flow_export_count
+            s["flow_export_drops"] = ifstats.stats_since_reset["db"].flow_export_drops
+            res["db"] = s
         end
 
         if auth.has_capability(auth.capabilities.alerts) then

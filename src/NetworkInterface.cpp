@@ -330,7 +330,7 @@ void NetworkInterface::init(const char *interface_name) {
 
   db = NULL;
 #ifndef HAVE_NEDGE
-  el_exporter = NULL;
+  es_exporter = NULL;
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
   kafka_exporter = NULL;
 #endif
@@ -3619,10 +3619,10 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
     }
 
 #ifndef HAVE_NEDGE
-    if (el_exporter) {
+    if (es_exporter) {
       json = f->serialize(export_format_ECS);
       if (json) {
-        el_exporter->dumpFlow(when, f, json);
+        es_exporter->dumpFlow(when, f, json);
         free(json);
       }
     }
@@ -7480,8 +7480,8 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
 				periodicStatsUpdateFrequency());
   }
 
-  /* .stats */
-  lua_newtable(vm);
+  lua_newtable(vm); /* stats */
+
   lua_push_uint64_table_entry(vm, "packets", getNumPackets());
   lua_push_uint64_table_entry(vm, "bytes", getNumBytes());
   lua_push_uint64_table_entry(vm, "flows", getNumFlows());
@@ -7503,42 +7503,146 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
   l4Stats.luaStats(vm);
 
   if(fullStats) {
-#if !defined(NTOPNG_PRO)
-    if (db) db->lua(vm, false /* Overall */);
-#else
-    if (!isView()) {
-      /* Standard non-view interface */
-      if (db) db->lua(vm, false /* Overall */);
-    } else {
-      /* View interfaces we need to merge the number of drops/exports */
-      (dynamic_cast<ViewInterface*>(this))->dumpDBStats(vm, false /* Overall */);
-    }
-#endif
-    
+
     usedPorts.lua(vm, this);
+
+    lua_newtable(vm); /* db */
+
+#if defined(NTOPNG_PRO)
+    if (!isView()) { /* Standard non-view interface */
+#endif
+      if (db) db->lua(vm, false /* Overall */);
+#if defined(NTOPNG_PRO)
+    } else /* View interfaces: merge drops/exports */
+      (dynamic_cast<ViewInterface*>(this))->luaDBStats(vm, false /* Overall */);
+#endif
+
+    lua_pushstring(vm, "db");
+    lua_insert(vm, -2);
+    lua_settable(vm, -3);
+
+#ifndef HAVE_NEDGE
+    lua_newtable(vm); /* es */
+
+#if defined(NTOPNG_PRO)
+    if (!isView()) { /* Standard non-view interface */
+#endif
+      if (es_exporter) es_exporter->lua(vm, false /* Overall */);
+#if defined(NTOPNG_PRO)
+    } else /* View interfaces: merge drops/exports */
+      (dynamic_cast<ViewInterface*>(this))->luaESStats(vm, false /* Overall */);
+#endif
+
+    lua_pushstring(vm, "es");
+    lua_insert(vm, -2);
+    lua_settable(vm, -3);
+
+#if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
+    lua_newtable(vm); /* kafka */
+
+    if (!isView()) { /* Standard non-view interface */
+      if (kafka_exporter) kafka_exporter->lua(vm, false /* Overall */);
+    } else /* View interfaces: merge drops/exports */
+      (dynamic_cast<ViewInterface*>(this))->luaKafkaStats(vm, false /* Overall */);
+
+    lua_pushstring(vm, "kafka");
+    lua_insert(vm, -2);
+    lua_settable(vm, -3);
+#endif
+
+#if !defined(WIN32) && !defined(__APPLE__)
+    lua_newtable(vm); /* syslog */
+
+#if defined(NTOPNG_PRO)
+    if (!isView()) { /* Standard non-view interface */
+#endif
+      if (syslog_exporter) syslog_exporter->lua(vm, false /* Overall */);
+#if defined(NTOPNG_PRO)
+    } else /* View interfaces: merge drops/exports */
+      (dynamic_cast<ViewInterface*>(this))->luaSyslogStats(vm, false /* Overall */);
+#endif
+
+    lua_pushstring(vm, "syslog");
+    lua_insert(vm, -2);
+    lua_settable(vm, -3);
+#endif
+
+#endif /* HAVE_NEDGE */
   }
 
   lua_pushstring(vm, "stats");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
+  
+  lua_newtable(vm); /* stats_since_reset */
 
-  lua_newtable(vm);
   lua_push_uint64_table_entry(vm, "packets", getNumPacketsSinceReset());
   lua_push_uint64_table_entry(vm, "bytes", getNumBytesSinceReset());
   lua_push_uint64_table_entry(vm, "drops", getNumPacketDropsSinceReset());
 
-#if !defined(NTOPNG_PRO)
-  if (db) db->lua(vm, true /* Since last checkpoint */);
-#else
-  if (!isView()) {
-    /* Standard non-view interface */
-    if (db) db->lua(vm, true /* Since last checkpoint */);
-  } else {
-    /* View interfaces we need to merge the number of drops/exports */
-    (dynamic_cast<ViewInterface*>(this))->dumpDBStats(vm, true /* Since last checkpoint */);
-  }
+  lua_newtable(vm); /* db */
+
+#if defined(NTOPNG_PRO)
+  if (!isView()) { /* Standard non-view interface */
 #endif
-  
+    if (db) db->lua(vm, true /* Since last checkpoint */);
+#if defined(NTOPNG_PRO)
+  } else /* View interfaces: merge drops/exports */
+    (dynamic_cast<ViewInterface*>(this))->luaDBStats(vm, true /* Since last checkpoint */);
+#endif
+
+  lua_pushstring(vm, "db");
+  lua_insert(vm, -2);
+  lua_settable(vm, -3);
+
+#ifndef HAVE_NEDGE
+  lua_newtable(vm); /* es */
+
+#if defined(NTOPNG_PRO)
+  if (!isView()) { /* Standard non-view interface */
+#endif
+    if (es_exporter) es_exporter->lua(vm, true /* Since last checkpoint */);
+#if defined(NTOPNG_PRO)
+  } else /* View interfaces: merge drops/exports */
+    (dynamic_cast<ViewInterface*>(this))->luaESStats(vm, true /* Since last checkpoint */);
+#endif
+
+  lua_pushstring(vm, "es");
+  lua_insert(vm, -2);
+  lua_settable(vm, -3);
+
+#if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
+  lua_newtable(vm); /* kafka */
+
+  if (!isView()) { /* Standard non-view interface */
+    if (kafka_exporter) kafka_exporter->lua(vm, true /* Since last checkpoint */);
+  } else /* View interfaces: merge drops/exports */
+    (dynamic_cast<ViewInterface*>(this))->luaKafkaStats(vm, true /* Since last checkpoint */);
+
+  lua_pushstring(vm, "kafka");
+  lua_insert(vm, -2);
+  lua_settable(vm, -3);
+#endif
+
+#if !defined(WIN32) && !defined(__APPLE__)
+  lua_newtable(vm); /* syslog */
+
+#if defined(NTOPNG_PRO)
+  if (!isView()) { /* Standard non-view interface */
+#endif
+    if (syslog_exporter) syslog_exporter->lua(vm, true /* Since last checkpoint */);
+#if defined(NTOPNG_PRO)
+  } else /* View interfaces: merge drops/exports */
+    (dynamic_cast<ViewInterface*>(this))->luaSyslogStats(vm, true /* Since last checkpoint */);
+#endif
+
+  lua_pushstring(vm, "syslog");
+  lua_insert(vm, -2);
+  lua_settable(vm, -3);
+#endif
+
+#endif /* HAVE_NEDGE */
+
   lua_pushstring(vm, "stats_since_reset");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
@@ -9527,8 +9631,8 @@ void NetworkInterface::initFlowDump() {
   initDB();
 
 #ifndef HAVE_NEDGE
-  if (ntop->getPrefs()->do_dump_flows_on_es() && el_exporter == NULL) {
-    el_exporter = new (std::nothrow) ElasticSearch(this);
+  if (ntop->getPrefs()->do_dump_flows_on_es() && es_exporter == NULL) {
+    es_exporter = new (std::nothrow) ElasticSearch(this);
   }
 
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)

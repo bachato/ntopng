@@ -79,13 +79,15 @@ local function format_info(ifstats)
     res["drops"]   = ifstats.stats_since_reset.drops
 
     res["throughput_bps"] = ifstats.stats.throughput_bps;
-   if (vs_utils.is_available()) then
-      local total, total_in_progress = vs_utils.check_in_progress_status()
-      res["vs_in_progress"] = total_in_progress or 0
-   end
-    if prefs.is_dump_flows_enabled == true then
-        res["flow_export_drops"]  = ifstats.stats_since_reset.flow_export_drops
-        res["flow_export_count"]  = ifstats.stats_since_reset.flow_export_count
+
+    if (vs_utils.is_available()) then
+        local total, total_in_progress = vs_utils.check_in_progress_status()
+        res["vs_in_progress"] = total_in_progress or 0
+    end
+
+    if prefs.is_dump_flows_enabled then
+        res["flow_export_drops"]  = ifstats.stats_since_reset.db.flow_export_drops
+        res["flow_export_count"]  = ifstats.stats_since_reset.db.flow_export_count
     end
 
     if auth.has_capability(auth.capabilities.alerts) then

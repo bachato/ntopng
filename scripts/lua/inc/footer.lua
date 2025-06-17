@@ -448,8 +448,8 @@ print [["
 
 					msg += NtopUtils.formatValue(rsp.num_flows, 1)+" <i class=\"fas fa-stream\"></i>  </span> </a>";
 
-					if (rsp.flow_export_drops > 0) {
-						const export_pctg = rsp.flow_export_drops / (rsp.flow_export_count + rsp.flow_export_drops + 1);
+					if (rsp.db && rsp.db.flow_export_drops > 0) {
+						const export_pctg = rsp.db.flow_export_drops / (rsp.db.flow_export_count + rsp.db.flow_export_drops + 1);
 						if (export_pctg > ]]
 print(stats_utils.UPPER_BOUND_INFO_EXPORTS)
 print [[) {
@@ -458,8 +458,8 @@ print(stats_utils.UPPER_BOUND_WARNING_EXPORTS)
 print [[) ? 'warning' : 'danger';
 							msg += "<a href=']]
 print(ntop.getHttpPrefix())
-print [[/lua/if_stats.lua'><span class=\"badge bg-"+badge_class+"\" data-bs-toggle='tooltip' data-bs-placement='bottom' title=\"]] print(i18n('flow_export_drops')) print[[\"><i class=\"fas fa-exclamation-triangle\" style=\"color: #FFFFFF;\"></i> "+NtopUtils.formatValue(rsp.flow_export_drops, 1)+" DB Export drop";
-							if(rsp.flow_export_drops > 1) msg += "s";
+print [[/lua/if_stats.lua'><span class=\"badge bg-"+badge_class+"\" data-bs-toggle='tooltip' data-bs-placement='bottom' title=\"]] print(i18n('flow_export_drops')) print[[\"><i class=\"fas fa-exclamation-triangle\" style=\"color: #FFFFFF;\"></i> "+NtopUtils.formatValue(rsp.db.flow_export_drops, 1)+" DB Export drop";
+							if(rsp.db.flow_export_drops > 1) msg += "s";
 							msg += "</span></a>";
 						}
 					}

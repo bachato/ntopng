@@ -690,14 +690,11 @@ end
 --- @param toast table The toast is the logic model defined in defined_toasts
 --- @param container table Is the table where to put the new toast ui
 function predicates.vulnerability_scan(toast, container)
-
     if not IS_ADMIN then
         return
     end
 
-    local is_clickhouse_enable = ntop.isClickHouseEnabled()
-    if (not is_clickhouse_enable) then
-
+    if not ntop.isClickHouseEnabled() then
         local body = i18n("hosts_stats.page_scan_hosts.enable_clickhouse_toast_label", {
             link = "https://www.ntop.org/guides/ntopng/user_interface/network_interface/monitoring/vulnerability_scan.html#scan-reports"
         })
@@ -927,13 +924,11 @@ function predicates.export_drops(toast, container)
     if (IS_SYSTEM_INTERFACE) then
         return
     end
-    local is_dump_flows_enabled = prefs.is_dump_flows_enabled
 
-    if is_dump_flows_enabled then
-
+    if ntop.isClickHouseEnabled() then
         local ifstats = interface.getStats()
-        local total_flows = ifstats.stats_since_reset.flow_export_count
-        local flow_export_drops = ifstats.stats_since_reset.flow_export_drops
+        local total_flows = ifstats.stats_since_reset.db.flow_export_count
+        local flow_export_drops = ifstats.stats_since_reset.db.flow_export_drops
         local severity = ToastLevels[stats_utils.get_severity_by_export_drops(flow_export_drops, total_flows)]
 
         -- for the info severity don't show anything
