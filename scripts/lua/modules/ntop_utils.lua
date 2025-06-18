@@ -975,3 +975,9 @@ function getProbeFromUUID(nprobe_uuid)
 
     return nil
 end
+
+-- ##############################################
+
+function isSystemInterface(ifid)
+    return (getSystemInterfaceId() == tostring(ifid))
+end

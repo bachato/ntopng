@@ -70,14 +70,22 @@ import { default as ModalDeleteAssetsEpoch } from "./modal-delete-assets-epoch.v
 import { default as ModalImportAssets } from "./modal-import-assets.vue"
 import { ntopng_url_manager } from "../services/context/ntopng_globals_services.js";
 
+/* ************************************** */
+
+const props = defineProps({
+    context: Object,
+});
+
 const _i18n = (t) => i18n(t);
+
+/* ************************************** */
 
 const import_assets_url = `${http_prefix}/lua/pro/rest/v2/add/assets/assets.lua`;
 const export_assets_url = `${http_prefix}/lua/pro/rest/v2/export/assets/assets.lua`;
 const modal_import_assets = ref();
 
 const host_filters_key = ref(0);
-const table_id = ref('assets');
+const table_id = ref(props.context.is_system_interface ? 'assets_snmp' : 'assets');
 const filter_table_array = ref([]);
 const table_assets = ref();
 const modal_delete_assets = ref();
@@ -94,12 +102,6 @@ const localhost_icon = "<abbr data-bs-toggle='tooltip' data-bs-placement='top' d
 const remotehost_icon = "<abbr title='" + i18n("details.label_remote") + "'><span class='badge bg-secondary'>" + i18n("details.label_short_remote") + "</span></abbr>"
 const blackhole_icon = "<abbr title='" + i18n("details.label_blackhole") + "'><span class='badge bg-info'>" + i18n("details.label_short_blackhole") + "</span></abbr>"
 const blocking_quota_icon = "<i class='fas fa-hourglass' title='" + i18n("hosts_stats.blocking_traffic_policy_popup_msg") + "'></i>"
-
-/* ************************************** */
-
-const props = defineProps({
-    context: Object,
-});
 
 /* ************************************** */
 
@@ -207,6 +209,18 @@ const map_table_def_columns = (columns) => {
 
             return name
         },
+        "switch_ip": (value, row) => {
+            if (!dataUtils.isEmptyOrNull(value.name) && value.name != value.value) {
+                return `<span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title='${value.value}'>${value.name}</span>`
+            }
+            return value.value
+        },
+        "switch_port": (value, row) => {
+            if (!dataUtils.isEmptyOrNull(value.name) && value.name != value.value) {
+                return `<span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title='${value.value}'>${value.name}</span>`
+            }
+            return value.value
+        },
         "mac": (value, row) => {
             let result = value.value
             if (!dataUtils.isEmptyOrNull(value.name)) {
@@ -217,6 +231,9 @@ const map_table_def_columns = (columns) => {
             }
 
             return result;
+        },
+        "manufacturer": (value, row) => {
+            return value;
         },
         "model": (value, row) => {
             return value;
