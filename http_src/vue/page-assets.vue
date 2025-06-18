@@ -210,16 +210,18 @@ const map_table_def_columns = (columns) => {
             return name
         },
         "switch_ip": (value, row) => {
+            const url = http_prefix + "/lua/pro/enterprise/snmp_device_details.lua?host=" + value.value
             if (!dataUtils.isEmptyOrNull(value.name) && value.name != value.value) {
-                return `<span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title='${value.value}'>${value.name}</span>`
+                return `<span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title='${value.value}'><a href='${url}'>${value.name}</a></span>`
             }
-            return value.value
+            return `<a href='${url}'>${value.value}</a>`
         },
         "switch_port": (value, row) => {
+            const url = http_prefix + "/lua/pro/enterprise/snmp_interface_details.lua?host=" + row.switch_ip.value + "&snmp_port_idx=" + value.value
             if (!dataUtils.isEmptyOrNull(value.name) && value.name != value.value) {
-                return `<span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title='${value.value}'>${value.name}</span>`
+                return `<span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title='${value.value}'><a href='${url}'>${value.name}</a></span>`
             }
-            return value.value
+            return `<a href='${url}'>${value.value}</a>`
         },
         "mac": (value, row) => {
             let result = value.value
