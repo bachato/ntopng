@@ -112,6 +112,9 @@ const map_table_def_columns = (columns) => {
             let ip_address = host.ip
             let icons = ''
 
+            if (dataUtils.isEmptyOrNull(ip_address)) {
+                return ''
+            }
             let is_asset_online = row.online;
 
             if (!dataUtils.isEmptyOrNull(host.vlan.name)) {

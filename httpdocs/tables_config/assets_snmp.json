@@ -48,6 +48,16 @@
 			]
 		},
 		{
+			"id": "ip_address",
+			"title_i18n": "ip_address",
+			"data_field": "ip_address",
+			"sortable": true,
+			"min-width": "180px",
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
 			"id": "switch_ip",
 			"title_i18n": "switch_ip",
 			"data_field": "switch_ip",
