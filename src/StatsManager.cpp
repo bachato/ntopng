@@ -25,10 +25,11 @@
 
 /* ******************************************* */
 
-StatsManager::StatsManager(int interface_id, const char *filename)
-    : SQLiteStoreManager(interface_id) {
+StatsManager::StatsManager(NetworkInterface *_iface)
+    : SQLiteStoreManager(_iface) {
   char filePath[MAX_PATH + 16], fileFullPath[MAX_PATH + 162],
       fileName[MAX_PATH + 16];
+  const char *filename = STATS_MANAGER_STORE_NAME;
 
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   
@@ -37,11 +38,11 @@ StatsManager::StatsManager(int interface_id, const char *filename)
   DAY_CACHE_NAME = "DAY_STATS";
 
   snprintf(filePath, sizeof(filePath) - 1, "%s/%d/top_talkers/",
-           ntop->get_working_dir(), ifid);
+           ntop->get_working_dir(), _iface->get_id());
   strncpy(fileName, filename, sizeof(fileName));
   fileName[sizeof(fileName) - 1] = '\0';
   snprintf(fileFullPath, sizeof(fileFullPath) - 1, "%s/%d/top_talkers/%s",
-           ntop->get_working_dir(), ifid, filename);
+           ntop->get_working_dir(), _iface->get_id(), filename);
   ntop->fixPath(filePath);
   ntop->fixPath(fileFullPath);
 

@@ -205,7 +205,7 @@ NetworkInterface::NetworkInterface(const char *name,
 
   loadScalingFactorPrefs();
 
-  statsManager = NULL, alertStore = NULL, alertsQueue = NULL;
+  statsManager = NULL, alertsQueue = NULL;
   ndpiStats = NULL;
   dscpStats = NULL;
 
@@ -356,7 +356,7 @@ void NetworkInterface::init(const char *interface_name) {
 #endif
   ndpiStats = NULL;
   dscpStats = NULL;
-  statsManager = NULL, alertStore = NULL, ifSpeed = 0;
+  statsManager = NULL, ifSpeed = 0;
   host_pools = NULL;
   bcast_domains = NULL;
   ifMTU = CONST_DEFAULT_MAX_PACKET_SIZE, mtuWarningShown = false;
@@ -1018,7 +1018,6 @@ NetworkInterface::~NetworkInterface() {
   if (ifDescription) free(ifDescription);
   if (discovery) delete discovery;
   if (statsManager) delete statsManager;
-  if (alertStore) delete alertStore;
   if (alertsQueue) delete alertsQueue;
   if (ndpiStats) delete ndpiStats;
   if (dscpStats) delete dscpStats;
@@ -8374,9 +8373,11 @@ static bool virtual_http_hosts_walker(GenericHashEntry *node, void *data,
 /* **************************************** */
 
 bool NetworkInterface::alert_store_query(lua_State *vm, const char *sql, bool limit_rows) {
-  if (!alertStore) return false;
+  if (!db) return false;
 
-  return alertStore->query(vm, sql, limit_rows);
+  incNumAlertsQueries();
+
+  return (db->execSQLQuery(vm, sql, limit_rows, true) == 0);
 }
 
 /* **************************************** */
@@ -8558,7 +8559,7 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
     FillObsHash();
 
     networkStats = new NetworkStats *[numNetworks];
-    statsManager = new StatsManager(id, STATS_MANAGER_STORE_NAME);
+    statsManager = new StatsManager(this);
     ndpiStats    = new nDPIStats(true /* Enable throughput calculation */,
 				 ntop->getPrefs()->isIfaceL7BehavourAnalysisEnabled());
     dscpStats = new DSCPStats();
@@ -8572,18 +8573,13 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
 
     /* Allocate only the DB connection, not any thread or queue for the export */
     if (!disable_dump)
-      initDB();
+      initFlowDB();
     else 
       flow_dump_disabled_by_backend = true;
 
     if (!isViewed() && !disable_dump) {
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-      if (ntop->getPrefs()->do_dump_alerts_on_clickhouse())
-        alertStore = new ClickHouseAlertStore(this);
-#endif
-
-      if (alertStore == NULL)
-        alertStore = new SQLiteAlertStore(id, ALERTS_STORE_DB_FILE_NAME);
+      if (db == NULL) /* ClickHouse disabled, use SQLite for alerts, assets, etc. */
+        db = new SQLiteDB(this);
 
       alertsQueue = new AlertsQueue(this);
     }
@@ -9567,7 +9563,7 @@ bool NetworkInterface::initHostChecksLoop() {
 
 /* *************************************** */
 
-bool NetworkInterface::initDB() {
+bool NetworkInterface::initFlowDB() {
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
   if (!ntop->getPrefs()->do_dump_flows_on_clickhouse())
     return false;
@@ -9610,7 +9606,7 @@ void NetworkInterface::initFlowDump() {
    * as there is no explorer for them (no need to run queries)
    */
 
-  initDB();
+  initFlowDB();
 
   if (isView())
     return;

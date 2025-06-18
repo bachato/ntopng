@@ -23,23 +23,32 @@
 
 /* **************************************************** */
 
-SQLiteAlertStore::SQLiteAlertStore(int interface_id, const char *filename)
-    : SQLiteStoreManager(interface_id) {
+const char *SQLiteDB::getEngineName() {
+  return "SQLite";
+}
+
+/* **************************************************** */
+
+SQLiteDB::SQLiteDB(NetworkInterface *_iface) : DB(_iface), SQLiteStoreManager(_iface) {
   char filePath[MAX_PATH + 256];
 
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  /* Create the directories needed to keep the alerts database */
+
+  /* Note: SQLite no longer used only for alerts (e.g. assets), however
+   * we keep the path containing 'alerts' for backward compatibility*/
+
+  /* Create the directories needed to keep the database */
   snprintf(filePath, sizeof(filePath), "%s/%d/alerts/", ntop->get_working_dir(),
-           ifid);
+           _iface->get_id());
   ntop->fixPath(filePath);
   Utils::mkdir_tree(filePath);
 
-  /* Prepare the alert database path */
+  /* Prepare the database path */
   snprintf(filePath, sizeof(filePath), "%s/%d/alerts/%s",
-           ntop->get_working_dir(), ifid, filename);
+           ntop->get_working_dir(), _iface->get_id(), ALERTS_STORE_DB_FILE_NAME);
   ntop->fixPath(filePath);
 
-  /* Initialize the alert database */
+  /* Initialize the database */
   store_initialized = init(filePath) == 0 ? true : false;
   if (!store_initialized)
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to initialize store %s",
@@ -53,12 +62,13 @@ SQLiteAlertStore::SQLiteAlertStore(int interface_id, const char *filename)
 
 /* **************************************************** */
 
-SQLiteAlertStore::~SQLiteAlertStore() { /* Nothing to do so far */
+SQLiteDB::~SQLiteDB() {
+  if (db) sqlite3_close(db);
 }
 
 /* **************************************************** */
 
-int SQLiteAlertStore::execFile(const char *path) {
+int SQLiteDB::execFile(const char *path) {
   char schema_path[MAX_PATH], *schema;
   int rc;
 
@@ -113,7 +123,7 @@ int SQLiteAlertStore::execFile(const char *path) {
 
 /* **************************************************** */
 
-int SQLiteAlertStore::openStore() {
+int SQLiteDB::openStore() {
   int rc;
 
   if (!store_initialized) return 1;
@@ -128,16 +138,16 @@ int SQLiteAlertStore::openStore() {
   return rc;
 }
 
-/* ******************************************* */
+/* **************************************************** */
 
-struct alertsRetriever {
+struct SQLiteDataRetriever {
   lua_State *vm;
   u_int32_t current_offset;
 };
 
-static int getAlertsCallback(void *data, int argc, char **argv,
-                             char **azColName) {
-  alertsRetriever *ar = (alertsRetriever *)data;
+static int process_sqlite_row(void *data, int argc, char **argv,
+                              char **azColName) {
+  SQLiteDataRetriever *ar = (SQLiteDataRetriever *) data;
   lua_State *vm = ar->vm;
 
   lua_newtable(vm);
@@ -154,32 +164,28 @@ static int getAlertsCallback(void *data, int argc, char **argv,
 
 /* **************************************************** */
 
-bool SQLiteAlertStore::query(lua_State *vm, const char *query, bool limit_rows) {
+int SQLiteDB::execSQLQuery(lua_State *vm, const char *sql,
+                           bool limitRows, bool wait_for_db_created) {
   int rc = SQLITE_ERROR;
+  SQLiteDataRetriever ar;
+  char *zErrMsg = NULL;
 
-  if (!ntop->getPrefs()->are_alerts_disabled()) {
-    alertsRetriever ar;
-    char *zErrMsg = NULL;
+  m.lock(__FILE__, __LINE__);
 
-    m.lock(__FILE__, __LINE__);
+  lua_newtable(vm);
 
-    lua_newtable(vm);
+  ar.vm = vm, ar.current_offset = 0;
+  rc = sqlite3_exec(db, sql, process_sqlite_row, (void *)&ar, &zErrMsg);
 
-    ar.vm = vm, ar.current_offset = 0;
-    rc = sqlite3_exec(db, query, getAlertsCallback, (void *)&ar, &zErrMsg);
-
-    iface->incNumAlertsQueries();
-
-    if (rc != SQLITE_OK) {
-      ntop->getTrace()->traceEvent(TRACE_ERROR, "SQL Error: %s\n%s", zErrMsg,
-                                   query);
-      sqlite3_free(zErrMsg);
-    }
-
-    m.unlock(__FILE__, __LINE__);
+  if (rc != SQLITE_OK) {
+    ntop->getTrace()->traceEvent(TRACE_ERROR, "SQL Error: %s\n%s", zErrMsg,
+                                 sql);
+    sqlite3_free(zErrMsg);
   }
 
-  return rc == SQLITE_OK;
+  m.unlock(__FILE__, __LINE__);
+
+  return (rc == SQLITE_OK ? 0 : -1);
 }
 
 /* **************************************************** */

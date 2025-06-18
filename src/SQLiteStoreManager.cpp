@@ -23,11 +23,10 @@
 
 /* **************************************************** */
 
-SQLiteStoreManager::SQLiteStoreManager(int interface_id) {
+SQLiteStoreManager::SQLiteStoreManager(NetworkInterface *_iface) {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   
-  ifid = interface_id;
-  iface = ntop->getInterfaceById(interface_id);
+  iface = _iface;
   db = NULL;
 };
 
@@ -42,13 +41,6 @@ int SQLiteStoreManager::init(const char *db_file_full_path) {
   }
 
   return 0;
-}
-
-/* **************************************************** */
-
-NetworkInterface *SQLiteStoreManager::getNetworkInterface() {
-  if (!iface) iface = ntop->getInterfaceById(ifid);
-  return iface;
 }
 
 /* **************************************************** */

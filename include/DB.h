@@ -53,16 +53,13 @@ class DB {
   inline void incNumExportedFlows(u_int64_t num = 1)     { exportedFlows += num;     };
 
   inline u_int64_t getNumExportedFlows() const { return (exportedFlows); }
-  inline u_int32_t getNumDroppedFlows() const {
-    return (queueDroppedFlows + droppedFlows);
-  };
+  inline u_int32_t getNumDroppedFlows()  const { return (queueDroppedFlows + droppedFlows); };
   void updateStats(const struct timeval *tv);
   void checkPointCounters(bool drops_only);
 
-  /* Pure Virtual Functions of a DB flow exporter */
   virtual const char *getEngineName() { return "Unknown"; };
-  virtual bool dumpFlow(time_t when, Flow *f, char *json) = 0;
-  virtual bool startDumpLoop() { return (false); }
+  virtual bool dumpFlow(time_t when, Flow *f, char *json) { return false; };
+  virtual bool startDumpLoop() { return false; }
 
   virtual int execSQLQuery(const char *sql,
                            bool doReconnect = true, bool ignoreErrors = false,
@@ -79,7 +76,7 @@ class DB {
   inline int isRunning() { return (running); };
   virtual bool isDbCreated() { return (true); };
   virtual void shutdown();
-  virtual void flush(){};
+  virtual void flush() {};
   virtual void lua(lua_State *vm, bool since_last_checkpoint);
   virtual void checkIdle(time_t when) { ; }
   virtual void getStats(u_int64_t *flow_export_count, u_int64_t *flow_export_drops,

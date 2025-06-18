@@ -336,9 +336,8 @@ using namespace std;
 #include "TcpFlowStats.h"
 #include "SQLiteStoreManager.h"
 #include "StatsManager.h"
-#include "AlertStore.h"
-#include "SQLiteAlertStore.h"
 #include "DB.h"
+#include "SQLiteDB.h"
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
 #include "KafkaProducer.h"
 #include "KafkaClient.h"
@@ -426,7 +425,6 @@ using namespace clickhouse;
 #include "FlowsTable.h"
 #include "ClickHouseImport.h"
 #include "ClickHouseDB.h"
-#include "ClickHouseAlertStore.h"
 #endif
 #ifdef NTOPNG_PRO
 #include "NtopCloud.h"

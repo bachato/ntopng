@@ -27,7 +27,6 @@
 class SQLiteStoreManager {
  private:
  protected:
-  int ifid;
   NetworkInterface *iface;
   Mutex m;
   sqlite3 *db;
@@ -38,10 +37,10 @@ class SQLiteStoreManager {
   int exec_statement(sqlite3_stmt *stmt);
 
  public:
-  SQLiteStoreManager(int interface_id);
+  SQLiteStoreManager(NetworkInterface *iface);
   virtual ~SQLiteStoreManager();
 
-  NetworkInterface *getNetworkInterface();
+  inline NetworkInterface *getNetworkInterface() { return iface; };
   int optimizeStore();
 };
 

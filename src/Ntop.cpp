@@ -2911,7 +2911,7 @@ void Ntop::initInterface(NetworkInterface *_if, bool disable_dump) {
 #ifndef HAVE_NEDGE
       || ntop->get_export_interface()
 #endif
-      #endif
+#endif
   ) && !disable_dump) {
     _if->initFlowDump();
   }

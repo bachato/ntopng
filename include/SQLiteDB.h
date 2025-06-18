@@ -19,14 +19,14 @@
  *
  */
 
-#ifndef _SQLITE_ALERT_STORE_H_
-#define _SQLITE_ALERT_STORE_H_
+#ifndef _SQLITE_DB_H_
+#define _SQLITE_DB_H_
 
 #include "ntop_includes.h"
 
 class Flow;
 
-class SQLiteAlertStore : virtual public AlertStore, public SQLiteStoreManager {
+class SQLiteDB : public DB, public SQLiteStoreManager {
  private:
   bool store_opened, store_initialized;
 
@@ -34,10 +34,13 @@ class SQLiteAlertStore : virtual public AlertStore, public SQLiteStoreManager {
   int execFile(const char *path);
 
  public:
-  SQLiteAlertStore(int interface_id, const char *db_filename);
-  ~SQLiteAlertStore();
+  SQLiteDB(NetworkInterface *iface);
+  ~SQLiteDB();
 
-  bool query(lua_State *vm, const char *query, bool limit_rows);
+  const char *getEngineName();
+
+  int execSQLQuery(lua_State *vm, const char *sql,
+                   bool limitRows, bool wait_for_db_created);
 };
 
-#endif /* _SQLITE_ALERT_STORE_H_ */
+#endif /* _SQLITE_DB_H_ */

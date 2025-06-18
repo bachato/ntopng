@@ -317,7 +317,6 @@ protected:
 #endif
 
   StatsManager *statsManager;
-  AlertStore *alertStore;
   HostPools *host_pools;
   bool has_vlan_packets, has_ebpf_events, has_mac_addresses,
     has_seen_dhcp_addresses;
@@ -422,7 +421,7 @@ protected:
   void build_protocol_flow_stats_lua_rsp(lua_State *vm, AggregatedFlowsStats *fs,
                                          u_int32_t size, u_int *num);
   bool dumpFlowOut(Flow *f, time_t when);
-  bool initDB();
+  bool initFlowDB();
   
 public:
   /**

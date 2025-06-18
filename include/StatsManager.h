@@ -33,7 +33,7 @@ struct statsManagerRetrieval {
 
 class StatsManager : protected SQLiteStoreManager {
  public:
-  StatsManager(int interface_id, const char *db_filename);
+  StatsManager(NetworkInterface *iface);
   ~StatsManager(){};
   int insertMinuteSampling(time_t epoch, const char *sampling);
   int insertHourSampling(time_t epoch, const char *sampling);

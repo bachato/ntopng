@@ -467,6 +467,10 @@ static int ntop_alert_store_query(lua_State *vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   }
 
+  if (ntop->getPrefs()->are_alerts_disabled()) {
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  }
+
   if (!iface->alert_store_query(vm, query, limit_rows)) {
     lua_pushnil(vm);
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
