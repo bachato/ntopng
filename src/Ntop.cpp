@@ -4130,7 +4130,7 @@ void Ntop::setZoneInfo() {
   } else {
     /* Last resort */
     const char *command_buf =
-        "find /usr/share/zoneinfo -type f | xargs md5sum | grep `md5sum -q "
+        "find /usr/share/zoneinfo -type f | xargs md5sum | grep `md5sum --quiet "
         "/etc/localtime` | tail -1 | cut -d '/' -f 5-";
     FILE *fp;
 
