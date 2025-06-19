@@ -166,6 +166,34 @@ A detailed blog post that discusses LDAP authentication and shows how
 to configure an LDAP server can be found at:
 https://www.ntop.org/ntopng/remote-ntopng-authentication-with-radius-and-ldap/
 
+Common Issues
+~~~~~~~~~~~~~
+
+In case the LDAP authentication is not working as expected despite the configuration,
+it is possible to enable debug logging by toggling the LDAP Debug preference. This
+should add to the ntopng service logs useful information when a login is attempted.
+
+One common error logged by ntopng is:
+
+.. code:: bash
+
+   LDAP bind error: Can't contact LDAP server
+
+This may be related to TLS certificate verification when using LDAPS (ldaps://),
+and you may need to create or modify /etc/ldap/ldap.conf to fix this.
+This configuration file lets you define trusted certificate authorities and other 
+TLS/SSL settings for OpenLDAP clients.
+Typical entries you might add to /etc/ldap/ldap.conf:
+
+.. code:: bash
+
+   TLS_CACERT /etc/ssl/certs/my_ldap_ca.pem
+   TLS_REQCERT demand
+
+Where TLS_CACERT is the path to the CA certificate file that signed your LDAP server’s cert.
+This means you need to obtain the CA certificate that signed your LDAP server’s certificate 
+(or the server cert if it's self-signed) and place it somewhere like /etc/ssl/certs/my_ldap_ca.pem
+
 OpenLDAP as Active Directory proxy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
