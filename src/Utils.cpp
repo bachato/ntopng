@@ -110,8 +110,8 @@ typedef struct {
 
 typedef struct {
   u_int8_t header_over;
-  char outbuf[3 * 65536];
-  u_int num_bytes;
+  char *outbuf;  
+  u_int num_bytes, outbuf_len;
   lua_State *vm;
   bool return_content;
 } DownloadState;
@@ -1982,7 +1982,10 @@ bool Utils::postHTTPTextFile(lua_State *vm, char *username, char *password,
       }
     }
 
-    if (state) free(state);
+    if (state) {
+      if(state->outbuf != NULL) free(state->outbuf);
+      free(state);
+    }
 
     fclose(fd);
 
@@ -2145,7 +2148,7 @@ out:
 static size_t curl_writefunc_to_lua(char *buffer, size_t size, size_t nitems,
                                     void *userp) {
   DownloadState *state = (DownloadState *)userp;
-  int len = size * nitems, diff;
+  int len = size * nitems, avail_space;
 
   if (state->header_over == 0) {
     /* We need to parse the header as this is the first call for the body */
@@ -2179,10 +2182,24 @@ static size_t curl_writefunc_to_lua(char *buffer, size_t size, size_t nitems,
   }
 
   if (state->return_content) {
-    diff = sizeof(state->outbuf) - state->num_bytes - 1;
+    avail_space = state->outbuf_len - state->num_bytes - 1;
 
-    if (diff > 0) {
-      int buff_diff = min(diff, len);
+    if(avail_space <= len) {
+      char *ptr;
+      u_int new_len;
+      
+      new_len = state->outbuf_len + ndpi_max(len, 1024);
+      
+      ptr = (char*)realloc(state->outbuf, new_len);
+      
+      if(ptr != NULL) {
+	state->outbuf = ptr, state->outbuf_len = new_len;
+	avail_space = state->outbuf_len - state->num_bytes - 1;	
+      }
+    }
+    
+    if (avail_space > 0) {
+      int buff_diff = min(avail_space, len);
 
       if (buff_diff > 0) {
         strncpy(&state->outbuf[state->num_bytes], buffer, buff_diff);
@@ -2209,10 +2226,24 @@ static size_t curl_writefunc_to_file(void *ptr, size_t size, size_t nmemb,
 static size_t curl_hdf(char *buffer, size_t size, size_t nitems, void *userp) {
   DownloadState *state = (DownloadState *)userp;
   int len = size * nitems;
-  int diff = sizeof(state->outbuf) - state->num_bytes - 1;
+  int avail_space = state->outbuf_len - state->num_bytes - 1;
 
-  if (diff > 0) {
-    int buff_diff = min(diff, len);
+  if(avail_space <= len) {
+    char *ptr;
+    u_int new_len;
+    
+    new_len = state->outbuf_len + ndpi_max(len, 1024);
+    
+    ptr = (char*)realloc(state->outbuf, new_len);
+    
+    if(ptr != NULL) {
+      state->outbuf = ptr, state->outbuf_len = new_len;
+      avail_space = state->outbuf_len - state->num_bytes - 1;	
+    }
+  }
+
+  if (avail_space > 0) {
+    int buff_diff = min(avail_space, len);
 
     if (buff_diff > 0) {
       strncpy(&state->outbuf[state->num_bytes], buffer, buff_diff);
@@ -2489,7 +2520,10 @@ bool Utils::httpGetPost(lua_State *vm, char *url,
       if (!ret) lua_push_bool_table_entry(vm, "IS_PARTIAL", true);
     }
 
-    if (state) free(state);
+    if (state) {
+      if(state->outbuf != NULL) free(state->outbuf);
+      free(state);
+    }
 
     /* always cleanup */
     if (headers != NULL) curl_slist_free_all(headers);
