@@ -2399,10 +2399,11 @@ static int ntop_http_get(lua_State *vm) {
 
   if (lua_type(vm, 8) == LUA_TNUMBER) ip_version = lua_tointeger(vm, 8);
 
-  Utils::httpGetPost(vm, url, username, pwd, NULL /* user_header_token */,
+  Utils::httpGetPostPutPatch(vm, url, username, pwd, NULL /* user_header_token */,
                      connection_timeout, lifetime_timeout,
 		     return_content, use_cookie_authentication, &stats,
-                     NULL, NULL, follow_redirects, ip_version);
+                     NULL, NULL, follow_redirects, ip_version,
+		     method_get);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
@@ -2452,10 +2453,11 @@ static int ntop_http_get_auth_token(lua_State *vm) {
 
   if (lua_type(vm, 7) == LUA_TNUMBER) ip_version = lua_tointeger(vm, 7);
 
-  Utils::httpGetPost(vm, url, NULL /* username */, NULL /* pwd */, auth_token,
+  Utils::httpGetPostPutPatch(vm, url, NULL /* username */, NULL /* pwd */, auth_token,
                      connection_timeout, lifetime_timeout,
 		     return_content, use_cookie_authentication, &stats,
-                     NULL, NULL, follow_redirects, ip_version);
+                     NULL, NULL, follow_redirects, ip_version,
+		     method_get);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
@@ -3033,17 +3035,17 @@ static int ntop_http_post(lua_State *vm) {
   if (lua_type(vm, 7) == LUA_TBOOLEAN) /* Optional */
     use_cookie_authentication = lua_toboolean(vm, 7) ? true : false;
 
-  Utils::httpGetPost(vm, url, username, password, NULL /* user_header_token */,
+  Utils::httpGetPostPutPatch(vm, url, username, password, NULL /* user_header_token */,
                      connection_timeout, lifetime_timeout,
 		     return_content, use_cookie_authentication, &stats,
-                     form_data, NULL, true, 0);
+                     form_data, NULL, true, 0, method_post);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
 /* ****************************************** */
 
-static int ntop_http_post_auth_token(lua_State *vm) {
+static int ntop_http_multi_auth_token(lua_State *vm, HttpMethod method) {
   char *url, *auth_token = NULL, *form_data;
   int connection_timeout = 30, lifetime_timeout = 0;
   bool return_content = false;
@@ -3076,56 +3078,19 @@ static int ntop_http_post_auth_token(lua_State *vm) {
   if (lua_type(vm, 6) == LUA_TBOOLEAN) /* Optional */
     use_cookie_authentication = lua_toboolean(vm, 6) ? true : false;
 
-  Utils::httpGetPost(vm, url, NULL /* username */, NULL /* pwd */, auth_token,
+  Utils::httpGetPostPutPatch(vm, url, NULL /* username */, NULL /* pwd */, auth_token,
                      connection_timeout, lifetime_timeout,
 		     return_content, use_cookie_authentication, &stats,
-                     form_data, NULL, true, 0);
+                     form_data, NULL, true, 0, method);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
 /* ****************************************** */
 
-static int ntop_http_put_auth_token(lua_State *vm) {
-  char *url, *auth_token = NULL, *form_data;
-  int connection_timeout = 30, lifetime_timeout = 0;
-  bool return_content = false;
-  bool use_cookie_authentication = false;
-  HTTPTranferStats stats;
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
-  if ((url = (char *)lua_tostring(vm, 1)) == NULL)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
-
-  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
-  if ((auth_token = (char *)lua_tostring(vm, 2)) == NULL)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
-
-  if (ntop_lua_check(vm, __FUNCTION__, 3, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
-  if ((form_data = (char *)lua_tostring(vm, 3)) == NULL)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
-
-  if (lua_type(vm, 4) == LUA_TNUMBER) /* Optional */
-    connection_timeout = lua_tonumber(vm, 4);
-
-  if (lua_type(vm, 5) == LUA_TBOOLEAN) /* Optional */
-    return_content = lua_toboolean(vm, 5) ? true : false;
-
-  if (lua_type(vm, 6) == LUA_TBOOLEAN) /* Optional */
-    use_cookie_authentication = lua_toboolean(vm, 6) ? true : false;
-
-  Utils::httpGetPost(vm, url, NULL /* username */, NULL /* pwd */, auth_token,
-                     connection_timeout, lifetime_timeout,
-		     return_content, use_cookie_authentication, &stats,
-                     form_data, NULL, true, 0, true);
-
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
-}
+static int ntop_http_post_auth_token(lua_State *vm)  { return(ntop_http_multi_auth_token(vm, method_post));}
+static int ntop_http_put_auth_token(lua_State *vm)   { return(ntop_http_multi_auth_token(vm, method_put));}
+static int ntop_http_patch_auth_token(lua_State *vm) { return(ntop_http_multi_auth_token(vm, method_patch));}
 
 /* ****************************************** */
 
@@ -3150,9 +3115,9 @@ static int ntop_http_fetch(lua_State *vm) {
   snprintf(fname, sizeof(fname), "%s", f);
   ntop->fixPath(fname);
 
-  Utils::httpGetPost(vm, url, NULL, NULL, NULL /* user_header_token */,
-		     connection_timeout, lifetime_timeout,
-                     false, false, &stats, NULL, fname, true, 0);
+  Utils::httpGetPostPutPatch(vm, url, NULL, NULL, NULL /* user_header_token */,
+			     connection_timeout, lifetime_timeout,
+			     false, false, &stats, NULL, fname, true, 0, method_post);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
@@ -8344,6 +8309,7 @@ static luaL_Reg _ntop_reg[] = {
     {"httpPost", ntop_http_post},
     {"httpPostAuthToken", ntop_http_post_auth_token},
     {"httpPutAuthToken", ntop_http_put_auth_token},
+    {"httpPatchAuthToken", ntop_http_patch_auth_token},
     {"httpFetch", ntop_http_fetch},
     {"postHTTPJsonData", ntop_post_http_json_data},
     {"postHTTPTextFile", ntop_post_http_text_file},
@@ -8582,6 +8548,7 @@ static luaL_Reg _ntop_reg[] = {
     {"reloadNetworksPolicyConfiguration", reload_networks_policy_configuration},
 #endif
 
-    {NULL, NULL}};
+    {NULL, NULL}
+};
 
 luaL_Reg *ntop_reg = _ntop_reg;

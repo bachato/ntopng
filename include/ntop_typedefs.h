@@ -1260,4 +1260,11 @@ typedef enum
   scan_alert_rst
 } ScanAlertType;
 
+typedef enum {
+  method_get,
+  method_post,
+  method_put,
+  method_patch,
+} HttpMethod;
+
 #endif /* _NTOP_TYPEDEFS_H_ */

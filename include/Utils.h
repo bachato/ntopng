@@ -127,17 +127,17 @@ class Utils {
 			       int connect_timeout,
 			       int max_duration_timeout,
                                HTTPTranferStats *stats);
-  static bool httpGetPost(lua_State *vm, char *url, char *username,
-                          char *password, char *user_header_token,
-			  int connect_timeout, int max_duration_timeout,			  
-                          bool return_content, bool use_cookie_authentication,
-                          HTTPTranferStats *stats, const char *form_data,
-                          char *write_fname, bool follow_redirects,
-                          int ip_version, bool use_put_method = false);
+  static bool httpGetPostPutPatch(lua_State *vm, char *url, char *username,
+				  char *password, char *user_header_token,
+				  int connect_timeout, int max_duration_timeout,			  
+				  bool return_content, bool use_cookie_authentication,
+				  HTTPTranferStats *stats, const char *form_data,
+				  char *write_fname, bool follow_redirects,
+				  int ip_version, HttpMethod method);
   static long httpGet(const char *url, const char *username,
                       const char *password, const char *user_header_token,
                       int connect_timeout, int max_duration_timeout,
-		       char *const resp, const u_int resp_len);
+		      char *const resp, const u_int resp_len);
   static bool progressCanContinue(ProgressState *progressState);
   static char *urlEncode(const char *url);
   static ticks getticks();

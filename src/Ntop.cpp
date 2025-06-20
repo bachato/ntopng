@@ -4451,8 +4451,8 @@ char* Ntop::getCustomnDPIProtos() {
 
 	snprintf(fname, sizeof(fname), "%s", TMP_PROTOS_FILE);
 
-	rc = Utils::httpGetPost(NULL, custom_ndpi_protos, NULL, NULL, NULL, 10, 30,
-				false, false, NULL, NULL, fname, true, 4, false);
+	rc = Utils::httpGetPostPutPatch(NULL, custom_ndpi_protos, NULL, NULL, NULL, 10, 30,
+					false, false, NULL, NULL, fname, true, 4, method_get);
 
 	if(rc == false)
 	  ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to access URL %s: ignored", custom_ndpi_protos);

@@ -2289,16 +2289,16 @@ static int progress_callback(void *clientp, double dltotal, double dlnow,
 /* **************************************** */
 
 /* form_data is in format param=value&param1=&value1... */
-bool Utils::httpGetPost(lua_State *vm, char *url,
-                        /* NOTE if user_header_token != NULL, username AND
-                           password are ignored, and vice-versa */
-                        char *username, char *password, char *user_header_token,
-                        int connect_timeout, int max_duration_timeout,
-			bool return_content,
-                        bool use_cookie_authentication, HTTPTranferStats *stats,
-                        const char *form_data, char *write_fname,
-                        bool follow_redirects, int ip_version,
-			bool use_put_method) {
+bool Utils::httpGetPostPutPatch(lua_State *vm, char *url,
+				/* NOTE if user_header_token != NULL, username AND
+				   password are ignored, and vice-versa */
+				char *username, char *password, char *user_header_token,
+				int connect_timeout, int max_duration_timeout,
+				bool return_content,
+				bool use_cookie_authentication, HTTPTranferStats *stats,
+				const char *form_data, char *write_fname,
+				bool follow_redirects, int ip_version,
+				HttpMethod method) {
   CURL *curl = curl_easy_init();
   FILE *out_f = NULL;
   bool ret = true;
@@ -2361,7 +2361,10 @@ bool Utils::httpGetPost(lua_State *vm, char *url,
 
     if (form_data) {
       /* This is a POST request */
-      curl_easy_setopt(curl, CURLOPT_POST, 1L);
+
+      if(method == method_post)
+	curl_easy_setopt(curl, CURLOPT_POST, 1L);
+      
       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, form_data);
       curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(form_data));
 
@@ -2382,9 +2385,20 @@ bool Utils::httpGetPost(lua_State *vm, char *url,
 
     if (headers != NULL) curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-    if(use_put_method) {
-      /* enable uploading (implies PUT over HTTP) */
+    
+    switch(method) {
+    case method_get:
+    case method_post:
+      /* They are handled automatically with the code above */
+      break;
+      
+    case method_put:
       curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+      break;
+
+    case method_patch:
+      curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+      break;
     }
 
     if (write_fname) {
