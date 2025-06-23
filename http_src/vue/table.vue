@@ -149,7 +149,7 @@
         <div v-if="query_info != null" class="mt-2">
             <div class="text-end">
                 <small style="" class="query text-end"><span class="records">{{ query_info.num_records_processed
-                        }}</span>.</small>
+                }}</span>.</small>
             </div>
             <div class="text-start">
                 <small id="historical_flows_table-query-time" style="" class="query">Query performed in <span
@@ -646,6 +646,7 @@ function filterRows(rows, searchTerm) {
 
 function stripHtmlTags(html) {
     if (!html) return '';
+    html = html.toString()
     return html.replace(/<\/?[^>]+(>|$)/g, " ").replace(/\s+/g, " ").trim();
 }
 
@@ -695,6 +696,17 @@ function set_active_rows() {
 // get columns with active sort
 function get_column_to_sort() {
     let col_to_sort = processedColumns.value.find((c) => c.sort != 0);
+    if (col_to_sort) {
+        localStorage.setItem(`tablesort_${props.id}`, col_to_sort.id);
+        localStorage.setItem(`tablesort_${props.id}_sort`, col_to_sort.sort);
+    } else {
+        col_to_sort = localStorage.getItem(`tablesort_${props.id}`);
+        const sort = localStorage.getItem(`tablesort_${props.id}_sort`);
+        if (col_to_sort) {
+            col_to_sort = processedColumns.value.find((c) => c.id === col_to_sort);
+            col_to_sort.sort = sort
+        }
+    }
     return col_to_sort;
 }
 
