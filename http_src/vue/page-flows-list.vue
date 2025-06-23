@@ -142,7 +142,7 @@ const format_host = function (value) {
         icons = `${icons} ${blackhole_icon}`
     }
     if (value.port !== 0) {
-        port_name = ` : <a href="#" class="tableFilter" tag-filter="port" tag-value="${value.port}">${value.service_port || value.port}</a>`
+        port_name = ` : <a href="#" class="tableFilter" tag-filter="port" data-bs-toggle='tooltip' data-bs-placement='bottom' title='${value.port}' tag-value="${value.port}">${value.service_port || value.port}</a>`
     } else {
         port_name = ''
     }
@@ -153,9 +153,9 @@ const format_host = function (value) {
         container = ` <a href="${http_prefix}/lua/flows_stats.lua?container=${value.container.id}"><i class='fas fa-ship'></i> ${value.container.name}</a>`
     }
     if (props.context.is_viewed) {
-        return `<a href="#" class="tableFilter" tag-filter="flowhosts_type" tag-value="${value.ip}@${value.vlan || 0}">${value.name}</a> ${icons}${port_name}${process}${container}`
+        return `<a href="#" class="tableFilter" tag-filter="flowhosts_type" data-bs-toggle='tooltip' data-bs-placement='bottom' title='${value.ip}' tag-value="${value.ip}@${value.vlan || 0}">${value.name}</a> ${icons}${port_name}${process}${container}`
     } else {
-        return `<a href="#" class="tableFilter" tag-filter="flowhosts_type" tag-value="${value.ip}@${value.vlan || 0}">${value.name}</a> ${icons} <a href=${url}>${host_details_icon}</a>${port_name}${process}${container}`
+        return `<a href="#" class="tableFilter" tag-filter="flowhosts_type" data-bs-toggle='tooltip' data-bs-placement='bottom' title='${value.ip}' tag-value="${value.ip}@${value.vlan || 0}">${value.name}</a> ${icons} <a href=${url}>${host_details_icon}</a>${port_name}${process}${container}`
     }
 }
 
