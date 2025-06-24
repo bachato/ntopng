@@ -5130,7 +5130,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
             (srv_pod && !strcmp(pod_filter, srv_pod))))
         return (false);
     }
-
+    
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
     if (retriever->pag &&
@@ -5156,11 +5156,13 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
       return (false);
     else if (retriever->pag && retriever->pag->asnFilter(&asn_filter) &&
              f->get_cli_host() && f->get_srv_host())
-      ntop->getTrace()->traceEvent(
-				   TRACE_WARNING, "Filtering ASN: %u | Client ASN: %u | Server ASN: %u",
+#ifdef DEBUG
+      ntop->getTrace()->traceEvent(TRACE_WARNING,
+				   "Filtering ASN: %u | Client ASN: %u | Server ASN: %u",
 				   asn_filter, f->get_cli_host()->get_asn(),
 				   f->get_srv_host()->get_asn());
-
+#endif
+    
     if (retriever->pag && retriever->pag->usernameFilter(&username_filter) &&
         (!f->get_user_name(true /* client uid */) ||
          strcmp(f->get_user_name(true /* client uid */), username_filter)) &&
