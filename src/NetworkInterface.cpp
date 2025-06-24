@@ -5156,6 +5156,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
       return (false);
     else if (retriever->pag && retriever->pag->asnFilter(&asn_filter) &&
              f->get_cli_host() && f->get_srv_host())
+
 #ifdef DEBUG
       ntop->getTrace()->traceEvent(TRACE_WARNING,
 				   "Filtering ASN: %u | Client ASN: %u | Server ASN: %u",
@@ -5163,6 +5164,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
 				   f->get_srv_host()->get_asn());
 #endif
     
+
     if (retriever->pag && retriever->pag->usernameFilter(&username_filter) &&
         (!f->get_user_name(true /* client uid */) ||
          strcmp(f->get_user_name(true /* client uid */), username_filter)) &&
