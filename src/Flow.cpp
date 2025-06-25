@@ -2966,6 +2966,47 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   char *json = alerts_json; /* Copying ref as it may be moved to the shadow meantime */
   if (json) lua_push_str_table_entry(vm, "json_alert", json);
 
+  if(srcAS)
+    lua_push_int32_table_entry(vm, "src_as", srcAS);
+  else {
+    Host *h = get_cli_host();
+    
+    if(h) {
+      lua_push_int32_table_entry(vm, "src_as", h->get_asn());
+      lua_push_str_table_entry(vm, "src_as_name", h->get_asname());
+    } else {
+      /* View interfaces */
+      u_int32_t asn;
+      char *asname;
+      
+      ntop->getGeolocation()->getAS(get_cli_ip_addr(), &asn, &asname);
+      
+      if(asn != 0) lua_push_int32_table_entry(vm, "src_as", asn);
+      if(asname)   lua_push_str_table_entry(vm, "src_as_name", asname);
+    }
+  }
+  
+  if(dstAS)
+    lua_push_int32_table_entry(vm, "dst_as", dstAS);
+  else {
+    Host *h = get_srv_host();
+    
+    if(h) {
+      lua_push_int32_table_entry(vm, "dst_as", h->get_asn());
+      lua_push_str_table_entry(vm, "dst_as_name", h->get_asname());
+    } else {
+      /* View interfaces */
+      u_int32_t asn;
+      char *asname;
+      
+      ntop->getGeolocation()->getAS(get_srv_ip_addr(), &asn, &asname);
+      if(asn != 0) lua_push_int32_table_entry(vm, "dst_as", asn);
+      if(asname)   lua_push_str_table_entry(vm, "dst_as_name", asname);
+    }
+  }
+
+  lua_snmp_info(vm);
+    
   if(details_level >= details_high) {
     if(tcp_fingerprint)
       lua_push_str_table_entry(vm, "tcp_fingerprint", tcp_fingerprint);
@@ -2984,45 +3025,6 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
     /* See VLANAddressTree.h for details */
     lua_push_uint32_table_entry(vm, "observation_point_id",
                                 get_observation_point_id());
-
-    if(srcAS)
-      lua_push_int32_table_entry(vm, "src_as", srcAS);
-    else {
-      Host *h = get_cli_host();
-
-      if(h) {
-        lua_push_int32_table_entry(vm, "src_as", h->get_asn());
-        lua_push_str_table_entry(vm, "src_as_name", h->get_asname());
-      } else {
-	/* View interfaces */
-	u_int32_t asn;
-	char *asname;
-
-	ntop->getGeolocation()->getAS(get_cli_ip_addr(), &asn, &asname);
-
-	if(asn != 0) lua_push_int32_table_entry(vm, "src_as", asn);
-        if(asname)   lua_push_str_table_entry(vm, "src_as_name", asname);
-      }
-    }
-
-    if(dstAS)
-      lua_push_int32_table_entry(vm, "dst_as", dstAS);
-    else {
-      Host *h = get_srv_host();
-
-      if(h) {
-        lua_push_int32_table_entry(vm, "dst_as", h->get_asn());
-        lua_push_str_table_entry(vm, "dst_as_name", h->get_asname());
-      } else {
-	/* View interfaces */
-	u_int32_t asn;
-	char *asname;
-
-	ntop->getGeolocation()->getAS(get_srv_ip_addr(), &asn, &asname);
-	if(asn != 0) lua_push_int32_table_entry(vm, "dst_as", asn);
-        if(asname)   lua_push_str_table_entry(vm, "dst_as_name", asname);
-      }
-    }
 
     if(collection) {
       if(collection->prevAdjacentAS)
@@ -7318,6 +7320,8 @@ void Flow::lua_get_protocols(lua_State *vm) const {
 void Flow::lua_get_bytes(lua_State *vm) const {
   lua_push_uint64_table_entry(vm, "bytes",
                               get_bytes_cli2srv() + get_bytes_srv2cli());
+  lua_push_uint64_table_entry(vm, "bytes_sent", get_bytes_cli2srv());
+  lua_push_uint64_table_entry(vm, "bytes_rcvd", get_bytes_srv2cli());
   lua_push_uint64_table_entry(vm, "goodput_bytes",
 			      get_goodput_bytes_cli2srv() + get_goodput_bytes_srv2cli());
   lua_push_uint64_table_entry(vm, "bytes.last",
@@ -7676,6 +7680,7 @@ void Flow::lua_duration_info(lua_State *vm) {
 void Flow::lua_snmp_info(lua_State *vm) {
   char str[16];
   u_int32_t device_ip = htonl(flow_device.device_ip);
+  
   inet_ntop(AF_INET, &(device_ip), str, INET_ADDRSTRLEN);
   lua_push_str_table_entry(vm, "device_ip", str);
   lua_push_uint64_table_entry(vm, "in_index", flow_device.in_index);

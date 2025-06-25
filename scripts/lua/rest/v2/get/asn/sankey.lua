@@ -11,16 +11,16 @@ local json = require "dkjson"
 local rest_utils = require "rest_utils"
 local format_utils = require "format_utils"
 local info = ntop.getInfo()
+local callback_utils = require "callback_utils"
 
 local rc = rest_utils.consts.success.ok
 local ifid = _GET["ifid"]
 local criteria_as = _GET["criteria_as"]
-local asn = _GET["asn"]
+local asn = tonumber(_GET["asn"])
+local rsp = {}
 
-local flows_filter = getFlowsFilter()
-flows_filter["asn"] = asn
-local flows_stats = interface.getFlowsInfo(flows_filter["hostFilter"], flows_filter, flows_filter["talkingWith"],
-					   flows_filter["client"], flows_filter["server"], flows_filter["flow_info"])
+local edges = {}
+local nodes = {}
 
 local unit
 if criteria_as == "egress_traffic_criteria" then
@@ -75,6 +75,8 @@ table.insert(nodes, {
 		label = "ASN "..asn
 })
 
+-- ####################
+
 local function add_unique_node(node_id, label, link)
    if not node_set[node_id] then
       table.insert(nodes, { node_id = node_id, label = label, link = link })
@@ -82,53 +84,71 @@ local function add_unique_node(node_id, label, link)
    end
 end
 
-asn = tonumber(asn)
-for flow_id, flow in pairs(flows_stats.flows) do
-   if type(flow) == "table" then
-      local exporter_ip = getProbeName(flow.device_ip) or "unknown"
-      local bytes = tonumber(flow.bytes) or 0	 
-      local exporter_node_id = find_node_id(exporter_ip)
-      if unit == "Ingress" and flow.dst_as == asn then
-	 local port_index = format_portidx_name(flow.device_ip, flow.in_index) or "?"
-	 local n_id = exporter_ip .. "@" .. port_index
-	 local port_node_id = find_node_id(n_id)
+-- ####################
 
-	 add_unique_node(exporter_node_id, exporter_ip, "#")
-	 add_unique_node(port_node_id, port_index, "#")
+local tot_bytes = {}
 
-	 table.insert(links, {
-			 source_node_id = port_node_id,
-			 target_node_id = exporter_node_id,
-			 value = bytes
-	 })
+function callback (_, flow)
+   -- tprint(flow) io.write("-------------------------------\n")
 
-	 table.insert(links, {
-			 source_node_id = exporter_node_id,
-			 target_node_id = as_root_key,
-			 value = bytes
-	 })
-      end
-      if unit == "Egress" and flow.src_as == asn then
-	 local port_index = format_portidx_name(flow.device_ip, flow.out_index) or "?"
-	 local n_id = exporter_ip .. "@" .. port_index
-	 local port_node_id = find_node_id(n_id)
+   local exporter_ip = getProbeName(flow.device_ip) or "unknown"
+   local bytes
+   local exporter_node_id = find_node_id(exporter_ip)
 
-	 add_unique_node(exporter_node_id, exporter_ip, "#")
-	 add_unique_node(port_node_id, port_index, "#")
-         table.insert(links, {
-			 source_node_id = as_root_key,
-			 target_node_id = exporter_node_id,
-			 value = bytes
-	 })
-	 table.insert(links, {
-			 source_node_id = exporter_node_id,port_node_id,
-			 target_node_id = port_node_id,
-			 value = bytes
-	 })
+   -- TODO: handle all directions
+   
+   if unit == "Ingress" and flow.dst_as == asn then	    
+      local port_index = format_portidx_name(flow.device_ip, flow.in_index) or "?"
+      local n_id = exporter_ip .. "@" .. port_index
+      local port_node_id = find_node_id(n_id)
 
-      end
+      bytes = tonumber(flow.bytes_sent) -- TODO haandle directions
+      add_unique_node(exporter_node_id, exporter_ip, "#")
+      add_unique_node(port_node_id, port_index, "#")
+
+      if(tot_bytes[n_id] == nil) then tot_bytes[n_id] = { sent = 0, rcvd = 0 } end
+      -- TODO sum bytes
+       
+      table.insert(links, {
+		      source_node_id = port_node_id,
+		      target_node_id = exporter_node_id,
+		      value = bytes -- TODO set bytes total 
+      })
+
+      table.insert(links, {
+		      source_node_id = exporter_node_id,
+		      target_node_id = as_root_key,
+		      value = bytes -- TODO set bytes total
+      })
+   end
+   
+   if unit == "Egress" and flow.src_as == asn then
+      local port_index = format_portidx_name(flow.device_ip, flow.out_index) or "?"
+      local n_id = exporter_ip .. "@" .. port_index
+      local port_node_id = find_node_id(n_id)
+
+      bytes = tonumber(flow.bytes_rcvd) or 0
+      
+      add_unique_node(exporter_node_id, exporter_ip, "#")
+      add_unique_node(port_node_id, port_index, "#")
+      table.insert(links, {
+		      source_node_id = as_root_key,
+		      target_node_id = exporter_node_id,
+		      value = bytes
+      })
+      table.insert(links, {
+		      source_node_id = exporter_node_id,port_node_id,
+		      target_node_id = port_node_id,
+		      value = bytes
+      })
    end
 end
+
+local flows_filter = { asnFilter = asn, detailsLevel = "normal", maxHits = 10000, perPage = 10000 }
+callback_utils.foreachFlow(ifid,
+			   os.time()+30, -- deadline
+			   callback, flows_filter)
+
 
 rsp["nodes"] = nodes
 rsp["links"] = links

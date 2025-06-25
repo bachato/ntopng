@@ -2806,7 +2806,7 @@ static int ntop_get_interface_flows_info(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
   char buf[64];
   char *host_ip = NULL, *talking_with_ip = NULL, *server_ip = NULL,
-       *client_ip = NULL;
+    *client_ip = NULL;
   u_int16_t vlan_id = (u_int16_t)-1;
   Host *host = NULL, *talking_with_host = NULL, *client = NULL, *server = NULL;
   char *flow_info = NULL;
@@ -2823,8 +2823,7 @@ static int ntop_get_interface_flows_info(lua_State *vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
   if (lua_type(vm, 1) == LUA_TSTRING) {
-    get_host_vlan_info((char *)lua_tostring(vm, 1), &host_ip, &vlan_id, buf,
-                       sizeof(buf));
+    get_host_vlan_info((char *)lua_tostring(vm, 1), &host_ip, &vlan_id, buf, sizeof(buf));
     host = curr_iface->getHost(host_ip, vlan_id,
 			       getLuaVMUservalue(vm, observationPointId),
 			       false /* Not an inline call */);
@@ -2835,7 +2834,8 @@ static int ntop_get_interface_flows_info(lua_State *vm) {
   if (lua_type(vm, 3) == LUA_TSTRING) {
     get_host_vlan_info((char *)lua_tostring(vm, 3), &talking_with_ip, &vlan_id,
                        buf, sizeof(buf));
-    talking_with_host = curr_iface->getHost(talking_with_ip, vlan_id, getLuaVMUservalue(vm, observationPointId),
+    talking_with_host = curr_iface->getHost(talking_with_ip, vlan_id,
+					    getLuaVMUservalue(vm, observationPointId),
 					    false /* Not an inline call */);
   }
   
