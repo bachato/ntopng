@@ -23,7 +23,7 @@ const props = defineProps({
 const table_id = ref('as_stats');
 const table_as_stats = ref(null);
 const csrf = props.context.csrf;
-const isZMQ = props.context.isZMQ;
+const showSankey = props.context.showSankey;
 onBeforeMount(() => {
 
 })
@@ -50,7 +50,7 @@ const map_table_def_columns = (columns) => {
         },
         "asn": (value, row) => {
             let return_value;
-            if(isZMQ) {
+            if(showSankey) {
                 return_value = `<A HREF='${http_prefix}/lua/as_overview.lua?asn=${row["asn"]}' title='${row["asname"]}'>${row["asn"]}</A>`
             }
             else {

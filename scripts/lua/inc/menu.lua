@@ -472,21 +472,23 @@ page_utils.add_menubar_section({
             url = "/lua/if_stats.lua"
         }, {entry = page_utils.menu_entries.divider}, {
             entry = page_utils.menu_entries.networks,
+            hidden = interface.isViewed(),
             url = '/lua/network_stats.lua'
         }, {
             entry = page_utils.menu_entries.host_pools,
             url = '/lua/pool_stats.lua'
         }, {
             entry = page_utils.menu_entries.autonomous_systems,
-            hidden = not ntop.hasGeoIP(),
+            hidden = (not ntop.hasGeoIP()) or interface.isViewed(),
             url = '/lua/as_stats.lua'
         }, {
             entry = page_utils.menu_entries.countries,
             hidden = not ntop.hasGeoIP(),
+            hidden = interface.isViewed(),
             url = '/lua/country_stats.lua'
         }, {
             entry = page_utils.menu_entries.vlans,
-            hidden = not interface.hasVLANs(),
+            hidden = not interface.hasVLANs() or interface.isViewed(),
             url = '/lua/vlan_stats.lua'
         }, {
             entry = page_utils.menu_entries.pods,

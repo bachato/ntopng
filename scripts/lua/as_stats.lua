@@ -63,9 +63,24 @@ page_utils.print_navbar(breadcrumb, ntop.getHttpPrefix() .. "/lua/as_stats.lua",
     label = "<i class='fas fa-lg fa-chart-area'></i>"
 }})
 
+local show_sankey = false
+local current_ifid = interface.getId()
+
+if interface.isView() then
+    for ifid, ifname in pairs(interface.getIfNames()) do 
+        interface.select(ifid)
+        if (interface.isZMQInterface() and interface.isViewed()) then
+            show_sankey = true
+            break
+        end
+    end
+    interface.select(current_ifid)
+end
+
+
 local context = {
     ifid = interface.getId(),
-    isZMQ = interface.isZMQInterface()
+    showSankey = show_sankey
 }
 
 local json_context = json.encode(context)
