@@ -1254,3 +1254,7 @@ a.disabled{
     pointer-events: none;
     cursor: default;
 }
+
+.input {
+  color: var(--ntop-text-color);
+}
