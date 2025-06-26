@@ -357,6 +357,10 @@ async function load_table_filters_array() {
 
 const get_extra_params_obj = () => {
     let extra_params = ntopng_url_manager.get_url_object();
+    extra_params = {
+        ...{ifid: props.context.ifid},
+        ...extra_params,
+    }
     return extra_params;
 };
 
