@@ -75,6 +75,8 @@ if interface.isView() then
         end
     end
     interface.select(current_ifid)
+elseif interface.isZMQInterface() then
+    show_sankey = true
 end
 
 
