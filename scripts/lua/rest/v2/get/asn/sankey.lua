@@ -1,6 +1,26 @@
 --
 -- (C) 2013-25 - ntop.org
 --
+
+--
+-- Logic implemented.
+-- Example for a given router 1.2.3.4 the flows below are rcvd
+-- (a) [ASN] src=34978 -> dst=12337 | [Port Idx] in=146 -> out=132 | sent=60 / rcvd=0
+-- (b) [ASN] src=34978 -> dst=12337 | [Port Idx] in=146 -> out=136 | sent=0  / rcvd=594
+--
+-- Flow a
+-- Port 146  = { rcvd = 60,  sent = 0 }, port 132 = { rcvd = 0, sent = 60 }, port 136 = { rcvd = 0, sent = 0 }
+-- ASN 34978 = { rcvd = 0,  sent = 60 }
+-- ASN 12337 = { rcvd = 60, sent = 0  }
+--
+-- Flow a+b
+-- Port 146  = { rcvd  = 60,  sent = 594 }, port 132 = { rcvd = 0, sent = 60 }, port 136 = { rcvd = 594, sent = 0  }
+-- ASN 34978 = { rcvd = 594, sent = 60  }
+-- ASN 12337 = { rcvd = 60,  sent = 594 }
+--
+
+
+
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 
@@ -127,15 +147,15 @@ function callback (_, flow)
       tot_bytes_exporter[flow.device_ip].rcvd = tot_bytes_exporter[flow.device_ip].rcvd + flow.bytes_sent
    end   
 
+   -- Don't double count flows with the same src/dst ASN
    if(flow.in_index ~= flow.out_index) then
-   --if(true) then
       -- (2) in index
       n_id = flow.device_ip .. "@" .. flow.in_index
       
       if(tot_bytes[n_id] == nil) then
 	 tot_bytes[n_id] = { sent = 0, rcvd = 0, exporter_ip = flow.device_ip, port_index = flow.in_index }
       end
-            
+      
       if(flow.src_as == asn) then
 	 tot_bytes[n_id].rcvd = tot_bytes[n_id].rcvd + flow.bytes_sent
       elseif(flow.dst_as == asn) then
