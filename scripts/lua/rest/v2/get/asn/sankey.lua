@@ -20,7 +20,6 @@
 --
 
 
-
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 
@@ -117,6 +116,7 @@ end
 local tot_bytes = {}
 local tot_bytes_exporter = {}
 
+-- Flow iterator callback
 function callback (_, flow)
    local n_id
 
@@ -178,18 +178,23 @@ end
 
 local exporter_nodes = {}
 
+-- Build Interface <-> Exporter links
 for n_id, data in pairs(tot_bytes) do
    if (criteria == traffic_criteria.INGRESS and data.sent > 0) or 
-         (criteria == traffic_criteria.EGRESS and data.rcvd > 0) or
-      (criteria == traffic_criteria.TOTAL and data.rcvd+data.sent > 0) then
+      (criteria == traffic_criteria.EGRESS  and data.rcvd > 0) or
+      (criteria == traffic_criteria.TOTAL   and (data.rcvd + data.sent) > 0) then
+
       local exporter_ip = getProbeName(data.exporter_ip)
       local port_index = format_portidx_name(data.exporter_ip, data.port_index) or "?"
       local exporter_node_id = find_node_id(exporter_ip)
       if(exporter_nodes[data.exporter_ip] == nil) then exporter_nodes[data.exporter_ip] = exporter_node_id end
       local port_node_id = find_node_id(n_id)
+
       add_unique_node(exporter_node_id, exporter_ip, "#")
       add_unique_node(port_node_id, port_index, "#")
+
       if criteria == traffic_criteria.INGRESS then
+         -- Interface -> Exporter
          table.insert(links, {
                source_node_id = port_node_id,
                target_node_id = exporter_node_id,
@@ -197,13 +202,15 @@ for n_id, data in pairs(tot_bytes) do
                value = data.sent 
          })
       elseif criteria == traffic_criteria.EGRESS then
+         -- Exporter -> Interface
          table.insert(links, {
                source_node_id = exporter_node_id,
                target_node_id = port_node_id,
                label = bytesToSize(data.rcvd),
                value = data.rcvd
          })
-      else
+      else -- TOTAL
+         -- Interface -> Exporter
          table.insert(links, {
                source_node_id = port_node_id,
                target_node_id = exporter_node_id,
@@ -211,12 +218,17 @@ for n_id, data in pairs(tot_bytes) do
                value = data.rcvd+data.sent
          })
       end
+
    end
 end
+
+-- Build Exporter <-> AS links
 for exporter_ip, exporter_node_id in pairs(exporter_nodes) do
    local sent = tot_bytes_exporter[exporter_ip].sent
    local rcvd = tot_bytes_exporter[exporter_ip].rcvd
+
    if criteria == traffic_criteria.INGRESS and sent > 0 then
+      -- Exporter -> AS
       table.insert(links, {
             source_node_id = exporter_node_id,
             target_node_id = as_root_key,
@@ -224,13 +236,15 @@ for exporter_ip, exporter_node_id in pairs(exporter_nodes) do
             value = sent
       })
    elseif criteria == traffic_criteria.EGRESS and rcvd > 0 then
+      -- AS -> Exporter
       table.insert(links, {
             source_node_id = as_root_key,
             target_node_id = exporter_node_id,
             label = bytesToSize(rcvd),
             value = rcvd
       })
-   else
+   else -- TOTAL
+      -- Exporter -> AS
       table.insert(links, {
             source_node_id = exporter_node_id,
             target_node_id = as_root_key,
