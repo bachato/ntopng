@@ -4487,3 +4487,16 @@ void Ntop::trackAssetChange(const char *protocol, const char *action,
 			       note ? note : "");
 #endif
 }
+
+/* ******************************************* */
+
+void Ntop::reloadASNConfiguration() {
+    getPrefs()->reloadASNConfiguration();
+    for (int i = 0; i < MAX_NUM_INTERFACE_IDS; i++) {
+        NetworkInterface *iface = ntop->getInterface(i);
+        if (iface && iface->isZMQInterface()) {
+            ntop->getTrace()->traceEvent(TRACE_NORMAL,"Updating ASN Exporter Prefs [ifid: %d]", iface->get_id());
+            iface->updateASNExportersPrefs();
+        }
+    }
+}

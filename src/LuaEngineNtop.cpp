@@ -8065,7 +8065,7 @@ static int reload_servers_configuration(lua_State *vm) {
 /* **************************************************************** */
 
 static int reload_asn_configuration(lua_State *vm) {
-  ntop->getPrefs()->reloadASNConfiguration();
+  ntop->reloadASNConfiguration();
   lua_pushnil(vm);
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }

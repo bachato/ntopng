@@ -114,6 +114,18 @@ schema:addMetric("bytes_rcvd")
 
 -- ##############################################
 
+schema = ts_utils.newSchema("asn:exporter_traffic", {
+    step = 300,
+})
+schema:addTag("ifid")
+schema:addTag("asn")
+schema:addTag("device")
+schema:addTag("if_index")
+schema:addMetric("bytes_sent")
+schema:addMetric("bytes_rcvd")
+
+-- ##############################################
+
 schema = ts_utils.newSchema("asn:score", {
     step = 300,
     metrics_type = ts_utils.metrics.gauge

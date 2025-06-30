@@ -2110,11 +2110,11 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
       if(cli_as)
         cli_as->incStats(tv->tv_sec, stats_protocol, partial->get_cli2srv_packets(),
 			 partial->get_cli2srv_bytes(), partial->get_srv2cli_packets(),
-			 partial->get_srv2cli_bytes());
+			 partial->get_srv2cli_bytes(), getFlowDeviceIP(), getFlowDeviceInIndex(), getFlowDeviceOutIndex());
       if(srv_as)
         srv_as->incStats(tv->tv_sec, stats_protocol, partial->get_srv2cli_packets(),
 			 partial->get_srv2cli_bytes(), partial->get_cli2srv_packets(),
-			 partial->get_cli2srv_bytes());
+			 partial->get_cli2srv_bytes(), getFlowDeviceIP(), getFlowDeviceInIndex(), getFlowDeviceOutIndex());
     }
 
     if(cli_host->get_observation_point_id() &&

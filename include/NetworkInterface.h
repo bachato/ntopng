@@ -494,6 +494,10 @@ public:
             getIfType() != interface_type_ZMQ);
   }
 
+  virtual bool isZMQInterface() const {
+    return (getIfType() == interface_type_ZMQ);
+  }
+
   virtual bool isSyslogInterface() const {
     return (getIfType() == interface_type_SYSLOG);
   }
@@ -1416,6 +1420,7 @@ public:
   void incQoEStats(QoEType qoe_type) { qoe_stats.incQoEStats(qoe_type); };
 #endif
   inline BroadcastDomains* getBroadcastDomains() { return(bcast_domains); }
+  void updateASNExportersPrefs();
 
   void resetBroacastDomains();
   inline u_int getNumDPIProtocols() { return(ndpi_struct ? ndpi_get_num_protocols(ndpi_struct) : 0); }

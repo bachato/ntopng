@@ -4529,6 +4529,7 @@ local lang = {
     ["throughput_pps"] = "Throughput (pps)",
     ["top_10_ndpi_categories"] = "Top 10 Categories",
     ["top_10_ndpi_protocols"] = "Top 10 Applications",
+    ["top_asn"] = "Top ASN",
     ["top_breed"] = "Top Breeds",
     ["top_checks"] = "Top %{subdir} Scripts by Duration",
     ["top_clients"] = "Top %{protocol} Clients",

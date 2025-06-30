@@ -12853,3 +12853,10 @@ void NetworkInterface::resetBroacastDomains() {
   if(bcast_domains != NULL)
     bcast_domains->reset();
 }
+
+/* **************************************************** */
+
+void NetworkInterface::updateASNExportersPrefs() {
+    if (ases_hash) ases_hash->updateASNExportersPrefs();
+}
+

@@ -168,6 +168,8 @@ class Ntop {
   void loadLocalInterfaceAddress();
   void initAllowedProtocolPresets();
 
+  void reloadASNPrefsOnInterfaces();
+
   bool getUserPasswordHashLocal(const char *user, char *password_hash,
                                 u_int password_hash_len) const;
   bool checkLocalAuth(const char *user, const char *password, char *group) const;
@@ -846,6 +848,7 @@ class Ntop {
   u_int32_t getNumberHostPoolsMembers();
   u_int8_t getNumberProfiles();
   bool isInLocalASN(IpAddress *ip);
+  void reloadASNConfiguration();
 
   void trackAssetChange(const char *protocol, const char *action,
 			Mac *mac, IpAddress *target_ip,

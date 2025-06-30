@@ -27,14 +27,16 @@
 
 AutonomousSystem::AutonomousSystem(NetworkInterface *_iface, IpAddress *ipa)
     : GenericHashEntry(_iface), GenericTrafficElement(), Score(_iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   asname = NULL;
+  save_exporters_stats = false;
   round_trip_time = 0;
   alerted_flows_as_client = alerted_flows_as_server = 0;
 #ifdef NTOPNG_PRO
   nextMinPeriodicUpdate = 0;
-					       
+
 #endif
   ntop->getGeolocation()->getAS(ipa, &asn, &asname);
 
@@ -42,6 +44,24 @@ AutonomousSystem::AutonomousSystem(NetworkInterface *_iface, IpAddress *ipa)
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Created Autonomous System %u",
                                asn);
 #endif
+
+  if (ntop->getPrefs()->isCustomerASN(get_asn()) ||
+      ntop->getPrefs()->isSubCustomerASN(get_asn()) ||
+      ntop->getPrefs()->isRemoteASN(get_asn())) {
+        saveExporterStatsPrefs(true);
+#ifdef AS_DEBUG
+        ntop->getTrace()->traceEvent(
+            TRACE_NORMAL, "Autonomous System [asn: %u] [exporter stats: true]",
+            get_asn());
+#endif
+    } else {
+        saveExporterStatsPrefs(false);
+#ifdef AS_DEBUG
+        ntop->getTrace()->traceEvent(
+            TRACE_NORMAL, "Autonomous System [asn: %u] [exporter stats: false]",
+            get_asn());
+#endif
+  }
 }
 
 /* *************************************** */
@@ -51,9 +71,10 @@ void AutonomousSystem::set_hash_entry_state_idle() { ; /* Nothing to do */ }
 /* *************************************** */
 
 AutonomousSystem::~AutonomousSystem() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
   if (asname) free(asname);
-    /* TODO: decide if it is useful to dump AS stats to redis */
+  /* TODO: decide if it is useful to dump AS stats to redis */
 
 #ifdef AS_DEBUG
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Deleted Autonomous System %u",
@@ -116,6 +137,26 @@ void AutonomousSystem::lua(lua_State *vm, DetailsLevel details_level,
 #ifdef NTOPNG_PRO
     qoe_stats.lua_qoe_stats(vm);
 #endif
+    if (!exporters_map.empty()) {
+      lua_newtable(vm);
+      for (auto it = exporters_map.begin(); it != exporters_map.end(); ++it) {
+        lua_newtable(vm);
+        char buf[32], buf2[64];
+        IpAddress exporter;
+        exporter.set(htonl(it->first.first));
+        TrafficCounter &stats = it->second;
+        lua_push_uint64_table_entry(vm, "bytes_sent", stats.getSent());
+        lua_push_uint64_table_entry(vm, "bytes_rcvd", stats.getRcvd());
+        snprintf(buf2, sizeof(buf2), "%s_%d", exporter.print(buf, sizeof(buf)),
+                 it->first.second);
+        lua_pushstring(vm, buf2);
+        lua_insert(vm, -2);
+        lua_settable(vm, -3);
+      }
+      lua_pushstring(vm, "exporters");
+      lua_insert(vm, -2);
+      lua_settable(vm, -3);
+    }
   }
 
   lua_newtable(vm);
@@ -161,3 +202,40 @@ void AutonomousSystem::updateStats(const struct timeval *tv) {
 void AutonomousSystem::updateBehaviorStats(const struct timeval *tv) {}
 
 #endif
+
+/* ***************************************** */
+
+void AutonomousSystem::findExportersStats(
+    u_int64_t bytes_sent, u_int64_t bytes_rcvd,
+    std::pair<u_int32_t, u_int16_t> *key) {
+  auto it = exporters_map.find(*key);
+  if (it != exporters_map.end()) {
+    it->second.incStats(bytes_sent,
+                        bytes_rcvd);  // Update if exists already
+  } else {
+    exporters_map[*key] = TrafficCounter();
+    exporters_map[*key].incStats(bytes_sent, bytes_rcvd);
+  }
+}
+
+/* ***************************************** */
+
+void AutonomousSystem::incExportersStats(u_int64_t bytes_sent,
+                                         u_int64_t bytes_rcvd,
+                                         u_int32_t exporter_ip,
+                                         u_int32_t in_index,
+                                         u_int32_t out_index) {
+  if (save_exporters_stats && exporter_ip) {
+    std::pair<u_int32_t, u_int16_t> key;
+    /* Increase the stats just one time, same interface */
+    /* Out interface, so Sent Bytes and Rcvd Bytes are okay this way */
+    key = std::make_pair(exporter_ip, out_index);
+    findExportersStats(bytes_sent, bytes_rcvd, &key);
+    if (in_index != out_index) {
+      key = std::make_pair(exporter_ip, in_index);
+      /* In interface, so Sent Bytes and Rcvd Bytes are inverted (Sent Bytes is
+       * Rcvd Bytes and viceversa) */
+      findExportersStats(bytes_rcvd, bytes_sent, &key);
+    }
+  }
+}

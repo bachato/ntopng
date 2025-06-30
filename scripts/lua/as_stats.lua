@@ -82,7 +82,8 @@ end
 
 local context = {
     ifid = interface.getId(),
-    showSankey = show_sankey
+    showSankey = show_sankey,
+    csrf = ntop.getRandomCSRFValue()
 }
 
 local json_context = json.encode(context)

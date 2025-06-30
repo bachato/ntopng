@@ -34,6 +34,8 @@ class AutonomousSystem : public GenericHashEntry,
   char *asname;
   u_int32_t round_trip_time;
   u_int32_t alerted_flows_as_client, alerted_flows_as_server;
+  bool save_exporters_stats;
+  std::map<std::pair<u_int32_t, u_int16_t>, TrafficCounter> exporters_map;
 #ifdef NTOPNG_PRO
   QoEStats qoe_stats;
 #endif
@@ -41,6 +43,10 @@ class AutonomousSystem : public GenericHashEntry,
 #if defined(NTOPNG_PRO)
   time_t nextMinPeriodicUpdate;
 #endif
+
+  void incExportersStats(u_int64_t bytes_sent, u_int64_t bytes_rcvd,
+                         u_int32_t exporter_ip, u_int32_t in_index,
+                         u_int32_t out_index);
 
   inline void incSentStats(time_t t, u_int64_t num_pkts, u_int64_t num_bytes) {
     if (first_seen == 0)
@@ -70,12 +76,14 @@ class AutonomousSystem : public GenericHashEntry,
 
   inline void incStats(time_t when, u_int16_t proto_id, u_int64_t sent_packets,
                        u_int64_t sent_bytes, u_int64_t rcvd_packets,
-                       u_int64_t rcvd_bytes) {
+                       u_int64_t rcvd_bytes, u_int32_t exporter_ip,
+                       u_int32_t in_index, u_int32_t out_index) {
     if (ndpiStats || (ndpiStats = new nDPIStats()))
       ndpiStats->incStats(when, proto_id, sent_packets, sent_bytes,
                           rcvd_packets, rcvd_bytes);
     incSentStats(when, sent_packets, sent_bytes);
     incRcvdStats(when, rcvd_packets, rcvd_bytes);
+    incExportersStats(sent_bytes, rcvd_bytes, exporter_ip, out_index, in_index);
   }
   inline void incNumAlertedFlows(bool as_client) {
     if (as_client)
@@ -100,8 +108,17 @@ class AutonomousSystem : public GenericHashEntry,
   inline u_int32_t getTotalAlertedNumFlowsAsServer() const {
     return (alerted_flows_as_server);
   };
+  inline void saveExporterStatsPrefs(bool _save_exporters_stats) {
+    save_exporters_stats = _save_exporters_stats;
+    if (!save_exporters_stats)
+      exporters_map.clear(); /* Empty the map in case it's present */
+  }
+  void findExportersStats(u_int64_t bytes_sent, u_int64_t bytes_rcvd,
+                          std::pair<u_int32_t, u_int16_t> *key);
 #ifdef NTOPNG_PRO
-  void incQoEStats(QoEType qoe_type) { qoe_stats.incQoEStats(qoe_type); };
+      void incQoEStats(QoEType qoe_type) {
+    qoe_stats.incQoEStats(qoe_type);
+  };
 #endif
 };
 

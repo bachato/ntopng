@@ -33,6 +33,7 @@ class AutonomousSystemHash : public GenericHash {
                        u_int _max_hash_size);
 
   AutonomousSystem *get(IpAddress *ipa, bool is_inline_call);
+  void updateASNExportersPrefs();
 
 #ifdef AS_DEBUG
   void printHash();
