@@ -56,15 +56,27 @@ function formatIPPort(ip, port)
    return ip, port
 end
 
-function formatASN(v, ip)
+function formatASN(v, peer_as, ip, is_client_as)
    local asn
 
    if ((v == nil) or (v == 0)) then
       asn = "&nbsp;"
    elseif not isEmptyString(ip) then
-      local as_name = ntop.getASName(ip)
-      local label = v .. " (" .. (as_name or "") .. ")"
+      local as_name = ntop.getASName(ip)      
+      local label = v .. " (" .. (as_name or "") .. ")"      
+
       asn = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. v .. "\">" .. label .. "</A>"
+
+      if((peer_as ~= 0) and (v ~= peer_as)) then
+	 local peer_asn = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. peer_as .. "\">" .. peer_as .. "</A>"
+
+	 if(is_client_as) then
+	    asn = asn .. " [via ASN ".. peer_asn  .. "]"
+	 else
+	    asn = "[via ASN "..peer_asn .. "] " .. asn
+	 end
+      end
+
    end
 
    print("<td>" .. asn .. "</td>\n")
@@ -1904,14 +1916,14 @@ else
          flow["profile"] .. "</span></td></tr>\n")
    end
 
-   if (flow.src_as and flow.src_as ~= 0) or (flow.dst_as and flow.dst_as ~= 0) then
+   if((flow.src_as ~= 0) or (flow.dst_as ~= 0)) then
       local asn
 
       print("<tr>")
       print("<th width=10%>" .. i18n("flow_details.as_src_dst") .. "</th>")
 
-      formatASN(flow.src_as, flow["cli.ip"])
-      formatASN(flow.dst_as, flow["srv.ip"])
+      formatASN(flow.src_as, flow.src_peer_as, flow["cli.ip"], true)
+      formatASN(flow.dst_as, flow.dst_peer_as, flow["srv.ip"], false)
 
       print("</tr>\n")
    end
@@ -1920,8 +1932,8 @@ else
       print("<tr>")
       print("<th width=10%>" .. i18n("flow_details.as_prev_next") .. "</th>")
 
-      formatASN(flow.prev_adjacent_as)
-      formatASN(flow.next_adjacent_as)
+      formatASN(flow.prev_adjacent_as, 0, true)
+      formatASN(flow.next_adjacent_as, 0, false)
 
       print("</tr>\n")
    end

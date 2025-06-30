@@ -2208,7 +2208,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
   }
 
   if (flow->isDetectionCompleted() && (!isSampledTraffic())) {
-    switch (ndpi_get_lower_proto(flow->get_detected_protocol())) {
+    switch(ndpi_get_lower_proto(flow->get_detected_protocol())) {
     case NDPI_PROTOCOL_DHCP:
       if (*srcHost) {
 	Mac *mac = (*srcHost)->getMac(), *payload_cli_mac;

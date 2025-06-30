@@ -109,7 +109,8 @@ private:
   u_int8_t cli2srv_tos, srv2cli_tos; /* RFC 2474, 3168 */
   u_int16_t cli_port, srv_port;
   u_int16_t vlanId;
-  u_int32_t srcAS, dstAS;
+  u_int32_t srcAS, dstAS; /* Calculated via GeoIP */
+  u_int32_t srcPeerAS, dstPeerAS; /* Collected via NetFLow/IPFIX */
   u_int32_t protocolErrorCode;
   u_int8_t protocol, flow_verdict;
   u_int16_t flow_score;
@@ -1286,8 +1287,8 @@ public:
     return (src2dst_tcp_zero_window || dst2src_tcp_zero_window);
   };
   inline void setVRFid(u_int32_t v) { allocateCollection(); if(collection) collection->vrfId = v; }
-  inline void setSrcAS(u_int32_t v) { srcAS = v; }
-  inline void setDstAS(u_int32_t v) { dstAS = v; }
+  inline void setSrcPeerAS(u_int32_t v) { srcPeerAS = v; } /* Used when collecting flows via ZMQ (usually it contains the peer AS) */
+  inline void setDstPeerAS(u_int32_t v) { dstPeerAS = v; } /* Used when collecting flows via ZMQ (usually it contains the peer AS) */
   inline void setPrevAdjacentAS(u_int32_t v) { allocateCollection(); if(collection) collection->prevAdjacentAS = v; }
   inline void setNextAdjacentAS(u_int32_t v) { allocateCollection(); if(collection) collection->nextAdjacentAS = v; }
 

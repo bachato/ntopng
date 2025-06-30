@@ -657,8 +657,8 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
       flow->setBTHash(zflow->getBittorrentHash(true));
 
     if (zflow->vrfId) flow->setVRFid(zflow->vrfId);
-    if (zflow->src_as) flow->setSrcAS(zflow->src_as);
-    if (zflow->dst_as) flow->setDstAS(zflow->dst_as);
+    if (zflow->src_as) flow->setSrcPeerAS(zflow->src_as);
+    if (zflow->dst_as) flow->setDstPeerAS(zflow->dst_as);
 
     if (zflow->prev_adjacent_as)
       flow->setPrevAdjacentAS(zflow->prev_adjacent_as);

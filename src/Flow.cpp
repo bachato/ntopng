@@ -51,7 +51,7 @@ Flow::Flow(NetworkInterface *_iface,
     vlanId = _vlanId, protocol = _protocol, cli_port = _cli_port,
     srv_port = _srv_port, privateFlowId = _private_flow_id;
   flow_dropped_counts_increased = 0, protocolErrorCode = 0;
-  srcAS = dstAS = 0, rttSec = 0;
+  srcAS = dstAS = srcPeerAS = dstPeerAS = 0, rttSec = 0;
   src2dst_tcp_flags = dst2src_tcp_flags = 0;
 
   collected_qoe.src_to_dst = collected_qoe.dst_to_src = NTOP_QOE_UNKNOWN, has_collected_qoe = 0;
@@ -3005,6 +3005,9 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
     }
   }
 
+  if(srcPeerAS != 0) lua_push_int32_table_entry(vm, "src_peer_as", srcPeerAS);
+  if(dstPeerAS != 0) lua_push_int32_table_entry(vm, "dst_peer_as", dstPeerAS);
+  
   lua_snmp_info(vm);
     
   if(details_level >= details_high) {
@@ -8849,7 +8852,7 @@ void Flow::swap() {
     }
   }
 
-  Utils::swap16(&cli_port, &srv_port), Utils::swap32(&srcAS, &dstAS);
+  Utils::swap16(&cli_port, &srv_port), Utils::swap32(&srcAS, &dstAS), Utils::swap32(&srcPeerAS, &dstPeerAS);
 
   Utils::swap8(&src2dst_tcp_flags, &dst2src_tcp_flags);
 
