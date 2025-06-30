@@ -157,8 +157,6 @@ end
 
 -- Flow iterator callback
 function callback (_, flow)
-   local n_id
-
    if(debug) then
       -- tprint(flow.bytes_sent .. " / " .. flow.bytes_rcvd)
       tprint("[AS] "..flow.src_as .. " -> " .. flow.dst_as.. " | [IDX] ".. flow.in_index .. " -> " .. flow.out_index .. " | ".. flow.bytes_sent .. " / " .. flow.bytes_rcvd)
@@ -166,33 +164,20 @@ function callback (_, flow)
 
    -- Initialize hash entries if not yet popupated
    init_exporter(flow.device_ip)
+   init_interface(flow.device_ip, flow.in_index)
    init_interface(flow.device_ip, flow.out_index)
 
-   -- (1) out index
-   n_id = get_interface_key(flow.device_ip, flow.out_index)
-
    if(flow.src_as == asn) then
-      inc_interface_sent(n_id, flow.bytes_rcvd)
+      inc_interface_sent(get_interface_key(flow.device_ip, flow.in_index), flow.bytes_rcvd)
+      inc_interface_rcvd(get_interface_key(flow.device_ip, flow.in_index), flow.bytes_sent)
       inc_exporter_sent(flow.device_ip, flow.bytes_rcvd)
       inc_exporter_rcvd(flow.device_ip, flow.bytes_sent)
    elseif(flow.dst_as == asn) then
-      inc_interface_rcvd(n_id, flow.bytes_sent)
-      inc_exporter_sent(flow.device_ip, flow.bytes_rcvd)
-      inc_exporter_rcvd(flow.device_ip, flow.bytes_sent)
+      inc_interface_sent(get_interface_key(flow.device_ip, flow.out_index), flow.bytes_sent)
+      inc_interface_rcvd(get_interface_key(flow.device_ip, flow.out_index), flow.bytes_rcvd)
+      inc_exporter_sent(flow.device_ip, flow.bytes_sent)
+      inc_exporter_rcvd(flow.device_ip, flow.bytes_rcvd)
    end   
-
-   -- Don't double count flows with the same src/dst ASN
-   if(flow.in_index ~= flow.out_index) then
-      -- (2) in index
-      init_interface(flow.device_ip, flow.in_index)
-      n_id = get_interface_key(flow.device_ip, flow.in_index)
-      
-      if(flow.src_as == asn) then
-	 inc_interface_rcvd(n_id, flow.bytes_sent)
-      elseif(flow.dst_as == asn) then
-         inc_interface_sent(n_id, flow.bytes_rcvd)
-      end
-   end
 end
 
 local flows_filter = { asnFilter = asn, detailsLevel = "normal", maxHits = 10000, perPage = 10000 }
@@ -240,13 +225,13 @@ for n_id, data in pairs(tot_bytes_exp_if) do
                label = bytesToSize(data.rcvd),
                value = data.rcvd
          })
-      else -- TOTAL
+      elseif criteria == traffic_criteria.TOTAL then
          -- Interface -> Exporter
          table.insert(links, {
                source_node_id = port_node_id,
                target_node_id = exporter_node_id,
                label = bytesToSize(data.rcvd+data.sent),
-               value = data.rcvd+data.sent
+               value = data.rcvd + data.sent
          })
       end
 
@@ -274,13 +259,13 @@ for exporter_ip, exporter_node_id in pairs(exporter_nodes) do
             label = bytesToSize(rcvd),
             value = rcvd
       })
-   else -- TOTAL
+   elseif criteria == traffic_criteria.TOTAL then
       -- Exporter -> AS
       table.insert(links, {
             source_node_id = exporter_node_id,
             target_node_id = as_root_key,
             label = bytesToSize(rcvd+sent),
-            value = rcvd+sent
+            value = rcvd + sent
       })
    end
 end
