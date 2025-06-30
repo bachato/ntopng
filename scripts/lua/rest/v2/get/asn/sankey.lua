@@ -113,8 +113,47 @@ end
 
 -- ####################
 
-local tot_bytes = {}
+-- Total bytes sent/rcvd per exporter (key = <device ip>)
+
 local tot_bytes_exporter = {}
+
+local function init_exporter(device_ip)
+   local key = device_ip
+   if not tot_bytes_exporter[key] then
+      tot_bytes_exporter[key] = { sent = 0, rcvd = 0 }
+   end
+end
+
+local function inc_exporter_sent(key, bytes)
+   tot_bytes_exporter[key].sent = tot_bytes_exporter[key].sent + bytes
+end 
+
+local function inc_exporter_rcvd(key, bytes)
+   tot_bytes_exporter[key].rcvd = tot_bytes_exporter[key].rcvd + bytes
+end 
+
+-- Total bytes sent/rcvd per exporter/interface (key = <device ip>@<if index>)
+
+local tot_bytes_exp_if = {}
+
+local function get_interface_key(device_ip, interface_index)
+   return device_ip .. "@" .. interface_index
+end
+
+local function init_interface(device_ip, interface_index)
+   local key = get_interface_key(device_ip, interface_index)
+   if not tot_bytes_exp_if[key] then
+      tot_bytes_exp_if[key] = { sent = 0, rcvd = 0, exporter_ip = device_ip, port_index = interface_index }
+   end
+end
+
+local function inc_interface_sent(key, bytes)
+   tot_bytes_exp_if[key].sent = tot_bytes_exp_if[key].sent + bytes
+end
+
+local function inc_interface_rcvd(key, bytes)
+   tot_bytes_exp_if[key].rcvd = tot_bytes_exp_if[key].rcvd + bytes
+end
 
 -- Flow iterator callback
 function callback (_, flow)
@@ -125,41 +164,33 @@ function callback (_, flow)
       tprint("[AS] "..flow.src_as .. " -> " .. flow.dst_as.. " | [IDX] ".. flow.in_index .. " -> " .. flow.out_index .. " | ".. flow.bytes_sent .. " / " .. flow.bytes_rcvd)
    end
 
-   -- (1) out index
-   n_id = flow.device_ip .. "@" .. flow.out_index
+   -- Initialize hash entries if not yet popupated
+   init_exporter(flow.device_ip)
+   init_interface(flow.device_ip, flow.out_index)
 
-   -- Nake sure the hash has been populated
-   if(tot_bytes[n_id] == nil) then
-      tot_bytes[n_id] = { sent = 0, rcvd = 0, exporter_ip = flow.device_ip, port_index = flow.out_index }
-   end
-   
-   if(tot_bytes_exporter[flow.device_ip] == nil) then
-      tot_bytes_exporter[flow.device_ip] = { sent = 0, rcvd = 0 }
-   end
-   
+   -- (1) out index
+   n_id = get_interface_key(flow.device_ip, flow.out_index)
+
    if(flow.src_as == asn) then
-      tot_bytes[n_id].sent = tot_bytes[n_id].sent + flow.bytes_rcvd
-      tot_bytes_exporter[flow.device_ip].sent = tot_bytes_exporter[flow.device_ip].sent + flow.bytes_rcvd
-      tot_bytes_exporter[flow.device_ip].rcvd = tot_bytes_exporter[flow.device_ip].rcvd + flow.bytes_sent
+      inc_interface_sent(n_id, flow.bytes_rcvd)
+      inc_exporter_sent(flow.device_ip, flow.bytes_rcvd)
+      inc_exporter_rcvd(flow.device_ip, flow.bytes_sent)
    elseif(flow.dst_as == asn) then
-      tot_bytes[n_id].rcvd = tot_bytes[n_id].rcvd + flow.bytes_sent
-      tot_bytes_exporter[flow.device_ip].sent = tot_bytes_exporter[flow.device_ip].sent + flow.bytes_rcvd
-      tot_bytes_exporter[flow.device_ip].rcvd = tot_bytes_exporter[flow.device_ip].rcvd + flow.bytes_sent
+      inc_interface_rcvd(n_id, flow.bytes_sent)
+      inc_exporter_sent(flow.device_ip, flow.bytes_rcvd)
+      inc_exporter_rcvd(flow.device_ip, flow.bytes_sent)
    end   
 
    -- Don't double count flows with the same src/dst ASN
    if(flow.in_index ~= flow.out_index) then
       -- (2) in index
-      n_id = flow.device_ip .. "@" .. flow.in_index
-      
-      if(tot_bytes[n_id] == nil) then
-	 tot_bytes[n_id] = { sent = 0, rcvd = 0, exporter_ip = flow.device_ip, port_index = flow.in_index }
-      end
+      init_interface(flow.device_ip, flow.in_index)
+      n_id = get_interface_key(flow.device_ip, flow.in_index)
       
       if(flow.src_as == asn) then
-	 tot_bytes[n_id].rcvd = tot_bytes[n_id].rcvd + flow.bytes_sent
+	 inc_interface_rcvd(n_id, flow.bytes_sent)
       elseif(flow.dst_as == asn) then
-	 tot_bytes[n_id].sent = tot_bytes[n_id].sent + flow.bytes_rcvd
+         inc_interface_sent(n_id, flow.bytes_rcvd)
       end
    end
 end
@@ -172,14 +203,14 @@ callback_utils.foreachFlow(ifid,
 -- ###################################################
 
 if(debug) then
-   tprint(tot_bytes)
+   tprint(tot_bytes_exp_if)
    tprint(tot_bytes_exporter)
 end
 
 local exporter_nodes = {}
 
 -- Build Interface <-> Exporter links
-for n_id, data in pairs(tot_bytes) do
+for n_id, data in pairs(tot_bytes_exp_if) do
    if (criteria == traffic_criteria.INGRESS and data.sent > 0) or 
       (criteria == traffic_criteria.EGRESS  and data.rcvd > 0) or
       (criteria == traffic_criteria.TOTAL   and (data.rcvd + data.sent) > 0) then
