@@ -240,6 +240,7 @@
 #define DOMAIN_TO_CATEGORIZE "ntopng.domain.tocategorize"
 #define DOMAIN_WHITELIST_CAT "ntopng.domain.whitelist"
 #define DNS_CACHE "ntopng.dns.cache"
+#define AS_NANE_CACHE "ntopng.as.cache"
 #define DHCP_CACHE "ntopng.dhcp.%d.cache.%s"
 #define DHCP_STORM_QUEUE_NAME "ntopng.dhcp.storm.%d"
 #define ASSET_SERVICE_KEY "ntopng.asset.%d.%s" /* ifId.host */

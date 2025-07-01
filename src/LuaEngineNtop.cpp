@@ -7656,6 +7656,25 @@ static int ntop_get_asn_name(lua_State *vm) {
 
 /* ****************************************** */
 
+static int ntop_get_as_name_from_asn(lua_State *vm) {
+  u_int32_t asn;
+  char as_name[128];
+    
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  else
+    asn = (u_int32_t)lua_tonumber(vm, 1);
+
+  if(ntop->getGeolocation()->getASName(asn, as_name, sizeof(as_name)))
+    lua_pushstring(vm, as_name);
+  else
+    lua_pushnil(vm); 
+
+  return(ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_get_host_geolocation(lua_State *vm) {
   IpAddress ip;
   char *continent = NULL, *country_name = NULL, *city = NULL;
@@ -8443,6 +8462,7 @@ static luaL_Reg _ntop_reg[] = {
 
     /* ASN */
     {"getASName", ntop_get_asn_name},
+    {"getASNameFromASN", ntop_get_as_name_from_asn},
     {"getHostGeolocation", ntop_get_host_geolocation},
 
     /* Mac */

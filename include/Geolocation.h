@@ -52,6 +52,7 @@ class Geolocation {
   bool getInfo(IpAddress *addr, char **continent_code, char **country_code,
                char **city, float *latitude, float *longitude);
   static void freeInfo(char **continent_code, char **country_code, char **city);
+  bool getASName(u_int32_t asn, char *asname, u_int asname_len);  
 };
 
 #endif /* _GEOLOCATION_H_ */

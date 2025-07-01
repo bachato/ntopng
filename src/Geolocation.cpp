@@ -476,3 +476,63 @@ void Geolocation::testme() {
   }
 }
 #endif
+
+/* *************************************** */
+
+bool Geolocation::getASName(u_int32_t asn, char *asname, u_int asname_len) {
+  char buf[256], val[16], json[2048];
+  long rc;
+
+  snprintf(val, sizeof(val), "%u", asn);
+  
+  if(ntop->getRedis()->hashGet(AS_NANE_CACHE, val, asname, asname_len) == 0) {
+    return(true); /* Found on cache */
+  }
+  
+  snprintf(buf, sizeof(buf), "https://stat.ripe.net/data/as-overview/data.json?resource=AS%u", asn);
+  json[0] = '\0';
+  rc = Utils::httpGet(buf, NULL, NULL, NULL, 5 /* connect timeout */,
+		      10 /* download timeout */, json, sizeof(json));
+  
+  ntop->getTrace()->traceEvent(TRACE_INFO, "[rc: %u][%s]", rc, json);
+  
+  if(rc == 200) {
+    json_object *o, *obj;
+    enum json_tokener_error jerr = json_tokener_success;
+
+    if((o = json_tokener_parse_verbose(json, &jerr)) == NULL)
+      return(false);
+
+    if(json_object_object_get_ex(o, "data", &obj)) {
+      json_object *obj1;
+      
+      if(json_object_object_get_ex(obj, "holder", &obj1)) {
+	const char *res, *r = json_object_get_string(obj1);
+
+#if 1
+	res = r;
+#else
+	res = strchr(r, ' ');
+
+	if(res == NULL)
+	  res = r;
+	else
+	  res = &res[1]; /* Skip space */
+#endif
+	
+	snprintf(asname, asname_len, "%s", res);
+	
+	ntop->getRedis()->hashSet(AS_NANE_CACHE, val, asname);
+	json_object_put(o);
+	return(true);
+      }
+
+      json_object_put(o);
+    }   
+  }
+
+  /* Not found */
+  ntop->getRedis()->hashSet(AS_NANE_CACHE, val, "");
+  
+  return(false);
+}
