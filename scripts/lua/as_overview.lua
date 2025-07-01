@@ -10,12 +10,18 @@ local page_utils = require("page_utils")
 local template_utils = require "template_utils"
 
 local asn = _GET["asn"]
-local asn_name = interface.getASInfo(tonumber(asn)).asname
+
+local a = interface.getASInfo(tonumber(asn))
+
 sendHTTPContentTypeHeader('text/html')
-
 page_utils.print_header_and_set_active_menu_entry(page_utils.menu_entries.autonomous_systems)
-
 dofile(dirs.installdir .. "/scripts/lua/inc/menu.lua")
+
+if(a == nil) then
+   return
+end
+
+local asn_name = a.asname
 
 page_utils.print_navbar(i18n("as_overview.asn",{asn=asn, asn_name = asn_name}), ntop.getHttpPrefix() .. "/lua/as_overview.lua", {{
     active = true,

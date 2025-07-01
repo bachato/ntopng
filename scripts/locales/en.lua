@@ -1834,7 +1834,7 @@ local lang = {
     ["egress_traffic_criteria"] = "Egress Traffic (Bytes)",
     ["ingress_egress_traffic_criteria"] = "Ingress-Egress Traffic (Bytes)",
     ["ingress_traffic_criteria"]= "Ingress Traffic (Bytes)",
-    ["note_ingress_egress"] = "The Sankey diagram with Ingress-Egress Traffic has the autonomous system in the center, the ingress traffic on the left, and the egress traffic on the right.",
+    ["note_ingress_egress"] = "The above diagram with Ingress-Egress Traffic depicts the AS at its center, with ingress traffic on the left and egress traffic on the right.",
     ["total_traffic_criteria"] = "Total Traffic (Bytes)",
   },
   ["as_stats"] = {

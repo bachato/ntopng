@@ -15,8 +15,8 @@
 --
 -- Flow a+b
 -- Port 146  = { rcvd  = 60,  sent = 594 }, port 132 = { rcvd = 0, sent = 60 }, port 136 = { rcvd = 594, sent = 0  }
--- ASN 34978 = { rcvd = 594, sent = 60  }
--- ASN 12337 = { rcvd = 60,  sent = 594 }
+-- ASN 34978 = { rcvd = 594, sent = 60   }
+-- ASN 12337 = { rcvd = 60,  sent = 594  }
 --
 
 
@@ -49,6 +49,7 @@ local traffic_criteria = {
 }
 
 local criteria
+
 if criteria_as == "egress_traffic_criteria" then
    criteria = traffic_criteria.EGRESS
 elseif criteria_as == "total_traffic_criteria" then
@@ -98,11 +99,13 @@ local nodes = {}
 local links = {}
 local node_set = {}
 local as_root_key = "root";
+local max_len = 32
 
 table.insert(nodes, {
 		link = "/",
 		node_id = as_root_key,
-		label = "ASN "..interface.getASInfo(asn).asname
+		label = "ASN "..asn.." ("..shortenString(interface.getASInfo(asn).asname, max_len)..")"
+
 })
 
 -- ####################
@@ -172,6 +175,7 @@ local function build_interface_exporter(criteria, tot_bytes_exp_if, exporter_nod
          local port_index = format_portidx_name(data.exporter_ip, data.port_index) or "?"
          local exporter_node_id = find_node_id(exporter_ip)
          local port_node_id = find_node_id(n_id)
+	 
          if criteria == traffic_criteria.EGRESS then 
             exporter_node_id = "egress".."_"..exporter_node_id
             port_node_id = "egress".."_"..port_node_id
@@ -179,6 +183,7 @@ local function build_interface_exporter(criteria, tot_bytes_exp_if, exporter_nod
             exporter_node_id = "ingress".."_"..exporter_node_id
             port_node_id = "ingress".."_"..port_node_id
          end
+	 
          if(exporter_nodes[data.exporter_ip] == nil) then exporter_nodes[data.exporter_ip] = exporter_node_id end
          add_unique_node(exporter_node_id, exporter_ip, "#")
          add_unique_node(port_node_id, port_index, "#")
@@ -240,7 +245,7 @@ local function build_exporter_as(criteria, exporter_nodes)
                source_node_id = exporter_node_id,
                target_node_id = as_root_key,
                label = bytesToSize(rcvd+sent),
-               value = rcvd + sent
+               value1 = rcvd + sent
          })
       end
    end
@@ -272,6 +277,7 @@ function callback (_, flow)
 end
 
 local flows_filter = { asnFilter = asn, detailsLevel = "normal", maxHits = 10000, perPage = 10000 }
+
 callback_utils.foreachFlow(ifid,
 			   os.time()+30, -- deadline
 			   callback, flows_filter)

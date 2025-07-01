@@ -58,32 +58,36 @@ end
 
 function formatASN(v, peer_as, ip, is_client_as)
    local asn
-
+   local max_len = 64
+   
    if ((v == nil) or (v == 0)) then
       asn = "&nbsp;"
    elseif not isEmptyString(ip) then
-      local as_name = ntop.getASName(ip)      
+      local as_name = shortenString(ntop.getASName(ip), max_len)
       local label = v .. " (" .. (as_name or "") .. ")"      
 
       asn = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. v .. "\">" .. label .. "</A>"
-            
-      if((peer_as ~= nil) and (peer_as ~= 0) and (v ~= peer_as)) then
-	 local peer_asn = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. peer_as .. "\">" .. peer_as
-	 local via
 
-	 peer_as_name = ntop.getASNameFromASN(tonumber(peer_as))
-
-	 if(peer_as_name == nil) then
-	    via = ""
-	 else
-	    via = " (".. peer_as_name .. ")"
-	 end
-
-	 if(is_client_as) then
-	    asn = asn .. " [via ASN ".. peer_asn  .. via .. "</A>]"
-	 else
-	    asn = "[via ASN "..peer_asn .. via .. "</A>] " .. asn
-	 end
+      -- tprint(v .. " / "..peer_as)
+   end
+   
+   if((peer_as ~= nil) and (peer_as ~= 0) and (v ~= peer_as)) then
+      local peer_asn = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. peer_as .. "\">" .. peer_as
+      local via
+      
+      peer_as_name = shortenString(ntop.getASNameFromASN(tonumber(peer_as)), max_len)
+      
+      if(peer_as_name == nil) then
+	 via = ""
+      else
+	 via = " (".. peer_as_name .. ")"
+      end
+      
+      if(is_client_as) then
+	 if(asn == "&nbsp;") then asn = "" end
+	 asn = asn .. "[via ASN ".. peer_asn  .. via .. "</A>]"
+      else
+	 asn = "[via ASN "..peer_asn .. via .. "</A>] " .. asn
       end
    end
 
