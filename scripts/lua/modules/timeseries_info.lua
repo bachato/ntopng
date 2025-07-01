@@ -107,11 +107,11 @@ local community_timeseries = {
         measure_unit = "pps",
         scale = i18n("graphs.metric_labels.traffic"),
         timeseries = {
-            packets_sent = {
+            bytes_sent = {
                 label = i18n('graphs.metric_labels.sent'),
                 color = timeseries_info.get_timeseries_color('bytes_sent')
             },
-            packets_rcvd = {
+            bytes_rcvd = {
                 invert_direction = true,
                 label = i18n('graphs.metric_labels.rcvd'),
                 color = timeseries_info.get_timeseries_color('bytes_rcvd')
@@ -1356,6 +1356,21 @@ local community_timeseries = {
             }
         },
         nedge_exclude = true
+    }, {
+        schema = "top:asn:traffic",
+        id = timeseries_id.iface,
+        label = i18n("graphs.top_asn"),
+        description = i18n("graphs.metric_descr.asn_traffic_rxtx"),
+        priority = 0,
+        measure_unit = "bps",
+        scale = i18n('graphs.metric_labels.traffic'),
+        timeseries = {
+            bytes = {
+                label = i18n('graphs.metric_labels.bytes'),
+                color = timeseries_info.get_timeseries_color('bytes')
+            }
+        },
+        always_visibile = true
     }, -- country_details.lua (Country): --
     {
         schema = "country:traffic",

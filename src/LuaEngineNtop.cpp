@@ -3948,6 +3948,27 @@ static int ntop_get_dirs(lua_State *vm) {
 
 /* ****************************************** */
 
+static int ntop_get_all_paths(lua_State *vm) {
+  const char *path, *filename;
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((path = (const char *)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((filename = (const char *)lua_tostring(vm, 2)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  lua_newtable(vm);
+  Utils::lua_getpaths_recursively(vm, path, filename);
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_get_uptime(lua_State *vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -8115,6 +8136,7 @@ static luaL_Reg _ntop_reg[] = {
     {"setOnline", ntop_set_online},
     {"isShuttingDown", ntop_is_shutting_down},
     {"limitResourcesUsage", ntop_limit_resources_usage},
+    {"getAllPaths", ntop_get_all_paths},
 
     /* Execute commands */
     {"execCmd", ntop_exec_cmd},

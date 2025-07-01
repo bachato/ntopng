@@ -280,7 +280,7 @@ function formatStandardSerie(timeserie_info, timeserie_options, config, tsCompar
     const extra_timeseries = timeserie_info.timeseries[0]; /* e.g. the Average */
     const ts_id = getSerieId(ts_info);
     const metadata = timeserie_info.metric.timeseries[ts_id];
-    const scalar = (metadata.invert_direction === true) ? -1 : 1;
+    const scalar = (metadata?.invert_direction === true) ? -1 : 1;
     const { timeserie_name, show_full_name } = getName(ts_info, metadata)
     /* Check if show_full_name is null or undefined */
     const serie_name = getSerieName(timeserie_name, ts_id, timeserie_info, (show_full_name !== null || show_full_name !== undefined) ? (config.use_full_name && show_full_name) : config.use_full_name)

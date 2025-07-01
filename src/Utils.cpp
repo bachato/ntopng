@@ -701,6 +701,47 @@ size_t Utils::file_read(const char *path, char **content) {
 
 /* ****************************************************** */
 
+void Utils::lua_getpaths_recursively(lua_State *vm, const char *path, const char *filename) {
+  DIR *d = opendir(path);
+  size_t path_len = strlen(path);
+  size_t len;
+  char *buf;
+
+  if (d) {
+    struct dirent *p;
+
+    while ((p = readdir(d))) {
+      /* Skip the names "." and ".." as we don't want to recurse on them. */
+      if (!strcmp(p->d_name, ".") || !strcmp(p->d_name, "..")) continue;
+
+      len = path_len + strlen(p->d_name) + 2;
+      buf = (char *)malloc(len);
+
+      if (buf) {
+        struct stat statbuf;
+
+        snprintf(buf, len, "%s/%s", path, p->d_name);
+
+        if (stat(buf, &statbuf) == 0) {
+          if (S_ISDIR(statbuf.st_mode))
+            lua_getpaths_recursively(vm, buf, filename);
+          else {
+            if (!strcmp(filename, p->d_name)) {
+                lua_push_int32_table_entry(vm, buf, 1);
+            }
+          }
+        }
+
+        free(buf);
+      }
+    }
+
+    closedir(d);
+  }
+}
+
+/* ****************************************************** */
+
 int Utils::remove_recursively(const char *path) {
   DIR *d = opendir(path);
   size_t path_len = strlen(path);

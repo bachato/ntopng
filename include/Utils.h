@@ -88,6 +88,7 @@ class Utils {
   static int8_t num_files_in_dir(const char *dir);
   static bool mkdir_tree(char *const path);
   static int mkdir(const char *pathname, mode_t mode);
+  static void lua_getpaths_recursively(lua_State *vm, const char *path, const char *filename);
   static int remove_recursively(const char *path);
   static const char *trend2str(ValueTrend t);
   static int dropPrivileges();

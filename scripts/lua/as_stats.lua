@@ -24,6 +24,7 @@ dofile(dirs.installdir .. "/scripts/lua/inc/menu.lua")
 -- Get Asname
 local as_info;
 local as_name = ""
+local ifid = interface.getId()
 
 asn = tonumber(asn)
 if (asn ~= nil) then
@@ -64,7 +65,7 @@ page_utils.print_navbar(breadcrumb, ntop.getHttpPrefix() .. "/lua/as_stats.lua",
 }})
 
 local show_sankey = false
-local current_ifid = interface.getId()
+local current_ifid = ifid
 
 if interface.isView() then
     for ifid, ifname in pairs(interface.getIfNames()) do 
@@ -81,9 +82,11 @@ end
 
 
 local context = {
-    ifid = interface.getId(),
+    ifid = ifid,
     showSankey = show_sankey,
-    csrf = ntop.getRandomCSRFValue()
+    csrf = ntop.getRandomCSRFValue(),
+    isEnterprise = ntop.isEnterprise(),
+    showTimeseries = areASTimeseriesEnabled(ifid)
 }
 
 local json_context = json.encode(context)
@@ -97,7 +100,7 @@ if page == "overview" or not page then
 else
     local source_value_object = {
         asn = asn,
-        ifid = interface.getId()
+        ifid = ifid
     }
     graph_utils.drawNewGraphs(source_value_object)
 end
