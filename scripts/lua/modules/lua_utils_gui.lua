@@ -41,7 +41,8 @@ function addGoogleMapsScript()
     else
         g_maps_key = ""
     end
-    print("<script src=\"https://maps.googleapis.com/maps/api/js?v=3.exp" .. g_maps_key .. "\"></script>\n")
+    print("<script src=\"https://maps.googleapis.com/maps/api/js?v=3.exp" ..
+              g_maps_key .. "\"></script>\n")
 end
 
 -- ##############################################
@@ -160,9 +161,7 @@ end
 -- ##############################################
 
 function addGauge(name, url, maxValue, width, height)
-    if (url ~= nil) then
-        print('<A HREF="' .. url .. '">')
-    end
+    if (url ~= nil) then print('<A HREF="' .. url .. '">') end
     print [[
   <div class="progress">
        <div id="]]
@@ -170,9 +169,7 @@ function addGauge(name, url, maxValue, width, height)
     print [[" class="progress-bar bg-warning"></div>
   </div>
   ]]
-    if (url ~= nil) then
-        print('</A>\n')
-    end
+    if (url ~= nil) then print('</A>\n') end
 end
 
 -- ##############################################
@@ -185,8 +182,9 @@ end
 -- @param href_check Performs existance checks on the link to avoid generating links to inactive hosts or hosts without timeseries
 -- @param href_only_with_ts True means that a HREF is geneated only of there are timeseries for this host
 -- @return A string containing the a href link or a plain string without a href
-function hostinfo2detailshref(host_info, href_params, href_value, href_tooltip, href_check, href_only_with_ts,
-    show_value_with_no_ref)
+function hostinfo2detailshref(host_info, href_params, href_value, href_tooltip,
+                              href_check, href_only_with_ts,
+                              show_value_with_no_ref)
     local show_href = false
     local res = ""
     local is_in_memory = false
@@ -195,21 +193,22 @@ function hostinfo2detailshref(host_info, href_params, href_value, href_tooltip, 
         local detailLevel = ntop.getCache("ntopng.prefs.hosts_ts_creation")
 
         if (detailLevel == "full") then
-            local l7 = ntop.getCache("ntopng.prefs.host_ndpi_timeseries_creation")
+            local l7 = ntop.getCache(
+                           "ntopng.prefs.host_ndpi_timeseries_creation")
 
-            if (l7 ~= "none") then
-                show_href = true
-            end
+            if (l7 ~= "none") then show_href = true end
         end
     else
         show_href = true
     end
 
     if (show_href) then
-        local hostdetails_url = hostinfo2detailsurl(host_info, href_params, href_check)
+        local hostdetails_url = hostinfo2detailsurl(host_info, href_params,
+                                                    href_check)
         if not isEmptyString(hostdetails_url) then
-            res = string.format("<a href='%s' data-bs-toggle='tooltip' data-bs-placement='top' title='%s'>%s</a>", hostdetails_url,
-                href_tooltip or '', href_value or '')
+            res = string.format(
+                      "<a href='%s' data-bs-toggle='tooltip' data-bs-placement='top' title='%s'>%s</a>",
+                      hostdetails_url, href_tooltip or '', href_value or '')
             is_in_memory = true
         else
             if show_value_with_no_ref == nil or show_value_with_no_ref == true then
@@ -237,7 +236,8 @@ function interface2detailhref(ifid, href_params)
             params = string.format('%s&%s=%s', params, param_name, param_value)
         end
 
-        return string.format('%s/lua/if_stats.lua?%s', ntop.getHttpPrefix(), params)
+        return string.format('%s/lua/if_stats.lua?%s', ntop.getHttpPrefix(),
+                             params)
     end
 
     return ''
@@ -253,11 +253,11 @@ end
 -- @param href_tooltip A string containing a tooltip shown when hovering the mouse on the link
 -- @param href_check Performs existance checks on the link to avoid generating links to inactive hosts or hosts without timeseries
 -- @return A string containing the a href link or a plain string without a href
-function ip2detailshref(ip, vlan, href_params, href_value, href_tooltip, href_check)
-    return hostinfo2detailshref({
-        host = ip,
-        vlan = tonumber(vlan) or 0
-    }, href_params, href_value, href_tooltip, href_check)
+function ip2detailshref(ip, vlan, href_params, href_value, href_tooltip,
+                        href_check)
+    return hostinfo2detailshref({host = ip, vlan = tonumber(vlan) or 0},
+                                href_params, href_value, href_tooltip,
+                                href_check)
 end
 
 -- ##############################################
@@ -275,8 +275,9 @@ function flowinfo2process(process, host_info_to_url)
             clean_name = t[#t]
 
             proc_name = string.format(
-                "<A HREF='%s/lua/process_details.lua?%s&pid_name=%s&pid=%u'><i class='fas fa-terminal'></i> %s</A>",
-                ntop.getHttpPrefix(), host_info_to_url, full_clean_name, process["pid"], clean_name)
+                            "<A HREF='%s/lua/process_details.lua?%s&pid_name=%s&pid=%u'><i class='fas fa-terminal'></i> %s</A>",
+                            ntop.getHttpPrefix(), host_info_to_url,
+                            full_clean_name, process["pid"], clean_name)
         end
 
         -- if not isEmptyString(process["user_name"]) then
@@ -291,7 +292,8 @@ function flowinfo2process(process, host_info_to_url)
         -- end
 
         if ((proc_user_name ~= '') or (proc_name ~= '')) then
-            fmt = string.format("[%s]", table.concat({proc_user_name, proc_name}, ' '))
+            fmt = string.format("[%s]",
+                                table.concat({proc_user_name, proc_name}, ' '))
         end
     end
 
@@ -304,8 +306,10 @@ function flowinfo2container(container)
     local fmt, cont_name, pod_name = '', '', ''
 
     if container then
-        cont_name = string.format("<A HREF='%s/lua/flows_stats.lua?container=%s'><i class='fas fa-ship'></i> %s</A>",
-            ntop.getHttpPrefix(), container["id"], format_utils.formatContainer(container))
+        cont_name = string.format(
+                        "<A HREF='%s/lua/flows_stats.lua?container=%s'><i class='fas fa-ship'></i> %s</A>",
+                        ntop.getHttpPrefix(), container["id"],
+                        format_utils.formatContainer(container))
 
         -- local formatted_pod = format_utils.formatPod(container)
         -- if not isEmptyString(formatted_pod) then
@@ -344,14 +348,16 @@ function url2hostinfo(get_info)
     if (get_info["host"] ~= nil) then
         host["host"] = get_info["host"]
         if (debug_host) then
-            traceError(TRACE_DEBUG, TRACE_CONSOLE, "URL2HOST => Host:" .. get_info["host"] .. "\n")
+            traceError(TRACE_DEBUG, TRACE_CONSOLE,
+                       "URL2HOST => Host:" .. get_info["host"] .. "\n")
         end
     end
 
     if (get_info["vlan"] ~= nil) then
         host["vlan"] = tonumber(get_info["vlan"])
         if (debug_host) then
-            traceError(TRACE_DEBUG, TRACE_CONSOLE, "URL2HOST => Vlan:" .. get_info["vlan"] .. "\n")
+            traceError(TRACE_DEBUG, TRACE_CONSOLE,
+                       "URL2HOST => Vlan:" .. get_info["vlan"] .. "\n")
         end
     else
         host["vlan"] = 0
@@ -377,19 +383,16 @@ end
 -- ##############################################
 
 function unescapeHttpHost(host)
-    if isEmptyString(host) then
-        return (host)
-    end
+    if isEmptyString(host) then return (host) end
 
-    return string.gsub(string.gsub(host, "http:__", "http://"), "https:__", "https://")
+    return string.gsub(string.gsub(host, "http:__", "http://"), "https:__",
+                       "https://")
 end
 
 -- ##############################################
 
 function isAdministratorOrPrintErr(isJsonResponse)
-    if (isAdministrator()) then
-        return (true)
-    end
+    if (isAdministrator()) then return (true) end
 
     local isJson = isJsonResponse or false
 
@@ -398,8 +401,8 @@ function isAdministratorOrPrintErr(isJsonResponse)
         sendHTTPContentTypeHeader('application/json')
         print(json.encode({}))
     else
-       local page_utils = require("page_utils")
-       local dirs = ntop.getDirs()
+        local page_utils = require("page_utils")
+        local dirs = ntop.getDirs()
 
         page_utils.print_header()
         dofile(dirs.installdir .. "/scripts/lua/inc/menu.lua")
@@ -417,16 +420,19 @@ function formatBreed(breed, is_encrypted)
 
     if (breed == "Safe") then
         if (is_encrypted == false) then
-            ret = "<i class='fas fa-thumbs-up' alt='" .. i18n("breed.safe") .. "'></i>"
+            ret = "<i class='fas fa-thumbs-up' alt='" .. i18n("breed.safe") ..
+                      "'></i>"
         end
     elseif (breed == "Acceptable") then
         -- if(is_encrypted == false) then ret = "<i class='fas fa-thumbs-up' alt='"..i18n("breed.acceptable").."'></i>" end
     elseif (breed == "Fun") then
         ret = "<i class='fas fa-smile' alt='" .. i18n("breed.fun") .. "'></i>"
     elseif (breed == "Unsafe") then
-        ret = "<i class='fas fa-thumbs-down' style='color: red' alt='" .. i18n("breed.unsafe") .. "'></i>"
+        ret = "<i class='fas fa-thumbs-down' style='color: red' alt='" ..
+                  i18n("breed.unsafe") .. "'></i>"
     elseif (breed == "Dangerous") then
-        ret = "<i class='fas fa-exclamation-triangle' alt='" .. i18n("breed.dangerous") .. "'></i>"
+        ret = "<i class='fas fa-exclamation-triangle' alt='" ..
+                  i18n("breed.dangerous") .. "'></i>"
     end
 
     if (is_encrypted == true) then
@@ -439,27 +445,34 @@ end
 -- ###############################################
 
 function macInfoWithSymbName(mac, name)
-    return (' <A HREF="' .. ntop.getHttpPrefix() .. '/lua/mac_details.lua?host=' .. mac .. '">' .. name .. '</A> ')
+    return
+        (' <A HREF="' .. ntop.getHttpPrefix() .. '/lua/mac_details.lua?host=' ..
+            mac .. '">' .. name .. '</A> ')
 end
 
 -- ###############################################
 
 function macInfo(mac)
-    return (' <A HREF="' .. ntop.getHttpPrefix() .. '/lua/mac_details.lua?host=' .. mac .. '">' .. mac .. '</A> ')
+    return
+        (' <A HREF="' .. ntop.getHttpPrefix() .. '/lua/mac_details.lua?host=' ..
+            mac .. '">' .. mac .. '</A> ')
 end
 
 -- ###############################################
 
 function intToIPv4(num)
-    return (math.floor(num / 2 ^ 24) .. "." .. math.floor((num % 2 ^ 24) / 2 ^ 16) .. "." ..
+    return (math.floor(num / 2 ^ 24) .. "." ..
+               math.floor((num % 2 ^ 24) / 2 ^ 16) .. "." ..
                math.floor((num % 2 ^ 16) / 2 ^ 8) .. "." .. num % 2 ^ 8)
 end
 
 -- ###############################################
 
 function formatWebSite(site)
-    return ("<A class='ntopng-external-link' target=\"_blank\" href=\"http://" .. site .. "\">" .. site ..
-               " <i class=\"fas fa-external-link-alt\"></i></A></th>")
+    return
+        ("<A class='ntopng-external-link' target=\"_blank\" href=\"http://" ..
+            site .. "\">" .. site ..
+            " <i class=\"fas fa-external-link-alt\"></i></A></th>")
 end
 
 -- #############################################
@@ -490,9 +503,7 @@ local guess_icon_keys = {
 
 function guessHostIcon(key)
     local m = get_manufacturer_mac(key)
-    if isEmptyString(m) then
-        return ""
-    end
+    if isEmptyString(m) then return "" end
 
     m = string.lower(get_manufacturer_mac(key))
     local icon = guess_icon_keys[m]
@@ -519,10 +530,7 @@ function makeResolutionButtons(fmt_to_data, ctrl_id, fmt, value, extra, max_val)
         string.gsub(fmt, ".", function(k)
             local v = fmt_to_data[k]
             if v ~= nil then
-                divisors[#divisors + 1] = {
-                    k = k,
-                    v = v.value
-                }
+                divisors[#divisors + 1] = {k = k, v = v.value}
             end
         end)
     end
@@ -538,11 +546,12 @@ function makeResolutionButtons(fmt_to_data, ctrl_id, fmt, value, extra, max_val)
         selected = string.sub(fmt, 1, 1)
     end
 
-    local style = table.merge({
-        display = "flex"
-    }, extra.style or {})
-    html_lines[#html_lines + 1] = [[<div class="btn-group ]] .. table.concat(extra.classes or {}, "") .. [[" id="]] ..
-                                      ctrl_id .. [[" role="group" style="]] .. table.tconcat(style, ":", "; ", ";") ..
+    local style = table.merge({display = "flex"}, extra.style or {})
+    html_lines[#html_lines + 1] = [[<div class="btn-group ]] ..
+                                      table.concat(extra.classes or {}, "") ..
+                                      [[" id="]] .. ctrl_id ..
+                                      [[" role="group" style="]] ..
+                                      table.tconcat(style, ":", "; ", ";") ..
                                       [[">]]
 
     -- foreach character in format
@@ -557,11 +566,13 @@ function makeResolutionButtons(fmt_to_data, ctrl_id, fmt, value, extra, max_val)
                 local input_name = ("opt_resbt_%s_%s"):format(k, ctrl_id)
                 local input = ([[
                <input class="btn-check" data-resol="%s" value="%s" title="%s" name="%s" id="input-%s" autocomplete="off" type="radio" %s/>
-                  ]]):format(k, truncate(v.value), v.label, input_name, input_name,
-                    ternary((selected == k), 'checked="checked"', ""))
+                  ]]):format(k, truncate(v.value), v.label, input_name,
+                             input_name,
+                             ternary((selected == k), 'checked="checked"', ""))
                 local label = ([[
                <label class="btn btn-sm %s" for="input-%s">%s</label>
-            ]]):format(ternary((selected == k), "btn-primary", "btn-secondary"), input_name, v.label)
+            ]]):format(ternary((selected == k), "btn-primary", "btn-secondary"),
+                       input_name, v.label)
 
                 line[#line + 1] = input
                 line[#line + 1] = label
@@ -719,9 +730,7 @@ end
 -- ###########################################
 
 -- avoids manual HTTP prefix and /lua concatenation
-function page_url(path)
-    return ntop.getHttpPrefix() .. "/lua/" .. path
-end
+function page_url(path) return ntop.getHttpPrefix() .. "/lua/" .. path end
 
 -- extracts a page url from the path
 function path_get_page(path)
@@ -747,36 +756,34 @@ function splitUrl(url)
         for _, param in pairs(parts) do
             local p = split(param, "=")
 
-            if #p == 2 then
-                params[p[1]] = p[2]
-            end
+            if #p == 2 then params[p[1]] = p[2] end
         end
     end
 
-    return {
-        url = url,
-        params = params
-    }
+    return {url = url, params = params}
 end
 
 -- ##############################################
 
 --- Return an HTML `select` element with passed options.
 --
-function generate_select(id, name, is_required, is_disabled, options, additional_classes)
+function generate_select(id, name, is_required, is_disabled, options,
+                         additional_classes)
     local required_flag = (is_required and "required" or "")
     local disabled_flag = (is_disabled and "disabled" or "")
     local name_attr = (name ~= "" and "name='" .. name .. "'" or "")
     local parsed_options = ""
     for i, option in ipairs(options) do
         parsed_options = parsed_options .. ([[
-         <option ]] .. (i == 1 and "selected" or "") .. [[ value="]] .. option.value .. [[">]] .. option.title ..
+         <option ]] .. (i == 1 and "selected" or "") .. [[ value="]] ..
+                             option.value .. [[">]] .. option.title ..
                              [[</option>
       ]])
     end
 
     return ([[
-      <select id="]] .. id .. [[" class="form-select ]] .. (additional_classes or "") .. [[" ]] .. name_attr .. [[ ]] ..
+      <select id="]] .. id .. [[" class="form-select ]] ..
+               (additional_classes or "") .. [[" ]] .. name_attr .. [[ ]] ..
                required_flag .. [[ ]] .. disabled_flag .. [[>
          ]] .. parsed_options .. [[
       </select>
@@ -830,13 +837,10 @@ function buildHostHREF(ip_address, vlan_id, page)
         local name = hostinfo2label(hinfo)
         local res
 
-        if ((name == nil) or (name == "")) then
-            name = ip_address
-        end
-        res = '<A HREF="' .. ntop.getHttpPrefix() .. '/lua/host_details.lua?host=' .. ip_address
-        if (vlan_id and (vlan_id ~= 0)) then
-            res = res .. "@" .. vlan_id
-        end
+        if ((name == nil) or (name == "")) then name = ip_address end
+        res = '<A HREF="' .. ntop.getHttpPrefix() ..
+                  '/lua/host_details.lua?host=' .. ip_address
+        if (vlan_id and (vlan_id ~= 0)) then res = res .. "@" .. vlan_id end
         res = res .. '&page=' .. page .. '">' .. name .. '</A>'
 
         return (res)
@@ -857,14 +861,13 @@ function buildMapHREF(service_peer, map, page, asset_family)
     local name
     local vlan = service_peer.vlan
     service_peer.vlan = nil
-    local map_url = ntop.getHttpPrefix() .. '/lua/pro/enterprise/network_maps.lua?map=' .. map .. '&page=' .. page ..
-                        '&' .. hostinfo2url(service_peer)
+    local map_url = ntop.getHttpPrefix() ..
+                        '/lua/pro/enterprise/network_maps.lua?map=' .. map ..
+                        '&page=' .. page .. '&' .. hostinfo2url(service_peer)
     local host_url = ''
     local host_icon
 
-    if vlan then
-        map_url = map_url .. '&vlan_id=' .. vlan
-    end
+    if vlan then map_url = map_url .. '&vlan_id=' .. vlan end
 
     if (asset_family) then
         map_url = map_url .. '&asset_family=' .. asset_family
@@ -878,7 +881,8 @@ function buildMapHREF(service_peer, map, page, asset_family)
             vlan = vlan
         }, nil, true --[[ check of the host is active --]] )
 
-        local hinfo = interface.getHostMinInfo(service_peer.ip or service_peer.host, vlan)
+        local hinfo = interface.getHostMinInfo(service_peer.ip or
+                                                   service_peer.host, vlan)
 
         name = hostinfo2label(hinfo or service_peer)
         host_icon = "fa-laptop"
@@ -887,11 +891,13 @@ function buildMapHREF(service_peer, map, page, asset_family)
 
         -- The URL only if the MAC is active
         if minfo and table.len(minfo) > 0 then
-            host_url = ntop.getHttpPrefix() .. '/lua/mac_details.lua?' .. hostinfo2url(service_peer)
+            host_url = ntop.getHttpPrefix() .. '/lua/mac_details.lua?' ..
+                           hostinfo2url(service_peer)
         end
 
         if (service_peer.ip and service_peer.is_mac) or not service_peer.is_mac then
-            local hinfo = interface.getHostMinInfo(service_peer.ip or service_peer.host, vlan)
+            local hinfo = interface.getHostMinInfo(service_peer.ip or
+                                                       service_peer.host, vlan)
             name = hostinfo2label(hinfo or service_peer)
         else
             name = mac2label(service_peer.host)
@@ -916,8 +922,9 @@ function buildMapHREF(service_peer, map, page, asset_family)
 
     local res
     if not isEmptyString(host_url) then
-        res = string.format('<a href="%s">%s</a> <a href="%s"><i class="fas %s"></i></a>', map_url, name, host_url,
-            host_icon)
+        res = string.format(
+                  '<a href="%s">%s</a> <a href="%s"><i class="fas %s"></i></a>',
+                  map_url, name, host_url, host_icon)
     else
         res = string.format('<a href="%s">%s</a>', map_url, name)
     end
@@ -930,20 +937,21 @@ end
 
 -- Used by REST v1
 function formatAlertAHref(key, value, label)
-    return "<a class='tag-filter' data-tag-key='" .. key .. "' title='" .. value .. "' data-tag-value='" .. value ..
-               "' data-tag-label='" .. label .. "' href='#'>" .. label .. "</a>"
+    return
+        "<a class='tag-filter' data-tag-key='" .. key .. "' title='" .. value ..
+            "' data-tag-value='" .. value .. "' data-tag-label='" .. label ..
+            "' href='#'>" .. label .. "</a>"
 end
 
 function add_historical_flow_explorer_button_ref(extra_params, no_href)
-    if not ntop.isClickHouseEnabled() then
-        return ''
-    end
+    if not ntop.isClickHouseEnabled() then return '' end
 
     local base_url = ntop.getHttpPrefix() .. "/lua/pro/db_search.lua?"
 
     for k, v in pairs(extra_params) do
         if v["value"] and v["operator"] then
-            base_url = base_url .. k .. "=" .. v["value"] .. ";" .. v["operator"] .. "&"
+            base_url = base_url .. k .. "=" .. v["value"] .. ";" ..
+                           v["operator"] .. "&"
         end
     end
 
@@ -994,9 +1002,12 @@ function format_portidx_name(device_ip, portidx, short_version, shorten_string)
             local port_info = cached_dev["interfaces"][tostring(portidx)]
 
             if port_info then
-	       local dirs = ntop.getDirs()
-                package.path = dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" .. package.path
-                snmp_location = require "snmp_location"
+                local dirs = ntop.getDirs()
+                package.path = dirs.installdir ..
+                                   "/pro/scripts/lua/modules/?.lua;" ..
+                                   package.path
+                local snmp_utils = require "snmp_utils"
+                local snmp_location = require "snmp_location"
 
                 if not port_info["id"] then
                     port_info["id"] = portidx
@@ -1004,7 +1015,7 @@ function format_portidx_name(device_ip, portidx, short_version, shorten_string)
                 end
 
                 if short_version then
-                    local name = port_info["name"]
+                    local name = snmp_utils.get_snmp_interface_label(port_info, true)
                     if shorten_string then
                         if type(shorten_string) == "number" then
                             name = shortenString(name, shorten_string)
@@ -1014,7 +1025,8 @@ function format_portidx_name(device_ip, portidx, short_version, shorten_string)
                     end
                     idx_name = string.format('%s', name);
                 else
-                    idx_name = string.format('%s', i18n("snmp.interface_device_2", {
+                    idx_name = string.format('%s',
+                                             i18n("snmp.interface_device_2", {
                         interface = snmp_location.snmp_port_link(port_info, true)
                         -- device=snmp_location.snmp_device_link(cached_dev["host_ip"])
                     }))
@@ -1025,9 +1037,7 @@ function format_portidx_name(device_ip, portidx, short_version, shorten_string)
 
                 local res = snmp_mappings.get_iface_name(device_ip, portidx)
 
-                if (res ~= nil) then
-                    idx_name = res
-                end
+                if (res ~= nil) then idx_name = res end
             end
         end
     end
@@ -1046,7 +1056,9 @@ function get_portidx_by_name(device_ip, port_name)
         local cached_dev = _snmp_devices[device_ip]
 
         if (cached_dev == nil) then
-            package.path = dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" .. package.path
+            package.path =
+                dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" ..
+                    package.path
             local snmp_cached_dev = require "snmp_cached_dev"
 
             cached_dev = snmp_cached_dev:get_interface_names(device_ip)
@@ -1066,9 +1078,7 @@ function get_portidx_by_name(device_ip, port_name)
             local snmp_mappings = require "snmp_mappings"
 
             local idx = snmp_mappings.get_iface_idx(device_ip, port_name)
-            if idx then
-                return idx
-            end
+            if idx then return idx end
 
         end
     end
@@ -1079,8 +1089,12 @@ end
 -- ##############################################
 
 -- function to format dns query to an HTML copy button and query value
-function format_dns_query_copy_btn(dns_query) 
-    return "<button onclick='const textArea = document.createElement(`textarea`);textArea.value=`" .. dns_query .. "`;textArea.style.position=`absolute`;textArea.style.left=`-999999px`;document.body.prepend(textArea);textArea.select();document.execCommand(`copy`);'class='btn btn-light btn-sm border ms-1'style='cursor: pointer;'><i class='fas fa-copy'></i></button><span style='margin-left: 8px;'>" .. dns_query .. "</span>"
+function format_dns_query_copy_btn(dns_query)
+    return
+        "<button onclick='const textArea = document.createElement(`textarea`);textArea.value=`" ..
+            dns_query ..
+            "`;textArea.style.position=`absolute`;textArea.style.left=`-999999px`;document.body.prepend(textArea);textArea.select();document.execCommand(`copy`);'class='btn btn-light btn-sm border ms-1'style='cursor: pointer;'><i class='fas fa-copy'></i></button><span style='margin-left: 8px;'>" ..
+            dns_query .. "</span>"
 end
 
 -- @brief Given a table of values, if available, it's going to format the values with the standard
@@ -1091,20 +1105,27 @@ function format_dns_query_info(dns_info, no_html)
 
     if dns_info.last_query_type then
         if no_html then
-            formatted_dns_query_info.last_query_type = dns_utils.getQueryType(dns_info.last_query_type)
+            formatted_dns_query_info.last_query_type =
+                dns_utils.getQueryType(dns_info.last_query_type)
         else
-            formatted_dns_query_info.last_query_type = string.format('<span class="badge bg-info">%s</span>',
-                dns_utils.getQueryType(dns_info.last_query_type))
+            formatted_dns_query_info.last_query_type = string.format(
+                                                           '<span class="badge bg-info">%s</span>',
+                                                           dns_utils.getQueryType(
+                                                               dns_info.last_query_type))
         end
     end
 
     if dns_info.last_return_code then
         if no_html then
-            formatted_dns_query_info.last_return_code = dns_utils.getResponseStatusCode(dns_info.last_return_code)
+            formatted_dns_query_info.last_return_code =
+                dns_utils.getResponseStatusCode(dns_info.last_return_code)
         else
             local badge = get_badge(dns_info.last_return_code)
-            formatted_dns_query_info.last_return_code = string.format('<span class="badge bg-%s">%s</span>', badge,
-                dns_utils.getResponseStatusCode(dns_info.last_return_code))
+            formatted_dns_query_info.last_return_code = string.format(
+                                                            '<span class="badge bg-%s">%s</span>',
+                                                            badge,
+                                                            dns_utils.getResponseStatusCode(
+                                                                dns_info.last_return_code))
         end
     end
 
@@ -1115,12 +1136,14 @@ function format_dns_query_info(dns_info, no_html)
             local url = dns_info["last_query"]
             url = string.gsub(url, " ", "") -- Clean the URL from spaces and %20, spaces in html
             if not string.find(url, '*') then
-                formatted_dns_query_info.last_query = format_dns_query_copy_btn(dns_info["last_query"])
+                formatted_dns_query_info.last_query =
+                    format_dns_query_copy_btn(dns_info["last_query"])
             end
         end
     end
 
-    if dns_info.last_rsp_arr and type(dns_info.last_rsp_arr) == 'table' and #dns_info.last_rsp_arr > 0 then
+    if dns_info.last_rsp_arr and type(dns_info.last_rsp_arr) == 'table' and
+        #dns_info.last_rsp_arr > 0 then
         local answers = table.concat(dns_info.last_rsp_arr, ", ")
         formatted_dns_query_info["last_answer"] = answers
     end
@@ -1143,13 +1166,17 @@ function format_tls_info(tls_info, no_html)
     end
 
     if tls_info.notBefore and tls_info.notAfter then
-        formatted_tls_info["tls_certificate_validity"] = string.format("%s - %s", tls_info.notBefore, tls_info.notAfter)
+        formatted_tls_info["tls_certificate_validity"] = string.format(
+                                                             "%s - %s",
+                                                             tls_info.notBefore,
+                                                             tls_info.notAfter)
         formatted_tls_info.notBefore = nil
         formatted_tls_info.notAfter = nil
     end
 
     if (tls_info.tls_version) and (tls_info.tls_version > 0) then
-        formatted_tls_info["tls_version"] = ntop.getTLSVersionName(tls_info.tls_version)
+        formatted_tls_info["tls_version"] =
+            ntop.getTLSVersionName(tls_info.tls_version)
     end
 
     if tls_info.client_requested_server_name then
@@ -1157,14 +1184,17 @@ function format_tls_info(tls_info, no_html)
         url = string.gsub(url, " ", "") -- Clean the URL from spaces and %20, spaces in html
         if not string.find(url, '*') then
             if no_html then
-                formatted_tls_info["client_requested_server_name"] = tls_info["client_requested_server_name"]
+                formatted_tls_info["client_requested_server_name"] =
+                    tls_info["client_requested_server_name"]
             else
                 if not isEmptyString(url) then
-                    formatted_tls_info["client_requested_server_name"] = i18n("external_link_url", {
-                        proto = 'https',
-                        url = url,
-                        url_name = url
-                    })
+                    formatted_tls_info["client_requested_server_name"] = i18n(
+                                                                             "external_link_url",
+                                                                             {
+                            proto = 'https',
+                            url = url,
+                            url_name = url
+                        })
                 end
             end
         end
@@ -1174,10 +1204,11 @@ function format_tls_info(tls_info, no_html)
         if no_html then
             formatted_tls_info["ja4_client_hash"] = tls_info["ja4_client_hash"]
         else
-            formatted_tls_info["ja4_client_hash"] = i18n("copy_button", {
-                full_name = tls_info["ja4_client_hash"],
-                name = tls_info["ja4_client_hash"]
-            })
+            formatted_tls_info["ja4_client_hash"] =
+                i18n("copy_button", {
+                    full_name = tls_info["ja4_client_hash"],
+                    name = tls_info["ja4_client_hash"]
+                })
         end
     end
 
@@ -1185,10 +1216,11 @@ function format_tls_info(tls_info, no_html)
         if no_html then
             formatted_tls_info["server_names"] = tls_info["server_names"]
         else
-            formatted_tls_info["server_names"] = i18n("copy_button", {
-                full_name = tls_info["server_names"],
-                name = tls_info["server_names"]
-            })
+            formatted_tls_info["server_names"] =
+                i18n("copy_button", {
+                    full_name = tls_info["server_names"],
+                    name = tls_info["server_names"]
+                })
         end
     end
 
@@ -1202,7 +1234,8 @@ function format_icmp_info(icmp_info)
     local formatted_icmp_info = {}
 
     if icmp_info.code then
-        formatted_icmp_info.code = icmp_utils.get_icmp_code(icmp_info.type, icmp_info.code)
+        formatted_icmp_info.code = icmp_utils.get_icmp_code(icmp_info.type,
+                                                            icmp_info.code)
     end
 
     if icmp_info.type then
@@ -1218,16 +1251,24 @@ function format_ssh_info(ssh_info)
     local formatted_ssh_info = {}
 
     if not isEmptyString(ssh_info["client_signature"]) then
-        formatted_ssh_info["client_signature"] = string.format('<span>%s</span>', ssh_info["client_signature"])
+        formatted_ssh_info["client_signature"] = string.format(
+                                                     '<span>%s</span>',
+                                                     ssh_info["client_signature"])
     end
     if not isEmptyString(ssh_info["client_hash_hassh"]) then
-        formatted_ssh_info["client_hash_hassh"] = string.format('<span>%s</span>', ssh_info["client_hash_hassh"])
+        formatted_ssh_info["client_hash_hassh"] = string.format(
+                                                      '<span>%s</span>',
+                                                      ssh_info["client_hash_hassh"])
     end
     if not isEmptyString(ssh_info["server_signature"]) then
-        formatted_ssh_info["server_signature"] = string.format('<span>%s</span>', ssh_info["server_signature"])
+        formatted_ssh_info["server_signature"] = string.format(
+                                                     '<span>%s</span>',
+                                                     ssh_info["server_signature"])
     end
     if not isEmptyString(ssh_info["server_hash_hassh"]) then
-        formatted_ssh_info["server_hash_hassh"] = string.format('<span>%s</span>', ssh_info["server_hash_hassh"])
+        formatted_ssh_info["server_hash_hassh"] = string.format(
+                                                      '<span>%s</span>',
+                                                      ssh_info["server_hash_hassh"])
     end
 
     return formatted_ssh_info
@@ -1246,8 +1287,11 @@ function format_http_info(http_info, no_html)
             else
                 local badge = get_badge(http_info.last_return_code < 400)
 
-                formatted_http_info["last_return_code"] = string.format('<span class="badge bg-%s">%s</span>', badge,
-                    http_utils.getResponseStatusCode(http_info["last_return_code"]))
+                formatted_http_info["last_return_code"] = string.format(
+                                                              '<span class="badge bg-%s">%s</span>',
+                                                              badge,
+                                                              http_utils.getResponseStatusCode(
+                                                                  http_info["last_return_code"]))
             end
         end
     end
@@ -1256,7 +1300,9 @@ function format_http_info(http_info, no_html)
         if no_html then
             formatted_http_info["last_method"] = http_info["last_method"]
         else
-            formatted_http_info["last_method"] = string.format('<span class="badge bg-info">%s</span>', http_info["last_method"])
+            formatted_http_info["last_method"] = string.format(
+                                                     '<span class="badge bg-info">%s</span>',
+                                                     http_info["last_method"])
         end
     end
 
@@ -1271,20 +1317,21 @@ function format_http_info(http_info, no_html)
             if no_html then
                 formatted_http_info["last_url"] = url
             else
-                formatted_http_info["last_url"] = i18n("external_link_url", {
-                    proto = 'http',
-                    url = url,
-                    url_name = url
-                })
+                formatted_http_info["last_url"] =
+                    i18n("external_link_url",
+                         {proto = 'http', url = url, url_name = url})
             end
         end
     end
 
     if not isEmptyString(http_info["last_user_agent"]) then
         if no_html then
-            formatted_http_info["last_user_agent"] = http_info["last_user_agent"]
+            formatted_http_info["last_user_agent"] =
+                http_info["last_user_agent"]
         else
-            formatted_http_info["last_user_agent"] = string.format('<span>%s</span>', http_info["last_user_agent"])
+            formatted_http_info["last_user_agent"] = string.format(
+                                                         '<span>%s</span>',
+                                                         http_info["last_user_agent"])
         end
     end
 
@@ -1297,9 +1344,7 @@ function format_proto_info(flow_details, proto_info)
     local proto_details = {}
 
     for key, value in pairs(proto_info) do
-        if type(value) ~= "table" then
-            proto_info[key] = nil
-        end
+        if type(value) ~= "table" then proto_info[key] = nil end
     end
 
     for proto, info in pairs(proto_info or {}) do
@@ -1326,9 +1371,8 @@ function format_proto_info(flow_details, proto_info)
             goto continue
         end
         local rsp = {
-            name = i18n('alerts_dashboard.flow_related_info_composed', {
-                proto = i18n(protocol)
-            }),
+            name = i18n('alerts_dashboard.flow_related_info_composed',
+                        {proto = i18n(protocol)}),
             values = {""}
         }
         flow_details[#flow_details + 1] = rsp
@@ -1370,9 +1414,7 @@ end
 function format_alert_hostname(alert, cli_srv)
     local host = alert[cli_srv .. "_name"]
 
-    if (isEmptyString(host)) then
-        host = alert[cli_srv .. "_ip"]
-    end
+    if (isEmptyString(host)) then host = alert[cli_srv .. "_ip"] end
 
     return format_ip_vlan(shortenString(host, 26), alert["vlan"])
 end
@@ -1391,7 +1433,8 @@ function format_external_link(url, name, no_html, proto, i18n_key)
         return (url)
     else
         local external_field = url
-        proto = ternary(((proto) and (proto == 'http' or proto == 'HTTP')), 'http', 'https')
+        proto = ternary(((proto) and (proto == 'http' or proto == 'HTTP')),
+                        'http', 'https')
 
         if no_html == false then
             if not isEmptyString(url) and not string.find(url, '*') then
@@ -1416,10 +1459,12 @@ end
 function format_confidence_badge(confidence, shorten_string)
     local badge = ""
     if confidence == 0 or confidence == -1 then
-        badge = "<span class=\"badge bg-warning\" title=\"" .. get_confidence(confidence) .. "\">" ..
+        badge = "<span class=\"badge bg-warning\" title=\"" ..
+                    get_confidence(confidence) .. "\">" ..
                     get_confidence(confidence, shorten_string) .. "</span>"
     elseif confidence then
-        badge = "<span class=\"badge bg-success\" title=\"" .. get_confidence(confidence) .. "\">" ..
+        badge = "<span class=\"badge bg-success\" title=\"" ..
+                    get_confidence(confidence) .. "\">" ..
                     get_confidence(confidence, shorten_string) .. "</span>"
     end
 
@@ -1432,21 +1477,29 @@ function format_query_direction(op, val)
     local historical_flow_utils = require "historical_flow_utils"
     local direction_where = ""
     if val == "0" then
-        direction_where = "(" .. historical_flow_utils.get_flow_column_by_tag("cli_location") .. " " .. op ..
-                              " '0' AND " .. historical_flow_utils.get_flow_column_by_tag("srv_location") .. " " .. op ..
-                              " '0')"
+        direction_where = "(" ..
+                              historical_flow_utils.get_flow_column_by_tag(
+                                  "cli_location") .. " " .. op .. " '0' AND " ..
+                              historical_flow_utils.get_flow_column_by_tag(
+                                  "srv_location") .. " " .. op .. " '0')"
     elseif val == "1" then
-        direction_where = "(" .. historical_flow_utils.get_flow_column_by_tag("cli_location") .. " " .. op ..
-                              " '1' AND " .. historical_flow_utils.get_flow_column_by_tag("srv_location") .. " " .. op ..
-                              " '1')"
+        direction_where = "(" ..
+                              historical_flow_utils.get_flow_column_by_tag(
+                                  "cli_location") .. " " .. op .. " '1' AND " ..
+                              historical_flow_utils.get_flow_column_by_tag(
+                                  "srv_location") .. " " .. op .. " '1')"
     elseif val == "2" then
-        direction_where = "(" .. historical_flow_utils.get_flow_column_by_tag("cli_location") .. " " .. op ..
-                              " '0' AND " .. historical_flow_utils.get_flow_column_by_tag("srv_location") .. " " .. op ..
-                              " '1')"
+        direction_where = "(" ..
+                              historical_flow_utils.get_flow_column_by_tag(
+                                  "cli_location") .. " " .. op .. " '0' AND " ..
+                              historical_flow_utils.get_flow_column_by_tag(
+                                  "srv_location") .. " " .. op .. " '1')"
     elseif val == "3" then
-        direction_where = "(" .. historical_flow_utils.get_flow_column_by_tag("cli_location") .. " " .. op ..
-                              " '1' AND " .. historical_flow_utils.get_flow_column_by_tag("srv_location") .. " " .. op ..
-                              " '0')"
+        direction_where = "(" ..
+                              historical_flow_utils.get_flow_column_by_tag(
+                                  "cli_location") .. " " .. op .. " '1' AND " ..
+                              historical_flow_utils.get_flow_column_by_tag(
+                                  "srv_location") .. " " .. op .. " '0')"
     end
 
     return direction_where
@@ -1508,27 +1561,29 @@ if ((ifname == nil) and (_GET ~= nil)) then
             require "label_utils"
             -- ifname does not contain the interface name but rather the interface id
             ifname = getInterfaceName(ifname, true)
-            if (ifname == "") then
-                ifname = nil
-            end
+            if (ifname == "") then ifname = nil end
         end
     end
 
     if (debug_session) then
-        traceError(TRACE_DEBUG, TRACE_CONSOLE, "Session => Session:" .. _SESSION["session"])
+        traceError(TRACE_DEBUG, TRACE_CONSOLE,
+                   "Session => Session:" .. _SESSION["session"])
     end
 
     if ((ifname == nil) and (_SESSION ~= nil)) then
         if (debug_session) then
-            traceError(TRACE_DEBUG, TRACE_CONSOLE, "Session => set ifname by _SESSION value")
+            traceError(TRACE_DEBUG, TRACE_CONSOLE,
+                       "Session => set ifname by _SESSION value")
         end
         ifname = _SESSION["ifname"]
         if (debug_session) then
-            traceError(TRACE_DEBUG, TRACE_CONSOLE, "Session => ifname:" .. ifname)
+            traceError(TRACE_DEBUG, TRACE_CONSOLE,
+                       "Session => ifname:" .. ifname)
         end
     else
         if (debug_session) then
-            traceError(TRACE_DEBUG, TRACE_CONSOLE, "Session => set ifname by _GET value")
+            traceError(TRACE_DEBUG, TRACE_CONSOLE,
+                       "Session => set ifname by _GET value")
         end
     end
 end
@@ -1541,5 +1596,6 @@ end
 http_lint = require "http_lint"
 
 if (trace_script_duration ~= nil) then
-    io.write(debug.getinfo(1, 'S').source .. " executed in " .. (os.clock() - clock_start) * 1000 .. " ms\n")
+    io.write(debug.getinfo(1, 'S').source .. " executed in " ..
+                 (os.clock() - clock_start) * 1000 .. " ms\n")
 end
