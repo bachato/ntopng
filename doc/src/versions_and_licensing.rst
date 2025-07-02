@@ -655,7 +655,8 @@ Version comparison
      - ✗
      - Bundle XL
 
-✓ = Feature supported, ✗ = Feature not Available
+✓ = Feature available
+✗ = Feature NOT available
 
 \* Feature not available on Windows
 

@@ -1,0 +1,14 @@
+
+/* Allow table cell content to wrap */
+.docutils table td,
+.docutils table th {
+    white-space: normal !important;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+.docutils table {
+    table-layout: fixed;
+    width: 100%;
+}
+
