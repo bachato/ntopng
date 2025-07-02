@@ -1,7 +1,7 @@
 <template>
-    <div ref="sankey_div" class="d-flex flex-column flex-grow-1 position-relative">
+    <div ref="sankey_div" class="d-flex align-items-center justify-content-center flex-column flex-grow-1 position-relative">
         <!-- Zoom button group -->
-        <div class="mb-2">
+        <div v-if="!no_data" class="mb-2">
             <div class="btn-group btn-ontop" role="group">
                 <button type="button" class="btn zoom-btn" @click="zoomChart(0.5)">
                     <i class="fa-solid fa-magnifying-glass-plus"></i>
@@ -32,7 +32,7 @@ const d3 = d3v7;
 const emit = defineEmits(['node_click', 'update_width', 'update_height', 'autorefresh_toggle'])
 const _i18n = (t) => i18n(t);
 
-function set_no_data_flag(set_no_data) {
+function setNoDataFlag(set_no_data) {
     no_data.value = set_no_data
 }
 
@@ -350,7 +350,7 @@ async function draw_sankey() {
         .text((d) => `${d.label}`);
 }
 
-defineExpose({ draw_sankey, set_no_data_flag });
+defineExpose({ draw_sankey, setNoDataFlag });
 
 </script>
 

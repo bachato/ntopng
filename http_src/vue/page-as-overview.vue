@@ -42,7 +42,7 @@ const sankey_url = `${http_prefix}/lua/rest/v2/get/asn/sankey.lua`;
 const sankey_chart = ref(null)
 const sankey_data = ref({});
 const loading = ref(false);
-const no_data_message = i18n("no_data_available")
+const no_data_message = _i18n("as_overview.no_data")
 const autoRefreshEnabled = ref(false);
 const active_sankey_type = ref({})
 const sankey_format_list = [
@@ -114,6 +114,9 @@ const get_sankey_data = async () => {
         node = graph.nodes.find((el) => el.node_id == link.target_node_id)
         link.target = node.index;
     })
+    
+    /* If there is more than one link (arc), there are data, otherwise it means no data */
+    sankey_chart.value.setNoDataFlag((graph.links.length > 0 ? false : true))
     return graph
 }
 

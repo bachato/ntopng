@@ -755,4 +755,27 @@ end
 
 -- ######################################################
 
+-- @brief   Given an asn id, it will return a string with the 
+--          asn name formatted consistently
+-- @params  asn: ASN Id
+-- @returns The formatted ASN name
+function format_utils.formatASN(asn)
+    local name = ""
+    if asn then
+        asn = tonumber(asn)
+        name = asn
+
+        if (asn ~= 0) then
+            local as_info = interface.getASInfo(asn)
+            if (as_info) then
+                name = string.format("%s (%s)", as_info.asname, asn)
+            end
+        end
+    end
+
+    return name
+end
+
+-- ######################################################
+
 return format_utils
