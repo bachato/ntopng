@@ -661,4 +661,4 @@ Version comparison
 
 ** Feature not available on FreeBSD / OPNsense / pfSense
 
-† `Here <https://www.ntop.org/faq/what-is-included-in-ntopng-enterprise-l-xl-bundle/>`_ you can read more about the software bundled with the Bundle edition
+† Read more about the software bundled with the Bundle edition in the `FAQ <https://www.ntop.org/faq/what-is-included-in-ntopng-enterprise-l-xl-bundle/>`_
