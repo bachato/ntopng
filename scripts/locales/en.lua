@@ -1831,6 +1831,7 @@ local lang = {
   ["as_overview"] = {
     ["asn"] = "ASN %{asn} (%{asn_name})",
     ["asn_hosts"] = "ASN Hosts",
+    ["asn_exporters"] = "ASN / Exporters View",
     ["egress_traffic_criteria"] = "Egress Traffic (Bytes)",
     ["ingress_egress_traffic_criteria"] = "Ingress-Egress Traffic (Bytes)",
     ["ingress_traffic_criteria"]= "Ingress Traffic (Bytes)",

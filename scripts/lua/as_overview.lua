@@ -8,25 +8,19 @@ require "lua_utils"
 local json = require("dkjson")
 local page_utils = require("page_utils")
 local template_utils = require "template_utils"
+local format_utils = require "format_utils"
 
 local asn = _GET["asn"]
-
-local a = interface.getASInfo(tonumber(asn))
-local asn_name = asn
 
 sendHTTPContentTypeHeader('text/html')
 page_utils.print_header_and_set_active_menu_entry(page_utils.menu_entries.autonomous_systems)
 dofile(dirs.installdir .. "/scripts/lua/inc/menu.lua")
 
-if a then
-   asn_name = a.asname
-end
-
-page_utils.print_navbar(i18n("as_overview.asn",{asn=asn, asn_name = asn_name}), ntop.getHttpPrefix() .. "/lua/as_overview.lua", {{
+page_utils.print_navbar(i18n("asn_id",{id = format_utils.formatASN(asn)}), ntop.getHttpPrefix() .. "/lua/as_overview.lua", {{
     active = true,
     page_name = "overview",
     label = "<i class=\"fas fa-lg fa-home\"  data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" title=\"" ..
-        i18n("as_overview.asn",{asn=asn, asn_name = asn_name}) .. "\"></i>"
+        i18n("as_overview.asn_exporters") .. "\"></i>"
 }, { 
     url = ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. asn .. "",
     active = page == "asn_hosts",

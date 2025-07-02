@@ -209,8 +209,11 @@ async function set_sankey_data(reset) {
     }
     if (props.sankey_data.nodes == null || props.sankey_data.links == null
         || props.sankey_data.length == 0 || props.sankey_data.links.length == 0) {
+        setNoDataFlag(true); /* No data */
         return;
     }
+    
+    setNoDataFlag(false) /* There is some data */
     await draw_sankey();
     attach_events();
     initializeZoom();

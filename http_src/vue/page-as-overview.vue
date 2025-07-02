@@ -115,8 +115,6 @@ const get_sankey_data = async () => {
         link.target = node.index;
     })
     
-    /* If there is more than one link (arc), there are data, otherwise it means no data */
-    sankey_chart.value.setNoDataFlag((graph.links.length > 0 ? false : true))
     return graph
 }
 
