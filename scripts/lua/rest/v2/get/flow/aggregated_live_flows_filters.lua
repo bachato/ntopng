@@ -199,7 +199,7 @@ local function build_response(criteria)
                 in_ports[#in_ports + 1] = {
                     key = "inIfIdx",
                     value = portidx,
-                    label = format_portidx_name(dev_ip, portidx)
+                    label = format_portidx_name(dev_ip, portidx, true)
                 }
             end
         end
@@ -225,7 +225,7 @@ local function build_response(criteria)
                 out_ports[#out_ports + 1] = {
                     key = "outIfIdx",
                     value = portidx,
-                    label = format_portidx_name(dev_ip, portidx)
+                    label = format_portidx_name(dev_ip, portidx, true)
                 }
             end
         end

@@ -984,7 +984,7 @@ local _snmp_devices = {}
 -- @params device_ip: snmp device ip
 --         portidx:   number or string, interface index to format
 --         short_version: boolean, long formatting version (e.g. flow info) or short version (e.g. dropdown menu)
-function format_portidx_name(device_ip, portidx, short_version, shorten_string)
+function format_portidx_name(device_ip, portidx, short_version)
     local idx_name = portidx
 
     -- SNMP is available only with Pro version at least
@@ -1008,29 +1008,7 @@ function format_portidx_name(device_ip, portidx, short_version, shorten_string)
                                    package.path
                 local snmp_utils = require "snmp_utils"
                 local snmp_location = require "snmp_location"
-
-                if not port_info["id"] then
-                    port_info["id"] = portidx
-                    port_info["snmp_device_ip"] = cached_dev["host_ip"]
-                end
-
-                if short_version then
-                    local name = snmp_utils.get_snmp_interface_label(port_info, true)
-                    if shorten_string then
-                        if type(shorten_string) == "number" then
-                            name = shortenString(name, shorten_string)
-                        else
-                            name = shortenString(name)
-                        end
-                    end
-                    idx_name = string.format('%s', name);
-                else
-                    idx_name = string.format('%s',
-                                             i18n("snmp.interface_device_2", {
-                        interface = snmp_location.snmp_port_link(port_info, true)
-                        -- device=snmp_location.snmp_device_link(cached_dev["host_ip"])
-                    }))
-                end
+                idx_name = snmp_utils.get_snmp_interface_label(port_info, short_version)
             else
                 -- No SNMP configured: last resort use exporters
                 local snmp_mappings = require "snmp_mappings"

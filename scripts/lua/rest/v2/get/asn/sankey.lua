@@ -172,7 +172,7 @@ local function build_interface_exporter(criteria, tot_bytes_exp_if, exporter_nod
          (criteria == traffic_criteria.TOTAL   and (data.rcvd + data.sent) > 0) then
          --tprint(n_id .. " " .. criteria .. " " .. data.sent .. " " .. data.rcvd)
          local exporter_ip = getProbeName(data.exporter_ip)
-         local port_index = format_portidx_name(data.exporter_ip, data.port_index) or "?"
+         local port_index = format_portidx_name(data.exporter_ip, data.port_index, true) or "?"
          local exporter_node_id = find_node_id(exporter_ip)
          local port_node_id = find_node_id(n_id)
 	 

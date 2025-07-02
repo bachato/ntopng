@@ -202,11 +202,11 @@ for _, value in ipairs(flows_stats.flows) do
             },
             in_port = {
                 index = value["in_index"],
-                name = format_portidx_name(device_ip, value["in_index"])
+                name = format_portidx_name(device_ip, value["in_index"], true)
             },
             out_port = {
                 index = value["out_index"],
-                name = format_portidx_name(device_ip, value["out_index"])
+                name = format_portidx_name(device_ip, value["out_index"], true)
             }
         }
 

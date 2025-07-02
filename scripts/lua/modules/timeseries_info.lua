@@ -536,11 +536,11 @@ local community_timeseries = {
             retransmissions = {
                 label = i18n('graphs.tcp_packets_retr'),
                 color = timeseries_info.get_timeseries_color('packets')
-            },      
+            },
             out_of_order = {
                 label = i18n('graphs.tcp_packets_ooo'),
                 color = timeseries_info.get_timeseries_color('packets')
-            },      
+            },
             lost = {
                 label = i18n('graphs.tcp_packets_lost'),
                 color = timeseries_info.get_timeseries_color('packets')
@@ -2999,8 +2999,7 @@ local function add_flowdev_interfaces_timeseries(tags, timeseries)
     local ports_table = interface.getFlowDeviceInfoByIP(tags.device) or {}
     for _, ports in pairs(ports_table) do
         for port_idx, _ in pairs(ports) do
-            local ifname =
-                format_portidx_name(tags.device, port_idx, true, true)
+            local ifname = format_portidx_name(tags.device, port_idx, true)
             timeseries[#timeseries + 1] = {
                 schema = "flowdev_port:traffic",
                 group = i18n("graphs.interfaces"),

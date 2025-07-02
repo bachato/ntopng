@@ -1603,7 +1603,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
 
                     for _, interfaces_table in pairs(interfaces or {}) do
                         for interface_id, _ in pairsByKeys(interfaces_table) do
-                            local label = format_portidx_name(exporter_ip, interface_id, false, false)
+                            local label = format_portidx_name(exporter_ip, interface_id, true)
                             if not hide_exporters_name then
                                 label = exporter_ip .. ' · ' .. label
                             end
