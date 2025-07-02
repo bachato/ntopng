@@ -12,7 +12,7 @@
                 <button v-if="showAutoRefresh" button type="button" class="btn refresh-btn" @click="toggleAutoRefresh"
                     :class="{ 'active': autoRefreshEnabled }"
                     :title="autoRefreshEnabled ? 'Auto-refresh enabled' : 'Auto-refresh disabled'">
-                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <i class="fa-solid fa-arrows-rotate" :class="{ 'fa-spin': autoRefreshEnabled }"></i>
                 </button>
             </div>
         </div>
