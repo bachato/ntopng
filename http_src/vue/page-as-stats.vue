@@ -1,7 +1,7 @@
 <template>
     <div>
-        <Loading v-if="loading && props.context.showTimeseries" :styles="'margin-top: 2rem !important;'"></Loading>
         <div v-if="(showChart || emptyData) && props.context.showTimeseries" class="mb-4 mt-3">
+            <Loading v-if="loading && props.context.showTimeseries" :styles="'margin-top: 2rem !important;'"></Loading>
             <div v-if="showTitle"class="widget-name"><h6 class="m-0">{{ chart_title }}</h6></div>  
             <DashboardTimeseries :id="timeseries_id" :epoch_begin="epoch_begin"
                 :epoch_end="epoch_end" :i18n_title="chart_title" :ifid="props.context.ifid.toString()" :max_width="12"
