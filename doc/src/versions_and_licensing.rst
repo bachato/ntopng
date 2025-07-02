@@ -245,17 +245,17 @@ An article that explain everything in details on how to deploy a license inside 
 Version comparison
 -----------------------
 
-.. list-table:: Version Sizing
+.. list-table:: Capacity by Model
    :widths: 25 15 15 15 15 15 15
    :header-rows: 1
 
-   * - Version Sizing
+   * - 
      - Community
      - Pro
-     - Enterprise M
-     - Enterprise L
-     - Enterprise XL
-     - Enterprise XXL
+     - M
+     - L
+     - XL
+     - XXL
    * - Maximum Number of Monitored (Local) Hosts (suggested)
      - 256
      - 256
@@ -320,7 +320,7 @@ Version comparison
      - 2K
      - 8K
 
-.. list-table:: Version Features
+.. list-table:: Features by Model
    :widths: 40 10 10 10 10 10
    :header-rows: 1
 
