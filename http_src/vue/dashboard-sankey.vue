@@ -87,11 +87,6 @@ async function get_sankey_data() {
     graph = make_complete_graph(graph);
 
     const sankey_data = get_sankey_data_from_rest_data(graph);
-    
-    /* In case no data is returned, show the No Data message */
-    (sankey_data.links.length > 0 && sankey_data.nodes.length > 0) ? 
-        sankey_chart.value.set_no_data_flag(false) : 
-        sankey_chart.value.set_no_data_flag(true);
   
     return sankey_data;
 }

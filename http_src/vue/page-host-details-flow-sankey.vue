@@ -110,9 +110,6 @@ async function get_sankey_data() {
     graph = make_complete_graph(graph);
     let main_node_id = get_main_node_id();
     let sankey_data = get_sankey_data_from_rest_data(graph, main_node_id);
-    (sankey_data.links.length > 0 && sankey_data.nodes.length > 0) ?
-        sankey_chart.value.set_no_data_flag(false) :
-        sankey_chart.value.set_no_data_flag(true);
     // sankey_data = make_dag_graph(sankey_data);
     return sankey_data;
 }

@@ -144,11 +144,7 @@ async function get_sankey_data() {
   check_max_entries(graph);
   graph = make_complete_graph(graph);
   const sankey_data = get_sankey_data_from_rest_data(graph);
-  /* In case no data is returned, show the No Data message */
-  (sankey_data.links.length > 0 && sankey_data.nodes.length > 0) ? 
-    sankey_chart.value.set_no_data_flag(false) : 
-    sankey_chart.value.set_no_data_flag(true);
-  
+  /* In case no data is returned, show the No Data message */  
   
   return sankey_data;
 }
