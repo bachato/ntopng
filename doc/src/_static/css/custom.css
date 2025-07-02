@@ -1,7 +1,7 @@
 
 /* Allow table cell content to wrap */
 table.docutils td,
-/* table.docutils th */
+table.docutils th
 {
     white-space: normal !important;
     word-wrap: break-word;
