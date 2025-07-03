@@ -2727,7 +2727,6 @@ local known_parameters = {
     ["reset_url"] = validateBool,
     ["as"] = validateNumber,
     ["exporter_uuid"] = validateUUID,
-    ["validateuuid"] = validateUUID,
     ["probe_uuid"] = validateUUID,
     ["telemetry"] = validateBool,
     ["preset"] = validateSingleWord,
