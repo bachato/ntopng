@@ -1691,6 +1691,7 @@ local known_parameters = {
     ["srv_mac"] = validateEmptyOr(validateListOfTypeInline(validateFilters(validateMac))), -- a MAC address
     ["apn_mac"] = validateEmptyOr(validateListOfTypeInline(validateFilters(validateMac))), -- a MAC address
     ["tskey"] = validateUnquoted, -- timeseries name
+    ["ts_unify"] = validateBool, -- timeseries name
     ["peer1"] = validateHost, -- a Peer in a connection
     ["peer2"] = validateHost, -- another Peer in a connection
     ["origin"] = validateHost, -- the source of the alert

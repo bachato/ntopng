@@ -18,7 +18,6 @@ require "lua_utils"
 --
 
 -- Get from redis the throughput type bps or pps
-local ts_enabled = areASTimeseriesEnabled(interface.getId())
 local throughput_type = getThroughputType()
 local now = os.time()
 
@@ -54,7 +53,6 @@ if as_info ~= nil then
       record["bytes_rcvd"] = bytes_rcvd
       record["alerted_flows"] = value["alerted_flows"]["total"]
       record["traffic"] = bytes_sent + bytes_rcvd
-      record["ts_enabled"] = ts_enabled
       record["seen_since"] = value["seen.first"]
       record["score"] = value["score"]
       record["num_hosts"] = value["num_hosts"]

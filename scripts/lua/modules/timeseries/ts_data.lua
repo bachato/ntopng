@@ -8,8 +8,10 @@ local ts_data = {}
 local function addHostInfo(tags)
     -- Checking if the host is in memory
     local host = hostkey2hostinfo(tags.host)
-    local serialize_by_mac = ntop.getPref(string.format("ntopng.prefs.ifid_" .. tags.ifid ..
-                                                            ".serialize_local_broadcast_hosts_as_macs")) == "1"
+    local serialize_by_mac = ntop.getPref(string.format(
+                                              "ntopng.prefs.ifid_" .. tags.ifid ..
+                                                  ".serialize_local_broadcast_hosts_as_macs")) ==
+                                 "1"
 
     if not isEmptyString(host["host"]) and serialize_by_mac then
         local host_info = interface.getHostMinInfo(host["host"], host["vlan"])
@@ -46,10 +48,11 @@ end
 local function compareBackward(compare_backward, curr_res, options)
     local graph_common = require "graph_common"
     local ts_common = require("ts_common")
-    
+
     local backward_sec = graph_common.getZoomDuration(compare_backward)
     local start_cmp = curr_res.metadata.epoch_begin - backward_sec
-    local end_cmp = start_cmp + curr_res.metadata.epoch_step * (curr_res.metadata.num_point - 1)
+    local end_cmp = start_cmp + curr_res.metadata.epoch_step *
+                        (curr_res.metadata.num_point - 1)
 
     local tmp_options = table.merge(options, {
         target_aggregation = curr_res.metadata.source_aggregation
@@ -63,7 +66,8 @@ local function compareBackward(compare_backward, curr_res, options)
 
     if (res) and (res.metadata) and (res.metadata.epoch_step) then
         curr_res.additional_series = {}
-        curr_res.additional_series[compare_backward .. "_" .. i18n("details.ago")] = res
+        curr_res.additional_series[compare_backward .. "_" ..
+            i18n("details.ago")] = res
     end
 
     return curr_res
@@ -95,12 +99,11 @@ function ts_data.get_timeseries(http_context)
         keep_nan = true,
         keep_total = false,
         tags = http_context.tags,
-        schema = ts_schema
+        schema = ts_schema,
+        ts_unify = http_context.ts_unify
     }
 
-    if options.tags.ifid then
-        interface.select(options.tags.ifid)
-    end
+    if options.tags.ifid then interface.select(options.tags.ifid) end
 
     if options.schema == 'snmp_if:traffic_min' and options.tags.port then
         options.tags.if_index = options.tags.port
@@ -114,7 +117,9 @@ function ts_data.get_timeseries(http_context)
 
         -- Setting host_ip (check that the provided IP matches the provided
         -- mac address as safety check and to avoid security issues)
-        if (options.schema == "top:snmp_if:packets") or (options.schema == "top:snmp_if:traffic") or (options.schema == "top:flowdev_port:traffic") then
+        if (options.schema == "top:snmp_if:packets") or
+            (options.schema == "top:snmp_if:traffic") or
+            (options.schema == "top:flowdev_port:traffic") then
             -- NOTE: the host here is not required, if added return an empty serie
             tskey = 0
             options.tags.host = nil
@@ -125,7 +130,8 @@ function ts_data.get_timeseries(http_context)
         end
     end
 
-    if ((options.schema == "top:flow_check:duration") or (options.schema == "top:elem_check:duration")) then
+    if ((options.schema == "top:flow_check:duration") or
+        (options.schema == "top:elem_check:duration")) then
         -- NOTE: Temporary fix for top checks page
         options.tags.check = nil
     end
@@ -134,8 +140,11 @@ function ts_data.get_timeseries(http_context)
 
     -- if Mac address ts is requested, check if the serialize by mac is enabled and if no data is found, use the host timeseries. 
     -- if (table.len(res) == 0) or (res.statistics) and (res.statistics.total == 0) then
-    local serialize_by_mac = ntop.getPref(string.format("ntopng.prefs.ifid_" .. options.tags.ifid ..
-                                                            ".serialize_local_broadcast_hosts_as_macs")) == "1"
+    local serialize_by_mac = ntop.getPref(string.format(
+                                              "ntopng.prefs.ifid_" ..
+                                                  options.tags.ifid ..
+                                                  ".serialize_local_broadcast_hosts_as_macs")) ==
+                                 "1"
     local tmp = split(options.schema, ":")
 
     if (serialize_by_mac) and (options.tags.mac) then
@@ -150,7 +159,7 @@ function ts_data.get_timeseries(http_context)
     end
 
     res = performQuery(options) or {}
-    
+
     -- No result found
     if res == nil then
         local ts_utils = require("ts_utils")
@@ -170,9 +179,7 @@ function ts_data.get_timeseries(http_context)
     end
 
     -- Add metadata other metadata
-    if not res.metadata then
-        res.metadata = {}
-    end
+    if not res.metadata then res.metadata = {} end
 
     if not isEmptyString(compare_backward) and (res.metadata.epoch_step) then
         res = compareBackward(compare_backward, res, options)

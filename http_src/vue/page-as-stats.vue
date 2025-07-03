@@ -1,8 +1,7 @@
 <template>
     <div>
-        <div v-if="(showChart || emptyData) && props.context.showTimeseries" class="mb-4 mt-3">
-            <Loading v-if="loading && props.context.showTimeseries" :styles="'margin-top: 2rem !important;'"></Loading>
-            <div v-if="showTitle"class="widget-name"><h6 class="m-0">{{ chart_title }}</h6></div>  
+        <div v-if="(showChart || !emptyData) && props.context.showTimeseries" class="mb-4 mt-3">
+            <div v-if="showTitle "class="widget-name"><h6 class="m-0">{{ chart_title }}</h6></div>  
             <DashboardTimeseries :id="timeseries_id" :epoch_begin="epoch_begin"
                 :epoch_end="epoch_end" :i18n_title="chart_title" :ifid="props.context.ifid.toString()" :max_width="12"
                 :max_height="4" :params="params" :get_component_data="get_component_data"
@@ -11,7 +10,7 @@
         </div>
         <TableWithConfig ref="table_as_stats" :table_id="table_id" :csrf="props.context.csrf"
             :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting"
-            :get_extra_params_obj="get_extra_params_obj">
+            :get_extra_params_obj="get_extra_params_obj" @custom_event="on_table_custom_event">
         </TableWithConfig>
     </div>
 </template>
@@ -22,7 +21,7 @@ import { ref } from "vue";
 import { default as sortingFunctions } from "../utilities/sorting-utils.js";
 import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as DashboardTimeseries } from "./dashboard-timeseries.vue";
-import { default as Loading } from "./loading.vue";
+import { default as dataUtils } from "../utilities/data-utils.js";
 import formatterUtils from "../utilities/formatter-utils";
 import NtopUtils from "../utilities/ntop-utils.js";
 
@@ -35,11 +34,10 @@ const props = defineProps({
 const current_time = Math.floor(Date.now() / 1000);
 const seconds_one_week = 3600 * 24 * 7;
 const table_id = ref('as_stats');
-const chart_title = _i18n('top_1_week_asn')
+const chart_title = _i18n('top_active_asn')
 const showTitle = ref(false);
 const timeseries_id = ref('top_asn');
 const table_as_stats = ref(null);
-const loading = ref(false);
 const epoch_begin = ref(current_time - seconds_one_week); // Get one week ago
 const epoch_end = ref(current_time);
 const showSankey = props.context.showSankey;
@@ -59,6 +57,11 @@ const params = {
     source_type: "interface"
 }
 
+const ts_query = {
+    ts_query: `ifid:$IFID$,asn:$ASN$`,
+    ts_schema: `asn:traffic`,
+}
+
 /* *************************************************** */
 
 const set_component_attr = async (attr, value) => {
@@ -71,17 +74,28 @@ const set_component_attr = async (attr, value) => {
 const get_component_data = async (url, query_params, post_params) => {
     query_params.csrf = props.context.csrf
     const url_params = ntopng_url_manager.obj_to_url_params(query_params);
+    await ntopng_utility.http_post_request(`${http_prefix}/lua/pro/rest/v2/get/timeseries/ts_multi.lua?${url_params}`, post_params)
+    const top_url = `${http_prefix}/lua/rest/v2/get/asn/get_top_asn.lua?${url_params}`;
+    const top_data = await ntopng_utility.http_request(top_url)
+    const ts_requests = [];
+    top_data?.forEach((el) => {
+        const tmp_query = { ...ts_query };
+        tmp_query.ts_query = tmp_query.ts_query.replace('$IFID$', props.context.ifid);
+        tmp_query.ts_query = tmp_query.ts_query.replace('$ASN$', el.asn);
+        tmp_query.tskey = `${el.asn}`;
+        tmp_query.ts_unify = true
+        ts_requests.push(tmp_query);
+    })
+    post_params.ts_requests = ts_requests;
     const data_url = `${http_prefix}/lua/pro/rest/v2/get/timeseries/ts_multi.lua?${url_params}`;
-    loading.value = true;
     const data = await ntopng_utility.http_post_request(data_url, post_params)
-    if (data[0]?.series.length === 0) {
-        emptyData.value = true;
-        showTitle.value = false;
-    } else {
+    if (data[0]?.series.length > 0) {
         emptyData.value = false;
         showTitle.value = true;
+    } else {
+        emptyData.value = true;
+        showTitle.value = false;
     }
-    loading.value = false;
     return data;
 };
 
@@ -106,18 +120,10 @@ const map_table_def_columns = (columns) => {
             return return_value;
         },
         "asn": (value, row) => {
-            let return_value;
-            if (showSankey) {
-                return_value = `<A HREF='${http_prefix}/lua/as_overview.lua?asn=${row["asn"]}' title='${row["asname"]}'>${row["asn"]}</A>`
+            let return_value = row["asn"]
+            if (!dataUtils.isEmptyOrNull(row["asname"])) {
+                return_value = `${row["asname"]} (${row["asn"]})`;
             }
-            else {
-                return_value = `<A HREF='${http_prefix}/lua/hosts_stats.lua?asn=${row["asn"]}' title='${row["asname"]}'>${row["asn"]}</A>`
-            }
-            if (row["ts_enabled"]) {
-                const url = `${http_prefix}/lua/as_stats.lua?asn=${row["asn"]}&page=historical`
-                return_value += `&nbsp;<a href=${url}><i class="fas fa-chart-area fa-lg"></i></a>`
-            }
-
             return return_value;
         },
         "hosts": (value, row) => {
@@ -148,13 +154,19 @@ const map_table_def_columns = (columns) => {
 
     columns.forEach((c) => {
         c.render_func = map_columns[c.data_field];
-        if (c.id === "actions") {
+        if (c.id == "actions") {
             const visible_dict = {
-                historical_data: props.show_historical,
+                host: true,
+                exporters_distro: showSankey,
+                timeseries: props.context.showTimeseries,
             };
             c.button_def_array.forEach((b) => {
-                if (!visible_dict[b.id]) {
-                    b.class.push("disabled");
+                b.f_map_class = (current_class, row) => {
+                    // if is not defined is enabled
+                    if (!visible_dict[b.id]) {
+                        current_class.push("disabled");
+                    }
+                    return current_class;
                 }
             });
         }
@@ -163,6 +175,42 @@ const map_table_def_columns = (columns) => {
     return columns;
 };
 
+/* ************************************** */
+
+function click_button_exporters_distro(event) {
+    const row = event.row;
+    window.location.href = `${http_prefix}/lua/as_overview.lua?asn=${row["asn"]}`;
+}
+
+/* ************************************** */
+
+function click_button_host(event) {
+    const row = event.row;
+    window.location.href = `${http_prefix}/lua/hosts_stats.lua?asn=${row["asn"]}`;
+}
+
+/* ************************************** */
+
+function click_button_timeseries(event) {
+    const row = event.row;
+    window.location.href = `${http_prefix}/lua/as_stats.lua?asn=${row["asn"]}&page=historical`;
+}
+
+/* ************************************** */
+
+function on_table_custom_event(event) {
+    let events_managed = {
+        "click_button_host": click_button_host,
+        "click_button_exporters_distro": click_button_exporters_distro,
+        "click_button_timeseries": click_button_timeseries,
+    };
+    if (events_managed[event.event_id] == null) {
+        return;
+    }
+    events_managed[event.event_id](event);
+}
+
+/* ************************************** */
 
 function columns_sorting(col, r0, r1) {
     if (col != null) {

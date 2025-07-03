@@ -7,11 +7,43 @@
 	"display_empty_rows": true,
 	"columns": [
 		{
-            "id": "as_number",
-			"title_i18n": "as_number",
-			"data_field": "asn",
+			"id": "actions",
+			"title_i18n": "actions",
 			"sortable": false,
 			"sticky": true,
+			"class": [
+				"text-nowrap",
+				"text-center"
+			],
+			"render_v_node_type": "button_list",
+			"button_def_array": [
+				{
+					"id": "timeseries",
+					"icon": "fas fa-chart-area",
+					"title_i18n": "prefs.timeseries",
+					"class": [],
+					"event_id": "click_button_timeseries"
+				},
+				{
+					"id": "exporters_distro",
+					"icon": "fas fa-file-export",
+					"title_i18n": "exporters_distribution",
+					"class": [],
+					"event_id": "click_button_exporters_distro"
+				},
+				{
+					"id": "host",
+					"icon": "fas fa-laptop",
+					"title_i18n": "hosts",
+					"class": [],
+					"event_id": "click_button_host"
+				}
+			]
+		}, {
+            "id": "as_number",
+			"title_i18n": "asn",
+			"data_field": "asn",
+			"sortable": true,
 			"class": [
 				"text-nowrap"
 			]
