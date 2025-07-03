@@ -74,7 +74,6 @@ const set_component_attr = async (attr, value) => {
 const get_component_data = async (url, query_params, post_params) => {
     query_params.csrf = props.context.csrf
     const url_params = ntopng_url_manager.obj_to_url_params(query_params);
-    await ntopng_utility.http_post_request(`${http_prefix}/lua/pro/rest/v2/get/timeseries/ts_multi.lua?${url_params}`, post_params)
     const top_url = `${http_prefix}/lua/rest/v2/get/asn/get_top_asn.lua?${url_params}`;
     const top_data = await ntopng_utility.http_request(top_url)
     const ts_requests = [];
