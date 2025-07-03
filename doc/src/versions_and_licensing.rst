@@ -254,8 +254,10 @@ Models Comparison Table
      - Pro
      - M
      - L
-     - XL / XXL
+     - XL
+     - XXL
    * - Monitor Remote Hosts using active monitoring (ICMP, HTTP/S, Throughput, SpeedTest)
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -267,7 +269,9 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Identify application protocols (Facebook, Youtube, BitTorrent, etc) in the network
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -279,7 +283,9 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Group hosts by VLAN, Operating System, Country, and Autonomous Systems
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -291,7 +297,9 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Discover the devices connected to your Local Network (Network Discovery)
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -303,7 +311,9 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Visualise the top HTTP sites contacted by an host
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -315,7 +325,9 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Generate alerts (for Flows, Hosts, Interfaces, …) when certain conditions are detected (Threshold Crossed, Suspicious Behaviour, …)
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -327,7 +339,9 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Get alerts notifications as Email, Discord, Telegram, WebHook, Slack, Syslog messages or execute Shell Scripts
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -339,7 +353,9 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - CollCollect data from nProbe to treat remote nProbe-monitored interfaces and flow exporter devices (for example routers and switches) as if they were localect data from remote nProbe-monitored interfaces and flow exporters
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -351,7 +367,9 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Group local hosts into logical sets of IP and MAC addresses known as host pools
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -363,8 +381,10 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Aggregate multiple interfaces traffic in a single view
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -375,8 +395,10 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Integrate ntopng login with LDAP authentication servers * **
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -387,8 +409,10 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Have access to other ntopng Checks (Alerts)
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -399,9 +423,11 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Visualize and historicise other ntopng data (Interface Score Anomalies, Top Talkers, …)
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -411,10 +437,12 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Automatic (periodic) graphical reports
      - ✗
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
    * - Graphical reports editor to build custom report templates
@@ -423,9 +451,11 @@ Models Comparison Table
      - ✗
      - ✗
      - ✓
+     - ✓
    * - Query SNMP devices data, such as port status, traffic and and MAC address information
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -435,9 +465,11 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Identify attackers and victims through an alerts dashboard in realtime and in the past
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -447,9 +479,11 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Explore and filter flow alerts in the past
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -459,9 +493,11 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Have access to other ntopng Checks (Alerts, such as SNMP Alerts)
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -471,9 +507,11 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Visualize and historicise NetFlow/sFlow devices data
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -483,9 +521,11 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Apply per-protocol daily traffic and time quotas to your clients *
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -495,9 +535,11 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Custom Interface Disaggregation †
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -507,9 +549,11 @@ Models Comparison Table
      - ✗
      - ✓
      - ✓
+     - ✓
    * - Hosts Map (find the hosts outliers)
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -519,10 +563,12 @@ Models Comparison Table
      - ✗
      - ✓
      - ✓
+     - ✓
    * - Identity Management with Firewalls and Active Directory
      - ✗
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
    * - Have access to all Behavioural Checks
@@ -531,10 +577,12 @@ Models Comparison Table
      - ✗
      - ✓
      - ✓
+     - ✓
    * - Native nTap Support
      - ✗
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
    * - Kafka Support
@@ -543,7 +591,9 @@ Models Comparison Table
      - ✗
      - ✓
      - ✓
+     - ✓
    * - OT/SCADA: IEC 60870-5-104 Traffic Analysis
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -555,23 +605,27 @@ Models Comparison Table
      - ✗
      - ✓
      - ✓
+     - ✓
    * - Continuous Recording license Included (n2disk 1Gbit)† **
      - ✗
      - ✗
      - ✗
      - Bundle L
      - Bundle XL
+     - ✗
    * - Smart Recording license Included (n2disk 1Gbit)† **
      - ✗
      - ✗
      - ✗
      - ✗
      - Bundle XL
+     - ✗
    * - Flow Collection license Included (nProbe Pro)†
      - ✗
      - ✗
      - ✗
      - Bundle L
+     - ✗
      - ✗
    * - Flow Collection license Included (nProbe Enterprise S)†
      - ✗
@@ -579,6 +633,7 @@ Models Comparison Table
      - ✗
      - ✗
      - Bundle XL
+     - ✗
    * - Maximum Number of Monitored (Local) Hosts (suggested)
      - 256
      - 256
