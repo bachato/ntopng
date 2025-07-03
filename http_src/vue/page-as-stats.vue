@@ -120,9 +120,6 @@ const map_table_def_columns = (columns) => {
         },
         "asn": (value, row) => {
             let return_value = row["asn"]
-            if (!dataUtils.isEmptyOrNull(row["asname"])) {
-                return_value = `${row["asname"]} (${row["asn"]})`;
-            }
             return return_value;
         },
         "hosts": (value, row) => {
