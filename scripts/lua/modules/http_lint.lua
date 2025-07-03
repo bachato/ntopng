@@ -1699,6 +1699,7 @@ local known_parameters = {
     ["srv_mac"] = validateEmptyOr(validateListOfTypeInline(validateFilters(validateMac))), -- a MAC address
     ["apn_mac"] = validateEmptyOr(validateListOfTypeInline(validateFilters(validateMac))), -- a MAC address
     ["tskey"] = validateUnquoted, -- timeseries name
+    ["ts_unify"] = validateBool, -- timeseries name
     ["peer1"] = validateHost, -- a Peer in a connection
     ["peer2"] = validateHost, -- another Peer in a connection
     ["origin"] = validateHost, -- the source of the alert
@@ -2925,7 +2926,7 @@ local function validateParameter(k, v)
             return success, nil, v
         else
             if (trace_failures) then
-                error("[LINT] Validation error: Unknown key '" .. k .. "' [" .. v .. "]: missing validation perhaps?\n")
+                error("[LINT] Validation error: Unknown key '" .. k .. "' [" .. tostring(v) .. "]: missing validation perhaps?\n")
             end
             return false, nil
         end
