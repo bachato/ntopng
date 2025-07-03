@@ -242,86 +242,11 @@ Licenses on a Container
 An article that explain everything in details on how to deploy a license inside a container can be found here:
 `Deploying Licenses inside Conteainers <https://www.ntop.org/support/faq/my-license-does-not-work-inside-a-container-what-can-i-do/>`_
 
-Version comparison
+Models Comparison Table
 -----------------------
 
-.. list-table:: Capacity by Model
-   :widths: 25 15 15 15 15 15 15
-   :header-rows: 1
-
-   * - 
-     - Community
-     - Pro
-     - M
-     - L
-     - XL
-     - XXL
-   * - Maximum Number of Monitored (Local) Hosts (suggested)
-     - 256
-     - 256
-     - 1K
-     - 4K
-     - 32K
-     - 128K
-   * - Maximum Number of Monitored Flows (suggested)
-     - 128K
-     - 1M
-     - 4M
-     - 8M
-     - 16M
-     - 32M
-   * - Max Number of Host Pools
-     - 3
-     - 3
-     - 128
-     - 128
-     - 128
-     - 128
-   * - Max Number of Host Pool Members (per Pool)
-     - 8
-     - 8
-     - Unlimited
-     - Unlimited
-     - Unlimited
-     - Unlimited
-   * - Maximum Number of Monitored Interfaces (-i)
-     - 8
-     - 8
-     - 16
-     - 32
-     - 64
-     - 64
-   * - Mark and historicize traffic with user-defined traffic profiles to match hosts, ports and applications using the BPF syntax (number of profiles) [total/per ntopng]
-     - -
-     - 16
-     - 128
-     - 128
-     - 128
-     - 128
-   * - Configurable SNMP Devices (device number) [total/per ntopng]
-     - -
-     - -
-     - 16
-     - 32
-     - 128
-     - 512
-   * - Max Number of Flow Exporters (e.g. NetFlow router) [total/per ntopng]
-     - -
-     - 4
-     - 16
-     - 128
-     - 256
-     - 512
-   * - Flow Exporters/Interfaces combinations [total/per ntopng]
-     - -
-     - 128
-     - 256
-     - 512
-     - 2K
-     - 8K
-
 .. list-table:: Features by Model
-   :widths: 40 10 10 10 10 10
+   :widths: 50 10 10 10 10 10
    :header-rows: 1
 
    * - Feature
@@ -654,9 +579,72 @@ Version comparison
      - ✗
      - ✗
      - Bundle XL
+   * - Maximum Number of Monitored (Local) Hosts (suggested)
+     - 256
+     - 256
+     - 1K
+     - 4K
+     - 32K
+     - 128K
+   * - Maximum Number of Monitored Flows (suggested)
+     - 128K
+     - 1M
+     - 4M
+     - 8M
+     - 16M
+     - 32M
+   * - Max Number of Host Pools
+     - 3
+     - 3
+     - 128
+     - 128
+     - 128
+     - 128
+   * - Max Number of Host Pool Members (per Pool)
+     - 8
+     - 8
+     - Unlimited
+     - Unlimited
+     - Unlimited
+     - Unlimited
+   * - Maximum Number of Monitored Interfaces (-i)
+     - 8
+     - 8
+     - 16
+     - 32
+     - 64
+     - 64
+   * - Mark and historicize traffic with user-defined traffic profiles to match hosts, ports and applications using the BPF syntax (number of profiles) [total/per ntopng]
+     - -
+     - 16
+     - 128
+     - 128
+     - 128
+     - 128
+   * - Configurable SNMP Devices (device number) [total/per ntopng]
+     - -
+     - -
+     - 16
+     - 32
+     - 128
+     - 512
+   * - Max Number of Flow Exporters (e.g. NetFlow router) [total/per ntopng]
+     - -
+     - 4
+     - 16
+     - 128
+     - 256
+     - 512
+   * - Flow Exporters/Interfaces combinations [total/per ntopng]
+     - -
+     - 128
+     - 256
+     - 512
+     - 2K
+     - 8K
 
-✓ = Feature available
-✗ = Feature NOT available
+
+✓ = Feature available, ✗ = Feature NOT available
 
 \* Feature not available on Windows
 
