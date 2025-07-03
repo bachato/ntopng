@@ -246,7 +246,7 @@ Models Comparison Table
 -----------------------
 
 .. list-table:: Features by Model
-   :widths: 50 10 10 10 10 10
+   :widths: 40 10 10 10 10 10 10
    :header-rows: 1
 
    * - Feature
