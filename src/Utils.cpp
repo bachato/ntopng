@@ -213,12 +213,16 @@ char *Utils::l4proto2name(u_int8_t proto) {
       return ((char *)"ICMP");
     case 2:
       return ((char *)"IGMP");
+    case 4:
+      return ((char *)"IP-in-IP");
     case 6:
       return ((char *)"TCP");
     case 17:
       return ((char *)"UDP");
     case 41:
       return ((char *)"IPv6");
+    case 44:
+      return ((char *)"IPV6-Frag");
     case 46:
       return ((char *)"RSVP");
     case 47:
