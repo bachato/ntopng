@@ -310,7 +310,7 @@ local lang = {
   ["exclude_for"] = "Exclude for",
   ["expired_csrf"] = "Could not perform the requested action because the page expired. Please reload the page and perform the action again.",
   ["export"] = "Export",
-  ["exporters_distribution"] = "Exporters Distribution",
+  ["exporters_distribution"] = "Ingress/Egress Stats",
   ["export_snmp_device_data"] = "Download Debug Data",
   ["external_link"] = "External Link",
   ["external_link_url"] = "<button onclick='const textArea = document.createElement(`textarea`);textArea.value=`%{proto}://%{url}`;textArea.style.position=`absolute`;textArea.style.left=`-999999px`;document.body.prepend(textArea);textArea.select();document.execCommand(`copy`);' class='btn btn-light btn-sm border ms-1' style='cursor: pointer;'><i class='fas fa-copy'></i></button> <a class='ntopng-external-link' href='%{proto}://%{url}' target='_blank'><i class='fas fa-external-link-alt'></i> %{url_name}</a>",

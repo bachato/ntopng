@@ -10,6 +10,7 @@ local l4_protocol_list = {}
 l4_protocol_list.l4_keys = {
   { "TCP",       "tcp",         6 },
   { "UDP",       "udp",        17 },
+  { "IP-in-IP",  "ip_in_ip",    4 },
   { "EIGRP",     "eigrp",      88 },
   { "ESP",       "esp",        50 },
   { "GRE",       "gre",        47 },
@@ -24,6 +25,7 @@ l4_protocol_list.l4_keys = {
   { "OSPF",      "ospf",       89 },
   { "PIM",       "pim",       103 },
   { "RSVP",      "rsvp",       46 },
+  { "IPv6-Frag", "ipv6_frag",  44 },
   { "SCTP",      "sctp",      132 },
   { "VRRP",      "vrrp",      112 },
   { "Other IP",  "other_ip",   -1 }
