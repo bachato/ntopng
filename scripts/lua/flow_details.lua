@@ -2047,7 +2047,7 @@ else
          print("<td colspan=\"2\">" .. custom_name .. "</td></tr>")
       end
 
-      if (snmpdevice ~= nil) then
+      if ((snmpdevice ~= nil) and (snmpdevice ~= "0.0.0.0")) then
          local exporter_info_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/flowdevice_details.lua?ip=" .. snmpdevice
          print("<tr><th>" .. i18n("details.flow_exporter") .. "</th>")
          print("<td colspan=\"2\">" .. "<a href=" .. exporter_info_url .. ">" .. snmpdevice .. "</a></td></tr>")
