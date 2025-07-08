@@ -104,7 +104,7 @@ TLS CERTIFICATE MISMATCH
 .. _Risk 011:
   
 HTTP SUSPICIOUS USER AGENT
-========================
+==========================
 
 #. **Description**: Detection of an unusual or modified User Agent string in HTTP traffic
 #. **Possible attacks**: Use of a custom or altered User Agent string can be indicative of bot traffic, data scraping, or other malicious activities that aim to bypass security mechanisms or evade detection.
@@ -113,7 +113,7 @@ HTTP SUSPICIOUS USER AGENT
 .. _Risk 012:
   
 NUMERIC IP HOST
-========================
+===============
 
 #. **Description**: The detection of numeric IP addresses being used as hostnames indicates potential misconfigurations or malicious activities.
 #. **Possible attacks**: Using numeric IP addresses as hostnames can bypass DNS resolution, enabling data exfiltration, phishing attacks, and other malicious activities that would otherwise be blocked by DNS filtering.
@@ -122,7 +122,7 @@ NUMERIC IP HOST
 .. _Risk 013:
   
 HTTP SUSPICIOUS URL
-========================
+===================
 
 #. **Description**: Detection of HTTP traffic to suspicious URLs in the monitored network.
 #. **Possible Attacks**: This risk signals potential web#.based threats such as malware downloads, phishing attempts, or unauthorized data exfiltration when users visit or interact with these URLs.
@@ -136,7 +136,7 @@ HTTP SUSPICIOUS URL
 .. _Risk 014:
   
 HTTP SUSPICIOUS HEADER
-========================
+======================
 
 #. **Description**: The presence of unusual or unexpected HTTP headers in a network packet.
 #. **Possible Attacks**: Detection of this risk could signal unauthorized activity such as data exfiltration, malware injection, or manipulation of web traffic in the monitored network. Malicious actors may use custom or modified HTTP headers to evade detection or perform unauthorized actions.
@@ -145,7 +145,7 @@ HTTP SUSPICIOUS HEADER
 .. _Risk 015:
   
 TLS NOT CARRYING HTTPS
-========================
+======================
 
 #. **Description**: Traffic using Transport Layer Security (TLS) but not carrying HTTPS. This can indicate a potential security misconfiguration.
 #. **Possible Attacks**: If detected, this could signal an unencrypted HTTP traffic being sent over TLS, exposing sensitive data to eavesdropping or manipulation.
@@ -158,7 +158,7 @@ TLS NOT CARRYING HTTPS
 .. _Risk 016:
   
 SUSPICIOUS DGA DOMAIN
-========================
+=====================
 
 #. **Description**: Detection of a Domain Generated Algorithm (DGA) domain indicates potential malicious activity.
 #. **Possible attacks**: The detection of this risk signals the use of Domain Generation Algorithms, which are typically employed by malware to evade detection by changing its command and control (C&C) servers frequently. This could indicate a network compromise or an ongoing attack.
@@ -167,7 +167,7 @@ SUSPICIOUS DGA DOMAIN
 .. _Risk 017:
   
 MALFORMED PACKET
-========================
+================
 
 #. **Description**: Packet structure does not comply with specified protocol standards.
 #. **Possible attacks**: Malformed packets may hide malicious content or be part of a denial#.of#.service attack, exploiting weaknesses in the network's protocol processing.
@@ -176,7 +176,7 @@ MALFORMED PACKET
 .. _Risk 018:
   
 SSH OBSOLETE CLIENT VERSION OR CIPHER
-========================
+=====================================
 
 #. **Description**: Outdated SSH client version or cipher suite being used in the network connection.
 #. **Possible attacks**: The detection of this risk indicates that a potentially vulnerable client software is being used, which could expose the network to brute force and dictionary attacks, man#.in#.the#.middle (MitM) attacks, and other forms of intrusion.
@@ -189,7 +189,7 @@ SSH OBSOLETE CLIENT VERSION OR CIPHER
 .. _Risk 019:
   
 SSH OBSOLETE SERVER VERSION OR CIPHER
-========================
+=====================================
 
 #. **Description**: Detection of an outdated SSH server version or cipher algorithm indicates potential vulnerabilities in the network security.
 #. **Possible attacks**: Outdated versions and weak ciphers may expose the network to brute force, dictionary, and man#.in#.the#.middle (MITM) attacks, compromising sensitive data transmissions.
@@ -198,7 +198,7 @@ SSH OBSOLETE SERVER VERSION OR CIPHER
 .. _Risk 020:
   
 SMB INSECURE VERSION
-========================
+====================
 
 #. **Description**: Detection of an SMB protocol version with known security vulnerabilities
 #. **Possible attacks**: The detection signals potential exploitation of weaknesses such as EternalBlue, which can lead to unauthorized access, data corruption, or denial of service
@@ -207,7 +207,7 @@ SMB INSECURE VERSION
 .. _Risk 021:
   
 TLS SUSPICIOUS ESNI USAGE
-========================
+=========================
 
 #. **Description**: Usage of Encrypted Server Name Indication (ESNI) in a suspicious or unexpected manner within Transport Layer Security (TLS) connections.
 #. **Possible attacks**: The detection of this risk could indicate the use of stealthy phishing attacks, man#.in#.the#.middle (MitM) attacks, or non#.compliant applications that bypass Certificate Authority (CA) checks, potentially allowing unauthorized access or data exfiltration.
@@ -216,7 +216,7 @@ TLS SUSPICIOUS ESNI USAGE
 .. _Risk 022:
   
 UNSAFE PROTOCOL
-========================
+===============
 
 #. **Description**: Detection of an unsafe protocol not explicitly authorized on the network, which may pose a security risk.
 #. **Possible attacks**: The use of unapproved or unknown protocols can provide opportunities for malicious actors to bypass security controls, introduce vulnerabilities, and facilitate data exfiltration or other forms of cyberattacks.
@@ -229,7 +229,7 @@ UNSAFE PROTOCOL
 .. _Risk 023:
   
 SUSPICIOUS DNS TRAFFIC
-========================
+======================
 
 #. **Description**: Suspicious DNS traffic that does not conform to standard protocol or is anomalous in behavior.
 #. **Possible Attacks**: This detection indicates potential DNS tunneling, phishing, botnet communication, or malware propagation through non#.standard DNS requests and responses.
@@ -238,7 +238,7 @@ SUSPICIOUS DNS TRAFFIC
 .. _Risk 024:
   
 TLS MISSING SNI
-========================
+===============
 
 #. **Description**: The TLS Server Name Indication (SNI) extension is not present in the Transport Layer Security (TLS) handshake.
 #. **Possible attacks**: Detection of this risk indicates that an unencrypted or non#.standard protocol may be used, potentially allowing man#.in#.the#.middle attacks, data tampering, and interception of sensitive information during communication.
@@ -247,7 +247,7 @@ TLS MISSING SNI
 .. _Risk 025:
   
 HTTP SUSPICIOUS CONTENT
-========================
+=======================
 
 #. **Description**: Detection of non#.standard HTTP content in network traffic.
 #. **Possible attacks**: This risk indicates that the monitored network may be subjected to malicious activities such as data manipulation, unauthorized data transmission, or the use of obscure protocols not commonly used in legitimate web traffic.
@@ -256,7 +256,7 @@ HTTP SUSPICIOUS CONTENT
 .. _Risk 026:
   
 RISKY ASN
-========================
+=========
 
 #. **Description**: Monitoring of a network using an ASN (Autonomous System Number) associated with known malicious or high#.risk networks
 #. **Possible attacks**: The detection of this risk indicates that traffic originating from or destined for such networks may pose a security threat, potentially exposing the monitored network to various types of attacks, including DDoS (Distributed Denial of Service), malware distribution, phishing, and more.
@@ -265,7 +265,7 @@ RISKY ASN
 .. _Risk 027:
   
 RISKY DOMAIN
-========================
+============
 
 #. **Description**: Detection of a connection to a domain identified as potentially malicious or high#.risk.
 #. **Possible attacks**: A connection to such domains can signal phishing attempts, malware downloads, botnet communication, or other forms of cyber threats.
@@ -274,12 +274,12 @@ RISKY DOMAIN
 .. _Risk 028:
   
 MALICIOUS FINGERPRINT
-========================
+=====================
 
 .. _Risk 029:
   
 MALICIOUS SHA1 CERTIFICATE
-========================
+==========================
 
 #. **Description**: Detection of a certificate with an SHA#.1 signature in the monitored network traffic. SHA#.1 is no longer considered secure for digital certificates.
 #. **Possible attacks**: This risk indicates that a connection may be using a weak or compromised digital certificate, potentially allowing man#.in#.the#.middle (MitM) attacks or data interception.
@@ -288,7 +288,7 @@ MALICIOUS SHA1 CERTIFICATE
 .. _Risk 030:
   
 DESKTOP OR FILE SHARING SESSION
-========================
+================================
 
 #. **Description**: A network data packet exchange that resembles a desktop or file sharing session.
 #. **Possible Attacks**: This detection signals potential unauthorized data transfers, which could expose sensitive information or introduce malware into the monitored network. It may also indicate inappropriate use of network resources for non#.work related activities.
@@ -297,7 +297,7 @@ DESKTOP OR FILE SHARING SESSION
 .. _Risk 031:
   
 TLS UNCOMMON ALPN
-========================
+=================
 
 #. **Description**: The detection of an unusual Application#.Layer Protocol Negotiation (ALPN) extension in Transport Layer Security (TLS) traffic signifies the use of an uncommon ALPN protocol.
 #. **Possible attacks**: An uncommon ALPN may indicate the use of a non#.standard or proprietary protocol, which can be exploited by attackers to bypass security measures and perform man#.in#.the#.middle (MitM) attacks, data exfiltration, or other malicious activities.
@@ -310,7 +310,7 @@ TLS UNCOMMON ALPN
 .. _Risk 032:
   
 TLS CERTIFICATE VALIDITY TOO LONG
-========================
+=================================
 
 #. **Description**: Certificate validity exceeding the defined time limit in Transport Layer Security (TLS) protocol.
 #. **Possible attacks**: Extended certificate validity periods can hide long#.term compromises, allowing attackers to remain undetected for extended durations and performing malicious activities.
@@ -328,12 +328,12 @@ TLS SUSPICIOUS EXTENSION
 .. _Risk 034:
   
 TLS FATAL ALERT
-========================
+===============
 
 .. _Risk 035:
   
 SUSPICIOUS ENTROPY
-========================
+==================
 
 #. **Description**: High level of entropy in a data packet, indicating potential random or encrypted data.
 #. **Possible attacks**: Detecting this risk signals the presence of unusual or unexpected data patterns that could indicate encryption evasion techniques, obfuscation, or malicious activity such as data exfiltration or botnet communication.
@@ -342,7 +342,7 @@ SUSPICIOUS ENTROPY
 .. _Risk 036:
   
 CLEAR TEXT CREDENTIALS
-========================
+======================
 
 #. **Description**: Transmission of unencrypted login credentials in clear text over the network.
 #. **Possible attacks**: Detection of this risk indicates that sensitive usernames and passwords may be intercepted by malicious actors, leading to potential account takeover or unauthorized access.
@@ -355,7 +355,7 @@ CLEAR TEXT CREDENTIALS
 .. _Risk 037:
   
 LARGE DNS PACKET
-========================
+================
 
 #. **Description**: A DNS (Domain Name System) packet exceeding the standard size limit.
 #. **Possible attacks**: Large DNS packets can indicate a DDoS amplification attack, where an attacker exploits a vulnerable DNS server to flood the target with excessive traffic. This can lead to network congestion and potential service disruption.
@@ -364,7 +364,7 @@ LARGE DNS PACKET
 .. _Risk 038:
   
 DNS FRAGMENTED
-========================
+==============
 
 #. **Description**: Fragmented DNS responses are sent in multiple packets due to being larger than the maximum transmission unit (MTU).
 #. **Possible attacks**: Fragmented DNS responses can hide malicious payloads, making them difficult to detect by traditional methods. Malware and phishing attacks often use this technique to evade network security controls.
@@ -373,7 +373,7 @@ DNS FRAGMENTED
 .. _Risk 039:
   
 INVALID CHARACTERS
-========================
+==================
 
 #. **Description**: The presence of invalid characters in network packets, which may indicate an attempt to circumvent security measures or introduce malicious content.
 #. **Possible attacks**: Detection of this risk can signal a problem such as packet injection with malformed data, SQL injection attempts, or the use of unauthorized or non#.standard protocols.
@@ -382,7 +382,7 @@ INVALID CHARACTERS
 .. _Risk 040:
 
 POSSIBLE EXPLOIT
-========================
+================
 
 #. **Description**: Detection of potentially malicious traffic related to known software exploits such as Log4j or WordPress.
 #. **Possible attacks**: This risk signal indicates the presence of network traffic that matches patterns associated with known software vulnerabilities (exploits). If left unchecked, these exploits can lead to unauthorized access, data breaches, and even remote code execution.
@@ -397,7 +397,7 @@ POSSIBLE EXPLOIT
 .. _Risk 041:
   
 TLS CERTIFICATE ABOUT TO EXPIRE
-========================
+===============================
 
 #. **Description**: A Transport Layer Security (TLS) certificate is about to expire. TLS certificates are used for secure communication over the internet. Expired or invalid certificates can lead to data breaches and man#.in#.the#.middle attacks.
 #. **Possible attacks**: If a TLS certificate is about to expire, it may not be trusted by clients trying to connect. This can cause connections to fail, leading to service disruptions. An expired certificate also opens the door for man#.in#.the#.middle (MITM) attacks, where an attacker can intercept and modify data between the communicating parties.
@@ -406,7 +406,7 @@ TLS CERTIFICATE ABOUT TO EXPIRE
 .. _Risk 042:
   
 PUNYCODE IDN (PUNYCODE INTERNATIONALIZED DOMAIN NAMES)
-========================
+======================================================
 
 #. **Description**: Identification of non#.ASCII domain names using Punycode encoding in DNS packets
 #. **Possible Attacks**: This detection signals a potential for homograph attacks, where malicious actors can disguise their domain as a legitimate one, leading to phishing or other cyber threats.
@@ -420,7 +420,7 @@ PUNYCODE IDN (PUNYCODE INTERNATIONALIZED DOMAIN NAMES)
 .. _Risk 043:
   
 ERROR CODE DETECTED
-========================
+===================
 
 #. **Description**: Detection of an unrecognized or unsupported Network Data Protocol Inspection (NDPI) error code in the monitored network traffic.
 #. **Possible attacks**: This can indicate the presence of unusual or potentially malicious protocols, as well as outdated or misconfigured software that may be susceptible to exploitation by attackers.
@@ -494,23 +494,23 @@ FULLY ENCRYPTED
 .. _Risk 052:
   
 TLS ALPN SNI MISMATCH
-========================
+=====================
 
 
 .. _Risk 053:
   
 MALWARE HOST CONTACTED
-========================
+======================
 
 
 .. _Risk 054:
   
 BINARY DATA TRANSFER
-========================
+====================
 
 
 .. _Risk 055:
   
 PROBING ATTEMPT
-========================
+===============
 
