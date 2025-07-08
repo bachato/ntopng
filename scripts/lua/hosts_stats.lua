@@ -307,9 +307,15 @@ page_utils.print_navbar(i18n("hosts"), base_url .. "?", {{
     label = i18n('active_hosts')
 }, {
     hidden = not host_ts_available or not ntop.isEnterpriseXL(),
-    active = page == "local_hosts_report" or page == nil,
+    active = page == "local_hosts_report",
     page_name = "local_hosts_report",
     label = i18n("local_hosts_report")
+}, {
+    hidden = not areASTimeseriesEnabled(ifid) or not asn,
+    active = page == "exporters_stats",
+    page_name = "exporters_stats",
+    label = i18n("exporters_stats"),
+    url = ntop.getHttpPrefix() .. "/lua/as_overview.lua?asn=" .. (asn or 0)
 }})
 
 if page == 'active_hosts' and ntop.isnEdge() then

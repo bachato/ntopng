@@ -3,7 +3,8 @@
 --
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
-package.path = dirs.installdir .. "/scripts/lua/modules/pools/?.lua;" .. package.path
+package.path = dirs.installdir .. "/scripts/lua/modules/pools/?.lua;" ..
+                   package.path
 
 require "label_utils"
 require "lua_utils_gui"
@@ -15,19 +16,11 @@ local country = _GET["country"]
 local mac = _GET["mac"]
 local asn = _GET["asn"]
 
-local ip_version_filters = {{
-    key = "version",
-    value = "",
-    label = i18n("all")
-}, {
-    key = "version",
-    value = "4",
-    label = i18n("flows_page.ipv4_only")
-}, {
-    key = "version",
-    value = "6",
-    label = i18n("flows_page.ipv6_only")
-}}
+local ip_version_filters = {
+    {key = "version", value = "", label = i18n("all")},
+    {key = "version", value = "4", label = i18n("flows_page.ipv4_only")},
+    {key = "version", value = "6", label = i18n("flows_page.ipv6_only")}
+}
 
 rsp[#rsp + 1] = {
     action = "version",
@@ -38,14 +31,11 @@ rsp[#rsp + 1] = {
 
 local networks_stats = interface.getNetworksStats() or {}
 if table.len(networks_stats) > 1 then
-    local network_filters = {{
-        key = "network",
-        value = "",
-        label = i18n("all")
-    }}
+    local network_filters = {{key = "network", value = "", label = i18n("all")}}
     local tmp_list = {}
     for n, local_network in pairs(networks_stats) do
-        local network_name = getFullLocalNetworkName(tostring(local_network["network_key"]))
+        local network_name = getFullLocalNetworkName(tostring(
+                                                         local_network["network_key"]))
         tmp_list[network_name] = {
             key = "network",
             value = local_network["network_id"],
@@ -67,16 +57,10 @@ end
 
 local vlans = interface.getVLANsList()
 if vlans then
-    local vlan_filters = {{
-        key = "vlan",
-        value = "",
-        label = i18n("all")
-    }}
+    local vlan_filters = {{key = "vlan", value = "", label = i18n("all")}}
     for _, vlan in pairs(vlans.VLANs) do
         local vlan_name = tostring(getFullVlanName(vlan["vlan_id"]))
-        if isEmptyString(vlan_name) then
-            vlan_name = i18n('no_vlan')
-        end
+        if isEmptyString(vlan_name) then vlan_name = i18n('no_vlan') end
         vlan_filters[#vlan_filters + 1] = {
             key = "vlan",
             value = vlan["vlan_id"],
@@ -92,19 +76,17 @@ if vlans then
     }
 end
 
-local direction_filters = {{
-    key = "traffic_type",
-    value = "",
-    label = i18n("all")
-}, {
-    key = "traffic_type",
-    value = "one_way",
-    label = i18n("hosts_stats.traffic_type_one_way")
-}, {
-    key = "traffic_type",
-    value = "bidirectional",
-    label = i18n("hosts_stats.traffic_type_two_ways")
-}}
+local direction_filters = {
+    {key = "traffic_type", value = "", label = i18n("all")}, {
+        key = "traffic_type",
+        value = "one_way",
+        label = i18n("hosts_stats.traffic_type_one_way")
+    }, {
+        key = "traffic_type",
+        value = "bidirectional",
+        label = i18n("hosts_stats.traffic_type_two_ways")
+    }
+}
 
 rsp[#rsp + 1] = {
     action = "traffic_type",
@@ -113,43 +95,44 @@ rsp[#rsp + 1] = {
     value = direction_filters
 }
 
-local hosts_filters = {{
-    key = "mode",
-    value = "",
-    label = i18n("all")
-}, {
-    key = "mode",
-    value = "blacklisted",
-    label = i18n("hosts_stats.blacklisted_hosts_only")
-}, {
-    key = "mode",
-    value = "broadcast_multicast",
-    label = i18n("hosts_stats.broadcast_and_multicast")
-}, {
-    key = "mode",
-    value = "local",
-    label = i18n("hosts_stats.local_hosts_only")
-}, {
-    key = "mode",
-    value = "local_no_tx",
-    label = i18n("hosts_stats.local_no_tx")
-}, {
-    key = "mode",
-    value = "local_no_tcp_tx",
-    label = i18n("hosts_stats.local_no_tcp_tx")
-}, {
-    key = "mode",
-    value = "remote",
-    label = i18n("hosts_stats.remote_hosts_only")
-}, {
-    key = "mode",
-    value = "remote_no_tx",
-    label = i18n("hosts_stats.remote_no_tx")
-}, {
-    key = "mode",
-    value = "remote_no_tcp_tx",
-    label = i18n("hosts_stats.remote_no_tcp_tx")
-}}
+local hosts_filters = {
+    {key = "mode", value = "", label = i18n("all")}, {
+        key = "mode",
+        value = "blacklisted",
+        label = i18n("hosts_stats.blacklisted_hosts_only")
+    }, {
+        key = "mode",
+        value = "broadcast_multicast",
+        label = i18n("hosts_stats.broadcast_and_multicast")
+    },
+    {
+        key = "mode",
+        value = "local",
+        label = i18n("hosts_stats.local_hosts_only")
+    },
+    {
+        key = "mode",
+        value = "local_no_tx",
+        label = i18n("hosts_stats.local_no_tx")
+    }, {
+        key = "mode",
+        value = "local_no_tcp_tx",
+        label = i18n("hosts_stats.local_no_tcp_tx")
+    },
+    {
+        key = "mode",
+        value = "remote",
+        label = i18n("hosts_stats.remote_hosts_only")
+    }, {
+        key = "mode",
+        value = "remote_no_tx",
+        label = i18n("hosts_stats.remote_no_tx")
+    }, {
+        key = "mode",
+        value = "remote_no_tcp_tx",
+        label = i18n("hosts_stats.remote_no_tcp_tx")
+    }
+}
 
 if interface.isPacketInterface() and not interface.isPcapDumpInterface() then
     hosts_filters[#hosts_filters + 1] = {
@@ -176,11 +159,7 @@ local host_pools = require "host_pools"
 local host_pools_instance = host_pools:create()
 local pools = host_pools_instance:get_all_pools()
 if (table.len(pools) > 1) then
-    local pool_filters = {{
-        key = "pool",
-        value = "",
-        label = i18n("all")
-    }}
+    local pool_filters = {{key = "pool", value = "", label = i18n("all")}}
     local tmp_list = {}
     for _, pool in pairs(pools) do
         tmp_list[pool.name] = {
@@ -206,18 +185,15 @@ if ntop.isPro() then
     local flowdevs = interface.getFlowDevices() or {}
     local devips = getProbesName(flowdevs)
     if table.len(devips) > 0 then
-        local exporter_filters = {{
-            key = "deviceIP",
-            value = "",
-            label = i18n("all")
-        }}
+        local exporter_filters = {
+            {key = "deviceIP", value = "", label = i18n("all")}
+        }
         local tmp_list = {}
         for interface, device_list in pairs(devips or {}) do
             for dev_ip, dev_resolved_name in pairsByValues(device_list, asc) do
                 local dev_name = dev_ip
-                if not isEmptyString(dev_resolved_name) and dev_resolved_name ~= dev_name then
-                    dev_name = dev_resolved_name
-                end
+                if not isEmptyString(dev_resolved_name) and dev_resolved_name ~=
+                    dev_name then dev_name = dev_resolved_name end
                 tmp_list[dev_name] = {
                     key = "deviceIP",
                     value = dev_ip,
@@ -242,22 +218,15 @@ end
 if ntop.isPro() and not isEmptyString(_GET["deviceIP"]) then
     local dev_ip = _GET["deviceIP"]
     -- Flow exporter requested
-    local in_ports = {{
-        key = "inIfIdx",
-        value = "",
-        label = i18n("all")
-    }}
-    local ports_table = interface.getFlowDeviceInfoByIP(dev_ip, true --[[ Show minimal info ]] )
-    
+    local in_ports = {{key = "inIfIdx", value = "", label = i18n("all")}}
+    local ports_table =
+        interface.getFlowDeviceInfoByIP(dev_ip, true --[[ Show minimal info ]] )
+
     local tmp_list = {}
     for _, ports in pairs(ports_table) do
         for portidx, _ in pairsByKeys(ports, asc) do
             local name = format_portidx_name(dev_ip, portidx, true)
-            tmp_list[name] = {
-                key = "inIfIdx",
-                value = portidx,
-                label = name
-            }
+            tmp_list[name] = {key = "inIfIdx", value = portidx, label = name}
         end
     end
 
@@ -274,22 +243,14 @@ if ntop.isPro() and not isEmptyString(_GET["deviceIP"]) then
         show_with_key = "deviceIP"
     }
 
-    local out_ports = {{
-        key = "outIfIdx",
-        value = "",
-        label = i18n("all")
-    }}
+    local out_ports = {{key = "outIfIdx", value = "", label = i18n("all")}}
     local ports_table = interface.getFlowDeviceInfoByIP(dev_ip, false)
 
     tmp_list = {}
     for _, ports in pairs(ports_table) do
         for portidx, _ in pairsByKeys(ports, asc) do
             local name = format_portidx_name(dev_ip, portidx, true)
-            tmp_list[name] = {
-                key = "outIfIdx",
-                value = portidx,
-                label = name
-            }
+            tmp_list[name] = {key = "outIfIdx", value = portidx, label = name}
         end
     end
 
@@ -307,18 +268,16 @@ if ntop.isPro() and not isEmptyString(_GET["deviceIP"]) then
     }
 end
 
-local country_filter = {{
-    key = "country",
-    value = "",
-    label = i18n("all")
-}, {
-    key = "country",
-    value = country,
+local country_filter = {
+    {key = "country", value = "", label = i18n("all")}, {
+        key = "country",
+        value = country,
 
-    label = country -- .. " <img src='/dist/images/blank.gif' class='flag flag-" .. string.lower(country) .. "'>"
-}}
+        label = country -- .. " <img src='/dist/images/blank.gif' class='flag flag-" .. string.lower(country) .. "'>"
+    }
+}
 
-if (not isEmptyString(country)) then 
+if (not isEmptyString(country)) then
     rsp[#rsp + 1] = {
         action = "country",
         label = i18n("country"),
@@ -327,17 +286,11 @@ if (not isEmptyString(country)) then
     }
 end
 
-local as_filter = {{
-    key = "asn",
-    value = "",
-    label = i18n("all")
-}, {
-    key = "asn",
-    value = asn,
-    label = asn
-}}
-
-if (not isEmptyString(asn)) then 
+if (not isEmptyString(asn)) then
+    local as_filter = {
+        {key = "asn", value = "", label = i18n("all")},
+        {key = "asn", value = asn, label = ntop.getASNameFromASN(tonumber(asn))}
+    }
     rsp[#rsp + 1] = {
         action = "asn",
         label = i18n("as"),
@@ -346,17 +299,12 @@ if (not isEmptyString(asn)) then
     }
 end
 
-local mac_filter = {{
-    key = "mac",
-    value = "",
-    label = i18n("all")
-}, {
-    key = "mac",
-    value = mac,
-    label = mac
-}}
+local mac_filter = {
+    {key = "mac", value = "", label = i18n("all")},
+    {key = "mac", value = mac, label = mac}
+}
 
-if (not isEmptyString(mac)) then 
+if (not isEmptyString(mac)) then
     rsp[#rsp + 1] = {
         action = "mac",
         label = i18n("mac_address"),

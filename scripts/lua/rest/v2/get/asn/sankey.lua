@@ -195,8 +195,9 @@ local function build_interface_exporter(criteria, tot_bytes_exp_if,
                 exporter_nodes[data.exporter_ip] = exporter_node_id
             end
             nprobe_stats = search_probe(data.exporter_ip)
+            
             local url = "#"
-            if ntop.isEnterprise() then 
+            if ntop.isEnterprise() and nprobe_stats then 
                 url = ntop.getHttpPrefix() ..
                         '/lua/pro/enterprise/exporter_details.lua?ip=' .. exporter_ip ..
                         '&exporter_uuid=' .. nprobe_stats.exporter_uuid ..
