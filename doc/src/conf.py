@@ -295,9 +295,9 @@ texinfo_documents = [
 #texinfo_no_detailmenu = False
 
 # sphinx 1.8
-intersphinx_mapping = {'https://docs.python.org/': None}
+#intersphinx_mapping = {'https://docs.python.org/': None}
 # sphinx 8.0
-#intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
 
 pdf_documents = [('index', u'ntopng_usersguide', u'ntop Users Guide', u'ntop'),]
 # index - master document
@@ -307,7 +307,7 @@ pdf_documents = [('index', u'ntopng_usersguide', u'ntop Users Guide', u'ntop'),]
           
 def setup(app):
     # sphinx 1.8
-    app.add_stylesheet('css/ntop.css')
+    #app.add_stylesheet('css/ntop.css')
     # sphinx 8.0
-    #app.add_css_file('css/ntop.css')
+    app.add_css_file('css/ntop.css')
 
