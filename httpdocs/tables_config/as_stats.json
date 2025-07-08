@@ -25,11 +25,11 @@
 					"event_id": "click_button_timeseries"
 				},
 				{
-					"id": "exporters_distro",
+					"id": "exporters_stats",
 					"icon": "fas fa-file-export",
-					"title_i18n": "exporters_distribution",
+					"title_i18n": "exporters_stats",
 					"class": [],
-					"event_id": "click_button_exporters_distro"
+					"event_id": "click_button_exporters_stats"
 				},
 				{
 					"id": "host",

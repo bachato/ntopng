@@ -157,13 +157,15 @@ const map_table_def_columns = (columns) => {
             const visible_dict = {
                 host: true,
                 flows: true,
-                exporters_distro: showSankey,
+                exporters_stats: showSankey,
                 timeseries: props.context.showTimeseries,
             };
             c.button_def_array.forEach((b) => {
                 b.f_map_class = (current_class, row) => {
                     // if is not defined is enabled
                     if (!visible_dict[b.id]) {
+                        current_class.push("disabled");
+                    } else if(row.asn === 0 && (b.id === "exporters_stats" || b.id === "timeseries")) {
                         current_class.push("disabled");
                     }
                     return current_class;
@@ -177,7 +179,7 @@ const map_table_def_columns = (columns) => {
 
 /* ************************************** */
 
-function click_button_exporters_distro(event) {
+function click_button_exporters_stats(event) {
     const row = event.row;
     window.location.href = `${http_prefix}/lua/as_overview.lua?asn=${row["asn"]}`;
 }
@@ -209,7 +211,7 @@ function on_table_custom_event(event) {
     let events_managed = {
         "click_button_host": click_button_host,
         "click_button_flows": click_button_flows,
-        "click_button_exporters_distro": click_button_exporters_distro,
+        "click_button_exporters_stats": click_button_exporters_stats,
         "click_button_timeseries": click_button_timeseries,
     };
     if (events_managed[event.event_id] == null) {
