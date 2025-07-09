@@ -389,14 +389,14 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
-   * - Limit or block hosts’ traffic with customized per-application policies *
+   * - Limit or block hosts’ traffic with customized per-application policies \*
      - ✗
      - ✗
      - ✓
      - ✓
      - ✓
      - ✓
-   * - Integrate ntopng login with LDAP authentication servers * **
+   * - Integrate ntopng login with LDAP authentication servers \* \*\*
      - ✗
      - ✓
      - ✓
@@ -522,21 +522,21 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
-   * - Apply per-protocol daily traffic and time quotas to your clients *
+   * - Apply per-protocol daily traffic and time quotas to your clients \*
      - ✗
      - ✗
      - ✓
      - ✓
      - ✓
      - ✓
-   * - High performance flow export to ClickHouse and explorer (both aggregated data explorer and historical flow explorer) *
+   * - High performance flow export to ClickHouse and explorer (both aggregated data explorer and historical flow explorer) \*
      - ✗
      - ✗
      - ✓
      - ✓
      - ✓
      - ✓
-   * - Custom Interface Disaggregation †
+   * - Custom Interface Disaggregation \*\*\*
      - ✗
      - ✗
      - ✓
@@ -606,28 +606,28 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
-   * - Continuous Recording license Included (n2disk 1Gbit)† **
+   * - Continuous Recording license Included (n2disk 1Gbit) \*\* \*\*\*
      - ✗
      - ✗
      - ✗
      - Bundle L
      - Bundle XL
      - ✗
-   * - Smart Recording license Included (n2disk 1Gbit)† **
+   * - Smart Recording license Included (n2disk 1Gbit) \*\* \*\*\*
      - ✗
      - ✗
      - ✗
      - ✗
      - Bundle XL
      - ✗
-   * - Flow Collection license Included (nProbe Pro)†
+   * - Flow Collection license Included (nProbe Pro) \*\*\*
      - ✗
      - ✗
      - ✗
      - Bundle L
      - ✗
      - ✗
-   * - Flow Collection license Included (nProbe Enterprise S)†
+   * - Flow Collection license Included (nProbe Enterprise S) \*\*\*
      - ✗
      - ✗
      - ✗
@@ -703,6 +703,6 @@ Models Comparison Table
 
 \* Feature not available on Windows
 
-** Feature not available on FreeBSD / OPNsense / pfSense
+\*\* Feature not available on FreeBSD / OPNsense / pfSense
 
-† Read more about the software bundled with the Bundle edition in the `FAQ <https://www.ntop.org/faq/what-is-included-in-ntopng-enterprise-l-xl-bundle/>`_
+\*\*\* Read more about the software bundled with the Bundle edition in the `FAQ <https://www.ntop.org/faq/what-is-included-in-ntopng-enterprise-l-xl-bundle/>`_
