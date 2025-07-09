@@ -1,6 +1,6 @@
 (sFlow/NetFlow) Flow Collection via ZMQ
 ---------------------------------------
-As described in http://www.ntop.org/nprobe/why-nprobejsonzmq-instead-of-native-sflownetflow-support-in-ntopng/
+As described in https://www.ntop.org/nprobe/why-nprobejsonzmq-instead-of-native-sflownetflow-support-in-ntopng/
 ntopng does not natively handle netflow but it rather does that via ZMQ.
 
 In ZMQ we have reverted the NetFlow collector/probe paradigm. When used via ZMQ ntopng connects to the

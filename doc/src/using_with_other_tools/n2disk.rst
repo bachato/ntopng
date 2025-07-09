@@ -25,7 +25,7 @@ In order to be able to enable this feature:
 3. *ntopng* and *n2disk* should be installed and running on the same host to get a copy of the same traffic and be able to interact (access the same file system).
 
 In order to install n2disk (we assume that you already configured the 
-`ntop repository <http://packages.ntop.org>`_ and have *ntopng* installed)
+`ntop repository <https://packages.ntop.org>`_ and have *ntopng* installed)
 run the below commands according to your Linux distribution:
 
 *apt*
@@ -44,7 +44,7 @@ Please make sure that *ntopng* is running using the *ntopng* user, which
 is the default since version 3.7, as reported in `this notice <https://www.ntop.org/support/faq/migrate-the-data-directory-in-ntopng/>`_.
 
 In order to use *n2disk* a license is also required, you can get one at
-`e-shop <http://shop.ntop.org>`_ or, if you are no-profit, research or an 
+`e-shop <https://shop.ntop.org>`_ or, if you are no-profit, research or an 
 education institution please read `this <https://www.ntop.org/support/faq/do-you-charge-universities-no-profit-and-research/>`_.
 The *n2disk* license can be installed directly from *ntopng* through the
 *Preferences*, *Traffic Recording* menu. The same page also provides
@@ -343,8 +343,8 @@ ZC/FPGA Support
 ---------------
 
 If you need to process traffic at high rate at 10/40Gbit and above, you are probably looking for
-capture technologies like `PF_RING ZC <http://www.ntop.org/guides/pf_ring/zc.html>`_ for Intel
-or `FPGA <http://www.ntop.org/guides/pf_ring/modules/index.html>`_ adapters.
+capture technologies like `PF_RING ZC <https://www.ntop.org/guides/pf_ring/zc.html>`_ for Intel
+or `FPGA <https://www.ntop.org/guides/pf_ring/modules/index.html>`_ adapters.
 
 As both PF_RING ZC and FPGA adapters are based on kernel bypass, the drawback is that they do not 
 allow you to capture the same stream from multiple applications at the same time. This means that
@@ -352,7 +352,7 @@ you cannot run ntopng for traffic analysis and n2disk for raw traffic recording 
 on the same interface.
 
 In order to overcome this, n2disk is able to export flow metadata to ntopng over ZMQ, similar to
-what nProbe does as explained in the `Using ntopng with nProbe <http://www.ntop.org/guides/ntopng/using_with_nprobe.html>`_ section. 
+what nProbe does as explained in the `Using ntopng with nProbe <https://www.ntop.org/guides/ntopng/using_with_nprobe.html>`_ section. 
 As depicted below, in this configuration n2disk can be configured to capture raw packets, dump PCAP 
 data to disk, and export flow metadata in JSON format through ZMQ to ntopng at the same time. 
 
@@ -385,9 +385,9 @@ metadata in addition to traffic statistics) are also required.
 It is a good practice to run n2disk using the *ntopng* user (see :code:`-u`) in order to make sure that
 ntopng is able to access the PCAP data recorded by n2disk and run traffic extractions.
 
-Please see the `n2disk User's Guide <http://www.ntop.org/guides/n2disk/index.html>`_ for further information
+Please see the `n2disk User's Guide <https://www.ntop.org/guides/n2disk/index.html>`_ for further information
 about the other options. Please note that in the example below n2disk is aggregating traffic in hardware
-from 2 ports of a Napatech adapter, please see the `Napatech configuration <http://www.ntop.org/guides/n2disk/napatech.html>`_
+from 2 ports of a Napatech adapter, please see the `Napatech configuration <https://www.ntop.org/guides/n2disk/napatech.html>`_
 for configuring the adapter.
 
 .. code:: bash

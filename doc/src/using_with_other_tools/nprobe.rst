@@ -26,7 +26,7 @@ The following picture summarizes the two scenarios highlighted above and demonst
 In the picture above, arrows from nProbe to ntopng represent the logical direction of exported flows. In practice:
 
  - The actual connection can either be initiated by ntopng or nProbe as discussed in `Using Behind a Firewall`_.
- - nProbe export flows in TLV format, or optionally as standard JSON, over ZMQ (http://zeromq.org/). The benefits of this are described in detail in the following blog post http://www.ntop.org/nprobe/why-nprobejsonzmq-instead-of-native-sflownetflow-support-in-ntopng/.
+ - nProbe export flows in TLV format, or optionally as standard JSON, over ZMQ (http://zeromq.org/). The benefits of this are described in detail in the following blog post https://www.ntop.org/nprobe/why-nprobejsonzmq-instead-of-native-sflownetflow-support-in-ntopng/.
 
 Following is a minimum, working, configuration example of nProbe and ntopng to obtain what has been sketched in the picture above. The example assumes both ntopng and nProbe are running on the same (local) host. In case they run on separate machines, the IP address :code:`127.0.0.1` has to be changed with the address of the machine hosting nProbe.
 

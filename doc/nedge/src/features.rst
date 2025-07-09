@@ -35,4 +35,4 @@ Some of the ntopng features, however, are *not* available in nEdge:
    Currently, IPv6 traffic is neither handled nor forwarded by
    nEdge. IPv6 traffic is never forwarded to LAN or WAN devices.
 
-.. _ntopng: http://www.ntop.org/products/traffic-analysis/ntop/
+.. _ntopng: https://www.ntop.org/products/traffic-analysis/ntop/
