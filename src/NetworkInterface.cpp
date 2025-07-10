@@ -510,7 +510,8 @@ struct ndpi_detection_module_struct *NetworkInterface::initnDPIStruct() {
 				     num);
 
 	/* Deleete domains cache */
-	ntop->getRedis()->del((char*)"ntopng.domains");
+	if(ntop->getRedis())
+	  ntop->getRedis()->del((char*)"ntopng.domains");
       }
     }
   }
