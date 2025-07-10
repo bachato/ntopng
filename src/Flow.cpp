@@ -6858,7 +6858,7 @@ bool Flow::updateDirectionShapers(bool src2dst_direction,
     u_int16_t cli_pool = cli_host->get_host_pool();
     u_int16_t srv_pool = srv_host->get_host_pool();
 
-    if(src2dst_direction) {
+    if(src2dst_direction) { /* Cli (-> Srv) */
 
       if (cli_pool == NO_HOST_POOL_ID && srv_pool != NO_HOST_POOL_ID)
         *egress_shaper = NULL; /* do not use shaper for Not Assigned if the other host has a pool */
@@ -6866,23 +6866,22 @@ bool Flow::updateDirectionShapers(bool src2dst_direction,
         *egress_shaper  = cli_host->get_egress_shaper(ndpiDetectedProtocol);
 
       if (srv_pool == NO_HOST_POOL_ID && cli_pool != NO_HOST_POOL_ID)
-        *egress_shaper = NULL;
+        *ingress_shaper = NULL;
       else
         *ingress_shaper = srv_host->get_ingress_shaper(ndpiDetectedProtocol);
 
       if(*egress_shaper)  cli2srv_out = (*egress_shaper)->get_shaper_id();
       if(*ingress_shaper) srv2cli_in = (*ingress_shaper)->get_shaper_id();
 
-    } else {
+    } else { /* Srv (-> Cli) */
 
       if (srv_pool == NO_HOST_POOL_ID && cli_pool != NO_HOST_POOL_ID)
-        *egress_shaper = NULL;
+        *egress_shaper = NULL; /* do not use shaper for Not Assigned if the other host has a pool */
       else
         *egress_shaper  = srv_host->get_egress_shaper(ndpiDetectedProtocol);
 
-
       if (cli_pool == NO_HOST_POOL_ID && srv_pool != NO_HOST_POOL_ID)
-        *egress_shaper = NULL;
+        *ingress_shaper = NULL;
       else
         *ingress_shaper = cli_host->get_ingress_shaper(ndpiDetectedProtocol);
 
