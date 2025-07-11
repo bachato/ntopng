@@ -17,7 +17,7 @@
                                 </div>
                                 <div class="ms-4 me-4">
                                     <textarea v-model="asnList[key]" class="form-control rounded"
-                                        :placeholder="`Enter an ASN IDs list (Comma Separated)`"
+                                        :placeholder="`Enter a comma separated list of ASNs`"
                                         @input="markAsModified(key)" rows="2"></textarea>
                                     <small>{{ _i18n(value.i18n_description) }}</small>
                                     <div v-if="validationErrors[key]" class="text-danger mt-1">
