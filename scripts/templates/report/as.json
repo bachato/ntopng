@@ -37,6 +37,29 @@
 	],
 	"components" : [
 	{
+		"component" : "timeseries",
+		"id" : "top_as_chart",
+		"i18n_name" : "graphs.top_asn",
+		"width" : 12,
+		"height" : 4,
+		"params" : {
+			"url" : "/lua/pro/rest/v2/get/timeseries/ts_multi.lua",
+			"url_params" : { },
+			"post_params" : {
+				"limit" : 180,
+				"version" : 4,
+				"ts_requests": {
+					"ifid" : {
+						"ts_query": "ifid:$IFID$",
+						"ts_schema": "top:asn:traffic",
+						"tskey": "$IFID$"
+					}
+				}
+			},
+			"source_type" : "interface"
+		}
+	},
+	{
 		"component" : "table",
 		"id" : "top_asn",
 		"i18n_name" : "report.top_asn",
