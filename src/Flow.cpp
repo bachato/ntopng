@@ -26,7 +26,9 @@
 const ndpi_protocol Flow::ndpiUnknownProtocol = {
   { NDPI_PROTOCOL_UNKNOWN /* master_protocol */, NDPI_PROTOCOL_UNKNOWN /* app_protocol */ },
   NDPI_PROTOCOL_UNKNOWN, /* protocol_by_ip */
-  NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, NULL};
+  NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, NULL
+};
+
 // #define DEBUG_DISCOVERY
 // #define DEBUG_UA
 // #define DEBUG_SCORE
@@ -6913,7 +6915,7 @@ void Flow::updateFlowShapers(bool first_update) {
   cli2srv_verdict = updateDirectionShapers(true,  &flowShaperIds.cli2srv.ingress, &flowShaperIds.cli2srv.egress);
   srv2cli_verdict = updateDirectionShapers(false, &flowShaperIds.srv2cli.ingress, &flowShaperIds.srv2cli.egress);
   if (!cli2srv_verdict) dropVerdictReason = DROP_REASON_CLI2SRV_SHAPER;
-  if (!srv2cli_verdict) dropVerdictReason = DROP_REASON_SRV2CLI_SHAPER;
+  else if (!srv2cli_verdict) dropVerdictReason = DROP_REASON_SRV2CLI_SHAPER;
   new_verdict = (cli2srv_verdict && srv2cli_verdict);
 
   if(ntop->getPrefs()->are_device_protocol_policies_enabled() &&
@@ -6925,8 +6927,7 @@ void Flow::updateFlowShapers(bool first_update) {
     if(cli_host->getDeviceAllowedProtocolStatus(ndpiDetectedProtocol, true /* client */) != device_proto_allowed) {
       dropVerdictReason = DROP_REASON_DEV_NOT_ALLOW_PROTO_CLI;
       new_verdict = false;
-    }
-    if(srv_host->getDeviceAllowedProtocolStatus(ndpiDetectedProtocol, false /* server */) != device_proto_allowed) {
+    } else if(srv_host->getDeviceAllowedProtocolStatus(ndpiDetectedProtocol, false /* server */) != device_proto_allowed) {
       dropVerdictReason = DROP_REASON_DEV_NOT_ALLOW_PROTO_SRV;
       new_verdict = false;
     }

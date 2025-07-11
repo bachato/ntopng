@@ -1534,7 +1534,7 @@ TrafficShaper *Host::get_shaper(ndpi_protocol ndpiProtocol, bool isIngress) {
     ntop->getTrace()->traceEvent(
         TRACE_NORMAL, "[%s] [%s@%u][ndpiProtocol=%d/%s] => [shaper_id=%d]",
         isIngress ? "INGRESS" : "EGRESS", ip.print(buf, sizeof(buf)), vlan_id,
-        ndpiProtocol.app_protocol,
+        ndpiProtocol.proto.app_protocol,
         ndpi_protocol2name(iface->get_ndpi_struct(), ndpiProtocol, buf1,
                            sizeof(buf1)),
         shaper_id);
