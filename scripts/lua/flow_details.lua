@@ -558,6 +558,9 @@ if (flow == nil) then
    print('<div class=\"alert alert-danger\"><i class="fas fa-exclamation-triangle fa-lg"></i> ' ..
       i18n("flow_details.flow_cannot_be_found_message") .. ' ' .. purgedErrorString() .. '</div>')
 else
+   local client_to_server_label = i18n("client") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("server")
+   local server_to_client_label = i18n("server") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("client")
+
    if isAdministrator() then
       if (_POST["drop_flow_policy"] == "true") then
          interface.dropFlowTraffic(tonumber(flow_key))
@@ -738,11 +741,28 @@ else
              host_pools_nedge.poolIdToUsername(flow["srv.pool_id"]) .. "</a>)"
       end
 
-      local shaper = shaper_utils.nedge_shaper_id_to_shaper(flow["shaper.cli2srv_egress"])
-      print("<td nowrap>" .. c .. "</td><td>" .. shaper.icon .. " " .. shaper.text .. "</td></tr>")
+      local shaper
 
-      local shaper = shaper_utils.nedge_shaper_id_to_shaper(flow["shaper.cli2srv_ingress"])
-      print("<td nowrap>" .. s .. "</td><td>" .. shaper.icon .. " " .. shaper.text .. "</td></tr>")
+      print("<td nowrap>" .. c .. "</td>")
+      shaper = shaper_utils.nedge_shaper_id_to_shaper(flow["shaper.cli2srv_egress"])
+
+      print("<td>")
+      print(client_to_server_label .. ": ")
+      shaper = shaper_utils.nedge_shaper_id_to_shaper(flow["shaper.cli2srv_ingress"])
+      print(i18n("ingress") .. shaper.icon .. " " .. shaper.text)
+      shaper = shaper_utils.nedge_shaper_id_to_shaper(flow["shaper.cli2srv_egress"])
+      print(i18n("egress") .. shaper.icon .. " " .. shaper.text)
+      print("</td>")
+      print("</tr>")
+
+      print("<td nowrap>" .. s .. "</td>")
+      print("<td>")
+      print(server_to_client_label .. ": ")
+      shaper = shaper_utils.nedge_shaper_id_to_shaper(flow["shaper.srv2cli_ingress"])
+      print(i18n("ingress") .. shaper.icon .. " " .. shaper.text)
+      shaper = shaper_utils.nedge_shaper_id_to_shaper(flow["shaper.srv2cli_egress"])
+      print(i18n("egress") .. shaper.icon .. " " .. shaper.text)
+      print("</td>")
       print("</tr>")
 
       if flow["cli.pool_id"] ~= nil and flow["srv.pool_id"] ~= nil then
@@ -827,9 +847,6 @@ else
    if (flow.tcp_fingerprint) then
       print("<tr><th width=33%>" .. i18n("details.tcp_fingerprint") .. "</th><td nowrap colspan=2<div id=duration>" .. flow.tcp_fingerprint .. "</div></td>\n")
    end
-
-   local client_to_server_label = i18n("client") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("server")
-   local server_to_client_label = i18n("server") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("client")
 
    if flow["bytes"] > 0 then
       print("<tr><th width=10% rowspan=3>" .. i18n("details.total_traffic") .. "</th><td>" .. i18n("total") ..
