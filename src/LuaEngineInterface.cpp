@@ -2103,7 +2103,7 @@ static int ntop_get_mac_device_types(lua_State *vm) {
 static int ntop_get_interface_ases_info(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
   bool diff = false;
-
+  ASType as_type = all;
   Paginator *p = NULL;
 
   if (!curr_iface)
@@ -2117,7 +2117,10 @@ static int ntop_get_interface_ases_info(lua_State *vm) {
   if (lua_type(vm, 2) == LUA_TBOOLEAN)
     diff = lua_toboolean(vm, 2) ? true : false;
 
-  if (curr_iface->getActiveASList(vm, p, diff) < 0) {
+  if (lua_type(vm, 3) == LUA_TNUMBER)
+    as_type = (ASType) lua_tointeger(vm, 3);
+
+  if (curr_iface->getActiveASList(vm, p, diff, as_type) < 0) {
     if (p) delete (p);
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   }

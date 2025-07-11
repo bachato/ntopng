@@ -8861,7 +8861,7 @@ int NetworkInterface::getActiveMacList(
 /* **************************************** */
 
 int NetworkInterface::getActiveASList(lua_State *vm, const Paginator *p,
-                                      bool diff) {
+                                      bool diff, ASType as_type) {
   struct flowHostRetriever retriever;
   DetailsLevel details_level;
 
@@ -8881,20 +8881,44 @@ int NetworkInterface::getActiveASList(lua_State *vm, const Paginator *p,
   if (p->a2zSortOrder()) {
     for (int i = p->toSkip(), num = 0;
          i < (int)retriever.actNumEntries && num < (int)p->maxHits();
-         i++, num++) {
+         i++) {
       AutonomousSystem *as = retriever.elems[i].asValue;
+      bool dont_skip_as = true;
+      if (as_type) {
+        switch(as_type) {
+          case customer_asn: dont_skip_as = ntop->getPrefs()->isCustomerASN(as->get_asn()); break;
+          case sub_customer_asn: dont_skip_as = ntop->getPrefs()->isSubCustomerASN(as->get_asn()); break;
+          case remote_asn: dont_skip_as = ntop->getPrefs()->isRemoteASN(as->get_asn()); break;
+          default: dont_skip_as = true; break;
+        }
+      }
 
-      as->lua(vm, details_level, false, diff);
-      lua_rawseti(vm, -2, num + 1); /* Must use integer keys to preserve and
-                                       iterate inorder with ipairs */
+      if (dont_skip_as) {
+        as->lua(vm, details_level, false, diff);
+        lua_rawseti(vm, -2, num + 1); /* Must use integer keys to preserve and
+                                        iterate inorder with ipairs */
+        num++;
+      }
     }
   } else {
     for (int i = (retriever.actNumEntries - 1 - p->toSkip()), num = 0;
-         i >= 0 && num < (int)p->maxHits(); i--, num++) {
+         i >= 0 && num < (int)p->maxHits(); i--) {
       AutonomousSystem *as = retriever.elems[i].asValue;
+      bool dont_skip_as = true;
+      if (as_type) {
+        switch(as_type) {
+          case customer_asn: dont_skip_as = ntop->getPrefs()->isCustomerASN(as->get_asn()); break;
+          case sub_customer_asn: dont_skip_as = ntop->getPrefs()->isSubCustomerASN(as->get_asn()); break;
+          case remote_asn: dont_skip_as = ntop->getPrefs()->isRemoteASN(as->get_asn()); break;
+          default: dont_skip_as = true; break;
+        }
+      }
 
-      as->lua(vm, details_level, false, diff);
-      lua_rawseti(vm, -2, num + 1);
+      if (dont_skip_as) {
+        as->lua(vm, details_level, false, diff);
+        lua_rawseti(vm, -2, num + 1);
+        num++;
+      }
     }
   }
 

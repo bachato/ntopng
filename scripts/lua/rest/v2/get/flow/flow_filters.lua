@@ -269,6 +269,8 @@ local status_filters = {{
     label = i18n("flows_page.all_periodic")
 }}
 
+
+
 local severity_stats = flowstats["alert_levels"]
 for s, severity_details in pairsByField(alert_consts.severity_groups, "severity_group_id", asc) do
     if severity_stats[s] and severity_stats[s] > 0 then
@@ -306,6 +308,8 @@ rsp[#rsp + 1] = {
     value = status_filters
 }
 
+--[[
+-- QOE filters
 if ntop.isEnterpriseL then
     local qoe_filters = {{
         key = "qoe",
@@ -330,6 +334,7 @@ if ntop.isEnterpriseL then
         value = qoe_filters
     }
 end
+]]
 
 local tcp_state_filters = {{
     key = "tcp_flow_state",
@@ -350,37 +355,6 @@ rsp[#rsp + 1] = {
     name = "tcp_flow_state",
     value = tcp_state_filters
 }
-
-local dscp_filters = {{
-    key = "dscp",
-    value = "",
-    label = i18n("all")
-}}
-
-if flowstats["dscps"] then
-    local tmp_list = {}
-    for key, value in pairs(flowstats["dscps"] or {}, asc) do
-        local name = dscp_consts.dscp_descr(key)
-
-        tmp_list[name] = {
-            key = "dscp",
-            value = tonumber(key),
-            label = name
-        }
-    end
-
-    for _, value in pairsByKeys(tmp_list, asc) do
-        dscp_filters[#dscp_filters + 1] = value
-    end    
-end
-
-rsp[#rsp + 1] = {
-    action = "dscp",
-    label = i18n("dscp"),
-    name = "dscp",
-    value = dscp_filters
-}
-
 
 local traffic_filters = {{
     key = "traffic_type",

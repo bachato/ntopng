@@ -1414,6 +1414,12 @@ end
 
 -- #################################################################
 
+local function validateImportantASN(m)
+    return validateChoice({"all", "my_as", "my_customer_as", "remote_as"}, m)
+end
+
+-- #################################################################
+
 local function validateAssociations(associations)
     if not associations or not type(associations) == "table" then
         return false
@@ -2360,6 +2366,8 @@ local known_parameters = {
     ["toggle_message_broker"] = validateBool,
     ["toggle_tls_quic_hostnaming"] = validateBool,
     ["toggle_exclude_from_usage_page"] = validateBool,
+
+    ["show_as"] = validateImportantASN,
 
     -- Input fields
     ["companion_interface"] = validateEmptyOr(validateInterface),

@@ -828,7 +828,7 @@ public:
 			 bool anomalousOnly, bool dhcpOnly, const AddressTree *const cidr_filter,
 			 char *sortColumn, u_int32_t maxHits, u_int32_t toSkip, bool a2zSortOrder, bool useArrayFormat, 
              bool getCheckpointOnly = false);
-  int getActiveASList(lua_State *vm, const Paginator *p, bool diff = false);
+  int getActiveASList(lua_State *vm, const Paginator *p, bool diff = false, ASType as_type = all);
   int getActiveObsPointsList(lua_State *vm, const Paginator *p);
   int getActiveCountriesList(lua_State *vm, const Paginator *p);
   int getActiveVLANList(lua_State *vm, char *sortColumn, u_int32_t maxHits,

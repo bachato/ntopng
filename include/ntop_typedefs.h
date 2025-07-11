@@ -1267,4 +1267,11 @@ typedef enum {
   method_patch,
 } HttpMethod;
 
+typedef enum {
+  all,
+  customer_asn,
+  sub_customer_asn,
+  remote_asn,
+} ASType;
+
 #endif /* _NTOP_TYPEDEFS_H_ */

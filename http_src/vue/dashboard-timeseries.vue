@@ -277,7 +277,7 @@ async function get_chart_options() {
 
 /* Watch - detect changes on epoch_begin / epoch_end and refresh the component */
 watch(() => [props.epoch_begin, props.epoch_end, props.filters], (cur_value, old_value) => {
-    refresh_chart();
+    refreshChart();
 }, { flush: 'pre', deep: true });
 
 /* *************************************************** */
@@ -301,10 +301,13 @@ async function init() {
 /* *************************************************** */
 
 /* Refresh function */
-async function refresh_chart() {
+async function refreshChart() {
     if (chart.value) {
         const result = await get_chart_options();
         chart.value.update_chart_series(result.data);
     }
 }
+
+defineExpose({ refreshChart });
+
 </script>
