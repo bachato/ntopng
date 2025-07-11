@@ -34,6 +34,8 @@ local rc = rest_utils.consts.success.ok
 local ifid = _GET["ifid"]
 local criteria_as = _GET["criteria_as"]
 local asn = tonumber(_GET["asn"])
+
+-- Read the ASn preferences from Policy -> Network Configuration -> ASN
 local customer_asn, sub_customer_asn, remote_asn = as_utils.getAllConfigurations()
 local rsp = {}
 
@@ -393,8 +395,9 @@ function callback(_, flow)
     init_interface(flow.device_ip, flow.out_index)
     if (flow.src_as == asn) then
         if (criteria ~= traffic_criteria.AS_TRAFFIC or 
-                (criteria == traffic_criteria.AS_TRAFFIC and remote_asn[tostring(flow.dst_as)]~=nil
-                and customer_asn[tostring(asn)]==nil)) then
+	    (criteria == traffic_criteria.AS_TRAFFIC
+	     and (remote_asn[tostring(flow.dst_as)] ~= nil) -- This ASN is listed among the remote/relevant ones
+	     and customer_asn[tostring(asn)]==nil)) then
             inc_interface_sent(get_interface_key(flow.device_ip, flow.in_index),
                             flow.bytes_rcvd)
             inc_interface_rcvd(get_interface_key(flow.device_ip, flow.in_index),
