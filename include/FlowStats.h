@@ -37,6 +37,7 @@ class FlowStats {
   u_int32_t host_pools[UNLIMITED_NUM_HOST_POOLS];
   std::map<std::string, u_int16_t> talking_hosts;
   std::map<std::string, u_int16_t> wlan_ssid;
+  std::set<u_int32_t> transit_asn_list;
 
  public:
   FlowStats();

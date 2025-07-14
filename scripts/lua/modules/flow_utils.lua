@@ -168,16 +168,16 @@ function getFlowsFilter()
     local icmp_code = _GET["icmp_cod"]
     local dscp_filter = _GET["dscp"]
     local wlan_ssid_filter = _GET["wlan_ssid"]
+    local transit_as_filter = _GET["transit_as_filter"]
     local host_pool = _GET["host_pool_id"]
     local flow_status = _GET["flow_status"]
     local flow_status_severity = _GET["flow_status_severity"]
-    local alert_type = _GET["alert_type"]
+    local status = _GET["status"]
     local alert_type_severity = _GET["alert_type_severity"]
     local deviceIP = _GET["deviceIP"]
     local inIfIdx = _GET["inIfIdx"]
     local outIfIdx = _GET["outIfIdx"]
     local asn = _GET["asn"]
-    local tcp_state = _GET["tcp_flow_state"]
     local talking_with = _GET["talking_with"]
     local client = _GET["client"]
     local server = _GET["server"]
@@ -302,19 +302,28 @@ function getFlowsFilter()
         end
     end
 
-    if not isEmptyString(alert_type) then
-        if alert_type == "normal" then
+    if not isEmptyString(status) then
+        -- Inside the status there are the TCP Flow states, AS Transit and alerts
+        if status == "direct" or
+            status == "transit" then -- AS Transit
+            pageinfo["transitAS"] = status
+        elseif status == "connecting" or 
+            status == "closed" or 
+            status == "enstablished" or
+            status == "reset" then -- TCP Flow State
+            pageinfo["tcpFlowStateFilter"] = status
+        elseif status == "normal" then -- Alerts
             pageinfo["alertedFlows"] = false
             pageinfo["filteredFlows"] = false
-        elseif alert_type == "alerted" then
+        elseif status == "alerted" then
             pageinfo["alertedFlows"] = true
-        elseif alert_type == "periodic" then
+        elseif status == "periodic" then
             pageinfo["periodicFlows"] = true
             pageinfo["filteredFlows"] = false
-        elseif alert_type == "filtered" then
+        elseif status == "filtered" then
             pageinfo["filteredFlows"] = true
         else
-            pageinfo["statusFilter"] = tonumber(alert_type) or alert_type
+            pageinfo["statusFilter"] = tonumber(status) or status
         end
     end
 
@@ -381,16 +390,16 @@ function getFlowsFilter()
         pageinfo["wlanSSIDFilter"] = wlan_ssid_filter
     end
 
+    if not isEmptyString(transit_as_filter) then
+        pageinfo["transitASFilter"] = transit_as_filter
+    end
+
     if not isEmptyString(talking_with) then
         pageinfo["talkingWith"] = talking_with
     end
 
     if not isEmptyString(host_pool) then
         pageinfo["poolFilter"] = tonumber(host_pool)
-    end
-
-    if not isEmptyString(tcp_state) then
-        pageinfo["tcpFlowStateFilter"] = tcp_state
     end
 
     if not isEmptyString(client) then

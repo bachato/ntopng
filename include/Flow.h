@@ -110,6 +110,7 @@ private:
   u_int16_t cli_port, srv_port;
   u_int16_t vlanId;
   u_int32_t srcAS, dstAS; /* Calculated via GeoIP */
+  char *srcASName, *dstASName;
   u_int32_t srcPeerAS, dstPeerAS; /* Collected via NetFLow/IPFIX */
   u_int32_t protocolErrorCode;
   u_int8_t protocol, flow_verdict;
@@ -1571,6 +1572,9 @@ public:
   inline u_int16_t getPreNATDstPort()  { return(collection ? ntohs(collection->nat.dst_port_pre_nat) : 0);     };
   inline u_int16_t getPostNATSrcPort() { return(collection ? ntohs(collection->nat.src_port_post_nat) : 0);    };
   inline u_int16_t getPostNATDstPort() { return(collection ? ntohs(collection->nat.dst_port_post_nat) : 0);    };
+  void getSrcAS(u_int32_t *as, char *as_name);
+  void getDstAS(u_int32_t *as, char *as_name);
+  transitAS getTransitASType();
   void setBittorrentHash(char *hash, u_int len);
   inline bool isFlowAccounted()        { return iface_flow_accounted; };
   inline void setFlowAccounted()       { iface_flow_accounted = 1;    };

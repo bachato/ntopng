@@ -57,6 +57,7 @@ Paginator::Paginator() {
   client_mode = location_all;
   server_mode = location_all;
   tcp_flow_state_filter = tcp_flow_state_filter_all;
+  transit_as = all_flow;
   unicast_traffic = -1;
   unidirectional_traffic = -1;
   alerted_flows = -1;
@@ -173,6 +174,14 @@ void Paginator::readOptions(lua_State* L, int index) {
             tcp_flow_state_filter = tcp_flow_state_reset;
           else
             tcp_flow_state_filter = tcp_flow_state_filter_all;
+        } else if (!strcmp(key, "transitAS")) {
+          const char* value = lua_tostring(L, -1);            
+          if (!strcmp(value, "direct"))
+            transit_as = direct_flow;
+          else if (!strcmp(value, "transit"))
+            transit_as = transit_flow;
+          else 
+            transit_as = all_flow;
         } else if (!strcmp(key, "detailsLevel")) {
           const char* value = lua_tostring(L, -1);
           details_level_set = Utils::str2DetailsLevel(value, &details_level);

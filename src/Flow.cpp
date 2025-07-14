@@ -54,6 +54,7 @@ Flow::Flow(NetworkInterface *_iface,
     srv_port = _srv_port, privateFlowId = _private_flow_id;
   flow_dropped_counts_increased = 0, protocolErrorCode = 0;
   srcAS = dstAS = srcPeerAS = dstPeerAS = 0, rttSec = 0;
+  srcASName = dstASName = NULL;
   src2dst_tcp_flags = dst2src_tcp_flags = 0;
 
   collected_qoe.src_to_dst = collected_qoe.dst_to_src = NTOP_QOE_UNKNOWN, has_collected_qoe = 0;
@@ -540,6 +541,9 @@ Flow::~Flow() {
   if(tcp_fingerprint) free(tcp_fingerprint);
   if(riskInfo)               free(riskInfo);
   if(end_reason)             free(end_reason);
+
+  if(srcASName) free(srcASName);
+  if(dstASName) free(dstASName);
 
   if(collection) {
     if(collection->wifi.wlan_ssid) free(collection->wifi.wlan_ssid);
@@ -2968,44 +2972,15 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   char *json = alerts_json; /* Copying ref as it may be moved to the shadow meantime */
   if (json) lua_push_str_table_entry(vm, "json_alert", json);
 
-  if(srcAS)
-    lua_push_int32_table_entry(vm, "src_as", srcAS);
-  else {
-    Host *h = get_cli_host();
-    
-    if(h) {
-      lua_push_int32_table_entry(vm, "src_as", h->get_asn());
-      lua_push_str_table_entry(vm, "src_as_name", h->get_asname());
-    } else {
-      /* View interfaces */
-      u_int32_t asn;
-      char *asname;
-      
-      ntop->getGeolocation()->getAS(get_cli_ip_addr(), &asn, &asname);
-      
-      if(asn != 0) lua_push_int32_table_entry(vm, "src_as", asn);
-      if(asname)   lua_push_str_table_entry(vm, "src_as_name", asname);
-    }
-  }
+  char *asname = NULL;
+  u_int32_t asn = 0;
+  getSrcAS(&asn, asname);
+  lua_push_int32_table_entry(vm, "dst_as", asn);
+  lua_push_str_table_entry(vm, "src_as_name", asname ? asname : "");
   
-  if(dstAS)
-    lua_push_int32_table_entry(vm, "dst_as", dstAS);
-  else {
-    Host *h = get_srv_host();
-    
-    if(h) {
-      lua_push_int32_table_entry(vm, "dst_as", h->get_asn());
-      lua_push_str_table_entry(vm, "dst_as_name", h->get_asname());
-    } else {
-      /* View interfaces */
-      u_int32_t asn;
-      char *asname;
-      
-      ntop->getGeolocation()->getAS(get_srv_ip_addr(), &asn, &asname);
-      if(asn != 0) lua_push_int32_table_entry(vm, "dst_as", asn);
-      if(asname)   lua_push_str_table_entry(vm, "dst_as_name", asname);
-    }
-  }
+  getDstAS(&asn, asname);
+  lua_push_int32_table_entry(vm, "dst_as", asn);
+  lua_push_str_table_entry(vm, "dst_as_name", asname ? asname : "");
 
   if(srcPeerAS != 0) lua_push_int32_table_entry(vm, "src_peer_as", srcPeerAS);
   if(dstPeerAS != 0) lua_push_int32_table_entry(vm, "dst_peer_as", dstPeerAS);
@@ -9610,4 +9585,63 @@ void Flow::setServerName(char *value /* Allocated by caller */) {
 #ifdef NTOPNG_PRO
   processHostName(host_server_name);
 #endif
+}
+
+/* *************************************** */
+
+void Flow::getSrcAS(u_int32_t *as, char *as_name) {
+  if(!srcAS) {
+    Host *h = get_cli_host();
+    
+    if(h) {
+      srcAS = h->get_asn();
+      srcASName = h->get_asname();
+    } else {
+      u_int32_t asn;
+      char *asname;
+      ntop->getGeolocation()->getAS(get_cli_ip_addr(), &asn, &asname);
+      srcAS = asn;
+      srcASName = asname;
+    }
+  }
+  *as = srcAS;
+  as_name = srcASName ? srcASName : (char*) "";
+}
+
+/* *************************************** */
+
+void Flow::getDstAS(u_int32_t *as, char *as_name) {
+  if(!dstAS) {
+    Host *h = get_srv_host();
+    
+    if(h) {
+      dstAS = h->get_asn();
+      dstASName = h->get_asname();
+    } else {
+      u_int32_t asn;
+      char *asname;
+      ntop->getGeolocation()->getAS(get_srv_ip_addr(), &asn, &asname);
+      dstAS = asn;
+      dstASName = asname;
+    }
+  }
+  *as = dstAS;
+  as_name = dstASName ? dstASName : (char*) "";
+}
+
+/* *************************************** */
+
+transitAS Flow::getTransitASType() {
+    u_int32_t src_asn = 0, dst_asn = 0;
+    char *asname = NULL;
+    getSrcAS(&src_asn, asname);
+    getDstAS(&dst_asn, asname);
+    if (!srcPeerAS && !dstPeerAS) {
+        return all_flow;
+    } else if ((src_asn != srcPeerAS) || (dst_asn != dstPeerAS)) {
+        return transit_flow;
+    } else if ((src_asn == srcPeerAS) || (dst_asn == dstPeerAS)) {
+        return direct_flow;
+    }
+    return all_flow;
 }

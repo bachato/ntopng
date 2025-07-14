@@ -55,6 +55,7 @@ class Paginator {
   LocationPolicy client_mode;
   LocationPolicy server_mode;
   TcpFlowStateFilter tcp_flow_state_filter;
+  transitAS transit_as;
 #ifdef NTOPNG_PRO
   u_int8_t qoe_filter;
 #endif
@@ -301,6 +302,14 @@ class Paginator {
   inline bool tcpFlowStateFilter(TcpFlowStateFilter *f) const {
     if (tcp_flow_state_filter) {
       (*f) = tcp_flow_state_filter;
+      return true;
+    }
+    return false;
+  }
+
+  inline bool transitASFilter(transitAS *f) const {
+    if (transit_as) {
+      (*f) = transit_as;
       return true;
     }
     return false;

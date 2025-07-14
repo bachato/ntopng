@@ -4848,6 +4848,7 @@ struct flowHostRetriever {
   TrafficType traffic_type; /* Not used in flow_search_walker */
   sortField sorter;
   TcpFlowStateFilter tcp_flow_state_filter;
+  transitAS transit_as;
   LocationPolicy location;        /* Not used in flow_search_walker */
   u_int8_t ipVersionFilter;       /* Not used in flow_search_walker */
   bool filteredHosts;             /* Not used in flow_search_walker */
@@ -4902,6 +4903,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
   LocationPolicy client_policy;
   LocationPolicy server_policy;
   TcpFlowStateFilter tcp_flow_state_filter;
+  transitAS transit_as;
   bool unicast, unidirectional, alerted_flows, periodic_flows,
     cli_pool_found = false, srv_pool_found = false;
   u_int32_t asn_filter;
@@ -5081,6 +5083,11 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
          (tcp_flow_state_filter == tcp_flow_state_closed &&
           !f->isTCPClosed()) ||
          (tcp_flow_state_filter == tcp_flow_state_reset && !f->isTCPReset())))
+      return (false);
+
+    if (retriever->pag &&
+        retriever->pag->transitASFilter(&transit_as) &&
+        !(f->getTransitASType() == transit_as))
       return (false);
 
     if (retriever->pag && retriever->pag->ipVersion(&ip_version) &&

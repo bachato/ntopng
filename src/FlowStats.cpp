@@ -24,13 +24,16 @@
 /* *************************************** */
 
 FlowStats::FlowStats() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  resetStats(); }
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  resetStats();
+}
 
 /* *************************************** */
 
 FlowStats::~FlowStats() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
 }
 
 /* *************************************** */
@@ -96,6 +99,18 @@ void FlowStats::incStats(Bitmap128 alert_bitmap, u_int8_t l4_protocol,
       host_pools[srv_pool]++;
     } else if (cli_pool_found) {
       host_pools[cli_pool]++;
+    }
+
+    /* Now handle the ASN Transit list */
+    u_int32_t srcPeerAS = flow->getSrcPeerAS(), dstPeerAS = flow->getDstPeerAS();
+    if ((srcPeerAS || dstPeerAS) && (srcPeerAS != dstPeerAS)) {
+        /* Transit */
+        u_int32_t srcAS, dstAS;
+        char *asname = NULL; /* Not interested */
+        flow->getSrcAS(&srcAS, asname);
+        flow->getDstAS(&dstAS, asname);
+        if (srcAS != srcPeerAS) transit_asn_list.insert(srcPeerAS);
+        if (dstAS != dstPeerAS) transit_asn_list.insert(dstPeerAS);
     }
   }
 }
@@ -238,6 +253,17 @@ void FlowStats::lua(lua_State *vm) {
   lua_pushstring(vm, "wlan_ssid");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
+
+  lua_newtable(vm);
+
+  std::set<u_int32_t>::iterator it3;
+  for (it3 = transit_asn_list.begin(); it3 != transit_asn_list.end(); it3++) {
+    lua_push_uint32_table_entry(vm, std::to_string(*it3).c_str(), 1);
+  }
+
+  lua_pushstring(vm, "transit_asn");
+  lua_insert(vm, -2);
+  lua_settable(vm, -3);
 }
 
 /* *************************************** */
@@ -260,10 +286,10 @@ void FlowStats::updateTalkingHosts(Flow *f) {
 
 void FlowStats::updateWLANSSID(Flow *f) {
   char *wlan_ssid_string = f->getWLANSSID();
-  if(wlan_ssid_string) {
+  if (wlan_ssid_string) {
     std::pair<std::map<std::string, u_int16_t>::iterator, bool> ret;
-    ret = wlan_ssid.insert(std::pair<std::string, u_int16_t>(
-        wlan_ssid_string, 1));
+    ret = wlan_ssid.insert(
+        std::pair<std::string, u_int16_t>(wlan_ssid_string, 1));
     if (!ret.second) ret.first->second++;
   }
 }
