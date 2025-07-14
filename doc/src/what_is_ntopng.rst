@@ -10,6 +10,8 @@ ntopng is a web-based traffic monitoring application able to:
 
 The main difference between ntopng and a traffic collector, is that ntopng not only reports traffic statistics but it also analizes the traffic, draws conclusions on observed traffic type and reports cybersecurity metrics.
 
+.. figure:: ./img/ntopng-main-components.png
+
 Releases and Features
 ---------------------
 
