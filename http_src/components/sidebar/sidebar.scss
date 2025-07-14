@@ -286,6 +286,10 @@ main#n-container {
     padding-left: 1rem !important;
   }
 
+  #n-container {
+    margin-left: 1rem;
+  }
+
   /** hide the default dropdown to switch interface */
   #button-switch-interface {
     display: none !important;
@@ -318,10 +322,6 @@ main#n-container {
   /** expand the sidebar to 80% of the screen */
   #n-sidebar.active {
     width: 80vw;
-  }
-
-  #n-container {
-    margin-left: 0;
   }
 
   #n-navbar {
