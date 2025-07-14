@@ -266,6 +266,10 @@
   text-align: left;
 }
 
+main#n-container {
+  padding-left: calc(var(--sidebar-width) + 1rem) !important;
+}
+
 @media (min-width: 320px) and (max-width: 480px) {
   footer {
     font-size: 0.8rem;
@@ -279,6 +283,7 @@
 
   main#n-container {
     padding: 0.8rem !important;
+    padding-left: 1rem !important;
   }
 
   /** hide the default dropdown to switch interface */
@@ -310,9 +315,9 @@
     left: 0;
   }
 
-  /** expand the sidebar to 85% of the screen */
+  /** expand the sidebar to 80% of the screen */
   #n-sidebar.active {
-    width: 85%;
+    width: 80vw;
   }
 
   #n-container {

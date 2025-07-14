@@ -298,7 +298,6 @@ main#n-container {
   flex-flow: column;
   display: inline-block;
   width: 100%;
-  padding-left: calc(var(--sidebar-width) + 1rem) !important;
 }
 
 .info-stats div.down,
