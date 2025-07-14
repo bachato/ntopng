@@ -274,6 +274,10 @@ main#n-container {
   left: var(--sidebar-width);
 }
 
+#host_search_form div.search-container {
+  width: 20rem;
+}
+
 @media (min-width: 320px) and (max-width: 480px) {
   footer {
     font-size: 0.8rem;
@@ -383,6 +387,10 @@ main#n-container {
 
   .navbar ul.navbar-nav li.nav-item-mobile-button {
     margin-top: 0.5rem;
+  }
+
+  #host_search_form div.search-container {
+    width: 17rem;
   }
 }
 

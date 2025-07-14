@@ -1121,10 +1121,10 @@ print(template_utils.gen("typeahead_input.html", {
         action = "", -- see makeFindHostBeforeSubmitCallback
         json_key = "ip",
         query_field = "host",
-        class = "typeahead-dropdown-right",
+        class = "typeahead-dropdown-right search-container",
         query_url = ntop.getHttpPrefix() .. "/lua/rest/v2/get/host/find.lua",
         query_title = i18n("search_host"),
-        style = "width: 20rem",
+        style = "",
         before_submit = [[NtopUtils.makeFindHostBeforeSubmitCallback("]] ..
             ntop.getHttpPrefix() .. [[")]],
         max_items = "'all'" --[[ let source script decide ]] ,
