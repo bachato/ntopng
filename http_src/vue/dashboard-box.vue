@@ -29,7 +29,7 @@ const props = defineProps({
 });
 
 const width_class = computed(() => {
-  return `col-${props.width || 4}`;
+  return `col-sm-${props.width || 4}`;
 });
 
 const height_class = computed(() => {
