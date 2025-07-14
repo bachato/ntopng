@@ -380,6 +380,10 @@ main#n-container {
     width: 100%;
     transition: 0.5s ease-in;
   }
+
+  .navbar ul.navbar-nav li.nav-item-mobile-button {
+    margin-top: 0.5rem;
+  }
 }
 
 #n-sidebar.bg-dark .sidebar-info {

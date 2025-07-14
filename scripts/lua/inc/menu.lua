@@ -883,7 +883,7 @@ page_utils.print_menubar()
 print([[
    <nav style="margin-top:-4.5rem;margin-right:5rem;" class="navbar navbar-expand-lg navbar-light px-2 navbar-main-top" id='n-navbar'>
       <ul class='navbar-nav flex-row flex-wrap navbar-main-top'>
-         <li class='nav-item'>
+         <li class='nav-item nav-item-mobile-button'>
             <button class='btn btn-outline-dark border-0 btn-sidebar' data-bs-toggle='sidebar'>
                <i class="fas fa-bars"></i>
             </button>
