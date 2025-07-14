@@ -542,9 +542,6 @@ Flow::~Flow() {
   if(riskInfo)               free(riskInfo);
   if(end_reason)             free(end_reason);
 
-  if(srcASName) free(srcASName);
-  if(dstASName) free(dstASName);
-
   if(collection) {
     if(collection->wifi.wlan_ssid) free(collection->wifi.wlan_ssid);
     free(collection);
