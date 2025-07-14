@@ -270,6 +270,10 @@ main#n-container {
   padding-left: calc(var(--sidebar-width) + 1rem) !important;
 }
 
+#n-navbar {
+  left: var(--sidebar-width);
+}
+
 @media (min-width: 320px) and (max-width: 480px) {
   footer {
     font-size: 0.8rem;
@@ -325,7 +329,7 @@ main#n-container {
   }
 
   #n-navbar {
-    left: 0;
+    left: 1rem;
   }
 
   /** hide the ntop logo */

@@ -332,7 +332,6 @@ main#n-container {
 }
 
 #n-navbar {
-  left: var(--sidebar-width);
   z-index: 1000;
   transition: 0.2s ease-out all;
   background-color: transparent;
