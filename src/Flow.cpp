@@ -2943,7 +2943,9 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   u_char community_id[200];
   char buf[64];
   Mac *cli_mac = get_cli_host() ? get_cli_host()->getMac() : NULL;
-
+  char *asname = NULL;
+  u_int32_t asn = 0;
+  
   if(ptree) {
     if(src_ip) src_match = src_ip->match(ptree);
     if(dst_ip) dst_match = dst_ip->match(ptree);
@@ -2969,10 +2971,8 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   char *json = alerts_json; /* Copying ref as it may be moved to the shadow meantime */
   if (json) lua_push_str_table_entry(vm, "json_alert", json);
 
-  char *asname = NULL;
-  u_int32_t asn = 0;
   getSrcAS(&asn, asname);
-  lua_push_int32_table_entry(vm, "dst_as", asn);
+  lua_push_int32_table_entry(vm, "src_as", asn);
   lua_push_str_table_entry(vm, "src_as_name", asname ? asname : "");
   
   getDstAS(&asn, asname);
