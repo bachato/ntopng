@@ -39,6 +39,12 @@ end
 
 -- ##############################################
 
+local function escape_pattern(s)
+  return s:gsub("([^%w])", "%%%1")
+end
+
+-- ##############################################
+
 function driver:new(options)
     local obj = {base_path = options.base_path}
 
@@ -861,7 +867,7 @@ function driver:listSeries(schema, tags_filter, wildcard_tags, start_time,
 
                 if last_update ~= nil and last_update >= start_time then
                     -- remove the path
-                    local val = string.gsub(f, base, "")
+                    local val = string.gsub(f, escape_pattern(base), "")
                     val = string.gsub(val, rrd .. ".rrd", "")
                     val = string.gsub(val, "/", "")
                     res[#res + 1] = table.merge(tags_filter,
