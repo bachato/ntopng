@@ -95,7 +95,7 @@ local ifstats = interface.getStats()
 table.insert(nodes, {
 		link = ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. asn .. "",
 		node_id = as_root_key,
-		label = shortenString(format_utils.formatASN(asn), 64)
+		label = format_utils.formatASN(asn, false, true)
 })
 
 -- ####################
@@ -313,8 +313,8 @@ local function build_as_transit(criteria, tot_bytes_as_transit, transit_nodes)
 	 (criteria == traffic_criteria.EGRESS and data.rcvd > 0) or
 	 (criteria == traffic_criteria.TOTAL and (data.rcvd + data.sent) > 0) then
 	 -- tprint(n_id .. " " .. criteria .. " " .. data.sent .. " " .. data.rcvd)
-	 local transit = shortenString(format_utils.formatASN(data.transit), 64)
-	 local src_dst_as = shortenString(format_utils.formatASN(data.src_dst_as), 64)
+	 local transit = format_utils.formatASN(data.transit, false, true)
+	 local src_dst_as = format_utils.formatASN(data.src_dst_as, false, true)
 	 local transit_node_id = find_node_id(transit)
 	 local src_dst_as_id = find_node_id(n_id)
 	 -- tprint("--- " .. transit .. " " .. src_dst_as)
