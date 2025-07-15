@@ -20,7 +20,7 @@ import timeseriesUtils from "../utilities/timeseries-utils.js";
 
 /* *************************************************** */
 
-const height_per_row = 62.5 /* px */
+const height_per_row = 62 /* px */
 const chart_type = ref(ntopChartApex.typeChart.TS_LINE);
 const chart = ref(null);
 const timeseries_groups = ref([]);
