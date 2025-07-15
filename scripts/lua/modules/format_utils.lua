@@ -758,8 +758,10 @@ end
 -- @brief   Given an asn id, it will return a string with the 
 --          asn name formatted consistently
 -- @params  asn: ASN Id
+--          short_version: Boolean, true if short version is needed (only name)
+--          shorten_string: Boolean, true if 64 char must be used
 -- @returns The formatted ASN name
-function format_utils.formatASN(asn)
+function format_utils.formatASN(asn, short_version, shorten_string)
     local name = ""
     if asn then
         asn = tonumber(asn)
@@ -768,8 +770,17 @@ function format_utils.formatASN(asn)
         if (asn ~= 0) then
             local as_info = interface.getASInfo(asn)
             if (as_info) then
-                name = string.format("%s (%s)", as_info.asname, asn)
+                name = as_info.asname
+            else
+                name = ntop.getASNameFromASN(asn)
             end
+            if (shorten_string) then
+                name = shortenString(name)
+            end
+        end
+
+        if (name ~= asn) and (not short_version) then
+            name = string.format("%s (%d)", name, asn)
         end
     end
 
