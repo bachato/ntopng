@@ -2163,6 +2163,7 @@ local lang = {
     ["print"] = "Print Report",
     ["realtime_app_traffic"] = "Top Applications (Realtime)",
     ["realtime_traffic"] = "All Network Interfaces (Realtime)",
+    ["server_ports_analysis"] = "Server Ports",
     ["slow_dashboard_message"] = "Too much latency in the %{product} response. Consider setting an higher <a href='%{url}'>Realtime Stats Refresh Rate</a>.",
     ["store"] = "Save Report",
     ["time_offset"] = "Time Offset",

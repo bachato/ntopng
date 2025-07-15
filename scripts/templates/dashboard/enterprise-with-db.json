@@ -226,7 +226,7 @@
 		{
 			"component" : "sankey",
 			"id" : "server_port_analysis",
-			"i18n_name" : "server_ports_analysis",
+			"i18n_name" : "dashboard.server_ports_analysis",
 			"width" : 8,
 			"height" : 4,
 			"params" : {
