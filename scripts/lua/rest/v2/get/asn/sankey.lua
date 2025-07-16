@@ -393,12 +393,12 @@ local function build_as_transit(criteria, tot_bytes_as_transit, transit_nodes)
 	   if (transit_nodes[data.transit] == nil and data.transit ~= data.src_dst_as) then
 	      transit_nodes[data.transit] = transit_node_id
 	   end
-  
-	   local url = ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. data.src_dst_as .. ""
+ 
+           local url =  ntop.getHttpPrefix() .. "/lua/as_overview.lua?asn=" .. data.src_dst_as .. "&criteria_as=" .. criteria_as
 	   if data.src_dst_as == other_asns then url = "#" end
            add_unique_node(src_dst_as_id, src_dst_as, url)
 	   if data.transit ~= data.src_dst_as then
-	      url = ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. data.transit .. ""
+              url =  ntop.getHttpPrefix() .. "/lua/as_overview.lua?asn=" .. data.transit .. "&criteria_as=" .. criteria_as
 	      add_unique_node(transit_node_id, transit, url)
 	   end
   
