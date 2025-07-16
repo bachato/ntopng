@@ -45,6 +45,7 @@ local nodes = {}
 local traffic_criteria = {INGRESS = 0, EGRESS = 1, TOTAL = 2, ING_EGR = 3, AS_TRAFFIC = 4}
 
 local criteria
+local other_asns = "Other"
 
 if criteria_as == "as_traffic_criteria" then
    criteria = traffic_criteria.AS_TRAFFIC
@@ -54,7 +55,7 @@ end
 
 -- If the ingress or egress part of the graph has fewer nodes than max_nodes, 
 -- all nodes will be shown in the Sankey. Otherwise, only the nodes specified 
--- in "Relevant Remote ASNs" will be displayed, along with an "others" node 
+-- in "Relevant Remote ASNs" will be displayed, along with an other_asns node 
 -- representing the sum of all the remaining ones.
 local max_nodes = 20
 
@@ -362,18 +363,18 @@ local function build_as_transit(criteria, tot_bytes_as_transit, transit_nodes)
 	 (criteria == traffic_criteria.TOTAL and (data.rcvd + data.sent) > 0) then
          -- This checks whether the number of nodes is excessive, and if so, adds only those in the 
          -- preference list or the 'others' node (unless 'show_all' is set to true).
-         if (criteria == traffic_criteria.INGRESS and num_sent <= max_nodes and data.src_dst_as ~= "others") or
-          (criteria == traffic_criteria.EGRESS and num_rcvd <= max_nodes and data.src_dst_as ~= "others") or
+         if (criteria == traffic_criteria.INGRESS and num_sent <= max_nodes and data.src_dst_as ~= other_asns) or
+          (criteria == traffic_criteria.EGRESS and num_rcvd <= max_nodes and data.src_dst_as ~= other_asns) or
           (remote_asn[tostring(data.src_dst_as)] ~= nil) or
-          (criteria == traffic_criteria.INGRESS and num_sent >= max_nodes and data.src_dst_as == "others") or
-          (criteria == traffic_criteria.EGRESS and num_rcvd >= max_nodes and data.src_dst_as == "others") or
-          (show_all == true and data.src_dst_as ~= "others") then
+          (criteria == traffic_criteria.INGRESS and num_sent >= max_nodes and data.src_dst_as == other_asns) or
+          (criteria == traffic_criteria.EGRESS and num_rcvd >= max_nodes and data.src_dst_as == other_asns) or
+          (show_all == true and data.src_dst_as ~= other_asns) then
 	   -- tprint(n_id .. " " .. criteria .. " " .. data.sent .. " " .. data.rcvd)
 	   local transit
            local src_dst_as
-           if data.src_dst_as == "others" then 
-                src_dst_as = "others" 
-                transit = "others"
+           if data.src_dst_as == other_asns then 
+                src_dst_as = other_asns 
+                transit = other_asns
            else
                 transit = format_utils.formatASN(data.transit, false, true)
 	     src_dst_as = format_utils.formatASN(data.src_dst_as, false, true) 
@@ -394,7 +395,7 @@ local function build_as_transit(criteria, tot_bytes_as_transit, transit_nodes)
 	   end
   
 	   local url = ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. data.src_dst_as .. ""
-	   if data.src_dst_as == "others" then url = "#" end
+	   if data.src_dst_as == other_asns then url = "#" end
            add_unique_node(src_dst_as_id, src_dst_as, url)
 	   if data.transit ~= data.src_dst_as then
 	      url = ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. data.transit .. ""
@@ -506,10 +507,10 @@ function callback(_, flow)
         else 
             inc_transit_sent_np(flow.dst_peer_as, flow.bytes_rcvd)
             inc_transit_rcvd_np(flow.dst_peer_as, flow.bytes_sent)
-            init_transit("others")
-            init_src_dst_as("others", "others")
-            inc_as_sent(get_as_key("others", "others"), flow.bytes_rcvd)
-            inc_as_rcvd(get_as_key("others", "others"), flow.bytes_sent)
+            init_transit(other_asns)
+            init_src_dst_as(other_asns, other_asns)
+            inc_as_sent(get_as_key(other_asns, other_asns), flow.bytes_rcvd)
+            inc_as_rcvd(get_as_key(other_asns, other_asns), flow.bytes_sent)
         end
      end
 
@@ -529,10 +530,10 @@ function callback(_, flow)
       else 
             inc_transit_sent_np(flow.src_peer_as, flow.bytes_sent)
             inc_transit_rcvd_np(flow.src_peer_as, flow.bytes_rcvd)
-            init_transit("others")
-            init_src_dst_as("others", "others")
-            inc_as_sent(get_as_key("others", "others"), flow.bytes_sent)
-            inc_as_rcvd(get_as_key("others", "others"), flow.bytes_rcvd)
+            init_transit(other_asns)
+            init_src_dst_as(other_asns, other_asns)
+            inc_as_sent(get_as_key(other_asns, other_asns), flow.bytes_sent)
+            inc_as_rcvd(get_as_key(other_asns, other_asns), flow.bytes_rcvd)
       end
      end
    end
