@@ -1954,7 +1954,7 @@ if auth.has_capability(auth.capabilities.preferences) then
     end
 
     function printSnmp()
-        if not ntop.isPro() then
+        if not ntop.isEnterprise() then
             return
         end
 
