@@ -73,6 +73,36 @@ local function compareBackward(compare_backward, curr_res, options)
     return curr_res
 end
 
+function ts_data.handle_ts_requests_filters(ts_requests)
+    local processed_ts_requests = {}
+
+    for k, v in pairsByKeys(ts_requests, asc) do
+
+        -- ts_schema 'top:asn:traffic' with ts_filter 'customer'
+        if v["ts_schema"] == "top:asn:traffic" and v["ts_filter"] and v["ts_filter"] == "customer" then
+            local as_utils = require "as_utils"
+            local customer_asn = as_utils.getCustomerASNs()
+            if table.len(customer_asn) > 0 then
+                for asn, asn_v in pairs(customer_asn) do
+                   processed_ts_requests[#processed_ts_requests+1] = {
+                      ts_query = v["ts_query"] .. ",asn:" .. asn,
+                      ts_schema = "asn:traffic",
+                      tskey = tostring(asn),
+                      ts_unify = true
+                   }
+                end
+            else
+               processed_ts_requests[#processed_ts_requests+1] = v
+            end
+
+        else
+           processed_ts_requests[#processed_ts_requests+1] = v
+        end
+    end
+
+    return processed_ts_requests
+end
+
 function ts_data.get_timeseries(http_context)
     local graph_utils = require "graph_utils"
 

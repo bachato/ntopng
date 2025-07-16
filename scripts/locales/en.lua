@@ -4546,6 +4546,7 @@ local lang = {
     ["top_breed"] = "Top Breeds",
     ["top_checks"] = "Top %{subdir} Scripts by Duration",
     ["top_clients"] = "Top %{protocol} Clients",
+    ["top_customer_asn"] = "Top My ASN",
     ["top_interfaces"] = "Top Interfaces",
     ["top_l7_contacts"] = "Top %{protocol} L7 Contacts",
     ["top_local_receivers"] = "Top Local Receivers",

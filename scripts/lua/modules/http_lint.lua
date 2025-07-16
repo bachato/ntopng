@@ -2682,6 +2682,7 @@ local known_parameters = {
     ["devices"] = {jsonCleanup, validateJSON},
     ["devices_csv"] = validateUnquoted,
     ["ts_schema"] = validateSingleWord,
+    ["ts_filter"] = validateSingleWord,
     ["metric"] = validateSingleWord,
     ["ts_query"] = validateListOfTypeInline(validateUnquoted),
     ["ts_compare"] = validateZoom,

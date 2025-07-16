@@ -39,7 +39,7 @@
 	{
 		"component" : "timeseries",
 		"id" : "top_as_chart",
-		"i18n_name" : "graphs.top_asn",
+		"i18n_name" : "graphs.top_customer_asn",
 		"width" : 12,
 		"height" : 4,
 		"params" : {
@@ -52,6 +52,7 @@
 					"ifid" : {
 						"ts_query": "ifid:$IFID$",
 						"ts_schema": "top:asn:traffic",
+						"ts_filter": "customer",
 						"tskey": "$IFID$"
 					}
 				}
