@@ -108,7 +108,7 @@
 					"type" : "summary"
 				},
 				"icon" : "fas fa-laptop",
-				"i18n_name" : "graphs.active_hosts",
+				"i18n_name" : "graphs.active_local_hosts",
 				"counter_path" : "num_local_hosts",
 				"counter_formatter" : "number"
 			}

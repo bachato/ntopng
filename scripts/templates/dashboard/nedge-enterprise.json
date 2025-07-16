@@ -41,7 +41,7 @@
 					"type" : "summary"
 				},
 				"icon" : "fas fa-laptop",
-				"i18n_name" : "graphs.active_hosts",
+				"i18n_name" : "graphs.active_local_hosts",
 				"link" : {
 					"url" : "/lua/hosts_stats.lua",
 					"url_params" : {
