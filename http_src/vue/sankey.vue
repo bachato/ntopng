@@ -249,12 +249,20 @@ async function draw_sankey() {
     const colors = d3.scaleOrdinal(d3.schemeCategory10);
     let data = props.sankey_data;
     const size = get_size();
+    const margin = { top: 8, right: 8, bottom: 8, left: 8 }; /* Add a margin of 8 px (1 rem) on every side */
     sankey_size.value = size;
 
+    svg = d3.select(sankey_wrapper.value)
+        .append("svg")
+        .attr("height", size.height)
+        .attr("width", size.width)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+    
     sankey = d3.sankey()
         .nodeWidth(15)
         .nodePadding(10)
-        .extent([[0, 0], [size.width, size.height * 0.95]]);
+        .extent([[0, 0], [size.width - margin.right - margin.left, size.height - margin.top - margin.bottom]]);
 
     // Sort nodes descending by value property
     sankey.nodeSort((a, b) => d3.descending(a.value, b.value));
@@ -264,11 +272,6 @@ async function draw_sankey() {
         sankeyData = sankey(data);
         ({ links, nodes } = sankeyData);
     }
-
-    svg = d3.select(sankey_wrapper.value)
-        .append("svg")
-        .attr("height", size.height * 1.2)
-        .attr("width", size.width);
 
     if (!links || !nodes) return;
 
