@@ -179,8 +179,7 @@
                         </div>
                     </template>
                     <template v-slot:box_content>
-                        <Loading v-if="loading && show_loading" :styles="'margin-top: 2rem !important;'"></Loading>
-                        <div :class="[(loading && show_loading) ? 'ntopng-gray-out' : '']">
+                        <div>
                             <component :is="components_dict[c.component]" :id="c.id" :style="component_custom_style(c)"
                                 :epoch_begin="c.epoch_begin" :epoch_end="c.epoch_end" :i18n_title="c.i18n_name"
                                 :ifid="c.ifid ? c.ifid.toString() : context.ifid.toString()" :max_width="c.width"
@@ -238,7 +237,6 @@ import { default as ModalUpload } from "./modal-file-upload.vue";
 import { default as ModalSelectComponent } from "./modal-select-component.vue";
 import { default as ModalEditComponent } from "./modal-edit-component.vue";
 import { default as ModalDeleteConfirm } from "./modal-delete-confirm.vue";
-import { default as Loading } from "./loading.vue";
 import { default as Spinner } from "./spinner.vue";
 
 import { default as Box } from "./dashboard-box.vue";
@@ -274,11 +272,9 @@ const components_dict = {
     "sankey": SankeyComponent,
 }
 
-const loading = ref(true);
 const loading_filters = ref(false);
 const second_load = ref(false);
 const page_id = "page-dashboard";
-const show_loading = props.context.show_loading || false;
 const allow_edit = props.context.allow_edit || false;
 const report_box = ref(null);
 
@@ -921,7 +917,6 @@ function get_component_data_func(component) {
             } else {
                 info = components_info[component.component_id];
             }
-            loading.value = false;
         } else {
             /* datasource_id is an optimization for components getting live data
              * from the same endpoint (e.g. multiple badges in the infrastructure dashboard) */
@@ -962,7 +957,6 @@ function get_component_data_func(component) {
 
                 const data_url = `${url}?${url_params}`;
 
-                loading.value = true;
 
                 if (post_params) {
                     info.data = ntopng_utility.http_post_request(data_url, post_params)
@@ -975,7 +969,6 @@ function get_component_data_func(component) {
 
                 info.data.then(() => {
                     info.data.done = true;
-                    loading.value = false;
                 });
 
             }

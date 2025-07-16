@@ -6,9 +6,8 @@
         </template>
         <div class="card card-shadow" :class="[(!props.context.is_check_enabled) ? 'ntopng-gray-out' : '']">
             <div class="card-body">
-                <Loading v-if="loading"></Loading>
-                <table class="table table-striped table-bordered col-sm-12"
-                    :class="[(loading) ? 'ntopng-gray-out' : '']">
+                <Loading :isLoading="loading"></Loading>
+                <table class="table table-striped table-bordered col-sm-12">
                     <tbody class="table_length">
                         <tr v-for="(value, key) in check_name" :key="key" class="mb-4">
                             <td>
@@ -58,7 +57,7 @@ const notes = [
     _i18n("network_configuration.uses_of_servers")
 ]
 
-const loading = ref(false);
+const loading = ref(true);
 const ipAddresses = reactive({});
 const validationErrors = reactive({});
 const set_config_url = `${http_prefix}/lua/rest/v2/set/network/config.lua`

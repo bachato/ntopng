@@ -13,7 +13,7 @@
                     </div>
                 </div>
             </div>
-            <Loading v-if="loading"></Loading>
+            <Loading :isLoading="loading"></Loading>
             <Sankey ref="sankey_chart" :no_data_message="no_data_message" :sankey_data="sankey_data"
                 :autorefresh="autoRefreshEnabled" @node_click="on_node_click" @autorefresh_toggle="onAutoRefreshToggle">
             </Sankey>
@@ -41,7 +41,7 @@ const first_open = ref(true);
 const sankey_url = `${http_prefix}/lua/rest/v2/get/asn/sankey.lua`;
 const sankey_chart = ref(null)
 const sankey_data = ref({});
-const loading = ref(false);
+const loading = ref(true);
 const no_data_message = _i18n("as_overview.no_data")
 const autoRefreshEnabled = ref(false);
 const active_sankey_type = ref({})

@@ -28,7 +28,7 @@
               </div>
             </template>
           </div>
-          <Loading v-if="loading"></Loading>
+          <Loading :isLoading="loading"></Loading>
           <div :id="widget_name" style="height: 90%;" :class="[ loading ? 'ntopng-gray-out' : '' ]">
             <Chart
               ref="bubble_chart"
@@ -63,7 +63,7 @@ const props = defineProps({
   available_filters: Object,
 })
 
-const loading = ref(false);
+const loading = ref(true);
 const chart_type = ntopChartApex.typeChart.BUBBLE
 const rest_url = `${http_prefix}/lua/pro/rest/v2/charts/alert/analysis.lua`
 const widget_name = 'alerts-map';

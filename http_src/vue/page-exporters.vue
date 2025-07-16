@@ -13,7 +13,7 @@
                     </div>
                 </div>
             </div>
-            <Loading v-if="loading"></Loading>
+            <Loading :isLoading="loading"></Loading>
             <Sankey ref="sankey_chart" :no_data_message="no_data_message" :sankey_data="sankey_data"
                 @node_click="on_node_click">
             </Sankey>
@@ -48,7 +48,7 @@ const _i18n = (t) => i18n(t);
 const sankey_url = `${http_prefix}/lua/pro/rest/v2/get/exporters/sankey.lua`;
 const sankey_chart = ref(null)
 const sankey_data = ref({});
-const loading = ref(false);
+const loading = ref(true);
 const no_data_message = i18n("no_nprobes_message")
 const active_sankey_type = ref({})
 const sankey_format_list = [

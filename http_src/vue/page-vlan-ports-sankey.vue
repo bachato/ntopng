@@ -6,9 +6,9 @@
 <div class="row">
   <div class="col-md-12 col-lg-12">
     <div class="card card-shadow">
-      <Loading v-if="loading"></Loading>
+      <Loading :isLoading="loading"></Loading>
       <div class="card-body">
-        <div class="align-items-center justify-content-end mb-2" :class="[loading ? 'ntopng-gray-out' : '']" style="height: 70vh;" ref="body_div">
+        <div class="align-items-center justify-content-end mb-2" style="height: 70vh;" ref="body_div">
           <div class="d-flex align-items-center flex-row-reverse mb-2">
             <div>
               <label class="my-auto me-1"></label>
@@ -80,7 +80,7 @@ const height = ref(null);
 const sankey_data = ref({});
 const live_rest = `${http_prefix}/lua/pro/rest/v2/get/vlan/live_ports.lua`
 const historical_rest = `${http_prefix}/lua/pro/rest/v2/get/vlan/historical_ports.lua`
-const loading = ref(false)
+const loading = ref(true)
 
 onBeforeMount(() => {
   /* Before mounting the various widgets, update the url to the correct one, by adding ifid, ecc. */

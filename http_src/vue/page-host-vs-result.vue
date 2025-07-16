@@ -3,7 +3,7 @@
     <div class="col-md-12 col-lg-12">
       <div class="card  card-shadow">
         <h3 class="d-inline-block pt-3 ps-3" v-html="title_html"></h3>
-        <Loading v-if="loading"></Loading>
+        <Loading :isLoading="loading"></Loading>
         <div class="card-body" :class="[loading ? 'ntopng-gray-out' : '']" v-html="message_html"></div>
       </div>
     </div>
@@ -19,7 +19,7 @@ import regexValidation from "../utilities/regex-validation.js";
 const scan_result_url = `${http_prefix}/lua/rest/v2/get/host/vulnerability_scan_result.lua`;
 
 const modal_id = ref(null);
-const loading = ref(false);
+const loading = ref(true);
 
 
 const props = defineProps({

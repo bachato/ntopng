@@ -24,20 +24,20 @@
       </div>
 
       <div class="card h-100 overflow-hidden">
-        <Loading v-if="loading_chart"></Loading>
+        <Loading :isLoading="loading_chart"></Loading>
         <DateTimeRangePicker style="margin-top:0.5rem;" class="ms-1" :id="id_date_time_picker" :enable_refresh="true"
           ref="date_time_picker" @epoch_change="epoch_change" :min_time_interval_id="min_time_interval_id"
           :custom_time_interval_list="time_preset_list">
         </DateTimeRangePicker>
 
-        <div class="mt-3" :class="[(loading_chart) ? 'ntopng-gray-out' : '']">
+        <div class="mt-3">
           <TimeseriesChart ref="all_qos_chart" :id="all_qos_id" :chart_type="chart_type" :base_url_request="base_url"
             :get_custom_chart_options="get_chart_options" :register_on_status_change="false"
             :disable_pointer_events="false" :key="all_qos_id">
           </TimeseriesChart>
         </div>
 
-        <div class="m-3 card card-shadow" :class="[(loading_chart) ? 'ntopng-gray-out' : '']">
+        <div class="m-3 card card-shadow">
           <div class="card-body">
             <BootstrapTable id="page_stats_bootstrap_table" :columns="stats_columns" :rows="stats_rows"
               :print_html_column="(col) => print_stats_column(col)"
@@ -88,8 +88,8 @@ const all_qos_id = ref("chart_qos_all");
 const basic_source_type = "snmp_qos";
 const group_option_mode = timeseriesUtils.getGroupOptionMode('1_chart_x_metric');
 const filter_table_array = ref([]);
-const loading = ref(false);
-const loading_chart = ref(false);
+const loading = ref(true);
+const loading_chart = ref(true);
 const filters = ref([]);
 const is_qos_polled = ref(false);
 const qos_not_polled_yet = _i18n('snmp.snmp_qos_info_not_polled')

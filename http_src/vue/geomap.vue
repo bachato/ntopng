@@ -1,6 +1,6 @@
 <template>
     <div class="geomap-container" ref="mapContainer">
-        <Loading v-if="isLoading"></Loading>
+        <Loading :isLoading="isLoading"></Loading>
 
         <!-- Tooltip -->
         <div v-if="tooltip.show" ref="tooltipRef" class="static-tooltip" :style="{
@@ -487,6 +487,7 @@ onMounted(async () => {
         console.error('Error loading map data:', error);
         isLoading.value = false;
     }
+    isLoading.value = false;
 });
 
 onUnmounted(() => {
@@ -534,42 +535,6 @@ watch(() => props.geomapDataArray, async (newData) => {
     overflow: hidden;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
     font-family: 'Inter', 'Segoe UI', sans-serif;
-}
-
-.loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(15, 23, 42, 0.9);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-}
-
-.loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(59, 130, 246, 0.3);
-    border-radius: 50%;
-    border-top-color: #3b82f6;
-    animation: spin 1s ease-in-out infinite;
-    margin-bottom: 12px;
-}
-
-.loading-text {
-    color: #e2e8f0;
-    font-size: 14px;
-    letter-spacing: 1px;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
 }
 
 .static-tooltip {

@@ -1,9 +1,8 @@
 <template>
     <div class="m-4 card card-shadow">
-        <Loading v-if="show_loading"></Loading>
+        <Loading :isLoading="isLoading"></Loading>
         <div class="card-body">
-            <table class="table w-100 table-striped table-hover table-bordered"
-                :class="[(show_loading) ? 'ntopng-gray-out' : '']">
+            <table class="table w-100 table-striped table-hover table-bordered">
                 <tbody class="table_length">
                     <tr>
                         <td>
@@ -75,11 +74,11 @@ const analyze_pcap_url = `${http_prefix}/lua/rest/v2/add/ntopng/analyze_pcap.lua
 const MAX_SIZE = 25 /* MB */ * 1024 * 1024;
 const new_iface_id = ref(null);
 const modal_pcap_uploaded = ref(null);
-const show_loading = ref(false)
+const isLoading = ref(true)
 let create_new_interface = false
 
 onMounted(() => {
-    show_loading.value = false;
+    isLoading.value = false;
 })
 
 const check_file = function () {
@@ -108,7 +107,7 @@ const upload_pcap = async function () {
 
         disable_save.value = true;
         error.value = '';
-        show_loading.value = true;
+        isLoading.value = true;
         console.log(pcap_file)
         // Create a Form object to send the data.
         // The Files are no more sent correctly if not used a form
@@ -140,7 +139,7 @@ const upload_pcap = async function () {
         error.value = i18n("analyze_pcap_error")
     } finally {
         disable_save.value = true;
-        show_loading.value = false;
+        isLoading.value = false;
     }
 }
 

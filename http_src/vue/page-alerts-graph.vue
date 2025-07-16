@@ -54,9 +54,8 @@
                         </button>
                     </div>
                     <div class="card-body p-0">
-                        <div ref="alerts_graph" class="graph-content d-flex justify-content-center align-items-center"
-                            :class="[(loading) ? 'ntopng-gray-out' : '']">
-                            <Loading v-if="loading" :class="'mt-1'"></Loading>
+                        <div ref="alerts_graph" class="graph-content d-flex justify-content-center align-items-center">
+                            <Loading :isLoading="loading" :class="'mt-1'"></Loading>
                             <div v-if="no_data" class="d-flex justify-content-center align-items-center h-100">
                                 <p class="text-center text-muted">{{ _i18n("alert.graph.no_data") }}</p>
                             </div>
@@ -68,7 +67,7 @@
             <!-- Node Details Section - Only shown when a node is selected -->
             <div class="col-lg-4">
                 <!-- Node or Alert Details Card -->
-                <div class="card shadow-sm h-100" :class="[(hostDataLoading) ? 'ntopng-gray-out' : '']">
+                <div class="card shadow-sm h-100">
                     <!-- Conditional header based on what was clicked -->
                     <div class="card-header bg-white py-3">
                         <h5 class="card-title mb-0 fw-bold">
@@ -76,9 +75,9 @@
                         </h5>
                     </div>
 
-                    <Loading v-if="hostDataLoading"></Loading>
+                    <Loading :isLoading="hostDataLoading"></Loading>
 
-                    <div v-else class="card-body">
+                    <div v-if="!hostDataLoading" class="card-body">
                         <!-- Node Details Section -->
                         <div v-if="lastClickedElementIsNode" class="node-details">
                             <div class="mb-4">

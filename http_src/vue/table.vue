@@ -2,8 +2,6 @@
 <template>
     <slot name="custom_header2"></slot>
     <div ref="tableContainerRef" :id="id">
-        <!-- Loading during data fetch-->
-        <Loading v-if="isLoading"></Loading>
         <div class="button-group mb-2 d-flex align-items-center"> <!-- TableHeader -->
             <div class="form-group d-flex align-items-end" style="flex-wrap: wrap;">
                 <!-- Slot for custom header-->
@@ -77,8 +75,7 @@
                 <span v-html="message_to_display"></span>
             </div>
 
-            <table ref="tableRef" class="table table-striped table-bordered ml-0 mr-0 mb-0 ntopng-table"
-                :class="[(display_message || isLoading) ? 'ntopng-gray-out' : '']" data-resizable="true"
+            <table ref="tableRef" class="table table-striped table-bordered ml-0 mr-0 mb-0 ntopng-table" data-resizable="true"
                 :data-resizable-columns-id="id"> <!-- Table -->
                 <thead>
                     <tr>
@@ -169,7 +166,6 @@ import { ntopng_utility, ntopng_url_manager } from "../services/context/ntopng_g
 import { default as Dropdown } from "./dropdown.vue";
 import { default as SelectTablePage } from "./select_table_page.vue";
 import { default as VueNode } from "./vue_node.vue";
-import { default as Loading } from "./loading.vue";
 import { default as Switch } from "./switch.vue";
 import NtopUtils from "../utilities/ntop-utils.js";
 
@@ -228,7 +224,6 @@ const columnWidthStore = window.store;                          // Store for col
 const searchString = ref("");                          // Search term
 
 const paginationRef = ref(null);                 // Reference to pagination component
-const isLoading = ref(false);                          // Loading state flag
 const query_info = ref(null);                        // Query execution info (time, records, SQL)
 const sqlButtonRef = ref(null);             // Reference to SQL button for copy to clipboard
 const isChangingColumnVisibility = ref(false);       // Flag for column visibility changes
@@ -567,9 +562,6 @@ let isFirstDataLoad = true;
 
 // get and update rows data
 async function set_rows() {
-    // show loading spinner
-    isLoading.value = true && !shouldDisableLoading;
-
     // get rows from backend
     let res = await props.get_rows(
         currentPage,                // current page
@@ -601,7 +593,6 @@ async function set_rows() {
     // store fetched rows and update displayed rows 
     allRows = res.rows;
     set_active_rows();
-    isLoading.value = false;
 
     // wait for dom to update and emit event
     await nextTick();

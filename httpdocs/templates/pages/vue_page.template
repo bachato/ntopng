@@ -4,7 +4,7 @@
 #}
 
 
-<div id="{* vue_page_name *}">
+<div id="{* vue_page_name *}" style="position: relative">
   <page-vue :context="context">
   </page-vue>
 </div>

@@ -5,10 +5,9 @@
             </div>
         </template>
         <div class="card card-shadow" :class="[(!props.context.is_check_enabled) ? 'ntopng-gray-out' : '']">
-            <Loading v-if="show_spinner"></Loading>
+            <Loading :isLoading="isLoading"></Loading>
             <div class="card-body">
-                <table class="table table-striped table-bordered col-sm-12"
-                    :class="show_spinner ? 'ntopng-gray-out' : ''">
+                <table class="table table-striped table-bordered col-sm-12">
                     <tbody class="table_length">
                         <tr v-for="(value, key) in check_name" :key="key" class="mb-4">
                             <td>
@@ -97,7 +96,7 @@ const isSaving = ref(false);
 const saveSuccess = ref(false);
 const disable_save = ref(true);
 const show_border_error = ref(false);
-const show_spinner = ref(false);
+const isLoading = ref(true);
 
 const saveButtonText = computed(() => {
     if (isSaving.value) return 'Saving...';
@@ -223,7 +222,7 @@ const saveConfig = async () => {
             }
         }
 
-        show_spinner.value = true;
+        isLoading.value = true;
         const res = await ntopng_utility.http_post_request(set_config_url, data)
         modifiedInputs.value = [];
         if (!res.error) {
@@ -236,13 +235,13 @@ const saveConfig = async () => {
             setTimeout(() => {
                 saveSuccess.value = false;
                 getConfig();
-                show_spinner.value = false;
+                isLoading.value = false;
             }, 500);
         } else {
             configuration_error.value = 'Error: ' + res.error_msg;
             show_configuration_error.value = true;
             show_border_error.value = true;
-            show_spinner.value = false;
+            isLoading.value = false;
         }
         return true;
     }

@@ -13,7 +13,7 @@
                     </div>
                 </div>
             </div>
-            <Loading v-if="loading"></Loading>
+            <Loading :isLoading="loading"></Loading>
             <Sankey ref="sankey_chart" :no_data_message="no_data_message" :sankey_data="sankey_data"
                 @node_click="on_node_click">
             </Sankey>
@@ -67,6 +67,7 @@ _i18n("exporters_page.dropped_packets_descr"),
 /* ************************************** */
 
 onBeforeMount(() => {
+    loading.value = true;
     const criteria = ntopng_url_manager.get_url_entry("criteria");
     active_sankey_type.value = sankey_format_list[0];
     if (criteria) {
@@ -85,6 +86,7 @@ onMounted(() => {
         table_probes.value.refresh_table()
         update_sankey_data()
     }, 10000 /* 10 sec refresh */)
+    loading.value = false;
 })
 
 /* ************************************** */
@@ -95,10 +97,8 @@ const add_sankey_filter = async (opt) => {
 }
 
 const update_sankey_data = async () => {
-    loading.value = true;
     let data = await get_sankey_data();
     sankey_data.value = data;
-    loading.value = false;
 }
 
 const get_sankey_data = async () => {

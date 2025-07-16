@@ -5,7 +5,7 @@
   <div class="row">
     <div class="col-12">
       <div class="card card-shadow">
-        <Loading v-if="loading"></Loading>
+        <Loading :isLoading="loading"></Loading>
         <div class="card-body">
           <template v-if="error">
             <div class="alert alert-danger" role="alert" id='error-alert'>
@@ -75,7 +75,7 @@ const network_discovery_table = ref(null);
 const progress_message = ref(null);
 const last_network_discovery = ref('');
 const discovery_requested_message = i18n('discover.network_discovery_not_enabled');
-const loading = ref(false);
+const loading = ref(true);
 const networkDiscoveryPrefEnabled = ref(true);
 
 const ghost_message = i18n("discover.ghost_icon_descr");
