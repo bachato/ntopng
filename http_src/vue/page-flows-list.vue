@@ -2,7 +2,7 @@
 <template>
     <div class="m-2 mb-3">
         <TableWithConfig ref="table_flows_list" :table_id="table_id" :csrf="csrf" :f_map_columns="map_table_def_columns"
-            :get_extra_params_obj="get_extra_params_obj" :f_sort_rows="columns_sorting"
+            :showLoading="true" :get_extra_params_obj="get_extra_params_obj" :f_sort_rows="columns_sorting"
             @custom_event="on_table_custom_event" @rows_loaded="change_filter_labels">
             <template v-slot:custom_header>
                 <div class="dropdown me-3 d-inline-block" v-for="item in filter_table_array">

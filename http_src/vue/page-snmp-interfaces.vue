@@ -1,7 +1,7 @@
 <!-- (C) 2024 - ntop.org     -->
 <template>
     <div class="m-2 mb-3">
-        <TableWithConfig ref="table_snmp_interfaces" :table_id="table_id" :csrf="csrf"
+        <TableWithConfig ref="table_snmp_interfaces" :table_id="table_id" :csrf="csrf" :showLoading="true"
             :f_map_columns="map_table_def_columns" :get_extra_params_obj="get_extra_params_obj"
             :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event">
             <template v-slot:custom_header>

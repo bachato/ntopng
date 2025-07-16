@@ -2,6 +2,7 @@
 <template>
     <slot name="custom_header2"></slot>
     <div ref="tableContainerRef" :id="id">
+        <Loading :isLoading="isLoading"></Loading>
         <div class="button-group mb-2 d-flex align-items-center"> <!-- TableHeader -->
             <div class="form-group d-flex align-items-end" style="flex-wrap: wrap;">
                 <!-- Slot for custom header-->
@@ -167,6 +168,7 @@ import { default as Dropdown } from "./dropdown.vue";
 import { default as SelectTablePage } from "./select_table_page.vue";
 import { default as VueNode } from "./vue_node.vue";
 import { default as Switch } from "./switch.vue";
+import { default as Loading } from "./loading.vue";
 import NtopUtils from "../utilities/ntop-utils.js";
 
 /* rows_loaded, is emitted every time the rows are loaded,
@@ -200,6 +202,7 @@ const props = defineProps({
     paging: Boolean,                // Enable server-side pagination
     display_message: Boolean,       // Display a message instead of the table
     message_to_display: String,     // Message to display    
+    showLoading: Boolean,
 });
 
 // Get number of rows shown per page from local storage
@@ -222,6 +225,7 @@ const rowsPerPageOptions = [10, 20, 40, 50, 80, 100];  // Available rows per pag
 const rowsPerPage = ref(get_num_pages());               // Current rows per page setting
 const columnWidthStore = window.store;                          // Store for column width persistence
 const searchString = ref("");                          // Search term
+const isLoading = ref(props.showLoading ? props.showLoading : false);
 
 const paginationRef = ref(null);                 // Reference to pagination component
 const query_info = ref(null);                        // Query execution info (time, records, SQL)
@@ -231,6 +235,7 @@ const isChangingRows = ref(false);                    // Flag for row data chang
 const isAutoRefreshEnabled = ref(false);               // Auto-refresh state
 
 onMounted(async () => {
+    debugger;
     if (props.columns != null) {
         load_table();
     }
@@ -562,6 +567,9 @@ let isFirstDataLoad = true;
 
 // get and update rows data
 async function set_rows() {
+    if (props.showLoading) {
+        isLoading.value = true;
+    }
     // get rows from backend
     let res = await props.get_rows(
         currentPage,                // current page
@@ -597,6 +605,9 @@ async function set_rows() {
     // wait for dom to update and emit event
     await nextTick();
     emit('rows_loaded', res);
+    if (props.showLoading) {
+        isLoading.value = false;
+    }
 }
 
 // New function to filter rows based on search string

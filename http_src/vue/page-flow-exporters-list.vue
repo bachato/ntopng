@@ -1,6 +1,6 @@
 <template>
     <div class="m-2 mb-3">
-        <TableWithConfig ref="table_exporters_list" :table_id="table_id" :csrf="csrf"
+        <TableWithConfig ref="table_exporters_list" :table_id="table_id" :csrf="csrf" :showLoading="true"
             :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting"
             :get_extra_params_obj="get_extra_params_obj" @custom_event="on_table_custom_event">
         </TableWithConfig>

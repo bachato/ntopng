@@ -1,14 +1,15 @@
 <!-- (C) 2024 - ntop.org     -->
 <template>
     <div class="m-2 mb-3">
-        <TableWithConfig ref="table_hosts_list" :table_id="table_id" :csrf="csrf" :f_map_columns="map_table_def_columns"
-            :get_extra_params_obj="get_extra_params_obj" :f_sort_rows="columns_sorting"
-            @custom_event="on_table_custom_event" @rows_loaded="change_filter_labels">
+        <TableWithConfig ref="table_hosts_list" :table_id="table_id" :csrf="csrf" :showLoading="true"
+            :f_map_columns="map_table_def_columns" :get_extra_params_obj="get_extra_params_obj"
+            :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event" @rows_loaded="change_filter_labels">
             <template v-slot:custom_header>
                 <div class="dropdown me-3 d-inline-block" v-for="item in filter_table_array">
-                    <span class="no-wrap d-flex align-items-center my-auto me-2 filters-label"><b>{{ item["basic_label"] }}</b></span>
+                    <span class="no-wrap d-flex align-items-center my-auto me-2 filters-label"><b>{{ item["basic_label"]
+                            }}</b></span>
                     <!-- :key="host_filters_key" -->
-                    <SelectSearch v-model:selected_option="item['current_option']" theme="bootstrap-5" 
+                    <SelectSearch v-model:selected_option="item['current_option']" theme="bootstrap-5"
                         dropdown_size="small" :disabled="loading" :options="item['options']"
                         @select_option="add_table_filter">
                     </SelectSearch>
@@ -278,7 +279,7 @@ async function load_table_filters_array() {
 
     return res.map((t) => {
         const key_in_url = ntopng_url_manager.get_url_entry(t.name);
-        if(dataUtils.isEmptyOrNull(key_in_url)) {
+        if (dataUtils.isEmptyOrNull(key_in_url)) {
             ntopng_url_manager.set_key_to_url(t.name, ``);
         }
         return {

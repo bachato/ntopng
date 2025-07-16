@@ -15,7 +15,7 @@
           <span> {{ import_ok_text }}</span>
         </div>
 
-        <TableWithConfig ref="table_snmp_devices" :table_id="table_id" :csrf="csrf"
+        <TableWithConfig ref="table_snmp_devices" :table_id="table_id" :csrf="csrf" :showLoading="true"
           :f_map_columns="map_table_def_columns" :get_extra_params_obj="get_extra_params_obj"
           :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event" @rows_loaded="change_filter_labels">
           <template v-slot:custom_buttons>

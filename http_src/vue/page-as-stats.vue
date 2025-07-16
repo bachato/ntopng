@@ -13,13 +13,14 @@
             <div v-if="showTitle" class="widget-name">
                 <h6 class="m-0">{{ chart_title }}</h6>
             </div>
-            <DashboardTimeseries ref="timeseries_chart" :key="timeseries_key" :id="timeseries_id" :epoch_begin="epoch_begin"
-                :epoch_end="epoch_end" :i18n_title="chart_title" :ifid="props.context.ifid.toString()" :max_width="12"
-                :max_height="4" :params="params" :get_component_data="get_component_data"
-                :set_component_attr="set_component_attr" :csrf="props.context.csrf">
+            <DashboardTimeseries ref="timeseries_chart" :key="timeseries_key" :id="timeseries_id"
+                :epoch_begin="epoch_begin" :epoch_end="epoch_end" :i18n_title="chart_title"
+                :ifid="props.context.ifid.toString()" :max_width="12" :max_height="4" :params="params"
+                :get_component_data="get_component_data" :set_component_attr="set_component_attr"
+                :csrf="props.context.csrf">
             </DashboardTimeseries>
         </div>
-        <TableWithConfig ref="table_as_stats" :table_id="table_id" :csrf="props.context.csrf"
+        <TableWithConfig ref="table_as_stats" :table_id="table_id" :csrf="props.context.csrf" :showLoading="true"
             :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting"
             :get_extra_params_obj="get_extra_params_obj" @custom_event="on_table_custom_event">
         </TableWithConfig>

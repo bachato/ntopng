@@ -36,7 +36,7 @@
                         </div>
                     </div>
                     <div>
-                        <TableWithConfig ref="table_server_ports" :csrf="csrf" :table_id="table_id"
+                        <TableWithConfig ref="table_server_ports" :csrf="csrf" :table_id="table_id" :showLoading="true"
                             :f_map_columns="map_table_def_columns" :get_extra_params_obj="get_extra_params_obj"
                             @custom_event="on_table_custom_event">
                             <template v-slot:custom_header>

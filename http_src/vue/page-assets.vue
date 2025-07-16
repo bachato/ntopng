@@ -6,7 +6,7 @@
             </div>
         </template>
         <div :class="[(!props.context.is_assets_collection_enabled) ? 'ntopng-gray-out' : '']">
-            <TableWithConfig ref="table_assets" :table_id="table_id" :csrf="context.csrf"
+            <TableWithConfig ref="table_assets" :table_id="table_id" :csrf="context.csrf" :showLoading="true"
                 :f_map_columns="map_table_def_columns" :get_extra_params_obj="get_extra_params_obj"
                 @custom_event="on_table_custom_event">
                 <template v-slot:custom_header>
@@ -359,7 +359,7 @@ async function load_table_filters_array() {
 const get_extra_params_obj = () => {
     let extra_params = ntopng_url_manager.get_url_object();
     extra_params = {
-        ...{ifid: props.context.ifid},
+        ...{ ifid: props.context.ifid },
         ...extra_params,
     }
     return extra_params;

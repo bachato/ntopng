@@ -10,7 +10,8 @@ x2<template>
         </div>
       </div>
       <div class="col-md-4 mb-2">
-        <div ref="exporterComponent" class="bg-success text-white p-3 d-flex justify-content-between align-items-center">
+        <div ref="exporterComponent"
+          class="bg-success text-white p-3 d-flex justify-content-between align-items-center">
           <BadgeComponent id="exportersCounter" :params="exportersCounterParams" :ifid="props.context.ifid.toString()"
             :get_component_data="get_component_data_func(exportersCounterParams)"
             :set_component_attr="set_component_attr_func(exportersCounterParams)" :filters="{}">
@@ -18,7 +19,8 @@ x2<template>
         </div>
       </div>
       <div class="col-md-4 mb-2">
-        <div ref="interfaceComponent" class="bg-success text-white p-3 d-flex justify-content-between align-items-center">
+        <div ref="interfaceComponent"
+          class="bg-success text-white p-3 d-flex justify-content-between align-items-center">
           <BadgeComponent id="interfacesCounter" :params="interfacesCounterParams" :ifid="props.context.ifid.toString()"
             :get_component_data="get_component_data_func(interfacesCounterParams)"
             :set_component_attr="set_component_attr_func(interfacesCounterParams)" :filters="{}">
@@ -27,7 +29,7 @@ x2<template>
       </div>
     </div>
 
-    <TableWithConfig ref="table_exporters_details" :table_id="table_id" :csrf="csrf"
+    <TableWithConfig ref="table_exporters_details" :table_id="table_id" :csrf="csrf" :showLoading="true"
       :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting"
       :get_extra_params_obj="get_extra_params_obj">
     </TableWithConfig>
@@ -113,7 +115,7 @@ function get_component_data_func(component) {
           component.componentRef.classList.add('bg-danger')
           component.componentRef.classList.remove('bg-success')
         }
-      } else if(response[component.current_value] === response[component.limit_value]) {
+      } else if (response[component.current_value] === response[component.limit_value]) {
         component.componentRef.classList.add('bg-warning')
         component.componentRef.classList.remove('bg-success')
       }

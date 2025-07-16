@@ -7,7 +7,7 @@
         :f_column_min_width="table_config.f_column_min_width" :f_get_column_classes="table_config.f_get_column_classes"
         :f_get_column_style="table_config.f_get_column_style" :display_empty_rows="table_config.display_empty_rows"
         :f_sort_rows="f_sort_rows" :enable_search="table_config.enable_search" :default_sort="table_config.default_sort"
-        :show_autorefresh="table_config.show_autorefresh" :paging="table_config.paging" :csrf="csrf"
+        :show_autorefresh="table_config.show_autorefresh" :paging="table_config.paging" :csrf="csrf" :showLoading="showLoading"
         :display_message="display_message" :message_to_display="message_to_display" @loaded="on_loaded"
         @rows_loaded="rows_loaded" @custom_event="on_custom_event">
         <template v-slot:custom_header>
@@ -35,6 +35,7 @@ const props = defineProps({
     get_extra_params_obj: Function,
     display_message: Boolean,
     message_to_display: String,
+    showLoading: Boolean,
 });
 
 const table_config = ref({});

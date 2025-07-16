@@ -74,7 +74,7 @@
                             </div>
                         </div>
                         <TableWithConfig ref="table_flows" :table_id="table_id" :table_config_id="table_config_id"
-                            :csrf="context.csrf" :f_map_columns="map_table_def_columns"
+                            :csrf="context.csrf" :showLoading="true" :f_map_columns="map_table_def_columns"
                             :get_extra_params_obj="get_extra_params_obj" @loaded="on_table_loaded"
                             @custom_event="on_table_custom_event">
                             <template v-slot:custom_header>

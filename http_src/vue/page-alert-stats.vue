@@ -69,7 +69,7 @@
                         </div>
                         <div></div>
                         <TableWithConfig ref="table_alerts" :table_config_id="table_config_id" :table_id="table_id"
-                            :csrf="context.csrf" :f_map_columns="map_table_def_columns"
+                            :csrf="context.csrf" :showLoading="true" :f_map_columns="map_table_def_columns"
                             :get_extra_params_obj="get_extra_params_obj" :display_message="display_message"
                             :message_to_display="message_to_display" @loaded="on_table_loaded"
                             @custom_event="on_table_custom_event" @rows_loaded="rows_loaded">

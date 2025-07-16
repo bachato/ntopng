@@ -25,7 +25,9 @@ const props = defineProps({
 
 /* By default already show the loading */
 onMounted(() => {
-    showLoading();
+    if (props.isLoading) {
+        showLoading();
+    }
 })
 
 /* *************************************** */
@@ -62,7 +64,7 @@ function hideLoading() {
     display: flex;
     justify-content: center !important;
     align-items: flex-start !important;
-    padding-top: 20vh; 
+    padding-top: 10%;
     z-index: 999;
     /* Bootstrap max overlay is 999 */
     opacity: 0;

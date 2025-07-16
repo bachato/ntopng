@@ -353,7 +353,6 @@ function formatDateTime(date, type = 'datetime') {
     if (type === 'date_only') {
         return formatted_date;
     }
-    debugger
     // datetime format
     return `${formatted_date}, ${time_formatter}`;
 }
