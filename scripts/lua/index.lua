@@ -84,12 +84,7 @@ if ntop.isnEdge() then
     end
 else
     if ntop.isEnterprise() then
-        if ntop.isClickHouseEnabled() and
-            auth.has_capability(auth.capabilities.historical_flows) then
-            default_template = "enterprise-with-db"
-        else
-            default_template = "enterprise"
-        end
+        default_template = "enterprise"
     elseif ntop.isPro() then
         default_template = "pro"
     end
