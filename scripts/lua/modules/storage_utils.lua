@@ -9,6 +9,7 @@ end
 
 if ntop.isEnterpriseM() or ntop.isnEdgeEnterprise() then
     package.path = dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" .. package.path
+    package.path = dirs.installdir .. "/pro/scripts/lua/modules/flow_db/?.lua;" .. package.path
 end
 
 local json = require("dkjson")
@@ -37,8 +38,8 @@ function storage_utils.interfaceStorageInfo(ifid, separate_pcap_volume, refresh_
         -- end
 
         if interfaceHasClickHouseSupport() then
-            local flow_db_utils = require "flow_db_utils"
-            local flows_storage_info = flow_db_utils.storageInfo(ifid, timeout)
+            local clickhouse_utils = require "clickhouse_utils"
+            local flows_storage_info = clickhouse_utils.storageInfo(ifid, timeout)
             info["flows"] = flows_storage_info.total
             info["total"] = info["total"] + flows_storage_info.total
         end
