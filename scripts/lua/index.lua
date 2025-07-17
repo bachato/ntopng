@@ -86,11 +86,7 @@ else
     if ntop.isEnterprise() then
         if ntop.isClickHouseEnabled() and
             auth.has_capability(auth.capabilities.historical_flows) then
-            if areInterfaceL7TimeseriesEnabled() then
-                default_template = "enterprise-with-db"
-            else
-                default_template = "enterprise-with-db-no-l7proto"
-            end
+            default_template = "enterprise-with-db"
         else
             default_template = "enterprise"
         end

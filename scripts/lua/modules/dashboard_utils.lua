@@ -24,10 +24,56 @@ local function is_clickhouse_available()
    return ntop.isClickHouseEnabled()
 end
 
+local function is_l7_timeseries_available()
+   return areInterfaceL7TimeseriesEnabled()
+end
+
 dashboard_utils.module_available = {
    ['historical_flows']   = is_clickhouse_available,
-   ['vulnerability_scan'] = vs_utils.is_available
+   ['vulnerability_scan'] = vs_utils.is_available,
+   ['l7_timeseries'] = is_l7_timeseries_available,
 }
+
+-- ##############################################
+
+local function check_requires(requires)
+   if not requires then
+      return true
+   end
+
+   if requires.model then
+      local model = requires.model
+      if     model == 'pro' and not info['pro.release']                   then return false
+      elseif model == 'm'   and not info['version.enterprise_m_edition']  then return false
+      elseif model == 'l'   and not info['version.enterprise_l_edition']  then return false
+      elseif model == 'xl'  and not info['version.enterprise_xl_edition'] then return false
+      end
+   end
+
+   if requires.modules then
+      for _, module in ipairs(requires.modules) do
+         local neg = false
+         if string.sub(module, 1, 1) == "!" then
+            neg = true
+            module = string.sub(module, 2)
+         end
+
+         if not neg then
+            if not dashboard_utils.module_available[module] or
+               not dashboard_utils.module_available[module]() then
+               return false
+            end
+         else
+            if dashboard_utils.module_available[module] and
+               dashboard_utils.module_available[module]() then
+               return false
+            end
+         end
+      end
+   end
+
+   return true
+end
 
 -- ##############################################
 
@@ -51,25 +97,17 @@ local function get_templates_from_dir(templates_dir)
          goto continue
       end
 
-      if template.requires then
-         if template.requires.model then
-            local model = template.requires.model
-            if     model == 'pro' and not info['pro.release']                   then goto continue
-            elseif model == 'm'   and not info['version.enterprise_m_edition']  then goto continue
-            elseif model == 'l'   and not info['version.enterprise_l_edition']  then goto continue
-            elseif model == 'xl'  and not info['version.enterprise_xl_edition'] then goto continue
-            end
-         end
+      if not check_requires(template.requires) then
+         goto continue
+      end
 
-         if template.requires.modules then
-            for _, module in ipairs(template.requires.modules) do
-               if not dashboard_utils.module_available[module] or
-                  not dashboard_utils.module_available[module]() then
-                  goto continue
-               end
-            end
+      local filtered_components = {}
+      for _, c in ipairs(template.components) do
+         if check_requires(c.requires) then
+            filtered_components[#filtered_components+1] = c
          end
       end
+      template.components = filtered_components
 
       template_name = template_name:sub(1, #template_name - 5)
 
