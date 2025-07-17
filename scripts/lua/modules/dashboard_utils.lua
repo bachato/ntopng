@@ -37,6 +37,8 @@ dashboard_utils.module_available = {
 -- ##############################################
 
 local function check_requires(requires)
+   local info = ntop.getInfo()
+
    if not requires then
       return true
    end
@@ -80,7 +82,6 @@ end
 -- Get all configured dashboard templates
 local function get_templates_from_dir(templates_dir)
    local templates = {}
-   local info = ntop.getInfo()
 
    local templates_names = ntop.readdir(templates_dir)
 
