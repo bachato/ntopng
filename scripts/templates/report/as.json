@@ -133,6 +133,9 @@
 		"height" : 4,
 		"time_window" : "day",
 		"time_offset" : "",
+		"requires" : {
+			"modules" : [ "packet_interface" ]
+		},
 		"params" : {
 			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
 			 "url_params" : {
@@ -156,6 +159,9 @@
 		"i18n_name" : "report.top_as_exporter_if",
 		"width" : 12,
 		"height" : 4,
+		"requires" : {
+			"modules" : [ "zmq_interface" ]
+		},
 		"params" : {
 			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
 			 "url_params" : {
@@ -179,6 +185,9 @@
 		"i18n_name" : "report.top_sender_as_exporter_if",
 		"width" : 12,
 		"height" : 4,
+		"requires" : {
+			"modules" : [ "zmq_interface" ]
+		},
 		"params" : {
 			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
 			 "url_params" : {
@@ -203,6 +212,9 @@
 		"i18n_name" : "report.top_receiver_as_exporter_if",
 		"width" : 12,
 		"height" : 4,
+		"requires" : {
+			"modules" : [ "zmq_interface" ]
+		},
 		"params" : {
 			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
 			 "url_params" : {

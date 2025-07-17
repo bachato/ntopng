@@ -1,6 +1,9 @@
 {
 	"name" : "Flow Exporters",
 	"readonly" : true,
+	"requires" : {
+		"modules" : [ "zmq_interface" ]
+	},
 	"filters" : [
 		{
 			"name" : "probe_ip",

@@ -32,6 +32,8 @@ dashboard_utils.module_available = {
    ['historical_flows']   = is_clickhouse_available,
    ['vulnerability_scan'] = vs_utils.is_available,
    ['l7_timeseries'] = is_l7_timeseries_available,
+   ['packet_interface'] = interface.isPacketInterface,
+   ['zmq_interface'] = interface.isZMQInterface,
 }
 
 -- ##############################################
