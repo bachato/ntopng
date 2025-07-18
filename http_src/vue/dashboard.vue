@@ -908,6 +908,7 @@ function check_diff_params(previous_params, current_params) {
 /* Callback to request REST data from components */
 function get_component_data_func(component) {
     const get_component_data = async (url, query_params, post_params, refresh_epoch) => {
+        component.isLoading = true;
         let info = {};
         if (data_from_backup) {
             // backward compatibility (component_id was not defined)
