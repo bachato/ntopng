@@ -14,7 +14,7 @@
                             <RangePicker v-if="mount_range_picker" ref="range_picker" id="range_picker"
                                 :min_time_interval_id="min_time_interval_id" :round_time="round_time">
                                 <template v-slot:begin>
-                                    <div class="ms-1 me-2">
+                                    <div class="me-2">
                                         <select class="me-2 form-select" style="min-width:8rem;"
                                             v-model="selected_query_preset" @change="update_select_query_presets()">
                                             <template v-for="item in query_presets">
