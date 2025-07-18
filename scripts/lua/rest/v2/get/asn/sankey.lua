@@ -576,8 +576,6 @@ end
 local flows_filter = {
    asnFilter = asn,
    detailsLevel = "normal",
-   maxHits = 10000,
-   perPage = 10000
 }
 
 callback_utils.foreachFlow(ifid, os.time() + 30, -- deadline

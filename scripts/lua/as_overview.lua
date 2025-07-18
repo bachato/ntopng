@@ -11,6 +11,14 @@ local template_utils = require "template_utils"
 local format_utils = require "format_utils"
 
 local asn = _GET["asn"]
+local criteria_as = _GET["criteria_as"]
+local tableId = "ingress_egress_as_stats"
+
+if (not criteria_as) or (criteria_as == "ingress_egress_traffic_criteria") then
+    tableId = "ingress_egress_as_stats" 
+else
+    tableId = "transit_as_stats"
+end
 
 sendHTTPContentTypeHeader('text/html')
 page_utils.print_header_and_set_active_menu_entry(page_utils.menu_entries.autonomous_systems)
@@ -47,7 +55,9 @@ template_utils.render("pages/vue_page.template", {
     vue_page_name = "PageAsOverview",
     page_context = json.encode({
         csrf = ntop.getRandomCSRFValue(),
-        ifid = interface.getId()
+        ifid = interface.getId(),
+        isEnterpriseL = ntop.isEnterpriseL(),
+        tableId = tableId 
     })
 })
 

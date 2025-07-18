@@ -4,8 +4,10 @@
 
 <template>
     <div ref="overlay" class="loading-overlay">
-        <div class="loading-spinner" :style="styles"></div>
-        <div class="loading-text">{{ loading }}</div>
+        <div class="loading-content vertical">
+            <div class="loading-spinner" :style="styles"></div>
+            <div class="loading-text">{{ loading }}</div>
+        </div>
     </div>
 </template>
 
@@ -113,8 +115,17 @@ function hideLoading() {
     color: #e2e8f0;
     font-size: 14px;
     letter-spacing: 1px;
-    margin-top: 0.5rem;
-    margin-left: 0.3rem;
+}
+
+.loading-content {
+  display: flex;
+  align-items: center;
+}
+
+.loading-content.vertical {
+  display: flex;
+  flex-direction: column; 
+  align-items: center; 
 }
 
 /* Variante fixed visibile ovunque */

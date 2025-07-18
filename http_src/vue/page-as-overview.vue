@@ -1,22 +1,29 @@
 <template>
     <div class="m-2 mb-3">
-        <div class="mb-3 d-flex flex-column" style="height: 60vh;">
-            <div class="d-flex align-items-center mb-2">
-                <div class="d-flex no-wrap">
-                    <div class="m-1">
-                        <div style="min-width: 16rem;">
-                            <label class="me-1">{{ _i18n('criteria') }}: </label>
-                            <SelectSearch v-model:selected_option="active_sankey_type" :options="sankey_format_list"
-                                @select_option="add_sankey_filter">
-                            </SelectSearch>
-                        </div>
-                    </div>
-                </div>
+        <div class="button-group mb-2 d-flex align-items-center">
+            <div class="dropdown me-3 d-flex"><span class="no-wrap d-flex align-items-center filters-label me-2"><b>{{
+                _i18n("criteria")
+                        }}: </b></span>
+                <SelectSearch v-model:selected_option="active_sankey_type" :options="sankey_format_list"
+                    @select_option="changeCriteria">
+                </SelectSearch>
             </div>
-            <Loading :isLoading="loading"></Loading>
-            <Sankey ref="sankey_chart" :no_data_message="no_data_message" :sankey_data="sankey_data"
-                :autorefresh="autoRefreshEnabled" @node_click="on_node_click" @autorefresh_toggle="onAutoRefreshToggle">
-            </Sankey>
+        </div>
+        <div style="position: relative;">
+            <div class="mb-3 d-flex flex-column" style="height: 60vh;">
+                <Loading :isLoading="loading"></Loading>
+                <Sankey ref="sankey_chart" :no_data_message="no_data_message" :sankey_data="sankey_data"
+                    :autorefresh="autoRefreshEnabled" @node_click="on_node_click"
+                    @autorefresh_toggle="onAutoRefreshToggle">
+                </Sankey>
+            </div>
+        </div>
+        <div style="position: relative;">
+            <TableWithConfig v-if="props.context.isEnterpriseL" ref="table_as_stats" :key="reload" :table_id="table_id"
+                :csrf="props.context.csrf" :showLoading="true" :f_map_columns="map_table_def_columns"
+                :f_sort_rows="columns_sorting" :get_extra_params_obj="get_extra_params_obj"
+                @custom_event="on_table_custom_event">
+            </TableWithConfig>
         </div>
         <div class="card-footer">
             <NoteList :note_list="note_list"> </NoteList>
@@ -30,7 +37,11 @@ import { ref, onMounted, onBeforeMount } from "vue";
 import { default as NoteList } from "./note-list.vue";
 import { default as Loading } from "./loading.vue"
 import { default as Sankey } from "./sankey.vue";
+import { default as sortingFunctions } from "../utilities/sorting-utils.js";
+import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as SelectSearch } from "./select-search.vue";
+import { default as dataUtils } from "../utilities/data-utils.js";
+import FormatterUtils from "../utilities/formatter-utils.js";
 
 const props = defineProps({
     context: Object,
@@ -45,6 +56,9 @@ const loading = ref(true);
 const no_data_message = _i18n("as_overview.no_data")
 const autoRefreshEnabled = ref(false);
 const active_sankey_type = ref({})
+const table_as_stats = ref(null);
+const reload = ref(false);
+const table_id = ref(props.context.tableId);
 const sankey_format_list = [
     { key: "criteria_as", value: 'ingress_egress_traffic_criteria', label: _i18n('as_overview.ingress_egress_traffic_criteria') },
     { key: "criteria_as", value: 'as_traffic_criteria', label: _i18n('as_overview.as_traffic_criteria') },
@@ -85,10 +99,21 @@ onMounted(() => {
 
 /* ************************************** */
 
-const add_sankey_filter = async (opt) => {
+/* This function is called upon changing the selected option in the dropdown */
+const changeCriteria = async (opt) => {
     ntopng_url_manager.set_key_to_url(opt.key, `${opt.value}`);
     update_sankey_data();
+    if (table_as_stats.value) {
+        if (opt.value === "ingress_egress_traffic_criteria") {
+            table_id.value = "ingress_egress_as_stats"
+        } else if(opt.value === "as_traffic_criteria") {
+            table_id.value = "transit_as_stats"
+        }
+        reload.value = !reload.value
+    }
 }
+
+/* ************************************** */
 
 const update_sankey_data = async () => {
     loading.value = true;
@@ -112,7 +137,7 @@ const get_sankey_data = async () => {
         node = graph.nodes.find((el) => el.node_id == link.target_node_id)
         link.target = node.index;
     })
-    
+
     return graph
 }
 
@@ -137,6 +162,100 @@ function on_node_click(_, node) {
 const get_extra_params_obj = () => {
     let extra_params = ntopng_url_manager.get_url_object();
     return extra_params;
+};
+
+/* ***************************************************** */
+
+function on_table_custom_event(event) {
+    let events_managed = {};
+    if (events_managed[event.event_id] == null) {
+        return;
+    }
+    events_managed[event.event_id](event);
+}
+
+/* ************************************** */
+
+function columns_sorting(col, r0, r1) {
+    if (col != null) {
+        if (col.id == "device") {
+            return sortingFunctions.sortByName(r0.device.name, r1.device.name, col.sort);
+        } else if (col.id == "interface") {
+            return sortingFunctions.sortByName(r0.interface.name, r1.interface.name, col.sort);
+        } else if (col.id == "as") {
+            return sortingFunctions.sortByName(r0.as.name, r1.as.name, col.sort);
+        } else if (col.id == "transit_as") {
+            return sortingFunctions.sortByName(r0.transit_as.name, r1.transit_as.name, col.sort);
+        } else if (col.id == "bytes_sent") {
+            return sortingFunctions.sortByNumber(r0.bytes_sent, r1.bytes_sent, col.sort);
+        } else if (col.id == "bytes_rcvd") {
+            return sortingFunctions.sortByNumber(r0.bytes_rcvd, r1.bytes_rcvd, col.sort);
+        } else if (col.id == "total_bytes") {
+            return sortingFunctions.sortByNumber(r0.total_bytes, r1.total_bytes, col.sort);
+        }
+    }
+    /* Default sorting */
+    return sortingFunctions.sortByNumber(r0.total_bytes, r1.total_bytes, col.sort);
+}
+
+/* ************************************** */
+
+const map_table_def_columns = (columns) => {
+    let map_columns = {
+        "device": (value, row) => {
+            if (dataUtils.isEmptyString(value.name)) {
+                value.id
+            }
+            return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
+        },
+        "interface": (value, row) => {
+            if (dataUtils.isEmptyString(value.name)) {
+                value.id
+            }
+            return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
+        },
+        "as": (value, row) => {
+            if (dataUtils.isEmptyString(value.name)) {
+                value.id
+            }
+            return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
+        },
+        "transit_as": (value, row) => {
+            if (dataUtils.isEmptyString(value.name)) {
+                value.id
+            }
+            return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
+        },
+        "bytes_sent": (value, row) => {
+            return FormatterUtils.getFormatter("bytes")(value);
+        },
+        "bytes_rcvd": (value, row) => {
+            return FormatterUtils.getFormatter("bytes")(value);
+        },
+        "total_bytes": (value, row) => {
+            return FormatterUtils.getFormatter("bytes")(value);
+        },
+    };
+
+    columns.forEach((c) => {
+        c.render_func = map_columns[c.data_field];
+        if (c.id == "actions") {
+            const visible_dict = {};
+            c.button_def_array.forEach((b) => {
+                b.f_map_class = (current_class, row) => {
+                    // if is not defined is enabled
+                    if (!visible_dict[b.id]) {
+                        current_class.push("disabled");
+                    } else if (row.asn === 0 && (b.id === "exporters_stats" || b.id === "timeseries")) {
+                        current_class.push("disabled");
+                    }
+                    return current_class;
+                }
+            });
+        }
+    });
+
+    return columns;
 };
 
 

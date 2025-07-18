@@ -35,7 +35,6 @@ import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as DashboardTimeseries } from "./dashboard-timeseries.vue";
 import { default as SelectSearch } from "./select-search.vue";
 import FormatterUtils from "../utilities/formatter-utils.js";
-import formatterUtils from "../utilities/formatter-utils";
 import NtopUtils from "../utilities/ntop-utils.js";
 
 const _i18n = (t) => i18n(t);
@@ -185,7 +184,7 @@ const map_table_def_columns = (columns) => {
             return return_value;
         },
         "hosts": (value, row) => {
-            return formatterUtils.getFormatter("number")(value);
+            return FormatterUtils.getFormatter("number")(value);
         },
         "seen_since": (value, row) => {
             // `seen_since` might require formatting, e.g., date formatting.
@@ -195,19 +194,19 @@ const map_table_def_columns = (columns) => {
         },
         "score": (value, row) => {
             // Assuming `score` is a number that might require some formatting.
-            return formatterUtils.getFormatter("number")(value);
+            return FormatterUtils.getFormatter("number")(value);
         },
         "breakdown": (value, row) => {
             return NtopUtils.createBreakdown(value["bytes_sent"], value["bytes_rcvd"], "Sent", "Rcvd")
         },
         "throughput": (value, row) => {
-            return formatterUtils.getFormatter("bps")(value);
+            return FormatterUtils.getFormatter("bps")(value);
         },
         "traffic": (value, row) => {
-            return formatterUtils.getFormatter("bytes")(value);
+            return FormatterUtils.getFormatter("bytes")(value);
         },
         "alerted_flows": (value, row) => {
-            return formatterUtils.getFormatter("number")(value);
+            return FormatterUtils.getFormatter("number")(value);
         },
     };
 
