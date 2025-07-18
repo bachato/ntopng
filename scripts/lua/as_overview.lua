@@ -32,6 +32,11 @@ page_utils.print_navbar(i18n("asn_id",{id = format_utils.formatASN(asn)}), ntop.
     page_name = "asn_flows",
     label = "<i class=\"fas fa-stream fa-lg\"></i>"
 }, { 
+    url = ntop.getHttpPrefix() .. "/lua/as_stats.lua?page=historical&asn=" .. asn,
+    active = page == "historical",
+    page_name = "historical",
+    label = "<i class=\"fas fa-chart-area\"></i>"
+}, { 
     url = ntop.getHttpPrefix() .. "/lua/as_stats.lua?show_as=all",
     active = page == "as_stats",
     page_name = "as_stats",

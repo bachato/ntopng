@@ -2330,11 +2330,60 @@ end
 local function add_top_asn_timeseries(tags, timeseries)
     local asn_ts_enabled = ntop.getCache("ntopng.prefs.asn_rrd_creation")
 
+    local series = ts_utils.listSeries("asn:exporter_traffic",
+                                       table.clone(tags), tags.epoch_begin) or
+                       {}
+    local tmp_tags = table.clone(tags)
+
+    -- Top Exporters - ASN
+    if not table.empty(series) then
+        for _, serie in pairs(series or {}) do
+            local tot = 0
+            tmp_tags.device = serie.device
+            tmp_tags.if_index = serie.if_index
+            local tot_serie = ts_utils.queryTotal("asn:exporter_traffic",
+                                                  tags.epoch_begin,
+                                                  tags.epoch_end, tmp_tags)
+            -- Remove serie with no data
+            for _, value in pairs(tot_serie or {}) do
+                tot = tot + tonumber(value)
+            end
+
+            if (tot > 0) then
+                timeseries[#timeseries + 1] = {
+                    schema = "asn:exporter_traffic",
+                    group = i18n("exporter_interface"),
+                    priority = 2,
+                    query = "device:" .. serie.device .. ",if_index:" ..
+                        serie.if_index,
+                    label = i18n("exporter_port", {
+                        exporter = getProbeName(serie.device),
+                        port = format_portidx_name(serie.device, serie.if_index,
+                                                   true)
+                    }),
+                    disable_default_ago_ts = true,
+                    measure_unit = "bps",
+                    scale = i18n('graphs.metric_labels.traffic'),
+                    timeseries = {
+                        bytes_sent = {
+                            label = i18n('graphs.metric_labels.sent'),
+                            color = timeseries_info.get_timeseries_color('bytes')
+                        },
+                        bytes_rcvd = {
+                            label = i18n('graphs.metric_labels.rcvd'),
+                            color = timeseries_info.get_timeseries_color('bytes')
+                        }
+                    }
+                }
+            end
+        end
+    end
+
     -- Top l7 Protocols
     if asn_ts_enabled then
         local series = ts_utils.listSeries("asn:ndpi", table.clone(tags),
                                            tags.epoch_begin) or {}
-        local tmp_tags = table.clone(tags)
+        tmp_tags = table.clone(tags)
 
         if not table.empty(series) then
             for _, serie in pairs(series or {}) do
