@@ -1,7 +1,7 @@
 <!-- (C) 2022 - ntop.org     -->
 <template>
     <div style="overflow-x: auto; white-space: nowrap; margin-bottom: 10px"> <!-- legend-wrapper -->
-      <div style="display: inline-block"> <!-- legend-div -->
+      <div class="d-flex"> <!-- legend-div -->
         <div class="ms-auto"></div>
         <label class="form-check-label form-control-sm" v-for="(item, i) in timeseries_list">
             <input type="checkbox" class="form-check-input align-middle mt-0"
