@@ -21,12 +21,30 @@ const props = defineProps({
     isLoading: Boolean,
 });
 
+function adjustLoadingPosition() {
+    if (!overlay.value.parentElement) {
+        return
+    }
+
+    const parentHeight = overlay.value.parentElement.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+
+    /* Height higher then viewpoint, add the fixed one */
+    if (parentHeight.height > viewportHeight * 0.7) {
+        overlay.value?.classList.add("fixed");
+    } else {
+        overlay.value?.classList.remove("fixed");
+    }
+}
+
 /* *************************************** */
 
 /* By default already show the loading */
 onMounted(() => {
     if (props.isLoading) {
+        adjustLoadingPosition();
         showLoading();
+        window.addEventListener("resize", () => adjustLoadingPosition());
     }
 })
 
@@ -62,9 +80,8 @@ function hideLoading() {
     inset: 0;
     /* top: 0; left: 0; bottom: 0; right: 0; */
     display: flex;
-    justify-content: center !important;
-    align-items: flex-start !important;
-    padding-top: 10%;
+    justify-content: center;
+    align-items: center;
     z-index: 999;
     /* Bootstrap max overlay is 999 */
     opacity: 0;
@@ -98,6 +115,12 @@ function hideLoading() {
     letter-spacing: 1px;
     margin-top: 0.5rem;
     margin-left: 0.3rem;
+}
+
+/* Variante fixed visibile ovunque */
+.loading-overlay.fixed {
+    padding-top: min(20%, 100px);
+    align-items: normal !important;
 }
 
 /* Light theme */

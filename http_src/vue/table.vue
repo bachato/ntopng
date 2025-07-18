@@ -235,7 +235,6 @@ const isChangingRows = ref(false);                    // Flag for row data chang
 const isAutoRefreshEnabled = ref(false);               // Auto-refresh state
 
 onMounted(async () => {
-    debugger;
     if (props.columns != null) {
         load_table();
     }
