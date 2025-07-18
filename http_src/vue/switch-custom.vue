@@ -1,8 +1,11 @@
 <template>
-    <a class="btn btn-link btn-sm w-auto" type="button" @click="change_value" :title="title" :class="isOn ? '' : 'link-secondary'">
-      <i class="fas fa-lg" :class="[ isOn ? 'btn-success' : 'btn-outline-secondary', icon ]">
-      </i>
-    </a>
+    <div class="d-flex align-items-center me-2">
+        <a class="btn btn-link btn-sm" type="button" @click="change_value" :title="title"
+            :class="isOn ? '' : 'link-secondary'">
+            <i class="fas fa-lg" :class="[isOn ? 'btn-success' : '', icon]">
+            </i>
+        </a>
+    </div>
 </template>
 
 <script setup>
@@ -25,7 +28,7 @@ onMounted(() => {
 
 watch(() => props.value, (cur_value, old_value) => {
     isOn.value = props.value;
-}, { flush: 'pre'});
+}, { flush: 'pre' });
 
 function change_value() {
     emit('update:value', !isOn.value);
@@ -34,5 +37,4 @@ function change_value() {
 
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
