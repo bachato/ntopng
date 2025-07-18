@@ -14,9 +14,6 @@
                             <RangePicker v-if="mount_range_picker" ref="range_picker" id="range_picker"
                                 :min_time_interval_id="min_time_interval_id" :round_time="round_time">
                                 <template v-slot:begin>
-                                    <Switch v-if="props.context.is_enterprise_xl" v-model:value="flows_aggregated"
-                                        class="me-2 mt-1" :change_label_side="true" :label="flow_type_label" style=""
-                                        @change_value="change_flow_type"></Switch>
                                     <div class="ms-1 me-2">
                                         <select class="me-2 form-select" style="min-width:8rem;"
                                             v-model="selected_query_preset" @change="update_select_query_presets()">
@@ -32,6 +29,9 @@
                                             </optgroup>
                                         </select>
                                     </div>
+                                    <CustomSwitch v-if="props.context.is_enterprise_xl" v-model:value="flows_aggregated"
+                                        class="me-2 mt-1" :change_label_side="true" :label="flow_type_label" style=""
+                                        icon="fa-truck-fast" :title="flow_type_label" @change_value="change_flow_type"></CustomSwitch>
                                 </template>
                                 <template v-slot:extra_range_buttons>
                                     <button v-if="context.show_permalink" class="btn btn-link btn-sm"
@@ -150,6 +150,7 @@ import { default as ModalAlertsFilter } from "./modal-alerts-filter.vue";
 import { default as ModalAcknoledgeAlert } from "./modal-acknowledge-alert.vue";
 import { default as ModalDeleteAlert } from "./modal-delete-alert.vue";
 
+import { default as CustomSwitch } from "./switch-custom.vue";
 import { default as Switch } from "./switch.vue";
 
 const _i18n = (t) => i18n(t);
