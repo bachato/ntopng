@@ -201,10 +201,22 @@ const get_extra_params_obj = () => {
     return extra_params;
 };
 
-/* ***************************************************** */
+/* ************************************** */
+
+function click_button_timeseries(event) {
+    const row = event.row;
+    const asn = ntopng_url_manager.get_url_entry("asn");
+    const url = `${http_prefix}/lua/as_overview.lua?asn=${asn}&page=historical&ts_schema=asn:exporter_traffic&ts_query=ifid:${props.context.ifid},asn:${asn},device:${row["device"]["id"]},if_index:${row["interface"]["id"]}`;
+    window.location.href = url
+}
+
+
+/* ************************************** */
 
 function on_table_custom_event(event) {
-    let events_managed = {};
+    let events_managed = {
+        "click_button_timeseries": click_button_timeseries,
+    };
     if (events_managed[event.event_id] == null) {
         return;
     }
@@ -277,7 +289,9 @@ const map_table_def_columns = (columns) => {
     columns.forEach((c) => {
         c.render_func = map_columns[c.data_field];
         if (c.id == "actions") {
-            const visible_dict = {};
+            const visible_dict = {
+                timeseries: props.context.showTimeseries
+            };
             c.button_def_array.forEach((b) => {
                 b.f_map_class = (current_class, row) => {
                     // if is not defined is enabled

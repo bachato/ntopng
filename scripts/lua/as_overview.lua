@@ -64,12 +64,13 @@ if page == "overview" or not page then
             isEnterpriseL = ntop.isEnterpriseL(),
             tableId = tableId,
             historical = content_type and content_type == "historical"
+            showTimeseries = areASTimeseriesEnabled(interface.getId())
         })
     })
 else
     local source_value_object = {
         asn = asn,
-        ifid = ifid
+        ifid = interface.getId()
     }
     graph_utils.drawNewGraphs(source_value_object)
 end
