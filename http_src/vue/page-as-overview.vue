@@ -1,6 +1,25 @@
 <template>
+        <DateTimeRangePicker v-if="enable_date_time_range_picker" class="dontprint"
+            id="as-date-time-picker" :round_time="true"
+            min_time_interval_id="min" @epoch_change="set_time_interval">
+
+            <!-- Report Selector -->
+            <template v-slot:begin>
+                <div class="me-2">
+                <SelectSearch v-model:selected_option="active_sankey_type" :options="sankey_format_list"
+                    @select_option="changeCriteria">
+                </SelectSearch>
+
+                </div>
+            </template>
+
+            <!-- Report Toolbox (Store, Save, ...) -->
+            <template v-slot:extra_buttons>
+            </template>
+        </DateTimeRangePicker>
+
     <div class="m-2 mb-3">
-        <div class="button-group mb-2 d-flex align-items-center">
+        <div v-if="!enable_date_time_range_picker" class="button-group mb-2 d-flex align-items-center">
             <div class="dropdown me-3 d-flex"><span class="no-wrap d-flex align-items-center filters-label me-2"><b>{{
                 _i18n("criteria")
                         }}: </b></span>
@@ -33,13 +52,14 @@
 
 
 <script setup>
-import { ref, onMounted, onBeforeMount } from "vue";
+import { ref, onMounted, onBeforeMount, computed } from "vue";
 import { default as NoteList } from "./note-list.vue";
 import { default as Loading } from "./loading.vue"
 import { default as Sankey } from "./sankey.vue";
 import { default as sortingFunctions } from "../utilities/sorting-utils.js";
 import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as SelectSearch } from "./select-search.vue";
+import { default as DateTimeRangePicker } from "./date-time-range-picker.vue";
 import { default as dataUtils } from "../utilities/data-utils.js";
 import FormatterUtils from "../utilities/formatter-utils.js";
 
@@ -58,6 +78,7 @@ const autoRefreshEnabled = ref(false);
 const active_sankey_type = ref({})
 const table_as_stats = ref(null);
 const reload = ref(false);
+const main_epoch_interval = ref(null);
 const table_id = ref(props.context.tableId);
 const sankey_format_list = [
     { key: "criteria_as", value: 'ingress_egress_traffic_criteria', label: _i18n('as_overview.ingress_egress_traffic_criteria') },
@@ -66,7 +87,12 @@ const sankey_format_list = [
 
 const note_list = [
     _i18n("as_overview.note_ingress_egress"),
-]
+];
+
+const enable_date_time_range_picker = computed(() => {
+    return props.context.historical;
+});
+
 /* ************************************** */
 
 onBeforeMount(() => {
@@ -109,6 +135,17 @@ const changeCriteria = async (opt) => {
         } else if(opt.value === "as_traffic_criteria") {
             table_id.value = "transit_as_stats"
         }
+        reload.value = !reload.value
+    }
+}
+
+/* ************************************** */
+
+function set_time_interval(epoch_interval) {
+    if (epoch_interval) {
+        main_epoch_interval.value = epoch_interval;
+
+        update_sankey_data();
         reload.value = !reload.value
     }
 }

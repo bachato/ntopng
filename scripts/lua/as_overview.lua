@@ -15,6 +15,7 @@ local asn = _GET["asn"]
 local criteria_as = _GET["criteria_as"]
 local tableId = "ingress_egress_as_stats"
 local page = _GET["page"]
+local content_type = _GET["type"]
 
 if (not criteria_as) or (criteria_as == "ingress_egress_traffic_criteria") then
     tableId = "ingress_egress_as_stats" 
@@ -61,7 +62,8 @@ if page == "overview" or not page then
             csrf = ntop.getRandomCSRFValue(),
             ifid = interface.getId(),
             isEnterpriseL = ntop.isEnterpriseL(),
-            tableId = tableId 
+            tableId = tableId,
+            historical = content_type and content_type == "historical"
         })
     })
 else
