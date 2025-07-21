@@ -63,7 +63,7 @@ if page == "overview" or not page then
             ifid = interface.getId(),
             isEnterpriseL = ntop.isEnterpriseL(),
             tableId = tableId,
-            historical = content_type and content_type == "historical"
+            historical = content_type and content_type == "historical",
             showTimeseries = areASTimeseriesEnabled(interface.getId())
         })
     })
