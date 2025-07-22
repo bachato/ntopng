@@ -259,15 +259,15 @@ tag_utils.defined_tags = {
         operators = { 'eq', 'neq' },
         hourly_available = true,
     },
-    src_peer_as = {
+    src_peer_asn = {
         value_type = 'asn',
-        i18n_label = i18n('db_search.tags.src_peer_as'),
+        i18n_label = i18n('db_search.tags.src_peer_asn'),
         operators = { 'eq', 'neq' },
         hourly_available = false,
     },
-    dst_peer_as = {
+    dst_peer_asn = {
         value_type = 'asn',
-        i18n_label = i18n('db_search.tags.dst_peer_as'),
+        i18n_label = i18n('db_search.tags.dst_peer_asn'),
         operators = { 'eq', 'neq' },
         hourly_available = false,
     },
@@ -800,6 +800,60 @@ tag_utils.defined_tags = {
         value_type = 'mac',
         i18n_label = i18n('db_search.tags.apn_mac'),
         operators = { 'eq', 'neq' }
+    },
+    is_srv_blacklisted = {
+        value_type = 'boolean',
+        i18n_label = i18n('db_search.tags.is_srv_blacklisted'),
+        operators = { 'eq', 'neq' },
+        hourly_available = false,
+    },
+    is_cli_blacklisted = {
+        value_type = 'boolean',
+        i18n_label = i18n('db_search.tags.is_cli_blacklisted'),
+        operators = { 'eq', 'neq' },
+        hourly_available = false,
+    },
+    is_srv_victim = {
+        value_type = 'boolean',
+        i18n_label = i18n('db_search.tags.is_srv_victim'),
+        operators = { 'eq', 'neq' },
+        hourly_available = false,
+    },
+    is_cli_victim = {
+        value_type = 'boolean',
+        i18n_label = i18n('db_search.tags.is_cli_victim'),
+        operators = { 'eq', 'neq' },
+        hourly_available = false,
+    },
+    is_srv_attacker = {
+        value_type = 'boolean',
+        i18n_label = i18n('db_search.tags.is_srv_attacker'),
+        operators = { 'eq', 'neq' },
+        hourly_available = false,
+    },
+    is_cli_attacker = {
+        value_type = 'boolean',
+        i18n_label = i18n('db_search.tags.is_cli_attacker'),
+        operators = { 'eq', 'neq' },
+        hourly_available = false,
+    },
+    interface_id = {
+        value_type = 'number',
+        i18n_label = i18n('db_search.tags.interface_id'),
+        operators = { 'eq', 'neq' },
+        hourly_available = true,
+    },
+    first_seen = {
+        value_type = 'number',
+        i18n_label = i18n('db_search.tags.first_seen'),
+        operators = { 'eq', 'neq', 'lt', 'gt', 'gte', 'lte' },
+        hourly_available = true,
+    },
+    last_seen = {
+        value_type = 'number',
+        i18n_label = i18n('db_search.tags.last_seen'),
+        operators = { 'eq', 'neq', 'lt', 'gt', 'gte', 'lte' },
+        hourly_available = true,
     },
 }
 -- #####################################
@@ -1777,14 +1831,16 @@ function tag_utils.build_bpf(filters)
     return bpf
 end
 
+-- #####################################
+
 -- given a tag, returns the associated formatted i18n value
-function tag_utils.get_tag_i18n(tag_name)  
-    local tag = tag_utils.defined_tags[tag_name]  
-    if tag == nil then  
-        return nil  
-    end  
-      
-    return tag.i18n_label  
+function tag_utils.get_tag_i18n(tag_name)
+    local tag = tag_utils.defined_tags[tag_name]
+    if tag == nil then
+        return nil
+    end
+    
+    return tag.i18n_label
 end
 
 -- #####################################
