@@ -39,9 +39,7 @@ end
 
 -- ##############################################
 
-local function escape_pattern(s)
-  return s:gsub("([^%w])", "%%%1")
-end
+local function escape_pattern(s) return s:gsub("([^%w])", "%%%1") end
 
 -- ##############################################
 
@@ -773,7 +771,8 @@ end
 -- one. For such tag, a list of available values will be returned.
 function driver:listSeries(schema, tags_filter, wildcard_tags, start_time,
                            not_print_error)
-    if #wildcard_tags > 1 then
+    --[[
+                           if #wildcard_tags > 1 then
         if not not_print_error then
             tprint(debug.traceback())
             tprint({schema_name = schema.name, wildcards = wildcard_tags})
@@ -783,8 +782,8 @@ function driver:listSeries(schema, tags_filter, wildcard_tags, start_time,
 
         return nil
     end
-
-    local wildcard_tag = wildcard_tags[1]
+]]
+    local wildcard_tag = wildcard_tags[#wildcard_tags]
 
     if not wildcard_tag then
         local full_path = driver.schema_get_full_path(schema, tags_filter)
@@ -798,10 +797,8 @@ function driver:listSeries(schema, tags_filter, wildcard_tags, start_time,
     end
 
     if wildcard_tag ~= schema._tags[#schema._tags] then
-        traceError(TRACE_ERROR, TRACE_CONSOLE,
-                   "RRD driver only support listSeries with wildcard in the last tag, got wildcard on '" ..
-                       wildcard_tag .. "'")
-        return nil
+        wildcard_tag = schema._tags[#schema._tags]
+        -- In case of multiple wildcard_tags this could happen
     end
 
     local base, rrd = schema_get_path(schema, table.merge(tags_filter,
@@ -868,10 +865,25 @@ function driver:listSeries(schema, tags_filter, wildcard_tags, start_time,
                 if last_update ~= nil and last_update >= start_time then
                     -- remove the path
                     local val = string.gsub(f, escape_pattern(base), "")
+                    local tags_values = {}
                     val = string.gsub(val, rrd .. ".rrd", "")
-                    val = string.gsub(val, "/", "")
-                    res[#res + 1] = table.merge(tags_filter,
-                                                {[wildcard_tag] = val})
+                    if #wildcard_tags == 2 then
+                        val = string.gsub(val, "^/(.-)/$", "%1") -- Remove just the first and last /
+                        local val1, val2 = val:match("^(.*)/(.-)$")
+                        -- NOTE: Wildcards are inverted, from the last one to the first one
+                        tags_values = {
+                            [wildcard_tags[2]] = val1,
+                            [wildcard_tags[1]] = val2
+                        }
+                    elseif #wildcard_tags == 1 then
+                        val = string.gsub(val, "/", "")
+                        tags_values = {[wildcard_tag] = val}
+                    else
+                        traceError(TRACE_ERROR, TRACE_CONSOLE,
+                                   "RRD driver does not support listSeries on more then 2 tags")
+                        break
+                    end
+                    res[#res + 1] = table.merge(tags_filter, tags_values)
                 end
             end
         end
