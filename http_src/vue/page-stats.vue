@@ -246,6 +246,10 @@ async function init() {
         timeseries_groups = await metricsManager.get_default_timeseries_groups(http_prefix, metric_ts_schema, metric_query);
     }
     metrics.value = await get_metrics(push_custom_metric);
+    if (timeseries_groups.length == 1) {
+        push_custom_metric = false;
+        metric_ts_schema = timeseries_groups[0]?.metric?.schema;
+    }
 
     if (push_custom_metric == true) {
         selected_metric.value = custom_metric;
@@ -462,6 +466,14 @@ function set_timeseries_groups_source_label(timeseries_groups, ts_charts_options
 function update_url_params() {
     ntopng_url_manager.set_key_to_url("timeseries_groups_mode", current_groups_options_mode.value.value);
     metricsManager.set_timeseries_groups_in_url(last_timeseries_groups_loaded);
+    const ts_query = timeseriesUtils.getTsQuery(last_timeseries_groups_loaded[0]);
+    const ts_schema = last_timeseries_groups_loaded[0]?.metric?.schema;
+    if (ts_query) {
+        ntopng_url_manager.set_key_to_url("ts_query", ts_query);
+    }
+    if (ts_schema) {
+        ntopng_url_manager.set_key_to_url("ts_schema", ts_schema);
+    }
 }
 
 function update_charts(charts_options) {
