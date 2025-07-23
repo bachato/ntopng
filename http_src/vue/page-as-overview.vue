@@ -81,9 +81,9 @@ const reload = ref(false);
 const main_epoch_interval = ref(null);
 const table_id = ref(props.context.tableId);
 const sankey_format_list = [
+    { key: "criteria_as", value: 'traffic_between_ases', label: _i18n('as_overview.as_traffic_criteria') },
+//    { key: "criteria_as", value: 'as_transit_only_criteria', label: _i18n('as_overview.traffic_between_ases') },
     { key: "criteria_as", value: 'ingress_egress_traffic_criteria', label: _i18n('as_overview.ingress_egress_traffic_criteria') },
-    { key: "criteria_as", value: 'as_traffic_criteria', label: _i18n('as_overview.as_traffic_criteria') },
-    //{ key: "criteria_as", value: 'as_transit_criteria', label: _i18n('as_overview.as_transit_criteria') },
 ];
 
 const note_list = [
@@ -133,10 +133,10 @@ const changeCriteria = async (opt) => {
     if (table_as_stats.value) {
         if (opt.value === "ingress_egress_traffic_criteria") {
             table_id.value = "ingress_egress_as_stats"
-        } else if(opt.value === "as_traffic_criteria") {
-            table_id.value = "traffic_as_stats"
-        } else if(opt.value === "as_transit_criteria") {
-            table_id.value = "transit_as_stats"
+        } else if(opt.value === "traffic_between_ases") {
+            table_id.value = "traffic_between_ases"
+        } else if(opt.value === "as_transit_only_criteria") {
+            table_id.value = "transit_only_as_stats"
         }
         reload.value = !reload.value
     }
@@ -236,10 +236,10 @@ function columns_sorting(col, r0, r1) {
             return sortingFunctions.sortByName(r0.interface.name, r1.interface.name, col.sort);
         } else if (col.id == "as") {
             return sortingFunctions.sortByName(r0.as.name, r1.as.name, col.sort);
-        } else if (col.id == "as_dst") {
-            return sortingFunctions.sortByName(r0.as_dst.name, r1.as_dst.name, col.sort);
-        } else if (col.id == "as_src") {
-            return sortingFunctions.sortByName(r0.as_src.name, r1.as_src.name, col.sort);
+        } else if (col.id == "dst_as") {
+            return sortingFunctions.sortByName(r0.dst_as.name, r1.dst_as.name, col.sort);
+        } else if (col.id == "src_as") {
+            return sortingFunctions.sortByName(r0.src_as.name, r1.src_as.name, col.sort);
         } else if (col.id == "transit_as") {
             return sortingFunctions.sortByName(r0.transit_as.name, r1.transit_as.name, col.sort);
         } else if (col.id == "bytes_sent") {
@@ -276,13 +276,13 @@ const map_table_def_columns = (columns) => {
             }
             return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
         },
-        "as_dst": (value, row) => {
+        "dst_as": (value, row) => {
             if (dataUtils.isEmptyString(value.name)) {
                 value.id
             }
             return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
         },
-        "as_src": (value, row) => {
+        "src_as": (value, row) => {
             if (dataUtils.isEmptyString(value.name)) {
                 value.id
             }
