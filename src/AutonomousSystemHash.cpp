@@ -98,12 +98,12 @@ static bool update_ases_prefs(GenericHashEntry *_as, void *user_data, bool *entr
       ntop->getPrefs()->isRemoteASN(as->get_asn())) {
     as->saveExporterStatsPrefs(true);
     ntop->getTrace()->traceEvent(
-        TRACE_NORMAL, "Autonomous System [asn: %u] [exporter stats: true]",
+        TRACE_DEBUG, "Autonomous System [asn: %u] [exporter stats: true]",
         as->get_asn());
   } else {
     as->saveExporterStatsPrefs(false);
     ntop->getTrace()->traceEvent(
-        TRACE_NORMAL, "Autonomous System [asn: %u] [exporter stats: false]",
+        TRACE_DEBUG, "Autonomous System [asn: %u] [exporter stats: false]",
         as->get_asn());
   }
   return (false); /* false = keep on walking */
