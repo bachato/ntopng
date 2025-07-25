@@ -955,7 +955,7 @@ local lang = {
     ["create_license"] = "We advise you create as well <code>ntopng.license</code> file (according to the instructions you received) to avoid loosing your license in case of redis cleanup",
     ["create_license_l"] = "Please be aware that you need also to create <code>/etc/ntopng.license</code> file as this file is used by the other companion applications.",
     ["data_directory"] = "Data",
-    ["datadir_warning"] = "Please <A HREF=\"https://www.ntop.org/support/faq/migrate-the-data-directory-in-ntopng/\">migrate your data</A>",
+    ["datadir_warning"] = "Please <A HREF=\"https://www.ntop.org/faq/migrate-the-data-directory-in-ntopng-nedge/\">migrate your data</A>",
     ["defs_directories"] = "Definitions Directories",
     ["dhcp_monitoring_title"] = "Monitoring DHCP Hosts",
     ["dhcp_range_missing_warning"] = "Configure <a href='%{dhcp_url}'>DHCP ranges</a> to make <a href='%{url}'>%{name}</a> preference effective.",
