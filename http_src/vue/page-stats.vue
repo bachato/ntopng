@@ -41,15 +41,19 @@
             </div>
 
             <template v-for="(item, i) in charts_options_items" :key="item.key">
+                <div style="position: relative">
+                <Loading :isLoading="loading"></Loading>
                 <TimeseriesChart :id="id_chart + i" :ref="el => { charts[i] = el }" :chart_type="chart_type"
                     :register_on_status_change="false" :get_custom_chart_options="get_f_get_custom_chart_options(i)"
                     @zoom="epoch_change" @chart_reloaded="chart_reloaded">
                 </TimeseriesChart>
+                </div>
             </template>
         </div>
 
         <div class="mt-4 card card-shadow" v-if="enable_stats_table">
-            <div class="card-body">
+            <div class="card-body" style="position: relative">
+                <Loading :isLoading="loading"></Loading>
                 <BootstrapTable id="page_stats_bootstrap_table" :columns="stats_columns" :rows="stats_rows"
                     :print_html_column="(col) => print_stats_column(col)"
                     :print_html_row="(col, row) => print_stats_row(col, row)">
@@ -58,7 +62,8 @@
         </div>
 
         <div class="mt-4 card card-shadow" v-if="is_ntop_pro">
-            <div class="card-body">
+            <div class="card-body" style="position: relative">
+                <Loading :isLoading="loading"></Loading>
                 <div v-if="selected_top_table?.table_config_def" class="inline select2-size me-2 mt-2">
                     <SelectSearch v-model:selected_option="selected_top_table" :options="top_table_options">
                     </SelectSearch>
@@ -99,6 +104,7 @@ import { default as ModalSnapshot } from "./modal-snapshot.vue";
 import { default as ModalTimeseries } from "./modal-timeseries.vue";
 import { default as ModalTrafficExtraction } from "./modal-traffic-extraction.vue";
 import { default as ModalDownloadFile } from "./modal-download-file.vue";
+import { default as Loading } from "./loading.vue"
 import { default as AlertInfo } from "./alert-info.vue";
 import { default as dataUtils } from "../utilities/data-utils.js";
 
@@ -138,6 +144,7 @@ const top_table_ref = ref(null);
 const modal_timeseries = ref(null);
 const modal_snapshot = ref(null);
 const modal_download_file = ref(null);
+const loading = ref(true);
 
 const is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 const image_button_title = is_safari ? _i18n('page_stats.download_image_disabled') : _i18n('page_stats.title_modal_download_file');
@@ -409,6 +416,7 @@ let ts_charts_options;
 /* This function load the chart data and options, doing the request and then setting the options */
 async function load_page_stats_data(timeseries_groups, reload_charts_data, reload_top_table_options, refreshed_time_interval) {
     /* Get the information necessary for the request, like epoch ecc. */
+    loading.value = true;
     let status = ntopng_status_manager.get_status();
     let ts_compare = get_ts_compare(status);
     if (reload_charts_data) {
@@ -446,6 +454,7 @@ async function load_page_stats_data(timeseries_groups, reload_charts_data, reloa
     last_timeseries_groups_loaded = timeseries_groups;
     // update url params
     update_url_params();
+    loading.value = false;
 }
 
 /* This function returns set the label of the timeseries; if available it should be
