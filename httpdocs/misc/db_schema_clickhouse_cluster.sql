@@ -993,3 +993,24 @@ UNION ALL
 SELECT 9 entity_id, interface_id, alert_id, alert_status, require_attention, tstamp, tstamp_end, severity, score, alert_category FROM `system_alerts`
 ;
 
+@
+
+CREATE TABLE IF NOT EXISTS `hourly_asn` ON CLUSTER '$CLUSTER' (
+`ID` UInt64,
+`NTOPNG_INSTANCE_NAME` String,
+`INTERFACE_ID` UInt16,
+`IP_PROTOCOL_VERSION` UInt8,
+`FIRST_SEEN` DateTime,
+`LAST_SEEN` DateTime,
+`SRC2DST_BYTES` UInt64,
+`DST2SRC_BYTES` UInt64,
+`SRC2DST_PACKETS` UInt32,
+`DST2SRC_PACKETS` UInt32,
+`SRC_ASN` UInt32,
+`DST_ASN` UInt32,
+`SRC_PEER_ASN` UInt32,
+`DST_PEER_ASN` UInt32,
+`PROBE_IP` UInt32, /* EXPORTER_IPV4_ADDRESS */
+`INPUT_SNMP` UInt32,
+`OUTPUT_SNMP` UInt32
+) ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{database}/{table}', '{replica}') PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (FIRST_SEEN, SRC_ASN, DST_ASN);
