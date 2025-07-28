@@ -376,7 +376,7 @@ void ZMQCollectorInterface::collect_flows() {
           probe = active_probes[source_id];
 
 #if 0
-	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "[subscriber_id: %u][message source: %u]"
+	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "[subscriber_id: %u][source_id: %u]"
 				       "[msg_id: %u][last_msg_id: %u][lost: %i]",
 				       subscriber_id, source_id, msg_id, probe->last_msg_id, msg_id - probe->last_msg_id - 1);
 #endif
@@ -398,9 +398,8 @@ void ZMQCollectorInterface::collect_flows() {
               /* Start over (just reset active_probes) */
 #ifdef MSG_ID_DEBUG
               ntop->getTrace()->traceEvent(TRACE_NORMAL,
-					   "ROLLBACK [subscriber_id: "
-					   "%u][msg_id=%u][last=%u][tot_msgs=%u][drops=%u]",
-					   subscriber_id, msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
+					   "ROLLBACK [subscriber_id: %u][source_id: %u][msg_id=%u][last=%u][tot_msgs=%u][drops=%u]",
+					   subscriber_id, source_id, msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
 					   recvStats.zmq_msg_drops);
 #endif
             } else {
@@ -412,9 +411,8 @@ void ZMQCollectorInterface::collect_flows() {
                 recvStats.zmq_msg_drops += diff - 1;
 #ifdef MSG_ID_DEBUG
                 ntop->getTrace()->traceEvent(TRACE_NORMAL,
-					     "DROP [subscriber_id: "
-					     "%u][msg_id=%u][last=%u][tot_msgs=%u][drops=%u][+%u]",
-					     subscriber_id, msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
+					     "DROP [subscriber_id: %u][source_id: %u][msg_id=%u][last=%u][tot_msgs=%u][drops=%u][+%u]",
+					     subscriber_id, source_id, msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
 					     recvStats.zmq_msg_drops, diff - 1);
 #endif
               }
