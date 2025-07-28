@@ -327,7 +327,10 @@ function formatDateTime(date, type = 'datetime') {
     let formatted_date = '';
 
     if (delta_days === 0) {
-        return time_formatter;
+	if (type === 'date_only')
+        	formatted_date = 'Today';
+	else
+	        return time_formatter;
     } else if (delta_days === 1) {
         // yesterday
         formatted_date = 'Yesterday';
@@ -385,6 +388,12 @@ function formatAsn(asn, as_name) {
     }
 }
 
+function get_midnight_epoch(utc_seconds) {
+  let utc = utc_seconds * 1000;
+  const utc_midnight = moment.tz(utc, ntop_zoneinfo).startOf('day');
+  return utc_midnight.valueOf()/1000;
+}
+
 const formatterUtils = function () {
     return {
         types,
@@ -395,10 +404,9 @@ const formatterUtils = function () {
         formatDateTime,
         utc_s_to_server_date,
         server_date_to_date,
-        formatAsn
+        formatAsn,
+        get_midnight_epoch
     };
 }();
-
-
 
 export default formatterUtils;

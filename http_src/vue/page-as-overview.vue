@@ -1,4 +1,5 @@
 <template>
+    <div v-if="false">
         <DateTimeRangePicker v-if="enable_date_time_range_picker" class="dontprint"
             id="as-date-time-picker" :round_time="true"
             min_time_interval_id="min" @epoch_change="set_time_interval">
@@ -17,9 +18,12 @@
             <template v-slot:extra_buttons>
             </template>
         </DateTimeRangePicker>
+    </div>
+
+    <DateSlider v-if="enable_date_time_range_picker" id="as-date-slider" :min_epoch="min_epoch" @epoch_change="set_time_interval" />
 
     <div class="m-2 mb-3">
-        <div v-if="!enable_date_time_range_picker" class="button-group mb-2 d-flex align-items-center">
+        <div class="button-group mb-2 d-flex align-items-center">
             <div class="dropdown me-3 d-flex"><span class="no-wrap d-flex align-items-center filters-label me-2"><b>{{
                 _i18n("criteria")
                         }}: </b></span>
@@ -50,7 +54,6 @@
     </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted, onBeforeMount, computed } from "vue";
 import { default as NoteList } from "./note-list.vue";
@@ -60,12 +63,15 @@ import { default as sortingFunctions } from "../utilities/sorting-utils.js";
 import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as SelectSearch } from "./select-search.vue";
 import { default as DateTimeRangePicker } from "./date-time-range-picker.vue";
+import { default as DateSlider } from "./date-slider.vue";
 import { default as dataUtils } from "../utilities/data-utils.js";
 import FormatterUtils from "../utilities/formatter-utils.js";
 
 const props = defineProps({
     context: Object,
 });
+
+const min_epoch = ref(1752847080) //TODO
 
 const _i18n = (t) => i18n(t);
 const first_open = ref(true);
@@ -141,6 +147,15 @@ const changeCriteria = async (opt) => {
         }
         reload.value = !reload.value
     }
+}
+
+/* ************************************** */
+
+function timeline_format(value) {
+    console.log(value);
+    let str = FormatterUtils.formatDateTime(value);
+    console.log(str);
+    return str;
 }
 
 /* ************************************** */

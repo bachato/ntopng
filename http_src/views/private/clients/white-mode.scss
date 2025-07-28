@@ -9,6 +9,8 @@
   --ntop-blue: #37474F;
   --ntop-blue-light: #62717B;
   --ntop-blue-dark: #101F27;
+  --slider-tooltip-bg: #d1d5db;
+  --slider-height: 3px;
 }
 
 /* White-Mode */
@@ -1261,4 +1263,8 @@ a.disabled{
 
 .input {
   color: var(--ntop-text-color);
+}
+
+.slider-connect {
+  background: none !important;
 }
