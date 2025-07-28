@@ -590,9 +590,9 @@ class Prefs {
     return http_index_page;
   };
 
-  inline bool getIXPModeEnabled() {
-    return ixp_mode_enabled;
-  };
+#ifdef NTOPNG_PRO
+  inline bool isIXPModeEnabled()                   { return ixp_mode_enabled;          };
+#endif
   inline bool are_top_talkers_enabled()            { return (enable_top_talkers);      };
   inline bool are_sites_collection_enabled()       { return (enable_sites_collection); };
   inline bool is_dns_cache_enabled()               { return (enable_dns_cache);        };

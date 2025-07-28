@@ -128,7 +128,9 @@ Prefs::Prefs(Ntop *_ntop) {
   http_port = CONST_DEFAULT_NTOP_PORT;
   http_prefix = strdup("");
   http_index_page = strdup(INDEX_URL);
+#ifdef NTOPNG_PRO
   ixp_mode_enabled = false;
+#endif
   instance_name = NULL;
   categorization_enabled = false, enable_users_login = true;
   categorization_key = NULL, zmq_encryption_pwd = NULL;
@@ -991,7 +993,9 @@ void Prefs::reloadPrefsFromRedis() {
   network_discovery = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_NETWORK_DISCOVERY, false);
   starttls = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_STARTTLS, false);
   dump_pcap_to_clickhouse = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_DUMP_PCAP_TO_CLICKHOUSE, false);
+#ifdef NTOPNG_PRO
   data_archive_before_ttl_delete = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ARCHIVE_BEFORE_TTL_DELETE, false);
+#endif
   query_performance_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_QUERY_PERFORMANCE_LOG, false);
 
   enable_arp_matrix_generation =
@@ -1083,10 +1087,11 @@ void Prefs::reloadPrefsFromRedis() {
   }
   http_index_page = tmp;
 
+#ifdef NTOPNG_PRO
   ixp_mode_enabled = getDefaultBoolPrefsValue(CONST_PREFS_IXP_MODE_ENABLED, false);
+#endif
   
-  global_dns_forging_enabled =
-      getDefaultBoolPrefsValue(CONST_PREFS_GLOBAL_DNS_FORGING_ENABLED, false);
+  global_dns_forging_enabled = getDefaultBoolPrefsValue(CONST_PREFS_GLOBAL_DNS_FORGING_ENABLED, false);
   enable_client_x509_auth = getDefaultBoolPrefsValue(CONST_PREFS_CLIENT_X509_AUTH, false);
   emit_flow_alerts = getDefaultBoolPrefsValue(CONST_PREFS_EMIT_FLOW_ALERTS, true);
   emit_host_alerts = getDefaultBoolPrefsValue(CONST_PREFS_EMIT_HOST_ALERTS, true);
@@ -2740,7 +2745,6 @@ void Prefs::lua(lua_State *vm) {
                             enable_interface_name_only);
   lua_push_uint64_table_entry(vm, "http_port", http_port);
   lua_push_str_table_entry(vm, "http_index_page", http_index_page);
-  lua_push_bool_table_entry(vm, "ixp_mode_enabled;", ixp_mode_enabled);
 
   lua_push_uint64_table_entry(vm, "max_num_hosts", max_num_hosts);
   lua_push_uint64_table_entry(vm, "max_num_flows", max_num_flows);
@@ -2758,6 +2762,8 @@ void Prefs::lua(lua_State *vm) {
 			     max_aggregated_flows_upperbound);
   lua_push_int32_table_entry(vm, "max_aggregated_flows_traffic_upperbound",
 			     max_aggregated_flows_traffic_upperbound);
+  lua_push_bool_table_entry(vm, "data_archive_before_ttl_delete", data_archive_before_ttl_delete);
+  lua_push_bool_table_entry(vm, "ixp_mode_enabled;", ixp_mode_enabled);  
 #endif
 
   if(clickhouse_dbname) lua_push_str_table_entry(vm, "clickhouse_dbname", clickhouse_dbname);
@@ -2783,13 +2789,11 @@ void Prefs::lua(lua_State *vm) {
   lua_push_bool_table_entry(vm, "network_discovery", network_discovery);
   lua_push_bool_table_entry(vm, "starttls", starttls);
   lua_push_bool_table_entry(vm, "dump_pcap_to_clickhouse", dump_pcap_to_clickhouse);
-  lua_push_bool_table_entry(vm, "data_archive_before_ttl_delete", data_archive_before_ttl_delete);
   lua_push_bool_table_entry(vm, "query_performance_log_enabled", query_performance_log);
   lua_push_bool_table_entry(vm, "tls_quic_hostnaming", tls_quic_hostnaming);
 
 #ifdef HAVE_NEDGE
-  lua_push_bool_table_entry(vm, "is_mac_based_captive_portal",
-                            mac_based_captive_portal);
+  lua_push_bool_table_entry(vm, "is_mac_based_captive_portal", mac_based_captive_portal);
 #endif
 
   lua_push_uint64_table_entry(vm, "http.port", get_http_port());
