@@ -238,7 +238,7 @@ Prefs::Prefs(Ntop *_ntop) {
   ntp_servers  = new (std::nothrow) ServerConfiguration();
   dhcp_servers = new (std::nothrow) ServerConfiguration();
   smtp_servers = new (std::nothrow) ServerConfiguration();
-  
+
   customer_asn = new (std::nothrow) ASNConfiguration();
   sub_customer_asn = new (std::nothrow) ASNConfiguration();
   remote_asn = new (std::nothrow) ASNConfiguration();
@@ -353,7 +353,7 @@ Prefs::~Prefs() {
   if(customer_asn)     delete customer_asn;
   if(sub_customer_asn) delete sub_customer_asn;
   if(remote_asn)       delete remote_asn;
-  
+
 #ifdef NTOPNG_PRO
   if(networks_policy_configuration) delete networks_policy_configuration;
   if(networks_policy_configuration_shadow) delete networks_policy_configuration_shadow;
@@ -875,7 +875,7 @@ bool Prefs::getDefaultBoolPrefsValue(const char *pref_key,
 }
 /* ******************************************* */
 
-bool Prefs::do_active_monitoring(){ 
+bool Prefs::do_active_monitoring(){
   return get_active_monitoring_pref() &&
          ntop->isPingInitialized();
 };
@@ -1080,7 +1080,7 @@ void Prefs::reloadPrefsFromRedis() {
 
   getDefaultStringPrefsValue(CONST_PREFS_HTTP_INDEX_PAGE, &tmp, DEFAULT_HTTP_INDEX_PAGE);
   if(http_index_page) free(http_index_page);
-  
+
   if(tmp[0] == '\0') {
     free(tmp);
     tmp = strdup(INDEX_URL);
@@ -1090,7 +1090,7 @@ void Prefs::reloadPrefsFromRedis() {
 #ifdef NTOPNG_PRO
   asn_mode_enabled = getDefaultBoolPrefsValue(CONST_PREFS_ASN_MODE_ENABLED, false);
 #endif
-  
+
   global_dns_forging_enabled = getDefaultBoolPrefsValue(CONST_PREFS_GLOBAL_DNS_FORGING_ENABLED, false);
   enable_client_x509_auth = getDefaultBoolPrefsValue(CONST_PREFS_CLIENT_X509_AUTH, false);
   emit_flow_alerts = getDefaultBoolPrefsValue(CONST_PREFS_EMIT_FLOW_ALERTS, true);
@@ -2403,13 +2403,13 @@ int Prefs::checkOptions() {
     printVersionInformation();
 
 #ifdef NTOPNG_PRO
-    
+
     ntop->getTrace()->set_trace_level((u_int8_t)1);
     ntop->registerPrefs(this, true);
     printf("Edition:\t%s\n", ntop->getPro()->get_edition());
     printf("License Type:\t%s\n",
            ntop->getPro()->get_license_type(buf, sizeof(buf)));
-    
+
     if(ntop->getPro()->demo_ends_at())
       printf("Validity:\t%s\n",
              ntop->getPro()->get_demo_expiration(buf, sizeof(buf)));
@@ -2763,7 +2763,7 @@ void Prefs::lua(lua_State *vm) {
   lua_push_int32_table_entry(vm, "max_aggregated_flows_traffic_upperbound",
 			     max_aggregated_flows_traffic_upperbound);
   lua_push_bool_table_entry(vm, "data_archive_before_ttl_delete", data_archive_before_ttl_delete);
-  lua_push_bool_table_entry(vm, "is_asn_mode_enabled;", asn_mode_enabled);  
+  lua_push_bool_table_entry(vm, "is_asn_mode_enabled", asn_mode_enabled);
 #endif
 
   if(clickhouse_dbname) lua_push_str_table_entry(vm, "clickhouse_dbname", clickhouse_dbname);
@@ -2847,7 +2847,7 @@ void Prefs::lua(lua_State *vm) {
   lua_push_bool_table_entry(vm, "flow_table_probe_order",
                             flow_table_probe_order);
   lua_push_bool_table_entry(vm, "enable_full_stats",
-                            full_stats_enabled);                
+                            full_stats_enabled);
   lua_push_bool_table_entry(vm, "is_active_local_hosts_cache_enabled",
                             enable_active_local_hosts_cache);
 
@@ -3302,7 +3302,7 @@ void Prefs::reloadASNConfiguration() {
   customer_asn->reloadASNConfiguration((char *) CONST_CUSTOMER_ASN_CONFIGURATION_REDIS_KEY);
   sub_customer_asn->reloadASNConfiguration((char *) CONST_SUB_CUSTOMER_ASN_CONFIGURATION_REDIS_KEY);
   remote_asn->reloadASNConfiguration((char *) CONST_REMOTE_ASN_CONFIGURATION_REDIS_KEY);
-/*  
+/*
   customer_asn->debugPrint("customer_asn");
   sub_customer_asn->debugPrint("sub_customer_asn");
   remote_asn->debugPrint("remote_asn");
@@ -3450,11 +3450,11 @@ void Prefs::setCustomGeoIPDir(char *d) {
 
 /* *************************************** */
 
-void Prefs::set_influx_internal_db_name(char *internal_name) { 
+void Prefs::set_influx_internal_db_name(char *internal_name) {
     if (internal_name && internal_name[0] != '\0') {
-        if (influx_internal_db_name) 
+        if (influx_internal_db_name)
             free(influx_internal_db_name);
-        influx_internal_db_name = strdup(internal_name); 
+        influx_internal_db_name = strdup(internal_name);
     }
 };
 
