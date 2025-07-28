@@ -72,7 +72,7 @@ class Prefs {
 #ifdef NTOPNG_PRO
   ndpi_bitmap* modbus_allowed_function_codes;
   u_int modbus_too_many_exceptions;
-  bool netbox_enabled, asset_inventory_enabled, snmp_trap_enabled;
+  bool data_archive_before_ttl_delete, netbox_enabled, asset_inventory_enabled, snmp_trap_enabled;
 #endif
   ServiceAcceptance behaviour_analysis_learning_status_during_learning,
       behaviour_analysis_learning_status_post_learning;
@@ -126,6 +126,7 @@ class Prefs {
   bool dump_flows_on_es, dump_flows_on_syslog,
       dump_json_flows_on_disk, dump_ext_json;
 #ifdef NTOPNG_PRO
+  bool ixp_mode_enabled;
   bool dump_flows_direct;
   u_int32_t max_aggregated_flows_upperbound, max_aggregated_flows_traffic_upperbound;
 #endif
@@ -587,6 +588,10 @@ class Prefs {
   };
   inline char *getHttpIndexPage() {
     return http_index_page;
+  };
+
+  inline bool getIXPModeEnabled() {
+    return ixp_mode_enabled;
   };
   inline bool are_top_talkers_enabled()            { return (enable_top_talkers);      };
   inline bool are_sites_collection_enabled()       { return (enable_sites_collection); };

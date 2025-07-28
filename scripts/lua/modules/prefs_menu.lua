@@ -230,8 +230,16 @@ local menu_subpages = {{
             description = i18n("prefs.toggle_dump_pcap_to_clickhouse_description")
         },
         toggle_query_performance_log = {
-	   title = i18n("prefs.toggle_query_performance_log_title"),
-	   description = i18n("prefs.toggle_query_performance_log_description")
+            title = i18n("prefs.toggle_query_performance_log_title"),
+            description = i18n("prefs.toggle_query_performance_log_description")
+        },
+        toggle_data_archive_before_ttl_delete = {
+            title = i18n("prefs.toggle_export_flows_to_archive_title"),
+            description = i18n("prefs.toggle_export_flows_to_archive_description")
+        },
+        path_data_archive_before_ttl_delete = {
+            title = i18n("prefs.path_export_flows_to_archive_title"),
+            description = i18n("prefs.path_export_flows_to_archive_description")
         }
     }
 }, {
@@ -275,6 +283,20 @@ local menu_subpages = {{
         }
     }
 }, {
+    -- url path value
+    id = "ixp_settings",
+    label = i18n("prefs.ixp_mode"),
+    advanced = true,
+    pro_only = true,
+    -- Enable IXP mode in EnterpriseXL and zmq interface
+    hidden = ((ntop.isEnterpriseXL() and interface.isZMQInterface()) == false),
+    entries = {
+        ixp_mode_enabled = {
+            title = i18n("prefs.toggle_ixp_mode_title"),
+            description = i18n("prefs.toggle_ixp_mode_description")
+        }
+    }
+},{
     id = "logging",
     label = i18n("prefs.logging"),
     advanced = false,

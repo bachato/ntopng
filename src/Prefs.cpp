@@ -128,6 +128,7 @@ Prefs::Prefs(Ntop *_ntop) {
   http_port = CONST_DEFAULT_NTOP_PORT;
   http_prefix = strdup("");
   http_index_page = strdup(INDEX_URL);
+  ixp_mode_enabled = false;
   instance_name = NULL;
   categorization_enabled = false, enable_users_login = true;
   categorization_key = NULL, zmq_encryption_pwd = NULL;
@@ -170,6 +171,7 @@ Prefs::Prefs(Ntop *_ntop) {
 #ifdef NTOPNG_PRO
   dump_flows_direct = false;
   max_aggregated_flows_upperbound = 10000, max_aggregated_flows_traffic_upperbound = 1;
+  data_archive_before_ttl_delete = false;
 #endif
   enable_runtime_flows_dump = true;
   enable_activities_debug = false;
@@ -989,6 +991,7 @@ void Prefs::reloadPrefsFromRedis() {
   network_discovery = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_NETWORK_DISCOVERY, false);
   starttls = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_STARTTLS, false);
   dump_pcap_to_clickhouse = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_DUMP_PCAP_TO_CLICKHOUSE, false);
+  data_archive_before_ttl_delete = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ARCHIVE_BEFORE_TTL_DELETE, false);
   query_performance_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_QUERY_PERFORMANCE_LOG, false);
 
   enable_arp_matrix_generation =
@@ -1073,14 +1076,17 @@ void Prefs::reloadPrefsFromRedis() {
 
   getDefaultStringPrefsValue(CONST_PREFS_HTTP_INDEX_PAGE, &tmp, DEFAULT_HTTP_INDEX_PAGE);
   if(http_index_page) free(http_index_page);
-
+  
   if(tmp[0] == '\0') {
     free(tmp);
     tmp = strdup(INDEX_URL);
   }
   http_index_page = tmp;
 
-  global_dns_forging_enabled = getDefaultBoolPrefsValue(CONST_PREFS_GLOBAL_DNS_FORGING_ENABLED, false);
+  ixp_mode_enabled = getDefaultBoolPrefsValue(CONST_PREFS_IXP_MODE_ENABLED, false);
+  
+  global_dns_forging_enabled =
+      getDefaultBoolPrefsValue(CONST_PREFS_GLOBAL_DNS_FORGING_ENABLED, false);
   enable_client_x509_auth = getDefaultBoolPrefsValue(CONST_PREFS_CLIENT_X509_AUTH, false);
   emit_flow_alerts = getDefaultBoolPrefsValue(CONST_PREFS_EMIT_FLOW_ALERTS, true);
   emit_host_alerts = getDefaultBoolPrefsValue(CONST_PREFS_EMIT_HOST_ALERTS, true);
@@ -2477,8 +2483,8 @@ int Prefs::checkOptions() {
   docs_dir = ntop->getValidPath(docs_dir);
   scripts_dir = ntop->getValidPath(scripts_dir);
   callbacks_dir = ntop->getValidPath(callbacks_dir);
-  pcap_dir = ntop->getValidPath(pcap_dir);
-  clickhouse_archive_dir = ntop->getValidPath(clickhouse_archive_dir);
+  ntop->fixPath(pcap_dir);
+  ntop->fixPath(clickhouse_archive_dir);
 
 #ifdef NTOPNG_PRO
   pro_callbacks_dir = ntop->getValidPath(pro_callbacks_dir);
@@ -2734,6 +2740,7 @@ void Prefs::lua(lua_State *vm) {
                             enable_interface_name_only);
   lua_push_uint64_table_entry(vm, "http_port", http_port);
   lua_push_str_table_entry(vm, "http_index_page", http_index_page);
+  lua_push_bool_table_entry(vm, "ixp_mode_enabled;", ixp_mode_enabled);
 
   lua_push_uint64_table_entry(vm, "max_num_hosts", max_num_hosts);
   lua_push_uint64_table_entry(vm, "max_num_flows", max_num_flows);
@@ -2776,6 +2783,7 @@ void Prefs::lua(lua_State *vm) {
   lua_push_bool_table_entry(vm, "network_discovery", network_discovery);
   lua_push_bool_table_entry(vm, "starttls", starttls);
   lua_push_bool_table_entry(vm, "dump_pcap_to_clickhouse", dump_pcap_to_clickhouse);
+  lua_push_bool_table_entry(vm, "data_archive_before_ttl_delete", data_archive_before_ttl_delete);
   lua_push_bool_table_entry(vm, "query_performance_log_enabled", query_performance_log);
   lua_push_bool_table_entry(vm, "tls_quic_hostnaming", tls_quic_hostnaming);
 

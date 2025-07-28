@@ -2167,7 +2167,15 @@ if auth.has_capability(auth.capabilities.preferences) then
                 min = 1,
                 max = 365 * 10
             })
-
+        
+        -- export flows for retention, only if ch and enterprise XL
+        prefsToggleButton(subpage_active, {
+            field = "toggle_data_archive_before_ttl_delete",
+            default = "0",
+            pref = "data_archive_before_ttl_delete",
+            hidden = not showAggregateFlowsPrefs
+        })
+            
         prefsInputFieldPrefs(subpage_active.entries["aggregated_flows_data_retention"].title,
             subpage_active.entries["aggregated_flows_data_retention"].description, "ntopng.prefs.",
             "aggregated_flows_data_retention_days", data_retention_utils.getAggregatedFlowsDataRetention(), "number",
@@ -2208,6 +2216,31 @@ if auth.has_capability(auth.capabilities.preferences) then
             field = "toggle_query_performance_log",
             default = "0",
             pref = "enable_query_performance_log"
+        })
+
+        print(
+            '<tr><th colspan=2 style="text-align:right;"><button type="submit" class="btn btn-primary" style="width:115px" disabled="disabled">' ..
+            i18n("save") .. '</button></th></tr>')
+
+        print [[<input name="csrf" type="hidden" value="]]
+        print(ntop.getRandomCSRFValue())
+        print [[" />]]
+        print [[  </form>]]
+        print [[  </table>]]
+    end
+
+    function printIXPModeOptions()
+        print('<form method="post">')
+        print('<table class="table">')
+        print('<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n("prefs.ixp_mode") ..
+            '</th></tr></thead>')
+
+        local enabledIXP = ntop.getPref("ntopng.prefs.toggle_ixp_mode")
+        -- enable ixp mode toggle button
+        prefsToggleButton(subpage_active, {
+            field = "ixp_mode_enabled",
+            default = "0",
+            pref = "toggle_ixp_mode"
         })
 
         print(
@@ -2412,6 +2445,10 @@ if auth.has_capability(auth.capabilities.preferences) then
 
     if (tab == "clickhouse") then
         printClickHouseOptions()
+    end
+
+    if (tab == "ixp_settings") then
+        printIXPModeOptions()
     end
 
     if (tab == "dump_settings") then
