@@ -126,7 +126,7 @@ class Prefs {
   bool dump_flows_on_es, dump_flows_on_syslog,
       dump_json_flows_on_disk, dump_ext_json;
 #ifdef NTOPNG_PRO
-  bool ixp_mode_enabled;
+  bool asn_mode_enabled;
   bool dump_flows_direct;
   u_int32_t max_aggregated_flows_upperbound, max_aggregated_flows_traffic_upperbound;
 #endif
@@ -591,7 +591,7 @@ class Prefs {
   };
 
 #ifdef NTOPNG_PRO
-  inline bool isIXPModeEnabled()                   { return ixp_mode_enabled;          };
+  inline bool isIASNModeEnabled()                  { return asn_mode_enabled;          };
 #endif
   inline bool are_top_talkers_enabled()            { return (enable_top_talkers);      };
   inline bool are_sites_collection_enabled()       { return (enable_sites_collection); };

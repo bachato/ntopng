@@ -129,7 +129,7 @@ Prefs::Prefs(Ntop *_ntop) {
   http_prefix = strdup("");
   http_index_page = strdup(INDEX_URL);
 #ifdef NTOPNG_PRO
-  ixp_mode_enabled = false;
+  asn_mode_enabled = false;
 #endif
   instance_name = NULL;
   categorization_enabled = false, enable_users_login = true;
@@ -1088,7 +1088,7 @@ void Prefs::reloadPrefsFromRedis() {
   http_index_page = tmp;
 
 #ifdef NTOPNG_PRO
-  ixp_mode_enabled = getDefaultBoolPrefsValue(CONST_PREFS_IXP_MODE_ENABLED, false);
+  asn_mode_enabled = getDefaultBoolPrefsValue(CONST_PREFS_ASN_MODE_ENABLED, false);
 #endif
   
   global_dns_forging_enabled = getDefaultBoolPrefsValue(CONST_PREFS_GLOBAL_DNS_FORGING_ENABLED, false);
@@ -2763,7 +2763,7 @@ void Prefs::lua(lua_State *vm) {
   lua_push_int32_table_entry(vm, "max_aggregated_flows_traffic_upperbound",
 			     max_aggregated_flows_traffic_upperbound);
   lua_push_bool_table_entry(vm, "data_archive_before_ttl_delete", data_archive_before_ttl_delete);
-  lua_push_bool_table_entry(vm, "ixp_mode_enabled;", ixp_mode_enabled);  
+  lua_push_bool_table_entry(vm, "is_asn_mode_enabled;", asn_mode_enabled);  
 #endif
 
   if(clickhouse_dbname) lua_push_str_table_entry(vm, "clickhouse_dbname", clickhouse_dbname);

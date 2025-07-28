@@ -2229,17 +2229,17 @@ if auth.has_capability(auth.capabilities.preferences) then
         print [[  </table>]]
     end
 
-    function printIXPModeOptions()
+    function printASNModeOptions()
         print('<form method="post">')
         print('<table class="table">')
-        print('<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n("prefs.ixp_mode") ..
+        print('<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n("prefs.asn_mode") ..
             '</th></tr></thead>')
 
-        -- enable ixp mode toggle button
+        -- enable asn mode toggle button
         prefsToggleButton(subpage_active, {
-            field = "ixp_mode_enabled",
+            field = "asn_mode_enabled",
             default = "0",
-            pref = "toggle_ixp_mode"
+            pref = "toggle_asn_mode"
         })
 
         print(
@@ -2446,8 +2446,8 @@ if auth.has_capability(auth.capabilities.preferences) then
         printClickHouseOptions()
     end
 
-    if (tab == "ixp_settings") then
-        printIXPModeOptions()
+    if (tab == "asn_settings") then
+        printASNModeOptions()
     end
 
     if (tab == "dump_settings") then
