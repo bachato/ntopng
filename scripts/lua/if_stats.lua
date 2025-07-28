@@ -967,9 +967,15 @@ if ((page == "overview") or (page == nil)) then
             "</th><td width=20% nowrap><span id=if_in_bytes>" .. bytesToSize(rx) .. "</span> [<span id=if_in_pkts>" ..
             formatValue(rx_pkts) .. " " .. label .. "</span>] <span id=pkts_in_trend></span></td>")
 
+        local tx_ratio = 0
+        local rx_ratio = 0
+        if tot > 0 then
+          tx_ratio = (tx * 100 / tot)
+          rx_ratio = (rx * 100 / tot)
+        end
         print('<td colspan=2><div class="progress"><div class="progress-bar bg-warning" style="width: ' ..
-            (tx * 100 / tot) .. '%;">' .. i18n("sent") .. '</div>')
-        print('<div class="progress-bar bg-success" style="width: ' .. (rx * 100 / tot) .. '%;">' .. i18n("received") ..
+            tx_ratio .. '%;">' .. i18n("sent") .. '</div>')
+        print('<div class="progress-bar bg-success" style="width: ' .. rx_ratio .. '%;">' .. i18n("received") ..
             '</div></div></td>')
 
         print("</tr>")
