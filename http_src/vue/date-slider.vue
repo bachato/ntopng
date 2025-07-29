@@ -43,7 +43,15 @@ export default {
 
     /** This method is the first method of the component called, it's called before html template creation. */
     created() {
-        this.setSliderMin(this.$props.min_epoch);
+        let min = this.$props.min_epoch;
+
+        let today = FormatterUtils.get_midnight_epoch(this.get_utc_seconds(Date.now()));
+        if (!min || FormatterUtils.get_midnight_epoch(min) == today) {
+          let yesterday = FormatterUtils.get_midnight_epoch(today - this.timeline_step);
+          min = yesterday; /* set begin time to yesterday at least */
+        }
+
+        this.setSliderMin(min);
     },
 
     beforeMount() {

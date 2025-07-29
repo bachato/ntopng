@@ -58,6 +58,20 @@ page_utils.print_navbar(i18n("asn_id",{id = format_utils.formatASN(asn)}), ntop.
 }})
 
 if page == "overview" or not page then
+
+    local show_historical = false
+    local first_seen = 0
+    if content_type and content_type == "historical" then
+        show_historical = true
+        -- Get the first record time, if any
+        if ntop.isClickHouseEnabled() then
+            local res = interface.execSQLQuery("SELECT FIRST_SEEN FROM hourly_asn ORDER BY FIRST_SEEN ASC LIMIT 1")
+            if res and type(res) == "table" and #res > 0 then
+                first_seen = tonumber(res[1]["FIRST_SEEN"])
+            end
+        end
+    end
+
     template_utils.render("pages/vue_page.template", {
         vue_page_name = "PageAsOverview",
         page_context = json.encode({
@@ -65,8 +79,9 @@ if page == "overview" or not page then
             ifid = interface.getId(),
             isEnterpriseL = ntop.isEnterpriseL(),
             tableId = tableId,
-            historical = content_type and content_type == "historical",
-            showTimeseries = areASTimeseriesEnabled(interface.getId())
+            historical = show_historical,
+            first_date_epoch = first_seen,
+            showTimeseries = areASTimeseriesEnabled(interface.getId()),
         })
     })
 else

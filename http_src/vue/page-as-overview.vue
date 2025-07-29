@@ -20,7 +20,7 @@
         </DateTimeRangePicker>
     </div>
 
-    <DateSlider v-if="enable_date_time_range_picker" id="as-date-slider" :min_epoch="min_epoch" @epoch_change="set_time_interval" />
+    <DateSlider v-if="enable_date_time_range_picker" id="as-date-slider" :min_epoch="first_date_epoch" @epoch_change="set_time_interval" />
 
     <div class="m-2 mb-3">
         <div class="button-group mb-2 d-flex align-items-center">
@@ -71,8 +71,6 @@ const props = defineProps({
     context: Object,
 });
 
-const min_epoch = ref(1752847080) //TODO
-
 const _i18n = (t) => i18n(t);
 const first_open = ref(true);
 const sankey_url = `${http_prefix}/lua/rest/v2/get/asn/sankey.lua`;
@@ -86,6 +84,7 @@ const table_as_stats = ref(null);
 const reload = ref(false);
 const main_epoch_interval = ref(null);
 const table_id = ref(props.context.tableId);
+const first_date_epoch = ref(props.context.first_date_epoch);
 const sankey_format_list = [
     { key: "criteria_as", value: 'traffic_between_ases', label: _i18n('as_overview.as_traffic_criteria') },
     { key: "criteria_as", value: 'ingress_egress_traffic_criteria', label: _i18n('as_overview.ingress_egress_traffic_criteria') },
