@@ -72,8 +72,11 @@ function formatASN(v, peer_as, ip, is_client_as)
    if((peer_as ~= nil) and (peer_as ~= 0) and (v ~= peer_as)) then
       local peer_asn = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. peer_as .. "\">" .. peer_as
       local via
-      
-      peer_as_name = shortenString(ntop.getASNameFromASN(tonumber(peer_as)), max_len)
+
+      local peer_as_name
+      if peer_as and tonumber(peer_as) then
+         peer_as_name = shortenString(ntop.getASNameFromASN(tonumber(peer_as)), max_len)
+      end
       
       if(peer_as_name == nil) then
 	 via = ""

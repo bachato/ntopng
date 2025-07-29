@@ -160,7 +160,7 @@ for _, value in ipairs(flows_stats.flows) do
 
     local transit_asn_data = {
         asn = transit_asn or 0,
-        name = ntop.getASNameFromASN(tonumber(transit_asn))
+        name = ntop.getASNameFromASN(tonumber(transit_asn) or 0)
     }
 
     -- Formatting client column
