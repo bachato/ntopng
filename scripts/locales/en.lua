@@ -549,6 +549,7 @@ local lang = {
   ["light"] = "Light",
   ["listening_ports"] = "Listening Ports",
   ["little_endian"] = "Day/Month/Year",
+  ["live"] = "Live",
   ["live_flows"] = "Active Flows",
   ["loading"] = "Loading...",
   ["local_hosts"] = "Local Hosts (Local RX-only Hosts)",

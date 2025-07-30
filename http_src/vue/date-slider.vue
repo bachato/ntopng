@@ -1,6 +1,6 @@
 <!-- (C) 2025 - ntop.org     -->
 <template>
-  <div class="m-2 mb-3 mt-5 px-5">
+  <div class="m-2 mb-3 mt-3 px-3">
     <Slider 
 	v-model="timeline_value"
 	:format="format"
@@ -8,6 +8,7 @@
 	:max="timeline_max"
 	:step="timeline_step" 
 	:disabled="disabled_date_picker"
+        tooltipPosition="bottom"
         @change="onSliderChange"
     />
   </div>
@@ -144,6 +145,9 @@ export default {
         timeline_step:  24*60*60, /* day */
 
         format: function (value) {
+            let today = FormatterUtils.get_midnight_epoch(ntopng_utility.get_utc_seconds(Date.now()));
+            if (value == today) return i18n("live");
+
             let str = FormatterUtils.formatDateTime(value, 'date_only');
             return str;
         },
