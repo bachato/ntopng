@@ -7943,7 +7943,9 @@ static int ntop_get_license_limits(lua_State *vm) {
       if (hosts >= rxonly_hosts) // Safety check
          hosts -= rxonly_hosts; // Do not consider non-existing hosts
 
-      num_flows += curr_iface->getNumFlows();
+      if (!curr_iface->isView())
+        num_flows += curr_iface->getNumFlows();
+
       num_hosts += hosts;
     }
   }
