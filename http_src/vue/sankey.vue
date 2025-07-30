@@ -5,12 +5,12 @@
         <div v-if="!no_data" class="mb-2">
             <div class="btn-group btn-ontop" role="group">
                 <button type="button" class="btn zoom-btn" @click="zoomChart(0.5)">
-                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    <i class="fa-solid fa-magnifying-glass-plus" data-bs-toggle="tooltip" data-bs-placement="top" :title="_i18n('date_time_range_picker.btn_zoom_in')"></i>
                 </button>
                 <button type="button" class="btn zoom-btn" @click="zoomChart(-0.5)">
-                    <i class="fa-solid fa-magnifying-glass-minus"></i>
+                    <i class="fa-solid fa-magnifying-glass-minus" data-bs-toggle="tooltip" data-bs-placement="top" :title="_i18n('date_time_range_picker.btn_zoom_out')"></i>
                 </button>
-                <button v-if="showAutoRefresh" button type="button" class="btn refresh-btn" @click="toggleAutoRefresh"
+                <button v-if="showAutoRefresh" button type="button" data-bs-toggle="tooltip" data-bs-placement="top" class="btn refresh-btn" @click="toggleAutoRefresh"
                     :class="{ 'active': autoRefreshEnabled }"
                     :title="autoRefreshEnabled ? 'Auto-refresh enabled' : 'Auto-refresh disabled'">
                     <i class="fa-solid fa-arrows-rotate" :class="{ 'fa-spin': autoRefreshEnabled }"></i>

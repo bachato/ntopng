@@ -8,7 +8,7 @@
                 @select_option="changeCriteria">
             </SelectSearch>
         </div>
-        <template v-if="enable_date_time_range_picker">
+        <div v-if="enable_date_time_range_picker" class="w-100 d-flex align-items-center button-group" style="position: relative;">
             <CustomSwitch v-model:value="toggle_slider" :change_label_side="true" :label="toggle_slider_label" style=""
                 class="me-1" icon="fa-calendar-days" :title="toggle_slider_label"></CustomSwitch>
 
@@ -17,11 +17,11 @@
                     min_time_interval_id="min" @epoch_change="set_time_interval">
                 </DateTimeRangePicker>
             </Transition>
-            <Transition name="add-opposite-effect" mode="out-in">
+            <Transition name="add-effect" mode="out-in">
                 <DateSlider v-if="!toggle_slider" id="as-date-slider" :min_epoch="first_date_epoch"
                     @epoch_change="set_time_interval" style="width: 100%" />
             </Transition>
-        </template>
+        </div>
     </div>
 
     <div class="m-2 mb-3">
@@ -365,31 +365,6 @@ const map_table_def_columns = (columns) => {
 /* ensure leaving items are taken out of layout flow so that moving
    animations can be calculated correctly. */
 .add-effect-leave-active {
-    position: absolute;
-}
-
-.add-opposite-effect-move,
-/* apply transition to moving elements */
-.add-opposite-effect-enter-active,
-.add-opposite-effect-leave-active {
-    transition: all 0.35s ease;
-}
-
-.add-opposite-effect-enter-from {
-    opacity: 0;
-    transform: translateX(60px);
-    /* enters from right */
-}
-
-.add-opposite-effect-leave-to {
-    opacity: 0;
-    transform: translateX(0);
-    /* exits from right */
-}
-
-/* ensure leaving items are taken out of layout flow so that moving
-   animations can be calculated correctly. */
-.add-opposite-effect-leave-active {
     position: absolute;
 }
 </style>

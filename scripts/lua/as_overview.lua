@@ -39,22 +39,26 @@ page_utils.print_navbar(i18n("asn_id",{id = format_utils.formatASN(asn)}), ntop.
     url = ntop.getHttpPrefix() .. "/lua/as_overview.lua?page=historical&asn=" .. asn .. "",
     active = page == "historical",
     page_name = "historical",
-    label = "<i class='fas fa-lg fa-chart-area'></i>"
+    label = "<i class='fas fa-lg fa-chart-area' data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" title=\"" ..
+        i18n("prefs.timeseries") .. "\"></i>"
 }, { 
     url = ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. asn .. "",
     active = page == "asn_hosts",
     page_name = "asn_hosts",
-    label = "<i class=\"fas fa-laptop fa-lg\"></i>"
+    label = "<i class=\"fas fa-laptop fa-lg\" data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" title=\"" ..
+        i18n("hosts") .. "\"></i>"
 }, { 
     url = ntop.getHttpPrefix() .. "/lua/flows_stats.lua?asn=" .. asn .. "",
     active = page == "asn_flows",
     page_name = "asn_flows",
-    label = "<i class=\"fas fa-stream fa-lg\"></i>"
+    label = "<i class=\"fas fa-stream fa-lg\" data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" title=\"" ..
+        i18n("flows") .. "\"></i>"
 }, { 
     url = ntop.getHttpPrefix() .. "/lua/as_stats.lua?show_as=all",
     active = page == "as_stats",
     page_name = "as_stats",
-    label = "<i class=\"fas fa-globe fa-lg\"></i>"
+    label = "<i class=\"fas fa-globe fa-lg\" data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" title=\"" ..
+        i18n("as_stats.autonomous_systems") .. "\"></i>"
 }})
 
 if page == "overview" or not page then

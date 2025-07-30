@@ -2280,8 +2280,8 @@ local lang = {
     ["btn_move_right"] = "Shift Right Time Interval",
     ["btn_refresh"] = "Refresh Time Interval",
     ["btn_undo"] = "Restore the previous Time Interval",
-    ["btn_zoom_in"] = "Zoom In Time Interval",
-    ["btn_zoom_out"] = "Zoom Out Time Interval",
+    ["btn_zoom_in"] = "Zoom In",
+    ["btn_zoom_out"] = "Zoom Out",
   },
   ["db_explorer"] = {
     ["abort"] = "Abort",
