@@ -85,8 +85,8 @@ export default {
             let epoch_begin = newValue;
             let epoch_end = newValue + this.timeline_step;
             let epoch_status = { epoch_begin: epoch_begin, epoch_end: epoch_end };
-            this.emit_epoch_change(epoch_status, this.$props.id);
             ntopng_url_manager.add_obj_to_url(epoch_status);
+            this.emit_epoch_change(epoch_status, this.$props.id);
         },
         setSliderValue(val) {
           this.timeline_value = val;
