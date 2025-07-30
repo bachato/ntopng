@@ -334,7 +334,7 @@ function formatDateTime(date, type = 'datetime') {
     } else if (delta_days === 1) {
         // yesterday
         formatted_date = 'Yesterday';
-    } else if (delta_days > 2 && delta_days <= 6) {
+    } else if (delta_days >= 2 && delta_days <= 6) {
         // if in current last week show weekday
         formatted_date = date.toLocaleDateString('en-GB', { weekday: 'short' });
         formatted_date = date.toLocaleDateString('en-GB', { weekday: 'short' });
