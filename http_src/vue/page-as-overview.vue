@@ -1,7 +1,7 @@
 <template>
 
     <div class="button-group mb-2 d-flex align-items-center">
-        <div class="dropdown me-3 d-flex"><span class="no-wrap d-flex align-items-center filters-label me-2"><b>{{
+        <div class="dropdown me-2 d-flex"><span class="no-wrap d-flex align-items-center filters-label me-2"><b>{{
             _i18n("criteria")
                     }}: </b></span>
             <SelectSearch v-model:selected_option="active_sankey_type" :options="sankey_format_list"
@@ -158,7 +158,7 @@ function timeline_format(value) {
 function set_time_interval(epoch_interval) {
     if (epoch_interval) {
         main_epoch_interval.value = epoch_interval;
-
+        debugger;
         update_sankey_data();
         reload.value = !reload.value
     }
