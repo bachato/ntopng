@@ -12,12 +12,13 @@
 
             <!-- Report Selector -->
             <template v-slot:begin>
+                <!--
                 <div class="me-2">
-                <SelectSearch v-model:selected_option="active_sankey_type" :options="sankey_format_list"
+                  <SelectSearch v-model:selected_option="active_sankey_type" :options="sankey_format_list"
                     @select_option="changeCriteria">
-                </SelectSearch>
-
+                  </SelectSearch>
                 </div>
+                -->
             </template>
 
             <!-- Report Toolbox (Store, Save, ...) -->
