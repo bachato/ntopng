@@ -35,14 +35,16 @@ const map_table_def_columns = (columns) => {
             return (i18n("limits_page." + value) || value);
         },
         "current": (value, row) => {
-            if (value < row.max) {
+            if (!row.max || value < row.max) {
                 return `<span class="text-success">${formatterUtils.getFormatter("full_number")(value)}</span>`;
             } else {
                 return `<span class="text-danger">! ${formatterUtils.getFormatter("full_number")(value)}</span>`;
             }
         },
         "max": (value, row) => {
-            if (row.current < value) {
+            if (!value) {
+                return ``;
+            } else if (row.current < value) {
                 return `<span class="text-success">${formatterUtils.getFormatter("full_number")(value)}</span>`;
             } else {
                 return `<span class="text-danger">! ${formatterUtils.getFormatter("full_number")(value)}</span>`;

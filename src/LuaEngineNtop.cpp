@@ -7932,21 +7932,23 @@ static int ntop_set_influxdb_internal_available(lua_State *vm) {
 /* **************************************************************** */
 
 static int ntop_get_license_limits(lua_State *vm) {
-  u_int32_t num_hosts = 0, num_flows = 0;
+  u_int32_t num_hosts = 0, num_local_hosts = 0, num_flows = 0;
 
   for (int i = 0; i < ntop->get_num_interfaces(); i++) {
     NetworkInterface *curr_iface = ntop->getInterface(i);
 
     if (curr_iface) {
-      u_int32_t hosts = curr_iface->getNumLocalHosts();
-      u_int32_t rxonly_hosts = curr_iface->getNumLocalRxOnlyHosts();
-      if (hosts >= rxonly_hosts) // Safety check
-         hosts -= rxonly_hosts; // Do not consider non-existing hosts
+      u_int32_t hosts = curr_iface->getNumHosts();
+      u_int32_t local_hosts = curr_iface->getNumLocalHosts();
+      u_int32_t rxonly_local_hosts = curr_iface->getNumLocalRxOnlyHosts();
+      if (local_hosts >= rxonly_local_hosts) // Safety check
+         local_hosts -= rxonly_local_hosts; // Do not consider non-existing hosts
 
       if (!curr_iface->isView())
         num_flows += curr_iface->getNumFlows();
 
       num_hosts += hosts;
+      num_local_hosts += local_hosts;
     }
   }
 
@@ -7961,6 +7963,7 @@ static int ntop_get_license_limits(lua_State *vm) {
   lua_push_uint32_table_entry(vm, "num_pool_members", ntop->getNumberHostPoolsMembers());
   lua_push_uint32_table_entry(vm, "num_profiles", ntop->getNumberProfiles());
   lua_push_uint32_table_entry(vm, "num_hosts", num_hosts);
+  lua_push_uint32_table_entry(vm, "num_local_hosts", num_local_hosts);
   lua_push_uint32_table_entry(vm, "num_flows", num_flows);
   lua_pushstring(vm, "current");
   lua_insert(vm, -2);
@@ -7976,7 +7979,8 @@ static int ntop_get_license_limits(lua_State *vm) {
 #endif
   lua_push_uint32_table_entry(vm, "num_host_pools", MAX_NUM_HOST_POOLS);
   lua_push_uint32_table_entry(vm, "num_pool_members", MAX_NUM_POOL_MEMBERS);
-  lua_push_uint32_table_entry(vm, "num_hosts", MAX_NUM_ACTIVE_HOSTS);
+  lua_push_uint32_table_entry(vm, "num_hosts", 0 /* no limit */);
+  lua_push_uint32_table_entry(vm, "num_local_hosts", MAX_NUM_ACTIVE_HOSTS);
   lua_push_uint32_table_entry(vm, "num_flows", MAX_NUM_ACTIVE_FLOWS);
   lua_pushstring(vm, "max");
   lua_insert(vm, -2);
