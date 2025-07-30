@@ -498,9 +498,6 @@ page_utils.add_menubar_section({
             entry = page_utils.menu_entries.containers,
             hidden = not ifs.has_seen_containers,
             url = '/lua/containers_stats.lua'
-        }, {entry = page_utils.menu_entries.divider}, {
-            entry = page_utils.menu_entries.http_servers,
-            url = '/lua/http_servers_stats.lua'
         }
     }
 })

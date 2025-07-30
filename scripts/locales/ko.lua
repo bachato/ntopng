@@ -4776,16 +4776,6 @@ local lang = {
     ["traffic_sent"] = "전송된 트래픽",
     ["virtual_hosts"] = "가상 호스트",
   },
-  ["http_servers_stats"] = {
-    ["actual_requests"] = "실제 요청",
-    ["bytes_received"] = "수신된 바이트",
-    ["bytes_sent"] = "전송된 바이트",
-    ["http_server_ip"] = "HTTP 서버 IP",
-    ["http_servers"] = "HTTP 서버",
-    ["http_virtual_host"] = "HTTP 가상 호스트",
-    ["local_http_servers"] = "로컬 HTTP 서버",
-    ["total_requests"] = "총 요청 수",
-  },
   ["http_status_code"] = {
     ["bad_request"] = "지정된 URL에 유효하지 않거나 위험한 문자가 포함되어 있습니다.",
     ["enterprise_only"] = "Enterprise 버전 라이선스가 필요합니다.",

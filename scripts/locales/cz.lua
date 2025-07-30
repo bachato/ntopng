@@ -1803,16 +1803,6 @@ local lang = {
     ["traffic_sent"] = "Provoz odeslán",
     ["virtual_hosts"] = "Virtuální hostitelé",
   },
-  ["http_servers_stats"] = {
-    ["actual_requests"] = "Skutečné žádosti",
-    ["bytes_received"] = "Bajty byly přijaty",
-    ["bytes_sent"] = "Bajty byly odeslány",
-    ["http_server_ip"] = "IP adresa HTTP serveru",
-    ["http_servers"] = "HTTP server",
-    ["http_virtual_host"] = "HTTP Virtual Host",
-    ["local_http_servers"] = "Lokální servery HTTP",
-    ["total_requests"] = "Celkový počet žádostí",
-  },
   ["icmp_page"] = {
     ["icmp_message"] = "Zpráva ICMP",
     ["icmp_port_unreachable_extra"] = "%{unreach_protocol} port %{unreach_port} nedostupný na %{unreach_host}",

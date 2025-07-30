@@ -3964,16 +3964,6 @@ local lang = {
     ["traffic_sent"] = "Traffico Inviato",
     ["virtual_hosts"] = "Host Virtuali",
   },
-  ["http_servers_stats"] = {
-    ["actual_requests"] = "Richieste Effettive",
-    ["bytes_received"] = "Bytes Ricevuti",
-    ["bytes_sent"] = "Bytes Inviati",
-    ["http_server_ip"] = "IP del Server HTTP",
-    ["http_servers"] = "Server HTTP",
-    ["http_virtual_host"] = "Host Virtuale HTTP",
-    ["local_http_servers"] = "Server HTTP locali",
-    ["total_requests"] = "Richieste Totali",
-  },
   ["http_status_code"] = {
     ["bad_request"] = "L'URL specificato contiene caratteri invalidi/pericolosi",
     ["enterprise_only"] = "È richiesta la licenza Enterprise per accedere a questa pagina!",

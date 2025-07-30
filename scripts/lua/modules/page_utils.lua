@@ -334,13 +334,7 @@ page_utils.menu_entries = {
         i18n_title = "operating_systems",
         section = "if_stats",
         help_link = "https://www.ntop.org/guides/ntopng/user_interface/network_interface/interface/operating_systems.html"
-    },
-    http_servers = {
-        key = "http_servers",
-        i18n_title = "http_servers_stats.local_http_servers",
-        section = "if_stats",
-        help_link = "https://www.ntop.org/guides/ntopng/user_interface/network_interface/interface/http_servers_local.html"
-    },    
+    }, 
     containers = {
         key = "containers",
         i18n_title = "containers_stats.containers",

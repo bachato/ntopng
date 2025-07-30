@@ -4784,16 +4784,6 @@ local lang = {
     ["traffic_sent"] = "Gesendeter Datenverkehr",
     ["virtual_hosts"] = "Virtuelle Hosts",
   },
-  ["http_servers_stats"] = {
-    ["actual_requests"] = "Tatsächliche Anfragen",
-    ["bytes_received"] = "Empfangene Bytes",
-    ["bytes_sent"] = "Gesendete Bytes",
-    ["http_server_ip"] = "HTTP-Server-IP",
-    ["http_servers"] = "HTTP-Server",
-    ["http_virtual_host"] = "Virtueller HTTP-Host",
-    ["local_http_servers"] = "Lokale HTTP-Server",
-    ["total_requests"] = "Anfragen gesamt",
-  },
   ["http_status_code"] = {
     ["bad_request"] = "Die angegebene URL enthält ungültige/gefährliche Zeichen",
     ["enterprise_only"] = "Enterprise Edition-Lizenz erforderlich",

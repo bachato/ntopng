@@ -5370,16 +5370,6 @@ local lang = {
     ["traffic_sent"] = "Traffic Sent",
     ["virtual_hosts"] = "Virtual Hosts",
   },
-  ["http_servers_stats"] = {
-    ["actual_requests"] = "Actual Requests",
-    ["bytes_received"] = "Bytes Received",
-    ["bytes_sent"] = "Bytes Sent",
-    ["http_server_ip"] = "HTTP Server IP",
-    ["http_servers"] = "HTTP Servers",
-    ["http_virtual_host"] = "HTTP Virtual Host",
-    ["local_http_servers"] = "Local HTTP Servers",
-    ["total_requests"] = "Total Requests",
-  },
   ["http_status_code"] = {
     ["bad_request"] = "The URL specified contains invalid/dangerous characters",
     ["enterprise_only"] = "Enterprise edition license required",

@@ -4776,16 +4776,6 @@ local lang = {
     ["traffic_sent"] = "Trafic envoyé",
     ["virtual_hosts"] = "Hôtes virtuels",
   },
-  ["http_servers_stats"] = {
-    ["actual_requests"] = "Demandes réelles",
-    ["bytes_received"] = "Octets reçus",
-    ["bytes_sent"] = "Octets envoyés",
-    ["http_server_ip"] = "IP du serveur HTTP",
-    ["http_servers"] = "Serveurs HTTP",
-    ["http_virtual_host"] = "Hôte virtuel HTTP",
-    ["local_http_servers"] = "Serveurs HTTP locaux",
-    ["total_requests"] = "Total des demandes",
-  },
   ["http_status_code"] = {
     ["bad_request"] = "L'URL spécifiée contient des caractères invalides/dangereux",
     ["enterprise_only"] = "Licence édition Entreprise requise",

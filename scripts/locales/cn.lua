@@ -2956,16 +2956,6 @@ local lang = {
     ["traffic_sent"] = "流量发送",
     ["virtual_hosts"] = "虚拟主机",
   },
-  ["http_servers_stats"] = {
-    ["actual_requests"] = "实际请求",
-    ["bytes_received"] = "接收的字节数",
-    ["bytes_sent"] = "发送的字节数",
-    ["http_server_ip"] = "HTTP 服务器 IP",
-    ["http_servers"] = "服务器 HTTP",
-    ["http_virtual_host"] = "HTTP 虚拟主机",
-    ["local_http_servers"] = "本地HTTP服务器",
-    ["total_requests"] = "请求总数",
-  },
   ["http_status_code"] = {
     ["bad_request"] = "指定的 URL 包含无效/危险字符",
     ["enterprise_only"] = "需要企业版许可证",

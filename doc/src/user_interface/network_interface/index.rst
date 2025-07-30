@@ -88,7 +88,6 @@ Interface
     interface/autonomous_systems
     interface/countries
     interface/operating_systems
-    interface/http_servers_local
 
 
 Policies

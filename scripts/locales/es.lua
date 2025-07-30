@@ -4782,16 +4782,6 @@ local lang = {
     ["traffic_sent"] = "Tráfico enviado",
     ["virtual_hosts"] = "Anfitriones virtuales",
   },
-  ["http_servers_stats"] = {
-    ["actual_requests"] = "Solicitudes reales",
-    ["bytes_received"] = "Bytes recibidos",
-    ["bytes_sent"] = "Bytes enviados",
-    ["http_server_ip"] = "IP del servidor HTTP",
-    ["http_servers"] = "Servidores HTTP",
-    ["http_virtual_host"] = "Servidor virtual HTTP",
-    ["local_http_servers"] = "Servidores HTTP locales",
-    ["total_requests"] = "Solicitudes totales",
-  },
   ["http_status_code"] = {
     ["bad_request"] = "La URL especificada contiene caracteres no válidos/peligrosos.",
     ["enterprise_only"] = "Se requiere licencia de edición empresarial",

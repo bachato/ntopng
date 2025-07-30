@@ -4368,16 +4368,6 @@ local lang = {
     ["traffic_sent"] = "送信トラフィック",
     ["virtual_hosts"] = "仮想ホスト",
   },
-  ["http_servers_stats"] = {
-    ["actual_requests"] = "実際のリクエスト",
-    ["bytes_received"] = "受信したバイト数",
-    ["bytes_sent"] = "送信したバイト数",
-    ["http_server_ip"] = "HTTPサーバーIP",
-    ["http_servers"] = "HTTPサーバー",
-    ["http_virtual_host"] = "HTTP仮想ホスト",
-    ["local_http_servers"] = "ローカルHTTPサーバー",
-    ["total_requests"] = "合計リクエスト",
-  },
   ["http_status_code"] = {
     ["bad_request"] = "指定されたURLに無効または危険な文字が含まれています",
     ["enterprise_only"] = "Enterpriseエディションライセンスが必要です",

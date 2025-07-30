@@ -1518,16 +1518,6 @@ local lang = {
     ["traffic_sent"] = "Tráfego enviado",
     ["virtual_hosts"] = "Hosts Virtuais",
   },
-  ["http_servers_stats"] = {
-    ["actual_requests"] = "Solicitações reais",
-    ["bytes_received"] = "Bytes Recebidos",
-    ["bytes_sent"] = "Bytes enviados",
-    ["http_server_ip"] = "IP do servidor HTTP",
-    ["http_servers"] = "HTTP do servidor",
-    ["http_virtual_host"] = "Host Virtual HTTP",
-    ["local_http_servers"] = "Servidores HTTP locais",
-    ["total_requests"] = "Total de Pedidos",
-  },
   ["icmp_page"] = {
     ["icmp_message"] = "Mensagem ICMP",
     ["icmp_port_unreachable_extra"] = "%{unreach_protocol} porta %{unreach_port} inacessível em %{unreach_host}",
