@@ -3347,16 +3347,6 @@ void ZMQParserInterface::setRemoteStats(nProbeStats *zrs) {
   zmq_remote_stats = cumulative_zrs;
 
   memcpy(&last_zmq_remote_stats_update, &now, sizeof(now));
-
-  /*
-   * Don't override ethStats here, these stats are properly updated
-   * inside NetworkInterface::processFlow for ZMQ interfaces.
-   * Overriding values here may cause glitches and non-strictly-increasing counters
-   * yielding negative rates.
-   ethStats.setNumBytes(cumulative_zrs->remote_bytes),
-   ethStats.setNumPackets(cumulative_zrs->remote_pkts);
-   *
-   */
 }
 
 /* **************************************************** */
