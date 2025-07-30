@@ -8,7 +8,7 @@
 	:max="timeline_max"
 	:step="timeline_step" 
 	:disabled="disabled_date_picker"
-        tooltipPosition="bottom"
+        tooltipPosition="right"
         @change="onSliderChange"
     />
   </div>

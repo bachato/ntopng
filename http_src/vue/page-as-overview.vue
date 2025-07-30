@@ -1,45 +1,30 @@
 <template>
 
-    <div v-if="enable_date_time_range_picker" class="d-flex">
+    <div class="button-group mb-2 d-flex align-items-center">
+        <div class="dropdown me-3 d-flex"><span class="no-wrap d-flex align-items-center filters-label me-2"><b>{{
+            _i18n("criteria")
+                    }}: </b></span>
+            <SelectSearch v-model:selected_option="active_sankey_type" :options="sankey_format_list"
+                @select_option="changeCriteria">
+            </SelectSearch>
+        </div>
+        <template v-if="enable_date_time_range_picker">
+            <CustomSwitch v-model:value="toggle_slider" :change_label_side="true" :label="toggle_slider_label" style=""
+                class="me-1" icon="fa-calendar-days" :title="toggle_slider_label"></CustomSwitch>
 
-        <CustomSwitch v-model:value="toggle_slider"
-            class="me-2 mt-1" :change_label_side="true" :label="toggle_slider_label" style=""
-            icon="fa-calendar-days" :title="toggle_slider_label"></CustomSwitch>
-
-        <DateTimeRangePicker v-if="toggle_slider" class="dontprint"
-            id="as-date-time-picker" :round_time="true"
-            min_time_interval_id="min" @epoch_change="set_time_interval">
-
-            <!-- Report Selector -->
-            <template v-slot:begin>
-                <!--
-                <div class="me-2">
-                  <SelectSearch v-model:selected_option="active_sankey_type" :options="sankey_format_list"
-                    @select_option="changeCriteria">
-                  </SelectSearch>
-                </div>
-                -->
-            </template>
-
-            <!-- Report Toolbox (Store, Save, ...) -->
-            <template v-slot:extra_buttons>
-            </template>
-        </DateTimeRangePicker>
-
-        <DateSlider v-if="!toggle_slider" id="as-date-slider" :min_epoch="first_date_epoch" @epoch_change="set_time_interval" style="width: 100%" />
-
+            <Transition name="add-effect" mode="out-in">
+                <DateTimeRangePicker v-if="toggle_slider" class="dontprint" id="as-date-time-picker" :round_time="true"
+                    min_time_interval_id="min" @epoch_change="set_time_interval">
+                </DateTimeRangePicker>
+            </Transition>
+            <Transition name="add-opposite-effect" mode="out-in">
+                <DateSlider v-if="!toggle_slider" id="as-date-slider" :min_epoch="first_date_epoch"
+                    @epoch_change="set_time_interval" style="width: 100%" />
+            </Transition>
+        </template>
     </div>
 
     <div class="m-2 mb-3">
-        <div class="button-group mb-2 d-flex align-items-center">
-            <div class="dropdown me-3 d-flex"><span class="no-wrap d-flex align-items-center filters-label me-2"><b>{{
-                _i18n("criteria")
-                        }}: </b></span>
-                <SelectSearch v-model:selected_option="active_sankey_type" :options="sankey_format_list"
-                    @select_option="changeCriteria">
-                </SelectSearch>
-            </div>
-        </div>
         <div style="position: relative;">
             <div class="mb-3 d-flex flex-column" style="height: 60vh;">
                 <Loading :isLoading="loading"></Loading>
@@ -73,7 +58,7 @@ import { default as SelectSearch } from "./select-search.vue";
 import { default as DateTimeRangePicker } from "./date-time-range-picker.vue";
 import { default as DateSlider } from "./date-slider.vue";
 import { default as dataUtils } from "../utilities/data-utils.js";
-import { default as CustomSwitch } from "./switch-custom.vue";
+import { default as CustomSwitch } from "./custom-switch.vue";
 import FormatterUtils from "../utilities/formatter-utils.js";
 
 const props = defineProps({
@@ -99,7 +84,7 @@ const toggle_slider_label = ref(_i18n("db_search.time_range"));
 const sankey_format_list = [
     { key: "criteria_as", value: 'traffic_between_ases', label: _i18n('as_overview.as_traffic_criteria') },
     { key: "criteria_as", value: 'ingress_egress_traffic_criteria', label: _i18n('as_overview.ingress_egress_traffic_criteria') },
-//    { key: "criteria_as", value: 'as_transit_only_criteria', label: _i18n('as_overview.traffic_between_ases') },
+    //    { key: "criteria_as", value: 'as_transit_only_criteria', label: _i18n('as_overview.traffic_between_ases') },
 ];
 
 const note_list = [
@@ -150,9 +135,9 @@ const changeCriteria = async (opt) => {
     if (table_as_stats.value) {
         if (opt.value === "ingress_egress_traffic_criteria") {
             table_id.value = "ingress_egress_as_stats"
-        } else if(opt.value === "traffic_between_ases") {
+        } else if (opt.value === "traffic_between_ases") {
             table_id.value = "traffic_between_ases"
-        } else if(opt.value === "as_transit_only_criteria") {
+        } else if (opt.value === "as_transit_only_criteria") {
             table_id.value = "transit_only_as_stats"
         }
         reload.value = !reload.value
@@ -356,3 +341,55 @@ const map_table_def_columns = (columns) => {
 
 
 </script>
+
+<style scoped>
+.add-effect-move,
+/* apply transition to moving elements */
+.add-effect-enter-active,
+.add-effect-leave-active {
+    transition: all 0.35s ease;
+}
+
+.add-effect-enter-from {
+    opacity: 0;
+    transform: translateX(-60px);
+    /* entra da sinistra */
+}
+
+.add-effect-leave-to {
+    opacity: 0;
+    transform: translateX(60px);
+    /* esce verso destra */
+}
+
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.add-effect-leave-active {
+    position: absolute;
+}
+
+.add-opposite-effect-move,
+/* apply transition to moving elements */
+.add-opposite-effect-enter-active,
+.add-opposite-effect-leave-active {
+    transition: all 0.35s ease;
+}
+
+.add-opposite-effect-enter-from {
+    opacity: 0;
+    transform: translateX(60px);
+    /* enters from right */
+}
+
+.add-opposite-effect-leave-to {
+    opacity: 0;
+    transform: translateX(0);
+    /* exits from right */
+}
+
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.add-opposite-effect-leave-active {
+    position: absolute;
+}
+</style>

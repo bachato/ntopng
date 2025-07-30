@@ -599,7 +599,7 @@ defineExpose({ draw_sankey, setNoDataFlag });
 .btn-ontop {
     position: absolute;
     right: 0;
-    top: -20px;
+    top: -0.7rem;
     z-index: 10;
 }
 

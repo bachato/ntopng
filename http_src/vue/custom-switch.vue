@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex align-items-center me-2">
+    <div class="btn-group align-items-center">
         <a class="btn btn-link btn-sm" type="button" @click="change_value" :title="title"
             :class="isOn ? '' : 'link-secondary'">
             <i class="fas fa-lg" :class="[isOn ? 'btn-success' : '', icon]">

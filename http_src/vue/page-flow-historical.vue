@@ -30,7 +30,7 @@
                                         </select>
                                     </div>
                                     <CustomSwitch v-if="props.context.is_enterprise_xl" v-model:value="flows_aggregated"
-                                        class="me-2 mt-1" :change_label_side="true" :label="flow_type_label" style=""
+                                        class="me-2" :change_label_side="true" :label="flow_type_label" style=""
                                         icon="fa-truck-fast" :title="flow_type_label" @change_value="change_flow_type"></CustomSwitch>
                                 </template>
                                 <template v-slot:extra_range_buttons>
@@ -158,7 +158,7 @@ import { default as ModalAcknoledgeAlert } from "./modal-acknowledge-alert.vue";
 import { default as ModalDeleteAlert } from "./modal-delete-alert.vue";
 import { default as ModalExportColumnsSelector } from "./modal-historical-flows-downloader.vue";
 
-import { default as CustomSwitch } from "./switch-custom.vue";
+import { default as CustomSwitch } from "./custom-switch.vue";
 
 const _i18n = (t) => i18n(t);
 
