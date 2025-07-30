@@ -1,6 +1,12 @@
 <template>
-    <div v-if="false">
-        <DateTimeRangePicker v-if="enable_date_time_range_picker" class="dontprint"
+
+    <div v-if="enable_date_time_range_picker" class="d-flex">
+
+        <CustomSwitch v-model:value="toggle_slider"
+            class="me-2 mt-1" :change_label_side="true" :label="toggle_slider_label" style=""
+            icon="fa-calendar-days" :title="toggle_slider_label"></CustomSwitch>
+
+        <DateTimeRangePicker v-if="toggle_slider" class="dontprint"
             id="as-date-time-picker" :round_time="true"
             min_time_interval_id="min" @epoch_change="set_time_interval">
 
@@ -18,9 +24,10 @@
             <template v-slot:extra_buttons>
             </template>
         </DateTimeRangePicker>
-    </div>
 
-    <DateSlider v-if="enable_date_time_range_picker" id="as-date-slider" :min_epoch="first_date_epoch" @epoch_change="set_time_interval" />
+        <DateSlider v-if="!toggle_slider" id="as-date-slider" :min_epoch="first_date_epoch" @epoch_change="set_time_interval" style="width: 100%" />
+
+    </div>
 
     <div class="m-2 mb-3">
         <div class="button-group mb-2 d-flex align-items-center">
@@ -65,6 +72,7 @@ import { default as SelectSearch } from "./select-search.vue";
 import { default as DateTimeRangePicker } from "./date-time-range-picker.vue";
 import { default as DateSlider } from "./date-slider.vue";
 import { default as dataUtils } from "../utilities/data-utils.js";
+import { default as CustomSwitch } from "./switch-custom.vue";
 import FormatterUtils from "../utilities/formatter-utils.js";
 
 const props = defineProps({
@@ -85,6 +93,8 @@ const reload = ref(false);
 const main_epoch_interval = ref(null);
 const table_id = ref(props.context.tableId);
 const first_date_epoch = ref(props.context.first_date_epoch);
+const toggle_slider = ref(false);
+const toggle_slider_label = ref(_i18n("db_search.time_range"));
 const sankey_format_list = [
     { key: "criteria_as", value: 'traffic_between_ases', label: _i18n('as_overview.as_traffic_criteria') },
     { key: "criteria_as", value: 'ingress_egress_traffic_criteria', label: _i18n('as_overview.ingress_egress_traffic_criteria') },
