@@ -1847,8 +1847,7 @@ local lang = {
     ["asn_exporters"] = "AS / Exporters View",
     ["dst_as"] = "Destination AS",
     ["src_as"] = "Source AS",
-    ["as_transit_criteria"] = "AS Transit",
-    ["as_traffic_criteria"] = "AS View",
+    ["as_traffic_criteria"] = "Talking AS",
     ["ingress_egress_traffic_criteria"] = "Ingress/Egress Interfaces",
     ["no_data"] = "No Data Available. Is the ASN still doing traffic?",
     ["note_ingress_egress"] = "The above diagram with Ingress-Egress Traffic depicts the AS at its center, with ingress traffic on the left and egress traffic on the right.",
@@ -9120,6 +9119,7 @@ local lang = {
     ["invalid_input"] = "Please respect the input pattern.",
     ["missing_field"] = "Please fill the input.",
   },
+  ["view_options"] = "View Options",
   ["vlan_details"] = {
     ["no_available_stats_for_vlan_message"] = "No available stats for VLAN %{vlan_id}. Please wait a few minutes to allow %{product} to harvest new statistics.",
     ["vlan_alias"] = "VLAN Alias",

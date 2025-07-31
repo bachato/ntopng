@@ -2,43 +2,43 @@
 
     <div class="button-group mb-2 d-flex align-items-center">
         <div class="dropdown me-2 d-flex"><span class="no-wrap d-flex align-items-center filters-label me-2"><b>{{
-            _i18n("criteria")
+            _i18n("view_options")
                     }}: </b></span>
             <SelectSearch v-model:selected_option="active_sankey_type" :options="sankey_format_list"
                 @select_option="changeCriteria">
             </SelectSearch>
         </div>
-        <div v-if="enable_date_time_range_picker" class="w-100 d-flex align-items-center button-group" style="position: relative;">
+        <div v-if="enable_date_time_range_picker" class="w-100 d-flex align-items-center button-group">
             <CustomSwitch v-model:value="toggle_slider" :change_label_side="true" :label="toggle_slider_label" style=""
                 class="me-1" icon="fa-calendar-days" :title="toggle_slider_label"></CustomSwitch>
-
-            <Transition name="add-effect" mode="out-in">
-                <DateTimeRangePicker v-if="toggle_slider" class="dontprint" id="as-date-time-picker" :round_time="true"
-                    min_time_interval_id="min" @epoch_change="set_time_interval">
-                </DateTimeRangePicker>
-            </Transition>
-            <Transition name="add-effect" mode="out-in">
-                <DateSlider v-if="!toggle_slider" id="as-date-slider" :min_epoch="first_date_epoch"
-                    @epoch_change="set_time_interval" style="width: 100%" />
-            </Transition>
+            <div class="w-100 position-relative">
+                <Transition name="add-effect" mode="out-in">
+                    <DateTimeRangePicker v-if="toggle_slider" class="dontprint" id="as-date-time-picker"
+                        :round_time="true" min_time_interval_id="min" @epoch_change="setTimeInterval">
+                    </DateTimeRangePicker>
+                </Transition>
+                <Transition name="add-effect" mode="out-in">
+                    <DateSlider v-if="!toggle_slider" id="as-date-slider" :min_epoch="first_date_epoch"
+                        @epoch_change="setTimeInterval" style="width: 100%" />
+                </Transition>
+            </div>
         </div>
     </div>
 
     <div class="m-2 mb-3">
-        <div style="position: relative;">
+        <div class="position-relative">
             <div class="mb-3 d-flex flex-column" style="height: 60vh;">
                 <Loading :isLoading="loading"></Loading>
                 <Sankey ref="sankey_chart" :no_data_message="no_data_message" :sankey_data="sankey_data"
-                    :autorefresh="autoRefreshEnabled" @node_click="on_node_click"
-                    @autorefresh_toggle="onAutoRefreshToggle">
+                    @node_click="onNodeClick" @autorefresh_toggle="onAutoRefreshToggle">
                 </Sankey>
             </div>
         </div>
-        <div style="position: relative;">
-            <TableWithConfig v-if="props.context.isEnterpriseL" ref="table_as_stats" :key="reload" :table_id="table_id"
-                :csrf="props.context.csrf" :showLoading="true" :f_map_columns="map_table_def_columns"
-                :f_sort_rows="columns_sorting" :get_extra_params_obj="get_extra_params_obj"
-                @custom_event="on_table_custom_event">
+        <div class="position-relative">
+            <TableWithConfig v-if="props.context.isEnterpriseL" ref="table_as_stats" :key="reRenderTable"
+                :table_id="table_id" :csrf="props.context.csrf" :showLoading="true" :f_map_columns="mapTableColumns"
+                :f_sort_rows="columnsSorting" :get_extra_params_obj="getExtraParameters"
+                @custom_event="onTableCustomEvent">
             </TableWithConfig>
         </div>
         <div class="card-footer">
@@ -66,16 +66,15 @@ const props = defineProps({
 });
 
 const _i18n = (t) => i18n(t);
-const first_open = ref(true);
 const sankey_url = `${http_prefix}/lua/rest/v2/get/asn/sankey.lua`;
 const sankey_chart = ref(null)
 const sankey_data = ref({});
 const loading = ref(true);
 const no_data_message = _i18n("as_overview.no_data")
-const autoRefreshEnabled = ref(false);
+let intervalId = null;
 const active_sankey_type = ref({})
 const table_as_stats = ref(null);
-const reload = ref(false);
+const reRenderTable = ref(false);
 const main_epoch_interval = ref(null);
 const table_id = ref(props.context.tableId);
 const first_date_epoch = ref(props.context.first_date_epoch);
@@ -84,7 +83,6 @@ const toggle_slider_label = ref(_i18n("db_search.time_range"));
 const sankey_format_list = [
     { key: "criteria_as", value: 'traffic_between_ases', label: _i18n('as_overview.as_traffic_criteria') },
     { key: "criteria_as", value: 'ingress_egress_traffic_criteria', label: _i18n('as_overview.ingress_egress_traffic_criteria') },
-    //    { key: "criteria_as", value: 'as_transit_only_criteria', label: _i18n('as_overview.traffic_between_ases') },
 ];
 
 const note_list = [
@@ -94,6 +92,12 @@ const note_list = [
 const enable_date_time_range_picker = computed(() => {
     return props.context.historical;
 });
+
+/* ************************************** */
+
+onMounted(() => {
+    updateSankeyData();
+})
 
 /* ************************************** */
 
@@ -110,28 +114,24 @@ onBeforeMount(() => {
     ntopng_url_manager.set_key_to_url("criteria_as", active_sankey_type.value.value);
 })
 
+/* ************************************** */
+
 const onAutoRefreshToggle = (enabled) => {
-    autoRefreshEnabled.value = enabled;
+    if (enabled) {
+        intervalId = setInterval(() => {
+            updateSankeyData()
+        }, 10000 /* 10 sec refresh */)
+    } else {
+        clearInterval(intervalId);
+    }
 }
-
-onMounted(() => {
-    update_sankey_data();
-    setInterval(() => {
-        first_open.value = false;
-
-        // refresh only if autorefresh is enabled
-        if (autoRefreshEnabled.value) {
-            update_sankey_data()
-        }
-    }, 10000 /* 10 sec refresh */)
-})
 
 /* ************************************** */
 
 /* This function is called upon changing the selected option in the dropdown */
 const changeCriteria = async (opt) => {
     ntopng_url_manager.set_key_to_url(opt.key, `${opt.value}`);
-    update_sankey_data();
+    updateSankeyData();
     if (table_as_stats.value) {
         if (opt.value === "ingress_egress_traffic_criteria") {
             table_id.value = "ingress_egress_as_stats"
@@ -140,41 +140,37 @@ const changeCriteria = async (opt) => {
         } else if (opt.value === "as_transit_only_criteria") {
             table_id.value = "transit_only_as_stats"
         }
-        reload.value = !reload.value
+        reRenderTable.value = !reRenderTable.value
     }
 }
 
 /* ************************************** */
 
-function timeline_format(value) {
-    console.log(value);
-    let str = FormatterUtils.formatDateTime(value);
-    console.log(str);
-    return str;
+function reloadTable() {
+    table_as_stats.value.refresh_table()
 }
 
 /* ************************************** */
 
-function set_time_interval(epoch_interval) {
-    if (epoch_interval) {
-        main_epoch_interval.value = epoch_interval;
-        debugger;
-        update_sankey_data();
-        reload.value = !reload.value
-    }
+function setTimeInterval(epoch_interval) {
+    main_epoch_interval.value = epoch_interval;
+    updateSankeyData();
+    reloadTable()
 }
 
 /* ************************************** */
 
-const update_sankey_data = async () => {
+const updateSankeyData = async () => {
     loading.value = true;
-    let data = await get_sankey_data();
+    let data = await getSankeyData();
     sankey_data.value = data;
     loading.value = false;
 }
 
-const get_sankey_data = async () => {
-    const url_request = get_sankey_url();
+/* ************************************** */
+
+const getSankeyData = async () => {
+    const url_request = getSankeyUrl();
     let graph = await ntopng_utility.http_request(url_request);
     graph.nodes.forEach((node, i) => {
         node.index = i
@@ -192,17 +188,21 @@ const get_sankey_data = async () => {
     return graph
 }
 
-const get_sankey_url = () => {
+/* ************************************** */
+
+const getSankeyUrl = () => {
     let params = {
         ifid: props.context.ifid,
-        ...get_extra_params_obj()
+        ...getExtraParameters()
     }
     let url_params = ntopng_url_manager.obj_to_url_params(params);
     let url_request = `${sankey_url}?${url_params}`;
     return url_request;
 }
 
-function on_node_click(_, node) {
+/* ************************************** */
+
+function onNodeClick(_, node) {
     if (node.link) {
         ntopng_url_manager.go_to_url(node.link)
     }
@@ -210,14 +210,14 @@ function on_node_click(_, node) {
 
 /* ***************************************************** */
 
-const get_extra_params_obj = () => {
+const getExtraParameters = () => {
     let extra_params = ntopng_url_manager.get_url_object();
     return extra_params;
 };
 
 /* ************************************** */
 
-function click_button_timeseries(event) {
+function clickButtonTimeseries(event) {
     const row = event.row;
     const asn = ntopng_url_manager.get_url_entry("asn");
     const url = `${http_prefix}/lua/as_overview.lua?asn=${asn}&page=historical&ts_schema=asn:exporter_traffic&ts_query=ifid:${props.context.ifid},asn:${asn},device:${row["device"]["id"]},if_index:${row["interface"]["id"]}`;
@@ -227,9 +227,9 @@ function click_button_timeseries(event) {
 
 /* ************************************** */
 
-function on_table_custom_event(event) {
+function onTableCustomEvent(event) {
     let events_managed = {
-        "click_button_timeseries": click_button_timeseries,
+        "click_button_timeseries": clickButtonTimeseries,
     };
     if (events_managed[event.event_id] == null) {
         return;
@@ -239,7 +239,7 @@ function on_table_custom_event(event) {
 
 /* ************************************** */
 
-function columns_sorting(col, r0, r1) {
+function columnsSorting(col, r0, r1) {
     if (col != null) {
         if (col.id == "device") {
             return sortingFunctions.sortByName(r0.device.name, r1.device.name, col.sort);
@@ -267,7 +267,7 @@ function columns_sorting(col, r0, r1) {
 
 /* ************************************** */
 
-const map_table_def_columns = (columns) => {
+const mapTableColumns = (columns) => {
     let map_columns = {
         "device": (value, row) => {
             if (dataUtils.isEmptyString(value.name)) {
@@ -338,8 +338,6 @@ const map_table_def_columns = (columns) => {
 
     return columns;
 };
-
-
 </script>
 
 <style scoped>
@@ -350,21 +348,26 @@ const map_table_def_columns = (columns) => {
     transition: all 0.35s ease;
 }
 
+/* Transform: positive pixels, the effects let enters the component
+ * from the right, negative pixels from the left
+ */
 .add-effect-enter-from {
     opacity: 0;
-    transform: translateX(-60px);
-    /* entra da sinistra */
+    transform: translateX(60px);
 }
 
 .add-effect-leave-to {
     opacity: 0;
-    transform: translateX(60px);
-    /* esce verso destra */
+    transform: translateX(0px);
 }
 
 /* ensure leaving items are taken out of layout flow so that moving
    animations can be calculated correctly. */
 .add-effect-leave-active {
     position: absolute;
+}
+
+.slider-connect {
+    background: none !important;
 }
 </style>

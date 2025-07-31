@@ -388,7 +388,7 @@ function formatAsn(asn, as_name) {
     }
 }
 
-function get_midnight_epoch(utc_seconds) {
+function getMidnightEpoch(utc_seconds) {
   let utc = utc_seconds * 1000;
   const utc_midnight = moment.tz(utc, ntop_zoneinfo).startOf('day');
   return utc_midnight.valueOf()/1000;
@@ -405,7 +405,7 @@ const formatterUtils = function () {
         utc_s_to_server_date,
         server_date_to_date,
         formatAsn,
-        get_midnight_epoch
+        getMidnightEpoch
     };
 }();
 
