@@ -7690,6 +7690,7 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
     luaScore(vm);
   }
 
+  /* In the View interface, this is used to sum stats from all viewed interfaces */
   sumStats(&_tcpFlowStats, &_ethStats, &_localStats, &_ndpiStats, &_pktStats,
            &_tcpPacketStats, &_dscpStats,
            &_syslogStats, &_downloadStats, &_uploadStats);
