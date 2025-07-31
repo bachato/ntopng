@@ -20,8 +20,11 @@ interface.select(ifname)
 sendHTTPContentTypeHeader('text/html')
 
 -- if asn mode, render active entry: 'as', not interface
-local menu = is_asn_mode_enabled and (page_utils.menu_entries.autonomous_systems_asn_mode
-                                  or page_utils.menu_entries.autonomous_systems)
+local menu = page_utils.menu_entries.autonomous_systems
+
+if is_asn_mode_enabled then
+    menu = page_utils.menu_entries.autonomous_systems_asn_mode
+end
 
 page_utils.print_header_and_set_active_menu_entry(menu)
 

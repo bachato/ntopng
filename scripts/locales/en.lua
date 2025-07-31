@@ -326,6 +326,7 @@ local lang = {
    ["filter"] = "Exclude",
    ["filter_alerts_by"] = "Deliver Alerts based on",
    ["filter_by"] = "Filter by",
+   ["filtered_as"] = "Filtered AS",
    ["filter_per_alerts"] = "Alert Type",
    ["filter_per_properties"] = "Properties",
    ["filter_presets"] = "Filter Presets",

@@ -2,28 +2,33 @@
     <div>
         <div class="button-group mb-2 d-flex align-items-center">
             <div class="dropdown me-3 d-flex"><span class="no-wrap d-flex align-items-center filters-label me-2"><b>{{
-                _i18n("as")
+                _i18n("filtered_as")
                         }}: </b></span>
                 <SelectSearch v-model:selected_option="current_selected_option" theme="bootstrap-5"
                     :options="asn_type_option" @select_option="add_filter">
                 </SelectSearch>
             </div>
         </div>
-        <div v-if="(showChart || !emptyData) && props.context.showTimeseries" class="mb-4 mt-3">
-            <div v-if="showTitle" class="widget-name">
+        <div v-if="(showChart) && props.context.showTimeseries" class="position-relative" style="height: 330px;">
+            <Loading :isLoading="loading"></Loading>
+            <div class="widget-name">
                 <h6 class="m-0">{{ chart_title }}</h6>
             </div>
-            <DashboardTimeseries ref="timeseries_chart" :key="timeseries_key" :id="timeseries_id"
-                :epoch_begin="epoch_begin" :epoch_end="epoch_end" :i18n_title="chart_title"
-                :ifid="props.context.ifid.toString()" :max_width="12" :max_height="4" :params="params"
-                :get_component_data="get_component_data" :set_component_attr="set_component_attr"
-                :csrf="props.context.csrf">
-            </DashboardTimeseries>
+            <Transition name="add-effect" mode="out-in">
+                <DashboardTimeseries ref="timeseries_chart" :key="timeseries_key" :id="timeseries_id"
+                    :epoch_begin="epoch_begin" :epoch_end="epoch_end" :i18n_title="chart_title"
+                    :ifid="props.context.ifid.toString()" :max_width="12" :max_height="4" :params="params"
+                    :get_component_data="get_component_data" :set_component_attr="set_component_attr"
+                    :csrf="props.context.csrf">
+                </DashboardTimeseries>
+            </Transition>
         </div>
-        <TableWithConfig ref="table_as_stats" :table_id="table_id" :csrf="props.context.csrf" :showLoading="true"
-            :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting"
-            :get_extra_params_obj="get_extra_params_obj" @custom_event="on_table_custom_event">
-        </TableWithConfig>
+        <div class="position-relative">
+            <TableWithConfig ref="table_as_stats" :table_id="table_id" :csrf="props.context.csrf" :showLoading="true"
+                :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting"
+                :get_extra_params_obj="get_extra_params_obj" @custom_event="on_table_custom_event">
+            </TableWithConfig>
+        </div>
     </div>
 </template>
 
@@ -34,6 +39,7 @@ import { default as sortingFunctions } from "../utilities/sorting-utils.js";
 import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as DashboardTimeseries } from "./dashboard-timeseries.vue";
 import { default as SelectSearch } from "./select-search.vue";
+import { default as Loading } from "./loading.vue"
 import FormatterUtils from "../utilities/formatter-utils.js";
 import NtopUtils from "../utilities/ntop-utils.js";
 
@@ -52,21 +58,20 @@ const table_id = computed(() => {
 });
 
 const chart_title = _i18n('top_active_asn')
-const showTitle = ref(false);
 const timeseries_id = ref('top_asn');
+const loading = ref(true);
 const timeseries_chart = ref(null);
 const table_as_stats = ref(null);
 const epoch_begin = ref(current_time - seconds_one_week); // Get one week ago
 const epoch_end = ref(current_time);
 const showSankey = props.context.showSankey;
 const showChart = ref(props.context.isEnterprise);
-const emptyData = ref(false);
 const current_selected_option = ref([])
 const timeseries_key = ref(false);
 const asn_type_option = ref([{
     key: "show_as",
     value: "all",
-    label: i18n("all")
+    label: i18n("none")
 }, {
     key: "show_as",
     value: "my_as",
@@ -124,16 +129,18 @@ onBeforeMount(async () => {
 /* *************************************************** */
 
 const add_filter = async (value) => {
+    loading.value = true;
     current_selected_option.value = value;
     ntopng_url_manager.set_key_to_url(current_selected_option.value.key, current_selected_option.value.value)
-    await table_as_stats.value.refresh_table();
     timeseries_key.value = !timeseries_key.value
+    table_as_stats.value.refresh_table(false);
 }
 
 /* *************************************************** */
 
 /* Callback to request REST data from components */
 const get_component_data = async (url, query_params, post_params) => {
+    loading.value = true;
     query_params.csrf = props.context.csrf
     query_params.show_as = current_selected_option.value.value;
     const url_params = ntopng_url_manager.obj_to_url_params(query_params);
@@ -151,13 +158,7 @@ const get_component_data = async (url, query_params, post_params) => {
     post_params.ts_requests = ts_requests;
     const data_url = `${http_prefix}/lua/pro/rest/v2/get/timeseries/ts_multi.lua?${url_params}`;
     const data = await ntopng_utility.http_post_request(data_url, post_params)
-    if (data[0]?.series.length > 0) {
-        emptyData.value = false;
-        showTitle.value = true;
-    } else {
-        emptyData.value = true;
-        showTitle.value = false;
-    }
+    loading.value = false;
     return data;
 };
 
@@ -311,3 +312,31 @@ function columns_sorting(col, r0, r1) {
     }
 }
 </script>
+
+<style scoped>
+.add-effect-move,
+/* apply transition to moving elements */
+.add-effect-enter-active,
+.add-effect-leave-active {
+    transition: all 0.35s ease;
+}
+
+/* Transform: positive pixels, the effects let enters the component
+ * from the right, negative pixels from the left
+ */
+.add-effect-enter-from {
+    opacity: 0;
+    transform: translateX(-60px);
+}
+
+.add-effect-leave-to {
+    opacity: 0;
+    transform: translateX(0px);
+}
+
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.add-effect-leave-active {
+    position: absolute;
+}
+</style>
