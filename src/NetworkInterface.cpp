@@ -493,13 +493,13 @@ struct ndpi_detection_module_struct *NetworkInterface::initnDPIStruct() {
     struct stat buf;
     const char *domains_file = "./domain_categories.txt";
     int rc;
-    
+
     if((rc = stat(domains_file, &buf)) == -1)
       domains_file = "/usr/share/ntopng/domain_categories.txt";
 
     if((rc == 0) || (stat(domains_file, &buf) == 0)) {
       int num = ndpi_load_categories_file(ndpi_s, domains_file, NULL);
-      
+
       if(num < 0)
 	ntop->getTrace()->traceEvent(TRACE_WARNING,
 				     "Error while loading categories  %s",
@@ -515,7 +515,7 @@ struct ndpi_detection_module_struct *NetworkInterface::initnDPIStruct() {
       }
     }
   }
-  
+
   return (ndpi_s);
 }
 
@@ -4833,6 +4833,8 @@ struct flowHostRetrieveList {
   IpAddress *ipValue;
 };
 
+#define FLOWHOSTRETRIEVER_BLOCK_SIZE      4096 /* Aloocate in blocks of 4096 entries */
+
 struct flowHostRetriever {
   /* Search criteria */
   AddressTree *allowed_hosts;
@@ -4869,7 +4871,7 @@ struct flowHostRetriever {
   int32_t iface_index;
 
   /* Return values */
-  u_int32_t maxNumEntries, actNumEntries;
+  u_int32_t maxNumEntries, actNumEntries, currentSize;
   u_int64_t totBytesSent, totBytesRcvd, totThpt;
   struct flowHostRetrieveList *elems;
 #ifdef NTOPNG_PRO
@@ -5138,7 +5140,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
             (srv_pod && !strcmp(pod_filter, srv_pod))))
         return (false);
     }
-    
+
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
     if (retriever->pag &&
@@ -5172,11 +5174,11 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
     f->getDstAS(&dst_asn, asname);
     ntop->getTrace()->traceEvent(TRACE_WARNING,
 				   "Interface: %u | Filtering ASN: %u | Client ASN: %u | Server ASN: %u",
-				   f->getInterface()->get_id(), asn_filter, 
+				   f->getInterface()->get_id(), asn_filter,
                    src_asn,
 				   dst_asn);
 #endif
-    
+
 
     if (retriever->pag && retriever->pag->usernameFilter(&username_filter) &&
         (!f->get_user_name(true /* client uid */) ||
@@ -5339,8 +5341,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
 
 /* **************************************************** */
 
-static bool flow_search_walker(GenericHashEntry *h, void *user_data,
-                               bool *matched) {
+static bool flow_search_walker(GenericHashEntry *h, void *user_data, bool *matched)  {
   struct flowHostRetriever *retriever = (struct flowHostRetriever *)user_data;
   Flow *f = (Flow *)h;
   const TcpInfo *tcp_info;
@@ -5348,7 +5349,24 @@ static bool flow_search_walker(GenericHashEntry *h, void *user_data,
   if (retriever->actNumEntries >= retriever->maxNumEntries)
     return (true); /* Limit reached - stop iterating */
 
-  if (flow_matches(f, retriever)) {
+  if (flow_matches(f, retriever)) {    
+    if(retriever->currentSize == retriever->actNumEntries) {
+      /* Not enough space: we need to grow a bit */
+      u_int32_t oldSize = retriever->currentSize * sizeof(struct flowHostRetrieveList);
+      u_int32_t newSize = (retriever->currentSize + FLOWHOSTRETRIEVER_BLOCK_SIZE) * sizeof(struct flowHostRetrieveList);
+      struct flowHostRetrieveList *new_elems = (struct flowHostRetrieveList*)realloc(retriever->elems, newSize);
+    
+      if(new_elems) {
+	char *ptr = (char*)new_elems;
+      
+	memset(&ptr[oldSize], 0, newSize - oldSize); /* Set new slots to NULL */
+	retriever->elems = new_elems, retriever->currentSize += FLOWHOSTRETRIEVER_BLOCK_SIZE;
+      } else {
+	ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
+	return (true); /* Stop walking */
+      }
+    }
+  
     retriever->elems[retriever->actNumEntries].flow = f;
     retriever->totBytesSent += f->get_bytes_cli2srv();
     retriever->totBytesRcvd += f->get_bytes_srv2cli();
@@ -5405,7 +5423,7 @@ static bool flow_search_walker(GenericHashEntry *h, void *user_data,
       {
 	u_int8_t qoe =
 #ifdef NTOPNG_PRO
-	f->getQoEScore();
+	  f->getQoEScore();
 #else
 	NTOP_QOE_UNKNOWN;
 #endif
@@ -5545,6 +5563,23 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
         ((r->ipVersionFilter == 6) && (!h->get_ip()->isIPv6()))))
       )
     return (false); /* false = keep on walking */
+
+  if(r->currentSize == r->actNumEntries) {
+    /* Not enough space: we need to grow a bit */
+    u_int32_t oldSize = r->currentSize * sizeof(struct flowHostRetrieveList);
+    u_int32_t newSize = (r->currentSize + FLOWHOSTRETRIEVER_BLOCK_SIZE) * sizeof(struct flowHostRetrieveList);
+    struct flowHostRetrieveList *new_elems = (struct flowHostRetrieveList*)realloc(r->elems, newSize);
+
+    if(new_elems) {
+      char *ptr = (char*)new_elems;
+
+      memset(&ptr[oldSize], 0, newSize - oldSize); /* Set new slots to NULL */
+      r->elems = new_elems, r->currentSize += FLOWHOSTRETRIEVER_BLOCK_SIZE;
+    } else {
+      ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
+      return (true); /* Stop walking */
+    }
+  }
 
   r->elems[r->actNumEntries].hostValue = h;
   h->incUses(); /* (***) */
@@ -5727,6 +5762,24 @@ static bool mac_search_walker(GenericHashEntry *he, void *user_data,
               m->get_manufacturer() ? m->get_manufacturer() : "") != 0))
     return (false); /* false = keep on walking */
 
+
+  if(r->currentSize == r->actNumEntries) {
+    /* Not enough space: we need to grow a bit */
+    u_int32_t oldSize = r->currentSize * sizeof(struct flowHostRetrieveList);
+    u_int32_t newSize = (r->currentSize + FLOWHOSTRETRIEVER_BLOCK_SIZE) * sizeof(struct flowHostRetrieveList);
+    struct flowHostRetrieveList *new_elems = (struct flowHostRetrieveList*)realloc(r->elems, newSize);
+    
+    if(new_elems) {
+      char *ptr = (char*)new_elems;
+      
+      memset(&ptr[oldSize], 0, newSize - oldSize); /* Set new slots to NULL */
+      r->elems = new_elems, r->currentSize += FLOWHOSTRETRIEVER_BLOCK_SIZE;
+    } else {
+      ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
+      return (true); /* Stop walking */
+    }
+  }
+  
   r->elems[r->actNumEntries].macValue = m;
 
   switch (r->sorter) {
@@ -6096,10 +6149,12 @@ int NetworkInterface::sortFlows(u_int32_t *begin_slot, bool walk_all,
   retriever->flow_info = flow_info;
   retriever->ndpi_proto = -1;
   retriever->iface_index = -1;
-  retriever->actNumEntries = 0, retriever->maxNumEntries = getFlowsHashSize(),
-    retriever->allowed_hosts = allowed_hosts;
+  retriever->actNumEntries = 0,
+    retriever->maxNumEntries = getFlowsHashSize(),
+    retriever->allowed_hosts = allowed_hosts,
+    retriever->currentSize = FLOWHOSTRETRIEVER_BLOCK_SIZE;
 
-  retriever->elems = (struct flowHostRetrieveList *)calloc(sizeof(struct flowHostRetrieveList), retriever->maxNumEntries);
+  retriever->elems = (struct flowHostRetrieveList *)calloc(sizeof(struct flowHostRetrieveList), retriever->currentSize);
 
   if (retriever->elems == NULL) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Out of memory :-(");
@@ -6159,18 +6214,6 @@ int NetworkInterface::sortFlows(u_int32_t *begin_slot, bool walk_all,
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Unknown sort column %s",
                                  sortColumn);
     retriever->sorter = column_bytes, sorter = numericSorter;
-  }
-
-  if (false) {
-    u_int32_t deviceIP = 0;
-    u_int32_t inIndex = 0, outIndex = 0;
-    char buf[32];
-
-    p->deviceIpFilter(&deviceIP), p->inIndexFilter(&inIndex),
-      p->outIndexFilter(&outIndex);
-
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[Device IP] %s / [In Idx] %u / [Out Idx] %u",
-				 Utils::intoaV4(deviceIP, buf, sizeof(buf)), inIndex, outIndex);
   }
 
   // make sure the caller has disabled the purge!!
@@ -6456,6 +6499,7 @@ int NetworkInterface::sortHosts(u_int32_t *begin_slot, bool walk_all, struct flo
 
   if (mac_filter) {
     Utils::parseMac(macAddr, mac_filter);
+
     retriever->mac = macAddr;
   } else {
     retriever->mac = NULL;
@@ -6473,9 +6517,10 @@ int NetworkInterface::sortHosts(u_int32_t *begin_slot, bool walk_all, struct flo
     retriever->cidr_filter = cidr_filter, retriever->ndpi_proto = proto_filter,
     retriever->traffic_type = traffic_type_filter,
     retriever->device_ip = device_ip,
-    retriever->maxNumEntries = getHostsHashSize();
+    retriever->maxNumEntries = getHostsHashSize(),
+    retriever->currentSize = FLOWHOSTRETRIEVER_BLOCK_SIZE;
 
-  retriever->elems = (struct flowHostRetrieveList *)calloc(sizeof(struct flowHostRetrieveList), retriever->maxNumEntries);
+  retriever->elems = (struct flowHostRetrieveList *)calloc(sizeof(struct flowHostRetrieveList), retriever->currentSize);
 
   if (retriever->elems == NULL) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Out of memory :-(");
@@ -6562,8 +6607,7 @@ int NetworkInterface::sortHosts(u_int32_t *begin_slot, bool walk_all, struct flo
   }
 
   // make sure the caller has disabled the purge!!
-  walker(begin_slot, walk_all, walker_hosts, host_search_walker,
-         (void *)retriever);
+  walker(begin_slot, walk_all, walker_hosts, host_search_walker, (void *)retriever);
 
   qsort(retriever->elems, retriever->actNumEntries,
         sizeof(struct flowHostRetrieveList), sorter);
@@ -6587,11 +6631,13 @@ int NetworkInterface::sortMacs(u_int32_t *begin_slot, bool walk_all,
   retriever->sourceMacsOnly = sourceMacsOnly, retriever->actNumEntries = 0,
     retriever->poolFilter = pool_filter,
     retriever->manufacturer = (char *)manufacturer,
-    retriever->maxNumEntries = getMacsHashSize();
-  retriever->devtypeFilter = devtype_filter,
+    retriever->maxNumEntries = getMacsHashSize(),
+    retriever->devtypeFilter = devtype_filter,
     retriever->locationFilter = location_filter,
     retriever->min_first_seen = min_first_seen, retriever->ndpi_proto = -1,
-    retriever->elems = (struct flowHostRetrieveList *)calloc(sizeof(struct flowHostRetrieveList), retriever->maxNumEntries);
+    retriever->currentSize = FLOWHOSTRETRIEVER_BLOCK_SIZE;
+  
+  retriever->elems = (struct flowHostRetrieveList *)calloc(sizeof(struct flowHostRetrieveList), retriever->currentSize);
 
   if (retriever->elems == NULL) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Out of memory :-(");
@@ -6618,14 +6664,14 @@ int NetworkInterface::sortMacs(u_int32_t *begin_slot, bool walk_all,
     retriever->sorter = column_arp_sent, sorter = numericSorter;
   else if (!strcmp(sortColumn, "column_arp_rcvd"))
     retriever->sorter = column_arp_rcvd, sorter = numericSorter;
-  else
+  else {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Unknown sort column %s",
-                                 sortColumn),
-      sorter = numericSorter;
-
+				 sortColumn);
+    sorter = numericSorter;
+  }
+  
   // make sure the caller has disabled the purge!!
-  walker(begin_slot, walk_all, walker_macs, mac_search_walker,
-         (void *)retriever);
+  walker(begin_slot, walk_all, walker_macs, mac_search_walker, (void *)retriever);
 
   qsort(retriever->elems, retriever->actNumEntries,
         sizeof(struct flowHostRetrieveList), sorter);
@@ -6862,8 +6908,7 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
 
 #if DEBUG
   if (!walk_all)
-    ntop->getTrace()->traceEvent(
-				 TRACE_NORMAL, "[END] %s(end_slot=%u, numHosts=%u)", __FUNCTION__,
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[END] %s(end_slot=%u, numHosts=%u)", __FUNCTION__,
 				 *begin_slot, retriever.actNumEntries);
 #endif
 
@@ -6888,8 +6933,7 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
           } else {
             (getCheckpointOnly) ?
                 h->checkpoint(vm) :
-                h->lua(vm, NULL /* Already checked */, host_details, false, false,
-                    true);
+                h->lua(vm, NULL /* Already checked */, host_details, false, false, true);
           }
         }
         else
@@ -8224,7 +8268,7 @@ bool NetworkInterface::findHostsByName(lua_State *vm,
 
   lua_newtable(vm);
   walker(&begin_slot, walk_all, walker_hosts, hosts_search_walker, (void *)&info);
-  
+
   return (info.num_matches > 0);
 }
 
@@ -12897,4 +12941,3 @@ void NetworkInterface::resetBroacastDomains() {
 void NetworkInterface::updateASNExportersPrefs() {
     if (ases_hash) ases_hash->updateASNExportersPrefs();
 }
-
