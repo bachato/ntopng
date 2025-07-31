@@ -92,7 +92,7 @@ function getSerieName(name, id, tsGroup, useFullName) {
 
 /* Given all the info about a timeserie, return the correct name to be displayed */
 function getName(ts_info, metadata) {
-  let name = (metadata.use_serie_name == true) ? ts_info.name : metadata.label;
+  let name = (metadata?.use_serie_name == true) ? ts_info.name : metadata.label;
 
   if (ts_info.ext_label) {
     name = ts_info.ext_label
