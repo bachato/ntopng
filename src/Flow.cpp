@@ -23,12 +23,6 @@
 
 /* static so default is zero-initialization, let's just define it */
 
-const ndpi_protocol Flow::ndpiUnknownProtocol = {
-  { NDPI_PROTOCOL_UNKNOWN /* master_protocol */, NDPI_PROTOCOL_UNKNOWN /* app_protocol */ },
-  NDPI_PROTOCOL_UNKNOWN, /* protocol_by_ip */
-  NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, NULL
-};
-
 // #define DEBUG_DISCOVERY
 // #define DEBUG_UA
 // #define DEBUG_SCORE
@@ -109,7 +103,7 @@ Flow::Flow(NetworkInterface *_iface,
     extra_dissection_completed = 0,
     has_malicious_cli_signature = has_malicious_srv_signature = 0,
     iface_flow_accounted = 0, periodicity = 0;
-  ndpiDetectedProtocol = ndpiUnknownProtocol;
+  memset(&ndpiDetectedProtocol, 0, sizeof(ndpiDetectedProtocol));
   cli2srv_tos = srv2cli_tos = 0;
   src2dst_tcp_zero_window = dst2src_tcp_zero_window = 0;
   swap_done = swap_requested = 0;
