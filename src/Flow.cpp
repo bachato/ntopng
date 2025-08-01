@@ -50,7 +50,6 @@ Flow::Flow(NetworkInterface *_iface,
   srcAS = dstAS = srcPeerAS = dstPeerAS = 0, rttSec = 0;
   srcASName = dstASName = NULL;
   src2dst_tcp_flags = dst2src_tcp_flags = 0;
-
   collected_qoe.src_to_dst = collected_qoe.dst_to_src = NTOP_QOE_UNKNOWN, has_collected_qoe = 0;
   tcp = NULL;
 

@@ -48,7 +48,6 @@ extern struct keyval string_to_replace[]; /* LuaEngine.cpp */
 Ntop::Ntop(const char *appName) {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 
-  // WTF: it's weird why do you want a global instance of ntop.
   ntop = this;
   globals = new (std::nothrow) NtopGlobals();
   extract = new (std::nothrow) TimelineExtract();

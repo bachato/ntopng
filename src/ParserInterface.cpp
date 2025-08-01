@@ -520,8 +520,8 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
   }
 
   if (!flow->isDetectionCompleted()) {
-    ndpi_protocol p = Flow::ndpiUnknownProtocol;
-    ndpi_protocol guessed_protocol = Flow::ndpiUnknownProtocol;
+    ndpi_protocol p = getConstNdpiUnknownProtocol();
+    ndpi_protocol guessed_protocol = getConstNdpiUnknownProtocol();
 
     p.proto.app_protocol = zflow->l7_proto.proto.app_protocol;
     p.proto.master_protocol = zflow->l7_proto.proto.master_protocol;

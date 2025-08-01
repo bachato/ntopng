@@ -207,6 +207,8 @@ https://translate.google.co.uk/translate?sl=auto&tl=en&u=http%3A%2F%2Fbugsfixed.
 #include <typeinfo>
 #include <thread>
 
+extern const ndpi_protocol getConstNdpiUnknownProtocol();
+
 using namespace std;
 
 #include "mongoose.h"

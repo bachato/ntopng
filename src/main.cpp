@@ -28,6 +28,7 @@ extern char *rrd_strversion(void);
 AfterShutdownAction afterShutdownAction = after_shutdown_nop;
 
 bool trace_new_delete = false;
+static ndpi_protocol ndpiUnknownProtocol;
 
 /* ******************************** */
 
@@ -96,7 +97,8 @@ extern "C" {
   ThreadedActivity *boot_activity;
 
   tzset(); /* Init time and timezone */
-
+  memset((void*)&ndpiUnknownProtocol, 0, sizeof(ndpiUnknownProtocol));
+  
 #ifdef WIN32
   initWinsock32();
 #else
@@ -573,3 +575,9 @@ void operator delete[](void *p) throw() {
  }
 
 #endif
+
+/* ******************************************* */
+
+const ndpi_protocol getConstNdpiUnknownProtocol() {
+  return((const ndpi_protocol)ndpiUnknownProtocol);
+}

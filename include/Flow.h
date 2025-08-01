@@ -535,7 +535,6 @@ public:
   bool isBlacklistedServer() const;
   struct site_categories *getFlowCategory(bool force_categorization);
   void freeDPIMemory();
-  static const ndpi_protocol ndpiUnknownProtocol;
   bool isTiny() const;
   inline bool isProto(u_int16_t p) const {
     return (((ndpiDetectedProtocol.proto.master_protocol == p) ||
@@ -809,7 +808,7 @@ public:
 
   inline ndpi_protocol get_detected_protocol() const {
     return (isDetectionCompleted() ? ndpiDetectedProtocol
-	    : ndpiUnknownProtocol);
+	    : getConstNdpiUnknownProtocol());
   };
 
   inline struct ndpi_flow_struct *get_ndpi_flow() const { return (ndpiFlow); };
@@ -932,18 +931,18 @@ public:
   inline ndpi_protocol_category_t get_protocol_category() const {
     return (ndpi_get_proto_category(
 	      iface->get_ndpi_struct(),
-	      isDetectionCompleted() ? ndpiDetectedProtocol : ndpiUnknownProtocol));
+	      isDetectionCompleted() ? ndpiDetectedProtocol : getConstNdpiUnknownProtocol()));
   };
   inline const char *get_protocol_category_name() const {
     return (ndpi_category_get_name(iface->get_ndpi_struct(),
                                    get_protocol_category()));
   };
   char *get_detected_protocol_name(char *buf, u_int buf_len) const {
-    return (iface->get_ndpi_full_proto_name(isDetectionCompleted() ? ndpiDetectedProtocol : ndpiUnknownProtocol,
+    return (iface->get_ndpi_full_proto_name(isDetectionCompleted() ? ndpiDetectedProtocol : getConstNdpiUnknownProtocol(),
 					    buf, buf_len));
   }
   static inline ndpi_protocol get_ndpi_unknown_protocol() {
-    return ndpiUnknownProtocol;
+    return getConstNdpiUnknownProtocol();
   };
 
 #ifdef NTOPNG_PRO

@@ -853,6 +853,8 @@ class Ntop {
   void trackAssetChange(const char *protocol, const char *action,
 			Mac *mac, IpAddress *target_ip,
 			Host *target, Flow *flow, char *note);
+
+  static const ndpi_protocol getConstNdpiUnknownProtocol();
 };
 
 extern Ntop *ntop;
