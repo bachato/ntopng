@@ -87,8 +87,8 @@
                                     { 'pointer': col.sortable, 'unset': !col.sortable, },
                                     { 'sticky-column-th': col.sticky }
                                 ]" style="white-space: nowrap;" :style="[
-                                (col.min_width ? 'min-width: ' + col.min_width + ';' : ''),
-                            ]" @click="change_column_sort(col, col_index)"
+                                    (col.min_width ? 'min-width: ' + col.min_width + ';' : ''),
+                                ]" @click="change_column_sort(col, col_index)"
                                     :data-resizable-column-id="get_column_id(col.data)">
                                     <div style="display:flex;">
                                         <!-- Print column name -->
@@ -149,7 +149,7 @@
         <div v-if="query_info != null" class="mt-2">
             <div class="text-end">
                 <small style="" class="query text-end"><span class="records">{{ query_info.num_records_processed
-                }}</span>.</small>
+                        }}</span>.</small>
             </div>
             <div class="text-start">
                 <small id="historical_flows_table-query-time" style="" class="query">Query performed in <span
@@ -711,6 +711,9 @@ function get_column_to_sort() {
         const sort = localStorage.getItem(`tablesort_${props.id}_sort`);
         if (col_to_sort) {
             col_to_sort = processedColumns.value.find((c) => c.id === col_to_sort);
+            if (!col_to_sort) {
+                col_to_sort = processedColumns.value[0]
+            }
             col_to_sort.sort = sort
         }
     }

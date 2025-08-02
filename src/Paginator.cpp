@@ -71,6 +71,8 @@ Paginator::Paginator() {
   deviceIP = 0;
   inIndex = outIndex = (u_int32_t)-1;
   asn_filter = (u_int32_t)-1;
+  asn_src_filter = (u_int32_t)-1;
+  asn_dst_filter = (u_int32_t)-1;
 
   icmp_type = u_int8_t(-1);
   icmp_code = u_int8_t(-1);
@@ -239,6 +241,10 @@ void Paginator::readOptions(lua_State* L, int index) {
           pool_filter = lua_tointeger(L, -1);
         else if (!strcmp(key, "asnFilter"))
           asn_filter = lua_tointeger(L, -1);
+        else if (!strcmp(key, "asnSrcFilter"))
+          asn_src_filter = lua_tointeger(L, -1);
+        else if (!strcmp(key, "asnDstFilter"))
+          asn_dst_filter = lua_tointeger(L, -1);
         else if (!strcmp(key, "icmp_type"))
           icmp_type = lua_tointeger(L, -1);
         else if (!strcmp(key, "icmp_code"))

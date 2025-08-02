@@ -1,6 +1,6 @@
 {
 	"id": "traffic_between_ases",
-	"data_url": "lua/pro/rest/v2/get/as/traffic_between_ases.lua",
+	"data_url": "lua/pro/rest/v2/get/as/as_table.lua",
 	"use_current_page": false,
 	"enable_search": true,
 	"paging": false,
@@ -16,9 +16,18 @@
 			]
 		},
         {
-            "id": "transit_as",
-            "title_i18n": "transit_as",
-            "data_field": "transit_as",
+            "id": "src_transit_as",
+            "title_i18n": "src_transit_as",
+            "data_field": "src_transit_as",
+            "sortable": true,
+            "class": [
+                "text-nowrap"
+            ]
+        },
+        {
+            "id": "dst_transit_as",
+            "title_i18n": "dst_transit_as",
+            "data_field": "dst_transit_as",
             "sortable": true,
             "class": [
                 "text-nowrap"

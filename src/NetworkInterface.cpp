@@ -4909,6 +4909,8 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
   bool unicast, unidirectional, alerted_flows, periodic_flows,
     cli_pool_found = false, srv_pool_found = false;
   u_int32_t asn_filter = (u_int32_t) -1;
+  u_int32_t asn_src_filter = (u_int32_t) -1;
+  u_int32_t asn_dst_filter = (u_int32_t) -1;
   char *username_filter;
   char *pidname_filter;
   char *wlan_ssid_filter;
@@ -5165,6 +5167,22 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
         f->getSrcAS(&src_asn, asname);
         f->getDstAS(&dst_asn, asname);
         if (src_asn != asn_filter && dst_asn != asn_filter)
+            return (false);
+    }
+
+    if (retriever->pag && retriever->pag->asnSrcFilter(&asn_src_filter)) {
+        char *asname = NULL;
+        u_int32_t src_asn = 0;
+        f->getSrcAS(&src_asn, asname);
+        if (src_asn != asn_src_filter)
+            return (false);
+    }
+
+    if (retriever->pag && retriever->pag->asnDstFilter(&asn_dst_filter)) {
+        char *asname = NULL;
+        u_int32_t dst_asn = 0;
+        f->getDstAS(&dst_asn, asname);
+        if (dst_asn != asn_dst_filter)
             return (false);
     }
 #ifdef DEBUG

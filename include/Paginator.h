@@ -43,7 +43,7 @@ class Paginator {
   u_int8_t l4_protocol;
   int8_t unicast_traffic, unidirectional_traffic, alerted_flows, filtered_flows,
       periodic_flows;
-  u_int32_t asn_filter;
+  u_int32_t asn_filter, asn_src_filter, asn_dst_filter;
   u_int32_t deviceIP;
   u_int32_t inIndex, outIndex;
   int32_t iface_index_filter;
@@ -318,6 +318,22 @@ class Paginator {
   inline bool asnFilter(u_int32_t *f) const {
     if (asn_filter != (u_int32_t)-1) {
       (*f) = asn_filter;
+      return true;
+    }
+    return false;
+  }
+
+  inline bool asnSrcFilter(u_int32_t *f) const {
+    if (asn_src_filter != (u_int32_t)-1) {
+      (*f) = asn_src_filter;
+      return true;
+    }
+    return false;
+  }
+
+  inline bool asnDstFilter(u_int32_t *f) const {
+    if (asn_dst_filter != (u_int32_t)-1) {
+      (*f) = asn_dst_filter;
       return true;
     }
     return false;

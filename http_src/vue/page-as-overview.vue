@@ -34,13 +34,15 @@
                 </Sankey>
             </div>
         </div>
-        <div class="position-relative">
-            <TableWithConfig v-if="props.context.isEnterpriseL" ref="table_as_stats" :key="reRenderTable"
-                :table_id="table_id" :csrf="props.context.csrf" :showLoading="true" :f_map_columns="mapTableColumns"
-                :f_sort_rows="columnsSorting" :get_extra_params_obj="getExtraParameters"
-                @custom_event="onTableCustomEvent">
-            </TableWithConfig>
-        </div>
+        <Transition name="add-effect" mode="out-in">
+            <div class="position-relative" :key="reRenderTable" style="min-height: 614px;">
+                <TableWithConfig v-if="props.context.isEnterpriseL" ref="table_as_stats" :table_id="table_id"
+                    :csrf="props.context.csrf" :showLoading="true" :f_map_columns="mapTableColumns"
+                    :f_sort_rows="columnsSorting" :get_extra_params_obj="getExtraParameters"
+                    @custom_event="onTableCustomEvent">
+                </TableWithConfig>
+            </div>
+        </Transition>
         <div class="card-footer">
             <NoteList :note_list="note_list"> </NoteList>
         </div>
@@ -251,8 +253,12 @@ function columnsSorting(col, r0, r1) {
             return sortingFunctions.sortByName(r0.dst_as.name, r1.dst_as.name, col.sort);
         } else if (col.id == "src_as") {
             return sortingFunctions.sortByName(r0.src_as.name, r1.src_as.name, col.sort);
+        } else if (col.id == "src_transit_as") {
+            return sortingFunctions.sortByName(r0.src_transit_as?.name || "", r1.src_transit_as?.name || "", col.sort);
+        } else if (col.id == "dst_transit_as") {
+            return sortingFunctions.sortByName(r0.dst_transit_as?.name || "", r1.dst_transit_as?.name || "", col.sort);
         } else if (col.id == "transit_as") {
-            return sortingFunctions.sortByName(r0.transit_as.name, r1.transit_as.name, col.sort);
+            return sortingFunctions.sortByName(r0.transit_as?.name || "", r1.transit_as?.name || "", col.sort);
         } else if (col.id == "bytes_sent") {
             return sortingFunctions.sortByNumber(r0.bytes_sent, r1.bytes_sent, col.sort);
         } else if (col.id == "bytes_rcvd") {
@@ -271,37 +277,49 @@ const mapTableColumns = (columns) => {
     let map_columns = {
         "device": (value, row) => {
             if (dataUtils.isEmptyString(value.name)) {
-                value.id
+                return value.id
             }
             return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
         },
         "interface": (value, row) => {
             if (dataUtils.isEmptyString(value.name)) {
-                value.id
+                return value.id
             }
             return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
         },
         "as": (value, row) => {
             if (dataUtils.isEmptyString(value.name)) {
-                value.id
+                return value.id
             }
             return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
         },
         "dst_as": (value, row) => {
             if (dataUtils.isEmptyString(value.name)) {
-                value.id
+                return value.id
             }
             return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
         },
         "src_as": (value, row) => {
             if (dataUtils.isEmptyString(value.name)) {
-                value.id
+                return value.id
             }
             return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
         },
-        "transit_as": (value, row) => {
+        "src_transit_as": (value, row) => {
+            if (!value) {
+                return "";
+            }
             if (dataUtils.isEmptyString(value.name)) {
-                value.id
+                return value.id
+            }
+            return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
+        },
+        "dst_transit_as": (value, row) => {
+            if (!value) {
+                return "";
+            }
+            if (dataUtils.isEmptyString(value.name)) {
+                return value.id
             }
             return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
         },

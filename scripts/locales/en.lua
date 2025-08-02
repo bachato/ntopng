@@ -898,6 +898,8 @@ local lang = {
   ["traffic"] = "Traffic",
   ["transit"] = "Transit",
   ["transit_as"] = "Transit AS",
+  ["src_transit_as"] = "Src Transit AS",
+  ["dst_transit_as"] = "Dst Transit AS",
   ["traffic_cli_to_srv"] = "Client <i class='fas fa-arrow-right'></i> Server",
   ["traffic_policy"] = "Traffic Policy",
   ["traffic_rcvd"] = "Traffic Rcvd",
