@@ -27,8 +27,10 @@ const timelineStep = ref(24 * 60 * 60) /* day */
 
 const format = function (value) {
     let today = FormatterUtils.getMidnightEpoch(ntopng_utility.get_utc_seconds(Date.now()));
-    if (value == today) return i18n("live");
-
+    if (value == today) {
+        return i18n("live");
+    }
+    
     let str = FormatterUtils.formatDateTime(value, 'date_only');
     return str;
 }
@@ -101,6 +103,10 @@ const emitEpochChange = function (epoch_status, id, emit_only_global_event) {
     ntopng_events_manager.emit_event(ntopng_events.EPOCH_CHANGE, epoch_status, props.id);
     if (emit_only_global_event) {
         return;
+    }
+    let today = FormatterUtils.getMidnightEpoch(ntopng_utility.get_utc_seconds(Date.now()));
+    if (epoch_status.epoch_begin == today) {
+        epoch_status.isToday = true
     }
     emit("epoch_change", epoch_status);
 }

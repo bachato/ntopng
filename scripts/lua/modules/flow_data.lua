@@ -68,16 +68,19 @@ local function formatEmptyStats(columns, flow, rename_field_list,
         if rename_field_list and rename_field_list[position] then
             key = rename_field_list[position]
         end
+        local col_value = flow[column_info.key] or flow[column_info.id]
 
         -- Check if the requested element is a key and if it's present
         if (column_info.is_key) then
             -- Skip if it's not in the flow
-            if (flow[column_info.key]) then
-                local flow_element = tostring(flow[column_info.key])
+            if (col_value) then
+                local flow_element = tostring(col_value)
                 element[key] = flow_element
                 -- Check if there is an other field to be checked
                 if (check_different_list) and (check_different_list[position]) then
-                    local other_flow_element = tostring(flow[check_different_list[position]["key"]])
+                    local other_flow_element = tostring(
+                                                   flow[check_different_list[position]["key"]] or
+                                                       flow[check_different_list[position]["id"]])
                     if flow_element == other_flow_element then
                         element[key] = nil
                     end
@@ -116,13 +119,13 @@ local function updateStats(columns, invert_direction, flow, current_element)
             local id = column_info.id
             if invert_direction then id = column_info.invert_with end
             current_element[id] = current_element[id] +
-                                      tonumber(flow[flow_key_stat] or 0)
+                                      tonumber(flow[flow_key_stat] or flow[id] or 0)
 
             if trace_stats then
                 traceError(TRACE_NORMAL, TRACE_CONSOLE,
                            string.format(
                                "Increasing stats [Column Id: %s]->[%s: %u] [Tot: %u]",
-                               id, flow_key_stat, tonumber(flow[flow_key_stat]),
+                               id, flow_key_stat, tonumber(flow[flow_key_stat] or flow[id] or 0),
                                current_element[id]))
             end
         end
@@ -148,26 +151,32 @@ function flow_data.getStats(queries)
                                                         isHistorical)
         local different_columns = flow_data_preset.retrieveColumns(
                                       query_info.different_from, isHistorical)
+        local function formatData(_, flow)
+            local empty = formatEmptyStats(columns, flow,
+                                           query_info.rename_key_field,
+                                           different_columns)
+            local key = formatKey(empty, columns, query_info.rename_key_field)
+            if not results[key] then -- Entry still not created
+                results[key] = empty
+            end
+
+            results[key] = updateStats(columns, query_info.invert_direction,
+                                       flow, results[key])
+        end
         if isHistorical then -- Historical
-            --[[
             if not ntop.isEnterpriseM() then return {} end
             flow_data_historical = require "flow_data_historical"
-            results = flow_data_historical.retrieveFlowData(columns, filters)
-        ]]
-        else -- Live
-            local function formatData(_, flow)
-                local empty = formatEmptyStats(columns, flow,
-                                               query_info.rename_key_field,
-                                               different_columns)
-                local key = formatKey(empty, columns,
-                                      query_info.rename_key_field)
-                if not results[key] then -- Entry still not created
-                    results[key] = empty
-                end
-
-                results[key] = updateStats(columns, query_info.invert_direction,
-                                           flow, results[key])
+            local first_seen = query_info.filters.first_seen
+            local last_seen = query_info.filters.last_seen
+            local query_result = flow_data_historical.retrieveFlowData(columns,
+                                                                       filters,
+                                                                       query_info.invert_direction,
+                                                                       first_seen,
+                                                                       last_seen)
+            for _, flow in pairs(query_result or {}) do
+                formatData(_, flow)
             end
+        else -- Live
             callback_utils.foreachFlow(filters.ifid, os.time() + 30, -- deadline
                                        formatData, filters)
         end

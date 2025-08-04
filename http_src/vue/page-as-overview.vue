@@ -8,9 +8,9 @@
                 @select_option="changeCriteria">
             </SelectSearch>
         </div>
-        <div v-if="enable_date_time_range_picker" class="w-100 d-flex align-items-center button-group">
+        <div class="w-100 d-flex align-items-center button-group">
             <CustomSwitch v-model:value="toggle_slider" :change_label_side="true" :label="toggle_slider_label" style=""
-                class="me-1" icon="fa-calendar-days" :title="toggle_slider_label"></CustomSwitch>
+                class="me-1" icon="fa-calendar-days" :title="toggle_slider_label" @change_value="saveSwitch"></CustomSwitch>
             <div class="w-100 position-relative">
                 <Transition name="add-effect" mode="out-in">
                     <DateTimeRangePicker v-if="toggle_slider" class="dontprint" id="as-date-time-picker"
@@ -62,6 +62,7 @@ import { default as DateSlider } from "./date-slider.vue";
 import { default as dataUtils } from "../utilities/data-utils.js";
 import { default as CustomSwitch } from "./custom-switch.vue";
 import FormatterUtils from "../utilities/formatter-utils.js";
+import { ntopng_url_manager } from "../services/context/ntopng_globals_services.js";
 
 const props = defineProps({
     context: Object,
@@ -91,10 +92,6 @@ const note_list = [
     _i18n("as_overview.note_ingress_egress"),
 ];
 
-const enable_date_time_range_picker = computed(() => {
-    return props.context.historical;
-});
-
 /* ************************************** */
 
 onMounted(() => {
@@ -105,6 +102,7 @@ onMounted(() => {
 
 onBeforeMount(() => {
     const criteria = ntopng_url_manager.get_url_entry("criteria_as");
+    toggle_slider.value = localStorage.getItem("as-overview-slider") == "true"
     active_sankey_type.value = sankey_format_list[0];
     if (criteria) {
         sankey_format_list.forEach((element) => {
@@ -155,9 +153,21 @@ function reloadTable() {
 /* ************************************** */
 
 function setTimeInterval(epoch_interval) {
+    // Check if it's live
+    if (epoch_interval.isToday) {
+        ntopng_url_manager.delete_key_from_url("type")
+    } else {
+        ntopng_url_manager.set_key_to_url("type", "historical")
+    }
     main_epoch_interval.value = epoch_interval;
     updateSankeyData();
     reloadTable()
+}
+
+/* ************************************** */
+
+function saveSwitch() {
+    localStorage.setItem("as-overview-slider", toggle_slider.value);
 }
 
 /* ************************************** */

@@ -12,7 +12,7 @@ local flow_data_preset = {}
 -- if the column has to be used as key (except bytes/packets everything should be a key)
 -- and the formatter
 local columns = {
-    asn = {filters = {live = "asnFilter", historical = " ASN"}},
+    asn = {filters = {live = "asnFilter", historical = {"src_asn", "dst_asn"}}},
     src_asn = {
         live = "src_as",
         historical = "SRC_ASN",
@@ -44,12 +44,14 @@ local columns = {
         historical = "PROBE_IP",
         is_key = true,
         filters = {live = "deviceIpFilter", historical = "PROBE_IP"},
+        db_formatting_fun = "IPv4NumToString",
         formatter = {funct = getProbeName}
     },
     out_device = {
         live = "device_ip",
         historical = "PROBE_IP",
         is_key = true,
+        db_formatting_fun = "IPv4NumToString",
         filters = {live = "deviceIpFilter", historical = "PROBE_IP"},
         formatter = {funct = getProbeName}
     },
@@ -58,6 +60,7 @@ local columns = {
         historical = "PROBE_IP",
         is_key = true,
         filters = {live = "deviceIpFilter", historical = "PROBE_IP"},
+        db_formatting_fun = "IPv4NumToString",
         formatter = {funct = getProbeName}
     },
     in_iface_index = {
@@ -75,12 +78,27 @@ local columns = {
     interface = {
         formatter = {funct = format_portidx_name, column_dependent = "device"}
     },
-    bytes_sent = {live = "bytes_sent", historical = "SUM(SRC2DST_BYTES)", invert_with = "bytes_rcvd"},
-    bytes_rcvd = {live = "bytes_rcvd", historical = "SUM(DST2SRC_BYTES)", invert_with = "bytes_sent"},
+    bytes_sent = {
+        live = "bytes_sent",
+        historical = "SUM(SRC2DST_BYTES)",
+        invert_with = "bytes_rcvd",
+        exclude_from_group_by = true,
+        is_number = true
+    },
+    bytes_rcvd = {
+        live = "bytes_rcvd",
+        historical = "SUM(DST2SRC_BYTES)",
+        invert_with = "bytes_sent",
+        exclude_from_group_by = true,
+        is_number = true
+    },
     as = {formatter = {funct = format_utils.formatASN}},
     transit_as = {formatter = {funct = format_utils.formatASN}},
     src_transit_as = {formatter = {funct = format_utils.formatASN}},
-    dst_transit_as = {formatter = {funct = format_utils.formatASN}}
+    dst_transit_as = {formatter = {funct = format_utils.formatASN}},
+    ifid = {live = "ifid", historical = "INTERFACE_ID"},
+    first_seen = {historical = "FIRST_SEEN"},
+    last_seen = {historical = "LAST_SEEN"}
 }
 
 -- ###########################################
@@ -128,13 +146,37 @@ function flow_data_preset.convertFilters(where, available_filters, is_historical
         if (columns[key] and columns[key]["filters"] and
             columns[key]["filters"][data_type]) then
             local filter = columns[key]["filters"][data_type]
-            where_query[filter] = available_filters[key]
+            if data_type == "live" then
+                where_query[filter] = available_filters[key]
+            else
+                -- Multiple filters only available in historical, see asn
+                if type(filter) == "table" then
+                    for _, or_filter in pairs(filter or {}) do 
+                        local new_filter = columns[or_filter]
+                        new_filter.filter_value = available_filters[key]
+                        new_filter.id = or_filter
+                        new_filter.key = new_filter["filters"][data_type]
+                        if not where_query[key] then
+                            where_query[key] = {}
+                        end
+                        where_query[key][#where_query[key] + 1] = new_filter
+                    end
+                else
+                    where_query[filter] = columns[key]
+                    where_query[filter].filter_value = available_filters[key]
+                end
+            end
         end
     end
 
-    -- Ifid filter is mandatory, add it in case it's missing
-    if not where_query["ifid"] then
-        where_query["ifid"] = interface.getId() -- Use current ifid
+    -- Ifid filter is mandatory, add it in case it's missing, only in live data
+    if not where_query["ifid"] and not where_query["INTERFACE_ID"] then
+        local ifid = available_filters["ifid"] or interface.getId() -- Use current ifid
+        if not is_historical then
+            where_query["ifid"] = ifid
+        else
+            where_query["INTERFACE_ID"] = ifid
+        end
     end
 
     if data_type == "live" then where_query["detailsLevel"] = "normal" end

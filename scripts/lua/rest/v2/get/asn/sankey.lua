@@ -76,12 +76,12 @@ elseif isEmptyString(criteria) or (criteria == "traffic_between_ases") then
     queries = {
         {
             select_query = {
-                "src_asn", "src_peer_asn", "dst_peer_asn", "bytes_sent", "bytes_rcvd"
+                "src_asn", "src_peer_asn", "dst_peer_asn", "bytes_sent",
+                "bytes_rcvd"
             },
-            where_query = {"dst_asn"},
             different_from = {nil, "src_asn", "dst_asn"},
+            where_query = {"dst_asn"},
             filters = {
-                src_asn = asn,
                 dst_asn = asn,
                 ifid = ifid,
                 first_seen = epoch_begin,
@@ -95,7 +95,8 @@ elseif isEmptyString(criteria) or (criteria == "traffic_between_ases") then
             }
         }, {
             select_query = {
-                "src_peer_asn", "dst_asn", "dst_peer_asn", "bytes_sent", "bytes_rcvd"
+                "src_peer_asn", "dst_asn", "dst_peer_asn", "bytes_sent",
+                "bytes_rcvd"
             },
             where_query = {"src_asn"},
             different_from = {"src_asn", nil, "dst_asn"},
