@@ -441,6 +441,7 @@ struct ndpi_detection_module_struct *NetworkInterface::initnDPIStruct() {
     { NULL,   "flow.track_payload",           "1"  },
     { "tls",  "metadata.ja4r_fingerprint",    "1"  },
     { NULL,   "packets_limit_per_flow",       "64" },
+    { NULL,   "hostname_dns_check",           "1"  },
     { "stun", "monitoring",                   "1"  },
     { "stun", "max_packets_extra_dissection", "32" },
     { NULL, NULL, NULL }

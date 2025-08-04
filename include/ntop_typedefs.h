@@ -528,7 +528,7 @@ typedef enum {
   flow_alert_modbus_unexpected_function_code = 93,
   flow_alert_modbus_too_many_exceptions = 94,
   flow_alert_modbus_invalid_transition = 95,
-  flow_alert_ndpi_not_used_anymore_2 = 96,
+  flow_alert_ndpi_unresolved_hostname = 96,
   flow_alert_ndpi_tls_alpn_sni_mismatch = 97,
   flow_alert_ndpi_malware_host_contacted = 98,
   flow_alert_ndpi_binary_data_transfer = 99,

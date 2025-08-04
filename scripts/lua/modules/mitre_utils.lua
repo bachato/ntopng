@@ -441,6 +441,11 @@ local mitre_id_to_categories = {}
 -- ##############################################
 
 local function add_to_mitre_id_to_categories(mitre_info, alert_id, entity_id)
+if(alert_id == 51) then
+tprint(debug.traceback())
+  tprint(mitre_info)
+end
+  
    if not mitre_info or not mitre_info.mitre_id then
       return
    end
@@ -513,25 +518,31 @@ function mitre_utils.insertDBMitreInfo()
 
    for mitre_id, value in pairs(mitre_id_to_categories) do
       local current_values = ""
+      
       for _, alert_key in pairs(value.alert_array) do
 	 if value.tactic == nil then
 	    value.tactic = 0
 	 end
+	 
 	 if value.technique == nil then
 	    value.technique = 0
 	 end
+	 
 	 if value.sub_technique == nil then
 	    value.sub_technique = 0
 	 end
+	 
 	 current_values = current_values.."("..alert_key[1]..","..alert_key[2]..","..value.tactic..","..value.technique
 	    ..","..value.sub_technique..",'"..mitre_id.."'),"
       end
+      
       value_to_add = value_to_add .. current_values
    end
 
    -- replace the last ',' character with ';' in order to push all value in one into the DB
    value_to_add = value_to_add:sub(1, -2)..";"
    local sql
+   
    if hasClickHouseSupport() then
       table_name_with_values = "mitre_table_info (ALERT_ID, ENTITY_ID, TACTIC, TECHNIQUE, SUB_TECHNIQUE, MITRE_ID)"
       sql = "INSERT INTO "..table_name_with_values.." VALUES "..value_to_add

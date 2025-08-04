@@ -91,7 +91,7 @@ static const FlowAlertTypeExtended risk_enum_to_alert_type[NDPI_MAX_RISK] {
   { { NDPI_PERIODIC_FLOW, flow_alert_ndpi_periodic_flow, alert_category_network}, "ndpi_periodic_flow"},
   { { NDPI_MINOR_ISSUES, flow_alert_ndpi_minor_issues, alert_category_network}, "ndpi_minor_issues"},
   { { NDPI_TCP_ISSUES, flow_alert_ndpi_tcp_issues, alert_category_network}, "ndpi_tcp_issues"},
-  { { NDPI_FREE_51 /* DUMMY LINE */, flow_alert_normal, alert_category_other}, ""},
+  { { NDPI_UNRESOLVED_HOSTNAME, flow_alert_ndpi_unresolved_hostname, alert_category_security}, "ndpi_unresolved_hostname"},
   { { NDPI_TLS_ALPN_SNI_MISMATCH, flow_alert_ndpi_tls_alpn_sni_mismatch, alert_category_security}, "ndpi_tls_alpn_sni_mismatch"},
   { { NDPI_MALWARE_HOST_CONTACTED, flow_alert_ndpi_malware_host_contacted, alert_category_security}, "ndpi_malware_host_contacted"},
   { { NDPI_BINARY_DATA_TRANSFER, flow_alert_ndpi_binary_data_transfer, alert_category_security}, "ndpi_binary_data_transfer"},

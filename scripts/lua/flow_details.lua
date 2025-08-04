@@ -1553,18 +1553,19 @@ else
                   end
                end
 
+
                local additional = ""
                local severity = alert_consts.alertSeverityById(map_score_to_severity(score_alert.score))
                local msg = string.format('<td> %s </td><td style=\"text-align: center;\"> %s </td><td> %s %s %s</td>',
-                  score_alert.message .. alert_source,
-                  '<span style="color:' .. severity.color .. '">' .. score_alert.score .. '</span>',
-                  riskLabel,
-                  (score_alert.alert_risk > 0 and flow_risk_utils.get_remediation_documentation_link(alert_risk, alert_src)) or
-                  '',
-                  status_icon or '')
+                    score_alert.message .. alert_source,
+                    '<span style="color:' .. severity.color .. '">' .. (score_alert.score or 0) .. '</span>',
+                    riskLabel,
+                    (score_alert.alert_risk > 0 and flow_risk_utils.get_remediation_documentation_link(alert_risk, alert_src)) or
+                    '',
+                    status_icon or '')
                
                print(msg)
-               
+	       
                if score_alert.alert_id then
                   print('<td nowrap>')
 
