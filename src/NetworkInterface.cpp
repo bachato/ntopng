@@ -12943,7 +12943,7 @@ void NetworkInterface::getSFlowDevices(lua_State *vm, bool add_table) {
 void NetworkInterface::incnDPIStats(time_t when, u_int16_t ndpi_proto,
 				    ndpi_protocol_category_t ndpi_category,
 				    u_int32_t bytes_sent, u_int32_t bytes_rcvd,
-            u_int32_t pkts_sent, u_int32_t pkts_rcvd) {
+				    u_int32_t pkts_sent, u_int32_t pkts_rcvd) {
   ndpiStats->incStats(when, ndpi_proto, pkts_sent, bytes_sent, pkts_rcvd, bytes_rcvd);
   ndpiStats->incCategoryStats(when, ndpi_category, bytes_sent, bytes_rcvd);
 }
