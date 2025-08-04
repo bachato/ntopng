@@ -709,7 +709,11 @@ function delta_val(reg, metric_name, granularity, curr_val, skip_first)
     if ((skip_first == true) and (prev_val == nil)) then
         return (0)
     else
-        return (curr_val - (prev_val or 0))
+        if(curr_val < prev_val) then
+	  return (0) -- counter wrap check
+	else
+          return (curr_val - (prev_val or 0))
+        end
     end
 end
 
