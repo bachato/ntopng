@@ -66,7 +66,6 @@ page_utils.print_navbar(i18n("asn_id", {id = format_utils.formatASN(asn)}),
 })
 
 if page == "overview" or not page then
-
     local show_historical = false
     local first_seen = 0
     -- Get the first record time, if any

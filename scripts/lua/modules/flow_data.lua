@@ -18,25 +18,18 @@ local separator = " | "
 
 -- @brief Given a list of columns and a flow, create a unique key to pair the values, 
 --        using the columns, basically simulating a group by
--- @param columns List, as key an id and as value a boolean, telling if the element
---                      has to be used as an id or not (e.g. bytes_sent are NOT ids)
+-- @param data List, generate by formatEmptyStats
 -- @return a unique key composed by the elements requested
-local function formatKey(data, columns, rename_field_list)
+local function formatKey(data)
     local all_key = ""
     local trace_string = "Checking new flow" -- string only used for tracing data
     -- Iterate all the requested info
-    for position, column_info in pairs(columns) do
-        local aggregation_key = column_info.id
-        -- Check if an other name is requested to be used
-        if rename_field_list and rename_field_list[position] then
-            aggregation_key = rename_field_list[position]
-        end
-        local value = data[aggregation_key]
-        -- Find the info inside the flow
-        if type(data[aggregation_key]) == "string" then
+    for key, value in pairs(data) do
+        -- Find the info inside the preformatted empty data
+        if type(value) == "string" then -- Key values are string
             all_key = string.format("%s%s%s", all_key, separator, value)
-            trace_string = string.format("%s [%s: %s]", trace_string,
-                                         aggregation_key, value)
+            trace_string =
+                string.format("%s [%s: %s]", trace_string, key, value)
         end
     end
     if trace_stats then traceError(TRACE_NORMAL, TRACE_CONSOLE, trace_string) end
@@ -119,13 +112,15 @@ local function updateStats(columns, invert_direction, flow, current_element)
             local id = column_info.id
             if invert_direction then id = column_info.invert_with end
             current_element[id] = current_element[id] +
-                                      tonumber(flow[flow_key_stat] or flow[id] or 0)
+                                      tonumber(
+                                          flow[flow_key_stat] or flow[id] or 0)
 
             if trace_stats then
                 traceError(TRACE_NORMAL, TRACE_CONSOLE,
                            string.format(
                                "Increasing stats [Column Id: %s]->[%s: %u] [Tot: %u]",
-                               id, flow_key_stat, tonumber(flow[flow_key_stat] or flow[id] or 0),
+                               id, flow_key_stat,
+                               tonumber(flow[flow_key_stat] or flow[id] or 0),
                                current_element[id]))
             end
         end
@@ -151,15 +146,25 @@ function flow_data.getStats(queries)
                                                         isHistorical)
         local different_columns = flow_data_preset.retrieveColumns(
                                       query_info.different_from, isHistorical)
+        -- Function used to, given a flow, merge all the same data togheter
         local function formatData(_, flow)
+            -- Create an empty table, composed only by key values
+            -- e.g. ip: 1.1.1.1
+            --      asn: 2222
+            --      bytes_sent: 0
+            --      bytes_rcvd: 0
             local empty = formatEmptyStats(columns, flow,
                                            query_info.rename_key_field,
                                            different_columns)
-            local key = formatKey(empty, columns, query_info.rename_key_field)
+            -- Now given the empty table created, create a unique key, where only
+            -- flows with the same exact requested data are going to have the same
+            -- key
+            local key = formatKey(empty)
             if not results[key] then -- Entry still not created
                 results[key] = empty
             end
 
+            -- Now update the data (e.g. bytes_sent and bytes_rcvd)
             results[key] = updateStats(columns, query_info.invert_direction,
                                        flow, results[key])
         end
@@ -202,7 +207,7 @@ function flow_data.formatStats(stats_to_format)
         local formatted_element = {}
         for key, value in pairs(values or {}) do
             -- Format the data
-            local formatted_data = flow_data_preset.getFormattedData(key, value,
+            local formatted_data = flow_data_preset.getFormattedDataAndLink(key, value,
                                                                      values)
             if (formatted_data ~= value) or (type(formatted_data) == "string") then
                 formatted_element[key] = {id = value, name = formatted_data}

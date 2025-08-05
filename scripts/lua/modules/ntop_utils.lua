@@ -24,9 +24,7 @@ function split(s, delimiter)
     if (s ~= nil) then
         if delimiter == nil then
             -- No delimiter, split all characters
-            for match in s:gmatch "." do
-                table.insert(result, match);
-            end
+            for match in s:gmatch "." do table.insert(result, match); end
         else
             -- Split by delimiter
             for match in (s .. delimiter):gmatch("(.-)" .. delimiter) do
@@ -46,18 +44,14 @@ end
 -- ##############################################
 
 function string.starts(String, Start)
-    if type(String) ~= 'string' or type(Start) ~= 'string' then
-        return false
-    end
+    if type(String) ~= 'string' or type(Start) ~= 'string' then return false end
     return string.sub(String, 1, string.len(Start)) == Start
 end
 
 -- ##############################################
 
 function string.ends(String, End)
-    if type(String) ~= 'string' or type(End) ~= 'string' then
-        return false
-    end
+    if type(String) ~= 'string' or type(End) ~= 'string' then return false end
     return End == '' or string.sub(String, -string.len(End)) == End
 end
 
@@ -74,15 +68,14 @@ function string.oid_starts(oid_string, oid_string_start)
 
     -- Make sure both OIDs end with a dot, to avoid
     -- considering 1.3.6.1.4.1.99 starting with 1.3.6.1.4.1.9
-    if not string.ends(oid_string, ".") then
-        oid_string = oid_string .. "."
-    end
+    if not string.ends(oid_string, ".") then oid_string = oid_string .. "." end
 
     if not string.ends(oid_string_start, ".") then
         oid_string_start = oid_string_start .. "."
     end
 
-    return string.sub(oid_string, 1, string.len(oid_string_start)) == oid_string_start
+    return string.sub(oid_string, 1, string.len(oid_string_start)) ==
+               oid_string_start
 end
 
 -- ##############################################
@@ -108,15 +101,11 @@ function tprint(s, l, i)
     for k, v in pairs(s) do
         local indent = ""
 
-        if (i ~= "") then
-            indent = i .. "."
-        end
+        if (i ~= "") then indent = i .. "." end
         indent = indent .. tostring(k)
 
         l = tprint(v, l, indent);
-        if (l < 0) then
-            break
-        end
+        if (l < 0) then break end
     end
 
     return l
@@ -125,9 +114,7 @@ end
 -- ##############################################
 
 function splitNetworkPrefix(net)
-    if not net then
-        tprint(debug.traceback())
-    end
+    if not net then tprint(debug.traceback()) end
     local prefix = tonumber(net:match("/(.+)"))
     local address = net:gsub("/.+", "")
     return address, prefix
@@ -182,9 +169,7 @@ function table.len(tbl)
         return 0
     end
 
-    for k, v in pairs(tbl) do
-        count = count + 1
-    end
+    for k, v in pairs(tbl) do count = count + 1 end
 
     return count
 end
@@ -204,13 +189,9 @@ end
 -- ##############################################
 
 function table.empty(tbl)
-    if (tbl == nil) then
-        return true
-    end
+    if (tbl == nil) then return true end
 
-    if next(tbl) == nil then
-        return true
-    end
+    if next(tbl) == nil then return true end
 
     return false
 end
@@ -218,9 +199,7 @@ end
 -- ##############################################
 
 function isIPv4(address)
-    if (address == nil) then
-        return false
-    end
+    if (address == nil) then return false end
 
     -- Reuse the for loop to check the address validity
     local checkAddress = (function(chunks)
@@ -233,7 +212,9 @@ function isIPv4(address)
     end)
 
     local chunks = {address:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$")}
-    local chunksWithPort = {address:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)%:(%d+)$")}
+    local chunksWithPort = {
+        address:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)%:(%d+)$")
+    }
 
     if #chunks == 4 then
         return checkAddress(chunks)
@@ -247,9 +228,7 @@ end
 
 -- ##############################################
 
-function isIPv6(ip)
-    return ((not isEmptyString(ip)) and ntop.isIPv6(ip))
-end
+function isIPv6(ip) return ((not isEmptyString(ip)) and ntop.isIPv6(ip)) end
 
 -- ##############################################
 
@@ -258,18 +237,15 @@ end
 function isIPv4Network(address, strict)
     -- Check for @ VLAN
     local parts = split(address, "@")
-    if #parts == 2 then
-        address = parts[1]
-    end
+    if #parts == 2 then address = parts[1] end
 
     -- Parse CIDR
     parts = split(address, "/")
     if #parts == 2 then
         local prefix = tonumber(parts[2])
 
-        if (prefix == nil) or (math.floor(prefix) ~= prefix) or (prefix < 0) or (prefix > 32) then
-            return false
-        end
+        if (prefix == nil) or (math.floor(prefix) ~= prefix) or (prefix < 0) or
+            (prefix > 32) then return false end
 
     elseif #parts == 1 and strict then
         return false
@@ -290,18 +266,15 @@ end
 function isIPv6Network(address, strict)
     -- Check for @ VLAN
     local parts = split(address, "@")
-    if #parts == 2 then
-        address = parts[1]
-    end
+    if #parts == 2 then address = parts[1] end
 
     -- Parse CIDR
     parts = split(address, "/")
     if #parts == 2 then
         local prefix = tonumber(parts[2])
 
-        if (prefix == nil) or (math.floor(prefix) ~= prefix) or (prefix < 0) or (prefix > 128) then
-            return false
-        end
+        if (prefix == nil) or (math.floor(prefix) ~= prefix) or (prefix < 0) or
+            (prefix > 128) then return false end
 
     elseif #parts == 1 and strict then
         return false
@@ -326,12 +299,8 @@ end
 
 function pairsByKeys(t, f)
     local a = {}
-    if t == nil then
-        io.write(debug.traceback() .. "\n")
-    end
-    for n in pairs(t) do
-        table.insert(a, n)
-    end
+    if t == nil then io.write(debug.traceback() .. "\n") end
+    for n in pairs(t) do table.insert(a, n) end
     table.sort(a, f)
     local i = 0 -- iterator variable
     local iter = function() -- iterator function
@@ -349,15 +318,9 @@ end
 
 function pairsByValues(t, f)
     local a = {}
-    if t == nil then
-        io.write(debug.traceback() .. "\n")
-    end
-    for n in pairs(t) do
-        table.insert(a, n)
-    end
-    table.sort(a, function(x, y)
-        return f(t[x], t[y])
-    end)
+    if t == nil then io.write(debug.traceback() .. "\n") end
+    for n in pairs(t) do table.insert(a, n) end
+    table.sort(a, function(x, y) return f(t[x], t[y]) end)
     local i = 0 -- iterator variable
     local iter = function() -- iterator function
         i = i + 1
@@ -402,7 +365,8 @@ function pairsByDottedDecimalKeys(t, f)
 
         for i = 1, len do
             -- Convert elements to numbers
-            local left_number, right_number = tonumber(left.sorter[i]), tonumber(right.sorter[i])
+            local left_number, right_number = tonumber(left.sorter[i]),
+                                              tonumber(right.sorter[i])
 
             if left_number ~= right_number then
                 -- If numbers are different, compare them using the sort function
@@ -419,9 +383,7 @@ function pairsByDottedDecimalKeys(t, f)
     local iter = function()
         i = i + 1
 
-        if sorter[i] == nil then
-            return
-        end
+        if sorter[i] == nil then return end
 
         return sorter[i].key, sorter[i].value
     end
@@ -433,13 +395,9 @@ end
 
 function pairsByField(t, field, f)
     local a = {}
-    for n in pairs(t) do
-        table.insert(a, n)
-    end
+    for n in pairs(t) do table.insert(a, n) end
 
-    table.sort(a, function(x, y)
-        return f(t[x][field], t[y][field])
-    end)
+    table.sort(a, function(x, y) return f(t[x][field], t[y][field]) end)
     local i = 0 -- iterator variable
     local iter = function() -- iterator function
         i = i + 1
@@ -459,7 +417,8 @@ function asc(a, b)
         return false
     elseif type(a) ~= type(b) then
         traceError(TRACE_WARNING, TRACE_CONSOLE,
-            "Bad types in asc(): " .. a .. " (" .. type(a) .. ") vs " .. b .. " (" .. type(b) .. ")")
+                   "Bad types in asc(): " .. a .. " (" .. type(a) .. ") vs " ..
+                       b .. " (" .. type(b) .. ")")
         return false
     end
 
@@ -473,7 +432,8 @@ function rev(a, b)
         return false
     elseif type(a) ~= type(b) then
         traceError(TRACE_WARNING, TRACE_CONSOLE,
-            "Bad types in rev(): " .. a .. " (" .. type(a) .. ") vs " .. b .. " (" .. type(b) .. ")")
+                   "Bad types in rev(): " .. a .. " (" .. type(a) .. ") vs " ..
+                       b .. " (" .. type(b) .. ")")
         tprint(debug.traceback())
         return false
     end
@@ -484,18 +444,14 @@ end
 -- ##############################################
 
 function asc_insensitive(a, b)
-    if type(a) ~= "string" then
-        return asc(a, b)
-    end
+    if type(a) ~= "string" then return asc(a, b) end
     return (string.lower(a) < string.lower(b))
 end
 
 -- ##############################################
 
 function rev_insensitive(a, b)
-    if type(a) ~= "string" then
-        return rev(a, b)
-    end
+    if type(a) ~= "string" then return rev(a, b) end
     return (string.lower(a) > string.lower(b))
 end
 
@@ -505,9 +461,7 @@ function string.split(s, p)
     local temp = {}
     local index = 0
 
-    if s == nil then
-        io.write(debug.traceback() .. "\n")
-    end
+    if s == nil then io.write(debug.traceback() .. "\n") end
 
     local last_index = string.len(s)
 
@@ -538,9 +492,7 @@ function isMacAddress(address)
     local v
     local addr
 
-    if (address == nil) then
-        return false
-    end
+    if (address == nil) then return false end
 
     v = string.split(address, "@")
 
@@ -560,14 +512,10 @@ end
 
 function isCommunityId(address)
     local c
-    if (address == nil) then
-        return false
-    end
+    if (address == nil) then return false end
 
     c = string.split(address, ":")
-    if (c ~= nil and #c == 2) then
-        return true
-    end
+    if (c ~= nil and #c == 2) then return true end
 
     return false
 end
@@ -594,15 +542,11 @@ end
 
 -- ##############################################
 
-function isAdministrator()
-    return ntop.isAdministrator()
-end
+function isAdministrator() return ntop.isAdministrator() end
 
 -- ##############################################
 
-function isNoLoginUser()
-    return _SESSION["user"] == ntop.getNologinUser()
-end
+function isNoLoginUser() return _SESSION["user"] == ntop.getNologinUser() end
 
 -- ##############################################
 
@@ -626,11 +570,13 @@ function hasHighResolutionTs()
 
     -- High resolution timeseries means dumping the host timeseries
     -- every 60 seconds instead of 300 seconds.
-    return ((active_driver == "influxdb") and (ntop.getPref("ntopng.prefs.ts_resolution") ~= "300"))
+    return ((active_driver == "influxdb") and
+               (ntop.getPref("ntopng.prefs.ts_resolution") ~= "300"))
 end
 
 if (trace_script_duration ~= nil) then
-    io.write(debug.getinfo(1, 'S').source .. " executed in " .. (os.clock() - clock_start) * 1000 .. " ms\n")
+    io.write(debug.getinfo(1, 'S').source .. " executed in " ..
+                 (os.clock() - clock_start) * 1000 .. " ms\n")
 end
 
 -- ##############################################
@@ -643,9 +589,7 @@ function getInterfaceId(interface_name)
     local ifnames = interface.getIfNames()
 
     for if_id, if_name in pairs(ifnames) do
-        if if_name == interface_name then
-            return tonumber(if_id)
-        end
+        if if_name == interface_name then return tonumber(if_id) end
     end
 
     return (-1)
@@ -709,12 +653,12 @@ function delta_val(reg, metric_name, granularity, curr_val, skip_first)
     if ((skip_first == true) and (prev_val == nil)) then
         return (0)
     else
-        if(prev_val == nil) then prev_val = 0 end
-	
-        if(curr_val < prev_val) then
-	  return (0) -- counter wrap check
-	else
-          return (curr_val - (prev_val or 0))
+        if (prev_val == nil) then prev_val = 0 end
+
+        if (curr_val < prev_val) then
+            return (0) -- counter wrap check
+        else
+            return (curr_val - (prev_val or 0))
         end
     end
 end
@@ -732,13 +676,9 @@ end
 -- Check if this is a valid pool member (MAC or CIDR@VLAN)
 -- @param fix_relaxed Fix relaxed notation (IP without net mask or vlan)
 function checkPoolMember(member, fix_relaxed)
-    if isEmptyString(member) then
-        return nil
-    end
+    if isEmptyString(member) then return nil end
 
-    if isMacAddress(member) then
-        return member
-    end
+    if isMacAddress(member) then return member end
 
     -- VLAN
     local vlan_id
@@ -754,9 +694,7 @@ function checkPoolMember(member, fix_relaxed)
     else
         local other = string.sub(member, 1, vlan_idx - 1)
         vlan_id = tonumber(string.sub(member, vlan_idx + 1))
-        if vlan_id == nil or vlan_id < 0 then
-            return nil
-        end
+        if vlan_id == nil or vlan_id < 0 then return nil end
         member = other
     end
 
@@ -780,7 +718,8 @@ function checkPoolMember(member, fix_relaxed)
 
     if isIPv4(address) and (tonumber(prefix) >= 0) and (tonumber(prefix) <= 32) then
         -- ok
-    elseif isIPv6(address) and (tonumber(prefix) >= 0) and (tonumber(prefix) <= 128) then
+    elseif isIPv6(address) and (tonumber(prefix) >= 0) and
+        (tonumber(prefix) <= 128) then
         -- ok
     else
         return nil -- bad format
@@ -803,9 +742,7 @@ end
 
 -- ##############################################
 
-function fixPoolMemberFormat(member)
-    return checkPoolMember(member, true)
-end
+function fixPoolMemberFormat(member) return checkPoolMember(member, true) end
 
 -- #################################################################
 
@@ -816,21 +753,15 @@ end
 -- ##############################################
 
 -- Typical call:  if hasbit(x, bit(3)) then ...
-function hasbit(x, p)
-    return x % (p + p) >= p
-end
+function hasbit(x, p) return x % (p + p) >= p end
 
 -- ##############################################
 
-function setbit(x, p)
-    return hasbit(x, p) and x or x + p
-end
+function setbit(x, p) return hasbit(x, p) and x or x + p end
 
 -- ##############################################
 
-function clearbit(x, p)
-    return hasbit(x, p) and x - p or x
-end
+function clearbit(x, p) return hasbit(x, p) and x - p or x end
 
 -- ###########################################
 
@@ -857,7 +788,8 @@ function getHttpHost()
         local ntopng_protocol = "http://"
         local ntopng_port = ntopng_info.http_port
 
-        if not ntop.isnEdge() and ntopng_info.https_port and tonumber(ntopng_info.https_port) ~= 0 then
+        if not ntop.isnEdge() and ntopng_info.https_port and
+            tonumber(ntopng_info.https_port) ~= 0 then
             ntopng_protocol = "https://"
             ntopng_port = ntopng_info.https_port
         end
@@ -871,9 +803,7 @@ end
 -- ##############################################
 
 function starts(String, Start)
-    if ((String == nil) or (Start == nil)) then
-        return (false)
-    end
+    if ((String == nil) or (Start == nil)) then return (false) end
 
     return string.sub(String, 1, string.len(Start)) == Start
 end
@@ -894,7 +824,8 @@ function getExportersUnifiedStats()
             if not unified_exporters[exporter_ip] then
                 unified_exporters[exporter_ip] = {}
             end
-            local ports_table = interface.getFlowDeviceInfoByIP(exporter_ip, true)
+            local ports_table = interface.getFlowDeviceInfoByIP(exporter_ip,
+                                                                true)
             for _, ports in pairs(ports_table) do
                 for port_idx, port_info in pairs(ports) do
                     if not unified_exporters[exporter_ip][port_idx] then
@@ -902,8 +833,12 @@ function getExportersUnifiedStats()
                     else
                         local tmp = unified_exporters[exporter_ip][port_idx]
                         tmp["ifid"] = interface_id
-                        tmp["bytes.in_bytes"] = port_info["bytes.in_bytes"] + (tmp["bytes.in_bytes"] or 0)
-                        tmp["bytes.out_bytes"] = port_info["bytes.out_bytes"] + (tmp["bytes.out_bytes"] or 0)
+                        tmp["bytes.in_bytes"] =
+                            port_info["bytes.in_bytes"] +
+                                (tmp["bytes.in_bytes"] or 0)
+                        tmp["bytes.out_bytes"] =
+                            port_info["bytes.out_bytes"] +
+                                (tmp["bytes.out_bytes"] or 0)
                         if not tmp.ndpi then
                             tmp["ndpi"] = {}
                         end
@@ -914,7 +849,9 @@ function getExportersUnifiedStats()
                             for field, value in pairs(proto_info or {}) do
                                 if (type(value) == number) then
                                     -- skip non numeric fields such as "breed"
-                                    tmp["ndpi"][proto][field] = value + (tmp["ndpi"][proto][field] or 0)
+                                    tmp["ndpi"][proto][field] = value +
+                                                                    (tmp["ndpi"][proto][field] or
+                                                                        0)
                                 end
                             end
                         end
@@ -939,7 +876,9 @@ function getExporterInfo(unique_source_id) -- Exporter unique_source_id
         for interface_id, probe_list in pairs(ifstats.probes or {}) do
             for probe_id, probe_info in pairs(probe_list or {}) do
                 if probe_info.exporters and table.len(probe_info.exporters) > 0 then -- Sflow or NetFlow/IPFIX
-                    for exporter_ip, exporter_info in pairs(probe_info.exporters or {}) do
+                    for exporter_ip, exporter_info in pairs(
+                                                          probe_info.exporters or
+                                                              {}) do
                         if exporter_info.unique_source_id == unique_source_id then
                             return table.merge({
                                 exporter_ip = exporter_ip,
@@ -980,6 +919,49 @@ function getProbeFromUUID(nprobe_uuid)
     end
 
     return nil
+end
+
+-- ##############################################
+
+function getProbeInfoFromExporterIP(ip)
+    local ifstats = interface.getStats()
+    for interface_id, probe_list in pairs(ifstats.probes or {}) do
+        for probe_ip, probe_info in pairsByKeys(probe_list or {}) do
+            for exporter_ip, exporter_info in pairsByKeys(
+                                                  probe_info.exporters or {}) do
+                if exporter_ip == ip then
+                    return {
+                        probe_uuid = tostring(probe_info["probe.uuid_num"]),
+                        exporter_uuid = tostring(
+                            exporter_info["unique_source_id"])
+                    }
+                end
+            end
+        end
+    end
+
+    return nil
+end
+
+-- ##############################################
+
+function generateExporterLink(ip)
+    local probe_info = getProbeInfoFromExporterIP(ip)
+    if probe_info then
+        return string.format("probe_uuid=%s", probe_info.probe_uuid)
+    end
+    return string.format("ip=%s", ip)
+end
+
+-- ##############################################
+
+function generateExporterInterfaceLink(ip, interface)
+    local probe_info = getProbeInfoFromExporterIP(ip)
+    if probe_info then
+        return string.format("ip=%s&exporter_uuid=%s&probe_uuid=%s", ip,
+                             probe_info.exporter_uuid, probe_info.probe_uuid)
+    end
+    return string.format("ip=%s&interface=%s", ip, interface)
 end
 
 -- ##############################################

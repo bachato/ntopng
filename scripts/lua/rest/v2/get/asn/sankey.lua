@@ -37,7 +37,6 @@ end
 if criteria_as == "traffic_between_ases" then end
 
 if criteria_as == "ingress_egress_traffic_criteria" then
-    local url_link = ntop.getHttpPrefix() .. "/lua/as_overview.lua?asn=%s"
     filters = {
         asn = asn,
         ifid = ifid,
@@ -51,7 +50,6 @@ if criteria_as == "ingress_egress_traffic_criteria" then
             },
             where_query = {"asn"},
             filters = filters,
-            links = {url_link = url_link},
             root = {
                 formatter = format_utils.formatASN,
                 id = asn,
@@ -63,7 +61,6 @@ if criteria_as == "ingress_egress_traffic_criteria" then
             },
             where_query = {"asn"},
             filters = filters,
-            links = {url_link = url_link},
             root = {
                 formatter = format_utils.formatASN,
                 id = asn,
@@ -72,7 +69,6 @@ if criteria_as == "ingress_egress_traffic_criteria" then
         }
     }
 elseif isEmptyString(criteria) or (criteria == "traffic_between_ases") then
-    local url_link = ntop.getHttpPrefix() .. "/lua/as_overview.lua?asn=%s"
     queries = {
         {
             select_query = {
@@ -80,6 +76,7 @@ elseif isEmptyString(criteria) or (criteria == "traffic_between_ases") then
                 "bytes_rcvd"
             },
             different_from = {nil, "src_asn", "dst_asn"},
+            rename_key_field = {nil, "src_peer_asn_1", "dst_peer_asn_1"},
             where_query = {"dst_asn"},
             filters = {
                 dst_asn = asn,
@@ -87,7 +84,6 @@ elseif isEmptyString(criteria) or (criteria == "traffic_between_ases") then
                 first_seen = epoch_begin,
                 last_seen = epoch_end
             },
-            links = {url_link = url_link},
             root = {
                 formatter = format_utils.formatASN,
                 id = asn,
@@ -95,18 +91,18 @@ elseif isEmptyString(criteria) or (criteria == "traffic_between_ases") then
             }
         }, {
             select_query = {
-                "src_peer_asn", "dst_asn", "dst_peer_asn", "bytes_sent",
+                "src_peer_asn", "dst_peer_asn", "dst_asn", "bytes_sent",
                 "bytes_rcvd"
             },
             where_query = {"src_asn"},
-            different_from = {"src_asn", nil, "dst_asn"},
+            different_from = {"src_asn", "dst_asn"},
+            rename_key_field = {"src_peer_asn_2", "dst_peer_asn_2"},
             filters = {
                 src_asn = asn,
                 ifid = ifid,
                 first_seen = epoch_begin,
                 last_seen = epoch_end
             },
-            links = {url_link = url_link},
             root = {
                 formatter = format_utils.formatASN,
                 id = asn,
@@ -118,7 +114,7 @@ end
 
 local nodes = {}
 local links = {}
-local MAX_NODES_PER_LEVEL = 20
+local MAX_NODES_PER_LEVEL = 10
 nodes, links = flow_sankey.generateSankey(queries, MAX_NODES_PER_LEVEL)
 
 res["nodes"] = nodes

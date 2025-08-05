@@ -18,26 +18,38 @@ local columns = {
         historical = "SRC_ASN",
         is_key = true,
         filters = {live = "asnSrcFilter", historical = "SRC_ASN"},
-        formatter = {funct = format_utils.formatASN}
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
     },
     dst_asn = {
         live = "dst_as",
         historical = "DST_ASN",
         is_key = true,
         filters = {live = "asnDstFilter", historical = "DST_ASN"},
-        formatter = {funct = format_utils.formatASN}
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
     },
     src_peer_asn = {
         live = "src_peer_as",
         historical = "SRC_PEER_ASN",
         is_key = true,
-        formatter = {funct = format_utils.formatASN}
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
     },
     dst_peer_asn = {
         live = "dst_peer_as",
         historical = "DST_PEER_ASN",
         is_key = true,
-        formatter = {funct = format_utils.formatASN}
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
     },
     in_device = {
         live = "device_ip",
@@ -45,7 +57,11 @@ local columns = {
         is_key = true,
         filters = {live = "deviceIpFilter", historical = "PROBE_IP"},
         db_formatting_fun = "IPv4NumToString",
-        formatter = {funct = getProbeName}
+        formatter = {
+            funct = getProbeName,
+            link = "/lua/pro/enterprise/exporters.lua?%s",
+            generateLinkParams = generateExporterLink
+        }
     },
     out_device = {
         live = "device_ip",
@@ -53,7 +69,11 @@ local columns = {
         is_key = true,
         db_formatting_fun = "IPv4NumToString",
         filters = {live = "deviceIpFilter", historical = "PROBE_IP"},
-        formatter = {funct = getProbeName}
+        formatter = {
+            funct = getProbeName,
+            link = "/lua/pro/enterprise/exporters.lua?%s",
+            generateLinkParams = generateExporterLink
+        }
     },
     device = {
         live = "device_ip",
@@ -61,41 +81,100 @@ local columns = {
         is_key = true,
         filters = {live = "deviceIpFilter", historical = "PROBE_IP"},
         db_formatting_fun = "IPv4NumToString",
-        formatter = {funct = getProbeName}
+        formatter = {
+            funct = getProbeName,
+            link = "/lua/pro/enterprise/exporters.lua?%s",
+            generateLinkParams = generateExporterLink
+        }
     },
     in_iface_index = {
         live = "in_index",
         historical = "INPUT_SNMP",
         is_key = true,
-        formatter = {funct = format_portidx_name, column_dependent = "device"}
+        formatter = {
+            funct = format_portidx_name,
+            column_dependent = "in_device",
+            link = "/lua/pro/enterprise/exporter_details.lua?%s",
+            generateLinkParams = generateExporterInterfaceLink
+        }
     },
     out_iface_index = {
         live = "out_index",
         historical = "OUTPUT_SNMP",
         is_key = true,
-        formatter = {funct = format_portidx_name, column_dependent = "device"}
+        formatter = {
+            funct = format_portidx_name,
+            column_dependent = "out_device",
+            link = "/lua/pro/enterprise/exporter_details.lua?%s",
+            generateLinkParams = generateExporterInterfaceLink
+        }
     },
     interface = {
-        formatter = {funct = format_portidx_name, column_dependent = "device"}
+        formatter = {
+            funct = format_portidx_name,
+            column_dependent = "device",
+            link = "/lua/pro/enterprise/exporter_details.lua?%s",
+            generateLinkParams = generateExporterInterfaceLink
+        }
     },
     bytes_sent = {
         live = "bytes_sent",
         historical = "SUM(SRC2DST_BYTES)",
-        invert_with = "bytes_rcvd",
-        exclude_from_group_by = true,
-        is_number = true
+        invert_with = "bytes_rcvd"
     },
     bytes_rcvd = {
         live = "bytes_rcvd",
         historical = "SUM(DST2SRC_BYTES)",
-        invert_with = "bytes_sent",
-        exclude_from_group_by = true,
-        is_number = true
+        invert_with = "bytes_sent"
     },
-    as = {formatter = {funct = format_utils.formatASN}},
-    transit_as = {formatter = {funct = format_utils.formatASN}},
-    src_transit_as = {formatter = {funct = format_utils.formatASN}},
-    dst_transit_as = {formatter = {funct = format_utils.formatASN}},
+    as = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    transit_as = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    src_transit_as = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    dst_transit_as = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    src_peer_asn_1 = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    dst_peer_asn_1 = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    src_peer_asn_2 = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    dst_peer_asn_2 = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
     ifid = {live = "ifid", historical = "INTERFACE_ID"},
     first_seen = {historical = "FIRST_SEEN"},
     last_seen = {historical = "LAST_SEEN"}
@@ -128,6 +207,22 @@ end
 
 -- ###########################################
 
+-- @brief given a column_id returns the info about that column
+-- @param columns_id String, containing a list of columns ids
+-- @return a list of matching ids for the requested type (live or historical)
+function flow_data_preset.getColumn(column_id)
+    local column_info = {}
+
+    if columns[column_id] then
+        column_info = columns[column_id]
+        column_info["id"] = column_id
+    end
+
+    return column_info
+end
+
+-- ###########################################
+
 -- @brief Given a list of filters, returns a list of particular conditions for each filter if available
 -- @param where Array, containing a list of ids for the where
 -- @param available_filters List, containing a list filters, key is the key of the filter, value is the value
@@ -151,7 +246,7 @@ function flow_data_preset.convertFilters(where, available_filters, is_historical
             else
                 -- Multiple filters only available in historical, see asn
                 if type(filter) == "table" then
-                    for _, or_filter in pairs(filter or {}) do 
+                    for _, or_filter in pairs(filter or {}) do
                         local new_filter = columns[or_filter]
                         new_filter.filter_value = available_filters[key]
                         new_filter.id = or_filter
@@ -190,37 +285,51 @@ end
 --        formatting function is available
 -- @param key String, key of the formatter to retrieve
 -- @param value String, data to format 
--- @param all_values List, element containing all the data, 
---               in case some data needs other data, e.g. SNMP Interface
 -- @return the formatted data
-function flow_data_preset.getFormattedData(key, value, all_values)
+function flow_data_preset.getFormattedDataAndLink(key, value)
     local formatted_value = value
+    local link = nil
     -- If key is empty or no formatter available return the value
     if isEmptyString(key) or isEmptyString(formatted_value) then
-        return formatted_value
+        return formatted_value, link
     end
 
     if (not columns[key]) or (not columns[key]["formatter"]) or
-        (not columns[key]["formatter"]["funct"]) then return formatted_value end
+        (not columns[key]["formatter"]["funct"]) then
+        return formatted_value, link
+    end
 
     -- Get the formatter function
     local formatter = columns[key]["formatter"]["funct"]
+    local link_params_formatter =
+        columns[key]["formatter"]["generateLinkParams"]
 
     -- See if there is some column from which is dependent, 
     -- e.g. SNMP Interface needs the SNMP IP
     if columns[key]["formatter"]["column_dependent"] then
         -- TODO: Now it's limited to a single column, add multiple columns
-        local element =
-            all_values[columns[key]["formatter"]["column_dependent"]]
-        if (not element) then -- Not found return value
-            return formatted_value
+        local dependent_values = split(value, "|")
+        if (#dependent_values == 1) then -- Not found return value
+            return formatted_value, link
         end
-        return formatter(element, formatted_value)
+        formatted_value = formatter(dependent_values[1], dependent_values[2])
+        if link_params_formatter then
+            local link_params = link_params_formatter(dependent_values[1], dependent_values[2])
+            link = string.format(columns[key]["formatter"]["link"], link_params)
+        end
     else
-        return formatter(formatted_value)
+        formatted_value = formatter(formatted_value)
+        if link_params_formatter then
+            local link_params = link_params_formatter(value)
+            link = string.format(columns[key]["formatter"]["link"], link_params)
+        end
     end
 
-    return formatted_value
+    if not link and columns[key]["formatter"]["link"] then
+        link = string.format(columns[key]["formatter"]["link"], value)
+    end
+    
+    return formatted_value, link
 end
 
 -- ###########################################

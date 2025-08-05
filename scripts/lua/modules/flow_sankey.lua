@@ -60,23 +60,15 @@ end
 
 -- This function push each node given to the nodes table
 local function unifyNodes(new_nodes, nodes, query, max_nodes_per_level)
-    local url_link = nil
-    if (query) and (query.links) and (not isEmptyString(query.links.url_query)) then
-        url_link = query.links.url_query
-    end
     -- Iterate all the nodes
-    for key, values in pairs(new_nodes or {}) do
+    for key, values in pairsByKeys(new_nodes or {}) do
         local current_nodes_per_level = 0
         for node_id, node_value in pairsByValues(values or {}, rev) do
             -- Get the formatter if available
-            local formatted_data = flow_data_preset.getFormattedData(key,
-                                                                     node_id,
-                                                                     values)
+            local formatted_data, node_link = flow_data_preset.getFormattedDataAndLink(key,
+                                                                     node_id)
             local label = node_id
             current_nodes_per_level = current_nodes_per_level + 1
-            if (url_link) then
-                url_link = string.format(url_link, node_id)
-            end
             if (formatted_data ~= node_id) then
                 label = formatted_data
             end
@@ -104,7 +96,7 @@ local function unifyNodes(new_nodes, nodes, query, max_nodes_per_level)
                     end
                 end
 
-                nodes[#nodes + 1] = {node_id = id, label = label, link = link}
+                nodes[#nodes + 1] = {node_id = id, label = label, link = node_link}
             end
             ::continue::
         end
@@ -192,27 +184,36 @@ local function updateNodesAndLinks(stats, query)
         -- so we know the order of the nodes
         local link_key = nil
         local general_link_key = nil
-        for _, query_key in pairs(query.select_query or {}) do
+        for position, query_key in pairs(query.select_query or {}) do
             -- Skip nil values
-            local value = values[query_key]
+            local column_name = query_key
+            if (query.rename_key_field and query.rename_key_field[position]) then
+                column_name = query.rename_key_field[position]
+            end
+            local value = values[column_name]
             if value and type(value) == "string" then
+                local column_info = flow_data_preset.getColumn(column_name)
                 -- it's a node, so add to the list of nodes if not present,
                 -- if present update the value
-                if not nodes[query_key] then
-                    nodes[query_key] = {}
+                if not nodes[column_name] then
+                    nodes[column_name] = {}
                 end
-                if not nodes[query_key][value] then
-                    nodes[query_key][value] = 0
+                if column_info.formatter and column_info.formatter.column_dependent then
+                    value = string.format("%s|%s", values[column_info.formatter.column_dependent], value)
                 end
-                nodes[query_key][value] = nodes[query_key][value] + total_value
+                if not nodes[column_name][value] then
+                    nodes[column_name][value] = 0
+                end
+                nodes[column_name][value] =
+                    nodes[column_name][value] + total_value
                 -- Now we know the node, add the key to the link key
                 -- This is a trick to identify the nodes and links,
                 -- for example in case of multiple queries
                 if not general_link_key then
-                    general_link_key = query_key
+                    general_link_key = column_name
                 else
                     general_link_key = general_link_key .. separator ..
-                                           query_key
+                                           column_name
                 end
                 -- Same thing for the link
                 if not link_key then
