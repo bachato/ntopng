@@ -164,6 +164,7 @@ void FlowChecksLoader::registerChecks() {
 #ifdef HAVE_NEDGE
   if ((fcb = new NedgeBlockedFlow())) registerCheck(fcb);
 #endif
+  if ((fcb = new UnresolvedHostname())) registerCheck(fcb);
 #endif
 
   /* Register all the remaining risk-based checks that haven't been already

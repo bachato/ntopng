@@ -113,6 +113,7 @@
 #include "flow_checks/NedgeBlockedFlow.h"
 #include "flow_checks/HostPolicy.h"
 #include "flow_checks/QoEDegraded.h"
+#include "flow_checks/UnresolvedHostname.h"
 #endif
 
 #endif /* _FLOW_CHECKS_INCLUDES_H_ */
