@@ -49,9 +49,11 @@ end
 -- @param check_different_list Array, containing a list of elements, the element inside column
 --                             in position i, needs to be different from element inside check_different_list
 --                             in position i, see line 74; 
+-- @param skip_flow Array, with a pair { key = key, value = value }, containing a list of values
+--                  that excludes the flow from the aggregation (e.g. ASN = 0)
 -- @return an array with a list of elements at 0 with are not ids, correctly compiled otherwise
 local function formatEmptyStats(columns, flow, rename_field_list,
-                                check_different_list)
+                                check_different_list, skip_flow)
     local element = {}
     local trace_string = "Creating entry for new key"
     -- Iterate all columns and create an entry for each KEY column (see scripts/lua/modules/flow_data_preset.lua)
@@ -87,6 +89,13 @@ local function formatEmptyStats(columns, flow, rename_field_list,
         else
             -- Not a key, so a value, set it to 0
             element[key] = 0
+        end
+    end
+
+    for _, skip_info in pairs(skip_flow or {}) do
+        if (skip_info.key) and (element[skip_info.key]) and
+            (tostring(element[skip_info.key]) == tostring(skip_info.value)) then
+            return nil
         end
     end
 
@@ -155,7 +164,10 @@ function flow_data.getStats(queries)
             --      bytes_rcvd: 0
             local empty = formatEmptyStats(columns, flow,
                                            query_info.rename_key_field,
-                                           different_columns)
+                                           different_columns,
+                                           query_info.skip_flow)
+            -- In case no record is created, skip the flow
+            if not empty then goto skip_flow end
             -- Now given the empty table created, create a unique key, where only
             -- flows with the same exact requested data are going to have the same
             -- key
@@ -167,6 +179,7 @@ function flow_data.getStats(queries)
             -- Now update the data (e.g. bytes_sent and bytes_rcvd)
             results[key] = updateStats(columns, query_info.invert_direction,
                                        flow, results[key])
+            ::skip_flow::
         end
         if isHistorical then -- Historical
             if not ntop.isEnterpriseM() then return {} end
@@ -207,8 +220,9 @@ function flow_data.formatStats(stats_to_format)
         local formatted_element = {}
         for key, value in pairs(values or {}) do
             -- Format the data
-            local formatted_data = flow_data_preset.getFormattedDataAndLink(key, value,
-                                                                     values)
+            local formatted_data = flow_data_preset.getFormattedDataAndLink(key,
+                                                                            value,
+                                                                            values)
             if (formatted_data ~= value) or (type(formatted_data) == "string") then
                 formatted_element[key] = {id = value, name = formatted_data}
             else

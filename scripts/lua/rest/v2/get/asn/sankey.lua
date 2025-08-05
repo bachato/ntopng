@@ -77,6 +77,7 @@ elseif isEmptyString(criteria) or (criteria == "traffic_between_ases") then
             },
             different_from = {nil, "src_asn", "dst_asn"},
             rename_key_field = {nil, "src_peer_asn_1", "dst_peer_asn_1"},
+            skip_flow = {{key = "src_asn", value = "0"}},
             where_query = {"dst_asn"},
             filters = {
                 dst_asn = asn,
@@ -97,6 +98,7 @@ elseif isEmptyString(criteria) or (criteria == "traffic_between_ases") then
             where_query = {"src_asn"},
             different_from = {"src_asn", "dst_asn"},
             rename_key_field = {"src_peer_asn_2", "dst_peer_asn_2"},
+            skip_flow = {{key = "dst_asn", value = 0}},
             filters = {
                 src_asn = asn,
                 ifid = ifid,
