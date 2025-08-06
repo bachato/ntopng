@@ -192,7 +192,7 @@ export default {
             // default begin date time now - 30 minutes
             let begin_date_time_utc = end_date_time_utc - 30 * 60 * 1000;
             if (status.epoch_end != null && status.epoch_begin != null
-                && Number.parseInt(status.epoch_end) > Number.parseInt(status.epoch_begin)) {
+                && Number.parseInt(status.epoch_end) >= Number.parseInt(status.epoch_begin)) {
                 status.epoch_begin = Number.parseInt(status.epoch_begin);
                 status.epoch_end = Number.parseInt(status.epoch_end);
                 end_date_time_utc = status.epoch_end * 1000;

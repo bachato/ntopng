@@ -10,11 +10,13 @@
         </div>
         <div class="w-100 d-flex align-items-center button-group">
             <CustomSwitch v-model:value="toggle_slider" :change_label_side="true" :label="toggle_slider_label" style=""
-                class="me-1" icon="fa-calendar-days" :title="toggle_slider_label" @change_value="saveSwitch"></CustomSwitch>
+                class="me-1" icon="fa-calendar-days" :title="toggle_slider_label" @change_value="saveSwitch">
+            </CustomSwitch>
             <div class="w-100 position-relative">
                 <Transition name="add-effect" mode="out-in">
                     <DateTimeRangePicker v-if="toggle_slider" class="dontprint" id="as-date-time-picker"
-                        :round_time="true" min_time_interval_id="min" @epoch_change="setTimeInterval">
+                        :round_time="true" :custom_time_interval_list="time_preset_list" min_time_interval_id="live"
+                        :custom_change_select_time="changeTime" @epoch_change="setTimeInterval">
                     </DateTimeRangePicker>
                 </Transition>
                 <Transition name="add-effect" mode="out-in">
@@ -87,6 +89,17 @@ const sankey_format_list = [
     { key: "criteria_as", value: 'traffic_between_ases', label: _i18n('as_overview.as_traffic_criteria') },
     { key: "criteria_as", value: 'ingress_egress_traffic_criteria', label: _i18n('as_overview.ingress_egress_traffic_criteria') },
 ];
+const time_preset_list = [
+    { value: "live", label: i18n('live'), currently_active: true },
+    { value: "30_min", label: i18n('show_alerts.presets.30_min'), currently_active: false },
+    { value: "hour", label: i18n('show_alerts.presets.hour'), currently_active: false },
+    { value: "12_hours", label: i18n('show_alerts.presets.12_hours'), currently_active: false },
+    { value: "day", label: i18n('show_alerts.presets.day'), currently_active: false },
+    { value: "week", label: i18n('show_alerts.presets.week'), currently_active: false },
+    { value: "month", label: i18n('show_alerts.presets.month'), currently_active: false },
+    { value: "year", label: i18n('show_alerts.presets.year'), currently_active: false },
+    { value: "custom", label: i18n('show_alerts.presets.custom'), currently_active: false, disabled: true, },
+]
 
 const note_list = [
     _i18n("as_overview.note_ingress_egress"),
@@ -113,6 +126,19 @@ onBeforeMount(() => {
     }
     ntopng_url_manager.set_key_to_url("criteria_as", active_sankey_type.value.value);
 })
+
+/* ************************************** */
+
+const changeTime = (selectedTimeframe) => {
+    let interval = 0; // Live
+    if (selectedTimeframe !== 'live') {
+        const timeframesDict = ntopng_utility.get_timeframes_dict();
+        interval = timeframesDict[selectedTimeframe];
+    }
+    const epoch_end = ntopng_utility.get_utc_seconds(Date.now());
+    const epoch_begin = epoch_end - interval;
+    return [epoch_begin, epoch_end]
+}
 
 /* ************************************** */
 
@@ -158,6 +184,11 @@ function setTimeInterval(epoch_interval) {
         ntopng_url_manager.delete_key_from_url("type")
     } else {
         ntopng_url_manager.set_key_to_url("type", "historical")
+    }
+
+    if (epoch_interval.timeframe_id === 'live' || (epoch_interval.epoch_begin === epoch_interval.epoch_end)) {
+        ntopng_url_manager.delete_key_from_url("type")
+        ntopng_url_manager.delete_key_from_url("timeframe_id")
     }
     main_epoch_interval.value = epoch_interval;
     updateSankeyData();
