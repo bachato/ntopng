@@ -5501,6 +5501,21 @@ static int ntop_clickhouse_archive_data(lua_State *vm) {
 
 /* ****************************************** */
 
+static int ntop_swap_hostname_ip_cache(lua_State *vm) {
+  NetworkInterface *curr_iface = getLuaVMUserdata(vm, iface);
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (curr_iface && !curr_iface->isEnabled())
+    ndpi_cache_hostname_ip_swap(curr_iface->get_ndpi_struct());  
+
+  lua_pushnil(vm);
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_interface_update_ip_reassignment(lua_State *vm) {
   NetworkInterface *iface = NULL;
   int ifid = -1;
@@ -5928,6 +5943,9 @@ static luaL_Reg _ntop_interface_reg[] = {
     {"clickhouseExecCSVQuery", ntop_clickhouse_exec_csv_query},
     {"clickhouseArchiveData", ntop_clickhouse_archive_data},
 
+    /* DNS Cache */
+    {"swapHostnameIPCache", ntop_swap_hostname_ip_cache},
+    
     {NULL, NULL}};
 
 luaL_Reg *ntop_interface_reg = _ntop_interface_reg;

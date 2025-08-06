@@ -52,8 +52,7 @@ FlowChecksLoader::~FlowChecksLoader() {
 
 void FlowChecksLoader::registerCheck(FlowCheck *cb) {
   if (cb_all.find(cb->getName()) != cb_all.end()) {
-    ntop->getTrace()->traceEvent(
-        TRACE_ERROR, "Ignoring duplicate flow check %s", cb->getName().c_str());
+    ntop->getTrace()->traceEvent(TRACE_ERROR, "Ignoring duplicate flow check %s", cb->getName().c_str());
     delete cb;
     return;
   }
@@ -177,7 +176,10 @@ void FlowChecksLoader::registerChecks() {
         /* The risk is among those supported by class FlowRiskAlerts */
         && FlowRiskAlerts::getFlowRiskAlertType(risk).id != flow_alert_normal) {
       /* Instantiate a simple risk class to handle it */
-      if ((fcb = new FlowRiskGeneric(risk))) registerCheck(fcb);
+      if ((fcb = new FlowRiskGeneric(risk))) {
+	registerCheck(fcb);
+	ntop->getTrace()->traceEvent(TRACE_INFO, "Defined generic flow risk for riskId %u", risk);
+      }
     }
   }
 
@@ -297,7 +299,8 @@ void FlowChecksLoader::loadConfiguration() {
             strcmp(check_key, "unexpected_gateway") &&
             strcmp(check_key, "tcp_connection_refused") &&
             strcmp(check_key, "ndpi_tls_suspicious_esni_usage") &&
-            strcmp(check_key, "ndpi_fully_encrypted")
+            strcmp(check_key, "ndpi_fully_encrypted") &&
+	    strcmp(check_key, "ndpi_unresolved_hostname") /* Handled in UnresolvedHostname.cpp */
 #ifdef HAVE_NEDGE
             &&
             strcmp(check_key, "lateral_movement") &&

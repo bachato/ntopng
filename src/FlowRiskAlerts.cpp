@@ -91,7 +91,7 @@ static const FlowAlertTypeExtended risk_enum_to_alert_type[NDPI_MAX_RISK] {
   { { NDPI_PERIODIC_FLOW, flow_alert_ndpi_periodic_flow, alert_category_network}, "ndpi_periodic_flow"},
   { { NDPI_MINOR_ISSUES, flow_alert_ndpi_minor_issues, alert_category_network}, "ndpi_minor_issues"},
   { { NDPI_TCP_ISSUES, flow_alert_ndpi_tcp_issues, alert_category_network}, "ndpi_tcp_issues"},
-  { { NDPI_UNRESOLVED_HOSTNAME, flow_alert_ndpi_unresolved_hostname, alert_category_security}, "unresolved_hostname"},
+  { { NDPI_UNRESOLVED_HOSTNAME, flow_alert_ndpi_unresolved_hostname, alert_category_security}, NULL /* Handled by UnresolvedHostname.cpp */},
   { { NDPI_TLS_ALPN_SNI_MISMATCH, flow_alert_ndpi_tls_alpn_sni_mismatch, alert_category_security}, "ndpi_tls_alpn_sni_mismatch"},
   { { NDPI_MALWARE_HOST_CONTACTED, flow_alert_ndpi_malware_host_contacted, alert_category_security}, "ndpi_malware_host_contacted"},
   { { NDPI_BINARY_DATA_TRANSFER, flow_alert_ndpi_binary_data_transfer, alert_category_security}, "ndpi_binary_data_transfer"},
@@ -137,15 +137,17 @@ bool FlowRiskAlerts::lua(lua_State* vm) {
     if (fat.id != flow_alert_normal) {
       const char* alert_name = FlowRiskAlerts::getCheckName(risk);
 
-      lua_newtable(vm);
-
-      lua_push_uint64_table_entry(vm, "alert_id", fat.id);
-      lua_push_uint64_table_entry(vm, "category", fat.category);
-      lua_push_str_table_entry(vm, "risk_name", ndpi_risk2str(risk));
-
-      lua_pushstring(vm, alert_name);
-      lua_insert(vm, -2);
-      lua_settable(vm, -3);
+      if(alert_name != NULL) {
+	lua_newtable(vm);
+	
+	lua_push_uint64_table_entry(vm, "alert_id", fat.id);
+	lua_push_uint64_table_entry(vm, "category", fat.category);
+	lua_push_str_table_entry(vm, "risk_name", ndpi_risk2str(risk));
+	
+	lua_pushstring(vm, alert_name);
+	lua_insert(vm, -2);
+	lua_settable(vm, -3);
+      }
     }
   }
 
