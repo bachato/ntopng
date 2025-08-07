@@ -29,7 +29,7 @@ local function dropped_alerts_check(params)
    -- Fetch the number of dropped alerts out of system host stats
    -- The number fetched is the number of drops occured in the internal queue, that is,
    -- in the queue currently used to generate alerts from C
-   local dropped_alerts = system_host_stats["alerts_stats"]["alert_queues"]["internal_alerts_queue"]["num_not_enqueued"]
+   local dropped_alerts = system_host_stats["alerts_stats"]["alert_queues"]["internal_alerts_queue"]["num_not_enqueued"] or 0
 
    -- Compute the delta with the previous value for drops
    local delta_drops = alerts_api.interface_delta_val(script.key, params.granularity, dropped_alerts, true --[[ skip first --]])
