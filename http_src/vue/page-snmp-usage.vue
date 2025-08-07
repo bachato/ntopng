@@ -119,7 +119,9 @@ const map_table_def_columns = (columns) => {
         c.render_func = map_columns[c.data_field];
         if (c.id == "actions") {
             const visible_dict = {
-                historical_data: props.show_historical,
+                timeseries_chart: props.context.timeseries_enabled,
+                device_configuration: true,
+                interface_configuration: true,
             };
             c.button_def_array.forEach((b) => {
                 if (!visible_dict[b.id]) {

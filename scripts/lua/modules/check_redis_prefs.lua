@@ -130,7 +130,7 @@ end
 
 -- ###########################################
 
-function areSnmpTimeseriesEnabled(device, port_idx)
+function areSnmpTimeseriesEnabled()
     return (ntop.getPref("ntopng.prefs.snmp_devices_rrd_creation") == "1")
 end
 
