@@ -15,7 +15,7 @@ function format_utils.round(num, idp)
    end
 
    if num ~= num then -- nan (not a number)
-      ttprint("Number is nan")
+      tprint("Number is nan")
       io.write(debug.traceback() .. "\n")
       res = 0
    elseif math.abs(num) == math.huge then
