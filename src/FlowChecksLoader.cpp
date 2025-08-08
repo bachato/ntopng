@@ -51,14 +51,18 @@ FlowChecksLoader::~FlowChecksLoader() {
 /* **************************************************** */
 
 void FlowChecksLoader::registerCheck(FlowCheck *cb) {
-  if (cb_all.find(cb->getName()) != cb_all.end()) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "Ignoring duplicate flow check %s", cb->getName().c_str());
-    delete cb;
-    return;
+  std::string name = cb->getName();
+
+  if(name != std::string("")) {
+    if (cb_all.find(name) != cb_all.end()) {
+      ntop->getTrace()->traceEvent(TRACE_ERROR, "Ignoring duplicate flow check %s", name.c_str());
+      delete cb;
+      return;
+    }
+    
+    cb_all[name] = cb;
   }
-
-  cb_all[cb->getName()] = cb;
-
+  
   /*
     If this is a check that handles an nDPI flow risk,
     the corresponding risk is cleared in the unhandled risks bitmap

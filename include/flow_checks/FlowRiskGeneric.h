@@ -39,7 +39,11 @@ class FlowRiskGeneric : public FlowRisk {
     return new FlowRiskGenericAlert(this, f, risk);
   }
 
-  std::string getName() const  { return (FlowRiskAlerts::getCheckName(risk)); }
+  std::string getName() const  {
+    const char *name = FlowRiskAlerts::getCheckName(risk);
+    
+    return (name ? std::string(name) : "");
+  }
   ndpi_risk_enum handledRisk() { return risk;  }
 };
 
