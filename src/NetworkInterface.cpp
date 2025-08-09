@@ -8136,6 +8136,23 @@ Flow *NetworkInterface::findFlowByKeyAndHashId(u_int32_t key, u_int hash_id,
 
 /* **************************************************** */
 
+#ifdef HAVE_NEDGE
+
+/* Returns the number of dropped flows */
+u_int32_t NetworkInterface::dropHostTraffic(char *host_ip, AddressTree *allowed_hosts) {
+  IpAddress ip;
+
+  if (!flows_hash) return (NULL);
+
+  ip.set(host_ip);
+  
+  return(flows_hash->dropHostTraffic(&ip, allowed_hosts));
+}
+
+#endif
+
+/* **************************************************** */
+
 Flow *NetworkInterface::findFlowByTuple(u_int16_t vlan_id,
                                         u_int16_t observation_domain_id,
                                         u_int32_t private_flow_id, Mac *src_mac,

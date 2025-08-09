@@ -1411,6 +1411,8 @@ public:
 
 #ifndef HAVE_NEDGE
   inline u_int8_t getNumProfiles() { return (flow_profiles) ? flow_profiles->getNumProfiles() : 0; }
+#else
+  u_int32_t dropHostTraffic(char *host_ip, AddressTree *allowed_hosts);
 #endif
 #endif
   void getActiveMacs(lua_State *vm);

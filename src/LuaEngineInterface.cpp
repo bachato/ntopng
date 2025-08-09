@@ -301,11 +301,11 @@ static int ntop_interface_get_snmp_stats(lua_State *vm) {
 
   if (curr_iface && curr_iface->getFlowInterfacesStats()) {
     curr_iface->getFlowInterfacesStats()->lua(vm, curr_iface);
-    
+
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
   } else {
     lua_pushnil(vm);
-    
+
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   }
 }
@@ -473,10 +473,10 @@ static int ntop_interface_viewed_by(lua_State *vm) {
 #ifdef NTOPNG_PRO
   NetworkInterface *curr_iface = getCurrentInterface(vm);
 #endif
-  
+
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 #ifdef NTOPNG_PRO
-  if (curr_iface && curr_iface->isViewed()) 
+  if (curr_iface && curr_iface->isViewed())
     lua_pushinteger(vm, curr_iface->viewedBy()->get_id());
   else
 #endif
@@ -610,7 +610,7 @@ static int ntop_add_data_to_assets(lua_State *vm) {
 
     get_host_vlan_info(host, &key, &vlan_id, host_ip, sizeof(host_ip));
 
-    if ((!iface) || 
+    if ((!iface) ||
         ((h = iface->findHostByIP(get_allowed_nets(vm), host_ip, vlan_id,
 				  getLuaVMUservalue(vm, observationPointId))) == NULL)) {
       ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to locate host %s",
@@ -622,14 +622,14 @@ static int ntop_add_data_to_assets(lua_State *vm) {
       /* Available only for local hosts */
       if (lua_type(vm, 2) == LUA_TSTRING) /* Field provided */
         field = (char *)lua_tostring(vm, 2);
-        
+
       if (lua_type(vm, 3) == LUA_TSTRING) /* Value provided */
         value = (char *)lua_tostring(vm, 3);
 
       if (!h->addDataToAssets(field, value)) {
         ntop->getTrace()->traceEvent(TRACE_WARNING, "Error while updating [%s] Asset Map [field: %s][value :%s]",
                                   host ? host : "NULL",
-                                  field ? field : "NULL", 
+                                  field ? field : "NULL",
                                   value ? value : "NULL");
         return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
       }
@@ -658,7 +658,7 @@ static int ntop_remove_data_from_assets(lua_State *vm) {
 
     get_host_vlan_info(host, &key, &vlan_id, host_ip, sizeof(host_ip));
 
-    if ((!iface) || 
+    if ((!iface) ||
         ((h = iface->findHostByIP(get_allowed_nets(vm), host_ip,
 				  vlan_id, getLuaVMUservalue(vm, observationPointId))) == NULL)) {
       ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to locate host %s",
@@ -840,7 +840,7 @@ static int ntop_interface_reset_broadcast_domains(lua_State *vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
   curr_iface->resetBroacastDomains();
-  
+
   lua_pushnil(vm);
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
@@ -2165,9 +2165,9 @@ static int ntop_interface_insert_ip_acl(lua_State *vm) {
   u_int16_t l7_proto = 0;
   bool is_allowed = true;
   char *src, *dst, *port = NULL;
-  
+
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));  
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   protocol = (u_int8_t) lua_tointeger(vm, 1);
 
   if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
@@ -2192,7 +2192,7 @@ static int ntop_interface_insert_ip_acl(lua_State *vm) {
     res = curr_iface->insertIPACL(protocol, src, dst, port, l7_proto, is_allowed);
 #endif
   lua_pushboolean(vm, res);
-  
+
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
@@ -2206,7 +2206,7 @@ static int ntop_interface_remove_ip_acl(lua_State *vm) {
   u_int8_t protocol = 0;
   u_int16_t l7_proto = 0;
   char *src, *dst, *port = NULL;
-  
+
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   protocol = (u_int8_t) lua_tointeger(vm, 1);
@@ -2228,9 +2228,9 @@ static int ntop_interface_remove_ip_acl(lua_State *vm) {
   if (curr_iface)
     res = curr_iface->removeIPACL(protocol, src, dst, port, l7_proto);
 #endif
-  
+
   lua_pushboolean(vm, res);
-  
+
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
@@ -2258,7 +2258,7 @@ static int ntop_interface_insert_mac_acl(lua_State *vm) {
   }
 #endif
   lua_pushboolean(vm, res);
-  
+
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
@@ -2282,7 +2282,7 @@ static int ntop_interface_remove_mac_acl(lua_State *vm) {
   }
 #endif
   lua_pushboolean(vm, res);
-  
+
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
@@ -2295,7 +2295,7 @@ static int ntop_interface_get_acl_info(lua_State *vm) {
   if (curr_iface) {
     curr_iface->getACLInfo(vm);
   }
-#endif  
+#endif
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
@@ -2545,7 +2545,7 @@ static int ntop_radius_accounting_update(lua_State *vm) {
 
   traffic_data.nas_port_name = curr_iface->get_name();
   traffic_data.nas_port_id = curr_iface->get_id();
-  
+
   res = ntop->radiusAccountingUpdate(&traffic_data);
 #endif
 
@@ -2833,7 +2833,7 @@ static int ntop_get_interface_flows_info(lua_State *vm) {
   }
 
   if (lua_type(vm, 2) == LUA_TTABLE) p->readOptions(vm, 2);
-  
+
   if (lua_type(vm, 3) == LUA_TSTRING) {
     get_host_vlan_info((char *)lua_tostring(vm, 3), &talking_with_ip, &vlan_id,
                        buf, sizeof(buf));
@@ -2841,7 +2841,7 @@ static int ntop_get_interface_flows_info(lua_State *vm) {
 					    getLuaVMUservalue(vm, observationPointId),
 					    false /* Not an inline call */);
   }
-  
+
   if (lua_type(vm, 4) == LUA_TSTRING) {
     get_host_vlan_info((char *)lua_tostring(vm, 4), &client_ip, &vlan_id, buf,
                        sizeof(buf));
@@ -3553,6 +3553,9 @@ static int ntop_get_interface_find_flow_by_tuple(lua_State *vm) {
 
 /* ****************************************** */
 
+#ifdef HAVE_NEDGE
+
+/* Set policy to drop for the specified flow */
 static int ntop_drop_flow_traffic(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
   u_int32_t key;
@@ -3587,6 +3590,39 @@ static int ntop_drop_flow_traffic(lua_State *vm) {
 
 /* ****************************************** */
 
+/*
+  Drops all flows where the specified IP is either client or server,
+  and return the flow number
+*/
+static int ntop_drop_host_traffic(lua_State *vm) {
+  NetworkInterface *curr_iface = getCurrentInterface(vm);
+  AddressTree *ptree = get_allowed_nets(vm);
+  char *host;
+  u_int32_t num_dropped_flows;
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+  else
+    host = (char *)lua_tostring(vm, 1);
+
+  if (!curr_iface)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  if (!ntop->isUserAdministrator(vm))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  num_dropped_flows = curr_iface->dropHostTraffic(host, ptree);
+  //if(num_dropped_flows > 0)  iface->setPolicyChanged();
+
+  lua_pushinteger(vm, num_dropped_flows);
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_drop_multiple_flows_traffic(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
   Paginator *p = NULL;
@@ -3612,6 +3648,8 @@ static int ntop_drop_multiple_flows_traffic(lua_State *vm) {
   if (p) delete p;
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
+
+#endif
 
 /* ****************************************** */
 
@@ -3694,9 +3732,9 @@ static int ntop_get_interface_find_host(lua_State *vm) {
 
   if (!curr_iface)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  
+
   curr_iface->findHostsByName(vm, get_allowed_nets(vm), key);
-  
+
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
@@ -3842,8 +3880,7 @@ static int ntop_update_host_traffic_policy(lua_State *vm) {
 
   if (!curr_iface) return CONST_LUA_ERROR;
 
-  lua_pushboolean(vm, curr_iface->updateHostTrafficPolicy(
-                          get_allowed_nets(vm), host_ip, vlan_id));
+  lua_pushboolean(vm, curr_iface->updateHostTrafficPolicy(get_allowed_nets(vm), host_ip, vlan_id));
   return CONST_LUA_OK;
 }
 
@@ -4258,7 +4295,7 @@ static int ntop_interface_store_triggered_alert(lua_State *vm) {
 static int ntop_get_interface_stats(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
   bool full_stats = true;
-  
+
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
   if (!curr_iface)
@@ -5324,8 +5361,7 @@ static int ntop_get_policy_change_marker(lua_State *vm) {
 
   if (curr_iface &&
       (curr_iface->getIfType() == interface_type_NETFILTER))
-    lua_pushinteger(
-        vm, ((NetfilterInterface *)curr_iface)->getPolicyChangeMarker());
+    lua_pushinteger(vm, ((NetfilterInterface *)curr_iface)->getPolicyChangeMarker());
   else
     lua_pushnil(vm);
 
@@ -5507,7 +5543,7 @@ static int ntop_swap_hostname_ip_cache(lua_State *vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
   if (curr_iface && !curr_iface->isEnabled())
-    ndpi_cache_hostname_ip_swap(curr_iface->get_ndpi_struct());  
+    ndpi_cache_hostname_ip_swap(curr_iface->get_ndpi_struct());
 
   lua_pushnil(vm);
 
@@ -5731,8 +5767,6 @@ static luaL_Reg _ntop_interface_reg[] = {
     {"getScore", ntop_get_interface_score},
     {"findFlowByKeyAndHashId", ntop_get_interface_find_flow_by_key_and_hash_id},
     {"findFlowByTuple", ntop_get_interface_find_flow_by_tuple},
-    {"dropFlowTraffic", ntop_drop_flow_traffic},
-    {"dropMultipleFlowsTraffic", ntop_drop_multiple_flows_traffic},
     {"findPidFlows", ntop_get_interface_find_pid_flows},
     {"findNameFlows", ntop_get_interface_find_proc_name_flows},
     {"listHTTPhosts", ntop_list_http_hosts},
@@ -5873,6 +5907,11 @@ static luaL_Reg _ntop_interface_reg[] = {
 #endif
 
 #ifdef HAVE_NEDGE
+
+    {"dropFlowTraffic", ntop_drop_flow_traffic},
+    {"dropMultipleFlowsTraffic", ntop_drop_multiple_flows_traffic},
+    {"dropHostTraffic", ntop_drop_host_traffic},
+
     /* L7 */
     {"reloadL7Rules", ntop_reload_l7_rules},
     {"reloadShapers", ntop_reload_shapers},
@@ -5945,7 +5984,7 @@ static luaL_Reg _ntop_interface_reg[] = {
 
     /* DNS Cache */
     {"swapHostnameIPCache", ntop_swap_hostname_ip_cache},
-    
+
     {NULL, NULL}};
 
 luaL_Reg *ntop_interface_reg = _ntop_interface_reg;

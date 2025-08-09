@@ -131,3 +131,40 @@ Flow *FlowHash::findByKeyAndHashId(u_int32_t key, u_int32_t hash_id) {
 
   return ((Flow *)head);
 }
+
+/* **************************************************** */
+
+#ifdef HAVE_NEDGE
+
+u_int32_t FlowHash::dropHostTraffic(IpAddress *host_ip, AddressTree *allowed_hosts) {
+  u_int32_t num_matched_flows = 0;
+  
+  for(u_int32_t i=0; i<num_hashes; i++) {
+    u_int32_t hash = i % num_hashes;
+    Flow *head = (Flow *)table[hash];
+    
+    if (head != NULL) {    
+      locks[hash]->rdlock(__FILE__, __LINE__);
+      
+      while (head) {
+	if (!head->idle()) {	
+	  if((head->get_cli_ip_addr()->equal(host_ip)) || (head->get_srv_ip_addr()->equal(host_ip))) {
+	    if(head->match(allowed_hosts)) {
+	      head->setDropVerdict(DROP_REASON_USER_ACTION);
+	      num_matched_flows++;
+	    }
+	  }
+	}
+
+	head = (Flow *)head->next();
+      }  /* while */
+
+      locks[hash]->unlock(__FILE__, __LINE__);
+    } /* if */    
+  } /* while */
+  
+  return(num_matched_flows);
+}
+
+#endif
+

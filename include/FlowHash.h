@@ -43,6 +43,10 @@ class FlowHash : public GenericHash {
    * isn't entry with the key parameter or if the hash is empty.
    */
   Flow *findByKeyAndHashId(u_int32_t key, u_int32_t hash_id);
+
+#ifdef HAVE_NEDGE
+  u_int32_t dropHostTraffic(IpAddress *host_ip, AddressTree *allowed_hosts);
+#endif  
 };
 
 #endif /* _FLOW_HASH_H_ */
