@@ -564,7 +564,7 @@ else
 
    if isAdministrator() then
       if (_POST["drop_flow_policy"] == "true") then
-         interface.dropFlowTraffic(tonumber(flow_key))
+         interface.dropFlowTraffic(tonumber(flow_key), tonumber(flow_hash_id))
          flow["verdict.pass"] = false
       end
    end
@@ -780,7 +780,7 @@ else
       end
 
       -- ENABLE MARKER DEBUG
-      if ntop.isnEdge() and false then
+      if ntop.isnEdge() then
          print("<tr><th width=10%>" .. i18n("flow_details.flow_marker") .. "</th>")
          print("<td colspan=2>" .. nf_config.formatMarker(flow["marker"]) .. "</td>")
          print("</tr>")
