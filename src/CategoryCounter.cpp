@@ -40,15 +40,14 @@ CategoryCounter::CategoryCounter(const CategoryCounter &c) {
 
 void CategoryCounter::lua(NetworkInterface *iface, lua_State *vm,
                           u_int16_t category_id, bool tsLua) {
-  const char *name =
-      iface->get_ndpi_category_name((ndpi_protocol_category_t)category_id);
+  const char *name = iface->get_ndpi_category_name((ndpi_protocol_category_t)category_id);
 
   if (!tsLua) {
     u_int64_t bytes_total = bytes.getTotal();
     lua_newtable(vm);
 
     if (bytes_total > INT64_MAX) {
-      ntop->getTrace()->traceEvent(TRACE_ERROR, "bytes (%llu/%llu/%llu) for category %s (%d) exceeds "
+      ntop->getTrace()->traceEvent(TRACE_ERROR, "bytes (total=%llu/sent=%llu/rcvd=%llu) for category %s (%d) exceeds "
                                    "max (%llu) allowed for ts",
                                    bytes_total, bytes.getSent(), bytes.getRcvd(),
                                    name, (int) category_id, INT64_MAX);
