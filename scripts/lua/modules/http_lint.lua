@@ -2594,6 +2594,7 @@ local known_parameters = {
     ["edit_device_policy"] = validateEmpty, -- set when editing device policy
     ["delete_user"] = validateSingleWord,
     ["drop_flow_policy"] = validateBool, -- true if target flow should be dropped
+    ["drop_host_policy"] = validateBool, -- true if target flow should be dropped
     ["traffic_type"] = validateBroadcastUnicast, -- flows_stats.lua
     ["alert_type"] = validateAlertTypeAndSeverity, -- flows_stats.lua
     ["flow_status"] = validateAlertType, -- flows_stats.lua

@@ -252,7 +252,7 @@ if((page == "overview") or (page == nil)) then
    end
 
    if have_nedge then
-     print("<tr><th>" .. i18n("hosts_stats.location") .. " </th><td colspan=2>".. firstToUpper(mac_info.location) .."</td></tr>\n")
+     print("<tr><th>" .. i18n("hosts_stats.location") .. " </th><td colspan=2>".. string.upper(mac_info.location) .."</td></tr>\n")
    end
 
    print("<tr><th>".. i18n("details.first_last_seen") .. "</th><td nowrap><span id=first_seen>" .. formatEpoch(mac_info["seen.first"]) ..  " [" .. secondsToTime(os.time()-mac_info["seen.first"]) .. " " .. i18n("details.ago").."]" .. "</span></td>\n")

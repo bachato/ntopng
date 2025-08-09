@@ -1,5 +1,5 @@
 --
--- (C) 2013-24 - ntop.org
+-- (C) 2013-25 - ntop.org
 --
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
@@ -743,6 +743,11 @@ else
       end
 
       local shaper
+      local cli_mac = flow["cli.mac"] and interface.getMacInfo(flow["cli.mac"])
+      local srv_mac = flow["srv.mac"] and interface.getMacInfo(flow["srv.mac"])
+      local cli_show = (cli_mac and cli_mac.location == "lan" and flow["cli.pool_id"] == 0)
+      local srv_show = (srv_mac and srv_mac.location == "lan" and flow["srv.pool_id"] == 0)
+      local num_rows = 0
 
       print("<td nowrap>" .. c .. "</td>")
       shaper = shaper_utils.nedge_shaper_id_to_shaper(flow["shaper.cli2srv_egress"])
@@ -753,6 +758,15 @@ else
       print(i18n("ingress") .. " " .. shaper.icon .. " " .. shaper.text .. " / ")
       shaper = shaper_utils.nedge_shaper_id_to_shaper(flow["shaper.cli2srv_egress"])
       print(i18n("egress") .. " " .. shaper.icon .. " " .. shaper.text)
+
+      if ntop.isnEdge() then
+         local cli_mac = flow["cli.mac"] and interface.getMacInfo(flow["cli.mac"])
+	 
+	  if(cli_mac.location ~= "lan") then
+	    print('<br><span class="badge bg-danger"">'.. i18n("nedge.invalid_src_host_location")..'</span>')
+	 end
+      end
+      
       print("</td>")
       print("</tr>")
 
@@ -794,12 +808,6 @@ else
          forbidden_proto = alert_info["devproto_forbidden_id"] or forbidden_proto
          forbidden_peer = alert_info["devproto_forbidden_peer"]
       end
-
-      local cli_mac = flow["cli.mac"] and interface.getMacInfo(flow["cli.mac"])
-      local srv_mac = flow["srv.mac"] and interface.getMacInfo(flow["srv.mac"])
-      local cli_show = (cli_mac and cli_mac.location == "lan" and flow["cli.pool_id"] == 0)
-      local srv_show = (srv_mac and srv_mac.location == "lan" and flow["srv.pool_id"] == 0)
-      local num_rows = 0
 
       if cli_show then
          num_rows = num_rows + 1

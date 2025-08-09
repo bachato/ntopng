@@ -16,8 +16,6 @@ local host_sites_update
 local sites_granularities = {}
 local auth = require "auth"
 local ts_utils = require "ts_utils_core"
-
-
 local vs_utils = require "vs_utils"
 local cve_utils = require "cve_utils"
 
@@ -115,6 +113,14 @@ end
 
 local restoreFailed = false
 local restoreInProgress = false
+
+-- #####################################################
+
+if(host_ip and isAdministrator()) then
+    if (_POST["drop_host_policy"] == "true") then
+       interface.dropHostTraffic(host_ip)
+    end
+end
 
 -- #####################################################
 
@@ -828,7 +834,16 @@ else
                 print(' <A class="ntopng-external-link" href="https://www.abuseipdb.com/check/' .. host["ip"] ..
                           '" target=_blank><small>AbuseIP DB</small> <i class=\"fas fa-external-link-alt\"></i></A>')
             end
-	    
+
+           if (ifstats.inline) then
+              print(' <form class="form-inline float-right" style="margin-bottom: 0px;" method="post">')
+              print('<input type="hidden" name="drop_host_policy" value="true">')
+              print('<button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-ban"></i> ' ..
+                 i18n("host_details.drop_host_traffic_btn") .. '</button>')
+              print('<input id="csrf" name="csrf" type="hidden" value="' .. ntop.getRandomCSRFValue() .. '" />\n')
+              print('</form>')
+            end
+   
             print("</td>\n")
         end
 	
