@@ -1042,6 +1042,7 @@ flow_consts.major_connection_states = {
 
 -- keep in sync with enum DropReason in include/ntop_typedefs.h 
 flow_consts.drop_reason = {
+   [ 0] = { i18n_label = "drop_reason.user_action" },
    [ 1] = { i18n_label = "drop_reason.user_action" },
    [ 2] = { i18n_label = "drop_reason.probe_verdict" },
    [ 3] = { i18n_label = "drop_reason.blacklisted_flow" },
