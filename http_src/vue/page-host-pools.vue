@@ -172,6 +172,7 @@ const map_table_def_columns = (columns) => {
             return formatterUtils.getFormatter("number")(value);
         },
         "seen_since": (value, row) => {
+	    if(value == 0) return("");
             const formattedDate = NtopUtils.secondsToTime(Math.round(new Date().getTime() / 1000) - value)
             return formattedDate;
         },
@@ -183,7 +184,8 @@ const map_table_def_columns = (columns) => {
         "throughput": (value, row) => {
             return formatterUtils.getFormatter("bps")(value);
         },
-        "traffic": (value, row) => {
+        "traffic": (value, row) => {	
+	    if(value == 0) return("");
             return formatterUtils.getFormatter("bytes")(value);
         },
         "clean_members": (value, row) => {
