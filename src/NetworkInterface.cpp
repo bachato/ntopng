@@ -1664,7 +1664,8 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 				     struct ndpi_ipv6hdr *ip6, u_int16_t ip_offset,
 				     u_int16_t encapsulation_overhead, u_int32_t len_on_wire,
 				     const struct pcap_pkthdr *h, const u_char *packet, u_int16_t *ndpiProtocol,
-				     Host **srcHost, Host **dstHost, Flow **hostFlow) {
+				     Host **srcHost, Host **dstHost, Flow **hostFlow,
+				     u_int8_t *sender_mac) {
   u_int16_t trusted_ip_len = max_val(0, (int)h->caplen - ip_offset);
   u_int16_t trusted_payload_len = 0;
   u_int32_t private_flow_id = 0;
@@ -1707,7 +1708,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 						datalink_type, *ingressPacket,
 						when, packet_time, eth, vlan_id, iph,
 						ip6, ip_offset, encapsulation_overhead, len_on_wire, h, packet,
-						ndpiProtocol, srcHost, dstHost, hostFlow);
+						ndpiProtocol, srcHost, dstHost, hostFlow, sender_mac);
     }
 #endif
 #endif
@@ -1722,7 +1723,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
           pass_verdict = vIface->processPacket(if_index, bridge_iface_idx,
 					       datalink_type, ingressPacket, when, packet_time, eth, vlan_id,
 					       iph, ip6, ip_offset, encapsulation_overhead, len_on_wire, h,
-					       packet, ndpiProtocol, srcHost, dstHost, hostFlow);
+					       packet, ndpiProtocol, srcHost, dstHost, hostFlow, sender_mac);
           processed = true;
         }
       }
@@ -2198,10 +2199,47 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 #ifdef IMPLEMENT_SMART_FRAGMENTS
         || (fragment_offset == 0)
 #endif
-	)
+	) {
+#ifdef HAVE_NEDGE
+      if((*ingressPacket == false) /* LAN -> WAN */
+	 && (sender_mac != NULL)
+	 ) {
+	Mac *src_mac = flow->get_cli_host()->getMac();
+	Mac *srv_mac = flow->get_srv_host()->getMac();
+
+	if(src2dst_direction == false) /* dst -> src */ {
+	  if(src_mac && src_mac->isNull()
+	     && srv_mac && memcmp(srv_mac->get_mac(), sender_mac, 6)) {
+	    src_mac->set(sender_mac);
+
+#ifdef DEBUG
+	    char buf[43];
+	    
+	    ntop->getTrace()->traceEvent(TRACE_WARNING, "[cli][ingressPacket: %s][MAC %s]",
+					 *ingressPacket ? "YES" : "No",
+					 src_mac->print(buf, sizeof(buf)));
+#endif
+	  }
+	} else {
+	  if(srv_mac && srv_mac->isNull()
+	     && src_mac && memcmp(src_mac->get_mac(), sender_mac, 6)) {
+	    srv_mac->set(sender_mac);
+
+#ifdef DEBUG
+	    char buf[43];
+	    
+	    ntop->getTrace()->traceEvent(TRACE_WARNING, "[srv][ingressPacket: %s][MAC %s]",
+					 *ingressPacket ? "YES" : "No",
+					 srv_mac->print(buf, sizeof(buf)));
+#endif
+	  }
+	}
+      }
+#endif
+
       flow->processPacket(src2dst_direction, h, ip, trusted_ip_len, packet_time, payload,
                           trusted_payload_len, src_port);
-    else {
+    } else {
       // FIX - only handle unfragmented packets
       // ntop->getTrace()->traceEvent(TRACE_WARNING, "IP fragments are not
       // handled yet!");
@@ -2459,7 +2497,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
       incnDPIStats(when->tv_sec,
 		   flow->getStatsProtocol(), flow->get_protocol_category(),
 		   flow->get_bytes_cli2srv(), flow->get_bytes_srv2cli(),
-       flow->get_packets_cli2srv(), flow->get_packets_srv2cli());
+		   flow->get_packets_cli2srv(), flow->get_packets_srv2cli());
       flow->setFlowAccounted(); /* Set the flow as accounted */
     }
   }
@@ -3108,7 +3146,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	pass_verdict = processPacket(if_index, bridge_iface_idx,
 				     datalink_type, &ingressPacket, &h->ts, time, ethernet, vlan_id,
 				     iph, ip6, ip_offset, encapsulation_overhead, len_on_wire, h,
-				     packet, ndpiProtocol, srcHost, dstHost, flow);
+				     packet, ndpiProtocol, srcHost, dstHost, flow, sender_mac);
       } catch (std::bad_alloc &ba) {
 	static bool oom_warning_sent = false;
 
@@ -3266,7 +3304,8 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	  pass_verdict = processPacket(if_index, bridge_iface_idx, datalink_type,
 				       &ingressPacket, &h->ts, time, ethernet,
 				       vlan_id, iph, ip6, ip_offset, encapsulation_overhead,
-				       len_on_wire, h, packet, ndpiProtocol, srcHost, dstHost, flow);
+				       len_on_wire, h, packet, ndpiProtocol, srcHost, dstHost,
+				       flow, sender_mac);
 	} catch (std::bad_alloc &ba) {
 	  static bool oom_warning_sent = false;
 
@@ -5367,16 +5406,16 @@ static bool flow_search_walker(GenericHashEntry *h, void *user_data, bool *match
   if (retriever->actNumEntries >= retriever->maxNumEntries)
     return (true); /* Limit reached - stop iterating */
 
-  if (flow_matches(f, retriever)) {    
+  if (flow_matches(f, retriever)) {
     if(retriever->currentSize == retriever->actNumEntries) {
       /* Not enough space: we need to grow a bit */
       u_int32_t oldSize = retriever->currentSize * sizeof(struct flowHostRetrieveList);
       u_int32_t newSize = (retriever->currentSize + FLOWHOSTRETRIEVER_BLOCK_SIZE) * sizeof(struct flowHostRetrieveList);
       struct flowHostRetrieveList *new_elems = (struct flowHostRetrieveList*)realloc(retriever->elems, newSize);
-    
+
       if(new_elems) {
 	char *ptr = (char*)new_elems;
-      
+
 	memset(&ptr[oldSize], 0, newSize - oldSize); /* Set new slots to NULL */
 	retriever->elems = new_elems, retriever->currentSize += FLOWHOSTRETRIEVER_BLOCK_SIZE;
       } else {
@@ -5384,7 +5423,7 @@ static bool flow_search_walker(GenericHashEntry *h, void *user_data, bool *match
 	return (true); /* Stop walking */
       }
     }
-  
+
     retriever->elems[retriever->actNumEntries].flow = f;
     retriever->totBytesSent += f->get_bytes_cli2srv();
     retriever->totBytesRcvd += f->get_bytes_srv2cli();
@@ -5786,10 +5825,10 @@ static bool mac_search_walker(GenericHashEntry *he, void *user_data,
     u_int32_t oldSize = r->currentSize * sizeof(struct flowHostRetrieveList);
     u_int32_t newSize = (r->currentSize + FLOWHOSTRETRIEVER_BLOCK_SIZE) * sizeof(struct flowHostRetrieveList);
     struct flowHostRetrieveList *new_elems = (struct flowHostRetrieveList*)realloc(r->elems, newSize);
-    
+
     if(new_elems) {
       char *ptr = (char*)new_elems;
-      
+
       memset(&ptr[oldSize], 0, newSize - oldSize); /* Set new slots to NULL */
       r->elems = new_elems, r->currentSize += FLOWHOSTRETRIEVER_BLOCK_SIZE;
     } else {
@@ -5797,7 +5836,7 @@ static bool mac_search_walker(GenericHashEntry *he, void *user_data,
       return (true); /* Stop walking */
     }
   }
-  
+
   r->elems[r->actNumEntries].macValue = m;
 
   switch (r->sorter) {
@@ -6654,7 +6693,7 @@ int NetworkInterface::sortMacs(u_int32_t *begin_slot, bool walk_all,
     retriever->locationFilter = location_filter,
     retriever->min_first_seen = min_first_seen, retriever->ndpi_proto = -1,
     retriever->currentSize = FLOWHOSTRETRIEVER_BLOCK_SIZE;
-  
+
   retriever->elems = (struct flowHostRetrieveList *)calloc(sizeof(struct flowHostRetrieveList), retriever->currentSize);
 
   if (retriever->elems == NULL) {
@@ -6687,7 +6726,7 @@ int NetworkInterface::sortMacs(u_int32_t *begin_slot, bool walk_all,
 				 sortColumn);
     sorter = numericSorter;
   }
-  
+
   // make sure the caller has disabled the purge!!
   walker(begin_slot, walk_all, walker_macs, mac_search_walker, (void *)retriever);
 
@@ -8145,7 +8184,7 @@ u_int32_t NetworkInterface::dropHostTraffic(char *host_ip, AddressTree *allowed_
   if (!flows_hash) return 0;
 
   ip.set(host_ip);
-  
+
   return(flows_hash->dropHostTraffic(&ip, allowed_hosts));
 }
 

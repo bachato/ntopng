@@ -102,6 +102,7 @@ class Mac : public GenericHashEntry {
   bool equal(const Mac *m) {
     return ((memcmp(mac, m->mac, 6) == 0) ? true : false);
   };
+  inline void set(u_int8_t *macval) { memcpy(mac, macval, 6); };
 
 #ifdef NTOPNG_PRO
   inline time_t getNotifiedTime() { return captive_portal_notified; };

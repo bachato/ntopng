@@ -1111,7 +1111,8 @@ void Flow::processPacket(bool src2dst_direction,
    * traffic), nDPI should process at least one packet in order to be able to
    * guess the protocol. */
 
-  proto_id = ndpi_detection_process_packet(iface->get_ndpi_struct(), ndpiFlow, ip_packet, ip_len, packet_time, NULL);
+  proto_id = ndpi_detection_process_packet(iface->get_ndpi_struct(),
+					   ndpiFlow, ip_packet, ip_len, packet_time, NULL);
 
   if((ndpi_flow_risk_bitmap != 0) && (ndpiFlow->risk == 0)) {
     /*

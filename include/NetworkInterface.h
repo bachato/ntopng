@@ -737,7 +737,8 @@ public:
                      u_int16_t ip_offset, u_int16_t encapsulation_overhead,
                      u_int32_t len_on_wire, const struct pcap_pkthdr *h,
                      const u_char *packet, u_int16_t *ndpiProtocol,
-                     Host **srcHost, Host **dstHost, Flow **flow);
+                     Host **srcHost, Host **dstHost, Flow **flow,
+		     u_int8_t *sender_mac);
   void processInterfaceStats(sFlowInterfaceStats *stats);
   void getActiveFlowsStats(nDPIStats *stats, FlowStats *status_stats,
                            AddressTree *allowed_hosts, Host *h,

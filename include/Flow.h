@@ -378,8 +378,8 @@ private:
                              u_int32_t diff_rcvd_packets,
                              u_int64_t diff_rcvd_bytes,
                              u_int64_t diff_rcvd_goodput_bytes);
-  static void updatePacketStats(InterarrivalStats *stats,
-                                const struct timeval *when, bool update_iat);
+  void updatePacketStats(InterarrivalStats *stats,
+			 const struct timeval *when, bool update_iat);
   char *printTCPState(char *const buf, u_int buf_len) const;
   void update_pools_stats(NetworkInterface *iface, Host *cli_host,
                           Host *srv_host, const struct timeval *tv,
