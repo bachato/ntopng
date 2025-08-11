@@ -26,27 +26,21 @@
 					"id": "chart_blacklist",
 					"icon": "fas fa-lg fa-chart-area",
 					"title_i18n": "chart",
-					"class": [
-						"btn-info"
-					],
+					"class": [],
 					"event_id": "click_chart"
 				},
 				{
 					"id": "edit_blacklist",
 					"icon": "fas fa-edit",
 					"title_i18n": "edit",
-					"class": [
-						"btn-info"
-					],
+					"class": [],
 					"event_id": "click_edit"
 				},
 				{
 					"id": "refresh_blacklist",
 					"icon": "fas fa-sync-alt",
 					"title_i18n": "refresh",
-					"class": [
-						"btn-info"
-					],
+					"class": [],
 					"event_id": "click_refresh"
 				}
 			]
