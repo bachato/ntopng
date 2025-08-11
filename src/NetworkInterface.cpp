@@ -1708,7 +1708,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 						datalink_type, *ingressPacket,
 						when, packet_time, eth, vlan_id, iph,
 						ip6, ip_offset, encapsulation_overhead, len_on_wire, h, packet,
-						ndpiProtocol, srcHost, dstHost, hostFlow, sender_mac);
+						ndpiProtocol, srcHost, dstHost, hostFlow);
     }
 #endif
 #endif
