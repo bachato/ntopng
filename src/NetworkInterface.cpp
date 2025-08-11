@@ -8142,7 +8142,7 @@ Flow *NetworkInterface::findFlowByKeyAndHashId(u_int32_t key, u_int hash_id,
 u_int32_t NetworkInterface::dropHostTraffic(char *host_ip, AddressTree *allowed_hosts) {
   IpAddress ip;
 
-  if (!flows_hash) return (NULL);
+  if (!flows_hash) return 0;
 
   ip.set(host_ip);
   
