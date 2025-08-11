@@ -1,56 +1,60 @@
 <!-- (C) 2022 - ntop.org     -->
 <template>
-  <modal @showed="showed()" ref="modal_id">
-    <template v-slot:title>{{ title_delete }}</template>
-    <template v-slot:body>
-      <!-- Modal -->
-      <div class="row form-group mb-3 has-feedback">
-        <div class="col col-md-12">
-          <label class="form-label">{{ _i18n("name") }}</label>
-          <input ref="list_name" class="form-control" type="text" disabled="disabled" readonly>
-        </div>
-      </div>
+    <modal ref="modal_id">
+        <template v-slot:title>{{ title_delete }}</template>
+        <template v-slot:body>
+            <!-- Modal -->
+            <div class="row form-group mb-3 has-feedback">
+                <div class="col col-md-12">
+                    <label class="form-label">{{ _i18n("name") }}</label>
+                    <input ref="list_name" class="form-control" type="text" disabled="disabled" readonly>
+                </div>
+            </div>
 
-      <div class="row form-group mb-3 has-feedback">
-        <div class="col col-md-12">
-          <label class="form-label">{{ _i18n("flow_details.url") }}</label>
-          <input ref="url" class="form-control" type="text" @input="validate_url"/>
-        </div>
-      </div>
+            <div class="row form-group mb-3 has-feedback">
+                <div class="col col-md-12">
+                    <label class="form-label">{{ _i18n("flow_details.url") }}</label>
+                    <input ref="url" class="form-control" type="text" @input="validate_url" />
+                </div>
+            </div>
 
-      <div class="row form-group mb-3">
-        <div class="col col-md-12">
-          <label class="form-label">{{ _i18n("category_lists.enabled") }}</label>
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" ref="enable_blacklist" id="enable_blacklist" @click="change_checkbox"/>
-          </div>
-        </div>
-      </div>
+            <div class="row form-group mb-3">
+                <div class="col col-md-12">
+                    <label class="form-label">{{ _i18n("category_lists.enabled") }}</label>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" ref="enable_blacklist" id="enable_blacklist"
+                            @click="change_checkbox" />
+                    </div>
+                </div>
+            </div>
 
-      <div class="row form-group mb-3">
-        <div class="col col-md-6">
-          <label class="form-label">{{ _i18n("category") }}</label>
-          <select name="category" class="form-select" readonly disabled="disabled">
-            <option ref="category_name" selected></option>
-          </select>
-        </div>
-        <div class="col col-md-6">
-          <label class="form-label">{{ _i18n("category_lists.update_frequency") }}</label>
-          <select ref="list_update" class="form-select">
-            <option ref="daily_frequency" value="86400">{{ _i18n("alerts_thresholds_config.daily") }}</option>
-            <option ref="hourly_frequency" value="3600">{{ _i18n("alerts_thresholds_config.hourly") }}</option>
-            <option ref="manual_frequency" value="0">{{ _i18n("alerts_thresholds_config.manual") }}</option>
-          </select>
-        </div>
-      </div>
-    </template>
-    <template v-slot:footer>
-      <button type="button" @click="load_default_blacklist" :disabled="!valid_url" class="btn btn-secondary btn-block">{{
-    _i18n('category_lists.reset_list') }}</button>
-      <button type="button" @click="edit_blacklist_" :disabled="!valid_url" class="btn btn-primary btn-block">{{
-    _i18n('category_lists.edit_list') }}</button>
-    </template>
-  </modal>
+            <div class="row form-group mb-3">
+                <div class="col col-md-6">
+                    <label class="form-label">{{ _i18n("category") }}</label>
+                    <select name="category" class="form-select" readonly disabled="disabled">
+                        <option ref="category_name" selected></option>
+                    </select>
+                </div>
+                <div class="col col-md-6">
+                    <label class="form-label">{{ _i18n("category_lists.update_frequency") }}</label>
+                    <select ref="list_update" class="form-select">
+                        <option ref="daily_frequency" value="86400">{{ _i18n("alerts_thresholds_config.daily") }}
+                        </option>
+                        <option ref="hourly_frequency" value="3600">{{ _i18n("alerts_thresholds_config.hourly") }}
+                        </option>
+                        <option ref="manual_frequency" value="0">{{ _i18n("alerts_thresholds_config.manual") }}</option>
+                    </select>
+                </div>
+            </div>
+        </template>
+        <template v-slot:footer>
+            <button type="button" @click="load_default_blacklist" :disabled="!valid_url"
+                class="btn btn-secondary btn-block">{{
+                    _i18n('category_lists.reset_list') }}</button>
+            <button type="button" @click="edit_blacklist_" :disabled="!valid_url" class="btn btn-primary btn-block">{{
+                _i18n('category_lists.edit_list') }}</button>
+        </template>
+    </modal>
 </template>
 
 <script setup>
@@ -68,93 +72,93 @@ const url = ref(null);
 const list_update = ref(null);
 const enable_blacklist = ref(null);
 const category_name = ref(null);
-const emit = defineEmits(['edit_blacklist','reset_blacklist']);
+const emit = defineEmits(['edit_blacklist', 'reset_blacklist']);
 const valid_url = ref(true);
 
 const props = defineProps({});
 
 const show = (blacklist) => {
-  list_name.value.value = blacklist.name
-  url.value.value = blacklist.url
-  category_name.value.value = blacklist.category_id
-  category_name.value.innerHTML = blacklist.category
-  category_name.value.setAttribute('selected', 'selected')
-  if (blacklist.status == "enabled") {
-    enable_blacklist.value.value = true
-    enable_blacklist.value.setAttribute('checked', 'checked')
-  } else {
-    enable_blacklist.value.value = false
-    enable_blacklist.value.removeAttribute('checked')
-  }
+    list_name.value.value = blacklist.name
+    url.value.value = blacklist.url
+    category_name.value.value = blacklist.category_id
+    category_name.value.innerHTML = blacklist.category
+    category_name.value.setAttribute('selected', 'selected')
+    if (blacklist.status == "enabled") {
+        enable_blacklist.value.value = true
+        enable_blacklist.value.checked = true;
+    } else {
+        enable_blacklist.value.value = false
+        enable_blacklist.value.checked = false;
+    }
 
-  if (blacklist.update_frequency == 86400) {
-    daily_frequency.value.setAttribute('selected', 'selected')
-  } else if (blacklist.update_frequency == 3600) {
-    hourly_frequency.value.setAttribute('selected', 'selected')
-  } else {
-    manual_frequency.value.setAttribute('selected', 'selected')
-  }
+    if (blacklist.update_frequency == 86400) {
+        daily_frequency.value.setAttribute('selected', 'selected')
+    } else if (blacklist.update_frequency == 3600) {
+        hourly_frequency.value.setAttribute('selected', 'selected')
+    } else {
+        manual_frequency.value.setAttribute('selected', 'selected')
+    }
 
-  modal_id.value.show();
+    modal_id.value.show();
 };
 
-const validate_url = function() {
-  valid_url.value = regexValidation.validateURL(url.value.value);
+const validate_url = function () {
+    valid_url.value = regexValidation.validateURL(url.value.value);
 }
 
-const change_checkbox = function() {
-  let checked = enable_blacklist.value.value
-  if(checked == "true") {
-    enable_blacklist.value.value = false
-  } else {
-    enable_blacklist.value.value = true
-  }
+const change_checkbox = function () {
+    let checked = enable_blacklist.value.value
+    if (checked == "true") {
+        enable_blacklist.value.value = false
+    } else {
+        enable_blacklist.value.value = true
+    }
 }
 
 const edit_blacklist_ = () => {
-  let checked = enable_blacklist.value.value
-  if (checked == "true") {
-    checked = 'on'
-  } else {
-    checked = 'off'
-  }
+    let checked = enable_blacklist.value.value
+    if (checked == "true") {
+        checked = 'on'
+    } else {
+        checked = 'off'
+    }
 
-  const params = {
-    list_name: list_name.value.value,
-    url: url.value.value,
-    category: category_name.value.value,
-    list_enabled: checked,
-    list_update: list_update.value[list_update.value.selectedIndex].value
-  }
+    const params = {
+        list_name: list_name.value.value,
+        url: url.value.value,
+        category: category_name.value.value,
+        list_enabled: checked,
+        list_update: list_update.value[list_update.value.selectedIndex].value
+    }
 
-  emit('edit_blacklist', params);
+    emit('edit_blacklist', params);
 
-  close();
+    close();
 };
 
 
 const load_default_blacklist = () => {
-  let checked = enable_blacklist.value.value
-  if (checked == "true") {
-    checked = 'on'
-  } else {
-    checked = 'off'
-  }
+    let checked = enable_blacklist.value.value
+    if (checked == "true") {
+        checked = 'on'
+    } else {
+        checked = 'off'
+    }
 
-  const params = {
-    list_name: list_name.value.value,
-    category: category_name.value.value,
-    list_enabled: checked,
-    list_update: list_update.value[list_update.value.selectedIndex].value
-  }
+    const params = {
+        list_name: list_name.value.value,
+        category: category_name.value.value,
+        list_enabled: checked,
+        list_update: list_update.value[list_update.value.selectedIndex].value
+    }
 
-  emit('reset_blacklist', params);
+    emit('reset_blacklist', params);
 
-  close();
+    close();
 }
 
 const close = () => {
-  modal_id.value.close();
+    modal_id.value.close();
 };
 
 

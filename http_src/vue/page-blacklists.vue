@@ -3,11 +3,11 @@
     <div class="m-2 mb-3">
         <TableWithConfig ref="table_blacklists" :table_id="table_id" :csrf="csrf" :f_map_columns="map_table_def_columns"
             :get_extra_params_obj="get_extra_params_obj" :f_sort_rows="columns_sorting"
-            @custom_event="on_table_custom_event" @rows_loaded="change_filter_labels">
+            @custom_event="on_table_custom_event" @rows_loaded="change_filter_labels" :showLoading="true">
             <template v-slot:custom_header>
                 <div class="dropdown me-3 d-inline-block" v-for="item in filter_table_array">
                     <span class="no-wrap d-flex align-items-center filters-label"><b>{{ item["basic_label"]
-                            }}</b></span>
+                    }}</b></span>
                     <SelectSearch v-model:selected_option="item['current_option']" theme="bootstrap-5"
                         dropdown_size="small" :disabled="loading" :options="item['options']"
                         @select_option="add_table_filter">
@@ -133,7 +133,7 @@ const map_table_def_columns = (columns) => {
                     current_class = current_class.filter((class_item) => class_item != "disabled");
                     if ((row.status != "enabled" || row.hits == 0) && b.id == "chart_blacklist") {
                         current_class.push("disabled");
-                    } else if((row.status != "error" && row.status !=  "enabled") && b.id == "refresh_blacklist") {
+                    } else if ((row.status != "error" && row.status != "enabled") && b.id == "refresh_blacklist") {
                         current_class.push("disabled");
                     }
                     return current_class;
