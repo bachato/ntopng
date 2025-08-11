@@ -32,7 +32,8 @@ CategoryCounter::CategoryCounter() {
 
 CategoryCounter::CategoryCounter(const CategoryCounter &c) {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  bytes = c.bytes, duration = c.duration,
+  bytes.set(c.bytes);
+  duration = c.duration;
   last_epoch_update = c.last_epoch_update;
 };
 

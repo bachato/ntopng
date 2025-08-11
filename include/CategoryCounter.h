@@ -36,7 +36,8 @@ class CategoryCounter {
 
   void incStats(u_int32_t when, u_int64_t sent_bytes, u_int64_t rcvd_bytes);
   inline void sum(CategoryCounter c) {
-    bytes = c.bytes, duration += c.duration;
+    bytes.sum(c.bytes);
+    duration += c.duration;
   };
 
   void lua(NetworkInterface *iface, lua_State *vm, u_int16_t category_id,

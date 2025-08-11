@@ -36,6 +36,8 @@ class TrafficCounter {
   inline u_int64_t getSent() { return (sent); }
   inline u_int64_t getRcvd() { return (rcvd); }
   /* Generic traffic counter, used for both bytes and packets */
+  inline void set(const TrafficCounter &c) { sent = c.sent; rcvd = c.rcvd; }
+  inline void sum(const TrafficCounter &c) { sent += c.sent; rcvd += c.rcvd; }
   inline void setSent(u_int64_t v) { sent = v; }
   inline void setRcvd(u_int64_t v) { rcvd = v; }
   inline void incStats(u_int64_t s, u_int64_t r) {
