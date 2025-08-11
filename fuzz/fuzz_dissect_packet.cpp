@@ -39,6 +39,7 @@ AfterShutdownAction afterShutdownAction = after_shutdown_nop;
 NetworkInterface *iface;
 
 constexpr const char *PROG_NAME = "ntopng";
+static ndpi_protocol ndpiUnknownProtocol;
 
 bool trace_new_delete = false;
 
@@ -111,6 +112,9 @@ static void setCLIArgs(Prefs *prefs, int params...) {
   va_end(args);
 }
 
+const ndpi_protocol getConstNdpiUnknownProtocol() {
+  return((const ndpi_protocol)ndpiUnknownProtocol);
+}
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
   // Final cleanup
   atexit(cleanup);
@@ -121,7 +125,8 @@ extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
   if ((prefs = new (std::nothrow) Prefs(ntop)) == NULL) _exit(1);
 
   ntop->getTrace()->set_trace_level(1);
-
+  memset((void*)&ndpiUnknownProtocol, 0, sizeof(ndpiUnknownProtocol));
+  
   setCLIArgs(prefs, 11, PROG_NAME, "-1", "_PATH_docs", "-2", "_PATH_scripts",
 	     "-3", "_PATH_scripts/callbacks", "-d", "_PATH_data-dir", "-t",
 	     "_PATH_install");
