@@ -25,6 +25,7 @@ Please refer to the `nProbe documentation <https://www.ntop.org/guides/nprobe/ip
 details about the nProbe configuration and working mode.
 
 A different traffic policy can be configured for each pool of hosts (see :ref:`HostPools`) by selecting the pool to edit, in the dropdown icon ('Actions column'), click 'Manage Pool'
+
 .. figure:: ../img/web_gui_interfaces_manage_pool.png
   :align: center
   :alt: Manage Host Pool
