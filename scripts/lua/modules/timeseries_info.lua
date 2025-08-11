@@ -3623,12 +3623,17 @@ function timeseries_info.retrieve_specific_timeseries(tags, prefix)
             if (info.nedge_only) and (not ntop.isnEdge()) then
                 goto skip
             end
-            local tmp_tags = table.clone(tags)
 
-            local tot = 0
-            local tot_serie = ts_utils.queryTotal(info.schema, tags.epoch_begin,
-                                                  tags.epoch_end, tmp_tags)
-            if not tot_serie then goto skip end
+            -- Remove empty timeseries but exclude the ones starting with top: from the check
+            if not (info.schema:match("^top:")) then
+                local tmp_tags = table.clone(tags)
+
+                local tot = 0
+                local tot_serie = ts_utils.queryTotal(info.schema,
+                                                      tags.epoch_begin,
+                                                      tags.epoch_end, tmp_tags)
+                if not tot_serie then goto skip end
+            end
 
             timeseries[#timeseries + 1] = info
         end
