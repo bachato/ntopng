@@ -117,8 +117,14 @@ local function get_host_data(host)
         res["column_alerts"] = 0
     end
 
-    sent2rcvd = round((host["bytes.sent"] * 100) / (host["bytes.sent"] + host["bytes.rcvd"]), 0)
-    if (sent2rcvd == nil) then
+    local sent = host["bytes.sent"] or 0
+    local rcvd = host["bytes.rcvd"] or 0
+    
+    local sent2rcvd = 0
+    if sent + rcvd > 0 then
+        sent2rcvd = round((sent * 100) / (sent + rcvd), 0)
+    end
+    if sent2rcvd == nil then
         sent2rcvd = 0
     end
     res["column_breakdown"] =
