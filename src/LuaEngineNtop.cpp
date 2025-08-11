@@ -6337,7 +6337,7 @@ static int ntop_reload_traffic_profiles(lua_State *vm) {
 /* ****************************************** */
 
 static int _ntop_set_redis(bool do_setnx, lua_State *vm) {
-  char *key, *value, buf[16];
+  char *key, *value, buf[21];
   u_int expire_secs = 0;  // default 0 = no expiration
   Redis *redis = ntop->getRedis();
 
@@ -6352,8 +6352,8 @@ static int _ntop_set_redis(bool do_setnx, lua_State *vm) {
     if ((value = (char *)lua_tostring(vm, 2)) == NULL)
       return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
   } else if (lua_type(vm, 2) == LUA_TNUMBER) {
-    u_int v = (u_int)lua_tonumber(vm, 2);
-    snprintf(buf, sizeof(buf), "%u", v);
+    u_int64_t v = (u_int64_t)lua_tonumber(vm, 2);
+    snprintf(buf, sizeof(buf), "%lu", v);
     value = buf;
   } else if (lua_type(vm, 2) == LUA_TBOOLEAN) {
     bool v = (bool)lua_toboolean(vm, 2);
