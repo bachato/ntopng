@@ -119,7 +119,9 @@ local function updateStats(columns, invert_direction, flow, current_element)
         if (not column_info.is_key) then -- Not a key, so a value to be updated (e.g. bytes)
             local flow_key_stat = column_info.key
             local id = column_info.id
-            if invert_direction then id = column_info.invert_with end
+            if invert_direction and column_info.invert_with then
+                id = column_info.invert_with
+            end
             current_element[id] = current_element[id] +
                                       tonumber(
                                           flow[flow_key_stat] or flow[id] or 0)
@@ -186,8 +188,11 @@ function flow_data.getStats(queries)
             flow_data_historical = require "flow_data_historical"
             local first_seen = query_info.filters.first_seen
             local last_seen = query_info.filters.last_seen
+            local sort_columns = flow_data_preset.retrieveColumns(
+                                     query_info.sort_by, isHistorical) or {}
             local query_result = flow_data_historical.retrieveFlowData(columns,
                                                                        filters,
+                                                                       sort_columns,
                                                                        query_info.invert_direction,
                                                                        first_seen,
                                                                        last_seen)

@@ -46,9 +46,11 @@ if criteria_as == "ingress_egress_traffic_criteria" then
     queries = {
         {
             select_query = {
-                "in_iface_index", "in_device", "bytes_sent", "bytes_rcvd"
+                "in_iface_index", "in_device", "bytes_sent", "bytes_rcvd",
+                "total_bytes"
             },
             where_query = {"asn"},
+            sort_by = {"total_bytes"},
             filters = filters,
             root = {
                 formatter = format_utils.formatASN,
@@ -57,9 +59,11 @@ if criteria_as == "ingress_egress_traffic_criteria" then
             }
         }, {
             select_query = {
-                "out_device", "out_iface_index", "bytes_sent", "bytes_rcvd"
+                "out_device", "out_iface_index", "bytes_sent", "bytes_rcvd",
+                "total_bytes"
             },
             where_query = {"asn"},
+            sort_by = {"total_bytes"},
             filters = filters,
             root = {
                 formatter = format_utils.formatASN,
@@ -73,12 +77,13 @@ elseif isEmptyString(criteria) or (criteria == "traffic_between_ases") then
         {
             select_query = {
                 "src_asn", "src_peer_asn", "dst_peer_asn", "bytes_sent",
-                "bytes_rcvd"
+                "bytes_rcvd", "total_bytes"
             },
             different_from = {nil, "src_asn", "dst_asn"},
             rename_key_field = {nil, "src_peer_asn_1", "dst_peer_asn_1"},
             skip_flow = {{key = "src_asn", value = "0"}},
             where_query = {"dst_asn"},
+            sort_by = {"total_bytes"},
             filters = {
                 dst_asn = asn,
                 ifid = ifid,
@@ -93,9 +98,10 @@ elseif isEmptyString(criteria) or (criteria == "traffic_between_ases") then
         }, {
             select_query = {
                 "src_peer_asn", "dst_peer_asn", "dst_asn", "bytes_sent",
-                "bytes_rcvd"
+                "bytes_rcvd", "total_bytes"
             },
             where_query = {"src_asn"},
+            sort_by = {"total_bytes"},
             different_from = {"src_asn", "dst_asn"},
             rename_key_field = {"src_peer_asn_2", "dst_peer_asn_2"},
             skip_flow = {{key = "dst_asn", value = 0}},

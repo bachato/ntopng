@@ -127,6 +127,10 @@ local columns = {
         historical = "SUM(DST2SRC_BYTES)",
         invert_with = "bytes_sent"
     },
+    total_bytes = {
+        live = "bytes",
+        historical = "SUM(TOTAL_BYTES)",
+    },
     as = {
         formatter = {
             funct = format_utils.formatASN,
