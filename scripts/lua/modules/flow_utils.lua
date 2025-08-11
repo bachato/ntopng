@@ -737,8 +737,14 @@ function getFlowLabel(flow, show_macs, add_hyperlinks, historical_bounds, hyperl
         end
 
         if ((flow.cli_as ~= nil) and (flow.cli_as ~= 0)) then
-            cli_as = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. flow.cli_as .. "\">" ..
-                         shortenString(flow.cli_as_name or "", 14) .. "</A>"
+	    local n = flow.cli_as_name
+
+	    if isEmptyString(n) then
+	      n = "ASN "..flow.cli_as
+	    end
+
+	    cli_as = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. flow.cli_as .. "\">" ..
+                         shortenString(n, 14) .. "</A>"
             cli_mac = ""
         else
             if cli_mac and (cli_mac ~= "00:00:00:00:00:00") and not interface.isView() then
@@ -752,8 +758,13 @@ function getFlowLabel(flow, show_macs, add_hyperlinks, historical_bounds, hyperl
         end
 
         if ((flow.dst_as ~= nil) and (flow.dst_as ~= 0)) then
-            dst_as = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. flow.dst_as .. "\">" ..
-                         shortenString(flow.dst_as_name or "", 14) .. "</A>"
+	    local n = flow.dst_as_name
+
+	    if isEmptyString(n) then
+	      n = "ASN "..flow.dst_as
+	    end
+	    
+            dst_as = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. flow.dst_as .. "\">" .. shortenString(n, 14) .. "</A>"
             srv_mac = ""
         else
             if srv_mac and (srv_mac ~= "00:00:00:00:00:00") and not interface.isView() then
