@@ -1,16 +1,16 @@
 <template>
     <div class="m-2 mb-3">
-        <!-- Edit traffic policy button -->
-        <button class="btn btn-primary" type="button" @click="editTrafficPolicy" v-show="true">
-            <i class="fas fa-shield-alt" data-bs-toggle="tooltip" data-bs-placement="top"></i>
-            {{ _i18n('host_pools.edit_traffic_policy') }}
-        </button>
-
-
         <!-- Table component -->
         <TableWithConfig ref="table_host_pools" :table_id="table_id" :csrf="csrf" :f_map_columns="map_table_def_columns"
             :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event"
             :get_extra_params_obj="get_extra_params_obj">
+            <template v-slot:custom_header>
+                <!-- Edit traffic policy button -->
+                <button class="btn btn-primary btn-sm" type="button" @click="editTrafficPolicy" v-show="true">
+                    <i class="fas fa-shield-alt" data-bs-toggle="tooltip" data-bs-placement="top"></i>
+                    {{ _i18n('host_pools.edit_traffic_policy') }}
+                </button>
+            </template>
             <template v-slot:custom_buttons>
                 <button class="btn btn-link" type="button" ref="add_new_pool" @click="addNewPool">
                     <i class="fas fa-plus"></i>
