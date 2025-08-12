@@ -1053,6 +1053,7 @@ flow_consts.drop_reason = {
    [ 8] = { i18n_label = "drop_reason.srv2cli_shaper" },
    [ 9] = { i18n_label = "drop_reason.dev_not_allow_proto_cli" },
    [10] = { i18n_label = "drop_reason.dev_not_allow_proto_srv" },
+   [11] = { i18n_label = "drop_reason.flow_size_exceeded" },
 }
 
 return flow_consts

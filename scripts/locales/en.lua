@@ -281,6 +281,7 @@ local lang = {
       ["srv2cli_shaper"] = "Srv2Cli Shaper",
       ["dev_not_allow_proto_cli"] = "Protocol Not Allowed on Client Device",
       ["dev_not_allow_proto_srv"] = "Protocol Not Allowed on Server Device",
+      ["flow_size_exceeded"] = "Flow Size Exceeded",
    },
    ["dscp"] = "DSCP",
    ["dscp_dst2src"] = "Server DSCP",

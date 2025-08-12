@@ -2496,7 +2496,9 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
   Host *cli_h = NULL, *srv_h = NULL;
 
 #if 0
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Periodic flow update");
+  char buf[256];
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Periodic flow update: %s",
+			       print(buf, sizeof(buf)));
 #endif
 
   if((last_update_time.tv_sec > 0)
@@ -2599,6 +2601,16 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
 
   memcpy(&last_update_time, tv, sizeof(struct timeval));
   GenericHashEntry::periodic_stats_update(tv);
+
+#ifdef HAVE_NEDGE
+  if (cli_host && srv_host) {
+    u_int32_t cli_max_flow_size = cli_host->getMaxFlowSize();
+    u_int32_t srv_max_flow_size = srv_host->getMaxFlowSize();
+    if ((cli_max_flow_size && get_bytes() > cli_max_flow_size) ||
+        (srv_max_flow_size && get_bytes() > srv_max_flow_size))
+      setDropVerdict(DROP_REASON_FLOW_SIZE_EXCEEDED);
+  } 
+#endif
 }
 
 /* *************************************** */
