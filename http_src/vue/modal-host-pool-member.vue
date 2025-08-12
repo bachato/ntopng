@@ -10,15 +10,24 @@
                     <b>{{ _i18n("host_pools.member_type") }}</b>
                 </label>
                 <div class="col-sm-8">
-                    <div class="btn-group w-100" role="group">
-                        <input type="radio" class="btn-check btn-primary" id="ip-radio" value="ip" v-model="memberType" @change="onMemberTypeChange">
-                        <label class="btn btn-sm flex-fill" :class="memberType === 'ip' ? 'btn-primary active' : 'btn-secondary'" for="ip-radio">{{ _i18n("host_pools.ipv4") }}/{{ _i18n("host_pools.ipv6") }}</label>
-                        
-                        <input type="radio" class="btn-check btn-primary" id="network-radio" value="network" v-model="memberType" @change="onMemberTypeChange">
-                        <label class="btn btn-sm flex-fill" :class="memberType === 'network' ? 'btn-primary active' : 'btn-secondary'" for="network-radio">{{ _i18n("network") }}</label>
-                        
-                        <input type="radio" class="btn-check btn-primary" id="mac-radio" value="mac" v-model="memberType" @change="onMemberTypeChange">
-                        <label class="btn btn-sm flex-fill" :class="memberType === 'mac' ? 'btn-primary active' : 'btn-secondary'" for="mac-radio">{{ _i18n("host_pools.mac_filter") }}</label>
+                    <div class="btn-group w-75" role="group">
+                        <input type="radio" class="btn-check btn-primary" id="ip-radio" value="ip" v-model="memberType"
+                            @change="onMemberTypeChange">
+                        <label class="btn btn-sm flex-fill"
+                            :class="memberType === 'ip' ? 'btn-primary active' : 'btn-secondary'" for="ip-radio">{{
+                                _i18n("host_pools.ipv4") }}/{{ _i18n("host_pools.ipv6") }}</label>
+
+                        <input type="radio" class="btn-check btn-primary" id="network-radio" value="network"
+                            v-model="memberType" @change="onMemberTypeChange">
+                        <label class="btn btn-sm flex-fill"
+                            :class="memberType === 'network' ? 'btn-primary active' : 'btn-secondary'"
+                            for="network-radio">{{ _i18n("network") }}</label>
+
+                        <input type="radio" class="btn-check btn-primary" id="mac-radio" value="mac"
+                            v-model="memberType" @change="onMemberTypeChange">
+                        <label class="btn btn-sm flex-fill"
+                            :class="memberType === 'mac' ? 'btn-primary active' : 'btn-secondary'" for="mac-radio">{{
+                                _i18n("host_pools.mac_filter") }}</label>
                     </div>
                 </div>
             </div>
@@ -30,18 +39,11 @@
                         <b>{{ _i18n("ip_address") }}</b>
                     </label>
                     <div class="col-sm-8">
-                        <div class="btn-group w-100" role="group">
-                            <input 
-                                id="ip_address" 
-                                type="text" 
-                                class="form-control" 
-                                :class="{ 'invalid': ipAddressError }"
-                                v-model="ipAddress" 
-                                :placeholder="_i18n('enter_ip_address')" 
-                                @input="validateIpAddress"
-                                @keyup.enter="handleSubmit"
-                                required
-                            />
+                        <div class="btn-group w-50" role="group">
+                            <input id="ip_address" type="text" class="form-control"
+                                :class="{ 'invalid': ipAddressError }" v-model="ipAddress"
+                                :placeholder="_i18n('enter_ip_address')" @input="validateIpAddress"
+                                @keyup.enter="handleSubmit" required />
                         </div>
                         <small v-if="ipAddressError" class="text-danger">
                             {{ ipAddressError }}
@@ -53,19 +55,10 @@
                         <b>{{ _i18n("vlan") }}</b>
                     </label>
                     <div class="col-sm-8">
-                        <div class="btn-group w-100" role="group">
-                            <input 
-                                id="ip_vlan" 
-                                type="number" 
-                                class="form-control" 
-                                :class="{ 'invalid': ipVlanError }"
-                                v-model.number="ipVlan" 
-                                placeholder="0"
-                                min="0"
-                                max="4094"
-                                @input="validateIpVlan"
-                                @keyup.enter="handleSubmit"
-                            />
+                        <div class="btn-group w-50" role="group">
+                            <input id="ip_vlan" type="number" class="form-control" :class="{ 'invalid': ipVlanError }"
+                                v-model.number="ipVlan" placeholder="0" min="0" max="4094" @input="validateIpVlan"
+                                @keyup.enter="handleSubmit" />
                         </div>
                         <small v-if="ipVlanError" class="text-danger">
                             {{ ipVlanError }}
@@ -81,42 +74,24 @@
                         <b>{{ _i18n("network") }}</b>
                     </label>
                     <div class="col-sm-8 d-flex">
-                        <div class="flex-grow-1 me-2">
-                            <input 
-                                id="network_address" 
-                                type="text" 
-                                class="form-control" 
-                                :class="{ 'invalid': networkAddressError }"
-                                v-model="networkAddress" 
-                                :placeholder="_i18n('enter_network_address')" 
-                                @input="validateNetworkAddress"
-                                @keyup.enter="handleSubmit"
-                                required
-                            />
+                        <div class="w-50">
+                            <input id="network_address" type="text" class="form-control"
+                                :class="{ 'invalid': networkAddressError }" v-model="networkAddress"
+                                :placeholder="_i18n('enter_network_address')" @input="validateNetworkAddress"
+                                @keyup.enter="handleSubmit" required />
                             <small v-if="networkAddressError" class="text-danger">
                                 {{ networkAddressError }}
                             </small>
                         </div>
-                        <div class="d-flex align-items-center">
-                            <span class="me-2">/</span>
-                            <div style="width: 80px;">
-                                <input 
-                                    id="cidr" 
-                                    type="number" 
-                                    class="form-control" 
-                                    :class="{ 'invalid': cidrError }"
-                                    v-model.number="cidr" 
-                                    :placeholder="_i18n('enter_cidr')"
-                                    min="1"
-                                    :max="isIPv6Network ? 128 : 32"
-                                    @input="validateCidr"
-                                    @keyup.enter="handleSubmit"
-                                    required
-                                />
-                                <small v-if="cidrError" class="text-danger">
-                                    {{ cidrError }}
-                                </small>
-                            </div>
+                        <div class="me-2 ms-2 align-items-center d-flex">/</div>
+                        <div>
+                            <input id="cidr" type="number" class="form-control" :class="{ 'invalid': cidrError }"
+                                v-model.number="cidr" :placeholder="_i18n('enter_cidr')" min="1"
+                                :max="isIPv6Network ? 128 : 32" @input="validateCidr" @keyup.enter="handleSubmit"
+                                required />
+                            <small v-if="cidrError" class="text-danger">
+                                {{ cidrError }}
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -125,19 +100,10 @@
                         <b>{{ _i18n("vlan") }}</b>
                     </label>
                     <div class="col-sm-8">
-                        <div class="btn-group w-100" role="group">
-                            <input 
-                                id="network_vlan" 
-                                type="number" 
-                                class="form-control" 
-                                :class="{ 'invalid': networkVlanError }"
-                                v-model.number="networkVlan" 
-                                placeholder="0"
-                                min="0"
-                                max="4094"
-                                @input="validateIpVlan"
-                                @keyup.enter="handleSubmit"
-                            />
+                        <div class="btn-group w-50" role="group">
+                            <input id="network_vlan" type="number" class="form-control"
+                                :class="{ 'invalid': networkVlanError }" v-model.number="networkVlan" placeholder="0"
+                                min="0" max="4094" @input="validateIpVlan" @keyup.enter="handleSubmit" />
                         </div>
                         <small v-if="networkVlanError" class="text-danger">
                             {{ networkVlanError }}
@@ -153,18 +119,11 @@
                         <b>{{ _i18n("mac_address") }}</b>
                     </label>
                     <div class="col-sm-8">
-                        <div class="btn-group w-100" role="group">
-                            <input 
-                                id="mac_address" 
-                                type="text" 
-                                class="form-control" 
-                                :class="{ 'invalid': macAddressError }"
-                                v-model="macAddress" 
-                                :placeholder="_i18n('enter_mac_address')" 
-                                @input="validateMacAddress"
-                                @keyup.enter="handleSubmit"
-                                required
-                            />
+                        <div class="btn-group w-50" role="group">
+                            <input id="mac_address" type="text" class="form-control"
+                                :class="{ 'invalid': macAddressError }" v-model="macAddress"
+                                :placeholder="_i18n('enter_mac_address')" @input="validateMacAddress"
+                                @keyup.enter="handleSubmit" required />
                         </div>
                         <small v-if="macAddressError" class="text-danger">
                             {{ macAddressError }}
@@ -173,7 +132,7 @@
                 </div>
             </template>
         </template>
-        
+
         <template v-slot:footer>
             <div v-if="generalError" class="me-auto text-danger d-inline">
                 {{ generalError }}
@@ -398,10 +357,10 @@ const show = () => {
 // Show modal for editing existing item
 const showEdit = async (item) => {
     resetForm();
-    
+
     isEditMode.value = true;
     currentItem.value = item;
-    
+
     // Parse the item data based on type
     if (item.type === "mac") {
         memberType.value = "mac";
@@ -421,7 +380,7 @@ const showEdit = async (item) => {
     }
 
     await nextTick();
-    
+
     if (!modal_id.value) {
         console.error('Modal reference is null after nextTick');
         return;
