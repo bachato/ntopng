@@ -340,6 +340,7 @@ using namespace std;
 #include "StatsManager.h"
 #include "DB.h"
 #include "SQLiteDB.h"
+#include "InMemorySQLiteDB.h"
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
 #include "KafkaProducer.h"
 #include "KafkaClient.h"

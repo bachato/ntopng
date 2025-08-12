@@ -44,7 +44,10 @@ public:
   bool localuser;
   u_int16_t observationPointId, getbulkMaxNumRepetitions;
   LuaEngine *engine;
-  
+
+  /* In-memory DB */
+  InMemorySQLiteDB *db;
+
   /* Capabilities bitmap */
   u_int64_t capabilities;
 

@@ -32,6 +32,7 @@ NtopngLuaContext::NtopngLuaContext() {
   iface = NULL;
   addr_tree = NULL;
   snmpBatch = NULL;
+  db = NULL;
   memset(snmpAsyncEngine, 0, sizeof(snmpAsyncEngine));
   host = NULL, network = NULL, flow = NULL;
   localuser = false, observationPointId = 0, engine = NULL;
@@ -71,4 +72,6 @@ NtopngLuaContext::~NtopngLuaContext() {
 #if defined(NTOPNG_PRO)
   if (bin) delete bin;
 #endif
+
+  if(db) delete db;
 }
