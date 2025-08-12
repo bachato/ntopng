@@ -6353,7 +6353,8 @@ static int _ntop_set_redis(bool do_setnx, lua_State *vm) {
       return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
   } else if (lua_type(vm, 2) == LUA_TNUMBER) {
     u_int64_t v = (u_int64_t)lua_tonumber(vm, 2);
-    snprintf(buf, sizeof(buf), "%lu", v);
+
+    snprintf(buf, sizeof(buf), "%llu", (unsigned long long)v);
     value = buf;
   } else if (lua_type(vm, 2) == LUA_TBOOLEAN) {
     bool v = (bool)lua_toboolean(vm, 2);

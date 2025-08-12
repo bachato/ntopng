@@ -442,13 +442,16 @@ class Ntop {
    * @return The network interface instance if exists, NULL otherwise.
    */
   NetworkInterface *getNetworkInterface(const char *name, lua_State *vm = NULL);
+  
   inline NetworkInterface *getNetworkInterface(lua_State *vm, int ifid) {
     char ifname[MAX_INTERFACE_NAME_LEN];
+    
     snprintf(ifname, sizeof(ifname), "%d", ifid);
-    return getNetworkInterface(
-        ifname, vm /* enforce the check on the allowed interface */);
+    return getNetworkInterface(ifname, vm /* enforce the check on the allowed interface */);
   };
 
+  bool viewHasZMQInterface(NetworkInterface *viewInterface);
+  
   /**
    * @brief Get the current HTTPserver instance.
    *

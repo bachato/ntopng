@@ -204,8 +204,7 @@ protected:
   bool bridge_interface;
 
   bool is_dynamic_interface;           /* Whether this is a dynamic interface */
-  bool show_dynamic_interface_traffic; /* Show traffic of this dynamic interface
-                                        */
+  bool show_dynamic_interface_traffic; /* Show traffic of this dynamic interface */
   bool push_host_filters; /* Push alerted hosts to pf_ring via Redis queue */
   u_int64_t dynamic_interface_criteria; /* Criteria identifying this dynamic
                                            interface */

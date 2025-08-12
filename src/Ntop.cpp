@@ -3387,7 +3387,7 @@ void Ntop::initAllowedProtocolPresets() {
 
     ndpi_bitmask_alloc(&deviceProtocolPresets[i].clientAllowed, num_protocols),
       ndpi_bitmask_alloc(&deviceProtocolPresets[i].serverAllowed, num_protocols);
-    
+
     b = getDeviceAllowedProtocols((DeviceType)i);
 
     ndpi_bitmask_set_all(&b->clientAllowed);
@@ -3429,7 +3429,7 @@ void Ntop::refreshAllowedProtocolPresets(DeviceType device_type, bool client,
 	  if (client)
 	    ndpi_bitmask_set(&b->clientAllowed, mapped_key_proto);
 	  else
-	    ndpi_bitmask_set(&b->serverAllowed, mapped_key_proto);	  
+	    ndpi_bitmask_set(&b->serverAllowed, mapped_key_proto);
 	}
       }
       break;
@@ -4277,7 +4277,7 @@ bool Ntop::createRuntimeInterface(char *name, char *source, int *iface_id) {
       return false;
     }
 
-    /* In case the preference is enabled, 
+    /* In case the preference is enabled,
      * dump the flows from the pcap into clickhouse
      */
     if (ntop->getPrefs()->dump_pcap_to_clickhouse_enabled()) {
@@ -4498,4 +4498,20 @@ void Ntop::reloadASNConfiguration() {
             iface->updateASNExportersPrefs();
         }
     }
+}
+
+/* ******************************************* */
+
+bool Ntop::viewHasZMQInterface(NetworkInterface *viewInterface) {
+#ifdef NTOPNG_PRO
+  for(int i = 0; i < num_defined_interfaces; i++) {
+    if(iface[i]
+       && (iface[i]->viewedBy() == viewInterface)
+       && (iface[i]->getIfType() == interface_type_ZMQ)
+       )
+      return(true);
+  }
+#endif
+
+  return(false);
 }

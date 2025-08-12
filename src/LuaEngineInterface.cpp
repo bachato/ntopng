@@ -449,7 +449,17 @@ static int ntop_interface_is_zmq_interface(lua_State *vm) {
 
   if (curr_iface && curr_iface->getIfType() == interface_type_ZMQ)
     rv = true;
-
+#ifdef NTOPNG_PRO
+  else if(curr_iface->getIfType() == interface_type_VIEW) {
+    /*
+      In case of a view interface we need to check if at least
+      one of the sub-intefaces is of type ZMQ
+    */
+    
+    rv = ntop->viewHasZMQInterface(curr_iface);
+  }
+#endif
+  
   lua_pushboolean(vm, rv);
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
