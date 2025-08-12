@@ -40,9 +40,11 @@ class HostPools {
 #ifdef NTOPNG_PRO
   bool *children_safe;
   bool *forge_global_dns;
+  bool *block_blacklisted_flows;
   u_int8_t *routing_policy_id;
   u_int16_t *pool_shaper;
   u_int32_t *schedule_bitmap;
+  u_int32_t *max_flow_size;
   bool *enforce_quotas_per_pool_member; /* quotas can be pool-wide or per pool
                                            member */
   bool *enforce_shapers_per_pool_member;
@@ -186,6 +188,14 @@ class HostPools {
     return (((pool_id != NO_HOST_POOL_ID) && (pool_id < max_num_pools))
                 ? routing_policy_id[pool_id]
                 : DEFAULT_ROUTING_TABLE_ID);
+  }
+
+  inline bool doBlockBlacklistedFlows(u_int16_t pool_id) {
+    return ((pool_id < max_num_pools) ? block_blacklisted_flows[pool_id] : false);
+  }
+
+  inline u_int32_t getMaxFlowSize(u_int16_t pool_id) {
+    return ((pool_id < max_num_pools) ? max_flow_size[pool_id] : 0);
   }
 
 #endif

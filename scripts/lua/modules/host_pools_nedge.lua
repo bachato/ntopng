@@ -301,6 +301,22 @@ function host_pools_nedge.setChildrenSafe(pool_id, value)
   host_pools_nedge.setPoolDetail(pool_id, "children_safe", ternary(value, "true", "false"))
 end
 
+function host_pools_nedge.getBlockBlacklistedFlows(pool_id)
+  return toboolean(host_pools_nedge.getPoolDetail(pool_id, "block_blacklisted_flows"))
+end
+
+function host_pools_nedge.setBlockBlacklistedFlows(pool_id, value)
+  host_pools_nedge.setPoolDetail(pool_id, "block_blacklisted_flows", ternary(value, "true", "false"))
+end
+
+function host_pools_nedge.getMaxFlowSize(pool_id)
+  return tonumber(host_pools_nedge.getPoolDetail(pool_id, "max_flow_size") or "0")
+end
+
+function host_pools_nedge.setMaxFlowSize(pool_id, value)
+  host_pools_nedge.setPoolDetail(pool_id, "max_flow_size", value)
+end
+
 function host_pools_nedge.routingPolicyNameToId(policy_name)
   package.path = dirs.installdir .. "/pro/scripts/lua/nedge/modules/system_config/?.lua;" .. package.path
   local nf_config = require("nf_config"):create()

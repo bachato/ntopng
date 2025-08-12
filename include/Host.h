@@ -331,6 +331,22 @@ class Host : public GenericHashEntry,
 #endif
   };
 
+  inline bool doBlockBlacklistedFlows() const {
+#ifdef NTOPNG_PRO
+    return (iface->getHostPools()->doBlockBlacklistedFlows(host_pool_id));
+#else
+    return (false);
+#endif
+  };
+
+  inline u_int32_t getMaxFlowSize() const {
+#ifdef NTOPNG_PRO
+    return (iface->getHostPools()->getMaxFlowSize(host_pool_id));
+#else
+    return (0);
+#endif
+  };
+
   virtual HostStats *allocateStats() { return (new HostStats(this)); };
 
   /* Override Score members to perform incs/decs on the host and also on its

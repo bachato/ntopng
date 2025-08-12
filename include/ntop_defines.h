@@ -1320,6 +1320,8 @@
 #define CONST_HELLO_HOST "hello"
 
 #define CONST_CHILDREN_SAFE "children_safe"
+#define CONST_BLOCK_BLACKLISTED_FLOWS "block_blacklisted_flows"
+#define CONST_MAX_FLOW_SIZE "max_flow_size"
 #define CONST_FORGE_GLOBAL_DNS "forge_global_dns"
 #define CONST_ROUTING_POLICY_ID "routing_policy_id"
 #define CONST_POOL_SHAPER_ID "pool_shaper_id"

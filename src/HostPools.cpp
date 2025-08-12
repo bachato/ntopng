@@ -32,18 +32,23 @@ HostPools::HostPools(NetworkInterface *_iface) {
   stats = stats_shadow = NULL;
 #ifdef NTOPNG_PRO
   children_safe = forge_global_dns = NULL;
+  block_blacklisted_flows = NULL;
+  max_flow_size = NULL;
   routing_policy_id = NULL;
 
-  if ((children_safe = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) ==
-      NULL)
+  if ((children_safe = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL)
     throw 1;
 
-  if ((forge_global_dns = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) ==
-      NULL)
+  if ((forge_global_dns = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL)
     throw 1;
 
-  if ((routing_policy_id =
-           (u_int8_t *)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int8_t))) == NULL)
+  if ((routing_policy_id = (u_int8_t *)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int8_t))) == NULL)
+    throw 1;
+
+  if ((block_blacklisted_flows = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL)
+    throw 1;
+
+  if ((max_flow_size = (u_int32_t *)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int32_t))) == NULL)
     throw 1;
 
   for (int i = 0; i < MAX_NUM_HOST_POOLS; i++)
@@ -129,6 +134,8 @@ HostPools::~HostPools() {
 
 #ifdef NTOPNG_PRO
   if (children_safe) free(children_safe);
+  if (block_blacklisted_flows) free(block_blacklisted_flows);
+  if (max_flow_size) free(max_flow_size);
   if (forge_global_dns) free(forge_global_dns);
   if (routing_policy_id) free(routing_policy_id);
   if (pool_shaper) free(pool_shaper);
@@ -355,6 +362,17 @@ void HostPools::reloadPool(u_int16_t _pool_id, VLANAddressTree *new_tree, HostPo
 	  ? atoi(rsp)
 	  : DEFAULT_ROUTING_TABLE_ID;
 
+  block_blacklisted_flows[_pool_id] =
+      ((redis->hashGet(kname, (char *)CONST_BLOCK_BLACKLISTED_FLOWS, rsp,
+		       sizeof(rsp)) != -1) &&
+       (!strcmp(rsp, "true")));
+
+  max_flow_size[_pool_id] =
+      (redis->hashGet(kname, (char *)CONST_MAX_FLOW_SIZE, rsp,
+		      sizeof(rsp)) != -1)
+	  ? atoi(rsp)
+	  : 0;
+
   pool_shaper[_pool_id] = (redis->hashGet(kname, (char *)CONST_POOL_SHAPER_ID,
 					  rsp, sizeof(rsp)) != -1)
 			      ? atoi(rsp)
@@ -381,16 +399,21 @@ void HostPools::reloadPool(u_int16_t _pool_id, VLANAddressTree *new_tree, HostPo
   redis->hashGet(kname, (char *)"name", rsp, sizeof(rsp));
   ntop->getTrace()->traceEvent(
       TRACE_NORMAL,
-      "Loading pool [%s][iteration: %u][pool_id: %u][name: %s]"
+      "Loading pool [%s][pool_id: %u][name: %s]"
       "[children_safe: %i]"
       "[forge_global_dns: %i]"
       "[pool_shaper: %i]"
       "[schedule_bitmap: %i]"
+      "[block_blacklisted_flows: %i]"
+      "[max_flow_size: %u]"
       "[enforce_quotas_per_pool_member: %i]"
       "[enforce_shapers_per_pool_member: %i]",
-      iface->get_name(), i, _pool_id, rsp, children_safe[_pool_id],
+      iface->get_name(), _pool_id, rsp, children_safe[_pool_id],
       forge_global_dns[_pool_id], pool_shaper[_pool_id],
-      schedule_bitmap[_pool_id], enforce_quotas_per_pool_member[_pool_id],
+      schedule_bitmap[_pool_id],
+      block_blacklisted_flows[_pool_id],
+      max_flow_size[_pool_id],
+      enforce_quotas_per_pool_member[_pool_id],
       enforce_shapers_per_pool_member[_pool_id]);
 #endif
 
