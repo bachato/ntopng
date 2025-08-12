@@ -52,10 +52,7 @@ nDPIStats::nDPIStats(nDPIStats &stats) {
     ProtoCounter *c = it->second;
 
     if (c != NULL) {
-      std::unordered_map<u_int16_t, ProtoCounter *>::iterator cbr =
-          counters.find(it->first);
-
-      if (cbr == counters.end()) {
+      if (counters.find(it->first) == counters.end()) {
         ProtoCounter *pc =
             new (std::nothrow) ProtoCounter(it->first,
 #ifdef NTOPNG_PRO
@@ -69,9 +66,16 @@ nDPIStats::nDPIStats(nDPIStats &stats) {
           pc->set(c);
           counters[it->first] = pc;
         }
-      } else
+      } else {
         (it->second)->set(c);
+      }
     }
+  }
+
+  std::unordered_map<u_int16_t, CategoryCounter>::iterator c_it;
+  for (c_it = stats.cat_counters.begin(); c_it != stats.cat_counters.end(); ++c_it) {
+    u_int16_t cat_id = c_it->first;
+    cat_counters[cat_id] = c_it->second;
   }
 }
 
