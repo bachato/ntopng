@@ -34,8 +34,6 @@ if data_type == "historical" and hasClickHouseSupport() then
     epoch_end = tonumber(_GET["epoch_end"])
 end
 
-if criteria_as == "traffic_between_ases" then end
-
 if criteria_as == "ingress_egress_traffic_criteria" then
     filters = {
         asn = asn,

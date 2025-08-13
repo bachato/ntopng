@@ -86,6 +86,9 @@ const first_date_epoch = ref(props.context.first_date_epoch);
 const toggle_slider = ref(false);
 const toggle_slider_label = ref(_i18n("db_search.time_range"));
 const skipFirstCheck = ref(true);
+const customerIcon = '<i class="fa-solid fa-house-flag" data-bs-toggle="tooltip" data-bs-placement="top" title="' + _i18n("asn_configuration.customer_asn_title") + '"></i>'
+const subCustomerIcon = '<i class="fa-solid fa-house-laptop" data-bs-toggle="tooltip" data-bs-placement="top" title="' + _i18n("asn_configuration.sub_customer_asn_title") + '"></i>'
+const remoteIcon = '<i class="fa-solid fa-house-fire" data-bs-toggle="tooltip" data-bs-placement="top" title="' + _i18n("asn_configuration.remote_asn_title") + '"></i>'
 const sankey_format_list = [
     { key: "criteria_as", value: 'traffic_between_ases', label: _i18n('as_overview.as_traffic_criteria') },
     { key: "criteria_as", value: 'ingress_egress_traffic_criteria', label: _i18n('as_overview.ingress_egress_traffic_criteria') },
@@ -320,14 +323,22 @@ const formatAS = (value) => {
         return ''
     }
     let addTitle = true;
+    let importantASNIcon = ''
     const title = `data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}"`;
+    if (value.is_customer_asn) {
+        importantASNIcon = customerIcon;
+    } else if(value.is_sub_customer_asn) {
+        importantASNIcon = subCustomerIcon;
+    } else if(value.is_remote_asn) {
+        importantASNIcon = remoteIcon;
+    }
     if (dataUtils.isEmptyString(value.name)) {
         addTitle = false
     }
     if (!dataUtils.isEmptyString(value.url)) {
-        return `<a href="${value.url}" ${addTitle ? title : ""}>${value.name}</a>`;
+        return `<a href="${value.url}" ${addTitle ? title : ""}>${value.name}</a> ${importantASNIcon}`;
     }
-    return `<span ${addTitle ? title : ""}>${value.name}</span>`;
+    return `<span ${addTitle ? title : ""}>${value.name}</span> ${importantASNIcon}`;
 }
 
 /* ************************************** */
