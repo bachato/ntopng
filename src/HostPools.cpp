@@ -70,6 +70,8 @@ HostPools::HostPools(NetworkInterface *_iface) {
 #endif
 
 #ifdef HAVE_NEDGE
+  dynamicBlacklist = (AddressTree **)calloc(sizeof(AddressTree*), MAX_NUM_HOST_POOLS);
+  
   for(u_int i=0; i<MAX_NUM_HOST_POOLS; i++)
     dynamicBlacklist[i] = NULL;
 #endif

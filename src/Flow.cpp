@@ -385,7 +385,9 @@ void Flow::deferredInitialization() {
     AddressTree *at = cli_host->getDynamicBlacklist();
   
     if(at != NULL) {
-      if(at->matchAndGetData(srv_host)) {
+      IpAddress *srv_ip = srv_host->get_ip();
+      
+      if(at->match(srv_ip, srv_ip->isIPv4() ? 32 : 128)) {
 	/* The server host is present on the dynamic blacklist */
 	flow_blacklisted = true;
       
@@ -396,8 +398,7 @@ void Flow::deferredInitialization() {
   }
   
   if(flow_blacklisted)
-    setDropVerdict();
-}
+    setDropVerdict(DROP_REASON_BLACKLISTED_FLOW);
 #endif
   
   iface->execFlowBeginChecks(this);

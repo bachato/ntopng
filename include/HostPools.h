@@ -52,7 +52,7 @@ class HostPools {
 #endif
 
 #ifdef HAVE_NEDGE
-  AddressTree *dynamicBlacklist[max_num_pools];
+  AddressTree **dynamicBlacklist;
 #endif
 
   inline HostPoolStats *getPoolStats(u_int16_t host_pool_id) {
@@ -208,6 +208,14 @@ class HostPools {
 #ifdef HAVE_NEDGE
   inline AddressTree* getDynamicBlacklist(u_int16_t pool_id) const {
     return ((pool_id < max_num_pools) ? dynamicBlacklist[pool_id] : NULL);
+  }
+  
+  inline bool setDynamicBlacklist(u_int16_t pool_id, AddressTree *at) const {
+    if(pool_id < max_num_pools) {
+      dynamicBlacklist[pool_id] = at;
+      return(true);
+    } else
+      return(false);
   }
 #endif
 };

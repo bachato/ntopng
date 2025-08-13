@@ -4681,12 +4681,19 @@ static int ntop_flush_pool_dynamic_blacklist(lua_State *vm) {
 
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-
+  
   pool_id = (u_int16_t)lua_tonumber(vm, 1);
 
   if (curr_iface) {
+    HostPools *hp = curr_iface->getHostPools();
+    AddressTree *at = hp->getDynamicBlacklist(pool_id);
+    
+    hp->setDynamicBlacklist(pool_id, new AddressTree());
 
-    //TODO
+    if(at != NULL) {
+      sleep(1);
+      delete at;
+    }
 
     lua_pushnil(vm);
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -4708,11 +4715,10 @@ static int ntop_get_pool_dynamic_blacklist_stats(lua_State *vm) {
   pool_id = (u_int16_t)lua_tonumber(vm, 1);
 
   if (curr_iface) {
-    int blacklist_size = 0;
+    HostPools *hp = curr_iface->getHostPools();
+    AddressTree *at = hp->getDynamicBlacklist(pool_id);
 
-    //TODO
-
-    lua_pushinteger(vm, blacklist_size);
+    lua_pushinteger(vm, at ? at->getNumAddresses() : 0);
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
   } else
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
