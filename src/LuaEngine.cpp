@@ -43,8 +43,6 @@ extern luaL_Reg *ntop_host_reg;
 extern luaL_Reg *ntop_cloud_reg;
 #endif
 
-#define HTTP_MAX_UPLOAD_DATA_LEN  25000000 /* ~25MB (see also upload_pcap.template) */
-
 /* #define TRACE_VM_ENGINES */
 
 /* ******************************* */
@@ -1175,8 +1173,7 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
             }
           }
         }
-      } else if ((post_data = (char *)malloc(content_len * sizeof(char))) ==
-                     NULL ||
+      } else if ((post_data = (char *)malloc(content_len * sizeof(char))) == NULL ||
                  (post_data_len = mg_read(conn, post_data, content_len)) == 0) {
         valid_csrf = 0;
       } else {
