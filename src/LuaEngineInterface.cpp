@@ -4650,7 +4650,6 @@ static int ntop_rrd_queue_length(lua_State *vm) {
 /* ****************************************** */
 
 #ifdef NTOPNG_PRO
-
 #ifdef HAVE_NEDGE
 /* NOTE: do no call this directly - use host_pools_utils.resetPoolsQuotas
  * instead */
@@ -4671,9 +4670,56 @@ static int ntop_reset_pools_quotas(lua_State *vm) {
   } else
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 }
-#endif
 
-#endif
+/* ****************************************** */
+
+static int ntop_flush_pool_dynamic_blacklist(lua_State *vm) {
+  NetworkInterface *curr_iface = getCurrentInterface(vm);
+  u_int16_t pool_id = (u_int16_t)-1;
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  pool_id = (u_int16_t)lua_tonumber(vm, 1);
+
+  if (curr_iface) {
+
+    //TODO
+
+    lua_pushnil(vm);
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  } else
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+}
+
+/* ****************************************** */
+
+static int ntop_get_pool_dynamic_blacklist_stats(lua_State *vm) {
+  NetworkInterface *curr_iface = getCurrentInterface(vm);
+  u_int16_t pool_id = (u_int16_t)-1;
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  pool_id = (u_int16_t)lua_tonumber(vm, 1);
+
+  if (curr_iface) {
+    int blacklist_size = 0;
+
+    //TODO
+
+    lua_pushinteger(vm, blacklist_size);
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  } else
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+}
+
+#endif /* HAVE_NEDGE */
+#endif /* NTOPNG_PRO */
 
 /* ****************************************** */
 
@@ -5907,6 +5953,8 @@ static luaL_Reg _ntop_interface_reg[] = {
 #ifdef NTOPNG_PRO
 #ifdef HAVE_NEDGE
     {"resetPoolsQuotas", ntop_reset_pools_quotas},
+    {"flushPoolDynamicBlacklist", ntop_flush_pool_dynamic_blacklist},
+    {"getPoolDynamicBlacklistStats", ntop_get_pool_dynamic_blacklist_stats},
 #endif
     {"getHostUsedQuotasStats", ntop_get_host_used_quotas_stats},
 
