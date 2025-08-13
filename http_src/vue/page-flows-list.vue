@@ -7,7 +7,7 @@
             <template v-slot:custom_header>
                 <div class="dropdown me-3 d-inline-block" v-for="item in filter_table_array">
                     <span class="no-wrap d-flex align-items-center filters-label"><b>{{ item["basic_label"]
-                    }}</b></span>
+                            }}</b></span>
                     <SelectSearch v-model:selected_option="item['current_option']" theme="bootstrap-5"
                         dropdown_size="small" :disabled="loading" :options="item['options']"
                         @select_option="add_table_filter">
@@ -47,21 +47,21 @@ const props = defineProps({
 
 // conditionally render tables
 const table_id = computed(() => {
-  if (props.context?.is_enterprise_l) {
-      if (props.context?.ASNModeEnabled) {
-      return 'flows_list_with_exporters_enterprise_l_ixp_mode'
-    } else if (props.context?.has_exporters) {
-      return 'flows_list_with_exporters_enterprise_l'
+    if (props.context?.is_enterprise_l) {
+        if (props.context?.ASNModeEnabled) {
+            return 'flows_list_with_exporters_enterprise_l_ixp_mode'
+        } else if (props.context?.has_exporters) {
+            return 'flows_list_with_exporters_enterprise_l'
+        } else {
+            return 'flows_list_enterprise_l'
+        }
     } else {
-      return 'flows_list_enterprise_l'
+        if (props.context?.has_exporters) {
+            return 'flows_list_with_exporters'
+        } else {
+            return 'flows_list'
+        }
     }
-  } else {
-    if (props.context?.has_exporters) {
-      return 'flows_list_with_exporters'
-    } else {
-      return 'flows_list'
-    }
-  }
 })
 
 const table_flows_list = ref(null);
@@ -356,12 +356,17 @@ const map_table_def_columns = (columns) => {
 
         if (c.id == "actions") {
             const visible_dict = {
+                block_host: true,
                 historical_chart: props.context.is_clickhouse_enabled && !props.context.is_pcap,
             };
-            c.button_def_array.forEach((b) => {
+            c.button_def_array.forEach((b, pos) => {
+                if ((b.id === "block_host") && (!props.context.isNedge)) {
+                    c.button_def_array.splice(pos, 1)
+                }
                 b.f_map_class = (current_class, row) => {
-                    // if is not defined is enabled
-                    if (visible_dict[b.id] != null && visible_dict[b.id] == false) {
+                    if (visible_dict[b.id] != null && b.id === "block_list" && row.verdict) {
+                        current_class.push("disabled");
+                    } else if (visible_dict[b.id] != null && visible_dict[b.id] == false) {
                         current_class.push("d-none");
                     } else if (row.last_seen - row.first_seen < 310 /* 5 minutes and 10 seconds */ &&
                         visible_dict[b.id] != null && visible_dict[b.id] == true) {
@@ -487,7 +492,7 @@ async function load_table_filters_array() {
         it could happen some strange behavior */
     clearInterval(interval_id.value);
     loading.value = true;
-    let extra_params = get_extra_params_obj();    
+    let extra_params = get_extra_params_obj();
     let url_params = ntopng_url_manager.obj_to_url_params(extra_params);
 
     const url = `${http_prefix}/lua/rest/v2/get/flow/flow_filters.lua?${url_params}`;
@@ -513,8 +518,6 @@ function reset_filters() {
 /* ************************************** */
 
 function columns_sorting(col, r0, r1) {
-    console.log("-------")
-    console.log(col)
     if (col != null) {
         if (col.id == "ip") {
             return sortingFunctions.sortByIP(r0.ip, r1.ip, col.sort);
@@ -563,6 +566,21 @@ function click_button_live_flows(event) {
 
 /* ************************************** */
 
+function click_button_drop_host_traffic(event) {
+    const row = event.row;
+    const url_params = ntopng_url_manager.obj_to_url_params({
+        flow_key: row.key,
+        flow_hash_id: row.hash_id
+    });
+
+    const url = `${http_prefix}/lua/pro/rest/v2/get/flow/nedge/block_flow.lua?${url_params}`;
+    ntopng_utility.http_request(url).then(data => {
+        refresh_table();
+    });
+}
+
+/* ************************************** */
+
 function click_button_historical_data(event) {
     const row = event.row;
     let cli_port = "";
@@ -583,6 +601,7 @@ function on_table_custom_event(event) {
     let events_managed = {
         "click_button_live_flows": click_button_live_flows,
         "click_button_historical_data": click_button_historical_data,
+        "click_button_drop_host_traffic": click_button_drop_host_traffic,
     };
     if (events_managed[event.event_id] == null) {
         return;

@@ -20,26 +20,29 @@
 				"text-center"
 			],
 			"min-width" : "88px",
-			"render_v_node_type": "button_array",
+			"render_v_node_type": "button_list",
 			"button_def_array": [
 				{
 					"id": "live_flows",
 					"icon": "fa-solid fa-magnifying-glass-plus",
 					"title_i18n": "flows",
-					"class": [
-						"btn-info"
-					],
+					"class": [],
 					"event_id": "click_button_live_flows"
 				},
 				{
 					"id": "historical_chart",
 					"icon": "fas fa-lg fa-chart-area",
 					"title_i18n": "chart",
-					"class": [
-						"btn-info"
-					],
+					"class": [],
 					"event_id": "click_button_historical_data"
-				}
+				},
+				{
+                    "id": "block_host",
+                    "icon": "fas fa-ban",
+                    "title_i18n": "flow_details.drop_flow_traffic_btn",
+                    "class": [],
+                    "event_id": "click_button_drop_host_traffic"
+                }
 			]
 		},
 		{
