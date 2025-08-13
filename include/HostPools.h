@@ -50,6 +50,11 @@ class HostPools {
                                            member */
   bool *enforce_shapers_per_pool_member;
 #endif
+
+#ifdef HAVE_NEDGE
+  AddressTree *dynamicBlacklist[max_num_pools];
+#endif
+
   inline HostPoolStats *getPoolStats(u_int16_t host_pool_id) {
     if ((host_pool_id >= max_num_pools) || (!stats)) return NULL;
     return stats[host_pool_id];
@@ -198,11 +203,12 @@ class HostPools {
   inline u_int32_t getMaxFlowSize(u_int16_t pool_id) {
     return ((pool_id < max_num_pools) ? max_flow_size[pool_id] : 0);
   }
+#endif
 
-  inline bool hasDynamicBlacklist(u_int16_t pool_id) {
-    return ((pool_id < max_num_pools) ? dynamic_blacklist_enabled[pool_id] : false);
+#ifdef HAVE_NEDGE
+  inline AddressTree* getDynamicBlacklist(u_int16_t pool_id) const {
+    return ((pool_id < max_num_pools) ? dynamicBlacklist[pool_id] : NULL);
   }
-
 #endif
 };
 

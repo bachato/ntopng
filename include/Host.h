@@ -347,13 +347,11 @@ class Host : public GenericHashEntry,
 #endif
   };
 
-  inline bool hasDynamicBlacklist() const {
-#ifdef NTOPNG_PRO
-    return (iface->getHostPools()->hasDynamicBlacklist(host_pool_id));
-#else
-    return (false);
-#endif
+#ifdef HAVE_NEDGE
+  inline AddressTree* getDynamicBlacklist() const {
+    return (iface->getHostPools()->getDynamicBlacklist(host_pool_id));
   };
+#endif
 
   virtual HostStats *allocateStats() { return (new HostStats(this)); };
 

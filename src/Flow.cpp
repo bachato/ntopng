@@ -239,6 +239,9 @@ Flow::Flow(NetworkInterface *_iface,
 
   memset(&custom_app, 0, sizeof(custom_app));
 
+  passVerdict = 1;
+  dropVerdictReason = DROP_REASON_UNKNOWN;
+
 #ifdef HAVE_NEDGE
   quota_exceeded = 0;
   HostPools *hp = iface->getHostPools();
@@ -253,8 +256,6 @@ Flow::Flow(NetworkInterface *_iface,
   }
 #endif
 
-  passVerdict = 1;
-  dropVerdictReason = DROP_REASON_UNKNOWN;
 #ifdef ALERTED_FLOWS_DEBUG
   iface_alert_inc = iface_alert_dec = false;
 #endif
@@ -347,6 +348,8 @@ Flow::Flow(NetworkInterface *_iface,
  * that are not really necessary at the creation of the flow
  */
 void Flow::deferredInitialization() {
+  bool flow_blacklisted = false;
+  
   if(cli_host && srv_host) {
     char country[64];
 
@@ -370,11 +373,33 @@ void Flow::deferredInitialization() {
   }
 
   if(isBlacklistedClient()) {
+    flow_blacklisted = true;
     if(srv_host) srv_host->inc_num_blacklisted_flows(false);
   } else if(isBlacklistedServer()) {
+    flow_blacklisted = true;
     if(cli_host) cli_host->inc_num_blacklisted_flows(true);
   }
 
+#ifdef HAVE_NEDGE
+  if(!flow_blacklisted) {
+    AddressTree *at = cli_host->getDynamicBlacklist();
+  
+    if(at != NULL) {
+      if(at->matchAndGetData(srv_host)) {
+	/* The server host is present on the dynamic blacklist */
+	flow_blacklisted = true;
+      
+	if(cli_host)
+	  cli_host->inc_num_blacklisted_flows(true);
+      }
+    }
+  }
+  
+  if(flow_blacklisted)
+    setDropVerdict();
+}
+#endif
+  
   iface->execFlowBeginChecks(this);
 }
 
@@ -1888,8 +1913,12 @@ bool Flow::dump(time_t t, bool last_dump_before_free) {
 
 void Flow::setDropVerdict(DropReason reason) {
 #if defined(HAVE_NEDGE)
-  if((iface->getIfType() == interface_type_NETFILTER) && (passVerdict == 1))
-    ((NetfilterInterface *)iface)->setPolicyChanged();
+  if(iface->getIfType() == interface_type_NETFILTER) {
+    if(passVerdict == 1)
+      ((NetfilterInterface *)iface)->setPolicyChanged();
+
+    fillDynamicPollBlacklist();
+  }
 #endif
 
   passVerdict = 0;
@@ -2606,6 +2635,7 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
   if (cli_host && srv_host) {
     u_int32_t cli_max_flow_size = cli_host->getMaxFlowSize();
     u_int32_t srv_max_flow_size = srv_host->getMaxFlowSize();
+    
     if ((cli_max_flow_size && get_bytes() > cli_max_flow_size) ||
         (srv_max_flow_size && get_bytes() > srv_max_flow_size))
       setDropVerdict(DROP_REASON_FLOW_SIZE_EXCEEDED);

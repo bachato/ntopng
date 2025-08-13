@@ -1395,6 +1395,7 @@ public:
     ingress2egress_direction = _ingress2egress;
   }
   inline bool isIngress2EgressDirection() { return (ingress2egress_direction); }
+  void fillDynamicPollBlacklist();
 #endif
   void housekeep(time_t t);
   void setParsedeBPFInfo(const ParsedeBPF *const _ebpf, bool swap_directions);
