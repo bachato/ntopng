@@ -30,7 +30,7 @@
     <!-- Modals to add and delete host pools -->
     <ModalAddHostPool ref="modal_add_pool" :context="context" @add="handleAddPool" @edit="handleEditPool">
     </ModalAddHostPool>
-    
+
     <ModalDeleteConfirm ref="modal_delete_pool" :title="title_delete" :body="body_delete" @delete="handleDeletePool">
     </ModalDeleteConfirm>
 </template>
@@ -186,7 +186,7 @@ const map_table_def_columns = (columns) => {
         "throughput": (value, row) => {
             return formatterUtils.getFormatter("bps")(value);
         },
-        "traffic": (value, row) => {	
+        "traffic": (value, row) => {
 	    if(value == 0) return("");
             return formatterUtils.getFormatter("bytes")(value);
         },
@@ -213,7 +213,7 @@ const map_table_def_columns = (columns) => {
                         // disable dropdown button manage pool for pool: 'Default'
                         current_class.push("disabled");
                     }
-                    else if (b.id === "edit_pool_policy" && (!isPro || isnEdge)) {
+                    else if (b.id === "edit_pool_policy" && (!isPro || !isnEdge)) {
                         current_class.push("disabled");
                     }
                     return current_class;
@@ -266,7 +266,7 @@ const click_manage_pool = (param) => {
 
 /* edit pool button to change pool name */
 const click_edit_pool = (param) => {
-    // memebers is an array, rest expects string of elements 
+    // memebers is an array, rest expects string of elements
     let members_array = param.row.members
     let members_string = members_array.join(",")
 
@@ -288,14 +288,20 @@ const click_edit_pool = (param) => {
 /* edit pool button to change pool policy */
 const click_edit_pool_policy = (param) => {
     let pool_id = param.row.pool_id;
-    let manage_pool_url = `${http_prefix}/lua/pro/policy.lua?pool=${pool_id}`;
+    let pool_name = param.row.pool_name;
+    let manage_pool_url;
+    
+    if(isnEdge)
+        manage_pool_url = `${http_prefix}/lua/pro/nedge/admin/nf_edit_user.lua?username=${pool_name}`;
+    else
+        manage_pool_url = `${http_prefix}/lua/pro/policy.lua?pool=${pool_id}`;
     // open page in current tab
     window.location.href = manage_pool_url;
 };
 
 /* delete host pool */
 const click_delete_pool = (param) => {
-    
+
     if (!modal_delete_pool.value) {
         console.error('Delete modal reference is null');
         return;
@@ -306,7 +312,7 @@ const click_delete_pool = (param) => {
 
     // reate body text
     const body_text = body_delete_18n.replace("%{pool}", param.row.pool_name);
-    
+
     // Pass the dynamic body and title to the show method
     modal_delete_pool.value.show(body_text, title_delete);
 };
