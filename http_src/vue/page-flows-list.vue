@@ -174,19 +174,19 @@ const map_table_def_columns = (columns) => {
 
             let flow_label = `${client} <i class="fas fa-exchange-alt fa-lg" aria-hidden="true"></i> ${server}`
             // strike through if verdict is to drop
-            flow_label = !row.verdict ? ` <strike>${flow_label}</strike>` : `${flow_label}`
+            flow_label = row.verdict ? ` <strike>${flow_label}</strike>` : `${flow_label}`
             
             return flow_label
         },
         "protocol": (value, row) => {
             value = row.application
-            const name = !row.verdict ? ` <strike>${value.name}</strike>` : `${value.name}`
+            const name = row.verdict ? ` <strike>${value.name}</strike>` : `${value.name}`
             const l7_proto_id = (dataUtils.isEmptyOrNull(value.master_id) || value.master_id === value.app_id) ? value.app_id : `${value.master_id}.${value.app_id}`
             const application = `<a href="#" class="tableFilter" tag-filter="application" tag-value="${l7_proto_id}">${name} ${protocolUtils.formatBreedIcon(value.breed, value.encrypted)}</a> ${protocolUtils.formatConfidence(value.confidence, value.confidence_id)}`
             value = row.l4_proto
             let proto = ""
             if (value && value.name) {
-                proto = !row.verdict ? ` <strike>${value.name}</strike>` : `${value.name}`
+                proto = row.verdict ? ` <strike>${value.name}</strike>` : `${value.name}`
             }
             proto = `<a href="#" class="tableFilter" tag-filter="l4proto" tag-value="${value.id}">${proto}</a>`
             if (row.l4_proto.name == "UDP" || row.l4_proto.name == "TCP") {
@@ -199,7 +199,7 @@ const map_table_def_columns = (columns) => {
         },
         "proto": (value, row) => {
             if (value) {
-                const name = !row.verdict ? ` <strike>${value}</strike>` : `${value}`
+                const name = row.verdict ? ` <strike>${value}</strike>` : `${value}`
                 return name
             }
             return ""
