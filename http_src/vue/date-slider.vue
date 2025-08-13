@@ -141,7 +141,7 @@ const onStatusUpdated = function (status) {
 
         ntopng_url_manager.add_obj_to_url(status);
         /* Skip the emit on the first */
-        emitEpochChange(status, props.id);
+        //emitEpochChange(status, props.id);
     }
 
     setSliderValue(status.epoch_begin);

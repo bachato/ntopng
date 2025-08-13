@@ -225,11 +225,11 @@ function flow_data.formatStats(stats_to_format)
         local formatted_element = {}
         for key, value in pairs(values or {}) do
             -- Format the data
-            local formatted_data = flow_data_preset.getFormattedDataAndLink(key,
+            local formatted_data, url_link = flow_data_preset.getFormattedDataAndLink(key,
                                                                             value,
                                                                             values)
             if (formatted_data ~= value) or (type(formatted_data) == "string") then
-                formatted_element[key] = {id = value, name = formatted_data}
+                formatted_element[key] = {id = value, name = formatted_data, url = url_link}
             else
                 formatted_element[key] = value
             end

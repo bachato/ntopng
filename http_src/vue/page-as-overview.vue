@@ -14,13 +14,13 @@
             </CustomSwitch>
             <div class="w-100 position-relative">
                 <Transition name="add-effect" mode="out-in">
-                    <DateTimeRangePicker v-if="toggle_slider" class="dontprint" id="as-date-time-picker"
+                    <DateTimeRangePicker v-if="!toggle_slider" class="dontprint" id="as-date-time-picker"
                         :round_time="true" :custom_time_interval_list="time_preset_list" min_time_interval_id="live"
                         :custom_change_select_time="changeTime" @epoch_change="setTimeInterval">
                     </DateTimeRangePicker>
                 </Transition>
                 <Transition name="add-effect" mode="out-in">
-                    <DateSlider v-if="!toggle_slider" id="as-date-slider" :min_epoch="first_date_epoch"
+                    <DateSlider v-if="toggle_slider" id="as-date-slider" :min_epoch="first_date_epoch"
                         @epoch_change="setTimeInterval" style="width: 100%" />
                 </Transition>
             </div>
@@ -180,12 +180,6 @@ function reloadTable() {
 /* ************************************** */
 
 function setTimeInterval(epoch_interval) {
-    // This is just used to skip the callback of this function the first time the component is loaded
-    if (skipFirstCheck) {
-        skipFirstCheck.value = false;
-        return;
-    }
-
     // Check if it's live
     if (epoch_interval.isToday) {
         ntopng_url_manager.delete_key_from_url("type")
@@ -321,6 +315,23 @@ function columnsSorting(col, r0, r1) {
 
 /* ************************************** */
 
+const formatAS = (value) => {
+    if (!value) {
+        return ''
+    }
+    let addTitle = true;
+    const title = `data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}"`;
+    if (dataUtils.isEmptyString(value.name)) {
+        addTitle = false
+    }
+    if (!dataUtils.isEmptyString(value.url)) {
+        return `<a href="${value.url}" ${addTitle ? title : ""}>${value.name}</a>`;
+    }
+    return `<span ${addTitle ? title : ""}>${value.name}</span>`;
+}
+
+/* ************************************** */
+
 const mapTableColumns = (columns) => {
     let map_columns = {
         "device": (value, row) => {
@@ -336,40 +347,19 @@ const mapTableColumns = (columns) => {
             return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
         },
         "as": (value, row) => {
-            if (dataUtils.isEmptyString(value.name)) {
-                return value.id
-            }
-            return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
+            return formatAS(value);
         },
         "dst_as": (value, row) => {
-            if (dataUtils.isEmptyString(value.name)) {
-                return value.id
-            }
-            return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
+            return formatAS(value);
         },
         "src_as": (value, row) => {
-            if (dataUtils.isEmptyString(value.name)) {
-                return value.id
-            }
-            return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
+            return formatAS(value);
         },
         "src_transit_as": (value, row) => {
-            if (!value) {
-                return "";
-            }
-            if (dataUtils.isEmptyString(value.name)) {
-                return value.id
-            }
-            return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
+            return formatAS(value);
         },
         "dst_transit_as": (value, row) => {
-            if (!value) {
-                return "";
-            }
-            if (dataUtils.isEmptyString(value.name)) {
-                return value.id
-            }
-            return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
+            return formatAS(value);
         },
         "bytes_sent": (value, row) => {
             return FormatterUtils.getFormatter("bytes")(value);
