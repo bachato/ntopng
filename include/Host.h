@@ -347,6 +347,14 @@ class Host : public GenericHashEntry,
 #endif
   };
 
+  inline bool hasDynamicBlacklist() const {
+#ifdef NTOPNG_PRO
+    return (iface->getHostPools()->hasDynamicBlacklist(host_pool_id));
+#else
+    return (false);
+#endif
+  };
+
   virtual HostStats *allocateStats() { return (new HostStats(this)); };
 
   /* Override Score members to perform incs/decs on the host and also on its

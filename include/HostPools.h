@@ -41,6 +41,7 @@ class HostPools {
   bool *children_safe;
   bool *forge_global_dns;
   bool *block_blacklisted_flows;
+  bool *dynamic_blacklist_enabled;
   u_int8_t *routing_policy_id;
   u_int16_t *pool_shaper;
   u_int32_t *schedule_bitmap;
@@ -196,6 +197,10 @@ class HostPools {
 
   inline u_int32_t getMaxFlowSize(u_int16_t pool_id) {
     return ((pool_id < max_num_pools) ? max_flow_size[pool_id] : 0);
+  }
+
+  inline bool hasDynamicBlacklist(u_int16_t pool_id) {
+    return ((pool_id < max_num_pools) ? dynamic_blacklist_enabled[pool_id] : false);
   }
 
 #endif

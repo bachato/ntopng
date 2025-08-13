@@ -309,6 +309,14 @@ function host_pools_nedge.setBlockBlacklistedFlows(pool_id, value)
   host_pools_nedge.setPoolDetail(pool_id, "block_blacklisted_flows", ternary(value, "true", "false"))
 end
 
+function host_pools_nedge.isDynamicBlacklistEnabled(pool_id)
+  return toboolean(host_pools_nedge.getPoolDetail(pool_id, "dynamic_blacklist"))
+end
+
+function host_pools_nedge.setDynamicBlacklist(pool_id, value)
+  host_pools_nedge.setPoolDetail(pool_id, "dynamic_blacklist", ternary(value, "true", "false"))
+end
+
 function host_pools_nedge.getMaxFlowSize(pool_id)
   return tonumber(host_pools_nedge.getPoolDetail(pool_id, "max_flow_size") or "0")
 end
