@@ -4974,6 +4974,7 @@ local lang = {
     ["dynamic_blacklist_descr"] = "Dynamically add destinations for blocked flows to blacklist",
     ["edit_name"] = "Edit Name",
     ["edit_traffic_policy"] = "Edit Pool Policy",
+    ["edit_pool_policy"] = "Edit Pool Policy",
     ["duplicate_member"] = "Duplicate member address",
     ["duplicate_pool"] = "Duplicate pool name",
     ["edit_host_pool_member"] = "Edit members",

@@ -27,7 +27,7 @@
 
 HostPools::HostPools(NetworkInterface *_iface) {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+
   tree = tree_shadow = NULL;
   stats = stats_shadow = NULL;
 #ifdef NTOPNG_PRO
@@ -71,7 +71,7 @@ HostPools::HostPools(NetworkInterface *_iface) {
 
 #ifdef HAVE_NEDGE
   dynamicBlacklist = (AddressTree **)calloc(sizeof(AddressTree*), MAX_NUM_HOST_POOLS);
-  
+
   for(u_int i=0; i<MAX_NUM_HOST_POOLS; i++)
     dynamicBlacklist[i] = NULL;
 #endif
@@ -90,7 +90,7 @@ HostPools::HostPools(NetworkInterface *_iface) {
 
   reloadPools();
   max_num_pools = MAX_NUM_HOST_POOLS;
-  
+
   ntop->getTrace()->traceEvent(TRACE_INFO, "Host Pools Available: %u", max_num_pools);
 }
 
@@ -111,7 +111,7 @@ void HostPools::deleteStats(HostPoolStats ***hps) {
 void HostPools::storeStats(HostPoolStats **stats) {
   char stats_key[CONST_MAX_LEN_REDIS_KEY];
   Redis *redis = ntop->getRedis();
-  
+
   for (int i = 0; i < MAX_NUM_HOST_POOLS; i++) {
     if (stats[i] == nullptr) continue;
     u_int16_t pool_id = i;
@@ -133,8 +133,8 @@ HostPools::~HostPools() {
 
   if (tree_shadow) delete tree_shadow;
   if (tree) delete tree;
-  
-  if (stats){ 
+
+  if (stats){
 #ifdef HAVE_NEDGE
     storeStats(stats);
 #endif
@@ -355,7 +355,7 @@ void HostPools::reloadPool(u_int16_t _pool_id, VLANAddressTree *new_tree, HostPo
   /* Initialize the name */
   if (new_stats[_pool_id]) {
     char name_rsp[POOL_MAX_NAME_LEN];
-    
+
     redis->hashGet(kname, (char *)"name", name_rsp, sizeof(name_rsp));
     new_stats[_pool_id]->updateName(name_rsp);
   }
@@ -363,55 +363,22 @@ void HostPools::reloadPool(u_int16_t _pool_id, VLANAddressTree *new_tree, HostPo
 #ifdef NTOPNG_PRO
   char rsp[16] = {0};
 
-  children_safe[_pool_id] =
-    ((redis->hashGet(kname, (char *)CONST_CHILDREN_SAFE, rsp,
-		     sizeof(rsp)) != -1) &&
-     (!strcmp(rsp, "true")));
+  children_safe[_pool_id] = ((redis->hashGet(kname, (char *)CONST_CHILDREN_SAFE, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
+  forge_global_dns[_pool_id] = ((redis->hashGet(kname, (char *)CONST_FORGE_GLOBAL_DNS, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
+  routing_policy_id[_pool_id] = (redis->hashGet(kname, (char *)CONST_ROUTING_POLICY_ID, rsp, sizeof(rsp)) != -1) ? atoi(rsp) : DEFAULT_ROUTING_TABLE_ID;
+  block_blacklisted_flows[_pool_id] = ((redis->hashGet(kname, (char *)CONST_BLOCK_BLACKLISTED_FLOWS, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
+  max_flow_size[_pool_id] = (redis->hashGet(kname, (char *)CONST_MAX_FLOW_SIZE, rsp, sizeof(rsp)) != -1) ? atoi(rsp) : 0;
+  pool_shaper[_pool_id] = (redis->hashGet(kname, (char *)CONST_POOL_SHAPER_ID, rsp, sizeof(rsp)) != -1) ? atoi(rsp) : DEFAULT_SHAPER_ID;
+  schedule_bitmap[_pool_id] = (redis->hashGet(kname, (char *)CONST_SCHEDULE_BITMAP, rsp, sizeof(rsp)) != -1) ? strtol(rsp, NULL, 16) : DEFAULT_TIME_SCHEDULE;
+  enforce_quotas_per_pool_member[_pool_id] = ((redis->hashGet(kname, (char *)CONST_ENFORCE_QUOTAS_PER_POOL_MEMBER, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
+  enforce_shapers_per_pool_member[_pool_id] = ((redis->hashGet(kname, (char *)CONST_ENFORCE_SHAPERS_PER_POOL_MEMBER, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
+  dynamic_blacklist_enabled[_pool_id] = ((redis->hashGet(kname, (char *)CONST_DYNAMIC_BLACKLIST, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
 
-  forge_global_dns[_pool_id] =
-    ((redis->hashGet(kname, (char *)CONST_FORGE_GLOBAL_DNS, rsp,
-		     sizeof(rsp)) != -1) &&
-     (!strcmp(rsp, "true")));
+  if(dynamic_blacklist_enabled[_pool_id]) {
+    ntop->getTrace()->traceEvent(TRACE_INFO, "Allocating synamic blacklist for poolId %d", _pool_id);
 
-  routing_policy_id[_pool_id] =
-    (redis->hashGet(kname, (char *)CONST_ROUTING_POLICY_ID, rsp,
-		    sizeof(rsp)) != -1)
-    ? atoi(rsp) : DEFAULT_ROUTING_TABLE_ID;
-
-  block_blacklisted_flows[_pool_id] =
-    ((redis->hashGet(kname, (char *)CONST_BLOCK_BLACKLISTED_FLOWS, rsp,
-		     sizeof(rsp)) != -1) &&
-     (!strcmp(rsp, "true")));
-
-  max_flow_size[_pool_id] =
-    (redis->hashGet(kname, (char *)CONST_MAX_FLOW_SIZE, rsp,
-		    sizeof(rsp)) != -1)
-    ? atoi(rsp) : 0;
-
-  dynamic_blacklist_enabled[_pool_id] =
-      ((redis->hashGet(kname, (char *)CONST_DYNAMIC_BLACKLIST, rsp,
-		       sizeof(rsp)) != -1) &&
-       (!strcmp(rsp, "true")));
-
-  pool_shaper[_pool_id] = (redis->hashGet(kname, (char *)CONST_POOL_SHAPER_ID,
-					  rsp, sizeof(rsp)) != -1)
-    ? atoi(rsp) : DEFAULT_SHAPER_ID;
-
-  schedule_bitmap[_pool_id] =
-    (redis->hashGet(kname, (char *)CONST_SCHEDULE_BITMAP, rsp,
-		    sizeof(rsp)) != -1)
-    ? strtol(rsp, NULL, 16) : DEFAULT_TIME_SCHEDULE;
-
-  enforce_quotas_per_pool_member[_pool_id] =
-    ((redis->hashGet(kname, (char *)CONST_ENFORCE_QUOTAS_PER_POOL_MEMBER,
-		     rsp, sizeof(rsp)) != -1) &&
-     (!strcmp(rsp, "true")));
-  
-  enforce_shapers_per_pool_member[_pool_id] =
-    ((redis->hashGet(kname, (char *)CONST_ENFORCE_SHAPERS_PER_POOL_MEMBER,
-		     rsp, sizeof(rsp)) != -1) &&
-     (!strcmp(rsp, "true")));
-  
+    dynamicBlacklist[_pool_id] = new AddressTree();
+  }
 
 #ifdef HOST_POOLS_DEBUG
   redis->hashGet(kname, (char *)"name", rsp, sizeof(rsp));
@@ -435,7 +402,7 @@ void HostPools::reloadPool(u_int16_t _pool_id, VLANAddressTree *new_tree, HostPo
 			       enforce_quotas_per_pool_member[_pool_id],
 			       enforce_shapers_per_pool_member[_pool_id]);
 #endif
-  
+
 #endif /* NTOPNG_PRO */
 
   snprintf(kname, sizeof(kname), HOST_POOL_MEMBERS_KEY, pool_id);
@@ -504,13 +471,13 @@ void HostPools::reloadPools() {
   if(new_tree == NULL) {
     return;
   }
-  
+
   new_stats = new (std::nothrow) HostPoolStats *[MAX_NUM_HOST_POOLS];
   if(new_stats == NULL) {
     delete new_tree;
     return;
   }
-  
+
   for (u_int32_t i = 0; i < MAX_NUM_HOST_POOLS; i++) new_stats[i] = NULL;
 
   snprintf(kname, sizeof(kname), HOST_POOL_IDS_KEY);
