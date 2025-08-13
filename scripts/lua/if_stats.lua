@@ -142,34 +142,41 @@ end
 local probes_stats = ifstats.probes or {}
 
 if interface.isView() then
+    local view_id = interface.getId()
+
     local zmq_stats = {}
     local exporters_stats = {}
+
     for interface_name, _ in pairsByKeys(interface.getIfNames() or {}) do
 
         interface.select(interface_name)
+        if interface.viewedBy() == view_id then
 
-        local tmp = interface.getStats()
+            local tmp = interface.getStats()
 
-        if tmp.stats and tmp.stats_since_reset then
-            tmp.stats = override_stats(tmp.stats, tmp.stats_since_reset)
-        end
-        if tmp.zmqRecvStats and tmp.zmqRecvStats_since_reset then
-            tmp.zmqRecvStats = override_stats(tmp.zmqRecvStats, tmp.zmqRecvStats_since_reset)
-        end
-
-        for k, v in pairs(tmp.probes or {}) do
-            probes_stats[k] = v
-        end
-        for k, v in pairs(tmp.exporters or {}) do
-            if not exporters_stats[k] then
-                exporters_stats[k] = {}
+            if tmp.stats and tmp.stats_since_reset then
+                tmp.stats = override_stats(tmp.stats, tmp.stats_since_reset)
             end
-            for key_stat, value_stat in pairs(v) do
-                exporters_stats[k][key_stat] = value_stat + (exporters_stats[k][key_stat] or 0)
+            if tmp.zmqRecvStats and tmp.zmqRecvStats_since_reset then
+                tmp.zmqRecvStats = override_stats(tmp.zmqRecvStats, tmp.zmqRecvStats_since_reset)
             end
-        end
-        for k, v in pairs(tmp.zmqRecvStats or {}) do
-            zmq_stats[k] = (zmq_stats[k] or 0) + v
+
+            for k, v in pairs(tmp.probes or {}) do
+                probes_stats[k] = v
+            end
+            for k, v in pairs(tmp.exporters or {}) do
+                if not exporters_stats[k] then
+                    exporters_stats[k] = {}
+                end
+                for key_stat, value_stat in pairs(v) do
+                    exporters_stats[k][key_stat] = value_stat + (exporters_stats[k][key_stat] or 0)
+                end
+            end
+
+            for k, v in pairs(tmp.zmqRecvStats or {}) do
+                zmq_stats[k] = (zmq_stats[k] or 0) + v
+            end
+
         end
     end
 
@@ -626,7 +633,7 @@ if ((page == "overview") or (page == nil)) then
 
             if cur_i >= max_items_per_row then
                 print("</tr><tr>");
-                cur_i = 0
+               cur_i = 0
             end
             print("<th nowrap>" .. i18n("if_stats_overview.probe_zmq_drops_flow_collection_udp_socket_drops") ..
                 " <sup><i class='fas fa-question-circle ' title='" ..
