@@ -140,6 +140,7 @@ const onStatusUpdated = function (status) {
         status.epoch_end = now + timelineStep.value;
 
         ntopng_url_manager.add_obj_to_url(status);
+        /* Skip the emit on the first */
         emitEpochChange(status, props.id);
     }
 

@@ -85,6 +85,7 @@ const table_id = ref(props.context.tableId);
 const first_date_epoch = ref(props.context.first_date_epoch);
 const toggle_slider = ref(false);
 const toggle_slider_label = ref(_i18n("db_search.time_range"));
+const skipFirstCheck = ref(true);
 const sankey_format_list = [
     { key: "criteria_as", value: 'traffic_between_ases', label: _i18n('as_overview.as_traffic_criteria') },
     { key: "criteria_as", value: 'ingress_egress_traffic_criteria', label: _i18n('as_overview.ingress_egress_traffic_criteria') },
@@ -179,6 +180,12 @@ function reloadTable() {
 /* ************************************** */
 
 function setTimeInterval(epoch_interval) {
+    // This is just used to skip the callback of this function the first time the component is loaded
+    if (skipFirstCheck) {
+        skipFirstCheck.value = false;
+        return;
+    }
+
     // Check if it's live
     if (epoch_interval.isToday) {
         ntopng_url_manager.delete_key_from_url("type")
