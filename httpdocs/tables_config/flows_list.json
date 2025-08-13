@@ -25,7 +25,7 @@
 				{
 					"id": "live_flows",
 					"icon": "fa-solid fa-magnifying-glass-plus",
-					"title_i18n": "flows",
+					"title_i18n": "info",
 					"class": [],
 					"event_id": "click_button_live_flows"
 				},
