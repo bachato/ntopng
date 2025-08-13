@@ -1,5 +1,6 @@
 <template>
-    <Geomap :ifid="ifid":tooltipFormatter="formatTooltipData" :geomapDataArray="geomapDataArray" :getGeomapData="getGeomapData"></Geomap>
+    <Geomap :ifid="ifid" :tooltipFormatter="formatTooltipData" :geomapDataArray="geomapDataArray"
+        :getGeomapData="getGeomapData"></Geomap>
 </template>
 
 <script setup>
@@ -80,15 +81,15 @@ async function getGeomapData() {
         if (geomapDataArray.value.length > 0) return;
         //build url
         let url = `${http_prefix}${alerts_url}?`;
-        
+
         url = create_url(url);
-        
+
         let headers = {
             "Content-Type": "application/json",
         };
         const rsp = await ntopng_utility.http_request(url, { method: "get", headers });
         console.log(`Got Data, len: ${geomapDataArray.value.length}`)
-        
+
         if (rsp) {
             if (rsp.length > 0) {
                 geomapDataArray.value = rsp;

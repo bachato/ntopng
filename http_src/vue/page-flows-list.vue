@@ -174,8 +174,8 @@ const map_table_def_columns = (columns) => {
 
             let flow_label = `${client} <i class="fas fa-exchange-alt fa-lg" aria-hidden="true"></i> ${server}`
             // strike through if verdict is to drop
-            flow_label = row.verdict ? ` <strike>${flow_label}</strike>` : `${flow_label}`
-            
+            flow_label = !row.verdict ? ` <strike>${flow_label}</strike>` : `${flow_label}`
+
             return flow_label
         },
         "protocol": (value, row) => {
@@ -372,7 +372,7 @@ const map_table_def_columns = (columns) => {
                     if (visible_dict[b.id] != null && visible_dict[b.id] == false) {
                         current_class.push("disabled");
                     } else if (row.last_seen - row.first_seen < 310 /* 5 minutes and 10 seconds */ &&
-                        visible_dict[b.id] != null && visible_dict[b.id] == true) {
+                        visible_dict[b.id] != null && visible_dict[b.id] === true && b.id === "historical_chart") {
                         current_class.push("disabled");
                     }
                     return current_class;
