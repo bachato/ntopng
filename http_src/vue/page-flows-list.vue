@@ -367,7 +367,7 @@ const map_table_def_columns = (columns) => {
                     if (visible_dict[b.id] != null && b.id === "block_list" && row.verdict) {
                         current_class.push("disabled");
                     } else if (visible_dict[b.id] != null && visible_dict[b.id] == false) {
-                        current_class.push("d-none");
+                        current_class.push("disabled");
                     } else if (row.last_seen - row.first_seen < 310 /* 5 minutes and 10 seconds */ &&
                         visible_dict[b.id] != null && visible_dict[b.id] == true) {
                         current_class.push("disabled");
