@@ -374,12 +374,14 @@ void HostPools::reloadPool(u_int16_t _pool_id, VLANAddressTree *new_tree, HostPo
   enforce_shapers_per_pool_member[_pool_id] = ((redis->hashGet(kname, (char *)CONST_ENFORCE_SHAPERS_PER_POOL_MEMBER, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
   dynamic_blacklist_enabled[_pool_id] = ((redis->hashGet(kname, (char *)CONST_DYNAMIC_BLACKLIST, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
 
+#ifdef HAVE_NEDGE
   if(dynamic_blacklist_enabled[_pool_id]) {
     ntop->getTrace()->traceEvent(TRACE_INFO, "Allocating synamic blacklist for poolId %d", _pool_id);
 
     dynamicBlacklist[_pool_id] = new AddressTree();
   }
-
+#endif
+  
 #ifdef HOST_POOLS_DEBUG
   redis->hashGet(kname, (char *)"name", rsp, sizeof(rsp));
   ntop->getTrace()->traceEvent(TRACE_NORMAL,
