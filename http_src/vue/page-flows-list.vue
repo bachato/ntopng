@@ -361,7 +361,7 @@ const map_table_def_columns = (columns) => {
 
         if (c.id == "actions") {
             const visible_dict = {
-                block_host: true,
+                block_host: props.context.isNedge,
                 historical_chart: props.context.is_clickhouse_enabled && !props.context.is_pcap,
             };
             c.button_def_array.forEach((b, pos) => {
@@ -369,9 +369,7 @@ const map_table_def_columns = (columns) => {
                     c.button_def_array.splice(pos, 1)
                 }
                 b.f_map_class = (current_class, row) => {
-                    if (visible_dict[b.id] != null && b.id === "block_list" && !row.verdict) {
-                        current_class.push("disabled");
-                    } else if (visible_dict[b.id] != null && visible_dict[b.id] == false) {
+                    if (visible_dict[b.id] != null && visible_dict[b.id] == false) {
                         current_class.push("disabled");
                     } else if (row.last_seen - row.first_seen < 310 /* 5 minutes and 10 seconds */ &&
                         visible_dict[b.id] != null && visible_dict[b.id] == true) {
