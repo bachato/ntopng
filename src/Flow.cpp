@@ -1918,7 +1918,7 @@ void Flow::setDropVerdict(DropReason reason) {
     if(passVerdict == 1)
       ((NetfilterInterface *)iface)->setPolicyChanged();
 
-    fillDynamicPollBlacklist();
+    fillDynamicPoolBlacklist();
   }
 #endif
 
