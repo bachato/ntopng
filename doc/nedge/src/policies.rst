@@ -62,3 +62,26 @@ There is an easy way to verify which policy would be applied to some application
 
   Policies Test page
 
+
+Max Flow Size
+-------------
+
+You can specify a maximum flow size over which a flow will be blocked automatically. If the value is set to 0 (zero) no block is applied.
+
+.. figure:: img/policies_test.png
+  :align: center
+  :alt: Policies Test
+
+In this case you enable the flow check "Policy Violation" an alert is generated whenever a flow is blocke due to maximum flow size.
+
+
+Dynamic Blacklist
+-----------------
+
+You can define per-user blacklists based on max flow size blocked flows.
+
+.. figure:: img/dynamic_blacklist.png
+  :align: center
+  :alt: Dynamic Blacklist
+
+Example if a flow from host A (user A1) -> host B (userd B1) exceed the specified max flow size for user A1, host B is added to dynamic blacklist. This means that future flows that target host B will be automatically blocked thanks to this dynamic blacklist. The blacklist is not persistent across restarts and it can be flushed clicking on the flush button.

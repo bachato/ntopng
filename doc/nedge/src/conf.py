@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'nEdge'
-copyright = u'2018, ntop'
+copyright = u'2025, ntop'
 author = u'ntop.org'
 
 # The version info for the project you're documenting, acts as replacement for
