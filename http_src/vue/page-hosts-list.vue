@@ -218,8 +218,13 @@ const map_table_def_columns = (columns) => {
                 b.f_map_class = (current_class, row) => {
 
                     // handle block button
-                    if ((b.id === "block_host") && (props.context.isNedge)) {
-                        current_class[0] = row.isBlocked ? "btn-danger" : "btn-secondary";
+                    if (b.id === "block_host") {
+		       if(props.context.isNedge) {
+                         current_class[0] = row.isBlocked ? "btn-danger" : "btn-secondary";
+  		       } else {
+		         // ntopng
+		         current_class[0] = "invisible";
+		       }
                     }
 
                     return current_class;
