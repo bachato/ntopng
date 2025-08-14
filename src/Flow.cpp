@@ -2633,6 +2633,9 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
   GenericHashEntry::periodic_stats_update(tv);
 
 #ifdef HAVE_NEDGE
+
+  callFlowUpdate(tv->tv_sec);
+
   if (cli_host && srv_host) {
     u_int32_t cli_max_flow_size = cli_host->getMaxFlowSize();
     u_int32_t srv_max_flow_size = srv_host->getMaxFlowSize();
