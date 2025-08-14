@@ -2614,6 +2614,7 @@ local known_parameters = {
     ["block_blacklisted"] = validateBool, -- users
     ["max_flow_size"] = validateNumber, -- users
     ["dynamic_blacklist"] = validateBool, -- users
+    ["flush_dynamic_blacklist"] = validateEmpty, -- users
     ["device_protocols_policing"] = validateBool, -- users
     ["forge_global_dns"] = validateBool, -- users
     ["asset_family"] = validateAssetFamily, -- network_maps.lua
