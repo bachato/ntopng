@@ -488,34 +488,6 @@ struct ndpi_detection_module_struct *NetworkInterface::initnDPIStruct() {
   // load custom protocols
   loadProtocolsAssociations(ndpi_s);
 
-  /* TODO Testing code */
-  {
-    struct stat buf;
-    const char *domains_file = "./domain_categories.txt";
-    int rc;
-
-    if((rc = stat(domains_file, &buf)) == -1)
-      domains_file = "/usr/share/ntopng/domain_categories.txt";
-
-    if((rc == 0) || (stat(domains_file, &buf) == 0)) {
-      int num = ndpi_load_categories_file(ndpi_s, domains_file, NULL);
-
-      if(num < 0)
-	ntop->getTrace()->traceEvent(TRACE_WARNING,
-				     "Error while loading categories  %s",
-				     domains_file);
-      else {
-	ntop->getTrace()->traceEvent(TRACE_NORMAL,
-				     "Loaded %d custom domain categories",
-				     num);
-
-	/* Deleete domains cache */
-	if(ntop->getRedis())
-	  ntop->getRedis()->del((char*)"ntopng.domains");
-      }
-    }
-  }
-
   return (ndpi_s);
 }
 
