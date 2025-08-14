@@ -538,6 +538,7 @@ typedef enum {
   flow_alert_host_policy = 103,
   flow_alert_qoe_degraded = 104,
   flow_alert_ndpi_obfuscated_traffic = 105,
+  flow_alert_nedge_policy_violation = 106,
 
   MAX_DEFINED_FLOW_ALERT_TYPE, /* Leave it as last member */
 

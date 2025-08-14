@@ -649,6 +649,8 @@ public:
   void incFlowDroppedCounters();
 #endif
   void setDropVerdict(DropReason reason);
+  inline bool getVerdict() { return passVerdict; };
+  inline DropReason getDropReason() { return dropVerdictReason; };
   u_int32_t getPid(bool client);
   u_int32_t getFatherPid(bool client);
   u_int32_t get_uid(bool client) const;

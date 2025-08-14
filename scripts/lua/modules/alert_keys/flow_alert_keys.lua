@@ -112,6 +112,7 @@ local flow_alert_keys = {
    flow_alert_host_policy                          = 103,
    flow_alert_qoe_degraded                         = 104,
    flow_alert_ndpi_obfuscated_traffic              = 105,
+   flow_alert_nedge_policy_violation               = 106,
 
    -- NOTE: do not go beyond the size of the alert_map bitmal inside Flow.h (currently 128)
 }

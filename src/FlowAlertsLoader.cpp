@@ -88,6 +88,8 @@ FlowAlertsLoader::FlowAlertsLoader() {
 #if defined(HAVE_NEDGE)
   registerAlert(NedgeBlockedFlowAlert::getClassType(),
                 NedgeBlockedFlowAlert::getDefaultScore());
+  registerAlert(NedgePolicyViolationAlert::getClassType(),
+                NedgePolicyViolationAlert::getDefaultScore());
 #endif
   registerAlert(NotPurgedAlert::getClassType(),
                 NotPurgedAlert::getDefaultScore());

@@ -166,6 +166,7 @@ void FlowChecksLoader::registerChecks() {
   if ((fcb = new QoEDegraded())) registerCheck(fcb);
 #ifdef HAVE_NEDGE
   if ((fcb = new NedgeBlockedFlow())) registerCheck(fcb);
+  if ((fcb = new NedgePolicyViolation())) registerCheck(fcb);
 #endif
   if ((fcb = new UnresolvedHostname())) registerCheck(fcb);
 #endif
