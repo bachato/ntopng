@@ -348,7 +348,9 @@ Flow::Flow(NetworkInterface *_iface,
  * that are not really necessary at the creation of the flow
  */
 void Flow::deferredInitialization() {
+#ifdef HAVE_NEDGE
   bool flow_blacklisted = false;
+#endif
   
   if(cli_host && srv_host) {
     char country[64];
@@ -373,10 +375,14 @@ void Flow::deferredInitialization() {
   }
 
   if(isBlacklistedClient()) {
+#ifdef HAVE_NEDGE
     flow_blacklisted = true;
+#endif
     if(srv_host) srv_host->inc_num_blacklisted_flows(false);
   } else if(isBlacklistedServer()) {
+#ifdef HAVE_NEDGE
     flow_blacklisted = true;
+#endif
     if(cli_host) cli_host->inc_num_blacklisted_flows(true);
   }
 
