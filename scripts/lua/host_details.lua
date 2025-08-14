@@ -116,10 +116,24 @@ local restoreInProgress = false
 
 -- #####################################################
 
-if(host_ip and isAdministrator()) then
-    if (_POST["drop_host_policy"] == "true") then
+if (ifstats.inline) then
+ if(host_ip and isAdministrator()) then
+    if (_POST["drop_host_active_flows_policy"] == "true") then
        interface.dropHostTraffic(host_ip)
+    else
+       if (_POST["drop_host_traffic_policy"] == "true") then
+         if ntop.getHashCache("ntopng.prefs.drop_host_traffic", host_ip) == "true" then
+           ntop.delHashCache("ntopng.prefs.drop_host_traffic", host_ip)
+            -- UNBLOCKED
+         else
+           ntop.setHashCache("ntopng.prefs.drop_host_traffic", host_ip, "true")
+            -- BLOCKED
+         end
+
+         interface.updateHostTrafficPolicy(host_ip, 0)
+       end
     end
+ end
 end
 
 -- #####################################################
@@ -335,6 +349,13 @@ else
     page_utils.print_header_and_set_active_menu_entry(page_utils.menu_entries.hosts, nil, i18n("host", {
         host = host_info["host"]
     }))
+
+    local blocked = false
+    if (ifstats.inline) then
+       if ntop.getHashCache("ntopng.prefs.drop_host_traffic", host_ip) == "true" then
+         blocked = true
+       end
+    end
 
     dofile(dirs.installdir .. "/scripts/lua/inc/menu.lua")
 
@@ -660,7 +681,13 @@ else
 
             print("</tr>")
 
-            print("<tr><th>" .. i18n("ip_address") .. "</th><td colspan=1>" .. host["ip"])
+            print("<tr><th>" .. i18n("ip_address") .. "</th><td colspan=1>")
+
+            if(blocked == true) then
+  	      print("<strike>")
+	    end
+            print(host["ip"])
+	      
             if (host.childSafe == true) then
                 print(getSafeChildIcon())
             end
@@ -700,6 +727,11 @@ else
             print(hostinfo2detailshref(host, {
                 page = "config"
             }, '<i class="fas fa-cog" aria-hidden="true"></i>'))
+
+            if(blocked == true) then
+  	      print("</strike>")
+	    end
+
             print("</td></tr>")
         else
             if (host["mac"] ~= nil) then
@@ -829,20 +861,32 @@ else
 
             if ((host["privatehost"] == false) and (host["is_multicast"] == false) and (host["is_broadcast"] == false)) then
                 print(
-                    ' <A class="ntopng-external-link" href="https://www.virustotal.com/gui/ip-address/' .. host["ip"] ..
+                    '  <A class="ntopng-external-link" href="https://www.virustotal.com/gui/ip-address/' .. host["ip"] ..
                         '/detection" target=_blank><small>VirusTotal</small> <i class=\"fas fa-external-link-alt\"></i></A>')
                 print(' <A class="ntopng-external-link" href="https://www.abuseipdb.com/check/' .. host["ip"] ..
                           '" target=_blank><small>AbuseIP DB</small> <i class=\"fas fa-external-link-alt\"></i></A>')
             end
 
-           if (ifstats.inline) then
-              print(' <form class="form-inline float-right" style="margin-bottom: 0px;" method="post">')
-              print('<input type="hidden" name="drop_host_policy" value="true">')
-              print('<button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-ban"></i> ' ..
-                 i18n("host_details.drop_host_traffic_btn") .. '</button>')
+	   if (ifstats.inline and ((host["localhost"] == true) and (host["is_multicast"] == false) and (host["is_broadcast"] == false))) then
+              print('<br><form class="form-inline float-right" style="margin-bottom: 0px;" method="post">')        
+              print('<input type="hidden" name="drop_host_traffic_policy" value="true">')
+              print('<button type="submit" class="btn ')
+
+	      if blocked == true then
+	        print('btn-danger  btn-sm"><i class="fas fa-ban"></i> ' .. i18n("host_details.allow_host_traffic_btn") .. '</button>')
+	      else
+      	        print('btn-success btn-sm"><i class="fas fa-ban"></i> ' .. i18n("host_details.drop_host_traffic_btn") .. '</button>')
+	      end
+
               print('<input id="csrf" name="csrf" type="hidden" value="' .. ntop.getRandomCSRFValue() .. '" />\n')
               print('</form>')
-            end
+
+              print(' <form class="form-inline float-right" style="margin-bottom: 0px;" method="post">')
+              print('<input type="hidden" name="drop_host_active_flows_policy" value="true">')
+              print('<button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-ban"></i> ' .. i18n("host_details.drop_host_flows_btn") .. '</button>')
+              print('<input id="csrf" name="csrf" type="hidden" value="' .. ntop.getRandomCSRFValue() .. '" />\n')
+              print('</form>')
+	      end
    
             print("</td>\n")
         end

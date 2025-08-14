@@ -171,7 +171,7 @@ const map_table_def_columns = (columns) => {
             return `<a href="${url}">${value}</a>`
         },
         "hosts": (value, row) => {
-            return formatterUtils.getFormatter("number")(value);
+            if(value != "0") { return formatterUtils.getFormatter("number")(value); } else { return(""); }
         },
         "seen_since": (value, row) => {
 	    if(value == 0) return("");

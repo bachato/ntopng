@@ -2,7 +2,7 @@
 <template>
     <modal ref="modal_id">
         <template v-slot:title>
-            {{ isEditMode ? _i18n("host_pools.edit_host_pool_member") : _i18n("host_pools.add_host_pool_member") }}
+            {{ isEditMode ? _i18n("host_pools.edit_host_pool_name") : _i18n("host_pools.add_host_pool_member") }}
         </template>
         <template v-slot:body>
             <!-- Name Input Box -->

@@ -25,7 +25,7 @@ page_utils.print_header_and_set_active_menu_entry(menu)
 
 dofile(dirs.installdir .. "/scripts/lua/inc/menu.lua")
 
-page_utils.print_navbar(i18n("pools.host_pools"), ntop.getHttpPrefix() .. "/lua/pool_stats_vue.lua", {{
+page_utils.print_navbar(title, ntop.getHttpPrefix() .. "/lua/pool_stats_vue.lua", {{
     active = page == "overview" or not page,
     page_name = "overview",
     label = "<i class=\"fas fa-lg fa-home\"  data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" title=\"" ..
