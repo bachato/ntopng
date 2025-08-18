@@ -1510,16 +1510,16 @@ function getRTPTableRows(info)
         if isFlowValueDefined(info, "RTP_IN_PAYLOAD_TYPE") then
             local rtp_payload_in_var = formatRtpPayloadType(getFlowValue(info, "RTP_IN_PAYLOAD_TYPE"))
             local rtp_payload_out_var = formatRtpPayloadType(getFlowValue(info, "RTP_OUT_PAYLOAD_TYPE"))
-            if (((rtp_payload_in_var == nil) or (rtp_payload_in_var == "")) and
-                ((rtp_payload_out_var == nil) or (rtp_payload_out_var == ""))) then
+            if isEmptyString(rtp_payload_in_var) and
+               isEmptyString(rtp_payload_out_var) then
                 rtp_payload_hide = "style=\"display: none;\""
             else
                 rtp_payload_hide = "style=\"display: table-row;\""
             end
             string_table = string_table .. "<tr id=\"payload_id_tr\" " .. rtp_payload_hide ..
                                "><th>" .. i18n("flow_details.payload_type") ..
-                               "</th><td><div id=payload_type_in>" .. rtp_payload_in_var ..
-                               "</div></td><td><div id=payload_type_out>" .. rtp_payload_out_var .. "</div></td></tr>\n"
+                               "</th><td><div id=payload_type_in>" .. (rtp_payload_in_var or "") ..
+                               "</div></td><td><div id=payload_type_out>" .. (rtp_payload_out_var or "") .. "</div></td></tr>\n"
         end
 
         -- MOS
