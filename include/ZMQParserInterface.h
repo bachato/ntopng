@@ -78,7 +78,7 @@ class ZMQParserInterface : public ParserInterface {
                              ParsedValue *value,
                              json_object *const jvalue);
   int parseSingleJSONFlow(json_object *o, u_int32_t source_id);
-  int parseSingleTLVFlow(ndpi_deserializer *deserializer, u_int32_t source_id);
+  int parseSingleTLVFlow(ndpi_deserializer *deserializer, u_int32_t source_id, u_int32_t record_id);
   void setFieldMap(const ZMQ_FieldMap *const field_map) const;
   void setFieldValueMap(const ZMQ_FieldValueMap *const field_value_map) const;
 
@@ -115,8 +115,8 @@ class ZMQParserInterface : public ParserInterface {
 
   u_int8_t parseJSONFlow(const char *payload, int payload_size,
                          u_int32_t source_id, u_int32_t msg_id);
-  u_int8_t parseTLVFlow(const char *payload, int payload_size,
-                        u_int32_t source_id, u_int32_t msg_id, void *data);
+  u_int32_t parseTLVFlows(const char *payload, int payload_size,
+                          u_int32_t source_id, u_int32_t msg_id, void *data);
   u_int8_t parseEvent(const char *payload, int payload_size, u_int32_t source_id,
                       u_int32_t msg_id, void *data);
   u_int8_t parseTLVCounter(const char *payload, int payload_size);

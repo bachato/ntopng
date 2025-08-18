@@ -2209,7 +2209,7 @@ int ZMQParserInterface::parseSingleJSONFlow(json_object *o,
 /* **************************************************** */
 
 int ZMQParserInterface::parseSingleTLVFlow(ndpi_deserializer *deserializer,
-                                           u_int32_t source_id) {
+                                           u_int32_t source_id, u_int32_t record_id) {
   ndpi_serialization_type kt, et;
   ParsedFlow flow;
   int ret = 0, rc;
@@ -2222,8 +2222,7 @@ int ZMQParserInterface::parseSingleTLVFlow(ndpi_deserializer *deserializer,
   INTERFACE_PROFILING_SECTION_ENTER("Decode TLV", 9);
 
   // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Processing TLV record");
-  while ((et = ndpi_deserialize_get_item_type(deserializer, &kt)) !=
-         ndpi_serialization_unknown) {
+  while ((et = ndpi_deserialize_get_item_type(deserializer, &kt)) != ndpi_serialization_unknown) {
     ParsedValue value = {0};
     u_int32_t pen = 0, key_id = 0;
     u_int32_t v32 = 0;
@@ -2256,8 +2255,8 @@ int ZMQParserInterface::parseSingleTLVFlow(ndpi_deserializer *deserializer,
       break;
     default:
       ntop->getTrace()->traceEvent(TRACE_WARNING,
-				   "Unsupported TLV key type %u: please update both ntopng and "
-				   "nprobe to the same version", kt);
+				   "Unsupported TLV key type %u (record #%u): please update both ntopng and "
+				   "nprobe to the same version", kt, record_id);
       ret = -1;
       goto error;
     }
@@ -2517,12 +2516,13 @@ u_int8_t ZMQParserInterface::parseJSONFlow(const char *payload,
 
 /* **************************************************** */
 
-u_int8_t ZMQParserInterface::parseTLVFlow(const char *payload, int payload_size,
-                                          u_int32_t source_id, u_int32_t msg_id,
-                                          void *data) {
+u_int32_t ZMQParserInterface::parseTLVFlows(const char *payload, int payload_size,
+                                            u_int32_t source_id, u_int32_t msg_id,
+                                            void *data) {
   ndpi_deserializer deserializer;
   ndpi_serialization_type kt;
-  int n = 0, rc;
+  u_int32_t n = 0;
+  int rc;
 
   rc = ndpi_init_deserializer_buf(&deserializer, (u_int8_t *)payload,
                                   payload_size);
@@ -2542,9 +2542,9 @@ u_int8_t ZMQParserInterface::parseTLVFlow(const char *payload, int payload_size,
     return 0;
   }
 
-  while (ndpi_deserialize_get_item_type(&deserializer, &kt) !=
-         ndpi_serialization_unknown) {
-    rc = parseSingleTLVFlow(&deserializer, source_id);
+  while (ndpi_deserialize_get_item_type(&deserializer, &kt) != ndpi_serialization_unknown) {
+
+    rc = parseSingleTLVFlow(&deserializer, source_id, n);
 
     if (rc < 0)
       break;

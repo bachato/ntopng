@@ -531,8 +531,8 @@ void ZMQCollectorInterface::collect_flows() {
 
 	  case 'f': /* flow */
 	    if (tlv_encoding)
-	      recvStats.num_flows += parseTLVFlow(uncompressed, uncompressed_len,
-						  subscriber_id, msg_id, this);
+	      recvStats.num_flows += parseTLVFlows(uncompressed, uncompressed_len,
+						   subscriber_id, msg_id, this);
 	    else if(ntop->getPrefs()->is_pro_edition()) {
 	      uncompressed[uncompressed_len] = '\0';
 	      recvStats.num_flows += parseJSONFlow(uncompressed, uncompressed_len, subscriber_id, msg_id);
