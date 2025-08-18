@@ -166,6 +166,10 @@ A detailed blog post that discusses LDAP authentication and shows how
 to configure an LDAP server can be found at:
 https://www.ntop.org/ntopng/remote-ntopng-authentication-with-radius-and-ldap/
 
+A step-by-step guide showing the configuration of *slapd* on Ubuntu to setup a sample LDAP server 
+to be used for authenticating ntopng users (posix) is also available at:
+https://github.com/ntop/ntopng/blob/dev/doc/README.ldap.md
+
 Common Issues
 ~~~~~~~~~~~~~
 
