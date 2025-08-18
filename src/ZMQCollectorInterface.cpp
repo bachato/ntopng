@@ -21,9 +21,7 @@
 
 #include "ntop_includes.h"
 
-// #define MSG_DEBUG
 // #define MSG_ID_DEBUG
-
 
 #ifdef HAVE_ZMQ
 #ifndef HAVE_NEDGE
@@ -208,13 +206,13 @@ char *ZMQCollectorInterface::findInterfaceEncryptionKeys(char *public_key, char 
 
 void ZMQCollectorInterface::checkPointCounters(bool drops_only) {
   if (!drops_only) {
-    recvStatsCheckpoint.num_flows = recvStats.num_flows,
-      recvStatsCheckpoint.num_events = recvStats.num_events,
-      recvStatsCheckpoint.num_counters = recvStats.num_counters,
-      recvStatsCheckpoint.num_templates = recvStats.num_templates,
-      recvStatsCheckpoint.num_options = recvStats.num_options,
-      recvStatsCheckpoint.num_network_events = recvStats.num_network_events,
-      recvStatsCheckpoint.zmq_msg_rcvd = recvStats.zmq_msg_rcvd;
+    recvStatsCheckpoint.num_flows = recvStats.num_flows;
+    recvStatsCheckpoint.num_events = recvStats.num_events;
+    recvStatsCheckpoint.num_counters = recvStats.num_counters;
+    recvStatsCheckpoint.num_templates = recvStats.num_templates;
+    recvStatsCheckpoint.num_options = recvStats.num_options;
+    recvStatsCheckpoint.num_network_events = recvStats.num_network_events;
+    recvStatsCheckpoint.zmq_msg_rcvd = recvStats.zmq_msg_rcvd;
   }
 
   recvStatsCheckpoint.num_dropped_flows = recvStats.num_dropped_flows;
@@ -332,11 +330,6 @@ void ZMQCollectorInterface::collect_flows() {
             continue; /* skip message */
           }
 
-#if 0
-          printf(".");
-          fflush(stdout);
-#endif
-
 #ifdef ZMQ_DEBUG
           ntop->getTrace()->traceEvent(TRACE_NORMAL, "[version: %u]", h->version);
 #endif
@@ -365,8 +358,7 @@ void ZMQCollectorInterface::collect_flows() {
         }
 
 #ifdef ZMQ_DEBUG
-        // ntop->getTrace()->traceEvent(TRACE_NORMAL, "[size: %u][source_id:
-        // %u]", size, source_id);
+        // ntop->getTrace()->traceEvent(TRACE_NORMAL, "[size: %u][source_id: %u]", size, source_id);
         ntop->getTrace()->traceEvent(TRACE_NORMAL, "[topic: %s]", h->url);
 #endif
 
@@ -379,10 +371,6 @@ void ZMQCollectorInterface::collect_flows() {
 	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "[subscriber_id: %u][source_id: %u]"
 				       "[msg_id: %u][last_msg_id: %u][lost: %i]",
 				       subscriber_id, source_id, msg_id, probe->last_msg_id, msg_id - probe->last_msg_id - 1);
-#endif
-
-#if 0
-	  fprintf(stdout, "."); fflush(stdout);
 #endif
 
           if (msg_id == (probe->last_msg_id + 1)) {
@@ -398,7 +386,7 @@ void ZMQCollectorInterface::collect_flows() {
               /* Start over (just reset active_probes) */
 #ifdef MSG_ID_DEBUG
               ntop->getTrace()->traceEvent(TRACE_NORMAL,
-					   "ROLLBACK [subscriber_id: %u][source_id: %u][msg_id=%u][last=%u][tot_msgs=%u][drops=%u]",
+					   "ROLLBACK [subscriber_id: %u][source_id: %u][msg_id: %u][last: %u][tot msgs/drops: %u/%u]",
 					   subscriber_id, source_id, msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
 					   recvStats.zmq_msg_drops);
 #endif
@@ -411,7 +399,7 @@ void ZMQCollectorInterface::collect_flows() {
                 recvStats.zmq_msg_drops += diff - 1;
 #ifdef MSG_ID_DEBUG
                 ntop->getTrace()->traceEvent(TRACE_NORMAL,
-					     "DROP [subscriber_id: %u][source_id: %u][msg_id=%u][last=%u][tot_msgs=%u][drops=%u][+%u]",
+					     "DROP [subscriber_id: %u][source_id: %u][msg_id: %u][last: %u][tot msgs/drops: %u/%u][drops: +%u]",
 					     subscriber_id, source_id, msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
 					     recvStats.zmq_msg_drops, diff - 1);
 #endif
