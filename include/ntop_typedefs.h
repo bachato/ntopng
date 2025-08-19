@@ -167,7 +167,7 @@ typedef enum {
   all_flow = 0,
   direct_flow,
   transit_flow,
-} transitAS;
+} TransitAS;
 
 typedef enum {
   traffic_type_all = 0,

@@ -1576,7 +1576,7 @@ public:
   inline u_int16_t getPostNATDstPort() { return(collection ? ntohs(collection->nat.dst_port_post_nat) : 0);    };
   void getSrcAS(u_int32_t *as, char *as_name);
   void getDstAS(u_int32_t *as, char *as_name);
-  transitAS getTransitASType();
+  TransitAS getTransitASType();
   void setBittorrentHash(char *hash, u_int len);
   inline bool isFlowAccounted()        { return iface_flow_accounted; };
   inline void setFlowAccounted()       { iface_flow_accounted = 1;    };

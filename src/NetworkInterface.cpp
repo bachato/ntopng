@@ -1606,10 +1606,10 @@ NetworkInterface *NetworkInterface::getDynInterface(u_int64_t criteria,
     sub_iface = new (std::nothrow) ZMQParserInterface(buf, vIface_type);
   else
 #endif
-   if (dynamic_cast<SyslogParserInterface *>(this))
-    sub_iface = new (std::nothrow) SyslogParserInterface(buf, vIface_type);
-  else
-    sub_iface = new (std::nothrow) NetworkInterface(buf, vIface_type);
+    if (dynamic_cast<SyslogParserInterface *>(this))
+      sub_iface = new (std::nothrow) SyslogParserInterface(buf, vIface_type);
+    else
+      sub_iface = new (std::nothrow) NetworkInterface(buf, vIface_type);
 
   if (sub_iface == NULL) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Failure allocating interface: not enough memory?");
@@ -2449,7 +2449,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 
 #ifdef NTOPNG_PRO
   if(flow && flow->isQUIC() && (trusted_payload_len > 0))
-     flow->updateQUICStats(src2dst_direction, &h->ts, payload, trusted_payload_len);
+    flow->updateQUICStats(src2dst_direction, &h->ts, payload, trusted_payload_len);
 #endif
 
   // ntop->getTrace()->traceEvent(TRACE_NORMAL, "direction: %s / len: %u", *ingressPacket ? "IN" : "OUT", len_on_wire);
@@ -3607,7 +3607,7 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
 #if defined(HAVE_ZMQ) && !defined(HAVE_NEDGE)
         || ntop->get_export_interface()
 #endif
-       ) {
+	) {
 
       json = f->serialize(export_format_GENERIC);
       if (json) {
@@ -4861,7 +4861,7 @@ struct flowHostRetriever {
   TrafficType traffic_type; /* Not used in flow_search_walker */
   sortField sorter;
   TcpFlowStateFilter tcp_flow_state_filter;
-  transitAS transit_as;
+  TransitAS transit_as;
   LocationPolicy location;        /* Not used in flow_search_walker */
   u_int8_t ipVersionFilter;       /* Not used in flow_search_walker */
   bool filteredHosts;             /* Not used in flow_search_walker */
@@ -4917,7 +4917,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
   LocationPolicy client_policy;
   LocationPolicy server_policy;
   TcpFlowStateFilter tcp_flow_state_filter;
-  transitAS transit_as;
+  TransitAS transit_as;
   bool unicast, unidirectional, alerted_flows, periodic_flows,
     cli_pool_found = false, srv_pool_found = false;
   u_int32_t asn_filter = (u_int32_t) -1;
@@ -5045,38 +5045,38 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
                                       &ndpi_proto_app_proto)) {
       bool is_ok = false;
 
-/*      ntop->getTrace()->traceEvent(TRACE_WARNING,
-        "Filtering app protocol: %u, master protocol: %u | Flow app protocol: %u, master protocol: %u",
-        ndpi_proto_app_proto, ndpi_proto_master_proto,
-        f->get_detected_protocol().proto.app_protocol,
-        f->get_detected_protocol().proto.master_protocol);
-*/      /* Case where both protocols are unknown */
+      /*      ntop->getTrace()->traceEvent(TRACE_WARNING,
+	      "Filtering app protocol: %u, master protocol: %u | Flow app protocol: %u, master protocol: %u",
+	      ndpi_proto_app_proto, ndpi_proto_master_proto,
+	      f->get_detected_protocol().proto.app_protocol,
+	      f->get_detected_protocol().proto.master_protocol);
+      */      /* Case where both protocols are unknown */
       if(ndpi_proto_master_proto == NDPI_PROTOCOL_UNKNOWN &&
-          ndpi_proto_app_proto == NDPI_PROTOCOL_UNKNOWN) {
+	 ndpi_proto_app_proto == NDPI_PROTOCOL_UNKNOWN) {
         if(
-            (ndpi_proto_master_proto == f->get_detected_protocol().proto.master_protocol) &&
-            (ndpi_proto_app_proto == f->get_detected_protocol().proto.app_protocol)
-          )
+	   (ndpi_proto_master_proto == f->get_detected_protocol().proto.master_protocol) &&
+	   (ndpi_proto_app_proto == f->get_detected_protocol().proto.app_protocol)
+	   )
           /* We're good */
           is_ok = true;
       } else if(ndpi_proto_master_proto == NDPI_PROTOCOL_UNKNOWN ||
                 ndpi_proto_app_proto == NDPI_PROTOCOL_UNKNOWN) {
-      /* Case where one is unknown, the other can match both master and app of the flow */
+	/* Case where one is unknown, the other can match both master and app of the flow */
         if((ndpi_proto_master_proto == NDPI_PROTOCOL_UNKNOWN &&
-              (ndpi_proto_app_proto == f->get_detected_protocol().proto.app_protocol ||
-              ndpi_proto_app_proto == f->get_detected_protocol().proto.master_protocol)) ||
-            (ndpi_proto_app_proto == NDPI_PROTOCOL_UNKNOWN &&
-              (ndpi_proto_master_proto == f->get_detected_protocol().proto.app_protocol ||
-              ndpi_proto_master_proto == f->get_detected_protocol().proto.master_protocol)))
+	    (ndpi_proto_app_proto == f->get_detected_protocol().proto.app_protocol ||
+	     ndpi_proto_app_proto == f->get_detected_protocol().proto.master_protocol)) ||
+	   (ndpi_proto_app_proto == NDPI_PROTOCOL_UNKNOWN &&
+	    (ndpi_proto_master_proto == f->get_detected_protocol().proto.app_protocol ||
+	     ndpi_proto_master_proto == f->get_detected_protocol().proto.master_protocol)))
           /* We're good */
           is_ok = true;
       } else {
-      /* Case where both are not unknown */
+	/* Case where both are not unknown */
         if (((ndpi_proto_master_proto == NDPI_PROTOCOL_UNKNOWN) ||
-              (ndpi_proto_master_proto == f->get_detected_protocol().proto.master_protocol)) &&
+	     (ndpi_proto_master_proto == f->get_detected_protocol().proto.master_protocol)) &&
             ((ndpi_proto_app_proto == NDPI_PROTOCOL_UNKNOWN) ||
-              (ndpi_proto_app_proto == f->get_detected_protocol().proto.app_protocol))
-          )
+	     (ndpi_proto_app_proto == f->get_detected_protocol().proto.app_protocol))
+	    )
           /* We're good */
           is_ok = true;
       }
@@ -5165,37 +5165,37 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
     }
 #endif
 #endif
-	  if (retriever->pag &&
+    if (retriever->pag &&
         retriever->pag->ifaceIndexFilter(&iface_index)) {
-          if (f->getInterface() &&
-            f->getInterface()->get_id() != iface_index) {
+      if (f->getInterface() &&
+	  f->getInterface()->get_id() != iface_index) {
         return (false);
       }
     }
 
     if (retriever->pag && retriever->pag->asnFilter(&asn_filter)) {
-        char *asname = NULL;
-        u_int32_t src_asn = 0, dst_asn = 0;
-        f->getSrcAS(&src_asn, asname);
-        f->getDstAS(&dst_asn, asname);
-        if (src_asn != asn_filter && dst_asn != asn_filter)
-            return (false);
+      char *asname = NULL;
+      u_int32_t src_asn = 0, dst_asn = 0;
+      f->getSrcAS(&src_asn, asname);
+      f->getDstAS(&dst_asn, asname);
+      if (src_asn != asn_filter && dst_asn != asn_filter)
+	return (false);
     }
 
     if (retriever->pag && retriever->pag->asnSrcFilter(&asn_src_filter)) {
-        char *asname = NULL;
-        u_int32_t src_asn = 0;
-        f->getSrcAS(&src_asn, asname);
-        if (src_asn != asn_src_filter)
-            return (false);
+      char *asname = NULL;
+      u_int32_t src_asn = 0;
+      f->getSrcAS(&src_asn, asname);
+      if (src_asn != asn_src_filter)
+	return (false);
     }
 
     if (retriever->pag && retriever->pag->asnDstFilter(&asn_dst_filter)) {
-        char *asname = NULL;
-        u_int32_t dst_asn = 0;
-        f->getDstAS(&dst_asn, asname);
-        if (dst_asn != asn_dst_filter)
-            return (false);
+      char *asname = NULL;
+      u_int32_t dst_asn = 0;
+      f->getDstAS(&dst_asn, asname);
+      if (dst_asn != asn_dst_filter)
+	return (false);
     }
 #ifdef DEBUG
     char *asname = NULL;
@@ -5203,10 +5203,10 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
     f->getSrcAS(&src_asn, asname);
     f->getDstAS(&dst_asn, asname);
     ntop->getTrace()->traceEvent(TRACE_WARNING,
-				   "Interface: %u | Filtering ASN: %u | Client ASN: %u | Server ASN: %u",
-				   f->getInterface()->get_id(), asn_filter,
-                   src_asn,
-				   dst_asn);
+				 "Interface: %u | Filtering ASN: %u | Client ASN: %u | Server ASN: %u",
+				 f->getInterface()->get_id(), asn_filter,
+				 src_asn,
+				 dst_asn);
 #endif
 
 
@@ -5240,11 +5240,11 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
     if (retriever->pag && retriever->pag->dscpFilter(&dscp_filter) &&
         f->getCli2SrvDSCP() != dscp_filter &&
         f->getSrv2CliDSCP() != dscp_filter)
-        return (false);
+      return (false);
 #ifdef NTOPNG_PRO
     if (retriever->pag && retriever->pag->QoEFilter(&qoe_filter) &&
         ((u_int8_t) f->getQoEType()) != qoe_filter)
-        return (false);
+      return (false);
 #endif
     if (retriever->pag && retriever->pag->portFilter(&port) &&
         f->get_cli_port() != port && f->get_srv_port() != port)
@@ -5256,7 +5256,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
         int32_t cli_local_network_id, srv_local_network_id;
 
         f->get_cli_ip_addr()->isLocalHost(&cli_local_network_id),
-        f->get_srv_ip_addr()->isLocalHost(&srv_local_network_id);
+	  f->get_srv_ip_addr()->isLocalHost(&srv_local_network_id);
 
         if (cli_local_network_id != local_network_id &&
             srv_local_network_id != local_network_id)
@@ -6154,9 +6154,9 @@ int protocolSorter(const void *_a, const void *_b) {
     char* a_l4_protocol = Utils::l4proto2name(a->flow->get_protocol());
     char* b_l4_protocol = Utils::l4proto2name(b->flow->get_protocol());
 #if 0
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Comparison between [%s]:[%s] and [%s]:[%s]",
-                                               a_l4_protocol, a_protocol,
-                                               b_l4_protocol, b_protocol);
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Comparison between [%s]:[%s] and [%s]:[%s]",
+				 a_l4_protocol, a_protocol,
+				 b_l4_protocol, b_protocol);
 #endif
     return (strcasecmp(a_l4_protocol, b_l4_protocol));
   }
@@ -6522,7 +6522,7 @@ int NetworkInterface::sortHosts(u_int32_t *begin_slot, bool walk_all, struct flo
 				bool blacklisted_hosts, bool anomalousOnly, bool dhcpOnly,
 				const AddressTree *const cidr_filter, u_int8_t ipver_filter,
 				int proto_filter, TrafficType traffic_type_filter, u_int32_t device_ip,
-                bool alertedHost, char *sortColumn) {
+				bool alertedHost, char *sortColumn) {
   u_int8_t macAddr[6];
   int (*sorter)(const void *_a, const void *_b);
 
@@ -6964,8 +6964,8 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
             lua_settable(vm, -3);
           } else {
             (getCheckpointOnly) ?
-                h->checkpoint(vm) :
-                h->lua(vm, NULL /* Already checked */, host_details, false, false, true);
+	      h->checkpoint(vm) :
+	      h->lua(vm, NULL /* Already checked */, host_details, false, false, true);
           }
         }
         else
@@ -6986,9 +6986,9 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
             lua_settable(vm, -3);
           } else {
             (getCheckpointOnly) ?
-                h->checkpoint(vm) :
-                h->lua(vm, NULL /* Already checked */, host_details, false, false,
-                    true);
+	      h->checkpoint(vm) :
+	      h->lua(vm, NULL /* Already checked */, host_details, false, false,
+		     true);
           }
         }
         else
@@ -7099,7 +7099,7 @@ static bool flow_stats_walker(GenericHashEntry *h, void *user_data,
 
   if(iface) {
     u_int32_t proto_id = ndpi_map_user_proto_id_to_ndpi_id(
-        iface->get_ndpi_struct(), flow->get_detected_protocol().proto.app_protocol);
+							   iface->get_ndpi_struct(), flow->get_detected_protocol().proto.app_protocol);
     stats->num_flows++, stats->ndpi_bytes[proto_id] += (u_int32_t)flow->get_bytes(),
       stats->breeds_bytes[flow->get_protocol_breed()] += (u_int32_t)flow->get_bytes();
 
@@ -7420,11 +7420,11 @@ static bool num_flows_walker(GenericHashEntry *node, void *user_data,
 
   if(iface) {
     u_int32_t proto_id = ndpi_map_user_proto_id_to_ndpi_id(
-        iface->get_ndpi_struct(), flow->get_detected_protocol().proto.app_protocol);
-/*
-    ntop->getTrace()->traceEvent(TRACE_NORMAL,
+							   iface->get_ndpi_struct(), flow->get_detected_protocol().proto.app_protocol);
+    /*
+      ntop->getTrace()->traceEvent(TRACE_NORMAL,
       "Increasing usage of protocol %d, converted from %d", proto_id, flow->get_detected_protocol().proto.app_protocol);
-*/
+    */
     num_flows[proto_id]++;
     *matched = true;
   }
@@ -8992,17 +8992,17 @@ int NetworkInterface::getActiveASList(lua_State *vm, const Paginator *p,
       bool dont_skip_as = true;
       if (as_type) {
         switch(as_type) {
-          case customer_asn: dont_skip_as = ntop->getPrefs()->isCustomerASN(as->get_asn()); break;
-          case sub_customer_asn: dont_skip_as = ntop->getPrefs()->isSubCustomerASN(as->get_asn()); break;
-          case remote_asn: dont_skip_as = ntop->getPrefs()->isRemoteASN(as->get_asn()); break;
-          default: dont_skip_as = true; break;
+	case customer_asn: dont_skip_as = ntop->getPrefs()->isCustomerASN(as->get_asn()); break;
+	case sub_customer_asn: dont_skip_as = ntop->getPrefs()->isSubCustomerASN(as->get_asn()); break;
+	case remote_asn: dont_skip_as = ntop->getPrefs()->isRemoteASN(as->get_asn()); break;
+	default: dont_skip_as = true; break;
         }
       }
 
       if (dont_skip_as) {
         as->lua(vm, details_level, false, diff);
         lua_rawseti(vm, -2, num + 1); /* Must use integer keys to preserve and
-                                        iterate inorder with ipairs */
+					 iterate inorder with ipairs */
         num++;
       }
     }
@@ -9013,10 +9013,10 @@ int NetworkInterface::getActiveASList(lua_State *vm, const Paginator *p,
       bool dont_skip_as = true;
       if (as_type) {
         switch(as_type) {
-          case customer_asn: dont_skip_as = ntop->getPrefs()->isCustomerASN(as->get_asn()); break;
-          case sub_customer_asn: dont_skip_as = ntop->getPrefs()->isSubCustomerASN(as->get_asn()); break;
-          case remote_asn: dont_skip_as = ntop->getPrefs()->isRemoteASN(as->get_asn()); break;
-          default: dont_skip_as = true; break;
+	case customer_asn: dont_skip_as = ntop->getPrefs()->isCustomerASN(as->get_asn()); break;
+	case sub_customer_asn: dont_skip_as = ntop->getPrefs()->isSubCustomerASN(as->get_asn()); break;
+	case remote_asn: dont_skip_as = ntop->getPrefs()->isRemoteASN(as->get_asn()); break;
+	default: dont_skip_as = true; break;
         }
       }
 
@@ -9562,7 +9562,7 @@ void NetworkInterface::checkMacIPAssociation(bool triggerEvent, u_char *_mac,
 
           AlertsQueue *q = getAlertsQueue();
           if (q) q->pushMacIpAssociationChangedAlert(ntohl(ipv4), tmp,
-                                                           _mac, host_mac);
+						     _mac, host_mac);
 
           ip_mac[ipv4] = mac;
         }
@@ -11153,7 +11153,7 @@ void NetworkInterface::addRedisSitesKey() {
 /* *************************************** */
 
 int NetworkInterface::execSQLQuery2CSV(const char *sql, bool dump_in_json_format,
-                                     struct mg_connection *conn) {
+				       struct mg_connection *conn) {
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
   ((ClickHouseDB *)db)->execSQLQuery2CSV(sql, dump_in_json_format, conn);
 
@@ -11628,7 +11628,7 @@ bool NetworkInterface::compute_client_server_srv_port_flow_stats(GenericHashEntr
 /* **************************************************** */
 
 bool NetworkInterface::compute_client_server_srv_port_app_proto_flow_stats(GenericHashEntry *node,
-								 void *user_data, bool *matched) {
+									   void *user_data, bool *matched) {
   Flow *f = (Flow *)node;
   struct aggregated_stats *stats = (struct aggregated_stats*)user_data;
 
@@ -11672,8 +11672,8 @@ bool NetworkInterface::compute_client_server_srv_port_app_proto_flow_stats(Gener
     (u_int64_t)detected_protocol.proto.master_protocol;
 
   u_int64_t proto_key = ((u_int64_t)vlan_id << 32) +
-                      (((u_int64_t)detected_protocol.proto.app_protocol) << 16) +
-                      (u_int64_t)detected_protocol.proto.master_protocol;
+    (((u_int64_t)detected_protocol.proto.app_protocol) << 16) +
+    (u_int64_t)detected_protocol.proto.master_protocol;
 
   it = stats->count.find(key);
 
@@ -11747,7 +11747,7 @@ static bool asc_flow_num_cmp(AggregatedFlowsStats *a, AggregatedFlowsStats *b) {
 }
 
 static bool asc_total_score_cmp(AggregatedFlowsStats *a,
-                               AggregatedFlowsStats *b) {
+				AggregatedFlowsStats *b) {
   return a->getTotalScore() < b->getTotalScore();
 }
 
@@ -11761,22 +11761,22 @@ static bool asc_vlan_cmp(AggregatedFlowsStats *a, AggregatedFlowsStats *b) {
 }
 
 static bool asc_num_servers_cmp(AggregatedFlowsStats *a,
-                               AggregatedFlowsStats *b) {
+				AggregatedFlowsStats *b) {
   return a->getNumServers() < b->getNumServers();
 }
 
 static bool asc_total_sent_cmp(AggregatedFlowsStats *a,
-                              AggregatedFlowsStats *b) {
+			       AggregatedFlowsStats *b) {
   return a->getTotalSent() < b->getTotalSent();
 }
 
 static bool asc_total_rcvd_cmp(AggregatedFlowsStats *a,
-                              AggregatedFlowsStats *b) {
+			       AggregatedFlowsStats *b) {
   return a->getTotalRcvd() < b->getTotalRcvd();
 }
 
 static bool asc_total_traffic_cmp(AggregatedFlowsStats *a,
-                                 AggregatedFlowsStats *b) {
+				  AggregatedFlowsStats *b) {
   return (a->getTotalRcvd() + a->getTotalSent()) <
     (b->getTotalRcvd() + b->getTotalSent());
 }
@@ -11935,7 +11935,7 @@ void NetworkInterface::build_lua_rsp(lua_State *vm,
     lua_push_uint64_table_entry(vm, "vlan_id",
                                 (u_int64_t)flow_stats->getVlanId());
     lua_push_str_table_entry(vm, "device_ip",
-                               flow_stats->getFlowDeviceIP(buf, sizeof(buf)));
+			     flow_stats->getFlowDeviceIP(buf, sizeof(buf)));
     lua_push_uint32_table_entry(vm, "l4_proto", flow_stats->getL4Protocol());
     lua_push_uint32_table_entry(vm, "num_clients", flow_stats->getNumClients());
     lua_push_uint32_table_entry(vm, "num_servers", flow_stats->getNumServers());
@@ -11990,18 +11990,18 @@ void NetworkInterface::sort_and_filter_flow_stats(lua_State *vm,
 
       for (it = stats->count.begin(); it != stats->count.end(); ++it) {
 	bool do_add_it = false;
-  ndpi_protocol detected_protocol;
+	ndpi_protocol detected_protocol;
 
-  char buf[64], *proto;
-  /* Get from the key, the master and application protocol,
-  * first 16 bit for the master, second for the application
-  */
-  detected_protocol.proto.master_protocol = (u_int16_t)(it->first & 0x00000000000FFFF);
-  detected_protocol.proto.app_protocol    = (u_int16_t)((it->first >> 16) & 0x000000000000FFFF);
+	char buf[64], *proto;
+	/* Get from the key, the master and application protocol,
+	 * first 16 bit for the master, second for the application
+	 */
+	detected_protocol.proto.master_protocol = (u_int16_t)(it->first & 0x00000000000FFFF);
+	detected_protocol.proto.app_protocol    = (u_int16_t)((it->first >> 16) & 0x000000000000FFFF);
 
-  proto = get_ndpi_full_proto_name(detected_protocol, buf, sizeof(buf));
+	proto = get_ndpi_full_proto_name(detected_protocol, buf, sizeof(buf));
 
-  it->second->setProtoName(proto);
+	it->second->setProtoName(proto);
 
 	if(search_string == NULL)
 	  do_add_it = true;
@@ -12158,12 +12158,12 @@ void NetworkInterface::getFilteredLiveFlowsStats(lua_State *vm) {
   case AnalysisCriteria::client_server_srv_port:
     /* client server server port criteria flows stats case */
     walker(&begin_slot, true /* walk_all */, walker_flows,
-      compute_client_server_srv_port_flow_stats, &stats);
+	   compute_client_server_srv_port_flow_stats, &stats);
     break;
   case AnalysisCriteria::client_server_srv_port_app_proto:
     /* client server server port app_proto criteria flows stats case */
     walker(&begin_slot, true /* walk_all */, walker_flows,
-      compute_client_server_srv_port_app_proto_flow_stats, &stats);
+	   compute_client_server_srv_port_app_proto_flow_stats, &stats);
     break;
 #if defined(NTOPNG_PRO)
   case AnalysisCriteria::client_server_criteria:
@@ -12224,7 +12224,7 @@ void NetworkInterface::getHostsPorts(lua_State *vm) {
   }
 
   walker(&begin_slot, true , walker_flows,
-	  get_host_ports, &count);
+	 get_host_ports, &count);
 
   lua_push_ports(vm, &count, l4_protocol);
 
@@ -12240,8 +12240,8 @@ void NetworkInterface::getHostsPorts(lua_State *vm) {
 /* **************************************************** */
 
 bool NetworkInterface::get_host_ports(GenericHashEntry *node,
-					  void *user_data,
-					  bool *matched) {
+				      void *user_data,
+				      bool *matched) {
   /* Retrieve HostsPorts instance */
   HostsPorts* hostsPorts = static_cast< HostsPorts *>(user_data);
   if (!hostsPorts)
@@ -12297,8 +12297,8 @@ bool NetworkInterface::get_host_ports(GenericHashEntry *node,
 /* **************************************************** */
 
 void NetworkInterface::lua_push_ports(lua_State *vm,
-				  HostsPorts *count,
-				  u_int16_t protocol) {
+				      HostsPorts *count,
+				      u_int16_t protocol) {
 
   std::unordered_map<u_int64_t, PortDetails*> port_list = count->get_srv_ports();
   std::unordered_map<u_int64_t, PortDetails*>::iterator it;
@@ -12329,7 +12329,7 @@ void NetworkInterface::lua_push_ports(lua_State *vm,
 
     lua_push_str_table_entry(vm, "proto_id", proto);
     lua_push_str_table_entry(vm, "l7_proto_name",
-            get_ndpi_full_proto_name(detected_protocol, buf, sizeof(buf)));
+			     get_ndpi_full_proto_name(detected_protocol, buf, sizeof(buf)));
     lua_push_uint32_table_entry(vm, "srv_port", srv_port);
     lua_push_str_table_entry(vm, "l4_proto", Utils::l4proto2name(count->get_protocol()));
     lua_push_uint64_table_entry(vm, "n_hosts", it->second->get_size());
@@ -12430,16 +12430,16 @@ bool NetworkInterface::get_hosts_by_port(GenericHashEntry *node,
       u_int32_t flows_count = 1;
       /* Build new host_info instance */
       HostDetails *host_info = new (std::nothrow) HostDetails(
-                    f->get_srv_ip_addr()->print(ip_buf, sizeof(ip_buf)),
-                    h->getMac() ? h->getMac()->print(mac_buf, sizeof(mac_buf)) : (char*)"",
-                    h->getMac() ? (char*)h->getMac()->get_manufacturer() : (char*)"",
-                    f->get_bytes_cli2srv() + f->get_bytes_srv2cli(),
-                    f->get_srv_ip_addr()->get_ip_hex(ip_hex_buf, sizeof(ip_hex_buf)),
-                    vlan_id,
-                    h->getScore(),
-                    flows_count,
-                    h->get_name(name, sizeof(name), false),
-                    host_key);
+							      f->get_srv_ip_addr()->print(ip_buf, sizeof(ip_buf)),
+							      h->getMac() ? h->getMac()->print(mac_buf, sizeof(mac_buf)) : (char*)"",
+							      h->getMac() ? (char*)h->getMac()->get_manufacturer() : (char*)"",
+							      f->get_bytes_cli2srv() + f->get_bytes_srv2cli(),
+							      f->get_srv_ip_addr()->get_ip_hex(ip_hex_buf, sizeof(ip_hex_buf)),
+							      vlan_id,
+							      h->getScore(),
+							      flows_count,
+							      h->get_name(name, sizeof(name), false),
+							      host_key);
       if(host_info) {
         host_details->insert({host_key, host_info});
       }
@@ -12988,5 +12988,5 @@ void NetworkInterface::resetBroacastDomains() {
 /* **************************************************** */
 
 void NetworkInterface::updateASNExportersPrefs() {
-    if (ases_hash) ases_hash->updateASNExportersPrefs();
+  if (ases_hash) ases_hash->updateASNExportersPrefs();
 }
