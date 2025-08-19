@@ -1004,6 +1004,7 @@ SELECT 9 entity_id, interface_id, alert_id, alert_status, require_attention, tst
 
 @
 
+/* IMPORTANT: keep in sync with db_schema_as_sqlite.sql */
 CREATE TABLE IF NOT EXISTS `hourly_asn` (
 `ID` UInt64,
 `NTOPNG_INSTANCE_NAME` String,
