@@ -44,6 +44,7 @@ Host::Host(NetworkInterface *_iface, int32_t _iface_idx, Mac *_mac,
       Score(_iface),
       HostChecksStatus(),
       HostAlertableEntity(_iface, alert_entity_host) {
+
   if(trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 

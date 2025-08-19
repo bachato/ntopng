@@ -2141,6 +2141,10 @@ local known_parameters = {
     ["view"] = validateSingleWord,
     ["enabled"] = validateBool,
 
+    -- CLASSIFICAION
+    ["classification_user_id"] = validateNumber,
+    ["classification_user_token"] = validateSingleWord,
+    
     -- VULNERABILITY SCAN
     ["scan_type"] = validateSingleWord,
     ["discovered_host_scan_type"] = validateListOfTypeInline(validateSingleWord),

@@ -37,13 +37,14 @@ Host* HostHash::get(u_int16_t vlanId, IpAddress *key, Mac *mac,
                     bool is_inline_call, u_int16_t observation_point_id) {
   u_int32_t hash = key->key();
 
+  /* Check if MAC address needs to be used in host key */
+  if (ntop->getPrefs()->useMacAddressInFlowKey() == false)
+    mac = NULL;
+
+#ifdef USE_MAC_IN_KEY_WITH_DHCP
   if((hash == 0 /* 0.0.0.0 */) && (mac != NULL))
     hash += mac->key();
-  else {
-    /* Check if MAC address needs to be used in host key */
-    if (ntop->getPrefs()->useMacAddressInFlowKey() == false)
-      mac = NULL;
-  }
+#endif
 
   hash %= num_hashes;
   
@@ -57,10 +58,11 @@ Host* HostHash::get(u_int16_t vlanId, IpAddress *key, Mac *mac,
     head = (Host *)table[hash];
 
     while (head != NULL) {
-      if ((!head->idle()) && (head->get_vlan_id() == vlanId) &&
-          (head->get_observation_point_id() == observation_point_id) &&
-          (head->get_ip() != NULL) && (head->get_ip()->compare(key) == 0) &&
-          ((mac == NULL) || (mac == head->getMac())))
+      if ((!head->idle()) && (head->get_vlan_id() == vlanId)
+          && (head->get_observation_point_id() == observation_point_id)
+          && (head->get_ip() != NULL) && (head->get_ip()->compare(key) == 0)
+          && ((mac == NULL) || (mac == head->getMac()))
+	  )
         break;
       else
         head = (Host *)head->next();

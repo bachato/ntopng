@@ -73,14 +73,12 @@ PartializableFlowTrafficStats PartializableFlowTrafficStats::operator-(
   static bool warn_once = true;
 
   /* Check flow counters (Debug) */
-  if ((fts.cli2srv_bytes > cur.cli2srv_bytes ||
-       fts.srv2cli_bytes > cur.srv2cli_bytes) &&
-      warn_once) {
-    ntop->getTrace()->traceEvent(
-        TRACE_WARNING,
-        "Flow stats went backwards [c2s %ju -> %ju][s2c %ju -> %ju]",
-        fts.cli2srv_bytes, cur.cli2srv_bytes, fts.srv2cli_bytes,
-        cur.srv2cli_bytes);
+  if (((fts.cli2srv_bytes > cur.cli2srv_bytes) || (fts.srv2cli_bytes > cur.srv2cli_bytes))
+      && warn_once) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING,
+				 "Flow stats went backwards [c2s %ju -> %ju][s2c %ju -> %ju]",
+				 fts.cli2srv_bytes, cur.cli2srv_bytes, fts.srv2cli_bytes,
+				 cur.srv2cli_bytes);
     warn_once = false;
   }
 

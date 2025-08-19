@@ -56,6 +56,7 @@ local page = _GET["page"]
 local host_info = url2hostinfo(_GET)
 local host_ip = host_info["host"]
 local host_vlan = host_info["vlan"] or 0
+local host_mac  = _GET["mac"] or ""
 local format_utils = require("format_utils")
 
 if not isEmptyString(_GET["ifid"]) then
@@ -98,7 +99,7 @@ if (debug_hosts) then
         vlan = host_vlan
     }) .. "\n")
 end
-local host = interface.getHostInfo(host_info["host"], host_vlan)
+local host = interface.getHostInfo(host_info["host"], host_vlan, host_mac)
 local tskey
 
 -- if(host) then tprint(host.mac_meaningful) end
