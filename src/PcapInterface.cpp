@@ -426,7 +426,8 @@ static void *packetPollLoop(void *ptr) {
 	  /* Delete the processed file */
           if (fname)
             ::unlink(fname);
-	}
+	} else
+	  sleep(1);
 
 	iface->purgeIdle(time(NULL));
 	break;
