@@ -307,3 +307,21 @@ u_int16_t PartializableFlowTrafficStats::get_num_dns_queries() const {
          protos.dns.num_txt + protos.dns.num_aaaa + protos.dns.num_any +
          protos.dns.num_other;
 }
+
+/* *************************************** */
+
+#define swapme(pivot, a, b)          { pivot = a; a = b; b = pivot; }
+#define swapme_buf(pivot, a, b, len) { memcpy(pivot, a, len); memcpy(a, b, len); memcpy(b, pivot, len); }
+
+void PartializableFlowTrafficStats::swap() {
+  u_int32_t p32;
+  u_int64_t p64;
+  FlowTCPPacketStats p;
+  u_int16_t p16[MAX_NUM_SCORE_CATEGORIES];
+	     
+  swapme(p32, cli2srv_packets, srv2cli_packets);
+  swapme(p64, cli2srv_bytes, srv2cli_bytes);
+  swapme(p64,  cli2srv_goodput_bytes, srv2cli_goodput_bytes);
+  swapme_buf(&p, &cli2srv_tcp_stats, &srv2cli_tcp_stats, sizeof(FlowTCPPacketStats));
+  swapme_buf(p16, cli_host_score, srv_host_score, sizeof(p16));
+}
