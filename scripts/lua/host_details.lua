@@ -121,7 +121,7 @@ if (ifstats.inline) then
     if (_POST["drop_host_active_flows_policy"] == "true") then
        interface.dropHostTraffic(host_ip)
     else
-       if (_POST["drop_host_traffic_policy"] == "true") then
+       if (toboolean(_POST["drop_host_traffic_policy"]) or toboolean(_POST["drop_host_traffic"])) then
          if ntop.getHashCache("ntopng.prefs.drop_host_traffic", host_ip) == "true" then
            ntop.delHashCache("ntopng.prefs.drop_host_traffic", host_ip)
             -- UNBLOCKED

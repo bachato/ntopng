@@ -2590,6 +2590,7 @@ local known_parameters = {
     ["show_advanced_prefs"] = validateBool, -- true if advanced preferences should be shown
     ["ifSpeed"] = validateEmptyOr(validateNumber), -- interface speed
     ["scaling_factor"] = validateEmptyOr(validateNumber), -- interface scaling factor
+    ["drop_host_traffic"] = validateBool, -- to drop an host traffic
     ["drop_host_traffic_policy"] = validateBool, -- to drop an host traffic
     ["drop_host_active_flows_policy"] = validateBool, -- to drop active host traffic flows
     ["lifetime_limited"] = validateEmptyOr(validateOnOff), -- set if user should have a limited lifetime
