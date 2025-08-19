@@ -76,7 +76,7 @@ const map_table_def_columns = (columns) => {
             const host = row.host
             let ip_address = host.ip
             let icons = ''
-            const url = `${http_prefix}/lua/host_details.lua?host=${host.ip}&vlan=${host.vlan.id}`
+            const url = `${http_prefix}/lua/host_details.lua?host=${host.ip}&vlan=${host.vlan.id}&mac=${host.mac.address}`
 
             if (!dataUtils.isEmptyOrNull(host.system_host)) {
                 icons = `${icons} ${system_host_icon}`
