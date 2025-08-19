@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch, h } from "vue";
+import { ref, onMounted, computed, onBeforeUnmount } from "vue";
 import { ntopng_utility } from "../services/context/ntopng_globals_services.js";
 import { useSlots, render, getCurrentInstance, nextTick } from 'vue';
 import { render_component } from "./ntop_utils.js";
@@ -59,13 +59,23 @@ const props = defineProps({
 });
 
 let default_overflow = null;
+
+onBeforeUnmount(() => {
+    /* Just to be sure, before unmounting the element reset correctly the css */
+    $(dropdown.value).parent().closest('div')?.css('overflow', default_overflow);
+    $(dropdown.value).parent().closest('div')[0]?.style.setProperty('overflow', default_overflow, 'important');
+    $(dropdown.value).parent().closest('td')[0]?.style.setProperty('z-index', 'auto', 'important');
+    if (props.f_on_close != null) {
+        props.f_on_close(el);
+    }
+})
 onMounted(() => {
     default_overflow = $(dropdown.value).parent().closest('div').css('overflow');
     if (props.auto_load == true) {
         load_menu();
     }
     let el = { dropdown: dropdown.value, dropdown_button: dropdown_button.value };
-   
+
     $(dropdown.value).on('show.bs.dropdown', function () {
         $(dropdown.value).parent().closest('div')?.css('overflow', "visible");
         $(dropdown.value).parent().closest('div')?.css('z-index', 'auto');
@@ -73,14 +83,14 @@ onMounted(() => {
         $(dropdown.value).parent().closest('div')[0]?.style.setProperty('z-index', 'auto', 'important');
         $(dropdown.value).parent().closest('td')[0]?.style.setProperty('z-index', '10', 'important');
         $(this).find('.dropdown-menu').css('z-index', '1050');
-        
+
         if (props.f_on_open != null) {
             props.f_on_open(el);
         }
     });
-    
+
     $(dropdown.value).on('hide.bs.dropdown', function () {
-        $(dropdown.value).parent().closest('div')?.css('overflow', default_overflow);        
+        $(dropdown.value).parent().closest('div')?.css('overflow', default_overflow);
         $(dropdown.value).parent().closest('div')[0]?.style.setProperty('overflow', default_overflow, 'important');
         $(dropdown.value).parent().closest('td')[0]?.style.setProperty('z-index', 'auto', 'important');
         if (props.f_on_close != null) {
@@ -138,5 +148,4 @@ defineExpose({ load_menu });
 
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
