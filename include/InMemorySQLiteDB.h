@@ -26,15 +26,12 @@
 
 /* General purpose in-memory databsed based on SQLite */
 
-class InMemorySQLiteDB {
+class InMemorySQLiteDB : public SQLiteStoreManager {
  private:
-  sqlite3 *db;
 
  public:
-  InMemorySQLiteDB();
+  InMemorySQLiteDB(NetworkInterface *iface);
   ~InMemorySQLiteDB();
-
-  int execSQLQuery(lua_State *vm, const char *sql);
 };
 
 #endif /* _IN_MEMORY_SQLITE_DB_H_ */

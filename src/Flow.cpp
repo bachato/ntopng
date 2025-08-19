@@ -8535,6 +8535,10 @@ void Flow::swap() {
     tcp->rtt.last_srv_ack = tmp;
   }
 
+  if(last_db_dump.partial)      last_db_dump.partial->swap();
+  last_db_dump.delta.swap();
+  if(periodic_stats_update_partial) periodic_stats_update_partial->swap();
+  
   c2sFirstGoodputTime.tv_sec = 0;
 
   /*

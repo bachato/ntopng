@@ -31,16 +31,12 @@ class SQLiteDB : public DB, public SQLiteStoreManager {
   bool store_opened, store_initialized;
 
   int openStore();
-  int execFile(const char *path);
 
  public:
   SQLiteDB(NetworkInterface *iface);
   ~SQLiteDB();
 
   const char *getEngineName();
-
-  int execSQLQuery(lua_State *vm, const char *sql,
-                   bool limitRows, bool wait_for_db_created);
 };
 
 #endif /* _SQLITE_DB_H_ */

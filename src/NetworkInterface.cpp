@@ -2186,7 +2186,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 
 #ifdef DEBUG
 	    char buf[43];
-	    
+
 	    ntop->getTrace()->traceEvent(TRACE_WARNING, "[cli][ingressPacket: %s][MAC %s]",
 					 *ingressPacket ? "YES" : "No",
 					 src_mac->print(buf, sizeof(buf)));
@@ -2199,7 +2199,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 
 #ifdef DEBUG
 	    char buf[43];
-	    
+
 	    ntop->getTrace()->traceEvent(TRACE_WARNING, "[srv][ingressPacket: %s][MAC %s]",
 					 *ingressPacket ? "YES" : "No",
 					 srv_mac->print(buf, sizeof(buf)));
@@ -3978,8 +3978,7 @@ void NetworkInterface::findFlowHosts(int32_t iface_idx, u_int16_t vlan_id,
     return;
   }
 
-  INTERFACE_PROFILING_SECTION_ENTER(
-				    "NetworkInterface::findFlowHosts: hosts_hash->get", 3);
+  INTERFACE_PROFILING_SECTION_ENTER("NetworkInterface::findFlowHosts: hosts_hash->get", 3);
   /* Do not look on sub interfaces, Flows are always created in the same
    * interface of its hosts */
   (*src) = hosts_hash->get(vlan_id, _src_ip, src_mac, true /* Inline call */,
@@ -4384,15 +4383,7 @@ void NetworkInterface::localHostsServerPorts(lua_State *vm) {
 
 #ifdef HAVE_NEDGE
 
-static bool update_flow_l7_policy(GenericHashEntry *node, void *user_data,
-                                  bool *matched) {
-  Flow *f = (Flow *)node;
-
-  *matched = true;
-  f->updateFlowShapers();
-  return (false); /* false = keep on walking */
-}
-
+_
 /* **************************************************** */
 
 void NetworkInterface::updateHostsL7Policy(u_int16_t host_pool_id) {
@@ -6553,7 +6544,7 @@ int NetworkInterface::sortHosts(u_int32_t *begin_slot, bool walk_all, struct flo
     retriever->currentSize = FLOWHOSTRETRIEVER_BLOCK_SIZE;
 
   retriever->elems = (struct flowHostRetrieveList *)calloc(sizeof(struct flowHostRetrieveList), retriever->currentSize);
-    
+
   if (retriever->elems == NULL) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Out of memory :-(");
     return (-1);
@@ -12989,4 +12980,214 @@ void NetworkInterface::resetBroacastDomains() {
 
 void NetworkInterface::updateASNExportersPrefs() {
   if (ases_hash) ases_hash->updateASNExportersPrefs();
+}
+
+/* **************************************************** */
+/* **************************************************** */
+
+class AggregatedASNFlowKey {
+public:
+  u_int8_t ip_protocol_version;
+  u_int32_t src_asn, dst_asn, src_peer_asn, dst_peer_asn;
+  u_int32_t probe_ip, input_snmp, output_snmp;
+
+  AggregatedASNFlowKey(u_int8_t  _ip_protocol_version,
+			u_int32_t _src_asn,
+			u_int32_t _dst_asn,
+			u_int32_t _src_peer_asn,
+			u_int32_t _dst_peer_asn,
+			u_int32_t _probe_ip,
+			u_int32_t _input_snmp,
+			u_int32_t _output_snmp) {
+    ip_protocol_version = _ip_protocol_version;
+    src_asn      = _src_asn;
+    dst_asn      = _dst_asn;
+    src_peer_asn = _src_peer_asn;
+    dst_peer_asn = _dst_peer_asn;
+    probe_ip     = _probe_ip;
+    input_snmp   = _input_snmp;
+    output_snmp  = _output_snmp;
+  }
+
+  AggregatedASNFlowKey(Flow *f) {
+    ip_protocol_version = f->get_cli_ip_addr()->getVersion();
+    src_asn      = f->getSrcAS();
+    dst_asn      = f->getDstAS();
+    src_peer_asn = f->getSrcPeerAS();
+    dst_peer_asn = f->getDstPeerAS();
+    probe_ip     = f->getFlowDeviceIP();
+    input_snmp   = f->getFlowDeviceInIndex();
+    output_snmp  = f->getFlowDeviceOutIndex();
+  }
+
+  bool equal(AggregatedASNFlowKey *k) const {
+    if((ip_protocol_version == k->ip_protocol_version)
+       && (src_asn == k->src_asn)
+       && (dst_asn == k->dst_asn)
+       && (src_peer_asn == k->src_peer_asn)
+       && (dst_peer_asn == k->dst_peer_asn)
+       && (probe_ip == k->probe_ip)
+       && (input_snmp == k->input_snmp)
+       && (output_snmp == k->output_snmp))
+      return(true);
+    else
+      return(false);
+  }
+};
+
+/* **************************************************** */
+
+class AggregatedASNFlowValue {
+private:
+  void update(u_int32_t _first_seen,
+	      u_int32_t _last_seen,
+	      u_int64_t _src2dst_bytes,
+	      u_int64_t _dst2src_bytes,
+	      u_int32_t _src2dst_packets,
+	      u_int32_t _dst2src_packets,
+	      bool swap_direction
+	      ) {
+    first_seen = ndpi_min(first_seen, _first_seen);
+    last_seen = ndpi_min(last_seen, _last_seen);
+
+    if(!swap_direction) {
+      src2dst_bytes += _src2dst_bytes;
+      dst2src_bytes += _dst2src_bytes;
+      src2dst_packets +=_src2dst_packets;
+      dst2src_packets += _dst2src_packets;
+    } else {
+      src2dst_bytes += _dst2src_bytes;
+      dst2src_bytes += _src2dst_bytes;
+      src2dst_packets +=_dst2src_packets;
+      dst2src_packets += _src2dst_packets;
+    }
+  }
+
+public:
+    u_int32_t first_seen, last_seen;
+    u_int64_t src2dst_bytes, dst2src_bytes;
+    u_int32_t src2dst_packets, dst2src_packets;
+
+  AggregatedASNFlowValue(Flow *f) {
+    first_seen      = f->get_first_seen();
+    last_seen       = f->get_last_seen();
+    src2dst_bytes   = f->get_bytes_cli2srv();
+    dst2src_bytes   = f->get_bytes_srv2cli();
+    src2dst_packets = f->get_packets_cli2srv();
+    dst2src_packets = f->get_packets_srv2cli();
+  }
+
+  void update(Flow *f, bool swap_direction) {
+    update(f->get_first_seen(),
+	   f->get_last_seen(),
+	   f->get_bytes_cli2srv(),
+	   f->get_bytes_srv2cli(),
+	   f->get_packets_cli2srv(),
+	   f->get_packets_srv2cli(),
+	   swap_direction);
+  }
+};
+
+/* **************************************************** */
+
+struct AggregatedASNFlowKeyCompare {
+  bool operator()(const AggregatedASNFlowKey& a, const AggregatedASNFlowKey& b) const {
+    if(
+       ((a.ip_protocol_version == b.ip_protocol_version)
+	&& (a.probe_ip == b.probe_ip))
+       && (
+	   ((a.src_asn         == b.src_asn)
+	    && (a.dst_asn      == b.dst_asn)
+	    && (a.src_peer_asn == b.src_peer_asn)
+	    && (a.dst_peer_asn == b.dst_peer_asn)
+	    && (a.input_snmp   == b.input_snmp)
+	    && (a.output_snmp  == b.output_snmp))
+	   ||
+	   ((a.src_asn         == b.dst_asn)
+	    && (a.dst_asn      == b.src_asn)
+	    && (a.src_peer_asn == b.dst_peer_asn)
+	    && (a.dst_peer_asn == b.src_peer_asn)
+	    && (a.input_snmp   == b.output_snmp)
+	    && (a.output_snmp  == b.input_snmp))
+	   )
+       )
+      return(true);
+    else
+      return(false);
+  }
+};
+
+/* **************************************************** */
+
+static bool aggregate_asn_flows(GenericHashEntry *node, void *user_data,
+				bool *matched) {
+  Flow *f = (Flow *)node;
+  std::map<AggregatedASNFlowKey, AggregatedASNFlowValue, AggregatedASNFlowKeyCompare> *flows =
+    static_cast< std::map<AggregatedASNFlowKey, AggregatedASNFlowValue, AggregatedASNFlowKeyCompare>* >(user_data);
+  AggregatedASNFlowKey ak(f);
+  std::map<AggregatedASNFlowKey, AggregatedASNFlowValue, AggregatedASNFlowKeyCompare>::iterator it = flows->find(ak);
+    
+  if(it == flows->end()) {
+    AggregatedASNFlowValue v(f);
+    
+    flows->insert(std::make_pair(ak, v));
+  } else {
+    it->second.update(f, it->first.equal(&ak) ? false : true);
+  }
+  
+  return (false); /* false = keep on walking */
+}
+
+/* **************************************************** */
+
+bool NetworkInterface::aggregateASNModeFlows(lua_State *vm) {
+  u_int32_t begin_slot = 0;
+  InMemorySQLiteDB *db = getLuaVMUserdata(vm, db);  
+  std::map<AggregatedASNFlowKey, AggregatedASNFlowValue, AggregatedASNFlowKeyCompare> flows;
+  std::map<AggregatedASNFlowKey, AggregatedASNFlowValue, AggregatedASNFlowKeyCompare>::iterator it;
+  
+  if(db == NULL) {
+    db = new (std::nothrow)InMemorySQLiteDB(getLuaVMUserdata(vm, iface));
+    
+    if(db == NULL)
+      return(false);
+    else {
+      getUserdata(vm)->db = db;
+      db->execFile("db_schema_as_sqlite.sql");
+    }
+  }
+  
+  walker(&begin_slot, true /* walk_all */, walker_flows,
+	 aggregate_asn_flows, &flows);
+
+  for(it = flows.begin(); it != flows.end(); it++) {
+    const AggregatedASNFlowKey   *k = &(it->first);
+    const AggregatedASNFlowValue *v = &(it->second);
+    
+    std::string sql =
+      "INSERT INTO hourly_asn VALUES (" + std::to_string(get_id())
+      + "," + std::to_string(k->ip_protocol_version)
+      + "," + std::to_string(v->first_seen)
+      + "," + std::to_string(v->last_seen)
+      + "," + std::to_string(v->src2dst_bytes)
+      + "," + std::to_string(v->dst2src_bytes)
+      + "," + std::to_string(v->src2dst_bytes + v->dst2src_bytes)
+      + "," + std::to_string(v->src2dst_packets)
+      + "," + std::to_string(v->dst2src_packets)
+      + "," + std::to_string(k->src_asn)
+      + "," + std::to_string(k->dst_asn)
+      + "," + std::to_string(k->src_peer_asn)
+      + "," + std::to_string(k->dst_peer_asn)
+      + "," + std::to_string(k->probe_ip)
+      + "," + std::to_string(k->input_snmp)
+      + "," + std::to_string(k->output_snmp)
+      + ")";
+
+    // ntop->getTrace()->traceEvent(TRACE_INFO, "%s", sql.c_str());
+    db->exec_query(sql.c_str(), NULL, NULL);
+  }
+
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Aggregated %u flows", flows.size());
+  
+  return(true);
 }

@@ -1350,8 +1350,7 @@ public:
     if (cli_host) cli_host->setLastDeviceIp(device_ip);
     if (srv_host) srv_host->setLastDeviceIp(device_ip);
 
-    if ((obs_point = iface->getObsPoint(observation_point_id, true, true)) !=
-        NULL)
+    if ((obs_point = iface->getObsPoint(observation_point_id, true, true)) != NULL)
       obs_point->addProbeIp(device_ip);
   }
   inline u_int32_t getFlowDeviceIP() { return flow_device.device_ip; };
@@ -1587,6 +1586,11 @@ public:
     collected_qoe.src_to_dst = c2s, collected_qoe.dst_to_src = s2c, has_collected_qoe = 1;
   }
   void setHostTCPFingerprint(char *fp, ndpi_os os_hint);
+
+  u_int32_t getSrcAS()     { return(srcAS);     }
+  u_int32_t getDstAS()     { return(dstAS);     }
+  u_int32_t getSrcPeerAS() { return(srcPeerAS); }
+  u_int32_t getDstPeerAS() { return(dstPeerAS); }
 };
 
 #endif /* _FLOW_H_ */
