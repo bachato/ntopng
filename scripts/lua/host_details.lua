@@ -635,8 +635,8 @@ else
       <div class="card-body">
       ]]
         print("<table class=\"table table-striped table-bordered\">\n")
-        if (host["ip"] ~= nil) then
-            if (host["mac"] ~= "00:00:00:00:00:00") then
+        if ((host["ip"] ~= nil)) then
+            if (host["mac"] ~= "00:00:00:00:00:00") and (host["is_broadcast"] == false) then
                 if (host.router ~= nil) then
                     print("<tr><th width=35%>" .. i18n("details.router_access_point_mac_address") ..
                               "</th><td colspan=2>" .. get_symbolic_mac(host.router, false) .. " </td></tr>")
