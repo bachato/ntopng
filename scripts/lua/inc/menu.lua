@@ -328,7 +328,7 @@ else
             }, {
                 entry = page_utils.menu_entries.alerts_graph,
                 url = "/lua/pro/alerts_graph.lua",
-                hidden = (not ntop.isEnterpriseL()) or ( not ntop.isClickHouseEnabled())
+                hidden = (not ntop.isEnterpriseL() and not ntop.isnEdgeEnterprise()) or ( not ntop.isClickHouseEnabled())
             }, {
                 entry = page_utils.menu_entries.alerts_geomap,
                 url = "/lua/pro/alerts_geomap.lua",
