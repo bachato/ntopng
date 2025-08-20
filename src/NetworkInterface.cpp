@@ -4383,7 +4383,6 @@ void NetworkInterface::localHostsServerPorts(lua_State *vm) {
 
 #ifdef HAVE_NEDGE
 
-_
 /* **************************************************** */
 
 void NetworkInterface::updateHostsL7Policy(u_int16_t host_pool_id) {
