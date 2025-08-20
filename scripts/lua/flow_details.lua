@@ -615,7 +615,7 @@ else
 
    print("<tr><th width=10%>" .. i18n("protocol") .. " / " .. i18n("application") .. "</th>")
    if ((ifstats.inline and flow["verdict.pass"]) or (flow.vrfId ~= nil)) then
-      print("<td>")
+      print("<td colspan=2>")
    else
       print("<td colspan=2>")
    end
