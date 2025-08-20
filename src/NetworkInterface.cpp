@@ -4385,6 +4385,17 @@ void NetworkInterface::localHostsServerPorts(lua_State *vm) {
 
 /* **************************************************** */
 
+static bool update_flow_l7_policy(GenericHashEntry *node, void *user_data,
+				  bool *matched) {
+  Flow *f = (Flow *)node;
+
+  *matched = true;
+  f->updateFlowShapers();
+  return (false); /* false = keep on walking */
+}
+
+/* **************************************************** */
+
 void NetworkInterface::updateHostsL7Policy(u_int16_t host_pool_id) {
   u_int32_t begin_slot = 0;
   bool walk_all = true;
