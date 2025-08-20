@@ -115,7 +115,7 @@
 
 #define ZMQ_COMPATIBILITY_MSG_VERSION 1
 
-#define ZMQ_MSG_VERSION               4 /* struct zmq_msg_hdr_v3 */
+#define ZMQ_MSG_VERSION               4 /* struct zmq_msg_hdr_v4 */
 #define ZMQ_MSG_VERSION_TLV           3
 #define ZMQ_MSG_VERSION_OLD           2
 

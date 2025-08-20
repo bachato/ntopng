@@ -317,7 +317,7 @@ void ZMQCollectorInterface::collect_flows() {
           publisher_version = h0.version;
         } else {
           /* safety checks */
-          if (((size != sizeof(struct zmq_msg_hdr_v3)) &&
+          if (((size != sizeof(struct zmq_msg_hdr_v4)) &&
                (size != sizeof(struct zmq_msg_hdr_v2)) &&
 	       (size != sizeof(struct zmq_msg_hdr_v1))
 	       ) ||
@@ -345,8 +345,8 @@ void ZMQCollectorInterface::collect_flows() {
 
             source_id = h2->source_id, msg_id = ntohl(h2->msg_id);
             publisher_version = h2->version;
-	  } else if ((h->version == ZMQ_MSG_VERSION) && (size == sizeof(struct zmq_msg_hdr_v3))) {
-            struct zmq_msg_hdr_v3 *h3 = (struct zmq_msg_hdr_v3 *)&h0;
+	  } else if ((h->version == ZMQ_MSG_VERSION) && (size == sizeof(struct zmq_msg_hdr_v4))) {
+            struct zmq_msg_hdr_v4 *h3 = (struct zmq_msg_hdr_v4 *)&h0;
 
             source_id = h3->source_id, msg_id = ntohl(h3->msg_id);
             publisher_version = h3->version;
@@ -461,7 +461,7 @@ void ZMQCollectorInterface::collect_flows() {
 
             uncompressed = (char *)malloc(uncompressed_len + 1);
 
-	    if(publisher_version == ZMQ_MSG_VERSION /* struct zmq_msg_hdr_v3 */)
+	    if(publisher_version == ZMQ_MSG_VERSION /* struct zmq_msg_hdr_v4 */)
 	      err = uncompress((Bytef *)uncompressed, &uLen, (Bytef *)zmq_payload, size);
 	    else
 	      err = uncompress((Bytef *)uncompressed, &uLen, (Bytef *)&zmq_payload[1], size - 1);

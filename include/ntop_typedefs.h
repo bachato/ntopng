@@ -275,7 +275,7 @@ struct zmq_msg_hdr_v2 {
   u_int32_t msg_id, source_id;
 };
 
-struct zmq_msg_hdr_v3 {
+struct zmq_msg_hdr_v4 { /* formerly v3 (but still version 4) */
   char url[16];
   u_int8_t version /* 4 */, flags;
   u_int32_t uncompressed_size, compressed_size;
