@@ -1272,11 +1272,11 @@ local community_timeseries = {
                 label = i18n('graphs.metric_labels.score'),
                 color = timeseries_info.get_timeseries_color('score')
             },
-            cli_score = {
+            scoreAsClient = {
                 label = i18n('graphs.metric_labels.cli_score'),
                 color = timeseries_info.get_timeseries_color('cli_score')
             },
-            srv_score = {
+            scoreAsServer = {
                 label = i18n('graphs.metric_labels.srv_score'),
                 color = timeseries_info.get_timeseries_color('srv_score')
             }
