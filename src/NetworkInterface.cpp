@@ -2176,25 +2176,12 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
       if((*ingressPacket == false) /* LAN -> WAN */
 	 && (sender_mac != NULL)
 	 ) {
-	Mac *src_mac = flow->get_cli_host()->getMac();
+	Mac *cli_mac = flow->get_cli_host()->getMac();
 	Mac *srv_mac = flow->get_srv_host()->getMac();
 
-	if(src2dst_direction == false) /* dst -> src */ {
-	  if(src_mac && src_mac->isNull()
-	     && srv_mac && memcmp(srv_mac->get_mac(), sender_mac, 6)) {
-	    src_mac->set(sender_mac);
-
-#ifdef DEBUG
-	    char buf[43];
-
-	    ntop->getTrace()->traceEvent(TRACE_WARNING, "[cli][ingressPacket: %s][MAC %s]",
-					 *ingressPacket ? "YES" : "No",
-					 src_mac->print(buf, sizeof(buf)));
-#endif
-	  }
-	} else {
-	  if(srv_mac && srv_mac->isNull()
-	     && src_mac && memcmp(src_mac->get_mac(), sender_mac, 6)) {
+	if(src2dst_direction) { /* src -> dst */
+	  if(srv_mac && srv_mac->isNull() &&
+	     cli_mac && memcmp(cli_mac->get_mac(), sender_mac, 6)) {
 	    srv_mac->set(sender_mac);
 
 #ifdef DEBUG
@@ -2205,7 +2192,20 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 					 srv_mac->print(buf, sizeof(buf)));
 #endif
 	  }
-	}
+	} else { /* dst -> src */
+	  if(cli_mac && cli_mac->isNull()
+	     && srv_mac && memcmp(srv_mac->get_mac(), sender_mac, 6)) {
+	    cli_mac->set(sender_mac);
+
+#ifdef DEBUG
+	    char buf[43];
+
+	    ntop->getTrace()->traceEvent(TRACE_WARNING, "[cli][ingressPacket: %s][MAC %s]",
+					 *ingressPacket ? "YES" : "No",
+					 cli_mac->print(buf, sizeof(buf)));
+#endif
+	  }
+        }
       }
 #endif
 
@@ -2577,11 +2577,14 @@ u_int16_t NetworkInterface::guessEthType(const u_char *p, u_int len,
 bool NetworkInterface::dissectPacket(int32_t if_index,
 				     u_int32_t bridge_iface_idx,
 				     int datalink_type,
-                                     bool ingressPacket, u_int8_t *sender_mac,
+                                     bool ingressPacket,
+                                     u_int8_t *sender_mac,
                                      const struct pcap_pkthdr *h,
                                      const u_char *packet,
-                                     u_int16_t *ndpiProtocol, Host **srcHost,
-                                     Host **dstHost, Flow **flow) {
+                                     u_int16_t *ndpiProtocol,
+                                     Host **srcHost,
+                                     Host **dstHost,
+                                     Flow **flow) {
   struct ndpi_ethhdr *ethernet = NULL, dummy_ethernet;
   u_int64_t time;
   u_int16_t eth_type, ip_offset = 0, vlan_id = 0, eth_offset = 0,
