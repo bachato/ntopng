@@ -12817,6 +12817,24 @@
         }
       }
     },
+    "/lua/rest/v2/get/system/reload_ndpi.lua" : {
+      "get":{
+        "tags": ["Health"],
+        "summary": "Reload nDPI and Blacklists",
+        "description": "Reload nDPI (also the changes to the custom protocols) and all the enabled blacklists",
+        "operationId": "reload_ndpi",
+        "produces": ["application/json"],
+        "parameters": [],
+        "responses": {
+          "0" : {
+            "description": "OK"
+          },
+          "-3": {
+            "description": "NOT_GRANTED"
+          }
+        }
+      }
+    },
     "/lua/rest/v2/get/timeseries/ts.lua": {
       "get": {
         "tags": [
