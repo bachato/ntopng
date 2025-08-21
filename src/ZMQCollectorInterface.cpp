@@ -305,7 +305,8 @@ void ZMQCollectorInterface::collect_flows() {
         u_int32_t msg_id = 0, current_msg_id = 0;
         u_int32_t source_id = 0;
         u_int32_t publisher_version = 0;
-	u_int32_t received_compressed_size = 0;
+	//u_int32_t received_compressed_size = 0;
+	u_int32_t received_uncompressed_size = 0;
         zmq_probe *probe = NULL;
 	bool tlv_encoding = false;
 	bool compressed = false;
@@ -346,14 +347,15 @@ void ZMQCollectorInterface::collect_flows() {
             source_id = h2->source_id, msg_id = ntohl(h2->msg_id);
             publisher_version = h2->version;
 	  } else if ((h->version == ZMQ_MSG_VERSION) && (size == sizeof(struct zmq_msg_hdr_v4))) {
-            struct zmq_msg_hdr_v4 *h3 = (struct zmq_msg_hdr_v4 *)&h0;
+            struct zmq_msg_hdr_v4 *h4 = (struct zmq_msg_hdr_v4 *)&h0;
 
-            source_id = h3->source_id, msg_id = ntohl(h3->msg_id);
-            publisher_version = h3->version;
-	    received_compressed_size = h3->compressed_size;
+            source_id = h4->source_id, msg_id = ntohl(h4->msg_id);
+            publisher_version = h4->version;
+	    //received_compressed_size = ntohl(h4->compressed_size);
+	    received_uncompressed_size = ntohl(h4->uncompressed_size);
 
-	    if(h3->flags & ZMQ_FLAG_IS_TLV)         tlv_encoding = true;
-	    if(h3->flags & ZMQ_FLAG_IS_COMPRESSED)  compressed   = true;
+	    if(h4->flags & ZMQ_FLAG_IS_TLV)         tlv_encoding = true;
+	    if(h4->flags & ZMQ_FLAG_IS_COMPRESSED)  compressed   = true;
           }
         }
 
@@ -429,11 +431,11 @@ void ZMQCollectorInterface::collect_flows() {
         */
         size = zmq_recv(items[subscriber_id].socket, zmq_payload, CONST_ZMQ_PAYLOAD_LEN, 0);
 
-        if (size > 0 && (u_int32_t)size > CONST_ZMQ_PAYLOAD_LEN)
+        if (size > 0 && (u_int32_t)size > CONST_ZMQ_PAYLOAD_LEN) {
           ntop->getTrace()->traceEvent(TRACE_WARNING,
 				       "ZMQ message truncated? [size: %u][CONST_ZMQ_PAYLOAD_LEN: %u]", size,
 				       CONST_ZMQ_PAYLOAD_LEN);
-        else if (size > 0) {
+        } else if (size > 0) {
           char *uncompressed = NULL;
           u_int uncompressed_len;
 
@@ -454,10 +456,10 @@ void ZMQCollectorInterface::collect_flows() {
             int err;
             uLongf uLen;
 
-	    if(received_compressed_size == 0) /* Old nProbe: do the best to guess the size */
+	    if(received_uncompressed_size == 0) /* Old nProbe: do the best to guess the size */
 	      uLen = uncompressed_len = ndpi_min(ndpi_max(10 * size, MAX_ZMQ_FLOW_BUF), MAX_ZMQ_FLOW_BUF/3); /* Compatibility mode */
 	    else
-	      uLen = uncompressed_len = received_compressed_size + 16; /* We know already the uncompressed size */
+	      uLen = uncompressed_len = received_uncompressed_size + 16; /* We know already the uncompressed size */
 
             uncompressed = (char *)malloc(uncompressed_len + 1);
 
@@ -467,8 +469,8 @@ void ZMQCollectorInterface::collect_flows() {
 	      err = uncompress((Bytef *)uncompressed, &uLen, (Bytef *)&zmq_payload[1], size - 1);
 
 	    if (err != Z_OK) {
-	      ntop->getTrace()->traceEvent(TRACE_ERROR, "[topic: %s][version: %u] Uncompress error %d [compressed len: %u][max decompress len: %u]",
-					   h->url, publisher_version, err, size, uncompressed_len);
+	      ntop->getTrace()->traceEvent(TRACE_ERROR, "Uncompress error %d [topic: %s][version: %u][compressed len: %u][max decompress len: %u]",
+					   err, h->url, publisher_version, size, uncompressed_len);
 
 	      if(err == Z_BUF_ERROR)
 		ntop->getTrace()->traceEvent(TRACE_ERROR, "Internal error: decompression buffer too short");
