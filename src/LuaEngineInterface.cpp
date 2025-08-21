@@ -4724,6 +4724,31 @@ static int ntop_get_pool_dynamic_blacklist_stats(lua_State *vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 }
 
+/* ****************************************** */
+
+static int ntop_get_pool_dynamic_blacklist_members(lua_State *vm) {
+  NetworkInterface *curr_iface = getCurrentInterface(vm);
+  u_int16_t pool_id = (u_int16_t)-1;
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  pool_id = (u_int16_t)lua_tonumber(vm, 1);
+
+  if (curr_iface) {
+    HostPools *hp = curr_iface->getHostPools();
+    AddressTree *at = hp->getDynamicBlacklist(pool_id);
+
+    lua_newtable(vm);
+    at->getAddresses(vm);
+    
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  } else 
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+}
+
 #endif /* HAVE_NEDGE */
 #endif /* NTOPNG_PRO */
 
@@ -5992,6 +6017,7 @@ static luaL_Reg _ntop_interface_reg[] = {
   {"resetPoolsQuotas", ntop_reset_pools_quotas},
   {"flushPoolDynamicBlacklist", ntop_flush_pool_dynamic_blacklist},
   {"getPoolDynamicBlacklistStats", ntop_get_pool_dynamic_blacklist_stats},
+  {"getPoolDynamicBlacklistMembers", ntop_get_pool_dynamic_blacklist_members},
 #endif
   {"getHostUsedQuotasStats", ntop_get_host_used_quotas_stats},
 
