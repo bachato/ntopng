@@ -2172,42 +2172,6 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
         || (fragment_offset == 0)
 #endif
 	) {
-#ifdef HAVE_NEDGE
-      if(*ingressPacket == false /* LAN -> WAN */
-	 && sender_mac != NULL) {
-	Mac *cli_mac = flow->get_cli_host()->getMac();
-	Mac *srv_mac = flow->get_srv_host()->getMac();
-
-	if(src2dst_direction) { /* src -> dst */
-	  if(srv_mac && srv_mac->isNull() &&
-	     cli_mac && memcmp(cli_mac->get_mac(), sender_mac, 6) != 0) {
-	    srv_mac->set(sender_mac);
-
-#ifdef DEBUG
-	    char buf[43];
-
-	    ntop->getTrace()->traceEvent(TRACE_WARNING, "[srv][ingressPacket: %s][MAC %s]",
-					 *ingressPacket ? "YES" : "No",
-					 srv_mac->print(buf, sizeof(buf)));
-#endif
-	  }
-	} else { /* dst -> src */
-	  if(cli_mac && cli_mac->isNull()
-	     && srv_mac && memcmp(srv_mac->get_mac(), sender_mac, 6)) {
-	    cli_mac->set(sender_mac);
-
-#ifdef DEBUG
-	    char buf[43];
-
-	    ntop->getTrace()->traceEvent(TRACE_WARNING, "[cli][ingressPacket: %s][MAC %s]",
-					 *ingressPacket ? "YES" : "No",
-					 cli_mac->print(buf, sizeof(buf)));
-#endif
-	  }
-        }
-      }
-#endif
-
       flow->processPacket(src2dst_direction, h, ip, trusted_ip_len, packet_time, payload,
                           trusted_payload_len, src_port);
     } else {
