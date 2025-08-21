@@ -2173,15 +2173,14 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 #endif
 	) {
 #ifdef HAVE_NEDGE
-      if((*ingressPacket == false) /* LAN -> WAN */
-	 && (sender_mac != NULL)
-	 ) {
+      if(*ingressPacket == false /* LAN -> WAN */
+	 && sender_mac != NULL) {
 	Mac *cli_mac = flow->get_cli_host()->getMac();
 	Mac *srv_mac = flow->get_srv_host()->getMac();
 
 	if(src2dst_direction) { /* src -> dst */
 	  if(srv_mac && srv_mac->isNull() &&
-	     cli_mac && memcmp(cli_mac->get_mac(), sender_mac, 6)) {
+	     cli_mac && memcmp(cli_mac->get_mac(), sender_mac, 6) != 0) {
 	    srv_mac->set(sender_mac);
 
 #ifdef DEBUG
