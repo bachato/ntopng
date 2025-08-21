@@ -30,10 +30,18 @@
 	"filters" : {
 		"items" : [
 			{
-				"name" : "SRC_ASN"
+				"name": "CLIENT_NW_LATENCY_US",
+				"op": "gt",
+				"value": "0",
+				"value_type": "number",
+				"input": "fixed"
 			},
 			{
-				"name" : "DST_ASN"
+				"name": "SERVER_NW_LATENCY_US",
+				"op": "gt",
+				"value": "0",
+				"value_type": "number",
+				"input": "fixed"
 			}
 		]
 	},
