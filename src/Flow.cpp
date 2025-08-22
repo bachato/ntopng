@@ -351,7 +351,7 @@ void Flow::deferredInitialization() {
 #ifdef HAVE_NEDGE
   bool flow_blacklisted = false;
 #endif
-  
+
   if(cli_host && srv_host) {
     char country[64];
 
@@ -389,24 +389,24 @@ void Flow::deferredInitialization() {
 #ifdef HAVE_NEDGE
   if(!flow_blacklisted) {
     AddressTree *at = cli_host->getDynamicBlacklist();
-  
+
     if(at != NULL) {
       IpAddress *srv_ip = srv_host->get_ip();
-      
+
       if(at->match(srv_ip, srv_ip->isIPv4() ? 32 : 128)) {
 	/* The server host is present on the dynamic blacklist */
 	flow_blacklisted = true;
-      
+
 	if(cli_host)
 	  cli_host->inc_num_blacklisted_flows(true);
       }
     }
   }
-  
+
   if(flow_blacklisted)
     setDropVerdict(DROP_REASON_BLACKLISTED_FLOW);
 #endif
-  
+
   iface->execFlowBeginChecks(this);
 }
 
@@ -1281,7 +1281,7 @@ void Flow::processDNSPacket(const u_char *ip_packet, u_int16_t ip_len,
 	protos.dns.last_query_type = ndpiFlow->protos.dns.query_type;
 
       protos.dns.last_return_code = ndpiFlow->protos.dns.reply_code;
-      
+
       if(!ndpiFlow->protos.dns.is_query) {
 	/* this is a response... */
 	if(ntop->getPrefs()->is_dns_decoding_enabled()) {
@@ -1318,7 +1318,7 @@ void Flow::processDNSPacket(const u_char *ip_packet, u_int16_t ip_len,
 	}
 
 	if(protos.dns.last_return_code == 0 /* NOERROR */)
-	  setDNSQuery(ndpiFlow->host_server_name, (char*)addresses.c_str(), true);	
+	  setDNSQuery(ndpiFlow->host_server_name, (char*)addresses.c_str(), true);
       }
     }
 
@@ -1938,6 +1938,13 @@ void Flow::setDropVerdict(DropReason reason) {
  * needs to be updated on flow_end, it's possible to do it from here
  */
 void Flow::flow_end_stats_update() {
+  struct timeval tv;
+
+  /* Force last update */
+  tv.tv_sec = last_seen, tv.tv_usec = 0;
+  last_update_time.tv_sec = 0; /* Trick to force periodic_stats_update() below */
+  periodic_stats_update(&tv);
+
   if(isBidirectional()) {
     if(isTCP()) {
       accountBidirectionalTCPProtocolServices();
@@ -1956,24 +1963,30 @@ void Flow::flow_end_stats_update() {
   if (cli_u) cli_u->incQoEStats(qoe_type);
   if (srv_u) srv_u->incQoEStats(qoe_type);
   if (cli_as) cli_as->incQoEStats(qoe_type);
+
   if (srv_as) {
     /* In case cli and srv ASN are the same do not increase, already increased above */
     if (cli_as && (cli_as == srv_as)) { ; }
     else { srv_as->incQoEStats(qoe_type); }
   }
+
   if (cli_u) {
     cli_network_id = cli_u->get_local_network_id();
     NetworkStats *cli_network_stats = cli_u->getNetworkStats(cli_network_id);
+
     if (cli_network_stats) cli_network_stats->incQoEStats(qoe_type);
   }
+
   if (srv_u) {
     /* Same as ASN, increase only if they are different networks */
     srv_network_id = srv_u->get_local_network_id();
     if (srv_network_id != cli_network_id) {
       NetworkStats *srv_network_stats = srv_u->getNetworkStats(srv_network_id);
+
       if (srv_network_stats) srv_network_stats->incQoEStats(qoe_type);
     }
   }
+
   if (iface) iface->incQoEStats(qoe_type);
 #endif
 }
@@ -2569,10 +2582,8 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
       /* Update L2 Device stats */
 
       if(srv_mac) {
-	//#ifdef HAVE_NEDGE
         srv_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
         srv_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
-	//#endif
 
         if(ntop->getPrefs()->areMacNdpiStatsEnabled()) {
           srv_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
@@ -2583,10 +2594,8 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
       }
 
       if(cli_mac) {
-	//#ifdef HAVE_NEDGE
         cli_mac->incSentStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
         cli_mac->incRcvdStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
-	//#endif
 
         if(ntop->getPrefs()->areMacNdpiStatsEnabled()) {
           cli_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
@@ -2608,8 +2617,7 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
   } /* Closes if(cli_h && srv_h) */
 
 #ifndef HAVE_NEDGE
-  /* For nEdge check Flow::setPacketsBytes */
-  /* Update throughput */
+  /* For nEdge check Flow::setPacketsBytes updates throughput */
   if(getFlowSource() != collected_netflow_ipfix) {
     /*
       In case of NetFlow/IPFIX throughput is computed whenever a new
@@ -2639,17 +2647,16 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
   GenericHashEntry::periodic_stats_update(tv);
 
 #ifdef HAVE_NEDGE
-
   callFlowUpdate(tv->tv_sec);
 
   if (cli_host && srv_host) {
     u_int32_t cli_max_flow_size = cli_host->getMaxFlowSize();
     u_int32_t srv_max_flow_size = srv_host->getMaxFlowSize();
-    
+
     if ((cli_max_flow_size && get_bytes() > cli_max_flow_size) ||
         (srv_max_flow_size && get_bytes() > srv_max_flow_size))
       setDropVerdict(DROP_REASON_FLOW_SIZE_EXCEEDED);
-  } 
+  }
 #endif
 }
 
@@ -2960,7 +2967,7 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   Mac *cli_mac = get_cli_host() ? get_cli_host()->getMac() : NULL;
   char *asname = NULL;
   u_int32_t asn = 0;
-  
+
   if(ptree) {
     if(src_ip) src_match = src_ip->match(ptree);
     if(dst_ip) dst_match = dst_ip->match(ptree);
@@ -2989,16 +2996,16 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   getSrcAS(&asn, asname);
   lua_push_int32_table_entry(vm, "src_as", asn);
   lua_push_str_table_entry(vm, "src_as_name", asname ? asname : "");
-  
+
   getDstAS(&asn, asname);
   lua_push_int32_table_entry(vm, "dst_as", asn);
   lua_push_str_table_entry(vm, "dst_as_name", asname ? asname : "");
 
   if(srcPeerAS != 0) lua_push_int32_table_entry(vm, "src_peer_as", srcPeerAS);
   if(dstPeerAS != 0) lua_push_int32_table_entry(vm, "dst_peer_as", dstPeerAS);
-  
+
   lua_snmp_info(vm);
-    
+
   if(details_level >= details_high) {
     if(tcp_fingerprint)
       lua_push_str_table_entry(vm, "tcp_fingerprint", tcp_fingerprint);
@@ -4816,12 +4823,11 @@ void Flow::housekeep(time_t t) {
 	cli_host->incIncompleteFlows();
       break;
     }
-
     break;
 
   default:
     break;
-  }
+  } /* switch */
 
   /*
     Check (and possibly enqueue) the flow for processing by a view interface.
@@ -6084,7 +6090,7 @@ bool Flow::setDNSQuery(char *query_value, char *rsp_addresses, bool copy_memory)
       if(getDNSRetCode() == 0 /* NOERROR */)
 	processHostName(protos.dns.last_query);
 #endif
-      
+
       if(protos.dns.last_rsp_shadow) free(protos.dns.last_rsp_shadow);
       protos.dns.last_rsp_shadow = protos.dns.last_rsp;
 
@@ -7316,7 +7322,7 @@ void Flow::lua_duration_info(lua_State *vm) {
 void Flow::lua_snmp_info(lua_State *vm) {
   char str[16];
   u_int32_t device_ip = htonl(flow_device.device_ip);
-  
+
   inet_ntop(AF_INET, &(device_ip), str, INET_ADDRSTRLEN);
   lua_push_str_table_entry(vm, "device_ip", str);
   lua_push_uint64_table_entry(vm, "in_index", flow_device.in_index);
@@ -8538,7 +8544,7 @@ void Flow::swap() {
   if(last_db_dump.partial)      last_db_dump.partial->swap();
   last_db_dump.delta.swap();
   if(periodic_stats_update_partial) periodic_stats_update_partial->swap();
-  
+
   c2sFirstGoodputTime.tv_sec = 0;
 
   /*
@@ -9254,7 +9260,7 @@ void Flow::setServerName(char *value /* Allocated by caller */) {
 void Flow::getSrcAS(u_int32_t *as, char *as_name) {
   if(!srcAS) {
     Host *h = get_cli_host();
-    
+
     if(h) {
       srcAS = h->get_asn();
       srcASName = h->get_asname();
@@ -9275,7 +9281,7 @@ void Flow::getSrcAS(u_int32_t *as, char *as_name) {
 void Flow::getDstAS(u_int32_t *as, char *as_name) {
   if(!dstAS) {
     Host *h = get_srv_host();
-    
+
     if(h) {
       dstAS = h->get_asn();
       dstASName = h->get_asname();
@@ -9296,7 +9302,7 @@ void Flow::getDstAS(u_int32_t *as, char *as_name) {
 TransitAS Flow::getTransitASType() {
   u_int32_t src_asn = 0, dst_asn = 0;
   char *asname = NULL;
-  
+
   getSrcAS(&src_asn, asname);
   getDstAS(&dst_asn, asname);
 
@@ -9307,7 +9313,7 @@ TransitAS Flow::getTransitASType() {
   } else if ((src_asn == srcPeerAS) || (dst_asn == dstPeerAS)) {
     return direct_flow;
   }
-  
+
   return all_flow;
 }
 
