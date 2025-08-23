@@ -712,15 +712,13 @@ void NetworkInterface::checkDisaggregationMode() {
       else if (!strcmp(rsp, DISAGGREGATION_VLAN))
         flowHashingMode = flowhashing_vlan;
       else if (strcmp(rsp, DISAGGREGATION_NONE))
-        ntop->getTrace()->traceEvent(
-				     TRACE_ERROR, "Unknown aggregation value for interface %s [rsp: %s]",
+        ntop->getTrace()->traceEvent(TRACE_ERROR, "Unknown aggregation value for interface %s [rsp: %s]",
 				     get_type(), rsp);
     } else { /* non-ZMQ interface */
       if (!strcmp(rsp, DISAGGREGATION_VLAN))
         flowHashingMode = flowhashing_vlan;
       else if (strcmp(rsp, DISAGGREGATION_NONE))
-        ntop->getTrace()->traceEvent(
-				     TRACE_ERROR, "Unknown aggregation value for interface %s [rsp: %s]",
+        ntop->getTrace()->traceEvent(TRACE_ERROR, "Unknown aggregation value for interface %s [rsp: %s]",
 				     get_type(), rsp);
     }
   }
@@ -728,8 +726,7 @@ void NetworkInterface::checkDisaggregationMode() {
   /* Populate ignored interfaces */
   rsp[0] = '\0';
   if ((!ntop->getRedis()->get((char *)CONST_RUNTIME_PREFS_IGNORED_INTERFACES,
-                              rsp, sizeof(rsp))) &&
-      (rsp[0] != '\0')) {
+                              rsp, sizeof(rsp))) && (rsp[0] != '\0')) {
     char *token;
     char *rest = rsp;
 
@@ -819,7 +816,8 @@ bool NetworkInterface::getInterfaceBooleanPref(const char *pref_key,
   }
 
 #if 0
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Reading pref [%s][ifid: %i][rsp: %s][actual_value: %d]", pref_buf, get_id(), rsp, interface_pref ? 1 : 0);
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Reading pref [%s][ifid: %i][rsp: %s][actual_value: %d]",
+			       pref_buf, get_id(), rsp, interface_pref ? 1 : 0);
 #endif
 
   return interface_pref;
@@ -1351,14 +1349,27 @@ Flow *NetworkInterface::getFlow(int32_t if_index, Mac *src_mac, Mac *dst_mac, u_
   INTERFACE_PROFILING_SECTION_EXIT(1);
 
   if ((ret == NULL) && (unswapped_flow != NULL)) {
+    bool dont_swap_now = false;
     /*
       We have found this flow but with the wrong direction
       and we're waiting it to be swapped.
     */
 
-    ret = unswapped_flow;      /* 1 - Use the new flow */
-    ret->swap();               /* 2 - Swap flow keys   */
-    *src2dst_direction = ((ntohs(src_port) == ret->get_cli_port()) && (ntohs(dst_port) == ret->get_srv_port()));
+#ifdef HAVE_NEDGE
+    if((dst_mac == NULL) || dst_mac->isNull()) {
+      /*
+	We need to wait until the destination MAC (that will become the future source MAC)
+	will be populated by a packet in the reverse direction
+      */
+      dont_swap_now = true;
+    }
+#endif
+
+    if(dont_swap_now == false) {
+      ret = unswapped_flow;      /* 1 - Use the new flow */
+      ret->swap();               /* 2 - Swap flow keys   */
+      *src2dst_direction = ((ntohs(src_port) == ret->get_cli_port()) && (ntohs(dst_port) == ret->get_srv_port()));
+    }
   }
 
   if (ret == NULL) {
@@ -1617,8 +1628,7 @@ NetworkInterface *NetworkInterface::getDynInterface(u_int64_t criteria,
   }
 
   if (!this->registerSubInterface(sub_iface, criteria)) {
-    ntop->getTrace()->traceEvent(TRACE_WARNING,
-                                 "Failure registering sub-interface");
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Failure registering sub-interface");
     sub_iface = NULL; /* NOTE: interface deleted by registerSubInterface */
     return (NULL);
   }
@@ -1793,9 +1803,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 
     l4_proto = iph->protocol;
     l4 = ((u_int8_t *)iph + ip_len);
-    l4_len =
-      ip_tot_len -
-      ip_len; /* use len from the ip header to compute sequence numbers */
+    l4_len = ip_tot_len - ip_len; /* use len from the ip header to compute sequence numbers */
     ip = (u_int8_t *)iph;
 
     /* An ethernet frame can contain padding at the end of the packet.
@@ -13102,15 +13110,15 @@ static bool aggregate_asn_flows(GenericHashEntry *node, void *user_data,
     static_cast< std::map<AggregatedASNFlowKey, AggregatedASNFlowValue, AggregatedASNFlowKeyCompare>* >(user_data);
   AggregatedASNFlowKey ak(f);
   std::map<AggregatedASNFlowKey, AggregatedASNFlowValue, AggregatedASNFlowKeyCompare>::iterator it = flows->find(ak);
-    
+
   if(it == flows->end()) {
     AggregatedASNFlowValue v(f);
-    
+
     flows->insert(std::make_pair(ak, v));
   } else {
     it->second.update(f, it->first.equal(&ak) ? false : true);
   }
-  
+
   return (false); /* false = keep on walking */
 }
 
@@ -13118,13 +13126,13 @@ static bool aggregate_asn_flows(GenericHashEntry *node, void *user_data,
 
 bool NetworkInterface::aggregateASNModeFlows(lua_State *vm) {
   u_int32_t begin_slot = 0;
-  InMemorySQLiteDB *db = getLuaVMUserdata(vm, db);  
+  InMemorySQLiteDB *db = getLuaVMUserdata(vm, db);
   std::map<AggregatedASNFlowKey, AggregatedASNFlowValue, AggregatedASNFlowKeyCompare> flows;
   std::map<AggregatedASNFlowKey, AggregatedASNFlowValue, AggregatedASNFlowKeyCompare>::iterator it;
-  
+
   if(db == NULL) {
     db = new (std::nothrow)InMemorySQLiteDB(getLuaVMUserdata(vm, iface));
-    
+
     if(db == NULL)
       return(false);
     else {
@@ -13132,14 +13140,14 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State *vm) {
       db->execFile("db_schema_as_sqlite.sql");
     }
   }
-  
+
   walker(&begin_slot, true /* walk_all */, walker_flows,
 	 aggregate_asn_flows, &flows);
 
   for(it = flows.begin(); it != flows.end(); it++) {
     const AggregatedASNFlowKey   *k = &(it->first);
     const AggregatedASNFlowValue *v = &(it->second);
-    
+
     std::string sql =
       "INSERT INTO hourly_asn VALUES (" + std::to_string(get_id())
       + "," + std::to_string(k->ip_protocol_version)
@@ -13164,6 +13172,6 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State *vm) {
   }
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Aggregated %u flows", flows.size());
-  
+
   return(true);
 }
