@@ -728,7 +728,7 @@ bool PcapInterface::processNextPacket(pcap_t *pd, int32_t if_index, int datalink
       incStats(true /* ingressPacket */, hdr->ts.tv_sec,
 	       0, NDPI_PROTOCOL_UNKNOWN,
 	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED,
-	       0, hdr->len, 1);
+	       0, hdr->len, 1, NULL, NULL);
     }
   } else if (rc < 0) {
     if (read_from_pcap_dump()) {

@@ -778,20 +778,20 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     if (zflow->in_pkts)
       incStats(true /* Ingress */, now, eth_type, flow->getStatsProtocol(),
                flow->get_protocol_category(), zflow->l4_proto, in_bytes,
-               in_pkts);
+               in_pkts, srcMac, dstMac);
     if (zflow->out_pkts)
       incStats(false /* Egress */, now, eth_type, flow->getStatsProtocol(),
                flow->get_protocol_category(), zflow->l4_proto, out_bytes,
-               out_pkts);
+               out_pkts, srcMac, dstMac);
   } else { /* TX */
     if (zflow->out_bytes)
       incStats(true /* Ingress */, now, eth_type, flow->getStatsProtocol(),
                flow->get_protocol_category(), zflow->l4_proto, out_bytes,
-               out_pkts);
+               out_pkts, srcMac, dstMac);
     if (zflow->in_pkts)
       incStats(false /* Egress */, now, eth_type, flow->getStatsProtocol(),
                flow->get_protocol_category(), zflow->l4_proto, in_bytes,
-               in_pkts);
+               in_pkts, srcMac, dstMac);
   }
 
 #ifdef NTOPNG_PRO
