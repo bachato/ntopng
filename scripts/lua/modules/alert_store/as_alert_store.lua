@@ -41,12 +41,8 @@ end
 
 function as_alert_store:_build_insert_query(alert, write_table, alert_status, extra_columns, extra_values)
 
-tprint("as store")
-tprint(alert.entity_val)
-tprint(alert.asn)
-
    local name = alert.entity_val
-   local alias = name -- TODO getASAlias(name)
+   local alias = ""
 
    local insert_stmt = string.format("INSERT INTO %s "..
       "(%salert_id, alert_status, require_attention, interface_id, tstamp, tstamp_end, severity, score, asn, name, alias, granularity, json) "..
@@ -62,7 +58,7 @@ tprint(alert.asn)
       alert.tstamp_end,
       map_score_to_severity(alert.score),
       alert.score,
-      alert.asn, -- TODO export from alerts
+      alert.asn,
       self:_escape(name),
       self:_escape(alias),
       alert.granularity,
