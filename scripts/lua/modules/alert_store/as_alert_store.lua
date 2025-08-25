@@ -41,7 +41,8 @@ end
 
 function as_alert_store:_build_insert_query(alert, write_table, alert_status, extra_columns, extra_values)
 
-   local name = alert.entity_val
+   local asn = alert.entity_val
+   local name = asn
    local alias = ""
 
    local insert_stmt = string.format("INSERT INTO %s "..
@@ -58,7 +59,7 @@ function as_alert_store:_build_insert_query(alert, write_table, alert_status, ex
       alert.tstamp_end,
       map_score_to_severity(alert.score),
       alert.score,
-      alert.asn,
+      asn,
       self:_escape(name),
       self:_escape(alias),
       alert.granularity,
