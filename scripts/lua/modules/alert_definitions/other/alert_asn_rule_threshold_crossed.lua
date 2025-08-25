@@ -22,8 +22,7 @@ alert_asn_rule_threshold_crossed.meta = {
   i18n_title = "show_alerts.host_pool_rule_threshold_cross",
   icon = "fas fa-fw fa-exclamation-triangle",
   entities = {
-     alert_entities.system,
-     alert_entities.interface,
+     alert_entities.as,
   },
 }
 

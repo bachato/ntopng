@@ -809,6 +809,11 @@ export class DataTableRenders {
         return DataTableRenders.filterize('network_name', obj, obj, obj, obj, null, false);
     }
 
+    static formatAS(obj, type, row, zero_is_null) {
+        if (type !== "display") return obj;
+        return DataTableRenders.filterize('asn', obj, obj, obj, obj, null, false);
+    }
+
     static formatProbeIP(obj, type, row, zero_is_null) {
         if (type !== "display") return obj;
 

@@ -498,6 +498,56 @@ CREATE TABLE `engaged_network_alerts` (
 
 @
 
+CREATE TABLE IF NOT EXISTS `as_alerts` (
+`rowid` UUID,
+`asn` UInt32,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`name` String,
+`alias` String,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp);
+
+@
+
+DROP TABLE IF EXISTS `engaged_as_alerts`;
+@
+CREATE TABLE `engaged_as_alerts` (
+`rowid` UUID,
+`asn` UInt32,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`name` String,
+`alias` String,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = Memory;
+
+@
+
 CREATE TABLE IF NOT EXISTS `interface_alerts` (
 `rowid` UUID,
 `ifid` UInt8,
@@ -828,6 +878,15 @@ SELECT * FROM `engaged_network_alerts`
 
 @
 
+DROP VIEW IF EXISTS `as_alerts_view`;
+@
+CREATE VIEW IF NOT EXISTS `as_alerts_view` AS
+SELECT * FROM `as_alerts`
+UNION ALL
+SELECT * FROM `engaged_as_alerts`
+
+@
+
 DROP VIEW IF EXISTS `interface_alerts_view`;
 @
 CREATE VIEW IF NOT EXISTS `interface_alerts_view` AS
@@ -1000,6 +1059,8 @@ UNION ALL
 SELECT 7 entity_id, interface_id, alert_id, alert_status, require_attention, tstamp, tstamp_end, severity, score, alert_category FROM `user_alerts`
 UNION ALL
 SELECT 9 entity_id, interface_id, alert_id, alert_status, require_attention, tstamp, tstamp_end, severity, score, alert_category FROM `system_alerts`
+UNION ALL
+SELECT 10 entity_id, interface_id, alert_id, alert_status, require_attention, tstamp, tstamp_end, severity, score, alert_category FROM `as_alerts`
 ;
 
 @

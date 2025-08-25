@@ -239,14 +239,13 @@ typedef enum {
   alert_entity_snmp_device = 3,
   alert_entity_flow = 4,
   alert_entity_mac = 5,
-  alert_entity_host_pool = 6,
+  //alert_entity_host_pool = 6,
   alert_entity_user = 7,
   alert_entity_am_host = 8,
   alert_entity_system = 9,
-  alert_entity_test = 10,
-  alert_entity_asn = 11,
-  alert_entity_l7 = 12,
-  alert_entity_mitre_table_info = 13,
+  alert_entity_as = 10,
+  //alert_entity_l7 = 12,
+  //alert_entity_mitre_table_info = 13,
 
   /* Add new entities above ^ and do not exceed alert_entity_other */
   alert_entity_other = 15,

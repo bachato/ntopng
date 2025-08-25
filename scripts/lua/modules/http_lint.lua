@@ -2045,7 +2045,7 @@ local known_parameters = {
     ["out_of_order"] = validateListOfTypeInline(validateFilters(validateNumber)),
     ["lost"] = validateListOfTypeInline(validateFilters(validateNumber)),
 
-    ["asn"] = validateNumber, -- An ASN number
+    ["asn"] = validateFilters(validateNumber), -- An ASN number
     ["country_id"] = validateNumber, -- A Country Code
     ["module"] = validateTopModule, -- A top script module
     ["step"] = validateNumber, -- A step value

@@ -1064,6 +1064,14 @@ function tag_utils.eval_op(v1, op, v2)
         end
     end
 
+    -- Convert numbers
+    if type(v1) == 'number' and type(v2) ~= 'number' then
+        v2 = tonumber(v2)
+    end
+    if type(v2) == 'number' and type(v1) ~= 'number' then
+        v1 = tonumber(v1)
+    end
+
     if not v1 or not v2 then
         return default_verdict
     end

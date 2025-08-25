@@ -693,7 +693,14 @@ function alert_store:eval_alert_cond(alert, cond)
         end
     end
 
-    return tag_utils.eval_op(alert[cond.field], cond.op, cond.value)
+    local field_value = alert[cond.field]
+
+    if field_value == nil then
+       local alert_json = json.decode(alert["json"]) or {}
+       field_value = alert_json[cond.field]
+    end
+
+    return tag_utils.eval_op(field_value, cond.op, cond.value)
 end
 
 -- ##############################################
@@ -851,6 +858,7 @@ end
 -- @param value_type The value type (e.g. 'number')
 -- @return True if set is successful, false otherwise
 function alert_store:add_filter_condition_list(field, values, values_type, value_to_use)
+
     if not values or isEmptyString(values) then
         return false
     end

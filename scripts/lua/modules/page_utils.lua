@@ -589,7 +589,7 @@ page_utils.menu_entries = {
     alert_exclusions_domains = {
         key = "alert_exclusions",
         subkey = "domains",
-        i18n_title = alert_entities.domain.i18n_label,
+        i18n_title = "domain",
         section = "alert_exclusions",
         help_link = "https://www.ntop.org/guides/ntopng/user_interface/shared/alerts/others/available_alerts.html"
     },

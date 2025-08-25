@@ -307,6 +307,7 @@ end
 -- ! @note false is also returned if an existing alert is found and refreshed
 function alerts_api.trigger(entity_info, type_info, when, cur_alerts)
     local json = require("dkjson")
+
     if (not areAlertsEnabled()) then
         return (false)
     end

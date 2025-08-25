@@ -83,6 +83,14 @@ local pages = {{
     }),
     hidden = is_system_interface,
 }, {
+    active = page == "as",
+    page_name = "as",
+    label = i18n(alert_entities.as.i18n_label),
+    url = getPageUrl(base_url, {
+        page = "as"
+    }),
+    hidden = is_system_interface,
+}, {
     active = page == "snmp_device",
     page_name = "snmp_device",
     label = i18n(alert_entities.snmp_device.i18n_label),
