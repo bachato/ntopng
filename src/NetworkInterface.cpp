@@ -1677,8 +1677,24 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 #ifdef NTOPNG_PRO
   u_int8_t tcp_window_scale = 0;
 #endif
+  bool create_flow_if_missing = true;
 
   *hostFlow = NULL;
+
+#ifdef HAVE_NEDGE
+  if((iph == NULL) && (ip6 == NULL)) {
+    /*
+      Ignore any non IP traffic (should not be
+      necessary but just in case...)
+    */
+    incStats(*ingressPacket, when->tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
+	     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, srcMac, dstMac);
+    return (pass_verdict);
+  }
+
+  if(*ingressPacket == true /* WAN -> LAN */)
+    create_flow_if_missing = false;
+#endif
 
   if (!isSubInterface()) {
     bool processed = false;
@@ -1713,7 +1729,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 
     if (processed && !showDynamicInterfaceTraffic()) {
       incStats(*ingressPacket, when->tv_sec, ETHERTYPE_IP, NDPI_PROTOCOL_UNKNOWN,
-               NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+               NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, srcMac, dstMac);
 
       return (pass_verdict);
     }
@@ -1721,7 +1737,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 
   if (eth == NULL) {
     incStats(*ingressPacket, when->tv_sec, ETHERTYPE_IP, NDPI_PROTOCOL_UNKNOWN,
-             NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+             NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, srcMac, dstMac);
     return (pass_verdict);
   }
 
@@ -1761,13 +1777,22 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 #endif
   }
 
+#ifdef HAVE_NEDGE
+  if((!srcMac) || (!dstMac)) {
+    /* It shouldn't happen that MAC addresses are NULL */
+    incStats(*ingressPacket, when->tv_sec, ETHERTYPE_IP, NDPI_PROTOCOL_UNKNOWN,
+	     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, srcMac, dstMac);
+    return (pass_verdict);
+  }
+#endif
+    
   if (iph != NULL) {
     u_int16_t ip_len, ip_tot_len;
 
     /* IPv4 */
     if ((trusted_ip_len < 20) || ((ip_len = iph->ihl * 4) == 0)) {
       incStats(*ingressPacket, when->tv_sec, ETHERTYPE_IP, NDPI_PROTOCOL_UNKNOWN,
-               NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+               NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, srcMac, dstMac);
       return (pass_verdict);
     }
 
@@ -1777,7 +1802,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
     if(ip_tot_len > (h->caplen - ip_offset)) {
       /* Invalid lenght */
       incStats(*ingressPacket, when->tv_sec, ETHERTYPE_IP, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, srcMac, dstMac);
       return (pass_verdict);
     }
 
@@ -1795,7 +1820,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 #ifdef IMPLEMENT_SMART_FRAGMENTS
       if (fragment_offset) {
 	incStats(*ingressPacket, when->tv_sec, ETHERTYPE_IP, NDPI_PROTOCOL_UNKNOWN,
-		 NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+		 NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, srcMac, dstMac);
 	return (pass_verdict);
       }
 #endif
@@ -1822,7 +1847,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
     if (trusted_ip_len < sizeof(const struct ndpi_ipv6hdr)) {
       incStats(*ingressPacket, when->tv_sec, ETHERTYPE_IPV6,
                NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
-               len_on_wire, 1);
+               len_on_wire, 1, srcMac, dstMac);
       return (pass_verdict);
     }
 
@@ -1838,7 +1863,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
       if (trusted_ip_len < ipv6_shift) {
         incStats(*ingressPacket, when->tv_sec, ETHERTYPE_IPV6,
                  NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
-                 len_on_wire, 1);
+                 len_on_wire, 1, srcMac, dstMac);
         return (pass_verdict);
       }
     }
@@ -1856,7 +1881,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
     /* Invalid lenght */
     incStats(*ingressPacket, when->tv_sec, ETHERTYPE_IPV6,
 	     NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
-	     len_on_wire, 1);
+	     len_on_wire, 1, srcMac, dstMac);
     return (pass_verdict);
   }
 
@@ -1918,7 +1943,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 				   trusted_l4_packet_len);
       incStats(*ingressPacket, when->tv_sec, iph ? ETHERTYPE_IP : ETHERTYPE_IPV6,
                NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
-               len_on_wire, 1);
+               len_on_wire, 1, srcMac, dstMac);
       return (pass_verdict);
     }
   } else if (l4_proto == IPPROTO_UDP) {
@@ -1941,7 +1966,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 				   trusted_l4_packet_len);
       incStats(*ingressPacket, when->tv_sec, iph ? ETHERTYPE_IP : ETHERTYPE_IPV6,
                NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
-               len_on_wire, 1);
+               len_on_wire, 1, srcMac, dstMac);
       return (pass_verdict);
     }
   } else if (l4_proto == IPPROTO_SCTP) {
@@ -1958,7 +1983,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 				   trusted_l4_packet_len);
       incStats(*ingressPacket, when->tv_sec, iph ? ETHERTYPE_IP : ETHERTYPE_IPV6,
                NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
-               len_on_wire, 1);
+               len_on_wire, 1, srcMac, dstMac);
       return (pass_verdict);
     }
   } else if (l4_proto == IPPROTO_ICMP) {
@@ -2023,18 +2048,38 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 		 srcMac, dstMac, vlan_id, 0 /* observationPointId */, private_flow_id, 0,
 		 0, 0, l4_proto == IPPROTO_ICMP ? &icmp_info : NULL, &src_ip, &dst_ip,
 		 src_port, dst_port, l4_proto, &src2dst_direction, last_pkt_rcvd,
-		 last_pkt_rcvd, len_on_wire, &new_flow, true, eth->h_source,
+		 last_pkt_rcvd, len_on_wire, &new_flow,
+		 create_flow_if_missing, eth->h_source,
 		 eth->h_dest /* Eth lvl, used just in view interfaces to add MAC */);
   INTERFACE_PROFILING_SECTION_EXIT(0);
 
   if (flow == NULL) {
+#ifdef HAVE_NEDGE
+#if 0
+    ntop->getTrace()->traceEvent(TRACE_WARNING,
+				 "[BAD FLOW DIRECTON] %s %u->%u",
+				 *ingressPacket ? "IN [WAN->LAN]" : "OUT [LAN->WAN]",
+				 ntohs(src_port), ntohs(dst_port));
+#endif
+#endif
+
     incStats(*ingressPacket, when->tv_sec, iph ? ETHERTYPE_IP : ETHERTYPE_IPV6,
              NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED,
-             l4_proto, len_on_wire, 1);
+             l4_proto, len_on_wire, 1, srcMac, dstMac);
     return (pass_verdict);
   } else {
 #ifdef HAVE_NEDGE
     if (new_flow) flow->setIngress2EgressDirection(*ingressPacket);
+#endif
+
+#ifdef HAVE_NEDGE
+#if 0
+    ntop->getTrace()->traceEvent(TRACE_WARNING,
+				 "[OK%s FLOW DIRECTON] %s %u->%u",
+				 new_flow ? " NEW" : "",
+				 *ingressPacket ? "IN [WAN->LAN]" : "OUT [LAN->WAN]",
+				 ntohs(src_port), ntohs(dst_port));
+#endif
 #endif
 
     if (flow->is_swap_requested()
@@ -2447,7 +2492,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 
   incStats(*ingressPacket, when->tv_sec, iph ? ETHERTYPE_IP : ETHERTYPE_IPV6,
            flow->getStatsProtocol(), flow->get_protocol_category(), l4_proto,
-           len_on_wire, 1);
+           len_on_wire, 1, srcMac, dstMac);
 
   /* For large flows, a periodic_stats_update is performed straight after
      processing a packet. Conditions checked to determine 'a large flow' are
@@ -2578,7 +2623,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 
   if (h->len == 0) {
     incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, 0, 1);
+	     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, 0, 1, NULL /* srcMac */, NULL /* dstMac */);
     goto dissect_packet_end;
   } else if (h->len > ifMTU) {
     if (!mtuWarningShown) {
@@ -2618,7 +2663,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
   if (datalink_type == DLT_NULL) {
     if (h->caplen < sizeof(u_int32_t)) {
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end;
     }
 
@@ -2626,7 +2671,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
       memcpy(&null_type, &packet[eth_offset], sizeof(u_int32_t));
     else {
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end;
     }
 
@@ -2641,7 +2686,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
       break;
     default:
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end; /* Any other non IP protocol */
     }
 
@@ -2651,7 +2696,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
   } else if (datalink_type == DLT_EN10MB) {
     if (h->caplen < sizeof(ndpi_ethhdr)) {
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end;
     }
 
@@ -2661,7 +2706,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
   } else if (datalink_type == 113 /* Linux Cooked Capture */) {
     if (h->caplen < 16) {
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end;
     }
 
@@ -2674,7 +2719,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
              || datalink_type == 14 /* raw IP DLT_RAW on OpenBSD captures */) {
     if (h->caplen < sizeof(u_int32_t)) {
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end;
     }
 
@@ -2687,7 +2732,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
       break;
     default:
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end; /* Unknown IP protocol version */
     }
 
@@ -2709,7 +2754,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
     ip_offset = 0;
   } else {
     incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-             NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+             NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
     goto dissect_packet_end;
   }
 
@@ -2743,7 +2788,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	} else {
 	  incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IP,
 		   NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
-		   len_on_wire, 1);
+		   len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
 	  goto dissect_packet_end;
 	}
       }
@@ -2785,7 +2830,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
     default:
       incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IP,
 	       NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
-	       len_on_wire, 1);
+	       len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end;
     }
     goto decode_packet_eth;
@@ -2802,7 +2847,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	 || (iph->version != 4) /* This is not IPv4 */) {
 	incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IP,
 		 NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
-		 len_on_wire, 1);
+		 len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
 	goto dissect_packet_end;
       } else
 	frag_off = ntohs(iph->frag_off);
@@ -2879,7 +2924,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	  incStats(ingressPacket, h->ts.tv_sec, 0,
 		   NDPI_PROTOCOL_UNKNOWN,
 		   NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire,
-		   1);
+		   1, NULL /* srcMac */, NULL /* dstMac */);
 	  goto dissect_packet_end;
         }
 
@@ -2912,7 +2957,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	      /* FIX - Add IPv6 support */
 	      incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IPV6,
 		       NDPI_PROTOCOL_UNKNOWN,
-		       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+		       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
 	      goto dissect_packet_end;
 	    }
 	  }
@@ -2957,13 +3002,13 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	    } else {
 	      incStats(ingressPacket, h->ts.tv_sec, 0,
 		       NDPI_PROTOCOL_UNKNOWN,
-		       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+		       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
 	      goto dissect_packet_end;
 	    }
 	  } else {
 	    incStats(ingressPacket, h->ts.tv_sec, 0,
 		     NDPI_PROTOCOL_UNKNOWN,
-		     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+		     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
 	    goto dissect_packet_end;
 	  }
 	} else if ((sport == TZSP_PORT) || (dport == TZSP_PORT)) {
@@ -2999,7 +3044,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	      if (offset >= h->caplen) {
 		incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IPV6,
 			 NDPI_PROTOCOL_UNKNOWN,
-			 NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+			 NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
 		goto dissect_packet_end;
 	      } else {
 		eth_offset = offset;
@@ -3033,7 +3078,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 
 	  if (ip_offset >= h->len) {
 	    incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-		     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+		     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
 	    goto dissect_packet_end;
 	  }
 	  eth_type = ntohs(*(u_int16_t *)&packet[ip_offset - 2]);
@@ -3048,7 +3093,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	    break;
 	  default:
 	    incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-		     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+		     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
 	    goto dissect_packet_end;
 	  }
 	}
@@ -3060,7 +3105,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 
 	if((ip_len == 0) || (ip_offset > h->caplen)) {
 	  incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-		   NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+		   NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
 	  goto dissect_packet_end;
 	} else
 	  goto decode_packet_eth;
@@ -3113,7 +3158,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	/* This is not IPv6 */
 	incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IPV6,
 		 NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
-		 len_on_wire, 1);
+		 len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
 	goto dissect_packet_end;
       } else {
 	u_int ipv6_shift = sizeof(const struct ndpi_ipv6hdr);
@@ -3177,7 +3222,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	  if ((ip_offset + ipv6_shift + sizeof(struct ndpi_udphdr)) > h->caplen) {
 	    incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IPV6,
 		     NDPI_PROTOCOL_UNKNOWN,
-		     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+		     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
 	    goto dissect_packet_end;
 	  }
 
@@ -3207,7 +3252,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 
 	      if (ip_offset >= h->caplen) {
 		incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-			 NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+			 NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
 		goto dissect_packet_end;
 	      }
 
@@ -3225,7 +3270,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 
 	      default:
 		incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-			 NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+			 NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
 		goto dissect_packet_end;
 	      }
 	    }
@@ -3269,7 +3314,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 
     if (ethernet == NULL) {
       incStats(ingressPacket, h->ts.tv_sec, eth_type, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end;
     }
 
@@ -3314,7 +3359,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
     }
 
     incStats(ingressPacket, h->ts.tv_sec, eth_type, NDPI_PROTOCOL_UNKNOWN,
-	     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);
+	     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
     break;
   }
 
@@ -13175,3 +13220,31 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State *vm) {
 
   return(true);
 }
+
+/* **************************************************** */
+
+void NetworkInterface::incStats(bool ingressPacket, time_t when, u_int16_t eth_proto,
+				u_int16_t ndpi_proto,
+				ndpi_protocol_category_t ndpi_category, u_int8_t l4proto,
+				u_int32_t pkt_len, u_int32_t num_pkts,
+				Mac *src_mac, Mac *dst_mac) {
+  /* NOTE: nEdge does the incs in NetfilterInterface::incStatsConntrack, keep it in sync! */
+#ifndef HAVE_NEDGE
+  incEthStats(ingressPacket, eth_proto, num_pkts, pkt_len, getPacketOverhead());
+  
+  // incnDPIStats(when, ndpi_proto, ndpi_category, pkt_len, num_pkts);
+  
+  pktStats.incStats(1, pkt_len);
+  l4Stats.incStats(when, l4proto, ingressPacket ? num_pkts : 0,
+		   ingressPacket ? pkt_len : 0, !ingressPacket ? num_pkts : 0,
+		   !ingressPacket ? pkt_len : 0);
+#endif
+  
+#ifdef NTOPNG_PRO
+  /* Added DHCP storm detection */
+  if (ndpi_proto == NDPI_PROTOCOL_DHCP) checkDHCPStorm(when, num_pkts);
+#endif
+  
+  if(src_mac) src_mac->incSentStats(when, 1, pkt_len);
+  if(dst_mac) dst_mac->incRcvdStats(when, 1, pkt_len);      
+};
