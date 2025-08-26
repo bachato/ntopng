@@ -289,6 +289,13 @@ typedef struct {
 typedef struct {
   u_int32_t last_seen;
   u_int32_t last_msg_id;
+
+  /* See ZMQ_DROPS_V2 */
+  u_int32_t base_msg_id;
+  u_int64_t msg_rcvd_since_rollback;
+  u_int64_t msg_drops_since_rollback;
+  u_int64_t committed_msg_drops_since_rollback;
+
 } zmq_probe;
 
 typedef u_int8_t dump_mac_t[DUMP_MAC_SIZE];

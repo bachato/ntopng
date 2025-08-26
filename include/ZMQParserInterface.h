@@ -87,11 +87,12 @@ class ZMQParserInterface : public ParserInterface {
 
  protected:
   struct {
-    u_int32_t num_flows,   /* flows processed */
-        num_dropped_flows, /* flows unhandles (received but no room in the flow hash) */
-        num_events, num_counters, num_hello, num_listening_ports, num_templates,
-        num_options, num_network_events, num_snmp_interfaces, zmq_msg_rcvd,
-        zmq_msg_drops;
+    u_int64_t zmq_msg_rcvd,
+        zmq_msg_drops,
+        num_flows,   /* flows processed */
+        num_dropped_flows; /* flows unhandles (received but no room in the flow hash) */
+    u_int32_t num_events, num_counters, num_hello, num_listening_ports, num_templates,
+        num_options, num_network_events, num_snmp_interfaces;
   } recvStats, recvStatsCheckpoint;
   inline void updateFlowMaxIdle() {
     returned_flow_max_idle = max(remote_idle_timeout, flow_max_idle);

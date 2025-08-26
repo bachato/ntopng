@@ -21,10 +21,11 @@
 
 #include "ntop_includes.h"
 
-//#define DEBUG_ZMQ_MSGID
-
 #ifdef HAVE_ZMQ
 #ifndef HAVE_NEDGE
+
+//#define ZMQ_DROPS_V2
+//#define DEBUG_ZMQ_MSGID
 
 /* **************************************************** */
 
@@ -318,6 +319,9 @@ void ZMQCollectorInterface::collect_flows() {
         zmq_probe *probe = NULL;
 	bool tlv_encoding = false;
 	bool compressed = false;
+#ifdef ZMQ_DROPS_V2
+        bool rollback_detected = false;
+#endif
 
         size = zmq_recv(items[subscriber_id].socket, &h0, sizeof(h0), ZMQ_DONTWAIT);
 
@@ -364,29 +368,47 @@ void ZMQCollectorInterface::collect_flows() {
           }
         }
 
-#if 0
-        ntop->getTrace()->traceEvent(TRACE_NORMAL, "[size: %u][source_id: %u][topic: %s]",
-          size, source_id, h->url);
-#endif
+        current_msg_id = msg_id;
+
+        //ntop->getTrace()->traceEvent(TRACE_NORMAL, "[size: %u][source_id: %u][topic: %s]",
+        //  size, source_id, h->url);
 
         if (active_probes.find(source_id) != active_probes.end()) {
           /* Found - read last message ID for the current source ID */
 
           probe = active_probes[source_id];
 
-#if 0
-	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "[subscriber_id: %u][source_id: %u]"
-				       "[msg_id: %u][last_msg_id: %u][lost: %i]",
-				       subscriber_id, source_id, msg_id, probe->last_msg_id, msg_id - probe->last_msg_id - 1);
-#endif
+	  //ntop->getTrace()->traceEvent(TRACE_NORMAL, "[subscriber_id: %u][source_id: %u]"
+	  //			       "[msg_id: %u][last_msg_id: %u][lost: %i]",
+	  //			       subscriber_id, source_id, msg_id, probe->last_msg_id, msg_id - probe->last_msg_id - 1);
 
           if (msg_id == (probe->last_msg_id + 1)) {
             /* No drop */
           } else {
-#if 0
-            ntop->getTrace()->traceEvent(TRACE_NORMAL, "DROP [msg_id: %u][last_msg_id: %u]",
-                                         msg_id, probe->last_msg_id);
+
+#ifdef ZMQ_DROPS_V2
+            if (msg_id < probe->last_msg_id) {
+
+              if ((probe->last_msg_id - msg_id) > 100) { /* Likely a msg_id wrap or application restart */
+                /* Start over (just reset active_probes) */
+                rollback_detected = true;
+#ifdef DEBUG_ZMQ_MSGID
+                ntop->getTrace()->traceEvent(TRACE_NORMAL,
+					     "ROLLBACK [%s][subscriber_id: %u][source_id: %u][msg_id: %u][last: %u][tot msgs/drops: %u/%u]",
+					     ifname, subscriber_id, source_id, msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
+					     recvStats.zmq_msg_drops);
 #endif
+              } else { /* Likely an out-of-order */
+#ifdef DEBUG_ZMQ_MSGID
+                ntop->getTrace()->traceEvent(TRACE_NORMAL,
+					     "OUT-OF-ORDER [%s][subscriber_id: %u][source_id: %u][msg_id: %u][last: %u][tot msgs/drops: %u/%u]",
+					     ifname, subscriber_id, source_id, msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
+					     recvStats.zmq_msg_drops);
+#endif
+              }
+            }
+
+#else /* ZMQ_DROPS_V1 */
 
             if (msg_id < probe->last_msg_id) {
               /* Start over (just reset active_probes) */
@@ -411,10 +433,10 @@ void ZMQCollectorInterface::collect_flows() {
 #endif
               }
             }
+
+#endif
           }
         }
-
-        current_msg_id = msg_id;
 
         if (recvStats.zmq_msg_drops > 0) {
           /*
@@ -444,6 +466,7 @@ void ZMQCollectorInterface::collect_flows() {
           u_int uncompressed_len;
 
           recvStats.zmq_msg_rcvd++;
+
           zmq_payload[size] = '\0';
 
 	  if(publisher_version != ZMQ_MSG_VERSION) {
@@ -512,9 +535,15 @@ void ZMQCollectorInterface::collect_flows() {
 
           /* Allocate probe info if it's the first time we see it */
           if (probe == NULL) {
+
+            //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Allocating new probe/source [source_id: %u]", source_id);
+
             probe = (zmq_probe *) calloc(1, sizeof(zmq_probe));
 
             if (probe != NULL) {
+#ifdef ZMQ_DROPS_V2
+              probe->base_msg_id = current_msg_id;
+#endif
               active_probes[source_id] = probe;
               incNumActiveProbes();
             }
@@ -522,6 +551,33 @@ void ZMQCollectorInterface::collect_flows() {
 
           /* Store last message ID for the current source ID */
           if (probe != NULL) {
+#ifdef ZMQ_DROPS_V2
+            if (rollback_detected) {
+              /* Reset counters */
+              probe->base_msg_id = current_msg_id;
+              probe->msg_rcvd_since_rollback = 0;
+              probe->msg_drops_since_rollback = 0;
+              probe->committed_msg_drops_since_rollback = 0;
+            }
+
+            if (current_msg_id < probe->base_msg_id) /* out-of-order? update base msg_id */
+              probe->base_msg_id = current_msg_id;
+
+            /* Update counters and check for drops */
+            probe->msg_rcvd_since_rollback++;
+            probe->msg_drops_since_rollback = (current_msg_id - probe->base_msg_id + 1) - probe->msg_rcvd_since_rollback;
+            if (probe->msg_drops_since_rollback > probe->committed_msg_drops_since_rollback) {
+              int diff = probe->msg_drops_since_rollback - probe->committed_msg_drops_since_rollback;
+              recvStats.zmq_msg_drops += diff;
+              probe->committed_msg_drops_since_rollback = probe->msg_drops_since_rollback;
+#ifdef DEBUG_ZMQ_MSGID
+              ntop->getTrace()->traceEvent(TRACE_NORMAL,
+					   "DROP [%s][subscriber_id: %u][source_id: %u][msg_id: %u][base_msg_id: %u][last: %u][tot msgs/drops: %u/%u][drops: +%u]",
+					   ifname, subscriber_id, source_id, current_msg_id, probe->base_msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
+					   recvStats.zmq_msg_drops, diff);
+#endif
+            }
+#endif
             probe->last_seen = now;
             probe->last_msg_id = current_msg_id;
           }
@@ -664,8 +720,7 @@ void ZMQCollectorInterface::lua(lua_State *vm, bool fullStats) {
 			      recvStats.num_counters - recvStatsCheckpoint.num_counters);
   lua_push_uint64_table_entry(vm, "zmq_msg_rcvd",
 			      recvStats.zmq_msg_rcvd - recvStatsCheckpoint.zmq_msg_rcvd);
-  lua_push_uint64_table_entry(vm, "zmq_msg_drops",
-			      recvStats.zmq_msg_drops - recvStatsCheckpoint.zmq_msg_drops);
+  lua_push_uint64_table_entry(vm, "zmq_msg_drops", recvStats.zmq_msg_drops - recvStatsCheckpoint.zmq_msg_drops);
   lua_pushstring(vm, "zmqRecvStats_since_reset");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
