@@ -45,7 +45,7 @@ class AggregatedFlowsStats {
 
  public:
   AggregatedFlowsStats(const IpAddress* c, const IpAddress* s, u_int8_t _l4_proto,
-             u_int64_t bytes_sent, u_int64_t bytes_rcvd, u_int32_t score);
+		       u_int64_t bytes_sent, u_int64_t bytes_rcvd, u_int32_t score);
 
   ~AggregatedFlowsStats();
 

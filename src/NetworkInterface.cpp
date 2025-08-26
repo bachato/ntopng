@@ -1692,8 +1692,10 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
     return (pass_verdict);
   }
 
+#if 0
   if(*ingressPacket == true /* WAN -> LAN */)
     create_flow_if_missing = false;
+#endif
 #endif
 
   if (!isSubInterface()) {
@@ -1745,7 +1747,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
                        true /* Inline call */))) {
     /* NOTE: in nEdge, stats are updated into Flow::update_hosts_stats */
 #ifndef HAVE_NEDGE
-    srcMac->incSentStats(getTimeLastPktRcvd(), 1, len_on_wire);
+    // srcMac->incSentStats(getTimeLastPktRcvd(), 1, len_on_wire);
 #endif
     srcMac->setSeenIface(bridge_iface_idx);
 
@@ -1773,7 +1775,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
                        true /* Inline call */))) {
     /* NOTE: in nEdge, stats are updated into Flow::update_hosts_stats */
 #ifndef HAVE_NEDGE
-    dstMac->incRcvdStats(getTimeLastPktRcvd(), 1, len_on_wire);
+    // dstMac->incRcvdStats(getTimeLastPktRcvd(), 1, len_on_wire);
 #endif
   }
 
@@ -2492,7 +2494,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 
   incStats(*ingressPacket, when->tv_sec, iph ? ETHERTYPE_IP : ETHERTYPE_IPV6,
            flow->getStatsProtocol(), flow->get_protocol_category(), l4_proto,
-           len_on_wire, 1, srcMac, dstMac);
+           len_on_wire, 1, NULL, NULL);
 
   /* For large flows, a periodic_stats_update is performed straight after
      processing a packet. Conditions checked to determine 'a large flow' are

@@ -2588,8 +2588,11 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
       /* Update L2 Device stats */
 
       if(srv_mac) {
-        srv_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
-        srv_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
+        if(diff_rcvd_packets)
+	  srv_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
+
+        if(diff_sent_packets)
+	  srv_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
 
         if(ntop->getPrefs()->areMacNdpiStatsEnabled()) {
           srv_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),

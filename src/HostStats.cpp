@@ -115,10 +115,9 @@ void HostStats::updateStats(const struct timeval* tv) {
     if (score_cli.addObservation(host->getScoreAsClient())) {
       char buf[64];
 
-      ntop->getTrace()->traceEvent(
-          TRACE_INFO, "[ANOMALY] %s [%s][client score] [value: %u]",
-          host->get_ip()->print(buf, sizeof(buf)),
-          host->getInterface()->get_name(), host->getScoreAsClient());
+      ntop->getTrace()->traceEvent(TRACE_INFO, "[ANOMALY] %s [%s][client score] [value: %u]",
+				   host->get_ip()->print(buf, sizeof(buf)),
+				   host->getInterface()->get_name(), host->getScoreAsClient());
       num_anomalies++;
       client_score_anomaly = 1;
     } else
@@ -127,10 +126,9 @@ void HostStats::updateStats(const struct timeval* tv) {
     if (score_srv.addObservation(host->getScoreAsServer())) {
       char buf[64];
 
-      ntop->getTrace()->traceEvent(
-          TRACE_INFO, "[ANOMALY] %s [%s][server score] [value: %u]",
-          host->get_ip()->print(buf, sizeof(buf)),
-          host->getInterface()->get_name(), host->getScoreAsServer());
+      ntop->getTrace()->traceEvent(TRACE_INFO, "[ANOMALY] %s [%s][server score] [value: %u]",
+				   host->get_ip()->print(buf, sizeof(buf)),
+				   host->getInterface()->get_name(), host->getScoreAsServer());
       num_anomalies++;
       server_score_anomaly = 1;
     } else

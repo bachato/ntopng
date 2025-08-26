@@ -977,13 +977,7 @@ public:
   u_int64_t get_current_packets_cli2srv() const;
   u_int64_t get_current_packets_srv2cli() const;
   inline void request_swap()            {
-#ifndef HAVE_NEDGE
-    /*
-      On nEdge flow direction is always correct as they
-      are created LAN -> WAN
-    */
     swap_requested = true;
-#endif
   }
   inline bool is_swap_requested() const {
     return (swap_requested ? true : false);
