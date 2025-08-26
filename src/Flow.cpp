@@ -453,13 +453,6 @@ Flow::~Flow() {
   bool is_oneway_tcp_udp_flow =
     (((protocol == IPPROTO_TCP) || (protocol == IPPROTO_UDP)) && isOneWay()) ? true : false;
 
-#ifdef NTOPNG_PRO
-#if 0  // DEBUG
-  if (rtp)
-    rtp->computeMOS(this);
-#endif
-#endif
-
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
   if(getUses() != 0 && !ntop->getGlobals()->isShutdown())
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] Deleting flow [%u]",
@@ -1993,15 +1986,20 @@ void Flow::flow_end_stats_update() {
 
 /* *************************************** */
 
-/* NOTE: this function is periodically executed both on normal interfaces
+/* 
+ * Update cli/srv hosts stats
+ *
+ * NOTE: this function is periodically executed both on normal interfaces
  * and ViewInterface. On ViewInterface, the cli_host and srv_host *do not*
  * correspond to the flow hosts (which remain NULL). This is the correct
  * place to increment stats on cli/srv hosts and make them work with
  * ViewInterfaces.
  *
  * const is *required* here as the flow must not be modified (as it could go in
- * concuncurrency with the subinterfaces). */
-
+ * concuncurrency with the subinterfaces).
+ *
+ * Called by Flow::periodic_stats_update
+ */
 void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
                                        Host *srv_host,
                                        PartializableFlowTrafficStats *partial,
@@ -2538,7 +2536,15 @@ void Flow::updateThroughputStats(float tdiff_msec, u_int32_t diff_sent_packets,
 
 /* *************************************** */
 
-/* This function is called every second by the purgeIdle function */
+/* 
+ * This function is called every second by the purgeIdle function, as well as from other methods
+ *
+ * Called by:
+ * - GenericHash::purgeIdle
+ * - Flow::flow_end_stats_update (called by GenericHash::purgeIdle -> Flow::housekeep)
+ * - NetfilterInterface::netfilter_callback (on nEdge, if not flow->get_ndpi_flow())
+ * - NetworkInterface::dissectPacket -> NetworkInterface::processPacket on thresholds (for large flows)
+ */
 void Flow::periodic_stats_update(const struct timeval *tv) {
   bool first_partial;
   PartializableFlowTrafficStats partial;
@@ -2662,6 +2668,10 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
 
 /* *************************************** */
 
+/*
+ * Call actual dump() after checking if flow dump is enabled and supported by the interface
+ * This is called by Flow::housekeep when status is active or idle
+ */
 void Flow::dumpCheck(time_t t, bool last_dump_before_free) {
   if((ntop->getPrefs()->is_flows_dump_enabled()
 #ifdef HAVE_ZMQ
@@ -5128,6 +5138,10 @@ void Flow::updateClientContactedPorts(Host *client, ndpi_protocol *proto) {
 }
 /* *************************************** */
 
+/*
+ * Called by NetworkInterface::processPacket to increase flow stats for each packet
+ * Note: this is NOT called on nEdge (see Flow::setPacketsBytes called by NetfilterInterface::updateFlowStats)
+ */
 void Flow::incStats(bool cli2srv_direction, u_int pkt_len, u_int8_t *payload,
                     u_int payload_len, u_int8_t l4_proto, u_int8_t is_fragment,
                     u_int16_t tcp_flags, const struct timeval *when,
