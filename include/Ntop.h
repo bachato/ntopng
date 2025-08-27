@@ -189,7 +189,8 @@ class Ntop {
   void connectMessageBroker();
   void reloadMessageBroker();
 #endif
-
+  bool downloadCustomnDPIProtos(char *url, char *dest_file);
+  
  public:
   /**
    * @brief A Constructor
