@@ -350,7 +350,7 @@ private:
     struct {
       TrafficShaper *ingress, *egress;
     } srv2cli;
-  } flowShaperIds;
+  } flowShapers;
 #endif
   struct timeval last_update_time;
 
@@ -1381,11 +1381,11 @@ public:
   void getFlowShapers(bool src2dst_direction, TrafficShaper **shaper_ingress,
                       TrafficShaper **shaper_egress) {
     if (src2dst_direction) {
-      *shaper_ingress = flowShaperIds.cli2srv.ingress,
-	*shaper_egress = flowShaperIds.cli2srv.egress;
+      *shaper_ingress = flowShapers.cli2srv.ingress,
+	*shaper_egress = flowShapers.cli2srv.egress;
     } else {
-      *shaper_ingress = flowShaperIds.srv2cli.ingress,
-	*shaper_egress = flowShaperIds.srv2cli.egress;
+      *shaper_ingress = flowShapers.srv2cli.ingress,
+	*shaper_egress = flowShapers.srv2cli.egress;
     }
   }
   bool updateCli2SrvShapers(TrafficShaper **ingress_shaper, TrafficShaper **egress_shaper);

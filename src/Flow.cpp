@@ -297,7 +297,7 @@ Flow::Flow(NetworkInterface *_iface,
   trafficProfile = NULL;
 #else
   cli2srv_in = cli2srv_out = srv2cli_in = srv2cli_out = DEFAULT_SHAPER_ID;
-  memset(&flowShaperIds, 0, sizeof(flowShaperIds));
+  memset(&flowShapers, 0, sizeof(flowShapers));
   cli_quota_source = srv_quota_source = policy_source_default;
 #endif
 #endif
@@ -1781,10 +1781,10 @@ char* Flow::print(char *buf, u_int buf_len, bool full_report) const {
 #if defined(NTOPNG_PRO) && defined(SHAPER_DEBUG)
   char shapers[64];
 
-  TrafficShaper *cli2srv_in  = flowShaperIds.cli2srv.ingress;
-  TrafficShaper *cli2srv_out = flowShaperIds.cli2srv.egress;
-  TrafficShaper *srv2cli_in  = flowShaperIds.srv2cli.ingress;
-  TrafficShaper *srv2cli_out = flowShaperIds.srv2cli.egress;
+  TrafficShaper *cli2srv_in  = flowShapers.cli2srv.ingress;
+  TrafficShaper *cli2srv_out = flowShapers.cli2srv.egress;
+  TrafficShaper *srv2cli_in  = flowShapers.srv2cli.ingress;
+  TrafficShaper *srv2cli_out = flowShapers.srv2cli.egress;
 
   if(iface->is_bridge_interface()) {
     snprintf(
@@ -1797,10 +1797,10 @@ char* Flow::print(char *buf, u_int buf_len, bool full_report) const {
 	     "[srv2cli_egress shaping_enabled: %i max_rate: %lu] ",
 	     passVerdict ? "PASS" : "DROP",
              (int) dropVerdictReason,
-	     flowShaperIds.cli2srv.ingress ? flowShaperIds.cli2srv.ingress->get_shaper_id() : DEFAULT_SHAPER_ID,
-	     flowShaperIds.cli2srv.egress  ? flowShaperIds.cli2srv.egress->get_shaper_id()  : DEFAULT_SHAPER_ID,
-	     flowShaperIds.srv2cli.ingress ? flowShaperIds.srv2cli.ingress->get_shaper_id() : DEFAULT_SHAPER_ID,
-	     flowShaperIds.srv2cli.egress  ? flowShaperIds.srv2cli.egress->get_shaper_id()  : DEFAULT_SHAPER_ID,
+	     flowShapers.cli2srv.ingress ? flowShapers.cli2srv.ingress->get_shaper_id() : DEFAULT_SHAPER_ID,
+	     flowShapers.cli2srv.egress  ? flowShapers.cli2srv.egress->get_shaper_id()  : DEFAULT_SHAPER_ID,
+	     flowShapers.srv2cli.ingress ? flowShapers.srv2cli.ingress->get_shaper_id() : DEFAULT_SHAPER_ID,
+	     flowShapers.srv2cli.egress  ? flowShapers.srv2cli.egress->get_shaper_id()  : DEFAULT_SHAPER_ID,
 	     cli2srv_in->shaping_enabled(), cli2srv_in->get_max_rate_kbit_sec(),
 	     cli2srv_out->shaping_enabled(), cli2srv_out->get_max_rate_kbit_sec(),
 	     srv2cli_in->shaping_enabled(), srv2cli_in->get_max_rate_kbit_sec(),
@@ -3137,13 +3137,13 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
     if(cli_host && srv_host) {
       /* Shapers */
       lua_push_uint64_table_entry(vm, "shaper.cli2srv_ingress",
-				  flowShaperIds.cli2srv.ingress ? flowShaperIds.cli2srv.ingress->get_shaper_id() : DEFAULT_SHAPER_ID);
+				  flowShapers.cli2srv.ingress ? flowShapers.cli2srv.ingress->get_shaper_id() : DEFAULT_SHAPER_ID);
       lua_push_uint64_table_entry(vm, "shaper.cli2srv_egress",
-				  flowShaperIds.cli2srv.egress  ? flowShaperIds.cli2srv.egress->get_shaper_id()  : DEFAULT_SHAPER_ID);
+				  flowShapers.cli2srv.egress  ? flowShapers.cli2srv.egress->get_shaper_id()  : DEFAULT_SHAPER_ID);
       lua_push_uint64_table_entry(vm, "shaper.srv2cli_ingress",
-				  flowShaperIds.srv2cli.ingress ? flowShaperIds.srv2cli.ingress->get_shaper_id() : DEFAULT_SHAPER_ID);
+				  flowShapers.srv2cli.ingress ? flowShapers.srv2cli.ingress->get_shaper_id() : DEFAULT_SHAPER_ID);
       lua_push_uint64_table_entry(vm, "shaper.srv2cli_egress",
-				  flowShaperIds.srv2cli.egress  ? flowShaperIds.srv2cli.egress->get_shaper_id()  : DEFAULT_SHAPER_ID);
+				  flowShapers.srv2cli.egress  ? flowShapers.srv2cli.egress->get_shaper_id()  : DEFAULT_SHAPER_ID);
 
       /* Quota */
       lua_push_str_table_entry(vm, "cli.quota_source",
@@ -8539,12 +8539,12 @@ void Flow::swap() {
   srv2cliPktTime = is;
 
 #ifdef HAVE_NEDGE
-  TrafficShaper *s1 = flowShaperIds.cli2srv.ingress;
-  TrafficShaper *s2 = flowShaperIds.srv2cli.egress;
+  TrafficShaper *s1 = flowShapers.cli2srv.ingress;
+  TrafficShaper *s2 = flowShapers.srv2cli.egress;
 
-  flowShaperIds.cli2srv.ingress = flowShaperIds.srv2cli.ingress,
-    flowShaperIds.srv2cli.egress = flowShaperIds.cli2srv.egress;
-  flowShaperIds.srv2cli.ingress = s1, flowShaperIds.cli2srv.egress = s2;
+  flowShapers.cli2srv.ingress = flowShapers.srv2cli.ingress,
+    flowShapers.srv2cli.egress = flowShapers.cli2srv.egress;
+  flowShapers.srv2cli.ingress = s1, flowShapers.cli2srv.egress = s2;
 #endif
 
   tmp32 = flow_device.in_index;
