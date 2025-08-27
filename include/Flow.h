@@ -1388,9 +1388,8 @@ public:
 	*shaper_egress = flowShaperIds.srv2cli.egress;
     }
   }
-  bool updateDirectionShapers(bool src2dst_direction,
-                              TrafficShaper **ingress_shaper,
-                              TrafficShaper **egress_shaper);
+  bool updateCli2SrvShapers(TrafficShaper **ingress_shaper, TrafficShaper **egress_shaper);
+  bool updateSrv2CliShapers(TrafficShaper **ingress_shaper, TrafficShaper **egress_shaper);
   void updateFlowShapers(bool first_update = false);
   void recheckQuota(const struct tm *now);
   inline u_int8_t getFlowRoutingTableId() { return (routing_table_id); }
