@@ -1641,13 +1641,17 @@ NetworkInterface *NetworkInterface::getDynInterface(u_int64_t criteria,
 
 bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_idx,
 				     int datalink_type, bool *ingressPacket,
-				     const struct bpf_timeval *when, const u_int64_t packet_time,
-				     struct ndpi_ethhdr *eth, u_int16_t vlan_id, struct ndpi_iphdr *iph,
+				     const struct bpf_timeval *when,
+				     const u_int64_t packet_time,
+				     struct ndpi_ethhdr *eth,
+				     u_int16_t vlan_id, struct ndpi_iphdr *iph,
 				     struct ndpi_ipv6hdr *ip6, u_int16_t ip_offset,
-				     u_int16_t encapsulation_overhead, u_int32_t len_on_wire,
-				     const struct pcap_pkthdr *h, const u_char *packet, u_int16_t *ndpiProtocol,
+				     u_int16_t encapsulation_overhead,
+				     u_int32_t len_on_wire,
+				     const struct pcap_pkthdr *h,
+				     const u_char *packet, u_int16_t *ndpiProtocol,
 				     Host **srcHost, Host **dstHost, Flow **hostFlow,
-				     u_int8_t *sender_mac) {
+				     bool *new_flow, u_int8_t *sender_mac) {
   u_int16_t trusted_ip_len = max_val(0, (int)h->caplen - ip_offset);
   u_int16_t trusted_payload_len = 0;
   u_int32_t private_flow_id = 0;
@@ -1665,7 +1669,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
   u_int16_t trusted_l4_packet_len;
   u_int8_t *l4, tcp_flags = 0, *payload = NULL;
   u_int8_t *ip;
-  bool is_fragment = false, new_flow;
+  bool is_fragment = false;
   bool pass_verdict = true;
   u_int16_t l4_len = 0, fragment_offset = 0;
 #ifndef HAVE_NEDGE
@@ -1723,7 +1727,8 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
           pass_verdict = vIface->processPacket(if_index, bridge_iface_idx,
 					       datalink_type, ingressPacket, when, packet_time, eth, vlan_id,
 					       iph, ip6, ip_offset, encapsulation_overhead, len_on_wire, h,
-					       packet, ndpiProtocol, srcHost, dstHost, hostFlow, sender_mac);
+					       packet, ndpiProtocol, srcHost, dstHost, hostFlow,
+					       new_flow, sender_mac);
           processed = true;
         }
       }
@@ -1787,7 +1792,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
     return (pass_verdict);
   }
 #endif
-    
+
   if (iph != NULL) {
     u_int16_t ip_len, ip_tot_len;
 
@@ -2050,7 +2055,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 		 srcMac, dstMac, vlan_id, 0 /* observationPointId */, private_flow_id, 0,
 		 0, 0, l4_proto == IPPROTO_ICMP ? &icmp_info : NULL, &src_ip, &dst_ip,
 		 src_port, dst_port, l4_proto, &src2dst_direction, last_pkt_rcvd,
-		 last_pkt_rcvd, len_on_wire, &new_flow,
+		 last_pkt_rcvd, len_on_wire, new_flow,
 		 create_flow_if_missing, eth->h_source,
 		 eth->h_dest /* Eth lvl, used just in view interfaces to add MAC */);
   INTERFACE_PROFILING_SECTION_EXIT(0);
@@ -2071,14 +2076,14 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
     return (pass_verdict);
   } else {
 #ifdef HAVE_NEDGE
-    if (new_flow) flow->setIngress2EgressDirection(*ingressPacket);
+    if (*new_flow) flow->setIngress2EgressDirection(*ingressPacket);
 #endif
 
 #ifdef HAVE_NEDGE
 #if 0
     ntop->getTrace()->traceEvent(TRACE_WARNING,
 				 "[OK%s FLOW DIRECTON] %s %u->%u",
-				 new_flow ? " NEW" : "",
+				 *new_flow ? " NEW" : "",
 				 *ingressPacket ? "IN [WAN->LAN]" : "OUT [LAN->WAN]",
 				 ntohs(src_port), ntohs(dst_port));
 #endif
@@ -2115,7 +2120,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
       else
 	flow->updateTCPWinScale(src2dst_direction, tcp_window_scale);
 #endif
-      flow->updateTcpFlags(when, tcp_flags, src2dst_direction, new_flow);
+      flow->updateTcpFlags(when, tcp_flags, src2dst_direction, *new_flow);
 
       /*
 	This is the heuristic "For TCP flows for which the 3WH has not been
@@ -2126,7 +2131,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 	a SYN and not an ACK, i.e., when we see the first packet of the TWH
 	that allows to reliably determine the direction.
       */
-      if (new_flow && (!(tcp_flags & TH_SYN) || (tcp_flags & TH_ACK)))
+      if ((*new_flow) && (!(tcp_flags & TH_SYN) || (tcp_flags & TH_ACK)))
 	flow->check_swap();
 
       if ((tcp_flags & (TH_RST | TH_FIN)) == 0) {
@@ -2165,7 +2170,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
       /*
 	NOTE: for non TCP-flows, the swap heuristic is always checked on the first packet
       */
-      if (new_flow) flow->check_swap();
+      if(*new_flow) flow->check_swap();
       break;
     }
 
@@ -2227,6 +2232,46 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
         || (fragment_offset == 0)
 #endif
 	) {
+
+
+#ifdef HAVE_NEDGE
+      /*
+	With nEdge we see only one MAC address at time so we need to check
+	is MAC addresses are still set to Unknown (00:00:00:00:00:00)
+      */
+      if(src2dst_direction) {
+	Host *c_host =  flow->get_cli_host();
+	Mac *cli_mac = c_host->getMac();
+
+	if(cli_mac && cli_mac->isNull()) {
+	  /* We need to set the client MAC address */
+	  Mac *mac = getMac(sender_mac, true /* Create if missing */, true /* Inline call */);
+
+	  if(mac != NULL) {
+	    c_host->setMac(mac);
+	    cli_mac->decUses();
+	  }
+
+	  // ntop->getTrace()->traceEvent(TRACE_WARNING, "SET MAC !!! [client]");
+	}
+      } else /* src2dst_direction == false */ {
+	Host *s_host =  flow->get_srv_host();
+	Mac *srv_mac = s_host->getMac();
+
+	if(srv_mac && srv_mac->isNull()) {
+	  /* We need to set the server MAC address */
+	  Mac *mac = getMac(sender_mac, true /* Create if missing */, true /* Inline call */);
+
+	  if(mac != NULL) {
+	    s_host->setMac(mac);
+	    srv_mac->decUses();
+	  }
+
+	  // ntop->getTrace()->traceEvent(TRACE_WARNING, "SET MAC !!! [server]");
+	}
+      }
+#endif
+
       flow->processPacket(src2dst_direction, h, ip, trusted_ip_len, packet_time, payload,
                           trusted_payload_len, src_port);
     } else {
@@ -2600,15 +2645,14 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
                                      const struct pcap_pkthdr *h,
                                      const u_char *packet,
                                      u_int16_t *ndpiProtocol,
-                                     Host **srcHost,
-                                     Host **dstHost,
+                                     Host **srcHost, Host **dstHost,
                                      Flow **flow) {
   struct ndpi_ethhdr *ethernet = NULL, dummy_ethernet;
   u_int64_t time;
   u_int16_t eth_type, ip_offset = 0, vlan_id = 0, eth_offset = 0,
     encapsulation_overhead = 0;
   u_int32_t null_type;
-  bool pass_verdict = true;
+  bool pass_verdict = true, new_flow = false;;
   u_int32_t len_on_wire = h->len * getScalingFactor();
   *flow = NULL;
 
@@ -2665,7 +2709,8 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
   if (datalink_type == DLT_NULL) {
     if (h->caplen < sizeof(u_int32_t)) {
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1, NULL /* srcMac */, NULL /* dstMac */);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
+	       h->len, 1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end;
     }
 
@@ -2673,7 +2718,8 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
       memcpy(&null_type, &packet[eth_offset], sizeof(u_int32_t));
     else {
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1, NULL /* srcMac */, NULL /* dstMac */);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len,
+	       1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end;
     }
 
@@ -2688,7 +2734,8 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
       break;
     default:
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire,
+	       1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end; /* Any other non IP protocol */
     }
 
@@ -2698,7 +2745,8 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
   } else if (datalink_type == DLT_EN10MB) {
     if (h->caplen < sizeof(ndpi_ethhdr)) {
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1, NULL /* srcMac */, NULL /* dstMac */);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len,
+	       1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end;
     }
 
@@ -2708,7 +2756,8 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
   } else if (datalink_type == 113 /* Linux Cooked Capture */) {
     if (h->caplen < 16) {
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1, NULL /* srcMac */, NULL /* dstMac */);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len,
+	       1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end;
     }
 
@@ -2721,7 +2770,8 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
              || datalink_type == 14 /* raw IP DLT_RAW on OpenBSD captures */) {
     if (h->caplen < sizeof(u_int32_t)) {
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1, NULL /* srcMac */, NULL /* dstMac */);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len,
+	       1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end;
     }
 
@@ -2734,7 +2784,8 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
       break;
     default:
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire,
+	       1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end; /* Unknown IP protocol version */
     }
 
@@ -2756,7 +2807,8 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
     ip_offset = 0;
   } else {
     incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
-             NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
+             NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire,
+	     1, NULL /* srcMac */, NULL /* dstMac */);
     goto dissect_packet_end;
   }
 
@@ -3139,7 +3191,8 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	pass_verdict = processPacket(if_index, bridge_iface_idx,
 				     datalink_type, &ingressPacket, &h->ts, time, ethernet, vlan_id,
 				     iph, ip6, ip_offset, encapsulation_overhead, len_on_wire, h,
-				     packet, ndpiProtocol, srcHost, dstHost, flow, sender_mac);
+				     packet, ndpiProtocol, srcHost, dstHost,
+				     flow, &new_flow, sender_mac);
       } catch (std::bad_alloc &ba) {
 	static bool oom_warning_sent = false;
 
@@ -3298,7 +3351,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 				       &ingressPacket, &h->ts, time, ethernet,
 				       vlan_id, iph, ip6, ip_offset, encapsulation_overhead,
 				       len_on_wire, h, packet, ndpiProtocol, srcHost, dstHost,
-				       flow, sender_mac);
+				       flow, &new_flow, sender_mac);
 	} catch (std::bad_alloc &ba) {
 	  static bool oom_warning_sent = false;
 
@@ -3316,7 +3369,8 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 
     if (ethernet == NULL) {
       incStats(ingressPacket, h->ts.tv_sec, eth_type, NDPI_PROTOCOL_UNKNOWN,
-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire,
+	       1, NULL /* srcMac */, NULL /* dstMac */);
       goto dissect_packet_end;
     }
 
@@ -3361,11 +3415,34 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
     }
 
     incStats(ingressPacket, h->ts.tv_sec, eth_type, NDPI_PROTOCOL_UNKNOWN,
-	     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
+	     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire,
+	     1, NULL /* srcMac */, NULL /* dstMac */);
     break;
   }
 
  dissect_packet_end:
+
+#ifdef HAVE_NEDGE
+  if((pass_verdict == false)
+     && (flow != NULL)
+     && new_flow) {
+    if((*flow)->get_packets() == 0) {
+      /*
+	This is a flow that will be dropped, hence Conntrack won't see it.
+	In this case flow counters won't be set and thus we need to force
+	their update
+       */
+      (*flow)->getTrafficStats()->incStats(true, 1, h->len, h->len);
+
+#if 0
+      ntop->getTrace()->traceEvent(TRACE_WARNING, "**** DROP **** [pkts: %u][bytes: %u]",
+				   (unsigned long)(*flow)->get_packets(),
+				   (unsigned long)(*flow)->get_bytes()
+				   );
+#endif
+    }
+  }
+#endif
 
   /* Live packet dump to mongoose */
   if (num_live_captures > 0) deliverLiveCapture(h, packet, *flow);
@@ -4997,8 +5074,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
 							    f->get_cli_ip_addr()) &&
               retriever->talking_with_host->get_vlan_id() ==
 	      f->get_vlan_id()) &&
-            !(retriever->talking_with_host->get_ip()->equal(
-							    f->get_srv_ip_addr()) &&
+            !(retriever->talking_with_host->get_ip()->equal(f->get_srv_ip_addr()) &&
               retriever->talking_with_host->get_vlan_id() == f->get_vlan_id()))
           return (false);
       }
@@ -13233,20 +13309,20 @@ void NetworkInterface::incStats(bool ingressPacket, time_t when, u_int16_t eth_p
   /* NOTE: nEdge does the incs in NetfilterInterface::incStatsConntrack, keep it in sync! */
 #ifndef HAVE_NEDGE
   incEthStats(ingressPacket, eth_proto, num_pkts, pkt_len, getPacketOverhead());
-  
+
   // incnDPIStats(when, ndpi_proto, ndpi_category, pkt_len, num_pkts);
-  
+
   pktStats.incStats(1, pkt_len);
   l4Stats.incStats(when, l4proto, ingressPacket ? num_pkts : 0,
 		   ingressPacket ? pkt_len : 0, !ingressPacket ? num_pkts : 0,
 		   !ingressPacket ? pkt_len : 0);
 #endif
-  
+
 #ifdef NTOPNG_PRO
   /* Added DHCP storm detection */
   if (ndpi_proto == NDPI_PROTOCOL_DHCP) checkDHCPStorm(when, num_pkts);
 #endif
-  
+
   if(src_mac) src_mac->incSentStats(when, 1, pkt_len);
-  if(dst_mac) dst_mac->incRcvdStats(when, 1, pkt_len);      
+  if(dst_mac) dst_mac->incRcvdStats(when, 1, pkt_len);
 };

@@ -2843,6 +2843,16 @@ bool Flow::equal(const Mac *_src_pkt_mac, const Mac *_dst_pkt_mac,
   }
 #endif
 
+#ifdef HAVE_NEDGE
+  /*
+    As with Netfilter we do not have MAC visibility
+    they should not be used here to avoid invalid
+    flow search as with Netfilter we see only the
+    sender MAC
+  */
+  useMacAddressInFlowKey = false;
+#endif
+  
   if(useMacAddressInFlowKey) {
     if(cli_host && src_mac) {
       Mac *cli_mac = cli_host->getMac();
