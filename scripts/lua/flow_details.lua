@@ -750,8 +750,6 @@ else
       local num_rows = 0
 
       print("<td nowrap>" .. c .. "</td>")
-      shaper = shaper_utils.nedge_shaper_id_to_shaper(flow["shaper.cli2srv_egress"])
-
       print("<td>")
       print(client_to_server_label .. ": ")
       shaper = shaper_utils.nedge_shaper_id_to_shaper(flow["shaper.cli2srv_ingress"])
