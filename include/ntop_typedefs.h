@@ -274,7 +274,7 @@ struct zmq_msg_hdr_v2 {
   u_int32_t msg_id, source_id;
 };
 
-struct zmq_msg_hdr_v4 { /* formerly v3 (but still version 4) */
+struct zmq_msg_hdr_v4 { /* formerly zmq_msg_hdr_v3 (but still version 4) */
   char url[16];
   u_int8_t version /* 4 */, flags;
   u_int32_t uncompressed_size, compressed_size;
@@ -289,13 +289,7 @@ typedef struct {
 typedef struct {
   u_int32_t last_seen;
   u_int32_t last_msg_id;
-
-  /* See ZMQ_DROPS_V2 */
-  u_int32_t base_msg_id;
-  u_int64_t msg_rcvd_since_rollback;
-  u_int64_t msg_drops_since_rollback;
-  u_int64_t committed_msg_drops_since_rollback;
-
+  bool last_msg_id_set;
 } zmq_probe;
 
 typedef u_int8_t dump_mac_t[DUMP_MAC_SIZE];

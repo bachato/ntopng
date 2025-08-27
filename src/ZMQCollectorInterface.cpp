@@ -24,7 +24,6 @@
 #ifdef HAVE_ZMQ
 #ifndef HAVE_NEDGE
 
-//#define ZMQ_DROPS_V2
 //#define DEBUG_ZMQ_MSGID
 
 /* **************************************************** */
@@ -311,7 +310,7 @@ void ZMQCollectorInterface::collect_flows() {
     /* Receive messages */
     for (int subscriber_id = 0; subscriber_id < num_subscribers; subscriber_id++) {
       if (items[subscriber_id].revents & ZMQ_POLLIN) {
-        u_int32_t msg_id = 0, current_msg_id = 0;
+        u_int32_t msg_id = 0;
         u_int32_t source_id = 0;
         u_int32_t publisher_version = 0;
 	//u_int32_t received_compressed_size = 0;
@@ -319,9 +318,8 @@ void ZMQCollectorInterface::collect_flows() {
         zmq_probe *probe = NULL;
 	bool tlv_encoding = false;
 	bool compressed = false;
-#ifdef ZMQ_DROPS_V2
-        bool rollback_detected = false;
-#endif
+        bool on_event_socket = false;
+        bool check_clock_drift = true;
 
         size = zmq_recv(items[subscriber_id].socket, &h0, sizeof(h0), ZMQ_DONTWAIT);
 
@@ -357,18 +355,24 @@ void ZMQCollectorInterface::collect_flows() {
             publisher_version = h2->version;
 	  } else if ((h->version == ZMQ_MSG_VERSION) && (size == sizeof(struct zmq_msg_hdr_v4))) {
             struct zmq_msg_hdr_v4 *h4 = (struct zmq_msg_hdr_v4 *)&h0;
+            u_int8_t flags = h4->flags;
 
             source_id = h4->source_id, msg_id = ntohl(h4->msg_id);
             publisher_version = h4->version;
 	    //received_compressed_size = ntohl(h4->compressed_size);
 	    received_uncompressed_size = ntohl(h4->uncompressed_size);
 
-	    if(h4->flags & ZMQ_FLAG_IS_TLV)         tlv_encoding = true;
-	    if(h4->flags & ZMQ_FLAG_IS_COMPRESSED)  compressed   = true;
+	    if(flags & ZMQ_FLAG_IS_TLV)        { flags &= ~ZMQ_FLAG_IS_TLV;        tlv_encoding = true; }
+	    if(flags & ZMQ_FLAG_IS_COMPRESSED) { flags &= ~ZMQ_FLAG_IS_COMPRESSED; compressed = true; }
+	    if(flags & ZMQ_FLAG_EVENT_SOCKET)  { flags &= ~ZMQ_FLAG_EVENT_SOCKET;  on_event_socket = true; }
+            if(flags) {
+              ntop->getTrace()->traceEvent(TRACE_WARNING,
+					   "Unsupported ZMQ message flags (%u), likely your nProbe is "
+					   "more recent than ntopng [%u][%u][%u][%u][%u]", flags);
+
+            }
           }
         }
-
-        current_msg_id = msg_id;
 
         //ntop->getTrace()->traceEvent(TRACE_NORMAL, "[size: %u][source_id: %u][topic: %s]",
         //  size, source_id, h->url);
@@ -378,63 +382,40 @@ void ZMQCollectorInterface::collect_flows() {
 
           probe = active_probes[source_id];
 
-	  //ntop->getTrace()->traceEvent(TRACE_NORMAL, "[subscriber_id: %u][source_id: %u]"
-	  //			       "[msg_id: %u][last_msg_id: %u][lost: %i]",
-	  //			       subscriber_id, source_id, msg_id, probe->last_msg_id, msg_id - probe->last_msg_id - 1);
+          if (!on_event_socket && probe->last_msg_id_set) { /* Check drops / rollback by using msg_id on data messages */
 
-          if (msg_id == (probe->last_msg_id + 1)) {
-            /* No drop */
-          } else {
+	    //ntop->getTrace()->traceEvent(TRACE_NORMAL, "[subscriber_id: %u][source_id: %u]"
+	    //			       "[msg_id: %u][last_msg_id: %u][lost: %i]",
+	    //			       subscriber_id, source_id, msg_id, probe->last_msg_id, msg_id - probe->last_msg_id - 1);
 
-#ifdef ZMQ_DROPS_V2
-            if (msg_id < probe->last_msg_id) {
+            if (msg_id == (probe->last_msg_id + 1)) {
+              /* No drop */
+            } else {
 
-              if ((probe->last_msg_id - msg_id) > 100) { /* Likely a msg_id wrap or application restart */
+              if (msg_id < probe->last_msg_id) {
                 /* Start over (just reset active_probes) */
-                rollback_detected = true;
 #ifdef DEBUG_ZMQ_MSGID
                 ntop->getTrace()->traceEvent(TRACE_NORMAL,
 					     "ROLLBACK [%s][subscriber_id: %u][source_id: %u][msg_id: %u][last: %u][tot msgs/drops: %u/%u]",
 					     ifname, subscriber_id, source_id, msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
 					     recvStats.zmq_msg_drops);
 #endif
-              } else { /* Likely an out-of-order */
+              } else {
+                /* Compute delta (this message ID - last message ID) */
+                int32_t diff = msg_id - probe->last_msg_id;
+
+                if (diff > 1) {
+                  /* Lost message detected */
+                  recvStats.zmq_msg_drops += diff - 1;
 #ifdef DEBUG_ZMQ_MSGID
-                ntop->getTrace()->traceEvent(TRACE_NORMAL,
-					     "OUT-OF-ORDER [%s][subscriber_id: %u][source_id: %u][msg_id: %u][last: %u][tot msgs/drops: %u/%u]",
-					     ifname, subscriber_id, source_id, msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
-					     recvStats.zmq_msg_drops);
+                  ntop->getTrace()->traceEvent(TRACE_NORMAL,
+					       "DROP [%s][subscriber_id: %u][source_id: %u][msg_id: %u][last: %u][tot msgs/drops: %u/%u][drops: +%u]",
+					       ifname, subscriber_id, source_id, msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
+					       recvStats.zmq_msg_drops, diff - 1);
 #endif
+                }
               }
             }
-
-#else /* ZMQ_DROPS_V1 */
-
-            if (msg_id < probe->last_msg_id) {
-              /* Start over (just reset active_probes) */
-#ifdef DEBUG_ZMQ_MSGID
-              ntop->getTrace()->traceEvent(TRACE_NORMAL,
-					   "ROLLBACK [%s][subscriber_id: %u][source_id: %u][msg_id: %u][last: %u][tot msgs/drops: %u/%u]",
-					   ifname, subscriber_id, source_id, msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
-					   recvStats.zmq_msg_drops);
-#endif
-            } else {
-              /* Compute delta (this message ID - last message ID) */
-              int32_t diff = msg_id - probe->last_msg_id;
-
-              if (diff > 1) {
-                /* Lost message detected */
-                recvStats.zmq_msg_drops += diff - 1;
-#ifdef DEBUG_ZMQ_MSGID
-                ntop->getTrace()->traceEvent(TRACE_NORMAL,
-					     "DROP [%s][subscriber_id: %u][source_id: %u][msg_id: %u][last: %u][tot msgs/drops: %u/%u][drops: +%u]",
-					     ifname, subscriber_id, source_id, msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
-					     recvStats.zmq_msg_drops, diff - 1);
-#endif
-              }
-            }
-
-#endif
           }
         }
 
@@ -445,7 +426,7 @@ void ZMQCollectorInterface::collect_flows() {
             cache for a while. So we use this trick to avoid
             silly clock drift errors that instead are not an error
           */
-          msg_id = 0; /* So parseXXXX knowns that this message could be lost/OOO */
+          check_clock_drift = false; /* So parseXXXX knowns that this message could be lost/OOO */
         }
 
         /*
@@ -541,9 +522,6 @@ void ZMQCollectorInterface::collect_flows() {
             probe = (zmq_probe *) calloc(1, sizeof(zmq_probe));
 
             if (probe != NULL) {
-#ifdef ZMQ_DROPS_V2
-              probe->base_msg_id = current_msg_id;
-#endif
               active_probes[source_id] = probe;
               incNumActiveProbes();
             }
@@ -551,51 +529,29 @@ void ZMQCollectorInterface::collect_flows() {
 
           /* Store last message ID for the current source ID */
           if (probe != NULL) {
-#ifdef ZMQ_DROPS_V2
-            if (rollback_detected) {
-              /* Reset counters */
-              probe->base_msg_id = current_msg_id;
-              probe->msg_rcvd_since_rollback = 0;
-              probe->msg_drops_since_rollback = 0;
-              probe->committed_msg_drops_since_rollback = 0;
+
+            if (!on_event_socket) {
+              probe->last_msg_id = msg_id;
+              probe->last_msg_id_set = true;
             }
 
-            if (current_msg_id < probe->base_msg_id) /* out-of-order? update base msg_id */
-              probe->base_msg_id = current_msg_id;
-
-            /* Update counters and check for drops */
-            probe->msg_rcvd_since_rollback++;
-            probe->msg_drops_since_rollback = (current_msg_id - probe->base_msg_id + 1) - probe->msg_rcvd_since_rollback;
-            if (probe->msg_drops_since_rollback > probe->committed_msg_drops_since_rollback) {
-              int diff = probe->msg_drops_since_rollback - probe->committed_msg_drops_since_rollback;
-              recvStats.zmq_msg_drops += diff;
-              probe->committed_msg_drops_since_rollback = probe->msg_drops_since_rollback;
-#ifdef DEBUG_ZMQ_MSGID
-              ntop->getTrace()->traceEvent(TRACE_NORMAL,
-					   "DROP [%s][subscriber_id: %u][source_id: %u][msg_id: %u][base_msg_id: %u][last: %u][tot msgs/drops: %u/%u][drops: +%u]",
-					   ifname, subscriber_id, source_id, current_msg_id, probe->base_msg_id, probe->last_msg_id, recvStats.zmq_msg_rcvd,
-					   recvStats.zmq_msg_drops, diff);
-#endif
-            }
-#endif
             probe->last_seen = now;
-            probe->last_msg_id = current_msg_id;
           }
 
           /* Process the message */
           switch (h->url[0]) {
 	  case 'e': /* event */
 	    recvStats.num_events++;
-	    parseEvent(uncompressed, uncompressed_len, source_id, msg_id, this);
+	    parseEvent(uncompressed, uncompressed_len, source_id, check_clock_drift, this);
 	    break;
 
 	  case 'f': /* flow */
 	    if (tlv_encoding)
 	      recvStats.num_flows += parseTLVFlows(uncompressed, uncompressed_len,
-						   subscriber_id, msg_id, this);
+						   subscriber_id, this);
 	    else if(ntop->getPrefs()->is_pro_edition()) {
 	      uncompressed[uncompressed_len] = '\0';
-	      recvStats.num_flows += parseJSONFlow(uncompressed, uncompressed_len, subscriber_id, msg_id);
+	      recvStats.num_flows += parseJSONFlow(uncompressed, uncompressed_len, subscriber_id);
 	    }
 	    break;
 
@@ -617,14 +573,12 @@ void ZMQCollectorInterface::collect_flows() {
 
 	  case 't': /* template */
 	    recvStats.num_templates++;
-	    parseTemplate(uncompressed, uncompressed_len, subscriber_id,
-			  msg_id, this);
+	    parseTemplate(uncompressed, uncompressed_len, subscriber_id, this);
 	    break;
 
 	  case 'o': /* option */
 	    recvStats.num_options++;
-	    parseOption(uncompressed, uncompressed_len, subscriber_id, msg_id,
-			this);
+	    parseOption(uncompressed, uncompressed_len, subscriber_id, this);
 	    break;
 
 	  case 'h': /* hello */
@@ -636,14 +590,13 @@ void ZMQCollectorInterface::collect_flows() {
 
 	  case 'l': /* listening-ports */
 	    recvStats.num_listening_ports++;
-	    parseListeningPorts(uncompressed, uncompressed_len, subscriber_id,
-				msg_id, this);
+	    parseListeningPorts(uncompressed, uncompressed_len, subscriber_id, this);
 	    break;
 
 	  case 's': /* snmp-ifaces */
 	    recvStats.num_snmp_interfaces++;
 	    parseSNMPIntefaces(uncompressed, uncompressed_len, subscriber_id,
-			       msg_id, this);
+			       this);
 	    break;
           }
 
