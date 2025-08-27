@@ -4441,7 +4441,16 @@ bool Ntop::isInLocalASN(IpAddress *ip) {
 
 char* Ntop::getCustomnDPIProtos() {
   if(custom_ndpi_protos != NULL) {
-    if(strcmp(custom_ndpi_protos, TMP_PROTOS_FILE) != 0) {
+    if(strcmp(custom_ndpi_protos, TMP_PROTOS_FILE) == 0) {
+        /* Protocol file already downloaded, redownload it, in case some 
+         * changes happened 
+         */
+        char *proto_path = (char *) getPrefs()->get_ndpi_proto_file_path();
+        if (proto_path) {
+            remove(TMP_PROTOS_FILE);
+            setCustomnDPIProtos(proto_path);
+        }
+    }
       if((strncmp(custom_ndpi_protos, "http://", 7) == 0)
 	 || (strncmp(custom_ndpi_protos, "https://", 8) == 0)) {
 	/* This looks like an URL */
@@ -4461,9 +4470,6 @@ char* Ntop::getCustomnDPIProtos() {
 	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Successfully downloaded nDPI protocols file from URL %s", custom_ndpi_protos);
 	}
       }
-    } else {
-      /* Protocols file already downloaded */
-    }
   }
 
   return(custom_ndpi_protos);

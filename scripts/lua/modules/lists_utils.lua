@@ -834,4 +834,6 @@ function lists_utils.cleanBlacklistsHits()
     ntop.delCache(REDIS_KEY_HITS)
 end
 
+-- ##############################################
+
 return lists_utils
