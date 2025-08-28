@@ -31,16 +31,17 @@
                                     </div>
                                     <CustomSwitch v-if="props.context.is_enterprise_xl" v-model:value="flows_aggregated"
                                         class="me-2" :change_label_side="true" :label="flow_type_label" style=""
-                                        icon="fa-truck-fast" :title="flow_type_label" @change_value="change_flow_type"></CustomSwitch>
+                                        icon="fa-truck-fast" :title="flow_type_label" @change_value="change_flow_type">
+                                    </CustomSwitch>
                                 </template>
                                 <template v-slot:extra_range_buttons>
                                     <button v-if="context.show_permalink" class="btn btn-link btn-sm"
                                         @click="get_permanent_link" :title="_i18n('graphs.get_permanent_link')"
                                         ref="permanent_link_button"><i class="fas fa-lg fa-link"></i></button>
                                     <!-- :href="href_download_records" -->
-                                        <a v-if="context.show_download" class="btn btn-link btn-sm"
-                                        :title="_i18n('graphs.download_records')" @click="show_modal_select_export_columns"><i
-                                            class="fas fa-lg fa-file"></i></a>
+                                    <a v-if="context.show_download" class="btn btn-link btn-sm"
+                                        :title="_i18n('graphs.download_records')"
+                                        @click="show_modal_select_export_columns"><i class="fas fa-lg fa-file"></i></a>
                                     <a v-if="context.show_analyse_records" class="btn btn-link btn-sm"
                                         :title="_i18n('graphs.analyse_records')" :href="href_analyse_records"><i
                                             class="fas fa-lg fa-play"></i></a>
@@ -127,10 +128,7 @@
     <ModalAlertsFilter :alert="current_alert" :page="page" @exclude="add_exclude" ref="modal_alerts_filter">
     </ModalAlertsFilter>
 
-    <ModalExportColumnsSelector 
-    ref="modal_choose_columns_export" 
-    :id="'select_columns'"
-  />
+    <ModalExportColumnsSelector ref="modal_choose_columns_export" :id="'select_columns'" />
 
 </template>
 
@@ -521,13 +519,22 @@ const map_table_def_columns = async (columns) => {
         "THROUGHPUT": (throughput, row) => {
             return FormatterUtils.getFormatter("bps_no_scale")(throughput);
         },
+        "l4proto": (value, row) => { 
+            let l4proto_string = DataTableRenders.filterize('l4proto', value.value, value.label) 
+            if (row.protocol_info_json && row.protocol_info_json.verdict && row.protocol_info_json.verdict.pass === 0)
+                l4proto_string = `<strike>${l4proto_string}</strike>`
+            return l4proto_string
+        },
         "l7proto": (proto, row) => {
             let confidence = "";
             if (proto.confidence !== undefined) {
                 const title = proto.confidence;
                 (title == "DPI") ? confidence = `<span class="badge bg-success" title="${title}">${title}</span>` : confidence = `<span class="badge bg-warning" title="${title}">${title}</span>`
             }
-            return DataTableRenders.filterize('l7proto', proto.value, proto.label) + " " + `${confidence}`;
+            let l7proto_string = DataTableRenders.filterize('l7proto', proto.value, proto.label) + " " + `${confidence}`
+            if (row.protocol_info_json && row.protocol_info_json.verdict && row.protocol_info_json.verdict.pass === 0)
+                l7proto_string = `<strike>${l7proto_string}</strike>`
+            return l7proto_string;
         },
         "asn": (asn, row) => f_print_asn("asn", asn, row),
         "cli_asn": (cli_asn, row) => f_print_asn("cli_asn", cli_asn, row),

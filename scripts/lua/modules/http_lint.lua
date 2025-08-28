@@ -2027,6 +2027,7 @@ local known_parameters = {
     ["l7_error_id"] = validateListOfTypeInline(validateFilters(validateNumber)), -- client/server
     ["http_method"] = validateListOfTypeInline(validateFilters(validateSingleWord)), -- client/server
     ["http_return"] = validateListOfTypeInline(validateFilters(validateNumber)), -- client/server
+    ["verdict"] = validateListOfTypeInline(validateFilters(validateNumber)), -- client/server
     ["http_url"] = validateListOfTypeInline(validateFilters(validateSingleWord)), -- client/server
     ["user_agent"] = validateListOfTypeInline(validateFilters(validateSingleWord)), -- client/server
     ["netbios_name"] = validateListOfTypeInline(validateFilters(validateSingleWord)), -- client/server

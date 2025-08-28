@@ -837,6 +837,13 @@ tag_utils.defined_tags = {
         operators = { 'eq', 'neq' },
         hourly_available = false,
     },
+    verdict = {
+        type = tag_utils.input_types.select,
+        value_type = 'verdict',
+        i18n_label = i18n('details.flow_verdict'),
+        operators = { 'eq', 'neq' },
+        hourly_available = false,
+    },
     interface_id = {
         value_type = 'number',
         i18n_label = i18n('db_search.tags.interface_id'),
@@ -1298,6 +1305,17 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = info.label
             }
         end
+    elseif tag.value_type == "verdict" then
+        if not ntop.isnEdge() then
+            return nil
+        end
+        -- nEdge verdict
+        filter.value_type = 'array'
+        filter.options = {}
+        -- Using 1 and 2 because some issue can happen with value = 0; it's going to be
+        -- transformed into 0 and 1 respectively in pro/scripts/lua/modules/flow_db/clickhouse_utils.lua
+        filter.options[1] = { value = 1, label = i18n('policy.drop') }
+        filter.options[2] = { value = 2, label = i18n('policy.pass') }
     elseif tag.value_type == "flow_risk" then
         filter.value_type = 'array'
         filter.options = {}

@@ -690,7 +690,7 @@ export class DataTableRenders {
         }
         return ""
     }
-    
+
     static formatMitreTactic(obj) {
         if (obj.mitre_tactic !== "0") {
             return DataTableRenders.filterize('mitre_tactic', obj.mitre_tactic, i18n(obj.mitre_tactic_i18n), obj.mitre_tactic_i18n, obj.mitre_tactic_i18n);
@@ -698,7 +698,7 @@ export class DataTableRenders {
 
         return ""
     }
-    
+
     static formatMitreTechnique(obj) {
         if (obj.mitre_technique !== "0") {
             return DataTableRenders.filterize('mitre_technique', obj.mitre_technique, i18n(obj.mitre_technique_i18n), obj.mitre_technique_i18n, obj.mitre_technique_i18n);
@@ -780,9 +780,9 @@ export class DataTableRenders {
             if (zero_is_null == true && obj?.value == 0) { return ""; }
             let formatted = '';
             //if (typeof row[field] === 'object') {
-                formatted = DataTableRenders.filterize_2(field, row[field].value, row[field].label, row[field].label, row[field].label);
-                if (obj.reference !== undefined)
-                    formatted = formatted + ' ' + obj.reference;
+            formatted = DataTableRenders.filterize_2(field, row[field].value, row[field].label, row[field].label, row[field].label);
+            if (obj.reference !== undefined)
+                formatted = formatted + ' ' + obj.reference;
             //} else {
             //    formatted = DataTableRenders.filterize_2(field, row[field], row[field], row[field], row[field]);
             //}
@@ -884,7 +884,7 @@ export class DataTableRenders {
         }
         return DataTableRenders.filterize(key, valueVlan, labelVlan, labelVlan, titleVlan);
     }
-    
+
     static formatIP(ip, type, row, zero_is_null) {
         if (!ip) return "";
         let title = "";
@@ -966,7 +966,12 @@ export class DataTableRenders {
                 srvIcons += DataTableRenders.filterize('role', 'victim', '<i class="fas fa-sad-tear" data-bs-toggle="tooltip" data-bs-placement="bottom" title="' + row.srv_role.label + '"></i>', row.srv_role.tag_label);
         }
 
-        return `${active_ref} ${cliLabel}${cliBlacklisted}${cliLocation}${cliFlagLabel}${cliPortLabel} ${cliIcons} ${flow.cli_ip.reference} <i class="fas fa-exchange-alt fa-lg" aria-hidden="true"></i> ${srvLabel}${srvBlacklisted}${srvLocation}${srvFlagLabel}${srvPortLabel} ${srvIcons} ${flow.srv_ip.reference}`;
+        let flow_string = `${active_ref} ${cliLabel}${cliBlacklisted}${cliLocation}${cliFlagLabel}${cliPortLabel} ${cliIcons} ${flow.cli_ip.reference} <i class="fas fa-exchange-alt fa-lg" aria-hidden="true"></i> ${srvLabel}${srvBlacklisted}${srvLocation}${srvFlagLabel}${srvPortLabel} ${srvIcons} ${flow.srv_ip.reference}`
+        
+        if (row.protocol_info_json && row.protocol_info_json.verdict && row.protocol_info_json.verdict.pass === 0)
+            flow_string = `<strike>${flow_string}</strike>`
+
+        return flow_string;
     }
 
     static formatSubtypeValueLabel(obj, type, row, zero_is_null) {

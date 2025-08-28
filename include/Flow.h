@@ -1492,6 +1492,7 @@ public:
   void setFlowRiskName(char *r);
   char *getFlowRiskName();
   void getJSONRiskInfo(ndpi_serializer *serializer);
+  void getVerdictInfo(ndpi_serializer *serializer);
   void setWLANInfo(char *wlan_ssid, u_int8_t *wtp_mac_address);
   char *getWLANSSID() { return(collection ? collection->wifi.wlan_ssid : NULL); };
   u_int8_t *getWTPMACAddress() { return (collection ? collection->wifi.wtp_mac_address : NULL); };

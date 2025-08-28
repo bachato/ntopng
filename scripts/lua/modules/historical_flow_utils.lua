@@ -10,6 +10,7 @@ local format_utils = require "format_utils"
 local flow_risk_utils = require "flow_risk_utils"
 local country_codes = require "country_codes"
 local network_consts = require "network_consts"
+local historical_format_utils = require "historical_format_utils"
 local qoe_utils
 local historical_ts_definitions
 if ntop.isEnterpriseM() then
@@ -1182,7 +1183,7 @@ local flow_columns = {
    ['IS_SRV_ATTACKER'] =      { tag = "is_srv_attacker" },
    ['IS_SRV_VICTIM'] =        { tag = "is_srv_victim" },
    ['IS_SRV_BLACKLISTED'] =   { tag = "is_srv_blacklisted" },
-   ['PROTOCOL_INFO_JSON'] =   { tag = "protocol_info_json" },
+   ['PROTOCOL_INFO_JSON'] =   { tag = "protocol_info_json", dt_func = historical_format_utils.parseInfoJson },
    ['ALERT_JSON'] =           { tag = "json" },
    ['SRC_PROC_NAME'] =        { tag = "cli_proc_name", db_type = "String", db_raw_type = "String" },
    ['DST_PROC_NAME'] =        { tag = "srv_proc_name", db_type = "String", db_raw_type = "String" },
@@ -1538,6 +1539,7 @@ function historical_flow_utils.get_tags()
    flow_defined_tags["post_nat_src_port"] = tag_utils.defined_tags["post_nat_src_port"]
    flow_defined_tags["post_nat_ipv4_dst_addr"] = tag_utils.defined_tags["post_nat_ipv4_dst_addr"]
    flow_defined_tags["post_nat_dst_port"] = tag_utils.defined_tags["post_nat_dst_port"]
+   flow_defined_tags["verdict"] = tag_utils.defined_tags["verdict"]
 
    return flow_defined_tags
 end

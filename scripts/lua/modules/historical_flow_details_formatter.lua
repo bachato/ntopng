@@ -135,6 +135,46 @@ end
 
 -- ###############################################
 
+local function format_historical_verdict(flow, protocol_info_json, flow_details)
+    if ntop.isnEdge() and protocol_info_json and protocol_info_json.verdict then
+        require "flow_utils"
+        local flow_consts = require "flow_consts"
+        local shaper_utils = require("shaper_utils")
+        local verdict = protocol_info_json.verdict
+
+        if tonumber(verdict.pass) == 1 then -- Pass
+            flow_details[#flow_details + 1] = {
+                name = i18n("details.flow_verdict"),
+                values = {
+                    i18n("policy.pass") .. " " ..
+                        shaper_utils.nedge_shapers[1].icon
+                }
+            }
+        else -- Drop
+            local drop_reason_label = ""
+            if flow_consts.drop_reason[verdict.drop_reason] then
+                drop_reason_label = " (" ..
+                                        i18n(
+                                            flow_consts.drop_reason[verdict.drop_reason]
+                                                .i18n_label) .. ")"
+            end
+            flow_details[#flow_details + 1] = {
+                name = i18n("details.flow_verdict"),
+                values = {
+                    i18n("policy.drop") .. " " ..
+                        shaper_utils.nedge_shapers[2].icon .. drop_reason_label
+                }
+            }
+            -- Add strike to protocol
+            flow_details[2].values[1] = '<strike>' .. flow_details[2].values[1] .. '</strike>'
+        end
+    end
+
+    return flow_details
+end
+
+-- ###############################################
+
 local function format_historical_last_first_seen(flow, info)
     return {
         name = i18n("db_explorer.date_time"),
@@ -162,7 +202,8 @@ function historical_flow_details_formatter.format_qoe(flow)
         json_info = json.decode(flow["PROTOCOL_INFO_JSON"])
     end
 
-    if json_info and json_info.qoe and ntop.isEnterpriseL() and tonumber(flow.QOE_SCORE) <= 100 then
+    if json_info and json_info.qoe and ntop.isEnterpriseL() and
+        tonumber(flow.QOE_SCORE) <= 100 then
         qoe_utils = require "qoe_utils"
 
         return {
@@ -177,7 +218,8 @@ end
 
 -- ###############################################
 
-function historical_flow_details_formatter.format_historical_client_server_bytes(flow)
+function historical_flow_details_formatter.format_historical_client_server_bytes(
+    flow)
     return {
         name = "",
         values = {
@@ -221,59 +263,60 @@ end
 -- formats asn peer or non peer. i18n_label is the string to identify the i18n
 function historical_flow_details_formatter.format_asn(flow)
     local max_len = max_len
-    
+
     local src_ip = flow["IPV4_SRC_ADDR"] or flow["IPV6_SRC_ADDR"]
     local dst_ip = flow["IPV4_DST_ADDR"] or flow["IPV6_DST_ADDR"]
-    
+
     local src_asn = flow["SRC_ASN"]
     local dst_asn = flow["DST_ASN"]
 
     local src_as = ""
     if src_asn and src_asn ~= "0" then
         local src_as_name = shortenString(ntop.getASName(src_ip), max_len)
-        local src_label = src_asn .. " (" .. (src_as_name or "") .. ")"      
-        src_as = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. src_asn .. "\">" .. src_label .. "</A>"
+        local src_label = src_asn .. " (" .. (src_as_name or "") .. ")"
+        src_as = "<A HREF=\"" .. ntop.getHttpPrefix() ..
+                     "/lua/hosts_stats.lua?asn=" .. src_asn .. "\">" ..
+                     src_label .. "</A>"
     end
-    
+
     local dst_as = ""
     if dst_asn and dst_asn ~= "0" then
         local dst_as_name = shortenString(ntop.getASName(dst_ip), max_len)
-        local dst_label = dst_asn .. " (" .. (dst_as_name or "") .. ")"      
-        dst_as = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. dst_asn .. "\">" .. dst_label .. "</A>"
+        local dst_label = dst_asn .. " (" .. (dst_as_name or "") .. ")"
+        dst_as = "<A HREF=\"" .. ntop.getHttpPrefix() ..
+                     "/lua/hosts_stats.lua?asn=" .. dst_asn .. "\">" ..
+                     dst_label .. "</A>"
     end
 
     return {
         name = i18n("flow_details.as_src_dst"),
-        values = {
-            [1] = src_as,
-            [2] = dst_as
-        }
+        values = {[1] = src_as, [2] = dst_as}
     }
 end
 
-function historical_flow_details_formatter.format_asn_peer(flow, src_peer_asn, dst_peer_asn)
+function historical_flow_details_formatter.format_asn_peer(flow, src_peer_asn,
+                                                           dst_peer_asn)
     local format_utils = require "format_utils"
 
     -- source asn
     local src_asn = flow.SRC_ASN or 0
     local src_ip = flow and flow.IPV4_SRC_ADDR or flow.IPV6_SRC_ADDR or 0
-    
+
     -- destination asn
     local dst_asn = flow.DST_ASN or 0
     local dst_ip = flow and flow.IPV4_DST_ADDR or flow.IPV6_DST_ADDR or 0
 
     -- source asn formatting
-    src_asn = format_utils.formatASN_transit(src_asn, src_peer_asn, src_ip, true)
-    
+    src_asn =
+        format_utils.formatASN_transit(src_asn, src_peer_asn, src_ip, true)
+
     -- destination asn formatting
-    dst_asn = format_utils.formatASN_transit(dst_asn, dst_peer_asn, dst_ip, false)
+    dst_asn = format_utils.formatASN_transit(dst_asn, dst_peer_asn, dst_ip,
+                                             false)
 
     return {
         name = i18n("flow_details.as_src_dst"),
-        values = {
-            [1] = src_asn,
-            [2] = dst_asn
-        }
+        values = {[1] = src_asn, [2] = dst_asn}
     }
 end
 
@@ -858,11 +901,16 @@ function historical_flow_details_formatter.formatHistoricalFlowDetails(flow)
     local flow_details = {}
 
     if flow then
+        local protocol_info_json =
+            json.decode(flow["PROTOCOL_INFO_JSON"] or '') or {}
         local info = historical_flow_utils.format_clickhouse_record(flow)
         flow_details[#flow_details + 1] = format_historical_flow_label(flow)
         flow_details[#flow_details + 1] = format_historical_protocol_label(flow)
         flow_details[#flow_details + 1] =
             format_historical_last_first_seen(flow, info)
+        if protocol_info_json and protocol_info_json.verdict then
+            flow_details = format_historical_verdict(flow, protocol_info_json, flow_details)
+        end
         flow_details[#flow_details + 1] =
             historical_flow_details_formatter.format_historical_total_traffic(
                 flow)
@@ -872,16 +920,17 @@ function historical_flow_details_formatter.formatHistoricalFlowDetails(flow)
         flow_details[#flow_details + 1] =
             historical_flow_details_formatter.format_historical_bytes_progress_bar(
                 flow, info)
-        
-        
+
         -- Format ASN Peers if they are != 0
         local src_peer_asn = flow["SRC_PEER_ASN"]
         local dst_peer_asn = flow["DST_PEER_ASN"]
-        local asn_data = historical_flow_details_formatter.format_asn_peer(flow, src_peer_asn, dst_peer_asn)
+        local asn_data = historical_flow_details_formatter.format_asn_peer(flow,
+                                                                           src_peer_asn,
+                                                                           dst_peer_asn)
 
         if src_peer_asn ~= nil or dst_peer_asn ~= nil then
             flow_details[#flow_details + 1] = asn_data
-                
+
         end
 
         if flow["QOE_SCORE"] and tonumber(flow["QOE_SCORE"]) > 0 then
@@ -957,9 +1006,6 @@ function historical_flow_details_formatter.formatHistoricalFlowDetails(flow)
             flow_details[#flow_details + 1] =
                 format_historical_latency(flow, "SERVER_NW_LATENCY_US", "srv")
         end
-
-        local protocol_info_json =
-            json.decode(flow["PROTOCOL_INFO_JSON"] or '') or {}
 
         if (protocol_info_json["appl_latency"]) then
             flow_details[#flow_details + 1] =

@@ -72,7 +72,6 @@
 			"data_field": "l4proto",
 			"min-width": "95px",
 			"sortable": true,
-			"render_generic": "l4proto",
 			"class": [
 				"no-wrap"
 			]

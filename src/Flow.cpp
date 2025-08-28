@@ -7842,6 +7842,7 @@ void Flow::setProtocolJSONInfo() {
 #ifdef NTOPNG_PRO
   getQoEInfo(&s);
 #endif
+  getVerdictInfo(&s);
 
   json = ndpi_serializer_get_buffer(&s, &json_len);
 
@@ -7856,6 +7857,20 @@ void Flow::setProtocolJSONInfo() {
 void Flow::getJSONRiskInfo(ndpi_serializer *serializer) {
   if(serializer && riskInfo) {
     ndpi_serialize_string_raw(serializer, "flow_risk_info", riskInfo, strlen(riskInfo));
+  }
+}
+
+/* ***************************************************** */
+
+void Flow::getVerdictInfo(ndpi_serializer *serializer) {
+  if(serializer) {
+#ifdef HAVE_NEDGE
+    ndpi_serialize_start_of_block(serializer, "verdict"); /* Custom fields block */
+    /* Using int in case more than 0 and 1 value are going to be used*/
+    ndpi_serialize_string_uint32(serializer, "pass", passVerdict); 
+    ndpi_serialize_string_uint32(serializer, "drop_reason", dropVerdictReason);
+    ndpi_serialize_end_of_block(serializer);
+#endif
   }
 }
 
