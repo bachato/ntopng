@@ -13099,13 +13099,13 @@ public:
   u_int32_t probe_ip, input_snmp, output_snmp;
 
   AggregatedASNFlowKey(u_int8_t  _ip_protocol_version,
-			u_int32_t _src_asn,
-			u_int32_t _dst_asn,
-			u_int32_t _src_peer_asn,
-			u_int32_t _dst_peer_asn,
-			u_int32_t _probe_ip,
-			u_int32_t _input_snmp,
-			u_int32_t _output_snmp) {
+		       u_int32_t _src_asn,
+		       u_int32_t _dst_asn,
+		       u_int32_t _src_peer_asn,
+		       u_int32_t _dst_peer_asn,
+		       u_int32_t _probe_ip,
+		       u_int32_t _input_snmp,
+		       u_int32_t _output_snmp) {
     ip_protocol_version = _ip_protocol_version;
     src_asn      = _src_asn;
     dst_asn      = _dst_asn;
@@ -13117,25 +13117,40 @@ public:
   }
 
   AggregatedASNFlowKey(Flow *f) {
+    Host *c = f->get_cli_host(), *s = f->get_srv_host();
+    
     ip_protocol_version = f->get_cli_ip_addr()->getVersion();
-    src_asn      = f->getSrcAS();
-    dst_asn      = f->getDstAS();
+    src_asn      = c ? c->get_asn() : 0;
+    dst_asn      = s ? s->get_asn() : 0;
     src_peer_asn = f->getSrcPeerAS();
     dst_peer_asn = f->getDstPeerAS();
     probe_ip     = f->getFlowDeviceIP();
     input_snmp   = f->getFlowDeviceInIndex();
     output_snmp  = f->getFlowDeviceOutIndex();
+
+    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%u -> %u", src_asn, dst_asn);
   }
 
-  bool equal(AggregatedASNFlowKey *k) const {
-    if((ip_protocol_version == k->ip_protocol_version)
-       && (src_asn == k->src_asn)
-       && (dst_asn == k->dst_asn)
-       && (src_peer_asn == k->src_peer_asn)
-       && (dst_peer_asn == k->dst_peer_asn)
-       && (probe_ip == k->probe_ip)
-       && (input_snmp == k->input_snmp)
-       && (output_snmp == k->output_snmp))
+  bool equal(const AggregatedASNFlowKey *k) const {
+    if(
+       ((ip_protocol_version == k->ip_protocol_version)
+	&& (probe_ip == k->probe_ip))
+       && (
+	   ((src_asn         == k->src_asn)
+	    && (dst_asn      == k->dst_asn)
+	    && (src_peer_asn == k->src_peer_asn)
+	    && (dst_peer_asn == k->dst_peer_asn)
+	    && (input_snmp   == k->input_snmp)
+	    && (output_snmp  == k->output_snmp))
+	   ||
+	   ((src_asn         == k->dst_asn)
+	    && (dst_asn      == k->src_asn)
+	    && (src_peer_asn == k->dst_peer_asn)
+	    && (dst_peer_asn == k->src_peer_asn)
+	    && (input_snmp   == k->output_snmp)
+	    && (output_snmp  == k->input_snmp))
+	   )
+       )
       return(true);
     else
       return(false);
@@ -13199,28 +13214,7 @@ public:
 
 struct AggregatedASNFlowKeyCompare {
   bool operator()(const AggregatedASNFlowKey& a, const AggregatedASNFlowKey& b) const {
-    if(
-       ((a.ip_protocol_version == b.ip_protocol_version)
-	&& (a.probe_ip == b.probe_ip))
-       && (
-	   ((a.src_asn         == b.src_asn)
-	    && (a.dst_asn      == b.dst_asn)
-	    && (a.src_peer_asn == b.src_peer_asn)
-	    && (a.dst_peer_asn == b.dst_peer_asn)
-	    && (a.input_snmp   == b.input_snmp)
-	    && (a.output_snmp  == b.output_snmp))
-	   ||
-	   ((a.src_asn         == b.dst_asn)
-	    && (a.dst_asn      == b.src_asn)
-	    && (a.src_peer_asn == b.dst_peer_asn)
-	    && (a.dst_peer_asn == b.src_peer_asn)
-	    && (a.input_snmp   == b.output_snmp)
-	    && (a.output_snmp  == b.input_snmp))
-	   )
-       )
-      return(true);
-    else
-      return(false);
+    return(!a.equal(&b));
   }
 };
 
@@ -13290,7 +13284,9 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State *vm) {
       + "," + std::to_string(k->output_snmp)
       + ")";
 
-    // ntop->getTrace()->traceEvent(TRACE_INFO, "%s", sql.c_str());
+    //ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", sql.c_str());
+
+    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%u -> %u", k->src_asn, k->dst_asn);
     db->exec_query(sql.c_str(), NULL, NULL);
   }
 
