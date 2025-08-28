@@ -10942,18 +10942,19 @@ void NetworkInterface::getEngagedAlerts(lua_State *vm, AlertEntity alert_entity,
 
 void NetworkInterface::processExternalAlertable(AlertEntity entity,
                                                 const char *entity_val,
+                                                const char *key,
                                                 lua_State *vm,
                                                 u_int vm_argument_idx,
                                                 bool do_store_alert) {
   std::map<std::pair<AlertEntity, std::string>,
            InterfaceMemberAlertableEntity *>::iterator it;
-  std::pair<AlertEntity, std::string> key(entity, std::string(entity_val));
+  std::pair<AlertEntity, std::string> ext_key(entity, std::string(key));
   InterfaceMemberAlertableEntity *alertable = NULL;
 
   external_alerts_lock.lock(__FILE__, __LINE__);
 
   /* Lookup */
-  if ((it = external_alerts.find(key)) != external_alerts.end())
+  if ((it = external_alerts.find(ext_key)) != external_alerts.end())
     alertable = it->second;
 
   if (alertable) {
@@ -10988,7 +10989,7 @@ void NetworkInterface::processExternalAlertable(AlertEntity entity,
     alertable->setEntityValue(entity_val);
 
     /* Add to the map */
-    external_alerts[key] = alertable;
+    external_alerts[ext_key] = alertable;
   }
 
   if (do_store_alert)
@@ -10997,7 +10998,7 @@ void NetworkInterface::processExternalAlertable(AlertEntity entity,
     ntop_release_triggered_alert(vm, alertable, vm_argument_idx);
 
     if (alertable->getNumEngagedAlerts() == 0) {
-      external_alerts.erase(key);
+      external_alerts.erase(ext_key);
       delete alertable;
     }
   }

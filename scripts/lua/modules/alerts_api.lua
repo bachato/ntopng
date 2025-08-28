@@ -372,8 +372,9 @@ function alerts_api.trigger(entity_info, type_info, when, cur_alerts)
             triggered = network.storeTriggeredAlert(table.unpack(params))
         end
     else
-        triggered = interface.triggerExternalAlert(entity_info.alert_entity.entity_id, entity_info.entity_val,
-            table.unpack(params))
+        local key = string.format("%s_%s_%s", entity_info.entity_val, type_info.alert_type.alert_key, subtype)
+
+        triggered = interface.triggerExternalAlert(entity_info.alert_entity.entity_id, entity_info.entity_val, key, table.unpack(params))
     end
 
     if (triggered == nil) then

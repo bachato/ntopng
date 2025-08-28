@@ -181,6 +181,12 @@ end
 
 -- ##############################################
 
+function Alert:get_subtype()
+    return self.subtype
+end
+
+-- ##############################################
+
 function Alert:set_granularity(granularity)
     self.granularity = alert_granularities[granularity]
     if (self.granularity == nil) then
