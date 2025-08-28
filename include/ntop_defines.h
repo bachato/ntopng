@@ -1346,8 +1346,7 @@
 #define MARKER_PASS 1
 #define MARKER_DROP 2
 
-#define NO_HOST_POOL_ID \
-  0 /* Keep in sync with pools.lua pools.DEFAULT_POOL_ID   */
+#define NO_HOST_POOL_ID 0 /* Keep in sync with pools.lua pools.DEFAULT_POOL_ID   */
 #define DEFAULT_POOL_NAME \
   "Default" /* Keep in sync with pools.lua pools.DEFAULT_POOL_NAME */
 

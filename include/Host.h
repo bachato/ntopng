@@ -166,9 +166,6 @@ class Host : public GenericHashEntry,
                   u_int16_t observation_point_id);
   bool statsResetRequested();
   void checkStatsReset();
-#ifdef HAVE_NEDGE
-  TrafficShaper *get_shaper(ndpi_protocol ndpiProtocol, bool isIngress);
-#endif
 #ifdef NTOPNG_PRO
   void get_quota(u_int16_t protocol, u_int64_t *bytes_quota,
                  u_int32_t *secs_quota, u_int32_t *schedule_bitmap,
@@ -348,6 +345,8 @@ class Host : public GenericHashEntry,
   };
 
 #ifdef HAVE_NEDGE
+  TrafficShaper *get_shaper(ndpi_protocol ndpiProtocol, bool isIngress);
+
   inline AddressTree* getDynamicBlacklist() const {
     return (iface->getHostPools()->getDynamicBlacklist(host_pool_id));
   };
@@ -449,14 +448,6 @@ class Host : public GenericHashEntry,
   char *getDHCPName(char *const buf, ssize_t buf_len);
   char *getTLSName(char *const buf, ssize_t buf_len);
   char *getHTTPName(char *const buf, ssize_t buf_len);
-#ifdef HAVE_NEDGE
-  inline TrafficShaper *get_ingress_shaper(ndpi_protocol ndpiProtocol) {
-    return (get_shaper(ndpiProtocol, true));
-  }
-  inline TrafficShaper *get_egress_shaper(ndpi_protocol ndpiProtocol) {
-    return (get_shaper(ndpiProtocol, false));
-  }
-#endif
 #ifdef NTOPNG_PRO
   inline void resetQuotaStats() { stats->resetQuotaStats(); }
   bool checkQuota(ndpi_protocol ndpiProtocol, L7PolicySource_t *quota_source,
