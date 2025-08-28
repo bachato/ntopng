@@ -93,9 +93,6 @@ Mac::~Mac() {
     dumpMacInfo(true /* Add last seen */);
 #endif
 
-  /* Serialize Mac before shutdown */
-  if ((!broadcast_mac) && (!special_mac)) dumpToRedis();
-
   if (model) free(model);
   if (ssid) free(ssid);
   if(dhcpv4_fingerprint) free(dhcpv4_fingerprint);
@@ -446,41 +443,6 @@ void Mac::deleteMacData() {
 /* *************************************** */
 
 u_int64_t Mac::get_mac64() { return Utils::encodeMacTo64(mac); }
-
-/* *************************************** */
-
-void Mac::dumpToRedis() {
-  char buf[32], *json_str = NULL;
-  ndpi_serializer mac_json;
-  u_int32_t json_str_len = 0;
-
-  ndpi_init_serializer(&mac_json, ndpi_serialization_format_json);
-  ndpi_serialize_string_string(&mac_json, "mac",
-                               Utils::formatMac(get_mac(), buf, sizeof(buf)));
-
-  ndpi_serialize_start_of_block(&mac_json, "seen");
-  ndpi_serialize_string_uint32(&mac_json, "first", first_seen);
-  ndpi_serialize_string_uint32(&mac_json, "last", last_seen);
-  ndpi_serialize_end_of_block(&mac_json);
-
-  ndpi_serialize_string_uint32(&mac_json, "devtype", device_type);
-  if (model) ndpi_serialize_string_string(&mac_json, "model", model);
-  if (ssid) ndpi_serialize_string_string(&mac_json, "ssid", ssid);
-
-  if (stats) ((GenericTrafficElement *)stats)->serialize(&mac_json);
-
-  json_str = ndpi_serializer_get_buffer(&mac_json, &json_str_len);
-  if ((json_str != NULL) && (json_str_len > 0)) {
-    u_int expire_secs = 30 * 86400; /* 1 month */
-    char key[64];
-
-    ntop->getTrace()->traceEvent(TRACE_INFO, "%s", json_str);
-    ntop->getRedis()->set(getSerializationKey(key, sizeof(key)), json_str,
-                          expire_secs);
-  }
-
-  ndpi_term_serializer(&mac_json);
-}
 
 /* *************************************** */
 
