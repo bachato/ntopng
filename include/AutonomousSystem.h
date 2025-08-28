@@ -34,7 +34,7 @@ class AutonomousSystem : public GenericHashEntry,
   char *asname;
   u_int32_t round_trip_time;
   u_int32_t alerted_flows_as_client, alerted_flows_as_server;
-  bool save_exporters_stats;
+  bool save_exporters_stats; /* Core ASN for which stats need to be saved */
   std::map<std::pair<u_int32_t, u_int16_t>, TrafficCounter> exporters_map;
 #ifdef NTOPNG_PRO
   QoEStats qoe_stats;
@@ -110,6 +110,7 @@ class AutonomousSystem : public GenericHashEntry,
   };
   inline void saveExporterStatsPrefs(bool _save_exporters_stats) {
     save_exporters_stats = _save_exporters_stats;
+    
     if (!save_exporters_stats)
       exporters_map.clear(); /* Empty the map in case it's present */
   }

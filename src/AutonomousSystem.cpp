@@ -205,13 +205,12 @@ void AutonomousSystem::updateBehaviorStats(const struct timeval *tv) {}
 
 /* ***************************************** */
 
-void AutonomousSystem::findExportersStats(
-    u_int64_t bytes_sent, u_int64_t bytes_rcvd,
-    std::pair<u_int32_t, u_int16_t> *key) {
-  auto it = exporters_map.find(*key);
+void AutonomousSystem::findExportersStats(u_int64_t bytes_sent, u_int64_t bytes_rcvd,
+					  std::pair<u_int32_t, u_int16_t> *key) {
+  std::map<std::pair<u_int32_t, u_int16_t>, TrafficCounter>::iterator it = exporters_map.find(*key);
+
   if (it != exporters_map.end()) {
-    it->second.incStats(bytes_sent,
-                        bytes_rcvd);  // Update if exists already
+    it->second.incStats(bytes_sent, bytes_rcvd);  // Update if exists already
   } else {
     exporters_map[*key] = TrafficCounter();
     exporters_map[*key].incStats(bytes_sent, bytes_rcvd);
@@ -227,14 +226,18 @@ void AutonomousSystem::incExportersStats(u_int64_t bytes_sent,
                                          u_int32_t out_index) {
   if (save_exporters_stats && exporter_ip) {
     std::pair<u_int32_t, u_int16_t> key;
+
     /* Increase the stats just one time, same interface */
     /* Out interface, so Sent Bytes and Rcvd Bytes are okay this way */
     key = std::make_pair(exporter_ip, out_index);
+
     findExportersStats(bytes_sent, bytes_rcvd, &key);
+
     if (in_index != out_index) {
       key = std::make_pair(exporter_ip, in_index);
       /* In interface, so Sent Bytes and Rcvd Bytes are inverted (Sent Bytes is
        * Rcvd Bytes and viceversa) */
+
       findExportersStats(bytes_rcvd, bytes_sent, &key);
     }
   }
