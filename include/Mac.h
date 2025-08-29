@@ -177,17 +177,17 @@ class Mac : public GenericHashEntry {
 
   inline u_int64_t getNumSentArp() { return (stats->getNumSentArp()); }
   inline u_int64_t getNumRcvdArp() { return (stats->getNumRcvdArp()); }
-  inline void incNumDroppedFlows() { stats->incNumDroppedFlows(); }
-  inline void incSentArpRequests() { stats->incSentArpRequests(); }
-  inline void incSentArpReplies() { stats->incSentArpReplies(); }
-  inline void incRcvdArpRequests() { stats->incRcvdArpRequests(); }
-  inline void incRcvdArpReplies() { stats->incRcvdArpReplies(); }
+  inline void incNumDroppedFlows() { stats->incNumDroppedFlows();     }
+  inline void incSentArpRequests() { stats->incSentArpRequests();     }
+  inline void incSentArpReplies()  { stats->incSentArpReplies();      }
+  inline void incRcvdArpRequests() { stats->incRcvdArpRequests();     }
+  inline void incRcvdArpReplies()  { stats->incRcvdArpReplies();      }
   void periodic_stats_update(const struct timeval *tv);
-  inline u_int64_t getNumBytes() { return (stats->getNumBytes()); }
-  inline float getBytesThpt() { return (stats->getBytesThpt()); }
-  inline bool isMulticast() { return Utils::isMulticastMac(mac); }
-  inline u_int64_t getNumPktsSent() { return stats ? stats->getNumPktsSent() : 0; }
-  inline u_int64_t getNumPktsRcvd() { return stats ? stats->getNumPktsRcvd() : 0; }
+  inline u_int64_t getNumBytes() { return (stats->getNumBytes());     }
+  inline float getBytesThpt() { return (stats->getBytesThpt());       }
+  inline bool isMulticast() { return Utils::isMulticastMac(mac);      }
+  inline u_int64_t getNumPktsSent() { return stats ? stats->getNumPktsSent() : 0;   }
+  inline u_int64_t getNumPktsRcvd() { return stats ? stats->getNumPktsRcvd() : 0;   }
   inline u_int64_t getNumBytesSent() { return stats ? stats->getNumBytesSent() : 0; }
   inline u_int64_t getNumBytesRcvd() { return stats ? stats->getNumBytesRcvd() : 0; }
 
