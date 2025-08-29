@@ -2055,8 +2055,7 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 
     // Update network stats
     cli_network_stats = cli_host->getNetworkStats(cli_network_id);
-    cli_host->incStats(
-		       tv->tv_sec, get_protocol(), stats_protocol, get_protocol_category(),
+    cli_host->incStats(tv->tv_sec, get_protocol(), stats_protocol, get_protocol_category(),
 		       custom_app, partial->get_cli2srv_packets(),
 		       partial->get_cli2srv_bytes(), partial->get_cli2srv_goodput_bytes(),
 		       partial->get_srv2cli_packets(), partial->get_srv2cli_bytes(),
