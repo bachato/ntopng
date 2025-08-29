@@ -2174,7 +2174,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
       break;
     }
 
-#ifndef HAVE_NEDGE
+#ifdef HAVE_NEDGE
     update_counters = (flow->getLastConntrackUpdate() != 0) ? false : true;
 #endif
 
