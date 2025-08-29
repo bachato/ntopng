@@ -18,9 +18,9 @@ end
 
 -- Function used to reload the custom applications (the protocol file, -p option)
 local function reloadApplications()
-   local lists_utils = require "lists_utils"
+    local lists_utils = require "lists_utils"
 
-   lists_utils.reloadLists()
+    lists_utils.reloadLists()
 end
 
 -- ##############################################
@@ -52,7 +52,9 @@ local function parsePortBasedRule(filter, value, line)
             }
         else
             traceError(TRACE_WARNING, TRACE_CONSOLE,
-                string.format("[protos.txt] Ignoring bad %s port range '%s' in rule: %s", filter, value, line))
+                       string.format(
+                           "[protos.txt] Ignoring bad %s port range '%s' in rule: %s",
+                           filter, value, line))
             return true, nil
         end
     end
@@ -69,9 +71,7 @@ end
 function protos_utils.parseProtosTxt()
     local path = getProtosFile()
 
-    if not ntop.exists(path) then
-        return {}, {}
-    end
+    if not ntop.exists(path) then return {}, {} end
 
     local f = io.open(path, "r")
     local defined_protos = {}
@@ -88,8 +88,9 @@ function protos_utils.parseProtosTxt()
     end
 
     if f == nil then
-        traceError(TRACE_ERROR, TRACE_CONSOLE,
-            string.format("[protos.txt] Could not open '%s' (invalid permissions?)", path))
+        traceError(TRACE_ERROR, TRACE_CONSOLE, string.format(
+                       "[protos.txt] Could not open '%s' (invalid permissions?)",
+                       path))
         return {}, {}
     end
 
@@ -117,7 +118,9 @@ function protos_utils.parseProtosTxt()
                     local filter = parts[1]
                     local value = rule:gsub(filter .. ":", "")
 
-                    local is_port_based, port_based_rule = parsePortBasedRule(filter, value, line)
+                    local is_port_based, port_based_rule = parsePortBasedRule(
+                                                               filter, value,
+                                                               line)
 
                     if is_port_based then
                         addRule(proto, port_based_rule)
@@ -126,34 +129,26 @@ function protos_utils.parseProtosTxt()
                         value = value:gsub("^\"*(.-)\"*$", "%1")
 
                         if not isEmptyString(value) then
-                            addRule(proto, {
-                                match = "host",
-                                value = value
-                            })
+                            addRule(proto, {match = "host", value = value})
                         else
                             traceError(TRACE_WARNING, TRACE_CONSOLE,
-                                string.format("[protos.txt] Ignoring bad host '%s' in rule: %s", value, line))
+                                       string.format(
+                                           "[protos.txt] Ignoring bad host '%s' in rule: %s",
+                                           value, line))
                         end
-                    elseif (filter == "ip") then
-                        addRule(proto, {
-                            match = "ip",
-                            value = value
-                        })
-                    elseif (filter == "ipv6") then
-                        addRule(proto, {
-                            match = "ipv6",
-                            value = value
-                        })
                     else
-                        traceError(TRACE_WARNING, TRACE_CONSOLE,
-                            string.format("[protos.txt] Ignoring unknown filter '%s' in rule: %s", filter, line))
+                        addRule(proto, {match = filter, value = value})
+                        -- traceError(TRACE_DEBUG, TRACE_CONSOLE,
+                        --    string.format("[protos.txt] Adding new rule [%s: %s]", filter, value))
                     end
                 else
-                    traceError(TRACE_WARNING, TRACE_CONSOLE, string.format("[protos.txt] Ignoring bad rule: %s", line))
+                    traceError(TRACE_WARNING, TRACE_CONSOLE, string.format(
+                                   "[protos.txt] Ignoring bad rule: %s", line))
                 end
             end
         else
-            traceError(TRACE_WARNING, TRACE_CONSOLE, string.format("[protos.txt] Ignoring bad rule: %s", line))
+            traceError(TRACE_WARNING, TRACE_CONSOLE, string.format(
+                           "[protos.txt] Ignoring bad rule: %s", line))
         end
     end
 
@@ -164,9 +159,8 @@ end
 
 -- ##############################################
 
-function protos_utils.hasProtosFile()
-    return (not isEmptyString(getProtosFile()))
-end
+function protos_utils.hasProtosFile() return
+    (not isEmptyString(getProtosFile())) end
 
 -- ##############################################
 
@@ -176,13 +170,10 @@ function protos_utils.getProtosTxtRule(line)
     line = trimString(line)
 
     if isIPv4(line) or http_lint.validateNetwork(line) then
-        return {
-            match = "ip",
-            value = line
-        }
+        return {match = "ip", value = line}
     else
         local parts = string.split(line, ":")
-        
+
         if ((parts ~= nil) and (#parts >= 2)) then
             local filter = parts[1]
             local value = parts[2]
@@ -190,36 +181,24 @@ function protos_utils.getProtosTxtRule(line)
             if filter == 'ip' then
                 -- Add the port in case there is one, so accept both cases, ip and ip:port :
                 -- e.g. ip:1.1.1.1 and ip:1.1.1.1:5466
-                if parts[3] then
-                    value = value .. ':' .. parts[3]
-                end
-                return {
-                    match = "ip",
-                    value = value
-                }
+                if parts[3] then value = value .. ':' .. parts[3] end
+                return {match = "ip", value = value}
             elseif filter == 'ipv6' then
                 -- Add each value after 'ipv6:', so accept both cases, [ipv6] and [ipv6]:port :
                 -- e.g. ipv6:[1:1:1:1:1:1:1:1] and ipv6:[1:1:1:1:1:1:1:1]:5466
                 value = line:gsub(filter .. ":", "")
-                return {
-                    match = "ipv6",
-                    value = value
-                }
+                return {match = "ipv6", value = value}
             elseif filter == 'host' then
                 -- Domain name filter
                 -- e.g. host:google
-                return {
-                    match = "host",
-                    value = value
-                }
+                return {match = "host", value = value}
             else
                 -- Check if it's a port or port range filter
                 -- e.g. udp:5555 and udp:5555-5557
-                local is_port_based, port_based_rule = parsePortBasedRule(filter, value, line)
+                local is_port_based, port_based_rule = parsePortBasedRule(
+                                                           filter, value, line)
 
-                if is_port_based then
-                    return port_based_rule
-                end
+                if is_port_based then return port_based_rule end
             end
         end
     end
@@ -233,9 +212,7 @@ function protos_utils.overwriteAppRules(app, rules)
     local found = false
     local skip_rules = false
 
-    if (current_rules == nil) or (type("app") ~= "string") then
-        return false
-    end
+    if (current_rules == nil) or (type("app") ~= "string") then return false end
 
     -- In case the name has different major or lower cases
     -- Replace with the new name
@@ -265,17 +242,14 @@ function protos_utils.addAppRule(app, rule)
     local current_rules, defined_protos = protos_utils.parseProtosTxt()
     local app_rules
 
-    if (current_rules == nil) or (type("app") ~= "string") then
-        return false
-    end
+    if (current_rules == nil) or (type("app") ~= "string") then return false end
 
     app_rules = current_rules[app] or {}
 
     -- Uniqueness Check
     for _, existing_rule in pairs(app_rules) do
-        if ((existing_rule.match == rule.match) and (existing_rule.value == rule.value)) then
-            return false
-        end
+        if ((existing_rule.match == rule.match) and
+            (existing_rule.value == rule.value)) then return false end
     end
 
     if (not current_rules[app]) then
@@ -307,13 +281,17 @@ end
 -- In order to have a clean startup, remove the old mappings 
 -- between protocols no more defined and categories
 function protos_utils.clearOldApplications()
-    local current_rules, defined_protos, app_id_mapping = protos_utils.parseProtosTxt()
+    local current_rules, defined_protos, app_id_mapping =
+        protos_utils.parseProtosTxt()
     local key = getCustomnDPIProtoCategoriesKey()
     local app_cat_mapping = ntop.getHashAllCache(key) or {}
     if app_id_mapping then
         for application_id, category_id in pairs(app_cat_mapping) do
             if not app_id_mapping[application_id] then
-                traceError(TRACE_NORMAL, TRACE_CONSOLE, string.format("Removing Application - Category old mapping: %s %s", application_id, category_id))
+                traceError(TRACE_NORMAL, TRACE_CONSOLE,
+                           string.format(
+                               "Removing Application - Category old mapping: %s %s",
+                               application_id, category_id))
                 ntop.delHashCache(key, application_id)
             end
         end
@@ -335,20 +313,20 @@ function protos_utils.generateProtosTxt(rules, defined_protos)
     local backup_file = path .. ".bak"
 
     if (ntop.exists(path) and (not ntop.exists(backup_file))) then
-        traceError(TRACE_INFO, TRACE_CONSOLE, string.format("Backing up '%s' to '%s'", path, backup_file))
+        traceError(TRACE_INFO, TRACE_CONSOLE,
+                   string.format("Backing up '%s' to '%s'", path, backup_file))
         os.rename(path, backup_file)
     end
 
     local f = io.open(path, "w")
 
     if f == nil then
-        traceError(TRACE_ERROR, TRACE_CONSOLE, string.format("[protos.txt] Could not open '%s' for write", path))
+        traceError(TRACE_ERROR, TRACE_CONSOLE, string.format(
+                       "[protos.txt] Could not open '%s' for write", path))
         return false
     end
 
-    local function writeRule(rule)
-        f:write(string.format("%s\n", rule))
-    end
+    local function writeRule(rule) f:write(string.format("%s\n", rule)) end
 
     -- Important: iterate by index to ensure that new protocols are always appended
     for _, proto in ipairs(defined_protos) do
@@ -364,14 +342,12 @@ function protos_utils.generateProtosTxt(rules, defined_protos)
         local proto_id = interface.getnDPIProtoId(proto_name)
 
         if isEmptyString(proto_id) then
-            proto_id = ntop.getHashCache(proto_key, proto_name) or ''    
+            proto_id = ntop.getHashCache(proto_key, proto_name) or ''
         end
-        
+
         if isEmptyString(proto_id) or proto_id == 0 then
             proto_id = tonumber(ntop.getCache(proto_last_id)) or 0
-            if proto_id == 0 then
-                proto_id = first_proto_id
-            end
+            if proto_id == 0 then proto_id = first_proto_id end
 
             ntop.setCache(proto_last_id, proto_id + 1)
             ntop.setHashCache(proto_key, proto_name, proto_id)
@@ -382,13 +358,14 @@ function protos_utils.generateProtosTxt(rules, defined_protos)
 
             for _, rule in ipairs(proto_rules) do
                 if rule.match == "port" then
-                    writeRule(string.format("%s@%s=%s", rule.value, proto_name, proto_id))
+                    writeRule(string.format("%s@%s=%s", rule.value, proto_name,
+                                            proto_id))
                 elseif rule.match == "host" then
-                    writeRule(string.format("host:\"%s\"@%s=%s", rule.value, proto_name, proto_id))
-                elseif rule.match == "ip" then
-                    writeRule(string.format("ip:%s@%s=%s", rule.value, proto_name, proto_id))
-                elseif rule.match == "ipv6" then
-                    writeRule(string.format("ipv6:%s@%s=%s", rule.value, proto_name, proto_id))
+                    writeRule(string.format("host:\"%s\"@%s=%s", rule.value,
+                                            proto_name, proto_id))
+                else
+                    writeRule(string.format("%s:%s@%s=%s", rule.match,
+                                            rule.value, proto_name, proto_id))
                 end
             end
 
