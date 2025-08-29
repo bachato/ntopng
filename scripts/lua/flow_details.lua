@@ -751,9 +751,8 @@ else
 
       print("<td nowrap>" .. c .. "</td>")
       print("<td>")
-      print(i18n("client") .. ": ")
       shaper = shaper_utils.nedge_shaper_id_to_shaper(flow["shaper.cli"])
-      print(shaper.icon .. " " .. shaper.text)
+      print(shaper.icon .. shaper.text)
 
       if ntop.isnEdge() then
          local cli_mac = flow["cli.mac"] and interface.getMacInfo(flow["cli.mac"])
@@ -768,9 +767,8 @@ else
 
       print("<td nowrap>" .. s .. "</td>")
       print("<td>")
-      print(i18n("server") .. ": ")
       shaper = shaper_utils.nedge_shaper_id_to_shaper(flow["shaper.srv"])
-      print(shaper.icon .. " " .. shaper.text)
+      print(shaper.icon .. shaper.text)
       print("</td>")
       print("</tr>")
 
