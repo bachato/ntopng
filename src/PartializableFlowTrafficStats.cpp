@@ -45,7 +45,7 @@ PartializableFlowTrafficStats::PartializableFlowTrafficStats() {
 /* *************************************** */
 
 PartializableFlowTrafficStats::PartializableFlowTrafficStats(
-    const PartializableFlowTrafficStats &fts) {
+							     const PartializableFlowTrafficStats &fts) {
   memcpy(&ndpiDetectedProtocol, &fts.ndpiDetectedProtocol,
          sizeof(ndpiDetectedProtocol));
   cli2srv_packets = fts.cli2srv_packets;
@@ -67,9 +67,16 @@ PartializableFlowTrafficStats::PartializableFlowTrafficStats(
 }
 /* *************************************** */
 
-PartializableFlowTrafficStats PartializableFlowTrafficStats::operator-(
-    const PartializableFlowTrafficStats &fts) {
+/* Safety difference */
+#define NON_NEGATIVE_DIFF(a, b) { if(b > a) a = 0; else a -= b; }
+
+PartializableFlowTrafficStats PartializableFlowTrafficStats::operator-(const PartializableFlowTrafficStats &fts) {
   PartializableFlowTrafficStats cur(*this);
+#ifndef HAVE_NEDGE
+  /*
+    nEdge counters can go backwards when passing from
+    packet accounting to conntrack
+  */
   static bool warn_once = true;
 
   /* Check flow counters (Debug) */
@@ -81,63 +88,65 @@ PartializableFlowTrafficStats PartializableFlowTrafficStats::operator-(
 				 cur.srv2cli_bytes);
     warn_once = false;
   }
+#endif
+  
+  NON_NEGATIVE_DIFF(cur.cli2srv_bytes, fts.cli2srv_bytes);
+  NON_NEGATIVE_DIFF(cur.srv2cli_bytes, fts.srv2cli_bytes);
 
-  cur.cli2srv_bytes -= fts.cli2srv_bytes;
-  cur.srv2cli_bytes -= fts.srv2cli_bytes;
+  NON_NEGATIVE_DIFF(cur.cli2srv_packets, fts.cli2srv_packets);
+  NON_NEGATIVE_DIFF(cur.cli2srv_goodput_bytes, fts.cli2srv_goodput_bytes);
+  NON_NEGATIVE_DIFF(cur.srv2cli_packets, fts.srv2cli_packets);
+  NON_NEGATIVE_DIFF(cur.srv2cli_goodput_bytes, fts.srv2cli_goodput_bytes);
 
-  cur.cli2srv_packets -= fts.cli2srv_packets;
-  cur.cli2srv_goodput_bytes -= fts.cli2srv_goodput_bytes;
-  cur.srv2cli_packets -= fts.srv2cli_packets;
-  cur.srv2cli_goodput_bytes -= fts.srv2cli_goodput_bytes;
+  NON_NEGATIVE_DIFF(cur.cli2srv_tcp_stats.pktRetr, fts.cli2srv_tcp_stats.pktRetr);
+  NON_NEGATIVE_DIFF(cur.cli2srv_tcp_stats.pktOOO, fts.cli2srv_tcp_stats.pktOOO);
+  NON_NEGATIVE_DIFF(cur.cli2srv_tcp_stats.pktLost, fts.cli2srv_tcp_stats.pktLost);
+  NON_NEGATIVE_DIFF(cur.cli2srv_tcp_stats.pktKeepAlive, fts.cli2srv_tcp_stats.pktKeepAlive);
+  NON_NEGATIVE_DIFF(cur.srv2cli_tcp_stats.pktRetr, fts.srv2cli_tcp_stats.pktRetr);
+  NON_NEGATIVE_DIFF(cur.srv2cli_tcp_stats.pktOOO, fts.srv2cli_tcp_stats.pktOOO);
+  NON_NEGATIVE_DIFF(cur.srv2cli_tcp_stats.pktLost, fts.srv2cli_tcp_stats.pktLost);
+  NON_NEGATIVE_DIFF(cur.srv2cli_tcp_stats.pktKeepAlive, fts.srv2cli_tcp_stats.pktKeepAlive);
 
-  cur.cli2srv_tcp_stats.pktRetr -= fts.cli2srv_tcp_stats.pktRetr;
-  cur.cli2srv_tcp_stats.pktOOO -= fts.cli2srv_tcp_stats.pktOOO;
-  cur.cli2srv_tcp_stats.pktLost -= fts.cli2srv_tcp_stats.pktLost;
-  cur.cli2srv_tcp_stats.pktKeepAlive -= fts.cli2srv_tcp_stats.pktKeepAlive;
-  cur.srv2cli_tcp_stats.pktRetr -= fts.srv2cli_tcp_stats.pktRetr;
-  cur.srv2cli_tcp_stats.pktOOO -= fts.srv2cli_tcp_stats.pktOOO;
-  cur.srv2cli_tcp_stats.pktLost -= fts.srv2cli_tcp_stats.pktLost;
-  cur.srv2cli_tcp_stats.pktKeepAlive -= fts.srv2cli_tcp_stats.pktKeepAlive;
-
-  for (int i = 0; i < MAX_NUM_SCORE_CATEGORIES; i++)
-    cur.cli_host_score[i] -= fts.cli_host_score[i],
-        cur.srv_host_score[i] -= fts.srv_host_score[i];
-
+  for (int i = 0; i < MAX_NUM_SCORE_CATEGORIES; i++){
+    NON_NEGATIVE_DIFF(cur.cli_host_score[i], fts.cli_host_score[i]);
+    NON_NEGATIVE_DIFF(cur.srv_host_score[i], fts.srv_host_score[i]);
+  }
+  
   /*
     Even though is_flow_alerted is a boolean, we can still use operator -= to
     keep it consistent with other fields. Compilers know how to handle the
     boolean as 0, 1.
-   */
-  cur.is_flow_alerted -= fts.is_flow_alerted;
+  */
+  NON_NEGATIVE_DIFF(cur.is_flow_alerted, fts.is_flow_alerted);
 
   switch (ndpi_get_lower_proto(ndpiDetectedProtocol)) {
-    case NDPI_PROTOCOL_HTTP:
-      cur.protos.http.num_get -= fts.protos.http.num_get;
-      cur.protos.http.num_post -= fts.protos.http.num_post;
-      cur.protos.http.num_put -= fts.protos.http.num_put;
-      cur.protos.http.num_other -= fts.protos.http.num_other;
-      cur.protos.http.num_1xx -= fts.protos.http.num_1xx;
-      cur.protos.http.num_2xx -= fts.protos.http.num_2xx;
-      cur.protos.http.num_3xx -= fts.protos.http.num_3xx;
-      cur.protos.http.num_4xx -= fts.protos.http.num_4xx;
-      cur.protos.http.num_5xx -= fts.protos.http.num_5xx;
-      break;
-    case NDPI_PROTOCOL_DNS:
-      cur.protos.dns.num_a -= fts.protos.dns.num_a;
-      cur.protos.dns.num_ns -= fts.protos.dns.num_ns;
-      cur.protos.dns.num_cname -= fts.protos.dns.num_cname;
-      cur.protos.dns.num_soa -= fts.protos.dns.num_soa;
-      cur.protos.dns.num_ptr -= fts.protos.dns.num_ptr;
-      cur.protos.dns.num_mx -= fts.protos.dns.num_mx;
-      cur.protos.dns.num_txt -= fts.protos.dns.num_txt;
-      cur.protos.dns.num_aaaa -= fts.protos.dns.num_aaaa;
-      cur.protos.dns.num_any -= fts.protos.dns.num_any;
-      cur.protos.dns.num_other -= fts.protos.dns.num_other;
-      cur.protos.dns.num_replies_ok -= fts.protos.dns.num_replies_ok;
-      cur.protos.dns.num_replies_error -= fts.protos.dns.num_replies_error;
-      break;
-    default:
-      break;
+  case NDPI_PROTOCOL_HTTP:
+    NON_NEGATIVE_DIFF(cur.protos.http.num_get, fts.protos.http.num_get);
+    NON_NEGATIVE_DIFF(cur.protos.http.num_post, fts.protos.http.num_post);
+    NON_NEGATIVE_DIFF(cur.protos.http.num_put, fts.protos.http.num_put);
+    NON_NEGATIVE_DIFF(cur.protos.http.num_other, fts.protos.http.num_other);
+    NON_NEGATIVE_DIFF(cur.protos.http.num_1xx, fts.protos.http.num_1xx);
+    NON_NEGATIVE_DIFF(cur.protos.http.num_2xx, fts.protos.http.num_2xx);
+    NON_NEGATIVE_DIFF(cur.protos.http.num_3xx, fts.protos.http.num_3xx);
+    NON_NEGATIVE_DIFF(cur.protos.http.num_4xx, fts.protos.http.num_4xx);
+    NON_NEGATIVE_DIFF(cur.protos.http.num_5xx, fts.protos.http.num_5xx);
+    break;
+  case NDPI_PROTOCOL_DNS:
+    NON_NEGATIVE_DIFF(cur.protos.dns.num_a, fts.protos.dns.num_a);
+    NON_NEGATIVE_DIFF(cur.protos.dns.num_ns, fts.protos.dns.num_ns);
+    NON_NEGATIVE_DIFF(cur.protos.dns.num_cname, fts.protos.dns.num_cname);
+    NON_NEGATIVE_DIFF(cur.protos.dns.num_soa, fts.protos.dns.num_soa);
+    NON_NEGATIVE_DIFF(cur.protos.dns.num_ptr, fts.protos.dns.num_ptr);
+    NON_NEGATIVE_DIFF(cur.protos.dns.num_mx, fts.protos.dns.num_mx);
+    NON_NEGATIVE_DIFF(cur.protos.dns.num_txt, fts.protos.dns.num_txt);
+    NON_NEGATIVE_DIFF(cur.protos.dns.num_aaaa, fts.protos.dns.num_aaaa);
+    NON_NEGATIVE_DIFF(cur.protos.dns.num_any, fts.protos.dns.num_any);
+    NON_NEGATIVE_DIFF(cur.protos.dns.num_other, fts.protos.dns.num_other);
+    NON_NEGATIVE_DIFF(cur.protos.dns.num_replies_ok, fts.protos.dns.num_replies_ok);
+    NON_NEGATIVE_DIFF(cur.protos.dns.num_replies_error, fts.protos.dns.num_replies_error);
+    break;
+  default:
+    break;
   }
 
   return cur;
@@ -150,7 +159,7 @@ PartializableFlowTrafficStats::~PartializableFlowTrafficStats() {}
 /* *************************************** */
 
 void PartializableFlowTrafficStats::setDetectedProtocol(
-    const ndpi_protocol *ndpi_detected_protocol) {
+							const ndpi_protocol *ndpi_detected_protocol) {
   memcpy(&ndpiDetectedProtocol, ndpi_detected_protocol,
          sizeof(ndpiDetectedProtocol));
 }
@@ -194,10 +203,10 @@ void PartializableFlowTrafficStats::incStats(bool cli2srv_direction,
                                              u_int64_t payloads_bytes) {
   if (cli2srv_direction)
     cli2srv_packets += num_pkts, cli2srv_bytes += pkts_bytes,
-        cli2srv_goodput_bytes += payloads_bytes;
+      cli2srv_goodput_bytes += payloads_bytes;
   else
     srv2cli_packets += num_pkts, srv2cli_bytes += pkts_bytes,
-        srv2cli_goodput_bytes += payloads_bytes;
+      srv2cli_goodput_bytes += payloads_bytes;
 }
 
 /* *************************************** */
@@ -207,58 +216,58 @@ void PartializableFlowTrafficStats::setStats(bool cli2srv_direction,
                                              u_int64_t payloads_bytes) {
   if (cli2srv_direction)
     cli2srv_packets = num_pkts, cli2srv_bytes = pkts_bytes,
-    cli2srv_goodput_bytes = payloads_bytes;
+      cli2srv_goodput_bytes = payloads_bytes;
   else
     srv2cli_packets = num_pkts, srv2cli_bytes = pkts_bytes,
-    srv2cli_goodput_bytes = payloads_bytes;
+      srv2cli_goodput_bytes = payloads_bytes;
 }
 
 /* *************************************** */
 
 void PartializableFlowTrafficStats::incDNSQuery(u_int16_t query_type) {
   switch (query_type) {
-    case 0:
-      /* Zero means we have not been able to decode the DNS message */
-      break;
-    case 1:
-      /* A */
-      protos.dns.num_a++;
-      break;
-    case 2:
-      /* NS */
-      protos.dns.num_ns++;
-      break;
-    case 5:
-      /* CNAME */
-      protos.dns.num_cname++;
-      break;
-    case 6:
-      /* SOA */
-      protos.dns.num_soa++;
-      break;
-    case 12:
-      /* PTR */
-      protos.dns.num_ptr++;
-      break;
-    case 15:
-      /* MX */
-      protos.dns.num_mx++;
-      break;
-    case 16:
-      /* TXT */
-      protos.dns.num_txt++;
-      break;
-    case 28:
-      /* AAAA */
-      protos.dns.num_aaaa++;
-      break;
-    case 255:
-      /* ANY */
-      protos.dns.num_any++;
-      break;
-    default:
-      protos.dns.num_other++;
-      break;
+  case 0:
+    /* Zero means we have not been able to decode the DNS message */
+    break;
+  case 1:
+    /* A */
+    protos.dns.num_a++;
+    break;
+  case 2:
+    /* NS */
+    protos.dns.num_ns++;
+    break;
+  case 5:
+    /* CNAME */
+    protos.dns.num_cname++;
+    break;
+  case 6:
+    /* SOA */
+    protos.dns.num_soa++;
+    break;
+  case 12:
+    /* PTR */
+    protos.dns.num_ptr++;
+    break;
+  case 15:
+    /* MX */
+    protos.dns.num_mx++;
+    break;
+  case 16:
+    /* TXT */
+    protos.dns.num_txt++;
+    break;
+  case 28:
+    /* AAAA */
+    protos.dns.num_aaaa++;
+    break;
+  case 255:
+    /* ANY */
+    protos.dns.num_any++;
+    break;
+  default:
+    protos.dns.num_other++;
+    break;
   }
 }
 
@@ -266,19 +275,18 @@ void PartializableFlowTrafficStats::incDNSQuery(u_int16_t query_type) {
 
 void PartializableFlowTrafficStats::incDNSResp(u_int16_t resp_code) {
   switch (resp_code) {
-    case 0:
-      protos.dns.num_replies_ok++;
-      break;
-    default:
-      protos.dns.num_replies_error++;
+  case 0:
+    protos.dns.num_replies_ok++;
+    break;
+  default:
+    protos.dns.num_replies_error++;
   }
 }
 
 /* *************************************** */
 
-void PartializableFlowTrafficStats::get_partial(
-    PartializableFlowTrafficStats *dst,
-    PartializableFlowTrafficStats *fts) const {
+void PartializableFlowTrafficStats::get_partial(PartializableFlowTrafficStats *dst,
+						PartializableFlowTrafficStats *fts) const {
   /* Set temp to the current value */
   PartializableFlowTrafficStats tmp(*this);
 
@@ -296,16 +304,16 @@ void PartializableFlowTrafficStats::get_partial(
 
 u_int16_t PartializableFlowTrafficStats::get_num_http_requests() const {
   return protos.http.num_get + protos.http.num_post + protos.http.num_head +
-         protos.http.num_put + protos.http.num_other;
+    protos.http.num_put + protos.http.num_other;
 }
 
 /* *************************************** */
 
 u_int16_t PartializableFlowTrafficStats::get_num_dns_queries() const {
   return protos.dns.num_a + protos.dns.num_ns + protos.dns.num_cname +
-         protos.dns.num_soa + protos.dns.num_ptr + protos.dns.num_mx +
-         protos.dns.num_txt + protos.dns.num_aaaa + protos.dns.num_any +
-         protos.dns.num_other;
+    protos.dns.num_soa + protos.dns.num_ptr + protos.dns.num_mx +
+    protos.dns.num_txt + protos.dns.num_aaaa + protos.dns.num_any +
+    protos.dns.num_other;
 }
 
 /* *************************************** */
