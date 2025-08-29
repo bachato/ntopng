@@ -1369,6 +1369,7 @@ public:
   inline void setLastConntrackUpdate(u_int32_t when) {
     last_conntrack_update = when;
   }
+  inline u_int32_t getLastConntrackUpdate() { return(last_conntrack_update); }
   bool isNetfilterIdleFlow() const;
 
   void setPacketsBytes(time_t now, u_int32_t s2d_pkts, u_int32_t d2s_pkts,

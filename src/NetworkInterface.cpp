@@ -1672,10 +1672,8 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
   bool is_fragment = false;
   bool pass_verdict = true;
   u_int16_t l4_len = 0, fragment_offset = 0;
-#ifndef HAVE_NEDGE
 #ifdef IMPLEMENT_SMART_FRAGMENTS
   u_int16_t fragment_extra_overhead = 0;
-#endif
 #endif
   u_int8_t tos;
 #ifdef NTOPNG_PRO
@@ -2075,6 +2073,8 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
              l4_proto, len_on_wire, 1, srcMac, dstMac);
     return (pass_verdict);
   } else {
+    bool update_counters = true;
+
 #ifdef HAVE_NEDGE
     if (*new_flow) flow->setIngress2EgressDirection(*ingressPacket);
 #endif
@@ -2175,21 +2175,24 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
     }
 
 #ifndef HAVE_NEDGE
+    update_counters = (flow->getLastConntrackUpdate() != 0) ? false : true;
+#endif
+
+    if(update_counters) {
 #ifdef __OpenBSD__
-    struct timeval tv_ts;
+      struct timeval tv_ts;
 
-    tv_ts.tv_sec = h->ts.tv_sec;
-    tv_ts.tv_usec = h->ts.tv_usec;
+      tv_ts.tv_sec = h->ts.tv_sec, tv_ts.tv_usec = h->ts.tv_usec;
 
-    flow->incStats(src2dst_direction, len_on_wire - encapsulation_overhead - frame_padding,
-                   payload, trusted_payload_len, l4_proto, is_fragment,
-                   tcp_flags, &tv_ts, fragment_extra_overhead);
+      flow->incStats(src2dst_direction, len_on_wire - encapsulation_overhead - frame_padding,
+		     payload, trusted_payload_len, l4_proto, is_fragment,
+		     tcp_flags, &tv_ts, fragment_extra_overhead);
 #else
-    flow->incStats(src2dst_direction, len_on_wire - encapsulation_overhead - frame_padding,
-                   payload, trusted_payload_len, l4_proto, is_fragment,
-                   tcp_flags, &h->ts, fragment_extra_overhead);
+      flow->incStats(src2dst_direction, len_on_wire - encapsulation_overhead - frame_padding,
+		     payload, trusted_payload_len, l4_proto, is_fragment,
+		     tcp_flags, &h->ts, fragment_extra_overhead);
 #endif
-#endif
+    }
   }
 
   /*
@@ -3440,29 +3443,6 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
   }
 
  dissect_packet_end:
-
-#ifdef HAVE_NEDGE
-  if((pass_verdict == false)
-     && (flow != NULL)
-     && new_flow) {
-    if((*flow)->get_packets() == 0) {
-      /*
-	This is a flow that will be dropped, hence Conntrack won't see it.
-	In this case flow counters won't be set and thus we need to force
-	their update
-       */
-      (*flow)->getTrafficStats()->incStats(true, 1, h->len, h->len);
-
-#if 0
-      ntop->getTrace()->traceEvent(TRACE_WARNING, "**** DROP **** [pkts: %u][bytes: %u]",
-				   (unsigned long)(*flow)->get_packets(),
-				   (unsigned long)(*flow)->get_bytes()
-				   );
-#endif
-    }
-  }
-#endif
-
   /* Live packet dump to mongoose */
   if (num_live_captures > 0) deliverLiveCapture(h, packet, *flow);
 
