@@ -13138,10 +13138,29 @@ public:
 
   AggregatedASNFlowKey(Flow *f) {
     Host *c = f->get_cli_host(), *s = f->get_srv_host();
-    
+    u_int32_t _src_asn = 0, _dst_asn = 0;
+
+    if(c != NULL)
+      _src_asn = c->get_asn();
+    else {
+      /* View interface */
+      char *asname;
+
+      ntop->getGeolocation()->getAS(f->get_cli_ip_addr(), &_src_asn, &asname);
+    }
+
+    if(s != NULL)
+      _dst_asn = s->get_asn();
+    else {
+      /* View interface */
+      char *asname;
+
+      ntop->getGeolocation()->getAS(f->get_cli_ip_addr(), &_dst_asn, &asname);
+    }
+
     ip_protocol_version = f->get_cli_ip_addr()->getVersion();
-    src_asn      = c ? c->get_asn() : 0;
-    dst_asn      = s ? s->get_asn() : 0;
+    src_asn      = _src_asn;
+    dst_asn      = _dst_asn;
     src_peer_asn = f->getSrcPeerAS();
     dst_peer_asn = f->getDstPeerAS();
     probe_ip     = f->getFlowDeviceIP();
@@ -13303,8 +13322,8 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State *vm) {
       + "," + std::to_string(k->input_snmp)
       + "," + std::to_string(k->output_snmp)
       + ")";
-
-    //ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", sql.c_str());
+      
+    // if(k->src_asn == 12912 || k->dst_asn == 12912)) ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", sql.c_str());
 
     // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%u -> %u", k->src_asn, k->dst_asn);
     db->exec_query(sql.c_str(), NULL, NULL);
