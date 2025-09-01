@@ -13150,6 +13150,17 @@ public:
     // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%u -> %u", src_asn, dst_asn);
   }
 
+  u_int32_t val() const {
+    return(ip_protocol_version
+	   + probe_ip
+	   + src_asn *2
+	   + dst_asn *3
+	   + src_peer_asn *4
+	   + dst_peer_asn *5
+	   + input_snmp *6
+	   + output_snmp *7);
+  }
+
   bool equal(const AggregatedASNFlowKey *k) const {
     if(
        ((ip_protocol_version == k->ip_protocol_version)
@@ -13173,6 +13184,10 @@ public:
       return(true);
     else
       return(false);
+  }
+
+  bool compare(const AggregatedASNFlowKey *k) const {
+    return(val() < k->val());
   }
 };
 
@@ -13233,7 +13248,7 @@ public:
 
 struct AggregatedASNFlowKeyCompare {
   bool operator()(const AggregatedASNFlowKey& a, const AggregatedASNFlowKey& b) const {
-    return(!a.equal(&b));
+    return(a.compare(&b));
   }
 };
 
@@ -13251,6 +13266,8 @@ static bool aggregate_asn_flows(GenericHashEntry *node, void *user_data,
     AggregatedASNFlowValue v(f);
 
     flows->insert(std::make_pair(ak, v));
+
+    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "New aggregation [size: %u]", flows->size());
   } else {
     it->second.update(f, it->first.equal(&ak) ? false : true);
   }
@@ -13263,7 +13280,7 @@ static bool aggregate_asn_flows(GenericHashEntry *node, void *user_data,
 bool NetworkInterface::aggregateASNModeFlows(lua_State *vm) {
   u_int32_t begin_slot = 0;
   InMemorySQLiteDB *db = getLuaVMUserdata(vm, db);
-  std::map<AggregatedASNFlowKey, AggregatedASNFlowValue, AggregatedASNFlowKeyCompare> flows;
+  std::map<AggregatedASNFlowKey, AggregatedASNFlowValue, AggregatedASNFlowKeyCompare> agg_flows;
   std::map<AggregatedASNFlowKey, AggregatedASNFlowValue, AggregatedASNFlowKeyCompare>::iterator it;
 
   if(db == NULL) {
@@ -13277,10 +13294,11 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State *vm) {
     }
   }
 
-  walker(&begin_slot, true /* walk_all */, walker_flows,
-	 aggregate_asn_flows, &flows);
+  walker(&begin_slot, true /* walk_all */, walker_flows, aggregate_asn_flows, &agg_flows);
 
-  for(it = flows.begin(); it != flows.end(); it++) {
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Aggregated %u flows", agg_flows.size());
+
+  for(it = agg_flows.begin(); it != agg_flows.end(); it++) {
     const AggregatedASNFlowKey   *k = &(it->first);
     const AggregatedASNFlowValue *v = &(it->second);
 
@@ -13302,14 +13320,12 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State *vm) {
       + "," + std::to_string(k->input_snmp)
       + "," + std::to_string(k->output_snmp)
       + ")";
-      
+
     // if(k->src_asn == 12912 || k->dst_asn == 12912)) ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", sql.c_str());
 
     // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%u -> %u", k->src_asn, k->dst_asn);
     db->exec_query(sql.c_str(), NULL, NULL);
   }
-
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Aggregated %u flows", flows.size());
 
   return(true);
 }
