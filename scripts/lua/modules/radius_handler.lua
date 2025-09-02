@@ -3,7 +3,8 @@
 --
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
-package.path = dirs.installdir .. "/scripts/lua/modules/pools/?.lua;" .. package.path
+package.path = dirs.installdir .. "/scripts/lua/modules/pools/?.lua;" ..
+                   package.path
 
 require "ntop_utils"
 local json = require("dkjson")
@@ -26,9 +27,7 @@ local function get_first_ip(mac)
     end
 
     local ip_address = first_host["ip"]
-    if isEmptyString(ip_address) then
-        ip_address = nil
-    end
+    if isEmptyString(ip_address) then ip_address = nil end
 
     return ip_address
 end
@@ -41,9 +40,7 @@ end
 ---@param password string, used to login the account to radius
 ---@return boolean, true if the accounting start went well, false otherwise
 function radius_handler.accountingStart(name, username, password)
-    if not radius_handler.isAccountingEnabled() then
-        return true
-    end
+    if not radius_handler.isAccountingEnabled() then return true end
     name = string.upper(name)
 
     -- Check if the user is already saved on redis
@@ -51,19 +48,24 @@ function radius_handler.accountingStart(name, username, password)
 
     -- In case the info are already on redis, means that the  system is restarted
     -- or the same request has been done twice, so just skip this
-    if is_accounting_on then
-        return true
-    end
+    if is_accounting_on then return true end
 
-    traceError(TRACE_NORMAL, TRACE_CONSOLE,
-        string.format("Accounting start requested for MAC [%s] with username [%s]", name, username))
 
-    local session_id = tostring(math.random(100000000000000000, 999999999999999999))
+    local session_id = tostring(math.random(100000000000000000,
+                                            999999999999999999))
     local ip_address = get_first_ip(name)
     local current_time = os.time()
     math.randomseed(current_time)
-    local accounting_started = interface.radiusAccountingStart(username --[[ Username ]] , name --[[ MAC Address ]] ,
-        session_id, ip_address --[[ First IP Address ]] , current_time)
+    
+    traceError(TRACE_NORMAL, TRACE_CONSOLE,
+               string.format(
+                   "Accounting start requested for MAC [%s] with username [%s][IP: %s]",
+                   name, username, ip_address or ""))
+
+    local accounting_started =
+        interface.radiusAccountingStart(username --[[ Username ]] , name --[[ MAC Address ]] ,
+                                        session_id, ip_address --[[ First IP Address ]] ,
+                                        current_time)
     if accounting_started then
         local key = string.format(redis_accounting_key, name)
         local user_data = {
@@ -91,16 +93,15 @@ end
 ---@param name string, used to check if name is an accounting going on
 ---@return boolean, true if the accounting went well, false otherwise and the stop was called
 function radius_handler.accountingStop(name, terminate_cause, info)
-    if not radius_handler.isAccountingEnabled() then
-        return true
-    end
+    if not radius_handler.isAccountingEnabled() then return true end
     name = string.upper(name)
 
     local _, user_data = radius_handler.isAccountingRequested(name)
     -- Removing the entry from redis
     ntop.delCache(string.format(redis_accounting_key, name))
 
-    traceError(TRACE_NORMAL, TRACE_CONSOLE, string.format("Accounting stop requested for MAC [%s]", name))
+    traceError(TRACE_DEBUG, TRACE_CONSOLE,
+               string.format("Accounting stop requested for MAC [%s]", name))
 
     -- Check in case no user_data is found
     if user_data then
@@ -132,7 +133,7 @@ function radius_handler.accountingStop(name, terminate_cause, info)
             if (info["bytes.rcvd"] or 0) > 0 then
                 bytes_rcvd = math.floor((info["bytes.rcvd"] or 0) / 1024 + 0.5)
             end
-    
+
             if (info["packets.sent"] or 0) > 0 then
                 packets_sent = info["packets.sent"] or 0
             end
@@ -141,9 +142,12 @@ function radius_handler.accountingStop(name, terminate_cause, info)
             end
         end
 
-        interface.radiusAccountingStop(user_data.username --[[ Username ]] , user_data.session_id, name --[[ MAC Address]] ,
-            ip_address, bytes_sent, bytes_rcvd, packets_sent, packets_rcvd, terminate_cause,
-            current_time - user_data.start_session_time)
+        interface.radiusAccountingStop(user_data.username --[[ Username ]] ,
+                                       user_data.session_id, name --[[ MAC Address]] ,
+                                       ip_address, bytes_sent, bytes_rcvd,
+                                       packets_sent, packets_rcvd,
+                                       terminate_cause, current_time -
+                                           user_data.start_session_time)
     end
 end
 
@@ -153,12 +157,11 @@ end
 ---@param name string, used to check if name is an accounting going on
 ---@return boolean, true if the accounting went well, false otherwise and the stop was called
 function radius_handler.accountingUpdate(name, info)
-    if not radius_handler.isAccountingEnabled() then
-        return true
-    end
+    if not radius_handler.isAccountingEnabled() then return true end
     name = string.upper(name)
 
-    local is_accounting_on, user_data = radius_handler.isAccountingRequested(name)
+    local is_accounting_on, user_data = radius_handler.isAccountingRequested(
+                                            name)
     local res = true
 
     if is_accounting_on and user_data then
@@ -194,8 +197,10 @@ function radius_handler.accountingUpdate(name, info)
             packets_rcvd = info["packets.rcvd"]
         end
 
-        traceError(TRACE_NORMAL, TRACE_CONSOLE,
-            string.format("Accounting update [MAC: %s][In Bytes: %d][Out Bytes: %d][Radius In Bytes: %d][Radius Out Bytes: %d]", name, info["bytes.rcvd"], info["bytes.sent"], bytes_rcvd, bytes_sent))
+        traceError(TRACE_NORMAL, TRACE_CONSOLE, string.format(
+                       "Accounting update [MAC: %s][IP: %s][In Bytes: %d][Out Bytes: %d][Radius In Bytes: %d][Radius Out Bytes: %d]",
+                       name, ip_address or "", info["bytes.rcvd"],
+                       info["bytes.sent"], bytes_rcvd, bytes_sent))
 
         user_data.bytes_sent = bytes_sent
         user_data.bytes_rcvd = bytes_rcvd
@@ -204,8 +209,12 @@ function radius_handler.accountingUpdate(name, info)
 
         ntop.setCache(key, json.encode(user_data))
 
-        interface.radiusAccountingUpdate(name, user_data.session_id, user_data.username, user_data.password, ip_address,
-            bytes_sent, bytes_rcvd, packets_sent, packets_rcvd, current_time - user_data.start_session_time)
+        interface.radiusAccountingUpdate(name, user_data.session_id,
+                                         user_data.username, user_data.password,
+                                         ip_address, bytes_sent, bytes_rcvd,
+                                         packets_sent, packets_rcvd,
+                                         current_time -
+                                             user_data.start_session_time)
     end
 
     return res
@@ -222,9 +231,7 @@ function radius_handler.isAccountingRequested(name)
     local key = string.format(redis_accounting_key, name)
     local user_data = ntop.getCache(key)
 
-    if not isEmptyString(user_data) then
-        return true, json.decode(user_data)
-    end
+    if not isEmptyString(user_data) then return true, json.decode(user_data) end
 
     return false, nil
 end
@@ -232,8 +239,10 @@ end
 -- ##############################################
 
 function radius_handler.isAccountingEnabled()
-    local accounting_enabled = ntop.getPref("ntopng.prefs.radius.accounting_enabled")
-    if (not accounting_enabled) or (isEmptyString(accounting_enabled) or (accounting_enabled == "0")) then
+    local accounting_enabled = ntop.getPref(
+                                   "ntopng.prefs.radius.accounting_enabled")
+    if (not accounting_enabled) or
+        (isEmptyString(accounting_enabled) or (accounting_enabled == "0")) then
         return false
     end
 
