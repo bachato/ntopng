@@ -115,7 +115,7 @@ private:
   u_int32_t protocolErrorCode;
   u_int8_t protocol, flow_verdict;
   u_int16_t flow_score;
-  bool twh_over_view; /* This flag is used for view interfaces */
+  bool twh_over_view:1 /* This flag is used for view interfaces */, shapers_profile_set:1,  iface_flow_accounted:1, _notused:5;
   u_int8_t view_cli_mac[6], view_srv_mac[6];
   struct ndpi_flow_struct *ndpiFlow;
   ndpi_risk ndpi_flow_risk_bitmap;
@@ -169,7 +169,6 @@ private:
     u_int8_t src_to_dst, dst_to_src;
   } collected_qoe;
 
-  u_int8_t iface_flow_accounted:1, _notused:7;
   DropReason dropVerdictReason;
 
   u_int8_t rtp_stream_type;
@@ -566,8 +565,8 @@ public:
   }
   inline bool isBittorrent() const { return (isProto(NDPI_PROTOCOL_BITTORRENT)); }
 
-  inline bool isTwhOverForViewInterface() { return twh_over_view; }
-  inline void setTwhOverForViewInterface() { twh_over_view = true; }
+  inline bool isTwhOverForViewInterface() { return((twh_over_view == 1) ? true : false); }
+  inline void setTwhOverForViewInterface() { twh_over_view = 1; }
 #if defined(NTOPNG_PRO)
   inline bool isLateralMovement() const { return (lateral_movement); }
   inline void setLateralMovement(bool change) { lateral_movement = change; }

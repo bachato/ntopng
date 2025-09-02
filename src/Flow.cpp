@@ -119,7 +119,7 @@ Flow::Flow(NetworkInterface *_iface,
     dissect_next_http_packet = 0;
   periodic_stats_update_partial = NULL;
   bt_hash = NULL, ebpf = NULL, iec104 = NULL, stun_mapped_address = NULL;
-  twh_over_view = false;
+  twh_over_view = 0, shapers_profile_set = 0;
   flow_verdict = 0;
   operating_system = ndpi_os_unknown;
   last_update_time.tv_sec = 0, last_update_time.tv_usec = 0;
@@ -1325,7 +1325,9 @@ void Flow::processDNSPacket(const u_char *ip_packet, u_int16_t ip_len,
 
 #if 0
   char buf[256];
-  ntop->getTrace()->traceEvent(TRACE_ERROR, "%s %s", ndpiFlow->host_server_name[0] != '\0' ? ndpiFlow->host_server_name : (unsigned char*)"", print(buf, sizeof(buf)));
+  ntop->getTrace()->traceEvent(TRACE_ERROR, "%s %s",
+			       ndpiFlow->host_server_name[0] != '\0' ? ndpiFlow->host_server_name : (unsigned char*)"",
+			       print(buf, sizeof(buf)));
 #endif
 }
 
@@ -1459,6 +1461,19 @@ void Flow::setExtraDissectionCompleted(bool src2dst_direction) {
   processExtraDissectedInformation();
 
   extra_dissection_completed = 1;
+  
+  /* 2(**) */
+#ifdef NTOPNG_PRO
+  if(!shapers_profile_set) {
+#ifdef HAVE_NEDGE
+    updateFlowShapers(true);
+#else
+    updateProfile();
+#endif
+
+    shapers_profile_set = 1;
+  }
+#endif
 
   /* Free the nDPI memory */
   freeDPIMemory();
@@ -1582,13 +1597,22 @@ void Flow::setProtocolDetectionCompleted(u_int8_t *payload,
   }
 #endif
 
+  if(host_server_name != NULL) {
+    /*
+      In case the host server name is NOT yet known (e.g. it can
+      happen with long QUIC Client Hello), we cannot yet set the
+      shapers/profile and need to wait for 2(**)
+    */
 #ifdef NTOPNG_PRO
 #ifdef HAVE_NEDGE
-  updateFlowShapers(true);
+    updateFlowShapers(true);
 #else
-  updateProfile();
+    updateProfile();
 #endif
+
+    shapers_profile_set = 1;
 #endif
+  }
 }
 
 /* *************************************** */
