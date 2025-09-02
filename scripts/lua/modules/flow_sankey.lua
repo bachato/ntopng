@@ -279,7 +279,7 @@ end
 -- @param max_nodes_per_level number, representing the maximum number of nodes per level
 --                            in case the number is surpassed, the "Other" node is added
 -- @return a list composed by nodes and links
-function flow_sankey.generateSankey(queries, max_nodes_per_level)
+function flow_sankey.generateSankey(queries, max_nodes_per_level, isHistorical)
     -- In case of multiple queries, run each query one by one,
     -- then merge the data.
     -- In case the rename_key_field and each queries search for different data,
@@ -287,6 +287,10 @@ function flow_sankey.generateSankey(queries, max_nodes_per_level)
     -- and so the data are not going to be merged
     local nodes = {}
     local links = {}
+
+    if not isHistorical then
+        interface.aggregateASNFlows()
+    end
 
     for _, query in pairs(queries) do
         local table_stats = flow_data.getStats({query})

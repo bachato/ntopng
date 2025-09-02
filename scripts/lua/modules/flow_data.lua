@@ -11,6 +11,7 @@ end
 local flow_data = {}
 local callback_utils = require "callback_utils"
 local flow_data_preset = require "flow_data_preset"
+local flow_data_historical = require "flow_data_historical"
 local trace_stats = false
 local separator = " | "
 
@@ -142,29 +143,40 @@ end
 
 -- ###################################################
 
-function flow_data.getStats(queries)
+function flow_data.getStats(queries, isHistorical)
     local results = {}
+
+    if isHistorical ~= nil then
+        if not isHistorical then
+            -- In case of sankey, the aggregation function is called by flow_sankey.lua
+            interface.aggregateASNFlows()
+        end
+    end
 
     for _, query_info in pairs(queries or {}) do
         local isHistorical = false
         if (query_info.filters and query_info.filters.last_seen) then
             isHistorical = true
         end
-        local columns = flow_data_preset.retrieveColumns(
-                            query_info.select_query, isHistorical)
-        local filters = flow_data_preset.convertFilters(query_info.where_query,
-                                                        query_info.filters,
-                                                        isHistorical)
+        local select_columns = flow_data_preset.retrieveColumns(
+                                   query_info.select_query)
+        local sort_columns =
+            flow_data_preset.retrieveColumns(query_info.sort_by) or {}
+        local where_filters = flow_data_preset.convertFilters(
+                                  query_info.where_query, query_info.filters,
+                                  isHistorical)
         local different_columns = flow_data_preset.retrieveColumns(
-                                      query_info.different_from, isHistorical)
+                                      query_info.different_from)
+
         -- Function used to, given a flow, merge all the same data togheter
         local function formatData(_, flow)
+            if not ntop.isEnterpriseM() then return {} end
             -- Create an empty table, composed only by key values
             -- e.g. ip: 1.1.1.1
             --      asn: 2222
             --      bytes_sent: 0
             --      bytes_rcvd: 0
-            local empty = formatEmptyStats(columns, flow,
+            local empty = formatEmptyStats(select_columns, flow,
                                            query_info.rename_key_field,
                                            different_columns,
                                            query_info.skip_flow)
@@ -179,30 +191,19 @@ function flow_data.getStats(queries)
             end
 
             -- Now update the data (e.g. bytes_sent and bytes_rcvd)
-            results[key] = updateStats(columns, query_info.invert_direction,
-                                       flow, results[key])
+            results[key] = updateStats(select_columns,
+                                       query_info.invert_direction, flow,
+                                       results[key])
             ::skip_flow::
         end
-        if isHistorical then -- Historical
-            if not ntop.isEnterpriseM() then return {} end
-            flow_data_historical = require "flow_data_historical"
-            local first_seen = query_info.filters.first_seen
-            local last_seen = query_info.filters.last_seen
-            local sort_columns = flow_data_preset.retrieveColumns(
-                                     query_info.sort_by, isHistorical) or {}
-            local query_result = flow_data_historical.retrieveFlowData(columns,
-                                                                       filters,
-                                                                       sort_columns,
-                                                                       query_info.invert_direction,
-                                                                       first_seen,
-                                                                       last_seen)
-            for _, flow in pairs(query_result or {}) do
-                formatData(_, flow)
-            end
-        else -- Live
-            callback_utils.foreachFlow(filters.ifid, os.time() + 30, -- deadline
-                                       formatData, filters)
-        end
+
+        local first_seen = query_info.filters.first_seen
+        local last_seen = query_info.filters.last_seen
+        local query_result = flow_data_historical.retrieveFlowData(
+                                 select_columns, where_filters, sort_columns,
+                                 query_info.invert_direction, first_seen,
+                                 last_seen, isHistorical)
+        for _, flow in pairs(query_result or {}) do formatData(_, flow) end
     end
 
     -- Now we have equal table for live and historical, so now format the data and run the checks
@@ -225,11 +226,14 @@ function flow_data.formatStats(stats_to_format)
         local formatted_element = {}
         for key, value in pairs(values or {}) do
             -- Format the data
-            local formatted_data, url_link = flow_data_preset.getFormattedDataAndLink(key,
-                                                                            value,
-                                                                            values)
+            local formatted_data, url_link =
+                flow_data_preset.getFormattedDataAndLink(key, value, values)
             if (formatted_data ~= value) or (type(formatted_data) == "string") then
-                formatted_element[key] = {id = value, name = formatted_data, url = url_link}
+                formatted_element[key] = {
+                    id = value,
+                    name = formatted_data,
+                    url = url_link
+                }
             else
                 formatted_element[key] = value
             end

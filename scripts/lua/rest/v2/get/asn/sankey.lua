@@ -121,7 +121,7 @@ end
 local nodes = {}
 local links = {}
 local MAX_NODES_PER_LEVEL = 10
-nodes, links = flow_sankey.generateSankey(queries, MAX_NODES_PER_LEVEL)
+nodes, links = flow_sankey.generateSankey(queries, MAX_NODES_PER_LEVEL, not isEmptyString(epoch_begin))
 
 res["nodes"] = nodes
 res["links"] = links

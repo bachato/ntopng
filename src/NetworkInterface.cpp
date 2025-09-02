@@ -13117,26 +13117,10 @@ public:
   }
 
   AggregatedASNFlowKey(Flow *f) {
-    Host *c = f->get_cli_host(), *s = f->get_srv_host();
     u_int32_t _src_asn = 0, _dst_asn = 0;
-
-    if(c != NULL)
-      _src_asn = c->get_asn();
-    else {
-      /* View interface */
-      char *asname;
-
-      ntop->getGeolocation()->getAS(f->get_cli_ip_addr(), &_src_asn, &asname);
-    }
-
-    if(s != NULL)
-      _dst_asn = s->get_asn();
-    else {
-      /* View interface */
-      char *asname;
-
-      ntop->getGeolocation()->getAS(f->get_cli_ip_addr(), &_dst_asn, &asname);
-    }
+    char *asName = NULL;
+    f->getSrcAS(&_src_asn, asName);
+    f->getDstAS(&_dst_asn, asName);
 
     ip_protocol_version = f->get_cli_ip_addr()->getVersion();
     src_asn      = _src_asn;
