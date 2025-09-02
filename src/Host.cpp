@@ -302,7 +302,8 @@ void Host::initialize(Mac *_mac, int32_t _iface_idx, u_int16_t _vlanId,
   memset(&customHostAlert, 0, sizeof(customHostAlert));
 
   /* Mac MUST be set before toggleRxOnlyHost() */
-  if((mac = _mac)) mac->incUses();
+  mac = _mac;
+  if (mac) mac->incUses();
   
   toggleRxOnlyHost(true);
 
@@ -467,11 +468,13 @@ void Host::updateHostPool(bool isInlineCall, bool firstUpdate) {
 /* *************************************** */
 
 void Host::set_mac(Mac *_mac) {
-  if((mac != _mac) && (_mac != NULL)) {
-    if(mac) mac->decUses();
-    mac = _mac;
-    mac->incUses();
-  }
+  if(_mac == NULL) return;
+  if(mac == _mac) return;
+
+  if(mac) mac->decUses();
+
+  mac = _mac;
+  mac->incUses();
 }
 
 /* *************************************** */

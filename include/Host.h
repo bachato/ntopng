@@ -1031,7 +1031,6 @@ class Host : public GenericHashEntry,
   void setnDPIOS(ndpi_os hint);
   virtual void setMACmeaningful() { is_mac_meaningful = true; }
   inline bool isMACmeaningful()   { return(is_mac_meaningful || isSystemHost()); }
-  inline void setMac(Mac *m)      { mac = m; }
 };
 
 #endif /* _HOST_H_ */

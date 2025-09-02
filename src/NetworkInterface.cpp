@@ -2240,7 +2240,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 #ifdef HAVE_NEDGE
       /*
 	With nEdge we see only one MAC address at time so we need to check
-	is MAC addresses are still set to Unknown (00:00:00:00:00:00)
+	if MAC addresses are still set to Unknown (00:00:00:00:00:00)
       */
       if(src2dst_direction) {
 	Host *c_host =  flow->get_cli_host();
@@ -2249,28 +2249,16 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 	if(cli_mac && cli_mac->isNull()) {
 	  /* We need to set the client MAC address */
 	  Mac *mac = getMac(sender_mac, true /* Create if missing */, true /* Inline call */);
-
-	  if(mac != NULL) {
-	    c_host->setMac(mac);
-	    cli_mac->decUses();
-	  }
-
-	  // ntop->getTrace()->traceEvent(TRACE_WARNING, "SET MAC !!! [client]");
+          c_host->set_mac(mac);
 	}
-      } else /* src2dst_direction == false */ {
+      } else /* dst2src */ {
 	Host *s_host =  flow->get_srv_host();
 	Mac *srv_mac = s_host->getMac();
 
 	if(srv_mac && srv_mac->isNull()) {
 	  /* We need to set the server MAC address */
 	  Mac *mac = getMac(sender_mac, true /* Create if missing */, true /* Inline call */);
-
-	  if(mac != NULL) {
-	    s_host->setMac(mac);
-	    srv_mac->decUses();
-	  }
-
-	  // ntop->getTrace()->traceEvent(TRACE_WARNING, "SET MAC !!! [server]");
+	  s_host->set_mac(mac);
 	}
       }
 #endif
