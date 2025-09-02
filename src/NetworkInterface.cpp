@@ -3389,7 +3389,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
     Mac *dstMac = getMac(ethernet->h_dest, true /* Create if missing */,
 			 true /* Inline call */);
 
-    /* NOTE: in nEdge, stats are updated into Flow::update_hosts_stats */
+    /* NOTE: in nEdge, stats are updated into Flow::periodic_stats_update */
 #ifndef HAVE_NEDGE
     if (srcMac) srcMac->incSentStats(h->ts.tv_sec, 1, len_on_wire);
     if (dstMac) dstMac->incRcvdStats(h->ts.tv_sec, 1, len_on_wire);

@@ -2594,47 +2594,48 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
 
   hosts_periodic_stats_update(getInterface(), cli_h, srv_h, &partial, first_partial, tv);
 
-  if(cli_h && srv_h) {
-    if(diff_sent_bytes || diff_rcvd_bytes) {
-      /* Update L2 Device stats */
+  if(diff_sent_bytes || diff_rcvd_bytes) {
+    /* Update L2 Device stats */
 
-      if(srv_mac) {
-        if(diff_rcvd_packets)
-	  srv_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
-
-        if(diff_sent_packets)
-	  srv_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
-
-        if(ntop->getPrefs()->areMacNdpiStatsEnabled()) {
-          srv_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
-                                diff_rcvd_packets, diff_rcvd_bytes,
-                                diff_rcvd_goodput_bytes, diff_sent_packets,
-                                diff_sent_bytes, diff_sent_goodput_bytes);
-        }
-      }
-
-      if(cli_mac) {
-        cli_mac->incSentStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
+    if(cli_mac) {
+      if(diff_rcvd_packets)
         cli_mac->incRcvdStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
 
-        if(ntop->getPrefs()->areMacNdpiStatsEnabled()) {
-          cli_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
-                                diff_sent_packets, diff_sent_bytes,
-                                diff_sent_goodput_bytes, diff_rcvd_packets,
-                                diff_rcvd_bytes, diff_rcvd_goodput_bytes);
-        }
+      if(diff_sent_packets)
+        cli_mac->incSentStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
+
+      if(ntop->getPrefs()->areMacNdpiStatsEnabled()) {
+        cli_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
+                              diff_sent_packets, diff_sent_bytes,
+                              diff_sent_goodput_bytes, diff_rcvd_packets,
+                              diff_rcvd_bytes, diff_rcvd_goodput_bytes);
       }
+    }
+
+    if(srv_mac) {
+      if(diff_rcvd_packets)
+        srv_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
+
+      if(diff_sent_packets)
+        srv_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
+
+      if(ntop->getPrefs()->areMacNdpiStatsEnabled())
+        srv_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
+                              diff_rcvd_packets, diff_rcvd_bytes,
+                              diff_rcvd_goodput_bytes, diff_sent_packets,
+                              diff_sent_bytes, diff_sent_goodput_bytes);
+    }
 
 #ifdef NTOPNG_PRO
-      if(ntop->getPro()->has_valid_license()) {
 #ifndef HAVE_NEDGE
-        if(trafficProfile)
-          trafficProfile->incBytes(diff_sent_bytes + diff_rcvd_bytes);
-#endif
-      }
-#endif
+    /* Update profile stats */
+    if (ntop->getPro()->has_valid_license()) {
+      if(trafficProfile)
+        trafficProfile->incBytes(diff_sent_bytes + diff_rcvd_bytes);
     }
-  } /* Closes if(cli_h && srv_h) */
+#endif
+#endif
+  }
 
 #ifndef HAVE_NEDGE
   /* For nEdge check Flow::setPacketsBytes updates throughput */
