@@ -92,9 +92,6 @@ onBeforeUnmount(() => {
         svg.on('mouseleave', null);
     }
     
-    // remove event listeners
-    window.removeEventListener('resize', resizeHandler);
-    
     eventsAttached = false;
 });
 

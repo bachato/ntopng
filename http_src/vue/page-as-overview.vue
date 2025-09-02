@@ -31,20 +31,18 @@
         <div class="position-relative">
             <div class="mb-3 d-flex flex-column" style="height: 60vh;">
                 <Loading :isLoading="loading"></Loading>
-                <Sankey ref="sankey_chart" :no_data_message="no_data_message" :sankey_data="sankey_data"
-                    @node_click="onNodeClick" @autorefresh_toggle="onAutoRefreshToggle">
+                <Sankey v-if="show_sankey" ref="sankey_chart" :no_data_message="no_data_message"
+                    :sankey_data="sankey_data" @node_click="onNodeClick" @autorefresh_toggle="onAutoRefreshToggle">
                 </Sankey>
-                <!--    
-                <Pie ref="pie_chart" :no_data_message="no_data_message" :pie_data="pie_data"
+                <Pie v-if="show_pie" ref="pie_chart" :no_data_message="no_data_message" :pie_data="pie_data"
                     @autorefresh_toggle="onAutoRefreshToggle">>
                 </Pie>
-                -->
             </div>
         </div>
         <Transition name="add-effect" mode="out-in">
             <div class="position-relative" :key="reRenderTable" style="min-height: 614px;">
-                <TableWithConfig v-if="props.context.isEnterpriseL" ref="table_as_stats" :table_id="table_id"
-                    :csrf="props.context.csrf" :showLoading="true" :f_map_columns="mapTableColumns"
+                <TableWithConfig v-if="props.context.isEnterpriseL && show_table" ref="table_as_stats"
+                    :table_id="table_id" :csrf="props.context.csrf" :showLoading="true" :f_map_columns="mapTableColumns"
                     :f_sort_rows="columnsSorting" :get_extra_params_obj="getExtraParameters"
                     @custom_event="onTableCustomEvent">
                 </TableWithConfig>
@@ -83,6 +81,9 @@ const sankey_chart = ref(null);
 const sankey_data = ref({});
 const pie_chart = ref(null);
 const pie_data = ref({});
+const show_table = ref(true);
+const show_pie = ref(true);
+const show_sankey = ref(true);
 const loading = ref(true);
 const no_data_message = _i18n("as_overview.no_data")
 let intervalId = null;
@@ -101,7 +102,7 @@ const remoteIcon = '<i class="fa-solid fa-house-fire" data-bs-toggle="tooltip" d
 const sankey_format_list = [
     { key: "criteria_as", value: 'traffic_between_ases', label: _i18n('as_overview.as_traffic_criteria') },
     { key: "criteria_as", value: 'ingress_egress_traffic_criteria', label: _i18n('as_overview.ingress_egress_traffic_criteria') },
-    //{ key: "criteria_as", value: 'user_traffic_breakdown', label: _i18n('as_overview.user_traffic_breakdown') },
+    { key: "criteria_as", value: 'user_traffic_breakdown', label: _i18n('as_overview.user_traffic_breakdown') },
 ];
 const time_preset_list = [
     { value: "live", label: i18n('live'), currently_active: true },
@@ -140,7 +141,24 @@ onBeforeMount(() => {
         })
     }
     ntopng_url_manager.set_key_to_url("criteria_as", active_sankey_type.value.value);
+    checkComponentsToShow();
 })
+
+/* ************************************** */
+
+function checkComponentsToShow() {
+    /* First two entries of the dropdown have both sankey + table */
+    if (active_sankey_type.value.value == "traffic_between_ases" ||
+        active_sankey_type.value.value == "ingress_egress_traffic_criteria") {
+        show_table.value = true;
+        show_sankey.value = true;
+        show_pie.value = false;
+    } else if (active_sankey_type.value.value == "user_traffic_breakdown") {
+        show_table.value = false;
+        show_sankey.value = false;
+        show_pie.value = true;
+    }
+}
 
 /* ************************************** */
 
@@ -172,6 +190,7 @@ const onAutoRefreshToggle = (enabled) => {
 
 /* This function is called upon changing the selected option in the dropdown */
 const changeCriteria = async (opt) => {
+    checkComponentsToShow();
     ntopng_url_manager.set_key_to_url(opt.key, `${opt.value}`);
     updateSankeyData();
     updatePieData();
@@ -180,9 +199,6 @@ const changeCriteria = async (opt) => {
             table_id.value = "ingress_egress_as_stats"
         } else if (opt.value === "traffic_between_ases") {
             table_id.value = "traffic_between_ases"
-        } else if (opt.value === "as_transit_only_criteria") {
-            table_id.value = "transit_only_as_stats"
-
         } //else if (opt.value === "user_traffic_breakdown") {
         //}
         reRenderTable.value = !reRenderTable.value
@@ -224,10 +240,12 @@ function saveSwitch() {
 /* ************************************** */
 
 const updatePieData = async () => {
-    loading.value = true;
-    let data = await getPieData();
-    pie_data.value = data;
-    loading.value = false;
+    if (show_pie.value) {
+        loading.value = true;
+        const data = await getPieData();
+        pie_data.value = data;
+        loading.value = false;
+    }
 }
 
 /* ************************************** */
@@ -253,10 +271,12 @@ const getPieUrl = () => {
 /* ************************************** */
 
 const updateSankeyData = async () => {
-    loading.value = true;
-    let data = await getSankeyData();
-    sankey_data.value = data;
-    loading.value = false;
+    if (show_sankey.value) {
+        loading.value = true;
+        let data = await getSankeyData();
+        sankey_data.value = data;
+        loading.value = false;
+    }
 }
 
 /* ************************************** */
@@ -372,9 +392,9 @@ const formatAS = (value) => {
     const title = `data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}"`;
     if (value.is_customer_asn) {
         importantASNIcon = customerIcon;
-    } else if(value.is_sub_customer_asn) {
+    } else if (value.is_sub_customer_asn) {
         importantASNIcon = subCustomerIcon;
-    } else if(value.is_remote_asn) {
+    } else if (value.is_remote_asn) {
         importantASNIcon = remoteIcon;
     }
     if (dataUtils.isEmptyString(value.name)) {

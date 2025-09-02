@@ -18,10 +18,8 @@ local page = _GET["page"]
 
 if (not criteria_as) or (criteria_as == "traffic_between_ases") then
     tableId = "traffic_between_ases"
-elseif (criteria_as == "ingress_egress_traffic_criteria") then
-    tableId = "ingress_egress_as_stats"
 else
-    tableId = "transit_only_as_stats"
+    tableId = "ingress_egress_as_stats"
 end
 
 sendHTTPContentTypeHeader('text/html')
