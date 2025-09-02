@@ -45,7 +45,6 @@ void CategoryCounter::lua(NetworkInterface *iface, lua_State *vm,
 
   if (!tsLua) {
     u_int64_t bytes_total = bytes.getTotal();
-    lua_newtable(vm);
 
     if (bytes_total > INT64_MAX) {
       ntop->getTrace()->traceEvent(TRACE_ERROR, "bytes (total=%llu/sent=%llu/rcvd=%llu) for category %s (%d) exceeds "
@@ -54,6 +53,11 @@ void CategoryCounter::lua(NetworkInterface *iface, lua_State *vm,
                                    name, (int) category_id, INT64_MAX);
       bytes_total = INT64_MAX;
     }
+
+    /* Note: ProtoCounter::lua is creating the table only
+     * when bytes_total > 0, FIXX for consistency */
+
+    lua_newtable(vm);
 
     lua_push_uint64_table_entry(vm, "category", category_id);
     lua_push_uint64_table_entry(vm, "bytes", bytes_total);
