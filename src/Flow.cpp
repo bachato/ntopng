@@ -6911,7 +6911,8 @@ void Flow::fillZMQFlowCategory(ndpi_protocol *res) {
     int rc;
     ndpi_protocol_match_result tmp;
     ndpi_protocol_category_t c;
-
+    ndpi_protocol_breed_t breed;
+    
     /* Match for custom protocols (protos.txt) */
     if((rc = ndpi_match_string_subprotocol(ndpi_struct, (char *)dst_name,
 					   strlen(dst_name), &tmp)) != 0) {
@@ -6925,7 +6926,7 @@ void Flow::fillZMQFlowCategory(ndpi_protocol *res) {
 
     /* Match for custom categories */
     if(ndpi_match_custom_category(ndpi_struct, (char *)dst_name,
-				  strlen(dst_name), &c) == 0)
+				  strlen(dst_name), &c, &breed) == 0)
       res->category = c;
   }
 }

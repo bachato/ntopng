@@ -615,11 +615,13 @@ bool NetworkInterface::nDPILoadIPCategory(char *what,
 
 bool NetworkInterface::nDPILoadHostnameCategory(char *what, u_int16_t id, char *list_name) {
   bool success = true;
-
+  
   // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s(%p) [%s]", __FUNCTION__, ndpi_struct_shadow, what);
 
   if (what && ndpi_struct_shadow)
-    success = (ndpi_load_hostname_category(ndpi_struct_shadow, what, (ndpi_protocol_category_t)id) == 0);
+    success = (ndpi_load_hostname_category(ndpi_struct_shadow, what,
+					   (ndpi_protocol_category_t)id,
+					   NDPI_PROTOCOL_UNRATED) == 0);
   else
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Internal error: invalid nDPI state");
 
@@ -7227,7 +7229,7 @@ void NetworkInterface::getFlowsStats(lua_State *vm) {
   lua_settable(vm, -3);
 
   lua_newtable(vm);
-  for (int i = 0; i < NUM_BREEDS; i++) {
+  for (int i = 0; i < NDPI_NUM_BREEDS; i++) {
     if (stats.breeds_bytes[i] > 0)
       lua_push_uint64_table_entry(vm, ndpi_get_proto_breed_name((ndpi_protocol_breed_t)i),
 				  stats.breeds_bytes[i]);

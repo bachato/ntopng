@@ -1412,6 +1412,9 @@ public:
   inline u_int getNumDPIProtocols() { return(ndpi_struct ? ndpi_get_num_protocols(ndpi_struct) : 0); }
   inline bool  isCustomDPIProtocol(u_int16_t proto_id) { return(ndpi_struct ? ndpi_is_custom_protocol(ndpi_struct, proto_id) : false); }
   bool aggregateASNModeFlows(lua_State *vm);
+#ifdef NTOPNG_PRO
+  bool updateRanking(lua_State *vm, u_int32_t epoch, char *key, char *values);
+#endif
 };
 
 #endif /* _NETWORK_INTERFACE_H_ */
