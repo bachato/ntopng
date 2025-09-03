@@ -91,7 +91,6 @@ const active_sankey_type = ref({})
 const table_as_stats = ref(null);
 const reRenderTable = ref(false);
 const main_epoch_interval = ref(null);
-const table_id = ref(props.context.tableId);
 const first_date_epoch = ref(props.context.first_date_epoch);
 const toggle_slider = ref(false);
 const toggle_slider_label = ref(_i18n("db_search.time_range"));
@@ -188,21 +187,25 @@ const onAutoRefreshToggle = (enabled) => {
 
 /* ************************************** */
 
+const table_id = computed(() => {
+    debugger;
+    if (active_sankey_type.value?.value === "ingress_egress_traffic_criteria") {
+        return "ingress_egress_as_stats"
+    } else if (active_sankey_type.value?.value === "traffic_between_ases") {
+        return "traffic_between_ases"
+    }
+
+    return props.context.tableId;
+});
+
+/* ************************************** */
+
 /* This function is called upon changing the selected option in the dropdown */
 const changeCriteria = async (opt) => {
     checkComponentsToShow();
     ntopng_url_manager.set_key_to_url(opt.key, `${opt.value}`);
     updateSankeyData();
     updatePieData();
-    if (table_as_stats.value) {
-        if (opt.value === "ingress_egress_traffic_criteria") {
-            table_id.value = "ingress_egress_as_stats"
-        } else if (opt.value === "traffic_between_ases") {
-            table_id.value = "traffic_between_ases"
-        } //else if (opt.value === "user_traffic_breakdown") {
-        //}
-        reRenderTable.value = !reRenderTable.value
-    }
 }
 
 /* ************************************** */

@@ -78,7 +78,7 @@ onBeforeMount(async () => { });
 /* ******************************************** */
 
 onMounted(async () => {
-    await draw_sankey();
+    await set_sankey_data();
 });
 
 /* ******************************************** */
