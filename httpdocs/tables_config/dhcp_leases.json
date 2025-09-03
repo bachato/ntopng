@@ -1,0 +1,42 @@
+{
+	"id": "dhcp_leases",
+	"data_url": "lua/pro/rest/v2/get/nedge/dhcp_active_leases_new.lua",
+	"use_current_page": false,
+	"enable_search": true,
+	"paging": true,
+	"display_empty_rows": true,
+	"columns": [
+		{
+			"title_i18n": "mac_address",
+			"data_field": "macAddress",
+			"sortable": false,
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
+			"title_i18n": "manufacturer",
+			"data_field": "manufacturer",
+			"sortable": false,
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
+            "title_i18n": "nedge.leased_ip",
+			"data_field": "leasedIP",
+			"sortable": false,
+			"class": [
+				"text-nowrap"
+			]
+		},
+        {
+            "title_i18n": "nedge.leased_host_name",
+            "data_field": "leasedHostName",
+            "sortable": false,
+            "class": [
+                "text-nowrap"
+            ]
+        }
+	]
+}

@@ -88,6 +88,7 @@ import { default as PageAlertsGraph } from "./page-alerts-graph.vue"
 import { default as PageAlertsGeoMap } from "./page-alerts-geomap.vue"
 import { default as PageTrafficProfiles } from "./page-traffic-profiles.vue"
 import { default as PageNetworksList } from "./page-networks-list.vue"
+import { default as PageDHCPLeases } from "./page-DHCP-leases.vue"
 
 /* Config pages */
 import { default as PageSNMPConfig } from "./page-snmp-config.vue"
@@ -193,6 +194,7 @@ let ntopVue = {
     PageManageHostPoolMembers: PageManageHostPoolMembers,
     PagePoolPolicy: PagePoolPolicy,
     PageTrafficProfiles: PageTrafficProfiles,
+    PageDHCPLeases: PageDHCPLeases,
     
     /* SNMP */
     PageSNMPDevices: PageSNMPDevices,
