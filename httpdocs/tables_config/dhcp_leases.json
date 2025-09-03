@@ -1,6 +1,6 @@
 {
 	"id": "dhcp_leases",
-	"data_url": "lua/pro/rest/v2/get/nedge/dhcp_active_leases_new.lua",
+	"data_url": "lua/pro/rest/v2/get/nedge/dhcp_active_leases.lua",
 	"use_current_page": false,
 	"enable_search": true,
 	"paging": true,
