@@ -265,6 +265,7 @@ function formatStandardSerie(timeserie_info, timeserie_options, config, tsCompar
   const min_value = timeserie_info.metric.min_value || null;
   const past_serie = timeserie_options.additional_series;
   let disable_past_ts = false;
+  let disable_perc_95_ts = false;
 
   config.value_range = [min_value, max_value];
   config.plotter = getPlotter(chart_type);
@@ -273,6 +274,9 @@ function formatStandardSerie(timeserie_info, timeserie_options, config, tsCompar
   }
   if (timeserie_info.metric.disable_default_ago_ts) {
     disable_past_ts = timeserie_info.metric.disable_default_ago_ts || true
+  }
+  if (timeserie_info.metric.disable_perc_95_ts) {
+    disable_perc_95_ts = timeserie_info.metric.disable_perc_95_ts || true
   }
 
   series.forEach((ts_info, j) => {
@@ -305,13 +309,12 @@ function formatStandardSerie(timeserie_info, timeserie_options, config, tsCompar
     if (extra_timeseries?.avg == true) {
       addNewSerie(avg_name, "point", { color: constant_serie_colors["avg"], palette: 1 }, config)
     }
-    if (extra_timeseries?.perc_95 == true) {
+    if (extra_timeseries?.perc_95 == true && !disable_perc_95_ts) {
       addNewSerie(perc_name, "point", { color: constant_serie_colors["perc_95"], palette: 1 }, config)
     }
     if (extra_timeseries?.past == true && !disable_past_ts) {
       addNewSerie(past_name, "dash", { color: constant_serie_colors["past"], palette: 1 }, config)
     }
-    addNewSerie(perc_name, "point", { color: constant_serie_colors["perc_95"], palette: 1 }, config)
     /* ************************************** */
 
     compactSerie(config, ts_info, extra_timeseries, serie, past_value, scalar, step, epoch_begin, {
