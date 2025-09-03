@@ -838,7 +838,9 @@ static int ntop_loadCustomCategoryFile(lua_State *vm) {
   ndpi_protocol_category_t catid;
   FILE *fd;
   u_int32_t num_lines_loaded = 0;
+  u_int32_t num_bad_lines = 0;
   bool ignorePrivateIPs = false;
+  bool warn_once = true;
 
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -948,11 +950,14 @@ static int ntop_loadCustomCategoryFile(lua_State *vm) {
           }
         }
 
-        if (!loaded) {
-          /* Silence Stratosphere Lab.txt (it has 2 possible formatting) */
-          if (strcmp(line, "ip,score") && strcmp(line, "Number,IP address,Rating")) {
+        if (!loaded
+            /* Silence Stratosphere Lab.txt (it has 2 possible formatting) */
+            && (strcmp(line, "ip,score") && strcmp(line, "Number,IP address,Rating"))) {
+          num_bad_lines++;
+          if (warn_once) {
             ntop->getTrace()->traceEvent(TRACE_NORMAL, "Invalid line format %s%s [%s]",
 					 ignorePrivateIPs ? "or private IP " : "", line, path);
+            warn_once = false;
           }
         }
       } break;
@@ -976,8 +981,13 @@ static int ntop_loadCustomCategoryFile(lua_State *vm) {
           }
         }
 
-        if (!loaded)
-          ntop->getTrace()->traceEvent(TRACE_ERROR, "Invalid line format %s [%s]", line, path);
+        if (!loaded) {
+          num_bad_lines++;
+          if (warn_once) {
+            ntop->getTrace()->traceEvent(TRACE_ERROR, "Invalid line format %s [%s]", line, path);
+            warn_once = false;
+          }
+        }
       } break;
 
     default:
@@ -987,6 +997,10 @@ static int ntop_loadCustomCategoryFile(lua_State *vm) {
   } /* while */
 
   fclose(fd);
+
+  if (num_bad_lines > 1) {
+    ntop->getTrace()->traceEvent(TRACE_ERROR, "%u more invalid lines [%s]", num_bad_lines-1, path);
+  }
 
   lua_pushinteger(vm, (int)num_lines_loaded);
 
