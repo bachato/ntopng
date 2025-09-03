@@ -984,6 +984,9 @@ local function validateTagsOperator(p)
     return (tag_utils.tag_operators[p] ~= nil)
 end
 
+--[[ 
+-- Note: this has been simplified and replaced by the function below
+-- (Why is this splitting by '-'? Do we have '-' in filters? Values may contain '-'...)
 local function validateFilters(other_validation)
     return function(s)
         local param = split(s, ";") or split(s, "-")
@@ -1011,6 +1014,23 @@ local function validateFilters(other_validation)
         param = split(s, ",")
         if param and #param == 2 then
             return (other_validation(param[1]) and (validateTagsOperator(param[2])))
+        end
+
+        return other_validation(s)
+    end
+end
+--]]
+
+local function validateFilters(other_validation)
+    return function(s)
+        local param = split(s, ";")
+
+        if param and #param == 2 then
+            if isEmptyString(param[1]) then
+                return validateTagsOperator(param[2])
+            else
+                return (other_validation(param[1]) and (validateTagsOperator(param[2])))
+            end
         end
 
         return other_validation(s)
