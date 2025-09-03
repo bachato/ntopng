@@ -243,6 +243,10 @@ local is_influxdb_enabled = ntop.getPref("ntopng.prefs.timeseries_driver") ==
 local is_clickhouse_enabled = ntop.isClickHouseEnabled()
 local is_asn_mode_enabled = isASNModeEnabled()
 
+if is_clickhouse_enabled and not auth.has_capability(auth.capabilities.historical_flows) then
+   is_clickhouse_enabled = false
+end
+
 ifId = ifs.id
 
 -- NOTE: see sidebar.js for the client logic
