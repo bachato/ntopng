@@ -976,8 +976,10 @@ function page_utils.print_header(title, addLoginJS)
     })
     local favicon_path = nil
 
-    local admin_lang = ntop.getPref("ntopng.user.admin.language")
-    local language = ternary(isEmptyString(admin_lang), "en", admin_lang)
+    local username = _SESSION["user"]
+
+    local user_lang = ntop.getPref("ntopng.user." .. username .. ".language")
+    local language = ternary(isEmptyString(user_lang), "en", user_lang)
     local locale_path = dirs.installdir .. "/scripts/locales/" .. language .. ".lua"
     local locale_when = ntop.fileLastChange(locale_path)
 
