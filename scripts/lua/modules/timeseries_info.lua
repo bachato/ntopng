@@ -11,7 +11,6 @@ require "lua_utils_generic"
 require "label_utils"
 require "lua_utils_get"
 
-
 local timeseries_info = {}
 
 -- #################################
@@ -1358,6 +1357,7 @@ local community_timeseries = {
                 color = timeseries_info.get_timeseries_color('bytes')
             }
         },
+        disable_perc_95_ts = true,
         always_visibile = true
     }, -- country_details.lua (Country): --
     {
@@ -2234,6 +2234,7 @@ local function add_top_vlan_timeseries(tags, timeseries)
                         label = serie.protocol,
                         measure_unit = "bps",
                         scale = i18n('graphs.metric_labels.traffic'),
+                        disable_perc_95_ts = true,
                         timeseries = {
                             bytes_sent = {
                                 label = serie.protocol .. " " ..
@@ -2284,6 +2285,7 @@ local function add_top_host_pool_timeseries(tags, timeseries)
                 if (tot > 0) then
                     timeseries[#timeseries + 1] = {
                         schema = "top:host_pool:ndpi",
+                        disable_perc_95_ts = true,
                         group = i18n("graphs.l7_proto"),
                         priority = 2,
                         query = "protocol:" .. serie.protocol,
@@ -2334,6 +2336,7 @@ local function add_all_asn_timeseries(tags, timeseries)
             },
             always_visibile = true,
             default_visible = true,
+            disable_perc_95_ts = true,
             disable_default_ago_ts = true
         }
 
@@ -2471,6 +2474,7 @@ local function add_top_asn_timeseries(tags, timeseries)
                         label = serie.protocol,
                         measure_unit = "bps",
                         scale = i18n('graphs.metric_labels.traffic'),
+                        disable_perc_95_ts = true,
                         timeseries = {
                             bytes_sent = {
                                 label = serie.protocol .. " " ..
@@ -2530,6 +2534,7 @@ local function add_top_mac_timeseries(tags, timeseries)
                         priority = 3,
                         query = "category:" .. category_name,
                         label = category_name,
+                        disable_perc_95_ts = true,
                         measure_unit = "bps",
                         scale = i18n('graphs.metric_labels.traffic'),
                         timeseries = {
@@ -2630,6 +2635,7 @@ local function add_top_host_timeseries(tags, timeseries)
                         label = i18n(serie.l4proto) or serie.l4proto,
                         measure_unit = "bps",
                         scale = i18n('graphs.metric_labels.traffic'),
+                        disable_perc_95_ts = true,
                         timeseries = {
                             bytes_sent = {
                                 label = serie.l4proto .. " " ..
@@ -2677,6 +2683,7 @@ local function add_top_host_timeseries(tags, timeseries)
                         label = serie.protocol,
                         measure_unit = "bps",
                         scale = i18n('graphs.metric_labels.traffic'),
+                        disable_perc_95_ts = true,
                         timeseries = {
                             bytes_sent = {
                                 label = serie.protocol .. " " ..
@@ -2722,6 +2729,7 @@ local function add_top_host_timeseries(tags, timeseries)
                 if (tot > 0) then
                     timeseries[#timeseries + 1] = {
                         schema = "top:host:ndpi_categories",
+                        disable_perc_95_ts = true,
                         group = i18n("graphs.category"),
                         priority = 3,
                         query = "category:" .. category_name,
@@ -2781,6 +2789,7 @@ local function add_top_interface_timeseries(tags, timeseries)
                         query = "profile:" .. serie.profile,
                         label = serie.profile,
                         measure_unit = "bps",
+                        disable_perc_95_ts = true,
                         scale = i18n('graphs.metric_labels.traffic'),
                         timeseries = {
                             bytes = {
@@ -2816,6 +2825,7 @@ local function add_top_interface_timeseries(tags, timeseries)
                 if (tot > 0) then
                     timeseries[#timeseries + 1] = {
                         schema = "top:iface:l4protos",
+                        disable_perc_95_ts = true,
                         group = i18n("graphs.l4_proto"),
                         priority = 2,
                         query = "l4proto:" .. serie.l4proto,
@@ -2881,6 +2891,7 @@ local function add_top_interface_timeseries(tags, timeseries)
 
                     timeseries[#timeseries + 1] = {
                         schema = "top:" .. id,
+                        disable_perc_95_ts = true,
                         group = i18n("graphs.l7_proto"),
                         priority = 2,
                         query = "protocol:" .. serie.protocol,
@@ -2893,6 +2904,7 @@ local function add_top_interface_timeseries(tags, timeseries)
             end
             timeseries[#timeseries + 1] = {
                 schema = "top:" .. id,
+                disable_perc_95_ts = true,
                 priority = 2,
                 label = i18n('top_l7_proto'),
                 measure_unit = "bps",
@@ -2937,6 +2949,7 @@ local function add_top_interface_timeseries(tags, timeseries)
                         group = i18n("graphs.category"),
                         priority = 3,
                         query = "category:" .. category_name,
+                        disable_perc_95_ts = true,
                         label = category_name,
                         measure_unit = "bps",
                         scale = i18n('graphs.metric_labels.traffic'),
@@ -2987,6 +3000,7 @@ local function add_top_obs_point_timeseries(tags, timeseries)
                         priority = 2,
                         query = "protocol:" .. serie.protocol,
                         label = serie.protocol,
+                        disable_perc_95_ts = true,
                         measure_unit = "bps",
                         scale = i18n("graphs.metric_labels.traffic"),
                         timeseries = {
@@ -3043,6 +3057,7 @@ local function add_flowdev_interfaces_timeseries(tags, timeseries)
                     color = timeseries_info.get_timeseries_color('bytes')
                 }
             },
+            disable_perc_95_ts = true,
             always_visibile = true
         }
     end
@@ -3052,6 +3067,7 @@ local function add_flowdev_interfaces_timeseries(tags, timeseries)
     if not table.empty(series) and are_l7_ts_enabled then
         timeseries[#timeseries + 1] = {
             schema = "top:flowdev:ndpi" .. ts_suffix,
+            disable_perc_95_ts = true,
             chart_type = "line",
             id = timeseries_id.flow_dev,
             label = i18n("db_search.top_l7proto"),
@@ -3084,6 +3100,7 @@ local function add_flowdev_interfaces_timeseries(tags, timeseries)
             if (tot > 0) then
                 timeseries[#timeseries + 1] = {
                     schema = "top:flowdev:ndpi" .. ts_suffix,
+                    disable_perc_95_ts = true,
                     group = i18n("graphs.l7_proto"),
                     priority = 2,
                     query = "protocol:" .. serie.protocol,
@@ -3339,6 +3356,7 @@ local function add_top_flow_port_timeseries(tags, timeseries)
             priority = 2,
             type = "top",
             measure_unit = "bps",
+            disable_perc_95_ts = true,
             scale = i18n("graphs.metric_labels.traffic"),
             timeseries = {
                 bytes = {
@@ -3363,6 +3381,7 @@ local function add_top_flow_port_timeseries(tags, timeseries)
             if (tot > 0) then
                 timeseries[#timeseries + 1] = {
                     schema = "top:flowdev_port:ndpi" .. ts_suffix,
+                    disable_perc_95_ts = true,
                     group = i18n("graphs.l7_proto"),
                     priority = 2,
                     query = "protocol:" .. serie.protocol,
@@ -3680,6 +3699,7 @@ function timeseries_info.get_traffic_rules_schema(rule_type)
                     group = i18n('applications_long'),
                     title = application,
                     id = 'top:host:ndpi',
+                    disable_perc_95_ts = true,
                     extra_metric = 'protocol:' .. application --[[ here the schema is the ID ]] ,
                     show_volume = true
                 }
@@ -3693,6 +3713,7 @@ function timeseries_info.get_traffic_rules_schema(rule_type)
                     label = category,
                     group = i18n('categories'),
                     title = category,
+                    disable_perc_95_ts = true,
                     id = 'top:host:ndpi_categories',
                     extra_metric = 'category:' .. category --[[ here the schema is the ID ]] ,
                     show_volume = true
@@ -3707,14 +3728,13 @@ function timeseries_info.get_traffic_rules_schema(rule_type)
         local has_top_protocols = ifname_ts_enabled == "both" or
                                       ifname_ts_enabled == "per_protocol" or
                                       ifname_ts_enabled ~= "0"
-        
+
         local metric_list = {}
         for _, item in ipairs(community_timeseries) do
             if (item.id == timeseries_id.asn) then
                 item.show_volume = false
-                if(item.schema == "asn:traffic_rcvd" or
-                        item.schema == "asn:traffic_sent" or
-                        item.schema == "asn:traffic") then
+                if (item.schema == "asn:traffic_rcvd" or item.schema ==
+                    "asn:traffic_sent" or item.schema == "asn:traffic") then
                     item.show_volume = true
                     metric_list[#metric_list + 1] = item
                 end
@@ -3729,6 +3749,7 @@ function timeseries_info.get_traffic_rules_schema(rule_type)
                     group = i18n('applications_long'),
                     title = application,
                     schema = id,
+                    disable_perc_95_ts = true,
                     extra_metric = 'protocol:' .. application --[[ here the schema is the ID ]] ,
                     show_volume = true
                 }
@@ -3794,6 +3815,7 @@ function timeseries_info.get_traffic_rules_schema(rule_type)
                     label = category,
                     group = i18n('categories'),
                     title = category,
+                    disable_perc_95_ts = true,
                     id = 'top:iface:ndpi_categories',
                     extra_metric = 'category:' .. category --[[ here the schema is the ID ]] ,
                     show_volume = true
