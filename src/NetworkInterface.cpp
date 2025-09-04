@@ -615,7 +615,7 @@ bool NetworkInterface::nDPILoadIPCategory(char *what,
 
 bool NetworkInterface::nDPILoadHostnameCategory(char *what, u_int16_t id, char *list_name) {
   bool success = true;
-  
+
   // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s(%p) [%s]", __FUNCTION__, ndpi_struct_shadow, what);
 
   if (what && ndpi_struct_shadow)
@@ -13104,7 +13104,7 @@ class AggregatedASNFlowKey {
 public:
   u_int8_t ip_protocol_version;
   u_int32_t src_asn, dst_asn, src_peer_asn, dst_peer_asn;
-  u_int32_t probe_ip, input_snmp, output_snmp;
+  u_int32_t probe_ip, input_snmp, output_snmp, key_val;
 
   AggregatedASNFlowKey(u_int8_t  _ip_protocol_version,
 		       u_int32_t _src_asn,
@@ -13139,19 +13139,17 @@ public:
     input_snmp   = f->getFlowDeviceInIndex();
     output_snmp  = f->getFlowDeviceOutIndex();
 
-    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%u -> %u", src_asn, dst_asn);
+    key_val = ip_protocol_version
+      + probe_ip
+      + src_asn *2
+      + dst_asn *3
+      + src_peer_asn *4
+      + dst_peer_asn *5
+      + input_snmp *6
+      + output_snmp *7;
   }
 
-  u_int32_t val() const {
-    return(ip_protocol_version
-	   + probe_ip
-	   + src_asn *2
-	   + dst_asn *3
-	   + src_peer_asn *4
-	   + dst_peer_asn *5
-	   + input_snmp *6
-	   + output_snmp *7);
-  }
+  inline u_int32_t get_val() const { return(key_val); }
 
   bool equal(const AggregatedASNFlowKey *k) const {
     if(
@@ -13179,7 +13177,7 @@ public:
   }
 
   bool compare(const AggregatedASNFlowKey *k) const {
-    return(val() < k->val());
+    return(get_val() < k->get_val());
   }
 };
 
