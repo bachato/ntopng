@@ -96,6 +96,15 @@ end
 
 -- ##############################################
 
+function alert_entity_builders.asAlertEntity(as)
+   return {
+       alert_entity = alert_entities.as,
+       entity_val = as
+   }
+end
+
+-- ##############################################
+
 function alert_entity_builders.systemEntity(system_entity_name)
    return {
        alert_entity = alert_entities.system,

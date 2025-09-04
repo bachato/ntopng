@@ -1,0 +1,38 @@
+-- This placeholder contains a sample check
+
+--
+-- (C) 2019-24 - ntop.org
+--
+
+local checks = require("checks")
+local alerts_api = require("alerts_api")
+local alert_consts = require("alert_consts")
+
+local script = {
+  -- Script category
+  category = checks.check_categories.internals,
+
+  severity = alert_consts.get_printable_severities().error,
+
+  -- See below
+  hooks = {},
+
+  gui = {
+    i18n_title = "alert_entities.test",
+    i18n_description = "alert_entities.test",
+  },
+}
+
+-- #################################################################
+
+local function test_check(params)
+    tprint("Test AS Check hook called")
+end
+
+-- #################################################################
+
+script.hooks.min = test_check
+
+-- #################################################################
+
+return script

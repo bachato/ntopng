@@ -75,6 +75,7 @@ checks.SNMP_DEVICE_SUBDIR_NAME = "snmp_device"
 checks.SYSTEM_SUBDIR_NAME = "system"
 checks.SYSLOG_SUBDIR_NAME = "syslog"
 checks.ACTIVE_MONITORING_SUBDIR_NAME = "active_monitoring"
+checks.AS_SUBDIR_NAME = "as"
 
 -- NOTE: the subdir id must be unique
 local available_subdirs = {
@@ -196,6 +197,9 @@ local available_subdirs = {
       id = checks.ACTIVE_MONITORING_SUBDIR_NAME,
       label = "active_monitoring"
    }, {
+      id = checks.AS_SUBDIR_NAME,
+      label = "as"
+   }, {
       id = checks.SYSLOG_SUBDIR_NAME,
       label = "Syslog"
    }
@@ -238,6 +242,13 @@ checks.script_types = {
       parent_dir = "system",
       hooks = {"min", "5mins", "hour", "day"},
       subdirs = {"active_monitoring"},
+      has_per_hook_config = true, -- Each hook has a separate configuration
+      default_config_only = true -- Only the default configset can be used
+   },
+   as = {
+      parent_dir = "interface",
+      hooks = {"min", "5mins", "hour", "day"},
+      subdirs = {"as"},
       has_per_hook_config = true, -- Each hook has a separate configuration
       default_config_only = true -- Only the default configset can be used
    },
@@ -1846,7 +1857,7 @@ end
 
 -- ##############################################
 
--- The function below ia called once at the startup
+-- The function below is called once at the startup
 local function setupHostChecks(str_granularity, checks_var, do_trace)
    if (do_trace) then
       print("alert.lua:setup(" .. str_granularity .. ") called\n")
@@ -1865,7 +1876,7 @@ end
 
 -- ##############################################
 
--- The function below ia called once at the startup
+-- The function below is called once at the startup
 local function setupInterfaceChecks(str_granularity, checks_var, do_trace)
    if (do_trace) then
       print("alert.lua:setup(" .. str_granularity .. ") called\n")
@@ -1884,7 +1895,7 @@ end
 
 -- #################################################################
 
--- The function below ia called once (#pragma once)
+-- The function below is called once (#pragma once)
 local function setupLocalNetworkChecks(str_granularity, checks_var, do_trace)
    checks_var.network_entity = alert_entities.network.entity_id
    if do_trace then
@@ -1902,7 +1913,7 @@ end
 
 -- #################################################################
 
--- The function below ia called once (#pragma once)
+-- The function below is called once (#pragma once)
 local function setupSystemChecks(str_granularity, checks_var, do_trace)
    if do_trace then
       traceError(TRACE_NORMAL, TRACE_CONSOLE, "system.lua:setup(%s) called", str_granularity)
@@ -1924,7 +1935,7 @@ end
 
 -- #################################################################
 
--- The function below ia called once (#pragma once)
+-- The function below is called once (#pragma once)
 local function setupSNMPChecks(str_granularity, checks_var, do_trace)
    if not ntop.isEnterprise() and not ntop.isnEdgeEnterprise() then
       return false
@@ -1948,7 +1959,7 @@ end
 
 -- #################################################################
 
--- The function below ia called once (#pragma once)
+-- The function below is called once (#pragma once)
 local function setupActiveMonitoringChecks(str_granularity, checks_var, do_trace)
    if not ntop.isEnterpriseL() then
       return false
@@ -1965,6 +1976,28 @@ local function setupActiveMonitoringChecks(str_granularity, checks_var, do_trace
 
    -- Load the threshold checking functions
    checks_var.available_modules = checks.load(ifid, checks.script_types.active_monitoring, "active_monitoring")
+   checks_var.configset = checks.getConfigset()
+
+   return true
+end
+
+-- #################################################################
+
+-- The function below is called once (#pragma once)
+local function setupASChecks(str_granularity, checks_var, do_trace)
+   if not ntop.isEnterpriseL() then
+      return false
+   end
+
+   if do_trace then
+      print("alert.lua:setup(" .. str_granularity .. ") called\n")
+   end
+
+   checks_var.ifid = interface.getId()
+
+   -- Load the threshold checking functions
+   checks_var.available_modules = checks.load(checks_var.ifid, checks.script_types.as, "as", { hook_filter = str_granularity })
+
    checks_var.configset = checks.getConfigset()
 
    return true
@@ -2224,6 +2257,41 @@ local function runActiveMonitoringChecks(granularity, checks_var, do_trace)
 end
 
 -- #################################################################
+
+local function runASChecks(granularity, checks_var, do_trace)
+   if do_trace then
+      print("runASChecks(" .. granularity .. ") called\n")
+   end
+
+   if table.empty(checks_var.available_modules.hooks[granularity]) then
+      if (do_trace) then
+	 print("runASChecks(" .. granularity .. "): no modules, skipping\n")
+      end
+      return
+   end
+
+   local info = interface.getStats()
+   local when = os.time()
+   local as_conf = checks.getConfig(checks_var.configset, "as")
+
+   for mod_key, hook_fn in pairs(checks_var.available_modules.hooks[granularity]) do
+      local check = checks_var.available_modules.modules[mod_key]
+      local conf = checks.getTargetHookConfig(as_conf, check, granularity)
+
+      if (conf.enabled) then
+	 invokeScriptHook(check, checks_var.configset, hook_fn, {
+			     granularity = granularity,
+			     alert_entity = alert_entity_builders.asAlertEntity(checks_var.ifid),
+			     entity_info = info,
+			     check_config = conf.script_conf,
+			     check = check,
+			     when = when,
+	 })
+      end
+   end
+end
+
+-- #################################################################
 -- @brief Setup, run and shutdown interface, network, system and
 --        SNMP checks
 --        The setup, loads the alerts, needs to be done once per VM
@@ -2283,6 +2351,19 @@ function checks.activeMonitoringChecks(granularity, checks_var, do_trace)
    end
 
    runActiveMonitoringChecks(granularity, checks_var, do_trace)
+   teardownChecks(granularity, checks_var, do_trace)
+
+   return true
+end
+
+-- #################################################################
+
+function checks.asChecks(granularity, checks_var, do_trace)
+   if not setupASChecks(granularity, checks_var, do_trace) then
+      return false
+   end
+
+   runASChecks(granularity, checks_var, do_trace)
    teardownChecks(granularity, checks_var, do_trace)
 
    return true
