@@ -989,6 +989,9 @@ function format_portidx_name(device_ip, portidx, short_version)
 
     -- SNMP is available only with Pro version at least
     if ntop.isPro() then
+        if tonumber(device_ip) then
+            device_ip = ntop.inet_ntoa(device_ip)
+        end
         local cached_dev = _snmp_devices[device_ip]
 
         if (cached_dev == nil) then

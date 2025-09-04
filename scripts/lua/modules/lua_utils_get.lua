@@ -95,6 +95,10 @@ function getProbeName(exporter_ip, show_vlan, shorten_len, show_ip_and_alias)
       show_ip_and_alias = true
    end
 
+   if tonumber(exporter_ip) then
+      exporter_ip = ntop.inet_ntoa(exporter_ip)
+   end
+
    local cached_device_name
    local snmp_cached_dev
 
