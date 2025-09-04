@@ -77,7 +77,8 @@ checks.SYSLOG_SUBDIR_NAME = "syslog"
 checks.ACTIVE_MONITORING_SUBDIR_NAME = "active_monitoring"
 
 -- NOTE: the subdir id must be unique
-local available_subdirs = {{
+local available_subdirs = {
+   {
       id = checks.HOST_SUBDIR_NAME,
       label = "hosts",
       filter = {
@@ -90,7 +91,7 @@ local available_subdirs = {{
             }
 	 }
       }
-			   }, {
+   }, {
       id = checks.INTERFACE_SUBDIR_NAME,
       label = "interfaces",
       filter = {
@@ -118,7 +119,7 @@ local available_subdirs = {{
             }
 	 }
       }
-			      }, {
+   }, {
       id = checks.NETWORK_SUBDIR_NAME,
       label = "networks",
       filter = {
@@ -146,7 +147,7 @@ local available_subdirs = {{
             }
 	 }
       }
-				 }, {
+   }, {
       id = checks.SNMP_DEVICE_SUBDIR_NAME,
       label = "host_details.snmp",
       filter = {
@@ -174,7 +175,7 @@ local available_subdirs = {{
             }
 	 }
       }
-				    }, {
+   }, {
       id = checks.FLOW_SUBDIR_NAME,
       label = "flows",
       -- User script execution filters (field names are those that arrive from the C Flow.cpp)
@@ -188,16 +189,17 @@ local available_subdirs = {{
             }
 	 }
       }
-				       }, {
+   }, {
       id = checks.SYSTEM_SUBDIR_NAME,
       label = "system"
-					  }, {
+   }, {
       id = checks.ACTIVE_MONITORING_SUBDIR_NAME,
       label = "active_monitoring"
-					     }, {
+   }, {
       id = checks.SYSLOG_SUBDIR_NAME,
       label = "Syslog"
-}}
+   }
+}
 
 -- Hook points for flow/periodic modules
 -- NOTE: keep in sync with the Documentation
