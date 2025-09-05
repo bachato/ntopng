@@ -40,7 +40,7 @@ if criteria_as == "user_traffic_breakdown" then
         {
             select_query = {"src_asn", "total_bytes"},
             rename_key_field = {"customer"},
-            skip_flow = {{key = "src_asn", value = "0"}},
+            skip_flow = {{key = "customer", value = "0"}},
             different_from = {"dst_asn"},
             where_query = {"dst_asn"},
             sort_by = {"total_bytes"},
@@ -60,7 +60,7 @@ if criteria_as == "user_traffic_breakdown" then
             different_from = {"src_asn"},
             where_query = {"src_asn"},
             sort_by = {"total_bytes"},
-            skip_flow = {{key = "dst_asn", value = 0}},
+            skip_flow = {{key = "customer", value = 0}},
             filters = {
                 src_asn = asn,
                 ifid = ifid,
