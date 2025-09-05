@@ -28,21 +28,23 @@
     </div>
 
     <div class="m-2 mb-3">
-        <div class="position-relative">
-            <div class="mb-3 d-flex flex-column" style="height: 60vh;">
-                <Loading :isLoading="loading"></Loading>
-                <Sankey v-if="show_sankey" ref="sankey_chart" :no_data_message="no_data_message"
-                    :sankey_data="sankey_data" @node_click="onNodeClick" @autorefresh_toggle="onAutoRefreshToggle">
-                </Sankey>
-                <Pie v-if="show_pie" ref="pie_chart" :no_data_message="no_data_message" :pie_data="pie_data"
-                    @autorefresh_toggle="onAutoRefreshToggle">>
-                </Pie>
+        <Transition name="add-effect" mode="out-in">
+            <div class="position-relative">
+                <div class="mb-3 d-flex flex-column" style="height: 60vh;">
+                    <Loading :isLoading="loading"></Loading>
+                    <Sankey v-if="show_sankey" ref="sankey_chart" :no_data_message="no_data_message"
+                        :sankey_data="sankey_data" @node_click="onNodeClick" @autorefresh_toggle="onAutoRefreshToggle">
+                    </Sankey>
+                    <Pie v-if="show_pie" ref="pie_chart" :no_data_message="no_data_message" :pie_data="pie_data"
+                        @autorefresh_toggle="onAutoRefreshToggle">>
+                    </Pie>
+                </div>
             </div>
-        </div>
+        </Transition>
         <Transition name="add-effect" mode="out-in">
             <div class="position-relative" :key="reRenderTable" style="min-height: 614px;">
-                <TableWithConfig v-if="props.context.isEnterpriseL && show_table" ref="table_as_stats"
-                    :table_id="table_id" :csrf="props.context.csrf" :showLoading="true" :f_map_columns="mapTableColumns"
+                <TableWithConfig v-if="props.context.isEnterpriseL" ref="table_as_stats" :table_id="table_id"
+                    :csrf="props.context.csrf" :showLoading="true" :f_map_columns="mapTableColumns"
                     :f_sort_rows="columnsSorting" :get_extra_params_obj="getExtraParameters"
                     @custom_event="onTableCustomEvent">
                 </TableWithConfig>
@@ -104,8 +106,7 @@ const sankey_format_list = [
 ];
 const time_preset_list = [
     { value: "live", label: i18n('live'), currently_active: true },
-    { value: "30_min", label: i18n('show_alerts.presets.30_min'), currently_active: false },
-    { value: "hour", label: i18n('show_alerts.presets.hour'), currently_active: false },
+    { value: "2_hours", label: i18n('show_alerts.presets.2_hours'), currently_active: false },
     { value: "12_hours", label: i18n('show_alerts.presets.12_hours'), currently_active: false },
     { value: "day", label: i18n('show_alerts.presets.day'), currently_active: false },
     { value: "week", label: i18n('show_alerts.presets.week'), currently_active: false },
@@ -192,6 +193,8 @@ const table_id = computed(() => {
         return "ingress_egress_as_stats"
     } else if (active_sankey_type.value?.value === "traffic_between_ases") {
         return "traffic_between_ases"
+    } else if (active_sankey_type.value?.value === "user_traffic_breakdown") {
+        return "user_traffic_breakdown"
     }
 
     return props.context.tableId;
@@ -333,7 +336,7 @@ const getExtraParameters = () => {
 
 function defineDropdown() {
     let asn_configuration = props.context.configuration
-    if (asn_configuration != "customer_asn" && asn_configuration != "sub_customer_asn"){
+    if (asn_configuration != "customer_asn" && asn_configuration != "sub_customer_asn") {
         sankey_format_list.push({
             key: "criteria_as",
             value: "user_traffic_breakdown",
@@ -372,6 +375,8 @@ function columnsSorting(col, r0, r1) {
             return sortingFunctions.sortByName(r0.device.name, r1.device.name, col.sort);
         } else if (col.id == "interface") {
             return sortingFunctions.sortByName(r0.interface.name, r1.interface.name, col.sort);
+        } else if (col.id == "customer") {
+            return sortingFunctions.sortByName(r0.customer.name, r1.customer.name, col.sort);
         } else if (col.id == "as") {
             return sortingFunctions.sortByName(r0.as.name, r1.as.name, col.sort);
         } else if (col.id == "dst_as") {
@@ -437,6 +442,9 @@ const mapTableColumns = (columns) => {
             }
             return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
         },
+        "customer": (value, row) => {
+            return formatAS(value);
+        },
         "as": (value, row) => {
             return formatAS(value);
         },
@@ -500,7 +508,7 @@ const mapTableColumns = (columns) => {
  */
 .add-effect-enter-from {
     opacity: 0;
-    transform: translateX(60px);
+    transform: translateX(-60px);
 }
 
 .add-effect-leave-to {

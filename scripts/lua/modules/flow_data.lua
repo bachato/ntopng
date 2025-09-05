@@ -146,6 +146,7 @@ end
 function flow_data.getStats(queries, isHistorical)
     local results = {}
 
+    --tprint(isHistorical)
     if isHistorical ~= nil then
         if not isHistorical then
             -- In case of sankey, the aggregation function is called by flow_sankey.lua

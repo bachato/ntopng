@@ -38,12 +38,10 @@ end
 if criteria_as == "user_traffic_breakdown" then
     queries = {
         {
-            select_query = {
-                "src_asn", "total_bytes"
-            },
+            select_query = {"src_asn", "total_bytes"},
             rename_key_field = {"customer"},
-            different_from = {nil, "src_asn", "dst_asn"},
             skip_flow = {{key = "src_asn", value = "0"}},
+            different_from = {"dst_asn"},
             where_query = {"dst_asn"},
             sort_by = {"total_bytes"},
             filters = {
@@ -57,13 +55,11 @@ if criteria_as == "user_traffic_breakdown" then
             section_ref = "customer",
             section_format = format_utils.formatASN
         }, {
-            select_query = {
-                "dst_asn", "total_bytes"
-            },
+            select_query = {"dst_asn", "total_bytes"},
             rename_key_field = {"customer"},
+            different_from = {"src_asn"},
             where_query = {"src_asn"},
             sort_by = {"total_bytes"},
-            different_from = {"src_asn", "dst_asn"},
             skip_flow = {{key = "dst_asn", value = 0}},
             filters = {
                 src_asn = asn,
@@ -79,12 +75,11 @@ if criteria_as == "user_traffic_breakdown" then
     }
 end
 
-local sections
-sections = flow_pie.generatePie(queries, 10000, not isEmptyString(epoch_begin))
+local sections = flow_pie.generatePie(queries, 10000, not isEmptyString(epoch_begin))
 
-table.sort(sections, function(a, b)
-  return a.value > b.value
-end)
+table.sort(sections, function(a, b) return a.value > b.value end)
 
 local js_formatter = "formatValue"
-rest_utils.extended_answer(rest_utils.consts.success.ok, graph_utils.convert_pie_data(sections, true, js_formatter))
+rest_utils.extended_answer(rest_utils.consts.success.ok,
+                           graph_utils.convert_pie_data(sections, true,
+                                                        js_formatter))

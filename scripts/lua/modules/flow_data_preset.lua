@@ -117,6 +117,12 @@ local columns = {
             link = "/lua/as_overview.lua?asn=%s"
         }
     },
+    customer = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
     transit_as = {
         formatter = {
             funct = format_utils.formatASN,
