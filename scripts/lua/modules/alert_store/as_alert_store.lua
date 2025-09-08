@@ -148,9 +148,11 @@ function as_alert_store:format_record(value, no_html)
     local alert_info = alert_utils.getAlertInfo(value)
     local msg = alert_utils.formatAlertMessage(ifid, value, alert_info)
 
+    value.asn = value.asn or value.entity_val
+
     -- record[RNAME.ALIAS.name] = value.alias
-    record[RNAME.ASN.name] = value.entity_val
-    record[RNAME.AS_NAME.name] = format_utils.formatASN(value.entity_val)
+    record[RNAME.ASN.name] = value.asn
+    record[RNAME.AS_NAME.name] = format_utils.formatASN(value.asn)
 
     record[RNAME.ALERT_NAME.name] = alert_name
 
