@@ -109,6 +109,10 @@ function alert_store:_escape(str)
         return ""
     end
 
+    if type(str) ~= "string" then
+        str = tostring(str)
+    end
+
     str = str:gsub("'", "''")
     if (str == '\\') then
         str = ''
