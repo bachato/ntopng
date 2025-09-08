@@ -465,7 +465,9 @@ function alerts_api.release(entity_info, type_info, when, cur_alerts)
         end
 
     else
-        released = interface.releaseExternalAlert(entity_info.alert_entity.entity_id, entity_info.entity_val,
+        local key = string.format("%s_%s_%s", entity_info.entity_val, type_info.alert_type.alert_key, subtype)
+
+        released = interface.releaseExternalAlert(entity_info.alert_entity.entity_id, entity_info.entity_val, key,
             table.unpack(params))
     end
 
