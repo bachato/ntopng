@@ -35,7 +35,7 @@
                     <Sankey v-if="show_sankey" ref="sankey_chart" :no_data_message="no_data_message"
                         :sankey_data="sankey_data" @node_click="onNodeClick" @autorefresh_toggle="onAutoRefreshToggle">
                     </Sankey>
-                    <Pie v-if="show_pie" ref="pie_chart" :no_data_message="no_data_message" :pie_data="pie_data"
+                    <Pie v-if="show_pie" :key="reRenderPie" ref="pie_chart" :no_data_message="no_data_message" :pie_data="pie_data"
                         @autorefresh_toggle="onAutoRefreshToggle">>
                     </Pie>
                 </div>
@@ -92,6 +92,7 @@ let intervalId = null;
 const active_sankey_type = ref({})
 const table_as_stats = ref(null);
 const reRenderTable = ref(false);
+const reRenderPie = ref(false);
 const main_epoch_interval = ref(null);
 const first_date_epoch = ref(props.context.first_date_epoch);
 const toggle_slider = ref(false);
@@ -246,6 +247,7 @@ function saveSwitch() {
 
 const updatePieData = async () => {
     if (show_pie.value) {
+        reRenderPie.value = !reRenderPie.value
         loading.value = true;
         const data = await getPieData();
         pie_data.value = data;

@@ -6,9 +6,7 @@ local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 
 local if_stats = interface.getStats()
-if not ntop.isEnterpriseL() then
-    return
-end
+if not ntop.isEnterpriseL() then return end
 
 require "check_redis_prefs"
 require "lua_utils"
@@ -22,9 +20,7 @@ sendHTTPContentTypeHeader('text/html')
 
 local menu = page_utils.menu_entries.server_ports
 
-if is_asn_mode_enabled then
-    menu = page_utils.menu_entries.server_ports_asn_mode
-end
+if is_asn_mode_enabled then menu = page_utils.menu_entries.server_ports_asn_mode end
 
 page_utils.print_header_and_set_active_menu_entry(menu)
 
@@ -48,16 +44,15 @@ local ifId = interface.getId()
 
 local base_url = ntop.getHttpPrefix() .. "/lua/server_ports.lua"
 
-page_utils.print_navbar(i18n('server_ports.server_ports'), base_url .. "?", {{
-    hidden = not ntop.isEnterpriseL(),
-    active = page == "flows_sankey",
-    page_name = "flows_sankey",
-    label = i18n("chart")
-}, {
-    active = page == "live",
-    page_name = "live",
-    label = i18n("jump_to_table")
-}})
+page_utils.print_navbar(i18n('server_ports.server_ports'), base_url .. "?", {
+    {
+        hidden = not ntop.isEnterpriseL(),
+        active = page == "flows_sankey",
+        page_name = "flows_sankey",
+        label = i18n("chart")
+    },
+    {active = page == "live", page_name = "live", label = i18n("jump_to_table")}
+})
 
 if (page == "live" or page == nil) then
     template.render("pages/server_ports.template", {
@@ -97,15 +92,13 @@ else
             currently_active = (vlan == 'none' or vlan == nil),
             label = i18n('all'),
             key = 'none',
-            id = 'none'
+            id = ''
         }
 
         for _, v in pairs(vlans.VLANs) do
             local name = getFullVlanName(v.vlan_id)
 
-            if isEmptyString(name) then
-                name = i18n('no_vlan')
-            end
+            if isEmptyString(name) then name = i18n('no_vlan') end
             vlan_options[#vlan_options + 1] = {
                 currently_active = (tonumber(vlan) == v.vlan_id),
                 label = name,
@@ -137,38 +130,41 @@ else
 
     -- ####################
 
-    l4_options = {{
-        currently_active = (l4_proto == "" or l4_proto == 'none' or l4_proto == nil),
-        label = i18n("all_tcp_udp"),
-        key = -1,
-        id = -1
-    }, {
-        currently_active = (l4_proto == "TCP" or l4_proto == 'tcp' or l4_proto == 6),
-        label = i18n("tcp"),
-        key = l4_proto_to_id('TCP'),
-        id = l4_proto_to_id('TCP')
-    }, {
-        currently_active = (l4_proto == "UDP" or l4_proto == 'udp' or l4_proto == 17),
-        label = i18n("udp"),
-        key = l4_proto_to_id('UDP'),
-        id = l4_proto_to_id('UDP')
-    }}
+    l4_options = {
+        {
+            currently_active = (l4_proto == "" or l4_proto == 'none' or l4_proto ==
+                nil),
+            label = i18n("all_tcp_udp"),
+            key = -1,
+            id = -1
+        }, {
+            currently_active = (l4_proto == "TCP" or l4_proto == 'tcp' or
+                l4_proto == 6),
+            label = i18n("tcp"),
+            key = l4_proto_to_id('TCP'),
+            id = l4_proto_to_id('TCP')
+        }, {
+            currently_active = (l4_proto == "UDP" or l4_proto == 'udp' or
+                l4_proto == 17),
+            label = i18n("udp"),
+            key = l4_proto_to_id('UDP'),
+            id = l4_proto_to_id('UDP')
+        }
+    }
 
     -- ####################
 
-    template_utils.render("pages/sankey_vlan.template", {
-        widget_gui_utils = widget_gui_utils,
-        ifid = ifid,
-        ports_analysis = {
-            timeframe_options = json.encode(timeframe_options),
-            vlan_options = json.encode(vlan_options),
-            l4_proto_options = json.encode(l4_options)
-        }
+    template_utils.render("pages/vue_page.template", {
+        vue_page_name = "PageVLANPortsSankey",
+        page_context = json.encode({
+            ifid = ifid,
+            available_filters = {
+                timeframe = timeframe_options,
+                vlan = vlan_options,
+                l4proto = l4_options
+            }
+        })
     })
-
-    print(ui_utils.render_notes({{
-        content = i18n("server_ports.notes")
-    }}))
 end
 
 dofile(dirs.installdir .. "/scripts/lua/inc/footer.lua")

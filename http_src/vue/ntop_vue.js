@@ -208,7 +208,7 @@ let ntopVue = {
 
     PageEditApplications: PageEditApplications,
 
-    PageVLANPortsFlowSankey: PageVLANPortsSankey,
+    PageVLANPortsSankey: PageVLANPortsSankey,
     PageTestTable: PageTestTable,
 
     NedgeRulesConfig: NedgeRulesConfig,
