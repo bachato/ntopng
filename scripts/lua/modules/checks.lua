@@ -554,7 +554,7 @@ local function loadAndCheckScript(mod_fname, full_path, script, script_type, sub
       local script_ok = scripts_filter(check)
 
       if (not script_ok) then
-	 traceError(TRACE_DEBUG, TRACE_CONSOLE, string.format("Skipping module'%s' for scripts_filter", check.key))
+	 traceError(TRACE_DEBUG, TRACE_CONSOLE, string.format("Skipping module '%s' for scripts_filter", check.key))
 	 return (nil)
       end
    end
@@ -709,7 +709,7 @@ function checks.load(ifid, script_type, subdir, options)
       end
 
       local check = loadAndCheckScript(mod_fname, full_path, script, script_type, subdir, return_all, scripts_filter, hook_filter)
-      
+
       if (not check) then
 	 goto next_module
       end
@@ -1028,6 +1028,7 @@ end
 local function toggleScriptConfigset(configset, script_key, subdir, enable)
    local script_type = checks.getScriptType(subdir)
    local script = checks.loadModule(interface.getId(), script_type, subdir, script_key, true)
+   local config,inconsistency_found
 
    if not script then
       return false, i18n("configsets.unknown_check", {
@@ -1035,7 +1036,7 @@ local function toggleScriptConfigset(configset, script_key, subdir, enable)
 			})
    end
 
-   local config = checks.getScriptConfig(configset, script, subdir)
+   config, inconsistency_found = checks.getScriptConfig(configset, script, subdir)
 
    if config then
       for hook, hook_config in pairs(config) do
@@ -1058,7 +1059,7 @@ local function toggleScriptConfigset(configset, script_key, subdir, enable)
       configset["config"][subdir] = {}
    end
 
-   if (not configset["config"][subdir][script_key]) or (table.len(configset["config"][subdir][script_key]) == 0) then
+   if (not configset["config"][subdir][script_key]) or (table.len(configset["config"][subdir][script_key]) == 0) or inconsistency_found then
       configset["config"][subdir][script_key] = {}
       configset["config"][subdir][script_key] = config
    end
@@ -1316,15 +1317,32 @@ local default_config = {
 function checks.getScriptConfig(configset, script, subdir)
    local script_key = script.key
    local config = configset.config[subdir]
+   local inconsistency_found = false
+   local script_type
 
    if (config) and (config[script_key]) and (table.len(config[script_key]) > 0) then
       -- A configuration was found
-      return (config[script_key])
+      local ret = {}
+
+      -- Check if thre is a check inconsistency in hooks configuration
+      for k,_ in pairs(script.hooks) do
+	 if(config[script_key][k] == nil) then
+	    traceError(TRACE_NORMAL, TRACE_CONSOLE, "Found inconsistency on script ".. script.key .." for hook " .. k)
+	    inconsistency_found = true
+	 else
+	    ret[k] = config[script_key][k]
+	 end
+      end
+
+      -- return (config[script_key])
+      if(table.len(ret) > 0) then
+	 return ret, inconsistency_found
+      end
    end
 
    -- Default
    local rv = {}
-   local script_type = checks.getScriptType(subdir)
+   script_type = checks.getScriptType(subdir)
    local hooks = ternary(script_type.has_per_hook_config, script.hooks, {
 			    [ALL_HOOKS_CONFIG_KEY] = 1
    })
@@ -1336,7 +1354,7 @@ function checks.getScriptConfig(configset, script, subdir)
       end
    end
 
-   return (rv)
+   return rv, inconsistency_found
 end
 
 -- ##############################################
@@ -2027,7 +2045,7 @@ local function runHostChecks(granularity, checks_var, do_trace)
       local check = checks_var.available_modules.modules[mod_key]
       local conf = checks.getTargetHookConfig(checks_var.iface_config, check, granularity)
 
-      if (conf.enabled) then
+--      if (conf.enabled) then
 	 invokeScriptHook(check, checks_var.configset, hook_fn, {
 			     granularity = granularity,
 			     alert_entity = entity_info,
@@ -2035,7 +2053,7 @@ local function runHostChecks(granularity, checks_var, do_trace)
 			     check_config = conf.script_conf,
 			     check = check
 	 })
-      end
+--      end
    end
 end
 
@@ -2394,4 +2412,3 @@ if (trace_script_duration ~= nil) then
 end
 
 return (checks)
-
