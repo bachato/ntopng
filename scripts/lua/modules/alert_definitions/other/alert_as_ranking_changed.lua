@@ -52,7 +52,7 @@ local function formatRanking(ranking)
 
    for _, t in pairs(ranking) do
       local ex = getProbeName(t.exporter_ip, false) -- lua_utils_get.lua
-      local ifname = format_portidx_name(t.exporter_ip, t.inteface_id, true)  -- lua_utils_gui.lua
+      local ifname = format_portidx_name(t.exporter_ip, t.interface_id, true)  -- lua_utils_gui.lua
       local volume = format_utils.bytesToSize(t.value)
       
       ex = ex .. ":" .. ifname .. " (".. volume ..")"
