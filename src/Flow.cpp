@@ -1698,11 +1698,7 @@ u_int64_t Flow::get_current_bytes_srv2cli() const {
 /* *************************************** */
 
 u_int64_t Flow::get_current_goodput_bytes_cli2srv() const {
-  int64_t diff =
-    get_goodput_bytes_cli2srv() -
-    (periodic_stats_update_partial
-     ? periodic_stats_update_partial->get_cli2srv_goodput_bytes()
-     : 0);
+  int64_t diff = get_goodput_bytes_cli2srv() - (periodic_stats_update_partial ? periodic_stats_update_partial->get_cli2srv_goodput_bytes() : 0);
 
   /*
     We need to do this as due to concurrency issues,
@@ -1714,8 +1710,7 @@ u_int64_t Flow::get_current_goodput_bytes_cli2srv() const {
 /* *************************************** */
 
 u_int64_t Flow::get_current_goodput_bytes_srv2cli() const {
-  int64_t diff =
-    get_goodput_bytes_srv2cli() - (periodic_stats_update_partial ? periodic_stats_update_partial->get_srv2cli_goodput_bytes() : 0);
+  int64_t diff = get_goodput_bytes_srv2cli() - (periodic_stats_update_partial ? periodic_stats_update_partial->get_srv2cli_goodput_bytes() : 0);
 
   /*
     We need to do this as due to concurrency issues,
@@ -2017,6 +2012,15 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
                                        PartializableFlowTrafficStats *partial,
                                        bool first_partial,
                                        const struct timeval *tv) {
+  Mac *cli_mac = cli_host ? cli_host->getMac() : NULL;
+  Mac *srv_mac = srv_host ? srv_host->getMac() : NULL;
+  u_int32_t diff_sent_packets = partial->get_cli2srv_packets();
+  u_int64_t diff_sent_bytes = partial->get_cli2srv_bytes();
+  u_int64_t diff_sent_goodput_bytes = partial->get_cli2srv_goodput_bytes();
+  u_int32_t diff_rcvd_packets = partial->get_srv2cli_packets();
+  u_int64_t diff_rcvd_bytes = partial->get_srv2cli_bytes();
+  u_int64_t diff_rcvd_goodput_bytes = partial->get_srv2cli_goodput_bytes();
+
   if((!isDNS()) && ntop->getPrefs()->is_dns_cache_enabled()) {
     if(!srv_host) {
       /* Standard Interface */
@@ -2027,9 +2031,9 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
     }
   }
 
-  update_pools_stats(iface, cli_host, srv_host, tv, partial->get_cli2srv_packets(),
-		     partial->get_cli2srv_bytes(), partial->get_srv2cli_packets(),
-		     partial->get_srv2cli_bytes());
+  update_pools_stats(iface, cli_host, srv_host, tv,
+		     diff_sent_packets, diff_sent_bytes,
+		     diff_rcvd_packets, diff_rcvd_bytes);
 
   if(cli_host && srv_host) {
     bool cli_and_srv_in_same_subnet = false;
@@ -2037,9 +2041,8 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
     VLAN *vl;
     int32_t cli_network_id = cli_host->get_local_network_id();
     int32_t srv_network_id = srv_host->get_local_network_id();
-    int16_t stats_protocol =
-      getStatsProtocol(); /* The protocol (among ndpi master_ and app_) that
-			     is chosen to increase stats */
+    int16_t stats_protocol = getStatsProtocol(); /* The protocol (among ndpi master_ and app_) that
+						    is chosen to increase stats */
     NetworkStats *cli_network_stats = NULL, *srv_network_stats = NULL;
 
     updateServerPortsStats(srv_host, &ndpiDetectedProtocol, get_first_seen());
@@ -2439,6 +2442,46 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 		))
       srv_host->offlineSetTLSName(protos.tls.client_requested_server_name); /* (***) */
   }
+  
+  /* Update L2 Device stats */
+  if(cli_mac) {
+    if(diff_rcvd_packets)
+      cli_mac->incRcvdStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
+    
+    if(diff_sent_packets)
+      cli_mac->incSentStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
+    
+    if(ntop->getPrefs()->areMacNdpiStatsEnabled()) {
+      cli_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
+			    diff_sent_packets, diff_sent_bytes,
+			    diff_sent_goodput_bytes, diff_rcvd_packets,
+			    diff_rcvd_bytes, diff_rcvd_goodput_bytes);
+    }    
+
+    if(srv_mac) {
+      if(diff_rcvd_packets)
+        srv_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
+
+      if(diff_sent_packets)
+        srv_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
+
+      if(ntop->getPrefs()->areMacNdpiStatsEnabled())
+        srv_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
+                              diff_rcvd_packets, diff_rcvd_bytes,
+                              diff_rcvd_goodput_bytes, diff_sent_packets,
+                              diff_sent_bytes, diff_sent_goodput_bytes);
+    }
+
+#ifdef NTOPNG_PRO
+#ifndef HAVE_NEDGE
+    /* Update profile stats */
+    if (ntop->getPro()->has_valid_license()) {
+      if(trafficProfile)
+        trafficProfile->incBytes(diff_sent_bytes + diff_rcvd_bytes);
+    }
+#endif
+#endif
+  }
 }
 
 /* *************************************** */
@@ -2575,67 +2618,10 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
 
   get_partial_traffic_stats(&periodic_stats_update_partial, &partial, &first_partial);
 
-  u_int32_t diff_sent_packets = partial.get_cli2srv_packets();
-  u_int64_t diff_sent_bytes = partial.get_cli2srv_bytes();
-  u_int64_t diff_sent_goodput_bytes = partial.get_cli2srv_goodput_bytes();
-
-  u_int32_t diff_rcvd_packets = partial.get_srv2cli_packets();
-  u_int64_t diff_rcvd_bytes = partial.get_srv2cli_bytes();
-  u_int64_t diff_rcvd_goodput_bytes = partial.get_srv2cli_goodput_bytes();
-
-  /*
-    Do the stats update on the actual peers, i.e.,
-    peers possibly swapped due to the heuristic
-  */
+  /* Do the stats update on the actual peers, i.e., peers possibly swapped due to the heuristic */
   get_actual_peers(&cli_h, &srv_h);
 
-  Mac *cli_mac = cli_h ? cli_h->getMac() : NULL;
-  Mac *srv_mac = srv_h ? srv_h->getMac() : NULL;
-
   hosts_periodic_stats_update(getInterface(), cli_h, srv_h, &partial, first_partial, tv);
-
-  if(diff_sent_bytes || diff_rcvd_bytes) {
-    /* Update L2 Device stats */
-
-    if(cli_mac) {
-      if(diff_rcvd_packets)
-        cli_mac->incRcvdStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
-
-      if(diff_sent_packets)
-        cli_mac->incSentStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
-
-      if(ntop->getPrefs()->areMacNdpiStatsEnabled()) {
-        cli_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
-                              diff_sent_packets, diff_sent_bytes,
-                              diff_sent_goodput_bytes, diff_rcvd_packets,
-                              diff_rcvd_bytes, diff_rcvd_goodput_bytes);
-      }
-    }
-
-    if(srv_mac) {
-      if(diff_rcvd_packets)
-        srv_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
-
-      if(diff_sent_packets)
-        srv_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
-
-      if(ntop->getPrefs()->areMacNdpiStatsEnabled())
-        srv_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
-                              diff_rcvd_packets, diff_rcvd_bytes,
-                              diff_rcvd_goodput_bytes, diff_sent_packets,
-                              diff_sent_bytes, diff_sent_goodput_bytes);
-    }
-
-#ifdef NTOPNG_PRO
-#ifndef HAVE_NEDGE
-    /* Update profile stats */
-    if (ntop->getPro()->has_valid_license()) {
-      if(trafficProfile)
-        trafficProfile->incBytes(diff_sent_bytes + diff_rcvd_bytes);
-    }
-#endif
-#endif
-  }
 
 #ifndef HAVE_NEDGE
   /* For nEdge check Flow::setPacketsBytes updates throughput */
@@ -2652,9 +2638,13 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
       u_int32_t total = diff_sent_bytes+diff_rcvd_bytes;
 #endif
 
-      updateThroughputStats(tdiff_msec, diff_sent_packets, diff_sent_bytes,
-			    diff_sent_goodput_bytes, diff_rcvd_packets,
-			    diff_rcvd_bytes, diff_rcvd_goodput_bytes);
+      updateThroughputStats(tdiff_msec,
+			    partial.get_cli2srv_packets(),
+			    partial.get_cli2srv_bytes(),
+			    partial.get_cli2srv_goodput_bytes(),
+			    partial.get_srv2cli_packets(),
+			    partial.get_srv2cli_bytes(),
+			    partial.get_srv2cli_goodput_bytes());
 
 #ifdef DEBUG
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "%.1f ms [%.3f Mbit][%u]", tdiff_msec,
