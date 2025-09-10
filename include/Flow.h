@@ -337,8 +337,9 @@ private:
   ViewInterfaceFlowStats *viewFlowStats;
 #endif
 
-  /* Partial used to periodically update stats out of flows */
-  PartializableFlowTrafficStats *periodic_stats_update_partial;
+  /* Stats base updated periodically (get_partial_traffic_stats)
+   * used to compute partial stats */
+  PartializableFlowTrafficStats *periodic_stats_base;
 
 #ifdef HAVE_NEDGE
   struct {

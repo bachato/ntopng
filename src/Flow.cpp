@@ -117,7 +117,7 @@ Flow::Flow(NetworkInterface *_iface,
   ndpiFlow = NULL, confidence = NDPI_CONFIDENCE_UNKNOWN;
   json_info = NULL, tlv_info = NULL, twh_over = 0,
     dissect_next_http_packet = 0;
-  periodic_stats_update_partial = NULL;
+  periodic_stats_base = NULL;
   bt_hash = NULL, ebpf = NULL, iec104 = NULL, stun_mapped_address = NULL;
   twh_over_view = 0, shapers_profile_set = 0;
   flow_verdict = 0;
@@ -569,7 +569,7 @@ Flow::~Flow() {
   if(viewFlowStats) delete (viewFlowStats);
 #endif
 
-  if(periodic_stats_update_partial) delete (periodic_stats_update_partial);
+  if(periodic_stats_base) delete (periodic_stats_base);
   if(last_db_dump.partial) delete (last_db_dump.partial);
   if(json_info) json_object_put(json_info);
 
@@ -1674,7 +1674,7 @@ char *Flow::intoaV4(unsigned int addr, char *buf, u_short bufLen) {
 /* *************************************** */
 
 u_int64_t Flow::get_current_bytes_cli2srv() const {
-  int64_t diff = get_bytes_cli2srv() - (periodic_stats_update_partial ? periodic_stats_update_partial->get_cli2srv_bytes() : 0);
+  int64_t diff = get_bytes_cli2srv() - (periodic_stats_base ? periodic_stats_base->get_cli2srv_bytes() : 0);
 
   /*
     We need to do this as due to concurrency issues,
@@ -1686,7 +1686,7 @@ u_int64_t Flow::get_current_bytes_cli2srv() const {
 /* *************************************** */
 
 u_int64_t Flow::get_current_bytes_srv2cli() const {
-  int64_t diff = get_bytes_srv2cli() - (periodic_stats_update_partial ? periodic_stats_update_partial->get_srv2cli_bytes() : 0);
+  int64_t diff = get_bytes_srv2cli() - (periodic_stats_base ? periodic_stats_base->get_srv2cli_bytes() : 0);
 
   /*
     We need to do this as due to concurrency issues,
@@ -1698,7 +1698,7 @@ u_int64_t Flow::get_current_bytes_srv2cli() const {
 /* *************************************** */
 
 u_int64_t Flow::get_current_goodput_bytes_cli2srv() const {
-  int64_t diff = get_goodput_bytes_cli2srv() - (periodic_stats_update_partial ? periodic_stats_update_partial->get_cli2srv_goodput_bytes() : 0);
+  int64_t diff = get_goodput_bytes_cli2srv() - (periodic_stats_base ? periodic_stats_base->get_cli2srv_goodput_bytes() : 0);
 
   /*
     We need to do this as due to concurrency issues,
@@ -1710,7 +1710,7 @@ u_int64_t Flow::get_current_goodput_bytes_cli2srv() const {
 /* *************************************** */
 
 u_int64_t Flow::get_current_goodput_bytes_srv2cli() const {
-  int64_t diff = get_goodput_bytes_srv2cli() - (periodic_stats_update_partial ? periodic_stats_update_partial->get_srv2cli_goodput_bytes() : 0);
+  int64_t diff = get_goodput_bytes_srv2cli() - (periodic_stats_base ? periodic_stats_base->get_srv2cli_goodput_bytes() : 0);
 
   /*
     We need to do this as due to concurrency issues,
@@ -1722,7 +1722,7 @@ u_int64_t Flow::get_current_goodput_bytes_srv2cli() const {
 /* *************************************** */
 
 u_int64_t Flow::get_current_packets_cli2srv() const {
-  int64_t diff = get_packets_cli2srv() - (periodic_stats_update_partial ? periodic_stats_update_partial->get_cli2srv_packets() : 0);
+  int64_t diff = get_packets_cli2srv() - (periodic_stats_base ? periodic_stats_base->get_cli2srv_packets() : 0);
 
   /*
     We need to do this as due to concurrency issues,
@@ -1734,7 +1734,7 @@ u_int64_t Flow::get_current_packets_cli2srv() const {
 /* *************************************** */
 
 u_int64_t Flow::get_current_packets_srv2cli() const {
-  int64_t diff = get_packets_srv2cli() - (periodic_stats_update_partial ? periodic_stats_update_partial->get_srv2cli_packets() : 0);
+  int64_t diff = get_packets_srv2cli() - (periodic_stats_base ? periodic_stats_base->get_srv2cli_packets() : 0);
 
   /*
     We need to do this as due to concurrency issues,
@@ -2616,7 +2616,7 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
     return; /* Too early */
   }
 
-  get_partial_traffic_stats(&periodic_stats_update_partial, &partial, &first_partial);
+  get_partial_traffic_stats(&periodic_stats_base, &partial, &first_partial);
 
   /* Do the stats update on the actual peers, i.e., peers possibly swapped due to the heuristic */
   get_actual_peers(&cli_h, &srv_h);
@@ -8586,9 +8586,10 @@ void Flow::swap() {
     tcp->rtt.last_srv_ack = tmp;
   }
 
-  if(last_db_dump.partial)      last_db_dump.partial->swap();
+  if(last_db_dump.partial) last_db_dump.partial->swap();
   last_db_dump.delta.swap();
-  if(periodic_stats_update_partial) periodic_stats_update_partial->swap();
+
+  if(periodic_stats_base) periodic_stats_base->swap();
 
   c2sFirstGoodputTime.tv_sec = 0;
 
