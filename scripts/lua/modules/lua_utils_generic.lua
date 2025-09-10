@@ -81,16 +81,17 @@ end
 
 -- ###########################################
 
--- Merges table a and table b into a new table. If some elements are presents in
--- both a and b, b elements will have precedence.
--- NOTE: this does *not* perform a deep merge. Only first level is merged.
+-- Perform a deep merge of table a and table b into a new table.
+-- If some elements are presents in both a and b, if they are both tables they are merged,
+-- otherwise b values will have precedence.
+-- Note: if a and b are arrays, the first level is merged only (b values have precedence)
 function table.merge(a, b, nodup)
   local merged = {}
   a = a or {}
   b = b or {}
 
   if((a[1] ~= nil) and (b[1] ~= nil)) then
-    -- index based tables
+    -- index based tables (array)
     for _, t in ipairs({a, b}) do
        for _,v in pairs(t) do
          if not nodup or not table.contains(merged, v) then
@@ -99,10 +100,19 @@ function table.merge(a, b, nodup)
        end
    end
   else
-     -- key based tables
+     -- key based tables (associative)
      for _, t in ipairs({a, b}) do
        for k,v in pairs(t) do
-         merged[k] = v
+         if merged[k] == nil then
+           -- Add value
+           merged[k] = v
+         elseif type(merged[k]) == "table" and type(v) == "table" then
+           -- Merge tables
+           merged[k] = table.merge(merged[k], v)
+         else
+           -- Use value in b (last to be set)
+           merged[k] = v
+         end
        end
      end
   end
