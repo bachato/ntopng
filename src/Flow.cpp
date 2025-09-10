@@ -2457,31 +2457,31 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 			    diff_sent_goodput_bytes, diff_rcvd_packets,
 			    diff_rcvd_bytes, diff_rcvd_goodput_bytes);
     }    
-
-    if(srv_mac) {
-      if(diff_rcvd_packets)
-        srv_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
-
-      if(diff_sent_packets)
-        srv_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
-
-      if(ntop->getPrefs()->areMacNdpiStatsEnabled())
-        srv_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
-                              diff_rcvd_packets, diff_rcvd_bytes,
-                              diff_rcvd_goodput_bytes, diff_sent_packets,
-                              diff_sent_bytes, diff_sent_goodput_bytes);
-    }
+  }
+  
+  if(srv_mac) {
+    if(diff_rcvd_packets)
+      srv_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
+      
+    if(diff_sent_packets)
+      srv_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
+      
+    if(ntop->getPrefs()->areMacNdpiStatsEnabled())
+      srv_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
+			    diff_rcvd_packets, diff_rcvd_bytes,
+			    diff_rcvd_goodput_bytes, diff_sent_packets,
+			    diff_sent_bytes, diff_sent_goodput_bytes);
+  }
 
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
-    /* Update profile stats */
-    if (ntop->getPro()->has_valid_license()) {
-      if(trafficProfile)
-        trafficProfile->incBytes(diff_sent_bytes + diff_rcvd_bytes);
-    }
-#endif
-#endif
+  /* Update profile stats */
+  if (ntop->getPro()->has_valid_license()) {
+    if(trafficProfile)
+      trafficProfile->incBytes(diff_sent_bytes + diff_rcvd_bytes);
   }
+#endif
+#endif  
 }
 
 /* *************************************** */
