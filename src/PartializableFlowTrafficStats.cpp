@@ -287,7 +287,7 @@ void PartializableFlowTrafficStats::incDNSResp(u_int16_t resp_code) {
 
 void PartializableFlowTrafficStats::get_partial(PartializableFlowTrafficStats *dst,
 						PartializableFlowTrafficStats *fts) const {
-  /* Set temp to the current value */
+  /* Set tmp to the current value */
   PartializableFlowTrafficStats tmp(*this);
 
   /* Compute the differences between the snapshot tmp and the values found in

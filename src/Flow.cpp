@@ -4872,13 +4872,20 @@ void Flow::housekeep(time_t t) {
 
 /* *************************************** */
 
+/**
+ * Returns partial traffic stats by computing a delta between current flow stats ("stats")
+ * and the previous snapshot ("dst").
+ * Note:
+ * - Delta is returned in "fts"
+ * - "dst" is updated taking the "stats" value
+ */
 bool Flow::get_partial_traffic_stats(PartializableFlowTrafficStats **dst,
                                      PartializableFlowTrafficStats *fts,
                                      bool *first_partial) const {
   if(!fts || !dst) return (false);
 
   if(!*dst) {
-    if(!(*dst = new (std::nothrow) PartializableFlowTrafficStats()))
+    if((*dst = new (std::nothrow) PartializableFlowTrafficStats()) == NULL)
       return (false);
     *first_partial = true;
   } else {
