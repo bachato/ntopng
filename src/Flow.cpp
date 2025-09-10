@@ -4864,25 +4864,25 @@ void Flow::housekeep(time_t t) {
 
 /**
  * Returns partial traffic stats by computing a delta between current flow stats ("stats")
- * and the previous snapshot ("dst").
+ * and the previous snapshot ("base").
  * Note:
- * - Delta is returned in "fts"
- * - "dst" is updated taking the "stats" value
+ * - Delta is returned in "partial"
+ * - "base" is updated taking the "stats" value
  */
-bool Flow::get_partial_traffic_stats(PartializableFlowTrafficStats **dst,
-                                     PartializableFlowTrafficStats *fts,
+bool Flow::get_partial_traffic_stats(PartializableFlowTrafficStats **base,
+                                     PartializableFlowTrafficStats *partial,
                                      bool *first_partial) const {
-  if(!fts || !dst) return (false);
+  if(!partial || !base) return (false);
 
-  if(!*dst) {
-    if((*dst = new (std::nothrow) PartializableFlowTrafficStats()) == NULL)
+  if(!*base) {
+    if((*base = new (std::nothrow) PartializableFlowTrafficStats()) == NULL)
       return (false);
     *first_partial = true;
   } else {
     *first_partial = false;
   }
 
-  stats.get_partial(*dst, fts);
+  stats.get_partial(*base, partial);
 
   return (true);
 }
@@ -4891,9 +4891,9 @@ bool Flow::get_partial_traffic_stats(PartializableFlowTrafficStats **dst,
 
 /* NOTE: this is only called by the ViewInterface */
 #ifdef NTOPNG_PRO
-bool Flow::get_partial_traffic_stats_view(PartializableFlowTrafficStats *fts,
+bool Flow::get_partial_traffic_stats_view(PartializableFlowTrafficStats *partial,
                                           bool *first_partial) {
-  if(!fts) return (false);
+  if(!partial) return (false);
 
   if(!viewFlowStats) {
     if(!(viewFlowStats = new (std::nothrow) ViewInterfaceFlowStats()))
@@ -4903,7 +4903,7 @@ bool Flow::get_partial_traffic_stats_view(PartializableFlowTrafficStats *fts,
   } else
     *first_partial = false;
 
-  stats.get_partial(viewFlowStats->getPartializableStats(), fts);
+  stats.get_partial(viewFlowStats->getPartializableStats(), partial);
 
   return (true);
 }
