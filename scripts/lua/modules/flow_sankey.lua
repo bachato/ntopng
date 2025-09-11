@@ -66,7 +66,7 @@ local function unifyNodes(new_nodes, nodes, query, max_nodes_per_level)
         for node_id, node_value in pairsByValues(values or {}, rev) do
             -- Get the formatter if available
             local formatted_data, node_link = flow_data_preset.getFormattedDataAndLink(key,
-                                                                     node_id)
+                                                                     node_id, values)
             local label = node_id
             current_nodes_per_level = current_nodes_per_level + 1
             if (formatted_data ~= node_id) then
