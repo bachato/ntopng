@@ -61,7 +61,7 @@ function connectivity_utils.checkConnectivity()
       traceError(TRACE_NORMAL, TRACE_CONSOLE, "[CONNECTIVITY CHECK] Result: " .. msg)
    else
      if(not(success)) then
-       traceError(TRACE_WARNING, TRACE_CONSOLE, "Connectivity check failed [Used " .. url .. "]")
+       traceError(TRACE_WARNING, TRACE_CONSOLE, "Connectivity check failed [" .. url .. "]")
      end
    end
 
