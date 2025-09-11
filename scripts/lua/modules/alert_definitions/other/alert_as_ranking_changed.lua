@@ -62,7 +62,7 @@ local function formatRanking(ranking, prev_ranking, verbose)
 	 and (ranking[id].exporter_ip == prev_ranking[id].exporter_ip)
 	 and (ranking[id].interface_id == prev_ranking[id].interface_id)) then
 	 -- nothing changed
-      else
+      elseif(t.exporter_ip ~= nil) then
 	 local ex
 	 local ifname
 	 local volume = format_utils.bytesToSize(t.value)
@@ -82,18 +82,28 @@ local function formatRanking(ranking, prev_ranking, verbose)
 	 ex = "[rank "..tostring(id).."] <A HREF=\""..href.."\" target=\"_blank\">"..ex .. ":" .. ifname .. "</A>"
 
 	 if(verbose) then
-	    ex = "<br>" .. ex .. " (".. volume ..")</br>"
+	    ex = ex .. " (".. volume ..")<br>\n"
 	 end
 
 	 if result == "" then
 	    result = ex -- set
 	 else
-	    result = result..",".. ex -- append
+	    if(verbose) then
+	       result = result.." ".. ex .. "\n" -- append
+	    else
+	       result = result..",".. ex .. "\n"-- append
+	    end
 	 end
       end
    end
 
-   if(result == "") then result = "<>" end
+   if(result == "") then
+      result = "<>"
+   else
+      if(verbose) then
+	 result = "<br>" .. result
+      end
+   end
 
    return result
 end
