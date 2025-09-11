@@ -328,6 +328,33 @@ CREATE INDEX IF NOT EXISTS network_alerts_i_alert_status ON network_alerts(alert
 @
 
 -- -----------------------------------------------------
+-- Table as_alerts
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS as_alerts (
+rowid INTEGER PRIMARY KEY AUTOINCREMENT,
+asn INTEGER NOT NULL,
+alert_id INTEGER NOT NULL CHECK(alert_id >= 0),
+alert_status INTEGER NOT NULL CHECK(alert_status >= 0) DEFAULT 0,
+interface_id INTEGER NULL,
+name TEXT NULL,
+alias TEXT NULL,
+tstamp DATETIME NOT NULL,
+tstamp_end DATETIME NULL DEFAULT 0,
+severity INTEGER NOT NULL CHECK(severity >= 0),
+score INTEGER NOT NULL DEFAULT 0 CHECK(score >= 0),
+granularity INTEGER NOT NULL DEFAULT 0 CHECK(granularity >= 0),
+counter INTEGER NOT NULL DEFAULT 0 CHECK(counter >= 0),
+description TEXT NULL,
+json TEXT NULL,
+user_label TEXT NULL,
+user_label_tstamp DATETIME NULL DEFAULT 0,
+alert_category INTEGER NULL,
+require_attention INTEGER NULL DEFAULT 0
+);
+
+@
+
+-- -----------------------------------------------------
 -- Table interface_alerts
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS interface_alerts (
@@ -592,6 +619,33 @@ require_attention INTEGER NULL DEFAULT 0
 @
 
 -- -----------------------------------------------------
+-- Table engaged_as_alerts
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS mem_db.engaged_as_alerts (
+rowid INTEGER PRIMARY KEY AUTOINCREMENT,
+asn INTEGER NOT NULL,
+alert_id INTEGER NOT NULL CHECK(alert_id >= 0),
+alert_status INTEGER NOT NULL CHECK(alert_status >= 0) DEFAULT 0,
+interface_id INTEGER NULL,
+name TEXT NULL,
+alias TEXT NULL,
+tstamp DATETIME NOT NULL,
+tstamp_end DATETIME NULL DEFAULT 0,
+severity INTEGER NOT NULL CHECK(severity >= 0),
+score INTEGER NOT NULL DEFAULT 0 CHECK(score >= 0),
+granularity INTEGER NOT NULL DEFAULT 0 CHECK(granularity >= 0),
+counter INTEGER NOT NULL DEFAULT 0 CHECK(counter >= 0),
+description TEXT NULL,
+json TEXT NULL,
+user_label TEXT NULL,
+user_label_tstamp DATETIME NULL DEFAULT 0,
+alert_category INTEGER NULL,
+require_attention INTEGER NULL DEFAULT 0
+);
+
+@
+
+-- -----------------------------------------------------
 -- Table engaged_interface_alerts
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS mem_db.engaged_interface_alerts (
@@ -736,6 +790,13 @@ CREATE TEMP VIEW network_alerts_view AS
 SELECT * FROM network_alerts
 UNION ALL
 SELECT * FROM mem_db.engaged_network_alerts
+
+@
+
+CREATE TEMP VIEW as_alerts_view AS
+SELECT * FROM as_alerts
+UNION ALL
+SELECT * FROM mem_db.engaged_as_alerts
 
 @
 
