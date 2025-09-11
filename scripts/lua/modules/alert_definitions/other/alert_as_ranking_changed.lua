@@ -108,11 +108,19 @@ end
 function alert_as_ranking_changed.format(ifid, alert, alert_type_params, local_explorer, verbose)
    local alert_consts = require("alert_consts")
    local changes = alert_type_params.changes or {}
+   local direction
 
    current = formatRanking(changes.current or {}, changes.previous or {}, verbose)
    prev    = formatRanking(changes.previous or {}, changes.current or {}, verbose)
 
+   if(changes.ingress_traffic) then
+      direction = "Ingress"
+   else
+      direction = "Egress"
+   end
+
    return i18n("alert_messages.alert_as_ranking_changed", {
+		  direction = direction,
 		  current_ranking = current,
 		  previous_ranking = prev
    })
