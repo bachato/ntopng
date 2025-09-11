@@ -73,9 +73,13 @@ end
 -- @param alert The alert description table, including alert data such as the generating entity, timestamp, granularity, type
 -- @param alert_type_params Table `alert_type_params` as built in the `:init` method
 -- @return A human-readable string
-function alert_as_ranking_changed.format(ifid, alert, alert_type_params)
+function alert_as_ranking_changed.format(ifid, alert, alert_type_params, local_explorer, verbose)
    local alert_consts = require("alert_consts")
    local changes = alert_type_params.changes or {}
+
+   if verbose then
+       -- TODO format as long description for the alert details page
+   end
 
    current = formatRanking(changes.current or {})
    prev    = formatRanking(changes.previous or {})

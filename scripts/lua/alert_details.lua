@@ -41,7 +41,7 @@ page_utils.print_navbar(label, url, pages)
 -- #######################################
 
 local json_context = json.encode({
-   url = "/lua/rest/v2/get/flow/alert/alert_details.lua"
+   url = "/lua/rest/v2/get/" .. page .. "/alert/alert_details.lua"
 })
 
 template_utils.render("pages/vue_page.template", {

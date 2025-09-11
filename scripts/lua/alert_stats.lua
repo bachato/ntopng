@@ -291,7 +291,7 @@ local context = {
         show_disable = ((page == 'host') or (page == 'flow')) and isAdministrator() and ntop.isEnterpriseM(),
         show_acknowledge = (page ~= 'all') and (status == "historical") and isAdministrator(),
         show_delete = (page ~= 'all') and (status ~= "engaged") and isAdministrator(),
-        show_info = (page == 'flow'),
+        show_info = (page == 'flow' or page == 'as'),
         show_snmp_info = (page == 'snmp_device')
     },
     chart = {

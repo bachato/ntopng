@@ -2469,6 +2469,28 @@ function alert_store:escape_csv(s)
     end
     return s
 end
+
+-- ##############################################
+
+function alert_store.get_label_link(label_info, tag, value_info, add_hyperlink)
+   local label = label_info
+   if type(label) == "table" then label = label.label or "" end
+
+   if add_hyperlink then
+
+      local value = value_info
+      if type(value) == "table" then value = value.value or "" end
+
+      return "<a href=\"" .. ntop.getHttpPrefix() ..
+	 "/lua/alert_stats.lua?status=" .. _GET['status'] .. "&page=" ..
+	 _GET['page'] .. "&" .. tag .. "=" .. value ..
+	 tag_utils.SEPARATOR .. "eq\" " .. ">" .. (label or "") ..
+	 "</a>"
+   else
+      return label
+   end
+end
+
 -- ##############################################
 
 -- @brief Deletes old data according to the configuration or up to a safe limit

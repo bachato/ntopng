@@ -1402,27 +1402,6 @@ end
 
 -- ##############################################
 
-local function get_label_link(label_info, tag, value_info, add_hyperlink)
-   if add_hyperlink then
-      local label = label_info
-      local value = value_info
-
-      if (label_info.label) then label = label_info.label end
-
-      if (value_info.value) then value = value_info.value end
-
-      return "<a href=\"" .. ntop.getHttpPrefix() ..
-	 "/lua/alert_stats.lua?status=" .. _GET['status'] .. "&page=" ..
-	 _GET['page'] .. "&" .. tag .. "=" .. value ..
-	 tag_utils.SEPARATOR .. "eq\" " .. ">" .. (label or "") ..
-	 "</a>"
-   else
-      return label
-   end
-end
-
--- ##############################################
-
 local function get_flow_link(fmt, add_hyperlink)
    local label = ''
 
@@ -1435,7 +1414,7 @@ local function get_flow_link(fmt, add_hyperlink)
    if fmt['flow']['vlan'] and fmt['flow']['vlan']["value"] ~= 0 then
       vlan_id = tonumber(fmt['flow']['vlan']["value"])
       vlan = '@' ..
-	 get_label_link(fmt['flow']['vlan']['label'], 'vlan_id',
+	 self.get_label_link(fmt['flow']['vlan']['label'], 'vlan_id',
 			fmt['flow']['vlan'], add_hyperlink)
    end
 
@@ -1450,14 +1429,14 @@ local function get_flow_link(fmt, add_hyperlink)
    if fmt['flow']['cli_ip']['label_long'] ~= fmt['flow']['cli_ip']['value'] then
       if add_hyperlink then
 	 cli_ip = " [ " ..
-	    get_label_link(fmt['flow']['cli_ip'], 'cli_ip', value,
+	    self.get_label_link(fmt['flow']['cli_ip'], 'cli_ip', value,
 			   add_hyperlink) .. " ]"
       end
       value = fmt['flow']['cli_ip']['label_long']
       tag = 'cli_name'
    end
    label = label ..
-      get_label_link(fmt['flow']['cli_ip']['label_long'], tag, value,
+      self.get_label_link(fmt['flow']['cli_ip']['label_long'], tag, value,
 		     add_hyperlink) .. cli_ip
 
    -- client is blacklisted, add block icon
@@ -1468,7 +1447,7 @@ local function get_flow_link(fmt, add_hyperlink)
    local cli_port = fmt['flow']['cli_port']['value']
    if not isEmptyString(cli_port) and cli_port ~= '0' then
       label = label .. vlan .. ':' ..
-	 get_label_link(fmt['flow']['cli_port'], 'cli_port',
+	 self.get_label_link(fmt['flow']['cli_port'], 'cli_port',
 			fmt['flow']['cli_port'], add_hyperlink)
    end
 
@@ -1486,14 +1465,14 @@ local function get_flow_link(fmt, add_hyperlink)
    if fmt['flow']['srv_ip']['label_long'] ~= fmt['flow']['srv_ip']['value'] then
       if add_hyperlink then
 	 srv_ip = " [ " ..
-	    get_label_link(fmt['flow']['srv_ip']['value'],
+	    self.get_label_link(fmt['flow']['srv_ip']['value'],
 			   'srv_ip', value, add_hyperlink) .. " ]"
       end
       value = fmt['flow']['srv_ip']['label_long']
       tag = 'srv_name'
    end
    label = label ..
-      get_label_link(fmt['flow']['srv_ip']['label_long'], tag, value,
+      self.get_label_link(fmt['flow']['srv_ip']['label_long'], tag, value,
 		     add_hyperlink) .. srv_ip
 
    -- server is blacklisted, add block icon
@@ -1504,7 +1483,7 @@ local function get_flow_link(fmt, add_hyperlink)
    local srv_port = fmt['flow']['srv_port']['value']
    if not isEmptyString(srv_port) and srv_port ~= '0' then
       label = label .. vlan .. ':' ..
-	 get_label_link(fmt['flow']['srv_port'], 'srv_port',
+	 self.get_label_link(fmt['flow']['srv_port'], 'srv_port',
 			fmt['flow']['srv_port'], add_hyperlink)
    end
 
@@ -1581,7 +1560,7 @@ function flow_alert_store:get_alert_details(value)
    details[#details + 1] = {
       name = i18n("alerts_dashboard.alert"),
       values = {
-	 get_label_link(fmt['alert_id']['label'], 'alert_id',
+	 self.get_label_link(fmt['alert_id']['label'], 'alert_id',
 			fmt['alert_id']['value'], add_hyperlink)
       }
    }
@@ -1594,7 +1573,7 @@ function flow_alert_store:get_alert_details(value)
    details[#details + 1] = {
       name = i18n("protocol") .. " / " .. i18n("application"),
       values = {
-	 get_label_link(fmt['l7_proto']['l4_label'] .. ':' ..
+	 self.get_label_link(fmt['l7_proto']['l4_label'] .. ':' ..
 			fmt['l7_proto']['l7_label'], 'l7proto',
 			fmt['l7_proto']['value'], add_hyperlink)
       }

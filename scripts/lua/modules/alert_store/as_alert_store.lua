@@ -15,6 +15,7 @@ local alert_utils = require "alert_utils"
 local alert_entities = require "alert_entities"
 local format_utils = require "format_utils"
 local tag_utils = require "tag_utils"
+local json = require "dkjson"
 
 -- ##############################################
 
@@ -173,6 +174,54 @@ function as_alert_store:format_record(value, no_html)
     }
 
     return record
+end
+
+-- ##############################################
+
+-- @brief Convert an alert coming from the DB (value) to a list of items to be printed in the details page
+function as_alert_store:get_alert_details(value)
+   local alert_info = alert_utils.getAlertInfo(value)
+   local fmt = self:format_record(value, false)
+   local add_hyperlink = true
+   local verbose = true
+
+   local verbose_msg = alert_utils.formatAlertMessage(ifid, value, alert_info, nil, verbose)
+
+   local details = {}
+
+   details[#details + 1] = {
+      name = i18n("as"),
+      values = {
+	 self.get_label_link(fmt['name'], 'asn',
+			fmt['asn'], add_hyperlink)
+      }
+   }
+
+   details[#details + 1] = {
+      name = i18n("show_alerts.alert_datetime"),
+      values = {
+	 self.get_label_link(fmt['tstamp']['title'], '',
+			fmt['tstamp']['value'], false)
+      }
+   }
+
+   details[#details + 1] = {
+      name = i18n("alerts_dashboard.alert"),
+      values = {
+	 self.get_label_link(fmt['alert_id']['label'], 'alert_id',
+			fmt['alert_id']['value'], add_hyperlink)
+      }
+   }
+
+   details[#details + 1] = {
+      name = i18n("show_alerts.alert_description"),
+      values = {
+	 self.get_label_link(verbose_msg, '',
+			fmt['msg']['value'], false)
+      }
+   }
+
+   return details
 end
 
 -- ##############################################

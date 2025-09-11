@@ -45,8 +45,10 @@ local alert_utils = {}
 local function alertTypeDescription(alert_key, entity_id)
     local alert_id = alert_consts.getAlertType(alert_key, entity_id)
 
-    if alert_id and alert_consts.alert_types[alert_id].format then
-        return alert_consts.alert_types[alert_id].format
+    if alert_id then
+        if alert_consts.alert_types[alert_id].format then
+            return alert_consts.alert_types[alert_id].format
+        end
     end
 
     return nil
@@ -322,7 +324,7 @@ end
 
 -- #################################
 
-function alert_utils.formatAlertMessage(ifid, alert, alert_json, local_explorer)
+function alert_utils.formatAlertMessage(ifid, alert, alert_json, local_explorer, verbose)
     local msg
 
     if (alert_json == nil) then
@@ -336,7 +338,7 @@ function alert_utils.formatAlertMessage(ifid, alert, alert_json, local_explorer)
         -- localization string
         msg = i18n(description, msg)
     elseif (type(description) == "function") then
-        msg = description(ifid, alert, alert_json, local_explorer)
+        msg = description(ifid, alert, alert_json, local_explorer, verbose)
     end
 
     if (type(msg) == "table") then
