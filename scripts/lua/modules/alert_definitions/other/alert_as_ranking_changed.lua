@@ -47,22 +47,54 @@ end
 
 -- ##############################################
 
-local function formatRanking(ranking)
+local function formatRanking(ranking, prev_ranking, verbose)
    local result = ""
+   local skip_duplicates
 
-   for _, t in pairs(ranking) do
-      local ex = getProbeName(t.exporter_ip, false) -- lua_utils_get.lua
-      local ifname = format_portidx_name(t.exporter_ip, t.interface_id, true)  -- lua_utils_gui.lua
-      local volume = format_utils.bytesToSize(t.value)
-      
-      ex = ex .. ":" .. ifname .. " (".. volume ..")"
-      if result == "" then
-	 result = ex
+   if(verbose == true) then
+      skip_duplicates = false
+   else
+      skip_duplicates = true
+   end
+
+   for id, t in pairs(ranking) do
+      if(skip_duplicates
+	 and (ranking[id].exporter_ip == prev_ranking[id].exporter_ip)
+	 and (ranking[id].interface_id == prev_ranking[id].interface_id)) then
+	 -- nothing changed
       else
-	 result = result..",".. ex
+	 local ex
+	 local ifname
+	 local volume = format_utils.bytesToSize(t.value)
+	 local use_sym_names = true
+	 local href
+
+	 if(use_sym_names) then
+	    ex = getProbeName(t.exporter_ip, false) -- lua_utils_get.lua
+	    ifname = format_portidx_name(t.exporter_ip, t.interface_id, true)  -- lua_utils_gui.lua
+	 else
+	    ex = t.exporter_ip
+	    ifname = t.interface_id
+	 end
+
+	 href = ntop.getHttpPrefix() .. "/lua/pro/enterprise/snmp_interface_details.lua?host=".. ntop.inet_ntoa(t.exporter_ip) .. "&snmp_port_idx=".. t.interface_id
+
+	 ex = "[rank "..tostring(id).."] <A HREF=\""..href.."\" target=\"_blank\">"..ex .. ":" .. ifname .. "</A>"
+
+	 if(verbose) then
+	    ex = "<br>" .. ex .. " (".. volume ..")</br>"
+	 end
+
+	 if result == "" then
+	    result = ex -- set
+	 else
+	    result = result..",".. ex -- append
+	 end
       end
    end
-   
+
+   if(result == "") then result = "<>" end
+
    return result
 end
 
@@ -77,12 +109,8 @@ function alert_as_ranking_changed.format(ifid, alert, alert_type_params, local_e
    local alert_consts = require("alert_consts")
    local changes = alert_type_params.changes or {}
 
-   if verbose then
-       -- TODO format as long description for the alert details page
-   end
-
-   current = formatRanking(changes.current or {})
-   prev    = formatRanking(changes.previous or {})
+   current = formatRanking(changes.current or {}, changes.previous or {}, verbose)
+   prev    = formatRanking(changes.previous or {}, changes.current or {}, verbose)
 
    return i18n("alert_messages.alert_as_ranking_changed", {
 		  current_ranking = current,
