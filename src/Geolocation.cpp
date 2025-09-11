@@ -79,11 +79,11 @@ Geolocation::Geolocation() {
     }
 
     /*
-       Let's try https://db-ip.com
+      Let's try https://db-ip.com
 
-       Filename format is
-       - dbip-asn-lite-YYYY-MM.mmdb
-       - dbip-country-lite-YYYY-MM.mmdb
+      Filename format is
+      - dbip-asn-lite-YYYY-MM.mmdb
+      - dbip-country-lite-YYYY-MM.mmdb
     */
 
     dirp = opendir(lookup_paths[i]);
@@ -94,20 +94,18 @@ Geolocation::Geolocation() {
 
       if (strncmp(dp->d_name, "dbip-", 5) == 0) {
         if ((!mmdbs_asn_ok) && (strncmp(dp->d_name, "dbip-asn", 8) == 0)) {
-          mmdbs_asn_ok =
-              loadGeoDB(lookup_paths[i], dp->d_name, &geo_ip_asn_mmdb);
+          mmdbs_asn_ok = loadGeoDB(lookup_paths[i], dp->d_name, &geo_ip_asn_mmdb);
         }
 
         if ((!mmdbs_city_ok) && (strncmp(dp->d_name, "dbip-city", 9) == 0)) {
           mmdbs_city_ok =
-              loadGeoDB(lookup_paths[i], dp->d_name, &geo_ip_city_mmdb);
+	    loadGeoDB(lookup_paths[i], dp->d_name, &geo_ip_city_mmdb);
         }
       }
 
       if (mmdbs_asn_ok && mmdbs_city_ok) {
-        ntop->getTrace()->traceEvent(
-            TRACE_NORMAL,
-            "Using geolocation provided by DB-IP (https://db-ip.com)");
+        ntop->getTrace()->traceEvent(TRACE_NORMAL,
+				     "Using geolocation provided by DB-IP (https://db-ip.com)");
         break;
       }
     }
@@ -125,17 +123,17 @@ Geolocation::Geolocation() {
 #ifdef HAVE_MAXMINDDB
   if (!mmdbs_ok)
 #endif
-  {
-    if (mmdbs_asn_ok) MMDB_close(&geo_ip_asn_mmdb);
-    if (mmdbs_city_ok) MMDB_close(&geo_ip_city_mmdb);
-    ntop->getTrace()->traceEvent(TRACE_NORMAL,
-                                 "Running without geolocation support.");
-    ntop->getTrace()->traceEvent(
-        TRACE_NORMAL, "To enable geolocation follow the instructions at");
-    ntop->getTrace()->traceEvent(
-        TRACE_NORMAL,
-        "https://github.com/ntop/ntopng/blob/dev/doc/README.geolocation.md");
-  }
+    {
+      if (mmdbs_asn_ok) MMDB_close(&geo_ip_asn_mmdb);
+      if (mmdbs_city_ok) MMDB_close(&geo_ip_city_mmdb);
+      ntop->getTrace()->traceEvent(TRACE_NORMAL,
+				   "Running without geolocation support.");
+      ntop->getTrace()->traceEvent(
+				   TRACE_NORMAL, "To enable geolocation follow the instructions at");
+      ntop->getTrace()->traceEvent(
+				   TRACE_NORMAL,
+				   "https://github.com/ntop/ntopng/blob/dev/doc/README.geolocation.md");
+    }
 #endif
 }
 
@@ -342,10 +340,10 @@ bool Geolocation::getInfo(IpAddress *addr, char **continent_code,
     char buf[64];
 
     ntop->getTrace()->traceEvent(
-        TRACE_ERROR,
-        "Invalid address lookup [addr addr: 0x%X][addr: %s][version: %u]",
-        addr ? addr : 0, addr ? addr->print(buf, sizeof(buf)) : "",
-        addr ? addr->getVersion() : 0);
+				 TRACE_ERROR,
+				 "Invalid address lookup [addr addr: 0x%X][addr: %s][version: %u]",
+				 addr ? addr : 0, addr ? addr->print(buf, sizeof(buf)) : "",
+				 addr ? addr->getVersion() : 0);
   }
   if (sa) free(sa);
 #endif
@@ -407,7 +405,7 @@ void Geolocation::testme() {
         entry_data_list = NULL;
 
         if ((status = MMDB_get_entry_data_list(
-                 &result.entry, &entry_data_list)) != MMDB_SUCCESS)
+					       &result.entry, &entry_data_list)) != MMDB_SUCCESS)
           ntop->getTrace()->traceEvent(TRACE_ERROR,
                                        "Unable to lookup address [%s]",
                                        MMDB_strerror(status));
@@ -424,8 +422,8 @@ void Geolocation::testme() {
 
         } else
           ntop->getTrace()->traceEvent(
-              TRACE_ERROR, "Unable to lookup autonomous system number [%s]",
-              MMDB_strerror(status));
+				       TRACE_ERROR, "Unable to lookup autonomous system number [%s]",
+				       MMDB_strerror(status));
 
         if ((status = MMDB_get_value(&result.entry, &entry_data,
                                      "autonomous_system_organization", NULL)) ==
@@ -444,9 +442,9 @@ void Geolocation::testme() {
 
         } else
           ntop->getTrace()->traceEvent(
-              TRACE_ERROR,
-              "Unable to lookup autonomous system organization [%s]",
-              MMDB_strerror(status));
+				       TRACE_ERROR,
+				       "Unable to lookup autonomous system organization [%s]",
+				       MMDB_strerror(status));
       }
 
       /* TEST City database */
