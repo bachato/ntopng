@@ -75,9 +75,10 @@ end
 -- @return A human-readable string
 function alert_as_ranking_changed.format(ifid, alert, alert_type_params)
    local alert_consts = require("alert_consts")
+   local changes = alert_type_params.changes or {}
 
-   current = formatRanking(alert_type_params.changes.current)
-   prev    = formatRanking(alert_type_params.changes.previous)
+   current = formatRanking(changes.current or {})
+   prev    = formatRanking(changes.previous or {})
 
    return i18n("alert_messages.alert_as_ranking_changed", {
 		  current_ranking = current,
