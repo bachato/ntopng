@@ -120,9 +120,9 @@
 #define ZMQ_MSG_VERSION_OLD           2
 
 /* Keep in sync with nProbe */
-#define ZMQ_FLAG_IS_TLV        1 << 1
-#define ZMQ_FLAG_IS_COMPRESSED 1 << 2
-#define ZMQ_FLAG_EVENT_SOCKET  1 << 3 /* indicates this is an event sent on a separate socket (msg_id follows a separate sequence) */
+#define ZMQ_FLAG_IS_TLV        (1 << 1)
+#define ZMQ_FLAG_IS_COMPRESSED (1 << 2)
+#define ZMQ_FLAG_EVENT_SOCKET  (1 << 3) /* indicates this is an event sent on a separate socket (msg_id follows a separate sequence) */
 
 #define LOGIN_URL "/lua/login.lua"
 #define INDEX_URL "/lua/index.lua"
