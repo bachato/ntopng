@@ -23,99 +23,99 @@ local queries = {}
 
 -- Empty ASN return an error
 if isEmptyString(asn) or (asn == 0) then
-    rest_utils.answer(rest_utils.consts.err.invalid_args)
-    return
+   rest_utils.answer(rest_utils.consts.err.invalid_args)
+   return
 end
 
 -- In case historical data has been requested, add the epoch_begin and epoch_end
 if data_type == "historical" and hasClickHouseSupport() then
-    -- Handle the epoch only with the historical
-    epoch_begin = tonumber(_GET["epoch_begin"])
-    epoch_end = tonumber(_GET["epoch_end"])
+   -- Handle the epoch only with the historical
+   epoch_begin = tonumber(_GET["epoch_begin"])
+   epoch_end = tonumber(_GET["epoch_end"])
 end
 
 if criteria_as == "ingress_egress_traffic_criteria" then
-    filters = {
-        asn = asn,
-        ifid = ifid,
-        first_seen = epoch_begin,
-        last_seen = epoch_end
-    }
-    queries = {
-        {
-            select_query = {
-                "in_iface_index", "in_device", "bytes_sent", "bytes_rcvd",
-                "total_bytes"
-            },
-            where_query = {"asn"},
-            sort_by = {"total_bytes"},
-            filters = filters,
-            root = {
-                formatter = format_utils.formatASN,
-                id = asn,
-                add_root_first = false
-            }
-        }, {
-            select_query = {
-                "out_device", "out_iface_index", "bytes_sent", "bytes_rcvd",
-                "total_bytes"
-            },
-            where_query = {"asn"},
-            sort_by = {"total_bytes"},
-            filters = filters,
-            root = {
-                formatter = format_utils.formatASN,
-                id = asn,
-                add_root_first = true
-            }
-        }
-    }
+   filters = {
+      asn = asn,
+      ifid = ifid,
+      first_seen = epoch_begin,
+      last_seen = epoch_end
+   }
+   queries = {
+      {
+	 select_query = {
+	    "in_iface_index", "in_device", "bytes_sent", "bytes_rcvd",
+	    "total_bytes"
+	 },
+	 where_query = {"asn"},
+	 sort_by = {"total_bytes"},
+	 filters = filters,
+	 root = {
+	    formatter = format_utils.formatASN,
+	    id = asn,
+	    add_root_first = false
+	 }
+      }, {
+	 select_query = {
+	    "out_device", "out_iface_index", "bytes_sent", "bytes_rcvd",
+	    "total_bytes"
+	 },
+	 where_query = {"asn"},
+	 sort_by = {"total_bytes"},
+	 filters = filters,
+	 root = {
+	    formatter = format_utils.formatASN,
+	    id = asn,
+	    add_root_first = true
+	 }
+	 }
+   }
 elseif isEmptyString(criteria) or (criteria == "traffic_between_ases") then
-    queries = {
-        {
-            select_query = {
-                "src_asn", "src_peer_asn", "dst_peer_asn", "bytes_sent",
-                "bytes_rcvd", "total_bytes"
-            },
-            different_from = {nil, "src_asn", "dst_asn"},
-            rename_key_field = {nil, "src_peer_asn_1", "dst_peer_asn_1"},
-            skip_flow = {{key = "src_asn", value = "0"}},
-            where_query = {"dst_asn"},
-            sort_by = {"total_bytes"},
-            filters = {
-                dst_asn = asn,
-                ifid = ifid,
-                first_seen = epoch_begin,
-                last_seen = epoch_end
-            },
-            root = {
-                formatter = format_utils.formatASN,
-                id = asn,
-                add_root_first = false
-            }
-        }, {
-            select_query = {
-                "src_peer_asn", "dst_peer_asn", "dst_asn", "bytes_sent",
-                "bytes_rcvd", "total_bytes"
-            },
-            where_query = {"src_asn"},
-            sort_by = {"total_bytes"},
-            different_from = {"src_asn", "dst_asn"},
-            rename_key_field = {"src_peer_asn_2", "dst_peer_asn_2"},
-            skip_flow = {{key = "dst_asn", value = 0}},
-            filters = {
-                src_asn = asn,
-                ifid = ifid,
-                first_seen = epoch_begin,
-                last_seen = epoch_end
-            },
-            root = {
-                formatter = format_utils.formatASN,
-                id = asn,
-                add_root_first = true
-            }
-        }
-    }
+   queries = {
+      {
+	 select_query = {
+	    "src_asn", "src_peer_asn", "dst_peer_asn", "bytes_sent",
+	    "bytes_rcvd", "total_bytes"
+	 },
+	 different_from = {nil, "src_asn", "dst_asn"},
+	 rename_key_field = {nil, "src_peer_asn_1", "dst_peer_asn_1"},
+	 skip_flow = {{key = "src_asn", value = "0"}},
+	 where_query = {"dst_asn"},
+	 sort_by = {"total_bytes"},
+	 filters = {
+	    dst_asn = asn,
+	    ifid = ifid,
+	    first_seen = epoch_begin,
+	    last_seen = epoch_end
+	 },
+	 root = {
+	    formatter = format_utils.formatASN,
+	    id = asn,
+	    add_root_first = false
+	 }
+      }, {
+	 select_query = {
+	    "src_peer_asn", "dst_peer_asn", "dst_asn", "bytes_sent",
+	    "bytes_rcvd", "total_bytes"
+	 },
+	 where_query = {"src_asn"},
+	 sort_by = {"total_bytes"},
+	 different_from = {"src_asn", "dst_asn"},
+	 rename_key_field = {"src_peer_asn_2", "dst_peer_asn_2"},
+	 skip_flow = {{key = "dst_asn", value = 0}},
+	 filters = {
+	    src_asn = asn,
+	    ifid = ifid,
+	    first_seen = epoch_begin,
+	    last_seen = epoch_end
+	 },
+	 root = {
+	    formatter = format_utils.formatASN,
+	    id = asn,
+	    add_root_first = true
+	 }
+	 }
+   }
 end
 
 local nodes = {}

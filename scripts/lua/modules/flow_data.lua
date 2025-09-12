@@ -3,9 +3,9 @@
 --
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
+
 if ntop.isPro() then
-   package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" ..
-      package.path
+   package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
 end
 
 local flow_data = {}
@@ -83,8 +83,7 @@ local function formatEmptyStats(columns, flow, rename_field_list,
 	    end
 	    if trace_stats then
 	       trace_string = string.format("%s [%s: %s]", trace_string,
-					    key,
-					    tostring(element[key] or ""))
+					    key, tostring(element[key] or ""))
 	    end
 	 end
       else
@@ -153,21 +152,16 @@ function flow_data.getStats(queries, isHistorical)
 	 interface.aggregateASNFlows()
       end
    end
-
+	     
    for _, query_info in pairs(queries or {}) do
       local isHistorical = false
       if (query_info.filters and query_info.filters.last_seen) then
 	 isHistorical = true
       end
-      local select_columns = flow_data_preset.retrieveColumns(
-	 query_info.select_query)
-      local sort_columns =
-	 flow_data_preset.retrieveColumns(query_info.sort_by) or {}
-      local where_filters = flow_data_preset.convertFilters(
-	 query_info.where_query, query_info.filters,
-	 isHistorical)
-      local different_columns = flow_data_preset.retrieveColumns(
-	 query_info.different_from)
+      local select_columns = flow_data_preset.retrieveColumns(query_info.select_query)
+      local sort_columns   = flow_data_preset.retrieveColumns(query_info.sort_by) or {}
+      local where_filters = flow_data_preset.convertFilters(query_info.where_query, query_info.filters, isHistorical)
+      local different_columns = flow_data_preset.retrieveColumns(query_info.different_from)
 
       -- Function used to, given a flow, merge all the same data togheter
       local function formatData(_, flow)
@@ -192,21 +186,21 @@ function flow_data.getStats(queries, isHistorical)
 	 end
 
 	 -- Now update the data (e.g. bytes_sent and bytes_rcvd)
-	 results[key] = updateStats(select_columns,
-				    query_info.invert_direction, flow,
-				    results[key])
+	 results[key] = updateStats(select_columns, query_info.invert_direction, flow, results[key])
 	 ::skip_flow::
       end
 
       local first_seen = query_info.filters.first_seen
       local last_seen = query_info.filters.last_seen
-      local query_result = flow_data_historical.retrieveFlowData(
-	 select_columns, where_filters, sort_columns,
-	 query_info.invert_direction, first_seen,
-	 last_seen, isHistorical)
+      local query_result = flow_data_historical.retrieveFlowData(select_columns, where_filters, sort_columns,
+								 query_info.invert_direction, first_seen,
+								 last_seen, isHistorical)
+
       for _, flow in pairs(query_result or {}) do formatData(_, flow) end
    end
 
+   --tprint(results)
+   
    -- Now we have equal table for live and historical, so now format the data and run the checks
    return results
 end

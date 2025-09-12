@@ -213,12 +213,13 @@ end
 -- @param where Array, containing a list of ids for the where
 -- @param available_filters List, containing a list filters, key is the key of the filter, value is the value
 -- @return a list of filters, key - value
-function flow_data_preset.convertFilters(where, available_filters)
-   local where_query = {}
+function flow_data_preset.convertFilters(where, available_filters, isHistorical)
+   local where_query = {} 
+   
    if (not available_filters) or (table.len(available_filters) == 0) then
       return where_query
-   end
-
+   end 
+   
    for _, key in pairs(where or {}) do
       if (columns[key] and columns[key]["filters"]) then
 	 local filter = columns[key]["filters"]
@@ -240,13 +241,13 @@ function flow_data_preset.convertFilters(where, available_filters)
 	 end
       end
    end
-
+   
    -- Ifid filter is mandatory, add it in case it's missing, only in live data
    if not where_query["ifid"] and not where_query["INTERFACE_ID"] then
       local ifid = available_filters["ifid"] or interface.getId() -- Use current ifid
       where_query["INTERFACE_ID"] = ifid
    end
-
+   
    return where_query
 end
 
