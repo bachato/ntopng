@@ -5678,6 +5678,8 @@ static int ntop_exec_in_memory_sql_query(lua_State *vm) {
   else
     db->execSQLQuery(vm, sql, false, false);
 
+  // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", sql);
+  
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 

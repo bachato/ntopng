@@ -13282,7 +13282,7 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State *vm) {
 
   walker(&begin_slot, true /* walk_all */, walker_flows, aggregate_asn_flows, &agg_flows);
 
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Aggregated %u flows", agg_flows.size());
+  /* ntop->getTrace()->traceEvent(TRACE_NORMAL, "Aggregated %u flows", agg_flows.size()); */
 
   for(it = agg_flows.begin(); it != agg_flows.end(); it++) {
     const AggregatedASNFlowKey   *k = &(it->first);
