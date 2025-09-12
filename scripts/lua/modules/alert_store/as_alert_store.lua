@@ -192,15 +192,15 @@ function as_alert_store:get_alert_details(value)
    details[#details + 1] = {
       name = i18n("as"),
       values = {
-	 self.get_label_link(fmt['name'], 'asn',
-			fmt['asn'], add_hyperlink)
+	 -- self.get_label_link(fmt['name'], 'asn', fmt['asn'], add_hyperlink)
+         "<a href=\"" .. ntop.getHttpPrefix() .. "/lua/as_overview.lua?asn=" .. fmt['asn'] .. "\">" .. (fmt['name'] or fmt['asn']) .. "</a>"
       }
    }
 
    details[#details + 1] = {
       name = i18n("show_alerts.alert_datetime"),
       values = {
-	 self.get_label_link(fmt['tstamp']['title'], '',
+	 self.get_label_link(fmt['tstamp']['label'], '',
 			fmt['tstamp']['value'], false)
       }
    }
