@@ -3,11 +3,14 @@
 --
 
 package.path = dirs.installdir .. "/scripts/lua/modules/alert_store/?.lua;" .. package.path
+package.path = dirs.installdir .. "/scripts/lua/modules/alert_keys/?.lua;" .. package.path
 
 require "lua_utils"
 local json = require "dkjson"
 local alerts_api = require "alerts_api"
 local alert_consts = require "alert_consts"
+local other_alert_keys = require "other_alert_keys"
+local alert_entities = require "alert_entities"
 
 local alert_store_db = {
    name = "DataBase",
@@ -148,7 +151,29 @@ end
 -- ##############################################
 
 function alert_store_db.runTest(recipient)
-  return false, "Not implemented"
+  local alert_store = get_alert_store(alert_entities.system.entity_id)
+
+  local dummy_alert = {
+    alert_id = other_alert_keys.alert_test,
+    tstamp = os.time(),
+    tstamp_end = os.time(),
+    score = 100,
+    entity_val = "",
+    granularity = 0,
+    json = "{}",
+    require_attention = true
+  }
+
+  local success = alert_store:insert(dummy_alert)
+
+  local msg
+  if success then
+    msg = i18n("alert_messages.database_test_success")
+  else
+    msg = i18n("alert_messages.database_test_failure")
+  end
+
+  return success, msg
 end
 
 -- ##############################################

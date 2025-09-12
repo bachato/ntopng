@@ -23,10 +23,9 @@
 
 /* **************************************************** */
 
-SQLiteStoreManager::SQLiteStoreManager(NetworkInterface *_iface) {
+SQLiteStoreManager::SQLiteStoreManager(NetworkInterface *_iface) : DB(_iface) {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   
-  iface = _iface;
   db = NULL;
 };
 

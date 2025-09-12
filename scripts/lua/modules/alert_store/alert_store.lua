@@ -997,7 +997,9 @@ function alert_store:insert(alert)
 
         local insert_stmt = self:_build_insert_query(alert, self:get_write_table_name(), alert_status, extra_columns, extra_values)
         local ifid = ternary(self:get_ifid() == getSystemInterfaceId(), getSystemInterfaceId(), nil)
+
         -- traceError(TRACE_NORMAL, TRACE_CONSOLE, insert_stmt)
+
         return interface.alert_store_query(insert_stmt, ifid)
     end
 

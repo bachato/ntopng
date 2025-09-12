@@ -304,14 +304,17 @@ protected:
   HostHash *hosts_hash; /**< Hash used to store hosts information. */
   bool purge_idle_flows_hosts, inline_interface;
 
-  DB *db;
+  DB *db; /* alerts, etc. (SQLite) */
+
+  FlowDB *flows_db; /* flows, alerts, etc. (ClickHouse) */
+
 #ifndef HAVE_NEDGE
-  DB *es_exporter;
+  FlowDB *es_exporter;
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
-  DB *kafka_exporter;
+  FlowDB *kafka_exporter;
 #endif
 #if !defined(WIN32) && !defined(__APPLE__)
-  DB *syslog_exporter;
+  FlowDB *syslog_exporter;
 #endif
 #endif
 
@@ -654,14 +657,15 @@ public:
                         DSCPStats *_dscpStats, SyslogStats *_syslogStats,
                         RoundTripStats *_downloadStats,
                         RoundTripStats *_uploadStats) const;
-  inline DB *getDB() const { return db; };
+  inline DB *getDB() const { return db ? db : flows_db; };
+  inline FlowDB *getFlowsDB() const { return flows_db; };
 #ifndef HAVE_NEDGE
-  inline DB *getESExporter() const { return es_exporter; };
+  inline FlowDB *getESExporter() const { return es_exporter; };
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
-  inline DB *getKafkaExporter() const { return kafka_exporter; };
+  inline FlowDB *getKafkaExporter() const { return kafka_exporter; };
 #endif
 #if !defined(WIN32) && !defined(__APPLE__)
-  inline DB *getSyslogExporter() const { return syslog_exporter; };
+  inline FlowDB *getSyslogExporter() const { return syslog_exporter; };
 #endif
 #endif
   inline EthStats* getStats() { return (&ethStats); };
@@ -988,21 +992,31 @@ public:
   void addInterfaceAddress(char *const addr);
   void addInterfaceNetwork(char *const net, char *addr);
   bool isInterfaceNetwork(IpAddress *ipa, int network_bits);
+
   inline int execSQLQuery(lua_State *vm, const char *sql, bool limit_rows,
-                            bool wait_for_db_created = false) {
-    return (db ? db->execSQLQuery(vm, sql, limit_rows, wait_for_db_created)
+                          bool wait_for_db_created = false) {
+    DB *actual_db = db ? db : flows_db;
+    return (actual_db ? actual_db->execSQLQuery(vm, sql, limit_rows, wait_for_db_created)
 	    : -1);
   };
-  int execSQLQuery2CSV(const char *sql, bool dump_in_json_format,
-                     struct mg_connection *conn);
+  inline int execSQLQuery2CSV(const char *sql, bool dump_in_json_format,
+                              struct mg_connection *conn) {
+    DB *actual_db = db ? db : flows_db;
+    return (actual_db ? actual_db->execSQLQuery2CSV(sql, dump_in_json_format, conn)
+            : -1);
+  }
   inline void archiveDBData(time_t epoch_begin, time_t epoch_end) {
-    if (db) db->archiveData(epoch_begin, epoch_end);
+    DB *actual_db = db ? db : flows_db;
+    if (actual_db) actual_db->archiveData(epoch_begin, epoch_end);
   }
 
   NetworkStats *getNetworkStats(u_int32_t networkId) const;
   void allocateStructures(bool disable_dump = false);
   void getsDPIStats(lua_State *vm);
-  inline bool isDbCreated() { return (db ? db->isDbCreated() : true); };
+  inline bool isDbCreated() {
+    DB *actual_db = db ? db : flows_db;
+    return (actual_db ? actual_db->isDbCreated() : true); 
+  };
 #ifdef NTOPNG_PRO
   void updateFlowProfiles();
 #ifndef HAVE_NEDGE
@@ -1022,7 +1036,7 @@ public:
 #endif
 
   void getFlowsStatus(lua_State *vm);
-  inline void incDBNumDroppedFlows(DB *actual_db, u_int num = 1) {
+  inline void incDBNumDroppedFlows(FlowDB *actual_db, u_int num = 1) {
     if (actual_db) actual_db->incNumDroppedFlows(num);
   };
 #ifdef NTOPNG_PRO

@@ -29,7 +29,7 @@
 
 /* **************************************** */
 
-SyslogDump::SyslogDump(NetworkInterface *_iface) : DB(_iface) {
+SyslogDump::SyslogDump(NetworkInterface *_iface) : FlowDB(_iface) {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   
   openlog(NULL /* If ident is NULL, the program name is used */,

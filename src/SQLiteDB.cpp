@@ -29,7 +29,7 @@ const char *SQLiteDB::getEngineName() {
 
 /* **************************************************** */
 
-SQLiteDB::SQLiteDB(NetworkInterface *_iface) : DB(_iface), SQLiteStoreManager(_iface) {
+SQLiteDB::SQLiteDB(NetworkInterface *_iface) : SQLiteStoreManager(_iface) {
   char filePath[MAX_PATH + 256];
 
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);

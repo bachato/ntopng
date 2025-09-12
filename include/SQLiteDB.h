@@ -26,7 +26,7 @@
 
 class Flow;
 
-class SQLiteDB : public DB, public SQLiteStoreManager {
+class SQLiteDB : public SQLiteStoreManager {
  private:
   bool store_opened, store_initialized;
 

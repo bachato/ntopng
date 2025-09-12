@@ -24,7 +24,7 @@
 
 #include "ntop_includes.h"
 
-class ElasticSearch : public DB {
+class ElasticSearch : public FlowDB {
  private:
   pthread_t esThreadLoop;
   std::atomic<u_int32_t> num_queued_elems;

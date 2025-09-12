@@ -329,6 +329,7 @@ void NetworkInterface::init(const char *interface_name) {
   download_stats = upload_stats = NULL;
 
   db = NULL;
+  flows_db = NULL;
 #ifndef HAVE_NEDGE
   es_exporter = NULL;
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
@@ -1013,6 +1014,11 @@ NetworkInterface::~NetworkInterface() {
     delete db;
   }
 
+  if (flows_db) {
+    flows_db->shutdown();
+    delete flows_db;
+  }
+
   if (host_pools) delete host_pools; /* note: this requires ndpi_struct */
   if (bcast_domains) delete bcast_domains;
   if (ifDescription) free(ifDescription);
@@ -1206,7 +1212,7 @@ int NetworkInterface::dumpFlow(time_t when, Flow *f) {
 #ifdef NTOPNG_PRO
 
 void NetworkInterface::flushFlowDump() {
-  if (db) db->flush();
+  if (flows_db) flows_db->flush();
 }
 
 #endif
@@ -3589,7 +3595,7 @@ u_int64_t NetworkInterface::dequeueHostAlertsFromChecks(u_int budget) {
 /* **************************************************** */
 
 void NetworkInterface::incNumQueueDroppedFlows(u_int32_t num) {
-  if (db) db->incNumQueueDroppedFlows(num);
+  if (flows_db) flows_db->incNumQueueDroppedFlows(num);
 };
 
 /* **************************************************** */
@@ -3670,7 +3676,7 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
   // flushFlowDump();
 #endif
 
-  if (db) db->checkIdle(when);
+  if (flows_db) flows_db->checkIdle(when);
 
   return (num_done);
 }
@@ -3687,7 +3693,7 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
 
   if (f->get_partial_bytes()) /* Make sure data is not at zero */ {
 
-    if (db
+    if (flows_db
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO) && !defined(HAVE_NEDGE)
         || kafka_exporter
 #endif
@@ -3699,8 +3705,8 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
       json = f->serialize(export_format_GENERIC);
       if (json) {
 
-        if (db)
-          rc = db->dumpFlow(when, f, json);
+        if (flows_db)
+          rc = flows_db->dumpFlow(when, f, json);
 
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO) && !defined(HAVE_NEDGE)
         if (kafka_exporter)
@@ -3744,7 +3750,7 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
   } /* get_partial_bytes > 0 */
 
   if (!rc)
-    incDBNumDroppedFlows(db);
+    incDBNumDroppedFlows(flows_db);
 
   f->decUses(); /* Add done, decrease the reference counter */
   f->set_dump_done();
@@ -4019,7 +4025,7 @@ void NetworkInterface::shutdown() {
     if (flowAlertsDequeueLoopCreated) pthread_join(flowChecksLoop, &res);
     if (hostAlertsDequeueLoopCreated) pthread_join(hostChecksLoop, &res);
 
-    if (db) db->flush();
+    if (flows_db) flows_db->flush();
   }
 }
 
@@ -4212,7 +4218,7 @@ void NetworkInterface::periodicStatsUpdate() {
 #endif
   struct timeval tv = periodicUpdateInitTime();
 
-  if (db) db->updateStats(&tv);
+  if (flows_db) flows_db->updateStats(&tv);
 
   checkReloadHostsBroadcastDomain();
 
@@ -7643,7 +7649,7 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
 #endif
 
   lua_push_bool_table_entry(vm, "isFlowDumpDisabled", isFlowDumpDisabled());
-  lua_push_bool_table_entry(vm, "isFlowDumpRunning", db != NULL);
+  lua_push_bool_table_entry(vm, "isFlowDumpRunning", flows_db != NULL);
   lua_push_uint64_table_entry(vm, "seen.last", getTimeLastPktRcvd());
   lua_push_bool_table_entry(vm, "inline", get_inline_interface());
   lua_push_bool_table_entry(vm, "vlan", hasSeenVLANTaggedPackets());
@@ -7712,7 +7718,7 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
 #if defined(NTOPNG_PRO)
     if (!isView()) { /* Standard non-view interface */
 #endif
-      if (db) db->lua(vm, false /* Overall */);
+      if (flows_db) flows_db->lua(vm, false /* Overall */);
 #if defined(NTOPNG_PRO)
     } else /* View interfaces: merge drops/exports */
       (dynamic_cast<ViewInterface*>(this))->luaDBStats(vm, false /* Overall */);
@@ -7786,7 +7792,7 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
 #if defined(NTOPNG_PRO)
   if (!isView()) { /* Standard non-view interface */
 #endif
-    if (db) db->lua(vm, true /* Since last checkpoint */);
+    if (flows_db) flows_db->lua(vm, true /* Since last checkpoint */);
 #if defined(NTOPNG_PRO)
   } else /* View interfaces: merge drops/exports */
     (dynamic_cast<ViewInterface*>(this))->luaDBStats(vm, true /* Since last checkpoint */);
@@ -8618,11 +8624,13 @@ static bool virtual_http_hosts_walker(GenericHashEntry *node, void *data,
 /* **************************************** */
 
 bool NetworkInterface::alert_store_query(lua_State *vm, const char *sql, bool limit_rows) {
-  if (!db) return false;
+  DB *alerts_db = db ? db : flows_db;
+
+  if (!alerts_db) return false;
 
   incNumAlertsQueries();
 
-  return (db->execSQLQuery(vm, sql, limit_rows, true) == 0);
+  return (alerts_db->execSQLQuery(vm, sql, limit_rows, true) == 0);
 }
 
 /* **************************************** */
@@ -8823,7 +8831,7 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
       flow_dump_disabled_by_backend = true;
 
     if (!isViewed() && !disable_dump) {
-      if (db == NULL) /* ClickHouse disabled, use SQLite for alerts, assets, etc. */
+      if (flows_db == NULL && db == NULL) /* ClickHouse disabled, use SQLite for alerts, assets, etc. */
         db = new SQLiteDB(this);
 
       alertsQueue = new AlertsQueue(this);
@@ -8903,7 +8911,7 @@ void NetworkInterface::checkPointCounters(bool drops_only) {
   checkpointDroppedAlertsCount = getNumDroppedAlerts();
   checkpointPktDropCount = getNumPacketDrops();
 
-  if (db) db->checkPointCounters(drops_only);
+  if (flows_db) flows_db->checkPointCounters(drops_only);
 }
 
 /* **************************************************** */
@@ -9837,22 +9845,22 @@ bool NetworkInterface::initFlowDB() {
   if (!ntop->getPrefs()->do_dump_flows_on_clickhouse())
     return false;
 
-  if (db != NULL)
+  if (flows_db != NULL)
     return true;
 
-  db = new (std::nothrow) ClickHouseDB(this);
+  flows_db = new (std::nothrow) ClickHouseDB(this);
 
-  if (db == NULL || db->isDbCreated() == false) {
+  if (flows_db == NULL || flows_db->isDbCreated() == false) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Running without ClickHouse support, please check the clickhouse service");
     ntop->getPrefs()->dontUseClickHouse();
-    if (db) {
-      delete db;
-      db = NULL;
+    if (flows_db) {
+      delete flows_db;
+      flows_db = NULL;
     }
   }
 #endif
 
-  return db != NULL;
+  return flows_db != NULL;
 }
 
 /* *************************************** */
@@ -9880,8 +9888,8 @@ void NetworkInterface::initFlowDump() {
   if (isView())
     return;
 
-  if (db)
-    db->startDBLoop();
+  if (flows_db)
+    flows_db->startDBLoop();
 
 #ifndef HAVE_NEDGE
   if (ntop->getPrefs()->do_dump_flows_on_es() && es_exporter == NULL) {
@@ -11255,18 +11263,6 @@ void NetworkInterface::addRedisSitesKey() {
 				  (char *)HASHKEY_LOCAL_HOSTS_TOP_SITES_HOUR_KEYS_PUSHED,
 				  (char *)HASHKEY_LOCAL_HOSTS_TOP_SITES_DAY_KEYS_PUSHED);
 }
-
-/* *************************************** */
-
-int NetworkInterface::execSQLQuery2CSV(const char *sql, bool dump_in_json_format,
-				       struct mg_connection *conn) {
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-  ((ClickHouseDB *)db)->execSQLQuery2CSV(sql, dump_in_json_format, conn);
-
-  return (0);
-#endif
-  return (-1);
-};
 
 /* *************************************** */
 
@@ -13269,18 +13265,18 @@ static bool aggregate_asn_flows(GenericHashEntry *node, void *user_data,
 
 bool NetworkInterface::aggregateASNModeFlows(lua_State *vm) {
   u_int32_t begin_slot = 0;
-  InMemorySQLiteDB *db = getLuaVMUserdata(vm, db);
+  InMemorySQLiteDB *inmem_db = getLuaVMUserdata(vm, db);
   std::map<AggregatedASNFlowKey, AggregatedASNFlowValue, AggregatedASNFlowKeyCompare> agg_flows;
   std::map<AggregatedASNFlowKey, AggregatedASNFlowValue, AggregatedASNFlowKeyCompare>::iterator it;
 
-  if(db == NULL) {
-    db = new (std::nothrow)InMemorySQLiteDB(getLuaVMUserdata(vm, iface));
+  if(inmem_db == NULL) {
+    inmem_db = new (std::nothrow)InMemorySQLiteDB(getLuaVMUserdata(vm, iface));
 
-    if(db == NULL)
+    if(inmem_db == NULL)
       return(false);
     else {
-      getUserdata(vm)->db = db;
-      db->execFile("db_schema_as_sqlite.sql");
+      getUserdata(vm)->db = inmem_db;
+      inmem_db->execFile("db_schema_as_sqlite.sql");
     }
   }
 
@@ -13314,7 +13310,7 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State *vm) {
     // if(k->src_asn == 12912 || k->dst_asn == 12912)) ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", sql.c_str());
 
     // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%u -> %u", k->src_asn, k->dst_asn);
-    db->exec_query(sql.c_str(), NULL, NULL);
+    inmem_db->exec_query(sql.c_str(), NULL, NULL);
   }
 
   return(true);

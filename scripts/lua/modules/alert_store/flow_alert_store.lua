@@ -1402,7 +1402,7 @@ end
 
 -- ##############################################
 
-local function get_flow_link(fmt, add_hyperlink)
+function flow_alert_store:get_flow_link(fmt, add_hyperlink)
    local label = ''
 
    local value = fmt['flow']['cli_ip']['value']
@@ -1542,7 +1542,7 @@ end
 -- @brief Get a label/title for the alert coming from the DB (value)
 function flow_alert_store:get_alert_label(value)
    local fmt = self:format_record(value, false)
-   return fmt['msg']['name'] .. ' | ' .. get_flow_link(fmt, false)
+   return fmt['msg']['name'] .. ' | ' .. self:get_flow_link(fmt, false)
 end
 
 -- ##############################################
@@ -1567,7 +1567,7 @@ function flow_alert_store:get_alert_details(value)
 
    details[#details + 1] = {
       name = i18n("flow_details.flow_peers_client_server"),
-      values = {add_historical_link(value, get_flow_link(fmt, add_hyperlink))}
+      values = {add_historical_link(value, self:get_flow_link(fmt, add_hyperlink))}
    }
 
    details[#details + 1] = {

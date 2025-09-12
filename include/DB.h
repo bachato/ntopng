@@ -28,37 +28,16 @@ typedef int db_result_row_callback(std::vector<std::string> *row, std::vector<st
 
 class DB {
  private:
-  struct timeval lastUpdateTime;
-  float exportRate;
-  u_int64_t exportedFlows, lastExportedFlows;
-  /* Multiple threads can inc in case of view interfaces */
-  std::atomic<u_int32_t> droppedFlows;
-  std::atomic<u_int32_t> queueDroppedFlows;
-  u_int64_t checkpointExportedFlows;
-  u_int32_t checkpointDroppedFlows, checkpointQueueDroppedFlows;
 
  protected:
-  bool running;
   NetworkInterface *iface;
+  bool running;
 
  public:
   DB(NetworkInterface *_iface);
   virtual ~DB(){};
 
-  /* Failures enqueueing flows for export (NetworkInterface) */
-  inline void incNumQueueDroppedFlows(u_int32_t num = 1) { queueDroppedFlows += num; };
-  /* Failures dumping flows to the database (ClickHouseDB) */
-  inline void incNumDroppedFlows(u_int32_t num = 1)      { droppedFlows += num;      };
-  /* Flows successfully dumped */
-  inline void incNumExportedFlows(u_int64_t num = 1)     { exportedFlows += num;     };
-
-  inline u_int64_t getNumExportedFlows() const { return (exportedFlows); }
-  inline u_int32_t getNumDroppedFlows()  const { return (queueDroppedFlows + droppedFlows); };
-  void updateStats(const struct timeval *tv);
-  void checkPointCounters(bool drops_only);
-
   virtual const char *getEngineName() { return "Unknown"; };
-  virtual bool dumpFlow(time_t when, Flow *f, char *json) { return false; };
   virtual bool startDumpLoop() { return false; }
 
   virtual int execSQLQuery(const char *sql,
@@ -72,17 +51,20 @@ class DB {
     return (-1);
   }
 
+  virtual int execSQLQuery2CSV(const char *sql, bool dump_in_json_format,
+                               struct mg_connection *mg_conn) {
+    return (-1);
+  }
+
   virtual void archiveData(time_t epoch_begin, time_t epoch_end) {}
 
+  inline NetworkInterface *getNetworkInterface() { return iface; };
   inline void startDBLoop() { if (startDumpLoop()) running = true; };
   inline int isRunning() { return (running); };
   virtual bool isDbCreated() { return (true); };
   virtual void shutdown();
   virtual void flush() {};
-  virtual void lua(lua_State *vm, bool since_last_checkpoint);
   virtual void checkIdle(time_t when) { ; }
-  virtual void getStats(u_int64_t *flow_export_count, u_int64_t *flow_export_drops,
-			u_int64_t *flow_export_rate, bool since_last_checkpoint);  
 };
 
 #endif /* _DB_CLASS_H_ */

@@ -28,12 +28,6 @@ DB::DB(NetworkInterface *_iface) {
   
   running = false;
   iface = _iface;
-
-  lastUpdateTime.tv_sec = 0, lastUpdateTime.tv_usec = 0;
-  droppedFlows = queueDroppedFlows = exportedFlows = lastExportedFlows = 0;
-  checkpointDroppedFlows = checkpointQueueDroppedFlows =
-      checkpointExportedFlows = 0;
-  exportRate = 0;
 }
 
 /* ******************************************* */
@@ -41,54 +35,3 @@ DB::DB(NetworkInterface *_iface) {
 void DB::shutdown() { running = false; }
 
 /* ******************************************* */
-
-void DB::getStats(u_int64_t *flow_export_count,
-		  u_int64_t *flow_export_drops,
-		  u_int64_t *flow_export_rate,
-		  bool since_last_checkpoint) {
-
-  *flow_export_count = exportedFlows - (since_last_checkpoint ? checkpointExportedFlows : 0);
-  *flow_export_drops = getNumDroppedFlows() - (since_last_checkpoint  ? (checkpointDroppedFlows + checkpointQueueDroppedFlows) : 0);
-  *flow_export_rate  = exportRate >= 0 ? exportRate : 0;
-}
-
-/* ******************************************* */
-
-void DB::lua(lua_State *vm, bool since_last_checkpoint) {
-  u_int64_t drops, rate, count;
-
-  getStats(&drops, &rate, &count, since_last_checkpoint);
-
-  /* Keep in sync with ViewInterface::dumpDBStats() */
-  lua_push_uint64_table_entry(vm, "flow_export_count", drops);
-  lua_push_int32_table_entry(vm, "flow_export_drops", rate);
-  lua_push_float_table_entry(vm, "flow_export_rate", count);
-}
-
-/* ******************************************* */
-
-void DB::checkPointCounters(bool drops_only) {
-  if (!drops_only) checkpointExportedFlows = exportedFlows;
-
-  checkpointDroppedFlows = droppedFlows;
-  checkpointQueueDroppedFlows = queueDroppedFlows;
-};
-
-/* ******************************************* */
-
-void DB::updateStats(const struct timeval *tv) {
-  if (tv == NULL) return;
-
-  if (lastUpdateTime.tv_sec > 0) {
-    float tdiffMsec = Utils::msTimevalDiff(tv, &lastUpdateTime);
-    if (tdiffMsec >= 1000) { /* al least one second */
-      u_int64_t diffFlows = exportedFlows - lastExportedFlows;
-      lastExportedFlows = exportedFlows;
-
-      exportRate = ((float)(diffFlows * 1000)) / tdiffMsec;
-      if (exportRate < 0) exportRate = 0;
-    }
-  }
-
-  memcpy(&lastUpdateTime, tv, sizeof(struct timeval));
-}

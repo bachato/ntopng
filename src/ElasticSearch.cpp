@@ -37,7 +37,7 @@ static void *esLoop(void *ptr) {
 
 /* **************************************** */
 
-ElasticSearch::ElasticSearch(NetworkInterface *_iface) : DB(_iface) {
+ElasticSearch::ElasticSearch(NetworkInterface *_iface) : FlowDB(_iface) {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   
   snprintf(es_version, sizeof(es_version), "%c", '0');

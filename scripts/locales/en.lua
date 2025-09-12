@@ -1254,6 +1254,8 @@ local lang = {
     ["contacted_peers_as_cli"] = "Too many Peers contacted as a client by %{host} %{host_category} [%{value_cli} > %{dyn_threshold_cli}].",
     ["contacted_peers_as_srv"] = "Too many Peers contacted as a server by %{host} %{host_category} [%{value_srv} > %{dyn_threshold_srv}].",
     ["custom_lua_script"] = "%{message}",
+    ["database_test_failure"] = "Failure inserting test alert into the database.",
+    ["database_test_success"] = "Test alert successfully pushed to the database, please check System alerts in the alert explorer,",
     ["device_has_connected"] = "MAC: [ <a href=\"%{device_url}\">%{device}</a> ] connected to the interface <a href=\"%{if_url}\">%{if_name}</a> <a target=\"blank\" href=\"%{exclusion_url}\"><i class=\"fas fa-external-link-alt\"></i></a>",
     ["device_has_disconnected"] = "MAC: [ <a href=\"%{device_url}\">%{device}</a> ] disconnected from the interface <a href=\"%{if_url}\">%{if_name}</a> <a target=\"blank\" href=\"%{exclusion_url}\"><i class=\"fas fa-external-link-alt\"></i></a>",
     ["dns_flood_attacker"] = "%{entity} is a DNS flooder [%{value} &gt; %{threshold} client DNS Flows/sec for ~3 sec]",

@@ -26,7 +26,7 @@
 
 #if !defined(WIN32) && !defined(__APPLE__)
 
-class SyslogDump : public DB {
+class SyslogDump : public FlowDB {
  public:
   SyslogDump(NetworkInterface *_iface);
   virtual ~SyslogDump();

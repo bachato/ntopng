@@ -24,10 +24,8 @@
 
 #include "ntop_includes.h"
 
-class SQLiteStoreManager {
- private:
+class SQLiteStoreManager : public DB {
  protected:
-  NetworkInterface *iface;
   Mutex m;
   sqlite3 *db;
 
@@ -38,7 +36,6 @@ class SQLiteStoreManager {
   SQLiteStoreManager(NetworkInterface *iface);
   virtual ~SQLiteStoreManager();
 
-  inline NetworkInterface *getNetworkInterface() { return iface; };
   int optimizeStore();
   
   int execFile(const char *path);
