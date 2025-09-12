@@ -27,8 +27,8 @@ local url = ntop.getHttpPrefix() .. "/lua/alert_stats.lua?"
 
 local pages = {
    {
-      active = page == "flow" or page == nil,
-      page_name = "flow",
+      active = false,
+      page_name = page,
       label = "<i class=\"fas fa-lg fa-home\"></i>"
    }
 }
