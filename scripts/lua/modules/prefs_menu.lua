@@ -287,9 +287,8 @@ local menu_subpages = {{
     id = "asn_settings",
     label = i18n("prefs.asn_mode"),
     advanced = true,
-    pro_only = true,
-    -- Enable ASN mode in EnterpriseXL and zmq interface
-    hidden = (ntop.isEnterpriseXL() == false) or (not interface.isZMQInterface()),
+    pro_only = false,
+    hidden = not interface.isZMQInterface(),
     entries = {
         asn_mode_enabled = {
             title = i18n("prefs.toggle_asn_mode_title"),
