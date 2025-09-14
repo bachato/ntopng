@@ -6817,7 +6817,7 @@ local lang = {
     ["notes"] = "Comma separated list of ASNs. Example: 10,2404,4044",
     ["remote_asn_title"] = "Relevant Remote ASNs",
     ["sub_customer_asn_description"] = "Comma separated list of Customer ASNs, interconnected to the Internet via my ASNs.",
-    ["sub_customer_asn_title"] = "Customer ASNs",
+    ["sub_customer_asn_title"] = "My Customers ASNs",
     ["remote_asn_description"] = "Comma separated list of Remote ASNs that are relevant for the monitoring standpoint.",
   },
   ["network_configuration"] = {
