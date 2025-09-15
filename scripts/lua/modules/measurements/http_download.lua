@@ -49,7 +49,7 @@ local function check(measurement, hosts, granularity)
     end
 
     if(rv and rv.HTTP_STATS and (rv.HTTP_STATS.TOTAL_TIME > 0)) then
-      local download_bytes = rv.HTTP_STATS.BYTES_DOWNLOAD
+      local download_bytes = rv.HTTP_STATS.BYTES_DOWNLOAD or 0
       local total_time = rv.HTTP_STATS.TOTAL_TIME
 
       -- the total_time is in seconds, being Bps, throughput is bit / seconds,
