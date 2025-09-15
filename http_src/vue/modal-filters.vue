@@ -47,7 +47,13 @@
               </select-search>
             </div>
             <template v-else>
-              <input v-model="input_value" :pattern="data_pattern_selected" name="value" :required="input_required" type="text" class="form-control">
+              <input v-model="input_value"
+                     v-if="operator_selected?.id != 'empty' && operator_selected?.id != 'nempty'"
+                     :pattern="data_pattern_selected"
+                     name="value"
+                     :required="input_required"
+                     type="text"
+                     class="form-control">
               <span style="margin: 0px;padding:0;" class="alert invalid-feedback">{{i18n('invalid_value')}}</span>
             </template>
           </div>
@@ -181,7 +187,7 @@ export default {
 		this.options_to_show = null;
 		this.data_pattern_selected = this.get_data_pattern(filter.value_type);
 	    }
-	    
+
 	    if(filter.operators && this.operator_selected?.id == null) {
 		this.operator_selected = filter.operators[0]
 	    }
@@ -223,7 +229,6 @@ export default {
 	    let value_label = this.input_value;
 	    if (value == null || (this.option_selected?.value != null)) {
 		let filter = this.filters_options.find((fo) => fo.id == this.filter_type_selected.id);
-                
 		let option = filter.options.find((o) => o.value == this.option_selected.value);
                 if (option == null) {
                     option = this.option_selected;

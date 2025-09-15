@@ -298,6 +298,11 @@ function alert_store:build_sql_cond(cond, is_write)
 
     local real_field = self:get_column_name(cond.field, is_write, cond.value)
 
+    -- Special case: description
+    if cond.field == "description" then
+        real_field = 'json'
+    end
+
     local sql_cond
 
     local sql_op = tag_utils.tag_operators[cond.op]
@@ -472,9 +477,6 @@ function alert_store:build_sql_cond(cond, is_write)
             sql_cond = string.format("%s = 1", self:get_column_name('is_server', is_write))
         end
 
-        -- Special case: description
-    elseif cond.field == "description" then
-        sql_cond = string.format("json LIKE %s", string.format("'%%%s%%'", cond.value))
         -- Number
     elseif cond.value_type == 'number' then
         if cond.op == 'in' then
@@ -499,6 +501,10 @@ function alert_store:build_sql_cond(cond, is_write)
             sql_cond = real_field .. ' LIKE ' .. string.format("'%%%s%%'", cond.value)
         elseif cond.op == 'nin' then
             sql_cond = real_field .. ' NOT LIKE ' .. string.format("'%%%s%%'", cond.value)
+        elseif cond.op == 'empty' then
+            sql_cond = real_field .. ' = ' .. "''"
+        elseif cond.op == 'nempty' then
+            sql_cond = real_field .. ' <> ' .. "''"
         else
             -- Any other operator
             sql_cond = string.format("%s %s ('%s')", real_field, sql_op, cond.value)
@@ -2143,6 +2149,7 @@ function alert_store:add_request_filters(is_write)
     self:add_filter_condition_list('score', score, 'number')
     self:add_filter_condition_list('tstamp', tstamp, 'number')
     self:add_filter_condition_list('info', info, 'string')
+
     self:add_filter_condition_list('description', description)
 
     if (ntop.isClickHouseEnabled()) then

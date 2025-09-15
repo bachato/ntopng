@@ -40,7 +40,9 @@ tag_utils.tag_operators = {
     ["gte"] = ">=",
     ["lte"] = "<=",
     ["in"] = i18n("has"),
-    ["nin"] = i18n("does_not_have")
+    ["nin"] = i18n("does_not_have"),
+    ["empty"] = i18n("is_empty"),
+    ["nempty"] = i18n("is_not_empty"),
 }
 
 -- #####################################
@@ -49,7 +51,7 @@ tag_utils.tag_operators = {
 tag_utils.input_types = {
     input = 'input',
     select = 'select',
-    select_with_input = 'select-with-input'
+    select_with_input = 'select-with-input',
 }
 
 -- #####################################
@@ -414,7 +416,7 @@ tag_utils.defined_tags = {
     info = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.info'),
-        operators = { 'eq', 'neq', 'in', 'nin' },
+        operators = { 'eq', 'neq', 'in', 'nin', 'empty', 'nempty' },
         hourly_available = false,
     },
     bytes = {
@@ -542,13 +544,13 @@ tag_utils.defined_tags = {
     community_id = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.community_id'),
-        operators = { 'eq', 'neq', 'in', 'nin' },
+        operators = { 'eq', 'neq', 'in', 'nin', 'empty', 'nempty' },
         hourly_available = false,
     },
     cli_fingerprint = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.cli_fingerprint'),
-        operators = { 'eq', 'neq' },
+        operators = { 'eq', 'neq', 'empty', 'nempty' },
         hourly_available = false,
     },
     --ja4_client = {
@@ -579,13 +581,13 @@ tag_utils.defined_tags = {
     issuer_dn = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.issuer_dn'),
-        operators = { 'eq', 'neq', 'in', 'nin' },
+        operators = { 'eq', 'neq', 'in', 'nin', 'empty', 'nempty' },
         hourly_available = false,
     },
     user_agent = {
         value_type = 'user_agent',
         i18n_label = i18n('db_search.tags.user_agent'),
-        operators = { 'eq', 'neq', 'in', 'nin' },
+        operators = { 'eq', 'neq', 'in', 'nin', 'empty', 'nempty' },
         hourly_available = false,
     },
     last_server = {
@@ -603,7 +605,7 @@ tag_utils.defined_tags = {
     dns_query = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.dns_query'),
-        operators = { 'eq', 'neq', 'in', 'nin' },
+        operators = { 'eq', 'neq', 'in', 'nin', 'empty', 'nempty' },
         hourly_available = false,
     },
     dns_answer = {
@@ -615,37 +617,37 @@ tag_utils.defined_tags = {
     mdns_answer = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.mdns_answer'),
-        operators = { 'eq', 'neq' },
+        operators = { 'eq', 'neq', 'empty', 'nempty' },
         hourly_available = false,
     },
     mdns_name = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.mdns_name'),
-        operators = { 'eq', 'neq', 'in', 'nin' },
+        operators = { 'eq', 'neq', 'in', 'nin', 'empty', 'nempty' },
         hourly_available = false,
     },
     mdns_name_txt = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.mdns_name_txt'),
-        operators = { 'eq', 'neq', 'in', 'nin' },
+        operators = { 'eq', 'neq', 'in', 'nin', 'empty', 'nempty' },
         hourly_available = false,
     },
     mdns_ssid = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.mdns_ssid'),
-        operators = { 'eq', 'neq', 'in', 'nin' },
+        operators = { 'eq', 'neq', 'in', 'nin', 'empty', 'nempty' },
         hourly_available = false,
     },
     domain_name = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.domain_name'),
-        operators = { 'eq', 'neq', 'in', 'nin' },
+        operators = { 'eq', 'neq', 'in', 'nin', 'empty', 'nempty' },
         hourly_available = false,
     },
     alert_domain = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.dga_domain_name'),
-        operators = { 'eq', 'neq', 'in', 'nin' },
+        operators = { 'eq', 'neq', 'in', 'nin', 'empty', 'nempty' },
         hourly_available = false,
     },
     cli_location = {
@@ -672,25 +674,25 @@ tag_utils.defined_tags = {
     cli_proc_name = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.cli_proc_name'),
-        operators = { 'eq', 'neq' },
+        operators = { 'eq', 'neq', 'empty', 'nempty' },
         hourly_available = false,
     },
     srv_proc_name = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.srv_proc_name'),
-        operators = { 'eq', 'neq' },
+        operators = { 'eq', 'neq', 'empty', 'nempty' },
         hourly_available = false,
     },
     cli_user_name = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.cli_user_name'),
-        operators = { 'eq', 'neq' },
+        operators = { 'eq', 'neq', 'empty', 'nempty' },
         hourly_available = false,
     },
     srv_user_name = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.srv_user_name'),
-        operators = { 'eq', 'neq' },
+        operators = { 'eq', 'neq', 'empty', 'nempty' },
         hourly_available = false,
     },
     major_connection_state = {
@@ -758,7 +760,7 @@ tag_utils.defined_tags = {
     description = {
         value_type = 'text',
         i18n_label = i18n('db_search.tags.alert_description'),
-        operators = { 'in' },
+        operators = { 'in', 'empty', 'nempty' },
         hourly_available = false,
     },
     mitre_tactic = {
@@ -794,7 +796,7 @@ tag_utils.defined_tags = {
         -- value_type = 'wlan_ssid',
         value_type = 'text',
         i18n_label = i18n('db_search.tags.wlan_ssid'),
-        operators = { 'eq', 'neq', 'in', 'nin' }
+        operators = { 'eq', 'neq', 'in', 'nin', 'empty', 'nempty' }
     },
     apn_mac = {
         value_type = 'mac',
