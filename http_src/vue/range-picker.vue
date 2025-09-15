@@ -144,12 +144,8 @@ const load_filters_data = async function () {
         let filter_def = FILTERS_CONST.find((fc) => fc.id == key);
         if (filter_def != null) {
             let options_string = value.split(",");
-            debugger;
             options_string.forEach((opt_string) => {
                 let [value, operator] = opt_string.split(";");
-                if (operator == null || value == null || operator == "") {
-                    return;
-                }
                 let value_label = value;
                 if (filter_def.value_type == "array") {
                     value_label = filter_def?.options?.find((opt) => opt.value == value)?.label;
@@ -233,18 +229,15 @@ export default {
             let filters_to_add = {}
             for (const key in filters_object) {
                 const value = filters_object[key]
-                const result = value.split(";"); /* Do not add the values like ;eq, it causes problems with linting */
-                if (!dataUtils.isEmptyOrNull(result[0])) {
-                    filters_to_add[key] = filters_object[key]
-                }
+                filters_to_add[key] = filters_object[key]
             }
             ntopng_url_manager.add_obj_to_url(filters_to_add);
             filters.forEach((f) => {
-                if (!dataUtils.isEmptyOrNull(f.value)) {
+                //if (!dataUtils.isEmptyOrNull(f.value)) {
                     let tag = create_tag_from_filter(f);
                     if (tag == null) { return; }
                     TAGIFY.addFilterTag(tag);
-                }
+                //}
             });
             this.last_filters = filters;
         },
