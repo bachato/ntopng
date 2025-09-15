@@ -121,9 +121,6 @@ local function updateStats(columns, invert_direction, flow, current_element)
         if (not column_info.is_key) then -- Not a key, so a value to be updated (e.g. bytes)
             local flow_key_stat = column_info.key
             local id = column_info.id
-            if invert_direction and column_info.invert_with then
-                id = column_info.invert_with
-            end
             current_element[id] = current_element[id] +
                                       tonumber(
                                           flow[flow_key_stat] or flow[id] or 0)
@@ -154,6 +151,7 @@ function flow_data.getStats(queries, isHistorical)
             interface.aggregateASNFlows()
         end
     end
+    -- tprint("##########################################")
 
     for _, query_info in pairs(queries or {}) do
         local isHistorical = false
@@ -189,6 +187,8 @@ function flow_data.getStats(queries, isHistorical)
             local key = formatKey(empty)
             if not results[key] then -- Entry still not created
                 results[key] = empty
+                -- tprint("-------------------")
+                -- tprint("Creating new entry: " .. key)
             end
 
             -- Now update the data (e.g. bytes_sent and bytes_rcvd)
@@ -208,6 +208,7 @@ function flow_data.getStats(queries, isHistorical)
         for _, flow in pairs(query_result or {}) do formatData(_, flow) end
     end
 
+    -- tprint(results)
     -- Now we have equal table for live and historical, so now format the data and run the checks
     return results
 end

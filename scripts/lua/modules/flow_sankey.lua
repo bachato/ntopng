@@ -8,6 +8,7 @@ require "ntop_utils"
 local flow_data = require "flow_data"
 local format_utils = require "format_utils"
 local flow_data_preset = require "flow_data_preset"
+local format_utils = require "format_utils"
 
 -- ##########################################
 
@@ -65,8 +66,8 @@ local function unifyNodes(new_nodes, nodes, query, max_nodes_per_level)
         local current_nodes_per_level = 0
         for node_id, node_value in pairsByValues(values or {}, rev) do
             -- Get the formatter if available
-            local formatted_data, node_link = flow_data_preset.getFormattedDataAndLink(key,
-                                                                     node_id, values)
+            local formatted_data, node_link =
+                flow_data_preset.getFormattedDataAndLink(key, node_id, values)
             local label = node_id
             current_nodes_per_level = current_nodes_per_level + 1
             if (formatted_data ~= node_id) then
@@ -96,7 +97,11 @@ local function unifyNodes(new_nodes, nodes, query, max_nodes_per_level)
                     end
                 end
 
-                nodes[#nodes + 1] = {node_id = id, label = label, link = node_link}
+                nodes[#nodes + 1] = {
+                    node_id = id,
+                    label = label,
+                    link = node_link
+                }
             end
             ::continue::
         end
@@ -139,8 +144,8 @@ local function unifyLinks(new_links, links, nodes)
                     -- Link found update the value
                     already_available_link.value =
                         already_available_link.value + link_value
-                    already_available_link.label = bytesToSize(
-                                                       already_available_link.value)
+                    already_available_link.label =
+                        format_utils.bytesToSize(already_available_link.value)
                     links[position] = already_available_link
                     -- Skip the add, already updated
                     goto continue
@@ -152,7 +157,7 @@ local function unifyLinks(new_links, links, nodes)
                 source_node_id = source_node_id,
                 target_node_id = target_node_id,
                 value = link_value,
-                label = bytesToSize(link_value)
+                label = format_utils.bytesToSize(link_value)
             }
             ::continue::
         end
@@ -173,10 +178,14 @@ local function updateNodesAndLinks(stats, query)
     for _, values in pairs(stats or {}) do
         local total_value = 0
         -- First get the weight of the link, it's needed to update the nodes and links
-        for key, value in pairs(values or {}) do
-            if type(value) == "number" then
-                -- Calculate the value of the link
-                total_value = total_value + value
+        if (values["total_bytes"]) then
+            total_value = values["total_bytes"]
+        else
+            for key, value in pairs(values or {}) do
+                if type(value) == "number" then
+                    -- Calculate the value of the link
+                    total_value = total_value + value
+                end
             end
         end
 
@@ -198,8 +207,10 @@ local function updateNodesAndLinks(stats, query)
                 if not nodes[column_name] then
                     nodes[column_name] = {}
                 end
-                if column_info.formatter and column_info.formatter.column_dependent then
-                    value = string.format("%s|%s", values[column_info.formatter.column_dependent], value)
+                if column_info.formatter and
+                    column_info.formatter.column_dependent then
+                    value = string.format("%s|%s", values[column_info.formatter
+                                              .column_dependent], value)
                 end
                 if not nodes[column_name][value] then
                     nodes[column_name][value] = 0
@@ -288,9 +299,7 @@ function flow_sankey.generateSankey(queries, max_nodes_per_level, isHistorical)
     local nodes = {}
     local links = {}
 
-    if not isHistorical then
-        interface.aggregateASNFlows()
-    end
+    if not isHistorical then interface.aggregateASNFlows() end
 
     for _, query in pairs(queries) do
         local table_stats = flow_data.getStats({query})

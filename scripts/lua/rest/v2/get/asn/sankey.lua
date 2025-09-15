@@ -103,6 +103,7 @@ elseif isEmptyString(criteria) or (criteria == "traffic_between_ases") then
             different_from = {"src_asn", "dst_asn"},
             rename_key_field = {"src_peer_asn_2", "dst_peer_asn_2"},
             skip_flow = {{key = "dst_asn", value = 0}},
+            invert_direction = true,
             filters = {
                 src_asn = asn,
                 ifid = ifid,
