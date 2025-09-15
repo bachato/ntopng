@@ -981,7 +981,7 @@ end
 
 local function validateTagsOperator(p)
     local tag_utils = require "tag_utils"
-    return (tag_utils.tag_operators[p] ~= nil)
+    return (tag_utils.tag_operators_label[p] ~= nil)
 end
 
 --[[ 

@@ -32,7 +32,22 @@ tag_utils.SEPARATOR = consts.SEPARATOR
 -- #####################################
 
 -- Supported operators
-tag_utils.tag_operators = {
+-- (empty string if there is no direct match)
+tag_utils.tag_operators_sql = {
+    ["eq"] = "=",
+    ["neq"] = "!=",
+    ["lt"] = "<",
+    ["gt"] = ">",
+    ["gte"] = ">=",
+    ["lte"] = "<=",
+    ["in"] = "",
+    ["nin"] = "",
+    ["empty"] = "",
+    ["nempty"] = "",
+}
+
+-- Operator to string (i18n)
+tag_utils.tag_operators_label = {
     ["eq"] = "=",
     ["neq"] = "!=",
     ["lt"] = "<",
@@ -1192,7 +1207,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
     for _, op in ipairs(tag.operators) do
         filter.operators[#filter.operators + 1] = {
             id = op,
-            label = tag_utils.tag_operators[op]
+            label = tag_utils.tag_operators_label[op]
         }
     end
 

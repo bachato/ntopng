@@ -305,7 +305,7 @@ function alert_store:build_sql_cond(cond, is_write)
 
     local sql_cond
 
-    local sql_op = tag_utils.tag_operators[cond.op]
+    local sql_op = tag_utils.tag_operators_sql[cond.op]
 
     -- Special case: l7proto
     if cond.field == 'l7proto' then
@@ -794,7 +794,7 @@ end
 -- @param value The value
 -- @param value_type The value type (e.g. 'number')
 function alert_store:add_filter_condition(field, op, value, value_type)
-    if not op or not tag_utils.tag_operators[op] then
+    if not op or not tag_utils.tag_operators_sql[op] then
         op = 'eq'
     end
 
