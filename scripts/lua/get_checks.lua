@@ -13,8 +13,8 @@ local rest_utils = require "rest_utils"
 local auth = require "auth"
 
 if not auth.has_capability(auth.capabilities.checks) then
-   rest_utils.answer(rest_utils.consts.err.not_granted)
-   return
+  rest_utils.answer(rest_utils.consts.err.not_granted)
+  return
 end
 
 sendHTTPContentTypeHeader('application/json')
@@ -23,33 +23,33 @@ local subdirs = {}
 local subdir = _GET["check_subdir"]
 local ifid = tonumber(_GET["ifid"] or getSystemInterfaceId())
 
-
 -- If subdir is the meta-subdir 'all', then all the available subdirs are returned.
 -- Otherwise, only checks for the specific subdir are chosen.
 if subdir == "all" then
-   for _, subdir in pairs(checks.listSubdirs()) do
-      subdirs[#subdirs + 1] = subdir.id
-   end
+  for _, subdir in pairs(checks.listSubdirs()) do
+    subdirs[#subdirs + 1] = subdir.id
+  end
 else
-   subdirs[#subdirs + 1] = subdir
+  subdirs[#subdirs + 1] = subdir
 end
 
 local config_set = checks.getConfigset()
 
 local result = {}
 for _, subdir in ipairs(subdirs) do
-   local script_type = checks.getScriptType(subdir)
+  local script_type = checks.getScriptType(subdir)
 
-   if(script_type == nil) then
-      traceError(TRACE_ERROR, TRACE_CONSOLE, "Bad subdir: " .. subdir)
-      return
-   end
+  if(script_type == nil) then
+    traceError(TRACE_ERROR, TRACE_CONSOLE, "Bad subdir: " .. subdir)
+    return
+  end
 
-   -- ################################################
+  -- ################################################
 
-   local scripts = checks.load(getSystemInterfaceId(), script_type, subdir, {return_all = false})
+  local scripts = checks.load(getSystemInterfaceId(), script_type, subdir, {return_all = false})
 
   for script_name, script in pairs(scripts.modules) do
+
     if script.gui and script.gui.i18n_title and script.gui.i18n_description then
       local hooks = checks.getScriptConfig(config_set, script, subdir)
 
