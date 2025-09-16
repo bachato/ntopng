@@ -1321,12 +1321,6 @@ function checks.getScriptConfig(configset, script, subdir)
    local script_type
 
    if (config) and (config[script_key]) and (table.len(config[script_key]) > 0) then
-
-      -- FIXX temporary fix, check the code below
-      if true then
-         return (config[script_key])
-      end
-
       -- A configuration was found
       local ret = {}
 
@@ -1343,6 +1337,8 @@ function checks.getScriptConfig(configset, script, subdir)
       if(table.len(ret) > 0) then
 	 return ret, inconsistency_found
       end
+
+      return config[script_key], inconsistency_found
    end
 
    -- Default
