@@ -35,7 +35,7 @@ for network_name, data in pairs(networks_stats) do
 
     local network_data = {
         networkId = networkId,
-        networkName = network_name,
+        networkName = getLocalNetworkLabel(network_name),
         hosts = num_hosts,
         score = network_score,
         hostsScoreRatio = hosts_score_ratio,
