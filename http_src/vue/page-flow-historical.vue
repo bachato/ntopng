@@ -288,10 +288,10 @@ async function init_url_params() {
     for (const key in url_params_obj) {
         const value = url_params_obj[key]
         const result = value.split(";"); /* Do not add the values like ;eq, it causes problems with linting */
-        if (dataUtils.isEmptyOrNull(result[0])) {
+/*        if (dataUtils.isEmptyOrNull(result[0])) {
             ntopng_url_manager.delete_key_from_url(key)
         }
-    }
+*/    }
     // 30 min default
     // chiamare set default_time interval
     if (flows_aggregated.value == false) {

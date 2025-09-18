@@ -274,7 +274,7 @@ function create_tagify(range_picker_vue) {
                         <div>
                            <b>${tagData.label ? tagData.label : tagData.key}</b>&nbsp;
                            <b class='operator'>${tagData.selectedOperator ? TAG_OPERATORS[tagData.selectedOperator] : '='}</b>&nbsp;
-                            <span class='tagify__tag-text'>${tagData.value}</span>
+                            <span class='tagify__tag-text'>${tagData.value == "&#039;&#039;" ? '' : tagData.value}</span>
                         </div>
                     </tag>`
                 }
@@ -304,8 +304,8 @@ function create_tagify(range_picker_vue) {
 
     const addFilterTag = async function (tag) {
         /* Convert values to string (this avoids issues e.g. with 0) */
-        if (typeof tag.realValue == 'number') { tag.realValue = '' + tag.realValue; }
-        if (typeof tag.value == 'number') { tag.value = '' + tag.value; }
+        if (typeof tag.realValue === 'number') { tag.realValue = '' + tag.realValue; }
+        if (typeof tag.value === 'number') { tag.value = '' + tag.value; }
 
         const existingTagElms = tagify.getTagElms();
 

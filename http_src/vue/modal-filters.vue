@@ -27,12 +27,12 @@
                                 </select-search>
                             </div>
                             <div class="col-sm-9" v-if="input_type == 'select'">
-                                <select-search v-model:selected_option="option_selected" :id="'data_filter'"
+                                <select-search ref="operator" v-model:selected_option="option_selected" :id="'data_filter'"
                                     :options="options_to_show" @select_option="change_data_filter">
                                 </select-search>
                             </div>
                             <div class="col-sm-9" v-else-if="input_type == 'select-with-input'">
-                                <select-search v-model:selected_option="option_selected" :id="'data_filter'"
+                                <select-search ref="operator" v-model:selected_option="option_selected" :id="'data_filter'"
                                     :add_tag="true" :pattern="data_pattern_selected" :options="options_to_show"
                                     @select_option="change_data_filter">
                                 </select-search>
@@ -223,10 +223,11 @@ export default {
                 if (option == null) {
                     option = this.option_selected;
                 }
-                value = option?.value;
-                value_label = option?.value_label || option?.label;
-                if (!value) {
+                if (!this.$refs["operator"]) {
                     value = ""
+                } else {
+                    value = option.value;
+                    value_label = option.value_label || option.label;
                 }
             }
             let params = {
