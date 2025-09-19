@@ -2542,6 +2542,7 @@ local known_parameters = {
     ["flow_export"] = validateBool,
     ["smart_record_traffic"] = validateBool,
     ["max_extracted_pcap_bytes"] = validateNumber,
+    ["max_extracted_pcap_files"] = validateNumber,
     ["traffic_recording_provider"] = validateTrafficRecordingProvider,
     ["dismiss_external_providers_reminder"] = validateBool,
     ["dismiss_missing_geoip_reminder"] = validateBool,

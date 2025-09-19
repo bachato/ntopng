@@ -38,10 +38,11 @@ PacketDumper::~PacketDumper() {
 
 /* ********************************************* */
 
-void PacketDumper::init(NetworkInterface *i) {
-  char *name = i->get_name();
+void PacketDumper::init(NetworkInterface *_iface) {
+  char *name;
 
-  iface = i;
+  iface = _iface;
+
   file_id = 0;
   dumper = NULL;
   num_dumped_packets = 0;
@@ -49,12 +50,13 @@ void PacketDumper::init(NetworkInterface *i) {
   num_bytes_cur_file = 0;
   out_path = NULL;
 
+  name = iface->get_name();
   if (strcmp(name, "lo") == 0)
     iface_type = DLT_NULL;
-  else if (!i->isPacketInterface())
+  else if (!iface->isPacketInterface())
     iface_type = DLT_EN10MB;
   else
-    iface_type = i->get_datalink();
+    iface_type = iface->get_datalink();
 }
 
 /* ********************************************* */
@@ -89,12 +91,20 @@ bool PacketDumper::openDump() {
   if (dumper != NULL) return true;
 
   max_bytes_per_file = ntop->getPrefs()->get_max_extracted_pcap_bytes();
+  max_files = ntop->getPrefs()->get_max_extracted_pcap_files();
+
+#ifdef HAVE_NEDGE
+  if (file_id >= max_files)
+    file_id = 0;
+#else
+  if (max_files && file_id >= max_files)
+    return false; /* Max files exceeded */ 
+#endif
 
   Utils::mkdir_tree(out_path);
   snprintf(pcap_path, sizeof(pcap_path), "%s/%u.pcap", out_path, file_id + 1);
 
-  dumper =
-      pcap_dump_open(pcap_open_dead(iface_type, 16384 /* MTU */), pcap_path);
+  dumper = pcap_dump_open(pcap_open_dead(iface_type, 16384 /* MTU */), pcap_path);
 
   if (dumper == NULL) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to create pcap file %s",
@@ -114,11 +124,11 @@ bool PacketDumper::openDump() {
 
 /* ********************************************* */
 
-void PacketDumper::dumpPacket(const struct pcap_pkthdr *h,
+bool PacketDumper::dumpPacket(const struct pcap_pkthdr *h,
                               const u_char *packet) {
   if (dumper == NULL) {
     openDump();
-    if (dumper == NULL) return;
+    if (dumper == NULL) return false;
   }
 
   pcap_dump((u_char *)dumper, h, packet);
@@ -127,6 +137,48 @@ void PacketDumper::dumpPacket(const struct pcap_pkthdr *h,
   num_bytes_cur_file += sizeof(struct pcap_disk_pkthdr) + h->caplen;
 
   checkClose();
+
+  return true;
+}
+
+/* ********************************************* */
+
+bool PacketDumper::dumpL3Packet(const u_char *l3, u_int32_t l3_len, struct timeval *ts,
+    u_char *dst_mac, u_char *src_mac, int ip_version) {
+  u_char buffer[CONST_DEFAULT_MAX_PACKET_SIZE];
+  struct ndpi_ethhdr *eth;
+  struct pcap_pkthdr h;
+
+  h.ts.tv_sec = ts->tv_sec;
+  h.ts.tv_usec = ts->tv_usec;
+ 
+  h.len = sizeof(struct ndpi_ethhdr) + l3_len; 
+
+  if (sizeof(struct ndpi_ethhdr) + l3_len > sizeof(buffer))
+    l3_len = sizeof(buffer) - sizeof(struct ndpi_ethhdr);
+
+  h.caplen = sizeof(struct ndpi_ethhdr) + l3_len;
+
+  eth = (struct ndpi_ethhdr *) buffer;
+
+  if (ip_version == 4)
+    eth->h_proto = htons(ETHERTYPE_IP);
+  else
+    eth->h_proto = htons(ETHERTYPE_IPV6);
+
+  if (dst_mac != NULL)
+    memcpy(eth->h_dest, dst_mac, sizeof(eth->h_dest));
+  else
+    memset(eth->h_dest, 0, sizeof(eth->h_dest));
+
+  if (src_mac != NULL)
+    memcpy(eth->h_source, src_mac, sizeof(eth->h_source));
+  else
+    memset(eth->h_source, 0, sizeof(eth->h_source));
+
+  memcpy(&buffer[sizeof(struct ndpi_ethhdr)], l3, l3_len);
+
+  return dumpPacket(&h, buffer);
 }
 
 /* ********************************************* */

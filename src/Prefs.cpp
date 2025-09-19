@@ -95,6 +95,7 @@ Prefs::Prefs(Ntop *_ntop) {
   ciphers_list = NULL;
   device_protocol_policies_enabled = false, enable_vlan_trunk_bridge = false;
   max_extracted_pcap_bytes = CONST_DEFAULT_MAX_EXTR_PCAP_BYTES;
+  max_extracted_pcap_files = CONST_DEFAULT_MAX_EXTR_PCAP_FILES;
   behaviour_analysis_learning_period =
     CONST_DEFAULT_BEHAVIOUR_ANALYSIS_LEARNING_PERIOD;
   mac_address_cache_duration = MAX_MAC_IDLE;
@@ -1010,6 +1011,7 @@ void Prefs::reloadPrefsFromRedis() {
     max_num_bytes_per_tiny_flow = getDefaultPrefsValue(CONST_MAX_NUM_BYTES_PER_TINY_FLOW,
 						       CONST_DEFAULT_MAX_NUM_BYTES_PER_TINY_FLOW),
     max_extracted_pcap_bytes = getDefaultPrefsValue(CONST_MAX_EXTR_PCAP_BYTES, CONST_DEFAULT_MAX_EXTR_PCAP_BYTES);
+    max_extracted_pcap_files = getDefaultPrefsValue(CONST_MAX_EXTR_PCAP_FILES, CONST_DEFAULT_MAX_EXTR_PCAP_FILES);
 
   ewma_alpha_percent = getDefaultPrefsValue(CONST_EWMA_ALPHA_PERCENT,
 					    CONST_DEFAULT_EWMA_ALPHA_PERCENT);
@@ -2879,6 +2881,8 @@ void Prefs::lua(lua_State *vm) {
 
   lua_push_uint64_table_entry(vm, "max_extracted_pcap_bytes",
                               max_extracted_pcap_bytes);
+  lua_push_uint64_table_entry(vm, "max_extracted_pcap_files",
+                              max_extracted_pcap_files);
 
   lua_push_uint64_table_entry(vm, "ewma_alpha_percent", ewma_alpha_percent);
 

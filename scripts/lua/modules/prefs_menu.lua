@@ -710,19 +710,24 @@ local menu_subpages = {{
     label = i18n("prefs.recording"),
     advanced = false,
     pro_only = false,
-    hidden = (not recording_utils.isAvailable()),
+    hidden = (not recording_utils.isAvailable() and not have_nedge),
     entries = {
         n2disk_license = {
             title = i18n("prefs.n2disk_license_title"),
             description = i18n("prefs.n2disk_license_description", {
                 purchase_url = 'http://shop.ntop.org/',
                 universities_url = 'http://www.ntop.org/support/faq/do-you-charge-universities-no-profit-and-research/'
-            })
+            }),
+            hidden = have_nedge
         },
         max_extracted_pcap_bytes = {
             title = i18n("traffic_recording.max_extracted_pcap_bytes_title"),
             description = i18n("traffic_recording.max_extracted_pcap_bytes_description")
-        }
+        },
+        max_extracted_pcap_files = {
+            title = i18n("traffic_recording.max_extracted_pcap_files_title"),
+            description = i18n("traffic_recording.max_extracted_pcap_files_description"),
+        },
     }
 }, {
     id = "updates",
