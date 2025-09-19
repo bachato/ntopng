@@ -46,4 +46,16 @@ In this setup:
 - n2disk runs independently in the background.  
 - ntopng can be launched manually in the foreground for easier debugging.  
 
+Traffic Recording Provider configuration under Interface Details Settings:
+
+<img width="1387" height="991" alt="external-provider" src="https://github.com/user-attachments/assets/135ef39f-ddf7-4d53-9577-9bfae35dc94f" />
+
+The n2disk status should be now reported in the recording section:
+
+<img width="1398" height="761" alt="status" src="https://github.com/user-attachments/assets/070c1a0d-42b6-4d5a-a094-29e569cc6af8" />
+
+Extraction should become available from pages including the historical chart:
+
+<img width="1394" height="957" alt="extraction" src="https://github.com/user-attachments/assets/92917511-e385-49ef-bc5c-b576d2ee0450" />
+
 
