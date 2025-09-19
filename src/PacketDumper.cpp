@@ -39,8 +39,6 @@ PacketDumper::~PacketDumper() {
 /* ********************************************* */
 
 void PacketDumper::init(NetworkInterface *_iface) {
-  char *name;
-
   iface = _iface;
 
   file_id = 0;
@@ -50,13 +48,17 @@ void PacketDumper::init(NetworkInterface *_iface) {
   num_bytes_cur_file = 0;
   out_path = NULL;
 
-  name = iface->get_name();
-  if (strcmp(name, "lo") == 0)
+
+#ifdef HAVE_NEDGE
+  iface_type = DLT_EN10MB;
+#else
+  if (strcmp(iface->get_name(), "lo") == 0)
     iface_type = DLT_NULL;
   else if (!iface->isPacketInterface())
     iface_type = DLT_EN10MB;
   else
     iface_type = iface->get_datalink();
+#endif
 }
 
 /* ********************************************* */
