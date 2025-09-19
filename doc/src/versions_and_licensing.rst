@@ -78,7 +78,7 @@ Alternatively, the license key can be placed in a one-line file
 Purchasing a License
 --------------------
 
-The first step is to purchase a license. Licenses can be purchased online at https://shop.ntop.org. For bulk purchases, reseller discounts, or any other special requirement related to the purchase of licenses you can `contact ntop <https://www.ntop.org/support/need-help-2/contact-us/>`_ directly.
+The first step is to purchase a license. Licenses can be purchased online at https://shop.ntop.org. For bulk purchases, reseller discounts, or any other special requirement related to the purchase of licenses you can `contact ntop <https://www.ntop.org/support/need-help/contacts/>`_ directly.
 Once the purchase has been completed successfully, you will receive an `Order Id`.
 
 .. figure:: img/adding_a_license_the_order_id.png
@@ -240,7 +240,7 @@ Licenses on a Container
 -----------------------
 
 An article that explain everything in details on how to deploy a license inside a container can be found here:
-`Deploying Licenses inside Conteainers <https://www.ntop.org/support/faq/my-license-does-not-work-inside-a-container-what-can-i-do/>`_
+`Deploying Licenses inside Conteainers <https://www.ntop.org/faq/my-license-does-not-work-inside-a-container-what-can-i-do/>`_
 
 Models Comparison Table
 -----------------------

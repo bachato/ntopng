@@ -41,11 +41,11 @@ run the below commands according to your Linux distribution:
    yum install n2disk
 
 Please make sure that *ntopng* is running using the *ntopng* user, which
-is the default since version 3.7, as reported in `this notice <https://www.ntop.org/support/faq/migrate-the-data-directory-in-ntopng/>`_.
+is the default since version 3.7, as reported in `this notice <https://www.ntop.org/faq/migrate-the-data-directory-in-ntopng/>`_.
 
 In order to use *n2disk* a license is also required, you can get one at
 `e-shop <https://shop.ntop.org>`_ or, if you are no-profit, research or an 
-education institution please read `this <https://www.ntop.org/support/faq/do-you-charge-universities-no-profit-and-research/>`_.
+education institution please read `this <https://www.ntop.org/faq/do-you-charge-universities-no-profit-and-research/>`_.
 The *n2disk* license can be installed directly from *ntopng* through the
 *Preferences*, *Traffic Recording* menu. The same page also provides
 the installed *n2disk* version and SystemID, both required to generate
