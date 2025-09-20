@@ -1346,6 +1346,14 @@ local function validateApplicationsList(l)
     return validateListOfType(l, validateApplication)
 end
 
+local function validateLocation(l)
+    if l == "wan" or l == "lan" then
+        return true
+    end
+    
+    return false
+end
+
 local function validateHostsList(l)
     return validateListOfType(l, validateHost)
 end
@@ -1775,6 +1783,7 @@ local known_parameters = {
     ["cli_location"] = validateListOfTypeInline(validateFilters(validateNumber)),
     ["srv_location"] = validateListOfTypeInline(validateFilters(validateNumber)),
     ["host_location"] = validateListOfTypeInline(validateFilters(validateNumber)),
+    ["location"] = validateEmptyOr(validateLocation),
     ["major_connection_state"] = validateListOfTypeInline(validateFilters(validateNumber)),
     ["minor_connection_state"] = validateListOfTypeInline(validateFilters(validateNumber)),
     ["pre_nat_ipv4_src_addr"] = validateListOfTypeInline(validateFilters(validateHost)),

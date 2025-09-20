@@ -19,6 +19,7 @@ local all = _GET["all"]
 local sort_order = _GET["order"]
 local devices_mode  = _GET["devices_mode"]
 local manufacturer  = _GET["manufacturer"]
+local location  = _GET["location"] or ""
 local device_type   = tonumber(_GET["device_type"])
 
 function macHosts(mac)
@@ -60,7 +61,7 @@ end
 if manufacturer == "" then manufacturer = nil end
 if device_type == "" then device_type = nil end
 local macs_stats = interface.getMacsInfo(false, nil, 0, c_order,
-					 source_macs_only, manufacturer, nil, device_type, "", nil)
+					 source_macs_only, manufacturer, nil, device_type, location, nil)
 local total_rows = #macs_stats["macs"]
 
 local record = {}
@@ -70,10 +71,13 @@ if macs_stats.macs then
     for key, value in pairs(macs_stats["macs"]) do
         record = {}
         record["mac"] = value["mac"]
-
+        
         local manufacturer = value["manufacturer"]
         if (manufacturer == nil) then
             manufacturer = ""
+        end
+        if ntop.isnEdge() then
+            record["location"] = value.location
         end
         if (value["model"] ~= nil) then
             local _model = discover.apple_products[value["model"]] or value["model"]

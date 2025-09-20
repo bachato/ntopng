@@ -47,7 +47,7 @@ const props = defineProps({ context: Object });
 /* ************************************** */
 const loading = ref(false);
 const mac_filters_key = ref(0);
-const table_id = ref("macs_list");
+const table_id = ref(props.context.isnEdge ? "macs_list_nedge" : "macs_list");
 const table_macs_list = ref(null);
 const filter_table_array = ref([]);
 const csrf = props.context.csrf;

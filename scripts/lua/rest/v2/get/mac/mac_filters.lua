@@ -60,4 +60,36 @@ if table.len(device_types) > 1 then
     }
 end
 
+if ntop.isnEdge() then
+    local location_list = {
+        {
+            key = "location",
+            value = "all",
+            label = i18n('hosts_stats.all')
+        },
+        {
+            key = "location",
+            value = "wan",
+            label = i18n('nedge.wan')
+        },
+        {
+            key = "location",
+            value = "lan",
+            label = i18n('nedge.lan')
+        },
+        {
+            key = "location",
+            value = "unknown",
+            label = i18n('nedge.unknown')
+        }
+    }
+    
+    rsp[#rsp + 1] = {
+        action = "location",
+        label = i18n("hosts_stats.location"),
+        name = "location",
+        value = location_list
+    }
+end
+
 rest_utils.answer(rest_utils.consts.success.ok, rsp)

@@ -26,6 +26,7 @@ local ifstats = interface.getStats()
 local context = {
     ifid = ifstats.id,
     csrf = ntop.getRandomCSRFValue(),
+    isnEdge = ntop.isnEdge()
 }
 
 local json_context = json.encode(context)
