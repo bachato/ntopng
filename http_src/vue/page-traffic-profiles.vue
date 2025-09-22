@@ -19,8 +19,8 @@
             
         </div>
         -->
-        <ModalAddTrafficProfile ref="trafficProfileModal" @add="handleAddProfile" @edit="handleEditProfile"
-            </ModalAddTrafficProfile>
+        <ModalAddTrafficProfile ref="trafficProfileModal" @add="handleAddProfile" @edit="handleEditProfile">
+        </ModalAddTrafficProfile>
     </div>
 </template>
 
