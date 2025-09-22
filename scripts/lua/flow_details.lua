@@ -1346,17 +1346,17 @@ else
       end
 
       if (flow["major_conn_state"] ~= 0) then
-         flow_msg = i18n(string.format("flow_fields_description.major_connection_states.%u", flow["major_conn_state"]))
+         flow_msg = "<ul><li>"..i18n(string.format("flow_fields_description.major_connection_states.%u", flow["major_conn_state"]))
              ..
              " (" ..
              i18n(string.format("flow_fields_description.minor_connection_states_info.%u", flow["minor_conn_state"])) ..
-             ").<br>"
+             ").<li>"
              .. i18n(string.format("flow_fields_description.minor_connection_states.%u", flow["minor_conn_state"]))
              ..
              " (" ..
              i18n(string.format("flow_fields_description.minor_connection_states_info.%u", flow["minor_conn_state"])) ..
-             ").<br>"
-             .. flow_msg
+             ").<li>"
+             .. flow_msg.."</ul>"
       end
 
       print(flow_msg)
