@@ -1,5 +1,5 @@
 {
-	"id": "macs_list",
+	"id": "nedge_macs_list",
 	"data_url": "lua/rest/v2/get/mac/macs_list.lua",
 	"use_current_page": false,
 	"enable_search": true,
@@ -21,7 +21,7 @@
 		},
 		{
 			"title_i18n": "location",
-			"data_field": "hosts_stats.location",
+			"data_field": "location",
 			"sortable": false,
 			"min-width" : "120px",
 			"class": [

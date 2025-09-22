@@ -569,6 +569,7 @@ local lang = {
   ["local_hosts_report"] = "Loc. Hosts Activity",
   ["local_hosts_report_description"] = "The availability color depends on the amount of traffic. The heatmap uses three colors, based on the observed host maximum traffic:<br><div class='d-inline-flex justify-content' style='background-color: rgb(211, 211, 211); height: 8px; width: 8px;'></div>: No traffic<br><div class='d-inline-flex justify-content' style='background-color: rgb(57, 211, 83); height: 8px; width: 8px;'></div>: Few traffic<br><div class='d-inline-flex justify-content' style='background-color: rgb(38, 166, 65); height: 8px; width: 8px;'></div>: Medium amount of traffic<br><div class='d-inline-flex justify-content' style='background-color: rgb(0, 109, 50); height: 8px; width: 8px;'></div>: High amount of Traffic",
   ["local_traffic"] = "Local Traffic",
+  ["location"] = "Location",
   ["lower_value_upper"] = "(lower / value / upper)",
   ["lua_c_api"] = "Lua/C API",
   ["mac_address"] = "MAC Address",

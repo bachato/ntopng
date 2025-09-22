@@ -1734,6 +1734,18 @@ static int ntop_get_batched_interface_hosts(lua_State *vm,
 
 /* ****************************************** */
 
+static u_int8_t str_2_location(const char *s) {
+  if (!strcmp(s, "lan"))
+    return located_on_lan_interface;
+  else if (!strcmp(s, "wan"))
+    return located_on_wan_interface;
+  else if (!strcmp(s, "unknown"))
+    return located_on_unknown_interface;
+  return (u_int8_t)-1;
+}
+
+/* ****************************************** */
+
 static int ntop_get_interface_hosts_criteria(lua_State *vm,
                                              LocationPolicy location) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
@@ -1751,6 +1763,7 @@ static int ntop_get_interface_hosts_criteria(lua_State *vm,
   u_int32_t toSkip = 0, maxHits = CONST_MAX_NUM_HITS;
   u_int32_t device_ip = 0;
   u_int32_t begin_slot = 0;
+  u_int8_t location_filter = (u_int8_t)-1;
   bool walk_all = true;
   bool anomalousOnly = false;
   bool dhcpOnly = false, cidr_filter_enabled = false;
@@ -1796,6 +1809,8 @@ static int ntop_get_interface_hosts_criteria(lua_State *vm,
   if (lua_type(vm, 22) == LUA_TBOOLEAN)
     arrayFormat = (lua_toboolean(vm, 22));
   if (lua_type(vm, 23) == LUA_TBOOLEAN) alertedHost = lua_toboolean(vm, 23);
+  if (lua_type(vm, 24) == LUA_TSTRING)
+    location_filter = str_2_location(lua_tostring(vm, 24));
 
   if ((!curr_iface) ||
       curr_iface->getActiveHostsList(vm, &begin_slot, walk_all,
@@ -1805,7 +1820,7 @@ static int ntop_get_interface_hosts_criteria(lua_State *vm,
 				     filtered_hosts, blacklisted_hosts, ipver_filter, proto_filter,
 				     traffic_type_filter, device_ip, false /* host->lua */, anomalousOnly,
 				     dhcpOnly, cidr_filter_enabled ? &cidr_filter : NULL, alertedHost, sortColumn,
-				     maxHits, toSkip, a2zSortOrder, arrayFormat) < 0)
+				     maxHits, toSkip, a2zSortOrder, arrayFormat, false, location_filter) < 0)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -1830,18 +1845,6 @@ static int ntop_add_macs_ip_addresses(lua_State *vm) {
   lua_pushnil(vm);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
-}
-
-/* ****************************************** */
-
-static u_int8_t str_2_location(const char *s) {
-  if (!strcmp(s, "lan"))
-    return located_on_lan_interface;
-  else if (!strcmp(s, "wan"))
-    return located_on_wan_interface;
-  else if (!strcmp(s, "unknown"))
-    return located_on_unknown_interface;
-  return (u_int8_t)-1;
 }
 
 /* ****************************************** */

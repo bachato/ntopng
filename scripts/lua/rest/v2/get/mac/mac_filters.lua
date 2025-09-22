@@ -80,7 +80,7 @@ if ntop.isnEdge() then
         {
             key = "location",
             value = "unknown",
-            label = i18n('nedge.unknown')
+            label = i18n('unknown')
         }
     }
     

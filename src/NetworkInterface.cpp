@@ -5630,7 +5630,7 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
   IpAddress *ip_addr = NULL;
   struct flowHostRetriever *r = (struct flowHostRetriever *)user_data;
   Host *h = (Host *)he;
-
+  
   if (r->actNumEntries >= r->maxNumEntries)
     return(true); /* Limit reached */
 
@@ -5647,6 +5647,8 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
 #endif
       )
     return (false);
+
+  Mac *h_mac = (h->getMac() ? h->getMac() : NULL);
 
   if ((r->location == location_local_only && (!h->isLocalUnicastHost())) ||
       (r->location == location_local_only_no_tx &&
@@ -5689,6 +5691,8 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
       (r->device_ip && h->getLastDeviceIp() &&
        (r->device_ip != h->getLastDeviceIp())) ||
       (r->dhcpHostsOnly && (!h->isDHCPHost())) ||
+      ((r->locationFilter != u_int8_t (-1)) &&
+       (!h_mac || h_mac->locate() != r->locationFilter)) ||
       (r->alerted && (!h->getScore())) ||
 #ifdef NTOPNG_PRO
       (r->filteredHosts && !h->hasBlockedTraffic()) ||
@@ -6633,7 +6637,7 @@ int NetworkInterface::sortHosts(u_int32_t *begin_slot, bool walk_all, struct flo
 				bool blacklisted_hosts, bool anomalousOnly, bool dhcpOnly,
 				const AddressTree *const cidr_filter, u_int8_t ipver_filter,
 				int proto_filter, TrafficType traffic_type_filter, u_int32_t device_ip,
-				bool alertedHost, char *sortColumn) {
+				bool alertedHost, u_int8_t mac_location_filter, char *sortColumn) {
   u_int8_t macAddr[6];
   int (*sorter)(const void *_a, const void *_b);
 
@@ -6648,6 +6652,7 @@ int NetworkInterface::sortHosts(u_int32_t *begin_slot, bool walk_all, struct flo
   }
 
   retriever->allowed_hosts = allowed_hosts, retriever->location = location,
+    retriever->locationFilter = mac_location_filter,
     retriever->country = countryFilter, retriever->vlan_id = vlan_id,
     retriever->osFilter = osFilter, retriever->asnFilter = asnFilter,
     retriever->networkFilter = networkFilter, retriever->actNumEntries = 0,
@@ -7020,7 +7025,7 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
 					 TrafficType traffic_type_filter, u_int32_t device_ip, bool tsLua,
 					 bool anomalousOnly, bool dhcpOnly, const AddressTree *const cidr_filter,
 					 bool alertedHost, char *sortColumn, u_int32_t maxHits, u_int32_t toSkip, bool a2zSortOrder,
-					 bool useArrayFormat, bool getCheckpointOnly) {
+					 bool useArrayFormat, bool getCheckpointOnly, u_int8_t mac_location_filter) {
   struct flowHostRetriever retriever;
   int count = 1;
 #ifdef NTOPNG_PRO
@@ -7045,7 +7050,8 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
                 mac_filter, vlan_id, osFilter, asnFilter, networkFilter,
                 pool_filter, filtered_hosts, blacklisted_hosts, anomalousOnly,
                 dhcpOnly, cidr_filter, ipver_filter, proto_filter,
-                traffic_type_filter, device_ip, alertedHost, sortColumn) < 0) {
+                traffic_type_filter, device_ip, alertedHost, 
+                mac_location_filter, sortColumn) < 0) {
     return (-1);
   }
 

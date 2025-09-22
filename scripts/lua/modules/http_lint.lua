@@ -1347,7 +1347,7 @@ local function validateApplicationsList(l)
 end
 
 local function validateLocation(l)
-    if l == "wan" or l == "lan" then
+    if l == "wan" or l == "lan" or l == "unknown" or l == "all" then
         return true
     end
     

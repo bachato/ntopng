@@ -37,6 +37,7 @@ local pool = _GET["pool"]
 local country = _GET["country"]
 local os_ = tonumber(_GET["os"])
 local mac = _GET["mac"]
+local mac_location = _GET["location"]
 
 local c_order = true
 local lua_order = asc
@@ -108,7 +109,7 @@ local mapping_column_lua_c = {
 
 local hosts_stats = hosts_retrv_function(false, mapping_column_lua_c[sort_column], length, start, c_order, country, os_, tonumber(vlan),
     tonumber(asn), tonumber(network), mac, tonumber(pool), tonumber(ipversion), tonumber(protocol), traffic_type_filter,
-    filtered_hosts, blacklisted_hosts, anomalous, dhcp_hosts, cidr, device_ip, true --[[ Array format ]])
+    filtered_hosts, blacklisted_hosts, anomalous, dhcp_hosts, cidr, device_ip, true --[[ Array format ]], false, mac_location)
 
 for key, value in pairs(hosts_stats["hosts"]) do
     local record = {}
@@ -174,6 +175,11 @@ for key, value in pairs(hosts_stats["hosts"]) do
     local alt_name = getHostAltName(value["ip"])
     if not isEmptyString(alt_name) then
         record.hostname.alt_name = alt_name
+    end
+
+    if ntop.isnEdge() and value["mac"] then
+        local mac_info = interface.getMacInfo(value["mac"])
+        record["location"] = mac_info.location
     end
 
     column_ip["mac"] = {

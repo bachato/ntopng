@@ -46,7 +46,10 @@ const props = defineProps({
 const loading = ref(false);
 const host_filters_key = ref(0);
 const as_filters_key = ref(0);
-const table_id = props.context?.has_vlans ? ref('hosts_list_with_vlans') : ref('hosts_list');
+let table_id = props.context?.has_vlans ? ref('hosts_list_with_vlans') : ref('hosts_list')
+if (props.context.isNedge) {
+    table_id = props.context?.has_vlans ? ref('nedge_hosts_list_with_vlans') : ref('nedge_hosts_list')
+}
 const table_hosts_list = ref(null);
 const csrf = props.context.csrf;
 const filter_table_array = ref([]);
@@ -138,6 +141,16 @@ const map_table_def_columns = (columns) => {
         "alerts": (value, row) => {
             if (value > 0) {
                 return formatterUtils.getFormatter("full_number")(value) + " <i class='fas fa-exclamation-triangle' style='color: #B94A48;'></i>"
+            }
+            return ''
+        },
+        "location": (value, row) => {
+            if (!dataUtils.isEmptyOrNull(value)) {
+                if (value == "unknown") {
+                    return value.charAt(0).toUpperCase() + value.slice(1)
+                } else {
+                    return value.toUpperCase()
+                }
             }
             return ''
         },
