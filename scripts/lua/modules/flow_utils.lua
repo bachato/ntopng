@@ -740,7 +740,13 @@ function getFlowLabel(flow, show_macs, add_hyperlinks, historical_bounds, hyperl
 	    local n = flow.cli_as_name
 
 	    if isEmptyString(n) then
-	      n = "ASN "..flow.cli_as
+	       local name = shortenString(ntop.getASName(flow["cli.ip"]), 43)
+	       
+	       if isEmptyString(name) then
+		  n = "ASN "..flow.cli_as
+	       else
+		  n = name
+	       end
 	    end
 
 	    cli_as = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. flow.cli_as .. "\">" ..
@@ -759,9 +765,15 @@ function getFlowLabel(flow, show_macs, add_hyperlinks, historical_bounds, hyperl
 
         if ((flow.dst_as ~= nil) and (flow.dst_as ~= 0)) then
 	    local n = flow.dst_as_name
-
+	    
 	    if isEmptyString(n) then
-	      n = "ASN "..flow.dst_as
+	       local name = shortenString(ntop.getASName(flow["srv.ip"]), 43)
+
+	       if isEmptyString(name) then
+		  n = "ASN "..flow.dst_as
+	       else
+		  n = name
+	       end
 	    end
 	    
             dst_as = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. flow.dst_as .. "\">" .. shortenString(n, 14) .. "</A>"
