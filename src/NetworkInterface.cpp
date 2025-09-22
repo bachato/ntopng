@@ -5648,8 +5648,10 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
       )
     return (false);
 
+#ifdef HAVE_NEDG
   Mac *h_mac = (h->getMac() ? h->getMac() : NULL);
-
+#endif
+    
   if ((r->location == location_local_only && (!h->isLocalUnicastHost())) ||
       (r->location == location_local_only_no_tx &&
        ((!h->isLocalUnicastHost()) || (!h->isRxOnlyHost()))) ||
@@ -5691,8 +5693,9 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
       (r->device_ip && h->getLastDeviceIp() &&
        (r->device_ip != h->getLastDeviceIp())) ||
       (r->dhcpHostsOnly && (!h->isDHCPHost())) ||
-      ((r->locationFilter != u_int8_t (-1)) &&
-       (!h_mac || h_mac->locate() != r->locationFilter)) ||
+#ifdef HAVE_NEDG
+      ((r->locationFilter != u_int8_t (-1)) && (!h_mac || h_mac->locate() != r->locationFilter)) ||
+#endif
       (r->alerted && (!h->getScore())) ||
 #ifdef NTOPNG_PRO
       (r->filteredHosts && !h->hasBlockedTraffic()) ||
