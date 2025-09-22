@@ -2118,6 +2118,38 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 
     flow->setTOS(tos, src2dst_direction);
 
+#ifndef HAVE_NEDGE
+    /*
+      With nEdge we see only one MAC address at time so we need to check
+      if MAC addresses are still set to Unknown (00:00:00:00:00:00)
+    */
+    u_int8_t e_mac[6] = { 0x0 };
+
+    if(src2dst_direction) {
+      u_int8_t *m = flow->getCliMac();
+
+      if(m && (memcmp(m, e_mac, 6) == 0)) {
+	/* We need to set the client MAC address */
+	Mac *mac = getMac(eth->h_source, true /* Create if missing */, true /* Inline call */);
+	Host *c_host = flow->get_cli_host();
+
+	c_host->set_mac(mac);
+	flow->setCliMac(eth->h_source);
+      }
+    } else {
+      u_int8_t *m = flow->getSrvMac();
+
+      if(m && (memcmp(m, e_mac, 6) == 0)) {
+	/* We need to set the client MAC address */
+	Mac *mac = getMac(eth->h_source, true /* Create if missing */, true /* Inline call */);
+	Host *d_host = flow->get_srv_host();
+
+	d_host->set_mac(mac);
+	flow->setSrvMac(eth->h_source);
+      }
+    }
+#endif
+
     switch (l4_proto) {
     case IPPROTO_TCP:
 #if defined(NTOPNG_PRO)
@@ -2243,34 +2275,6 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
         || (fragment_offset == 0)
 #endif
 	) {
-
-
-#ifdef HAVE_NEDGE
-      /*
-	With nEdge we see only one MAC address at time so we need to check
-	if MAC addresses are still set to Unknown (00:00:00:00:00:00)
-      */
-      if(src2dst_direction) {
-	Host *c_host =  flow->get_cli_host();
-	Mac *cli_mac = c_host->getMac();
-
-	if(cli_mac && cli_mac->isNull()) {
-	  /* We need to set the client MAC address */
-	  Mac *mac = getMac(sender_mac, true /* Create if missing */, true /* Inline call */);
-          c_host->set_mac(mac);
-	}
-      } else /* dst2src */ {
-	Host *s_host =  flow->get_srv_host();
-	Mac *srv_mac = s_host->getMac();
-
-	if(srv_mac && srv_mac->isNull()) {
-	  /* We need to set the server MAC address */
-	  Mac *mac = getMac(sender_mac, true /* Create if missing */, true /* Inline call */);
-	  s_host->set_mac(mac);
-	}
-      }
-#endif
-
       flow->processPacket(src2dst_direction, h, ip, trusted_ip_len, packet_time, payload,
                           trusted_payload_len, src_port);
     } else {
@@ -5630,7 +5634,7 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
   IpAddress *ip_addr = NULL;
   struct flowHostRetriever *r = (struct flowHostRetriever *)user_data;
   Host *h = (Host *)he;
-  
+
   if (r->actNumEntries >= r->maxNumEntries)
     return(true); /* Limit reached */
 
@@ -5651,7 +5655,7 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
 #ifdef HAVE_NEDG
   Mac *h_mac = (h->getMac() ? h->getMac() : NULL);
 #endif
-    
+
   if ((r->location == location_local_only && (!h->isLocalUnicastHost())) ||
       (r->location == location_local_only_no_tx &&
        ((!h->isLocalUnicastHost()) || (!h->isRxOnlyHost()))) ||
@@ -7053,7 +7057,7 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
                 mac_filter, vlan_id, osFilter, asnFilter, networkFilter,
                 pool_filter, filtered_hosts, blacklisted_hosts, anomalousOnly,
                 dhcpOnly, cidr_filter, ipver_filter, proto_filter,
-                traffic_type_filter, device_ip, alertedHost, 
+                traffic_type_filter, device_ip, alertedHost,
                 mac_location_filter, sortColumn) < 0) {
     return (-1);
   }

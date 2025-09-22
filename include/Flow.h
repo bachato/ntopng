@@ -117,7 +117,8 @@ private:
   u_int8_t protocol, flow_verdict;
   u_int16_t flow_score;
   bool twh_over_view:1 /* This flag is used for view interfaces */, shapers_profile_set:1,  iface_flow_accounted:1, _notused:5;
-  u_int8_t view_cli_mac[6], view_srv_mac[6];
+  u_int8_t cli_mac[6], srv_mac[6];
+  Mac *c_mac, *s_mac;
   struct ndpi_flow_struct *ndpiFlow;
   ndpi_risk ndpi_flow_risk_bitmap;
   /* The bitmap of all possible flow alerts set by FlowCheck subclasses.
@@ -426,7 +427,8 @@ private:
 #ifdef NTOPNG_PRO
   void processHostName(char *host_name);
 #endif
-  
+  void updateMac();
+
 public:
   Flow(NetworkInterface *_iface, int32_t iface_idx,
        u_int16_t _vlanId,
@@ -494,7 +496,7 @@ public:
 
 #if defined(NTOPNG_PRO)
   bool isFlowAllowed(bool *is_allowed);
-  
+
 #endif
   inline u_int32_t getSrcPeerAS() const { return srcPeerAS; }
   inline u_int32_t getDstPeerAS() const { return dstPeerAS; }
@@ -1495,8 +1497,11 @@ public:
       return ((char *)ndpiDetectedProtocol.custom_category_userdata);
   }
 
-  inline u_int8_t *getViewCliMac() { return (view_cli_mac); };
-  inline u_int8_t *getViewSrvMac() { return (view_srv_mac); };
+  inline void setCliMac(u_int8_t *m) { memcpy(cli_mac, m, 6); updateMac(); };
+  inline void setSrvMac(u_int8_t *m) { memcpy(srv_mac, m, 6); updateMac(); };
+
+  inline u_int8_t *getCliMac()   { return (cli_mac);      };
+  inline u_int8_t *getSrvMac()   { return (srv_mac);      };
 
   inline u_int32_t getErrorCode() { return (protocolErrorCode); }
   inline void setErrorCode(u_int32_t rc) { protocolErrorCode = rc; }
@@ -1581,7 +1586,7 @@ public:
 
   u_int32_t getSrcAS()     { return(srcAS);     }
   u_int32_t getDstAS()     { return(dstAS);     }
-  u_int32_t getTransitAS() { return(transitAS);     }
+  u_int32_t getTransitAS() { return(transitAS); }
   u_int32_t getSrcPeerAS() { return(srcPeerAS); }
   u_int32_t getDstPeerAS() { return(dstPeerAS); }
 };

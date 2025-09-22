@@ -169,18 +169,21 @@ Flow::Flow(NetworkInterface *_iface,
     flow_device.observation_point_id = _observation_point_id;
   }
 
-#ifdef NTOPNG_PRO
-  if(_iface->isViewed()) {
-    memset(view_cli_mac, 0, sizeof(view_cli_mac));
-    memset(view_srv_mac, 0, sizeof(view_srv_mac));
+  if(_view_cli_mac)
+    memcpy(cli_mac, _view_cli_mac, sizeof(cli_mac));
+  else if(_cli_mac != NULL)
+    memcpy(cli_mac, _cli_mac->get_mac(), 6);
+  else
+    memset(cli_mac, 0, sizeof(cli_mac));
 
-    if(_view_cli_mac)
-      memcpy(view_cli_mac, _view_cli_mac, sizeof(view_cli_mac));
+  if(_view_srv_mac)
+    memcpy(srv_mac, _view_srv_mac, sizeof(srv_mac));
+  else if(_srv_mac != NULL)
+    memcpy(srv_mac, _srv_mac->get_mac(), 6);
+  else
+    memset(srv_mac, 0, sizeof(srv_mac));
 
-    if(_view_srv_mac)
-      memcpy(view_srv_mac, _view_srv_mac, sizeof(view_srv_mac));
-  }
-#endif
+  updateMac();
 
   /*
     Standard Interface
@@ -1461,7 +1464,7 @@ void Flow::setExtraDissectionCompleted(bool src2dst_direction) {
   processExtraDissectedInformation();
 
   extra_dissection_completed = 1;
-  
+
   /* 2(**) */
 #ifdef NTOPNG_PRO
   if(!shapers_profile_set) {
@@ -1779,18 +1782,16 @@ char* Flow::print(char *buf, u_int buf_len, bool full_report) const {
   buf[0] = '\0';
 
   if(!full_report) {
-    Mac *cli_mac = get_cli_host() ? get_cli_host()->getMac() : NULL;
-    Mac *srv_mac = get_srv_host() ? get_srv_host()->getMac() : NULL;
     char b1[32], b2[32];
 
     snprintf(buf, buf_len, "%s %s:%u [%s] <-> %s:%u [%s][%u/%u pkts][%llu/%llu bytes]",
 	     get_protocol_name(),
 	     get_cli_ip_addr() ? get_cli_ip_addr()->print(buf1, sizeof(buf1)) : "",
 	     ntohs(cli_port),
-	     cli_mac ? cli_mac->print(b1, sizeof(b1)) : "",
+	     c_mac ? c_mac->print(b1, sizeof(b1)) : "",
 	     get_srv_ip_addr() ? get_srv_ip_addr()->print(buf2, sizeof(buf2)) : "",
 	     ntohs(srv_port),
-	     srv_mac ? srv_mac->print(b2, sizeof(b2)) : "",
+	     s_mac ? s_mac->print(b2, sizeof(b2)) : "",
 	     get_packets_cli2srv(), get_packets_srv2cli(),
 	     (long long unsigned)get_bytes_cli2srv(),
 	     (long long unsigned)get_bytes_srv2cli());
@@ -1993,7 +1994,7 @@ void Flow::flow_end_stats_update() {
 
 /* *************************************** */
 
-/* 
+/*
  * Update cli/srv hosts stats
  *
  * NOTE: this function is periodically executed both on normal interfaces
@@ -2012,8 +2013,6 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
                                        PartializableFlowTrafficStats *partial,
                                        bool first_partial,
                                        const struct timeval *tv) {
-  Mac *cli_mac = cli_host ? cli_host->getMac() : NULL;
-  Mac *srv_mac = srv_host ? srv_host->getMac() : NULL;
   u_int32_t diff_sent_packets = partial->get_cli2srv_packets();
   u_int64_t diff_sent_bytes = partial->get_cli2srv_bytes();
   u_int64_t diff_sent_goodput_bytes = partial->get_cli2srv_goodput_bytes();
@@ -2442,46 +2441,58 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 		))
       srv_host->offlineSetTLSName(protos.tls.client_requested_server_name); /* (***) */
   }
-  
-  /* Update L2 Device stats */
-  if(cli_mac) {
-    if(diff_rcvd_packets)
-      cli_mac->incRcvdStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
-    
-    if(diff_sent_packets)
-      cli_mac->incSentStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
-    
-    if(ntop->getPrefs()->areMacNdpiStatsEnabled()) {
-      cli_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
+
+  if(diff_rcvd_packets || diff_sent_packets) {
+#ifdef DEBUG
+    {
+      char a[32], b[32];
+
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "[IDLE] %s <-> %s [s=%u/r=%u]",
+				   c_mac->print(a, sizeof(a)), s_mac->print(b, sizeof(b)),
+				   diff_sent_packets, diff_rcvd_packets);
+    }
+#endif
+
+    /* Update L2 Device stats */
+    if(c_mac != NULL) {
+      if(diff_rcvd_packets)
+	c_mac->incRcvdStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
+
+      if(diff_sent_packets)
+	c_mac->incSentStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
+
+      if(ntop->getPrefs()->areMacNdpiStatsEnabled()) {
+	c_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
 			    diff_sent_packets, diff_sent_bytes,
 			    diff_sent_goodput_bytes, diff_rcvd_packets,
 			    diff_rcvd_bytes, diff_rcvd_goodput_bytes);
-    }    
-  }
-  
-  if(srv_mac) {
-    if(diff_rcvd_packets)
-      srv_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
-      
-    if(diff_sent_packets)
-      srv_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
-      
-    if(ntop->getPrefs()->areMacNdpiStatsEnabled())
-      srv_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
+      }
+    }
+
+    if(s_mac != NULL) {
+      if(diff_rcvd_packets)
+	s_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
+
+      if(diff_sent_packets)
+	s_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
+
+      if(ntop->getPrefs()->areMacNdpiStatsEnabled())
+	s_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
 			    diff_rcvd_packets, diff_rcvd_bytes,
 			    diff_rcvd_goodput_bytes, diff_sent_packets,
 			    diff_sent_bytes, diff_sent_goodput_bytes);
-  }
+    }
 
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
-  /* Update profile stats */
-  if (ntop->getPro()->has_valid_license()) {
-    if(trafficProfile)
-      trafficProfile->incBytes(diff_sent_bytes + diff_rcvd_bytes);
-  }
+    /* Update profile stats */
+    if (ntop->getPro()->has_valid_license()) {
+      if(trafficProfile)
+	trafficProfile->incBytes(diff_sent_bytes + diff_rcvd_bytes);
+    }
 #endif
-#endif  
+#endif
+  }
 }
 
 /* *************************************** */
@@ -2590,7 +2601,7 @@ void Flow::updateThroughputStats(float tdiff_msec, u_int32_t diff_sent_packets,
 
 /* *************************************** */
 
-/* 
+/*
  * This function is called every second by the purgeIdle function, as well as from other methods
  *
  * Called by:
@@ -2713,15 +2724,14 @@ void Flow::update_pools_stats(NetworkInterface *iface, Host *cli_host,
     /* Client host */
     if(cli_host
 #ifdef HAVE_NEDGE
-       && cli_host->getMac() &&
-       (cli_host->getMac()->locate() == located_on_lan_interface)
+       && c_mac && (c_mac->locate() == located_on_lan_interface)
 #endif
        ) {
       cli_host_pool_id = cli_host->get_host_pool();
 
       /* Overall host pool stats */
       if(ndpiDetectedProtocol.proto.app_protocol != NDPI_PROTOCOL_UNKNOWN &&
-	 !ndpi_is_subprotocol_informative(iface->get_ndpi_struct(), ndpiDetectedProtocol.proto.master_protocol))
+	 (!ndpi_is_subprotocol_informative(iface->get_ndpi_struct(), ndpiDetectedProtocol.proto.master_protocol)))
         hp->incPoolStats(tv->tv_sec, cli_host_pool_id,
                          ndpiDetectedProtocol.proto.app_protocol, category_id,
                          diff_sent_packets, diff_sent_bytes, diff_rcvd_packets,
@@ -2747,8 +2757,7 @@ void Flow::update_pools_stats(NetworkInterface *iface, Host *cli_host,
     /* Server host */
     if(srv_host
 #ifdef HAVE_NEDGE
-       && srv_host->getMac() &&
-       (srv_host->getMac()->locate() == located_on_lan_interface)
+       && s_mac && (s_mac()->locate() == located_on_lan_interface)
 #endif
        ) {
       srv_host_pool_id = srv_host->get_host_pool();
@@ -2854,7 +2863,7 @@ bool Flow::equal(const Mac *_src_pkt_mac, const Mac *_dst_pkt_mac,
   */
   useMacAddressInFlowKey = false;
 #endif
-  
+
   if(useMacAddressInFlowKey) {
     if(cli_host && src_mac) {
       Mac *cli_mac = cli_host->getMac();
@@ -2989,7 +2998,6 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   bool has_json_info = false;
   u_char community_id[200];
   char buf[64];
-  Mac *cli_mac = get_cli_host() ? get_cli_host()->getMac() : NULL;
   char *asname = NULL;
   u_int32_t asn = 0;
 
@@ -3298,11 +3306,11 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   lua_push_uint64_table_entry(vm, "ntopng.key", key());  // Key
   lua_push_uint64_table_entry(vm, "hash_entry_id", get_hash_entry_id());
 
-  if(cli_mac != NULL) {
-    if(cli_mac->getDHCPfingerprint())
+  if(c_mac != NULL) {
+    if(c_mac->getDHCPfingerprint())
       lua_push_str_table_entry(vm,
 			       "dhcp_fingerprint",
-			       cli_mac->getDHCPfingerprint());
+			       c_mac->getDHCPfingerprint());
   }
 }
 
@@ -6909,7 +6917,7 @@ void Flow::fillZMQFlowCategory(ndpi_protocol *res) {
     ndpi_protocol_match_result tmp;
     ndpi_protocol_category_t c;
     ndpi_protocol_breed_t breed;
-    
+
     /* Match for custom protocols (protos.txt) */
     if((rc = ndpi_match_string_subprotocol(ndpi_struct, (char *)dst_name,
 					   strlen(dst_name), &tmp)) != 0) {
@@ -7873,7 +7881,7 @@ void Flow::getVerdictInfo(ndpi_serializer *serializer) {
 #ifdef HAVE_NEDGE
     ndpi_serialize_start_of_block(serializer, "verdict"); /* Custom fields block */
     /* Using int in case more than 0 and 1 value are going to be used*/
-    ndpi_serialize_string_uint32(serializer, "pass", passVerdict); 
+    ndpi_serialize_string_uint32(serializer, "pass", passVerdict);
     ndpi_serialize_string_uint32(serializer, "drop_reason", dropVerdictReason);
     ndpi_serialize_end_of_block(serializer);
 #endif
@@ -8548,9 +8556,9 @@ void Flow::swap() {
   initial_bytes_entropy.s2c = s;
 #endif
 
-  memcpy(m, view_cli_mac, 6);
-  memcpy(view_cli_mac, view_srv_mac, 6);
-  memcpy(view_srv_mac, m, 6);
+  memcpy(m, cli_mac, 6);
+  memcpy(cli_mac, srv_mac, 6);
+  memcpy(srv_mac, m, 6);
 
   stats.swap();
 
@@ -9365,5 +9373,17 @@ TransitAS Flow::getTransitASType() {
 
 /* *************************************** */
 
+void Flow::updateMac() {
+  c_mac = iface->getMac(cli_mac, false /* don't create if missing */, true /* Inline call */);
+  s_mac = iface->getMac(srv_mac, false /* don't create if missing */, true /* Inline call */);
+
+#ifdef DEBUG
+  char a[32], b[32];
+
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s <-> %s",
+			       c_mac->print(a, sizeof(a)),
+			       s_mac->print(b, sizeof(b)));
+#endif
+}
 
 /* *************************************** */
