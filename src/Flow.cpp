@@ -2757,7 +2757,7 @@ void Flow::update_pools_stats(NetworkInterface *iface, Host *cli_host,
     /* Server host */
     if(srv_host
 #ifdef HAVE_NEDGE
-       && s_mac && (s_mac()->locate() == located_on_lan_interface)
+       && s_mac && (s_mac->locate() == located_on_lan_interface)
 #endif
        ) {
       srv_host_pool_id = srv_host->get_host_pool();
