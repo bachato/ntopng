@@ -278,16 +278,8 @@ Flow::Flow(NetworkInterface *_iface,
     /* Is this necessary? */
     cli2srvPktTime = new (std::nothrow) InterarrivalStats();
     srv2cliPktTime = new (std::nothrow) InterarrivalStats();
-
-#ifdef ENABLE_ENTROPHY_CALCULATION
-    initial_bytes_entropy.c2s = ndpi_alloc_data_analysis(256);
-    initial_bytes_entropy.s2c = ndpi_alloc_data_analysis(256);
-#endif
   } else {
     cli2srvPktTime = srv2cliPktTime = NULL;
-#ifdef ENABLE_ENTROPHY_CALCULATION
-    initial_bytes_entropy.c2s = initial_bytes_entropy.s2c = NULL;
-#endif
   }
 
   c2sFirstGoodputTime.tv_sec = c2sFirstGoodputTime.tv_usec = 0;
@@ -593,13 +585,6 @@ Flow::~Flow() {
 
   if(cli2srvPktTime) delete cli2srvPktTime;
   if(srv2cliPktTime) delete srv2cliPktTime;
-
-#ifdef ENABLE_ENTROPHY_CALCULATION
-  if(initial_bytes_entropy.c2s)
-    ndpi_free_data_analysis(initial_bytes_entropy.c2s, 1);
-  if(initial_bytes_entropy.s2c)
-    ndpi_free_data_analysis(initial_bytes_entropy.s2c, 1);
-#endif
 
   if(flow_payload) free(flow_payload);
 
@@ -3281,9 +3266,6 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
 
     lua_confidence(vm);
     lua_get_risk_info(vm);
-#ifdef ENABLE_ENTROPHY_CALCULATION
-    lua_entropy(vm);
-#endif
     if(riskInfo)
       lua_push_str_table_entry(vm, "riskInfo", riskInfo);
 
@@ -5192,54 +5174,6 @@ void Flow::incStats(bool cli2srv_direction, u_int pkt_len, u_int8_t *payload,
   if((l4_proto == IPPROTO_TCP) && (tcp_flags & (TH_SYN | TH_FIN | TH_RST)))
     update_iat = false;
 
-#ifdef ENABLE_ENTROPHY_CALCULATION
-  if((protocol == IPPROTO_ICMP) &&
-     (get_packets() < 10) /* Compute only on the first few flow packets */
-     && ((protos.icmp.cli2srv.icmp_type == 0) ||
-	 (protos.icmp.cli2srv.icmp_type == 8)) /* Echo Request or Reply */
-     && cli2srv_direction && (payload != NULL) && (payload_len > 0)) {
-    /*
-      We compute cli->srv entropy to see how much
-      packets are different and see if they are
-      repetitions or not
-    */
-    struct ndpi_analyze_struct e;
-    float res;
-
-    ndpi_init_data_analysis(&e, 256);
-    updateEntropy(&e, payload, payload_len);
-    res = ndpi_data_entropy(&e);
-
-    if(protos.icmp.client_to_server.min_entropy == 0)
-      protos.icmp.client_to_server.min_entropy =
-	protos.icmp.client_to_server.max_entropy = res;
-    else {
-      if(protos.icmp.client_to_server.min_entropy > res)
-        protos.icmp.client_to_server.min_entropy = res;
-      else if(protos.icmp.client_to_server.max_entropy < res)
-        protos.icmp.client_to_server.max_entropy = res;
-    }
-
-    /* See icmp_utils.is_suspicious_entropy() */
-    if((protos.icmp.client_to_server.min_entropy < 5) ||
-       (protos.icmp.client_to_server.max_entropy > 6) ||
-       ((protos.icmp.client_to_server.max_entropy -
-	 protos.icmp.client_to_server.min_entropy) > 0.3)) {
-      ndpi_risk r = ((ndpi_risk)2) << (NDPI_SUSPICIOUS_ENTROPY - 1);
-
-      addRisk(r);
-    }
-
-#ifdef DEBUG
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Entropy %.23f - %.23f",
-                                 protos.icmp.client_to_server.min_entropy,
-                                 protos.icmp.client_to_server.max_entropy);
-#endif
-
-    ndpi_free_data_analysis(&e, 0);
-  }
-#endif
-
   updatePacketStats(cli2srv_direction ? getCli2SrvIATStats() : getSrv2CliIATStats(), when,
 		    update_iat);
 
@@ -5262,16 +5196,6 @@ void Flow::incStats(bool cli2srv_direction, u_int pkt_len, u_int8_t *payload,
   }
 
   if(payload_len > 0) {
-#ifdef ENABLE_ENTROPHY_CALCULATION
-    if(cli2srv_direction) {
-      if(get_bytes_cli2srv() < MAX_ENTROPY_BYTES)
-        updateEntropy(initial_bytes_entropy.c2s, payload, payload_len);
-    } else {
-      if(get_bytes_srv2cli() < MAX_ENTROPY_BYTES)
-        updateEntropy(initial_bytes_entropy.s2c, payload, payload_len);
-    }
-#endif
-
     if(applLatencyMsec == 0) {
       if(cli2srv_direction) {
         memcpy(&c2sFirstGoodputTime, when, sizeof(struct timeval));
@@ -8345,46 +8269,6 @@ void Flow::luaRetrieveExternalAlert(lua_State *vm) {
 
 /* *************************************** */
 
-#ifdef ENABLE_ENTROPHY_CALCULATION
-void Flow::updateEntropy(struct ndpi_analyze_struct *e, u_int8_t *payload,
-                         u_int payload_len) {
-  if(e != NULL) {
-    for (u_int i = 0; i < payload_len; i++) ndpi_data_add_value(e, payload[i]);
-  }
-}
-#endif
-
-/* *************************************** */
-
-#ifdef ENABLE_ENTROPHY_CALCULATION
-void Flow::lua_entropy(lua_State *vm) {
-  if(initial_bytes_entropy.c2s && initial_bytes_entropy.s2c) {
-    lua_newtable(vm);
-
-    lua_push_float_table_entry(vm, "client", getEntropy(true));
-    lua_push_float_table_entry(vm, "server", getEntropy(false));
-
-    if(protocol == IPPROTO_ICMP) {
-      if(protos.icmp.client_to_server.min_entropy != 0) {
-        lua_newtable(vm);
-        lua_push_float_table_entry(vm, "min",
-                                   protos.icmp.client_to_server.min_entropy);
-        lua_push_float_table_entry(vm, "max",
-                                   protos.icmp.client_to_server.max_entropy);
-
-        lua_pushstring(vm, "icmp");
-        lua_insert(vm, -2);
-        lua_settable(vm, -3);
-      }
-    }
-
-    lua_pushstring(vm, "entropy");
-    lua_insert(vm, -2);
-    lua_settable(vm, -3);
-  }
-}
-#endif
-
 /* *************************************** */
 
 void Flow::check_swap()
@@ -8512,9 +8396,6 @@ void Flow::swap() {
   u_int8_t m[6];
   u_int8_t f1 = alert_info.is_cli_attacker;
   u_int8_t f2 = alert_info.is_cli_victim;
-#ifdef ENABLE_ENTROPHY_CALCULATION
-  struct ndpi_analyze_struct *s = initial_bytes_entropy.c2s;
-#endif
   TCPSeqNum ts;
   InterarrivalStats *is = cli2srvPktTime;
   time_t now = time(NULL);
@@ -8548,13 +8429,7 @@ void Flow::swap() {
   }
 
   Utils::swap16(&cli_port, &srv_port), Utils::swap32(&srcAS, &dstAS), Utils::swap32(&srcPeerAS, &dstPeerAS);
-
   Utils::swap8(&src2dst_tcp_flags, &dst2src_tcp_flags);
-
-#ifdef ENABLE_ENTROPHY_CALCULATION
-  initial_bytes_entropy.c2s = initial_bytes_entropy.s2c;
-  initial_bytes_entropy.s2c = s;
-#endif
 
   memcpy(m, cli_mac, 6);
   memcpy(cli_mac, srv_mac, 6);

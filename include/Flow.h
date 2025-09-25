@@ -118,7 +118,7 @@ private:
   u_int16_t flow_score;
   bool twh_over_view:1 /* This flag is used for view interfaces */, shapers_profile_set:1,  iface_flow_accounted:1, _notused:5;
   u_int8_t cli_mac[6], srv_mac[6];
-  Mac *c_mac, *s_mac;
+  Mac *c_mac, *s_mac; /* Real flow MACs (hosts can have floating MACs when load-balancers are in use) Calculated using cli_mac and srv_mac[6] */
   struct ndpi_flow_struct *ndpiFlow;
   ndpi_risk ndpi_flow_risk_bitmap;
   /* The bitmap of all possible flow alerts set by FlowCheck subclasses.
@@ -140,13 +140,6 @@ private:
   } alert_info;
 
   char *json_protocol_info, *alerts_json, *alerts_json_shadow, *riskInfo, *end_reason;
-
-#ifdef ENABLE_ENTROPHY_CALCULATION
-  /* Calculate the entropy on the first MAX_ENTROPY_BYTES bytes */
-  struct {
-    struct ndpi_analyze_struct *c2s, *s2c;
-  } initial_bytes_entropy;
-#endif
 
   u_int32_t hash_entry_id; /* Uniquely identify this flow inside the flows_hash hash table */
   u_int32_t periodicity; /* When is_periodic_flow is set, specifies how periodic (seconds) is this flow */
@@ -404,9 +397,6 @@ private:
                                  bool *first_partial) const;
   void lua_tos(lua_State *vm);
   void lua_confidence(lua_State *vm);
-  void updateEntropy(struct ndpi_analyze_struct *e, u_int8_t *payload,
-                     u_int payload_len);
-  void lua_entropy(lua_State *vm);
   void luaScore(lua_State *vm);
   void luaIEC104(lua_State *vm);
   bool setAlertsMap(FlowAlert *alert);
@@ -1453,15 +1443,6 @@ public:
 
   inline u_int8_t getCli2SrvECN() { return (cli2srv_tos & 0x3); }
   inline u_int8_t getSrv2CliECN() { return (srv2cli_tos & 0x3); }
-
-#ifdef ENABLE_ENTROPHY_CALCULATION
-  inline float getEntropy(bool src2dst_direction) {
-    struct ndpi_analyze_struct *e = src2dst_direction
-      ? initial_bytes_entropy.c2s : initial_bytes_entropy.s2c;
-
-    return (e ? ndpi_data_entropy(e) : 0);
-  }
-#endif
 
   inline float getICMPPacketsEntropy() {
     return (protos.icmp.client_to_server.max_entropy -
