@@ -137,11 +137,18 @@ if host_pools_changed then
   if synchronous then
     -- Wait for the change to be applied (pools reloaded)
     for member, info in pairs(_POST["associations"] or {}) do
-      local max_iterations = 50 -- max 5s
-      local iterations = 0
-      while get_current_pool(member) ~= get_configured_pool(member) and iterations < max_iterations do
-        ntop.msleep(100)
-        iterations = iterations + 1
+      local m = string.upper(member)
+      if res["associations"][m]["status"] ~= "ERROR" then
+        local max_iterations = 50 -- max 5s
+        local iterations = 0
+        while get_current_pool(m) ~= get_configured_pool(m) and iterations < max_iterations do
+          ntop.msleep(100)
+          iterations = iterations + 1
+        end
+        if iterations >= max_iterations then
+          res["associations"][m]["status"] = "ERROR"
+          res["associations"][m]["status_msg"] = "Request timed out: pool update is taking too long"
+        end
       end
     end
   end
