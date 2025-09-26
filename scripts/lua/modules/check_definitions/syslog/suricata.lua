@@ -17,6 +17,7 @@ local syslog_module = {
   nedge_exclude = true,
 
   key = "suricata",
+   not_periodic_check = true,
 
   -- See below
   hooks = {},

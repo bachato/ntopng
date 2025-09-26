@@ -14,6 +14,7 @@ local syslog_module = {
   category = checks.check_categories.security,
 
   key = "nbox",
+   not_periodic_check = true,
 
   -- See below
   hooks = {},

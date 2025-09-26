@@ -1332,7 +1332,7 @@ function checks.getScriptConfig(configset, script, subdir)
 
         -- Check if thre is a check inconsistency in hooks configuration
         for k, _ in pairs(script.hooks) do
-            if (config[script_key][k] == nil) then
+            if (config[script_key][k] == nil) and not (script.not_periodic_check) then
                 traceError(TRACE_NORMAL, TRACE_CONSOLE,
                            "Found inconsistency on script " .. script.key ..
                                " for hook " .. k)

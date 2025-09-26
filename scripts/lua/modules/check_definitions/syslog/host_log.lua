@@ -12,6 +12,7 @@ local syslog_module = {
   category = checks.check_categories.security,
 
   key = "host_log",
+   not_periodic_check = true,
 
   default_value = {
     operator = "lt",
