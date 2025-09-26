@@ -414,7 +414,7 @@ char *Host::get_hostkey(char *buf, u_int buf_len, bool force_vlan) {
     strncpy(buf, key, buf_len);
 
   buf[buf_len - 1] = '\0';
-  return buf;
+  return(buf);
 }
 
 /* *************************************** */
@@ -1152,7 +1152,7 @@ char *Host::get_host_label(char *const buf, ssize_t buf_len) {
     get_name(buf, buf_len, false /* don't resolve */);
   }
 
-  return buf;
+  return(buf);
 }
 
 /* ***************************************** */
@@ -1212,7 +1212,7 @@ char *Host::getMDNSInfo(char *const buf, ssize_t buf_len) {
     m.unlock(__FILE__, __LINE__);
   }
 
-  return buf;
+  return(buf);
 }
 
 /* ***************************************** */
@@ -1225,7 +1225,7 @@ char *Host::getNetbiosName(char *const buf, ssize_t buf_len) {
     m.unlock(__FILE__, __LINE__);
   }
 
-  return buf;
+  return(buf);
 }
 
 /* ***************************************** */
@@ -1269,7 +1269,7 @@ char *Host::getHTTPName(char *const buf, ssize_t buf_len) {
 const char *Host::getOSDetail(char *const buf, ssize_t buf_len) {
   if(buf && buf_len) buf[0] = '\0';
 
-  return buf;
+  return(buf);
 }
 
 /* ***************************************** */
@@ -1427,16 +1427,18 @@ char *Host::get_visual_name(char *buf, u_int buf_len) {
 
   buf[0] = '\0';
 
-  if(mask_host) return buf;
+  if(mask_host)
+    return(buf);
 
   sym_name = get_name(buf2, sizeof(buf2), false);
 
-  if(sym_name == NULL || !sym_name[0]) return buf;
+  if((sym_name == NULL) || (sym_name[0] == '\0'))
+    return(buf);
 
   strncpy(buf, sym_name, buf_len);
   buf[buf_len - 1] = '\0';
 
-  return buf;
+  return(buf);
 }
 
 /* *************************************** */
@@ -1754,7 +1756,9 @@ void Host::offlineSetTLSName(const char *tls_n) {
 /* *************************************** */
 
 void Host::offlineSetHTTPName(const char *http_n) {
-  if(!isValidHostName(http_n)) return;
+  if(!isValidHostName(http_n))
+    return;
+  
   if(!names.http && http_n)
     names.http = Utils::toLowerResolvedNames(http_n);
 }
@@ -1765,18 +1769,20 @@ bool Host::isValidHostName(const char *name) {
   /* Make sure we do not use invalid names as strings */
   u_int ip4_0 = 0, ip4_1 = 0, ip4_2 = 0, ip4_3 = 0;
 
-  if((name == NULL) ||
-     (name[0] == '_') ||
-     Utils::endsWith(name, ".ip6.arpa") ||
-     Utils::endsWith(name, "._udp.local") ||
-     (sscanf(name, "%u.%u.%u.%u", &ip4_0, &ip4_1, &ip4_2, &ip4_3) ==
-      4) /* IPv4 address */
-     /* Invlid chars */
-     || (strchr(name, ':') != NULL) ||
-     (strchr(name, '*') != NULL) ||
-     (strchr(name, ' ') != NULL) ||
-     (strchr(name, '@') != NULL) ||
-     (strchr(name, ',') != NULL))
+  if((name == NULL)
+     || (name[0] == '_')
+     || Utils::endsWith(name, ".ip6.arpa")
+     || Utils::endsWith(name, "._udp.local")
+     || (sscanf(name, "%u.%u.%u.%u", &ip4_0, &ip4_1, &ip4_2, &ip4_3) == 4) /* IPv4 address */
+     /* Invalid chars */
+     || (strchr(name, ':') != NULL)
+     || (strchr(name, '*') != NULL)
+     || (strchr(name, ' ') != NULL)
+     || (strchr(name, '@') != NULL)
+     || (strchr(name, ',') != NULL)
+     || (strchr(name, '(') != NULL)
+     || (strchr(name, ')') != NULL)
+     )
     return (false);
   
   return (true);
