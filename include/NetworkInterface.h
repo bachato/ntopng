@@ -1429,6 +1429,7 @@ public:
 #ifdef NTOPNG_PRO
   bool updateRanking(lua_State *vm, u_int32_t epoch, char *key, char *values);
 #endif
+  inline bool hasMACs() { return(macs_hash); }
 };
 
 #endif /* _NETWORK_INTERFACE_H_ */

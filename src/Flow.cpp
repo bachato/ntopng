@@ -2452,6 +2452,10 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 			    diff_sent_goodput_bytes, diff_rcvd_packets,
 			    diff_rcvd_bytes, diff_rcvd_goodput_bytes);
       }
+    } else if(iface->hasMACs() && (!iface->isView())) {
+      char buf[128];
+      
+      ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL client MAC [%s]", print(buf, sizeof(buf)));
     }
 
     if(s_mac != NULL) {
@@ -2466,6 +2470,10 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 			    diff_rcvd_packets, diff_rcvd_bytes,
 			    diff_rcvd_goodput_bytes, diff_sent_packets,
 			    diff_sent_bytes, diff_sent_goodput_bytes);
+    } else if(iface->hasMACs() && (!iface->isView())) {
+      char buf[128];
+      
+      ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL server MAC [%s]", print(buf, sizeof(buf)));
     }
 
 #ifdef NTOPNG_PRO
@@ -3290,8 +3298,7 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
 
   if(c_mac != NULL) {
     if(c_mac->getDHCPfingerprint())
-      lua_push_str_table_entry(vm,
-			       "dhcp_fingerprint",
+      lua_push_str_table_entry(vm, "dhcp_fingerprint",
 			       c_mac->getDHCPfingerprint());
   }
 }
@@ -3979,15 +3986,13 @@ void Flow::formatSyslogFlow(json_object *my_object) {
   char buf[64], jsonbuf[64];
 
   if(cli_host && cli_host->getMac() && !cli_host->getMac()->isNull())
-    json_object_object_add(
-			   my_object,
+    json_object_object_add(my_object,
 			   Utils::jsonLabel(IN_SRC_MAC, "IN_SRC_MAC", jsonbuf, sizeof(jsonbuf)),
 			   json_object_new_string(Utils::formatMac(
 								   cli_host ? cli_host->get_mac() : NULL, buf, sizeof(buf))));
 
   if(srv_host && srv_host->getMac() && !srv_host->getMac()->isNull())
-    json_object_object_add(
-			   my_object,
+    json_object_object_add(my_object,
 			   Utils::jsonLabel(OUT_DST_MAC, "OUT_DST_MAC", jsonbuf, sizeof(jsonbuf)),
 			   json_object_new_string(Utils::formatMac(srv_host ? srv_host->get_mac() : NULL, buf, sizeof(buf))));
 
@@ -3997,8 +4002,7 @@ void Flow::formatSyslogFlow(json_object *my_object) {
 			   json_object_new_string(protos.tls.ja4.client_hash));
 
   if(isSSH() && protos.ssh.hassh.client_hash)
-    json_object_object_add(
-			   my_object,
+    json_object_object_add(my_object,
 			   Utils::jsonLabel(HASSHC_HASH, "HASSHC_HASH", jsonbuf, sizeof(jsonbuf)),
 			   json_object_new_string(protos.ssh.hassh.client_hash));
 
@@ -4170,17 +4174,14 @@ void Flow::formatGenericFlow(json_object *my_object) {
                            Utils::jsonLabel(TCP_FLAGS, "OUT_OUT_OF_ORDER",
                                             jsonbuf, sizeof(jsonbuf)),
                            json_object_new_int64(stats.get_srv2cli_tcp_ooo()));
-    json_object_object_add(
-			   my_object,
+    json_object_object_add(my_object,
 			   Utils::jsonLabel(TCP_FLAGS, "IN_LOST", jsonbuf, sizeof(jsonbuf)),
 			   json_object_new_int64(stats.get_cli2srv_tcp_lost()));
-    json_object_object_add(
-			   my_object,
+    json_object_object_add(my_object,
 			   Utils::jsonLabel(TCP_FLAGS, "OUT_LOST", jsonbuf, sizeof(jsonbuf)),
 			   json_object_new_int64(stats.get_srv2cli_tcp_lost()));
 
-    json_object_object_add(
-			   my_object,
+    json_object_object_add(my_object,
 			   Utils::jsonLabel(APPL_LATENCY_MS, "APPL_LATENCY_MS", jsonbuf, sizeof(jsonbuf)),
 			   json_object_new_int64(applLatencyMsec));
 
@@ -4386,8 +4387,7 @@ void Flow::formatGenericFlow(json_object *my_object) {
     const char *info;
     char buf[128];
 
-    json_object_object_add(
-			   my_object,
+    json_object_object_add(my_object,
 			   Utils::jsonLabel(FLOW_TIME, "FLOW_TIME", jsonbuf, sizeof(jsonbuf)),
 			   json_object_new_int(last_seen));
 #endif
@@ -4477,8 +4477,7 @@ u_char *Flow::getCommunityId(u_char *community_id, u_int community_id_len) {
 	  icmp_code = protos.icmp.cli2srv.icmp_code;
 
       if(c->isIPv6()) {
-        if(ndpi_flowv6_flow_hash(
-				 protocol, (struct ndpi_in6_addr *)c->get_ipv6(),
+        if(ndpi_flowv6_flow_hash(protocol, (struct ndpi_in6_addr *)c->get_ipv6(),
 				 (struct ndpi_in6_addr *)s->get_ipv6(), get_cli_port(),
 				 get_srv_port(), icmp_type, icmp_code, community_id,
 				 community_id_len) == 0)

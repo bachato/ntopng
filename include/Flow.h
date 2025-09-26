@@ -1431,7 +1431,8 @@ public:
     if (tcp_fingerprint) free(tcp_fingerprint);
     tcp_fingerprint = strdup(fp);
   }
-  inline char *getTCPFingerprint(){ return tcp_fingerprint; }
+  inline char *getTCPFingerprint() { return(tcp_fingerprint); }
+  
   inline void setTOS(u_int8_t tos, bool is_cli_tos) {
     if (is_cli_tos) cli2srv_tos = tos; else srv2cli_tos = tos;
   }
@@ -1478,12 +1479,6 @@ public:
     else
       return ((char *)ndpiDetectedProtocol.custom_category_userdata);
   }
-
-  inline void setCliMac(u_int8_t *m) { memcpy(cli_mac, m, 6); updateMac(); };
-  inline void setSrvMac(u_int8_t *m) { memcpy(srv_mac, m, 6); updateMac(); };
-
-  inline u_int8_t *getCliMac()   { return (cli_mac);      };
-  inline u_int8_t *getSrvMac()   { return (srv_mac);      };
 
   inline u_int32_t getErrorCode() { return (protocolErrorCode); }
   inline void setErrorCode(u_int32_t rc) { protocolErrorCode = rc; }
@@ -1571,6 +1566,14 @@ public:
   u_int32_t getTransitAS() { return(transitAS); }
   u_int32_t getSrcPeerAS() { return(srcPeerAS); }
   u_int32_t getDstPeerAS() { return(dstPeerAS); }
+
+  inline Mac* getCliMac()         { return(c_mac);   }
+  inline Mac* getSrvMac()         { return(s_mac);   }
+
+  inline u_int8_t* getCliMacRaw()       { return(cli_mac); }
+  inline u_int8_t* getSrvMacRaw()       { return(srv_mac); }
+  inline void setCliMacRaw(u_int8_t *m) { memcpy(cli_mac, m, 6); updateMac(); };
+  inline void setSrvMacRaw(u_int8_t *m) { memcpy(srv_mac, m, 6); updateMac(); };
 };
 
 #endif /* _FLOW_H_ */

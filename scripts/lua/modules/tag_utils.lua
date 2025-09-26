@@ -568,9 +568,9 @@ tag_utils.defined_tags = {
         operators = { 'eq', 'neq', 'empty', 'nempty' },
         hourly_available = false,
     },
-    ndpi_tcp_fingerprint = {
+    tcp_fingerprint = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.ndpi_tcp_fingerprint'),
+        i18n_label = i18n('db_search.tags.tcp_fingerprint'),
         operators = { 'eq', 'neq', 'empty', 'nempty' },
         hourly_available = false,
     },

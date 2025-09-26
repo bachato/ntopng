@@ -2119,33 +2119,35 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
     flow->setTOS(tos, src2dst_direction);
 
 #ifndef HAVE_NEDGE
-    /*
-      With nEdge we see only one MAC address at time so we need to check
-      if MAC addresses are still set to Unknown (00:00:00:00:00:00)
-    */
-    u_int8_t e_mac[6] = { 0x0 };
+    if(*new_flow) {
+      /*
+	With nEdge we see only one MAC address at time so we need to check
+	if MAC addresses are still set to Unknown (00:00:00:00:00:00)
+      */
+      u_int8_t e_mac[6] = { 0x0 };
 
-    if(src2dst_direction) {
-      u_int8_t *m = flow->getCliMac();
+      if(src2dst_direction) {
+	u_int8_t *m = flow->getCliMacRaw();
 
-      if(m && (memcmp(m, e_mac, 6) == 0)) {
-	/* We need to set the client MAC address */
-	Mac *mac = getMac(eth->h_source, true /* Create if missing */, true /* Inline call */);
-	Host *c_host = flow->get_cli_host();
+	if(m && (memcmp(m, e_mac, 6) == 0)) {
+	  /* We need to set the client MAC address */
+	  Mac *mac = getMac(eth->h_source, true /* Create if missing */, true /* Inline call */);
+	  Host *c_host = flow->get_cli_host();
 
-	c_host->set_mac(mac);
-	flow->setCliMac(eth->h_source);
-      }
-    } else {
-      u_int8_t *m = flow->getSrvMac();
+	  c_host->set_mac(mac);
+	  flow->setCliMacRaw(eth->h_source);
+	}
+      } else {
+	u_int8_t *m = flow->getSrvMacRaw();
 
-      if(m && (memcmp(m, e_mac, 6) == 0)) {
-	/* We need to set the client MAC address */
-	Mac *mac = getMac(eth->h_source, true /* Create if missing */, true /* Inline call */);
-	Host *d_host = flow->get_srv_host();
+	if(m && (memcmp(m, e_mac, 6) == 0)) {
+	  /* We need to set the client MAC address */
+	  Mac *mac = getMac(eth->h_source, true /* Create if missing */, true /* Inline call */);
+	  Host *d_host = flow->get_srv_host();
 
-	d_host->set_mac(mac);
-	flow->setSrvMac(eth->h_source);
+	  d_host->set_mac(mac);
+	  flow->setSrvMacRaw(eth->h_source);
+	}
       }
     }
 #endif
