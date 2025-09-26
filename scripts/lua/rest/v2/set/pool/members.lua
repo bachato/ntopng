@@ -41,6 +41,7 @@ local radius_handler = require "radius_handler"
    }
 --]]
 
+local synchronous = toboolean(_POST["sync"])
 local rc = rest_utils.consts.success.ok
 local host_pools_changed = false
 
@@ -83,10 +84,11 @@ for member, info in pairs(_POST["associations"] or {}) do
   local password = info["password"]
   local handle_with_radius = toboolean(info["handle_with_radius"] or false)
 
+  local current_interface = interface.getId() or -1 -- System Interface
+
   if connectivity == "pass" then
     if s:bind_member(m, pool_id) == true then
       host_pools_changed = true
-      local current_interface = interface.getId() or -1       -- System Interface
       res["associations"][m]["status"] = "OK"
       interface.select(tostring(interface.getFirstInterfaceId()))
       if handle_with_radius then
@@ -97,16 +99,15 @@ for member, info in pairs(_POST["associations"] or {}) do
       res["associations"][m]["status"] = "ERROR"
       res["associations"][m]["status_msg"] = "Failure adding member, maybe bad member MAC or IP"
     end
-  elseif info["connectivity"] == "reject" then
+  elseif connectivity == "reject" then
     -- To check radius termination cause see https://datatracker.ietf.org/doc/html/rfc2866#section-5.10
-    local terminate_cause = info["terminateCause"] or 3     -- Lost service
-    local current_interface = interface.getId() or -1       -- System Interface
     s:bind_member(m, host_pools.DEFAULT_POOL_ID)
     host_pools_changed = true
     res["associations"][m]["status"] = "OK"
     interface.select(tostring(interface.getFirstInterfaceId()))
     local mac_info = interface.getMacInfo(m)
     if handle_with_radius then
+      local terminate_cause = info["terminateCause"] or 3     -- Lost service
       radius_handler.accountingStop(m, terminate_cause, mac_info)
     end
     interface.select(current_interface)
@@ -118,8 +119,33 @@ for member, info in pairs(_POST["associations"] or {}) do
   ::continue::
 end
 
+local function get_configured_pool(member)
+  local exp_pool = s:get_pool_by_member(member) -- pool on redis
+  if exp_pool ~= nil then exp_pool = exp_pool.pool_id end
+  return exp_pool
+end
+
+local function get_current_pool(member)
+  local cur_pool = s:get_pool_id(member) -- pool on backend (updating)
+  if cur_pool == 0 then cur_pool = nil end
+  return cur_pool
+end
+
 if host_pools_changed then
   ntop.reloadHostPools()
+
+  if synchronous then
+    -- Wait for the change to be applied (pools reloaded)
+    for member, info in pairs(_POST["associations"] or {}) do
+      local max_iterations = 50 -- max 5s
+      local iterations = 0
+      while get_current_pool(member) ~= get_configured_pool(member) and iterations < max_iterations do
+        ntop.msleep(100)
+        iterations = iterations + 1
+      end
+    end
+  end
+
 end
 
 rest_utils.answer(rc, res)

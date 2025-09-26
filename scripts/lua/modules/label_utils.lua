@@ -196,6 +196,7 @@ end
 
 --
 -- Split the host key (ip@vlan) creating a new lua table.
+-- Note: removes /32 if cidr (ip/32@vlan)
 -- Example:
 --    info = hostkey2hostinfo(key)
 --    ip = info["host"]
@@ -218,6 +219,12 @@ function hostkey2hostinfo(key)
         host["vlan"] = tonumber(info[2])
     else
         host["vlan"] = 0
+    end
+
+    -- Remove / if any
+    local info = split(host["host"], '/')
+    if info and info[1] ~= nil then
+        host["host"] = info[1]
     end
 
     return host

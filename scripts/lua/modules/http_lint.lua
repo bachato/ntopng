@@ -1975,6 +1975,7 @@ local known_parameters = {
     ["recipients"] = validateEmptyOr(validateListOfTypeInline(validateNumber)),
 
     -- OTHER
+    ["sync"] = validateBool, -- synchronous request (wait for the change to be applied)
     ["rsp_format"] = validateBool,
     ["interface"] = validateNetworkInterface,
     ["showjson"] = validateBool,
