@@ -122,8 +122,8 @@ function alert_as_ranking_changed.format(ifid, alert, alert_type_params, local_e
    local changes = alert_type_params.changes or {}
    local direction
 
-   current = formatRanking(changes.current or {}, changes.previous or {}, verbose)
-   prev    = formatRanking(changes.previous or {}, changes.current or {}, verbose)
+   current = formatRanking(changes.current or {},  changes.previous or {}, verbose)
+   prev    = formatRanking(changes.previous or {}, changes.current or {},  verbose)
 
    if(changes.ingress_traffic) then
       direction = "Ingress"
@@ -131,12 +131,14 @@ function alert_as_ranking_changed.format(ifid, alert, alert_type_params, local_e
       direction = "Egress"
    end
 
-   return i18n("alert_messages.alert_as_ranking_changed", {
-		  num_changes = changes.num_ranking_changes,
+   return i18n("alert_messages.alert_as_ranking_changed",
+	       {
+		  num_changes = changes.num_changes,
 		  direction = direction,
 		  current_ranking = current,
 		  previous_ranking = prev
-   })
+	       }
+   )
 end
 
 -- #######################################################
