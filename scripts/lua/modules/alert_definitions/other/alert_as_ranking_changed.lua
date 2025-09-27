@@ -52,8 +52,10 @@ local function formatRanking(ranking, prev_ranking, verbose)
    local skip_duplicates
 
    if(verbose == true) then
+      -- When showing the alert info
       skip_duplicates = false
    else
+      -- When showing the alert headline in the alerts page
       skip_duplicates = true
    end
 
@@ -130,6 +132,7 @@ function alert_as_ranking_changed.format(ifid, alert, alert_type_params, local_e
    end
 
    return i18n("alert_messages.alert_as_ranking_changed", {
+		  num_changes = changes.num_ranking_changes,
 		  direction = direction,
 		  current_ranking = current,
 		  previous_ranking = prev
