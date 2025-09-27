@@ -1332,7 +1332,8 @@ function checks.getScriptConfig(configset, script, subdir)
 
         -- Check if thre is a check inconsistency in hooks configuration
         for k, _ in pairs(script.hooks) do
-            if (config[script_key][k] == nil) and not (script.not_periodic_check) then
+            if (config[script_key][k] == nil) and
+                not (script.not_periodic_check) then
                 traceError(TRACE_NORMAL, TRACE_CONSOLE,
                            "Found inconsistency on script " .. script.key ..
                                " for hook " .. k)
@@ -2446,7 +2447,8 @@ end
 -- @params alert_info: list of information to be used in the alert (optional)
 -- @params when: timestamp of the alert (optional)
 -- @return A list of elements to be used as params argument when calling the trigger/release/store
-function checks.generateCustomParams(granularity, alert_entity_name, severity, alert_info, when)
+function checks.generateCustomParams(granularity, alert_entity_name, severity,
+                                     alert_info, when)
     local entity_info = nil
     if (not granularity) or (not alert_granularities[granularity]) then
         traceError(TRACE_WARNING, TRACE_CONSOLE, string.format(
@@ -2455,15 +2457,18 @@ function checks.generateCustomParams(granularity, alert_entity_name, severity, a
         return {}
     end
     if alert_entity_name == "interface" then
-        entity_info = alert_entity_builders.interfaceAlertEntity(alert_info.ifid)
+        entity_info =
+            alert_entity_builders.interfaceAlertEntity(alert_info.ifid)
     elseif alert_entity_name == "as" then
         entity_info = alert_entity_builders.asAlertEntity(alert_info.as)
     elseif alert_entity_name == "host" then
-        entity_info = alert_entity_builders.hostAlertEntity(alert_info.ip, alert_info.vlan)
+        entity_info = alert_entity_builders.hostAlertEntity(alert_info.ip,
+                                                            alert_info.vlan)
     elseif alert_entity_name == "network" then
         entity_info = alert_entity_builders.networkAlertEntity(alert_info.cidr)
     elseif alert_entity_name == "snmp_interface" then
-        entity_info = alert_entity_builders.snmpInterfaceEntity(alert_info.device, alert_info.interface)
+        entity_info = alert_entity_builders.snmpInterfaceEntity(
+                          alert_info.device, alert_info.interface)
     elseif alert_entity_name == "snmp_device" then
         entity_info = alert_entity_builders.snmpDeviceEntity(alert_info.device)
     elseif alert_entity_name == "mac" then
@@ -2473,14 +2478,15 @@ function checks.generateCustomParams(granularity, alert_entity_name, severity, a
     elseif alert_entity_name == "host_pool" then
         entity_info = alert_entity_builders.hostPoolEntity(alert_info.pool_id)
     elseif alert_entity_name == "system" then
-        entity_info = alert_entity_builders.systemEntity(alert_info.system_entity_name)
+        entity_info = alert_entity_builders.systemEntity(
+                          alert_info.system_entity_name)
     else
         traceError(TRACE_WARNING, TRACE_CONSOLE,
                    "Alert entity requested NOT FOUND when generatic params [requested: %s]",
                    alert_entity_name)
         return {}
     end
-    
+
     if (not severity) or (not alert_severities[severity]) then
         traceError(TRACE_WARNING, TRACE_CONSOLE,
                    "Empty severity passed when generatic params [requested: %s]",
@@ -2490,13 +2496,33 @@ function checks.generateCustomParams(granularity, alert_entity_name, severity, a
 
     local params = {
         granularity = granularity,
-        check = {
-            severity = alert_severities[severity],
-        },
+        check = {severity = alert_severities[severity]},
         entity_info = entity_info,
         when = when
     }
     return params
+end
+
+-- #################################################################
+
+-- @brief Given a script name and subdir (e.g. host), returns true if the script
+--        is enabled, false otherwise.
+-- @params alert_name: string, the name of the alert
+-- @params subdir: string, id of the subdir (e.g. flow)
+function checks.getCheckEnabled(alert_name, subdir)
+    local checks_config = checks.getConfigset()["config"]
+
+    -- First check if the requested alert exists
+    if (checks_config) and (checks_config[subdir]) and
+        (checks_config[subdir][alert_name]) then
+        -- Now check all the granularities and check if enabled in at least one
+        for granularity, info in pairs(checks_config[subdir][alert_name]) do
+            if (info.enabled) and (info.enabled == true) then
+                return true
+            end
+        end
+    end
+    return false
 end
 
 -- #################################################################
