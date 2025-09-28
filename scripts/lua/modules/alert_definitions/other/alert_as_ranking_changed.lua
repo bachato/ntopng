@@ -47,17 +47,22 @@ end
 
 -- ##############################################
 
-local function formatRanking(ranking, prev_ranking, verbose)
-   local result = ""
-   local skip_duplicates
-
-   if(verbose == true) then
-      -- When showing the alert info
-      skip_duplicates = false
-   else
-      -- When showing the alert headline in the alerts page
-      skip_duplicates = true
+local function findPosition(ranking, exporter_ip, interface_id)
+   for id, t in pairs(ranking) do
+      if((ranking[id].exporter_ip == exporter_ip)
+	 and (ranking[id].interface_id == interface_id)) then
+	 return(id)
+      end
    end
+
+   return nil
+end
+
+-- ##############################################
+
+local function formatRanking(ranking, prev_ranking, verbose, show_icons)
+   local result = ""
+   local skip_duplicates = false
 
    for id, t in pairs(ranking) do
       if(skip_duplicates
@@ -81,15 +86,41 @@ local function formatRanking(ranking, prev_ranking, verbose)
 
 	 href = ntop.getHttpPrefix() .. "/lua/pro/enterprise/snmp_interface_details.lua?host=".. ntop.inet_ntoa(t.exporter_ip) .. "&snmp_port_idx=".. t.interface_id
 
-	 ex = "[rank "..tostring(id).."] <A HREF=\""..href.."\" target=\"_blank\">"..ex .. ":" .. ifname .. "</A>"
+	 if(show_rank) then ex = ex .. "[rank "..tostring(id).."]" end
+	 ex = " <A HREF=\""..href.."\" target=\"_blank\">"..ex .. ":" .. ifname .. "</A>"
 
 	 if(verbose) then
-	    ex = ex .. " (".. volume ..")<br>\n"
+	    ex = ex .. " (".. volume ..")"
 	 end
 
+	 if(show_icons and verbose) then
+	    local prev_pos = findPosition(prev_ranking, ranking[id].exporter_ip, ranking[id].interface_id)
+
+	    if(prev_pos == nil) then
+	       ex = ex .. ' [ <font color=blue><b>' .. i18n("new") .. '</b></font> ]'
+	    else
+	       local diff = prev_pos - id
+	       local icon
+	       
+	       if(diff == 0) then
+		  icon = '<font color=gray><b>=</b></font>'
+	       elseif (diff > 0) then
+		  icon = '<font color=green><b>+'..diff..'</b></font>'
+	       else
+		  icon = '<font color=red><b>'..diff..'</b></font>'
+	       end
+		  
+	       ex = ex .. " [ " ..icon.." ] "
+	    end
+	 end
+
+	 if(verbose) then
+	    ex = ex .. "<br>\n"
+	 end
+	 
 	 if result == "" then
 	    result = ex -- set
-	 else
+	 else	    
 	    if(verbose) then
 	       result = result.." ".. ex .. "\n" -- append
 	    else
@@ -122,8 +153,8 @@ function alert_as_ranking_changed.format(ifid, alert, alert_type_params, local_e
    local changes = alert_type_params.changes or {}
    local direction
 
-   current = formatRanking(changes.current or {},  changes.previous or {}, verbose)
-   prev    = formatRanking(changes.previous or {}, changes.current or {},  verbose)
+   current = formatRanking(changes.current or {},  changes.previous or {}, verbose, true)
+   prev    = formatRanking(changes.previous or {}, changes.current or {},  verbose, false)
 
    if(changes.ingress_traffic) then
       direction = "Ingress"
