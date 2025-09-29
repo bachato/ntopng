@@ -2452,7 +2452,7 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 			    diff_sent_goodput_bytes, diff_rcvd_packets,
 			    diff_rcvd_bytes, diff_rcvd_goodput_bytes);
       }
-    } else if(iface->hasMACs() && (!iface->isView())) {
+    } else if(iface->hasMACs() && (!iface->isView()) && iface->isPacketInterface()) {
       char buf[128];
       
       ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL client MAC [%s]", print(buf, sizeof(buf)));
@@ -2470,7 +2470,7 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 			    diff_rcvd_packets, diff_rcvd_bytes,
 			    diff_rcvd_goodput_bytes, diff_sent_packets,
 			    diff_sent_bytes, diff_sent_goodput_bytes);
-    } else if(iface->hasMACs() && (!iface->isView())) {
+    } else if(iface->hasMACs() && (!iface->isView()) && iface->isPacketInterface()) {
       char buf[128];
       
       ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL server MAC [%s]", print(buf, sizeof(buf)));
