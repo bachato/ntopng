@@ -209,6 +209,34 @@ function set_default_source_object_in_url() {
     metricsManager.set_source_value_object_in_url(source_type, props.source_value_object);
 }
 
+/* This function retrieves the global status (epoch_begin and epoch_end),
+ * in case it's empty format it and update the status
+ */
+function retrieveGlobalStatus() {
+    // Retrieve the status
+    let status = ntopng_status_manager.get_status();
+    let update_status = false;
+    // In case it is empty or missing something, update it
+    if (!status) {
+        update_status = true
+        status = status = {};
+    }
+    if (!status.epoch_begin) {
+        update_status = true
+        status.epoch_begin = ntopng_url_manager.get_url_entry("epoch_begin");
+    }
+    if (!status.epoch_end) {
+        update_status = true
+        status.epoch_end = ntopng_url_manager.get_url_entry("epoch_end");
+    }
+    // In case some update was done, update the global status
+    if (update_status) {
+        ntopng_status_manager.replace_status(status);
+    }
+
+    return status;
+}
+
 onBeforeMount(async () => {
 
     if (ntopng_url_manager.get_url_entry("page") == "va_historical") {
@@ -235,7 +263,6 @@ onMounted(async () => {
     await Promise.all([
         ntopng_sync.on_ready(id_date_time_picker),
     ]);
-    // chart.value.register_status();
 });
 
 async function init() {
@@ -419,7 +446,7 @@ let ts_charts_options;
 async function load_page_stats_data(timeseries_groups, reload_charts_data, reload_top_table_options, refreshed_time_interval) {
     /* Get the information necessary for the request, like epoch ecc. */
     loading.value = true;
-    let status = ntopng_status_manager.get_status();
+    const status = retrieveGlobalStatus()
     let ts_compare = get_ts_compare(status);
     if (reload_charts_data) {
         /* Do the request to the backend; the answer is formatted as
@@ -533,13 +560,7 @@ function get_ts_compare(status) {
 
 function get_top_table_url(ts_group, table_value, table_view, table_source_def_value_dict, status) {
     if (!status) {
-        status = ntopng_status_manager.get_status();
-    }
-    if (!status.epoch_begin) {
-        status.epoch_begin = ntopng_url_manager.get_url_entry("epoch_begin");
-    }
-    if (!status.epoch_end) {
-        status.epoch_end = ntopng_url_manager.get_url_entry("epoch_end");
+        status = retrieveGlobalStatus();
     }
     let ts_query = timeseriesUtils.getTsQuery(ts_group, true, table_source_def_value_dict);
     let v = table_value;
@@ -577,8 +598,8 @@ function set_top_table_options(timeseries_groups, status) {
     if (timeseries_groups == null) {
         timeseries_groups = last_timeseries_groups_loaded;
     }
-    if (status == null) {
-        status = ntopng_status_manager.get_status();
+    if (!status) {
+        status = retrieveGlobalStatus();
     }
 
     let sources_types_tables = metricsManager.sources_types_tables;
@@ -680,7 +701,7 @@ let stats_columns = [
 
 const stats_rows = ref([]);
 
-function set_stats_rows(ts_charts_options, timeseries_groups, status) {
+function set_stats_rows(ts_charts_options, timeseries_groups) {
     const extend_serie_name = ts_charts_options.length > 1;
     enable_stats_table.value = timeseries_groups.map((ts_group) => !ts_group.source_type.disable_stats).reduce((res, el) => res | el, false);
     if (!enable_stats_table.value) { return; }
@@ -769,7 +790,7 @@ function print_stats_row(col, row) {
 }
 
 function create_historical_params() {
-    let status = ntopng_status_manager.get_status();
+    let status = retrieveGlobalStatus();
     let params = { epoch_begin: status.epoch_begin, epoch_end: status.epoch_end };
     /* Add the source elements to the redirect, like host, snmp, ecc. */
     if (last_timeseries_groups_loaded && last_timeseries_groups_loaded.length > 0) {
