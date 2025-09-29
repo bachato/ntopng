@@ -183,7 +183,7 @@ const map_table_def_columns = (columns) => {
         c.render_func = map_columns[c.data_field];
         if (c.id == "actions") {
             const visible_dict = {
-                historical_data: props.show_historical,
+                interface_configuration: true, /* Alwais available */
             };
             c.button_def_array.forEach((b) => {
                 if (!visible_dict[b.id]) {
