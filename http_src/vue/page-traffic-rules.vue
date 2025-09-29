@@ -6,13 +6,6 @@
   <div class="row">
     <div class="col-md-12 col-lg-12">
       <div class="card">
-        <div class="overlay justify-content-center align-items-center position-absolute h-100 w-100">
-          <div class="text-center">
-            <div class="spinner-border text-primary mt-5" role="status">
-              <span class="sr-only position-absolute">Loading...</span>
-            </div>
-          </div>
-        </div>
         <div class="card-body">
           <div class="mb-4">
             <h4>{{ _i18n('if_stats_config.traffic_rules') }}</h4>
