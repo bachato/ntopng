@@ -740,8 +740,7 @@ void NetworkInterface::checkDisaggregationMode() {
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
   sub_interfaces = ntop->getPrefs()->is_enterprise_m_edition()
-    ? new (std::nothrow) SubInterfaces(this)
-    : NULL;
+    ? new (std::nothrow) SubInterfaces(this) : NULL;
 #endif
 #endif
 }
@@ -2118,14 +2117,14 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 
     flow->setTOS(tos, src2dst_direction);
 
-#ifndef HAVE_NEDGE
-    if(*new_flow) {
+#ifdef HAVE_NEDGE
+    /* if(*new_flow) */ {
       /*
 	With nEdge we see only one MAC address at time so we need to check
 	if MAC addresses are still set to Unknown (00:00:00:00:00:00)
       */
       u_int8_t e_mac[6] = { 0x0 };
-
+      
       if(src2dst_direction) {
 	u_int8_t *m = flow->getCliMacRaw();
 
@@ -2134,6 +2133,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 	  Mac *mac = getMac(eth->h_source, true /* Create if missing */, true /* Inline call */);
 	  Host *c_host = flow->get_cli_host();
 
+	  /* ntop->getTrace()->traceEvent(TRACE_WARNING, "Check MAC %02X:%02X:%02X:%02X:%02X:%02X", m[0], m[1], m[2], m[3], m[4], m[5]); */
 	  c_host->set_mac(mac);
 	  flow->setCliMacRaw(eth->h_source);
 	}
@@ -2145,6 +2145,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 	  Mac *mac = getMac(eth->h_source, true /* Create if missing */, true /* Inline call */);
 	  Host *d_host = flow->get_srv_host();
 
+	  /* ntop->getTrace()->traceEvent(TRACE_WARNING, "Check MAC %02X:%02X:%02X:%02X:%02X:%02X", m[0], m[1], m[2], m[3], m[4], m[5]); */
 	  d_host->set_mac(mac);
 	  flow->setSrvMacRaw(eth->h_source);
 	}
