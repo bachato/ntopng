@@ -108,6 +108,7 @@ Flow::Flow(NetworkInterface *_iface,
   swap_done = swap_requested = 0;
   current_c_state = MINOR_NO_STATE;
 #ifdef HAVE_NEDGE
+  numnDPIProcessedPkts = 0;
   last_conntrack_update = 0;
   marker = MARKER_NO_ACTION;
 #endif
@@ -1127,6 +1128,10 @@ void Flow::processPacket(bool src2dst_direction,
   proto_id = ndpi_detection_process_packet(iface->get_ndpi_struct(),
 					   ndpiFlow, ip_packet, ip_len, packet_time, NULL);
 
+#ifdef HAVE_NEDGE
+  numnDPIProcessedPkts++;
+#endif
+  
   if((ndpi_flow_risk_bitmap != 0) && (ndpiFlow->risk == 0)) {
     /*
       Probably an exception has cleared the risk that was previously
@@ -3077,6 +3082,10 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
     lua_get_dir_traffic(vm, true /* Client to Server */);
     lua_get_dir_traffic(vm, false /* Server to Client */);
 
+#ifdef HAVE_NEDGE
+    lua_push_uint32_table_entry(vm, "ndpi_processed_pkts", numnDPIProcessedPkts);
+#endif
+    
     lua_get_flow_connection_state(vm);
 
     luaScore(vm);
@@ -6961,35 +6970,26 @@ void Flow::lua_get_dir_traffic(lua_State *vm, bool cli2srv) const {
     (ndpi_analyze_struct *)stats.get_analize_struct(cli2srv);
   const IPPacketStats *cur_ip_stats = cli2srv ? &ip_stats_s2d : &ip_stats_d2s;
 
-  lua_push_uint64_table_entry(
-			      vm, cli2srv ? "cli2srv.bytes" : "srv2cli.bytes",
+  lua_push_uint64_table_entry(vm, cli2srv ? "cli2srv.bytes" : "srv2cli.bytes",
 			      cli2srv ? get_bytes_cli2srv() : get_bytes_srv2cli());
-  lua_push_uint64_table_entry(
-			      vm, cli2srv ? "cli2srv.goodput_bytes" : "srv2cli.goodput_bytes",
+  lua_push_uint64_table_entry(vm, cli2srv ? "cli2srv.goodput_bytes" : "srv2cli.goodput_bytes",
 			      cli2srv ? get_goodput_bytes_cli2srv() : get_goodput_bytes_srv2cli());
-  lua_push_uint64_table_entry(
-			      vm, cli2srv ? "cli2srv.packets" : "srv2cli.packets",
+  lua_push_uint64_table_entry(vm, cli2srv ? "cli2srv.packets" : "srv2cli.packets",
 			      cli2srv ? get_packets_cli2srv() : get_packets_srv2cli());
 
-  lua_push_uint64_table_entry(
-			      vm, cli2srv ? "cli2srv.last" : "srv2cli.last",
+  lua_push_uint64_table_entry(vm, cli2srv ? "cli2srv.last" : "srv2cli.last",
 			      cli2srv ? get_current_bytes_cli2srv() : get_current_bytes_srv2cli());
 
-  lua_push_uint64_table_entry(
-			      vm, cli2srv ? "cli2srv.pkt_len.min" : "srv2cli.pkt_len.min",
+  lua_push_uint64_table_entry(vm, cli2srv ? "cli2srv.pkt_len.min" : "srv2cli.pkt_len.min",
 			      ndpi_data_min(cur_analyze));
-  lua_push_uint64_table_entry(
-			      vm, cli2srv ? "cli2srv.pkt_len.max" : "srv2cli.pkt_len.max",
+  lua_push_uint64_table_entry(vm, cli2srv ? "cli2srv.pkt_len.max" : "srv2cli.pkt_len.max",
 			      ndpi_data_max(cur_analyze));
-  lua_push_uint64_table_entry(
-			      vm, cli2srv ? "cli2srv.pkt_len.avg" : "srv2cli.pkt_len.avg",
+  lua_push_uint64_table_entry(vm, cli2srv ? "cli2srv.pkt_len.avg" : "srv2cli.pkt_len.avg",
 			      ndpi_data_average(cur_analyze));
-  lua_push_uint64_table_entry(
-			      vm, cli2srv ? "cli2srv.pkt_len.stddev" : "srv2cli.pkt_len.stddev",
+  lua_push_uint64_table_entry(vm, cli2srv ? "cli2srv.pkt_len.stddev" : "srv2cli.pkt_len.stddev",
 			      ndpi_data_stddev(cur_analyze));
 
-  lua_push_uint64_table_entry(
-			      vm, cli2srv ? "cli2srv.fragments" : "srv2cli.fragments",
+  lua_push_uint64_table_entry(vm, cli2srv ? "cli2srv.fragments" : "srv2cli.fragments",
 			      cur_ip_stats->pktFrag);
 }
 

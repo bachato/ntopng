@@ -177,6 +177,7 @@ private:
 #ifndef HAVE_NEDGE
   FlowProfile *trafficProfile;
 #else
+  u_int32_t numnDPIProcessedPkts;
   u_int8_t routing_table_id;
   L7PolicySource_t cli_quota_source, srv_quota_source;
 #endif

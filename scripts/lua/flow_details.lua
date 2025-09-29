@@ -850,6 +850,10 @@ else
    end
 
    if flow["bytes"] > 0 then
+      if(flow.ndpi_processed_pkts ~= nil) then
+        print("<tr><th width=33%>".. i18n("details.ndpi_pkts") .."</th><td nowrap colspan=2>".. flow.ndpi_processed_pkts .."</td></tr>\n")
+      end
+
       print("<tr><th width=10% rowspan=3>" .. i18n("details.total_traffic") .. "</th><td>" .. i18n("total") ..
          ": <span id=volume>" .. bytesToSize(flow["bytes"]) .. "</span> <span id=volume_trend></span></td>")
       if ((ifstats.type ~= "zmq") and ((flow["proto.l4"] == "TCP") or (flow["proto.l4"] == "UDP")) and
