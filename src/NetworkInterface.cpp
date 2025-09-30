@@ -2266,6 +2266,10 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 #endif
   }
 
+#ifdef HAVE_NEDGE
+  flow->incNumProcessedPkts();
+#endif
+  
   /* Protocol Detection */
 
   /* This is now incremented in Flow::hosts_periodic_stats_update

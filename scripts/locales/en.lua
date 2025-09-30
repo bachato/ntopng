@@ -2731,7 +2731,7 @@ local lang = {
     ["more_then_one_device"] = " (More than one Probe has detected this Host)",
     ["note"] = "NOTE",
     ["note_hosts_located_snmp_device"] = "Hosts are located in SNMP devices using the <A HREF=%{url}>Bridge MIB</A>.",
-    ["ndpi_pkts"] = "nDPI Processed Packets",
+    ["num_processed_pkts"] = "Num Processed Packets",
     ["observation_point_id"] = "Observation Point Id",
     ["os_learning"] = "OS Learning Methods",
     ["out_of_order"] = "Out of Order",

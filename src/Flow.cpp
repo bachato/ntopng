@@ -108,7 +108,7 @@ Flow::Flow(NetworkInterface *_iface,
   swap_done = swap_requested = 0;
   current_c_state = MINOR_NO_STATE;
 #ifdef HAVE_NEDGE
-  numnDPIProcessedPkts = 0;
+  numFlowProcessedPkts = 0;
   last_conntrack_update = 0;
   marker = MARKER_NO_ACTION;
 #endif
@@ -1128,10 +1128,6 @@ void Flow::processPacket(bool src2dst_direction,
   proto_id = ndpi_detection_process_packet(iface->get_ndpi_struct(),
 					   ndpiFlow, ip_packet, ip_len, packet_time, NULL);
 
-#ifdef HAVE_NEDGE
-  numnDPIProcessedPkts++;
-#endif
-  
   if((ndpi_flow_risk_bitmap != 0) && (ndpiFlow->risk == 0)) {
     /*
       Probably an exception has cleared the risk that was previously
@@ -3083,7 +3079,7 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
     lua_get_dir_traffic(vm, false /* Server to Client */);
 
 #ifdef HAVE_NEDGE
-    lua_push_uint32_table_entry(vm, "ndpi_processed_pkts", numnDPIProcessedPkts);
+    lua_push_uint32_table_entry(vm, "num_flow_processed_pkts", numFlowProcessedPkts);
 #endif
     
     lua_get_flow_connection_state(vm);
