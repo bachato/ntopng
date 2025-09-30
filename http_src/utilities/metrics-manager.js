@@ -64,7 +64,7 @@ const get_ts_group = (source_type, source_array, metric, customized_ts) => {
 
     let id = get_ts_group_id(source_type, source_array, metric);
     let timeseries = [];
-    for (let key in metric.timeseries) {
+    for (let key in metric?.timeseries) {
         let ts = metric.timeseries[key];
         ts_config.id = key;
         ts_config.label = ts.label;
@@ -272,15 +272,19 @@ const get_default_source_value_array = (source_type) => {
     return source_value_array;
 };
 
-function get_metrics_url(http_prefix, source_type, source_array, epoch) {
+function get_metrics_url(http_prefix, source_type, source_array, epoch, include_empty_ts) {
     let params = source_type.source_def_array.map((source_def, i) => {
         return `${source_def.value}=${source_array[i].value}`;
     }).join("&");
     let epoch_string = ``;
+    let include_empty_ts_string = "";
+    if (include_empty_ts) {
+        include_empty_ts_string = "include_empty_ts=true"
+    }
     if (epoch != null) {
         epoch_string = `epoch_end=${epoch.epoch_end}&epoch_begin=${epoch.epoch_begin}`
     }
-    let url = `${http_prefix}/lua/rest/v2/get/timeseries/type/consts.lua?query=${source_type.query}&${params}&${epoch_string}`;
+    let url = `${http_prefix}/lua/rest/v2/get/timeseries/type/consts.lua?query=${source_type.query}&${params}&${epoch_string}&${include_empty_ts_string}`;
     return url;
 }
 
@@ -292,7 +296,7 @@ function get_metric_key(source_type, source_array) {
 
 let cache_metrics = {};
 let last_metrics_time_interval = null;
-const get_metrics = async (http_prefix, source_type, source_array, status) => {
+const get_metrics = async (http_prefix, source_type, source_array, status, include_empty_ts) => {
     let epoch_begin = status?.epoch_begin || ntopng_url_manager.get_url_entry("epoch_begin");
     let epoch_end = status?.epoch_end || ntopng_url_manager.get_url_entry("epoch_end");
     let current_last_metrics_time_interval = `${epoch_begin}_${epoch_end}`;
@@ -303,7 +307,7 @@ const get_metrics = async (http_prefix, source_type, source_array, status) => {
         source_array = await get_default_source_array(http_prefix, source_type);
     }
     // let url = `${http_prefix}/lua/rest/v2/get/timeseries/type/consts.lua?query=${source_type.value}`;
-    let url = get_metrics_url(http_prefix, source_type, source_array, { epoch_begin: epoch_begin, epoch_end: epoch_end });
+    let url = get_metrics_url(http_prefix, source_type, source_array, { epoch_begin: epoch_begin, epoch_end: epoch_end }, include_empty_ts);
     let key = get_metric_key(source_type, source_array);
     if (current_last_metrics_time_interval != last_metrics_time_interval) {
         cache_metrics[key] = null;
@@ -331,8 +335,8 @@ const get_current_page_source_type = () => {
     throw `source_type not found for ${pathname}`;
 };
 
-const get_metric_from_schema = async (http_prefix, source_type, source_array, metric_schema, metric_query, status) => {
-    let metrics = await get_metrics(http_prefix, source_type, source_array, status);
+const get_metric_from_schema = async (http_prefix, source_type, source_array, metric_schema, metric_query, status, include_empty_ts) => {
+    let metrics = await get_metrics(http_prefix, source_type, source_array, status, include_empty_ts);
     if (metric_schema === 'top:iface:ndpi') {
         return metrics.find((m) => m.schema == metric_schema && m.query == metric_query) ||
             metrics.find((m) => m.schema == 'top:iface:ndpi_full' && m.query == metric_query)

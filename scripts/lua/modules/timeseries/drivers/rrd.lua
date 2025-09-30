@@ -1221,10 +1221,10 @@ function driver:queryTotal(schema, tstart, tend, tags, options)
         serie[#serie] = nil
 
         for i, v in pairs(serie) do
-            local v = ts_common.normalizeVal(v, max_val, options)
+            local x = ts_common.normalizeVal(v, max_val, options)
 
             -- v is not null
-            if v == v then sum = sum + v * fstep end
+            if x == x then sum = sum + x * fstep end
         end
 
         totals[name] = sum

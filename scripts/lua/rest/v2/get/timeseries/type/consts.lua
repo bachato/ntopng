@@ -25,6 +25,8 @@ local epoch_end = _GET["epoch_end"]
 local if_index = _GET["if_index"]
 local profile = _GET["profile"]
 
+local include_empty_ts = _GET["include_empty_ts"]
+
 local res = {}
 
 if ifid then
@@ -52,5 +54,5 @@ local tags = {
     epoch_end = tonumber(epoch_end)
 }
 
-res = table.merge(res, timeseries_info.retrieve_specific_timeseries(tags, query))
+res = table.merge(res, timeseries_info.retrieve_specific_timeseries(tags, query, include_empty_ts))
 rest_utils.answer(rc, res)

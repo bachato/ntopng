@@ -2782,6 +2782,7 @@ local known_parameters = {
     ["telemetry"] = validateBool,
     ["preset"] = validateSingleWord,
     ["rules"] = validateUnquoted,
+    ["include_empty_ts"] = validateBool,
 
     -- nEdge policy
     ["default_policy"] = validatePolicy, -- users, nedge policies
