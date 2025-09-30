@@ -108,7 +108,7 @@ Flow::Flow(NetworkInterface *_iface,
   swap_done = swap_requested = 0;
   current_c_state = MINOR_NO_STATE;
 #ifdef HAVE_NEDGE
-  numFlowProcessedPkts = 0;
+  numFlowProcessedPkts = numPktsMarkerSet = 0;
   last_conntrack_update = 0;
   marker = MARKER_NO_ACTION;
 #endif
@@ -3080,6 +3080,7 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
 
 #ifdef HAVE_NEDGE
     lua_push_uint32_table_entry(vm, "num_flow_processed_pkts", numFlowProcessedPkts);
+    lua_push_uint32_table_entry(vm, "num_flow_marker_pkts",    numPktsMarkerSet);
 #endif
     
     lua_get_flow_connection_state(vm);

@@ -2084,6 +2084,8 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 
 #ifdef HAVE_NEDGE
     if (*new_flow) flow->setIngress2EgressDirection(*ingressPacket);
+
+    flow->incNumProcessedPkts();
 #endif
 
 #ifdef HAVE_NEDGE
@@ -2118,7 +2120,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
     flow->setTOS(tos, src2dst_direction);
 
 #ifdef HAVE_NEDGE
-    /* if(*new_flow) */ {
+    {
       /*
 	With nEdge we see only one MAC address at time so we need to check
 	if MAC addresses are still set to Unknown (00:00:00:00:00:00)
@@ -2128,7 +2130,10 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
       if(src2dst_direction) {
 	u_int8_t *m = flow->getCliMacRaw();
 
-	if(m && (memcmp(m, e_mac, 6) == 0)) {
+	if(m
+	   && (memcmp(m, e_mac, 6) == 0)
+	   && (memcmp(eth->h_source, e_mac, 6) != 0) /* Not 00:00:00:00:00:00 */
+	   ) {
 	  /* We need to set the client MAC address */
 	  Mac *mac = getMac(eth->h_source, true /* Create if missing */, true /* Inline call */);
 	  Host *c_host = flow->get_cli_host();
@@ -2140,7 +2145,10 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
       } else {
 	u_int8_t *m = flow->getSrvMacRaw();
 
-	if(m && (memcmp(m, e_mac, 6) == 0)) {
+	if(m
+	   && (memcmp(m, e_mac, 6) == 0)
+	   && (memcmp(eth->h_source, e_mac, 6) != 0) /* Not 00:00:00:00:00:00 */
+	   ) {
 	  /* We need to set the client MAC address */
 	  Mac *mac = getMac(eth->h_source, true /* Create if missing */, true /* Inline call */);
 	  Host *d_host = flow->get_srv_host();
@@ -2266,10 +2274,6 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 #endif
   }
 
-#ifdef HAVE_NEDGE
-  flow->incNumProcessedPkts();
-#endif
-  
   /* Protocol Detection */
 
   /* This is now incremented in Flow::hosts_periodic_stats_update

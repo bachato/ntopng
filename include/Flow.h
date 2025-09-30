@@ -177,7 +177,7 @@ private:
 #ifndef HAVE_NEDGE
   FlowProfile *trafficProfile;
 #else
-  u_int32_t numFlowProcessedPkts;
+  u_int32_t numFlowProcessedPkts, numPktsMarkerSet;
   u_int8_t routing_table_id;
   L7PolicySource_t cli_quota_source, srv_quota_source;
 #endif
@@ -1577,7 +1577,8 @@ public:
   inline void setSrvMacRaw(u_int8_t *m) { memcpy(srv_mac, m, 6); updateMac(); };
 
 #ifdef HAVE_NEDGE
-  inline void incNumProcessedPkts()     { numFlowProcessedPkts++;             }
+  inline void incNumProcessedPkts()     { numFlowProcessedPkts++;                  }
+  inline void setNumPktsMarker()        { numPktsMarkerSet = numFlowProcessedPkts; }
 #endif
 };
 
