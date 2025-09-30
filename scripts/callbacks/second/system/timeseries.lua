@@ -167,7 +167,7 @@ for i = 1, num_runs do
     end, true --[[ update direction stats ]] )
 
     -- Save ZMQ stats correctly for view interfaces
-    if check_view then
+    if (check_view and ntop.isPro()) then
         ts_utils.append("iface:zmq_recv_flows", {
             ifid = view_id,
             flows = viewed_zmq_stats.zmq_recv_flows or 0
