@@ -65,7 +65,6 @@ export default defineComponent({
         } else {
             this.modal_size = "modal-lg"
         }
-        debugger;
         let me = this;
         $(this.$refs["modal_id"]).on('shown.bs.modal', function (e) {
             me.$emit("showed");
