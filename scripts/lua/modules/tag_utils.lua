@@ -730,18 +730,6 @@ tag_utils.defined_tags = {
         operators = { 'eq', 'neq' },
         hourly_available = false,
     },
-    pre_nat_ipv4_src_addr = {
-        value_type = 'ip',
-        i18n_label = i18n("db_search.tags.pre_nat_ipv4_src_addr"),
-        operators = { 'eq', 'neq' },
-        hourly_available = false,
-    },
-    pre_nat_ipv4_dst_addr = {
-        value_type = 'ip',
-        i18n_label = i18n("db_search.tags.pre_nat_ipv4_dst_addr"),
-        operators = { 'eq', 'neq' },
-        hourly_available = false,
-    },
     post_nat_ipv4_src_addr = {
         value_type = 'ip',
         i18n_label = i18n("db_search.tags.post_nat_ipv4_src_addr"),
@@ -751,18 +739,6 @@ tag_utils.defined_tags = {
     post_nat_ipv4_dst_addr = {
         value_type = 'ip',
         i18n_label = i18n("db_search.tags.post_nat_ipv4_dst_addr"),
-        operators = { 'eq', 'neq' },
-        hourly_available = false,
-    },
-    pre_nat_src_port = {
-        value_type = 'port',
-        i18n_label = i18n("db_search.tags.pre_nat_src_port"),
-        operators = { 'eq', 'neq' },
-        hourly_available = false,
-    },
-    pre_nat_dst_port = {
-        value_type = 'port',
-        i18n_label = i18n("db_search.tags.pre_nat_dst_port"),
         operators = { 'eq', 'neq' },
         hourly_available = false,
     },

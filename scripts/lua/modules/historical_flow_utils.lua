@@ -1192,10 +1192,6 @@ local flow_columns = {
    ['DST_PROC_USER_NAME'] =   { tag = "srv_user_name", db_type = "String", db_raw_type = "String" },
    ['MAJOR_CONNECTION_STATE'] = { tag = "major_connection_state", dt_func = dt_format_major_connection_state, db_type = "Number", db_raw_type = "Uint8" },
    ['MINOR_CONNECTION_STATE'] = { tag = "minor_connection_state", dt_func = dt_format_minor_connection_state, db_type = "Number", db_raw_type = "Uint8" },
-   ['PRE_NAT_IPV4_SRC_ADDR']  = { tag = "pre_nat_ipv4_src_addr", dt_func = dt_format_nat_ip, select_func = "IPv4NumToString", db_type = "Number", db_raw_type = "Uint32"  },
-   ['PRE_NAT_SRC_PORT']       = { tag = "pre_nat_src_port", dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
-   ['PRE_NAT_IPV4_DST_ADDR']  = { tag = "pre_nat_ipv4_dst_addr", dt_func = dt_format_nat_ip, select_func = "IPv4NumToString", db_type = "Number", db_raw_type = "Uint32"  },
-   ['PRE_NAT_DST_PORT']       = { tag = "pre_nat_dst_port", dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
    ['POST_NAT_IPV4_SRC_ADDR'] = { tag = "post_nat_ipv4_src_addr", dt_func = dt_format_nat_ip, select_func = "IPv4NumToString", db_type = "Number", db_raw_type = "Uint32"  },
    ['POST_NAT_SRC_PORT']      = { tag = "post_nat_src_port", dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
    ['POST_NAT_IPV4_DST_ADDR'] = { tag = "post_nat_ipv4_dst_addr", dt_func = dt_format_nat_ip, select_func = "IPv4NumToString", db_type = "Number", db_raw_type = "Uint32"  },
@@ -1533,10 +1529,6 @@ function historical_flow_utils.get_tags()
    flow_defined_tags["out_of_order"] = tag_utils.defined_tags["out_of_order"]
    flow_defined_tags["lost"] = tag_utils.defined_tags["lost"]
    flow_defined_tags["l4proto"] = tag_utils.defined_tags["l4proto"]
-   flow_defined_tags["pre_nat_ipv4_src_addr"] = tag_utils.defined_tags["pre_nat_ipv4_src_addr"]
-   flow_defined_tags["pre_nat_src_port"] = tag_utils.defined_tags["pre_nat_src_port"]
-   flow_defined_tags["pre_nat_ipv4_dst_addr"] = tag_utils.defined_tags["pre_nat_ipv4_dst_addr"]
-   flow_defined_tags["pre_nat_dst_port"] = tag_utils.defined_tags["pre_nat_dst_port"]
    flow_defined_tags["post_nat_ipv4_src_addr"] = tag_utils.defined_tags["post_nat_ipv4_src_addr"]
    flow_defined_tags["post_nat_src_port"] = tag_utils.defined_tags["post_nat_src_port"]
    flow_defined_tags["post_nat_ipv4_dst_addr"] = tag_utils.defined_tags["post_nat_ipv4_dst_addr"]

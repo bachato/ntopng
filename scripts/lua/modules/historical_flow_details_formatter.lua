@@ -25,40 +25,23 @@ local function empty_ip(ip) return ip == '0.0.0.0' end
 -- ###############################################
 
 -- This function format info regarding pre/post nat ips and ports
-local function format_pre_post_nat_info(flow, info)
+local function format_post_nat_info(flow, info)
     local tmp = {}
     local nat_values = {}
 
     -- Checking empty values
     -- Checking IPs
-    if (not isEmptyString(info["PRE_NAT_IPV4_SRC_ADDR"]) and
-        not empty_ip(info["PRE_NAT_IPV4_SRC_ADDR"])) then
-        nat_values.pre_nat_src_ip = info["PRE_NAT_IPV4_SRC_ADDR"]
-    end
     if (not isEmptyString(info["POST_NAT_IPV4_SRC_ADDR"]) and
         not empty_ip(info["POST_NAT_IPV4_SRC_ADDR"])) then
         nat_values.post_nat_src_ip = info["POST_NAT_IPV4_SRC_ADDR"]
-    end
-    if (not isEmptyString(info["PRE_NAT_IPV4_DST_ADDR"]) and
-        not empty_ip(info["PRE_NAT_IPV4_DST_ADDR"])) then
-        nat_values.pre_nat_dst_ip = info["PRE_NAT_IPV4_DST_ADDR"]
     end
     if (not isEmptyString(info["POST_NAT_IPV4_DST_ADDR"]) and
         not empty_ip(info["POST_NAT_IPV4_DST_ADDR"])) then
         nat_values.post_nat_dst_ip = info["POST_NAT_IPV4_DST_ADDR"]
     end
-    -- Checking ports
-    if (not isEmptyString(info["PRE_NAT_SRC_PORT"]) and
-        not empty_port(info["PRE_NAT_SRC_PORT"])) then
-        nat_values.pre_nat_src_port = info["PRE_NAT_SRC_PORT"]
-    end
     if (not isEmptyString(info["POST_NAT_SRC_PORT"]) and
         not empty_port(info["POST_NAT_SRC_PORT"])) then
         nat_values.post_nat_src_port = info["POST_NAT_SRC_PORT"]
-    end
-    if (not isEmptyString(info["PRE_NAT_DST_PORT"]) and
-        not empty_port(info["PRE_NAT_DST_PORT"])) then
-        nat_values.pre_nat_dst_port = info["PRE_NAT_DST_PORT"]
     end
     if (not isEmptyString(info["POST_NAT_DST_PORT"]) and
         not empty_port(info["POST_NAT_DST_PORT"])) then
@@ -71,24 +54,9 @@ local function format_pre_post_nat_info(flow, info)
         return flow
     end
 
-    -- Substituting empty values
-    if not nat_values.post_nat_src_ip then
-        nat_values.post_nat_src_ip = nat_values.pre_nat_src_ip
-    end
-
-    if not nat_values.post_nat_dst_ip then
-        nat_values.post_nat_dst_ip = nat_values.pre_nat_dst_ip
-    end
-
-    if not nat_values.post_nat_src_port then
-        nat_values.post_nat_src_port = nat_values.pre_nat_src_port
-    end
-
-    if not nat_values.post_nat_dst_port then
-        nat_values.post_nat_dst_port = nat_values.pre_nat_dst_port
-    end
-
+    tprint(flow)
     -- Format all info
+    --[[
     local pre_nat_flow = nat_values.pre_nat_src_ip .. ":" ..
                              nat_values.pre_nat_src_port ..
                              ' <i class="fas fa-exchange-alt fa-lg"></i> ' ..
@@ -106,7 +74,7 @@ local function format_pre_post_nat_info(flow, info)
     flow[#flow + 1] = {
         name = i18n('db_explorer.post_nat_info'),
         values = {post_nat_flow}
-    }
+    }]]
 
     return flow
 end
@@ -990,7 +958,7 @@ function historical_flow_details_formatter.formatHistoricalFlowDetails(flow)
             end
         end
 
-        flow_details = format_pre_post_nat_info(flow_details, flow, info)
+        --flow_details = format_post_nat_info(flow_details, flow, info)
 
         if (flow["PROBE_IP"] and not isEmptyString(flow['PROBE_IP']) and
             (flow['PROBE_IP'] ~= '0.0.0.0')) then
