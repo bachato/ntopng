@@ -446,8 +446,7 @@ void Flow::freeDPIMemory() {
 /* *************************************** */
 
 Flow::~Flow() {
-  bool is_oneway_tcp_udp_flow =
-    (((protocol == IPPROTO_TCP) || (protocol == IPPROTO_UDP)) && isOneWay()) ? true : false;
+  bool is_oneway_tcp_udp_flow = (((protocol == IPPROTO_TCP) || (protocol == IPPROTO_UDP)) && isOneWay()) ? true : false;
 
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
   if(getUses() != 0 && !ntop->getGlobals()->isShutdown())
@@ -2333,24 +2332,20 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
   case NDPI_PROTOCOL_IP_ICMPV6:
     if(cli_host && cli_host->getICMPstats()) {
       if(partial->get_cli2srv_packets())
-	cli_host->getICMPstats()->incStats(
-					   partial->get_cli2srv_packets(), protos.icmp.cli2srv.icmp_type,
+	cli_host->getICMPstats()->incStats(partial->get_cli2srv_packets(), protos.icmp.cli2srv.icmp_type,
 					   protos.icmp.cli2srv.icmp_code, true /* Sent */, srv_host);
 
       if(partial->get_srv2cli_packets())
-	cli_host->getICMPstats()->incStats(
-					   partial->get_srv2cli_packets(), protos.icmp.srv2cli.icmp_type,
+	cli_host->getICMPstats()->incStats(partial->get_srv2cli_packets(), protos.icmp.srv2cli.icmp_type,
 					   protos.icmp.srv2cli.icmp_code, false /* Rcvd */, srv_host);
     }
     if(srv_host && srv_host->getICMPstats()) {
       if(partial->get_cli2srv_packets())
-	srv_host->getICMPstats()->incStats(
-					   partial->get_cli2srv_packets(), protos.icmp.cli2srv.icmp_type,
+	srv_host->getICMPstats()->incStats(partial->get_cli2srv_packets(), protos.icmp.cli2srv.icmp_type,
 					   protos.icmp.cli2srv.icmp_code, false /* Rcvd */, cli_host);
 
       if(partial->get_srv2cli_packets())
-	srv_host->getICMPstats()->incStats(
-					   partial->get_srv2cli_packets(), protos.icmp.srv2cli.icmp_type,
+	srv_host->getICMPstats()->incStats(partial->get_srv2cli_packets(), protos.icmp.srv2cli.icmp_type,
 					   protos.icmp.srv2cli.icmp_code, true /* Sent */, cli_host);
     }
 
@@ -2622,7 +2617,7 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
   }
 
   get_partial_traffic_stats(&periodic_stats_base, &partial, &first_partial);
-
+  
   /* Do the stats update on the actual peers, i.e., peers possibly swapped due to the heuristic */
   get_actual_peers(&cli_h, &srv_h);
 
@@ -4800,11 +4795,11 @@ void Flow::housekeep(time_t t) {
 	  *srv_network_stats = iface->getNetworkStats(srv_net_id);
 
 	if(cli_network_stats)
-	  cli_network_stats->incTrafficBetweenNets(
-						   srv_net_id, get_bytes_cli2srv(), get_bytes_srv2cli());
+	  cli_network_stats->incTrafficBetweenNets(srv_net_id,
+						   get_bytes_cli2srv(), get_bytes_srv2cli());
 	if(srv_network_stats)
-	  srv_network_stats->incTrafficBetweenNets(
-						   cli_net_id, get_bytes_srv2cli(), get_bytes_cli2srv());
+	  srv_network_stats->incTrafficBetweenNets(cli_net_id,
+						   get_bytes_srv2cli(), get_bytes_cli2srv());
 #ifdef DEBUG
 	ntop->getTrace()->traceEvent(TRACE_NORMAL,
 				     "Cli Network ID: %u | Srv Network ID: "
