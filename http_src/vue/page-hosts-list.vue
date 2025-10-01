@@ -3,12 +3,11 @@
     <div class="m-2 mb-3">
         <TableWithConfig ref="table_hosts_list" :table_id="table_id" :csrf="csrf" :showLoading="true"
             :f_map_columns="map_table_def_columns" :get_extra_params_obj="get_extra_params_obj"
-            :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event" @rows_loaded="change_filter_labels">
+            :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event">
             <template v-slot:custom_header>
                 <div class="dropdown me-3 d-inline-block" v-for="item in filter_table_array">
                     <span class="no-wrap d-flex align-items-center my-auto me-2 filters-label"><b>{{ item["basic_label"]
-                            }}</b></span>
-                    <!-- :key="host_filters_key" -->
+                    }}</b></span>
                     <SelectSearch v-model:selected_option="item['current_option']" theme="bootstrap-5"
                         dropdown_size="small" :disabled="loading" :options="item['options']"
                         @select_option="add_table_filter">
@@ -25,7 +24,7 @@
     </div>
 </template>
 <script setup>
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted, onBeforeMount } from "vue";
 import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as SelectSearch } from "./select-search.vue";
 import { default as osUtils } from "../utilities/map/os-utils.js";
@@ -44,8 +43,6 @@ const props = defineProps({
 /* ************************************** */
 
 const loading = ref(false);
-const host_filters_key = ref(0);
-const as_filters_key = ref(0);
 let table_id = props.context?.has_vlans ? ref('hosts_list_with_vlans') : ref('hosts_list')
 if (props.context.isNedge) {
     table_id = props.context?.has_vlans ? ref('nedge_hosts_list_with_vlans') : ref('nedge_hosts_list')
@@ -53,7 +50,7 @@ if (props.context.isNedge) {
 const table_hosts_list = ref(null);
 const csrf = props.context.csrf;
 const filter_table_array = ref([]);
-const filter_table_dropdown_array = ref([]);
+const filters = ref([]);
 const child_safe_icon = "<font color='#5cb85c'><i class='fas fa-lg fa-child' aria-hidden='true' title='" + i18n("host_pools.children_safe") + "'></i></font>"
 const system_host_icon = "<i class='fas fa-flag' title='" + i18n("system_host") + "'></i>"
 const hidden_from_top_icon = "<i class='fas fa-eye-slash' title='" + i18n("hidden_from_top_talkers") + "'></i>"
@@ -232,12 +229,12 @@ const map_table_def_columns = (columns) => {
 
                     // handle block button
                     if (b.id === "block_host") {
-		       if(props.context.isNedge) {
-                         current_class[0] = row.isBlocked ? "btn-danger" : "btn-secondary";
-  		       } else {
-		         // ntopng
-		         current_class[0] = "invisible";
-		       }
+                        if (props.context.isNedge) {
+                            current_class[0] = row.isBlocked ? "btn-danger" : "btn-secondary";
+                        } else {
+                            // ntopng
+                            current_class[0] = "invisible";
+                        }
                     }
 
                     return current_class;
@@ -248,6 +245,40 @@ const map_table_def_columns = (columns) => {
 
     return columns;
 };
+
+/* ************************************** */
+
+function set_filters_list(res) {
+    if (!res) {
+        filter_table_array.value = filters.value.filter((t) => {
+            if (t.show_with_key) {
+                const key = ntopng_url_manager.get_url_entry(t.show_with_key)
+                if (key !== t.show_with_value) {
+                    return false
+                }
+            }
+            return true
+        })
+    } else {
+        filters.value = res.map((t) => {
+            const key_in_url = ntopng_url_manager.get_url_entry(t.name);
+            if (key_in_url === null) {
+                ntopng_url_manager.set_key_to_url(t.name, ``);
+            }
+            return {
+                id: t.name,
+                label: t.label,
+                title: t.tooltip,
+                options: t.value,
+                show_with_key: t.show_with_key,
+                show_with_value: t.show_with_value,
+            };
+        });
+        set_filters_list();
+        return;
+    }
+    set_filter_array_label();
+}
 
 /* ************************************** */
 
@@ -270,64 +301,25 @@ function set_filter_array_label() {
 
 /* ************************************** */
 
-function change_filter_labels() {
-    set_filter_array_label()
-}
-
-/* ************************************** */
-
-async function add_table_filter(opt) {
+function add_table_filter(opt) {
     ntopng_url_manager.set_key_to_url(opt.key, `${opt.value}`);
-    set_filter_array_label();
-    table_hosts_list.value.refresh_table();
-    filter_table_array.value = await load_table_filters_array()
-}
-
-/* ************************************** */
-
-const get_open_filter_table_dropdown = (filter, filter_index) => {
-    return (_) => {
-        load_table_filters(filter, filter_index);
-    };
-};
-
-/* ************************************** */
-
-async function load_table_filters(filter, filter_index) {
-    filter.show_spinner = true;
-    await nextTick();
-    filter.options = filter_table_array.value.find((t) => t.id == filter.id).options;
-    await nextTick();
-    let dropdown = filter_table_dropdown_array.value[filter_index];
-    dropdown.load_menu();
-    filter.show_spinner = false;
+    refresh_table_without_loading();
+    load_table_filters_array()
 }
 
 /* ************************************** */
 
 async function load_table_filters_array() {
     loading.value = true;
-    let extra_params = get_extra_params_obj();
-    let url_params = ntopng_url_manager.obj_to_url_params(extra_params);
-    const url = `${http_prefix}/lua/rest/v2/get/host/host_filters.lua?${url_params}`;
-    let res = await ntopng_utility.http_request(url);
-    host_filters_key.value = host_filters_key.value + 1
-    as_filters_key.value = as_filters_key.value + 1
-    loading.value = false;
 
-    return res.map((t) => {
-        const key_in_url = ntopng_url_manager.get_url_entry(t.name);
-        if (dataUtils.isEmptyOrNull(key_in_url)) {
-            ntopng_url_manager.set_key_to_url(t.name, ``);
-        }
-        return {
-            id: t.name,
-            label: t.label,
-            title: t.tooltip,
-            options: t.value,
-            hidden: (t.value.length == 1)
-        };
-    });
+    const extra_params = get_extra_params_obj();
+    const url_params = ntopng_url_manager.obj_to_url_params(extra_params);
+    const url = `${http_prefix}/lua/rest/v2/get/host/host_filters.lua?${url_params}`;
+    const res = await ntopng_utility.http_request(url);
+
+    set_filters_list(res)
+
+    loading.value = false;
 }
 
 /* ************************************** */
@@ -400,15 +392,28 @@ function on_table_custom_event(event) {
     events_managed[event.event_id](event);
 }
 
+/* ************************************** */
+
+function refresh_table_without_loading() {
+    table_hosts_list.value.refresh_table(false);
+}
+
+/* ************************************** */
+
 function refresh_table() {
     table_hosts_list.value.refresh_table(true);
 }
 
 /* ************************************** */
 
+onBeforeMount(() => {
+    load_table_filters_array();
+})
+
+/* ************************************** */
+
 onMounted(async () => {
     setInterval(refresh_table, 10000)
-    filter_table_array.value = await load_table_filters_array();
     set_filter_array_label()
 });
 

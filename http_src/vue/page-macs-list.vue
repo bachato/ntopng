@@ -271,6 +271,8 @@ function columns_sorting(col, r0, r1) {
       return sortingFunctions.sortByName(r0.manufacturer, r1.manufacturer, col.sort);
     } else if (col.id == "mac") {
       return sortingFunctions.sortByMacAddress(r0.mac, r1.mac, col.sort);
+    } else if (col.id == "location") {
+      return sortingFunctions.sortByName(r0.location, r1.location, col.sort);
     } else if (col.id == "hosts") {
       return sortingFunctions.sortByNumber(r0.hosts, r1.hosts, col.sort);
     } else if (col.id == "arp") {
@@ -294,7 +296,7 @@ const get_extra_params_obj = () => {
 /* ************************************** */
 
 function refresh_table() {
-    table_macs_list.value.refresh_table(true);
+    table_macs_list.value.refresh_table(false);
 }
 
 /* ************************************** */

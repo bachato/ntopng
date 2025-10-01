@@ -22,7 +22,7 @@
 		{
 			"title_i18n": "location",
 			"data_field": "location",
-			"sortable": false,
+			"sortable": true,
 			"min-width" : "120px",
 			"class": [
 				"text-nowrap"

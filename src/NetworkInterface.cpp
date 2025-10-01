@@ -5663,7 +5663,7 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
       )
     return (false);
 
-#ifdef HAVE_NEDG
+#ifdef HAVE_NEDGE
   Mac *h_mac = (h->getMac() ? h->getMac() : NULL);
 #endif
 
@@ -5708,7 +5708,7 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
       (r->device_ip && h->getLastDeviceIp() &&
        (r->device_ip != h->getLastDeviceIp())) ||
       (r->dhcpHostsOnly && (!h->isDHCPHost())) ||
-#ifdef HAVE_NEDG
+#ifdef HAVE_NEDGE
       ((r->locationFilter != u_int8_t (-1)) && (!h_mac || h_mac->locate() != r->locationFilter)) ||
 #endif
       (r->alerted && (!h->getScore())) ||
