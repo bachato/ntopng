@@ -73,10 +73,8 @@ typedef struct {
 
   struct {
     /* IPv4 only, so a int32 bit is only needed */
-    u_int32_t src_ip_addr_pre_nat, dst_ip_addr_pre_nat,
-      src_ip_addr_post_nat, dst_ip_addr_post_nat;
-    u_int16_t src_port_pre_nat, dst_port_pre_nat,
-      src_port_post_nat, dst_port_post_nat;
+    u_int32_t src_ip_addr_post_nat, dst_ip_addr_post_nat;
+    u_int16_t src_port_post_nat, dst_port_post_nat;
   } nat;
 } FlowCollectionInfo;
 
@@ -730,15 +728,11 @@ public:
                     u_int in_fragments, u_int out_fragments, time_t first_seen,
                     time_t last_seen);
 
-  void addPrePostNATIPv4(u_int32_t _src_ip_addr_pre_nat,
-			 u_int32_t _dst_ip_addr_pre_nat,
-			 u_int32_t _src_ip_addr_post_nat,
-			 u_int32_t _dst_ip_addr_post_nat);
+  void addPostNATIPv4(u_int32_t _src_ip_addr_post_nat,
+		      u_int32_t _dst_ip_addr_post_nat);
 
-  void addPrePostNATPort(u_int32_t _src_port_pre_nat,
-			 u_int32_t _dst_port_pre_nat,
-			 u_int32_t _src_port_post_nat,
-			 u_int32_t _dst_port_post_nat);
+  void addPostNATPort(u_int32_t _src_port_post_nat,
+		      u_int32_t _dst_port_post_nat);
   void check_swap();
 
   bool isThreeWayHandshakeOK() const;
@@ -1540,12 +1534,8 @@ public:
   bool isTCPFlagSet(u_int8_t flags, int flag_to_check);
   MinorConnectionStates calculateConnectionState(bool is_cumulative);
   MajorConnectionStates getMajorConnState();
-  inline u_int32_t getPreNATSrcIp()    { return(collection ? ntohl(collection->nat.src_ip_addr_pre_nat) : 0);  };
-  inline u_int32_t getPreNATDstIp()    { return(collection ? ntohl(collection->nat.dst_ip_addr_pre_nat) : 0);  };
   inline u_int32_t getPostNATSrcIp()   { return(collection ? ntohl(collection->nat.src_ip_addr_post_nat) : 0); };
   inline u_int32_t getPostNATDstIp()   { return(collection ? ntohl(collection->nat.dst_ip_addr_post_nat) : 0); };
-  inline u_int16_t getPreNATSrcPort()  { return(collection ? ntohs(collection->nat.src_port_pre_nat) : 0);     };
-  inline u_int16_t getPreNATDstPort()  { return(collection ? ntohs(collection->nat.dst_port_pre_nat) : 0);     };
   inline u_int16_t getPostNATSrcPort() { return(collection ? ntohs(collection->nat.src_port_post_nat) : 0);    };
   inline u_int16_t getPostNATDstPort() { return(collection ? ntohs(collection->nat.dst_port_post_nat) : 0);    };
   void getSrcAS(u_int32_t *as, char *as_name);

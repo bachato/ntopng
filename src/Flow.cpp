@@ -2450,7 +2450,7 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
       }
     } else if(iface->hasMACs() && (!iface->isView()) && iface->isPacketInterface()) {
       char buf[128];
-      
+
       ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL client MAC [%s]", print(buf, sizeof(buf)));
     }
 
@@ -2468,7 +2468,7 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 			    diff_sent_bytes, diff_sent_goodput_bytes);
     } else if(iface->hasMACs() && (!iface->isView()) && iface->isPacketInterface()) {
       char buf[128];
-      
+
       ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL server MAC [%s]", print(buf, sizeof(buf)));
     }
 
@@ -2617,7 +2617,7 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
   }
 
   get_partial_traffic_stats(&periodic_stats_base, &partial, &first_partial);
-  
+
   /* Do the stats update on the actual peers, i.e., peers possibly swapped due to the heuristic */
   get_actual_peers(&cli_h, &srv_h);
 
@@ -3077,7 +3077,7 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
     lua_push_uint32_table_entry(vm, "num_flow_processed_pkts", numFlowProcessedPkts);
     lua_push_uint32_table_entry(vm, "num_flow_marker_pkts",    numPktsMarkerSet);
 #endif
-    
+
     lua_get_flow_connection_state(vm);
 
     luaScore(vm);
@@ -3785,8 +3785,8 @@ void Flow::formatECSNetwork(json_object *my_object, const IpAddress *addr) {
 void Flow::formatECSHost(json_object *my_object, bool is_client,
                          const IpAddress *addr, Host *host) {
   json_object *host_object;
-  bool use_nat = false;
-
+  u_int16_t port;
+  
   if((host_object = json_object_new_object()) != NULL) {
     char buf[64], jsonbuf[64], *c;
     IpAddress tmp_ip;
@@ -3800,15 +3800,8 @@ void Flow::formatECSHost(json_object *my_object, bool is_client,
 
     /* Adding IP */
     if(addr) {
-      if(getPreNATSrcIp()) {
-        tmp_ip.set(htonl(getPreNATSrcIp()));
-        if(is_client && (getPreNATSrcIp() != getPostNATSrcIp()))
-          use_nat = true;
-      } else {
         tmp_ip.set(addr);
-      }
 
-      /* With NAT they are IPv4 */
       json_object_object_add(host_object,
 			     Utils::jsonLabel(is_client ? (tmp_ip.isIPv4() ? IPV4_SRC_ADDR : IPV6_SRC_ADDR)
 					      : (tmp_ip.isIPv4() ? IPV4_DST_ADDR : IPV6_DST_ADDR),
@@ -3839,9 +3832,10 @@ void Flow::formatECSHost(json_object *my_object, bool is_client,
       tmp_ip.reset();
     }
 
-    if(use_nat) {
+    if(getPostNATSrcIp() || getPostNATDstIp()) {
       json_object *nat = json_object_new_object();
       u_int16_t port = 0;
+
       if(is_client) {
         tmp_ip.set(getPostNATSrcIp());
         port = getPostNATSrcPort();
@@ -3881,11 +3875,7 @@ void Flow::formatECSHost(json_object *my_object, bool is_client,
       }
     }
 
-    u_int16_t port = 0;
-    if(use_nat)
-      port = is_client ? getPreNATSrcPort() : getPreNATDstPort();
-    else
-      port = is_client ? get_cli_port() : get_srv_port();
+    port = is_client ? get_cli_port() : get_srv_port();
 
     /* Type of Service */
     json_object_object_add(host_object,
@@ -8764,16 +8754,12 @@ MinorConnectionStates Flow::calculateConnectionState(bool is_cumulative) {
 
 /* **************************************************** */
 
-void Flow::addPrePostNATIPv4(u_int32_t _src_ip_addr_pre_nat,
-			     u_int32_t _dst_ip_addr_pre_nat,
-			     u_int32_t _src_ip_addr_post_nat,
-			     u_int32_t _dst_ip_addr_post_nat) {
+void Flow::addPostNATIPv4(u_int32_t _src_ip_addr_post_nat,
+			  u_int32_t _dst_ip_addr_post_nat) {
 
   allocateCollection();
 
   if(collection) {
-    collection->nat.src_ip_addr_pre_nat = _src_ip_addr_pre_nat;
-    collection->nat.dst_ip_addr_pre_nat = _dst_ip_addr_pre_nat;
     collection->nat.src_ip_addr_post_nat = _src_ip_addr_post_nat;
     collection->nat.dst_ip_addr_post_nat = _dst_ip_addr_post_nat;
   }
@@ -8781,16 +8767,12 @@ void Flow::addPrePostNATIPv4(u_int32_t _src_ip_addr_pre_nat,
 
 /* **************************************************** */
 
-void Flow::addPrePostNATPort(u_int32_t _src_port_pre_nat,
-			     u_int32_t _dst_port_pre_nat,
-			     u_int32_t _src_port_post_nat,
-			     u_int32_t _dst_port_post_nat) {
+void Flow::addPostNATPort(u_int32_t _src_port_post_nat,
+			  u_int32_t _dst_port_post_nat) {
 
   allocateCollection();
 
   if(collection) {
-    collection->nat.src_port_pre_nat = _src_port_pre_nat;
-    collection->nat.dst_port_pre_nat = _dst_port_pre_nat;
     collection->nat.src_port_post_nat = _src_port_post_nat;
     collection->nat.dst_port_post_nat = _dst_port_post_nat;
   }

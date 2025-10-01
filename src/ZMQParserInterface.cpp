@@ -769,10 +769,6 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow *const flow,
 				     "Attempt to set source ip multiple times. "
 				     "Check exported fields");
     }
-    /* Pre-Post nat IPs are only supported for IPv4 */
-    if (flow->src_ip.isIPv4()) {
-      flow->setPreNATSrcIp(flow->src_ip.get_ipv4());
-    }
     break;
   case IP_PROTOCOL_VERSION:
     flow->version = value->int_num;
@@ -794,10 +790,6 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow *const flow,
 				     "Attempt to set destination ip multiple times. "
 				     "Check exported fields");
     }
-    /* Pre-Post nat IPs are only supported for IPv4 */
-    if (flow->dst_ip.isIPv4()) {
-      flow->setPreNATDstIp(flow->dst_ip.get_ipv4());
-    }
     break;
   case L4_SRC_PORT:
     if (!flow->src_port) {
@@ -805,9 +797,6 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow *const flow,
 	flow->src_port = atoi(value->string);
       else
 	flow->src_port = ntohs((u_int32_t)value->int_num);
-
-      flow->setPreNATSrcPort(flow->src_port);
-
 #ifdef DEBUG
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "L4_SRC_PORT %u", htons(flow->src_port));
 #endif
@@ -819,8 +808,6 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow *const flow,
 	flow->dst_port = atoi(value->string);
       else
 	flow->dst_port = ntohs((u_int32_t)value->int_num);
-
-      flow->setPreNATDstPort(flow->dst_port);
 
 #ifdef DEBUG
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "L4_DST_PORT %u", htons(flow->dst_port));

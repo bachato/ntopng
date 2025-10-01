@@ -509,14 +509,9 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     }
   }
 
-  if (zflow->getPreNATSrcIp()) {
-    /* Add Pre-Post NAT src/dst IPv4 */
-    flow->addPrePostNATIPv4(zflow->getPreNATSrcIp(), zflow->getPreNATDstIp(),
-                            zflow->getPostNATSrcIp(), zflow->getPostNATDstIp());
-
-    /* Add Pre-Post NAT src/dst Ports */
-    flow->addPrePostNATPort(zflow->getPreNATSrcPort(), zflow->getPreNATDstPort(),
-			    zflow->getPostNATSrcPort(), zflow->getPostNATDstPort());
+  if (zflow->getPostNATSrcIp()) {
+    flow->addPostNATIPv4(zflow->getPostNATSrcIp(), zflow->getPostNATDstIp());
+    flow->addPostNATPort(zflow->getPostNATSrcPort(), zflow->getPostNATDstPort());
   }
 
   if (!flow->isDetectionCompleted()) {
