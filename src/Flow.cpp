@@ -1998,12 +1998,35 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
                                        PartializableFlowTrafficStats *partial,
                                        bool first_partial,
                                        const struct timeval *tv) {
-  u_int32_t diff_sent_packets = partial->get_cli2srv_packets();
-  u_int64_t diff_sent_bytes = partial->get_cli2srv_bytes();
+  u_int32_t diff_sent_packets       = partial->get_cli2srv_packets();
+  u_int64_t diff_sent_bytes         = partial->get_cli2srv_bytes();
   u_int64_t diff_sent_goodput_bytes = partial->get_cli2srv_goodput_bytes();
-  u_int32_t diff_rcvd_packets = partial->get_srv2cli_packets();
-  u_int64_t diff_rcvd_bytes = partial->get_srv2cli_bytes();
+  u_int32_t diff_rcvd_packets       = partial->get_srv2cli_packets();
+  u_int64_t diff_rcvd_bytes         = partial->get_srv2cli_bytes();
   u_int64_t diff_rcvd_goodput_bytes = partial->get_srv2cli_goodput_bytes();
+  static bool shown = false;
+
+  if((diff_sent_packets == 0) && (diff_sent_bytes > 0)) {
+    if(!shown) {
+      ntop->getTrace()->traceEvent(TRACE_WARNING, "Inconsistency found [%u / %u]", diff_sent_packets, diff_sent_bytes);
+      shown = true;
+    }
+  } else if((diff_sent_packets > 0) && (diff_sent_bytes == 0)) {
+    if(!shown) {
+      ntop->getTrace()->traceEvent(TRACE_WARNING, "Inconsistency found [%u / %u]", diff_sent_packets, diff_sent_bytes);
+      shown = true;
+      }
+  } else if((diff_rcvd_packets == 0) && (diff_rcvd_bytes > 0)) {
+    if(!shown) {
+      ntop->getTrace()->traceEvent(TRACE_WARNING, "Inconsistency found [%u / %u]", diff_rcvd_packets, diff_rcvd_bytes);
+      shown = true;
+    }
+  } else if((diff_rcvd_packets > 0) && (diff_rcvd_bytes == 0)) {
+    if(!shown) {
+      ntop->getTrace()->traceEvent(TRACE_WARNING, "Inconsistency found [%u / %u]", diff_rcvd_packets, diff_rcvd_bytes);
+      shown = true;
+    }
+  }
 
   if((!isDNS()) && ntop->getPrefs()->is_dns_cache_enabled()) {
     if(!srv_host) {
@@ -2049,55 +2072,55 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "Increasing VLAN %u stats",
                                    u_int16_t);
 #endif
-      vl->incStats(tv->tv_sec, stats_protocol, partial->get_cli2srv_packets(),
-                   partial->get_cli2srv_bytes(), partial->get_srv2cli_packets(),
-                   partial->get_srv2cli_bytes());
+      vl->incStats(tv->tv_sec, stats_protocol, diff_sent_packets,
+                   diff_sent_bytes, diff_rcvd_packets,
+                   diff_rcvd_bytes);
     }
 
     // Update local stats (local vs remote)
     // this replaces the old call to Flow::updateInterfaceLocalStats from packet
     // processing
-    iface->incLocalStats(partial->get_cli2srv_packets(),
-                         partial->get_cli2srv_bytes(), cli_host->isLocalHost(),
+    iface->incLocalStats(diff_sent_packets,
+                         diff_sent_bytes, cli_host->isLocalHost(),
                          srv_host->isLocalHost());
-    iface->incLocalStats(partial->get_srv2cli_packets(),
-                         partial->get_srv2cli_bytes(), srv_host->isLocalHost(),
+    iface->incLocalStats(diff_rcvd_packets,
+                         diff_rcvd_bytes, srv_host->isLocalHost(),
                          cli_host->isLocalHost());
 
     // Update network stats
     cli_network_stats = cli_host->getNetworkStats(cli_network_id);
     cli_host->incStats(tv->tv_sec, get_protocol(), stats_protocol, get_protocol_category(),
-		       custom_app, partial->get_cli2srv_packets(),
-		       partial->get_cli2srv_bytes(), partial->get_cli2srv_goodput_bytes(),
-		       partial->get_srv2cli_packets(), partial->get_srv2cli_bytes(),
+		       custom_app, diff_sent_packets,
+		       diff_sent_bytes, partial->get_cli2srv_goodput_bytes(),
+		       diff_rcvd_packets, diff_rcvd_bytes,
 		       partial->get_srv2cli_goodput_bytes(),
 		       srv_host->get_ip()->isNonEmptyUnicastAddress());
 
     // update per-subnet byte counters
     if(cli_network_stats) {  // only if the network is known and local
       if(!cli_and_srv_in_same_subnet) {
-        cli_network_stats->incEgress(tv->tv_sec, partial->get_cli2srv_packets(),
-                                     partial->get_cli2srv_bytes(),
+        cli_network_stats->incEgress(tv->tv_sec, diff_sent_packets,
+                                     diff_sent_bytes,
                                      srv_host->get_ip()->isBroadcastAddress());
         cli_network_stats->incIngress(tv->tv_sec,
-                                      partial->get_srv2cli_packets(),
-                                      partial->get_srv2cli_bytes(),
+                                      diff_rcvd_packets,
+                                      diff_rcvd_bytes,
                                       cli_host->get_ip()->isBroadcastAddress());
       } else  // client and server ARE in the same subnet
         // need to update the inner counter (just one time, will intentionally
         // skip this for srv_host)
         cli_network_stats->incInner(tv->tv_sec,
-				    partial->get_cli2srv_packets() + partial->get_srv2cli_packets(),
-				    partial->get_cli2srv_bytes() + partial->get_srv2cli_bytes(),
+				    diff_sent_packets + diff_rcvd_packets,
+				    diff_sent_bytes + diff_rcvd_bytes,
 				    srv_host->get_ip()->isBroadcastAddress() ||
 				    cli_host->get_ip()->isBroadcastAddress());
     }
 
     srv_network_stats = srv_host->getNetworkStats(srv_network_id);
     srv_host->incStats(tv->tv_sec, get_protocol(), stats_protocol, get_protocol_category(),
-		       custom_app, partial->get_srv2cli_packets(),
-		       partial->get_srv2cli_bytes(), partial->get_srv2cli_goodput_bytes(),
-		       partial->get_cli2srv_packets(), partial->get_cli2srv_bytes(),
+		       custom_app, diff_rcvd_packets,
+		       diff_rcvd_bytes, partial->get_srv2cli_goodput_bytes(),
+		       diff_sent_packets, diff_sent_bytes,
 		       partial->get_cli2srv_goodput_bytes(),
 		       cli_host->get_ip()->isNonEmptyUnicastAddress());
 
@@ -2105,11 +2128,10 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
       // local and known server network
       if(!cli_and_srv_in_same_subnet) {
         srv_network_stats->incIngress(tv->tv_sec,
-                                      partial->get_cli2srv_packets(),
-                                      partial->get_cli2srv_bytes(),
+                                      diff_sent_packets, diff_sent_bytes,
                                       srv_host->get_ip()->isBroadcastAddress());
-        srv_network_stats->incEgress(tv->tv_sec, partial->get_srv2cli_packets(),
-                                     partial->get_srv2cli_bytes(),
+        srv_network_stats->incEgress(tv->tv_sec, diff_rcvd_packets,
+                                     diff_rcvd_bytes,
                                      cli_host->get_ip()->isBroadcastAddress());
       }
     }
@@ -2119,13 +2141,15 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 	*srv_as = srv_host ? srv_host->get_as() : NULL;
 
       if(cli_as)
-        cli_as->incStats(tv->tv_sec, stats_protocol, partial->get_cli2srv_packets(),
-			 partial->get_cli2srv_bytes(), partial->get_srv2cli_packets(),
-			 partial->get_srv2cli_bytes(), getFlowDeviceIP(), getFlowDeviceInIndex(), getFlowDeviceOutIndex());
+        cli_as->incStats(tv->tv_sec, stats_protocol, diff_sent_packets,
+			 diff_sent_bytes, diff_rcvd_packets,
+			 diff_rcvd_bytes, getFlowDeviceIP(),
+			 getFlowDeviceInIndex(), getFlowDeviceOutIndex());
       if(srv_as)
-        srv_as->incStats(tv->tv_sec, stats_protocol, partial->get_srv2cli_packets(),
-			 partial->get_srv2cli_bytes(), partial->get_cli2srv_packets(),
-			 partial->get_cli2srv_bytes(), getFlowDeviceIP(), getFlowDeviceInIndex(), getFlowDeviceOutIndex());
+        srv_as->incStats(tv->tv_sec, stats_protocol, diff_rcvd_packets,
+			 diff_rcvd_bytes, diff_sent_packets,
+			 diff_sent_bytes, getFlowDeviceIP(),
+			 getFlowDeviceInIndex(), getFlowDeviceOutIndex());
     }
 
     if(cli_host->get_observation_point_id() &&
@@ -2134,26 +2158,24 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 	*srv_obs_point = srv_host ? srv_host->get_obs_point() : NULL;
 
       if(cli_obs_point)
-        cli_obs_point->incStats(tv->tv_sec, stats_protocol, partial->get_cli2srv_packets(),
-				partial->get_cli2srv_bytes(), partial->get_srv2cli_packets(),
-				partial->get_srv2cli_bytes());
+        cli_obs_point->incStats(tv->tv_sec, stats_protocol, diff_sent_packets,
+				diff_sent_bytes, diff_rcvd_packets,
+				diff_rcvd_bytes);
       if(srv_obs_point)
-        srv_obs_point->incStats(tv->tv_sec, stats_protocol, partial->get_srv2cli_packets(),
-				partial->get_srv2cli_bytes(), partial->get_cli2srv_packets(),
-				partial->get_cli2srv_bytes());
+        srv_obs_point->incStats(tv->tv_sec, stats_protocol, diff_rcvd_packets,
+				diff_rcvd_bytes, diff_sent_packets,
+				diff_sent_bytes);
     }
 
     // Update client DSCP stats
-    cli_host->incDSCPStats(getCli2SrvDSCP(), partial->get_cli2srv_packets(),
-                           partial->get_cli2srv_bytes(),
-                           partial->get_srv2cli_packets(),
-                           partial->get_srv2cli_bytes());
+    cli_host->incDSCPStats(getCli2SrvDSCP(), diff_sent_packets,
+                           diff_sent_bytes,  diff_rcvd_packets,
+                           diff_rcvd_bytes);
 
     // Update server DSCP stats
-    srv_host->incDSCPStats(getSrv2CliDSCP(), partial->get_srv2cli_packets(),
-                           partial->get_srv2cli_bytes(),
-                           partial->get_cli2srv_packets(),
-                           partial->get_cli2srv_bytes());
+    srv_host->incDSCPStats(getSrv2CliDSCP(), diff_rcvd_packets,
+                           diff_rcvd_bytes,  diff_sent_packets,
+                           diff_sent_bytes);
 
     // Update Country stats
     Country *cli_country_stats = cli_host->getCountryStats();
@@ -2165,19 +2187,18 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 
     if(cli_country_stats) {
       if(!cli_and_srv_in_same_country) {
-        cli_country_stats->incEgress(tv->tv_sec, partial->get_cli2srv_packets(),
-                                     partial->get_cli2srv_bytes(),
+        cli_country_stats->incEgress(tv->tv_sec, diff_sent_packets,
+                                     diff_sent_bytes,
                                      srv_host->get_ip()->isBroadcastAddress());
         cli_country_stats->incIngress(tv->tv_sec,
-                                      partial->get_srv2cli_packets(),
-                                      partial->get_srv2cli_bytes(),
+                                      diff_rcvd_packets, diff_rcvd_bytes,
                                       cli_host->get_ip()->isBroadcastAddress());
       } else  // client and server ARE in the same country
         // need to update the inner counter (just one time, will intentionally
         // skip this for srv_host)
         cli_country_stats->incInner(tv->tv_sec,
-				    partial->get_cli2srv_packets() + partial->get_srv2cli_packets(),
-				    partial->get_cli2srv_bytes() + partial->get_srv2cli_bytes(),
+				    diff_sent_packets + diff_rcvd_packets,
+				    diff_sent_bytes + diff_rcvd_bytes,
 				    srv_host->get_ip()->isBroadcastAddress() ||
 				    cli_host->get_ip()->isBroadcastAddress());
     }
@@ -2185,11 +2206,10 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
     if(srv_country_stats) {
       if(!cli_and_srv_in_same_country) {
         srv_country_stats->incIngress(tv->tv_sec,
-                                      partial->get_cli2srv_packets(),
-                                      partial->get_cli2srv_bytes(),
+                                      diff_sent_packets, diff_sent_bytes,
                                       srv_host->get_ip()->isBroadcastAddress());
-        srv_country_stats->incEgress(tv->tv_sec, partial->get_srv2cli_packets(),
-                                     partial->get_srv2cli_bytes(),
+        srv_country_stats->incEgress(tv->tv_sec, diff_rcvd_packets,
+                                     diff_rcvd_bytes,
                                      cli_host->get_ip()->isBroadcastAddress());
       }
     }
@@ -2197,10 +2217,9 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 
   // Update interface DSCP stats
   if(iface) {
-    iface->incDSCPStats(getCli2SrvDSCP(), partial->get_cli2srv_packets(),
-                        partial->get_cli2srv_bytes(),
-                        partial->get_srv2cli_packets(),
-                        partial->get_srv2cli_bytes());
+    iface->incDSCPStats(getCli2SrvDSCP(), diff_sent_packets,
+                        diff_sent_bytes, diff_rcvd_packets,
+                        diff_rcvd_bytes);
   }
 
   switch (get_protocol()) {
@@ -2215,15 +2234,15 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 
   case IPPROTO_ICMP:
     if(iface) {
-      if(partial->get_cli2srv_packets())
+      if(diff_sent_packets)
 	iface->incICMPStats(false /* icmp v4 */,
-			    partial->get_cli2srv_packets(),
+			    diff_sent_packets,
 			    protos.icmp.cli2srv.icmp_type,
 			    protos.icmp.cli2srv.icmp_code, true);
 
-      if(partial->get_srv2cli_packets())
+      if(diff_rcvd_packets)
 	iface->incICMPStats(false /* icmp v4 */,
-			    partial->get_srv2cli_packets(),
+			    diff_rcvd_packets,
 			    protos.icmp.srv2cli.icmp_type,
 			    protos.icmp.srv2cli.icmp_code, true);
     }
@@ -2231,15 +2250,15 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 
   case IPPROTO_ICMPV6:
     if(iface) {
-      if(partial->get_cli2srv_packets())
+      if(diff_sent_packets)
 	iface->incICMPStats(true /* icmp v6 */,
-			    partial->get_cli2srv_packets(),
+			    diff_sent_packets,
 			    protos.icmp.cli2srv.icmp_type,
 			    protos.icmp.cli2srv.icmp_code, true);
 
-      if(partial->get_srv2cli_packets())
+      if(diff_rcvd_packets)
 	iface->incICMPStats(true /* icmp v6 */,
-			    partial->get_srv2cli_packets(),
+			    diff_rcvd_packets,
 			    protos.icmp.srv2cli.icmp_type,
 			    protos.icmp.srv2cli.icmp_code, true);
     }
@@ -2275,8 +2294,9 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 
       if(srv_host->getHTTPstats() && host_server_name &&
 	 isThreeWayHandshakeOK()) {
-	srv_host->getHTTPstats()->updateHTTPHostRequest(tv->tv_sec, host_server_name, partial->get_num_http_requests(),
-							partial->get_cli2srv_bytes(), partial->get_srv2cli_bytes());
+	srv_host->getHTTPstats()->updateHTTPHostRequest(tv->tv_sec, host_server_name,
+							partial->get_num_http_requests(),
+							diff_sent_bytes, diff_rcvd_bytes);
       }
     }
     break;
@@ -2331,21 +2351,21 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
   case NDPI_PROTOCOL_IP_ICMP:
   case NDPI_PROTOCOL_IP_ICMPV6:
     if(cli_host && cli_host->getICMPstats()) {
-      if(partial->get_cli2srv_packets())
-	cli_host->getICMPstats()->incStats(partial->get_cli2srv_packets(), protos.icmp.cli2srv.icmp_type,
+      if(diff_sent_packets)
+	cli_host->getICMPstats()->incStats(diff_sent_packets, protos.icmp.cli2srv.icmp_type,
 					   protos.icmp.cli2srv.icmp_code, true /* Sent */, srv_host);
 
-      if(partial->get_srv2cli_packets())
-	cli_host->getICMPstats()->incStats(partial->get_srv2cli_packets(), protos.icmp.srv2cli.icmp_type,
+      if(diff_rcvd_packets)
+	cli_host->getICMPstats()->incStats(diff_rcvd_packets, protos.icmp.srv2cli.icmp_type,
 					   protos.icmp.srv2cli.icmp_code, false /* Rcvd */, srv_host);
     }
     if(srv_host && srv_host->getICMPstats()) {
-      if(partial->get_cli2srv_packets())
-	srv_host->getICMPstats()->incStats(partial->get_cli2srv_packets(), protos.icmp.cli2srv.icmp_type,
+      if(diff_sent_packets)
+	srv_host->getICMPstats()->incStats(diff_sent_packets, protos.icmp.cli2srv.icmp_type,
 					   protos.icmp.cli2srv.icmp_code, false /* Rcvd */, cli_host);
 
-      if(partial->get_srv2cli_packets())
-	srv_host->getICMPstats()->incStats(partial->get_srv2cli_packets(), protos.icmp.srv2cli.icmp_type,
+      if(diff_rcvd_packets)
+	srv_host->getICMPstats()->incStats(diff_rcvd_packets, protos.icmp.srv2cli.icmp_type,
 					   protos.icmp.srv2cli.icmp_code, true /* Sent */, cli_host);
     }
 
@@ -2423,7 +2443,7 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
       srv_host->offlineSetTLSName(protos.tls.client_requested_server_name); /* (***) */
   }
 
-  if(diff_rcvd_packets || diff_sent_packets) {
+  {
 #ifdef DEBUG
     {
       char a[32], b[32];
@@ -2436,11 +2456,8 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 
     /* Update L2 Device stats */
     if(c_mac != NULL) {
-      if(diff_rcvd_packets)
-	c_mac->incRcvdStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
-
-      if(diff_sent_packets)
-	c_mac->incSentStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
+      c_mac->incRcvdStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
+      c_mac->incSentStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
 
       if(ntop->getPrefs()->areMacNdpiStatsEnabled()) {
 	c_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
@@ -2455,11 +2472,8 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
     }
 
     if(s_mac != NULL) {
-      if(diff_rcvd_packets)
-	s_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
-
-      if(diff_sent_packets)
-	s_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
+      s_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
+      s_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
 
       if(ntop->getPrefs()->areMacNdpiStatsEnabled())
 	s_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
@@ -3786,7 +3800,7 @@ void Flow::formatECSHost(json_object *my_object, bool is_client,
                          const IpAddress *addr, Host *host) {
   json_object *host_object;
   u_int16_t port;
-  
+
   if((host_object = json_object_new_object()) != NULL) {
     char buf[64], jsonbuf[64], *c;
     IpAddress tmp_ip;
