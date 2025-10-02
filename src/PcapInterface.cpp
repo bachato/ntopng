@@ -759,6 +759,9 @@ static int alphasort_case_insensitive(const struct dirent ** a,
 /* **************************************************** */
 
 bool PcapInterface::loadPcapFilesFromDir() {
+#ifdef WIN32
+    return(false);
+ #else
   int fnum;
   struct dirent **pent;
   const char *pcap_extn = ".pcap";
@@ -796,6 +799,7 @@ bool PcapInterface::loadPcapFilesFromDir() {
   }
 
   return(pcap_files_queue.size() > 0 ? true : false);
+#endif
 }
 
 #endif /* HAVE_NEDGE */

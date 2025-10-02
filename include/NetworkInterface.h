@@ -865,10 +865,10 @@ public:
   virtual u_int64_t getNumNewFlows();
   virtual u_int getNumFlows();
   inline u_int getNumL2Devices() { return (numL2Devices); };
-  inline u_int getNumHosts() { return (totalNumHosts); };
-  inline u_int getNumLocalHosts() { return (numLocalHosts); };
-  inline u_int getNumRxOnlyHosts() { return (numTotalRxOnlyHosts); };
-  inline u_int getNumLocalRxOnlyHosts() { return (numLocalRxOnlyHosts); };
+  inline u_int getNumHosts() { return ((u_int)totalNumHosts); };
+  inline u_int getNumLocalHosts() { return ((u_int)numLocalHosts); };
+  inline u_int getNumRxOnlyHosts() { return ((u_int)numTotalRxOnlyHosts); };
+  inline u_int getNumLocalRxOnlyHosts() { return ((u_int)numLocalRxOnlyHosts); };
 
   u_int getNumMacs();
   u_int getNumHTTPHosts();

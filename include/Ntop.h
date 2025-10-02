@@ -496,8 +496,8 @@ class Ntop {
 
   inline Prefs *getPrefs() { return (prefs); };
   void initPing();
-  inline bool isPingInitialized() { return (ping_initialized);};
 #ifndef WIN32
+  inline bool isPingInitialized() { return (ping_initialized);};
   void lockNtopInstance();
 #endif
 #ifdef NTOPNG_PRO

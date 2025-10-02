@@ -877,8 +877,11 @@ bool Prefs::getDefaultBoolPrefsValue(const char *pref_key,
 /* ******************************************* */
 
 bool Prefs::do_active_monitoring(){
-  return get_active_monitoring_pref() &&
-         ntop->isPingInitialized();
+  return get_active_monitoring_pref() 
+      #ifndef WIN32
+      && ntop->isPingInitialized()
+      #endif
+      ;
 };
 
 /* ******************************************* */
