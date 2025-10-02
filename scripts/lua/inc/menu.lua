@@ -289,11 +289,12 @@ else
         hidden = is_system_interface or not is_admin,
         entries = {
             {
-                entry = page_utils.menu_entries.active_monitoring,
+	       entry = page_utils.menu_entries.active_monitoring,
+	       hidden = is_windows,
                 url = "/lua/active_monitoring.lua"
             }, {
                 entry = page_utils.menu_entries.network_discovery,
-                hidden = not interface.isDiscoverableInterface() or
+                hidden = not interface.isDiscoverableInterface() or is_windows or
                     interface.isLoopback() or ntop.limitResourcesUsage() or infrastructure_view,
                 url = "/lua/discover.lua"
             },
