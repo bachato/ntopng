@@ -177,7 +177,7 @@
 			]
 		},
 		{
-			"title_i18n": "db_search.tags.src_peer_as",
+			"title_i18n": "db_search.tags.src_peer_asn",
 			"data_field": "src_peer_as",
 			"min-width": "100px",
 			"sortable": true,
@@ -195,7 +195,7 @@
 			]
 		},
 		{
-			"title_i18n": "db_search.tags.dst_peer_as",
+			"title_i18n": "db_search.tags.dst_peer_asn",
 			"data_field": "dst_peer_as",
 			"min-width": "100px",
 			"sortable": true,
