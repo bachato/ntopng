@@ -100,7 +100,7 @@ function radius_handler.accountingStop(name, terminate_cause, info)
     -- Removing the entry from redis
     ntop.delCache(string.format(redis_accounting_key, name))
 
-    traceError(TRACE_DEBUG, TRACE_CONSOLE,
+    traceError(TRACE_NORMAL, TRACE_CONSOLE,
                string.format("Accounting stop requested for MAC [%s]", name))
 
     -- Check in case no user_data is found
