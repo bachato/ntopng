@@ -39,7 +39,6 @@ typedef struct {
   struct timeval synTime, synAckTime, ackTime; /* network Latency (3-way handshake) */
   float clientRTT3WH, serverRTT3WH; /* Computed at 3WH (msec) */
   time_t last_network_issues; /* last time retr/ooo/lost has been observed */
-
   struct {
     struct ndpi_analyze_struct cli_to_srv, srv_to_cli;
     u_int8_t cli_to_srv_winscale, srv_to_cli_winscale;
@@ -117,6 +116,7 @@ private:
   bool twh_over_view:1 /* This flag is used for view interfaces */, shapers_profile_set:1,  iface_flow_accounted:1, _notused:5;
   u_int8_t cli_mac[6], srv_mac[6];
   Mac *c_mac, *s_mac; /* Real flow MACs (hosts can have floating MACs when load-balancers are in use) Calculated using cli_mac and srv_mac[6] */
+  bool c_mac_updated, s_mac_updated;
   struct ndpi_flow_struct *ndpiFlow;
   ndpi_risk ndpi_flow_risk_bitmap;
   /* The bitmap of all possible flow alerts set by FlowCheck subclasses.
@@ -984,7 +984,7 @@ public:
                                    PartializableFlowTrafficStats *partial,
                                    bool first_partial,
                                    const struct timeval *tv);
-  void periodic_stats_update(const struct timeval *tv);
+  void periodic_stats_update(const struct timeval *tv, bool force_update);
   void flow_end_stats_update();
   void set_hash_entry_id(u_int32_t assigned_hash_entry_id);
   u_int32_t get_hash_entry_id() const;

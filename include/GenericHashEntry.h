@@ -229,7 +229,7 @@ class GenericHashEntry {
    * @param quick Only perform minimal operations
    *
    */
-  virtual void periodic_stats_update(const struct timeval *tv);
+  virtual void periodic_stats_update(const struct timeval *tv, bool force_update);
   inline HashEntryState get_state() const { return (hash_entry_state); }
   void updateSeen();
   void updateSeen(time_t _last_seen);

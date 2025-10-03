@@ -213,7 +213,7 @@ void LocalHost::syncMACMetadata(bool force_update) {
 
 /* *************************************** */
 
-void LocalHost::periodic_stats_update(const struct timeval *tv) {
+void LocalHost::periodic_stats_update(const struct timeval *tv, bool force_update) {
   checkGatewayInfo();
   syncMACMetadata(false);
 
@@ -230,7 +230,7 @@ void LocalHost::periodic_stats_update(const struct timeval *tv) {
   }
 #endif
 
-  Host::periodic_stats_update(tv);
+  Host::periodic_stats_update(tv, force_update);
 }
 
 /* *************************************** */

@@ -52,6 +52,7 @@ Flow::Flow(NetworkInterface *_iface,
   src2dst_tcp_flags = dst2src_tcp_flags = 0;
   collected_qoe.src_to_dst = collected_qoe.dst_to_src = NTOP_QOE_UNKNOWN, has_collected_qoe = 0;
   tcp = NULL;
+  c_mac_updated = s_mac_updated = false;
 
 #ifdef NTOPNG_PRO
   udp = NULL;
@@ -535,6 +536,18 @@ Flow::~Flow() {
 
     free(tcp);
     tcp = NULL;
+  }
+
+  if(c_mac && (!c_mac_updated)) {
+    char buf[256];
+
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Client MAC not updated %s", print(buf, sizeof(buf)));
+  }
+
+  if(s_mac && (!s_mac_updated)) {
+    char buf[256];
+
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Server MAC not updated %s", print(buf, sizeof(buf)));
   }
 
 #ifdef NTOPNG_PRO
@@ -1763,6 +1776,7 @@ char *Flow::printTCPState(char *const buf, u_int buf_len) const {
 
 char* Flow::print(char *buf, u_int buf_len, bool full_report) const {
   char buf1[32], buf2[32], buf3[32], buf4[32], buf5[32], pbuf[32], tcp_buf[64];
+  char c_buf[32], s_buf[32];
 
   buf[0] = '\0';
 
@@ -1828,9 +1842,8 @@ char* Flow::print(char *buf, u_int buf_len, bool full_report) const {
                       stats.get_srv2cli_tcp_keepalive());
   }
 
-  snprintf(
-	   buf, buf_len,
-	   "%s %s:%u &gt; %s:%u [first: %u][last: %u][proto: %u.%u/%s][cat: "
+  snprintf(buf, buf_len,
+	   "[%s/%s] %s %s:%u &gt; %s:%u [first: %u][last: %u][proto: %u.%u/%s][cat: "
 	   "%u/%s][device: %u in: %u out:%u]"
 	   "[%u/%u pkts][%llu/%llu bytes][flags src2dst: %s][flags dst2stc: "
 	   "%s][state: %s]"
@@ -1838,7 +1851,10 @@ char* Flow::print(char *buf, u_int buf_len, bool full_report) const {
 #if defined(NTOPNG_PRO) && defined(SHAPER_DEBUG)
 	   "%s"
 #endif
+	   "%s"
 	   ,
+	   c_mac ? c_mac->print(c_buf, sizeof(c_buf)) : "<no MAC>",
+	   s_mac ? s_mac->print(s_buf, sizeof(s_buf)) : "<no MAC>",
 	   get_protocol_name(),
 	   get_cli_ip_addr() ? get_cli_ip_addr()->print(buf1, sizeof(buf1)) : "",
 	   ntohs(cli_port),
@@ -1860,7 +1876,7 @@ char* Flow::print(char *buf, u_int buf_len, bool full_report) const {
 	   ,
 	   shapers
 #endif
-	   );
+	   , swap_done ? "[swapped]" : "");
 
   return (buf);
 }
@@ -1928,8 +1944,7 @@ void Flow::flow_end_stats_update() {
 
   /* Force last update */
   tv.tv_sec = last_seen, tv.tv_usec = 0;
-  last_update_time.tv_sec = 0; /* Trick to force periodic_stats_update() below */
-  periodic_stats_update(&tv);
+  periodic_stats_update(&tv, true);
 
   if(isBidirectional()) {
     if(isTCP()) {
@@ -2454,36 +2469,40 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
     }
 #endif
 
-    /* Update L2 Device stats */
-    if(c_mac != NULL) {
-      c_mac->incRcvdStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
-      c_mac->incSentStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
+    if(diff_rcvd_packets || diff_sent_packets) {
+      /* Update L2 Device stats */
+      if(c_mac != NULL) {
+	c_mac->incRcvdStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
+	c_mac->incSentStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
 
-      if(ntop->getPrefs()->areMacNdpiStatsEnabled()) {
-	c_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
-			    diff_sent_packets, diff_sent_bytes,
-			    diff_sent_goodput_bytes, diff_rcvd_packets,
-			    diff_rcvd_bytes, diff_rcvd_goodput_bytes);
+	if(ntop->getPrefs()->areMacNdpiStatsEnabled()) {
+	  c_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
+			      diff_sent_packets, diff_sent_bytes,
+			      diff_sent_goodput_bytes, diff_rcvd_packets,
+			      diff_rcvd_bytes, diff_rcvd_goodput_bytes);
+	}
+	c_mac_updated = true;
+      } else if(iface->hasMACs() && (!iface->isView()) && iface->isPacketInterface()) {
+	char buf[128];
+
+	ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL client MAC [%s]", print(buf, sizeof(buf)));
       }
-    } else if(iface->hasMACs() && (!iface->isView()) && iface->isPacketInterface()) {
-      char buf[128];
 
-      ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL client MAC [%s]", print(buf, sizeof(buf)));
-    }
+      if(s_mac != NULL) {
+	s_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
+	s_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
 
-    if(s_mac != NULL) {
-      s_mac->incSentStats(tv->tv_sec, diff_rcvd_packets, diff_rcvd_bytes);
-      s_mac->incRcvdStats(tv->tv_sec, diff_sent_packets, diff_sent_bytes);
+	if(ntop->getPrefs()->areMacNdpiStatsEnabled())
+	  s_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
+			      diff_rcvd_packets, diff_rcvd_bytes,
+			      diff_rcvd_goodput_bytes, diff_sent_packets,
+			      diff_sent_bytes, diff_sent_goodput_bytes);
+	s_mac_updated = true;
+      } else if(iface->hasMACs() && (!iface->isView()) && iface->isPacketInterface()) {
+	char buf[128];
 
-      if(ntop->getPrefs()->areMacNdpiStatsEnabled())
-	s_mac->incnDPIStats(tv->tv_sec, get_protocol_category(),
-			    diff_rcvd_packets, diff_rcvd_bytes,
-			    diff_rcvd_goodput_bytes, diff_sent_packets,
-			    diff_sent_bytes, diff_sent_goodput_bytes);
-    } else if(iface->hasMACs() && (!iface->isView()) && iface->isPacketInterface()) {
-      char buf[128];
-
-      ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL server MAC [%s]", print(buf, sizeof(buf)));
+	ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL server MAC [%s]", print(buf, sizeof(buf)));
+      }
     }
 
 #ifdef NTOPNG_PRO
@@ -2613,7 +2632,7 @@ void Flow::updateThroughputStats(float tdiff_msec, u_int32_t diff_sent_packets,
  * - NetfilterInterface::netfilter_callback (on nEdge, if not flow->get_ndpi_flow())
  * - NetworkInterface::dissectPacket -> NetworkInterface::processPacket on thresholds (for large flows)
  */
-void Flow::periodic_stats_update(const struct timeval *tv) {
+void Flow::periodic_stats_update(const struct timeval *tv, bool force_update) {
   bool first_partial;
   PartializableFlowTrafficStats partial;
   Host *cli_h = NULL, *srv_h = NULL;
@@ -2624,7 +2643,8 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
 			       print(buf, sizeof(buf)));
 #endif
 
-  if((last_update_time.tv_sec > 0)
+  if((!force_update)
+     && (last_update_time.tv_sec > 0)
      && ((tv->tv_sec - last_update_time.tv_sec) < 3.)) {
 
     return; /* Too early */
@@ -2669,7 +2689,7 @@ void Flow::periodic_stats_update(const struct timeval *tv) {
 #endif
 
   memcpy(&last_update_time, tv, sizeof(struct timeval));
-  GenericHashEntry::periodic_stats_update(tv);
+  GenericHashEntry::periodic_stats_update(tv, force_update);
 
 #ifdef HAVE_NEDGE
   callFlowUpdate(tv->tv_sec);

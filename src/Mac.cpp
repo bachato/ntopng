@@ -392,7 +392,7 @@ void Mac::checkStatsReset() {
 
 /* *************************************** */
 
-void Mac::periodic_stats_update(const struct timeval *tv) {
+void Mac::periodic_stats_update(const struct timeval *tv, bool force_update) {
   checkDataReset();
   checkStatsReset();
   stats->updateStats(tv);

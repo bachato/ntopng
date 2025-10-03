@@ -523,8 +523,8 @@ class Host : public GenericHashEntry,
   char *get_tskey(char *buf, size_t bufsize);
 
   bool is_hash_entry_state_idle_transition_ready();
-  void periodic_stats_update(const struct timeval *tv);
-  virtual void custom_periodic_stats_update(const struct timeval *tv) { ; }
+  void periodic_stats_update(const struct timeval *tv, bool force_update);
+  virtual void custom_periodic_stats_update(const struct timeval *tv, bool force_update) { ; }
 
   virtual void lua(lua_State *vm, AddressTree *ptree, bool host_details,
                    bool verbose, bool returnHost, bool asListElement);

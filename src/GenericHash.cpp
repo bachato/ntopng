@@ -382,7 +382,7 @@ u_int GenericHash::purgeIdle(const struct timeval *tv, bool force_idle,
         HashEntryState head_state = head->get_state();
         GenericHashEntry *next = head->next();
 
-        head->periodic_stats_update(tv);
+        head->periodic_stats_update(tv, false);
 
         buckets_checked++;
 

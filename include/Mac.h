@@ -182,7 +182,7 @@ class Mac : public GenericHashEntry {
   inline void incSentArpReplies()  { stats->incSentArpReplies();      }
   inline void incRcvdArpRequests() { stats->incRcvdArpRequests();     }
   inline void incRcvdArpReplies()  { stats->incRcvdArpReplies();      }
-  void periodic_stats_update(const struct timeval *tv);
+  void periodic_stats_update(const struct timeval *tv, bool force_update);
   inline u_int64_t getNumBytes() { return (stats->getNumBytes());     }
   inline float getBytesThpt() { return (stats->getBytesThpt());       }
   inline bool isMulticast() { return Utils::isMulticastMac(mac);      }

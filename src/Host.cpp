@@ -1289,7 +1289,7 @@ bool Host::is_hash_entry_state_idle_transition_ready() {
 
 /* *************************************** */
 
-void Host::periodic_stats_update(const struct timeval *tv) {
+void Host::periodic_stats_update(const struct timeval *tv, bool force_update) {
   if(!deferred_init) {
     deferred_init = 1;
     deferredInitialization();
@@ -1303,7 +1303,7 @@ void Host::periodic_stats_update(const struct timeval *tv) {
   
   if(stats) stats->updateStats(tv);
 
-  GenericHashEntry::periodic_stats_update(tv);
+  GenericHashEntry::periodic_stats_update(tv, force_update);
 
 #ifdef DEBUG_SCAN_DETECTION
   if(num_incomplete_flows > 0) {
@@ -1315,7 +1315,7 @@ void Host::periodic_stats_update(const struct timeval *tv) {
   }
 #endif
 
-  custom_periodic_stats_update(tv);
+  custom_periodic_stats_update(tv, force_update);
 }
 
 /* *************************************** */

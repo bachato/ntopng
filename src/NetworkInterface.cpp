@@ -2594,7 +2594,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
       PERIODIC_STATS_UPDATE_MIN_REFRESH_BYTES &&
       Utils::msTimevalDiff(when, flow->get_current_update_time()) >=
       PERIODIC_STATS_UPDATE_MIN_REFRESH_MS) {
-    flow->periodic_stats_update(when);
+    flow->periodic_stats_update(when, false);
   }
 
   return (pass_verdict);

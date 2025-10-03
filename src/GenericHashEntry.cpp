@@ -75,7 +75,7 @@ void GenericHashEntry::set_state(HashEntryState s) {
 
 /* ***************************************** */
 
-void GenericHashEntry::periodic_stats_update(const struct timeval *tv) {
+void GenericHashEntry::periodic_stats_update(const struct timeval *tv, bool force_update) {
   GenericTrafficElement *elem;
 
   if ((elem = dynamic_cast<GenericTrafficElement *>(this)))

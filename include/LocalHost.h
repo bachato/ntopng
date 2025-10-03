@@ -136,7 +136,7 @@ class LocalHost : public Host {
 
   virtual void lua(lua_State *vm, AddressTree *ptree, bool host_details,
                    bool verbose, bool returnHost, bool asListElement);
-  void custom_periodic_stats_update(const struct timeval *tv) { ; }
+  void custom_periodic_stats_update(const struct timeval *tv, bool force_update) { ; }
 
   virtual void luaHostBehaviour(lua_State *vm) {
     if (stats) stats->luaHostBehaviour(vm);
@@ -200,7 +200,7 @@ class LocalHost : public Host {
     return (usedPorts.getServerPorts(isTCP));
   };
 
-  void periodic_stats_update(const struct timeval *tv);
+  void periodic_stats_update(const struct timeval *tv, bool force_update);
   void checkGatewayInfo();
   inline Fingerprint* getJA4Fingerprint()   { return (fingerprints ? &fingerprints->ja4  : NULL); }
   inline Fingerprint* getHASSHFingerprint() { return (fingerprints ? &fingerprints->hassh: NULL); }
