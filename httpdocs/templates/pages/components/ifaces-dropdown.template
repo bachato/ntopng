@@ -50,6 +50,10 @@
   <input name="csrf" type="hidden" value="{{ ntop.getRandomCSRFValue() }}" />
 </form>
 {% end %}
+{% local system_interface_name = i18n('system') %}
+{% if ntop.isnEdge() then %}
+{%    system_interface_name = i18n('setup') %}
+{% end %}
 
 {% if not infrastructure_view then %}
 
@@ -60,7 +64,7 @@
 
     {% if isAdministrator() then %}
     <option disabled>{{ i18n('system') }}</option>
-    <option value="{{ getSystemInterfaceId() }}" {{ selected }} data-content="{{ i18n('system') }}" style="padding-left: 2rem !important;">{{ i18n('system') }}</option>
+    <option value="{{ getSystemInterfaceId() }}" {{ selected }} data-content="{{ system_interface_name }}" style="padding-left: 2rem !important;">{{ system_interface_name }}</option>
     {% end %}
 
     {% -- The Interfaces optgroup %}
