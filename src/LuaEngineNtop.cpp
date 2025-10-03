@@ -999,7 +999,7 @@ static int ntop_loadCustomCategoryFile(lua_State *vm) {
   fclose(fd);
 
   if (num_bad_lines > 1) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "%u more invalid lines [%s]", num_bad_lines-1, path);
+    ntop->getTrace()->traceEvent(TRACE_ERROR, "%u invalid lines [%s]", num_bad_lines-1, path);
   }
 
   lua_pushinteger(vm, (int)num_lines_loaded);

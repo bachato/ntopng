@@ -383,10 +383,18 @@ void Mac::checkDataReset() {
 void Mac::checkStatsReset() {
   if (statsResetRequested()) {
     MacStats *new_stats = new (std::nothrow) MacStats(iface);
+
     stats_shadow = stats;
     stats = new_stats;
     last_stats_reset = ntop->getLastStatsReset();
     stats_reset_requested = false;
+
+#ifdef HAVE_NEDGE
+    char buf[32];
+
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Reset stats for MAC %s",
+				 print(buf, sizeof(buf)));
+#endif
   }
 }
 
@@ -462,7 +470,7 @@ bool Mac::is_hash_entry_state_idle_transition_ready() {
 void Mac::setDHCPFingerprint(const char *f) {
   if((f == NULL) || (f[0] == '\0'))
     return;
-  
+
   if(dhcpv4_fingerprint != NULL)
     free(dhcpv4_fingerprint);
 
@@ -495,7 +503,7 @@ void Mac::guessDeviceType() {
 void Mac::setDeviceType(DeviceType devtype) {
   if(isNull() || (device_type == devtype))
     return;
-  
+
   /* Called by ntopng when it can guess a device type during normal packet processing */
   if (!lockDeviceTypeChanges) {
     device_type = devtype;
@@ -511,7 +519,7 @@ void Mac::setDeviceType(DeviceType devtype) {
 void Mac::setDeviceOS(ndpi_os _os) {
   if(device_os == _os)
     return;
-  
+
   device_os = _os, asset_map_updated = true;
   ntop->trackAssetChange("MAC", "setDeviceOS",
 			 this, NULL, NULL, NULL,
