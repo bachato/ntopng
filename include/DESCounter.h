@@ -44,10 +44,7 @@ class DESCounter : public BehaviouralCounter {
 
   bool addObservation(u_int64_t value) {
     double forecast, confidence_band;
-    bool rc =
-        (ndpi_des_add_value(&des, value, &forecast, &confidence_band) == 1)
-            ? true
-            : false;
+    bool rc = (ndpi_des_add_value(&des, value, &forecast, &confidence_band) == 1) ? true : false;
     double l_forecast = forecast - confidence_band;
     double h_forecast = forecast + confidence_band;
 

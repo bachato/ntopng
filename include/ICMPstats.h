@@ -33,7 +33,7 @@ class ICMPstats {
  private:
   std::map<u_int16_t, ICMPstats_t> stats;
   Mutex m;
-  MonitoredCounter<u_int32_t> num_destination_unreachable;
+  u_int32_t num_destination_unreachable;
 
   void addToTable(const char *label, lua_State *vm, const ICMPstats_t *curr,
                   bool verbose);
@@ -53,8 +53,6 @@ class ICMPstats {
                 bool sent, Host *peer);
   void updateStats(const struct timeval *tv);
   void lua(bool isV4, lua_State *vm, bool verbose = true);
-  bool hasAnomalies(time_t when);
-  void luaAnomalies(lua_State *vm, time_t when);
   void sum(ICMPstats *e);
   void getTsStats(ts_icmp_stats *s);
 };

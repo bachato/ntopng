@@ -30,7 +30,7 @@ struct queries_breakdown {
 };
 
 struct dns_stats {
-  MonitoredCounter<u_int32_t> num_queries, num_replies_ok, num_replies_error;
+  u_int32_t num_queries, num_replies_ok, num_replies_error;
   struct queries_breakdown breakdown;
 };
 
@@ -48,22 +48,20 @@ class DnsStats {
   void incStats(bool as_client, const FlowDNSStats *fts);
   void updateStats(const struct timeval *const tv);
 
-  u_int32_t getSentNumQueries() { return sent_stats.num_queries.get(); }
-  u_int32_t getSentNumRepliesOk() { return sent_stats.num_replies_ok.get(); }
+  u_int32_t getSentNumQueries() { return sent_stats.num_queries; }
+  u_int32_t getSentNumRepliesOk() { return sent_stats.num_replies_ok; }
   u_int32_t getSentNumRepliesError() {
-    return sent_stats.num_replies_error.get();
+    return sent_stats.num_replies_error;
   }
 
-  u_int32_t getRcvdNumQueries() { return rcvd_stats.num_queries.get(); }
-  u_int32_t getRcvdNumRepliesOk() { return rcvd_stats.num_replies_ok.get(); }
+  u_int32_t getRcvdNumQueries() { return rcvd_stats.num_queries; }
+  u_int32_t getRcvdNumRepliesOk() { return rcvd_stats.num_replies_ok; }
   u_int32_t getRcvdNumRepliesError() {
-    return rcvd_stats.num_replies_error.get();
+    return rcvd_stats.num_replies_error;
   }
 
   json_object *getJSONObject();
   void lua(lua_State *vm, bool verbose);
-  bool hasAnomalies(time_t when);
-  void luaAnomalies(lua_State *vm, time_t when);
 };
 
 #endif /* _STATS_H_ */

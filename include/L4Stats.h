@@ -10,7 +10,6 @@ class L4Stats {
 
  public:
   void luaStats(lua_State* vm);
-  void luaAnomalies(lua_State* vm);
   void incStats(time_t when, u_int8_t l4_proto, u_int64_t rcvd_packets,
                 u_int64_t rcvd_bytes, u_int64_t sent_packets,
                 u_int64_t sent_bytes);

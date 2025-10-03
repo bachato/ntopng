@@ -25,7 +25,7 @@
 
 TrafficStats::TrafficStats() {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  numPkts.reset(), numBytes.reset();
+  numPkts = 0, numBytes = 0;
 }
 
 /* *************************************** */
@@ -57,14 +57,14 @@ void TrafficStats::deserialize(json_object *o) {
   if (!o) return;
 
   if (json_object_object_get_ex(o, "packets", &obj))
-    numPkts.setInitialValue(json_object_get_int64(obj));
+    numPkts = json_object_get_int64(obj);
   else
-    numPkts.reset();
+    numPkts = 0;
 
   if (json_object_object_get_ex(o, "bytes", &obj))
-    numBytes.setInitialValue(json_object_get_int64(obj));
+    numBytes = json_object_get_int64(obj);
   else
-    numBytes.reset();
+    numBytes = 0;
 }
 
 /* ******************************************* */
@@ -74,9 +74,9 @@ json_object *TrafficStats::getJSONObject() {
 
   if (my_object) {
     json_object_object_add(my_object, "packets",
-                           json_object_new_int64(numPkts.get()));
+                           json_object_new_int64(numPkts));
     json_object_object_add(my_object, "bytes",
-                           json_object_new_int64(numBytes.get()));
+                           json_object_new_int64(numBytes));
   }
 
   return (my_object);
@@ -85,7 +85,7 @@ json_object *TrafficStats::getJSONObject() {
 /* *************************************** */
 
 void TrafficStats::serialize(ndpi_serializer *s) {
-  ndpi_serialize_string_uint32(s, "packets", numPkts.get());
-  ndpi_serialize_string_uint32(s, "bytes", numBytes.get());
+  ndpi_serialize_string_uint32(s, "packets", numPkts);
+  ndpi_serialize_string_uint32(s, "bytes", numBytes);
 }
 

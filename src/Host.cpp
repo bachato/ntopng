@@ -479,32 +479,6 @@ void Host::set_mac(Mac *_mac) {
 
 /* *************************************** */
 
-bool Host::hasAnomalies() const {
-  time_t now = time(0);
-
-  return (stats ? stats->hasAnomalies(now) : false);
-}
-
-/* *************************************** */
-
-void Host::lua_get_anomalies(lua_State *vm) const {
-  if(!vm) return;
-
-  if(hasAnomalies()) {
-    time_t now = time(0);
-
-    lua_newtable(vm);
-
-    stats->luaAnomalies(vm, now);
-
-    lua_pushstring(vm, "anomalies");
-    lua_insert(vm, -2);
-    lua_settable(vm, -3);
-  }
-}
-
-/* *************************************** */
-
 void Host::luaStrTableEntryLocked(lua_State *const vm, const char *entry_name,
                                   const char *entry_value) {
   /* Perform access to const entry values using a lock as entry value can change
@@ -1021,10 +995,6 @@ void Host::lua(lua_State *vm, AddressTree *ptree, bool host_details,
   lua_get_time(vm);
 
   lua_get_fingerprints(vm);
-
-  if(verbose) {
-    if(hasAnomalies()) lua_get_anomalies(vm);
-  }
 
   if(!returnHost) host_id = get_hostkey(buf_id, sizeof(buf_id));
 

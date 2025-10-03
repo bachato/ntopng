@@ -294,24 +294,6 @@ void LocalHostStats::lua_get_timeseries(lua_State *vm) {
 
 /* *************************************** */
 
-bool LocalHostStats::hasAnomalies(time_t when) {
-  bool ret = false;
-
-  if (dns) ret |= dns->hasAnomalies(when);
-  if (icmp) ret |= icmp->hasAnomalies(when);
-
-  return ret;
-}
-
-/* *************************************** */
-
-void LocalHostStats::luaAnomalies(lua_State *vm, time_t when) {
-  if (dns) dns->luaAnomalies(vm, when);
-  if (icmp) icmp->luaAnomalies(vm, when);
-}
-
-/* *************************************** */
-
 void LocalHostStats::incStats(time_t when, u_int8_t l4_proto, u_int ndpi_proto,
                               ndpi_protocol_category_t ndpi_category,
                               custom_app_t custom_app, u_int64_t sent_packets,

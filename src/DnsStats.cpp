@@ -28,9 +28,9 @@ DnsStats::DnsStats() {
   
   memset(&sent_stats.breakdown, 0, sizeof(sent_stats.breakdown)),
       memset(&rcvd_stats.breakdown, 0, sizeof(rcvd_stats.breakdown));
-  sent_stats.num_queries.reset(), sent_stats.num_replies_ok.reset(),
-      sent_stats.num_replies_error.reset(), rcvd_stats.num_queries.reset(),
-      rcvd_stats.num_replies_ok.reset(), rcvd_stats.num_replies_error.reset();
+  sent_stats.num_queries = 0, sent_stats.num_replies_ok = 0,
+      sent_stats.num_replies_error = 0, rcvd_stats.num_queries = 0,
+      rcvd_stats.num_replies_ok = 0, rcvd_stats.num_replies_error = 0;
 }
 
 /* *************************************** */
@@ -57,11 +57,11 @@ void DnsStats::incStats(bool as_client, const FlowDNSStats *fts) {
     qry->breakdown.num_any += fts->num_any, tot_qry += fts->num_any;
   if (fts->num_other)
     qry->breakdown.num_other += fts->num_other, tot_qry += fts->num_other;
-  if (tot_qry) qry->num_queries.inc(tot_qry);
+  if (tot_qry) qry->num_queries += tot_qry;
 
-  if (fts->num_replies_ok) rsp->num_replies_ok.inc(fts->num_replies_ok);
+  if (fts->num_replies_ok) rsp->num_replies_ok += fts->num_replies_ok;
   if (fts->num_replies_error)
-    rsp->num_replies_error.inc(fts->num_replies_error);
+    rsp->num_replies_error += fts->num_replies_error;
 }
 
 /* *************************************** */
@@ -70,11 +70,11 @@ void DnsStats::luaStats(lua_State *vm, struct dns_stats *stats,
                         const char *label, bool verbose) {
   lua_newtable(vm);
 
-  lua_push_uint64_table_entry(vm, "num_queries", stats->num_queries.get());
+  lua_push_uint64_table_entry(vm, "num_queries", stats->num_queries);
   lua_push_uint64_table_entry(vm, "num_replies_ok",
-                              stats->num_replies_ok.get());
+                              stats->num_replies_ok);
   lua_push_uint64_table_entry(vm, "num_replies_error",
-                              stats->num_replies_error.get());
+                              stats->num_replies_error);
 
   if (verbose) {
     lua_newtable(vm);
@@ -111,51 +111,22 @@ void DnsStats::lua(lua_State *vm, bool verbose) {
   lua_settable(vm, -3);
 }
 
-/* *************************************** */
-
-bool DnsStats::hasAnomalies(time_t when) {
-  return sent_stats.num_queries.is_misbehaving(when) ||
-         sent_stats.num_replies_ok.is_misbehaving(when) ||
-         sent_stats.num_replies_error.is_misbehaving(when) ||
-         rcvd_stats.num_queries.is_misbehaving(when) ||
-         rcvd_stats.num_replies_ok.is_misbehaving(when) ||
-         rcvd_stats.num_replies_error.is_misbehaving(when);
-}
-
-/* *************************************** */
-
-void DnsStats::luaAnomalies(lua_State *vm, time_t when) {
-  if (sent_stats.num_queries.is_misbehaving(when))
-    sent_stats.num_queries.lua(vm, "dns.sent.num_queries");
-  if (sent_stats.num_replies_ok.is_misbehaving(when))
-    sent_stats.num_replies_ok.lua(vm, "dns.sent.num_replies_ok");
-  if (sent_stats.num_replies_error.is_misbehaving(when))
-    sent_stats.num_replies_error.lua(vm, "dns.sent.num_replies_error");
-
-  if (rcvd_stats.num_queries.is_misbehaving(when))
-    rcvd_stats.num_queries.lua(vm, "dns.rcvd.num_queries");
-  if (rcvd_stats.num_replies_ok.is_misbehaving(when))
-    rcvd_stats.num_replies_ok.lua(vm, "dns.rcvd.num_replies_ok");
-  if (rcvd_stats.num_replies_error.is_misbehaving(when))
-    rcvd_stats.num_replies_error.lua(vm, "dns.rcvd.num_replies_error");
-}
-
 /* ******************************************* */
 
 json_object *DnsStats::getStatsJSONObject(struct dns_stats *stats) {
   json_object *my_object = json_object_new_object();
   json_object *my_stats = json_object_new_object();
 
-  if (stats->num_queries.get() > 0)
+  if (stats->num_queries > 0)
     json_object_object_add(my_object, "num_queries",
-                           json_object_new_int64(stats->num_queries.get()));
-  if (stats->num_replies_ok.get() > 0)
+                           json_object_new_int64(stats->num_queries));
+  if (stats->num_replies_ok > 0)
     json_object_object_add(my_object, "num_replies_ok",
-                           json_object_new_int64(stats->num_replies_ok.get()));
-  if (stats->num_replies_error.get() > 0)
+                           json_object_new_int64(stats->num_replies_ok));
+  if (stats->num_replies_error > 0)
     json_object_object_add(
         my_object, "num_replies_error",
-        json_object_new_int64(stats->num_replies_error.get()));
+        json_object_new_int64(stats->num_replies_error));
 
   if (stats->breakdown.num_a > 0)
     json_object_object_add(my_stats, "num_a",
@@ -206,28 +177,5 @@ json_object *DnsStats::getJSONObject() {
 /* ******************************************* */
 
 void DnsStats::updateStats(const struct timeval *const tv) {
-  time_t when = tv->tv_sec;
-
-  sent_stats.num_queries.computeAnomalyIndex(when),
-      sent_stats.num_replies_ok.computeAnomalyIndex(when),
-      sent_stats.num_replies_error.computeAnomalyIndex(when);
-  rcvd_stats.num_queries.computeAnomalyIndex(when),
-      rcvd_stats.num_replies_ok.computeAnomalyIndex(when),
-      rcvd_stats.num_replies_error.computeAnomalyIndex(when);
-
-#if 0
-  char buf[64];
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "sent.num_queries: %s",
-			       sent_stats.num_queries.print(buf, sizeof(buf)));
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "sent.num_replies_ok: %s",
-			       sent_stats.num_replies_ok.print(buf, sizeof(buf)));
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "sent.num_replies_error: %s",
-			       sent_stats.num_replies_error.print(buf, sizeof(buf)));
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "rcvd.num_queries: %s",
-			       rcvd_stats.num_queries.print(buf, sizeof(buf)));
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "rcvd.num_replies_ok: %s",
-			       rcvd_stats.num_replies_ok.print(buf, sizeof(buf)));
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "rcvd.num_replies_error: %s",
-			       rcvd_stats.num_replies_error.print(buf, sizeof(buf)));
-#endif
+  /* REMOVE */  
 }

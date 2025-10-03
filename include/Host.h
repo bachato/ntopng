@@ -798,7 +798,6 @@ class Host : public GenericHashEntry,
   void checkDataReset();
   void checkBroadcastDomain();
   void updateView(IpAddress *ipa);
-  bool hasAnomalies() const;
   void housekeep(time_t t); /* Virtual method, called in the datapath from
                                GenericHash::purgeIdle */
   virtual void inlineSetOSDetail(const char *detail) {}

@@ -175,8 +175,6 @@ class HostStats : public GenericTrafficElement {
       total_num_flows_as_server++;
   };
 
-  virtual bool hasAnomalies(time_t when) { return false; };
-  virtual void luaAnomalies(lua_State *vm, time_t when){};
   virtual void luaPeers(lua_State *vm){};
   virtual void lua(lua_State *vm, bool mask_host, DetailsLevel details_level);
   void updateStats(const struct timeval *tv);
@@ -214,16 +212,16 @@ class HostStats : public GenericTrafficElement {
   virtual void luaICMP(lua_State *vm, bool isV4, bool verbose) {}
   virtual void incrVisitedWebSite(char *hostname) {}
   virtual HTTPstats *getHTTPstats() { return (NULL); }
-  virtual DnsStats *getDNSstats() { return (NULL); }
+  virtual DnsStats *getDNSstats()   { return (NULL); }
   virtual ICMPstats *getICMPstats() { return (NULL); }
 
-  virtual void incCliContactedPorts(u_int16_t port) { ; }
-  virtual void incSrvPortsContacts(u_int16_t port) { ; }
-  virtual void incContactedService(char *name) { ; }
+  virtual void incCliContactedPorts(u_int16_t port)  { ; }
+  virtual void incSrvPortsContacts(u_int16_t port)   { ; }
+  virtual void incContactedService(char *name)       { ; }
   virtual void incCliContactedHosts(IpAddress *peer) { ; }
-  virtual void incSrvHostContacts(IpAddress *peer) { ; }
-  virtual void incContactedHosts(char *hostname) { ; }
-  virtual void incCountriesContacts(char *country) { ; }
+  virtual void incSrvHostContacts(IpAddress *peer)   { ; }
+  virtual void incContactedHosts(char *hostname)     { ; }
+  virtual void incCountriesContacts(char *country)   { ; }
 
   virtual void resetCountriesContacts() { ; }
   virtual void resetContactedHosts() { ; }
@@ -233,17 +231,17 @@ class HostStats : public GenericTrafficElement {
   }
   virtual u_int16_t getContactedHostsCardinality() { return ((u_int16_t)-1); }
 
-  virtual u_int32_t getNTPContactCardinality() { return ((u_int32_t)-1); }
-  virtual u_int32_t getDNSContactCardinality() { return ((u_int32_t)-1); }
+  virtual u_int32_t getNTPContactCardinality()  { return ((u_int32_t)-1); }
+  virtual u_int32_t getDNSContactCardinality()  { return ((u_int32_t)-1); }
   virtual u_int32_t getSMTPContactCardinality() { return ((u_int32_t)-1); }
   virtual u_int32_t getIMAPContactCardinality() { return ((u_int32_t)-1); }
-  virtual u_int32_t getPOPContactCardinality() { return ((u_int32_t)-1); }
+  virtual u_int32_t getPOPContactCardinality()  { return ((u_int32_t)-1); }
 
-  virtual bool incNTPContactCardinality(Host *h) { return (false); }
-  virtual bool incDNSContactCardinality(Host *h) { return (false); }
+  virtual bool incNTPContactCardinality(Host *h)  { return (false); }
+  virtual bool incDNSContactCardinality(Host *h)  { return (false); }
   virtual bool incSMTPContactCardinality(Host *h) { return (false); }
   virtual bool incIMAPContactCardinality(Host *h) { return (false); }
-  virtual bool incPOPContactCardinality(Host *h) { return (false); }
+  virtual bool incPOPContactCardinality(Host *h)  { return (false); }
 
   inline bool has_flows_anomaly(bool as_client) {
     return (as_client ? client_flows_anomaly : server_flows_anomaly);

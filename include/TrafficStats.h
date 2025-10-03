@@ -26,28 +26,20 @@
 
 class TrafficStats {
  private:
-  MonitoredCounter<u_int64_t> numPkts, numBytes;
+  u_int64_t numPkts, numBytes;
 
  public:
   TrafficStats();
   TrafficStats(const TrafficStats& ts) {
-    numPkts = MonitoredCounter<u_int64_t>(ts.numPkts),
-    numBytes = MonitoredCounter<u_int64_t>(ts.numBytes);
+    numPkts = ts.numPkts, numBytes = ts.numBytes;
   };
 
   inline void incStats(time_t t, u_int64_t num_pkts, u_int64_t num_bytes) {
-    numPkts.inc(num_pkts), numBytes.inc(num_bytes);
-    numPkts.computeAnomalyIndex(t), numBytes.computeAnomalyIndex(t);
+    numPkts += num_pkts, numBytes += num_bytes;
   };
-  inline void resetStats() { numPkts.reset(), numBytes.reset(); };
-  inline u_int64_t getNumPkts() const { return (numPkts.get()); };
-  inline u_int64_t getNumBytes() const { return (numBytes.get()); };
-  inline u_int64_t getPktsAnomaly() const {
-    return (numPkts.getAnomalyIndex());
-  };
-  inline u_int64_t getBytesAnomaly() const {
-    return (numBytes.getAnomalyIndex());
-  };
+  inline void resetStats() { numPkts = 0, numBytes = 0; };
+  inline u_int64_t getNumPkts() const { return (numPkts); };
+  inline u_int64_t getNumBytes() const { return (numBytes); };
   void printStats();
   char* serialize();
   void serialize(ndpi_serializer *s);

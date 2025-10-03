@@ -25,7 +25,7 @@
 
 ICMPstats::ICMPstats() {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  num_destination_unreachable.reset();
+  num_destination_unreachable = 0;
 }
 
 /* *************************************** */
@@ -60,7 +60,7 @@ void ICMPstats::incStats(u_int32_t num_pkts, u_int8_t icmp_type,
   else
     memset(&s, 0, sizeof(s));
 
-  if (icmp_type == ICMP_DEST_UNREACH) num_destination_unreachable.inc(num_pkts);
+  if (icmp_type == ICMP_DEST_UNREACH) num_destination_unreachable += num_pkts;
 
   if (sent) {
     s.pkt_sent += num_pkts;
@@ -104,15 +104,7 @@ void ICMPstats::addToTable(const char *label, lua_State *vm,
 /* ******************************************* */
 
 void ICMPstats::updateStats(const struct timeval *const tv) {
-  time_t when = tv->tv_sec;
-
-  num_destination_unreachable.computeAnomalyIndex(when);
-
-#if 0
-  char buf[64];
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "num_destination_unreachable: %s",
-			       num_destination_unreachable.print(buf, sizeof(buf)));
-#endif
+  /* REMOVE */
 }
 
 /* *************************************** */
@@ -138,19 +130,6 @@ void ICMPstats::lua(bool isV4, lua_State *vm, bool verbose) {
   lua_pushstring(vm, isV4 ? "ICMPv4" : "ICMPv6");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
-}
-
-/* *************************************** */
-
-bool ICMPstats::hasAnomalies(time_t when) {
-  return num_destination_unreachable.is_misbehaving(when);
-}
-
-/* *************************************** */
-
-void ICMPstats::luaAnomalies(lua_State *vm, time_t when) {
-  if (num_destination_unreachable.is_misbehaving(when))
-    num_destination_unreachable.lua(vm, "icmp.num_destination_unreachable");
 }
 
 /* *************************************** */

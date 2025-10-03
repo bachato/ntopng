@@ -5698,7 +5698,6 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
        strcmp(h->get_country(buf, sizeof(buf)), r->country)) ||
       (r->osFilter != ndpi_os_MAX_OS && (h->getOS() != r->osFilter)) ||
       (r->blacklistedHosts && !h->isBlacklisted()) ||
-      (r->anomalousOnly && !h->hasAnomalies()) ||
       (r->dhcpOnly && !h->isDHCPHost()) ||
       (r->cidr_filter && !h->match(r->cidr_filter)) ||
       (r->traffic_type == traffic_type_unidirectional &&

@@ -51,27 +51,6 @@ void L4Stats::luaStats(lua_State *vm) {
 
 /* **************************************************** */
 
-void L4Stats::luaAnomalies(lua_State *vm) {
-  lua_push_uint64_table_entry(vm, "tcp.bytes.sent.anomaly_index",
-                              tcp_sent.getBytesAnomaly());
-  lua_push_uint64_table_entry(vm, "tcp.bytes.rcvd.anomaly_index",
-                              tcp_rcvd.getBytesAnomaly());
-  lua_push_uint64_table_entry(vm, "udp.bytes.sent.anomaly_index",
-                              udp_sent.getBytesAnomaly());
-  lua_push_uint64_table_entry(vm, "udp.bytes.rcvd.anomaly_index",
-                              udp_rcvd.getBytesAnomaly());
-  lua_push_uint64_table_entry(vm, "icmp.bytes.sent.anomaly_index",
-                              icmp_sent.getBytesAnomaly());
-  lua_push_uint64_table_entry(vm, "icmp.bytes.rcvd.anomaly_index",
-                              icmp_rcvd.getBytesAnomaly());
-  lua_push_uint64_table_entry(vm, "other_ip.bytes.sent.anomaly_index",
-                              other_ip_sent.getBytesAnomaly());
-  lua_push_uint64_table_entry(vm, "other_ip.bytes.rcvd.anomaly_index",
-                              other_ip_rcvd.getBytesAnomaly());
-}
-
-/* **************************************************** */
-
 void L4Stats::incStats(time_t when, u_int8_t l4_proto, u_int64_t rcvd_packets,
                        u_int64_t rcvd_bytes, u_int64_t sent_packets,
                        u_int64_t sent_bytes) {

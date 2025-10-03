@@ -382,9 +382,6 @@ void HostStats::lua(lua_State* vm, bool mask_host, DetailsLevel details_level) {
   tcp_packet_stats_rcvd.lua(vm, "tcpPacketStats.rcvd");
 
   if (details_level >= details_higher) {
-    /* Bytes anomalies */
-    l4stats.luaAnomalies(vm);
-
     lua_push_uint64_table_entry(vm, "total_activity_time", total_activity_time);
     lua_push_uint64_table_entry(vm, "flows.as_client",
                                 getTotalNumFlowsAsClient());
