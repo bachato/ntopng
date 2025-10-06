@@ -1964,6 +1964,7 @@ static int ntop_get_interface_mac_info(lua_State *vm) {
 
 /* ****************************************** */
 
+#ifdef HAVE_NEDGE
 static int ntop_append_mac_event(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
   char *mac, *event_message;
@@ -2001,6 +2002,7 @@ static int ntop_append_mac_event(lua_State *vm) {
   
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
+#endif
 
 /* ****************************************** */
 
@@ -6053,8 +6055,10 @@ static luaL_Reg _ntop_interface_reg[] = {
   { "getMacManufacturers", ntop_get_interface_macs_manufacturers },
   { "getMacDeviceTypes", ntop_get_mac_device_types },
   { "isMulticastMac", ntop_is_multicast_mac },
+#ifdef HAVE_NEDGE
   { "appendMacEvent", ntop_append_mac_event },
-
+#endif
+  
   /* Anomalies */
   { "getAnomalies", ntop_get_interface_anomalies },
 
