@@ -748,6 +748,12 @@ if test -f "/etc/centos-release"; then
   fi
 fi
 
+if [ "$CENTOS_RELEASE" -lt "10" ]; then
+  CENTOS_REDIS_DEP=", redis >= 2.4.0"
+else
+  CENTOS_REDIS_DEP=
+fi
+
 AC_ARG_WITH(maxminddb-static,
     [  --with-maxminddb-static       Use static link for the maxminddb library],
     [PKG_CHECK_MODULES_STATIC(MAXMINDDB, libmaxminddb,
@@ -893,6 +899,7 @@ AC_SUBST(SERVICE_PRE)
 AC_SUBST(SERVICE_ALIAS)
 AC_SUBST(APP)
 AC_SUBST(JE)
+AC_SUBST(CENTOS_REDIS_DEP)
 AC_SUBST(LIBPCAP)
 AC_SUBST(RPM_SIGN_CMD)
 AC_SUBST(LIBRRD_LD_FLAGS)
