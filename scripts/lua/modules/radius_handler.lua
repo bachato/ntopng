@@ -56,11 +56,10 @@ function radius_handler.accountingStart(name, username, password)
    local ip_address = get_first_ip(name)
    local current_time = os.time()
    math.randomseed(current_time)
-   
-   traceError(TRACE_NORMAL, TRACE_CONSOLE,
-	      string.format(
-		 "Accounting start requested for MAC [%s] with username [%s][IP: %s]",
-		 name, username, ip_address or ""))
+
+   local msg = string.format("Accounting start requested for MAC [%s] with username [%s][IP: %s]", name, username, ip_address or "")
+   traceError(TRACE_DEBUG, TRACE_CONSOLE, msg)
+   interface.appendMacEvent(name, msg)
 
    local accounting_started =
       interface.radiusAccountingStart(username --[[ Username ]] , name --[[ MAC Address ]] ,
@@ -100,8 +99,9 @@ function radius_handler.accountingStop(name, terminate_cause, info)
    -- Removing the entry from redis
    ntop.delCache(string.format(redis_accounting_key, name))
 
-   traceError(TRACE_NORMAL, TRACE_CONSOLE,
-	      string.format("Accounting stop requested for MAC [%s]", name))
+   local msg = string.format("Accounting stop requested for MAC [%s]", name)
+   traceError(TRACE_DEBUG, TRACE_CONSOLE, msg)
+   interface.appendMacEvent(name, msg)
 
    -- Check in case no user_data is found
    if user_data then
@@ -197,7 +197,7 @@ function radius_handler.accountingUpdate(name, info)
 	 packets_rcvd = info["packets.rcvd"]
       end
 
-      traceError(TRACE_NORMAL, TRACE_CONSOLE, string.format(
+      traceError(TRACE_DEBUG, TRACE_CONSOLE, string.format(
 		    "Accounting update [MAC: %s][IP: %s][In Bytes: %d][Out Bytes: %d][Radius In Bytes: %d][Radius Out Bytes: %d]",
 		    name, ip_address or "", info["bytes.rcvd"],
 		    info["bytes.sent"], bytes_rcvd, bytes_sent))

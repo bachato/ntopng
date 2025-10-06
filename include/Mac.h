@@ -36,7 +36,10 @@ class Mac : public GenericHashEntry {
   MacStats *stats, *stats_shadow;
   time_t last_stats_reset;
   ndpi_os device_os; /* This is the OS hint has observed via MAC address */
-  
+#ifdef HAVE_NEDGE
+  u_int32_t last_counter_reset;
+  std::vector<std::string> events;
+#endif
   struct {
     char *dhcp; /* Extracted from DHCP dissection */
   } names;
@@ -205,6 +208,10 @@ class Mac : public GenericHashEntry {
 #endif
 
   inline char* getDHCPfingerprint() { return(dhcpv4_fingerprint); }
+
+#ifdef HAVE_NEDGE
+  void logMacEvent(char *msg);
+#endif
 };
 
 #endif /* _MAC_H_ */

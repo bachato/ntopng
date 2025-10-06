@@ -5339,6 +5339,9 @@ local lang = {
         ["vulners"] = "Vulners",
       },
     },
+    ["last_counter_reset"] = "Last Traffic Counters Reset",
+    ["no_counter_reset_yet"] = "Never",
+    ["events"] = "Last MAC Events",
   },
   ["http_info"] = {
     ["methods"] = {

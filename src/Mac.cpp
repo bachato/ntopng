@@ -46,6 +46,9 @@ Mac::Mac(NetworkInterface *_iface, u_int8_t _mac[6])
   stats_shadow = NULL;
   last_stats_reset = ntop->getLastStatsReset(); /* assume fresh stats, may be
                                                    changed by deserialize */
+#ifdef HAVE_NEDGE
+  last_counter_reset = 0;
+#endif
 
   if (ntop->getMacManufacturers()) {
     manuf = ntop->getMacManufacturers()->getManufacturer(mac);
@@ -159,7 +162,7 @@ static const char *location2str(MacLocation location) {
 
 void Mac::lua(lua_State *vm, bool show_details, bool asListElement) {
   char buf[32], *m;
-
+  
   lua_newtable(vm);
 
   lua_push_str_table_entry(vm, "mac",
@@ -188,7 +191,25 @@ void Mac::lua(lua_State *vm, bool show_details, bool asListElement) {
   lua_push_uint64_table_entry(vm, "duration", get_duration());
   lua_push_uint64_table_entry(vm, "num_hosts", getNumHosts());
   lua_push_uint64_table_entry(vm, "pool", get_host_pool());
+#ifdef HAVE_NEDGE
+  lua_push_uint32_table_entry(vm, "last_counter_reset", last_counter_reset);
 
+  if(events.size() > 0) {
+    u_int i = 1;
+
+    lua_newtable(vm);
+    
+    for (std::vector<std::string>::iterator it = events.begin(); it != events.end(); ++it, i++) {
+      lua_pushstring(vm, it->c_str());
+      lua_rawseti(vm, -2, i);
+    }
+    
+    lua_pushstring(vm, "events");
+    lua_insert(vm, -2);
+    lua_settable(vm, -3);
+  }
+#endif
+  
   if (asListElement) {
     lua_pushstring(vm, m);
     lua_insert(vm, -2);
@@ -392,8 +413,9 @@ void Mac::checkStatsReset() {
 #ifdef HAVE_NEDGE
     char buf[32];
 
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Reset stats for MAC %s",
+    ntop->getTrace()->traceEvent(TRACE_INFO, "Reset stats for MAC %s",
 				 print(buf, sizeof(buf)));
+    last_counter_reset = time(NULL);
 #endif
   }
 }
@@ -525,3 +547,22 @@ void Mac::setDeviceOS(ndpi_os _os) {
 			 this, NULL, NULL, NULL,
 			 (char*)Utils::OS2Str(_os));
 }
+
+/* *************************************** */
+
+#ifdef HAVE_NEDGE
+void Mac::logMacEvent(char *msg) {
+  char buf[512], theDate[32];
+  time_t theTime = time(NULL);
+  struct tm result;
+  
+  strftime(theDate, sizeof(theDate), "%d/%b/%Y %H:%M:%S",
+	   localtime_r(&theTime, &result));
+  snprintf(buf, sizeof(buf), "%s %s", theDate, msg);
+
+  events.insert(events.begin(), buf); /* Asdds a message at the beginning */
+
+  if(events.size() > 25 /* max number of events */)
+    events.pop_back(); /* Deletes last element */
+}
+#endif

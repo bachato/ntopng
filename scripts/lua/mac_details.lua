@@ -298,6 +298,19 @@ print([[<tr>
 </tr>]])
 end
 
+   if(mac_info.last_counter_reset ~= nil) then
+     local format_utils = require "format_utils"     
+     local str
+
+     if(mac_info.last_counter_reset == 0) then
+       str = "Never"
+     else
+       str = format_utils.formatEpoch(mac_info.last_counter_reset, true)
+     end
+
+     print("<tr><th>" .. i18n("hosts_stats.last_counter_reset") .. " </th><td colspan=2>".. str .."</td></tr>\n")
+   end
+
    -- Stats reset
    print(
      template.gen("modal_confirm_dialog.html", {
@@ -317,6 +330,15 @@ end
    </form>
    <button class="btn btn-secondary" onclick="$('#reset_mac_stats_dialog').modal('show')">]] print(i18n("mac_details.reset_mac_stats")) print[[</button>
    </td></tr>]]
+
+  if(mac_info.events) then
+       print("<tr><th>" .. i18n("hosts_stats.events") .. " </th><td colspan=2><ol>")
+
+       for _, v in pairs(mac_info.events) do
+         print("<li>"..v.."</li>\n")
+       end
+       print("</ol></td></tr>\n")
+  end
 
    print("</table>")
 
