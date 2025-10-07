@@ -2131,31 +2131,57 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 	u_int8_t *m = flow->getCliMacRaw();
 
 	if(m
-	   && (memcmp(m, e_mac, 6) == 0)
-	   && (memcmp(eth->h_source, e_mac, 6) != 0) /* Not 00:00:00:00:00:00 */
+	   && (memcmp(m, e_mac, 6) == 0)             /* Raw MAC is 00:00:00:00:00:00 */
+	   && (memcmp(eth->h_source, e_mac, 6) != 0) /* Received source MAC is not 00:00:00:00:00:00 */
 	   ) {
 	  /* We need to set the client MAC address */
 	  Mac *mac = getMac(eth->h_source, true /* Create if missing */, true /* Inline call */);
 	  Host *c_host = flow->get_cli_host();
 
-	  /* ntop->getTrace()->traceEvent(TRACE_WARNING, "Check MAC %02X:%02X:%02X:%02X:%02X:%02X", m[0], m[1], m[2], m[3], m[4], m[5]); */
-	  c_host->set_mac(mac);
-	  flow->setCliMacRaw(eth->h_source);
+	  if(mac != NULL) {
+	    /* ntop->getTrace()->traceEvent(TRACE_WARNING, "Check MAC %02X:%02X:%02X:%02X:%02X:%02X", m[0], m[1], m[2], m[3], m[4], m[5]); */
+	    c_host->set_mac(mac);
+	    flow->setCliMacRaw(eth->h_source);
+	  }
+	} else {
+	  Host *c_host = flow->get_cli_host();
+	  Mac  *c_mac  = c_host->getMac();
+
+	  if(c_mac->isNull()) {
+	    /* ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL source MAC"); */
+	    Mac *mac = getMac(eth->h_source, true /* Create if missing */, true /* Inline call */);
+
+	    if(mac != NULL)
+	      c_host->set_mac(mac);
+	  }
 	}
       } else {
 	u_int8_t *m = flow->getSrvMacRaw();
 
 	if(m
-	   && (memcmp(m, e_mac, 6) == 0)
-	   && (memcmp(eth->h_source, e_mac, 6) != 0) /* Not 00:00:00:00:00:00 */
+	   && (memcmp(m, e_mac, 6) == 0)             /* Raw MAC is 00:00:00:00:00:00 */
+	   && (memcmp(eth->h_source, e_mac, 6) != 0) /* Received source MAC is not 00:00:00:00:00:00 */
 	   ) {
 	  /* We need to set the client MAC address */
 	  Mac *mac = getMac(eth->h_source, true /* Create if missing */, true /* Inline call */);
 	  Host *d_host = flow->get_srv_host();
 
-	  /* ntop->getTrace()->traceEvent(TRACE_WARNING, "Check MAC %02X:%02X:%02X:%02X:%02X:%02X", m[0], m[1], m[2], m[3], m[4], m[5]); */
-	  d_host->set_mac(mac);
-	  flow->setSrvMacRaw(eth->h_source);
+	  if(mac != NULL) {
+	    /* ntop->getTrace()->traceEvent(TRACE_WARNING, "Check MAC %02X:%02X:%02X:%02X:%02X:%02X", m[0], m[1], m[2], m[3], m[4], m[5]); */
+	    d_host->set_mac(mac);
+	    flow->setSrvMacRaw(eth->h_source);
+	  }
+	} else {
+	  Host *d_host = flow->get_srv_host();
+	  Mac  *d_mac  = d_host->getMac();
+
+	  if(d_mac->isNull()) {
+	    /* ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL destination MAC"); */
+	    Mac *mac = getMac(eth->h_source, true /* Create if missing */, true /* Inline call */);
+
+	    if(mac != NULL)
+	      d_host->set_mac(mac);
+	  }
 	}
       }
     }
