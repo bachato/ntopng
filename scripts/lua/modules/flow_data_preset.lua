@@ -34,6 +34,7 @@ local columns = {
     src_peer_asn = {
         column_id = "SRC_PEER_ASN",
         is_key = true,
+        hide_if_value = "0",
         formatter = {
             funct = format_utils.formatASN,
             link = "/lua/as_overview.lua?asn=%s"
@@ -42,6 +43,7 @@ local columns = {
     dst_peer_asn = {
         column_id = "DST_PEER_ASN",
         is_key = true,
+        hide_if_value = "0",
         formatter = {
             funct = format_utils.formatASN,
             link = "/lua/as_overview.lua?asn=%s"

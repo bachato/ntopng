@@ -82,6 +82,11 @@ local function formatEmptyStats(columns, flow, rename_field_list,
                         element[key] = nil
                     end
                 end
+                -- In case the value needs to be removed,
+                -- e.g. if the peer ASN are 0, they needs to be skipped.
+                if (column_info.hide_if_value) and (flow_element == column_info.hide_if_value) then
+                    element[key] = nil
+                end
                 if trace_stats then
                     trace_string = string.format("%s [%s: %s]", trace_string,
                                                  key,
