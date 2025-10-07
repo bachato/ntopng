@@ -20,6 +20,7 @@ sendHTTPContentTypeHeader('text/html')
 -- if not nedge use hosts_pools
 local menu = not ntop.isnEdge() and page_utils.menu_entries.host_pools or page_utils.menu_entries.users
 local title = have_nedge and i18n("nedge.users_list") or i18n("pool_stats.host_pool_list")
+local ifid = interface.getId()
 
 page_utils.print_header_and_set_active_menu_entry(menu)
 
@@ -34,9 +35,10 @@ page_utils.print_navbar(title, ntop.getHttpPrefix() .. "/lua/pool_stats_vue.lua"
 
 local context = {
     csrf = ntop.getRandomCSRFValue(),
-    ifid = interface.getId(),
+    ifid = ifid,
     isnEdge = ntop.isnEdge(),
-    isPro = ntop.isPro()
+    isPro = ntop.isPro(),
+    timeseriesEnabled = areHostPoolsTimeseriesEnabled(ifid)
 }
 
 local json_context = json.encode(context)

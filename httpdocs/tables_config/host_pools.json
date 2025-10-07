@@ -19,6 +19,12 @@
 			"render_v_node_type": "button_list",
 			"button_def_array": [
 				{
+					"id": "timeseries_chart",
+					"icon": "fas fa-lg fa-chart-area",
+					"title_i18n": "prefs.timeseries",
+					"event_id": "click_button_timeseries"
+				},
+				{
 					"id": "manage_pool",
 					"icon": "fas fa-layer-group",
 					"title_i18n": "host_pools.manage_pool",

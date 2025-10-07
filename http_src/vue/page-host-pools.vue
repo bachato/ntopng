@@ -171,10 +171,10 @@ const map_table_def_columns = (columns) => {
             return `<a href="${url}">${value}</a>`
         },
         "hosts": (value, row) => {
-            if(value != "0") { return formatterUtils.getFormatter("number")(value); } else { return(""); }
+            if (value != "0") { return formatterUtils.getFormatter("number")(value); } else { return (""); }
         },
         "seen_since": (value, row) => {
-	    if(value == 0) return("");
+            if (value == 0) return ("");
             const formattedDate = NtopUtils.secondsToTime(Math.round(new Date().getTime() / 1000) - value)
             return formattedDate;
         },
@@ -185,7 +185,7 @@ const map_table_def_columns = (columns) => {
             return formatterUtils.getFormatter("bps")(value);
         },
         "traffic": (value, row) => {
-	    if(value == 0) return("");
+            if (value == 0) return ("");
             return formatterUtils.getFormatter("bytes")(value);
         },
         "clean_members": (value, row) => {
@@ -198,10 +198,15 @@ const map_table_def_columns = (columns) => {
         c.render_func = map_columns[c.data_field];
         // disable action dropdown items
         if (c.id == "actions") {
+            const visible_dict = {
+                timeseries_chart: props.context.timeseriesEnabled,
+            };
 
             c.button_def_array.forEach((b) => {
                 b.f_map_class = (current_class, row) => {
-
+                    if ((visible_dict[b.id] !== null) && (visible_dict[b.id] === false)) {
+                        current_class.push("disabled");
+                    }
                     // disable dropdown button delete for pools: 'Jailed Hosts' and 'Default'
                     if ((row.pool_name === "Jailed Hosts" || row.pool_name === "Default") &&
                         b.id === "delete") {
@@ -241,6 +246,7 @@ function columns_sorting(col, r0, r1) {
 /* Used to Handle click on actions dropdown */
 function on_table_custom_event(event) {
     let events_managed = {
+        "click_button_timeseries": click_button_timeseries,
         "click_manage_pool": click_manage_pool,
         "click_edit_pool": click_edit_pool,
         "click_edit_pool_policy": click_edit_pool_policy,
@@ -253,6 +259,14 @@ function on_table_custom_event(event) {
 }
 
 /* Functions below are used to handle 'actions' dropdown click */
+
+/* redirect to host pools page */
+const click_button_timeseries = (param) => {
+    let pool_id = param.row.pool_id;
+    let manage_pool_url = `${http_prefix}/lua/pool_details.lua?pool=${pool_id}`;
+    // open page in current tab
+    window.location.href = manage_pool_url;
+};
 
 /* redirect to manage pool page */
 const click_manage_pool = (param) => {
@@ -288,8 +302,8 @@ const click_edit_pool_policy = (param) => {
     let pool_id = param.row.pool_id;
     let pool_name = param.row.pool_name;
     let manage_pool_url;
-    
-    if(isnEdge)
+
+    if (isnEdge)
         manage_pool_url = `${http_prefix}/lua/pro/nedge/admin/nf_edit_user.lua?username=${pool_name}`;
     else
         manage_pool_url = `${http_prefix}/lua/pro/policy.lua?pool=${pool_id}`;
