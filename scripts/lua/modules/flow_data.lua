@@ -9,6 +9,8 @@ if ntop.isPro() then
                        package.path
 end
 
+require "lua_utils_gui"
+
 local flow_data = {}
 local callback_utils = require "callback_utils"
 local flow_data_preset = require "flow_data_preset"

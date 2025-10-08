@@ -3,7 +3,9 @@
 --
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
-package.path = dirs.installdir .. "/scripts/lua/modules/vulnerability_scan/?.lua;" .. package.path
+package.path = dirs.installdir ..
+                   "/scripts/lua/modules/vulnerability_scan/?.lua;" ..
+                   package.path
 
 require "lua_utils"
 require "flow_utils"
@@ -12,7 +14,7 @@ local rest_utils = require "rest_utils"
 local alert_consts = require "alert_consts"
 local format_utils = require "format_utils"
 local l4_protocol_list = require "l4_protocol_list"
-local icmp_utils       = require("icmp_utils")
+local icmp_utils = require("icmp_utils")
 
 -- Trick to handle the application and the categories togheter
 local application = _GET["application"]
@@ -98,13 +100,16 @@ if not isEmptyString(flows_filter.statusFilter) then
 end
 
 local rsp = {}
-local flows_stats = interface.getFlowsInfo(flows_filter["hostFilter"], flows_filter, flows_filter["talkingWith"],
-					   flows_filter["client"], flows_filter["server"], flows_filter["flow_info"])
+local flows_stats = interface.getFlowsInfo(flows_filter["hostFilter"],
+                                           flows_filter,
+                                           flows_filter["talkingWith"],
+                                           flows_filter["client"],
+                                           flows_filter["server"],
+                                           flows_filter["flow_info"])
 
 if not flows_stats then
-    rest_utils.extended_answer(rest_utils.consts.success.ok, {}, {
-        ["recordsTotal"] = 0
-    })
+    rest_utils.extended_answer(rest_utils.consts.success.ok, {},
+                               {["recordsTotal"] = 0})
     return
 end
 
@@ -143,11 +148,11 @@ for _, value in ipairs(flows_stats.flows) do
     local transit_asn_ip = ""
 
     -- Get transit asn from flow
-    if(value.src_peer_as ~= value.src_as) then
+    if (value.src_peer_as ~= value.src_as) then
         transit_asn = value.src_peer_as
         transit_asn_ip = cli_ip
     else
-        if(value.dst_peer_as ~= value.dst_as) then
+        if (value.dst_peer_as ~= value.dst_as) then
             transit_asn = value.dst_peer_as
             transit_asn_ip = srv_ip
         end
@@ -180,15 +185,19 @@ for _, value in ipairs(flows_stats.flows) do
     client = format_utils.formatMainAddressCategoryNoHTML(info_cli, client)
     client.allowed_host = value["cli.allowed_host"] and not interface.isViewed()
     if client.allowed_host then
-        if value["cli.port"] > 0 or value["proto.l4"] == "TCP" or value["proto.l4"] == "UDP" then
-            client.service_port = ntop.getservbyport(value["cli.port"], string.lower(value["proto.l4"]))
+        if value["cli.port"] > 0 or value["proto.l4"] == "TCP" or
+            value["proto.l4"] == "UDP" then
+            client.service_port = ntop.getservbyport(value["cli.port"],
+                                                     string.lower(
+                                                         value["proto.l4"]))
         end
     end
 
     if (value["cli.serialize_by_mac"] and (value["cli.mac"] ~= nil)) then
         client.mac = value["cli.mac"]
     end
-    if value["client_process"] and not isEmptyString(value["client_process"]["name"]) then
+    if value["client_process"] and
+        not isEmptyString(value["client_process"]["name"]) then
         local name = value["client_process"]["name"]
         client.process.name = name
         client.process.pid = value["client_process"]["pid"]
@@ -198,7 +207,8 @@ for _, value in ipairs(flows_stats.flows) do
     end
     if value["client_container"] then
         client.container.id = value["client_container"]["id"]
-        client.container.name = format_utils.formatContainer(value["client_container"])
+        client.container.name = format_utils.formatContainer(
+                                    value["client_container"])
     end
 
     -- Formatting server column
@@ -213,12 +223,16 @@ for _, value in ipairs(flows_stats.flows) do
     server = format_utils.formatMainAddressCategoryNoHTML(info_srv, server)
     server.allowed_host = value["srv.allowed_host"] and not interface.isViewed()
     if server.allowed_host then
-        if value["cli.port"] > 0 or value["proto.l4"] == "TCP" or value["proto.l4"] == "UDP" then
-            server.service_port = ntop.getservbyport(value["srv.port"], string.lower(value["proto.l4"]))
+        if value["cli.port"] > 0 or value["proto.l4"] == "TCP" or
+            value["proto.l4"] == "UDP" then
+            server.service_port = ntop.getservbyport(value["srv.port"],
+                                                     string.lower(
+                                                         value["proto.l4"]))
         end
     end
 
-    if value["server_process"] and not isEmptyString(value["server_process"]["name"]) then
+    if value["server_process"] and
+        not isEmptyString(value["server_process"]["name"]) then
         local name = value["server_process"]["name"]
         server.process.name = name
         server.process.pid = value["server_process"]["pid"]
@@ -228,21 +242,26 @@ for _, value in ipairs(flows_stats.flows) do
     end
     if value["server_container"] then
         server.container.id = value["server_container"]["id"]
-        server.container.name = format_utils.formatContainer(value["server_container"])
+        server.container.name = format_utils.formatContainer(
+                                    value["server_container"])
         server.container.pod = value["server_container"]["k8s.pod"]
     end
 
     -- snmp interface index
     if (value["in_index"] ~= nil and value["out_index"] ~= nil) then
-        local device_ip = value["device_ip"]
+        local snmp_cached_dev = require "snmp_cached_dev"
+
         local probe_uuid = 0
+        local device_ip = value["device_ip"]
+        local cached_dev = snmp_cached_dev:get_interfaces(device_ip)
+tprint(cached_dev["interfaces"])
 
         -- get exporter info
         local ifstats = interface.getStats()
         for interface_id, probes_list in pairs(ifstats.probes or {}) do
             for source_id, probe_info in pairs(probes_list or {}) do
                 local probe_ip = probe_info["probe.ip"]
-                
+
                 -- get probe uuid if ips match
                 if probe_ip == device_ip then
                     probe_uuid = probe_info["probe.uuid_num"]
@@ -260,12 +279,12 @@ for _, value in ipairs(flows_stats.flows) do
             in_port = {
                 index = value["in_index"],
                 -- last param is short version
-                name = format_portidx_name(device_ip, value["in_index"], true)
+                name = format_portidx_name(device_ip, value["in_index"], true, cached_dev["interfaces"][tostring(value["in_index"])])
             },
             out_port = {
                 index = value["out_index"],
                 -- last param is short version
-                name = format_portidx_name(device_ip, value["out_index"], true)
+                name = format_portidx_name(device_ip, value["out_index"], true, cached_dev["interfaces"][tostring(value["out_index"])])
             }
         }
 
@@ -286,33 +305,30 @@ for _, value in ipairs(flows_stats.flows) do
 
     local proto_id = 0
     local proto_name = ""
-    
+
     -- l4_protocol_list.l4_keys entry is like:  { "IP",        "ip",          0 }
     for _, proto in pairs(l4_protocol_list.l4_keys) do
-        if proto[1] == value["proto.l4"] or proto[2] == value["proto.l4"] or proto[3] == tonumber(value["proto.l4"]) then
+        if proto[1] == value["proto.l4"] or proto[2] == value["proto.l4"] or
+            proto[3] == tonumber(value["proto.l4"]) then
             proto_id = (proto[3])
             proto_name = (proto[1])
             break
         end
     end
 
-    record["l4_proto"] = {
-        id = proto_id,
-        name = proto_name
-    }
+    record["l4_proto"] = {id = proto_id, name = proto_name}
     record["first_seen"] = value["seen.first"]
     record["last_seen"] = value["seen.last"]
     record["key"] = string.format("%u", value["ntopng.key"])
     record["hash_id"] = string.format("%u", value["hash_entry_id"])
     record["verdict"] = value["verdict.pass"]
     record["duration"] = value["duration"]
-    if(
-       ((record.l4_proto.id == 58) or (record.l4_proto.id == 1)) -- ICMP or ICMPv6
-       and (value["info"] ~= "")) then
-       local tc = split(value["info"], ",")
-       record["info"] = icmp_utils.get_icmp_label(tc[1], tc[2])
+    if (((record.l4_proto.id == 58) or (record.l4_proto.id == 1)) -- ICMP or ICMPv6
+    and (value["info"] ~= "")) then
+        local tc = split(value["info"], ",")
+        record["info"] = icmp_utils.get_icmp_label(tc[1], tc[2])
     else
-       record["info"] = value["info"]
+        record["info"] = value["info"]
     end
     record["periodic_flow"] = value.periodic_flow
     record["client"] = client
@@ -322,9 +338,7 @@ for _, value in ipairs(flows_stats.flows) do
     record["transit_asn"] = transit_asn_data
 
     record["ifid"] = ifid
-    if value.score then
-        record["score"] = value.score.flow_score
-    end
+    if value.score then record["score"] = value.score.flow_score end
     record["bytes"] = {
         total = value["bytes"],
         cli_bytes = value["cli2srv.bytes"],
@@ -348,22 +362,21 @@ for _, value in ipairs(flows_stats.flows) do
 
     if (not isEmptyString(value["protos.http.last_method"])) then
         record["application"]["http_method"] = value["protos.http.last_method"]
-        record["application"]["return_code"] = value["protos.http.last_return_code"]
-        record["application"]["rsp_status_code"] = http_utils.getResponseStatusCode(
-            value["protos.http.last_return_code"])
+        record["application"]["return_code"] =
+            value["protos.http.last_return_code"]
+        record["application"]["rsp_status_code"] =
+            http_utils.getResponseStatusCode(
+                value["protos.http.last_return_code"])
     end
 
-    if((value.qoe ~= nil) and (value.qoe.score ~= nil)) then
-       record["qoe"] = value.qoe.score.overall
+    if ((value.qoe ~= nil) and (value.qoe.score ~= nil)) then
+        record["qoe"] = value.qoe.score.overall
     end
 
     rsp[#rsp + 1] = record
 end
 
-if tostring(current_ifid) ~= tostring(ifid) then
-    interface.select(current_ifid)
-end
+if tostring(current_ifid) ~= tostring(ifid) then interface.select(current_ifid) end
 
-rest_utils.extended_answer(rest_utils.consts.success.ok, rsp, {
-    ["recordsTotal"] = flows_stats["numFlows"]
-})
+rest_utils.extended_answer(rest_utils.consts.success.ok, rsp,
+                           {["recordsTotal"] = flows_stats["numFlows"]})

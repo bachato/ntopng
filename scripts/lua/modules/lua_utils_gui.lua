@@ -23,10 +23,12 @@ local format_utils = require "format_utils"
 local dns_utils = require "dns_utils"
 local http_utils = require "http_utils"
 local rest_utils = require "rest_utils"
+local snmp_utils
 if ntop.isPro() then
     package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" ..
                        package.path
     require "flow_exporter_utils"
+    snmp_utils = require "snmp_utils"
 end
 -- For backward compatibility override these functions
 sendHTTPContentTypeHeader = rest_utils.sendHTTPContentTypeHeader
@@ -989,50 +991,40 @@ local _snmp_devices = {}
 -- @params device_ip: snmp device ip
 --         portidx:   number or string, interface index to format
 --         short_version: boolean, long formatting version (e.g. flow info) or short version (e.g. dropdown menu)
-function format_portidx_name(device_ip, portidx, short_version)
+--         interface_info: table, contains all the info of an interface, basically got by snmp_cached_dev:get_interfaces(device_ip)[portidx]
+function format_portidx_name(device_ip, portidx, short_version, interface_info)
     local idx_name = portidx
 
     -- SNMP is available only with Pro version at least
     if ntop.isPro() then
+        local name = ""
+        -- In case of the device being in number format, convert to string
         if tonumber(device_ip) then device_ip = ntop.inet_ntoa(device_ip) end
-        local alias = getFlowDevInterfaceAlias(device_ip, portidx) 
-        -- First check if some custom name was set from the GUI
-        if tostring(alias) ~= tostring(portidx) then
-            if (short_version) then
-                idx_name = tostring(alias)
-            else
-                idx_name = string.format("%s (%s)", tostring(alias), tostring(portidx))
-            end
-            return idx_name
-        end
-        local cached_dev = _snmp_devices[device_ip]
 
-        if (cached_dev == nil) then
+        local cached_info = _snmp_devices[device_ip]
+
+        if (cached_info == nil) then
+            -- Retrieve the name from SNMP cache (redis)
             local snmp_cached_dev = require "snmp_cached_dev"
 
-            cached_dev = snmp_cached_dev:get_interfaces(device_ip)
-            _snmp_devices[device_ip] = cached_dev
+            cached_info = snmp_cached_dev:get_interfaces(device_ip)
+            _snmp_devices[device_ip] = cached_info
         end
-
-        if (cached_dev) and (cached_dev["interfaces"]) then
-            local port_info = cached_dev["interfaces"][tostring(portidx)]
-
-            if port_info then
-                local dirs = ntop.getDirs()
-                package.path = dirs.installdir ..
-                                   "/pro/scripts/lua/modules/?.lua;" ..
-                                   package.path
-                local snmp_utils = require "snmp_utils"
-                local snmp_location = require "snmp_location"
-                idx_name = snmp_utils.get_snmp_interface_label(port_info,
-                                                               short_version)
-            else
-                -- No SNMP configured: last resort use exporters
-                local snmp_mappings = require "snmp_mappings"
-
-                local res = snmp_mappings.get_iface_name(device_ip, portidx)
-                if (res ~= nil) then idx_name = res end
+        
+        if (cached_info) and (cached_info["interfaces"]) then
+            -- if the info are available, use this function 
+            cached_info = cached_info["interfaces"][tostring(portidx)]
+            if (cached_info) then
+                name = snmp_utils.getInterfaceNameFromCache(device_ip, portidx,
+                                                            cached_info,
+                                                            short_version)
             end
+        else
+            -- No SNMP configured: last resort use exporters
+            local snmp_mappings = require "snmp_mappings"
+
+            local res = snmp_mappings.get_iface_name(device_ip, portidx)
+            if (res ~= nil) then idx_name = res end
         end
     end
 

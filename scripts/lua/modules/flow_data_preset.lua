@@ -5,7 +5,6 @@ dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 
 require "lua_utils_get"
-require "lua_utils_gui"
 local format_utils = require "format_utils"
 local flow_data_preset = {}
 -- This table contains the mapping to the live and historical flows,
