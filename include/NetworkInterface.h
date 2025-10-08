@@ -218,13 +218,13 @@ protected:
   bool is_smart_recording_enabled;
   char *smart_recording_instance_name;
 #ifdef NTOPNG_PRO
-  L7Policer *policer;
-
 #if defined(HAVE_KAFKA)
   KafkaProducer *kafka;
 #endif
 
-#ifndef HAVE_NEDGE
+#ifdef HAVE_NEDGE
+  L7Policer *policer;
+#else
   FlowProfiles *flow_profiles, *shadow_flow_profiles;
   SubInterfaces *sub_interfaces;
 #endif
@@ -921,14 +921,18 @@ public:
   bool alert_store_query(lua_State *vm, const char *sql, bool limit_rows);
 
   void listHTTPHosts(lua_State *vm, char *key);
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
   void refreshL7Rules();
   void refreshShapers();
   inline L7Policer *getL7Policer() { return (policer); }
+#endif
+
+#ifdef NTOPNG_PRO
   inline FlowInterfacesStats *getFlowInterfacesStats() {
     return (flow_interfaces_stats);
   }
 #endif
+  
   inline HostPools *getHostPools() { return (host_pools); }
   inline void reloadHostPools() {
     if (host_pools) host_pools->reloadPools();

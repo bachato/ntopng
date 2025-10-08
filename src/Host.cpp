@@ -429,7 +429,7 @@ void Host::updateHostPool(bool isInlineCall, bool firstUpdate) {
   host_pool_id_is_from_mac = mac_match;
   iface->incPoolNumHosts(get_host_pool(), isInlineCall);
 
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
   if(iface && iface->is_bridge_interface()) {
     HostPools *hp = iface->getHostPools();
 
@@ -1560,7 +1560,7 @@ TrafficShaper *Host::get_shaper(ndpi_protocol ndpiProtocol) {
 
 /* *************************************** */
 
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
 bool Host::checkQuota(ndpi_protocol ndpiProtocol,
                       L7PolicySource_t *quota_source, const struct tm *now) {
   bool is_above;

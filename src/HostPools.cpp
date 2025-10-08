@@ -30,7 +30,7 @@ HostPools::HostPools(NetworkInterface *_iface) {
 
   tree = tree_shadow = NULL;
   stats = stats_shadow = NULL;
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
   children_safe = forge_global_dns = NULL;
   block_blacklisted_flows = NULL;
   dynamic_blacklist_enabled = NULL;
@@ -141,7 +141,7 @@ HostPools::~HostPools() {
     deleteStats(&stats); }
   if (stats_shadow) deleteStats(&stats_shadow);
 
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
   if (children_safe) free(children_safe);
   if (block_blacklisted_flows) free(block_blacklisted_flows);
   if (dynamic_blacklist_enabled) free(dynamic_blacklist_enabled);
@@ -360,7 +360,7 @@ void HostPools::reloadPool(u_int16_t _pool_id, VLANAddressTree *new_tree, HostPo
     new_stats[_pool_id]->updateName(name_rsp);
   }
 
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
   char rsp[16] = {0};
 
   children_safe[_pool_id] = ((redis->hashGet(kname, (char *)CONST_CHILDREN_SAFE, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
@@ -374,13 +374,11 @@ void HostPools::reloadPool(u_int16_t _pool_id, VLANAddressTree *new_tree, HostPo
   enforce_shapers_per_pool_member[_pool_id] = ((redis->hashGet(kname, (char *)CONST_ENFORCE_SHAPERS_PER_POOL_MEMBER, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
   dynamic_blacklist_enabled[_pool_id] = ((redis->hashGet(kname, (char *)CONST_DYNAMIC_BLACKLIST, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
 
-#ifdef HAVE_NEDGE
   if(dynamic_blacklist_enabled[_pool_id]) {
     ntop->getTrace()->traceEvent(TRACE_INFO, "Allocating synamic blacklist for poolId %d", _pool_id);
 
     dynamicBlacklist[_pool_id] = new AddressTree();
   }
-#endif
   
 #ifdef HOST_POOLS_DEBUG
   redis->hashGet(kname, (char *)"name", rsp, sizeof(rsp));

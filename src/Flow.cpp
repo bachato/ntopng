@@ -2765,7 +2765,7 @@ void Flow::update_pools_stats(NetworkInterface *iface, Host *cli_host,
                          diff_sent_packets, diff_sent_bytes, diff_rcvd_packets,
                          diff_rcvd_bytes);
 
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
       /* Per host quota-enforcement stats */
       if(hp->enforceQuotasPerPoolMember(cli_host_pool_id)) {
         cli_host->incQuotaEnforcementStats(tv->tv_sec, ndpiDetectedProtocol.proto.master_protocol, diff_sent_packets,
@@ -2803,7 +2803,7 @@ void Flow::update_pools_stats(NetworkInterface *iface, Host *cli_host,
 
       /* When quotas have to be enforced per pool member, stats must be
        * increased even if cli and srv are on the same pool */
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
       if(hp->enforceQuotasPerPoolMember(srv_host_pool_id)) {
         srv_host->incQuotaEnforcementStats(tv->tv_sec, ndpiDetectedProtocol.proto.master_protocol, diff_rcvd_packets,
 					   diff_rcvd_bytes, diff_sent_packets, diff_sent_bytes);

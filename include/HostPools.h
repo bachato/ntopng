@@ -37,7 +37,7 @@ class HostPools {
   int32_t *num_active_l2_devices_inline, *num_active_l2_devices_offline;
   HostPoolStats **stats, **stats_shadow;
 
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
   bool *children_safe;
   bool *forge_global_dns;
   bool *block_blacklisted_flows;
@@ -161,7 +161,7 @@ class HostPools {
 
   void resetPoolsStats(u_int16_t pool_filter);
 
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
   inline bool enforceQuotasPerPoolMember(u_int16_t pool_id) {
     return (((pool_id != NO_HOST_POOL_ID) && (pool_id < max_num_pools))
                 ? enforce_quotas_per_pool_member[pool_id]

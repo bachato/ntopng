@@ -190,8 +190,9 @@ NetworkInterface::NetworkInterface(const char *name,
   networkStats = NULL;
 
 #ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
   policer = NULL; /* possibly instantiated by subclass PacketBridge */
-#ifndef HAVE_NEDGE
+#else
   flow_profiles = ntop->getPro()->has_valid_license() ? new (std::nothrow)
     FlowProfiles(id) : NULL;
   if (flow_profiles) flow_profiles->loadProfiles();
@@ -340,11 +341,14 @@ void NetworkInterface::init(const char *interface_name) {
 #endif
 #endif
 
+#ifdef HAVE_NEDGE
+  policer = NULL;
+#endif
+  
 #ifdef NTOPNG_PRO
   custom_app_stats = NULL;
   flow_interfaces_stats = NULL;
-  policer = NULL;
-
+  
   /* Behavior init variables */
   next5MinPeriodicUpdate = nextMinPeriodicUpdate = 0;
   score_behavior = new BehaviorAnalysis();
@@ -682,7 +686,7 @@ void NetworkInterface::setnDPIProtocolCategory(struct ndpi_detection_module_stru
 
 /* **************************************************** */
 
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
 
 void NetworkInterface::initL7Policer() {
   /* Instantiate the policer */
@@ -1056,8 +1060,10 @@ NetworkInterface::~NetworkInterface() {
   external_alerts.clear();
 
 #ifdef NTOPNG_PRO
+
+#ifdef HAVE_NEDGE
   if (policer) delete (policer);
-#ifndef HAVE_NEDGE
+#else
   if (flow_profiles) delete (flow_profiles);
   if (shadow_flow_profiles) delete (shadow_flow_profiles);
   if (sub_interfaces) delete (sub_interfaces);
@@ -4424,7 +4430,7 @@ void NetworkInterface::refreshHostPools() {
   update_host.update_pool_id = true;
   update_host.update_l7policy = false;
 
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
   if (is_bridge_interface() && getL7Policer()) {
     /*
       Every pool is associated with a set of L7 rules
@@ -8723,15 +8729,13 @@ void NetworkInterface::addAllAvailableInterfaces() {
 
 /* **************************************** */
 
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
 void NetworkInterface::refreshL7Rules() {
   if (ntop->getPro()->has_valid_license() && policer) policer->refreshL7Rules();
 }
-#endif
 
 /* **************************************** */
 
-#ifdef NTOPNG_PRO
 void NetworkInterface::refreshShapers() {
   if (ntop->getPro()->has_valid_license() && policer) policer->refreshShapers();
 }

@@ -1427,7 +1427,7 @@ static int ntop_get_host_pool_interface_stats(lua_State *vm) {
 
 /* ****************************************** */
 
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
 
 /**
  * @brief Get the Host statistics corresponding to the amount of host quotas
@@ -6104,8 +6104,8 @@ static luaL_Reg _ntop_interface_reg[] = {
   { "flushPoolDynamicBlacklist", ntop_flush_pool_dynamic_blacklist },
   { "getPoolDynamicBlacklistStats", ntop_get_pool_dynamic_blacklist_stats },
   { "getPoolDynamicBlacklistMembers", ntop_get_pool_dynamic_blacklist_members },
-#endif
   { "getHostUsedQuotasStats", ntop_get_host_used_quotas_stats },
+#endif
 
   /* SNMP */
   { "getSNMPStats", ntop_interface_get_snmp_stats },

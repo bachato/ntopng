@@ -313,7 +313,7 @@ class Host : public GenericHashEntry,
   inline nDPIStats *get_ndpi_stats() const { return (stats->getnDPIStats()); };
 
   inline bool isChildSafe() const {
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
     return (iface->getHostPools()->isChildrenSafePool(host_pool_id));
 #else
     return (false);
@@ -321,7 +321,7 @@ class Host : public GenericHashEntry,
   };
 
   inline bool forgeGlobalDns() {
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
     return (iface->getHostPools()->forgeGlobalDns(host_pool_id));
 #else
     return (false);
@@ -329,7 +329,7 @@ class Host : public GenericHashEntry,
   };
 
   inline bool doBlockBlacklistedFlows() const {
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
     return (iface->getHostPools()->doBlockBlacklistedFlows(host_pool_id));
 #else
     return (false);
@@ -337,7 +337,7 @@ class Host : public GenericHashEntry,
   };
 
   inline u_int32_t getMaxFlowSize() const {
-#ifdef NTOPNG_PRO
+#ifdef HAVE_NEDGE
     return (iface->getHostPools()->getMaxFlowSize(host_pool_id));
 #else
     return (0);
