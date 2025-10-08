@@ -396,14 +396,40 @@ u_int32_t ParsedFlow::get_private_flow_id() {
 
 /* *************************************** */
 
+void ParsedFlow::addAdditionalField(const char *key, json_object *field) {
+  if (!additional_fields_json)
+    additional_fields_json = json_object_new_object();
+  if (additional_fields_json)
+    json_object_object_add(additional_fields_json, key, field);
+}
+
+/* *************************************** */
+  
+void ParsedFlow::addAdditionalField(ndpi_deserializer *deserializer) {
+  if (!additional_fields_tlv) {
+    additional_fields_tlv = (ndpi_serializer *)calloc(1, sizeof(ndpi_serializer));
+    if (additional_fields_tlv) {
+      if (ndpi_init_serializer_ll(additional_fields_tlv, ndpi_serialization_format_tlv, 64) != 0) {
+        ntop->getTrace()->traceEvent(TRACE_WARNING, "Failure allocating TLV serializer");
+        free(additional_fields_tlv);
+        additional_fields_tlv = NULL;
+      }
+    }
+  }
+    
+  if (additional_fields_tlv)
+    ndpi_deserialize_clone_item(deserializer, additional_fields_tlv);
+}
+
+/* *************************************** */
+
 void ParsedFlow::print() {
   char buf1[32], buf2[32];
 
   src_ip.print(buf1, sizeof(buf1));
   dst_ip.print(buf2, sizeof(buf2));
 
-  ntop->getTrace()->traceEvent(
-      TRACE_NORMAL, "[src-ip: %s][src-port: %u][dst-ip: %s][dst-port: %u][first: %u][last: %u]",
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "[src-ip: %s][src-port: %u][dst-ip: %s][dst-port: %u][first: %u][last: %u]",
       src_ip.print(buf1, sizeof(buf1)),
       ntohs(src_port), 
       dst_ip.print(buf2, sizeof(buf2)),
