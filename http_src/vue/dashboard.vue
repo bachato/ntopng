@@ -924,6 +924,7 @@ function get_component_data_func(component) {
             } else {
                 info = components_info[component.component_id];
             }
+            component.isLoading = false;
         } else {
             /* datasource_id is an optimization for components getting live data
              * from the same endpoint (e.g. multiple badges in the infrastructure dashboard) */
