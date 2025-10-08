@@ -281,6 +281,8 @@ function columns_sorting(col, r0, r1) {
             return sortingFunctions.sortByName(r0_col, r1_col, col.sort);
         } else if (col.id == "type") {
             return sortingFunctions.sortByName(r0_col, r1_col, col.sort);
+        } else if (col.id == "port_type") {
+            return sortingFunctions.sortByName(r0_col, r1_col, col.sort);
         } else if (col.id == "speed") {
             const lower_value = -1;
             return sortingFunctions.sortByNumberWithNormalizationValue(r0_col, r1_col, col.sort, lower_value);
