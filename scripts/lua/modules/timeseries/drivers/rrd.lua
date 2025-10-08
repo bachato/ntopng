@@ -181,6 +181,8 @@ local function schema_get_path(schema, tags)
     return path, rrd
 end
 
+-- ##############################################
+
 function driver.schema_get_full_path(schema, tags)
     local base, rrd = schema_get_path(schema, tags)
 
@@ -193,14 +195,6 @@ end
 
 -- ##############################################
 
-local function getRRAParameters(step, resolution, retention_time)
-    local aggregation_dp = math.ceil(resolution / step)
-    local retention_dp = math.ceil(retention_time / resolution)
-    return aggregation_dp, retention_dp
-end
-
--- ##############################################
-
 local function getConsolidationFunction(schema)
     local fn = schema:getAggregationFunction()
 
@@ -208,8 +202,7 @@ local function getConsolidationFunction(schema)
         return (aggregation_to_consolidation[fn])
     end
 
-    traceError(TRACE_ERROR, TRACE_CONSOLE, "unknown aggregation function: %s",
-               fn)
+     traceError(TRACE_ERROR, TRACE_CONSOLE, "unknown aggregation function: %s", fn)
 
     return ("AVERAGE")
 end
@@ -238,13 +231,6 @@ local function create_rrd(schema, path, timestamp)
     for _, rra in ipairs(schema.retention) do
         params[#params + 1] = "RRA:" .. cf .. ":0.5:" .. rra.aggregation_dp ..
                                   ":" .. rra.retention_dp
-    end
-
-    if use_hwpredict and schema.hwpredict then
-        -- NOTE: at most one RRA, otherwise rrd_update crashes.
-        local hwpredict = schema.hwpredict
-        params[#params + 1] = "RRA:HWPREDICT:" .. hwpredict.row_count ..
-                                  ":0.1:0.0035:" .. hwpredict.period
     end
 
     if isDebugEnabled() then
