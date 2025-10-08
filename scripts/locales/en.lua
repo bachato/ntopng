@@ -7374,7 +7374,7 @@ local lang = {
     ["captive_portal_informative_url_title"] = "External Informative Page URL",
     ["captive_portal_url_description"] = "The URL your clients will be redirected to after a successful captive portal authentication.",
     ["captive_portal_url_title"] = "Redirection URL",
-    ["change_exporter_timeseries_resolution"] = "The exporter timeseries resolution is set to 5 minutes (the timeseries are updated once every 5 minutes), you can increase the resolution to once per minute from the <a href='%{link}'>preferences</a>",
+    ["change_exporter_timeseries_resolution"] = "The exporter timeseries resolution is set to 5 minutes (the timeseries are updated every 5 minutes), you can increase the resolution to 1 minute from the <a href='%{link}'>preferences</a>",
     ["chap"] = "CHAP",
     ["clickhouse"] = "ClickHouse",
     ["client_x509_auth"] = "HTTPS Client Authentication",
