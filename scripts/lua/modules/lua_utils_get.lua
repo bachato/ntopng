@@ -89,6 +89,8 @@ end
 
 -- ##############################################
 
+local probes_names = {}
+
 function getProbeName(exporter_ip, show_vlan, shorten_len, show_ip_and_alias)
    -- Set default to true if nil to show ip [alias]
    if show_ip_and_alias == nil then
@@ -101,11 +103,12 @@ function getProbeName(exporter_ip, show_vlan, shorten_len, show_ip_and_alias)
 
    local cached_device_name
    local snmp_cached_dev
+   local probe_alias = probes_names[exporter_ip]
 
-   local probe_alias = ""
-
-   -- if show_ip_and_alias == false only returns the alias
-   local probe_alias = getFlowDevAlias(exporter_ip, show_ip_and_alias)
+   if (not probe_alias) then
+      probe_alias = getFlowDevAlias(exporter_ip, show_ip_and_alias)
+      probes_names[exporter_ip] = probe_alias or ""
+   end
 
    -- In case an alias is set to the flow exporter, directly use the alias
    if not isEmptyString(probe_alias) and probe_alias ~= exporter_ip then

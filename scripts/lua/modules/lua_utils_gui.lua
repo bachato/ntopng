@@ -986,6 +986,7 @@ end
 -- ##############################################
 
 local _snmp_devices = {}
+local _exporters_ports_names = {}
 
 -- @brief This function format the SNMP interface name.
 -- @params device_ip: snmp device ip
@@ -1023,8 +1024,13 @@ function format_portidx_name(device_ip, portidx, short_version, interface_info)
             -- No SNMP configured: last resort use exporters
             local snmp_mappings = require "snmp_mappings"
 
-            local res = snmp_mappings.get_iface_name(device_ip, portidx)
-            if (res ~= nil) then idx_name = res end
+            local key = string.format("%s_%s", device_ip, portidx)
+            local port_name = _exporters_ports_names[key]
+            if (not port_name) then
+                port_name = snmp_mappings.get_iface_name(device_ip, portidx)
+                _exporters_ports_names[key] = port_name or ""
+            end
+            if (not isEmptyString(port_name)) then idx_name = port_name end
         end
     end
 
