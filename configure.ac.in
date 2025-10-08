@@ -5,7 +5,7 @@ AC_CONFIG_MACRO_DIR([m4])
 HERE=`pwd`
 SYSTEM=`uname -s`
 
-if test "${with_sanitizer+set}" = set || "${with_leak_sanitizer+set}" = set; then
+if test "${with_sanitizer+set}" = set || test "${with_leak_sanitizer+set}" = set; then
   # Setting debug flags in CFLAGS/CXXFLAGS to avoid AC_PROG_CPP add -O2
   CFLAGS="-g -O0"
   CXXFLAGS="-g -O0"
@@ -24,7 +24,7 @@ AS_IF([test "${with_leak_sanitizer+set}" = set],[
     USE_CLANG=yes
 ])
 
-if test $SYSTEM = "Darwin" && "${with_leak_sanitizer+set}" = set; then
+if test $SYSTEM = "Darwin" && test "${with_leak_sanitizer+set}" = set; then
   echo "FATAL ERROR: sorry --with-leak-sanitizer is not available on macOS"
   exit -1
 fi
