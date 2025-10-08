@@ -66,25 +66,8 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   
   ParsedFlow(const ParsedFlow &pf);
 
-  inline void addAdditionalField(const char *key, json_object *field) {
-    if (!additional_fields_json)
-      additional_fields_json = json_object_new_object();
-    if (additional_fields_json)
-      json_object_object_add(additional_fields_json, key, field);
-  }
-  
-  inline void addAdditionalField(ndpi_deserializer *deserializer) {
-    if (!additional_fields_tlv) {
-      additional_fields_tlv =
-          (ndpi_serializer *)calloc(1, sizeof(ndpi_serializer));
-      if (additional_fields_tlv)
-        ndpi_init_serializer_ll(additional_fields_tlv,
-                                ndpi_serialization_format_tlv, 64);
-    }
-    
-    if (additional_fields_tlv)
-      ndpi_deserialize_clone_item(deserializer, additional_fields_tlv);
-  }
+  void addAdditionalField(const char *key, json_object *field);
+  void addAdditionalField(ndpi_deserializer *deserializer);
   
   inline json_object *getAdditionalFieldsJSON()    { return additional_fields_json; };
   inline ndpi_serializer *getAdditionalFieldsTLV() {
