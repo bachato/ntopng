@@ -1,5 +1,5 @@
 --
--- (C) 2013-24 - ntop.org
+-- (C) 2013-25 - ntop.org
 --
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
@@ -254,7 +254,6 @@ for _, value in ipairs(flows_stats.flows) do
         local probe_uuid = 0
         local device_ip = value["device_ip"]
         local cached_dev = snmp_cached_dev:get_interfaces(device_ip)
-tprint(cached_dev["interfaces"])
 
         -- get exporter info
         local ifstats = interface.getStats()
