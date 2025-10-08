@@ -959,12 +959,13 @@ end
 
 function page_utils.is_dark_mode_enabled(theme)
 
-    local dark_mode
-    local theme = theme or ntop.getPref("ntopng.user." .. _SESSION["user"] .. ".theme")
+    local dark_mode = false
 
-    if (isEmptyString(theme)) then
-        dark_mode = false
-    else
+    local user = "admin"
+    if _SESSION["user"] then user = _SESSION["user"] end
+
+    local theme = theme or ntop.getPref("ntopng.user." .. user .. ".theme")
+    if not isEmptyString(theme) then
         dark_mode = (theme == "dark")
     end
 
