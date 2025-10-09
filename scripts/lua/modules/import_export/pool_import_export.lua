@@ -53,9 +53,11 @@ function pool_import_export:import(conf)
          local pool_instance = pool_instances[pool_name]
 
          for i, pool_conf in ipairs(pool_list) do
-            if i > MAX_POOLS_NUMBER + 30 --[[ 30 is a threshold just to print some error ]] then
+            if i > MAX_POOLS_NUMBER then
+               traceError(TRACE_ERROR, TRACE_CONSOLE, "Failure importing " .. #pool_list " pools (max supported is " .. MAX_POOLS_NUMBER .. ")")
                break
             end
+
             -- Add Pool
             local new_pool_id = pool_instance:add_pool(
                pool_conf.name,
@@ -88,7 +90,15 @@ function pool_import_export:export()
    local conf = {}
 
    for pool_name, pool_instance in pairs(pool_instances) do
-      conf[pool_name] = pool_instance:get_all_pools() or {}
+      local all_pools = pool_instance:get_all_pools() or {}
+      local exported_pools = {}
+      for i, pool_conf in ipairs(all_pools) do
+         exported_pools[#exported_pools + 1] = {
+            name = pool_conf.name,
+            members = pool_conf.members
+         }
+      end
+      conf[pool_name] = exported_pools
    end
 
    return conf
