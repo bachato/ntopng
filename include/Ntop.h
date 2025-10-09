@@ -662,7 +662,7 @@ class Ntop {
   void recipient_delete(u_int16_t recipient_id);
   void recipient_register(u_int16_t recipient_id, AlertLevel minimum_severity,
                           Bitmap128 enabled_categories,
-                          Bitmap128 enabled_host_pools,
+                          Bitmap4096 enabled_host_pools,
                           Bitmap128 enabled_entities,
                           Bitmap128 enabled_flow_alert_types,
                           Bitmap128 enabled_host_alert_types,

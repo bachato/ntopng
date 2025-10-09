@@ -63,9 +63,6 @@ class RecipientQueue {
   Bitmap128 enabled_entities; /* MUST be large enough to contain
                                  ALERT_ENTITY_MAX_NUM_ENTITIES */
 
-  /* MUST be large enough to contain MAX_NUM_HOST_POOLS */
-  Bitmap128 enabled_host_pools;
-
   Bitmap128 enabled_flow_alert_types; /* MUST be large enough to contain
                                  FlowAlertTypeEnum */
 
@@ -74,6 +71,9 @@ class RecipientQueue {
 
   Bitmap128 enabled_other_alert_types; /* MUST be large enough to contain
                                  Other alert IDs defined in other_alert_keys.lua */
+
+  /* MUST be large enough to contain MAX_NUM_HOST_POOLS */
+  Bitmap4096 enabled_host_pools;
 
   bool doDebug(const AlertFifoItem* const notification);
 
@@ -136,7 +136,7 @@ class RecipientQueue {
    *
    * @return
    */
-  inline void setEnabledHostPools(Bitmap128 _enabled_pools) {
+  inline void setEnabledHostPools(Bitmap4096 _enabled_pools) {
     enabled_host_pools = _enabled_pools;
   };
 

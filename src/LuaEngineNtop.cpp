@@ -7431,9 +7431,10 @@ static int ntop_recipient_register(lua_State *vm) {
   char *str_categories, *str_host_pools, *str_entities, *str_flow_alert_types,
       *str_host_alert_types, *str_other_alert_types;
   bool match_alert_id = false, skip_alerts = false;
-  Bitmap128 enabled_categories, enabled_host_pools, enabled_entities,
+  Bitmap128 enabled_categories, enabled_entities,
       enabled_flow_alert_types, enabled_host_alert_types,
       enabled_other_alert_types;
+  Bitmap4096 enabled_host_pools;
 
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));

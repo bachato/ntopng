@@ -37,35 +37,20 @@ HostPools::HostPools(NetworkInterface *_iface) {
   max_flow_size = NULL;
   routing_policy_id = NULL;
 
-  if ((children_safe = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL)
-    throw 1;
-
-  if ((forge_global_dns = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL)
-    throw 1;
-
-  if ((routing_policy_id = (u_int8_t *)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int8_t))) == NULL)
-    throw 1;
-
-  if ((block_blacklisted_flows = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL)
-    throw 1;
-
-  if ((max_flow_size = (u_int32_t *)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int32_t))) == NULL)
-    throw 1;
-
-  if ((dynamic_blacklist_enabled = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL)
-    throw 1;
+  if ((children_safe = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL) throw 1;
+  if ((forge_global_dns = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL) throw 1;
+  if ((routing_policy_id = (u_int8_t *)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int8_t))) == NULL) throw 1;
+  if ((block_blacklisted_flows = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL) throw 1;
+  if ((max_flow_size = (u_int32_t *)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int32_t))) == NULL) throw 1;
+  if ((dynamic_blacklist_enabled = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL) throw 1;
 
   for (int i = 0; i < MAX_NUM_HOST_POOLS; i++)
     routing_policy_id[i] = DEFAULT_ROUTING_TABLE_ID;
 
-  if ((pool_shaper = (u_int16_t *)calloc(MAX_NUM_HOST_POOLS,
-                                         sizeof(u_int16_t))) == NULL ||
-      (schedule_bitmap = (u_int32_t *)calloc(MAX_NUM_HOST_POOLS,
-                                             sizeof(u_int32_t))) == NULL ||
-      (enforce_quotas_per_pool_member =
-       (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL ||
-      (enforce_shapers_per_pool_member =
-       (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL)
+  if ((pool_shaper = (u_int16_t *)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int16_t))) == NULL ||
+      (schedule_bitmap = (u_int32_t *)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int32_t))) == NULL ||
+      (enforce_quotas_per_pool_member = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL ||
+      (enforce_shapers_per_pool_member = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL)
     throw 1;
 #endif
 
@@ -76,14 +61,10 @@ HostPools::HostPools(NetworkInterface *_iface) {
     dynamicBlacklist[i] = NULL;
 #endif
 
-  if ((num_active_hosts_inline =
-       (int32_t *)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL ||
-      (num_active_hosts_offline =
-       (int32_t *)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL ||
-      (num_active_l2_devices_inline =
-       (int32_t *)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL ||
-      (num_active_l2_devices_offline =
-       (int32_t *)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL)
+  if ((num_active_hosts_inline = (int32_t *)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL ||
+      (num_active_hosts_offline = (int32_t *)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL ||
+      (num_active_l2_devices_inline = (int32_t *)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL ||
+      (num_active_l2_devices_offline = (int32_t *)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL)
     throw 1;
 
   if (_iface) iface = _iface;
@@ -113,7 +94,7 @@ void HostPools::storeStats(HostPoolStats **stats) {
   Redis *redis = ntop->getRedis();
 
   for (int i = 0; i < MAX_NUM_HOST_POOLS; i++) {
-    if (stats[i] == nullptr) continue;
+    if (stats[i] == NULL) continue;
     u_int16_t pool_id = i;
     snprintf(stats_key, sizeof(stats_key), HOST_POOL_SERIALIZED_KEY, iface->get_id());
     std::string json = stats[i]->serialize(iface);
@@ -222,8 +203,7 @@ void HostPools::updateStats(const struct timeval *tv) {
   if (stats && tv) {
     for (int i = 0; i < MAX_NUM_HOST_POOLS; i++)
       if ((hps = stats[i]))
-        hps->updateStats(
-			 tv); /* Use hps, stats[i] can become NULL after a swap */
+        hps->updateStats(tv); /* Use hps, stats[i] can become NULL after a swap */
   }
 };
 
