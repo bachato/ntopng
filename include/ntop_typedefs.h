@@ -612,7 +612,7 @@ typedef struct {
 
 class HostAlert;
 typedef std::pair<HostAlert *, bool> HostAlertReleasedPair;
-typedef Bitmap<u_int32_t> HostAlertBitmap;
+typedef UintBitmap<u_int32_t> HostAlertBitmap;
 
 typedef enum {
   host_check_http_replies_requests_ratio = 0,

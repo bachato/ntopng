@@ -234,7 +234,7 @@ using namespace std;
 #include "TrafficStats.h"
 #include "TcpPacketStats.h"
 #include "DSCPStats.h"
-#include "Bitmap.h"
+#include "UintBitmap.h"
 #if defined(NTOPNG_PRO)
 #include "BinAnalysis.h"
 #endif
