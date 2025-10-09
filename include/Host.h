@@ -312,39 +312,23 @@ class Host : public GenericHashEntry,
   };
   inline nDPIStats *get_ndpi_stats() const { return (stats->getnDPIStats()); };
 
-  inline bool isChildSafe() const {
 #ifdef HAVE_NEDGE
+  inline bool isChildSafe() const {
     return (iface->getHostPools()->isChildrenSafePool(host_pool_id));
-#else
-    return (false);
-#endif
   };
 
   inline bool forgeGlobalDns() {
-#ifdef HAVE_NEDGE
     return (iface->getHostPools()->forgeGlobalDns(host_pool_id));
-#else
-    return (false);
-#endif
   };
 
   inline bool doBlockBlacklistedFlows() const {
-#ifdef HAVE_NEDGE
     return (iface->getHostPools()->doBlockBlacklistedFlows(host_pool_id));
-#else
-    return (false);
-#endif
   };
 
   inline u_int32_t getMaxFlowSize() const {
-#ifdef HAVE_NEDGE
     return (iface->getHostPools()->getMaxFlowSize(host_pool_id));
-#else
-    return (0);
-#endif
   };
 
-#ifdef HAVE_NEDGE
   TrafficShaper *get_shaper(ndpi_protocol ndpiProtocol);
 
   inline AddressTree* getDynamicBlacklist() const {
