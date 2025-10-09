@@ -45,47 +45,57 @@ for _, m in ipairs(expected_modules) do
   end
 end
 
-if #missing_modules > 0 then
-  traceError(TRACE_ERROR, TRACE_CONSOLE, "Failure importing configuration due to missing modules: " .. table.concat(missing_modules, ", "))
+if #missing_modules == #expected_modules then
+  traceError(TRACE_ERROR, TRACE_CONSOLE, "Failure importing configuration, none of the expected modules found: " .. table.concat(expected_modules, ", "))
   return
 end
 
 local items = {}
 
-local snmp_ie = snmp_import_export:create()
-items[#items+1] = {
-   name = "snmp",
-   conf = modules["snmp"],
-   instance = snmp_ie
-}
+if modules["snmp"] then
+   local snmp_ie = snmp_import_export:create()
+   items[#items+1] = {
+      name = "snmp",
+      conf = modules["snmp"],
+      instance = snmp_ie
+   }
+end
 
-local am_ie = am_import_export:create()
-items[#items+1] = {
-   name = "active_monitoring", 
-   conf = modules["active_monitoring"],
-   instance = am_ie
-}
+if modules["active_monitoring"] then
+   local am_ie = am_import_export:create()
+   items[#items+1] = {
+      name = "active_monitoring", 
+      conf = modules["active_monitoring"],
+      instance = am_ie
+   }
+end
 
-local notifications_ie = notifications_import_export:create()
-items[#items+1] = {
-   name = "notifications", 
-   conf = modules["notifications"],     
-   instance = notifications_ie
-}
+if modules["notifications"] then
+   local notifications_ie = notifications_import_export:create()
+   items[#items+1] = {
+      name = "notifications", 
+      conf = modules["notifications"],     
+      instance = notifications_ie
+   }
+end
 
-local scripts_ie = checks_import_export:create()
-items[#items+1] = {
-   name = "scripts", 
-   conf = modules["scripts"],           
-   instance = scripts_ie
-}
+if modules["scripts"] then
+   local scripts_ie = checks_import_export:create()
+   items[#items+1] = {
+      name = "scripts", 
+      conf = modules["scripts"],           
+      instance = scripts_ie
+   }
+end
 
-local pool_ie = pool_import_export:create()
-items[#items+1] = {
-   name = "pool", 
-   conf = modules["pool"],              
-   instance = pool_ie
-}
+if modules["pool"] then
+   local pool_ie = pool_import_export:create()
+   items[#items+1] = {
+      name = "pool", 
+      conf = modules["pool"],              
+      instance = pool_ie
+   }
+end
 
 import_export_rest_utils.import(items)
 
