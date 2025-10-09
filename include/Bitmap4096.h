@@ -19,12 +19,12 @@
  *
  */
 
-#ifndef _BITMAP128_H_
-#define _BITMAP128_H_
+#ifndef _BITMAP4096_H_
+#define _BITMAP4096_H_
 
 #include "ntop_includes.h"
 
-/* Bitmap128 is now implemented as a generic Bitmap with 2x uint64 */
-typedef Bitmap<2> Bitmap128;
+/* Bitmap128 is implemented as a generic Bitmap with 64x uint64 */
+typedef Bitmap<64> Bitmap4096;
 
-#endif /* _BITMAP128_H_ */
+#endif /* _BITMAP4096_H_ */

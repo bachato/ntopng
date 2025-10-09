@@ -19,12 +19,24 @@
  *
  */
 
-#ifndef _BITMAP128_H_
-#define _BITMAP128_H_
-
 #include "ntop_includes.h"
 
-/* Bitmap128 is now implemented as a generic Bitmap with 2x uint64 */
-typedef Bitmap<2> Bitmap128;
+template <size_t N> void Bitmap<N>::lua(lua_State *vm, const char *label) const {
+  lua_newtable(vm);
 
-#endif /* _BITMAP128_H_ */
+  for (u_int i = 0; i < numBits(); i++) {
+    if (isSetBit(i)) {
+      lua_pushboolean(vm, true); /* The boolean indicating this bit is set */
+      lua_pushinteger(vm, i); /* The integer bit id, used as key of this lua table */
+      lua_insert(vm, -2);
+      lua_settable(vm, -3);
+    }
+  }
+
+  lua_pushstring(vm, label);
+  lua_insert(vm, -2);
+  lua_settable(vm, -3);
+}
+
+template class Bitmap<2>;   // Bitmap128
+template class Bitmap<64>;  // Bitmap4096
