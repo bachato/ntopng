@@ -95,7 +95,7 @@ confirm_button = 'btn-danger'
     const setImportExportButtonLabels = (key) => {
 
         $(`#btn-import span, #btn-confirm-import`).text((key == 'all') ? i18n('restore') : i18n('import'));
-        $(`#btn-export span`).text((key == 'all') ? i18n('backup') : i18n('export'));
+        $(`#btn-export span`).text((key == 'all') ? i18n('backup') : i18n('export.export'));
 
         if (key == 'all') {
             $(`.import-title`).hide();
