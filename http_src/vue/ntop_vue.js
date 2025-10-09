@@ -65,6 +65,7 @@ import { default as PagePoolPolicy } from "./page-pool-policy.vue"
 import { default as PageUploadPcap } from "./page-upload-pcap.vue"
 import { default as PageRedisStats } from "./page-redis-stats.vue"
 import { default as PageAsStats } from "./page-as-stats.vue"
+import { default as PageExportersInterfacesStats } from "./page-exporters-interfaces-stats.vue"
 import { default as PageAsOverview } from "./page-as-overview.vue"
 import { default as PageProbes } from "./page-probes.vue"
 import { default as PageExporters } from "./page-exporters.vue"
@@ -177,6 +178,7 @@ let ntopVue = {
     PageFlowsList: PageFlowsList,
     PageMacsList: PageMacsList,
     PageAsStats: PageAsStats,
+    PageExportersInterfacesStats: PageExportersInterfacesStats,
     PageAsOverview: PageAsOverview,
     PageProbes: PageProbes,
     PageExportersDetails: PageExportersDetails,

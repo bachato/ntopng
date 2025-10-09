@@ -6832,6 +6832,11 @@ local lang = {
     ["sub_customer_asn_title"] = "My Customers ASNs",
     ["remote_asn_description"] = "Comma separated list of Remote ASNs that are relevant for the monitoring standpoint.",
   },
+  ["exporters_interfaces_configuration"] = {
+    ["network_communications"] = "Network Communications",
+    ["all_roles"] = "All Roles",
+    ["filter"] = "Interfaces Roles",
+  },
   ["network_configuration"] = {
     ["alert_note"] = "The Unexpected DNS/NTP/DHCP/SMTP/Gateway Server Checks are disabled. Please enable at least one of them <a href='" .. ntop.getHttpPrefix() .. "/lua/admin/edit_configset.lua?subdir=all#all'><i class='fas fa-cog'></i></a>.",
     ["policy_note"] = "The check 'Host Policy' is disabled. Please enable this flow check here <a href='" .. ntop.getHttpPrefix() .. "/lua/admin/edit_configset.lua?subdir=all#all'><i class='fas fa-cog'></i></a>.",

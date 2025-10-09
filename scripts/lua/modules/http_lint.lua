@@ -1436,6 +1436,24 @@ end
 
 -- #################################################################
 
+local function validateInterfaceRole(m)
+    if ntop.isPro() then
+        package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" ..
+                        package.path
+        local snmp_utils = require "snmp_utils"
+        local roles_list = snmp_utils.get_snmp_interface_role_options()
+        local validation_list = {}
+        -- Dinamically retrieve the roles list in order to not need to modify
+        -- also this function in case of future changes
+        for _, info in pairs(roles_list) do
+            validation_list[#validation_utils + 1] = info.value
+        end
+        return validateChoice(validation_list, m)
+    end
+end
+
+-- #################################################################
+
 local function validateImportantASN(m)
     return validateChoice({"all", "my_as", "my_customer_as", "remote_as", "other_as"}, m)
 end
@@ -2400,6 +2418,7 @@ local known_parameters = {
     ["toggle_exclude_from_usage_page"] = validateBool,
 
     ["show_as"] = validateImportantASN,
+    ["interface_role"] = validateInterfaceRole,
 
     -- Input fields
     ["companion_interface"] = validateEmptyOr(validateInterface),

@@ -347,6 +347,11 @@ page_utils.menu_entries = {
         i18n_title = "as_stats.autonomous_systems",
         section = "as"
     },
+    exporters_interfaces_traffic_asn_mode = {
+        key = "exporters_interfaces_traffic_asn_mode",
+        i18n_title = "exporters_interfaces_configuration.network_communications",
+        section = "as"
+    },
     historical_autonomous_systems_asn_mode = {
         key = "historical_autonomous_systems_asn_mode",
         i18n_title = "db_explorer.historical_data_explorer",
