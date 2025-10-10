@@ -5,6 +5,7 @@ dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 
 require "lua_utils_gui"
+require "lua_utils_get"
 local snmp_utils = nil
 if ntop.isPro() then
     package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" ..
@@ -16,13 +17,44 @@ local exporters_utils = {}
 
 -- ################################################
 
+local function formatInterfaceData(exporter_ip, new_ports_list, res, uuid_list,
+                                   add_role_to_interfaces)
+    for _, v in pairs(new_ports_list or {}) do
+        for id, info in pairsByField(v, "bytes.total", rev) do
+            local role = nil
+            local interface_name = format_portidx_name(exporter_ip,
+                                                       tostring(id), true)
+            local exporter_name = getProbeName(exporter_ip, true, true, false)
+            if (add_role_to_interfaces) then
+                role = snmp_utils.get_snmp_interface_role(exporter_ip, id)
+            end
+            res[#res + 1] = {
+                interface_id = id,
+                interface_name = interface_name,
+                exporter_ip = exporter_ip,
+                exporter_name = exporter_name,
+                exporter_uuid = uuid_list.exporter_uuid,
+                probe_uuid = uuid_list.probe_uuid,
+                ifid = uuid_list.ifid, -- Ifid of the exporter
+                bytes_sent = info["bytes.out_bytes"],
+                bytes_rcvd = info["bytes.in_bytes"],
+                total_bytes = info["bytes.total"],
+                role = role
+            }
+        end
+    end
+
+end
+
+-- ################################################
+
 -- @brief: this function returns the list of all the Exporters Interfaces
 function exporters_utils.getAllInterfacesList(add_role_to_interfaces)
     local list = {}
 
     local ifstats = interface.getStats()
     -- Get the list of all the probes
-    for _, probe_list in pairs(ifstats.probes or {}) do
+    for ifid, probe_list in pairs(ifstats.probes or {}) do
         for probe_ip, probe_info in pairsByKeys(probe_list or {}) do
             local uuid = probe_info["probe.uuid_num"]
 
@@ -31,23 +63,11 @@ function exporters_utils.getAllInterfacesList(add_role_to_interfaces)
                 if (table.len(probe_info.exporters) == 0) then
                     -- Packet probe
                     local ports_table = interface.getFlowDeviceInfo(uuid, true)
-
-                    for _, v in pairs(ports_table or {}) do
-                        for id, info in pairsByField(v, "bytes.total", rev) do
-                            local role = nil
-                            if (add_role_to_interfaces) then
-                                role = snmp_utils.get_snmp_interface_role(
-                                           probe_ip, id)
-                            end
-                            list[#list + 1] = {
-                                id = id,
-                                name = format_portidx_name(
-                                    probe_info["probe.ip"], tostring(id), true),
-                                total_bytes = info["bytes.total"],
-                                role = role
-                            }
-                        end
-                    end
+                    formatInterfaceData(probe_ip, ports_table, list, {
+                        probe_uuid = uuid,
+                        exporter_uuid = uuid,
+                        ifid = ifid
+                    }, add_role_to_interfaces)
                 else
                     -- Collector probe
                     local collector_value = 0
@@ -55,31 +75,15 @@ function exporters_utils.getAllInterfacesList(add_role_to_interfaces)
                     for exporter_ip, exporter_info in pairsByKeys(
                                                           probe_info.exporters or
                                                               {}) do
-                        local node_key =
-                            probe_info["probe.uuid"] ..
-                                exporter_info["unique_source_id"]
                         local ports_table =
                             interface.getFlowDeviceInfo(
                                 exporter_info.unique_source_id, true)
 
-                        for _, v in pairs(ports_table or {}) do
-                            for id, info in pairsByField(v, "bytes.total", rev) do
-                                local role = nil
-                                if (add_role_to_interfaces) then
-                                    role =
-                                        snmp_utils.get_snmp_interface_role(
-                                            exporter_ip, id)
-                                end
-                                list[#list + 1] = {
-                                    id = id,
-                                    name = format_portidx_name(
-                                        exporter_ip, tostring(id),
-                                        true),
-                                    total_bytes = info["bytes.total"],
-                                    role = role
-                                }
-                            end
-                        end
+                        formatInterfaceData(exporter_ip, ports_table, list, {
+                            probe_uuid = uuid,
+                            exporter_uuid = unique_source_id,
+                            ifid = ifid
+                        }, add_role_to_interfaces)
                     end
                 end
             end

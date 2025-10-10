@@ -324,7 +324,7 @@ async function load_table_filters_array(opt) {
 
 /* *************************************************** */
 
-/* The source_type can be found on the json and the source_array is automatically generated
+/* The source_type can be found in the json and the source_array is automatically generated
  * by using the source_type
  */
 async function get_timeseries_groups_from_metric(metric_schema, source_def) {

@@ -17,15 +17,15 @@
             <Transition name="add-effect" mode="out-in">
                 <DashboardTimeseries ref="timeseries_chart" :key="timeseries_key" :id="timeseries_id"
                     :epoch_begin="epoch_begin" :epoch_end="epoch_end" :i18n_title="chart_title"
-                    :ifid="props.context.ifid.toString()" :max_width="12" :max_height="4" :params="params"
+                    :ifid="system_interface_id" :max_width="12" :max_height="4" :params="params"
                     :get_component_data="get_component_data" :set_component_attr="set_component_attr"
                     :csrf="props.context.csrf">
                 </DashboardTimeseries>
             </Transition>
         </div>
         <div class="position-relative">
-            <TableWithConfig ref="table_exporters_interfaces_stats" :table_id="table_id" :csrf="props.context.csrf" :showLoading="true"
-                :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting"
+            <TableWithConfig ref="table_exporters_interfaces_stats" :table_id="table_id" :csrf="props.context.csrf"
+                :showLoading="true" :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting"
                 :get_extra_params_obj="get_extra_params_obj" @custom_event="on_table_custom_event">
             </TableWithConfig>
         </div>
@@ -41,7 +41,8 @@ import { default as DashboardTimeseries } from "./dashboard-timeseries.vue";
 import { default as SelectSearch } from "./select-search.vue";
 import { default as Loading } from "./loading.vue"
 import FormatterUtils from "../utilities/formatter-utils.js";
-import NtopUtils from "../utilities/ntop-utils.js";
+import dataUtils from "../utilities/data-utils.js";
+import linksUtils from "../utilities/links-utils.js";
 
 const _i18n = (t) => i18n(t);
 
@@ -70,6 +71,7 @@ const current_selected_option = ref([])
 const interfaces_filters_rest_url = `${http_prefix}/lua/pro/rest/v2/get/flowdevices/interfaces_role_filters.lua`
 const interfaces_role_filters = ref([])
 const timeseries_key = ref(true)
+const system_interface_id = '-1'
 
 const params = {
     post_params: {
@@ -78,16 +80,16 @@ const params = {
         ts_requests: {
             "$IFID$": {
                 ts_query: `ifid:$IFID$`,
-                ts_schema: `top:snmp_if:traffic`,
+                ts_schema: `top:flowdev_port:traffic`,
             }
         }
     },
-    source_type: "interface"
+    source_type: "flow_device"
 }
 
 const ts_query = {
-    ts_query: `ifid:$IFID$,asn:$ASN$`,
-    ts_schema: `asn:traffic`,
+    ts_query: `ifid:$IFID$,device:$DEVICE$,port:$PORT$`,
+    ts_schema: `flowdev_port:traffic`,
 }
 
 /* *************************************************** */
@@ -140,9 +142,10 @@ const get_component_data = async (url, query_params, post_params) => {
     const ts_requests = [];
     top_data?.forEach((el) => {
         const tmp_query = { ...ts_query };
-        tmp_query.ts_query = tmp_query.ts_query.replace('$IFID$', props.context.ifid);
-        tmp_query.ts_query = tmp_query.ts_query.replace('$ASN$', el.asn);
-        tmp_query.tskey = `${el.asn}`;
+        tmp_query.ts_query = tmp_query.ts_query.replace('$IFID$', el.ifid); /* SNMP timeseries are in the system interface */
+        tmp_query.ts_query = tmp_query.ts_query.replace('$DEVICE$', el.exporter_ip);
+        tmp_query.ts_query = tmp_query.ts_query.replace('$PORT$', el.interface_id);
+        tmp_query.tskey = `${el.interface_id}`;
         tmp_query.ts_unify = true
         ts_requests.push(tmp_query);
     })
@@ -165,15 +168,34 @@ const get_extra_params_obj = () => {
 const map_table_def_columns = (columns) => {
     let map_columns = {
         "exporter_ip": (value, row) => {
-            return value;
+            let exporter = value
+            if (!dataUtils.isEmptyString(row.exporter_name) && (row.exporter_name !== value)) {
+                const url = linksUtils.getExporterDetailsPageURL({ ip: value, probe_uuid: row.probe_uuid, exporter_uuid: row.exporter_uuid })
+                exporter = `<a href="${url}" data-bs-toggle='tooltip' data-bs-placement='bottom' title='${value}'>${row.exporter_name}</a>`
+            }
+            return exporter;
         },
         "interface_name": (value, row) => {
-            return value;
+            let info = value
+            if (!dataUtils.isEmptyString(row.interface_name) && (row.interface_name !== value)) {
+                const url = linksUtils.getExporterDetailsPageURL({ ip: value, probe_uuid: row.probe_uuid, exporter_uuid: row.exporter_uuid })
+                info = `<a href="${url}" data-bs-toggle='tooltip' data-bs-placement='bottom' title='${value}'>${row.interface_name}</a>`
+            }
+            return info;
         },
         "role": (value, row) => {
-            return value;
+            if (!dataUtils.isEmptyString(value.label)) {
+                return value.label
+            }
+            return "";
         },
-        "traffic": (value, row) => {
+        "bytes_sent": (value, row) => {
+            return FormatterUtils.getFormatter("bytes")(value);
+        },
+        "bytes_rcvd": (value, row) => {
+            return FormatterUtils.getFormatter("bytes")(value);
+        },
+        "total_bytes": (value, row) => {
             return FormatterUtils.getFormatter("bytes")(value);
         },
     };
@@ -251,15 +273,21 @@ function on_table_custom_event(event) {
 
 function columns_sorting(col, r0, r1) {
     if (col != null) {
-        if (col.id == "traffic") {
-            return sortingFunctions.sortByNumber(r0.traffic, r1.traffic, col.sort);
+        if (col.id == "total_bytes") {
+            return sortingFunctions.sortByNumber(r0.total_bytes, r1.total_bytes, col.sort);
         } else if (col.id == "exporter_ip") {
             return sortingFunctions.sortByName(r0.exporter_ip, r1.exporter_ip, col.sort);
         } else if (col.id == "interface_name") {
             return sortingFunctions.sortByName(r0.interface_name, r1.interface_name, col.sort);
         } else if (col.id == "role") {
-            return sortingFunctions.sortByName(r0.role, r1.role, col.sort);
+            return sortingFunctions.sortByName(r0.role?.value, r1.role?.value, col.sort);
+        } else if (col.id == "bytes_sent") {
+            return sortingFunctions.sortByNumber(r0.bytes_sent, r1.bytes_sent, col.sort);
+        } else if (col.id == "bytes_rcvd") {
+            return sortingFunctions.sortByNumber(r0.bytes_rcvd, r1.bytes_rcvd, col.sort);
         }
+        // Default option
+        return sortingFunctions.sortByName(r0.exporter_ip, r1.exporter_ip, col.sort);
     }
 }
 </script>

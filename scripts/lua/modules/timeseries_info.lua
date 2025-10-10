@@ -3127,35 +3127,37 @@ local function add_flowdev_interfaces_timeseries(tags, timeseries)
         end
     end
 
-    local ports_table = interface.getFlowDeviceInfoByIP(tags.device) or {}
-    for _, ports in pairs(ports_table) do
-        for port_idx, _ in pairs(ports) do
-            local ifname = format_portidx_name(tags.device, port_idx, true)
-            timeseries[#timeseries + 1] = {
-                schema = "flowdev_port:traffic",
-                group = i18n("graphs.interfaces"),
-                priority = 2,
-                query = "port:" .. port_idx,
-                label = i18n('graphs.interface_label_traffic',
-                             {if_name = ifname}),
-                measure_unit = "bps",
-                scale = i18n("graphs.metric_labels.traffic"),
-                timeseries = {
-                    bytes_sent = {
-                        label = ifname .. " " ..
-                            i18n('graphs.metric_labels.sent'),
-                        color = timeseries_info.get_timeseries_color(
-                            'bytes_sent')
-                    },
-                    bytes_rcvd = {
-                        invert_direction = true,
-                        label = ifname .. " " ..
-                            i18n('graphs.metric_labels.rcvd'),
-                        color = timeseries_info.get_timeseries_color(
-                            'bytes_rcvd')
+    if (tags.device) then
+        local ports_table = interface.getFlowDeviceInfoByIP(tags.device) or {}
+        for _, ports in pairs(ports_table) do
+            for port_idx, _ in pairs(ports) do
+                local ifname = format_portidx_name(tags.device, port_idx, true)
+                timeseries[#timeseries + 1] = {
+                    schema = "flowdev_port:traffic",
+                    group = i18n("graphs.interfaces"),
+                    priority = 2,
+                    query = "port:" .. port_idx,
+                    label = i18n('graphs.interface_label_traffic',
+                                {if_name = ifname}),
+                    measure_unit = "bps",
+                    scale = i18n("graphs.metric_labels.traffic"),
+                    timeseries = {
+                        bytes_sent = {
+                            label = ifname .. " " ..
+                                i18n('graphs.metric_labels.sent'),
+                            color = timeseries_info.get_timeseries_color(
+                                'bytes_sent')
+                        },
+                        bytes_rcvd = {
+                            invert_direction = true,
+                            label = ifname .. " " ..
+                                i18n('graphs.metric_labels.rcvd'),
+                            color = timeseries_info.get_timeseries_color(
+                                'bytes_rcvd')
+                        }
                     }
                 }
-            }
+            end
         end
     end
 

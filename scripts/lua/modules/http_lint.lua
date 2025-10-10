@@ -1446,7 +1446,7 @@ local function validateInterfaceRole(m)
         -- Dinamically retrieve the roles list in order to not need to modify
         -- also this function in case of future changes
         for _, info in pairs(roles_list) do
-            validation_list[#validation_utils + 1] = info.value
+            validation_list[#validation_list + 1] = info.value
         end
         return validateChoice(validation_list, m)
     end

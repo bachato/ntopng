@@ -274,7 +274,9 @@ const get_default_source_value_array = (source_type) => {
 
 function get_metrics_url(http_prefix, source_type, source_array, epoch, include_empty_ts) {
     let params = source_type.source_def_array.map((source_def, i) => {
-        return `${source_def.value}=${source_array[i].value}`;
+        if (source_array[i]) {
+            return `${source_def.value}=${source_array[i].value}`;
+        }
     }).join("&");
     let epoch_string = ``;
     let include_empty_ts_string = "";
@@ -337,6 +339,7 @@ const get_current_page_source_type = () => {
 
 const get_metric_from_schema = async (http_prefix, source_type, source_array, metric_schema, metric_query, status, include_empty_ts) => {
     let metrics = await get_metrics(http_prefix, source_type, source_array, status, include_empty_ts);
+
     if (metric_schema === 'top:iface:ndpi') {
         return metrics.find((m) => m.schema == metric_schema && m.query == metric_query) ||
             metrics.find((m) => m.schema == 'top:iface:ndpi_full' && m.query == metric_query)
