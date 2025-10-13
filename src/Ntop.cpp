@@ -497,12 +497,7 @@ void Ntop::registerPrefs(Prefs *_prefs, bool quick_registration) {
   prefs->loadInstanceNameDefaults();
 
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-#ifndef CLICKHOUSE_USE_IN_MEMORY_DUMP_QUEUE
-  if (prefs->do_dump_flows_on_clickhouse())
-    clickhouseImport = new (std::nothrow) ClickHouseImport();
-  else
-#endif
-    clickhouseImport = NULL;
+  clickhouseImport = NULL;
 #endif
 
 #ifdef HAVE_RADIUS
