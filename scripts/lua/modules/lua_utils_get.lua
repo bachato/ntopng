@@ -15,6 +15,7 @@ require "label_utils"
 require "check_redis_prefs"
 
 local clock_start = os.clock()
+local snmp_cached_devices = {}
 
 -- ##############################################
 
@@ -75,7 +76,7 @@ end
 function getProbesName(flowdevs, show_vlan, shorten_len)
    local probes_list = {}
    for interface, devices in pairs(flowdevs or {}) do
-      local device_list = {} 
+      local device_list = {}
       if table.len(devices or {}) > 0 then
 	 for id, device_info in pairsByKeys(devices or {}, asc) do
 	    device_list[device_info.exporter_ip] = getProbeName(device_info.exporter_ip, show_vlan, shorten_len)
@@ -123,11 +124,16 @@ function getProbeName(exporter_ip, show_vlan, shorten_len, show_ip_and_alias)
    end
 
    if snmp_cached_dev then
-      cached_device_name = snmp_cached_dev:create(exporter_ip)
+      cached_device_name = snmp_cached_devices[exporter_ip]
+
+      if(snmp_cached_devices[exporter_ip] == nil) then
+	 cached_device_name = snmp_cached_dev:get_system(exporter_ip)
+	 snmp_cached_devices[exporter_ip] = cached_device_name
+      end
    end
 
-   if cached_device_name then
-      cached_device_name = cached_device_name["name"]
+   if cached_device_name and cached_device_name.system then
+      cached_device_name = cached_device_name.system.name
    else
       local hinfo = hostkey2hostinfo(exporter_ip)
       local exporter_label = hostinfo2label(hinfo, show_vlan, shorten_len)
@@ -135,6 +141,10 @@ function getProbeName(exporter_ip, show_vlan, shorten_len, show_ip_and_alias)
       if not isEmptyString(exporter_label) then
 	 cached_device_name = exporter_label
       end
+   end
+
+   if(cached_device_name == nil) then
+      cached_device_name = exporter_ip
    end
 
    return cached_device_name
@@ -345,7 +355,7 @@ function getDeviceName(device_mac, skip_manufacturer)
    if name == device_mac then
       -- Not found, try with first host
       local info = interface.getHostsInfo(false, nil, 1, 0, nil, nil, nil, tonumber(vlan), nil, nil, device_mac)
-      
+
       if (info ~= nil) then
 	 for x, host in pairs(info.hosts) do
 	    -- Make sure the IP is in the broadcast domain to avoid setting up names to MACs such as the gateway
@@ -373,7 +383,7 @@ function getDeviceName(device_mac, skip_manufacturer)
 	 name = device_mac
       end
    end
-   
+
    if isEmptyString(name) or name == device_mac then
       return ''
    end
@@ -1059,7 +1069,7 @@ end
 function getFlowDevAlias(flowdev_ip, add_id)
    local alias = ntop.getHashCache(getFlowDevAliasKey(), flowdev_ip)
    local ret
-   
+
    if not isEmptyString(alias) then
       if (add_id == true) then
 	 ret = flowdev_ip .. " [" .. alias .. "]"
@@ -1221,9 +1231,9 @@ local function readServices()
    if(services == nil) then
       local file = io.open("/etc/services", "r")
       if not file then return services end
-      
+
       services = {}
-      
+
       for line in file:lines() do
 	 if((line ~= "") and (not(string.starts(line, "#")))) then
 	    line = line:gsub("\t", " ")
@@ -1232,7 +1242,7 @@ local function readServices()
 	    local label = elems[1]
 	    local value
 	    local i = 2
-	    
+
 	    while(elems[i] ~= nil) do
 	       if(elems[i] ~=  "") then
 		  value = elems[i]
@@ -1241,12 +1251,12 @@ local function readServices()
 
 	       i = i + 1
 	    end
-	    
+
 	    services[value] = label
 	    -- print(label.." = "..value.."<br>\n")
 	 end
       end
-      
+
       file:close()
    end
 
