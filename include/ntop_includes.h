@@ -424,7 +424,6 @@ using namespace std;
 #include <iomanip> /* std::setfill */
 using namespace clickhouse;
 #include "FlowsTable.h"
-#include "ClickHouseImport.h"
 #include "ClickHouseDB.h"
 #endif
 #ifdef NTOPNG_PRO

@@ -2772,7 +2772,6 @@ void Prefs::lua(lua_State *vm) {
 #endif
 
   if(clickhouse_dbname) lua_push_str_table_entry(vm, "clickhouse_dbname", clickhouse_dbname);
-  lua_push_str_table_entry(vm, "clickhouse_import_mode", "memory");
   lua_push_bool_table_entry(vm, "is_dump_flows_to_es_enabled",
                             do_dump_flows_on_es());
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)

@@ -2319,33 +2319,6 @@ static int ntop_clickhouse_enabled(lua_State *vm) {
 
 /* ****************************************** */
 
-static int ntop_clickhouse_import_dumps(lua_State *vm) {
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-  bool silence_warnings;
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TBOOLEAN) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  else
-    silence_warnings = (bool)lua_toboolean(vm, 1);
-
-  lua_pushinteger(vm, ntop->importClickHouseDumps(silence_warnings));
-#else
-  lua_pushinteger(vm, 0);
-#endif
-
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
-}
-
-/* ****************************************** */
-
-static int ntop_get_clickhouse_stats(lua_State *vm) {
-  ntop->luaClickHouseStats(vm);
-
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
-}
-
-/* ****************************************** */
-
 // *** API ***
 static int ntop_http_redirect(lua_State *vm) {
   char *url, str[512];
@@ -8548,8 +8521,6 @@ static luaL_Reg _ntop_reg[] = {
 
     /* ClickHouse */
     { "isClickHouseEnabled", ntop_clickhouse_enabled },
-    { "importClickHouseDumps", ntop_clickhouse_import_dumps },
-    { "getClickHouseStats", ntop_get_clickhouse_stats },
 
     /* Data Binning */
     { "addBin", ntop_add_bin },

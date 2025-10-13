@@ -7211,8 +7211,6 @@ local lang = {
     ["remote_hosts"] = "リモートホスト",
   },
   ["system_stats"] = {
-    ["clickhouse_import_queue"] = "バッチインポートキュー",
-    ["clickhouse_imports"] = "バッチインポート",
     ["clickhouse_last_import_duration"] = "最後のインポートは次の通りでした",
     ["cpu_states_monitor"] = "CPUステータスモニター",
     ["cpu_states_monitor_description"] = "CPUの状態（ユーザー、システム、アイドル、iowaitなど）を監視します。",
@@ -7268,8 +7266,6 @@ local lang = {
       ["short_desc_clickhouse_alert_size"] = "ClickHouseのアラートテーブルの合計サイズ。",
       ["short_desc_clickhouse_flows_size"] = "ClickHouseのフローズテーブルの合計サイズ。",
       ["short_desc_clickhouse_health"] = "現在のClickHouseヘルス。",
-      ["short_desc_clickhouse_import_queue"] = "インポート待ちのファイルの数。",
-      ["short_desc_clickhouse_imports"] = "ClickHouseでバッチフローズ/アラートのインポート。",
       ["short_desc_version"] = "ClickHouseサーバーバージョン",
       ["tables_size"] = "テーブルサイズ",
       ["tables_size_descr"] = "ClickHouseテーブルの合計サイズ",

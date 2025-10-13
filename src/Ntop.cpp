@@ -357,10 +357,6 @@ Ntop::~Ntop() {
   }
 #endif
 
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-  if (clickhouseImport) delete clickhouseImport;
-#endif
-
   if (resolvedHostsBloom) delete resolvedHostsBloom;
   delete internal_alerts_queue;
 
@@ -495,10 +491,6 @@ void Ntop::registerPrefs(Prefs *_prefs, bool quick_registration) {
 #endif
 
   prefs->loadInstanceNameDefaults();
-
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-  clickhouseImport = NULL;
-#endif
 
 #ifdef HAVE_RADIUS
   if(!prefs->limitResourcesUsage())
@@ -3210,9 +3202,6 @@ void Ntop::checkShutdownWhenDone() {
 
     /* Make sure all flushed flows are also dumped to the database for post
      * analysis (e.g. historical data) */
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-    if (clickhouseImport) importClickHouseDumps(true);
-#endif
 
     /* Test Script (Post Analysis) */
     if (ntop->getPrefs()->get_test_post_script_path()) {
@@ -3828,19 +3817,6 @@ bool Ntop::luaFlowCheckInfo(lua_State *vm, std::string check_name) const {
   if (fcl) return fcl->luaCheckInfo(vm, check_name);
 
   return false;
-}
-
-/* ******************************************* */
-
-void Ntop::luaClickHouseStats(lua_State *vm) const {
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-  if (clickhouseImport) {
-    clickhouseImport->lua(vm);
-    return;
-  }
-#endif
-
-  lua_pushnil(vm);
 }
 
 /* ******************************************* */

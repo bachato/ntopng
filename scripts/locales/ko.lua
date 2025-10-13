@@ -7849,8 +7849,6 @@ local lang = {
     ["remote_hosts"] = "원격 호스트",
   },
   ["system_stats"] = {
-    ["clickhouse_import_queue"] = "일괄 가져오기 대기열",
-    ["clickhouse_imports"] = "일괄 가져오기",
     ["clickhouse_last_import_duration"] = "마지막 가져오기가 지속됨",
     ["cpu_states_monitor"] = "CPU 상태 모니터",
     ["cpu_states_monitor_description"] = "CPU 상태(예: 사용자, 시스템, 유휴 및 iowait)를 모니터링합니다.",
@@ -7906,8 +7904,6 @@ local lang = {
       ["short_desc_clickhouse_alert_size"] = "ClickHouse 경고 테이블의 총 크기입니다.",
       ["short_desc_clickhouse_flows_size"] = "ClickHouse 흐름 테이블의 전체 크기입니다.",
       ["short_desc_clickhouse_health"] = "현재 ClickHouse 상태.",
-      ["short_desc_clickhouse_import_queue"] = "가져오기를 대기 중인 파일 수입니다.",
-      ["short_desc_clickhouse_imports"] = "ClickHouse에서 일괄 처리된 흐름/알림 가져오기.",
       ["short_desc_version"] = "클릭하우스 서버 버전",
       ["tables_size"] = "테이블 크기",
       ["tables_size_descr"] = "ClickHouse 테이블의 총 크기",

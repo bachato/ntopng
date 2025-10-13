@@ -330,11 +330,6 @@ if (ntop.isPro()) then
             interface.execSQLQuery(
                 "ALTER TABLE hourly_flows UPDATE DST_NETWORK_ID = 4294967295 WHERE DST_NETWORK_ID = 65535")
         end
-
-        -- Import ClickHouse dumps if any
-        local silence_import_warnings = true
-        traceError(TRACE_NORMAL, TRACE_CONSOLE, "Importing ClickHouse dumps...")
-        ntop.importClickHouseDumps(silence_import_warnings)
     end
     -- In case of the alert enabled, clean the list of all the elements
     drop_host_pool_utils.clean_list()

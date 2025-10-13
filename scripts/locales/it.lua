@@ -6598,8 +6598,6 @@ local lang = {
     ["remote_hosts"] = "Host Remoti",
   },
   ["system_stats"] = {
-    ["clickhouse_import_queue"] = "Coda di importazione batch",
-    ["clickhouse_imports"] = "Importazioni Batch",
     ["clickhouse_last_import_duration"] = "L'ultima importazione è durata ",
     ["cpu_states_monitor"] = "Monitor degli Stati della CPU",
     ["cpu_states_monitor_description"] = "Monitor degli stati della CPU (e.g., user, system, idle and iowait)",
@@ -6653,8 +6651,6 @@ local lang = {
       ["short_desc_clickhouse_alert_size"] = "Dimensione totale delle tabelle di avviso di ClickHouse.",
       ["short_desc_clickhouse_flows_size"] = "Dimensione totale delle tabelle dei flussi di ClickHouse.",
       ["short_desc_clickhouse_health"] = "Salute attuale di ClickHouse.",
-      ["short_desc_clickhouse_import_queue"] = "Numero di file in attesa di importazione.",
-      ["short_desc_clickhouse_imports"] = "Importazioni di flussi/allarmi in batch in ClickHouse.",
       ["short_desc_version"] = "Versione del Server ClickHouse",
       ["tables_size"] = "Dimensione Tabelle",
       ["tables_size_descr"] = "Dimensione totale delle tabelle ClickHouse, sia i flussi che le tabelle degli avvisi",

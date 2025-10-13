@@ -145,9 +145,6 @@ class Ntop {
   bool alertExclusionsReloadInProgress;
   AlertExclusions *alert_exclusions, *alert_exclusions_shadow;
 #endif
-#if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-  ClickHouseImport *clickhouseImport;
-#endif
 
   bool assignUserId(u_int8_t *new_user_id);
 
@@ -806,21 +803,17 @@ class Ntop {
   void collectContinuousResponses(lua_State *vm);
   inline char *getZoneInfo() { return (zoneinfo); }
 
-  void luaClickHouseStats(lua_State *vm) const;
   void speedtest(lua_State *vm);
 #if defined(NTOPNG_PRO)
   MessageBroker* getMessageBroker() { return(message_broker); };
 #endif
+
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-  inline u_int importClickHouseDumps(bool silence_warnings) {
-    return (clickhouseImport ? clickhouseImport->importDumps(silence_warnings)
-                             : 0);
-  }
   void setFlowId(u_int64_t id) { flow_id = id; flow_id_initialized = true; }
   bool isFlowIdInitialized() { return flow_id_initialized; }
   u_int64_t getNextFlowId() { return (flow_id++); }
-  inline ClickHouseImport *getClickHouseImport() { return (clickhouseImport); }
 #endif
+
   inline char *getTZname() { return (myTZname); }
   inline Mutex *get_pools_lock()      { return (&pools_lock); };
   inline u_int32_t get_current_time() { return(current_time); };

@@ -7862,8 +7862,6 @@ local lang = {
     ["remote_hosts"] = "Remote-Hosts",
   },
   ["system_stats"] = {
-    ["clickhouse_import_queue"] = "Stapelimport-Warteschlange",
-    ["clickhouse_imports"] = "Stapelimporte",
     ["clickhouse_last_import_duration"] = "Letzter Import dauerte",
     ["cpu_states_monitor"] = "CPU-Zustandsmonitor",
     ["cpu_states_monitor_description"] = "Überwacht die Zustände der CPU (z. B. Benutzer, System, Leerlauf und Iowait)",
@@ -7919,8 +7917,6 @@ local lang = {
       ["short_desc_clickhouse_alert_size"] = "Gesamtgröße der ClickHouse-Alarmtabellen.",
       ["short_desc_clickhouse_flows_size"] = "Gesamtgröße der ClickHouse-Flows-Tabelle.",
       ["short_desc_clickhouse_health"] = "Aktueller Zustand von ClickHouse.",
-      ["short_desc_clickhouse_import_queue"] = "Anzahl der Dateien, die auf den Import warten.",
-      ["short_desc_clickhouse_imports"] = "Stapelimport von Flows/Warnungen in ClickHouse.",
       ["short_desc_version"] = "ClickHouse Server Version",
       ["tables_size"] = "Tische Größe",
       ["tables_size_descr"] = "Gesamtgröße der ClickHouse-Tabellen",
