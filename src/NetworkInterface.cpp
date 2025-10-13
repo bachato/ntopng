@@ -1166,47 +1166,47 @@ bool NetworkInterface::enqueueHostAlert(HostAlert *alert) {
 /* **************************************************** */
 
 int NetworkInterface::dumpFlow(time_t when, Flow *f) {
+  SPSCQueue<Flow *> *queue;
   int rc = -1;
+#if DEBUG_FLOW_DUMP
+  const char *status_str;
+#endif
 
   /* Asynchronous dump via a thread */
+
   if (f->get_state() == hash_entry_state_idle) {
     /* Last flow dump before delete
      * Note: this never happens in 'direct' mode */
-    if (idleFlowsToDump && idleFlowsToDump->enqueue(f, true)) {
-      f->incUses(), f->set_dump_in_progress();
-
-      /*
-        Signal there's work to do.
-        Don't signal for view interfaces, they use sleep.
-      */
-#ifndef WIN32
-      if (!isViewed()) dump_condition.signal();
-#endif
-
+    queue = idleFlowsToDump;
 #if DEBUG_FLOW_DUMP
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] Queueing flow to dump [IDLE]", __FUNCTION__);
+    status_str = "IDLE";
 #endif
-    } else {
-      incNumQueueDroppedFlows(1);
-    }
   } else {
     /* Partial dump if active flows */
-    if (activeFlowsToDump && activeFlowsToDump->enqueue(f, true)) {
-      f->incUses(), f->set_dump_in_progress();
+    queue = activeFlowsToDump;
+#if DEBUG_FLOW_DUMP
+    status_str = "ACTIVE";
+#endif
+  }
 
-      /*
-        Signal there's work to do.
-      */
+  if (queue && queue->enqueue(f, true)) {
+    f->incUses(), f->set_dump_in_progress();
+
+    /*
+      Signal there's work to do.
+      Don't signal for view interfaces, they use sleep.
+    */
 #ifndef WIN32
-      if (!isViewed()) dump_condition.signal();
+    if (!isViewed()) dump_condition.signal();
 #endif
 
 #if DEBUG_FLOW_DUMP
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] Queueing flow to dump [ACTIVE]", __FUNCTION__);
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] Queueing flow to dump [%s]", __FUNCTION__, status_str);
 #endif
-    } else {
-      incNumQueueDroppedFlows(1);
-    }
+
+    rc = 0;
+  } else {
+    incNumQueueDroppedFlows(1);
   }
 
   return (rc);
@@ -4065,6 +4065,12 @@ void NetworkInterface::shutdown() {
 
     /* stop host/flow alerts dump threads */
     shutting_down = true;
+
+#ifndef WIN32
+    dump_condition.signal();
+    flow_checks_condvar.signal();
+    host_checks_condvar.signal();
+#endif
 
     /* Shut down dump threads (after purging flows/hosts to flush engaged
      * alerts to the database) */
