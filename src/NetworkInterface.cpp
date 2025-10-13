@@ -3695,9 +3695,6 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
 
   /*
     Wait until there's some work to do.
-    Don't wait for viewed interfaces to prevent one viewed interface to block
-    all the other interfaces. For viewed interfaces, this method is called
-    sequentially in ViewInterface::dumpFlowLoop
   */
   u_int64_t num_done = idle_flows_done + active_flows_done;
 
@@ -4004,21 +4001,19 @@ void NetworkInterface::startFlowDumping() {
   idleFlowsToDump   = new (std::nothrow)SPSCQueue<Flow *>(MAX_IDLE_FLOW_QUEUE_LEN, "idleFlowsToDump");
   activeFlowsToDump = new (std::nothrow)SPSCQueue<Flow *>(MAX_ACTIVE_FLOW_QUEUE_LEN, "activeFlowsToDump");
 
-  if (!isViewed()) {
-    /* Do not spawn the dumper thread for viewed interfaces -
-       it's the view interface that has the dumper thread */
-    if (idleFlowsToDump && activeFlowsToDump) {
-      pthread_create(&flowDumpLoop, NULL, flowDumper, (void *)this);
-      flowDumpLoopCreated = true;
-    } else {
-      if (idleFlowsToDump) {
-        delete idleFlowsToDump;
-        idleFlowsToDump = NULL;
-      }
-      if (activeFlowsToDump) {
-        delete activeFlowsToDump;
-        activeFlowsToDump = NULL;
-      }
+  /* Note: spawn the dumper thread also on viewed interfaces to scale with performance
+   * (rather than using a single dump thread on the view as it used to be) */
+  if (idleFlowsToDump && activeFlowsToDump) {
+    pthread_create(&flowDumpLoop, NULL, flowDumper, (void *)this);
+    flowDumpLoopCreated = true;
+  } else {
+    if (idleFlowsToDump) {
+      delete idleFlowsToDump;
+      idleFlowsToDump = NULL;
+    }
+    if (activeFlowsToDump) {
+      delete activeFlowsToDump;
+      activeFlowsToDump = NULL;
     }
   }
 }
@@ -9935,7 +9930,6 @@ bool NetworkInterface::initFlowDB() {
   is successful
 */
 void NetworkInterface::initFlowDump() {
-  startFlowDumping();
 
   /* Note:
    * Database is initialized both on standard interfaces and views, however
@@ -9952,6 +9946,8 @@ void NetworkInterface::initFlowDump() {
 
   if (isView())
     return;
+
+  startFlowDumping();
 
   if (flows_db)
     flows_db->startDBLoop();
