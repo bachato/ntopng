@@ -998,7 +998,7 @@ function format_portidx_name(device_ip, portidx, short_version, interface_info)
    local idx_name = portidx
 
    -- tprint("format_portidx_name("..device_ip .. ", " .. portidx..")")
-   
+
    -- SNMP is available only with Pro version at least
    if ntop.isPro() then
       local name = ""
@@ -1014,14 +1014,14 @@ function format_portidx_name(device_ip, portidx, short_version, interface_info)
 	 cached_info = snmp_cached_dev:get_interfaces(device_ip)
 	 _snmp_devices[device_ip] = cached_info
       end
-      
+
       if (cached_info) and (cached_info["interfaces"]) then
-	 -- if the info are available, use this function 
+	 -- if the info are available, use this function
 	 cached_info = cached_info["interfaces"][tostring(portidx)]
-	 
+
 	 if (cached_info) then
-	    name = snmp_utils.getInterfaceNameFromCache(device_ip, portidx,
-							cached_info, short_version)
+	    idx_name = snmp_utils.getInterfaceNameFromCache(device_ip, portidx,
+							    cached_info, short_version)
 	 end
       else
 	 -- No SNMP configured: last resort use exporters
