@@ -16,6 +16,11 @@ local format_utils = require "format_utils"
 local l4_protocol_list = require "l4_protocol_list"
 local icmp_utils = require("icmp_utils")
 
+if ntop.isPro() then
+    package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" ..
+                       package.path
+end
+
 -- Trick to handle the application and the categories togheter
 local application = _GET["application"]
 local ip_version_or_host = _GET["flowhosts_type"]
@@ -249,21 +254,32 @@ for _, value in ipairs(flows_stats.flows) do
 
     -- snmp interface index
     if (value["in_index"] ~= nil and value["out_index"] ~= nil) then
-        local snmp_cached_dev = require "snmp_cached_dev"
-
         local probe_uuid = 0
+        local in_port_name = ""
+        local out_port_name = ""
         local device_ip = value["device_ip"]
-        local cached_dev = snmp_cached_dev:get_interfaces(device_ip)
 
-        -- get exporter info
-        local ifstats = interface.getStats()
-        for interface_id, probes_list in pairs(ifstats.probes or {}) do
-            for source_id, probe_info in pairs(probes_list or {}) do
-                local probe_ip = probe_info["probe.ip"]
+        if ntop.isPro() then
+            local snmp_cached_dev = require "snmp_cached_dev"
+            local cached_dev = snmp_cached_dev:get_interfaces(device_ip)
+            in_port_name = format_portidx_name(device_ip, value["in_index"],
+                                               true,
+                                               cached_dev["interfaces"][tostring(
+                                                   value["in_index"])])
+            out_port_name = format_portidx_name(device_ip, value["out_index"],
+                                                true,
+                                                cached_dev["interfaces"][tostring(
+                                                    value["out_index"])])
+            -- get exporter info
+            local ifstats = interface.getStats()
+            for interface_id, probes_list in pairs(ifstats.probes or {}) do
+                for source_id, probe_info in pairs(probes_list or {}) do
+                    local probe_ip = probe_info["probe.ip"]
 
-                -- get probe uuid if ips match
-                if probe_ip == device_ip then
-                    probe_uuid = probe_info["probe.uuid_num"]
+                    -- get probe uuid if ips match
+                    if probe_ip == device_ip then
+                        probe_uuid = probe_info["probe.uuid_num"]
+                    end
                 end
             end
         end
@@ -278,12 +294,12 @@ for _, value in ipairs(flows_stats.flows) do
             in_port = {
                 index = value["in_index"],
                 -- last param is short version
-                name = format_portidx_name(device_ip, value["in_index"], true, cached_dev["interfaces"][tostring(value["in_index"])])
+                name = in_port_name
             },
             out_port = {
                 index = value["out_index"],
                 -- last param is short version
-                name = format_portidx_name(device_ip, value["out_index"], true, cached_dev["interfaces"][tostring(value["out_index"])])
+                name = out_port_name
             }
         }
 
