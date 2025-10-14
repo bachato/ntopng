@@ -46,6 +46,10 @@ recipients.FIRST_RECIPIENT_CREATED_CACHE_KEY = "ntopng.prefs.endpoint_hints.reci
 
 local default_builtin_minimum_severity = alert_severities.notice.severity_id -- minimum severity is notice (to avoid flooding) (*****)
 
+-- Cache recipients to avoid re-reading them constantly
+-- from redis with recipients.get_all_recipients()
+local cached_recipients
+
 -- ##############################################
 
 function recipients.get_notification_types()
@@ -1118,9 +1122,11 @@ function recipients.dispatch_notification(notification, current_script, notifica
 
     local notification_category = get_notification_category(notification, current_script)
 
-    local recipients = recipients.get_all_recipients()
+    if not cached_recipients then
+        cached_recipients = recipients.get_all_recipients()
+    end
 
-    if #recipients > 0 then
+    if #cached_recipients > 0 then
 
         -- Use pcall to catch possible exceptions, e.g., (string expected, got light userdata)
         local status, json_notification = pcall(function()
@@ -1134,7 +1140,7 @@ function recipients.dispatch_notification(notification, current_script, notifica
             return
         end
 
-        for _, recipient in ipairs(recipients) do
+        for _, recipient in ipairs(cached_recipients) do
             local recipient_ok = true
 
             if debug_vs and is_vs then
@@ -1417,7 +1423,6 @@ end
 -- @param periodic_frequency The frequency, in seconds, of this call
 -- @param force_export A boolean telling to forcefully export dispatched notifications
 -- @return nil
-local cached_recipients
 function recipients.process_notifications(now, deadline, periodic_frequency, force_export)
     local endpoints = require "endpoints"
     if not areAlertsEnabled() then
@@ -1434,6 +1439,7 @@ function recipients.process_notifications(now, deadline, periodic_frequency, for
         -- function is reloaded and thus, recipients, are re-cached automatically
         cached_recipients = recipients.get_all_recipients()
     end
+
     local modules_by_name = endpoints.get_types()
     local ready_recipients = {}
 
