@@ -163,7 +163,7 @@ $(LUA_LIB):
 	$(MAKE) -C $(LUA_HOME) $(LUA_PLATFORM)
 
 $(CLICKHOUSE_LIB):
-	cd $(CLICKHOUSE_HOME) && cmake -B build .
+	cd $(CLICKHOUSE_HOME) && cmake -B build -DWITH_OPENSSL=ON .
 	cd $(CLICKHOUSE_HOME) && cmake --build build
 
 $(ZEROMQ_LIB):
