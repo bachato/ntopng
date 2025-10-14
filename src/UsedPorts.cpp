@@ -182,6 +182,6 @@ char* UsedPorts::getRedisKey(char *redis_key, size_t key_len) {
   static char buf[64];
 
   snprintf(redis_key, key_len, LOCALHOST_SERVER_PORT_BITMAP, 
-        h->getInterface()->get_id(), h->getSerializationKey(buf, sizeof(buf)));
+           h->getSerializationKey(buf, sizeof(buf), true));
   return redis_key;
 }
