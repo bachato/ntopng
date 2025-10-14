@@ -140,8 +140,26 @@ void SNMP::handle_async_response(struct snmp_pdu *pdu, const char *agent_ip) {
       }
 
       if(is_printable) {
-	strncpy(buf, (const char *)vp->val.string, len);
-	buf[len] = '\0';
+	bool already_set = false;
+
+	if(len > 2) {
+	  /* Bug with NET-SNMP <name> */
+	  if((vp->val.string[0] == 0x3C) && (vp->val.string[len-1] == 0x3E)) {
+	    strncpy(buf, (const char *)&vp->val.string[1], len-2);
+	    buf[len-2] = '\0', already_set = true;
+	  }
+	}
+
+	if(!already_set) {
+	  strncpy(buf, (const char *)vp->val.string, len);
+	  buf[len] = '\0';
+	}
+
+#ifdef DEBUG
+	if(len >= 4)
+	  ntop->getTrace()->traceEvent(TRACE_WARNING, "%s [%02X %02X %02X %02X][len: %u]",
+				       buf, buf[0], buf[1], buf[2], buf[3], len);
+#endif
       } else if(len == 4) {
 	snprintf(buf, sizeof(buf), "%u.%u.%u.%u", vp->val.string[0],
 		 vp->val.string[1], vp->val.string[2], vp->val.string[3]);
