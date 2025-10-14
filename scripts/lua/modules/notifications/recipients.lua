@@ -1311,18 +1311,24 @@ end
 -- @param force_export A boolean telling to forcefully export dispatched notifications
 -- @return nil
 local function process_notifications(ready_recipients, now, deadline, periodic_frequency, force_export)
-    -- Total budget available, which is a multiple of the periodic_frequency
-    -- Budget in this case is the maximum number of notifications which can
-    -- be processed during this call.
-    local total_budget = 1000 * periodic_frequency
-    -- To avoid having one recipient jeopardizing all the resources, the total
-    -- budget is consumed in chunks, that is, recipients are iterated multiple times
-    -- and, each time any recipient has a maximum budget for every iteration.
-    local budget_per_iter = total_budget / #ready_recipients
+    -- Default
+    local total_budget = 1000
+    local budget_per_iter = 100
 
-    -- Put a cap of 1000 messages/iteration
-    if (budget_per_iter > 1000) then
-        budget_per_iter = 1000
+    if periodic_frequency > 0 then -- from a periodic script
+        -- Total budget available, which is a multiple of the periodic_frequency
+        -- Budget in this case is the maximum number of notifications which can
+        -- be processed during this call.
+        total_budget = 1000 * periodic_frequency
+        -- To avoid having one recipient jeopardizing all the resources, the total
+        -- budget is consumed in chunks, that is, recipients are iterated multiple times
+        -- and, each time any recipient has a maximum budget for every iteration.
+        budget_per_iter = total_budget / #ready_recipients
+
+        -- Put a cap of 1000 messages/iteration
+        if (budget_per_iter > 1000) then
+            budget_per_iter = 1000
+        end
     end
 
     -- Cycle until there are ready_recipients and total_budget left
