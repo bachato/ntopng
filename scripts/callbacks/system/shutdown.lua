@@ -38,7 +38,7 @@ for _, ifname in pairs(ifnames) do
   alerts_api.releaseAllAlerts()
 end
 
-recipients.process_notifications(now, now + 1000 --[[ deadline ]], 3 --[[ periodicity ]], true)
+recipients.process_notifications(now, now + 10 --[[ deadline ]], 3 --[[ periodicity ]], true)
 
 if ntop.isPro() then
    package.path = dirs.installdir .. "/pro/scripts/callbacks/system/?.lua;" .. package.path
