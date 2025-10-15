@@ -186,7 +186,7 @@ void LocalHost::initialize() {
       setMACmeaningful();
   }
 
-  if (!ntop->getPrefs()->isIASNModeEnabled())
+  if (!ntop->getPrefs()->isASNModeEnabled())
     usedPorts = new (std::nothrow) UsedPorts(this); 
 
 #ifdef NTOPNG_PRO
