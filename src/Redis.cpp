@@ -441,6 +441,31 @@ int Redis::del(char *key) {
 
 /* **************************************** */
 
+int Redis::rename(char *key, char *new_key) {
+  int rc;
+  redisReply *reply;
+
+  l->lock(__FILE__, __LINE__);
+
+  stats.num_del++;
+  reply = (redisReply *)redisCommand(redis, "RENAME %s %s", key, new_key);
+  if (!reply) reconnectRedis(true);
+  if (reply && (reply->type == REDIS_REPLY_ERROR)) {
+    ntop->getTrace()->traceEvent(TRACE_ERROR, "%s",
+                                 reply->str ? reply->str : "???");
+    rc = -1;
+  } else {
+    rc = 0;
+  }
+
+  if (reply) freeReplyObject(reply);
+  l->unlock(__FILE__, __LINE__);
+
+  return (rc);
+}
+
+/* **************************************** */
+
 int Redis::hashGet(const char *key, const char *field, char *const rsp,
                    u_int rsp_len) {
   int rc;

@@ -96,6 +96,7 @@ class Redis {
   int hashKeys(const char *pattern, char ***keys_p);
   int hashGetAll(const char *key, char ***keys_p, char ***values_p);
   int del(char *key);
+  int rename(char *key, char *new_key);
   int pushHostToResolve(char *hostname, bool dont_check_for_existence,
                         bool localHost);
   int popHostToResolve(char *hostname, u_int hostname_len);
