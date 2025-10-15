@@ -55,7 +55,7 @@ const seconds_one_day = 3600 * 24;
 
 // render table in httpdocs/tables_config/as_stats.json if context.ASNModeEnabled is false, else render the IXP mode table: httpdocs/tables_config/as_stats_ixp_mode.json
 const table_id = computed(() => {
-    return props.context?.ASNModeEnabled ? 'exporters_interfaces_stats_ixp_mode' : 'exporters_interfaces_stats';
+    return 'exporters_interfaces_stats';
 });
 
 const chart_title = _i18n('top_active_interfaces')
