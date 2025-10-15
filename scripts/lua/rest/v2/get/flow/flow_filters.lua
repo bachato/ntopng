@@ -227,11 +227,7 @@ end
 local status_filters = {
     {key = "status", value = "", label = i18n("all")},
     {key = "status", value = "normal", label = i18n("flows_page.normal")},
-    {
-        key = "status",
-        value = "alerted",
-        label = i18n("flows_page.all_alerted")
-    }
+    {key = "status", value = "alerted", label = i18n("flows_page.all_alerted")}
 }
 
 if table.len(flowstats["transit_asn"]) > 0 then
@@ -431,12 +427,15 @@ if table.len(networks_stats) > 1 then
     }
 end
 
-local as_filter = {
-    {key = "asn", value = "", label = i18n("all")},
-    {key = "asn", value = asn, label = format_utils.formatASN(tonumber(asn))}
-}
-
 if (not isEmptyString(asn)) then
+    local as_filter = {
+        {key = "asn", value = "", label = i18n("all")},
+        {
+            key = "asn",
+            value = asn,
+            label = format_utils.formatASN(tonumber(asn))
+        }
+    }
     rsp[#rsp + 1] = {
         action = "asn",
         label = i18n("as"),
@@ -456,7 +455,8 @@ if flowstats["src_asn"] and table.len(flowstats["src_asn"]) > 0 then
             tmp_list[as_label] = {
                 key = "src_asn",
                 value = as_num,
-                label = as_label .. " (" .. format_utils.formatValue(count) .. ")"
+                label = as_label .. " (" .. format_utils.formatValue(count) ..
+                    ")"
             }
         end
     end
@@ -486,7 +486,8 @@ if flowstats["dst_asn"] and table.len(flowstats["dst_asn"]) > 0 then
             tmp_list[as_label] = {
                 key = "dst_asn",
                 value = as_num,
-                label = as_label .. " (" .. format_utils.formatValue(count) .. ")"
+                label = as_label .. " (" .. format_utils.formatValue(count) ..
+                    ")"
             }
         end
     end
@@ -562,63 +563,64 @@ end
 
 if ntop.isPro() and not isEmptyString(_GET["deviceIP"]) then
     local dev_ip = _GET["deviceIP"]
-    -- Flow exporter requested
-    local in_ports = {{key = "inIfIdx", value = "", label = i18n("all")}}
-    local ports_table =
-        interface.getFlowDeviceInfoByIP(dev_ip, true --[[ Show minimal info ]] )
 
-    tmp_list = {}
-    for _, ports in pairs(ports_table) do
-        for portidx, _ in pairsByKeys(ports, asc) do
-            local name = format_portidx_name(dev_ip, portidx, true)
-            tmp_list[tostring(name)] = {
-                key = "inIfIdx",
-                value = portidx,
-                label = name
+    if not isEmptyString(_GET["ifIdx"]) then
+        local ports = {
+            {key = "ifIdx", value = "", label = i18n("all")}, {
+                key = "ifIdx",
+                value = _GET["ifIdx"],
+                label = format_portidx_name(dev_ip, _GET["ifIdx"], true)
             }
+        }
+
+        rsp[#rsp + 1] = {
+            action = "ifIdx",
+            label = i18n("db_search.exporter_interface"),
+            name = "ifIdx",
+            value = ports,
+            show_with_value = dev_ip,
+            show_with_key = "deviceIP"
+        }
+    else
+        -- Flow exporter requested
+        local in_ports = {{key = "inIfIdx", value = "", label = i18n("all")}}
+        local out_ports = {{key = "outIfIdx", value = "", label = i18n("all")}}
+        local ports_table =
+            interface.getFlowDeviceInfoByIP(dev_ip, false --[[ Show minimal info ]] )
+
+        tmp_list = {}
+        for _, ports in pairs(ports_table) do
+            for portidx, _ in pairsByKeys(ports, asc) do
+                local name = format_portidx_name(dev_ip, portidx, true)
+                tmp_list[tostring(name)] = {value = portidx, label = name}
+            end
         end
-    end
 
-    for _, value in pairsByKeys(tmp_list, asc) do
-        in_ports[#in_ports + 1] = value
-    end
-
-    rsp[#rsp + 1] = {
-        action = "inIfIdx",
-        label = i18n("db_search.input_snmp"),
-        name = "inIfIdx",
-        value = in_ports,
-        show_with_value = dev_ip,
-        show_with_key = "deviceIP"
-    }
-
-    local out_ports = {{key = "outIfIdx", value = "", label = i18n("all")}}
-    local ports_table = interface.getFlowDeviceInfoByIP(dev_ip, false)
-
-    tmp_list = {}
-    for _, ports in pairs(ports_table) do
-        for portidx, _ in pairsByKeys(ports, asc) do
-            local name = format_portidx_name(dev_ip, portidx, true)
-            tmp_list[tostring(name)] = {
-                key = "outIfIdx",
-                value = portidx,
-                label = name
-            }
+        for _, value in pairsByKeys(tmp_list, asc) do
+            value["key"] = "inIfIdx"
+            in_ports[#in_ports + 1] = value
+            value["key"] = "outIfIdx"
+            out_ports[#out_ports + 1] = value
         end
-    end
 
-    for _, value in pairsByKeys(tmp_list, asc) do
-        out_ports[#out_ports + 1] = value
-    end
+        rsp[#rsp + 1] = {
+            action = "inIfIdx",
+            label = i18n("db_search.input_snmp"),
+            name = "inIfIdx",
+            value = in_ports,
+            show_with_value = dev_ip,
+            show_with_key = "deviceIP"
+        }
 
-    rsp[#rsp + 1] = {
-        action = "outIfIdx",
-        label = i18n("db_search.output_snmp"),
-        name = "outIfIdx",
-        value = out_ports,
-        show_with_value = dev_ip,
-        show_with_key = "deviceIP"
-    }
+        rsp[#rsp + 1] = {
+            action = "outIfIdx",
+            label = i18n("db_search.output_snmp"),
+            name = "outIfIdx",
+            value = out_ports,
+            show_with_value = dev_ip,
+            show_with_key = "deviceIP"
+        }
+    end
 end
 
 rest_utils.answer(rest_utils.consts.success.ok, rsp)

@@ -91,6 +91,7 @@ import { default as PageAlertsGeoMap } from "./page-alerts-geomap.vue"
 import { default as PageTrafficProfiles } from "./page-traffic-profiles.vue"
 import { default as PageNetworksList } from "./page-networks-list.vue"
 import { default as PageDHCPLeases } from "./page-DHCP-leases.vue"
+import { default as PageExporterInterfaceOverview } from "./page-exporter-interface-overview.vue"
 
 /* Config pages */
 import { default as PageSNMPConfig } from "./page-snmp-config.vue"
@@ -199,6 +200,7 @@ let ntopVue = {
     PagePoolPolicy: PagePoolPolicy,
     PageTrafficProfiles: PageTrafficProfiles,
     PageDHCPLeases: PageDHCPLeases,
+    PageExporterInterfaceOverview: PageExporterInterfaceOverview,
     
     /* SNMP */
     PageSNMPDevices: PageSNMPDevices,

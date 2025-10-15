@@ -179,6 +179,7 @@ function getFlowsFilter()
     local deviceIP = _GET["deviceIP"]
     local inIfIdx = _GET["inIfIdx"]
     local outIfIdx = _GET["outIfIdx"]
+    local ifIndex = _GET["ifIdx"]
     local asn = _GET["asn"]
     local talking_with = _GET["talking_with"]
     local client = _GET["client"]
@@ -370,6 +371,10 @@ function getFlowsFilter()
 
         if not isEmptyString(inIfIdx) then
             pageinfo["inIndexFilter"] = tonumber(inIfIdx)
+        end
+
+        if not isEmptyString(ifIdx) then
+            pageinfo["ifaceIndexFilter"] = tonumber(ifIdx)
         end
 
         if not isEmptyString(outIfIdx) then

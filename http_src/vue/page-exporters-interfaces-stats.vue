@@ -230,35 +230,27 @@ const map_table_def_columns = (columns) => {
 
 function click_button_exporters_stats(event) {
     const row = event.row;
-    //window.location.href = `${http_prefix}/lua/as_overview.lua?asn=${row["asn"]}`;
-}
-
-/* ************************************** */
-
-function click_button_host(event) {
-    const row = event.row;
-    window.location.href = `${http_prefix}/lua/hosts_stats.lua?asn=${row["asn"]}`;
+    window.location.href = `${http_prefix}/lua/pro/exporter_interface_overview.lua?deviceIP=${row["exporter_ip"]}&ifIdx=${row["interface_id"]}`;
 }
 
 /* ************************************** */
 
 function click_button_flows(event) {
     const row = event.row;
-    window.location.href = `${http_prefix}/lua/flows_stats.lua?asn=${row["asn"]}`;
+    window.location.href = `${http_prefix}/lua/flows_stats.lua?deviceIP=${row["exporter_ip"]}&ifIdx=${row["interface_id"]}`;
 }
 
 /* ************************************** */
 
 function click_button_timeseries(event) {
     const row = event.row;
-    window.location.href = `${http_prefix}/lua/as_overview.lua?asn=${row["asn"]}&page=historical`;
+    window.location.href = `${http_prefix}/lua/pro/enterprise/flowdevice_interface_details.lua?page=historical&ip=${row["exporter_ip"]}&snmp_port_idx=${row["interface_id"]}`;
 }
 
 /* ************************************** */
 
 function on_table_custom_event(event) {
     let events_managed = {
-        "click_button_host": click_button_host,
         "click_button_flows": click_button_flows,
         "click_button_exporters_stats": click_button_exporters_stats,
         "click_button_timeseries": click_button_timeseries,

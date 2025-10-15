@@ -37,13 +37,6 @@
 					"class": [],
 					"event_id": "click_button_exporters_stats"
 				},
-				{
-					"id": "host",
-					"icon": "fas fa-laptop",
-					"title_i18n": "hosts",
-					"class": [],
-					"event_id": "click_button_host"
-				},
                 {
 					"id": "flows",
 					"icon": "fas fa-stream",

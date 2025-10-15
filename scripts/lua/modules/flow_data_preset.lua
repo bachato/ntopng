@@ -11,164 +11,176 @@ local flow_data_preset = {}
 -- if the column has to be used as key (except bytes/packets everything should be a key)
 -- and the formatter
 local columns = {
-   asn = {filters = {"src_asn", "dst_asn"}},
-   src_asn = {
-      column_id = "SRC_ASN",
-      is_key = true,
-      filters = "SRC_ASN",
-      formatter = {
-	 funct = format_utils.formatASN,
-	 link = "/lua/as_overview.lua?asn=%s"
-      }
-   },
-   dst_asn = {
-      column_id = "DST_ASN",
-      is_key = true,
-      filters = "DST_ASN",
-      formatter = {
-	 funct = format_utils.formatASN,
-	 link = "/lua/as_overview.lua?asn=%s"
-      }
-   },
-   src_peer_asn = {
-      column_id = "SRC_PEER_ASN",
-      is_key = true,
-      hide_if_value = "0",
-      formatter = {
-	 funct = format_utils.formatASN,
-	 link = "/lua/as_overview.lua?asn=%s"
-      }
-   },
-   dst_peer_asn = {
-      column_id = "DST_PEER_ASN",
-      is_key = true,
-      hide_if_value = "0",
-      formatter = {
-	 funct = format_utils.formatASN,
-	 link = "/lua/as_overview.lua?asn=%s"
-      }
-   },
-   in_device = {
-      column_id = "PROBE_IP",
-      is_key = true,
-      filters = "PROBE_IP",
-      db_formatting_fun = "IPv4NumToString",
-      formatter = {
-	 funct = getProbeName,
-	 link = "/lua/pro/enterprise/exporters.lua?%s",
-	 generateLinkParams = generateExporterLink
-      }
-   },
-   out_device = {
-      column_id = "PROBE_IP",
-      is_key = true,
-      db_formatting_fun = "IPv4NumToString",
-      filters = "PROBE_IP",
-      formatter = {
-	 funct = getProbeName,
-	 link = "/lua/pro/enterprise/exporters.lua?%s",
-	 generateLinkParams = generateExporterLink
-      }
-   },
-   device = {
-      column_id = "PROBE_IP",
-      is_key = true,
-      filters = "PROBE_IP",
-      db_formatting_fun = "IPv4NumToString",
-      formatter = {
-	 funct = getProbeName,
-	 link = "/lua/pro/enterprise/exporters.lua?%s",
-	 generateLinkParams = generateExporterLink
-      }
-   },
-   in_iface_index = {
-      column_id = "INPUT_SNMP",
-      is_key = true,
-      formatter = {
-	 funct = format_portidx_name,
-	 column_dependent = "in_device",
-	 link = "/lua/pro/enterprise/exporter_details.lua?%s",
-	 generateLinkParams = generateExporterInterfaceLink
-      }
-   },
-   out_iface_index = {
-      column_id = "OUTPUT_SNMP",
-      is_key = true,
-      formatter = {
-	 funct = format_portidx_name,
-	 column_dependent = "out_device",
-	 link = "/lua/pro/enterprise/exporter_details.lua?%s",
-	 generateLinkParams = generateExporterInterfaceLink
-      }
-   },
-   interface = {
-      formatter = {
-	 funct = format_portidx_name,
-	 column_dependent = "device",
-	 link = "/lua/pro/enterprise/exporter_details.lua?%s",
-	 generateLinkParams = generateExporterInterfaceLink
-      }
-   },
-   bytes_sent = {column_id = "SUM(SRC2DST_BYTES)", invert_with = "bytes_rcvd"},
-   bytes_rcvd = {column_id = "SUM(DST2SRC_BYTES)", invert_with = "bytes_sent"},
-   total_bytes = {column_id = "SUM(TOTAL_BYTES)"},
-   as = {
-      formatter = {
-	 funct = format_utils.formatASN,
-	 link = "/lua/as_overview.lua?asn=%s"
-      }
-   },
-   customer = {
-      formatter = {
-	 funct = format_utils.formatASN,
-	 link = "/lua/as_overview.lua?asn=%s"
-      }
-   },
-   transit_as = {
-      formatter = {
-	 funct = format_utils.formatASN,
-	 link = "/lua/as_overview.lua?asn=%s"
-      }
-   },
-   src_transit_as = {
-      formatter = {
-	 funct = format_utils.formatASN,
-	 link = "/lua/as_overview.lua?asn=%s"
-      }
-   },
-   dst_transit_as = {
-      formatter = {
-	 funct = format_utils.formatASN,
-	 link = "/lua/as_overview.lua?asn=%s"
-      }
-   },
-   src_peer_asn_1 = {
-      formatter = {
-	 funct = format_utils.formatASN,
-	 link = "/lua/as_overview.lua?asn=%s"
-      }
-   },
-   dst_peer_asn_1 = {
-      formatter = {
-	 funct = format_utils.formatASN,
-	 link = "/lua/as_overview.lua?asn=%s"
-      }
-   },
-   src_peer_asn_2 = {
-      formatter = {
-	 funct = format_utils.formatASN,
-	 link = "/lua/as_overview.lua?asn=%s"
-      }
-   },
-   dst_peer_asn_2 = {
-      formatter = {
-	 funct = format_utils.formatASN,
-	 link = "/lua/as_overview.lua?asn=%s"
-      }
-   },
-   ifid = {column_id = "INTERFACE_ID"},
-   first_seen = {column_id = "FIRST_SEEN"},
-   last_seen = {column_id = "LAST_SEEN"}
+    asn = {filters = {"src_asn", "dst_asn"}},
+    src_asn = {
+        column_id = "SRC_ASN",
+        is_key = true,
+        filters = "SRC_ASN",
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    dst_asn = {
+        column_id = "DST_ASN",
+        is_key = true,
+        filters = "DST_ASN",
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    src_peer_asn = {
+        column_id = "SRC_PEER_ASN",
+        is_key = true,
+        hide_if_value = "0",
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    dst_peer_asn = {
+        column_id = "DST_PEER_ASN",
+        is_key = true,
+        hide_if_value = "0",
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    in_device = {
+        column_id = "PROBE_IP",
+        is_key = true,
+        filters = "PROBE_IP",
+        db_formatting_fun = {
+            historical = "IPv4NumToString",
+            live = ntop.ipToNumber
+        },
+        formatter = {
+            funct = getProbeName,
+            link = "/lua/pro/enterprise/exporters.lua?%s",
+            generateLinkParams = generateExporterLink
+        }
+    },
+    out_device = {
+        column_id = "PROBE_IP",
+        is_key = true,
+        db_formatting_fun = {
+            historical = "IPv4NumToString",
+            live = ntop.ipToNumber
+        },
+        filters = "PROBE_IP",
+        formatter = {
+            funct = getProbeName,
+            link = "/lua/pro/enterprise/exporters.lua?%s",
+            generateLinkParams = generateExporterLink
+        }
+    },
+    device = {
+        column_id = "PROBE_IP",
+        is_key = true,
+        filters = "PROBE_IP",
+        db_formatting_fun = {
+            historical = "IPv4NumToString",
+            live = ntop.ipToNumber
+        },
+        formatter = {
+            funct = getProbeName,
+            link = "/lua/pro/enterprise/exporters.lua?%s",
+            generateLinkParams = generateExporterLink
+        }
+    },
+    in_iface_index = {
+        column_id = "INPUT_SNMP",
+        filters = "INPUT_SNMP",
+        is_key = true,
+        formatter = {
+            funct = format_portidx_name,
+            column_dependent = "in_device",
+            link = "/lua/pro/enterprise/exporter_details.lua?%s",
+            generateLinkParams = generateExporterInterfaceLink
+        }
+    },
+    out_iface_index = {
+        column_id = "OUTPUT_SNMP",
+        filters = "OUTPUT_SNMP",
+        is_key = true,
+        formatter = {
+            funct = format_portidx_name,
+            column_dependent = "out_device",
+            link = "/lua/pro/enterprise/exporter_details.lua?%s",
+            generateLinkParams = generateExporterInterfaceLink
+        }
+    },
+    interface = {
+        formatter = {
+            funct = format_portidx_name,
+            column_dependent = "device",
+            link = "/lua/pro/enterprise/exporter_details.lua?%s",
+            generateLinkParams = generateExporterInterfaceLink
+        },
+        filters = {"in_iface_index", "out_iface_index"},
+    },
+    bytes_sent = {column_id = "SUM(SRC2DST_BYTES)", invert_with = "bytes_rcvd"},
+    bytes_rcvd = {column_id = "SUM(DST2SRC_BYTES)", invert_with = "bytes_sent"},
+    total_bytes = {column_id = "SUM(TOTAL_BYTES)"},
+    as = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    customer = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    transit_as = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    src_transit_as = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    dst_transit_as = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    src_peer_asn_1 = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    dst_peer_asn_1 = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    src_peer_asn_2 = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    dst_peer_asn_2 = {
+        formatter = {
+            funct = format_utils.formatASN,
+            link = "/lua/as_overview.lua?asn=%s"
+        }
+    },
+    ifid = {column_id = "INTERFACE_ID"},
+    first_seen = {column_id = "FIRST_SEEN"},
+    last_seen = {column_id = "LAST_SEEN"}
 }
 
 -- ###########################################

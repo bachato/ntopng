@@ -1553,6 +1553,12 @@ end
 
 -- #################################################################
 
+function validateSankeyExporterInterfaceCriteria(criteria)
+    return (criteria == 'traffic_with_ases')
+end
+
+-- #################################################################
+
 function validateSankeyAsCriteria(criteria)
     return (criteria == 'as_transit_only_criteria' or criteria == 'ingress_egress_traffic_criteria'
             or criteria == 'traffic_between_ases' or criteria == 'user_traffic_breakdown')
@@ -2135,6 +2141,7 @@ local known_parameters = {
     ["custom_column"] = validateCustomColumn,
     ["criteria"] = validateSankeyCriteria,
     ["criteria_as"] = validateSankeyAsCriteria,
+    ["criteria_exporter_interface_view"] = validateSankeyExporterInterfaceCriteria,
     ["aggregation_criteria"] = validateSingleWord,
     ["row_id"] = validateUnquoted, -- A number used to identify a record in a database
     ["rrd_file"] = validateUnquoted, -- A path or special identifier to read an RRD file

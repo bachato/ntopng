@@ -123,14 +123,14 @@ end
 -- @param current_element List, containing the statistics previously collected, needs to be updated
 -- @return an updated list of stats, contained in current_element
 local function updateStats(columns, invert_direction, flow, current_element)
-   -- Iterate the requested fields
-   for _, column_info in pairs(columns) do
-      if (not column_info.is_key) then -- Not a key, so a value to be updated (e.g. bytes)
-	 local flow_key_stat = column_info.key
-	 local id = column_info.id
-	 current_element[id] = current_element[id] +
-	    tonumber(
-	       flow[flow_key_stat] or flow[id] or 0)
+    -- Iterate the requested fields
+    for _, column_info in pairs(columns) do
+        if (not column_info.is_key) then -- Not a key, so a value to be updated (e.g. bytes)
+            local flow_key_stat = column_info.key
+            local id = column_info.id
+            current_element[id] = (current_element[id] or 0) +
+                                      tonumber(
+                                          flow[flow_key_stat] or flow[id] or 0)
 
 	 if trace_stats then
 	    traceError(TRACE_NORMAL, TRACE_CONSOLE,

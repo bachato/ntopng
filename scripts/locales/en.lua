@@ -112,6 +112,7 @@ local lang = {
    ["as_server"] = "as Server",
    ["asn"] = "ASN",
    ["asn_id"] = "ASN %{id}",
+   ["exporter_id"] = "Exporter %{device} - %{interface}",
    ["asset"] = "Asset",
    ["asset_map"] = "Asset Map",
    ["asset_table"] = "Asset Table",
@@ -1869,6 +1870,10 @@ local lang = {
     ["as_timeseries_enable_message"] = "AS timeseries can be enabled from the <A HREF=\"%{url}\">%{icon_flask} Preferences</A>. Few minutes are necessary to see the first data points.",
     ["no_available_data_for_as"] = "No available data for AS %{asn}.",
   },
+  ["exporter_interface_overview"] = {
+    ["as_view"] = "AS View",
+    ["note_ingress_egress"] = " ",
+  },
   ["as_overview"] = {
     ["asn"] = "ASN %{asn} (%{asn_name})",
     ["asn_hosts"] = "ASN Hosts",
@@ -2440,6 +2445,7 @@ local lang = {
     ["number"] = "Number",
     ["observation_point_id"] = "Obs. Point ID",
     ["output_snmp"] = "Output Interface",
+    ["exporter_interface"] = "Exporter Interface",
     ["packets"] = "Pkts",
     ["probe_ip"] = "Flow Exporter",
     ["processed_records"] = "Processed %{records} records [%{rps} records/sec]",

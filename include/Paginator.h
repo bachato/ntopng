@@ -45,7 +45,7 @@ class Paginator {
       periodic_flows;
   u_int32_t asn_filter, asn_src_filter, asn_dst_filter;
   u_int32_t deviceIP;
-  u_int32_t inIndex, outIndex;
+  u_int32_t inIndex, outIndex, ifaceIndex;
   int32_t iface_index_filter;
   u_int16_t pool_filter, alert_type_filter;
   AlertLevelGroup alert_type_severity_filter;
@@ -230,6 +230,14 @@ class Paginator {
   inline bool deviceIpFilter(u_int32_t *f) const {
     if (deviceIP) {
       (*f) = deviceIP;
+      return true;
+    }
+    return false;
+  }
+
+  inline bool ifaceIndexFilter(u_int32_t *f) const {
+    if (ifaceIndex != (u_int32_t)-1) {
+      (*f) = ifaceIndex;
       return true;
     }
     return false;

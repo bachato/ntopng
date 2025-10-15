@@ -1867,6 +1867,25 @@ static int ntop_inet_ntoa(lua_State *vm) {
 
 /* ****************************************** */
 
+static int ntop_ip_to_number(lua_State *vm) {
+    char *device_ip = NULL;    
+    struct in_addr addr;
+
+    ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+    if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+        return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    device_ip = (char *)lua_tostring(vm, 1);
+    
+    if (inet_pton(AF_INET, device_ip, &addr) != 1)
+        return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+    lua_pushinteger(vm, ntohl(addr.s_addr));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 #ifndef HAVE_NEDGE
 
 static int ntop_brodcast_ips_message(lua_State *vm) {
@@ -8259,6 +8278,7 @@ static luaL_Reg _ntop_reg[] = {
     { "send_tcp_data", ntop_send_tcp_data },
 
     /* IP */
+    { "ipToNumber", ntop_ip_to_number},
     { "inet_ntoa", ntop_inet_ntoa },
     { "networkPrefix", ntop_network_prefix },
 

@@ -30,20 +30,37 @@ end
 -- @param select_query String, update the select_query when done
 -- @return where, group_by, select_query
 local function processFilter(filter, use_or, position, where, group_by,
-                             select_query)
+                             select_query, isHistorical)
     local skip_select = false
     local column_name
     local new_filter
 
+    -- Format the select + group by if needed
+    local column_key = nil
+
     -- Choose the right filter type
     if type(filter) == "number" or type(filter) == "string" then
         skip_select = true
-        new_filter =
-            string.format("%s=%s", tostring(position), tostring(filter))
+        new_filter = string.format("%s='%s'", tostring(position),
+                                   tostring(filter))
     else
+        local value_filter = filter.filter_value
+        column_key = filter.key or filter.column_id
+        if filter.db_formatting_fun then
+            -- In case of historical, the DB needs to apply this function
+            if (isHistorical) and (filter.db_formatting_fun.historical) then
+                column_key = string.format("%s(%s)",
+                                           filter.db_formatting_fun.historical,
+                                           column_key)
+            elseif (not isHistorical) and (filter.db_formatting_fun.live) then
+                -- In case of live, it needs to be applied before (so now)
+                value_filter = filter.db_formatting_fun.live(value_filter)
+            end
+        end
+
         column_name = filter.id or filter.key or filter.column_id
-        new_filter = string.format("%s=%s", column_name,
-                                   tostring(filter.filter_value))
+        new_filter = string.format("%s='%s'", column_name,
+                                   tostring(value_filter))
     end
 
     -- Update the where
@@ -51,13 +68,6 @@ local function processFilter(filter, use_or, position, where, group_by,
 
     -- Skip if requested
     if skip_select then return where, group_by, select_query end
-
-    -- Format the select + group by if needed
-    local column_key = filter.key or filter.column_id
-    if not isEmptyString(filter.db_formatting_fun) then
-        column_key = string.format("%s(%s)", filter.db_formatting_fun,
-                                   column_key)
-    end
 
     select_query = string.format("%s, %s AS %s", select_query, column_key,
                                  column_name)
@@ -97,11 +107,16 @@ function flow_data_historical.retrieveFlowData(select_columns, where_filters,
         if invert_direction and not isEmptyString(column_info.invert_with) then
             column_name = column_info.invert_with
         end
+
         -- In case of CH, some columns needs a special formatting function
         -- (e.g. IPs with IPv4NumToString)
-        if not isEmptyString(column_info.db_formatting_fun) and isHistorical then
-            column_key = string.format("%s(%s)", column_info.db_formatting_fun,
-                                       column_info.key)
+        if column_info.db_formatting_fun then
+            -- In case of historical, the DB needs to apply this function
+            if (isHistorical) and (column_info.db_formatting_fun.historical) then
+                column_key = string.format("%s(%s)",
+                                           column_info.db_formatting_fun
+                                               .historical, column_info.key)
+            end
         end
         -- Format the select
         local select_part = string.format("%s AS %s", column_key, column_name)
@@ -122,12 +137,12 @@ function flow_data_historical.retrieveFlowData(select_columns, where_filters,
             for i, sub_filter in ipairs(column_info) do
                 where, group_by, select_query =
                     processFilter(sub_filter, i > 1, i, where, group_by,
-                                  select_query)
+                                  select_query, isHistorical)
             end
         else
             where, group_by, select_query =
                 processFilter(column_info, false, pos, where, group_by,
-                              select_query)
+                              select_query, isHistorical)
         end
     end
 
@@ -157,13 +172,13 @@ function flow_data_historical.retrieveFlowData(select_columns, where_filters,
                       "SELECT %s FROM %s WHERE %s GROUP BY %s %s LIMIT 2000", -- Upper floor
                       select_query, TABLE_NAME, where, group_by, order_by)
 
-    --tprint(query)
+    -- tprint(query)
     if isHistorical and hasClickHouseSupport() then
         results = interface.execSQLQuery(query) or {}
     else
         results = interface.execInMemoryQuery(query) or {}
     end
-    --tprint(results)
+    -- tprint(results)
 
     return results
 end
