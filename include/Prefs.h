@@ -729,7 +729,7 @@ class Prefs {
   inline u_int32_t getModbusLearingPeriod()   { return (modbus_learning_period); };
 #ifdef NTOPNG_PRO
   inline bool isNetBoxEnabled() { return netbox_enabled; };
-  inline bool isAssetInventoryEnabled() { return asset_inventory_enabled; };
+  inline bool isAssetInventoryEnabled() { return(asset_inventory_enabled && !isASNModeEnabled()); };
   inline bool isSNMPTrapEnabled() { return snmp_trap_enabled; };
   inline ndpi_bitmap* getModbusAllowedFunctionCodes() { return (modbus_allowed_function_codes);  };
   inline void         setModbusTooManyExceptionsThreshold(u_int v) { modbus_too_many_exceptions = v;     }
@@ -737,7 +737,7 @@ class Prefs {
 #endif
   inline u_int32_t devicesLearingPeriod() { return (devices_learning_period); };
   inline u_int32_t macAddressCacheDuration() { return (mac_address_cache_duration); };
-  inline bool isAssetsCollectionEnabled() { return (enable_assets_collection); };
+  inline bool isAssetsCollectionEnabled() { return (enable_assets_collection && !isASNModeEnabled()); };
   inline u_int32_t hostPortLearningPeriod() { return (host_port_learning_period); };
   inline bool are_alerts_disabled() { return (disable_alerts); };
   inline bool dontEmitFlowAlerts() {
