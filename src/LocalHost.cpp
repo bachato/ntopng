@@ -27,8 +27,8 @@ LocalHost::LocalHost(NetworkInterface *_iface, int32_t _iface_idx, Mac *_mac,
                      u_int16_t _vlanId, u_int16_t _observation_point_id,
                      IpAddress *_ip)
   : Host(_iface, _iface_idx, _mac, _vlanId, _observation_point_id, _ip),
-    contacted_server_ports(CONST_MAX_NUM_QUEUED_PORTS, "localhost-serverportsproto"),
-    usedPorts(this) {
+    contacted_server_ports(CONST_MAX_NUM_QUEUED_PORTS, "localhost-serverportsproto")
+{
   tcp_fingerprint = NULL;
 
   if (trace_new_delete)
@@ -49,8 +49,7 @@ LocalHost::LocalHost(NetworkInterface *_iface, int32_t _iface_idx,
                      char *ipAddress, u_int16_t _vlanId,
                      u_int16_t _observation_point_id)
   : Host(_iface, _iface_idx, ipAddress, _vlanId, _observation_point_id),
-    contacted_server_ports(CONST_MAX_NUM_QUEUED_PORTS, "localhost-serverportsproto"),
-    usedPorts(this) {
+    contacted_server_ports(CONST_MAX_NUM_QUEUED_PORTS, "localhost-serverportsproto") {
   if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   initialize();
@@ -121,6 +120,7 @@ void LocalHost::initialize() {
 
   local_network_id = -1;
   os_detail = NULL;
+  usedPorts = NULL;
   asset_map_updated = false;
 
   ip.isLocalHost(&local_network_id);
@@ -185,6 +185,9 @@ void LocalHost::initialize() {
        || iface->getInterfaceNetworks()->match(&ip, ip.isIPv4() ? 32 : 128))
       setMACmeaningful();
   }
+
+  if (!ntop->getPrefs()->isIASNModeEnabled())
+    usedPorts = new (std::nothrow) UsedPorts(this); 
 
 #ifdef NTOPNG_PRO
   loadAssetInfo();
@@ -359,7 +362,7 @@ void LocalHost::lua(lua_State *vm, AddressTree *ptree, bool host_details,
 
   Host::lua_blacklisted_flows(vm);
   lua_contacts_stats(vm);
-  usedPorts.lua(vm, iface);
+  if (usedPorts) usedPorts->lua(vm, iface);
 
   /* *** */
 
@@ -530,6 +533,12 @@ void LocalHost::lua_get_timeseries(lua_State *vm) {
 void LocalHost::freeLocalHostData() {
   /* Better not to use a virtual function as it is called in the destructor as
    * well */
+
+  if (usedPorts) {
+    delete usedPorts;
+    usedPorts = NULL;
+  }
+
   if (os_detail) {
     free(os_detail);
     os_detail = NULL;
@@ -656,7 +665,11 @@ void LocalHost::setRouterMac(Mac *gw) {
 
 void LocalHost::setServerPort(bool isTCP, u_int16_t port, ndpi_protocol *proto,
                               time_t when) {
-  bool set_port_status = usedPorts.setServerPort(isTCP, port, proto);
+  bool set_port_status;
+
+  if (!usedPorts) return;
+
+  set_port_status = usedPorts->setServerPort(isTCP, port, proto);
 
   if (set_port_status && ntop->getPrefs()->is_enterprise_l_edition()) {
     /* If the port is set for the first time set_port_status == true */

@@ -32,7 +32,7 @@ class LocalHost : public Host {
   LocalHostStats *initial_ts_point;
   /* contacted_server_ports it's a buffer used by the "Server Port Detected" check */
   SPSCQueue<std::pair<u_int16_t, u_int16_t>> contacted_server_ports;
-  UsedPorts usedPorts; /* List of server+client-contacted ports */
+  UsedPorts *usedPorts; /* List of server+client-contacted ports */
   ndpi_os tcp_fingerprint_host_os; /* Learnt from TCP Fingerprinting */
   HostFingerprints *fingerprints; /* Application fingerprints */
   std::unordered_map<u_int32_t, DoHDoTStats *> doh_dot_map;
@@ -188,17 +188,11 @@ class LocalHost : public Host {
   void setRouterMac(Mac *gw);
 
   void setServerPort(bool isTCP, u_int16_t port, ndpi_protocol *proto, time_t when);
-  inline void setContactedPort(bool isTCP, u_int16_t port,
-                               ndpi_protocol *proto) {
-    usedPorts.setContactedPort(isTCP, port, proto);
-  };
-  virtual inline void luaUsedPorts(lua_State *vm) { usedPorts.lua(vm, iface); };
-  virtual inline std::unordered_map<u_int16_t, ndpi_protocol>* getUDPServerPorts() { return(usedPorts.getUDPServerPorts()); };
-  virtual inline std::unordered_map<u_int16_t, ndpi_protocol>* getTCPServerPorts() { return(usedPorts.getTCPServerPorts()); };
-
-  virtual inline std::unordered_map<u_int16_t, ndpi_protocol>* getServerPorts(bool isTCP) {
-    return (usedPorts.getServerPorts(isTCP));
-  };
+  inline void setContactedPort(bool isTCP, u_int16_t port, ndpi_protocol *proto) { if (usedPorts) usedPorts->setContactedPort(isTCP, port, proto); };
+  virtual inline void luaUsedPorts(lua_State *vm) { if (usedPorts) usedPorts->lua(vm, iface); };
+  virtual inline std::unordered_map<u_int16_t, ndpi_protocol>* getUDPServerPorts() { return(usedPorts ? usedPorts->getUDPServerPorts() : NULL); };
+  virtual inline std::unordered_map<u_int16_t, ndpi_protocol>* getTCPServerPorts() { return(usedPorts ? usedPorts->getTCPServerPorts() : NULL); };
+  virtual inline std::unordered_map<u_int16_t, ndpi_protocol>* getServerPorts(bool isTCP) { return (usedPorts ? usedPorts->getServerPorts(isTCP) : NULL); };
 
   void periodic_stats_update(const struct timeval *tv, bool force_update);
   void checkGatewayInfo();
