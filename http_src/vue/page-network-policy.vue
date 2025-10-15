@@ -35,12 +35,12 @@
                 <div class="d-flex justify-content-between">
                     <div clas="align-items-center ms-auto">
                         <button class="btn btn-primary me-2" type="button" @click="import_policies">
-                            <i class="fa-solid fa-file-arrow-up" data-bs-toggle="tooltip" data-bs-placement="top"
+                            <i class="fa-solid fa-file-arrow-down" data-bs-toggle="tooltip" data-bs-placement="top"
                                 :title="_i18n('network_configuration.import_policies')"></i> {{
                                     _i18n('network_configuration.import_policies') }}
                         </button>
                         <a class="btn btn-primary" download="network_policies.json" :href="export_network_policies_url">
-                            <i class="fa-solid fa-file-arrow-down" data-bs-toggle="tooltip" data-bs-placement="top"
+                            <i class="fa-solid fa-file-arrow-up" data-bs-toggle="tooltip" data-bs-placement="top"
                                 :title="_i18n('network_configuration.export_policies')"></i> {{
                                     _i18n('network_configuration.export_policies') }}
                         </a>

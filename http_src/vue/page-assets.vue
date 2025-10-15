@@ -28,12 +28,12 @@
             </TableWithConfig>
             <div class="card-footer mt-3">
                 <button class="btn btn-primary me-1" type="button" @click="import_assets">
-                    <i class="fa-solid fa-file-arrow-up" data-bs-toggle="tooltip" data-bs-placement="top"
+                    <i class="fa-solid fa-file-arrow-down" data-bs-toggle="tooltip" data-bs-placement="top"
                         :title="_i18n('asset_details.import')"></i> {{
                             _i18n('asset_details.import') }}
                 </button>
                 <a class="btn btn-primary" download="assets.csv" :href="export_assets_url">
-                    <i class="fa-solid fa-file-arrow-down" data-bs-toggle="tooltip" data-bs-placement="top"
+                    <i class="fa-solid fa-file-arrow-up" data-bs-toggle="tooltip" data-bs-placement="top"
                         :title="_i18n('asset_details.export')"></i> {{
                             _i18n('asset_details.export') }}
                 </a>
