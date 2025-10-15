@@ -26,11 +26,11 @@
               <i class="fas fa-plus"></i>
             </button>
             <button class="btn btn-link" type="button" @click="import_snmp_devices">
-              <i class="fa-solid fa-file-arrow-up" data-bs-toggle="tooltip" data-bs-placement="top"
+              <i class="fa-solid fa-file-arrow-down" data-bs-toggle="tooltip" data-bs-placement="top"
                 :title="_i18n('snmp.import_devices')"></i>
             </button>
             <a class="btn btn-link" download="snmp_config.json" :href="config_export_url">
-              <i class="fa-solid fa-file-arrow-down" data-bs-toggle="tooltip" data-bs-placement="top"
+              <i class="fa-solid fa-file-arrow-up" data-bs-toggle="tooltip" data-bs-placement="top"
               :title="_i18n('snmp.export_devices')"></i>
             </a>
           </template>
