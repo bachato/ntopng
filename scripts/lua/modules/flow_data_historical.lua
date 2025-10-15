@@ -149,6 +149,8 @@ function flow_data_historical.retrieveFlowData(select_columns, where_filters,
     for pos, column_info in pairs(sort_columns or {}) do
         local order_col = string.format("%s DESC", column_info.id)
         order_by = order_by and (order_by .. ", " .. order_col) or order_col
+        -- Also for each sort, add a condition where the sorting column MUST not be 0
+        where = string.format("%s AND (%s > 0)", where, column_info.column_id_no_fun)
     end
 
     -- Add first and last_seen to the where
@@ -178,7 +180,7 @@ function flow_data_historical.retrieveFlowData(select_columns, where_filters,
     else
         results = interface.execInMemoryQuery(query) or {}
     end
-    -- tprint(results)
+     --tprint(results)
 
     return results
 end

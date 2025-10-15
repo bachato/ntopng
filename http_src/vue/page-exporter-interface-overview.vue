@@ -7,7 +7,7 @@
                 @select_option="changeCriteria">
             </SelectSearch>
         </div>
-        <div class="button-group mb-2 d-flex align-items-center">
+        <div class="button-group w-50 d-flex align-items-center">
             <div v-if="props.context.isEnterpriseL" class="w-100 d-flex align-items-center button-group">
                 <CustomSwitch v-model:value="toggle_slider" :change_label_side="true" :label="toggle_slider_label"
                     style="" class="me-1" icon="fa-calendar-days" :title="toggle_slider_label"
@@ -334,24 +334,28 @@ const mapTableColumns = (columns) => {
             return formatAS(value);
         },
         "bytes_sent": (value, row) => {
-            return FormatterUtils.getFormatter("bytes")(value);
+            return FormatterUtils.getFormatter("bytes")(value || 0);
         },
         "bytes_rcvd": (value, row) => {
-            return FormatterUtils.getFormatter("bytes")(value);
+            return FormatterUtils.getFormatter("bytes")(value || 0);
         },
         "total_bytes": (value, row) => {
             if (value) {
                 return FormatterUtils.getFormatter("bytes")(value);
             }
 
-            if (row.bytes_rcvd && row.bytes_sent) {
-                return FormatterUtils.getFormatter("bytes")(row.bytes_rcvd + row.bytes_sent);
+            if (row.bytes_rcvd || row.bytes_sent) {
+                let bytes_sent = 0;
+                let bytes_rcvd = 0;
+                if (row.bytes_rcvd) { bytes_rcvd = row.bytes_rcvd }
+                if (row.bytes_sent) { bytes_sent = row.bytes_sent }
+                return FormatterUtils.getFormatter("bytes")(bytes_rcvd + bytes_sent);
             }
 
-            return ''
+            return FormatterUtils.getFormatter("bytes")(0);
         },
     };
-    
+
     columns.forEach((c) => {
         c.render_func = map_columns[c.data_field];
     });

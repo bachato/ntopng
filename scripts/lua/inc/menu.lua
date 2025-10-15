@@ -477,6 +477,9 @@ else
 	       entry = page_utils.menu_entries.nprobe,
 	       url = '/lua/pro/enterprise/nprobe.lua'
 	       }, {
+	       entry = page_utils.menu_entries.exporters_interfaces_stats,
+	       url = '/lua/pro/exporters_interfaces_stats.lua'
+	       }, {
 	       entry = page_utils.menu_entries.observation_points,
 	       hidden = (interface.getObsPointsInfo().numObsPoints or 0) == 0,
 	       url = '/lua/pro/enterprise/observation_points.lua'

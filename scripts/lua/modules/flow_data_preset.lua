@@ -121,9 +121,9 @@ local columns = {
         },
         filters = {"in_iface_index", "out_iface_index"},
     },
-    bytes_sent = {column_id = "SUM(SRC2DST_BYTES)", invert_with = "bytes_rcvd"},
-    bytes_rcvd = {column_id = "SUM(DST2SRC_BYTES)", invert_with = "bytes_sent"},
-    total_bytes = {column_id = "SUM(TOTAL_BYTES)"},
+    bytes_sent = {column_id = "SUM(SRC2DST_BYTES)", column_id_no_fun = "SRC2DST_BYTES", invert_with = "bytes_rcvd"},
+    bytes_rcvd = {column_id = "SUM(DST2SRC_BYTES)", column_id_no_fun = "DST2SRC_BYTES", invert_with = "bytes_sent"},
+    total_bytes = {column_id = "SUM(TOTAL_BYTES)", column_id_no_fun = "TOTAL_BYTES",},
     as = {
         formatter = {
             funct = format_utils.formatASN,

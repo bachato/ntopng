@@ -472,6 +472,11 @@ page_utils.menu_entries = {
         i18n_title = "flow_devices.nprobe_instances",
         section = "collection"
     },
+    exporters_interfaces_stats = {
+        key = "exporters_interfaces_stats",
+        i18n_title = "flow_devices.exporters_interfaces_stats",
+        section = "collection"
+    },
     observation_points = {
         key = "observation_points",
         i18n_title = "flow_devices.observation_points",
