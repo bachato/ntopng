@@ -874,7 +874,6 @@ export default class NtopUtils {
                 // Submit configuration file
                 params.loadConfigXHR(reader.result)
                     .done((response, status, xhr) => {
-
                         if (response.rc < 0) {
                             $("#import-error").text(response.rc_str).show();
                             return;
@@ -904,7 +903,6 @@ export default class NtopUtils {
 
                     })
                     .fail(({ responseJSON }) => {
-
                         const PARTIAL_IMPORT_RC = -28;
 
                         if (params.failureCallback) {
@@ -912,8 +910,9 @@ export default class NtopUtils {
                         }
 
                         if (responseJSON && responseJSON.rc > 0) return;
-                        if (responseJSON.rc == PARTIAL_IMPORT_RC)
+                        if (responseJSON.rc == PARTIAL_IMPORT_RC) {
                             $(`#import-error`).removeClass('invalid-feedback').addClass('text-warning');
+                        }
 
                         $("#import-error").text(i18n_ext.rest_consts[responseJSON.rc_str] || i18n_ext.FAILED_HTTP_REQUEST).show();
 
