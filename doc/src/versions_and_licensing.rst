@@ -634,14 +634,14 @@ Models Comparison Table
      - ✗
      - Bundle XL
      - ✗
-   * - Maximum Number of Monitored (Local) Hosts (suggested)
+   * - Maximum Number of Live (Local) Hosts (suggested)
      - 256
      - 256
      - 1K
      - 4K
      - 32K
      - 128K
-   * - Maximum Number of Monitored Flows (suggested)
+   * - Maximum Number of Live Flows (suggested)
      - 128K
      - 1M
      - 4M
@@ -651,17 +651,17 @@ Models Comparison Table
    * - Max Number of Host Pools
      - 3
      - 3
-     - 128
-     - 128
-     - 128
-     - 128
+     - 4096
+     - 4096
+     - 4096
+     - 4096
    * - Max Number of Host Pool Members (per Pool)
      - 8
      - 8
-     - Unlimited
-     - Unlimited
-     - Unlimited
-     - Unlimited
+     - Unlimited \*\*\*\*
+     - Unlimited \*\*\*\*
+     - Unlimited \*\*\*\*
+     - Unlimited \*\*\*\*
    * - Maximum Number of Monitored Interfaces (-i)
      - 8
      - 8
@@ -676,7 +676,7 @@ Models Comparison Table
      - 128
      - 128
      - 128
-   * - Configurable SNMP Devices (device number) [total/per ntopng]
+   * - Max Number of configurable SNMP Devices [total/per ntopng]
      - -
      - -
      - 16
@@ -706,3 +706,5 @@ Models Comparison Table
 \*\* Feature not available on FreeBSD / OPNsense / pfSense
 
 \*\*\* Read more about the software bundled with the Bundle edition in the `FAQ <https://www.ntop.org/faq/what-is-included-in-ntopng-enterprise-l-xl-bundle/>`_
+
+\*\*\*\* Read it "as long as there are resources available in the system", i.e. not artifically limited.
