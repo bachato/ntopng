@@ -7060,30 +7060,26 @@ void Flow::lua_get_ip(lua_State *vm, bool client) const {
   if(h) {
     mask_host = Utils::maskHost(h->isLocalHost());
 
-    lua_push_str_table_entry(
-			     vm, client ? "cli.ip" : "srv.ip",
-			     h->get_ip()->printMask(buf, sizeof(buf), h->isLocalHost()));
-    lua_push_uint64_table_entry(vm, client ? "cli.key" : "srv.key",
-                                mask_host ? 0 : h->key());
+    lua_push_str_table_entry(vm, client ? "cli.ip" : "srv.ip", h->get_ip()->printMask(buf, sizeof(buf), h->isLocalHost()));
+    lua_push_uint64_table_entry(vm, client ? "cli.key" : "srv.key", mask_host ? 0 : h->key());
 
     if(h->isProtocolServer())
       lua_push_bool_table_entry(vm, client ? "cli.protocol_server" : "srv.protocol_server", true);
+
+    lua_push_bool_table_entry(vm, client ? "cli.broadmulticast" : "srv.broadmulticast",
+			      h->get_ip()->isBroadMulticastAddress());
   } else if(h_ip) {
     /* Host hasn't been instantiated but we still have the ip address (e.g, in
      * viewed interfaces) */
-    lua_push_str_table_entry(vm, client ? "cli.ip" : "srv.ip",
-                             h_ip->print(buf, sizeof(buf)));
-    lua_push_uint64_table_entry(vm, client ? "cli.key" : "srv.key",
-                                h_ip->key());
+    lua_push_str_table_entry(vm, client ? "cli.ip" : "srv.ip", h_ip->print(buf, sizeof(buf)));
+    lua_push_uint64_table_entry(vm, client ? "cli.key" : "srv.key", h_ip->key());
+    lua_push_bool_table_entry(vm, client ? "cli.broadmulticast" : "srv.broadmulticast",
+			      h_ip->isBroadMulticastAddress());
   }
 
   if(get_vlan_id())
     lua_push_uint64_table_entry(vm, client ? "cli.vlan" : "srv.vlan",
                                 get_vlan_id());
-
-  lua_push_bool_table_entry(
-			    vm, client ? "cli.broadmulticast" : "srv.broadmulticast",
-			    h_ip->isBroadMulticastAddress());
 }
 
 /* ***************************************************** */
