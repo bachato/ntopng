@@ -572,6 +572,9 @@ AS_VAR_IF(with_hiredis, yes, [
       exit -1
       fi
    fi
+
+   AC_DEFINE_UNQUOTED(HAVE_HIREDIS, 1, [Hiredis support
+   ])
 ])
 
 if test "${with_nedge+set}" != set; then
@@ -746,12 +749,12 @@ if test -f "/etc/centos-release"; then
   if test "$CENTOS_RELEASE" -ne 8; then
     RPM_SIGN_CMD="./packages/rpm-sign.exp"
   fi
-fi
 
-if [ "$CENTOS_RELEASE" -lt "10" ]; then
-  CENTOS_REDIS_DEP=", redis >= 2.4.0"
-else
-  CENTOS_REDIS_DEP=
+  if [ "$CENTOS_RELEASE" -lt 10 ]; then
+    CENTOS_REDIS_DEP=", redis >= 2.4.0"
+  else
+    CENTOS_REDIS_DEP=
+  fi
 fi
 
 AC_ARG_WITH(maxminddb-static,
