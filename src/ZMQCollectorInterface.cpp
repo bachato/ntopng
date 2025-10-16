@@ -248,7 +248,8 @@ void ZMQCollectorInterface::collect_flows() {
   char *zmq_payload = NULL;
   zmq_pollitem_t items[MAX_ZMQ_SUBSCRIBERS];
   u_int32_t zmq_max_num_polls_before_purge = MAX_ZMQ_POLLS_BEFORE_PURGE;
-  u_int32_t now, next_purge_idle = (u_int32_t)time(NULL) + FLOW_PURGE_FREQUENCY;
+  u_int32_t now = (u_int32_t) time(NULL);
+  u_int32_t next_purge_idle = now + FLOW_PURGE_FREQUENCY;
   int rc, size;
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Collecting flows on %s", ifname);
@@ -267,7 +268,8 @@ void ZMQCollectorInterface::collect_flows() {
 
     /* Check if State has been switched from Active to Paused from the interface page */
     while (idle()) {
-      purgeIdle(time(NULL));
+      now = (u_int32_t) time(NULL);
+      purgeIdle(now);
       sleep(1);
 
       if (ntop->getGlobals()->isShutdown()) {
@@ -285,7 +287,7 @@ void ZMQCollectorInterface::collect_flows() {
 
       rc = zmq_poll(items, num_subscribers, MAX_ZMQ_POLL_WAIT_MS);
 
-      now = (u_int32_t)time(NULL);
+      now = (u_int32_t) time(NULL);
       zmq_max_num_polls_before_purge--;
 
       if (rc < 0 || !isRunning()) {
@@ -406,7 +408,12 @@ void ZMQCollectorInterface::collect_flows() {
 
                 if (diff > 1) {
                   /* Lost message detected */
-                  recvStats.zmq_msg_drops += diff - 1;
+
+                  if (now - ntop->getGlobals()->getStartTime() > 10) { /* Increase msg drops (ignore startup drops) */
+                    recvStats.zmq_msg_drops += diff - 1;
+                  }
+
+                  check_clock_drift = false;
 #ifdef DEBUG_ZMQ_MSGID
                   ntop->getTrace()->traceEvent(TRACE_NORMAL,
 					       "DROP [%s][subscriber_id: %u][source_id: %u][msg_id: %u][last: %u][tot msgs/drops: %u/%u][drops: +%u]",

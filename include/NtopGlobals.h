@@ -34,6 +34,7 @@ class NtopGlobals {
   NtopGlobals();
   ~NtopGlobals();
 
+  inline time_t getStartTime() const { return start_time; };
   inline u_int getUptime() const { return ((u_int)(time(NULL) - start_time + 1)); };
   inline void  setInitialized()  { is_initialized = true; }
   inline bool  isInitialized()   { return(is_initialized); }
