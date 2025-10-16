@@ -44,7 +44,7 @@
 - Implement mechanism to retain old-dated collected flows longer
 - Improve Dashboard layouts
 - Improve Webhook messages and latency
-- Improve flow swap euristic
+- Improve flow swap heuristic
 - Improve localhost MAC detection
 - Improve flow alerts and add ability to refresh already-triggered alerts
 - Improve host MAC address learning

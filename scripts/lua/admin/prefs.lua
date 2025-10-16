@@ -795,7 +795,6 @@ if auth.has_capability(auth.capabilities.preferences) then
                 default = "0",
                 pref = "use_mac_in_flow_key"
             })
-
         end
 
         print('<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n("prefs.flow_table") ..
@@ -1394,8 +1393,10 @@ if auth.has_capability(auth.capabilities.preferences) then
         print('<form id="localRemoteTimeoutForm" method="post">')
 
         print('<table class="table">')
+
         print('<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n("prefs.stats_reset") ..
             '</th></tr></thead>')
+
         prefsToggleButton(subpage_active, {
             field = "toggle_midnight_stats_reset",
             default = "0",
@@ -1470,11 +1471,14 @@ if auth.has_capability(auth.capabilities.preferences) then
             })
         end
 
-        prefsInputFieldPrefs(subpage_active.entries["mac_address_cache_duration"].title,
-            subpage_active.entries["mac_address_cache_duration"].description, "ntopng.prefs.",
-            "mac_address_cache_duration", prefs.mac_address_cache_duration or 300, "number", true, nil, nil, {
-                min = 5,
-                tformat = "mhd"
+        print(
+            '<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n("prefs.flow_cache_settings") ..
+            '</th></tr></thead>')
+
+        prefsToggleButton(subpage_active, {
+            field = "toggle_flow_swap_heuristic",
+            default = "1",
+            pref = "enable_flow_swap_heuristic"
         })
 
         print('</table>')
@@ -1509,6 +1513,13 @@ if auth.has_capability(auth.capabilities.preferences) then
                 max = 7 * 86400,
                 tformat = "smh"
             })
+
+        prefsInputFieldPrefs(subpage_active.entries["mac_address_cache_duration"].title,
+            subpage_active.entries["mac_address_cache_duration"].description, "ntopng.prefs.",
+            "mac_address_cache_duration", prefs.mac_address_cache_duration or 300, "number", true, nil, nil, {
+                min = 5,
+                tformat = "mhd"
+        })
 
         print(
             '<tr><th colspan=2 style="text-align:right;"><button type="submit" class="btn btn-primary" style="width:115px" disabled="disabled">' ..

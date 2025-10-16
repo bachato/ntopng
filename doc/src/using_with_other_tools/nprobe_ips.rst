@@ -63,7 +63,7 @@ configuration is a *guess* and should be manually fine tuned. This feature is pa
 devices which are supposed to use a limited/static set of services, which is the case of *IoT devices* for 
 instance. In this case the *Default Policy* is set to Drop (*Default Deny*) and the *Auto Configure* 
 functionality adds those L7 protocols and hostnames which are actually required for the device to work 
-(according to the historical data). In order to populate *Host Rules*, the *Top Visited Sites* euristic 
+(according to the historical data). In order to populate *Host Rules*, the *Top Visited Sites* heuristic
 should be enabled under *Settings* > *Preferences* > *Applications*.
 
 .. figure:: ../img/web_gui_interfaces_autoconfigure_policies.png

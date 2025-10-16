@@ -8286,8 +8286,12 @@ void Flow::luaRetrieveExternalAlert(lua_State *vm) {
 
 /* *************************************** */
 
-void Flow::check_swap()
-  /* NOTE: keep in sync with  ZMQParserInterface::preprocessFlow() */{
+void Flow::check_swap() {
+
+  if(!ntop->getPrefs()->isFlowSwapHeuristicEnabled()) return;
+
+  /* NOTE: keep in sync with  ZMQParserInterface::preprocessFlow() */
+
   if(((protocol == IPPROTO_TCP) && ((src2dst_tcp_flags & TH_SYN) == TH_SYN) /* Ignore in case we have seen a SYN */)
      || (get_cli_port() == 0) || (get_srv_port() == 0))
     return;
@@ -8406,6 +8410,14 @@ void Flow::triggerCustomFlowAlert(u_int8_t score, char *msg) {
 
 /* *************************************** */
 
+void Flow::request_swap() {
+  if(!ntop->getPrefs()->isFlowSwapHeuristicEnabled()) return;
+
+  swap_requested = true;
+}
+
+/* *************************************** */
+
 void Flow::swap() {
   IpAddress *i = cli_ip_addr;
   u_int8_t m[6];
@@ -8415,6 +8427,8 @@ void Flow::swap() {
   InterarrivalStats *is = cli2srvPktTime;
   time_t now = time(NULL);
   u_int32_t tmp32;
+
+  if(!ntop->getPrefs()->isFlowSwapHeuristicEnabled()) return;
 
 #if 0
   char buf[128];

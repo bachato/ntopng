@@ -876,6 +876,8 @@
   NTOPNG_PREFS_PREFIX ".active_local_host_cache_interval"
 #define CONST_RUNTIME_ENABLE_ASSETS_COLLECTION \
   NTOPNG_PREFS_PREFIX ".enable_assets_collection"
+#define CONST_RUNTIME_ENABLE_FLOW_SWAP_HEURISTIC \
+  NTOPNG_PREFS_PREFIX ".enable_flow_swap_heuristic"
 #define CONST_RUNTIME_MAC_ADDRESS_CACHE_DURATION \
   NTOPNG_PREFS_PREFIX ".mac_address_cache_duration"
 #define CONST_RUNTIME_PREFS_LOG_TO_FILE NTOPNG_PREFS_PREFIX ".log_to_file"

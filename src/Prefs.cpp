@@ -100,6 +100,7 @@ Prefs::Prefs(Ntop *_ntop) {
     CONST_DEFAULT_BEHAVIOUR_ANALYSIS_LEARNING_PERIOD;
   mac_address_cache_duration = MAX_MAC_IDLE;
   enable_assets_collection = true; /* Enabled by default */
+  enable_flow_swap_heuristic = true; /* Enabled by default */
   behaviour_analysis_learning_status_during_learning = service_allowed;
   behaviour_analysis_learning_status_post_learning = service_allowed;
   iec60870_learning_period = CONST_IEC104_LEARNING_TIME;
@@ -957,6 +958,8 @@ void Prefs::reloadPrefsFromRedis() {
     mac_address_cache_duration = getDefaultPrefsValue(CONST_RUNTIME_MAC_ADDRESS_CACHE_DURATION,
 							     MAX_MAC_IDLE),
     enable_assets_collection = getDefaultPrefsValue(CONST_RUNTIME_ENABLE_ASSETS_COLLECTION,
+							     true),
+    enable_flow_swap_heuristic = getDefaultBoolPrefsValue(CONST_RUNTIME_ENABLE_FLOW_SWAP_HEURISTIC,
 							     true),
     enable_assets_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false);
 
@@ -2889,6 +2892,8 @@ void Prefs::lua(lua_State *vm) {
                               mac_address_cache_duration);
   lua_push_bool_table_entry(vm, "enable_assets_collection",
                               enable_assets_collection);
+  lua_push_bool_table_entry(vm, "enable_flow_swap_heuristic",
+                              enable_flow_swap_heuristic);
   lua_push_bool_table_entry(vm, "enable_assets_log",
                               enable_assets_log);
   lua_push_uint64_table_entry(vm, "devices_learning_period",
