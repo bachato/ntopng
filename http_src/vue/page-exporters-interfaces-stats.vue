@@ -40,7 +40,7 @@ import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as DashboardTimeseries } from "./dashboard-timeseries.vue";
 import { default as SelectSearch } from "./select-search.vue";
 import { default as Loading } from "./loading.vue"
-import FormatterUtils from "../utilities/formatter-utils.js";
+import formatterUtils from "../utilities/formatter-utils.js";
 import dataUtils from "../utilities/data-utils.js";
 import linksUtils from "../utilities/links-utils.js";
 
@@ -168,24 +168,12 @@ const get_extra_params_obj = () => {
 const map_table_def_columns = (columns) => {
     let map_columns = {
         "exporter_ip": (value, row) => {
-            let exporter = value
-            const url = linksUtils.getExporterDetailsPageURL({ ip: value, probe_uuid: row.probe_uuid, exporter_uuid: row.exporter_uuid })
-            if (!dataUtils.isEmptyString(row.exporter_name) && (row.exporter_name !== value)) {
-                exporter = `<a href="${url}" data-bs-toggle='tooltip' data-bs-placement='bottom' title='${value}'>${row.exporter_name}</a>`
-            } else {
-                exporter = `<a href="${url}">${value}</a>`
-            }
-            return exporter;
+            const url = linksUtils.getExporterDetailsPageURL({ ip: value, probe_uuid: row.probe_uuid, exporter_uuid: row.exporter_uuid }, http_prefix)
+            return formatterUtils.formatHTMLaTagNameValue(value, row.exporter_name, url, true)
         },
         "interface_name": (value, row) => {
-            let info = value
-            const url = linksUtils.getExporterInterfaceDetailsPageURL({ ip: row.exporter_ip, interface: row.interface_id, ifid: row.ifid })
-            if (!dataUtils.isEmptyString(row.interface_name) && (row.interface_name !== value)) {
-                info = `<a href="${url}" data-bs-toggle='tooltip' data-bs-placement='bottom' title='${value}'>${row.interface_name}</a>`
-            } else {
-                info = `<a href="${url}">${row.interface_id}</a>`
-            }
-            return info;
+            const url = linksUtils.getExporterInterfaceDetailsPageURL(row.exporter_ip, row.interface_id, row.ifid, http_prefix)
+            return formatterUtils.formatHTMLaTagNameValue(row.interface_id, value, url, false)
         },
         "role": (value, row) => {
             if (!dataUtils.isEmptyString(value.label)) {
@@ -194,13 +182,13 @@ const map_table_def_columns = (columns) => {
             return "";
         },
         "bytes_sent": (value, row) => {
-            return FormatterUtils.getFormatter("bytes")(value);
+            return formatterUtils.getFormatter("bytes")(value);
         },
         "bytes_rcvd": (value, row) => {
-            return FormatterUtils.getFormatter("bytes")(value);
+            return formatterUtils.getFormatter("bytes")(value);
         },
         "total_bytes": (value, row) => {
-            return FormatterUtils.getFormatter("bytes")(value);
+            return formatterUtils.getFormatter("bytes")(value);
         },
     };
 
@@ -248,7 +236,8 @@ function click_button_flows(event) {
 
 function click_button_timeseries(event) {
     const row = event.row;
-    window.location.href = `${http_prefix}/lua/pro/enterprise/flowdevice_interface_details.lua?page=historical&ip=${row["exporter_ip"]}&snmp_port_idx=${row["interface_id"]}&ifid=${row["ifid"]}`;
+    const url = linksUtils.getExporterInterfaceDetailsPageURL(row.exporter_ip, row.interface_id, row.ifid, http_prefix)
+    window.location.href = url;
 }
 
 /* ************************************** */

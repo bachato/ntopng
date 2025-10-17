@@ -5,6 +5,7 @@
 dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 
+require "ntop_utils"
 require "lua_utils_get"
 local format_utils = require "format_utils"
 local flow_data_preset = {}
@@ -19,8 +20,7 @@ local columns = {
         filters = "SRC_ASN",
         formatter = {
             funct = format_utils.formatASN,
-            link = "/lua/as_overview.lua?asn=%s",
-            generateLinkParams = generateASNLink
+            generateLink = generateASNLink
         }
     },
     dst_asn = {
@@ -29,8 +29,7 @@ local columns = {
         filters = "DST_ASN",
         formatter = {
             funct = format_utils.formatASN,
-            link = "/lua/as_overview.lua?asn=%s",
-            generateLinkParams = generateASNLink
+            generateLink = generateASNLink
         }
     },
     src_peer_asn = {
@@ -39,8 +38,7 @@ local columns = {
         hide_if_value = "0",
         formatter = {
             funct = format_utils.formatASN,
-            link = "/lua/as_overview.lua?asn=%s",
-            generateLinkParams = generateASNLink
+            generateLink = generateASNLink
         }
     },
     dst_peer_asn = {
@@ -49,8 +47,7 @@ local columns = {
         hide_if_value = "0",
         formatter = {
             funct = format_utils.formatASN,
-            link = "/lua/as_overview.lua?asn=%s",
-            generateLinkParams = generateASNLink
+            generateLink = generateASNLink
         }
     },
     in_device = {
@@ -63,8 +60,7 @@ local columns = {
         },
         formatter = {
             funct = getProbeName,
-            link = "/lua/pro/enterprise/exporters.lua?%s",
-            generateLinkParams = generateExporterLink
+            generateLink = generateExporterLink
         }
     },
     out_device = {
@@ -77,8 +73,7 @@ local columns = {
         filters = "PROBE_IP",
         formatter = {
             funct = getProbeName,
-            link = "/lua/pro/enterprise/exporters.lua?%s",
-            generateLinkParams = generateExporterLink
+            generateLink = generateExporterLink
         }
     },
     device = {
@@ -91,8 +86,7 @@ local columns = {
         },
         formatter = {
             funct = getProbeName,
-            link = "/lua/pro/enterprise/exporters.lua?%s",
-            generateLinkParams = generateExporterLink
+            generateLink = generateExporterLink
         }
     },
     in_iface_index = {
@@ -102,8 +96,7 @@ local columns = {
         formatter = {
             funct = format_portidx_name,
             column_dependent = "in_device",
-            link = "/lua/pro/enterprise/flowdevice_interface_details.lua?%s",
-            generateLinkParams = generateExporterInterfaceLink
+            generateLink = generateExporterInterfaceLink
         }
     },
     out_iface_index = {
@@ -113,16 +106,14 @@ local columns = {
         formatter = {
             funct = format_portidx_name,
             column_dependent = "out_device",
-            link = "/lua/pro/enterprise/flowdevice_interface_details.lua?%s",
-            generateLinkParams = generateExporterInterfaceLink
+            generateLink = generateExporterInterfaceLink
         }
     },
     interface = {
         formatter = {
             funct = format_portidx_name,
             column_dependent = "device",
-            link = "/lua/pro/enterprise/flowdevice_interface_details.lua?%s",
-            generateLinkParams = generateExporterInterfaceLink
+            generateLink = generateExporterInterfaceLink
         },
         filters = {"in_iface_index", "out_iface_index"}
     },
@@ -143,64 +134,55 @@ local columns = {
     as = {
         formatter = {
             funct = format_utils.formatASN,
-            link = "/lua/as_overview.lua?asn=%s",
-            generateLinkParams = generateASNLink
+            generateLink = generateASNLink
         }
     },
     customer = {
         formatter = {
             funct = format_utils.formatASN,
-            link = "/lua/as_overview.lua?asn=%s",
-            generateLinkParams = generateASNLink
+            generateLink = generateASNLink
         }
     },
     transit_as = {
         formatter = {
             funct = format_utils.formatASN,
-            link = "/lua/as_overview.lua?asn=%s",
-            generateLinkParams = generateASNLink
+            generateLink = generateASNLink
         }
     },
     src_transit_as = {
         formatter = {
             funct = format_utils.formatASN,
-            link = "/lua/as_overview.lua?asn=%s",
-            generateLinkParams = generateASNLink
+            generateLink = generateASNLink
         }
     },
     dst_transit_as = {
         formatter = {
             funct = format_utils.formatASN,
-            link = "/lua/as_overview.lua?asn=%s",
-            generateLinkParams = generateASNLink
+            generateLink = generateASNLink
         }
     },
     src_peer_asn_1 = {
         formatter = {
             funct = format_utils.formatASN,
-            link = "/lua/as_overview.lua?asn=%s",
-            generateLinkParams = generateASNLink
+            generateLink = generateASNLink
         }
     },
     dst_peer_asn_1 = {
         formatter = {
             funct = format_utils.formatASN,
-            link = "/lua/as_overview.lua?asn=%s",
-            generateLinkParams = generateASNLink
+            generateLink = generateASNLink
         }
     },
     src_peer_asn_2 = {
         formatter = {
             funct = format_utils.formatASN,
-            link = "/lua/as_overview.lua?asn=%s",
-            generateLinkParams = generateASNLink
+            generateLink = generateASNLink
         }
     },
     dst_peer_asn_2 = {
         formatter = {
             funct = format_utils.formatASN,
-            link = "/lua/as_overview.lua?asn=%s",
-            generateLinkParams = generateASNLink
+            generateLink = generateASNLink
         }
     },
     ifid = {column_id = "INTERFACE_ID"},
@@ -314,8 +296,8 @@ function flow_data_preset.getFormattedDataAndLink(key, value, values)
 
     -- Get the formatter function
     local formatter = columns[key]["formatter"]["funct"]
-    local link_params_formatter =
-        columns[key]["formatter"]["generateLinkParams"]
+    local link_formatter =
+        columns[key]["formatter"]["generateLink"]
 
     -- See if there is some column from which is dependent,
     -- e.g. SNMP Interface needs the SNMP IP
@@ -327,16 +309,9 @@ function flow_data_preset.getFormattedDataAndLink(key, value, values)
             formatted_value =
                 formatter(dependent_values[1], dependent_values[2])
 
-            if link_params_formatter then
-                local link_params = link_params_formatter(dependent_values[1],
+            if link_formatter then
+                link = link_formatter(dependent_values[1],
                                                           dependent_values[2])
-                if not link_params then
-                    -- in case of nill returned, return nil, it means that the function
-                    -- failed, so no parameters, so no link
-                    return formatted_value, nil
-                end
-                link = string.format(columns[key]["formatter"]["link"],
-                                     link_params)
             end
         else
             -- new code
@@ -346,15 +321,8 @@ function flow_data_preset.getFormattedDataAndLink(key, value, values)
             if (dependency ~= nil) then
                 formatted_value = formatter(dependency, value)
 
-                if link_params_formatter then
-                    local link_params = link_params_formatter(dependency, value)
-                    if not link_params then
-                        -- in case of nill returned, return nil, it means that the function
-                        -- failed, so no parameters, so no link
-                        return formatted_value, nil
-                    end
-                    link = string.format(columns[key]["formatter"]["link"],
-                                         link_params)
+                if link_formatter then
+                    link = link_formatter(dependency, value)
                 end
             end
 
@@ -362,14 +330,8 @@ function flow_data_preset.getFormattedDataAndLink(key, value, values)
         end
     else
         formatted_value = formatter(formatted_value)
-        if link_params_formatter then
-            local link_params = link_params_formatter(value)
-            if not link_params then
-                -- in case of nill returned, return nil, it means that the function
-                -- failed, so no parameters, so no link
-                return formatted_value, nil
-            end
-            link = string.format(columns[key]["formatter"]["link"], link_params)
+        if link_formatter then
+            link = link_formatter(value)
         end
     end
 

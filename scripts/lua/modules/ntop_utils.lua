@@ -946,53 +946,48 @@ end
 -- ##############################################
 
 function generateASNLink(asn)
-    if tostring(asn) == "0" then
-        return nil
-    end
-    return string.format("asn=%s", asn)
+    if (tostring(asn) == '0') then return nil end
+    return string.format("%s/lua/as_overview.lua?asn=%s", ntop.getHttpPrefix(),
+                         asn)
 end
 
 -- ##############################################
 
 function generateExporterLink(ip)
     if ntop.isPro() then
-        -- In case 
-        package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" ..
-                           package.path
-
+        -- Fallback SNMP not available, use exporter link
         local exporters_utils = require "exporters_utils"
         local exporter_uuid = nil
         local probe_uuid = nil
         local exporter_ifid = nil
-        if tonumber(ip) then ip = ntop.inet_ntoa(ip) end
 
+        if tonumber(ip) then ip = ntop.inet_ntoa(ip) end
         exporter_uuid, exporter_ifid = exporters_utils.getExporterUUID(ip)
         probe_uuid = exporters_utils.getProbeUUID(ip)
-        return string.format("ip=%s&exporter_uuid=%s&probe_uuid=%s", ip,
-                             exporter_uuid, probe_uuid)
+        return string.format(
+                   "%s/lua/pro/enterprise/exporters.lua?ip=%s&exporter_uuid=%s&probe_uuid=%s",
+                   ntop.getHttpPrefix(), ip, exporter_uuid, probe_uuid)
     end
 
-    return ''
+    return nil
 end
 
 -- ##############################################
 
 function generateExporterInterfaceLink(ip, interface)
     if ntop.isPro() then
-        -- In case 
-        package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" ..
-                           package.path
-
+        -- Fallback SNMP not available, use exporter link
         local exporters_utils = require "exporters_utils"
         local exporter_uuid = nil
         local exporter_ifid = nil
         if tonumber(ip) then ip = ntop.inet_ntoa(ip) end
         exporter_uuid, exporter_ifid = exporters_utils.getExporterUUID(ip)
-        return string.format("ip=%s&snmp_port_idx=%s&ifid=%s", ip, interface,
-                             exporter_ifid)
+        return string.format(
+                   "%s/lua/pro/enterprise/flowdevice_interface_details.lua?ip=%s&snmp_port_idx=%s&ifid=%s",
+                   ntop.getHttpPrefix(), ip, interface, exporter_ifid)
     end
 
-    return ''
+    return nil
 end
 
 -- ##############################################

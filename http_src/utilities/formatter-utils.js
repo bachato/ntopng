@@ -312,13 +312,13 @@ function formatDateTime(date, type = 'datetime') {
     }
 
     const now = new Date();
-    
+
     // create date only
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const inputDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     // Calculate difference in days
     const delta_days = Math.floor((today.getTime() - inputDate.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     // Time formatter
     const time_formatter = date.toLocaleTimeString('en-GB', {
         hour: '2-digit',
@@ -368,7 +368,7 @@ function formatDateTime(date, type = 'datetime') {
     if (type === 'date_only') {
         return formatted_date;
     }
-    
+
     return `${formatted_date}, ${time_formatter}`;
 }
 
@@ -401,22 +401,38 @@ function formatAsn(asn, as_name) {
 }
 
 function getMidnightEpoch(utc_seconds) {
-  let utc = utc_seconds * 1000;
-  const utc_midnight = moment.tz(utc, ntop_zoneinfo).startOf('day');
-  return utc_midnight.valueOf()/1000;
+    let utc = utc_seconds * 1000;
+    const utc_midnight = moment.tz(utc, ntop_zoneinfo).startOf('day');
+    return utc_midnight.valueOf() / 1000;
 }
 
 /* Makes uppercase each first character of a string */
 function capitalizeFirstLetters(str) {
     return str
-      .split(' ')
-      .map(word => {
-        if (word.length === 0) return word;
-        return word[0].toUpperCase() + word.slice(1);
-      })
-      .join(' ');
+        .split(' ')
+        .map(word => {
+            if (word.length === 0) return word;
+            return word[0].toUpperCase() + word.slice(1);
+        })
+        .join(' ');
 }
-  
+
+// This function is used to format a standard a tag, with value - name
+function formatHTMLaTagNameValue(value, name, url, short_version) {
+    let a_tag = ''
+    if (name && name !== value) {
+        if (short_version) {
+            a_tag = `<a href="${url}" data-bs-toggle='tooltip' data-bs-placement='bottom' title='${value}'>${name}</a>`
+        } else {
+            a_tag = `<a href="${url}">${name} (${value})</a>`
+        }
+    } else {
+        a_tag = `<a href="${url}">${value}</a>`
+    }
+
+    return a_tag
+}
+
 const formatterUtils = function () {
     return {
         types,
@@ -429,7 +445,8 @@ const formatterUtils = function () {
         server_date_to_date,
         formatAsn,
         getMidnightEpoch,
-        capitalizeFirstLetters
+        capitalizeFirstLetters,
+        formatHTMLaTagNameValue
     };
 }();
 

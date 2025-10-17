@@ -48,7 +48,7 @@
 		},
         {
             "id": "exporter_ip",
-            "title_i18n": "flow_devices.exporter_ip",
+            "title_i18n": "flows_page.device_ip",
             "data_field": "exporter_ip",
             "sortable": true,
             "min-width": "30px",
