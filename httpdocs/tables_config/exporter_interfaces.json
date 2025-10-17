@@ -1,0 +1,61 @@
+{
+	"id": "exporters_details",
+	"data_url": "lua/pro/rest/v2/get/exporters/exporters_interfaces.lua",
+	"use_current_page": false,
+	"enable_search": false,
+	"paging": false,
+	"display_empty_rows": true,
+	"columns": [
+		{
+			"title_i18n": "flow_devices.interface",
+			"data_field": "snmp_ifname",
+			"sortable": false,
+			"min-width": "30px",
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
+			"title_i18n": "snmp.in_bytes",
+			"data_field": "in_bytes",
+			"sortable": true,
+			"min-width": "40px",
+			"class": [
+                                "text-center",
+				"text-nowrap"
+			]
+		},
+		{
+			"title_i18n": "snmp.out_bytes",
+			"data_field": "out_bytes",
+			"sortable": true,
+			"min-width": "40px",
+			"class": [
+                                "text-center",
+				"text-nowrap"
+			]
+		},
+		{
+			"title_i18n": "throughput",
+			"data_field": "throughput",
+			"sortable": true,
+			"min-width": "80px",
+			"class": [
+                                "text-center",
+				"text-nowrap"
+			]
+		},
+		{
+			"title_i18n": "flow_devices.flow_snmp_ratio",
+			"data_field": "ratio",
+			"sortable": true,
+			"min-width": "40px",
+			"class": [
+                                "text-center",
+				"text-nowrap"
+			]
+		}
+	]
+}
+
+

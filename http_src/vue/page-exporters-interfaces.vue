@@ -90,7 +90,7 @@ const props = defineProps({
 
 const note_list = ref([]);
 const snmp_port_idx = ref(null);
-const table_id = ref('exporters_interfaces');
+const table_id = ref(props.context.all_exporters ? 'exporters_interfaces' : 'exporter_interfaces');
 const table_probes = ref(null);
 const csrf = props.context.csrf;
 
