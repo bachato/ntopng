@@ -70,7 +70,7 @@ const csrf = props.context.csrf;
 
 const chart_url = `${http_prefix}/lua/pro/enterprise/exporters.lua?`
 const exporter_url = `${http_prefix}/lua/pro/enterprise/exporters.lua?`
-const host_url = `${http_prefix}/lua/pro/enterprise/exporter_interfaces.lua?`
+const exporter_interfaces_url = `${http_prefix}/lua/pro/enterprise/exporter_interfaces.lua?`
 
 /* ************************************** */
 
@@ -172,7 +172,7 @@ const map_table_def_columns = (columns) => {
                 host_link = ` <a href=${host_details_url}host=${value}><i class="fas fa-laptop"></i></a>`
             }
 
-            return `<a href="${host_url}ip=${value}&exporter_uuid=${row.exporter_uuid}&probe_uuid=${row.probe_uuid}">${exporter_ip}</a>${host_link}${timeseries_link}`;
+            return `<a href="${exporter_interfaces_url}ip=${value}&exporter_uuid=${row.exporter_uuid}&probe_uuid=${row.probe_uuid}&probe_ip=${row.probe_ip}">${exporter_ip}</a>${host_link}${timeseries_link}`;
         },
         "probe_ip": (value, row) => {
             return value;

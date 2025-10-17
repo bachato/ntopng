@@ -14,6 +14,7 @@ const getExporterDetailsPageURL = (exporter_info) => {
     const exporter_ip = exporter_info.ip
     let probe_uuid = ''
     let exporter_uuid = ''
+    let probe_ip = ''
     
     if (exporter_info.probe_uuid) {
         probe_uuid = exporter_info.probe_uuid
@@ -21,7 +22,10 @@ const getExporterDetailsPageURL = (exporter_info) => {
     if (exporter_info.exporter_uuid) {
         exporter_uuid = exporter_info.exporter_uuid
     }
-    return `/lua/pro/enterprise/exporter_interfaces.lua?ip=${exporter_ip}&exporter_uuid=${exporter_uuid}&probe_uuid=${probe_uuid}`
+    if (exporter_info.probe_ip) {
+        probe_ip = exporter_info.probe_ip
+    }
+    return `/lua/pro/enterprise/exporter_interfaces.lua?ip=${exporter_ip}&exporter_uuid=${exporter_uuid}&probe_uuid=${probe_uuid}&probe_ip=${probe_ip}`
 }
 
 /* ******************************************************************** */
