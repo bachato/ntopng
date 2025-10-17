@@ -7,7 +7,7 @@
                 @select_option="changeCriteria">
             </SelectSearch>
         </div>
-        <div class="button-group w-50 d-flex align-items-center">
+        <div class="button-group w-25 d-flex align-items-center">
             <div v-if="props.context.isEnterpriseL" class="w-100 d-flex align-items-center button-group">
                 <CustomSwitch v-model:value="toggle_slider" :change_label_side="true" :label="toggle_slider_label"
                     style="" class="me-1" icon="fa-calendar-days" :title="toggle_slider_label"

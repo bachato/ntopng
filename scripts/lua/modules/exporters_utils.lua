@@ -64,7 +64,8 @@ function exporters_utils.getAllInterfacesList(add_role_to_interfaces)
                 if (table.len(probe_info.exporters) == 0) then
                     -- Packet probe
                     local ports_table = interface.getFlowDeviceInfo(uuid, true)
-                    formatInterfaceData(probe_ip, ports_table, list, {
+                    local exporter_ip = probe_info["remote.if_addr"]
+                    formatInterfaceData(exporter_ip, ports_table, list, {
                         probe_uuid = uuid,
                         exporter_uuid = uuid,
                         ifid = ifid
@@ -93,6 +94,61 @@ function exporters_utils.getAllInterfacesList(add_role_to_interfaces)
     end
 
     return list
+end
+
+-- ################################################
+
+function exporters_utils.getExporterUUID(exporter_ip)
+    if not isEmptyString(exporter_ip) then
+        local flow_exporters = interface.getFlowDevices()
+        for ifid, info in pairs(flow_exporters or {}) do
+            for exporter_uuid, exporter_info in pairs(info or {}) do
+                if exporter_info.exporter_ip == exporter_ip then
+                    return exporter_uuid, ifid
+                end
+            end
+        end
+    end
+
+    return nil, nil
+end
+
+-- ################################################
+
+function exporters_utils.getProbeUUID(exporter_ip)
+    if not isEmptyString(exporter_ip) then
+        local exporter_uuid = nil
+        local flow_exporters = interface.getFlowDevices()
+        for ifid, info in pairs(flow_exporters or {}) do
+            for uuid, exporter_info in pairs(info or {}) do
+                if exporter_info.exporter_ip == exporter_ip then
+                    exporter_uuid = uuid
+                    goto uuid_found
+                end
+            end
+        end
+        ::uuid_found::
+        if (exporter_uuid) then
+            local ifstats = interface.getStats()
+            -- Get the list of all the probes
+            for ifid, probe_list in pairs(ifstats.probes or {}) do
+                for probe_uuid, probe_info in pairsByKeys(probe_list or {}) do 
+                    if tostring(probe_uuid) == tostring(exporter_uuid) then
+                        -- Packet interface
+                        return probe_uuid, ifid
+                    end
+                    for _, exporter_info in pairs(probe_info.exporters or {}) do
+                        if tostring(exporter_info.unique_source_id) == tostring(exporter_uuid) then
+                            -- Netflow Interface
+                            return probe_uuid, ifid
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return nil, nil
 end
 
 -- ################################################

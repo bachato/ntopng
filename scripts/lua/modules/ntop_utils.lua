@@ -945,25 +945,54 @@ end
 
 -- ##############################################
 
-function generateExporterLink(ip)
-    ip_string = ntop.inet_ntoa(ip)
-    local probe_info = getProbeInfoFromExporterIP(ip_string)
-    if probe_info then
-        return string.format("probe_uuid=%s", probe_info.probe_uuid)
+function generateASNLink(asn)
+    if tostring(asn) == "0" then
+        return nil
     end
-    return string.format("ip=%s", ip_string)
+    return string.format("asn=%s", asn)
+end
+
+-- ##############################################
+
+function generateExporterLink(ip)
+    if ntop.isPro() then
+        -- In case 
+        package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" ..
+                           package.path
+
+        local exporters_utils = require "exporters_utils"
+        local exporter_uuid = nil
+        local probe_uuid = nil
+        local exporter_ifid = nil
+        if tonumber(ip) then ip = ntop.inet_ntoa(ip) end
+
+        exporter_uuid, exporter_ifid = exporters_utils.getExporterUUID(ip)
+        probe_uuid = exporters_utils.getProbeUUID(ip)
+        return string.format("ip=%s&exporter_uuid=%s&probe_uuid=%s", ip,
+                             exporter_uuid, probe_uuid)
+    end
+
+    return ''
 end
 
 -- ##############################################
 
 function generateExporterInterfaceLink(ip, interface)
-    ip_string = ntop.inet_ntoa(ip)
-    local probe_info = getProbeInfoFromExporterIP(ip_string)
-    if probe_info then
-        return string.format("ip=%s&exporter_uuid=%s&probe_uuid=%s", ip_string,
-                             probe_info.exporter_uuid, probe_info.probe_uuid)
+    if ntop.isPro() then
+        -- In case 
+        package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" ..
+                           package.path
+
+        local exporters_utils = require "exporters_utils"
+        local exporter_uuid = nil
+        local exporter_ifid = nil
+        if tonumber(ip) then ip = ntop.inet_ntoa(ip) end
+        exporter_uuid, exporter_ifid = exporters_utils.getExporterUUID(ip)
+        return string.format("ip=%s&snmp_port_idx=%s&ifid=%s", ip, interface,
+                             exporter_ifid)
     end
-    return string.format("ip=%s&interface=%s", ip_string, interface)
+
+    return ''
 end
 
 -- ##############################################

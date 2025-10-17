@@ -6842,6 +6842,8 @@ local lang = {
   },
   ["exporters_interfaces_configuration"] = {
     ["network_communications"] = "Network Communications",
+    ["exporter_details"] = "Exporter Details",
+    ["network_communications_x_interface_y"] = "<a href=\"%{basic_url}\">Network Communications</a>: %{device} / %{interface}",
     ["all_roles"] = "All Roles",
     ["filter"] = "Interfaces Roles",
   },

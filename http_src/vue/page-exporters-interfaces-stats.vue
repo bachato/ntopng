@@ -169,17 +169,21 @@ const map_table_def_columns = (columns) => {
     let map_columns = {
         "exporter_ip": (value, row) => {
             let exporter = value
+            const url = linksUtils.getExporterDetailsPageURL({ ip: value, probe_uuid: row.probe_uuid, exporter_uuid: row.exporter_uuid })
             if (!dataUtils.isEmptyString(row.exporter_name) && (row.exporter_name !== value)) {
-                const url = linksUtils.getExporterDetailsPageURL({ ip: value, probe_uuid: row.probe_uuid, exporter_uuid: row.exporter_uuid })
                 exporter = `<a href="${url}" data-bs-toggle='tooltip' data-bs-placement='bottom' title='${value}'>${row.exporter_name}</a>`
+            } else {
+                exporter = `<a href="${url}">${value}</a>`
             }
             return exporter;
         },
         "interface_name": (value, row) => {
             let info = value
+            const url = linksUtils.getExporterInterfaceDetailsPageURL({ ip: row.exporter_ip, interface: row.interface_id, ifid: row.ifid })
             if (!dataUtils.isEmptyString(row.interface_name) && (row.interface_name !== value)) {
-                const url = linksUtils.getExporterDetailsPageURL({ ip: value, probe_uuid: row.probe_uuid, exporter_uuid: row.exporter_uuid })
                 info = `<a href="${url}" data-bs-toggle='tooltip' data-bs-placement='bottom' title='${value}'>${row.interface_name}</a>`
+            } else {
+                info = `<a href="${url}">${row.interface_id}</a>`
             }
             return info;
         },
@@ -244,7 +248,7 @@ function click_button_flows(event) {
 
 function click_button_timeseries(event) {
     const row = event.row;
-    window.location.href = `${http_prefix}/lua/pro/enterprise/flowdevice_interface_details.lua?page=historical&ip=${row["exporter_ip"]}&snmp_port_idx=${row["interface_id"]}`;
+    window.location.href = `${http_prefix}/lua/pro/enterprise/flowdevice_interface_details.lua?page=historical&ip=${row["exporter_ip"]}&snmp_port_idx=${row["interface_id"]}&ifid=${row["ifid"]}`;
 }
 
 /* ************************************** */

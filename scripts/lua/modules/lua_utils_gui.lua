@@ -1592,6 +1592,26 @@ if ((ifname == nil) and (_GET ~= nil)) then
    end
 end
 
+-- ##############################################
+
+-- @brief this function returns the correctly formatted a tag in html
+--        with correctly set value, name and url
+function formatHTMLaTag(real_value, name, url)
+    local use_title = true
+    local link = ''
+    if (real_value == name) then
+        use_title = false
+    end
+
+    if (use_title) then
+        link = '<a href="' .. url .. '" data-bs-toggle="tooltip" data-bs-placement="top" title="' .. real_value .. '">' .. name .. '</a>'
+    else
+        link = '<a href="' .. url .. '">' .. real_value .. '</a>'
+    end
+
+    return link
+end
+
 --
 -- IMPORTANT
 -- Leave it at the end so it can use the functions

@@ -30,9 +30,24 @@ const getExporterDetailsPageURL = (exporter_info) => {
 
 /* ******************************************************************** */
 
+/* Returns the URL of the exporter details */
+const getExporterInterfaceDetailsPageURL = (exporter_info) => {
+    const exporter_ip = exporter_info.ip
+    let exporter_interface = ''
+    
+    if (exporter_info.interface) {
+        exporter_interface = exporter_info.interface
+    }
+
+    return `/lua/pro/enterprise/flowdevice_interface_details.lua?ip=${exporter_ip}&snmp_port_idx=${exporter_interface}&ifid=${exporter_info.ifid}`
+}
+
+/* ******************************************************************** */
+
 const linksUtils = function () {
     return {
         getExporterDetailsPageURL,
+        getExporterInterfaceDetailsPageURL,
     };
 }();
 

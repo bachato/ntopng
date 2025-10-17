@@ -150,7 +150,7 @@
         <div v-if="query_info != null" class="mt-2">
             <div class="text-end">
                 <small style="" class="query text-end"><span class="records">{{ query_info.num_records_processed
-                        }}</span>.</small>
+                }}</span>.</small>
             </div>
             <div class="text-start">
                 <small id="historical_flows_table-query-time" style="" class="query">Query performed in <span
@@ -223,6 +223,7 @@ const rowElementRefs = ref([]);                   // References to row HTML elem
 const showLoading = ref(props.showLoading)
 let currentPage = 0;                                 // Current active page
 let allRows = [];                                       // All fetched rows data
+let lastRes = [];                                       // Last fetched response
 const processedColumns = ref([]);                        // Wrapped column definitions with extra properties
 const displayedRows = ref([]);                         // Rows displayed in the current page
 const totalRowCount = ref(0);                           // Total number of rows (for pagination)
@@ -574,18 +575,27 @@ async function refresh_table(disable_loading) {
 let isFirstDataLoad = true;
 
 // get and update rows data
-async function set_rows() {
+async function set_rows(do_not_reload) {
     if (showLoading.value) {
         isLoading.value = true;
     }
-    // get rows from backend
-    let res = await props.get_rows(
-        currentPage,                // current page
-        rowsPerPage.value,          // rows per page
-        processedColumns.value,     // columns definition
-        searchString.value,         // search term
-        isFirstDataLoad             // first load
-    );
+    let res = null
+    if (props.paging !== true && do_not_reload === true) {
+        // If no reload is requested and the paging is false,
+        // simply use the old rows
+        res = JSON.parse(JSON.stringify(lastRes)); // Create a deep copy of the request
+    } else {
+        // get rows from backend
+        res = await props.get_rows(
+            currentPage,                // current page
+            rowsPerPage.value,          // rows per page
+            processedColumns.value,     // columns definition
+            searchString.value,         // search term
+            isFirstDataLoad             // first load
+        );
+        // store fetched rows and update displayed rows 
+        lastRes = res;
+    }
 
     // update query info if available
     query_info.value = null;
@@ -606,7 +616,6 @@ async function set_rows() {
         totalRowCount.value = res.total_rows; // use number of rows provided by server
     }
 
-    // store fetched rows and update displayed rows 
     allRows = res.rows;
     set_active_rows();
 
@@ -746,12 +755,12 @@ async function on_change_map_search() {
             // For server-side pagination, reset to first page when searching
             currentPage = 0;
             paginationRef.value.change_active_page(0, 0);
+            await set_rows(false /* reload rows */); // get filtered rows
         }
-
-        await set_rows(); // get filtered rows
 
         // Update pagination after search
         if (!props.paging) {
+            await set_rows(true /* Skip reloading */); // get filtered rows
             redraw_select_pages();
         }
 
