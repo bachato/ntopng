@@ -12,19 +12,9 @@
 	"columns": [
 		{
 			"id": "ip",
-			"title_i18n": "flow_devices.flow_exporter_ip",
+			"title_i18n": "flow_devices.exporter",
 			"data_field": "ip",
 			"sortable": true,
-			"class": [
-				"text-nowrap"
-			]
-		},
-		{
-			"id": "name",
-			"title_i18n": "name",
-			"data_field": "name",
-			"sortable": true,
-			"min-width": "40px",
 			"class": [
 				"text-nowrap"
 			]
@@ -41,7 +31,7 @@
 		},
 		{
 			"id": "probe_ip",
-			"title_i18n": "if_stats_overview.probe_ip",
+			"title_i18n": "flow_devices.probe",
 			"data_field": "probe_ip",
 			"sortable": true,
 			"min-width": "40px",
