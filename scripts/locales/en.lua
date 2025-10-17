@@ -483,7 +483,6 @@ local lang = {
     ["os_distribution"] = "Assets By OS",
     ["pop_server"] = "POP Server",
     ["pop_servers"] = "POP Servers",
-    ["preference_disabled"] = "Assets collection is disabled by preferences. Please enable it <a href='" .. ntop.getHttpPrefix() .. "/lua/admin/prefs.lua?tab=in_memory'><i class='fas fa-cog fa-sm'></i></a>",
     ["rdp_server"] = "RDP Server",
     ["servers_overview"] = "Servers Overview",
     ["server_type"] = "Server Type",
