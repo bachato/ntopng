@@ -205,8 +205,10 @@ void LocalHost::deferredInitialization() {
 void LocalHost::syncMACMetadata(bool force_update) {
   Mac *cur_mac;
 
+#ifdef NTOPNG_PRO
   if(!ntop->getPrefs()->isAssetInventoryEnabled()) return;
-
+#endif
+  
   cur_mac = getMac();
 
   if(cur_mac && (force_update || cur_mac->isAssetUpdated())) {
