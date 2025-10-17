@@ -1,6 +1,6 @@
 {
 	"id": "exporters_details",
-	"data_url": "lua/pro/rest/v2/get/flowdevice/stats.lua",
+	"data_url": "lua/pro/rest/v2/get/exporters/exporters_interfaces.lua",
 	"use_current_page": false,
 	"enable_search": false,
 	"paging": false,

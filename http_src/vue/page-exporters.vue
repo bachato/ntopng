@@ -70,7 +70,7 @@ const csrf = props.context.csrf;
 
 const chart_url = `${http_prefix}/lua/pro/enterprise/exporters.lua?`
 const exporter_url = `${http_prefix}/lua/pro/enterprise/exporters.lua?`
-const host_url = `${http_prefix}/lua/pro/enterprise/exporter_details.lua?`
+const host_url = `${http_prefix}/lua/pro/enterprise/exporter_interfaces.lua?`
 
 /* ************************************** */
 

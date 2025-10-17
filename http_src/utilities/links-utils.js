@@ -21,7 +21,7 @@ const getExporterDetailsPageURL = (exporter_info) => {
     if (exporter_info.exporter_uuid) {
         exporter_uuid = exporter_info.exporter_uuid
     }
-    return `/lua/pro/enterprise/exporter_details.lua?ip=${exporter_ip}&exporter_uuid=${exporter_uuid}&probe_uuid=${probe_uuid}`
+    return `/lua/pro/enterprise/exporter_interfaces.lua?ip=${exporter_ip}&exporter_uuid=${exporter_uuid}&probe_uuid=${probe_uuid}`
 }
 
 /* ******************************************************************** */

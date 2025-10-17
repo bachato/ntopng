@@ -3518,52 +3518,6 @@
         }
       }
     },
-    "/lua/pro/rest/v2/get/flowdevice/stats.lua": {
-      "get": {
-        "tags": [
-          "Alerts"
-        ],
-        "summary": "Get flow device stats",
-        "description": "get flow device stats",
-        "operationId": "get_flowdevice_stats",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "ifid",
-            "in": "query",
-            "description": "Interface identifier",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "ip",
-            "in": "query",
-            "description": "The IP address of the device",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "ifIdx",
-            "in": "query",
-            "description": "The interface index",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "responses": {
-          "0": {
-            "description": "OK"
-          },
-          "-3": {
-            "description": "NOT_GRANTED"
-          }
-        }
-      }
-    },
     "/lua/pro/rest/v2/get/flowdevices/stats.lua": {
       "get": {
         "tags": [

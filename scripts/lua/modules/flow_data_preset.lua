@@ -98,7 +98,7 @@ local columns = {
         formatter = {
             funct = format_portidx_name,
             column_dependent = "in_device",
-            link = "/lua/pro/enterprise/exporter_details.lua?%s",
+            link = "/lua/pro/enterprise/exporter_interfaces.lua?%s",
             generateLinkParams = generateExporterInterfaceLink
         }
     },
@@ -109,7 +109,7 @@ local columns = {
         formatter = {
             funct = format_portidx_name,
             column_dependent = "out_device",
-            link = "/lua/pro/enterprise/exporter_details.lua?%s",
+            link = "/lua/pro/enterprise/exporter_interfaces.lua?%s",
             generateLinkParams = generateExporterInterfaceLink
         }
     },
@@ -117,7 +117,7 @@ local columns = {
         formatter = {
             funct = format_portidx_name,
             column_dependent = "device",
-            link = "/lua/pro/enterprise/exporter_details.lua?%s",
+            link = "/lua/pro/enterprise/exporter_interfaces.lua?%s",
             generateLinkParams = generateExporterInterfaceLink
         },
         filters = {"in_iface_index", "out_iface_index"},
