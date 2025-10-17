@@ -7,9 +7,9 @@
 	"display_empty_rows": true,
 	"columns": [
                 {
-                    "id": "probe_ip",
-                    "title_i18n": "flow_devices.nprobe_ip",
-                    "data_field": "probe_ip",
+                    "id": "probe_name",
+                    "title_i18n": "flow_devices.probe",
+                    "data_field": "probe_name",
                     "sortable": true,
                     "min-width": "30px",
                     "class": [
@@ -17,9 +17,9 @@
                     ]
                 },
                 {
-                    "id": "exporter_ip",
-                    "title_i18n": "flow_devices.exporter_ip",
-                    "data_field": "exporter_ip",
+                    "id": "exporter_name",
+                    "title_i18n": "flow_devices.exporter",
+                    "data_field": "exporter_name",
                     "sortable": true,
                     "min-width": "30px",
                     "class": [
@@ -27,7 +27,7 @@
                     ]
                 },
 		{
-			"title_i18n": "flow_devices.interface_name",
+			"title_i18n": "flow_devices.interface",
 			"data_field": "snmp_ifname",
 			"sortable": false,
 			"min-width": "30px",
@@ -41,7 +41,7 @@
 			"sortable": true,
 			"min-width": "40px",
 			"class": [
-                "text-center",
+                                "text-center",
 				"text-nowrap"
 			]
 		},
@@ -51,7 +51,7 @@
 			"sortable": true,
 			"min-width": "40px",
 			"class": [
-                "text-center",
+                                "text-center",
 				"text-nowrap"
 			]
 		},
@@ -61,7 +61,7 @@
 			"sortable": true,
 			"min-width": "80px",
 			"class": [
-                "text-center",
+                                "text-center",
 				"text-nowrap"
 			]
 		},
@@ -71,7 +71,7 @@
 			"sortable": true,
 			"min-width": "40px",
 			"class": [
-                "text-center",
+                                "text-center",
 				"text-nowrap"
 			]
 		}
