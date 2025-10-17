@@ -1,11 +1,7 @@
 <!-- (C) 2024 - ntop.org     -->
 <template>
     <div class="m-2 mb-3">
-        <template v-if="(!props.context.is_assets_collection_enabled)">
-            <div class="alert alert-warning" role="alert" id='error-alert' v-html:="error_message">
-            </div>
-        </template>
-        <div :class="[(!props.context.is_assets_collection_enabled) ? 'ntopng-gray-out' : '']">
+        <div class="">
             <TableWithConfig ref="table_assets" :table_id="table_id" :csrf="context.csrf" :showLoading="true"
                 :f_map_columns="map_table_def_columns" :get_extra_params_obj="get_extra_params_obj"
                 @custom_event="on_table_custom_event">
@@ -92,7 +88,6 @@ const filter_table_array = ref([]);
 const table_assets = ref();
 const modal_delete_assets = ref();
 const modal_delete_assets_epoch = ref();
-const error_message = i18n('asset_details.preference_disabled')
 const child_safe_icon = "<font color='#5cb85c'><i class='fas fa-lg fa-child' aria-hidden='true' title='" + i18n("host_pools.children_safe") + "'></i></font>"
 const system_host_icon = "<i class='fas fa-flag' title='" + i18n("system_host") + "'></i>"
 const hidden_from_top_icon = "<i class='fas fa-eye-slash' title='" + i18n("hidden_from_top_talkers") + "'></i>"
