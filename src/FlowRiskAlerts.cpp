@@ -61,7 +61,7 @@ static const FlowAlertTypeExtended risk_enum_to_alert_type[NDPI_MAX_RISK] {
   { { NDPI_SSH_OBSOLETE_CLIENT_VERSION_OR_CIPHER, flow_alert_ndpi_ssh_obsolete_client, alert_category_security}, "ndpi_ssh_obsolete_client"},
   { { NDPI_SSH_OBSOLETE_SERVER_VERSION_OR_CIPHER, flow_alert_ndpi_ssh_obsolete_server, alert_category_security}, "ndpi_ssh_obsolete_server"},
   { { NDPI_SMB_INSECURE_VERSION, flow_alert_ndpi_smb_insecure_version, alert_category_security}, "ndpi_smb_insecure_version"},
-  { { NDPI_FREE_21 /* DUMMY LINE */, flow_alert_normal, alert_category_other}, ""},
+  { { NDPI_MISMATCHING_PROTOCOL_WITH_IP, flow_alert_ndpi_mismatching_protocol_with_ip, alert_category_security}, "ndpi_mismatching_protocol_with_ip"},
   { { NDPI_UNSAFE_PROTOCOL, flow_alert_ndpi_unsafe_protocol, alert_category_security}, "ndpi_unsafe_protocol"},
   { { NDPI_DNS_SUSPICIOUS_TRAFFIC, flow_alert_ndpi_dns_suspicious_traffic, alert_category_security}, "ndpi_dns_suspicious_traffic"},
   { { NDPI_TLS_MISSING_SNI, flow_alert_ndpi_tls_missing_sni, alert_category_security}, "ndpi_tls_missing_sni"},
