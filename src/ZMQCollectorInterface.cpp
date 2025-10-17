@@ -384,7 +384,8 @@ void ZMQCollectorInterface::collect_flows() {
 
           probe = active_probes[source_id];
 
-          if (!on_event_socket && probe->last_msg_id_set) { /* Check drops / rollback by using msg_id on data messages */
+          if (!on_event_socket && probe->last_msg_id_set) {
+	    /* Check drops / rollback by using msg_id on data messages */
 
 	    //ntop->getTrace()->traceEvent(TRACE_NORMAL, "[subscriber_id: %u][source_id: %u]"
 	    //			       "[msg_id: %u][last_msg_id: %u][lost: %i]",
@@ -393,7 +394,6 @@ void ZMQCollectorInterface::collect_flows() {
             if (msg_id == (probe->last_msg_id + 1)) {
               /* No drop */
             } else {
-
               if (msg_id < probe->last_msg_id) {
                 /* Start over (just reset active_probes) */
 #ifdef DEBUG_ZMQ_MSGID
@@ -409,7 +409,8 @@ void ZMQCollectorInterface::collect_flows() {
                 if (diff > 1) {
                   /* Lost message detected */
 
-                  if (now - ntop->getGlobals()->getStartTime() > 10) { /* Increase msg drops (ignore startup drops) */
+                  if (now - ntop->getGlobals()->getStartTime() > 15) {
+		    /* Increase msg drops (ignore startup drops) */
                     recvStats.zmq_msg_drops += diff - 1;
                   }
 
