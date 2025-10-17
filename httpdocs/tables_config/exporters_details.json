@@ -6,6 +6,26 @@
 	"paging": false,
 	"display_empty_rows": true,
 	"columns": [
+                {
+                    "id": "probe_ip",
+                    "title_i18n": "flow_devices.nprobe_ip",
+                    "data_field": "probe_ip",
+                    "sortable": true,
+                    "min-width": "30px",
+                    "class": [
+                        "text-nowrap"
+                    ]
+                },
+                {
+                    "id": "exporter_ip",
+                    "title_i18n": "flow_devices.exporter_ip",
+                    "data_field": "exporter_ip",
+                    "sortable": true,
+                    "min-width": "30px",
+                    "class": [
+                        "text-nowrap"
+                    ]
+                },
 		{
 			"id": "snmp_index",
 			"title_i18n": "flow_devices.interface_index",

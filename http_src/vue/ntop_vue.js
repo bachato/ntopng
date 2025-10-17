@@ -70,7 +70,6 @@ import { default as PageAsOverview } from "./page-as-overview.vue"
 import { default as PageProbes } from "./page-probes.vue"
 import { default as PageExporters } from "./page-exporters.vue"
 import { default as PageExportersDetails } from "./page-exporters-details.vue"
-import { default as PageExportersInterfaces } from "./page-exporters-interfaces.vue"
 import { default as PageNetworkConfiguration } from "./page-network-configuration.vue"
 import { default as PageASNConfiguration } from "./page-asn-configuration.vue"
 import { default as PageNetworkPolicy } from "./page-network-policy.vue"
@@ -240,7 +239,6 @@ let ntopVue = {
     PageExportersConfig: PageExportersConfig,
     PageFlowDeviceInterfaceDetails: PageFlowDeviceInterfaceDetails,
     PageHistoricalFlow: PageHistoricalFlow,
-    PageExportersInterfaces: PageExportersInterfaces,
     PageNetworkConfiguration: PageNetworkConfiguration,
     PageASNConfiguration: PageASNConfiguration,
     PageNetworkPolicy: PageNetworkPolicy,
