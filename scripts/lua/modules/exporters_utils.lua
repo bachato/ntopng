@@ -55,8 +55,9 @@ function exporters_utils.getAllInterfacesList(add_role_to_interfaces)
     local ifstats = interface.getStats()
     -- Get the list of all the probes
     for ifid, probe_list in pairs(ifstats.probes or {}) do
-        for probe_ip, probe_info in pairsByKeys(probe_list or {}) do
+        for _, probe_info in pairsByKeys(probe_list or {}) do
             local uuid = probe_info["probe.uuid_num"]
+            local probe_ip = probe_info["probe.ip"]
 
             -- For each probe retrieve the list of interfaces
             if (uuid) then
