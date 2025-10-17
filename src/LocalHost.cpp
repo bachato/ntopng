@@ -187,7 +187,7 @@ void LocalHost::initialize() {
   }
 
   if (!ntop->getPrefs()->isASNModeEnabled())
-    usedPorts = new (std::nothrow) UsedPorts(this); 
+    usedPorts = new (std::nothrow) UsedPorts(this);
 
 #ifdef NTOPNG_PRO
   loadAssetInfo();
@@ -203,7 +203,11 @@ void LocalHost::deferredInitialization() {
 /* *************************************** */
 
 void LocalHost::syncMACMetadata(bool force_update) {
-  Mac *cur_mac = getMac();
+  Mac *cur_mac;
+
+  if(!ntop->getPrefs()->isAssetInventoryEnabled()) return;
+
+  cur_mac = getMac();
 
   if(cur_mac && (force_update || cur_mac->isAssetUpdated())) {
     if(cur_mac->getDHCPNamePtr())
@@ -221,15 +225,17 @@ void LocalHost::periodic_stats_update(const struct timeval *tv, bool force_updat
   syncMACMetadata(false);
 
 #ifdef NTOPNG_PRO
-  /* If at least CONST_ASSETS_PERIODIC_UPDATE are past and the map was updated, dump the info */
-  float diff = Utils::msTimevalDiff(tv, &last_periodic_asset_update) / 1000; /* in Sec */
-  Mac *cur_mac = getMac();
+  if(ntop->getPrefs()->isAssetInventoryEnabled()) {
+    /* If at least CONST_ASSETS_PERIODIC_UPDATE are past and the map was updated, dump the info */
+    float diff = Utils::msTimevalDiff(tv, &last_periodic_asset_update) / 1000; /* in Sec */
+    Mac *cur_mac = getMac();
 
-  if(cur_mac) asset_map_updated |= cur_mac->isAssetUpdated();
+    if(cur_mac) asset_map_updated |= cur_mac->isAssetUpdated();
 
-  if ((diff > CONST_ASSETS_PERIODIC_UPDATE) && asset_map_updated) {
-    memcpy(&last_periodic_asset_update, tv, sizeof(last_periodic_asset_update));
-    dumpAssetInfo();
+    if ((diff > CONST_ASSETS_PERIODIC_UPDATE) && asset_map_updated) {
+      memcpy(&last_periodic_asset_update, tv, sizeof(last_periodic_asset_update));
+      dumpAssetInfo();
+    }
   }
 #endif
 
@@ -283,7 +289,7 @@ char* LocalHost::getRedisKey(char *buf, uint buf_len, bool skip_prefix) {
 
   if (mac && (is_in_broadcast_domain || serializeByMac())) {
     get_mac_based_tskey(mac, buf, buf_len, skip_prefix);
-    
+
     return(buf);
   } else
     return(get_hostkey(buf, buf_len, false));
@@ -367,10 +373,12 @@ void LocalHost::lua(lua_State *vm, AddressTree *ptree, bool host_details,
   /* *** */
 
 #ifdef NTOPNG_PRO
-  snprintf(asset_key, sizeof(asset_key), ASSET_SERVICE_KEY,
-           getInterface()->get_id(), getRedisKey(buf_id, sizeof(buf_id)));
+  if(ntop->getPrefs()->isAssetInventoryEnabled()) {
+    snprintf(asset_key, sizeof(asset_key), ASSET_SERVICE_KEY,
+	     getInterface()->get_id(), getRedisKey(buf_id, sizeof(buf_id)));
 
-  lua_push_str_table_entry(vm, "asset_key", asset_key);
+    lua_push_str_table_entry(vm, "asset_key", asset_key);
+  }
 #endif
 
   lua_push_int32_table_entry(vm, "local_network_id", local_network_id);

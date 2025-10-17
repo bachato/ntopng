@@ -99,7 +99,6 @@ Prefs::Prefs(Ntop *_ntop) {
   behaviour_analysis_learning_period =
     CONST_DEFAULT_BEHAVIOUR_ANALYSIS_LEARNING_PERIOD;
   mac_address_cache_duration = MAX_MAC_IDLE;
-  enable_assets_collection = true; /* Enabled by default */
   enable_flow_swap_heuristic = true; /* Enabled by default */
   behaviour_analysis_learning_status_during_learning = service_allowed;
   behaviour_analysis_learning_status_post_learning = service_allowed;
@@ -115,7 +114,6 @@ Prefs::Prefs(Ntop *_ntop) {
   callbacks_dir = strdup(CONST_DEFAULT_CALLBACKS_DIR);
 #ifdef NTOPNG_PRO
   asset_inventory_enabled = CONST_DEFAULT_ASSET_INVENTORY_ENABLED;
-  netbox_enabled = CONST_DEFAULT_NETBOX_ENABLED;
   snmp_trap_enabled = CONST_DEFAULT_SNMP_TRAP_ENABLED;
   pro_callbacks_dir = strdup(CONST_DEFAULT_PRO_CALLBACKS_DIR);
   lic_mgr_config_file = NULL;
@@ -957,8 +955,6 @@ void Prefs::reloadPrefsFromRedis() {
 							     CONST_DEFAULT_ACTIVE_LOCAL_HOSTS_CACHE_INTERVAL),
     mac_address_cache_duration = getDefaultPrefsValue(CONST_RUNTIME_MAC_ADDRESS_CACHE_DURATION,
 							     MAX_MAC_IDLE),
-    enable_assets_collection = getDefaultPrefsValue(CONST_RUNTIME_ENABLE_ASSETS_COLLECTION,
-							     true),
     enable_flow_swap_heuristic = getDefaultBoolPrefsValue(CONST_RUNTIME_ENABLE_FLOW_SWAP_HEURISTIC,
 							     true),
     enable_assets_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false);
@@ -1111,9 +1107,6 @@ void Prefs::reloadPrefsFromRedis() {
 
 #ifdef NTOPNG_PRO
   // reset value
-  netbox_enabled = getDefaultPrefsValue(CONST_PREFS_NETBOX_ENABLED,
-					CONST_DEFAULT_NETBOX_ENABLED);
-
 #if 1
   asset_inventory_enabled = false; /* FIX */
 #else
@@ -2890,8 +2883,6 @@ void Prefs::lua(lua_State *vm) {
                               modbus_learning_period);
   lua_push_uint64_table_entry(vm, "mac_address_cache_duration",
                               mac_address_cache_duration);
-  lua_push_bool_table_entry(vm, "enable_assets_collection",
-                              enable_assets_collection);
   lua_push_bool_table_entry(vm, "enable_flow_swap_heuristic",
                               enable_flow_swap_heuristic);
   lua_push_bool_table_entry(vm, "enable_assets_log",

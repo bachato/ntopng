@@ -181,10 +181,6 @@ local menu_subpages = {{
             title = i18n("prefs.toggle_active_local_host_cache_enabled_title"),
             description = i18n("prefs.toggle_active_local_host_cache_enabled_description")
         },
-        toggle_assets_collection = {
-            title = i18n("prefs.toggle_assets_collection"),
-            description = i18n("prefs.toggle_assets_collection_description")
-        },
         toggle_flow_swap_heuristic = {
             title = i18n("prefs.toggle_flow_swap_heuristic"),
             description = i18n("prefs.toggle_flow_swap_heuristic_description")

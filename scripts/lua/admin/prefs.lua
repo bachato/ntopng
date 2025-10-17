@@ -1462,15 +1462,6 @@ if auth.has_capability(auth.capabilities.preferences) then
                 tformat = "mhd"
             })
 
-
-        if ntop.isEnterpriseM() then
-            prefsToggleButton(subpage_active, {
-                field = "toggle_assets_collection",
-                default = "1",
-                pref = "enable_assets_collection"
-            })
-        end
-
         print(
             '<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n("prefs.flow_cache_settings") ..
             '</th></tr></thead>')

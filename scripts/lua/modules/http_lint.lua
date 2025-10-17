@@ -2461,7 +2461,6 @@ local known_parameters = {
     ["flow_max_idle"] = validateNumber,
     ["active_local_host_cache_interval"] = validateNumber,
     ["mac_address_cache_duration"] = validateNumber,
-    ["toggle_assets_collection"] = validateBool,
     ["toggle_flow_swap_heuristic"] = validateBool,
     ["auth_session_duration"] = validateNumber,
     ["local_host_cache_duration"] = validateNumber,

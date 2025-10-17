@@ -67,13 +67,13 @@ class Prefs {
     tls_quic_hostnaming;
   u_int32_t behaviour_analysis_learning_period;
   u_int32_t iec60870_learning_period, modbus_learning_period,
-    devices_learning_period, mac_address_cache_duration, enable_assets_collection;
+    devices_learning_period, mac_address_cache_duration;
   u_int32_t host_port_learning_period;
   bool enable_flow_swap_heuristic;
 #ifdef NTOPNG_PRO
   ndpi_bitmap* modbus_allowed_function_codes;
   u_int modbus_too_many_exceptions;
-  bool data_archive_before_ttl_delete, netbox_enabled, asset_inventory_enabled, snmp_trap_enabled;
+  bool data_archive_before_ttl_delete, asset_inventory_enabled, snmp_trap_enabled;
 #endif
   ServiceAcceptance behaviour_analysis_learning_status_during_learning,
       behaviour_analysis_learning_status_post_learning;
@@ -729,7 +729,6 @@ class Prefs {
   inline u_int32_t getIEC60870LearingPeriod() { return (iec60870_learning_period); };
   inline u_int32_t getModbusLearingPeriod()   { return (modbus_learning_period); };
 #ifdef NTOPNG_PRO
-  inline bool isNetBoxEnabled() { return netbox_enabled; };
   inline bool isAssetInventoryEnabled() { return(asset_inventory_enabled && !isASNModeEnabled()); };
   inline bool isSNMPTrapEnabled() { return snmp_trap_enabled; };
   inline ndpi_bitmap* getModbusAllowedFunctionCodes() { return (modbus_allowed_function_codes);  };
@@ -738,7 +737,6 @@ class Prefs {
 #endif
   inline u_int32_t devicesLearingPeriod() { return (devices_learning_period); };
   inline u_int32_t macAddressCacheDuration() { return (mac_address_cache_duration); };
-  inline bool isAssetsCollectionEnabled() { return (enable_assets_collection && !isASNModeEnabled()); };
   inline u_int32_t hostPortLearningPeriod() { return (host_port_learning_period); };
   inline bool isFlowSwapHeuristicEnabled() { return (enable_flow_swap_heuristic); };
   inline bool are_alerts_disabled() { return (disable_alerts); };

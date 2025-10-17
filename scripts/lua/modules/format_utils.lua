@@ -798,7 +798,7 @@ function format_utils.formatASN(asn, short_version, shorten_string)
 	 name = i18n("no_asn")
       end
 
-      cached[asn] = name
+      _asn_cache[asn] = name
    end
 
    return name
