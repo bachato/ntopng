@@ -12,7 +12,7 @@
 	"columns": [
 		{
 			"id": "probe_ip",
-			"title_i18n": "if_stats_overview.probe_ip",
+			"title_i18n": "flow_devices.probe",
 			"data_field": "probe_ip",
 			"sortable": true,
 			"min-width": "80px",

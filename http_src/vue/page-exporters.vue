@@ -154,9 +154,8 @@ const map_table_def_columns = (columns) => {
     let map_columns = {
         "ip": (value, row) => {
             let exporter_ip = value;
-            // Add interface name if defined
-            if (!dataUtils.isEmptyOrNull(row['interface_name'])) {
-                exporter_ip = `${exporter_ip} ${row['interface_name']}`;
+            if (!dataUtils.isEmptyOrNull(row['name'])) {
+                exporter_ip = `${row['name']}`;
             }
 
             let timeseries_link = ""
@@ -175,7 +174,12 @@ const map_table_def_columns = (columns) => {
             return `<a href="${exporter_interfaces_url}ip=${value}&exporter_uuid=${row.exporter_uuid}&probe_uuid=${row.probe_uuid}&probe_ip=${row.probe_ip}">${exporter_ip}</a>${host_link}${timeseries_link}`;
         },
         "probe_ip": (value, row) => {
-            return value;
+            let probe_ip = value;
+            if (!dataUtils.isEmptyOrNull(row['probe_name'])) {
+                probe_ip = `${row['probe_name']}`;
+            }
+
+            return probe_ip;
         },
         "name": (value, row) => {
             return value
