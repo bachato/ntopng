@@ -988,6 +988,7 @@ end
 
 local _snmp_devices = {}
 local _exporters_ports_names = {}
+local _portidx_name_cache = {}
 
 -- @brief This function format the SNMP interface name.
 -- @params device_ip: snmp device ip
@@ -996,6 +997,12 @@ local _exporters_ports_names = {}
 --         interface_info: table, contains all the info of an interface, basically got by snmp_cached_dev:get_interfaces(device_ip)[portidx]
 function format_portidx_name(device_ip, portidx, short_version, interface_info)
    local idx_name = portidx
+   local cache_key = device_ip .. "@" .. portidx
+   local cached_val = _portidx_name_cache[cache_key]
+
+   if(cached_val ~= nil) then
+      return(cached_val)
+   end
 
    -- tprint("format_portidx_name("..device_ip .. ", " .. portidx..")")
 
@@ -1036,6 +1043,8 @@ function format_portidx_name(device_ip, portidx, short_version, interface_info)
 	 if (not isEmptyString(port_name)) then idx_name = port_name end
       end
    end
+
+   _portidx_name_cache[cache_key] = idx_name
 
    return idx_name
 end

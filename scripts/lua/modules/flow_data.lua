@@ -165,13 +165,11 @@ function flow_data.getStats(queries, isHistorical)
       if (query_info.filters and query_info.filters.last_seen) then
 	 isHistorical = true
       end
-      local select_columns = flow_data_preset.retrieveColumns(
-	 query_info.select_query)
+      local select_columns = flow_data_preset.retrieveColumns(query_info.select_query)
       local sort_columns =
 	 flow_data_preset.retrieveColumns(query_info.sort_by) or {}
       local where_filters = flow_data_preset.convertFilters(
-	 query_info.where_query, query_info.filters,
-	 isHistorical)
+	 query_info.where_query, query_info.filters, isHistorical)
       local different_columns = flow_data_preset.retrieveColumns(
 	 query_info.different_from)
 
@@ -236,8 +234,7 @@ function flow_data.formatStats(stats_to_format)
       local formatted_element = {}
       for key, value in pairs(values or {}) do
 	 -- Format the data
-	 local formatted_data, url_link =
-	    flow_data_preset.getFormattedDataAndLink(key, value, values)
+	 local formatted_data, url_link = flow_data_preset.getFormattedDataAndLink(key, value, values)
 
 	 if (formatted_data ~= value) or (type(formatted_data) == "string") then
 	    formatted_element[key] = {

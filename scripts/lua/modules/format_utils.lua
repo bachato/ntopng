@@ -1,5 +1,5 @@
 --
--- (C) 2014-24 - ntop.org
+-- (C) 2014-25 - ntop.org
 --
 
 local format_utils = {}
@@ -21,9 +21,9 @@ function format_utils.round(num, idp)
    elseif math.abs(num) == math.huge then
       -- This is an infinite, e.g., 1/0 or -1/0
       res = num
---   elseif num == math.floor(num) then
+      --   elseif num == math.floor(num) then
    elseif string.find(tostring(num), 'e') == nil and
-          math.floor(num) == num then
+      math.floor(num) == num then
       -- This is an integer, so represent it
       -- without decimals
       res = string.format("%d", math.floor(num))
@@ -68,7 +68,7 @@ function format_utils.timeToSeconds(time)
       end
 
       index = index + 1
-   end 
+   end
 
    return seconds
 end
@@ -151,7 +151,7 @@ function format_utils.bytesToSize(bytes)
 
       bytes = tonumber(bytes)
       if bytes == 1
-         then return "1 Byte"
+      then return "1 Byte"
       elseif((bytes >= 0) and (bytes < kilobyte)) then
 	 return round(bytes, precision) .. " Bytes"
       elseif((bytes >= kilobyte) and (bytes < megabyte)) then
@@ -251,86 +251,86 @@ end
 
 -- format an epoch using ISO 8601 format
 function format_utils.formatEpochISO8601(epoch)
-  if epoch == nil then
-    epoch = os.time()
-  end
+   if epoch == nil then
+      epoch = os.time()
+   end
 
-  if epoch == 0 then
-    return("")
-  end
+   if epoch == 0 then
+      return("")
+   end
 
-  return os.date("!%Y-%m-%dT%TZ", epoch)
+   return os.date("!%Y-%m-%dT%TZ", epoch)
 end
 
 -- format an epoch according to RFC 2822 format (email)
 -- E.g. "Tue, 3 Apr 2018 14:58:00 +0100"
 function format_utils.formatEpochRFC2822(epoch)
-  if epoch == nil then
-    epoch = os.time()
-  end
+   if epoch == nil then
+      epoch = os.time()
+   end
 
-  -- Compute local time diff
-  local now_ts = os.time()
-  local d1 = os.date("*t", now_ts)
-  local d2 = os.date("!*t", now_ts)
-  d1.isdst = false
-  local diff = -os.difftime(os.time(d1), os.time(d2))
+   -- Compute local time diff
+   local now_ts = os.time()
+   local d1 = os.date("*t", now_ts)
+   local d2 = os.date("!*t", now_ts)
+   d1.isdst = false
+   local diff = -os.difftime(os.time(d1), os.time(d2))
 
-  -- Format zone offset E.g. "+0100"
-  local sign
-  local hours 
-  local minutes
-  if diff > 0 then
-    sign = '-'
-    hours = math.floor(diff / (60*60))
-    minutes = (diff % (60*60)) / 60
-  else
-    sign = '+'
-    hours = math.floor(-diff / (60*60))
-    minutes = (-diff % (60*60)) / 60
-  end
+   -- Format zone offset E.g. "+0100"
+   local sign
+   local hours
+   local minutes
+   if diff > 0 then
+      sign = '-'
+      hours = math.floor(diff / (60*60))
+      minutes = (diff % (60*60)) / 60
+   else
+      sign = '+'
+      hours = math.floor(-diff / (60*60))
+      minutes = (-diff % (60*60)) / 60
+   end
 
-  -- Format date
-  local d = os.date("%a, %d %b %Y %X", epoch) -- E.g. "Tue, 3 Apr 2018 14:58:00"
+   -- Format date
+   local d = os.date("%a, %d %b %Y %X", epoch) -- E.g. "Tue, 3 Apr 2018 14:58:00"
 
-  -- Format final date with zone offset
-  return string.format("%s %s%02d%02d", d, sign, hours, minutes) -- E.g. "Tue, 3 Apr 2018 14:58:00 +0100"
+   -- Format final date with zone offset
+   return string.format("%s %s%02d%02d", d, sign, hours, minutes) -- E.g. "Tue, 3 Apr 2018 14:58:00 +0100"
 end
 
 -- format an epoch
 function format_utils.formatEpoch(epoch, full_time)
-  if epoch == nil then
-    epoch = os.time()
-  end
-
-  if epoch == 0 then
-    return("")
-  else
-   local t = epoch
-   local key = ""
-   local time = ""
-
-   if _SESSION then
-      key = ntop.getPref('ntopng.user.' .. (_SESSION["user"] or "") .. '.date_format')
+   if epoch == nil then
+      epoch = os.time()
    end
 
-   if(key == "big_endian") then
-      -- do NOT specify the ! to indicate UTC time; the time must be in Local Server Time
-      time = "%Y/%m/%d"
-   elseif( key == "middle_endian") then
-      -- do NOT specify the ! to indicate UTC time; the time must be in Local Server Time
-      time = "%m/%d/%Y"
+   if epoch == 0 then
+      return("")
    else
-      -- do NOT specify the ! to indicate UTC time; the time must be in Local Server Time
-      time = "%d/%m/%Y"
-   end
-   
-   if(full_time == nil) or (full_time == true) then      
-      time = time .. " %X"
-   end
+      local t = epoch
+      local key = ""
+      local time = ""
 
-   return os.date(time, t)
-  end
+      if _SESSION then
+	 key = ntop.getPref('ntopng.user.' .. (_SESSION["user"] or "") .. '.date_format')
+      end
+
+      if(key == "big_endian") then
+	 -- do NOT specify the ! to indicate UTC time; the time must be in Local Server Time
+	 time = "%Y/%m/%d"
+      elseif( key == "middle_endian") then
+	 -- do NOT specify the ! to indicate UTC time; the time must be in Local Server Time
+	 time = "%m/%d/%Y"
+      else
+	 -- do NOT specify the ! to indicate UTC time; the time must be in Local Server Time
+	 time = "%d/%m/%Y"
+      end
+
+      if(full_time == nil) or (full_time == true) then
+	 time = time .. " %X"
+      end
+
+      return os.date(time, t)
+   end
 end
 
 function format_utils.formatPastEpochShort(input_epoch)
@@ -466,16 +466,16 @@ function format_utils.formatFullAddressCategory(host)
 
    if host ~= nil then
       addr_category = format_utils.formatMainAddressCategory(host)
-      
-      if(host["is_broadcast"] == true) then 
+
+      if(host["is_broadcast"] == true) then
          addr_category = addr_category .. " <abbr title=\"".. i18n("broadcast") .."\"><span class='badge bg-dark'>" ..i18n("short_broadcast").. "</span></abbr>"
       end
-      
+
       if(host["broadcast_domain_host"] == true) then
          addr_category = addr_category .. " <span class='badge bg-info' style='cursor: help;'><i class='fas fa-sitemap' title='"..i18n("hosts_stats.label_broadcast_domain_host").."'></i></span>"
       end
-      
-      if(host["privatehost"] == true) then 
+
+      if(host["privatehost"] == true) then
          addr_category = addr_category .. ' <abbr title=\"'.. i18n("details.label_private_ip") ..'\"><span class="badge bg-warning">'..i18n("details.label_short_private_ip")..'</span></abbr>'
       end
 
@@ -483,32 +483,32 @@ function format_utils.formatFullAddressCategory(host)
          addr_category = addr_category .. ' <i class=\"fas fa-bolt\" title=\"'..i18n("details.label_dhcp")..'\"></i>'
       end
    end
-   
+
    return addr_category
 end
 
 function format_utils.formatMainAddressCategory(host)
    local addr_category = ""
 
-   if host ~= nil then      
+   if host ~= nil then
       if(host["country"] and not isEmptyString(host["country"])) then
 	 addr_category = addr_category .. " <a href='".. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?country="..host.country.."'><img src='".. ntop.getHttpPrefix() .. "/dist/images/blank.gif' class='flag flag-".. string.lower(host.country) .."'></a>"
       end
-      
-      if(host["is_blacklisted"] == true) then
-        addr_category = addr_category .. " <i class=\'fas fa-ban fa-sm\' title=\'"..i18n("hosts_stats.blacklisted").."\'></i>"
-      end
-           
-      if(host["crawlerBotScannerHost"] == true) then
-        addr_category = addr_category .. " <i class=\'fas fa-spider fa-sm\' title=\'"..i18n("hosts_stats.crawler_bot_scanner").."\'></i>"
-      end
-     
 
-      if(host["is_multicast"] == true) then 
+      if(host["is_blacklisted"] == true) then
+	 addr_category = addr_category .. " <i class=\'fas fa-ban fa-sm\' title=\'"..i18n("hosts_stats.blacklisted").."\'></i>"
+      end
+
+      if(host["crawlerBotScannerHost"] == true) then
+	 addr_category = addr_category .. " <i class=\'fas fa-spider fa-sm\' title=\'"..i18n("hosts_stats.crawler_bot_scanner").."\'></i>"
+      end
+
+
+      if(host["is_multicast"] == true) then
          addr_category = addr_category .. " <abbr title=\"".. i18n("multicast") .."\"><span class='badge bg-primary'>" ..i18n("short_multicast").. "</span></abbr>"
       elseif(host["localhost"] == true) then
          addr_category = addr_category .. ' <abbr title=\"'.. i18n("details.label_local_host") ..'\"><span class="badge bg-success">'..i18n("details.label_short_local_host")..'</span></abbr>'
-      else 
+      else
          addr_category = addr_category .. ' <abbr title=\"'.. i18n("details.label_remote") ..'\"><span class="badge bg-secondary">'..i18n("details.label_short_remote")..'</span></abbr>'
       end
 
@@ -569,7 +569,7 @@ end
 -- ######################################################
 
 local function format_report_email(notification)
-  return [[
+   return [[
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
@@ -612,7 +612,7 @@ end
 
 -- ######################################################
 
-local function format_no_html_vs_report_message(message) 
+local function format_no_html_vs_report_message(message)
    local formatted_message = message
    formatted_message = formatted_message:gsub("<br>", "")
    formatted_message = formatted_message:gsub("</br>","\n")
@@ -625,7 +625,7 @@ end
 -- ######################################################
 
 local function format_notification_subject(notifications)
-   
+
    if not notifications or #notifications < 1 then
       subject = ""
 
@@ -656,18 +656,18 @@ local function format_notification(notification, options)
    local message = notification.message or ""
    local handled = false
 
-   -- TODO: add the support to options 
+   -- TODO: add the support to options
 
-   if notification.notification_type == "reports" and 
+   if notification.notification_type == "reports" and
       (not options or not options.nohtml) then
       message = format_report_email(notification)
       handled = true
 
    elseif (notification.notification_type == "vulnerability_scans") then
       if(not options or not options.nohtml) then
-          -- nothing to do
+	 -- nothing to do
       else
-         message = format_no_html_vs_report_message(message) 
+         message = format_no_html_vs_report_message(message)
       end
       handled = true
 
@@ -697,7 +697,7 @@ function format_utils.formatMessage(notification, options)
          return message
       end
    end
-   
+
    -- In case it is an alert, format it by using the standard function
    local alert_utils = require "alert_utils"
    local message = alert_utils.formatAlertNotification(notification, options)
@@ -710,86 +710,98 @@ end
 -- adds a space after the commas
 function format_utils.formatEmailList(email_list)
    local email_list_formatted = replace(email_list,"<","")
-    email_list_formatted = replace(email_list_formatted, ">", "")
-    email_list_formatted = replace(email_list_formatted, ",", ", ")
-    return email_list_formatted
+   email_list_formatted = replace(email_list_formatted, ">", "")
+   email_list_formatted = replace(email_list_formatted, ",", ", ")
+   return email_list_formatted
 end
 
 -- ##############################################
 
 -- This function, given a record and a name return a  standard formatted value
 -- and if the value is 0, an empty string is returned
--- e.g.   1000 -> 1,000    | 0 -> 
+-- e.g.   1000 -> 1,000    | 0 ->
 function format_utils.format_high_num_value_for_tables(record, name)
-  local formatted_record = format_utils.formatValue(record[name] or 0)
-  if formatted_record == '0' then
-    formatted_record = ''
-  end
+   local formatted_record = format_utils.formatValue(record[name] or 0)
+   if formatted_record == '0' then
+      formatted_record = ''
+   end
 
-  return formatted_record
+   return formatted_record
 end
 
 -- ##############################################
 
 function format_utils.format_name_value(name, value, shorten)
-    local formatted_name_value = value
+   local formatted_name_value = value
 
-    if not isEmptyString(name) and name ~= value then
-        if (shorten) and (shorten == true) then
-            formatted_name_value = shortenString(name)
-        else
-            formatted_name_value = name
-        end
-    end
+   if not isEmptyString(name) and name ~= value then
+      if (shorten) and (shorten == true) then
+	 formatted_name_value = shortenString(name)
+      else
+	 formatted_name_value = name
+      end
+   end
 
-    if(value ~= nil) then
-       local idx = string.find(formatted_name_value, value)
-       
-       if (idx == nil) then
-	  formatted_name_value = formatted_name_value .. " [" .. value .. "]"
-       end
-    end
-    
-    return formatted_name_value
+   if(value ~= nil) then
+      local idx = string.find(formatted_name_value, value)
+
+      if (idx == nil) then
+	 formatted_name_value = formatted_name_value .. " [" .. value .. "]"
+      end
+   end
+
+   return formatted_name_value
 end
 
 -- ######################################################
+local _asn_cache = {}
 
--- @brief   Given an asn id, it will return a string with the 
+-- @brief   Given an asn id, it will return a string with the
 --          asn name formatted consistently
 -- @params  asn: ASN Id
 --          short_version: Boolean, true if short version is needed (only name)
 --          shorten_string: Boolean, true if 64 char must be used
 -- @returns The formatted ASN name
 function format_utils.formatASN(asn, short_version, shorten_string)
-    local name = ""
-    if asn then
-        asn = tonumber(asn)
-        name = asn
+   local name = ""
 
-        if (asn ~= 0) then
-            local as_info = interface.getASInfo(asn)
-            if (as_info) then
-                name = as_info.asname
-            else
-               -- if no asn info is present, curl to get ASN name
-                name = ntop.getASNameFromASN(asn)
-            end
-            if (shorten_string) then
-                name = shortenString(name)
-            end
-        end
+   if asn then
+      local cached
 
-        if (name ~= asn) and (not short_version) then
-            name = string.format("%d (%s)", asn, name)
-        end
-        
-        if (asn == 0) then
-            name = i18n("no_asn")
-        end
-    end
+      asn = tonumber(asn)
 
-    return name
+      cached = _asn_cache[asn]
+      if(cached) then
+	 return cached
+      end
+
+      name = asn
+
+      if (asn ~= 0) then
+	 local as_info = interface.getASInfo(asn)
+	 if (as_info) then
+	    name = as_info.asname
+	 else
+	    -- if no asn info is present, curl to get ASN name
+	    name = ntop.getASNameFromASN(asn)
+	 end
+	 if (shorten_string) then
+	    name = shortenString(name)
+	 end
+      end
+
+      if (name ~= asn) and (not short_version) then
+	 name = string.format("%d (%s)", asn, name)
+      end
+
+      if (asn == 0) then
+	 name = i18n("no_asn")
+      end
+
+      cached[asn] = name
+   end
+
+   return name
 end
 
 -- formats asn transit as ASN (AS NAME)  [via ASN X (AS NAME)]
