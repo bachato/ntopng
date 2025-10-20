@@ -2,7 +2,7 @@
 	"id": "exporter_interfaces",
 	"data_url": "lua/pro/rest/v2/get/exporters/exporters_interfaces.lua",
 	"use_current_page": false,
-	"enable_search": false,
+	"enable_search": true,
 	"paging": false,
 	"display_empty_rows": true,
 	"columns": [
@@ -38,7 +38,7 @@
 		{
 			"title_i18n": "flow_devices.interface",
 			"data_field": "snmp_ifname",
-			"sortable": false,
+			"sortable": true,
 			"min-width": "30px",
 			"class": [
 				"text-nowrap"

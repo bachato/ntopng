@@ -183,10 +183,24 @@ function columns_sorting(col, r0, r1) {
             return sortingFunctions.sortByIP(r0.probe_ip, r1.probe_ip, col.sort);
         } else if (col.id == "name") {
             return sortingFunctions.sortByName(r0.probe_public_ip, r1.probe_public_ip, col.sort);
+        } else if (col.id == "probe_name") {
+            return sortingFunctions.sortByName(r0.probe_name, r1.probe_name, col.sort);
+        } else if (col.id == "exporter_name") {
+            return sortingFunctions.sortByName(r0.exporter_name, r1.exporter_name, col.sort);
+        } else if (col.id == "snmp_ifname") {
+            return sortingFunctions.sortByName(r0.snmp_ifname, r1.snmp_ifname, col.sort);
         } else if (col.id == "exported_flows") {
             return sortingFunctions.sortByNumber(r0.probe_uuid, r1.probe_uuid, col.sort);
         } else if (col.id == "interface_name") {
             return sortingFunctions.sortByName(r0.probe_interface, r1.probe_interface, col.sort);
+        } else if (col.id == "in_bytes") {
+            return sortingFunctions.sortByNumber(r0.in_bytes, r1.in_bytes, col.sort);
+        } else if (col.id == "out_bytes") {
+            return sortingFunctions.sortByNumber(r0.out_bytes, r1.out_bytes, col.sort);
+        } else if (col.id == "throughput") {
+            return sortingFunctions.sortByNumber(r0.throughput, r1.throughput, col.sort);
+        } else if (col.id == "ratio") {
+            return sortingFunctions.sortByNumber(r0.ratio?.value, r1.ratio?.value, col.sort);
         }
     }
 }

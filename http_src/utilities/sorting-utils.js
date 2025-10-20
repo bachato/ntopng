@@ -39,26 +39,33 @@ const normalize_number_value = function (lower_value, val, sort) {
 }
 /* ******************************************************************** */
 
-/* Sort by Name */
 const sortByName = function (val_1, val_2, sort) {
-    const isNumeric1 = !isNaN(val_1);
-    const isNumeric2 = !isNaN(val_2);
+    // Convert the values into number, to see if they are numbers or not
+    const num1 = Number(val_1);
+    const num2 = Number(val_2);
 
-    /* Check if the two are number, if they are, confront as numbers */
+    const isNumeric1 = !isNaN(num1) && val_1 !== null && val_1 !== '';
+    const isNumeric2 = !isNaN(num2) && val_2 !== null && val_2 !== '';
+
+    /* Both are numbers */
     if (isNumeric1 && isNumeric2) {
-        return sortByNumber(Number(val_1), Number(val_2), sort)
+        return sortByNumber(num1, num2, sort);
     }
 
-    if (sort == 1) {
-        if (!val_1) return -1;
-        if (!val_2) return 1;
-        return val_1?.localeCompare(val_2);
+    /* At least a string */
+    const str1 = (val_1 ?? '').toString();
+    const str2 = (val_2 ?? '').toString();
+
+    if (sort === 1) {
+        if (!str1) return -1;
+        if (!str2) return 1;
+        return str1.localeCompare(str2, undefined, { numeric: true, sensitivity: 'base' });
     }
 
-    if (!val_1) return 1;
-    if (!val_2) return -1;
-    return val_2?.localeCompare(val_1);
-}
+    if (!str1) return 1;
+    if (!str2) return -1;
+    return str2.localeCompare(str1, undefined, { numeric: true, sensitivity: 'base' });
+};
 
 /* ******************************************************************** */
 
