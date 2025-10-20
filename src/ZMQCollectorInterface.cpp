@@ -26,6 +26,8 @@
 
 //#define DEBUG_ZMQ_MSGID
 
+#define DEBUG_PROBES
+
 /* **************************************************** */
 
 ZMQCollectorInterface::ZMQCollectorInterface(const char *_endpoint) : ZMQParserInterface(_endpoint) {
@@ -376,9 +378,9 @@ void ZMQCollectorInterface::collect_flows() {
           }
         }
 
-        //ntop->getTrace()->traceEvent(TRACE_NORMAL, "[size: %u][source_id: %u][topic: %s]",
-        //  size, source_id, h->url);
-
+#ifdef DEBUG_PROBES
+        // ntop->getTrace()->traceEvent(TRACE_NORMAL, "[size: %u][source_id: %u][topic: %s]", size, source_id, h->url);
+#endif
         if (active_probes.find(source_id) != active_probes.end()) {
           /* Found - read last message ID for the current source ID */
 
@@ -524,9 +526,10 @@ void ZMQCollectorInterface::collect_flows() {
 
           /* Allocate probe info if it's the first time we see it */
           if (probe == NULL) {
-
-            //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Allocating new probe/source [source_id: %u]", source_id);
-
+#ifdef DEBUG_PROBES
+            ntop->getTrace()->traceEvent(TRACE_NORMAL, "Allocating new probe/source [source_id: %u]", source_id);
+#endif
+	    
             probe = (zmq_probe *) calloc(1, sizeof(zmq_probe));
 
             if (probe != NULL) {
