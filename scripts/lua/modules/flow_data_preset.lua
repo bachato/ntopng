@@ -105,7 +105,7 @@ local columns = {
         is_key = true,
         formatter = {
             funct = format_portidx_name,
-            column_dependent = "out_device",
+            column_dependent = "in_device",
             generateLink = generateExporterInterfaceLink
         }
     },

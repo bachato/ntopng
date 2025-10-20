@@ -5265,11 +5265,12 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
           (retriever->pag->outIndexFilter(&outIndex) &&
            f->getFlowDeviceOutIndex() != outIndex))
         return (false);
+      // Just in or out interface needs to match
       if ((f->getFlowDeviceIP() != deviceIP) ||
+          ((retriever->pag->ifaceIndexFilter(&ifaceIndex) &&
+           f->getFlowDeviceInIndex() != ifaceIndex) &&
           (retriever->pag->ifaceIndexFilter(&ifaceIndex) &&
-           f->getFlowDeviceInIndex() != ifaceIndex) ||
-          (retriever->pag->ifaceIndexFilter(&ifaceIndex) &&
-           f->getFlowDeviceOutIndex() != ifaceIndex))
+           f->getFlowDeviceOutIndex() != ifaceIndex)))
         return (false);
     }
 
