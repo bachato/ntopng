@@ -32,7 +32,7 @@
     </div>
 
         <TableWithConfig ref="table_probes" :table_id="table_id" :csrf="csrf" :f_map_columns="map_table_def_columns"
-            :f_sort_rows="columns_sorting" :get_extra_params_obj="get_extra_params_obj">
+            :f_sort_rows="columns_sorting" :get_extra_params_obj="get_extra_params_obj" @custom_event="on_table_custom_event">
         </TableWithConfig>
 
         <NoteList :note_list="note_list"> </NoteList>
@@ -48,6 +48,7 @@ import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as BadgeComponent } from "./dashboard-badge.vue";
 import { default as NoteList } from "./note-list.vue";
 import formatterUtils from "../utilities/formatter-utils";
+import linksUtils from "../utilities/links-utils.js";
 import { ntopng_url_manager } from "../services/context/ntopng_globals_services.js";
 
 // used for dashboard badges
@@ -125,20 +126,8 @@ const map_table_def_columns = (columns) => {
             else
                 return value
         },
-        "snmp_ifname": (value, row) => {
-            // get table footer notes
-            var returnValue = value;
-
-            // Add timeseries icon if timeseries are enabled
-            if (row['timeseries_enabled']) {
-                let timeseriesUrl = `${flowdevice_interface_url}ip=${get_ip_from_url()}&ts_schema=flowdev_port:traffic&page=historical&snmp_port_idx=${row.ifindex}&ifid=${row.ifid}`
-                returnValue += `&nbsp;<a href=${timeseriesUrl}><i class="fas fa-chart-area fa-lg"></i></a>&nbsp;`
-            }
-
-            let snmp_config = `${snmp_interface_config_url}ip=${get_ip_from_url()}&page=config&snmp_port_idx=${row.ifindex}&ifid=${row.ifid}`
-            returnValue += `<a href=${snmp_config}><i class="fas fa-cog"></i></a>`
-            
-            return returnValue
+        "snmp_ifname": (value, row) => {            
+            return value
         },
         "in_bytes": (value, row) => {
             if (!value)
@@ -164,11 +153,29 @@ const map_table_def_columns = (columns) => {
 
     columns.forEach((c) => {
         c.render_func = map_columns[c.data_field];
+        if (c.id == "actions") {
+            const visible_dict = {
+                jump_to_snmp: props.context.isSNMPAvailable,
+                timeseries: props.context.showTimeseries,
+            };
+            c.button_def_array.forEach((b) => {
+                b.f_map_class = (current_class, row) => {
+                    // if is not defined is enabled
+                    if (!visible_dict[b.id]) {
+                        current_class.push("disabled");
+                    } else if (!(row.snmp_interface_available) && (b.id === "jump_to_snmp")) {
+                        current_class.push("disabled");
+                    }
+                    return current_class;
+                }
+            });
+        }
     });
 
     return columns;
 };
 
+/* ************************************** */
 
 function columns_sorting(col, r0, r1) {
     if (col != null) {
@@ -183,6 +190,37 @@ function columns_sorting(col, r0, r1) {
         }
     }
 }
+
+/* ************************************** */
+
+function click_button_jump_to_snmp(event) {
+    const row = event.row;
+    const url = linksUtils.getSNMPInterfaceDetailsPageURL(row.exporter_ip, row.ifindex, http_prefix)
+    window.location.href = url;
+}
+
+/* ************************************** */
+
+function click_button_timeseries(event) {
+    const row = event.row;
+    const url = linksUtils.getExporterInterfaceDetailsPageURL(row.exporter_ip, row.ifindex, row.ifid, http_prefix)
+    window.location.href = url;
+}
+
+/* ************************************** */
+
+function on_table_custom_event(event) {
+    let events_managed = {
+        "click_button_jump_to_snmp": click_button_jump_to_snmp,
+        "click_button_timeseries": click_button_timeseries,
+    };
+    if (events_managed[event.event_id] == null) {
+        return;
+    }
+    events_managed[event.event_id](event);
+}
+
+/* ************************************** */
 
 // used by dashboard badges
 function get_component_data_func(component) {

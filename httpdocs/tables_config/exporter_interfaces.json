@@ -7,6 +7,35 @@
 	"display_empty_rows": true,
 	"columns": [
 		{
+			"id": "actions",
+			"title_i18n": "actions",
+			"sortable": false,
+			"sticky": true,
+			"min-width" : "80px",
+			"max-width" : "80px",
+			"class": [
+				"text-nowrap",
+				"text-center"
+			],
+			"render_v_node_type": "button_list",
+			"button_def_array": [
+				{
+					"id": "timeseries",
+					"icon": "fas fa-chart-area",
+					"title_i18n": "prefs.timeseries",
+					"class": [],
+					"event_id": "click_button_timeseries"
+				},
+				{
+					"id": "jump_to_snmp",
+					"icon": "fas fa-satellite-dish",
+					"title_i18n": "jump_to_snmp",
+					"class": [],
+					"event_id": "click_button_jump_to_snmp"
+				}
+			]
+		},
+		{
 			"title_i18n": "flow_devices.interface",
 			"data_field": "snmp_ifname",
 			"sortable": false,

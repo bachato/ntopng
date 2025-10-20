@@ -39,14 +39,14 @@ const getExporterInterfaceDetailsPageURL = (exporter_ip, interface_id, ifid, htt
 
 /* Returns the URL of the exporter details */
 const getSNMPDetailsPageURL = (device_ip, http_prefix) => {
-    return `${http_prefix}/lua/pro/enterprise/snmp_device_details.lua?host=${device_ip}&page=interfaces`
+    return `${http_prefix}/lua/pro/enterprise/snmp_device_details.lua?host=${device_ip}`
 }
 
 /* ******************************************************************** */
 
 /* Returns the URL of the exporter details */
 const getSNMPInterfaceDetailsPageURL = (device_ip, interface_id, http_prefix) => {
-    return `${http_prefix}/lua/pro/enterprise/snmp_interface_details.lua?page=historical&host=${device_ip}&snmp_port_idx=${interface_id}`
+    return `${http_prefix}/lua/pro/enterprise/snmp_interface_details.lua?&host=${device_ip}&snmp_port_idx=${interface_id}`
 }
 
 /* ******************************************************************** */

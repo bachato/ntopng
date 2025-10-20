@@ -536,6 +536,7 @@ local lang = {
   ["ja4_client_hash"] = "JA4 Client Hash",
   ["json"] = "JSON",
   ["jump_to_chart"] = "Chart View",
+  ["jump_to_snmp"] = "Jump to SNMP",
   ["jump_to_table"] = "Table View",
   ["kb"] = "KB",
   ["kbps"] = "Kbps",
