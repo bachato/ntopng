@@ -1,11 +1,21 @@
 {
-	"id": "exporter_interfaces",
+	"id": "probe_exporters_interfaces",
 	"data_url": "lua/pro/rest/v2/get/exporters/exporters_interfaces.lua",
 	"use_current_page": false,
 	"enable_search": false,
 	"paging": false,
 	"display_empty_rows": true,
 	"columns": [
+                {
+                    "id": "exporter_name",
+                    "title_i18n": "flow_devices.exporter",
+                    "data_field": "exporter_name",
+                    "sortable": true,
+                    "min-width": "30px",
+                    "class": [
+                        "text-nowrap"
+                    ]
+                },
 		{
 			"title_i18n": "flow_devices.interface",
 			"data_field": "snmp_ifname",

@@ -1,5 +1,5 @@
 {
-	"id": "exporters_details",
+	"id": "all_exporters_interfaces",
 	"data_url": "lua/pro/rest/v2/get/exporters/exporters_interfaces.lua",
 	"use_current_page": false,
 	"enable_search": false,
