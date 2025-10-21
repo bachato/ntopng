@@ -215,58 +215,6 @@ if ntop.isPro() then
     end
 end
 
-if ntop.isPro() and not isEmptyString(_GET["deviceIP"]) then
-    local dev_ip = _GET["deviceIP"]
-    -- Flow exporter requested
-    local in_ports = {{key = "inIfIdx", value = "", label = i18n("all")}}
-    local ports_table =
-        interface.getFlowDeviceInfoByIP(dev_ip, true --[[ Show minimal info ]] )
-
-    local tmp_list = {}
-    for _, ports in pairs(ports_table) do
-        for portidx, _ in pairsByKeys(ports, asc) do
-            local name = format_portidx_name(dev_ip, portidx, true)
-            tmp_list[name] = {key = "inIfIdx", value = portidx, label = name}
-        end
-    end
-
-    for _, value in pairsByKeys(tmp_list, asc) do
-        in_ports[#in_ports + 1] = value
-    end
-
-    rsp[#rsp + 1] = {
-        action = "inIfIdx",
-        label = i18n("db_search.input_snmp"),
-        name = "inIfIdx",
-        value = in_ports,
-        show_with_value = dev_ip,
-        show_with_key = "deviceIP"
-    }
-
-    local out_ports = {{key = "outIfIdx", value = "", label = i18n("all")}}
-    local ports_table = interface.getFlowDeviceInfoByIP(dev_ip, false)
-
-    tmp_list = {}
-    for _, ports in pairs(ports_table) do
-        for portidx, _ in pairsByKeys(ports, asc) do
-            local name = format_portidx_name(dev_ip, portidx, true)
-            tmp_list[name] = {key = "outIfIdx", value = portidx, label = name}
-        end
-    end
-
-    for _, value in pairsByKeys(tmp_list, asc) do
-        out_ports[#out_ports + 1] = value
-    end
-
-    rsp[#rsp + 1] = {
-        action = "outIfIdx",
-        label = i18n("db_search.output_snmp"),
-        name = "outIfIdx",
-        value = out_ports,
-        show_with_value = dev_ip,
-        show_with_key = "deviceIP"
-    }
-end
 
 local country_filter = {
     {key = "country", value = "", label = i18n("all")}, {
