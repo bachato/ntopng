@@ -63,7 +63,7 @@ page_utils.print_navbar(i18n('graphs.active_flows'), base_url .. "?", {{
         sort .. "&order=" .. order .. "&start=" .. start .. "&length=" .. length,
     active = page == "analysis",
     page_name = "analysis",
-    label = i18n("analysis")
+    label = i18n("aggregation")
 }})
 
 if (page == "flows" or page == nil) then
