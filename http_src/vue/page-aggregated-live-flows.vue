@@ -501,13 +501,13 @@ const format_flows_icon = function (data, rowData) {
         if (add_host) url = url + `&host=` + props.context.host;
     }
 
-    if (!(exporter === "")) {
+    if (exporter && exporter !== "") {
         url = `${url}&deviceIP=${exporter}`
     }
-    if (!(in_interface === "")) {
+    if (in_interface && in_interface !== "") {
         url = `${url}&inIfIdx=${in_interface}`
     }
-    if (!(out_interface === "")) {
+    if (out_interface && out_interface !== "") {
         url = `${url}&outIfIdx=${out_interface}`
     }
 
