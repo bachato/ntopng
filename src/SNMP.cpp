@@ -1083,12 +1083,13 @@ int SNMP::snmpv3_get_fctn(lua_State *vm, snmp_pdu_primitive pduType,
 
 int SNMP::snmp_get_fctn(lua_State *vm, snmp_pdu_primitive pduType,
                         bool skip_first_param, bool _batch_mode) {
+  if(lua_type(vm, skip_first_param ? 5 : 4) != LUA_TNUMBER) {
 #ifdef HAVE_LIBSNMP
-  if(lua_type(vm, skip_first_param ? 5 : 4) != LUA_TNUMBER)
     return (snmpv3_get_fctn(vm, pduType, skip_first_param, _batch_mode));
-  else
+#else
+    return (CONST_LUA_ERROR); /* not supported */
 #endif
-    {
+  } else {
       char *agent_host, *community;
       u_int timeout = 5, version = snmp_version, oid_idx = 0, idx = skip_first_param ? 2 : 1;
       char *oid[SNMP_MAX_NUM_OIDS] = {NULL};
@@ -1106,7 +1107,7 @@ int SNMP::snmp_get_fctn(lua_State *vm, snmp_pdu_primitive pduType,
       community = (char *)lua_tostring(vm, idx++);
 
       if(ntop_lua_check(vm, __FUNCTION__, idx, LUA_TNUMBER) != CONST_LUA_OK)
-	return (CONST_LUA_ERROR);
+        return (CONST_LUA_ERROR);
 
       timeout = min(timeout, (u_int)lua_tointeger(vm, idx));
 
