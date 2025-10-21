@@ -8148,6 +8148,7 @@ local lang = {
     ["SNMP_DEVICE_EDITED_SUCCESSFULLY"] = "SNMP device edited successfully",
     ["SNMP_DEVICE_INTERFACE_STATUS_CHANGE_FAILED"] = "SNMP device interface status change has failed",
     ["SNMP_DEVICE_UNREACHABLE"] = "No answer from the SNMP device",
+    ["SNMP_UNSUPPORTED_VERSION"] = "SNMP version not supported (please check SNMPv3 is supported on this platform)",
     ["WIDGETS_MISSING_DATASOURCES"] = "Missing datasources",
     ["WIDGETS_MISSING_DATASOURCE_PARAMS"] = "Missing datasource params",
     ["WIDGETS_MISSING_DATASOURCE_TYPE"] = "Missing datasource type",

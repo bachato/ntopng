@@ -356,6 +356,12 @@ local rest_utils = {
                 str= "MISSING_PARAMETERS"
             },
 
+            snmp_unsupported_version = {
+                http_code = 400,
+                rc = -60,
+                str = "SNMP_UNSUPPORTED_VERSION"
+            },
+
             -- Checks
             not_enabled = {http_code = 400, rc = -2, str = "NOT_ENABLED"}
         }

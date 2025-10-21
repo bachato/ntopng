@@ -39,12 +39,12 @@ end
 -- @param conf The configuration to be imported
 -- @return A table with a key "success" set to true is returned on success. A key "err" is set in case of failure, with one of the errors defined in rest_utils.consts.err.
 function snmp_import_export:import(conf)
+
+   err = snmp_config.restore(conf)
+
    local res = {}
-
-   local success = snmp_config.restore(conf)
-
-   if not success then
-      res.err = rest_utils.consts.err.internal_error
+   if err then
+      res.err = err
    else
       res.success = true
    end
