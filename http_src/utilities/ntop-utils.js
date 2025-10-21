@@ -914,7 +914,7 @@ export default class NtopUtils {
                             $(`#import-error`).removeClass('invalid-feedback').addClass('text-warning');
                         }
 
-                        $("#import-error").text(i18n_ext.rest_consts[responseJSON.rc_str] || i18n_ext.FAILED_HTTP_REQUEST).show();
+                        $("#import-error").text(responseJSON.rc_str_hr || i18n_ext.rest_consts[responseJSON.rc_str] || i18n_ext.FAILED_HTTP_REQUEST).show();
 
                     })
                     .always(() => {
