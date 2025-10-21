@@ -1,6 +1,12 @@
 --
--- (C) 2013-24 - ntop.org
+-- (C) 2013-25 - ntop.org
 --
+
+--
+-- NOTE: see scripts/lua/modules/prefs_menu.lua for displaying
+--       or hidign menu entries
+--
+
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 package.path = dirs.installdir .. "/scripts/lua/modules/timeseries/drivers/?.lua;" .. package.path -- for influxdb
@@ -1855,7 +1861,7 @@ if auth.has_capability(auth.capabilities.preferences) then
             })
         end
 
-        if info["version.enterprise_edition"] then
+        if info["version.enterprise_edition"] or ntop.isnEdge() then
             prefsInformativeField("SNMP", i18n("prefs.snmp_timeseries_config_link", {
                 url = "?tab=snmp&show_advanced_prefs=1"
             }))
@@ -1982,7 +1988,7 @@ if auth.has_capability(auth.capabilities.preferences) then
     end
 
     function printSnmp()
-        if not ntop.isEnterprise() then
+        if not ntop.isEnterprise() and not ntop.isnEdge() then
             return
         end
 
@@ -2551,12 +2557,15 @@ if auth.has_capability(auth.capabilities.preferences) then
     if (tab == "auth") then
         printAuthentication()
     end
+
     if (tab == "ifaces") then
         printInterfaces()
     end
+
     if (tab == "logging") then
         printLogging()
     end
+
     if (tab == "snmp") then
         printSnmp()
     end

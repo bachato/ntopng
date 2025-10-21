@@ -1,3 +1,7 @@
+--
+-- (C) 2014-25 - ntop.org
+--
+
 require "lua_utils"
 
 local recording_utils = require "recording_utils"
@@ -529,7 +533,7 @@ local menu_subpages = {{
     label = i18n("prefs.snmp"),
     advanced = true,
     pro_only = true,
-    hidden = not (ntop.isEnterpriseM()),
+    hidden = not (ntop.isEnterpriseM() or have_nedge),
     nedge_hidden = false,
     entries = {
         toggle_snmp_rrds = {
