@@ -126,8 +126,30 @@ const map_table_def_columns = (columns) => {
             else
                 return value
         },
-        "snmp_ifname": (value, row) => {            
+        "probe_name": (value, row) => {
+            if (row.probe_uuid) {
+                const probe_url = `${http_prefix}/lua/pro/enterprise/exporters.lua?probe_uuid=${row.probe_uuid}`
+                return `<a href="${probe_url}">${value}</a>`
+            }
             return value
+        },
+        "exporter_name": (value, row) => {
+            if (row.exporter_uuid && row.probe_uuid && row.exporter_ip && row.probe_ip) {
+                const exporter_url = `${http_prefix}/lua/pro/enterprise/exporter_interfaces.lua?ip=${row.exporter_ip}&exporter_uuid=${row.exporter_uuid}&probe_uuid=${row.probe_uuid}&probe_ip=${row.probe_ip}`
+                return `<a href="${exporter_url}">${value}</a>`
+            }
+            return value
+        },
+        "snmp_ifname": (value, row) => {
+            let displayValue = value
+            if (row.ifindex) {
+                displayValue = `${value} (${row.ifindex})`
+            }
+            if (row.exporter_ip && row.ifindex && row.ifid) {
+                const interface_url = `${http_prefix}/lua/pro/enterprise/flowdevice_interface_details.lua?ip=${row.exporter_ip}&snmp_port_idx=${row.ifindex}&ifid=${row.ifid}`
+                return `<a href="${interface_url}">${displayValue}</a>`
+            }
+            return displayValue
         },
         "in_bytes": (value, row) => {
             if (!value)
