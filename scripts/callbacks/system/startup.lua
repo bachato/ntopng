@@ -34,6 +34,7 @@ local blog_utils = require("blog_utils")
 local vs_utils = require "vs_utils"
 local drop_host_pool_utils = require "drop_host_pool_utils"
 local json = require "dkjson"
+local cache_utils = require "cache_utils"
 
 -- ##################################################################
 
@@ -384,5 +385,7 @@ local mitre_table = mitre_utils.insertDBMitreInfo()
 ntop.reloadServersConfiguration()
 ntop.reloadASNConfiguration()
 ts_utils.runFirstSetup()
+
+cache_utils.initialize()
 
 traceError(TRACE_NORMAL, TRACE_CONSOLE, "Completed startup.lua")

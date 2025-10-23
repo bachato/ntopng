@@ -24,6 +24,8 @@ local dns_utils = require "dns_utils"
 local http_utils = require "http_utils"
 local rest_utils = require "rest_utils"
 local snmp_utils
+local cache_utils = require "cache_utils"
+
 if ntop.isPro() then
     package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" ..
                        package.path
@@ -987,7 +989,6 @@ end
 
 local _snmp_devices = {}
 local _exporters_ports_names = {}
-local _portidx_name_cache = {}
 
 -- @brief This function format the SNMP interface name.
 -- @params device_ip: snmp device ip
@@ -995,11 +996,17 @@ local _portidx_name_cache = {}
 --         short_version: boolean, long formatting version (e.g. flow info) or short version (e.g. dropdown menu)
 function format_portidx_name(device_ip, portidx, short_version)
     local idx_name = portidx
-    local cache_key = device_ip .. "@" .. portidx
-    local cached_val = _portidx_name_cache[cache_key]
+    local cached_val = cache_utils.getifname(device_ip, portidx)
 
-    if (cached_val ~= nil) then return (cached_val) end
+    if (cached_val ~= nil) then
+       if(short_version) then
+	  cached_val = shortenString(cached_val, 26)
+       end
+       
+       return (cached_val)
+    end
 
+    -- DEAD CODE BEGIN
     -- tprint("format_portidx_name("..device_ip .. ", " .. portidx..")")
 
     -- SNMP is available only with Pro version at least
@@ -1044,9 +1051,11 @@ function format_portidx_name(device_ip, portidx, short_version)
         end
     end
 
-    _portidx_name_cache[cache_key] = idx_name
+    cache_utils.setifname(device_ip, portidx, idx_name)
 
     return idx_name
+
+    -- DEAD CODE END
 end
 
 -- ##############################################

@@ -763,8 +763,7 @@ function predicates.exporters_SNMP_ratio_column(toast, container)
         return
     end
 
-    local cached_device = snmp_cached_dev:create(flow_device_ip)
-
+    local cached_device = snmp_cached_dev:get_interfaces(flow_device_ip)
     local is_ratio_available = snmp_utils.is_snmp_ratio_available(cached_device)
 
     if (is_ratio_available) then

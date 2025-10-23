@@ -68,7 +68,9 @@ class Ntop {
   Redis *redis;         /**< Pointer to the Redis server. */
   Mutex m, users_m, speedtest_m, pools_lock;
   std::map<std::string, u_int8_t> cachedCustomLists; /* Cache of lists filenames */
-  u_int32_t current_time; /* Upated by current_time */
+  std::map<std::string, std::string> luaCache; /* Cache used by Lua */
+  RwLock luaCacheLock;
+  u_int32_t current_time; /* Updated by current_time */
 #ifndef HAVE_NEDGE
   ElasticSearch *elastic_search; /**< Pointer of Elastic Search. */
 #ifdef HAVE_ZMQ
@@ -852,6 +854,10 @@ class Ntop {
 			Host *target, Flow *flow, char *note);
 
   static const ndpi_protocol getConstNdpiUnknownProtocol();
+
+  std::string getLuaCache(std::string);
+  void setLuaCache(std::string, std::string);
+  void dumpLuaCache(lua_State *vm);
 };
 
 extern Ntop *ntop;

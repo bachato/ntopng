@@ -4496,3 +4496,41 @@ bool Ntop::viewHasZMQInterface(NetworkInterface *viewInterface) {
 
   return(false);
 }
+
+/* ******************************************* */
+
+std::string Ntop::getLuaCache(std::string key) {
+  std::map<std::string, std::string>::iterator it;
+  
+  luaCacheLock.rdlock(__FILE__, __LINE__);
+  it = luaCache.find(key);
+  luaCacheLock.unlock(__FILE__, __LINE__);
+
+  if(it == luaCache.end())
+    return("");
+  else
+    return(it->second);
+}
+
+/* ******************************************* */
+
+void Ntop::setLuaCache(std::string key, std::string val) {
+  luaCacheLock.wrlock(__FILE__, __LINE__);
+  luaCache[key] = val;
+  luaCacheLock.unlock(__FILE__, __LINE__);
+}
+
+/* ******************************************* */
+
+void Ntop::dumpLuaCache(lua_State *vm) {
+  std::map<std::string, std::string>::iterator it;
+
+  lua_newtable(vm);
+  
+  luaCacheLock.rdlock(__FILE__, __LINE__);
+  
+  for(it = luaCache.begin(); it != luaCache.end(); ++it)
+    lua_push_str_table_entry(vm, it->first.c_str(), it->second.c_str());
+  
+  luaCacheLock.unlock(__FILE__, __LINE__);
+}

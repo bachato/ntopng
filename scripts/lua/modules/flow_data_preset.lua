@@ -296,8 +296,7 @@ function flow_data_preset.getFormattedDataAndLink(key, value, values)
 
     -- Get the formatter function
     local formatter = columns[key]["formatter"]["funct"]
-    local link_formatter =
-        columns[key]["formatter"]["generateLink"]
+    local link_formatter = columns[key]["formatter"]["generateLink"]
 
     -- See if there is some column from which is dependent,
     -- e.g. SNMP Interface needs the SNMP IP
@@ -306,12 +305,10 @@ function flow_data_preset.getFormattedDataAndLink(key, value, values)
 
         if (#dependent_values > 1) then
             -- TODO: Now it's limited to a single column, add multiple columns	 
-            formatted_value =
-                formatter(dependent_values[1], dependent_values[2])
+            formatted_value = formatter(dependent_values[1], dependent_values[2])
 
             if link_formatter then
-                link = link_formatter(dependent_values[1],
-                                                          dependent_values[2])
+                link = link_formatter(dependent_values[1], dependent_values[2])
             end
         else
             -- new code

@@ -13,6 +13,7 @@ pragma_once_lua_utils_get = true
 require "ntop_utils"
 require "label_utils"
 require "check_redis_prefs"
+local cache_utils = require "cache_utils"
 
 local clock_start = os.clock()
 local snmp_cached_devices = {}
@@ -97,9 +98,17 @@ function getProbeName(exporter_ip, show_vlan, shorten_len, show_ip_and_alias)
    if show_ip_and_alias == nil then
       show_ip_and_alias = true
    end
-
+   
    if tonumber(exporter_ip) then
       exporter_ip = ntop.inet_ntoa(exporter_ip)
+   end
+
+   if(exporter_ip ~= nil) then
+      local ret = cache_utils.gethostname(exporter_ip)
+
+      if(not isEmptyString(ret)) then
+	 return(ret)
+      end
    end
 
    local cached_device_name

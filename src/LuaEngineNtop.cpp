@@ -271,6 +271,7 @@ static int ntop_list_interfaces(lua_State *vm) {
 
 static int ntop_ip_cmp(lua_State *vm) {
   IpAddress a, b;
+
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
@@ -8131,7 +8132,6 @@ static int reload_asn_configuration(lua_State *vm) {
 
 /* **************************************************************** */
 
-
 #ifdef NTOPNG_PRO
 
 static int reload_networks_policy_configuration(lua_State *vm) {
@@ -8145,6 +8145,48 @@ static int reload_networks_policy_configuration(lua_State *vm) {
 
 }
 #endif
+
+/* **************************************************************** */
+
+static int ntop_get_lua_cache(lua_State *vm) {
+  std::string ret;
+  
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+  
+  ret = ntop->getLuaCache(std::string((char *)lua_tostring(vm, 1)));
+
+  lua_pushstring(vm, ret.c_str());
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* **************************************************************** */
+
+static int ntop_set_lua_cache(lua_State *vm) {
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  ntop->setLuaCache(std::string((char *)lua_tostring(vm, 1)),
+		    std::string((char *)lua_tostring(vm, 2)));
+  
+  lua_pushnil(vm);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* **************************************************************** */
+
+static int ntop_dump_lua_cache(lua_State *vm) {
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);  
+  ntop->dumpLuaCache(vm);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
 
 /* **************************************************************** */
 
@@ -8610,6 +8652,11 @@ static luaL_Reg _ntop_reg[] = {
     { "reloadNetworksPolicyConfiguration", reload_networks_policy_configuration },
 #endif
 
+    /* In Memory cache */
+    { "getLuaCache",  ntop_get_lua_cache  },
+    { "setLuaCache",  ntop_set_lua_cache  },
+    { "dumpLuaCache", ntop_dump_lua_cache },
+    
     {NULL, NULL}
 };
 
