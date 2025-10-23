@@ -711,8 +711,7 @@ void ZMQCollectorInterface::purgeIdle(time_t when, bool force_idle,
 
   purgeIdleProbes(when);
   
-  for (std::map<u_int64_t, NetworkInterface *>::iterator it = flowHashing.begin();
-       it != flowHashing.end(); ++it)
+  for (std::map<u_int64_t, NetworkInterface *>::iterator it = flowHashing.begin(); it != flowHashing.end(); ++it)
     it->second->purgeIdle(when, force_idle, full_scan);
 }
 

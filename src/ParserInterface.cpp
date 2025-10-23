@@ -59,15 +59,15 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
   bpf_timeval now_tv = {0};
   Mac *srcMac = NULL, *dstMac = NULL;
   IpAddress srcIP, dstIP;
-  u_int32_t unique_source_id = zflow->unique_source_id;
+  u_int32_t exporter_unique_source_id = zflow->unique_source_id;
   u_int32_t in_pkts, in_bytes, out_pkts, out_bytes;
 
 #ifdef NTOPNG_PRO
   if (!flow_interfaces_stats) return false;
 #endif
 
-  if (unique_source_id == 0)
-    unique_source_id = zflow->nprobe_ip + zflow->exporter_device_ip;
+  if (exporter_unique_source_id == 0) /* Fallback */
+    exporter_unique_source_id = getExporterUniqueSourceID(zflow->exporter_device_ip, zflow->nprobe_ip);
 
   now = time(NULL);
   now_tv.tv_sec = now;
@@ -259,42 +259,22 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     return(false);
 
 #ifdef NTOPNG_PRO
-  if ((unique_source_id != 0)/* && (!isSubInterface())*/) {
+  if ((exporter_unique_source_id != 0)/* && (!isSubInterface())*/) {
 
 #if 0
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "unique_source_id=%u, inIndex=%u, outIndex=%u, exporter_device_ip=%u, nprobe_ip=%u [%u / %u]",
-				 unique_source_id,
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "exporter_unique_source_id=%u, inIndex=%u, outIndex=%u, exporter_device_ip=%u, nprobe_ip=%u [%u / %u]",
+				 exporter_unique_source_id,
 				 flow->getFlowDeviceInIndex(),
 				 flow->getFlowDeviceOutIndex(),
 				 zflow->exporter_device_ip, zflow->nprobe_ip,
 				 flow->getFlowDeviceInIndex(), flow->getFlowDeviceOutIndex());
 #endif
 
-    if (!flow_interfaces_stats->checkExporters(unique_source_id,
+    if (!flow_interfaces_stats->checkExporterInterfaces(exporter_unique_source_id,
 					       flow->getFlowDeviceInIndex(),
 					       flow->getFlowDeviceOutIndex(),
 					       zflow->exporter_device_ip, zflow->nprobe_ip)) {
-      static bool shown = false;
-
-      if (!shown) {
-        ntop->getTrace()->traceEvent(TRACE_NORMAL, "Flow dropped due to license limitations");
-
-        ntop->getTrace()->traceEvent(TRACE_NORMAL,
-				     "Exporters: %d/%d max | Exporter Interfaces: %d/%d max",
-				     ntop->getNumFlowExporters(), get_max_num_flow_exporters(),
-				     ntop->getNumFlowExportersInterfaces(),
-				     get_max_num_flow_exporters_interfaces());
-
-        ntop->getTrace()->traceEvent(TRACE_NORMAL,
-				     "Discarded [unique_source_id: %u];device_ip: %u][probe_ip: "
-				     "%u][iface: %u->%u]",
-				     unique_source_id, zflow->exporter_device_ip, zflow->nprobe_ip,
-				     flow->getFlowDeviceInIndex(), flow->getFlowDeviceOutIndex());
-
-        ntop->getRedis()->set(EXPORTERS_EXCEEDED_LIMITS_KEY, "1");
-        shown = true;
-      }
-
+      exportersLimitReached();
       return(false);
     }
   }
@@ -717,9 +697,9 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
   }
 
 #ifdef NTOPNG_PRO
-  if (unique_source_id) {
+  if (exporter_unique_source_id) {
     if (flow_interfaces_stats) {
-      flow_interfaces_stats->incStats(now, unique_source_id, flow->getFlowDeviceInIndex(),
+      flow_interfaces_stats->incStats(now, exporter_unique_source_id, flow->getFlowDeviceInIndex(),
                                       flow->getStatsProtocol(), out_pkts,
                                       out_bytes, in_pkts, in_bytes);
 
@@ -730,7 +710,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
          double counting. */
 
       if (flow->getFlowDeviceOutIndex() != flow->getFlowDeviceInIndex())
-        flow_interfaces_stats->incStats(now, unique_source_id, flow->getFlowDeviceOutIndex(),
+        flow_interfaces_stats->incStats(now, exporter_unique_source_id, flow->getFlowDeviceOutIndex(),
                                         flow->getStatsProtocol(), in_pkts,
                                         in_bytes, out_pkts, out_bytes);
     }
@@ -978,6 +958,26 @@ void ParserInterface::deliverFlowToCompanions(ParsedFlow *const flow) {
       }
     }
   }
+}
+
+/* **************************************************** */
+
+void ParserInterface::exportersLimitReached() {
+  static bool shown = false;
+
+  if (shown) return;
+
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Flows may be dropped due to license limitations");
+
+  ntop->getTrace()->traceEvent(TRACE_NORMAL,
+			       "Exporters: %d/%d max | Exporter Interfaces: %d/%d max",
+			       ntop->getNumFlowExporters(), get_max_num_flow_exporters(),
+			       ntop->getNumFlowExportersInterfaces(),
+			       get_max_num_flow_exporters_interfaces());
+
+  ntop->getRedis()->set(EXPORTERS_EXCEEDED_LIMITS_KEY, "1");
+
+  shown = true;
 }
 
 #endif

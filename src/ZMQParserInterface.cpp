@@ -469,8 +469,11 @@ u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
   enum json_tokener_error jerr = json_tokener_success;
   nProbeStats zrs; /* Do not instantiate, automatically cleaned outside of the scope */
   const u_int32_t max_timeout = 600, min_timeout = 60;
+  //u_int32_t nprobe_ip = 0;
 
   if (polling_start_time == 0) polling_start_time = (u_int32_t)time(NULL);
+
+  //ntop->getTrace()->traceEvent(TRACE_NORMAL, "EVENT = %s", payload);
 
   o = json_tokener_parse_verbose(payload, &jerr);
 
@@ -502,10 +505,12 @@ u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
 	       "%s", json_object_get_string(w));
 
     if (json_object_object_get_ex(o, "probe", &w)) {
-      if (json_object_object_get_ex(w, "public_ip", &z))
+      if (json_object_object_get_ex(w, "public_ip", &z)) {
+        const char *ip = json_object_get_string(z);
+        //nprobe_ip = ntohl(inet_addr(ip));
         snprintf(zrs.remote_probe_public_address,
-                 sizeof(zrs.remote_probe_public_address), "%s",
-                 json_object_get_string(z));
+                 sizeof(zrs.remote_probe_public_address), "%s", ip);
+      }
       if (json_object_object_get_ex(w, "uuid", &z))
         snprintf(zrs.uuid, sizeof(zrs.uuid),
                  "%s", json_object_get_string(z));
@@ -626,7 +631,7 @@ u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
       if (json_object_object_get_ex(w, "exporters", &z)) {
         json_object_object_foreach(z, key, val) {
           //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Exporter: %s", key);
-          u_int32_t ip = ntohl(inet_addr(key));
+          u_int32_t exporter_device_ip = ntohl(inet_addr(key));
           ExporterStats exp_stats;
           json_object *x;
 
@@ -647,7 +652,10 @@ u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
 	  if (json_object_object_get_ex(val, "unique_source_id", &x))
             exp_stats.unique_source_id = (u_int32_t)json_object_get_int64(x);
 
-          zrs.exportersStats[ip] = exp_stats;
+          //if (!flow_interfaces_stats->checkExporter(exp_stats.unique_source_id, exporter_device_ip, nprobe_ip))
+          //  exportersLimitReached();
+
+          zrs.exportersStats[exporter_device_ip] = exp_stats;
         }
       }
     }
@@ -681,17 +689,14 @@ u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
 				 zrs.num_exporters, zrs.num_flow_exports);
 #endif
 
-    remote_lifetime_timeout = zrs.remote_lifetime_timeout,
-      remote_idle_timeout = zrs.remote_idle_timeout;
+    remote_lifetime_timeout = zrs.remote_lifetime_timeout;
+    remote_idle_timeout = zrs.remote_idle_timeout;
 
-    /* ntop->getTrace()->traceEvent(TRACE_WARNING, "%u/%u", avg_bps, avg_pps);
-     */
-
-    /* Process Flow */
+    /* Set stats */
     setRemoteStats(&zrs);
 
-    for (std::map<u_int64_t, NetworkInterface *>::iterator it = flowHashing.begin();
-         it != flowHashing.end(); ++it) {
+    /* Set stats to sub interfaces */
+    for (std::map<u_int64_t, NetworkInterface *>::iterator it = flowHashing.begin(); it != flowHashing.end(); ++it) {
       ZMQParserInterface *z = (ZMQParserInterface *)it->second;
 
       z->setRemoteStats(&zrs);
@@ -3231,8 +3236,8 @@ void ZMQParserInterface::setRemoteStats(nProbeStats *zrs) {
 
   lock.wrlock(__FILE__, __LINE__);
 
-  if (source_id_last_zmq_remote_stats.find(zrs->source_id) ==
-      source_id_last_zmq_remote_stats.end()) {
+  if (source_id_last_zmq_remote_stats.find(zrs->source_id) == source_id_last_zmq_remote_stats.end()) {
+    /* Allocate last stats for source ID */
     last_zrs = new (std::nothrow) nProbeStats();
 
     if (!last_zrs) {
@@ -3241,8 +3246,9 @@ void ZMQParserInterface::setRemoteStats(nProbeStats *zrs) {
     }
 
     source_id_last_zmq_remote_stats[zrs->source_id] = last_zrs;
-  } else
+  } else {
     last_zrs = source_id_last_zmq_remote_stats[zrs->source_id];
+  }
 
   *last_zrs = *zrs;
 
@@ -3260,8 +3266,8 @@ void ZMQParserInterface::setRemoteStats(nProbeStats *zrs) {
 
   lock.wrlock(__FILE__, __LINE__); /* Need write lock due to (*) */
 
-  for (it = source_id_last_zmq_remote_stats.begin();
-       it != source_id_last_zmq_remote_stats.end(); it++)  {
+  /* Compute cumulative stats for all sources */
+  for (it = source_id_last_zmq_remote_stats.begin(); it != source_id_last_zmq_remote_stats.end(); it++)  {
     nProbeStats *zrs_i = it->second;
 
     last_update = ndpi_max(last_update, zrs_i->last_update);
@@ -3307,12 +3313,11 @@ void ZMQParserInterface::setRemoteStats(nProbeStats *zrs) {
                           cumulative_zrs->remote_collected_lifetime_timeout) + 10 /* Safe margin */;
   updateFlowMaxIdle();
 
-  if ((zmq_initial_pkts == 0) /* ntopng has been restarted */
-      || (cumulative_zrs->remote_bytes < zmq_initial_bytes) /* nProbe has been restarted */
-      ) {
+  if (zmq_initial_pkts == 0 /* ntopng has been restarted */
+      || cumulative_zrs->remote_bytes < zmq_initial_bytes /* nProbe has been restarted */ ) {
     /* Start over */
-    zmq_initial_bytes = cumulative_zrs->remote_bytes,
-      zmq_initial_pkts  = cumulative_zrs->remote_pkts;
+    zmq_initial_bytes = cumulative_zrs->remote_bytes;
+    zmq_initial_pkts  = cumulative_zrs->remote_pkts;
     zmq_initial_drops = cumulative_zrs->remote_pkt_drops;
   }
 
@@ -3348,8 +3353,7 @@ void ZMQParserInterface::probeLuaStats(lua_State *vm) {
 
   lock.rdlock(__FILE__, __LINE__);
 
-  for (it = source_id_last_zmq_remote_stats.begin();
-       it != source_id_last_zmq_remote_stats.end(); ++it) {
+  for (it = source_id_last_zmq_remote_stats.begin(); it != source_id_last_zmq_remote_stats.end(); ++it) {
     nProbeStats *zrs = it->second;
 
     lua_newtable(vm);
@@ -3383,39 +3387,31 @@ void ZMQParserInterface::probeLuaStats(lua_State *vm) {
     lua_push_uint64_table_entry(vm, "flow_collection.collection_port", zrs->flow_collection.collection_port);
     lua_push_uint64_table_entry(vm, "flow_collection.sflow_samples", zrs->flow_collection.sflow_samples);
     lua_push_uint64_table_entry(vm, "zmq.num_flow_exports", zrs->num_flow_exports);
-    lua_push_uint64_table_entry(vm, "zmq.num_exporters", zrs->num_exporters);
+
     exporterLuaStats(vm, zrs);
+    lua_push_uint64_table_entry(vm, "zmq.num_exporters", zrs->num_exporters);
 
     /* ************************************* */
 
     if (zrs) {
-      lua_push_uint64_table_entry(vm, "probe.remote_time",
-				  zrs->remote_time); /* remote time when last event has been sent */
-      lua_push_uint64_table_entry(vm, "probe.local_time",
-				  zrs->local_time); /* local time when last event has been received */
+      lua_push_uint64_table_entry(vm, "probe.remote_time", zrs->remote_time); /* remote time when last event has been sent */
+      lua_push_uint64_table_entry(vm, "probe.local_time", zrs->local_time); /* local time when last event has been received */
 
       if(zrs->num_flow_exports < zmq_remote_initial_exported_flows)
 	zmq_remote_initial_exported_flows = zrs->num_flow_exports; /* nProbe has been reset */
 
-      lua_push_uint64_table_entry(vm, "zmq.num_flow_exports",
-				  zrs->num_flow_exports - zmq_remote_initial_exported_flows);
+      lua_push_uint64_table_entry(vm, "zmq.num_flow_exports",  zrs->num_flow_exports - zmq_remote_initial_exported_flows);
       lua_push_uint64_table_entry(vm, "zmq.num_exporters", zrs->num_exporters);
 
       if (zrs->export_queue_full > 0)
-        lua_push_uint64_table_entry(vm, "zmq.drops.export_queue_full",
-                                    zrs->export_queue_full);
+        lua_push_uint64_table_entry(vm, "zmq.drops.export_queue_full", zrs->export_queue_full);
       if (zrs->flow_collection_drops)
-        lua_push_uint64_table_entry(vm, "zmq.drops.flow_collection_drops",
-                                    zrs->flow_collection_drops);
+        lua_push_uint64_table_entry(vm, "zmq.drops.flow_collection_drops", zrs->flow_collection_drops);
       if (zrs->flow_collection_udp_socket_drops)
-        lua_push_uint64_table_entry(vm,
-                                    "zmq.drops.flow_collection_udp_socket_drops",
-                                    zrs->flow_collection_udp_socket_drops);
+        lua_push_uint64_table_entry(vm, "zmq.drops.flow_collection_udp_socket_drops", zrs->flow_collection_udp_socket_drops);
 
-      lua_push_uint64_table_entry(vm, "timeout.lifetime",
-                                  zrs->remote_lifetime_timeout);
-      lua_push_uint64_table_entry(vm, "timeout.collected_lifetime",
-                                  zrs->remote_collected_lifetime_timeout);
+      lua_push_uint64_table_entry(vm, "timeout.lifetime", zrs->remote_lifetime_timeout);
+      lua_push_uint64_table_entry(vm, "timeout.collected_lifetime", zrs->remote_collected_lifetime_timeout);
       lua_push_uint64_table_entry(vm, "timeout.idle", zrs->remote_idle_timeout);
     }
 
@@ -3448,8 +3444,7 @@ void ZMQParserInterface::exporterLuaStats(lua_State *vm, nProbeStats *zrs) {
   std::map<u_int32_t, ExporterStats>::iterator it;
   lua_newtable(vm);
 
-  for (it = zrs->exportersStats.begin();
-       it != zrs->exportersStats.end(); ++it) {
+  for (it = zrs->exportersStats.begin(); it != zrs->exportersStats.end(); ++it) {
     lua_newtable(vm);
     char buf[32], ipb[24];
     snprintf(buf, sizeof(buf), "%s", Utils::intoaV4(it->first, ipb, sizeof(ipb)));

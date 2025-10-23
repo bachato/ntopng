@@ -30,7 +30,16 @@ class ParserInterface : public NetworkInterface {
   u_int8_t num_companion_interfaces;
   NetworkInterface **companion_interfaces;
 
+  inline u_int32_t getExporterUniqueSourceID(u_int32_t exporter_device_ip, u_int32_t nprobe_ip) {
+    return exporter_device_ip + nprobe_ip;
+  }
+
   virtual void reloadCompanions();
+
+ protected:
+#ifdef NTOPNG_PRO
+  void exportersLimitReached();
+#endif
 
  public:
   ParserInterface(const char *endpoint,
