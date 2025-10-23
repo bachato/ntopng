@@ -11541,6 +11541,44 @@ bool NetworkInterface::resetHostTopSites(AddressTree *allowed_hosts,
 
 /* **************************************************** */
 
+bool NetworkInterface::matchAggregatedFlow(Flow *flow, struct aggregated_stats *stats) {
+  if(stats->ip_addr != NULL) {
+    if(!flow->matchFlowIP(stats->ip_addr, stats->vlan_id))
+      return(false);
+  }
+
+  if(stats->vlan_id != NO_VLAN /* -1 == any VLAN */) {
+    if(!flow->matchFlowVLAN(stats->vlan_id))
+      return(false);
+  }
+
+  if (stats->flow_device_ip != (u_int32_t)-1 /* -1 == any Flow Device IP */) {
+    if(!flow->matchFlowDeviceIP(stats->flow_device_ip))
+      return(false);
+  }
+
+  // Filter for interfaces indexes, in or out are okay
+  if (stats->if_index != NO_OUT_IF_INDEX /* -1 == any Flow Device Interface Index */) {
+    if (!flow->matchInIfIdx(stats->if_index) && !flow->matchOutIfIdx(stats->if_index))
+      return(false);
+  } else {
+    // A specific in or out interface is requested
+    if (stats->in_if_index != NO_IN_IF_INDEX /* -1 == any Flow Device In Interface Index */) {
+      if (!flow->matchInIfIdx(stats->in_if_index))
+        return(false);
+    }
+
+    if (stats->out_if_index != NO_OUT_IF_INDEX /* -1 == any Flow Device In Interface Index */) {
+      if (!flow->matchOutIfIdx(stats->out_if_index))
+        return(false);
+    }
+  }
+
+  return (true);
+}
+
+/* **************************************************** */
+
 bool NetworkInterface::compute_protocol_flow_stats(GenericHashEntry *node,
                                                    void *user_data,
                                                    bool *matched) {
@@ -11556,30 +11594,8 @@ bool NetworkInterface::compute_protocol_flow_stats(GenericHashEntry *node,
   struct aggregated_stats *stats = (struct aggregated_stats*)user_data;
   bool is_not_guessed = f->isDPIDetectedFlow();
 
-  if(stats->ip_addr != NULL) {
-    if(!f->matchFlowIP(stats->ip_addr, stats->vlan_id))
-      return(false);
-  }
-
-  if(stats->vlan_id != NO_VLAN /* -1 == any VLAN */) {
-    if(!f->matchFlowVLAN(stats->vlan_id))
-      return(false);
-  }
-
-  if (stats->flow_device_ip != (u_int32_t)-1 /* -1 == any Flow Device IP */) {
-    if(!f->matchFlowDeviceIP(stats->flow_device_ip))
-      return(false);
-  }
-
-  if (stats->in_if_index != NO_IN_IF_INDEX /* -1 == any Flow Device In Interface Index */) {
-    if (!f->matchInIfIdx(stats->in_if_index))
-      return(false);
-  }
-
-  if (stats->out_if_index != NO_OUT_IF_INDEX /* -1 == any Flow Device In Interface Index */) {
-    if (!f->matchOutIfIdx(stats->out_if_index))
-      return(false);
-  }
+  if (!matchAggregatedFlow(f, stats))
+    return false;
 
   /* <vlan_id (16 bit)><proto.app_protocol (16 bit)><proto.master_protocol (16 bit) */
   key =
@@ -11625,30 +11641,8 @@ bool NetworkInterface::compute_client_flow_stats(GenericHashEntry *node,
   std::unordered_map<u_int64_t, AggregatedFlowsStats *>::iterator it;
   struct aggregated_stats *stats = (struct aggregated_stats*)user_data;
 
-  if(stats->ip_addr != NULL) {
-    if(!f->matchFlowIP(stats->ip_addr, stats->vlan_id))
-      return(false);
-  }
-
-  if(stats->vlan_id != NO_VLAN /* -1 == any VLAN */) {
-    if(!f->matchFlowVLAN(stats->vlan_id))
-      return(false);
-  }
-
-  if (stats->flow_device_ip != (u_int32_t)-1 /* -1 == any Flow Device IP */) {
-    if(!f->matchFlowDeviceIP(stats->flow_device_ip))
-      return(false);
-  }
-
-  if (stats->in_if_index != NO_IN_IF_INDEX /* -1 == any Flow Device In Interface Index */) {
-    if (!f->matchInIfIdx(stats->in_if_index))
-      return(false);
-  }
-
-  if (stats->out_if_index != NO_OUT_IF_INDEX /* -1 == any Flow Device In Interface Index */) {
-    if (!f->matchOutIfIdx(stats->out_if_index))
-      return(false);
-  }
+  if (!matchAggregatedFlow(f, stats))
+    return false;
 
   it = stats->count.find(key);
 
@@ -11687,30 +11681,8 @@ bool NetworkInterface::compute_server_flow_stats(GenericHashEntry *node,
   std::unordered_map<u_int64_t, AggregatedFlowsStats *>::iterator it;
   struct aggregated_stats *stats = (struct aggregated_stats*)user_data;
 
-  if(stats->ip_addr != NULL) {
-    if(!f->matchFlowIP(stats->ip_addr, stats->vlan_id))
-      return(false);
-  }
-
-  if(stats->vlan_id != NO_VLAN/* -1 == any VLAN */) {
-    if(!f->matchFlowVLAN(stats->vlan_id))
-      return(false);
-  }
-
-  if (stats->flow_device_ip != (u_int32_t)-1 /* -1 == any Flow Device IP */) {
-    if(!f->matchFlowDeviceIP(stats->flow_device_ip))
-      return(false);
-  }
-
-  if (stats->in_if_index != NO_IN_IF_INDEX /* -1 == any Flow Device In Interface Index */) {
-    if (!f->matchInIfIdx(stats->in_if_index))
-      return(false);
-  }
-
-  if (stats->out_if_index != NO_OUT_IF_INDEX /* -1 == any Flow Device In Interface Index */) {
-    if (!f->matchOutIfIdx(stats->out_if_index))
-      return(false);
-  }
+  if (!matchAggregatedFlow(f, stats))
+    return false;
 
   it = stats->count.find(key);
 
@@ -11740,31 +11712,9 @@ bool NetworkInterface::compute_client_server_srv_port_flow_stats(GenericHashEntr
   Flow *f = (Flow *)node;
   struct aggregated_stats *stats = (struct aggregated_stats*)user_data;
 
-  if(stats->ip_addr != NULL) {
-    if(!f->matchFlowIP(stats->ip_addr, stats->vlan_id))
-      return(false);
-  }
-
-  if(stats->vlan_id != NO_VLAN /* -1 == any VLAN */) {
-    if(!f->matchFlowVLAN(stats->vlan_id))
-      return(false);
-  }
-
-  if (stats->flow_device_ip != (u_int32_t)-1 /* -1 == any Flow Device IP */) {
-    if(!f->matchFlowDeviceIP(stats->flow_device_ip))
-      return(false);
-  }
-
-  if (stats->in_if_index != NO_IN_IF_INDEX /* -1 == any Flow Device In Interface Index */) {
-    if (!f->matchInIfIdx(stats->in_if_index))
-      return(false);
-  }
-
-  if (stats->out_if_index != NO_OUT_IF_INDEX /* -1 == any Flow Device In Interface Index */) {
-    if (!f->matchOutIfIdx(stats->out_if_index))
-      return(false);
-  }
-
+  if (!matchAggregatedFlow(f, stats))
+    return false;
+  
   u_int64_t vlan_id = f->get_vlan_id();
   std::unordered_map<u_int64_t, AggregatedFlowsStats *>::iterator it;
   u_int64_t key = (((u_int64_t)f->get_cli_ip_addr()->key()) << 16) +
@@ -11802,30 +11752,8 @@ bool NetworkInterface::compute_client_server_srv_port_app_proto_flow_stats(Gener
   Flow *f = (Flow *)node;
   struct aggregated_stats *stats = (struct aggregated_stats*)user_data;
 
-  if(stats->ip_addr != NULL) {
-    if(!f->matchFlowIP(stats->ip_addr, stats->vlan_id))
-      return(false);
-  }
-
-  if(stats->vlan_id != (u_int16_t)-1 /* -1 == any VLAN */) {
-    if(!f->matchFlowVLAN(stats->vlan_id))
-      return(false);
-  }
-
-  if (stats->flow_device_ip != (u_int32_t)-1 /* -1 == any Flow Device IP */) {
-    if(!f->matchFlowDeviceIP(stats->flow_device_ip))
-      return(false);
-  }
-
-  if (stats->in_if_index != NO_IN_IF_INDEX /* -1 == any Flow Device In Interface Index */) {
-    if (!f->matchInIfIdx(stats->in_if_index))
-      return(false);
-  }
-
-  if (stats->out_if_index != NO_OUT_IF_INDEX /* -1 == any Flow Device In Interface Index */) {
-    if (!f->matchOutIfIdx(stats->out_if_index))
-      return(false);
-  }
+  if (!matchAggregatedFlow(f, stats))
+    return false;
 
   ndpi_protocol detected_protocol = f->get_detected_protocol();
 
@@ -12358,6 +12286,7 @@ void NetworkInterface::getFilteredLiveFlowsStats(lua_State *vm) {
   u_int16_t vlan_id = NO_VLAN /* Any VLAN */;
   u_int32_t in_if_idx = NO_IN_IF_INDEX /* Any inIfIdx */;
   u_int32_t out_if_idx = NO_OUT_IF_INDEX /* Any outIfIdx */;
+  u_int32_t if_idx = NO_OUT_IF_INDEX /* Any interface index */;
 
   /* NOTE: parsing of additional Lua parameters in NetworkInterface::sort_and_filter_flow_stats() */
   if (lua_type(vm, 8) == LUA_TSTRING) host_ip = (char *)lua_tostring(vm, 8);
@@ -12365,12 +12294,14 @@ void NetworkInterface::getFilteredLiveFlowsStats(lua_State *vm) {
   if (lua_type(vm, 10) == LUA_TSTRING) flow_device_ip = (char*)lua_tostring(vm,10);
   if (lua_type(vm, 11) == LUA_TNUMBER) in_if_idx = lua_tonumber(vm,11);
   if (lua_type(vm, 12) == LUA_TNUMBER) out_if_idx = lua_tonumber(vm,12);
+  if (lua_type(vm, 13) == LUA_TNUMBER) if_idx = lua_tonumber(vm,13);
 
   stats.vlan_id = vlan_id;
   stats.ip_addr = host_ip ? Utils::parseHostString(host_ip, &stats.vlan_id) : NULL;
   stats.flow_device_ip = flow_device_ip ? ntohl(inet_addr(flow_device_ip)) : /* Any flow device */ (u_int32_t)-1;
   stats.in_if_index = in_if_idx;
   stats.out_if_index = out_if_idx;
+  stats.if_index = if_idx;
 
   switch (filter_type) {
   case AnalysisCriteria::application_criteria:

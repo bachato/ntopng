@@ -237,8 +237,11 @@ function click_button_flows(event) {
 
 function click_button_hosts(event) {
     const row = event.row;
-    window.location.href = 
-        `${http_prefix}/lua/flows_stats.lua?page=analysis&aggregation_criteria=src_as_dst_as&draw=0&sort=flows&order=desc&start=0&length=10&deviceIP=${row["exporter_ip"]}`;
+    const filters = {
+        deviceIP: row.exporter_ip,
+        ifIdx: row.interface_id
+    }
+    window.location.href = linksUtils.getAggregatedFlowsURL(filters, "src_as_dst_as", http_prefix)
 }
 
 /* ************************************** */

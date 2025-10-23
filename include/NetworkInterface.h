@@ -1377,6 +1377,7 @@ public:
   void getRxOnlyHostsList(lua_State *vm, bool local_host_rx_only,
                           bool list_host_peers);
 
+  static bool matchAggregatedFlow(Flow *flow, struct aggregated_stats *stats);
   static bool compute_protocol_flow_stats(GenericHashEntry *node,
 					  void *user_data, bool *matched);
   static bool compute_client_flow_stats(GenericHashEntry *node, void *user_data,

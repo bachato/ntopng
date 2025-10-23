@@ -40,14 +40,14 @@
                 {
 					"id": "flows",
 					"icon": "fas fa-stream",
-					"title_i18n": "flows",
+					"title_i18n": "active_flows",
 					"class": [],
 					"event_id": "click_button_flows"
 				},
                 {
 					"id": "hosts",
 					"icon": "fas fa-laptop",
-					"title_i18n": "hosts",
+					"title_i18n": "active_hosts",
 					"class": [],
 					"event_id": "click_button_hosts"
 				}
