@@ -702,6 +702,8 @@ void usage() {
 	 "                                    |\n"
 #endif
 #endif
+	 "[--direct-flows-dump]               | Dump collected flows directly before "
+	 "any additional processing\n"
 	 "[--export-flows|-I] <endpoint>      | Export flows with the specified "
 	 "endpoint\n"
 	 "                                    | See https://wp.me/p1LxdS-O5 for a "
@@ -1204,7 +1206,6 @@ static const struct option long_options[] = {
   {"interface",               required_argument, NULL, 'i'},
   {"traffic-filtering",       required_argument, NULL, 'k'},
   {"disable-login",           required_argument, NULL, 'l'},
-  {"http-log",                required_argument, NULL, 'L'},
   {"local-networks",          required_argument, NULL, 'm'},
 #ifndef HAVE_NEDGE
   {"dns-mode",                required_argument, NULL, 'n'},
@@ -1229,6 +1230,7 @@ static const struct option long_options[] = {
   {"pid",                     required_argument, NULL, 'G'},
 #endif
   {"export-flows",            required_argument, NULL, 'I'},
+  {"http-log",                required_argument, NULL, 'L'},
   {"ppp-networks",            no_argument,       NULL, 'M'},
   {"instance-name",           required_argument, NULL, 'N'},
   {"capture-direction",       required_argument, NULL, 'Q'},
@@ -1287,6 +1289,7 @@ static const struct option long_options[] = {
   {"insecure",                no_argument,       NULL, 225},
   {"offline",                 no_argument,       NULL, 226},
 #ifdef NTOPNG_PRO
+  {"direct-flows-dump",       no_argument,       NULL, 250},
   {"fail-invalid-license",    no_argument,       NULL, 251},
   {"check-maintenance",       no_argument,       NULL, 252},
   {"check-license",           no_argument,       NULL, 253},
@@ -2335,6 +2338,10 @@ int Prefs::setOption(int optkey, char *optarg) {
     break;
 
 #ifdef NTOPNG_PRO
+  case 250:
+    toggle_dump_flows_direct(true);
+    break;
+
   case 251:
     fail_on_invalid_license = true;
     break;

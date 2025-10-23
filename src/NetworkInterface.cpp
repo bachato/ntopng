@@ -1168,7 +1168,7 @@ bool NetworkInterface::enqueueHostAlert(HostAlert *alert) {
 int NetworkInterface::dumpFlow(time_t when, Flow *f) {
   SPSCQueue<Flow *> *queue;
   int rc = -1;
-#if DEBUG_FLOW_DUMP
+#ifdef DEBUG_FLOW_DUMP
   const char *status_str;
 #endif
 
@@ -1178,13 +1178,13 @@ int NetworkInterface::dumpFlow(time_t when, Flow *f) {
     /* Last flow dump before delete
      * Note: this never happens in 'direct' mode */
     queue = idleFlowsToDump;
-#if DEBUG_FLOW_DUMP
+#ifdef DEBUG_FLOW_DUMP
     status_str = "IDLE";
 #endif
   } else {
     /* Partial dump if active flows */
     queue = activeFlowsToDump;
-#if DEBUG_FLOW_DUMP
+#ifdef DEBUG_FLOW_DUMP
     status_str = "ACTIVE";
 #endif
   }
@@ -1200,7 +1200,7 @@ int NetworkInterface::dumpFlow(time_t when, Flow *f) {
     if (!isViewed()) dump_condition.signal();
 #endif
 
-#if DEBUG_FLOW_DUMP
+#ifdef DEBUG_FLOW_DUMP
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] Queueing flow to dump [%s]", __FUNCTION__, status_str);
 #endif
 
@@ -3764,7 +3764,7 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
 
         free(json);
 
-#if DEBUG_FLOW_DUMP
+#ifdef DEBUG_FLOW_DUMP
         ntop->getTrace()->traceEvent(TRACE_NORMAL, "Dumped active flow");
 #endif
 
