@@ -962,6 +962,7 @@ void ParserInterface::deliverFlowToCompanions(ParsedFlow *const flow) {
 
 /* **************************************************** */
 
+#ifdef NTOPNG_PRO
 void ParserInterface::exportersLimitReached() {
   static bool shown = false;
 
@@ -979,5 +980,6 @@ void ParserInterface::exportersLimitReached() {
 
   shown = true;
 }
+#endif
 
 #endif
