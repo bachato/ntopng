@@ -34,13 +34,10 @@ If you plan to manipulate javascript you also need to do
 - npm install -g clean-css-cli
 
 If you plan to build packages you should also install:
-- apt install debhelper dkms
+- apt install debhelper dkms debsigs
 
 On Ubuntu/Debian (up to Debian 11) do
 - apt install dpkg-sig
-
-oo Debian 12
-- apt install debsigs
 
 If you want to optimize memory usage please consider installing jemalloc
 - git clone https://github.com/jemalloc/jemalloc.git 
