@@ -91,8 +91,6 @@ end
 
 -- ##############################################
 
-local probes_names = {}
-
 function getProbeName(exporter_ip, show_vlan, shorten_len, show_ip_and_alias)
    -- Set default to true if nil to show ip [alias]
    if show_ip_and_alias == nil then
@@ -112,54 +110,6 @@ function getProbeName(exporter_ip, show_vlan, shorten_len, show_ip_and_alias)
    else
       return(exporter_ip)      
    end
-
-   -- DEAD CODE
-   local cached_device_name
-   local snmp_cached_dev
-   local probe_alias = probes_names[exporter_ip]
-
-   if (not probe_alias) then
-      probe_alias = getFlowDevAlias(exporter_ip, show_ip_and_alias)
-      probes_names[exporter_ip] = probe_alias or ""
-   end
-
-   -- In case an alias is set to the flow exporter, directly use the alias
-   if not isEmptyString(probe_alias) and probe_alias ~= exporter_ip then
-      return probe_alias
-   end
-
-   -- No alias set, let's try with the SNMP
-   if ntop.isPro() then
-      local dirs = ntop.getDirs()
-      package.path = dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" .. package.path
-      snmp_cached_dev = require "snmp_cached_dev"
-   end
-
-   if snmp_cached_dev then
-      cached_device_name = snmp_cached_devices[exporter_ip]
-
-      if(snmp_cached_devices[exporter_ip] == nil) then
-	 cached_device_name = snmp_cached_dev:get_system(exporter_ip)
-	 snmp_cached_devices[exporter_ip] = cached_device_name
-      end
-   end
-
-   if cached_device_name and cached_device_name.system then
-      cached_device_name = cached_device_name.system.name
-   else
-      local hinfo = hostkey2hostinfo(exporter_ip)
-      local exporter_label = hostinfo2label(hinfo, show_vlan, shorten_len)
-
-      if not isEmptyString(exporter_label) then
-	 cached_device_name = exporter_label
-      end
-   end
-
-   if(cached_device_name == nil) then
-      cached_device_name = exporter_ip
-   end
-
-   return cached_device_name
 end
 
 -- ##############################################
