@@ -571,7 +571,7 @@
 #define NPROBE_UUID           NTOP_BASE_ID+590
 #define L7_DOMAIN_INFO        NTOP_BASE_ID+591
 #define TCP_FINGERPRINT       NTOP_BASE_ID+597
-#define NPROBE_SOURCE_ID      NTOP_BASE_ID+598 /* Unique nProbe identifier */
+#define NPROBE_SOURCE_ID      NTOP_BASE_ID+600 /* Unique nProbe identifier */
 
 /* sFlow Counter Fields */
 #define SFLOW_DEVICE_IP 0
