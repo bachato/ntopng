@@ -594,8 +594,8 @@ public:
       : ndpiDetectedProtocol.proto.master_protocol;
   }
   inline bool isMaskedFlow() const {
-    return (Utils::maskHost(get_cli_ip_addr()->isLocalHost())
-            || Utils::maskHost(get_srv_ip_addr()->isLocalHost()));
+    return ((get_cli_ip_addr() && Utils::maskHost(get_cli_ip_addr()->isLocalHost()))
+            || (get_srv_ip_addr() && Utils::maskHost(get_srv_ip_addr()->isLocalHost())));
   };
   char *serialize(ExportFormat format = export_format_GENERIC);
   /* Prepares an alert JSON and puts int in the resulting `serializer`. */
