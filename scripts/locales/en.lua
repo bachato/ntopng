@@ -8570,6 +8570,7 @@ local lang = {
     ["ping_all_snmp_devices"] = "Ping All SNMP Devices",
     ["ping_all_snmp_devices_confirm"] = "Do you really want to ping all the SNMP devices?",
     ["ping_devices"] = "Ping Devices",
+    ["polling_in_progress"] = "Polling currently in progress",
     ["port_macs"] = "MAC Addresses",
     ["port_macs_short"] = "MACs",
     ["printer"] = "Printer",

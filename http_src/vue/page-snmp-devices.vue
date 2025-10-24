@@ -153,17 +153,19 @@ const rest_params = {
 const map_table_def_columns = (columns) => {
     let map_columns = {
         "ip": (data, row) => {
+            let rsp = ''
             if (row.polling_in_progress) {
-                data = `${data} <i class='fas fa-sync' data-bs-toggle='tooltip' data-bs-placement='top' title='${_i18n('snmp.polling_in_progress')}'></i>`
+                rsp = `<i class='fas fa-sync' data-bs-toggle='tooltip' data-bs-placement='top' title='${_i18n('snmp.polling_in_progress')}'></i>`
             }
             if (row.is_unreachable) {
-                return `<span class='badge bg-warning' data-bs-toggle='tooltip' data-bs-placement='top' title='${_i18n('snmp.snmp_device_does_not_respond')}'>
+                rsp =  `<span class='badge bg-warning' data-bs-toggle='tooltip' data-bs-placement='top' title='${_i18n('snmp.snmp_device_does_not_respond')}'>
                             <i class="fas fa-exclamation-triangle"></i>
-                        </span> ${data}`;
-            } else if (row.last_update) {
-                return `<a href='${linksUtils.getSNMPDetailsPageURL(data, http_prefix)}'>${data}</a>`;
+                        </span> ${data} ${rsp}`;
             }
-            return data;
+            if (row.last_update) {
+                return `<a href='${linksUtils.getSNMPDetailsPageURL(data, http_prefix)}'>${data}</a> ${rsp}`;
+            }
+            return `${data} ${rsp}`;
         },
         "interfaces_with_errors": (data, row) => {
             if (data === 0) return "";
