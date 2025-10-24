@@ -353,7 +353,8 @@ void LocalHost::lua_contacts_stats(lua_State *vm) const {
 /* *************************************** */
 
 void LocalHost::lua(lua_State *vm, AddressTree *ptree, bool host_details,
-                    bool verbose, bool returnHost, bool asListElement) {
+                    bool verbose, bool veryBasicInfo,
+		    bool returnHost, bool asListElement) {
   char buf_id[64], *host_id = buf_id;
   const char *local_net;
   bool mask_host = Utils::maskHost(isLocalHost());
@@ -364,10 +365,13 @@ void LocalHost::lua(lua_State *vm, AddressTree *ptree, bool host_details,
   if ((ptree && (!match(ptree))) || mask_host) return;
 
   Host::lua(vm, NULL /* ptree already checked */, host_details, verbose,
-            returnHost, false /* asListElement possibly handled later */);
+            veryBasicInfo, returnHost, false /* asListElement possibly handled later */);
 
   /* *** */
 
+  if(veryBasicInfo)
+    return;
+  
   Host::lua_blacklisted_flows(vm);
   lua_contacts_stats(vm);
   if (usedPorts) usedPorts->lua(vm, iface);

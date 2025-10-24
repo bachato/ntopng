@@ -996,66 +996,27 @@ local _exporters_ports_names = {}
 --         short_version: boolean, long formatting version (e.g. flow info) or short version (e.g. dropdown menu)
 function format_portidx_name(device_ip, portidx, short_version)
     local idx_name = portidx
-    local cached_val = cache_utils.getifname(device_ip, portidx)
+    local cached_val
+
+    if tonumber(device_ip) then
+       device_ip = ntop.inet_ntoa(device_ip)
+    end
+    
+    cached_val = cache_utils.getifname(device_ip, portidx)
 
     if (cached_val ~= nil) then
        if(short_version) then
 	  cached_val = shortenString(cached_val, 26)
        end
-       
-       return (cached_val)
+
+       -- if(cached_val ~= portidx) then
+       --  return (cached_val.." ("..portidx..")")
+       -- else
+	  return (cached_val)
+       -- end
+    else
+       return(portidx)
     end
-
-    -- DEAD CODE BEGIN
-    -- tprint("format_portidx_name("..device_ip .. ", " .. portidx..")")
-
-    -- SNMP is available only with Pro version at least
-    if ntop.isPro() then
-        local name = ""
-        -- In case of the device being in number format, convert to string
-        if tonumber(device_ip) then device_ip = ntop.inet_ntoa(device_ip) end
-
-        local cached_info = _snmp_devices[device_ip]
-
-        if (cached_info == nil) then
-            -- Retrieve the name from SNMP cache (redis)
-            local snmp_cached_dev = require "snmp_cached_dev"
-
-            cached_info = snmp_cached_dev:get_interfaces(device_ip)
-            _snmp_devices[device_ip] = cached_info
-        end
-
-        if (cached_info) and (cached_info["interfaces"]) then
-            -- if the info are available, use this function
-            cached_info = cached_info["interfaces"][tostring(portidx)]
-
-            if (cached_info) then
-                idx_name = snmp_utils.getInterfaceNameFromCache(device_ip,
-                                                                portidx,
-                                                                cached_info,
-                                                                short_version)
-            end
-        else
-            -- No SNMP configured: last resort use exporters
-            local snmp_mappings = require "snmp_mappings"
-
-            local key = string.format("%s_%s", device_ip, portidx)
-            local port_name = _exporters_ports_names[key]
-            if (not port_name) then
-                port_name = snmp_mappings.get_iface_name(device_ip, portidx)
-                _exporters_ports_names[key] = port_name or ""
-            end
-            if (not isEmptyString(port_name)) then
-                idx_name = port_name
-            end
-        end
-    end
-
-    cache_utils.setifname(device_ip, portidx, idx_name)
-
-    return idx_name
-
-    -- DEAD CODE END
 end
 
 -- ##############################################

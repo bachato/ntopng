@@ -109,8 +109,11 @@ function getProbeName(exporter_ip, show_vlan, shorten_len, show_ip_and_alias)
       if(not isEmptyString(ret)) then
 	 return(ret)
       end
+   else
+      return(exporter_ip)      
    end
 
+   -- DEAD CODE
    local cached_device_name
    local snmp_cached_dev
    local probe_alias = probes_names[exporter_ip]

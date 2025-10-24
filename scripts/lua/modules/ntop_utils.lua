@@ -983,7 +983,9 @@ function generateExporterInterfaceLink(ip, interface)
       local exporter_uuid = nil
       local exporter_ifid = nil
       if tonumber(ip) then ip = ntop.inet_ntoa(ip) end
+
       exporter_uuid, exporter_ifid = exporters_utils.getExporterUUID(ip)
+
       return string.format(
 	 "%s/lua/pro/enterprise/flowdevice_interface_details.lua?ip=%s&snmp_port_idx=%s&ifid=%s",
 	 ntop.getHttpPrefix(), ip, interface, exporter_ifid)

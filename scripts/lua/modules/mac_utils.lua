@@ -74,7 +74,7 @@ end
 -- ################################################
 
 function getMacHosts(mac, additional_ip)
-    local mac_hosts = interface.getMacHosts(mac)
+    local mac_hosts = interface.getMacHosts(mac, false)
     local num_hosts = table.len(mac_hosts)
     local url, hosts
 
@@ -99,7 +99,7 @@ function getMacHosts(mac, additional_ip)
             hosts = i18n("n_more_objects", {
                 label = first_host["ip"],
                 num = num_hosts,
-                object = i18n("hosts")
+                object = string.lower(i18n("hosts"))
             })
         end
     end

@@ -830,7 +830,7 @@ public:
                                 bool sourceMacsOnly, u_int32_t maxHits,
                                 u_int8_t devtype_filter,
                                 u_int8_t location_filter);
-  bool getActiveMacHosts(lua_State *vm, const char *mac);
+  bool getActiveMacHosts(lua_State *vm, const char *mac, bool verbose);
   int getActiveDeviceTypes(lua_State *vm, u_int8_t bridge_iface_idx,
                            bool sourceMacsOnly, u_int32_t maxHits,
                            const char *manufacturer, u_int8_t location_filter);

@@ -135,7 +135,8 @@ class LocalHost : public Host {
   char *getRedisKey(char *buf, uint buf_len, bool skip_prefix = false);
 
   virtual void lua(lua_State *vm, AddressTree *ptree, bool host_details,
-                   bool verbose, bool returnHost, bool asListElement);
+                   bool verbose, bool veryBasicInfo,
+		   bool returnHost, bool asListElement);
   void custom_periodic_stats_update(const struct timeval *tv, bool force_update) { ; }
 
   virtual void luaHostBehaviour(lua_State *vm) {

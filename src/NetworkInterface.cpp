@@ -4675,6 +4675,7 @@ struct mac_find_info {
   u_int16_t vlan_id;
   Mac *m;
   DeviceType dtype;
+  bool verbose;
   lua_State *vm;
 };
 
@@ -4905,7 +4906,7 @@ bool NetworkInterface::getHostInfo(lua_State *vm, AddressTree *allowed_hosts,
                    getLuaVMUservalue(vm, observationPointId));
 
   if (h) {
-    h->lua(vm, allowed_hosts, true, true, true, false);
+    h->lua(vm, allowed_hosts, true, true, false, true, false);
     ret = true;
   } else
     ret = false;
@@ -7138,14 +7139,14 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
       if (h != NULL) {
         if (!tsLua) {
           if(useArrayFormat) {
-            h->lua(vm, NULL /* Already checked */, host_details, false, false, false);
+            h->lua(vm, NULL /* Already checked */, host_details, false, false, false, false);
             lua_pushinteger(vm, count++);
             lua_insert(vm, -2);
             lua_settable(vm, -3);
           } else {
             (getCheckpointOnly) ?
 	      h->checkpoint(vm) :
-	      h->lua(vm, NULL /* Already checked */, host_details, false, false, true);
+	      h->lua(vm, NULL /* Already checked */, host_details, false, false, false, true);
           }
         }
         else
@@ -7160,15 +7161,14 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
       if(h != NULL) {
         if (!tsLua) {
           if(useArrayFormat) {
-            h->lua(vm, NULL /* Already checked */, host_details, false, false, false);
+            h->lua(vm, NULL /* Already checked */, host_details, false, false, false, false);
             lua_pushinteger(vm, count++);
             lua_insert(vm, -2);
             lua_settable(vm, -3);
           } else {
             (getCheckpointOnly) ?
 	      h->checkpoint(vm) :
-	      h->lua(vm, NULL /* Already checked */, host_details, false, false,
-		     true);
+	      h->lua(vm, NULL /* Already checked */, host_details, false, false, false, true);
           }
         }
         else
@@ -9424,15 +9424,16 @@ static bool find_mac_hosts(GenericHashEntry *h, void *user_data,
   struct mac_find_info *info = (struct mac_find_info *)user_data;
   Host *host = (Host *)h;
 
-  if (host->getMac() == info->m)
-    host->lua(info->vm, NULL /* Already checked */, false, false, false, true);
-
+  if (host->getMac() == info->m) {
+    host->lua(info->vm, NULL /* Already checked */, false, false, false, false, true);
+  }
+  
   return false; /* false = keep on walking */
 }
 
 /* **************************************** */
 
-bool NetworkInterface::getActiveMacHosts(lua_State *vm, const char *mac) {
+bool NetworkInterface::getActiveMacHosts(lua_State *vm, const char *mac, bool verbose) {
   struct mac_find_info info;
   bool res = false;
   u_int32_t begin_slot = 0;
@@ -9442,6 +9443,7 @@ bool NetworkInterface::getActiveMacHosts(lua_State *vm, const char *mac) {
   memset(&info, 0, sizeof(info));
   Utils::parseMac(info.mac, mac);
   info.vm = vm;
+  info.verbose = verbose;
 
   info.m = macs_hash->get(info.mac, false /* Not an inline call */);
 

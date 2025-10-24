@@ -511,7 +511,8 @@ class Host : public GenericHashEntry,
   virtual void custom_periodic_stats_update(const struct timeval *tv, bool force_update) { ; }
 
   virtual void lua(lua_State *vm, AddressTree *ptree, bool host_details,
-                   bool verbose, bool returnHost, bool asListElement);
+                   bool verbose, bool veryBasicInfo,
+		   bool returnHost, bool asListElement);
 
   void lua_get_bins(lua_State *vm) const;
   void lua_get_ip(lua_State *vm) const;

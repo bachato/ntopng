@@ -867,13 +867,16 @@ void Host::lua_get_listening_ports(lua_State *vm) {
 /* ***************************************************** */
 
 void Host::lua(lua_State *vm, AddressTree *ptree, bool host_details,
-               bool verbose, bool returnHost, bool asListElement) {
+               bool verbose, bool veryBasicInfo,
+	       bool returnHost, bool asListElement) {
   char buf[64], buf_id[64], *host_id = buf_id;
   char ip_buf[64], *ipaddr = NULL;
   bool mask_host = Utils::maskHost(isLocalHost());
   
   if((ptree && (!match(ptree))) || mask_host) return;
 
+  if(verbose) veryBasicInfo = false;
+  
   /* Some checks first... */
   if(!is_dhcp_host) {
     Mac *cur_mac = getMac();
@@ -889,115 +892,118 @@ void Host::lua(lua_State *vm, AddressTree *ptree, bool host_details,
                            (ipaddr = printMask(ip_buf, sizeof(ip_buf))));
   lua_push_uint32_table_entry(vm, "vlan", get_vlan_id());
   lua_push_int32_table_entry(vm, "iface_index", iface_index);
-  lua_push_uint32_table_entry(vm, "observation_point_id",
-                              get_observation_point_id());
-  lua_push_bool_table_entry(vm, "serialize_by_mac", serializeByMac());
-  lua_push_uint64_table_entry(vm, "ipkey", ip.key());
-  lua_push_str_table_entry(vm, "iphex", ip.get_ip_hex(buf_id, sizeof(buf_id)));
-  lua_push_str_table_entry(vm, "tskey", get_tskey(buf_id, sizeof(buf_id)));
-  lua_push_bool_table_entry(vm, "mac_meaningful", isMACmeaningful());
   lua_push_str_table_entry(vm, "name", get_visual_name(buf, sizeof(buf)));
 
-  lua_get_min_info(vm);
-  lua_get_mac(vm);
+  if(!veryBasicInfo) {
+    lua_push_uint32_table_entry(vm, "observation_point_id",
+				get_observation_point_id());
+    lua_push_bool_table_entry(vm, "serialize_by_mac", serializeByMac());
+    lua_push_uint64_table_entry(vm, "ipkey", ip.key());
+    lua_push_str_table_entry(vm, "iphex", ip.get_ip_hex(buf_id, sizeof(buf_id)));
+    lua_push_str_table_entry(vm, "tskey", get_tskey(buf_id, sizeof(buf_id)));
+    lua_push_bool_table_entry(vm, "mac_meaningful", isMACmeaningful()); 
 
-  lua_get_num_alerts(vm);
-  lua_get_score(vm);
+    lua_get_min_info(vm);
+    lua_get_mac(vm);
 
-  lua_get_as(vm);
-  lua_get_os(vm);
-  lua_get_host_pool(vm);
+    lua_get_num_alerts(vm);
+    lua_get_score(vm);
+
+    lua_get_as(vm);
+    lua_get_os(vm);
+    lua_get_host_pool(vm);
 #ifdef NTOPNG_PRO
-  qoe_stats.lua_qoe_stats(vm);
+    qoe_stats.lua_qoe_stats(vm);
 #endif
 
-  if(stats)
-    stats->lua(vm, mask_host, Utils::bool2DetailsLevel(verbose, host_details)),
+    if(stats)
+      stats->lua(vm, mask_host, Utils::bool2DetailsLevel(verbose, host_details)),
         stats->luaHostBehaviour(vm);
 
-  lua_get_num_flows(vm);
-  lua_get_num_contacts(vm);
-  lua_get_num_http_hosts(vm);
+    lua_get_num_flows(vm);
+    lua_get_num_contacts(vm);
+    lua_get_num_http_hosts(vm);
 
-  lua_push_float_table_entry(vm, "bytes_ratio", ndpi_data_ratio(getNumBytesSent(), getNumBytesRcvd()));
-  lua_push_float_table_entry(vm, "pkts_ratio", ndpi_data_ratio(getNumPktsSent(), getNumPktsRcvd()));
+    lua_push_float_table_entry(vm, "bytes_ratio", ndpi_data_ratio(getNumBytesSent(), getNumBytesRcvd()));
+    lua_push_float_table_entry(vm, "pkts_ratio", ndpi_data_ratio(getNumPktsSent(), getNumPktsRcvd()));
 
-  lua_push_int32_table_entry(vm, "num_contacted_peers_with_tcp_udp_flows_no_response",
-			     getNumContactedPeersAsClientTCPUDPNoTX());
-  lua_push_int32_table_entry(
-      vm, "num_incoming_peers_that_sent_tcp_udp_flows_no_response",
-      getNumContactsFromPeersAsServerTCPUDPNoTX());
+    lua_push_int32_table_entry(vm, "num_contacted_peers_with_tcp_udp_flows_no_response",
+			       getNumContactedPeersAsClientTCPUDPNoTX());
+    lua_push_int32_table_entry(
+			       vm, "num_incoming_peers_that_sent_tcp_udp_flows_no_response",
+			       getNumContactsFromPeersAsServerTCPUDPNoTX());
 
-  if(device_ip)
-    lua_push_str_table_entry(vm, "device_ip",
-                             Utils::intoaV4(device_ip, buf, sizeof(buf)));
+    if(device_ip)
+      lua_push_str_table_entry(vm, "device_ip",
+			       Utils::intoaV4(device_ip, buf, sizeof(buf)));
 
-  if(blacklist_name != NULL)
-    lua_push_str_table_entry(vm, "blacklist_name", blacklist_name);
+    if(blacklist_name != NULL)
+      lua_push_str_table_entry(vm, "blacklist_name", blacklist_name);
 
-  lua_push_bool_table_entry(vm, "is_rx_only", isRxOnlyHost());
+    lua_push_bool_table_entry(vm, "is_rx_only", isRxOnlyHost());
 
-  if(more_then_one_device)
-    lua_push_bool_table_entry(vm, "more_then_one_device", more_then_one_device);
+    if(more_then_one_device)
+      lua_push_bool_table_entry(vm, "more_then_one_device", more_then_one_device);
 
-  luaDNS(vm, verbose);
-  luaTCP(vm);
-  luaICMP(vm, get_ip()->isIPv4(), false);
+    luaDNS(vm, verbose);
+    luaTCP(vm);
+    luaICMP(vm, get_ip()->isIPv4(), false);
 
-  lua_unidirectional_tcp_udp_flows(vm, true);
+    lua_unidirectional_tcp_udp_flows(vm, true);
 
-  if(host_details) {
-    lua_get_score_breakdown(vm);
-    lua_blacklisted_flows(vm);
+    if(host_details) {
+      lua_get_score_breakdown(vm);
+      lua_blacklisted_flows(vm);
 
-    /*
-      This has been disabled as in case of an attack, most hosts do not have a
-      name and we will waste a lot of time doing activities that are not
-      necessary
-    */
-    get_name(buf, sizeof(buf), false);
-    if(strlen(buf) == 0 || strcmp(buf, ipaddr) == 0) {
-      if(isBroadcastHost() || isMulticastHost() ||
-          (isIPv6() && ((strncmp(ipaddr, "ff0", 3) == 0) ||
-                        (strncmp(ipaddr, "fe80", 4) == 0))))
-        ; /* Nothing to do */
-      else {
-        /* We resolve immediately the IP address by queueing on the top of
-         * address queue */
-        ntop->getRedis()->pushHostToResolve(ipaddr, false,
-                                            true /* Fake to resolve it ASAP */);
+      /*
+	This has been disabled as in case of an attack, most hosts do not have a
+	name and we will waste a lot of time doing activities that are not
+	necessary
+      */
+      get_name(buf, sizeof(buf), false);
+      if(strlen(buf) == 0 || strcmp(buf, ipaddr) == 0) {
+	if(isBroadcastHost() || isMulticastHost() ||
+	   (isIPv6() && ((strncmp(ipaddr, "ff0", 3) == 0) ||
+			 (strncmp(ipaddr, "fe80", 4) == 0))))
+	  ; /* Nothing to do */
+	else {
+	  /* We resolve immediately the IP address by queueing on the top of
+	   * address queue */
+	  ntop->getRedis()->pushHostToResolve(ipaddr, false,
+					      true /* Fake to resolve it ASAP */);
+	}
       }
-    }
 
-    luaStrTableEntryLocked(
-        vm, "ssdp",
-        ssdpLocation); /* locked to protect against data-reset changes */
+      luaStrTableEntryLocked(
+			     vm, "ssdp",
+			     ssdpLocation); /* locked to protect against data-reset changes */
 
-    /* ifid is useful for example for view interfaces to detemine
-       the actual, original interface the host is associated to. */
-    lua_push_uint64_table_entry(vm, "ifid", iface->get_id());
-    if(!mask_host)
-      luaStrTableEntryLocked(vm, "info",
-			     names.mdns_info); /* locked to protect against data-reset changes */
+      /* ifid is useful for example for view interfaces to detemine
+	 the actual, original interface the host is associated to. */
+      lua_push_uint64_table_entry(vm, "ifid", iface->get_id());
+      if(!mask_host)
+	luaStrTableEntryLocked(vm, "info",
+			       names.mdns_info); /* locked to protect against data-reset changes */
 
-    lua_get_names(vm, buf, sizeof(buf));
+      lua_get_names(vm, buf, sizeof(buf));
 
-    lua_get_geoloc(vm);
+      lua_get_geoloc(vm);
 
-    lua_get_flow_flood(vm);
-    lua_get_services(vm);
+      lua_get_flow_flood(vm);
+      lua_get_services(vm);
 
 #ifndef HAVE_NEDGE
-    lua_get_listening_ports(vm);
+      lua_get_listening_ports(vm);
 #endif
+    }
+
+    lua_get_time(vm);
+
+    lua_get_fingerprints(vm);
+
+    if(!returnHost) host_id = get_hostkey(buf_id, sizeof(buf_id));
   }
-
-  lua_get_time(vm);
-
-  lua_get_fingerprints(vm);
-
-  if(!returnHost) host_id = get_hostkey(buf_id, sizeof(buf_id));
-
+  
   if(asListElement) {
     lua_pushstring(vm, host_id);
     lua_insert(vm, -2);

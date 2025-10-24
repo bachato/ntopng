@@ -2009,12 +2009,14 @@ static int ntop_append_mac_event(lua_State *vm) {
 static int ntop_get_interface_mac_hosts(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
   char *mac = NULL;
-
-  if (lua_type(vm, 1) == LUA_TSTRING) mac = (char *)lua_tostring(vm, 1);
+  bool verbose = false;
+  
+  if (lua_type(vm, 1) == LUA_TSTRING)  mac = (char *)lua_tostring(vm, 1);
+  if (lua_type(vm, 2) == LUA_TBOOLEAN) verbose = (bool)lua_toboolean(vm, 2);
 
   lua_newtable(vm);
 
-  if (curr_iface) curr_iface->getActiveMacHosts(vm, mac);
+  if (curr_iface) curr_iface->getActiveMacHosts(vm, mac, verbose);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
