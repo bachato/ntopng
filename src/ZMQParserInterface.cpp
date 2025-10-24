@@ -37,8 +37,8 @@ ZMQParserInterface::ZMQParserInterface(const char *endpoint,
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 
   zmq_initial_bytes = 0, zmq_initial_pkts = 0, zmq_initial_drops = 0;
-  zmq_remote_stats = zmq_remote_stats_shadow = NULL;
-  memset(&last_zmq_remote_stats_update, 0, sizeof(last_zmq_remote_stats_update));
+  cumulative_remote_stats = cumulative_remote_stats_shadow = NULL;
+  memset(&last_cumulative_remote_stats_update, 0, sizeof(last_cumulative_remote_stats_update));
   zmq_remote_initial_exported_flows = 0;
   remote_lifetime_timeout = remote_idle_timeout = 0;
   once = false, is_sampled_traffic = false;
@@ -151,6 +151,7 @@ ZMQParserInterface::ZMQParserInterface(const char *endpoint,
   addMapping("SMTP_MAIL_FROM", SMTP_MAIL_FROM, NTOP_PEN);
   addMapping("SMTP_RCPT_TO", SMTP_RCPT_TO, NTOP_PEN);
   addMapping("UNIQUE_SOURCE_ID", UNIQUE_SOURCE_ID, NTOP_PEN);
+  addMapping("NPROBE_SOURCE_ID", NPROBE_SOURCE_ID, NTOP_PEN);
   addMapping("TCP_FINGERPRINT", TCP_FINGERPRINT, NTOP_PEN);
 
   /* eBPF / Process */
@@ -289,17 +290,16 @@ void ZMQParserInterface::addMappingFromRedis() {
 ZMQParserInterface::~ZMQParserInterface() {
   map<u_int32_t, nProbeStats *>::iterator it;
 
-  if (zmq_remote_stats) delete (zmq_remote_stats);
-  if (zmq_remote_stats_shadow) delete (zmq_remote_stats_shadow);
+  if (cumulative_remote_stats) delete (cumulative_remote_stats);
+  if (cumulative_remote_stats_shadow) delete (cumulative_remote_stats_shadow);
 #ifdef NTOPNG_PRO
   if (custom_app_maps) delete (custom_app_maps);
 #endif
 
-  for (it = source_id_last_zmq_remote_stats.begin();
-       it != source_id_last_zmq_remote_stats.end(); ++it)
+  for (it = nprobes_last_remote_stats.begin(); it != nprobes_last_remote_stats.end(); ++it)
     delete (it->second);
+  nprobes_last_remote_stats.clear();
 
-  source_id_last_zmq_remote_stats.clear();
   if (!descriptions_map.empty()) {
     char buf[64];
     descriptions_map_t::iterator it;
@@ -463,7 +463,7 @@ void ZMQParserInterface::luaGetAllKeyDescription(lua_State *vm) {
 /* **************************************************** */
 
 u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
-                                        u_int32_t source_id, bool check_clock_drift,
+                                        bool check_clock_drift,
                                         void *data) {
   json_object *o;
   enum json_tokener_error jerr = json_tokener_success;
@@ -480,7 +480,7 @@ u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
   if (o) {
     json_object *w, *z;
 
-    zrs.source_id = source_id, zrs.last_update = time(NULL);
+    zrs.last_update = time(NULL);
 
     if (json_object_object_get_ex(o, "bytes", &w))
       zrs.remote_bytes = (u_int64_t)json_object_get_int64(w);
@@ -517,7 +517,7 @@ u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
 
       if (json_object_object_get_ex(w, "uuid_num", &z) /* uuid_num (old) == unique_source_id (new) */
 	  || json_object_object_get_ex(w, "unique_source_id", &z)) {
-        zrs.uuid_num = (u_int32_t)json_object_get_int64(z);
+        zrs.nprobe_source_id = (u_int32_t)json_object_get_int64(z);
       } if (json_object_object_get_ex(w, "ip", &z))
 	  snprintf(zrs.remote_probe_address, sizeof(zrs.remote_probe_address),
 		   "%s", json_object_get_string(z));
@@ -1299,6 +1299,10 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow *const flow,
     flow->unique_source_id = value->int_num;
     break;
 
+  case NPROBE_SOURCE_ID:
+    flow->nprobe_source_id = value->int_num;
+    break;
+
   case SRC_FRAGMENTS:
     flow->in_fragments = value->int_num;
     break;
@@ -1752,6 +1756,9 @@ bool ZMQParserInterface::matchPENNtopField(ParsedFlow *const flow,
   case UNIQUE_SOURCE_ID:
     return (flow->unique_source_id == value->int_num);
 
+  case NPROBE_SOURCE_ID:
+    return (flow->nprobe_source_id == value->int_num);
+
   case SMTP_MAIL_FROM:
     if (value->string && flow->getSMTPMailFrom())
       return (strcmp(flow->getSMTPMailFrom(), value->string) == 0);
@@ -2064,15 +2071,13 @@ bool ZMQParserInterface::preprocessFlow(ParsedFlow *flow) {
 
 /* **************************************************** */
 
-int ZMQParserInterface::parseSingleJSONFlow(json_object *o,
-                                            u_int32_t source_id) {
+int ZMQParserInterface::parseSingleJSONFlow(json_object *o) {
   ParsedFlow flow;
   struct json_object_iterator it = json_object_iter_begin(o);
   struct json_object_iterator itEnd = json_object_iter_end(o);
   int ret = 0;
 
   /* Reset data */
-  flow.source_id = source_id;
   flow.direction = UNKNOWN_FLOW_DIRECTION;
 
   while (!json_object_iter_equal(&it, &itEnd)) {
@@ -2195,14 +2200,13 @@ int ZMQParserInterface::parseSingleJSONFlow(json_object *o,
 /* **************************************************** */
 
 int ZMQParserInterface::parseSingleTLVFlow(ndpi_deserializer *deserializer,
-                                           u_int32_t source_id, u_int32_t record_id) {
+                                           u_int32_t record_id) {
   ndpi_serialization_type kt, et;
   ParsedFlow flow;
   int ret = 0, rc;
   bool recordFound = false;
 
   /* Reset data */
-  flow.source_id = source_id;
   flow.direction = UNKNOWN_FLOW_DIRECTION;
 
   INTERFACE_PROFILING_SECTION_ENTER("Decode TLV", 9);
@@ -2432,8 +2436,8 @@ int ZMQParserInterface::parseSingleTLVFlow(ndpi_deserializer *deserializer,
 
 /* **************************************************** */
 
-u_int8_t ZMQParserInterface::parseJSONFlow(const char *payload,
-                                           int payload_size, u_int32_t source_id) {
+u_int8_t ZMQParserInterface::parseJSONFlows(const char *payload,
+                                            int payload_size) {
   json_object *f = NULL;
   enum json_tokener_error jerr = json_tokener_success;
 
@@ -2462,7 +2466,7 @@ u_int8_t ZMQParserInterface::parseJSONFlow(const char *payload,
       int id, num_elements = json_object_array_length(f);
 
       for (id = 0; id < num_elements; id++) {
-        rc = parseSingleJSONFlow(json_object_array_get_idx(f, id), source_id);
+        rc = parseSingleJSONFlow(json_object_array_get_idx(f, id));
 
         if (rc > 0) n++;
       }
@@ -2471,12 +2475,12 @@ u_int8_t ZMQParserInterface::parseJSONFlow(const char *payload,
 	json_object *obj = json_tokener_parse(json_object_get_string(f));
 
 	if(obj != NULL) {
-	  rc = parseSingleJSONFlow(obj, source_id);
+	  rc = parseSingleJSONFlow(obj);
 	  json_object_put(obj);
 	} else
 	  rc = -1;
       } else
-	rc = parseSingleJSONFlow(f, source_id);
+	rc = parseSingleJSONFlow(f);
 
       if (rc > 0) n++;
     }
@@ -2503,7 +2507,7 @@ u_int8_t ZMQParserInterface::parseJSONFlow(const char *payload,
 /* **************************************************** */
 
 u_int32_t ZMQParserInterface::parseTLVFlows(const char *payload, int payload_size,
-                                            u_int32_t source_id, void *data) {
+                                            void *data) {
   ndpi_deserializer deserializer;
   ndpi_serialization_type kt;
   u_int32_t n = 0;
@@ -2529,7 +2533,7 @@ u_int32_t ZMQParserInterface::parseTLVFlows(const char *payload, int payload_siz
 
   while (ndpi_deserialize_get_item_type(&deserializer, &kt) != ndpi_serialization_unknown) {
 
-    rc = parseSingleTLVFlow(&deserializer, source_id, n);
+    rc = parseSingleTLVFlow(&deserializer, n);
 
     if (rc < 0)
       break;
@@ -2873,7 +2877,7 @@ static std::string mandatory_template_fields[] = {
   "OUT_BYTES",           "OUT_PKTS"};
 
 u_int8_t ZMQParserInterface::parseTemplate(const char *payload,
-                                           int payload_size, u_int32_t source_id,
+                                           int payload_size,
                                            void *data) {
   /* The format that is currently defined for templates is a JSON as follows:
 
@@ -3066,7 +3070,6 @@ u_int8_t ZMQParserInterface::parseOptionFieldValueMap(json_object *const w) {
 
 u_int8_t ZMQParserInterface::parseListeningPorts(const char *payload,
                                                  int payload_size,
-                                                 u_int32_t source_id,
                                                  void *data) {
   enum json_tokener_error jerr = json_tokener_success;
   json_object *o = json_tokener_parse_verbose(payload, &jerr);
@@ -3129,7 +3132,6 @@ u_int8_t ZMQParserInterface::parseListeningPorts(const char *payload,
 
 u_int8_t ZMQParserInterface::parseSNMPIntefaces(const char *payload,
                                                 int payload_size,
-                                                u_int32_t source_id,
                                                 void *data) {
   enum json_tokener_error jerr = json_tokener_success;
   json_object *f = json_tokener_parse_verbose(payload, &jerr);
@@ -3169,14 +3171,13 @@ u_int8_t ZMQParserInterface::parseSNMPIntefaces(const char *payload,
 /* **************************************************** */
 
 u_int8_t ZMQParserInterface::parseOption(const char *payload, int payload_size,
-                                         u_int32_t source_id, void *data) {
+                                         void *data) {
   /* The format that is currently defined for options is a JSON as follows:
 
      char opt[] = "
      "{\"PEN\":8741, \"field\": 22, \"value\":1, \"map\":{\"name\":\"Skype\"}},"
      "{\"PEN\":8741, \"field\": 22, \"value\":3, \"map\":{\"name\":\"Winni\"}}";
 
-     parseOption(opt, strlen(opt), source_id, this);
   */
 
   // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", payload);
@@ -3209,7 +3210,7 @@ u_int8_t ZMQParserInterface::parseOption(const char *payload, int payload_size,
 /* **************************************** */
 
 u_int32_t ZMQParserInterface::periodicStatsUpdateFrequency() const {
-  nProbeStats *zrs = zmq_remote_stats;
+  nProbeStats *zrs = cumulative_remote_stats;
   u_int32_t update_freq;
   u_int32_t update_freq_min = ntop->getPrefs()->get_housekeeping_frequency();
 
@@ -3234,9 +3235,14 @@ void ZMQParserInterface::setRemoteStats(nProbeStats *zrs) {
 
   /* Store stats for the current exporter */
 
+  if (!zrs->nprobe_source_id) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "nProbe Source ID not defined");
+    return;
+  }
+
   lock.wrlock(__FILE__, __LINE__);
 
-  if (source_id_last_zmq_remote_stats.find(zrs->source_id) == source_id_last_zmq_remote_stats.end()) {
+  if (nprobes_last_remote_stats.find(zrs->nprobe_source_id) == nprobes_last_remote_stats.end()) {
     /* Allocate last stats for source ID */
     last_zrs = new (std::nothrow) nProbeStats();
 
@@ -3245,16 +3251,16 @@ void ZMQParserInterface::setRemoteStats(nProbeStats *zrs) {
       return;
     }
 
-    source_id_last_zmq_remote_stats[zrs->source_id] = last_zrs;
+    nprobes_last_remote_stats[zrs->nprobe_source_id] = last_zrs;
   } else {
-    last_zrs = source_id_last_zmq_remote_stats[zrs->source_id];
+    last_zrs = nprobes_last_remote_stats[zrs->nprobe_source_id];
   }
 
   *last_zrs = *zrs;
 
   lock.unlock(__FILE__, __LINE__);
 
-  if (Utils::msTimevalDiff(&now, &last_zmq_remote_stats_update) < 1000) {
+  if (Utils::msTimevalDiff(&now, &last_cumulative_remote_stats_update) < 1000) {
     /* Do not update cumulative stats more frequently than once per second.
      * Note: this also avoids concurrent access (use after free) of shadow */
     return;
@@ -3267,7 +3273,7 @@ void ZMQParserInterface::setRemoteStats(nProbeStats *zrs) {
   lock.wrlock(__FILE__, __LINE__); /* Need write lock due to (*) */
 
   /* Compute cumulative stats for all sources */
-  for (it = source_id_last_zmq_remote_stats.begin(); it != source_id_last_zmq_remote_stats.end(); it++)  {
+  for (it = nprobes_last_remote_stats.begin(); it != nprobes_last_remote_stats.end(); it++)  {
     nProbeStats *zrs_i = it->second;
 
     last_update = ndpi_max(last_update, zrs_i->last_update);
@@ -3326,11 +3332,11 @@ void ZMQParserInterface::setRemoteStats(nProbeStats *zrs) {
     zmq_remote_initial_exported_flows = cumulative_zrs->num_flow_exports;
 
   /* Swap values */
-  if (zmq_remote_stats_shadow) delete (zmq_remote_stats_shadow);
-  zmq_remote_stats_shadow = zmq_remote_stats;
-  zmq_remote_stats = cumulative_zrs;
+  if (cumulative_remote_stats_shadow) delete (cumulative_remote_stats_shadow);
+  cumulative_remote_stats_shadow = cumulative_remote_stats;
+  cumulative_remote_stats = cumulative_zrs;
 
-  memcpy(&last_zmq_remote_stats_update, &now, sizeof(now));
+  memcpy(&last_cumulative_remote_stats_update, &now, sizeof(now));
 }
 
 /* **************************************************** */
@@ -3353,7 +3359,7 @@ void ZMQParserInterface::probeLuaStats(lua_State *vm) {
 
   lock.rdlock(__FILE__, __LINE__);
 
-  for (it = source_id_last_zmq_remote_stats.begin(); it != source_id_last_zmq_remote_stats.end(); ++it) {
+  for (it = nprobes_last_remote_stats.begin(); it != nprobes_last_remote_stats.end(); ++it) {
     nProbeStats *zrs = it->second;
 
     lua_newtable(vm);
@@ -3367,7 +3373,7 @@ void ZMQParserInterface::probeLuaStats(lua_State *vm) {
     lua_push_uint64_table_entry(vm, "remote.ifspeed", zrs->remote_ifspeed);
     lua_push_str_table_entry(vm, "probe.ip", zrs->remote_probe_address);
     lua_push_str_table_entry(vm, "probe.uuid", zrs->uuid);
-    lua_push_uint64_table_entry(vm, "probe.uuid_num", zrs->uuid_num);
+    lua_push_uint64_table_entry(vm, "probe.uuid_num", zrs->nprobe_source_id);
     lua_push_str_table_entry(vm, "probe.public_ip", zrs->remote_probe_public_address);
     lua_push_str_table_entry(vm, "probe.probe_version", zrs->remote_probe_version);
     lua_push_str_table_entry(vm, "probe.probe_os", zrs->remote_probe_os);
@@ -3591,21 +3597,19 @@ u_int8_t ZMQParserInterface::parseJSONCustomIE(const char *payload,
 u_int16_t ZMQParserInterface::purgeIdleProbes(time_t when) {
   u_int16_t num_purged = 0;
   std::map<u_int32_t, nProbeStats *>::iterator it;
-  u_int32_t deadline = (u_int32_t)when - MAX_PROBE_IDLE_IDLE;
+  u_int32_t deadline = (u_int32_t) when - MAX_PROBE_IDLE_TIME;
   
   lock.wrlock(__FILE__, __LINE__); /* Need write lock due to (*) */
 
-  for (it = source_id_last_zmq_remote_stats.begin();
-       it != source_id_last_zmq_remote_stats.end();) {
+  for (it = nprobes_last_remote_stats.begin(); it != nprobes_last_remote_stats.end();) {
     nProbeStats *zrs_i = it->second;
 
     if (zrs_i->local_time < deadline /* sec */) {
       /* Do not account inactive exporters, release them */
-      // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Erased %s [local_time:
-      // %u][last_time: %u]", zrs_i->remote_ifname, zrs_i->local_time,
-      // last_time);
+      // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Erased %s [local_time: %u]"
+      //   "[last_time: %u]", zrs_i->remote_ifname, zrs_i->local_time, last_time);
       delete (zrs_i);
-      source_id_last_zmq_remote_stats.erase(it++); /* (*) */
+      nprobes_last_remote_stats.erase(it++); /* (*) */
       num_purged++;
     } else
       it++;

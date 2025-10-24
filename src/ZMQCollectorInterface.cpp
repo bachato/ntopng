@@ -553,16 +553,15 @@ void ZMQCollectorInterface::collect_flows() {
           switch (h->url[0]) {
 	  case 'e': /* event */
 	    recvStats.num_events++;
-	    parseEvent(uncompressed, uncompressed_len, source_id, check_clock_drift, this);
+	    parseEvent(uncompressed, uncompressed_len, check_clock_drift, this);
 	    break;
 
 	  case 'f': /* flow */
 	    if (tlv_encoding)
-	      recvStats.num_flows += parseTLVFlows(uncompressed, uncompressed_len,
-						   subscriber_id, this);
+	      recvStats.num_flows += parseTLVFlows(uncompressed, uncompressed_len, this);
 	    else if(ntop->getPrefs()->is_pro_edition()) {
 	      uncompressed[uncompressed_len] = '\0';
-	      recvStats.num_flows += parseJSONFlow(uncompressed, uncompressed_len, subscriber_id);
+	      recvStats.num_flows += parseJSONFlows(uncompressed, uncompressed_len);
 	    }
 	    break;
 
@@ -584,12 +583,12 @@ void ZMQCollectorInterface::collect_flows() {
 
 	  case 't': /* template */
 	    recvStats.num_templates++;
-	    parseTemplate(uncompressed, uncompressed_len, subscriber_id, this);
+	    parseTemplate(uncompressed, uncompressed_len, this);
 	    break;
 
 	  case 'o': /* option */
 	    recvStats.num_options++;
-	    parseOption(uncompressed, uncompressed_len, subscriber_id, this);
+	    parseOption(uncompressed, uncompressed_len, this);
 	    break;
 
 	  case 'h': /* hello */
@@ -601,13 +600,12 @@ void ZMQCollectorInterface::collect_flows() {
 
 	  case 'l': /* listening-ports */
 	    recvStats.num_listening_ports++;
-	    parseListeningPorts(uncompressed, uncompressed_len, subscriber_id, this);
+	    parseListeningPorts(uncompressed, uncompressed_len, this);
 	    break;
 
 	  case 's': /* snmp-ifaces */
 	    recvStats.num_snmp_interfaces++;
-	    parseSNMPIntefaces(uncompressed, uncompressed_len, subscriber_id,
-			       this);
+	    parseSNMPIntefaces(uncompressed, uncompressed_len, this);
 	    break;
           }
 

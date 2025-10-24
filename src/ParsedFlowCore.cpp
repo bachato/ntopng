@@ -35,6 +35,7 @@ ParsedFlowCore::ParsedFlowCore() {
   exporter_device_ip = 0;
   nprobe_ip = 0;
   unique_source_id = 0;
+  nprobe_source_id = 0;
   src_port = dst_port = 0;
   inIndex = outIndex = 0;
   observationPointId = 0;
@@ -47,7 +48,7 @@ ParsedFlowCore::ParsedFlowCore() {
   absolute_packet_octet_counters = 0;
   memset(&tcp, 0, sizeof(tcp));
   first_switched = last_switched = 0;
-  direction = source_id = 0;
+  direction = 0;
   src_as = dst_as = prev_adjacent_as = next_adjacent_as = 0;
 }
 
@@ -62,6 +63,7 @@ ParsedFlowCore::ParsedFlowCore(const ParsedFlowCore &pfc) {
   exporter_device_ip = pfc.exporter_device_ip;
   nprobe_ip = pfc.nprobe_ip;
   unique_source_id = pfc.unique_source_id;
+  nprobe_source_id = pfc.nprobe_source_id;
   src_port = pfc.src_port, dst_port = pfc.dst_port;
   inIndex = pfc.inIndex, outIndex = pfc.outIndex;
   observationPointId = pfc.observationPointId;
@@ -76,7 +78,6 @@ ParsedFlowCore::ParsedFlowCore(const ParsedFlowCore &pfc) {
   memcpy(&tcp, &pfc.tcp, sizeof(tcp));
   first_switched = pfc.first_switched, last_switched = pfc.last_switched;
   direction = pfc.direction;
-  source_id = pfc.source_id;
   src_as = pfc.src_as, dst_as = pfc.dst_as;
   prev_adjacent_as = pfc.prev_adjacent_as,
   next_adjacent_as = pfc.next_adjacent_as;

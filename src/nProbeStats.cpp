@@ -22,7 +22,7 @@
 #include "ntop_includes.h"
 
 nProbeStats::nProbeStats() {
-   source_id = uuid_num = num_exporters =
+   nprobe_source_id = num_exporters =
       remote_ifspeed = remote_time = local_time = avg_bps = avg_pps =
       remote_lifetime_timeout = remote_idle_timeout =
       remote_collected_lifetime_timeout = export_queue_full = 
