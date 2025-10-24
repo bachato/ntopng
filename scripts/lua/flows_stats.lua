@@ -147,6 +147,7 @@ else
         order = order,
         start = start,
         length = length,
+        asn_mode = isASNModeEnabled(),
         host = "",
         csrf = ntop.getRandomCSRFValue()
     }

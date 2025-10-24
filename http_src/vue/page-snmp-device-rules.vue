@@ -66,7 +66,7 @@ const row_to_delete = ref({})
 const row_to_edit = ref({})
 
 const snmp_metric_url = `${http_prefix}/lua/pro/rest/v2/get/snmp/metric/rule_metrics.lua`
-const snmp_devices_url = `${http_prefix}/lua/pro/enterprise/get_snmp_devices_list.lua`
+const snmp_devices_url = `${http_prefix}/lua/pro/rest/v2/get/snmp/list.lua`
 
 const add_rule_url = `${http_prefix}/lua/pro/rest/v2/add/snmp/device/rule.lua`
 const remove_rule_url = `${http_prefix}/lua/pro/rest/v2/delete/snmp/device/rule.lua`
@@ -130,7 +130,7 @@ const get_snmp_devices_list = async function () {
   await $.get(url, function (rsp, status) {
     snmp_devices_list = rsp.rsp;
   });
-  snmp_devices_list.push({ column_key: "*", column_name: "all" })
+  snmp_devices_list.push({ key: "*", name: "all" })
 }
 
 /* ******************************************************************** */

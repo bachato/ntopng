@@ -1,6 +1,6 @@
 {
 	"id": "snmp_interfaces",
-	"data_url": "lua/pro/enterprise/get_snmp_devices_list.lua",
+	"data_url": "lua/pro/rest/v2/get/snmp/list.lua",
 	"use_current_page": false,
 	"enable_search": true,
 	"paging": false,
@@ -35,6 +35,13 @@
 					"event_id": "click_button_delete"
 				},
 				{
+					"id": "timeseries",
+					"icon": "fas fa-chart-area",
+					"title_i18n": "prefs.timeseries",
+					"class": [],
+					"event_id": "click_button_timeseries"
+				},
+				{
 					"id": "export",
 					"icon": "fa-solid fa-download",
 					"title_i18n": "export_snmp_device_data",
@@ -43,8 +50,15 @@
 			]
 		},
 		{
+			"title_i18n": "unknown_devices.device_name",
+			"data_field": "name",
+			"min-width": "80px",
+			"sortable": true,
+			"class": []
+		},
+		{
 			"title_i18n": "snmp.device_ip",
-			"data_field": "column_ip",
+			"data_field": "ip",
 			"min-width": "160px",
 			"sortable": true,
 			"class": [
@@ -53,7 +67,7 @@
 		},
 		{
 			"title_i18n": "snmp.snmp_version",
-			"data_field": "column_version",
+			"data_field": "snmp_version",
 			"min-width": "100px",
 			"sortable": true,
 			"class": [
@@ -61,31 +75,15 @@
 			]
 		},
 		{
-			"title_i18n": "chart",
-			"data_field": "column_chart",
-			"min-width": "80px",
-			"sortable": false,
-			"class": [
-				"text-center"
-			]
-		},
-		{
-			"title_i18n": "unknown_devices.device_name",
-			"data_field": "column_name",
-			"min-width": "80px",
-			"sortable": true,
-			"class": []
-		},
-		{
 			"title_i18n": "show_alerts.alert_description",
-			"data_field": "column_descr",
+			"data_field": "description",
 			"min-width": "80px",
 			"sortable": true,
 			"class": []
 		},
 		{
 			"title_i18n": "snmp.alerted_interfaces",
-			"data_field": "column_err_interfaces",
+			"data_field": "interfaces_with_errors",
 			"min-width": "180px",
 			"sortable": true,
 			"class": [
@@ -95,7 +93,7 @@
 		},
 		{
 			"title_i18n": "snmp.snmp_device_last_poll",
-			"data_field": "column_last_update",
+			"data_field": "last_update",
 			"min-width": "80px",
 			"sortable": true,
 			"class": [
@@ -104,7 +102,7 @@
 		},
 		{
 			"title_i18n": "snmp.snmp_device_last_poll_duration",
-			"data_field": "column_last_poll_duration",
+			"data_field": "last_poll_duration",
 			"min-width": "80px",
 			"sortable": true,
 			"class": [

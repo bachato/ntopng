@@ -327,19 +327,19 @@ const set_row_to_edit = (row) => {
 
     is_username_valid.value = true;
 
-    selected_version.value = snmp_versions.value.find((item) => item.label == row.column_version);
+    selected_version.value = snmp_versions.value.find((item) => item.label == row.snmp_version);
     if (selected_version.value.id != '2') {
-        snmp_read_community.value = row.column_community;
-        snmp_write_community.value = row.column_write_community;
+        snmp_read_community.value = row.community;
+        snmp_write_community.value = row.write_community;
     } else {
         enable_v3_options.value = true;
-        snmp_context.value = row.column_context
-        snmp_auth_passphrase.value = row.column_auth_passphrase;
-        selected_auth_protocol.value = snmp_auth_protocols.value.find((item) => item.id == row.column_auth_protocol);
-        selected_snmp_level.value = snmp_levels.value.find((item) => item.id == row.column_level);
-        selected_privacy_protocol.value = snmp_privacy_protocols.value.find((item) => item.id == row.column_privacy_protocol);
-        snmp_privacy_passphrase.value = row.column_privacy_passphrase;
-        snmp_username.value = row.column_username;
+        snmp_context.value = row.context
+        snmp_auth_passphrase.value = row.auth_passphrase;
+        selected_auth_protocol.value = snmp_auth_protocols.value.find((item) => item.id == row.auth_protocol);
+        selected_snmp_level.value = snmp_levels.value.find((item) => item.id == row.level);
+        selected_privacy_protocol.value = snmp_privacy_protocols.value.find((item) => item.id == row.privacy_protocol);
+        snmp_privacy_passphrase.value = row.privacy_passphrase;
+        snmp_username.value = row.username;
         switch (selected_snmp_level.value.id) {
             case "authNoPriv": {
                 with_privacy.value = false;
@@ -367,7 +367,7 @@ const show = (row, _host) => {
     title.value = i18n("snmp.add_snmp_devices");
     if (!dataUtils.isEmptyOrNull(row)) {
         /* In case row is not null then an edit is requested */
-        const device_name = row.column_name != null && row.column_name != "" ? row.column_name : row.ip;
+        const device_name = row.name != null && row.name != "" ? row.name : row.ip;
         title.value = `${_i18n("snmp.edit_snmp_devices")}: ${device_name}`;
         set_row_to_edit(row);
     }
