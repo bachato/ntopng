@@ -99,12 +99,21 @@ end
 
 -- ################################################
 
+local _exporter_uuid = {}
+
 function exporters_utils.getExporterUUID(exporter_ip)
+   local ret = _exporter_uuid[exporter_ip]
+
+   if(ret ~= nil) then
+      return ret
+   end
+
    if not isEmptyString(exporter_ip) then
       local flow_exporters = interface.getFlowDevices()
       for ifid, info in pairs(flow_exporters or {}) do
 	 for exporter_uuid, exporter_info in pairs(info or {}) do
 	    if exporter_info.exporter_ip == exporter_ip then
+	       _exporter_uuid[exporter_ip] = { exporter_uuid, ifid }
 	       return exporter_uuid, ifid
 	    end
 	 end
@@ -116,7 +125,15 @@ end
 
 -- ################################################
 
+local _probe_uuid = {}
+
 function exporters_utils.getProbeUUID(exporter_ip)
+   local ret = _probe_uuid[exporter_ip]
+
+   if(ret ~= nil) then
+      return ret
+   end
+
    if not isEmptyString(exporter_ip) then
       local exporter_uuid = nil
       local flow_exporters = interface.getFlowDevices()
@@ -133,14 +150,16 @@ function exporters_utils.getProbeUUID(exporter_ip)
 	 local ifstats = interface.getStats()
 	 -- Get the list of all the probes
 	 for ifid, probe_list in pairs(ifstats.probes or {}) do
-	    for probe_uuid, probe_info in pairsByKeys(probe_list or {}) do 
+	    for probe_uuid, probe_info in pairsByKeys(probe_list or {}) do
 	       if tostring(probe_uuid) == tostring(exporter_uuid) then
 		  -- Packet interface
+		  _probe_uuid[exporter_ip] = { probe_uuid, ifid }
 		  return probe_uuid, ifid
 	       end
 	       for _, exporter_info in pairs(probe_info.exporters or {}) do
 		  if tostring(exporter_info.unique_source_id) == tostring(exporter_uuid) then
 		     -- Netflow Interface
+		     _probe_uuid[exporter_ip] =  { probe_uuid, ifid }
 		     return probe_uuid, ifid
 		  end
 	       end
