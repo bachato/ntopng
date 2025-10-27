@@ -141,15 +141,8 @@ const map_table_def_columns = (columns) => {
             return value
         },
         "snmp_ifname": (value, row) => {
-            let displayValue = value
-            if (row.ifindex) {
-                displayValue = `${value} (${row.ifindex})`
-            }
-            if (row.exporter_ip && row.ifindex && row.ifid) {
-                const interface_url = `${http_prefix}/lua/pro/enterprise/flowdevice_interface_details.lua?ip=${row.exporter_ip}&snmp_port_idx=${row.ifindex}&ifid=${row.ifid}`
-                return `<a href="${interface_url}">${displayValue}</a>`
-            }
-            return displayValue
+            const url = linksUtils.getFlowExporterInterfaceOverviewPageURL(row.exporter_ip, row.ifindex, http_prefix)
+            return formatterUtils.formatHTMLaTagNameValue(row.ifindex, value, url, false)
         },
         "in_bytes": (value, row) => {
             if (!value)
@@ -160,11 +153,6 @@ const map_table_def_columns = (columns) => {
             if (!value)
                 return '';
             return formatterUtils.getFormatter("bytes")(value);
-        },
-        "throughput": (value, row) => {
-            if (!value)
-                return '';
-            return formatterUtils.getFormatter("bps")(value);
         },
         "ratio": (value, row) => {
             if (!value.value || value.value == -1)

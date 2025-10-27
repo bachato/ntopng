@@ -62,13 +62,21 @@ const getAggregatedFlowsURL = (filters, aggregation_criteria, http_prefix) => {
 
 /* ******************************************************************** */
 
+/* Returns the URL of the exporter details */
+const getFlowExporterInterfaceOverviewPageURL = (device_ip, interface_id, http_prefix) => {
+    return `${http_prefix}/lua/pro/exporter_interface_overview.lua?deviceIP=${device_ip}&ifIdx=${interface_id}`
+}
+
+/* ******************************************************************** */
+
 const linksUtils = function () {
     return {
         getExporterDetailsPageURL,
         getExporterInterfaceDetailsPageURL,
         getSNMPDetailsPageURL,
         getSNMPInterfaceDetailsPageURL,
-        getAggregatedFlowsURL
+        getAggregatedFlowsURL,
+        getFlowExporterInterfaceOverviewPageURL
     };
 }();
 

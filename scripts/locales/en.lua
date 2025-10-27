@@ -6848,9 +6848,9 @@ local lang = {
     ["remote_asn_description"] = "Comma separated list of Remote ASNs that are relevant for the monitoring standpoint.",
   },
   ["exporters_interfaces_configuration"] = {
-    ["network_communications"] = "Network Communications",
+    ["exporters_interfaces_overview"] = "Exporters/Interfaces Stats",
     ["exporter_details"] = "Exporter Details",
-    ["network_communications_x_interface_y"] = "<a href=\"%{basic_url}\">Network Communications</a>: %{device} / %{interface}",
+    ["exporters_interfaces_overview_x_interface_y"] = "<a href=\"%{basic_url}\">Exporters/Interfaces Stats</a>: %{device} / %{interface}",
     ["all_roles"] = "All Roles",
     ["filter"] = "Interfaces Roles",
   },

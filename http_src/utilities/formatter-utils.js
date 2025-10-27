@@ -420,7 +420,7 @@ function capitalizeFirstLetters(str) {
 // This function is used to format a standard a tag, with value - name
 function formatHTMLaTagNameValue(value, name, url, short_version) {
     let a_tag = ''
-    if (name && name !== value) {
+    if (name && name != value) {
         if (short_version) {
             a_tag = `<a href="${url}" data-bs-toggle='tooltip' data-bs-placement='bottom' title='${value}'>${name}</a>`
         } else {

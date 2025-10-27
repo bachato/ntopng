@@ -65,16 +65,6 @@
 			]
 		},
 		{
-			"title_i18n": "throughput",
-			"data_field": "throughput",
-			"sortable": true,
-			"min-width": "80px",
-			"class": [
-                                "text-center",
-				"text-nowrap"
-			]
-		},
-		{
 			"title_i18n": "flow_devices.flow_snmp_ratio",
 			"data_field": "ratio",
 			"sortable": true,

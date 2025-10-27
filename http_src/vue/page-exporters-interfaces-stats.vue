@@ -172,7 +172,7 @@ const map_table_def_columns = (columns) => {
             return formatterUtils.formatHTMLaTagNameValue(value, row.exporter_name, url, true)
         },
         "interface_name": (value, row) => {
-            const url = linksUtils.getExporterInterfaceDetailsPageURL(row.exporter_ip, row.interface_id, row.ifid, http_prefix)
+            const url = linksUtils.getFlowExporterInterfaceOverviewPageURL(row.exporter_ip, row.interface_id, http_prefix)
             return formatterUtils.formatHTMLaTagNameValue(row.interface_id, value, url, false)
         },
         "role": (value, row) => {
@@ -223,7 +223,7 @@ const map_table_def_columns = (columns) => {
 
 function click_button_exporters_stats(event) {
     const row = event.row;
-    window.location.href = `${http_prefix}/lua/pro/exporter_interface_overview.lua?deviceIP=${row["exporter_ip"]}&ifIdx=${row["interface_id"]}`;
+    window.location.href = linksUtils.getFlowExporterInterfaceOverviewPageURL(row["exporter_ip"], row["interface_id"], http_prefix);
 }
 
 /* ************************************** */
