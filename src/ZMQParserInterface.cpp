@@ -3615,8 +3615,11 @@ u_int16_t ZMQParserInterface::purgeIdleProbes(time_t when) {
 
     if (zrs_i->local_time < deadline /* sec */) {
       /* Do not account inactive exporters, release them */
-      // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Erased %s [local_time: %u]"
-      //   "[last_time: %u]", zrs_i->remote_ifname, zrs_i->local_time, last_time);
+      //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Erased %s [local_time: %u]",
+      //   zrs_i->remote_ifname, zrs_i->local_time);
+
+      flow_devices_stats->removeProbe(zrs_i->nprobe_source_id);
+
       delete (zrs_i);
       nprobes_last_remote_stats.erase(it++); /* (*) */
       num_purged++;
