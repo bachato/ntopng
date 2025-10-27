@@ -603,6 +603,8 @@ class Ntop {
   u_int32_t getNumFlowExportersInterfaces()    { return num_flow_interfaces; }
   bool incNumFlowExporters();
   bool incNumFlowExportersInterfaces();
+  void decNumFlowExporters();
+  void decNumFlowExportersInterfaces();
 
   inline u_int getNumCPUs() { return (num_cpus); }
   inline void setNumCPUs(u_int num) { num_cpus = num; }

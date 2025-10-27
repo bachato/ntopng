@@ -37,8 +37,10 @@ ZMQParserInterface::ZMQParserInterface(const char *endpoint,
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 
   zmq_initial_bytes = 0, zmq_initial_pkts = 0, zmq_initial_drops = 0;
-  cumulative_remote_stats = cumulative_remote_stats_shadow = NULL;
+
+  memset(&cumulative_remote_stats, 0, sizeof(cumulative_remote_stats));
   memset(&last_cumulative_remote_stats_update, 0, sizeof(last_cumulative_remote_stats_update));
+
   zmq_remote_initial_exported_flows = 0;
   remote_lifetime_timeout = remote_idle_timeout = 0;
   once = false, is_sampled_traffic = false;
@@ -290,8 +292,6 @@ void ZMQParserInterface::addMappingFromRedis() {
 ZMQParserInterface::~ZMQParserInterface() {
   map<u_int32_t, nProbeStats *>::iterator it;
 
-  if (cumulative_remote_stats) delete (cumulative_remote_stats);
-  if (cumulative_remote_stats_shadow) delete (cumulative_remote_stats_shadow);
 #ifdef NTOPNG_PRO
   if (custom_app_maps) delete (custom_app_maps);
 #endif
@@ -440,8 +440,6 @@ void ZMQParserInterface::luaGetAllKeyDescription(lua_State *vm) {
 
   lua_newtable(vm);
 
-  lock.rdlock(__FILE__, __LINE__);
-
   for (it = descriptions_map.begin();
        it != descriptions_map.end(); ++it) {
     char pen_field[128];
@@ -456,8 +454,6 @@ void ZMQParserInterface::luaGetAllKeyDescription(lua_State *vm) {
     lua_insert(vm, -2);
     lua_settable(vm, -3);
   }
-
-  lock.unlock(__FILE__, __LINE__);
 }
 
 /* **************************************************** */
@@ -3219,23 +3215,17 @@ u_int8_t ZMQParserInterface::parseOption(const char *payload, int payload_size,
 /* **************************************** */
 
 u_int32_t ZMQParserInterface::periodicStatsUpdateFrequency() const {
-  nProbeStats *zrs = cumulative_remote_stats;
-  u_int32_t update_freq;
   u_int32_t update_freq_min = ntop->getPrefs()->get_housekeeping_frequency();
-
-  if (zrs)
-    update_freq = min_val(max_val(zrs->remote_lifetime_timeout, zrs->remote_idle_timeout),
-			  zrs->remote_collected_lifetime_timeout);
-  else
-    update_freq = update_freq_min;
-
+  u_int32_t update_freq = min_val(max_val(cumulative_remote_stats.remote_lifetime_timeout,
+                                          cumulative_remote_stats.remote_idle_timeout),
+			          cumulative_remote_stats.remote_collected_lifetime_timeout);
   return max_val(update_freq, update_freq_min);
 }
 
 /* **************************************** */
 
 void ZMQParserInterface::setRemoteStats(nProbeStats *zrs) {
-  nProbeStats *last_zrs, *cumulative_zrs;
+  nProbeStats *last_zrs;
   std::map<u_int32_t, nProbeStats *>::iterator it;
   struct timeval now;
   u_int32_t last_update = 0;
@@ -3249,14 +3239,14 @@ void ZMQParserInterface::setRemoteStats(nProbeStats *zrs) {
     return;
   }
 
-  lock.wrlock(__FILE__, __LINE__);
+  stats_lock.wrlock(__FILE__, __LINE__);
 
   if (nprobes_last_remote_stats.find(zrs->nprobe_source_id) == nprobes_last_remote_stats.end()) {
     /* Allocate last stats for source ID */
     last_zrs = new (std::nothrow) nProbeStats();
 
     if (!last_zrs) {
-      lock.unlock(__FILE__, __LINE__);
+      stats_lock.unlock(__FILE__, __LINE__);
       return;
     }
 
@@ -3267,7 +3257,7 @@ void ZMQParserInterface::setRemoteStats(nProbeStats *zrs) {
 
   *last_zrs = *zrs;
 
-  lock.unlock(__FILE__, __LINE__);
+  stats_lock.unlock(__FILE__, __LINE__);
 
   if (Utils::msTimevalDiff(&now, &last_cumulative_remote_stats_update) < 1000) {
     /* Do not update cumulative stats more frequently than once per second.
@@ -3276,74 +3266,73 @@ void ZMQParserInterface::setRemoteStats(nProbeStats *zrs) {
   }
 
   /* Sum stats from all exporters */
-  cumulative_zrs = new (std::nothrow) nProbeStats();
-  if (!cumulative_zrs) return;
 
-  lock.wrlock(__FILE__, __LINE__); /* Need write lock due to (*) */
+  u_int32_t remote_lifetime_timeout = 0;
+  u_int32_t remote_idle_timeout = 0;
+  u_int32_t remote_collected_lifetime_timeout = 0;
+  u_int32_t sflow_pkt_sample_drops = 0;
+
+  u_int32_t remote_ifspeed = 0, remote_time = 0, avg_pps = 0, avg_bps = 0;
+  u_int64_t sflow_samples = 0, remote_bytes = 0, remote_pkts = 0, remote_pkt_drops = 0, num_flow_exports = 0;
+
+  stats_lock.wrlock(__FILE__, __LINE__); /* Need write lock due to (*) */ 
 
   /* Compute cumulative stats for all sources */
   for (it = nprobes_last_remote_stats.begin(); it != nprobes_last_remote_stats.end(); it++)  {
     nProbeStats *zrs_i = it->second;
 
     last_update = ndpi_max(last_update, zrs_i->last_update);
-    cumulative_zrs->num_exporters += zrs_i->num_exporters;
-    cumulative_zrs->remote_bytes += zrs_i->remote_bytes;
-    cumulative_zrs->remote_pkts += zrs_i->remote_pkts;
-    cumulative_zrs->remote_pkt_drops += zrs_i->remote_pkt_drops;
-    cumulative_zrs->num_flow_exports += zrs_i->num_flow_exports;
-    cumulative_zrs->remote_ifspeed = max_val(cumulative_zrs->remote_ifspeed, zrs_i->remote_ifspeed);
-    cumulative_zrs->remote_time = max_val(cumulative_zrs->remote_time, zrs_i->remote_time);
-    cumulative_zrs->local_time =  max_val(cumulative_zrs->local_time, zrs_i->local_time);
-    cumulative_zrs->avg_bps += zrs_i->avg_bps;
-    cumulative_zrs->avg_pps += zrs_i->avg_pps;
-    cumulative_zrs->remote_lifetime_timeout = max_val(cumulative_zrs->remote_lifetime_timeout,
-						      zrs_i->remote_lifetime_timeout);
-    cumulative_zrs->remote_collected_lifetime_timeout = max_val(cumulative_zrs->remote_collected_lifetime_timeout,
-								zrs_i->remote_collected_lifetime_timeout);
-    cumulative_zrs->remote_idle_timeout = max_val(cumulative_zrs->remote_idle_timeout, zrs_i->remote_idle_timeout);
-    cumulative_zrs->export_queue_full += zrs_i->export_queue_full;
-    cumulative_zrs->too_many_flows += zrs_i->too_many_flows;
-    cumulative_zrs->elk_flow_drops += zrs_i->elk_flow_drops;
-    cumulative_zrs->sflow_pkt_sample_drops += zrs_i->sflow_pkt_sample_drops;
-    cumulative_zrs->flow_collection_drops += zrs_i->flow_collection_drops;
-    cumulative_zrs->flow_collection_udp_socket_drops += zrs_i->flow_collection_udp_socket_drops;
-    cumulative_zrs->flow_collection.nf_ipfix_flows += zrs_i->flow_collection.nf_ipfix_flows;
-    cumulative_zrs->flow_collection.sflow_samples += zrs_i->flow_collection.sflow_samples;
+
+    remote_lifetime_timeout = max_val(remote_lifetime_timeout, zrs_i->remote_lifetime_timeout);
+    remote_idle_timeout = max_val(remote_idle_timeout, zrs_i->remote_idle_timeout);
+    remote_collected_lifetime_timeout = max_val(remote_collected_lifetime_timeout, zrs_i->remote_collected_lifetime_timeout);
+    sflow_pkt_sample_drops += zrs_i->sflow_pkt_sample_drops;
+
+    remote_ifspeed = max_val(remote_ifspeed, zrs_i->remote_ifspeed);
+    remote_time = max_val(remote_time, zrs_i->remote_time);
+    avg_pps += zrs_i->avg_pps;
+    avg_bps += zrs_i->avg_bps;
+    sflow_samples += zrs_i->flow_collection.sflow_samples;
+    remote_bytes += zrs_i->remote_bytes;
+    remote_pkts += zrs_i->remote_pkts;
+    remote_pkt_drops += zrs_i->remote_pkt_drops;
+    num_flow_exports += zrs_i->num_flow_exports;
   }
 
-  lock.unlock(__FILE__, __LINE__);
+  stats_lock.unlock(__FILE__, __LINE__);
 
-  ifSpeed = cumulative_zrs->remote_ifspeed;
+  /* Update cumulative counters */
+  cumulative_remote_stats.remote_lifetime_timeout = remote_lifetime_timeout;
+  cumulative_remote_stats.remote_idle_timeout = remote_idle_timeout;
+  cumulative_remote_stats.remote_collected_lifetime_timeout = remote_collected_lifetime_timeout;
+  cumulative_remote_stats.sflow_pkt_sample_drops = sflow_pkt_sample_drops;
+
+  ifSpeed = remote_ifspeed;
   last_pkt_rcvd = 0;
-  last_pkt_rcvd_remote = cumulative_zrs->remote_time;
-  last_remote_pps = cumulative_zrs->avg_pps;
-  last_remote_bps = cumulative_zrs->avg_bps;
+  last_pkt_rcvd_remote = remote_time;
+  last_remote_pps = avg_pps;
+  last_remote_bps = avg_bps;
   last_remote_update = last_update;
 
-  if (cumulative_zrs->flow_collection.sflow_samples > 0)
+  if (sflow_samples > 0)
     is_sampled_traffic = true;
 
   /* Recalculate the flow max idle according to the timeouts received */
-  flow_max_idle = min_val(cumulative_zrs->remote_lifetime_timeout,
-                          cumulative_zrs->remote_collected_lifetime_timeout) + 10 /* Safe margin */;
+  flow_max_idle = min_val(remote_lifetime_timeout,
+                          remote_collected_lifetime_timeout) + 10 /* Safe margin */;
   updateFlowMaxIdle();
 
   if (zmq_initial_pkts == 0 /* ntopng has been restarted */
-      || cumulative_zrs->remote_bytes < zmq_initial_bytes /* nProbe has been restarted */ ) {
+      || remote_bytes < zmq_initial_bytes /* nProbe has been restarted */ ) {
     /* Start over */
-    zmq_initial_bytes = cumulative_zrs->remote_bytes;
-    zmq_initial_pkts  = cumulative_zrs->remote_pkts;
-    zmq_initial_drops = cumulative_zrs->remote_pkt_drops;
+    zmq_initial_bytes = remote_bytes;
+    zmq_initial_pkts  = remote_pkts;
+    zmq_initial_drops = remote_pkt_drops;
   }
 
   if (zmq_remote_initial_exported_flows == 0 /* ntopng has been restarted */
-      || cumulative_zrs->num_flow_exports < zmq_remote_initial_exported_flows) /* nProbe has been restarted */
-    zmq_remote_initial_exported_flows = cumulative_zrs->num_flow_exports;
-
-  /* Swap values */
-  if (cumulative_remote_stats_shadow) delete (cumulative_remote_stats_shadow);
-  cumulative_remote_stats_shadow = cumulative_remote_stats;
-  cumulative_remote_stats = cumulative_zrs;
+      || num_flow_exports < zmq_remote_initial_exported_flows) /* nProbe has been restarted */
+    zmq_remote_initial_exported_flows = num_flow_exports;
 
   memcpy(&last_cumulative_remote_stats_update, &now, sizeof(now));
 }
@@ -3366,7 +3355,7 @@ void ZMQParserInterface::probeLuaStats(lua_State *vm) {
   std::map<u_int32_t, nProbeStats *>::iterator it;
   lua_newtable(vm);
 
-  lock.rdlock(__FILE__, __LINE__);
+  stats_lock.rdlock(__FILE__, __LINE__);
 
   for (it = nprobes_last_remote_stats.begin(); it != nprobes_last_remote_stats.end(); ++it) {
     nProbeStats *zrs = it->second;
@@ -3439,7 +3428,7 @@ void ZMQParserInterface::probeLuaStats(lua_State *vm) {
    * this field could be the same for different interfaces
    */
 
-  lock.unlock(__FILE__, __LINE__);
+  stats_lock.unlock(__FILE__, __LINE__);
 }
 
 /* **************************************************** */
@@ -3608,7 +3597,7 @@ u_int16_t ZMQParserInterface::purgeIdleProbes(time_t when) {
   std::map<u_int32_t, nProbeStats *>::iterator it;
   u_int32_t deadline = (u_int32_t) when - MAX_PROBE_IDLE_TIME;
   
-  lock.wrlock(__FILE__, __LINE__); /* Need write lock due to (*) */
+  stats_lock.wrlock(__FILE__, __LINE__); /* Need write lock due to (*) */
 
   for (it = nprobes_last_remote_stats.begin(); it != nprobes_last_remote_stats.end();) {
     nProbeStats *zrs_i = it->second;
@@ -3627,7 +3616,7 @@ u_int16_t ZMQParserInterface::purgeIdleProbes(time_t when) {
       it++;
   }
 
-  lock.unlock(__FILE__, __LINE__);
+  stats_lock.unlock(__FILE__, __LINE__);
 
   return(num_purged);
 }

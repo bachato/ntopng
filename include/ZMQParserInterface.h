@@ -48,13 +48,23 @@ class ZMQParserInterface : public ParserInterface {
    * while flow_devices_stats (FlowDevicesStats) in NetworkInterface
    * is updated from collected flows */
   std::map<u_int32_t, nProbeStats *> nprobes_last_remote_stats;
-  nProbeStats *cumulative_remote_stats, *cumulative_remote_stats_shadow;
+
+  /* Note: using a small structure to account cumulative stats from 
+   * all remote probes. This is accessed concurrently, thus please
+   * consider a lock or shadow if you need to handle non-atomic access. */
+  struct {
+    u_int32_t remote_lifetime_timeout;
+    u_int32_t remote_idle_timeout;
+    u_int32_t remote_collected_lifetime_timeout;
+    u_int32_t sflow_pkt_sample_drops;
+  } cumulative_remote_stats;
   struct timeval last_cumulative_remote_stats_update;
+
   u_int32_t remote_lifetime_timeout, remote_idle_timeout;
   u_int64_t zmq_initial_bytes, zmq_initial_pkts, zmq_initial_drops,
             zmq_remote_initial_exported_flows;
 
-  RwLock lock;
+  RwLock stats_lock;
 
 #ifdef NTOPNG_PRO
   CustomAppMaps *custom_app_maps;
@@ -145,7 +155,7 @@ class ZMQParserInterface : public ParserInterface {
                                    u_int32_t *const app_id);
 #endif
   u_int32_t getNumDroppedPackets() {
-    return cumulative_remote_stats ? cumulative_remote_stats->sflow_pkt_sample_drops : 0;
+    return cumulative_remote_stats.sflow_pkt_sample_drops;
   };
   virtual void lua(lua_State *vm, bool fullStats);
   virtual void probeLuaStats(lua_State *vm);
