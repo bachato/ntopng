@@ -58,16 +58,16 @@ const csrf = ref(props.context.csrf);
 const _i18n = (t) => i18n(t);
 
 const criteria_list_def = [
-    { label: _i18n("application_proto"), value: 1, param: "application_protocol", table_id: "aggregated_app_proto", enterprise_m: false, search_enabled: true },
-    { label: _i18n("client"), value: 2, param: "client", table_id: "aggregated_client", enterprise_m: false, search_enabled: false },
-    { label: _i18n("client_server"), value: 4, param: "client_server", table_id: "aggregated_client_server", enterprise_m: true, search_enabled: false },
-    { label: _i18n("client_server_application_proto"), value: 5, param: "app_client_server", table_id: "aggregated_app_client_server", enterprise_m: true, search_enabled: true },
-    { label: _i18n("client_server_srv_port"), value: 7, param: "client_server_srv_port", table_id: "aggregated_client_server_srv_port", enterprise_m: false, search_enabled: false },
-    { label: _i18n("client_server_srv_port_app_proto"), value: 8, param: "client_server_srv_port_app_proto", table_id: "aggregated_client_server_srv_port_app_proto", enterprise_m: false, search_enabled: false },
-    { label: _i18n("info"), value: 6, param: "info", table_id: "aggregated_info", enterprise_m: true, search_enabled: true },
-    { label: _i18n("server"), value: 3, param: "server", table_id: "aggregated_server", enterprise_m: false, search_enabled: false },
-    { label: _i18n("src_as_dst_as"), value: 9, param: "src_as_dst_as", table_id: "aggregated_src_as_dst_as", enterprise_m: true, search_enabled: false },
-    { label: _i18n("src_as_transit_as_dst_as"), value: 10, param: "src_as_transit_as_dst_as", table_id: "aggregated_src_as_transit_as_dst_as", enterprise_m: true, search_enabled: false },
+    { label: _i18n("application_proto"), value: 1, param: "application_protocol", table_id: "aggregated_app_proto", enterprise_m: false, search_enabled: true, asn_mode: false },
+    { label: _i18n("client"), value: 2, param: "client", table_id: "aggregated_client", enterprise_m: false, search_enabled: false, asn_mode: true },
+    { label: _i18n("client_server"), value: 4, param: "client_server", table_id: "aggregated_client_server", enterprise_m: true, search_enabled: false, asn_mode: true },
+    { label: _i18n("client_server_application_proto"), value: 5, param: "app_client_server", table_id: "aggregated_app_client_server", enterprise_m: true, search_enabled: true, asn_mode: false },
+    { label: _i18n("client_server_srv_port"), value: 7, param: "client_server_srv_port", table_id: "aggregated_client_server_srv_port", enterprise_m: false, search_enabled: false, asn_mode: true },
+    { label: _i18n("client_server_srv_port_app_proto"), value: 8, param: "client_server_srv_port_app_proto", table_id: "aggregated_client_server_srv_port_app_proto", enterprise_m: false, search_enabled: false, asn_mode: false },
+    { label: _i18n("info"), value: 6, param: "info", table_id: "aggregated_info", enterprise_m: true, search_enabled: true, asn_mode: false },
+    { label: _i18n("server"), value: 3, param: "server", table_id: "aggregated_server", enterprise_m: false, search_enabled: false, asn_mode: true },
+    { label: _i18n("src_as_dst_as"), value: 9, param: "src_as_dst_as", table_id: "aggregated_src_as_dst_as", enterprise_m: true, search_enabled: false, asn_mode: true },
+    { label: _i18n("src_as_transit_as_dst_as"), value: 10, param: "src_as_transit_as_dst_as", table_id: "aggregated_src_as_transit_as_dst_as", enterprise_m: true, search_enabled: false, asn_mode: true },
 ];
 
 const loading = ref(false)
@@ -81,22 +81,24 @@ const table_id = computed(() => {
     let id = `${table_config_id.value}_${selected_criteria.value.value}`;
     return id;
 });
-const selected_criteria = ref(criteria_list_def[0]);
 let default_url_params = {};
-
 const criteria_list = function () {
-    if (props.context.is_ntop_enterprise_m) {
-        return ref(criteria_list_def);
-    }
-    else {
-        let critera_list_def_com = [];
-        criteria_list_def.forEach((c) => {
-            if (!c.enterprise_m)
-                critera_list_def_com.push(c);
-        });
-        return ref(critera_list_def_com);
-    }
+    let critera_list_def_com = [];
+    criteria_list_def.forEach((c) => {
+        let add = true;
+        if (!(props.context.is_ntop_enterprise_m && c.enterprise_m)) {
+            add = false;
+        }
+        if (!(props.context.asn_mode && c.asn_mode)) {
+            add = false;
+        }
+        if (add) {
+            critera_list_def_com.push(c);
+        }
+    });
+    return ref(critera_list_def_com);
 }();
+const selected_criteria = ref({});
 
 onBeforeMount(async () => {
     init_selected_criteria();
@@ -108,7 +110,14 @@ function init_selected_criteria() {
     if (aggregation_criteria == null || aggregation_criteria == "") {
         return;
     }
-    selected_criteria.value = criteria_list_def.find((c) => c.param == aggregation_criteria);
+    const tmp_criteria = criteria_list.value.find((c) => c.param == aggregation_criteria);
+    // In case it's not found, use the first available criteria
+    if (!tmp_criteria) {
+        selected_criteria.value = criteria_list.value[0];
+        ntopng_url_manager.set_key_to_url("aggregation_criteria", selected_criteria.value.value)
+    } else {
+        selected_criteria.value = tmp_criteria;
+    }
 }
 
 async function update_criteria() {
