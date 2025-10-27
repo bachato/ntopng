@@ -57,7 +57,7 @@ class HostChecksExecutor;
 #ifdef NTOPNG_PRO
 class ViewInterface;
 class L7Policer;
-class FlowInterfacesStats;
+class FlowDevicesStats;
 class TrafficShaper;
 class NetworkInterfacePro;
 #endif
@@ -229,7 +229,7 @@ protected:
   SubInterfaces *sub_interfaces;
 #endif
   CustomAppStats *custom_app_stats;
-  FlowInterfacesStats *flow_interfaces_stats;
+  FlowDevicesStats *flow_devices_stats;
   NetworkInterfacePro *network_interface_pro;
 #endif
   EthStats ethStats;
@@ -928,8 +928,8 @@ public:
 #endif
 
 #ifdef NTOPNG_PRO
-  inline FlowInterfacesStats *getFlowInterfacesStats() {
-    return (flow_interfaces_stats);
+  inline FlowDevicesStats *getFlowInterfacesStats() {
+    return (flow_devices_stats);
   }
 #endif
   
@@ -1048,18 +1048,18 @@ public:
 
   virtual void getFlowDevices(lua_State *vm);
   virtual void getFlowDeviceInfo(lua_State *vm, u_int32_t deviceID, bool showAllStats = true) {
-    if (flow_interfaces_stats) {
+    if (flow_devices_stats) {
       lua_newtable(vm);
-      flow_interfaces_stats->luaDeviceInfo(vm, deviceID, this, showAllStats);
+      flow_devices_stats->luaDeviceInfo(vm, deviceID, this, showAllStats);
       lua_pushinteger(vm, get_id());
       lua_insert(vm, -2);
       lua_settable(vm, -3);
     }
   };  
   virtual void getFlowDeviceInfoByIP(lua_State *vm, u_int32_t deviceIP, bool showAllStats = true) {
-    if (flow_interfaces_stats) {
+    if (flow_devices_stats) {
       lua_newtable(vm);
-      flow_interfaces_stats->luaDeviceInfoByIP(vm, deviceIP, this, showAllStats);
+      flow_devices_stats->luaDeviceInfoByIP(vm, deviceIP, this, showAllStats);
       lua_pushinteger(vm, get_id());
       lua_insert(vm, -2);
       lua_settable(vm, -3);

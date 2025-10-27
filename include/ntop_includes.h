@@ -303,7 +303,7 @@ using namespace std;
 #endif /* HAVE_NEDGE */
 #include "CounterTrend.h"
 #include "LRUMacIP.h"
-#include "FlowInterfacesStats.h"
+#include "FlowDevicesStats.h"
 #ifdef HAVE_LDAP
 #include "LdapAuthenticator.h"
 #endif /* HAVE_LDAP */

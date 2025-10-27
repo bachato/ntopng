@@ -201,7 +201,7 @@ NetworkInterface::NetworkInterface(const char *name,
 
   /* Lazy, instantiated on demand */
   custom_app_stats = NULL;
-  flow_interfaces_stats = NULL;
+  flow_devices_stats = NULL;
 #endif
 
   loadScalingFactorPrefs();
@@ -347,7 +347,7 @@ void NetworkInterface::init(const char *interface_name) {
   
 #ifdef NTOPNG_PRO
   custom_app_stats = NULL;
-  flow_interfaces_stats = NULL;
+  flow_devices_stats = NULL;
   
   /* Behavior init variables */
   next5MinPeriodicUpdate = nextMinPeriodicUpdate = 0;
@@ -1069,7 +1069,7 @@ NetworkInterface::~NetworkInterface() {
   if (sub_interfaces) delete (sub_interfaces);
 #endif
   if (custom_app_stats) delete custom_app_stats;
-  if (flow_interfaces_stats) delete flow_interfaces_stats;
+  if (flow_devices_stats) delete flow_devices_stats;
 #endif
   if (influxdb_ts_exporter) delete influxdb_ts_exporter;
   if (rrd_ts_exporter) delete rrd_ts_exporter;

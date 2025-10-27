@@ -43,13 +43,19 @@ class ZMQParserInterface : public ParserInterface {
   u_int32_t polling_start_time;
   bool once, is_sampled_traffic;
   u_int32_t flow_max_idle, returned_flow_max_idle;
-  u_int64_t zmq_initial_bytes, zmq_initial_pkts, zmq_initial_drops,
-      zmq_remote_initial_exported_flows;
+
+  /* Note: data structures below are updated from events/stats,
+   * while flow_devices_stats (FlowDevicesStats) in NetworkInterface
+   * is updated from collected flows */
   std::map<u_int32_t, nProbeStats *> nprobes_last_remote_stats;
   nProbeStats *cumulative_remote_stats, *cumulative_remote_stats_shadow;
-  u_int32_t remote_lifetime_timeout, remote_idle_timeout;
   struct timeval last_cumulative_remote_stats_update;
+  u_int32_t remote_lifetime_timeout, remote_idle_timeout;
+  u_int64_t zmq_initial_bytes, zmq_initial_pkts, zmq_initial_drops,
+            zmq_remote_initial_exported_flows;
+
   RwLock lock;
+
 #ifdef NTOPNG_PRO
   CustomAppMaps *custom_app_maps;
 #endif

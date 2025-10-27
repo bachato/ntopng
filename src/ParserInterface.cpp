@@ -36,9 +36,9 @@ ParserInterface::ParserInterface(const char *endpoint,
     new (std::nothrow) NetworkInterface *[MAX_NUM_COMPANION_INTERFACES]();
 
 #ifdef NTOPNG_PRO
-  flow_interfaces_stats = new (std::nothrow) FlowInterfacesStats();
+  flow_devices_stats = new (std::nothrow) FlowDevicesStats();
 
-  if (!flow_interfaces_stats)
+  if (!flow_devices_stats)
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Memory allocation failure");
 #endif
 }
@@ -59,15 +59,11 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
   bpf_timeval now_tv = {0};
   Mac *srcMac = NULL, *dstMac = NULL;
   IpAddress srcIP, dstIP;
-  u_int32_t exporter_unique_source_id = zflow->unique_source_id;
   u_int32_t in_pkts, in_bytes, out_pkts, out_bytes;
 
 #ifdef NTOPNG_PRO
-  if (!flow_interfaces_stats) return false;
+  if (!flow_devices_stats) return false;
 #endif
-
-  if (exporter_unique_source_id == 0) /* Fallback */
-    exporter_unique_source_id = getExporterUniqueSourceID(zflow->exporter_device_ip, zflow->nprobe_ip);
 
   now = time(NULL);
   now_tv.tv_sec = now;
@@ -259,21 +255,21 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     return(false);
 
 #ifdef NTOPNG_PRO
-  if ((exporter_unique_source_id != 0)/* && (!isSubInterface())*/) {
+  if (zflow->unique_source_id != 0) {
 
 #if 0
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "exporter_unique_source_id=%u, inIndex=%u, outIndex=%u, exporter_device_ip=%u, nprobe_ip=%u [%u / %u]",
-				 exporter_unique_source_id,
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "unique_source_id=%u, inIndex=%u, outIndex=%u, exporter_device_ip=%u, nprobe_ip=%u [%u / %u]",
+				 zflow->unique_source_id,
 				 flow->getFlowDeviceInIndex(),
 				 flow->getFlowDeviceOutIndex(),
 				 zflow->exporter_device_ip, zflow->nprobe_ip,
 				 flow->getFlowDeviceInIndex(), flow->getFlowDeviceOutIndex());
 #endif
 
-    if (!flow_interfaces_stats->checkExporterInterfaces(exporter_unique_source_id,
+    if (!flow_devices_stats->checkExporterInterfaces(zflow->unique_source_id,
 					       flow->getFlowDeviceInIndex(),
 					       flow->getFlowDeviceOutIndex(),
-					       zflow->exporter_device_ip, zflow->nprobe_ip)) {
+					       zflow->exporter_device_ip, zflow->nprobe_source_id, zflow->nprobe_ip)) {
       exportersLimitReached();
       return(false);
     }
@@ -697,11 +693,11 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
   }
 
 #ifdef NTOPNG_PRO
-  if (exporter_unique_source_id) {
-    if (flow_interfaces_stats) {
-      flow_interfaces_stats->incStats(now, exporter_unique_source_id, flow->getFlowDeviceInIndex(),
+  if (zflow->unique_source_id) {
+    if (flow_devices_stats) {
+      flow_devices_stats->incStats(now, zflow->unique_source_id, flow->getFlowDeviceInIndex(),
                                       flow->getStatsProtocol(), out_pkts,
-                                      out_bytes, in_pkts, in_bytes);
+                                      out_bytes, in_pkts, in_bytes, zflow->nprobe_source_id);
 
       /* If the SNMP device is actually an host with an SNMP agent, then traffic
          can enter and leave it from the same interface (think to a management
@@ -710,9 +706,9 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
          double counting. */
 
       if (flow->getFlowDeviceOutIndex() != flow->getFlowDeviceInIndex())
-        flow_interfaces_stats->incStats(now, exporter_unique_source_id, flow->getFlowDeviceOutIndex(),
+        flow_devices_stats->incStats(now, zflow->unique_source_id, flow->getFlowDeviceOutIndex(),
                                         flow->getStatsProtocol(), in_pkts,
-                                        in_bytes, out_pkts, out_bytes);
+                                        in_bytes, out_pkts, out_bytes, zflow->nprobe_source_id);
     }
   }
 #endif

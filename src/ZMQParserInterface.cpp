@@ -652,7 +652,7 @@ u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
 	  if (json_object_object_get_ex(val, "unique_source_id", &x))
             exp_stats.unique_source_id = (u_int32_t)json_object_get_int64(x);
 
-          //if (!flow_interfaces_stats->checkExporter(exp_stats.unique_source_id, exporter_device_ip, nprobe_ip))
+          //if (!flow_devices_stats->checkExporter(exp_stats.unique_source_id, exporter_device_ip, zrs.nprobe_source_id, nprobe_ip))
           //  exportersLimitReached();
 
           zrs.exportersStats[exporter_device_ip] = exp_stats;
@@ -2054,7 +2054,16 @@ bool ZMQParserInterface::preprocessFlow(ParsedFlow *flow) {
 
     if (flow->pkt_sampling_rate == 0) flow->pkt_sampling_rate = 1;
 
-    if(flow->nprobe_ip == 0) flow->nprobe_ip = flow->exporter_device_ip;
+    if(flow->nprobe_ip == 0) 
+      flow->nprobe_ip = flow->exporter_device_ip;
+
+    if (flow->unique_source_id == 0) {
+      if (flow->nprobe_source_id) flow->unique_source_id = flow->nprobe_source_id;
+      else flow->unique_source_id = getExporterUniqueSourceID(flow->exporter_device_ip, flow->nprobe_ip);
+    }
+
+    if (flow->nprobe_source_id == 0)
+      flow->nprobe_source_id = flow->unique_source_id;
 
     /* Process Flow */
     INTERFACE_PROFILING_SECTION_ENTER("processFlow", 30);
