@@ -929,8 +929,7 @@ void Host::lua(lua_State *vm, AddressTree *ptree, bool host_details,
 
     lua_push_int32_table_entry(vm, "num_contacted_peers_with_tcp_udp_flows_no_response",
 			       getNumContactedPeersAsClientTCPUDPNoTX());
-    lua_push_int32_table_entry(
-			       vm, "num_incoming_peers_that_sent_tcp_udp_flows_no_response",
+    lua_push_int32_table_entry(vm, "num_incoming_peers_that_sent_tcp_udp_flows_no_response",
 			       getNumContactsFromPeersAsServerTCPUDPNoTX());
 
     if(device_ip)

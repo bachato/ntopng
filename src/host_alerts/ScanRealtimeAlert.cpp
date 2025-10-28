@@ -22,13 +22,15 @@
 #include "host_alerts_includes.h"
 
 ndpi_serializer* ScanRealtimeAlert::getAlertJSON(ndpi_serializer* serializer) {
-    #ifdef NTOPNG_PRO
-        if (serializer == NULL) return NULL;
-        ndpi_serialize_start_of_list(serializer, "alerts");
-        for(ScanAlertType alert : alerts)
-            ndpi_serialize_string_uint64(serializer, "alerts_addr", alert);
-        ndpi_serialize_end_of_list(serializer);
-    #endif
-    
-    return serializer;
+#ifdef NTOPNG_PRO
+  if (serializer == NULL) return NULL;
+  ndpi_serialize_start_of_list(serializer, "alerts");
+
+  for(ScanAlertType alert : alerts)
+    ndpi_serialize_string_uint64(serializer, "alerts_addr", alert);
+  
+  ndpi_serialize_end_of_list(serializer);
+#endif
+  
+  return serializer;
 }

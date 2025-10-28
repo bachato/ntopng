@@ -1217,6 +1217,13 @@ local lang = {
       ["score_as_client"] = "Score Behaviour as Client",
       ["score_as_server"] = "Score Behaviour as Server",
     },
+    ["scan_realtime"] = {
+       ["incomplete_flows"] = "Too many TCP 3WH Incomplete/UDP Unidirectional Flows Scan",
+       ["rx_only_scan"] = "RX-only Host Scan",
+       ["syn_scan"] = "TCP SYN Scan",
+       ["fin_scan"] = "TCP FIN Scan",
+       ["rst_scan"] = "TCP RST Scan",
+    }
   },
   ["alert_behaviors"] = {
     ["l7_traffic_behavior"] = "Traffic RX + TX",
@@ -3140,9 +3147,9 @@ local lang = {
     ["rst_scan_title"] = "RST Scan",
     ["rx_only_host_scan_description"] = "Trigger an alert when a server host RX-only is under scan attack.",
     ["rx_only_host_scan_title"] = "RX-only Host Scan",
-    ["scan_detection_description"] = "Trigger an alert when a scan (host/port) is detected when the number of incomplete TCP/UDP flows exceeds the specified threshold.",
+    ["scan_detection_description"] = "Trigger an alert when a scan (host/port) is detected. The alert is triggered whenever an excessive number of unidirectional (i.e. without a reponse) flows is detected.",
     ["scan_realtime_title"] = "Scan (Realtime)",
-    ["scan_realtime_description"] = "Collection of Scan checks. Trigger an alert when a host is scanning a network. This check works with live traffic, no database required.",
+    ["scan_realtime_description"] = "Collection of Scan checks. Trigger an alert when a host is scanning a network. This check works with live traffic (ClickHouse not required).",
     ["scan_detection_title"] = "Scan Detection",
     ["snmp_flood_description"] = "Trigger an alert when the number of sent/received SNMP Flows/sec exceeds the threshold",
     ["snmp_flood_title"] = "SNMP Flood",

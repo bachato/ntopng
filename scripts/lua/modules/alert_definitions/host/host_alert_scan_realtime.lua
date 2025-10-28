@@ -12,17 +12,22 @@ local classes = require "classes"
 local alert = require "alert"
 local mitre = require "mitre_utils"
 
+local dirs = ntop.getDirs()
+package.path = dirs.installdir .. "/scripts/lua/modules/i18n/?.lua;" .. package.path
+local i18n = require "i18n"
+
 -- ##############################################
 
 local host_alert_scan_realtime = classes.class(alert)
 
 local alert_table = {
-  [0] = "Incomplete Flows Scan",
-  [1] = "RX-only Host Scan",
-  [2] = "SYN Scan",
-  [3] = "FIN Scan",
-  [4] = "RST Scan"
+   [0] = i18n("alert.scan_realtime.incomplete_flows"),
+   [1] = i18n("alert.scan_realtime.rx_only_scan"),
+   [2] = i18n("alert.scan_realtime.syn_scan"),
+   [3] = i18n("alert.scan_realtime.fin_scan"),
+   [4] = i18n("alert.scan_realtime.rst_scan"),
 }
+
 -- ##############################################
 
 host_alert_scan_realtime.meta = {
