@@ -103,7 +103,7 @@ function getDefaultLegendFormatter(options) {
                 total = total + Math.abs(s.y)
             }
             const colorDot = `<span class="badge rounded-pill me-1" style="background-color:${s.color}"> </span>`;
-            return `<div class="mt-1 d-flex"><div class="me-4">${colorDot}<strong>${s.labelHTML}</strong></div><div class="ms-auto">${s.yHTML}</div></div>`;
+            return `<div class="mt-1 d-flex"><div class="me-4">${colorDot}${s.labelHTML}</div><div class="ms-auto">${s.yHTML}</div></div>`;
         }).join("");
 
         if (setTotal) {
