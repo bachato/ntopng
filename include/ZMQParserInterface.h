@@ -44,33 +44,18 @@ class ZMQParserInterface : public ParserInterface {
   bool once, is_sampled_traffic;
   u_int32_t flow_max_idle, returned_flow_max_idle;
 
-  /* Note: data structures below are updated from events/stats,
-   * while flow_devices_stats (FlowDevicesStats) in NetworkInterface
-   * is updated from collected flows */
-  std::map<u_int32_t, nProbeStats *> nprobes_last_remote_stats;
-
   /* Note: using a small structure to account cumulative stats from 
    * all remote probes. This is accessed concurrently, thus please
    * consider a lock or shadow if you need to handle non-atomic access. */
-  struct {
-    u_int32_t remote_lifetime_timeout;
-    u_int32_t remote_idle_timeout;
-    u_int32_t remote_collected_lifetime_timeout;
-    u_int32_t sflow_pkt_sample_drops;
-  } cumulative_remote_stats;
+  CumulativenProbeStats cumulative_remote_stats;
   struct timeval last_cumulative_remote_stats_update;
 
   u_int32_t remote_lifetime_timeout, remote_idle_timeout;
-  u_int64_t zmq_initial_bytes, zmq_initial_pkts, zmq_initial_drops,
-            zmq_remote_initial_exported_flows;
-
-  RwLock stats_lock;
 
 #ifdef NTOPNG_PRO
   CustomAppMaps *custom_app_maps;
 #endif
 
-  void exporterLuaStats(lua_State *vm, nProbeStats *zrs);
   void loadVLANMappings();
   u_int16_t findVLANMapping(std::string name);
   
@@ -160,7 +145,6 @@ class ZMQParserInterface : public ParserInterface {
   virtual void lua(lua_State *vm, bool fullStats);
   virtual void probeLuaStats(lua_State *vm);
   inline u_int32_t getFlowMaxIdle() { return (returned_flow_max_idle); }
-  u_int16_t purgeIdleProbes(time_t when);
 };
 
 #endif /* _ZMQ_PARSER_INTERFACE_H_ */

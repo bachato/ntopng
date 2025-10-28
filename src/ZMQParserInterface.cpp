@@ -36,12 +36,9 @@ ZMQParserInterface::ZMQParserInterface(const char *endpoint,
   : ParserInterface(endpoint, custom_interface_type) {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 
-  zmq_initial_bytes = 0, zmq_initial_pkts = 0, zmq_initial_drops = 0;
-
   memset(&cumulative_remote_stats, 0, sizeof(cumulative_remote_stats));
   memset(&last_cumulative_remote_stats_update, 0, sizeof(last_cumulative_remote_stats_update));
 
-  zmq_remote_initial_exported_flows = 0;
   remote_lifetime_timeout = remote_idle_timeout = 0;
   once = false, is_sampled_traffic = false;
   flow_max_idle = ntop->getPrefs()->get_pkt_ifaces_flow_max_idle();
@@ -295,10 +292,6 @@ ZMQParserInterface::~ZMQParserInterface() {
 #ifdef NTOPNG_PRO
   if (custom_app_maps) delete (custom_app_maps);
 #endif
-
-  for (it = nprobes_last_remote_stats.begin(); it != nprobes_last_remote_stats.end(); ++it)
-    delete (it->second);
-  nprobes_last_remote_stats.clear();
 
   if (!descriptions_map.empty()) {
     char buf[64];
@@ -648,8 +641,10 @@ u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
 	  if (json_object_object_get_ex(val, "unique_source_id", &x))
             exp_stats.unique_source_id = (u_int32_t)json_object_get_int64(x);
 
+#ifdef NTOPNG_PRO
           //if (!flow_devices_stats->checkExporter(exp_stats.unique_source_id, exporter_device_ip, zrs.nprobe_source_id, nprobe_ip))
           //  exportersLimitReached();
+#endif
 
           zrs.exportersStats[exporter_device_ip] = exp_stats;
         }
@@ -3225,116 +3220,49 @@ u_int32_t ZMQParserInterface::periodicStatsUpdateFrequency() const {
 /* **************************************** */
 
 void ZMQParserInterface::setRemoteStats(nProbeStats *zrs) {
-  nProbeStats *last_zrs;
+#ifdef NTOPNG_PRO
   std::map<u_int32_t, nProbeStats *>::iterator it;
   struct timeval now;
-  u_int32_t last_update = 0;
 
   gettimeofday(&now, NULL);
-
-  /* Store stats for the current exporter */
 
   if (!zrs->nprobe_source_id) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "nProbe Source ID not defined");
     return;
   }
 
-  stats_lock.wrlock(__FILE__, __LINE__);
+  /* Store stats for the current probe */
+  flow_devices_stats->setProbeStats(zrs->nprobe_source_id, zrs);
 
-  if (nprobes_last_remote_stats.find(zrs->nprobe_source_id) == nprobes_last_remote_stats.end()) {
-    /* Allocate last stats for source ID */
-    last_zrs = new (std::nothrow) nProbeStats();
-
-    if (!last_zrs) {
-      stats_lock.unlock(__FILE__, __LINE__);
-      return;
-    }
-
-    nprobes_last_remote_stats[zrs->nprobe_source_id] = last_zrs;
-  } else {
-    last_zrs = nprobes_last_remote_stats[zrs->nprobe_source_id];
-  }
-
-  *last_zrs = *zrs;
-
-  stats_lock.unlock(__FILE__, __LINE__);
-
-  if (Utils::msTimevalDiff(&now, &last_cumulative_remote_stats_update) < 1000) {
-    /* Do not update cumulative stats more frequently than once per second.
-     * Note: this also avoids concurrent access (use after free) of shadow */
+  /* Do not update cumulative stats more frequently than once per second. */
+  if (Utils::msTimevalDiff(&now, &last_cumulative_remote_stats_update) < 1000)
     return;
-  }
 
-  /* Sum stats from all exporters */
+  /* Sum stats from all probes */
+  CumulativenProbeStats cumulative;
+  flow_devices_stats->sumAllProbeStats(&cumulative);
 
-  u_int32_t remote_lifetime_timeout = 0;
-  u_int32_t remote_idle_timeout = 0;
-  u_int32_t remote_collected_lifetime_timeout = 0;
-  u_int32_t sflow_pkt_sample_drops = 0;
+  /* Update cumulative counters
+   * Note: make sure this assignment is atomic (concurrency) */
+  cumulative_remote_stats = cumulative;
 
-  u_int32_t remote_ifspeed = 0, remote_time = 0, avg_pps = 0, avg_bps = 0;
-  u_int64_t sflow_samples = 0, remote_bytes = 0, remote_pkts = 0, remote_pkt_drops = 0, num_flow_exports = 0;
-
-  stats_lock.wrlock(__FILE__, __LINE__); /* Need write lock due to (*) */ 
-
-  /* Compute cumulative stats for all sources */
-  for (it = nprobes_last_remote_stats.begin(); it != nprobes_last_remote_stats.end(); it++)  {
-    nProbeStats *zrs_i = it->second;
-
-    last_update = ndpi_max(last_update, zrs_i->last_update);
-
-    remote_lifetime_timeout = max_val(remote_lifetime_timeout, zrs_i->remote_lifetime_timeout);
-    remote_idle_timeout = max_val(remote_idle_timeout, zrs_i->remote_idle_timeout);
-    remote_collected_lifetime_timeout = max_val(remote_collected_lifetime_timeout, zrs_i->remote_collected_lifetime_timeout);
-    sflow_pkt_sample_drops += zrs_i->sflow_pkt_sample_drops;
-
-    remote_ifspeed = max_val(remote_ifspeed, zrs_i->remote_ifspeed);
-    remote_time = max_val(remote_time, zrs_i->remote_time);
-    avg_pps += zrs_i->avg_pps;
-    avg_bps += zrs_i->avg_bps;
-    sflow_samples += zrs_i->flow_collection.sflow_samples;
-    remote_bytes += zrs_i->remote_bytes;
-    remote_pkts += zrs_i->remote_pkts;
-    remote_pkt_drops += zrs_i->remote_pkt_drops;
-    num_flow_exports += zrs_i->num_flow_exports;
-  }
-
-  stats_lock.unlock(__FILE__, __LINE__);
-
-  /* Update cumulative counters */
-  cumulative_remote_stats.remote_lifetime_timeout = remote_lifetime_timeout;
-  cumulative_remote_stats.remote_idle_timeout = remote_idle_timeout;
-  cumulative_remote_stats.remote_collected_lifetime_timeout = remote_collected_lifetime_timeout;
-  cumulative_remote_stats.sflow_pkt_sample_drops = sflow_pkt_sample_drops;
-
-  ifSpeed = remote_ifspeed;
+  ifSpeed = cumulative.remote_ifspeed;
   last_pkt_rcvd = 0;
-  last_pkt_rcvd_remote = remote_time;
-  last_remote_pps = avg_pps;
-  last_remote_bps = avg_bps;
-  last_remote_update = last_update;
+  last_pkt_rcvd_remote = cumulative.remote_time;
+  last_remote_pps = cumulative.avg_pps;
+  last_remote_bps = cumulative.avg_bps;
+  last_remote_update = cumulative.last_update;
 
-  if (sflow_samples > 0)
+  if (cumulative.sflow_samples > 0)
     is_sampled_traffic = true;
 
   /* Recalculate the flow max idle according to the timeouts received */
-  flow_max_idle = min_val(remote_lifetime_timeout,
-                          remote_collected_lifetime_timeout) + 10 /* Safe margin */;
+  flow_max_idle = min_val(cumulative.remote_lifetime_timeout,
+                          cumulative.remote_collected_lifetime_timeout) + 10 /* Safe margin */;
   updateFlowMaxIdle();
 
-  if (zmq_initial_pkts == 0 /* ntopng has been restarted */
-      || remote_bytes < zmq_initial_bytes /* nProbe has been restarted */ ) {
-    /* Start over */
-    zmq_initial_bytes = remote_bytes;
-    zmq_initial_pkts  = remote_pkts;
-    zmq_initial_drops = remote_pkt_drops;
-  }
-
-  if (zmq_remote_initial_exported_flows == 0 /* ntopng has been restarted */
-      || num_flow_exports < zmq_remote_initial_exported_flows) /* nProbe has been restarted */
-    zmq_remote_initial_exported_flows = num_flow_exports;
-
   memcpy(&last_cumulative_remote_stats_update, &now, sizeof(now));
+#endif
 }
 
 /* **************************************************** */
@@ -3352,83 +3280,15 @@ bool ZMQParserInterface::getCustomAppDetails(u_int32_t remapped_app_id,
 /* **************************************************** */
 
 void ZMQParserInterface::probeLuaStats(lua_State *vm) {
-  std::map<u_int32_t, nProbeStats *>::iterator it;
   lua_newtable(vm);
+  
+#ifdef NTOPNG_PRO
+  flow_devices_stats->luaProbesStats(vm);
+#endif
 
-  stats_lock.rdlock(__FILE__, __LINE__);
-
-  for (it = nprobes_last_remote_stats.begin(); it != nprobes_last_remote_stats.end(); ++it) {
-    nProbeStats *zrs = it->second;
-
-    lua_newtable(vm);
-
-    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s (%u)", zrs->remote_ifname,
-    // it->first);
-
-    lua_push_uint32_table_entry(vm, "probe.last_update", zrs->last_update);
-    lua_push_str_table_entry(vm, "remote.name", zrs->remote_ifname);
-    lua_push_str_table_entry(vm, "remote.if_addr", zrs->remote_ifaddress);
-    lua_push_uint64_table_entry(vm, "remote.ifspeed", zrs->remote_ifspeed);
-    lua_push_str_table_entry(vm, "probe.ip", zrs->remote_probe_address);
-    lua_push_str_table_entry(vm, "probe.uuid", zrs->uuid);
-    lua_push_uint64_table_entry(vm, "probe.uuid_num", zrs->nprobe_source_id);
-    lua_push_str_table_entry(vm, "probe.public_ip", zrs->remote_probe_public_address);
-    lua_push_str_table_entry(vm, "probe.probe_version", zrs->remote_probe_version);
-    lua_push_str_table_entry(vm, "probe.probe_os", zrs->remote_probe_os);
-    lua_push_str_table_entry(vm, "probe.probe_license", zrs->remote_probe_license);
-    lua_push_str_table_entry(vm, "probe.probe_edition", zrs->remote_probe_edition);
-    lua_push_str_table_entry(vm, "probe.mode", zrs->mode);
-    lua_push_str_table_entry(vm, "probe.probe_maintenance", zrs->remote_probe_maintenance);
-    lua_push_uint64_table_entry(vm, "drops.export_queue_full", zrs->export_queue_full);
-    lua_push_uint64_table_entry(vm, "drops.too_many_flows", zrs->too_many_flows);
-    lua_push_uint64_table_entry(vm, "drops.elk_flow_drops", zrs->elk_flow_drops);
-    lua_push_uint64_table_entry(vm, "drops.sflow_pkt_sample_drops", zrs->sflow_pkt_sample_drops);
-    lua_push_uint64_table_entry(vm, "drops.flow_collection_drops", zrs->flow_collection_drops);
-    lua_push_uint64_table_entry(vm, "drops.flow_collection_udp_socket_drops", zrs->flow_collection_udp_socket_drops);
-    lua_push_uint64_table_entry(vm, "packets.total", zrs->remote_pkts);
-    lua_push_uint64_table_entry(vm, "packets.drops", zrs->remote_pkt_drops);
-    lua_push_uint64_table_entry(vm, "flow_collection.nf_ipfix_flows", zrs->flow_collection.nf_ipfix_flows);
-    lua_push_uint64_table_entry(vm, "flow_collection.collection_port", zrs->flow_collection.collection_port);
-    lua_push_uint64_table_entry(vm, "flow_collection.sflow_samples", zrs->flow_collection.sflow_samples);
-    lua_push_uint64_table_entry(vm, "zmq.num_flow_exports", zrs->num_flow_exports);
-
-    exporterLuaStats(vm, zrs);
-    lua_push_uint64_table_entry(vm, "zmq.num_exporters", zrs->num_exporters);
-
-    /* ************************************* */
-
-    if (zrs) {
-      lua_push_uint64_table_entry(vm, "probe.remote_time", zrs->remote_time); /* remote time when last event has been sent */
-      lua_push_uint64_table_entry(vm, "probe.local_time", zrs->local_time); /* local time when last event has been received */
-
-      if(zrs->num_flow_exports < zmq_remote_initial_exported_flows)
-	zmq_remote_initial_exported_flows = zrs->num_flow_exports; /* nProbe has been reset */
-
-      lua_push_uint64_table_entry(vm, "zmq.num_flow_exports",  zrs->num_flow_exports - zmq_remote_initial_exported_flows);
-      lua_push_uint64_table_entry(vm, "zmq.num_exporters", zrs->num_exporters);
-
-      if (zrs->export_queue_full > 0)
-        lua_push_uint64_table_entry(vm, "zmq.drops.export_queue_full", zrs->export_queue_full);
-      if (zrs->flow_collection_drops)
-        lua_push_uint64_table_entry(vm, "zmq.drops.flow_collection_drops", zrs->flow_collection_drops);
-      if (zrs->flow_collection_udp_socket_drops)
-        lua_push_uint64_table_entry(vm, "zmq.drops.flow_collection_udp_socket_drops", zrs->flow_collection_udp_socket_drops);
-
-      lua_push_uint64_table_entry(vm, "timeout.lifetime", zrs->remote_lifetime_timeout);
-      lua_push_uint64_table_entry(vm, "timeout.collected_lifetime", zrs->remote_collected_lifetime_timeout);
-      lua_push_uint64_table_entry(vm, "timeout.idle", zrs->remote_idle_timeout);
-    }
-
-    lua_pushstring(vm, std::to_string(it->first).c_str() /* The source_id as string (can't use integers or Lua will think it's an array ) */);
-    lua_insert(vm, -2);
-    lua_settable(vm, -3);
-  }
-  lua_rawseti(vm, -2, get_id());
   /* Here the Interface ID is added because in case of View Interfaces
-   * this field could be the same for different interfaces
-   */
-
-  stats_lock.unlock(__FILE__, __LINE__);
+   * this field could be the same for different interfaces */
+  lua_rawseti(vm, -2, get_id());
 }
 
 /* **************************************************** */
@@ -3438,33 +3298,6 @@ void ZMQParserInterface::lua(lua_State *vm, bool fullStats) {
   lua_newtable(vm);
   probeLuaStats(vm);
   lua_pushstring(vm, "probes");
-  lua_insert(vm, -2);
-  lua_settable(vm, -3);
-}
-
-/* **************************************************** */
-
-void ZMQParserInterface::exporterLuaStats(lua_State *vm, nProbeStats *zrs) {
-  std::map<u_int32_t, ExporterStats>::iterator it;
-  lua_newtable(vm);
-
-  for (it = zrs->exportersStats.begin(); it != zrs->exportersStats.end(); ++it) {
-    lua_newtable(vm);
-    char buf[32], ipb[24];
-    snprintf(buf, sizeof(buf), "%s", Utils::intoaV4(it->first, ipb, sizeof(ipb)));
-
-    lua_push_uint64_table_entry(vm, "time_last_used", it->second.time_last_used);
-    lua_push_uint64_table_entry(vm, "num_netflow_flows", it->second.num_netflow_flows);
-    lua_push_uint64_table_entry(vm, "num_sflow_flows", it->second.num_sflow_flows);
-    lua_push_uint64_table_entry(vm, "num_drops", it->second.num_drops);
-    lua_push_uint64_table_entry(vm, "unique_source_id", it->second.unique_source_id);
-
-    lua_pushstring(vm, buf);
-    lua_insert(vm, -2);
-    lua_settable(vm, -3);
-  }
-
-  lua_pushstring(vm, "exporters");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
 }
@@ -3588,37 +3421,6 @@ u_int8_t ZMQParserInterface::parseJSONCustomIE(const char *payload,
   }
 
   return 0;
-}
-
-/* **************************************************** */
-
-u_int16_t ZMQParserInterface::purgeIdleProbes(time_t when) {
-  u_int16_t num_purged = 0;
-  std::map<u_int32_t, nProbeStats *>::iterator it;
-  u_int32_t deadline = (u_int32_t) when - MAX_PROBE_IDLE_TIME;
-  
-  stats_lock.wrlock(__FILE__, __LINE__); /* Need write lock due to (*) */
-
-  for (it = nprobes_last_remote_stats.begin(); it != nprobes_last_remote_stats.end();) {
-    nProbeStats *zrs_i = it->second;
-
-    if (zrs_i->local_time < deadline /* sec */) {
-      /* Do not account inactive exporters, release them */
-      //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Erased %s [local_time: %u]",
-      //   zrs_i->remote_ifname, zrs_i->local_time);
-
-      flow_devices_stats->removeProbe(zrs_i->nprobe_source_id);
-
-      delete (zrs_i);
-      nprobes_last_remote_stats.erase(it++); /* (*) */
-      num_purged++;
-    } else
-      it++;
-  }
-
-  stats_lock.unlock(__FILE__, __LINE__);
-
-  return(num_purged);
 }
 
 #endif

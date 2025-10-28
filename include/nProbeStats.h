@@ -38,22 +38,57 @@ typedef struct {
   u_int32_t unique_source_id;
 } ExporterStats;
 
+typedef struct {
+  u_int32_t last_update;
+  u_int32_t remote_lifetime_timeout;
+  u_int32_t remote_idle_timeout;
+  u_int32_t remote_collected_lifetime_timeout;
+  u_int32_t sflow_pkt_sample_drops;
+  u_int32_t remote_ifspeed;
+  u_int32_t remote_time;
+  u_int32_t avg_pps;
+  u_int32_t avg_bps;
+  u_int64_t sflow_samples;
+  u_int64_t remote_bytes;
+  u_int64_t remote_pkts;
+  u_int64_t remote_pkt_drops;
+  u_int64_t num_flow_exports;
+} CumulativenProbeStats;
+
 class nProbeStats {
 public:
-  char remote_ifname[32], remote_ifaddress[64];
-  char remote_probe_address[64], remote_probe_public_address[64], uuid[36];
-  char remote_probe_version[64], remote_probe_os[64];
-  char remote_probe_license[64], remote_probe_edition[64];
+  char remote_ifname[32];
+  char remote_ifaddress[64];
+  char remote_probe_address[64];
+  char remote_probe_public_address[64];
+  char uuid[36];
+  char remote_probe_version[64];
+  char remote_probe_os[64];
+  char remote_probe_license[64];
+  char remote_probe_edition[64];
   char remote_probe_maintenance[64];
   char mode[64];
-  u_int32_t nprobe_source_id, num_exporters, last_update;
-  u_int64_t remote_bytes, remote_pkts, remote_pkt_drops, num_flow_exports;
-  u_int32_t remote_ifspeed, remote_time, local_time, avg_bps, avg_pps;
-  u_int32_t remote_lifetime_timeout, remote_idle_timeout,
-    remote_collected_lifetime_timeout;
-  u_int32_t export_queue_full, too_many_flows, elk_flow_drops,
-    sflow_pkt_sample_drops, flow_collection_drops,
-    flow_collection_udp_socket_drops;
+  u_int32_t nprobe_source_id;
+  u_int32_t num_exporters;
+  u_int32_t last_update;
+  u_int64_t remote_bytes;
+  u_int32_t remote_pkts;
+  u_int32_t remote_pkt_drops;
+  u_int32_t num_flow_exports;
+  u_int32_t remote_ifspeed;
+  u_int32_t remote_time;
+  u_int32_t local_time;
+  u_int32_t avg_bps;
+  u_int32_t avg_pps;
+  u_int32_t remote_lifetime_timeout;
+  u_int32_t remote_idle_timeout;
+  u_int32_t remote_collected_lifetime_timeout;
+  u_int32_t export_queue_full;
+  u_int32_t too_many_flows;
+  u_int32_t elk_flow_drops;
+  u_int32_t sflow_pkt_sample_drops;
+  u_int32_t flow_collection_drops;
+  u_int32_t flow_collection_udp_socket_drops;
   FlowCollection flow_collection; 
     
   std::map<u_int32_t, ExporterStats> exportersStats;
