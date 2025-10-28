@@ -138,7 +138,7 @@ local community_timeseries = {
             }
         },
         always_visibile = true,
-        draw_stacked = true
+        draw_stacked = false
     }, {
         schema = "iface:flows",
         id = timeseries_id.iface,
@@ -1346,6 +1346,7 @@ local community_timeseries = {
     }, {
         schema = "top:asn:traffic",
         id = timeseries_id.iface,
+        draw_stacked = true,
         label = i18n("graphs.top_asn"),
         description = i18n("graphs.metric_descr.asn_traffic_rxtx"),
         priority = 0,
