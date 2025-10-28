@@ -160,7 +160,7 @@ const map_table_def_columns = (columns) => {
             if (row.is_unreachable) {
                 rsp =  `<span class='badge bg-warning' data-bs-toggle='tooltip' data-bs-placement='top' title='${_i18n('snmp.snmp_device_does_not_respond')}'>
                             <i class="fas fa-exclamation-triangle"></i>
-                        </span> ${data} ${rsp}`;
+                        </span> ${rsp}`;
             }
             if (row.last_update) {
                 return `<a href='${linksUtils.getSNMPDetailsPageURL(data, http_prefix)}'>${data}</a> ${rsp}`;
