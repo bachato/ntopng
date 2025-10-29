@@ -17,7 +17,7 @@
             <div>
                 <TableWithConfig ref="table_aggregated_live_flows" :csrf="csrf" :table_id="table_id"
                     :table_config_id="table_config_id" :f_map_columns="map_table_def_columns"
-                    :get_extra_params_obj="get_extra_params_obj" :f_map_config="map_config">
+                    :get_extra_params_obj="get_extra_params_obj" :f_map_config="map_config" :showLoading="true">
                     <template v-slot:custom_header>
                         <div class="dropdown me-3 d-inline-block" v-for="item in filter_table_array">
                             <span class="no-wrap d-flex align-items-center filters-label">
@@ -81,15 +81,14 @@ const table_id = computed(() => {
     let id = `${table_config_id.value}_${selected_criteria.value.value}`;
     return id;
 });
-let default_url_params = {};
 const criteria_list = function () {
     let critera_list_def_com = [];
     criteria_list_def.forEach((c) => {
         let add = true;
-        if (!(props.context.is_ntop_enterprise_m && c.enterprise_m)) {
+        if (c.enterprise_m && !props.context.is_ntop_enterprise_m) {
             add = false;
         }
-        if (!(props.context.asn_mode && c.asn_mode)) {
+        if (props.context.asn_mode && !c.asn_mode) {
             add = false;
         }
         if (add) {
@@ -114,7 +113,7 @@ function init_selected_criteria() {
     // In case it's not found, use the first available criteria
     if (!tmp_criteria) {
         selected_criteria.value = criteria_list.value[0];
-        ntopng_url_manager.set_key_to_url("aggregation_criteria", selected_criteria.value.value)
+        ntopng_url_manager.set_key_to_url("aggregation_criteria", selected_criteria.value.param)
     } else {
         selected_criteria.value = tmp_criteria;
     }
