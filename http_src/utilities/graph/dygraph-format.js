@@ -269,6 +269,7 @@ function formatStandardSerie(timeserie_info, timeserie_options, config, tsCompar
 
     config.value_range = [min_value, max_value];
     config.plotter = getPlotter(chart_type);
+    config.block_stacked = false;
     if (!config.stacked) {
         config.stacked = timeserie_info.metric.draw_stacked || false;
     }
@@ -285,6 +286,7 @@ function formatStandardSerie(timeserie_info, timeserie_options, config, tsCompar
         const ts_id = getSerieId(ts_info);
         const metadata = timeserie_info.metric.timeseries[ts_id];
         const scalar = (metadata?.invert_direction === true) ? -1 : 1;
+        config.block_stacked = (metadata?.invert_direction === true) ? (true || config.block_stacked) : (false || config.block_stacked);
         const { timeserie_name, show_full_name } = getName(ts_info, metadata)
         /* Check if show_full_name is null or undefined */
         const serie_name = getSerieName(timeserie_name, ts_id, timeserie_info, (show_full_name !== null || show_full_name !== undefined) ? (config.use_full_name && show_full_name) : config.use_full_name)

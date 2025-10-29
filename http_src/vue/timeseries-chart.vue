@@ -1,15 +1,24 @@
 <!-- (C) 2022 - ntop.org     -->
 <template>
     <div style="overflow-x: auto; white-space: nowrap; margin-bottom: 10px;min-height:31px;"> <!-- legend-wrapper -->
-      <div class="d-flex"> <!-- legend-div -->
-        <div class="ms-auto"></div>
-        <label class="form-check-label form-control-sm" v-for="(item, i) in timeseries_list">
-            <input type="checkbox" class="form-check-input align-middle mt-0"
-                @click="change_visibility(!item.checked, i)" :checked="item.checked" style="border-color: #0d6efd;"
-                :style="{ backgroundColor: item.color }">
-            {{ item.name }}
-        </label>
-      </div>
+        <div class="d-flex align-items-center"> <!-- legend-div -->
+            <div class="form-check form-switch form-control-sm ms-1" data-bs-toggle="tooltip"
+                :title="block_stacked ? i18n('stacked_blocked_title') : i18n('stacked_unblocked_title')">
+                <input type="checkbox" class="form-check-input" @click="changeStacked" :checked="stacked"
+                    :disabled="block_stacked">
+                <label class="form-check-label">
+                    {{ i18n('stacked') }}
+                </label>
+            </div>
+            <div class="ms-auto">
+                <label class="form-check-label form-control-sm" v-for="(item, i) in timeseries_list">
+                    <input type="checkbox" class="form-check-input align-middle mt-0"
+                        @click="change_visibility(!item.checked, i)" :checked="item.checked"
+                        style="border-color: #0d6efd;" :style="{ backgroundColor: item.color }">
+                    {{ item.name }}
+                </label>
+            </div>
+        </div>
     </div>
     <div v-if="disable_fixed_height == true" class="mb-3" style="width:100%;" ref="chart"></div>
     <div v-else class="mb-3" style="width:100%;min-height:320px;" ref="chart"></div>
@@ -36,11 +45,15 @@ export default {
     data() {
         return {
             chart: null,
+            stacked: null,
+            block_stacked: false,
             chart_options: null,
             from_zoom: false,
+            reload: false,
             timeseries_visibility: null,
             timeseries_list: [],
-            //i18n: (t) => i18n(t),
+            last_url_request: '',
+            i18n: (t) => i18n(t),
         };
     },
     /** This method is the first method called after html template creation. */
@@ -59,6 +72,11 @@ export default {
         },
         get_image: function (image) {
             return Dygraph.Export.asPNG(this.chart, image, this.$refs["chart"]);
+        },
+        changeStacked: function () {
+            this.stacked = !this.stacked;
+            localStorage.setItem('ntopng.timeseries.chartStackedOption.' + this.$props["id"], this.stacked)
+            this.updateIntoStackedChart(this.stacked);
         },
         change_visibility: function (visible, id) {
             if (this.timeseries_list[id] != null) {
@@ -118,6 +136,20 @@ export default {
             }
             /* Emit the chart_reloaded event */
             this.$emit('chart_reloaded', chart_options);
+            if (this.stacked === null && !chart_options.blockStacked) {
+                // First loading of the chart
+                const is_stacked_option_found = localStorage.getItem('ntopng.timeseries.chartStackedOption.' + this.$props["id"])
+                if (is_stacked_option_found !== null) {
+                    this.stacked = (is_stacked_option_found == 'true');
+                    chart_options.stackedGraph = this.stacked;
+                } else {
+                    this.stacked = chart_options.stackedGraph;
+                }
+            } else {
+                if (chart_options.blockStacked)
+                    this.stacked = false;
+                chart_options.stackedGraph = this.stacked;
+            }
             return chart_options;
         },
         draw_chart: async function (url_request) {
@@ -125,6 +157,9 @@ export default {
             const data = chart_options.data || [];
             chart_options.data = null;
             chart_options.zoomCallback = this.on_zoomed;
+            if (chart_options.blockStacked) {
+                this.block_stacked = true
+            }
             this.timeseries_list = [];
             let visibility = [];
             let id = 0;
@@ -146,6 +181,11 @@ export default {
         update_chart_options: function (chart_options) {
             if (this.chart) {
                 this.chart.updateChart(chart_options);
+            }
+        },
+        updateIntoStackedChart: function (stacked) {
+            if (this.chart) {
+                this.chart.updateOptions({ 'stackedGraph': stacked });
             }
         },
         update_chart_series: function (series) {
