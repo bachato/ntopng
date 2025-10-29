@@ -23,7 +23,7 @@ function cache_utils.initialize()
    -- system
    local keys = ntop.getKeysCache(basename.."*.system")
 
-   for k,_ in pairs(keys) do
+   for k,_ in pairs(keys or {}) do
       local system = json.decode(ntop.getCache(k))
       local ipaddr = string.sub(k, len+1, string.len(k)-7)
 
@@ -33,7 +33,7 @@ function cache_utils.initialize()
    -- interfaces
    keys = ntop.getKeysCache(basename.."*.interfaces")
 
-   for k,_ in pairs(keys) do
+   for k,_ in pairs(keys or {}) do
       local ifaces = json.decode(ntop.getCache(k))
       local ipaddr = string.sub(k, len+1, string.len(k)-11)
 
