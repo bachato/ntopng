@@ -97,7 +97,7 @@ function getDefaultLegendFormatter(options) {
         // Entries
         const seriesHTML = data.series.filter(s => s.isVisible && s.yHTML).map(s => {
             if (!s.isVisible) return "";
-            if (!isNaN(s.y) && !s.labelHTML.includes("Ago")) {
+            if (!isNaN(s.y) && !s.labelHTML.includes(i18n('details.ago'))) {
                 // Skip e.g. 30 min Ago series from the total
                 setTotal = true;
                 total = total + Math.abs(s.y)

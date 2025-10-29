@@ -66,8 +66,7 @@ local function compareBackward(compare_backward, curr_res, options)
 
     if (res) and (res.metadata) and (res.metadata.epoch_step) then
         curr_res.additional_series = {}
-        curr_res.additional_series[compare_backward .. "_" ..
-            i18n("details.ago")] = res
+        curr_res.additional_series[compare_backward .. "_ago"] = res
     end
 
     return curr_res

@@ -290,7 +290,7 @@ function formatStandardSerie(timeserie_info, timeserie_options, config, tsCompar
         const serie_name = getSerieName(timeserie_name, ts_id, timeserie_info, (show_full_name !== null || show_full_name !== undefined) ? (config.use_full_name && show_full_name) : config.use_full_name)
         const avg_name = getSerieName(timeserie_name + " Avg", ts_id, timeserie_info, config.use_full_name)
         const perc_name = getSerieName(timeserie_name + " 95th Perc", ts_id, timeserie_info, config.use_full_name);
-        const past_name = getSerieName(timeserie_name + " " + tsCompare + " Ago", ts_id, timeserie_info, config.use_full_name);
+        const past_name = getSerieName(timeserie_name + " " + tsCompare + " " + i18n('details.ago'), ts_id, timeserie_info, config.use_full_name);
         const past_value = (past_serie) ? past_serie[`${tsCompare}_ago`]?.series[j]?.data : null;
         /* An option used to not display a timeserie */
         if (metadata.hidden) {
