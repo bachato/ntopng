@@ -57,13 +57,13 @@ for interface_id, probes_list in pairs(ifstats.probes or {}) do
                 num_ports = num_ports + table.len(ports)
             end
         else
-            for _, values in pairs(probe_info.exporters) do
+            for _, values in pairs(probe_info.exporters or {}) do
                 local ports_table = interface.getFlowDeviceInfo(values.unique_source_id, true)
                 for _, ports in pairs(ports_table or {}) do
                     num_ports = num_ports + table.len(ports)
                 end
-                flow_drops = flow_drops + values.num_drops
-                exported_flows = exported_flows + values.num_netflow_flows + values.num_sflow_flows
+                flow_drops = flow_drops + (values.num_drops or 0)
+                exported_flows = exported_flows + (values.num_netflow_flows or 0) + (values.num_sflow_flows or 0)
             end
             probe_interface = i18n("if_stats_overview.remote_probe_collector_mode")
         end
