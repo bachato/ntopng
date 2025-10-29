@@ -231,8 +231,7 @@ u_int64_t GenericHash::purgeQueuedIdleEntries() {
 /* ************************************ */
 
 bool GenericHash::walk(u_int32_t *begin_slot, bool walk_all,
-                       bool (*walker)(GenericHashEntry *h, void *user_data,
-                                      bool *entryMatched),
+                       bool (*walker)(GenericHashEntry *h, void *user_data, bool *entryMatched),
                        void *user_data) {
   bool found = false;
   u_int16_t tot_matched = 0;
@@ -253,7 +252,7 @@ bool GenericHash::walk(u_int32_t *begin_slot, bool walk_all,
         GenericHashEntry *next = head->next();
 
         /* FIXX get_state() does not always match idle() as the latter can be
-         * overriden (e.g. Flow), leading to walking entries that are actually
+         * overridden (e.g. Flow), leading to walking entries that are actually
          * idle even with walk_idle = false, what about using idle() here? */
 
         if (!head->idle()) {
@@ -278,8 +277,7 @@ bool GenericHash::walk(u_int32_t *begin_slot, bool walk_all,
       if ((tot_matched >= MIN_NUM_HASH_WALK_ELEMS) /* At least a few entries
                                                       have been returned */
           && (!walk_all)) {
-        u_int32_t next_slot =
-            (hash_id == (num_hashes - 1)) ? 0 /* start over */ : (hash_id + 1);
+        u_int32_t next_slot = (hash_id == (num_hashes - 1)) ? 0 /* start over */ : (hash_id + 1);
 
         *begin_slot = next_slot;
 #ifdef WALK_DEBUG

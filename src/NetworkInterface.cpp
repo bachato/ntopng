@@ -1279,8 +1279,7 @@ u_int32_t NetworkInterface::getMacsHashSize() {
 
 bool NetworkInterface::walker(u_int32_t *begin_slot, bool walk_all,
                               WalkerType wtype,
-                              bool (*walker)(GenericHashEntry *h,
-                                             void *user_data, bool *matched),
+                              bool (*walker)(GenericHashEntry *h, void *user_data, bool *matched),
                               void *user_data) {
   bool ret = false;
 
@@ -6563,27 +6562,37 @@ int NetworkInterface::getFlows(lua_State *vm, u_int32_t *begin_slot,
   // sort flows in ascending order
   if (p->a2zSortOrder()) {
     for (int i = p->toSkip(), num = 0; i < (int)retriever.actNumEntries; i++) {
-      lua_newtable(vm);
+      Flow *f = retriever.elems[i].flow;
 
-      retriever.elems[i].flow->lua(vm, allowed_hosts, highDetails, true);
+      /* Safety check: flow may have been deleted after sortFlows() */
+      if (f && f->get_state() && f->get_state() != hash_entry_state_idle) {
+        lua_newtable(vm);
 
-      lua_pushinteger(vm, num + 1);
-      lua_insert(vm, -2);
-      lua_settable(vm, -3);
+        f->lua(vm, allowed_hosts, highDetails, true);
 
-      if (++num >= (int)p->maxHits()) break;
+        lua_pushinteger(vm, num + 1);
+        lua_insert(vm, -2);
+        lua_settable(vm, -3);
+
+        if (++num >= (int)p->maxHits()) break;
+      }
     }
   } else {
     for (int i = (retriever.actNumEntries - 1 - p->toSkip()), num = 0; i >= 0; i--) {
-      lua_newtable(vm);
+      Flow *f = retriever.elems[i].flow;
 
-      retriever.elems[i].flow->lua(vm, allowed_hosts, highDetails, true);
+      /* Safety check: flow may have been deleted after sortFlows() */
+      if (f && f->get_state() && f->get_state() != hash_entry_state_idle) {
+        lua_newtable(vm);
 
-      lua_pushinteger(vm, num + 1);
-      lua_insert(vm, -2);
-      lua_settable(vm, -3);
+        f->lua(vm, allowed_hosts, highDetails, true);
 
-      if (++num >= (int)p->maxHits()) break;
+        lua_pushinteger(vm, num + 1);
+        lua_insert(vm, -2);
+        lua_settable(vm, -3);
+
+        if (++num >= (int)p->maxHits()) break;
+      }
     }
   }
 

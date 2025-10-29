@@ -49,6 +49,7 @@ ParsedFlow::ParsedFlow() : ParsedFlowCore(), ParsedeBPF() {
   tcp_fingerprint = bittorrent_hash = NULL;
   l7_error_code = 0;
   confidence = NDPI_CONFIDENCE_UNKNOWN;
+  os_hint = ndpi_os_unknown;
   flow_source = packet_to_flow;
   src_ip_addr_pre_nat = dst_ip_addr_pre_nat =
     src_ip_addr_post_nat = dst_ip_addr_post_nat = 0;
@@ -177,6 +178,7 @@ ParsedFlow::ParsedFlow(const ParsedFlow &pf) : ParsedFlowCore(pf), ParsedeBPF(pf
   dns_query_type = pf.dns_query_type;
   dns_ret_code = pf.dns_ret_code;
   dns_query_id = pf.dns_query_id;
+  os_hint = pf.os_hint;
   
   /* Only IPv4 supported, in case the ipv4 is 0 it's already handled inside IpAddress class */
   src_ip_addr_pre_nat = pf.src_ip_addr_pre_nat;
@@ -192,6 +194,11 @@ ParsedFlow::ParsedFlow(const ParsedFlow &pf) : ParsedFlowCore(pf), ParsedeBPF(pf
 
   memcpy(&custom_app, &pf.custom_app, sizeof(custom_app));
   has_parsed_ebpf = pf.has_parsed_ebpf;
+  is_swapped = pf.is_swapped;
+  flow_verdict = pf.flow_verdict;
+  confidence = pf.confidence;
+  flow_source = pf.flow_source;
+  l7_error_code = pf.l7_error_code;
 
   memcpy(&qoe, &pf.qoe, sizeof(qoe));
 }
