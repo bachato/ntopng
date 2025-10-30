@@ -90,10 +90,22 @@ if criteria == "client" then
     criteria_type_id = 2
 elseif criteria == "server" then
     criteria_type_id = 3
+elseif criteria == "client_server" then
+    criteria_type_id = 4
+elseif criteria == "app_client_server_criteria" then
+    criteria_type_id = 5
+elseif criteria == "info" then
+    criteria_type_id = 6
 elseif criteria == "client_server_srv_port" then
     criteria_type_id = 7
 elseif criteria == "client_server_srv_port_app_proto" then
     criteria_type_id = 8
+elseif criteria == "src_as_dst_as" then
+    criteria_type_id = 9
+elseif criteria == "src_as_transit_as_dst_as" then
+    criteria_type_id = 10
+elseif criteria == "host" then
+    criteria_type_id = 11
 elseif ntop.isEnterpriseM() then
     criteria_type_id = get_criteria_type_id(criteria)
 end
@@ -111,10 +123,12 @@ for _, data in pairs(aggregated_info or {}) do
     local total_bytes = bytes_rcvd + bytes_sent
     local add_app_proto = false
     local add_server = false
+    local add_host = false
     local add_client = false
     local add_server_port = false
     local client = nil
     local server = nil
+    local host = nil
     local info = nil
     local application = nil
     local srv_port = nil
@@ -151,6 +165,10 @@ for _, data in pairs(aggregated_info or {}) do
             add_server_port = true
         end
         add_app_proto = true
+    elseif (criteria_type_id == 11) then
+        if (data.ip ~= nil) then
+            add_host = true
+        end
     elseif ntop.isEnterpriseM() then
         response = get_output_flags(criteria_type_id)
     end
@@ -211,6 +229,20 @@ for _, data in pairs(aggregated_info or {}) do
         }
     end
 
+    if (add_host or (response ~= {} and response.add_host)) then
+        local host_info = interface.getHostInfo(data.ip, data.vlan_id)
+        host = {
+            vlan_id = data.srv_vlan_id or data.vlan_id,
+            label = hostinfo2label({
+                ip = data.ip,
+                vlan = data.srv_vlan_id or data.vlan_id
+            }),
+            ip = data.ip,
+            in_memory = (host_info ~= nil),
+            extra_labels = format_utils.formatFullAddressCategory(host_info or {})
+        }
+    end
+
     if (table.len(response) > 0 and response.add_info) then
         info = {
             label = data.info,
@@ -263,6 +295,7 @@ for _, data in pairs(aggregated_info or {}) do
         num_clients = format_high_num_value_for_tables(data, 'num_clients'),
         client = client,
         server = server,
+        host = host,
         info = info,
         srv_port = srv_port,
         application = application,

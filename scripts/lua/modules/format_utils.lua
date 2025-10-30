@@ -468,19 +468,19 @@ function format_utils.formatFullAddressCategory(host)
       addr_category = format_utils.formatMainAddressCategory(host)
 
       if(host["is_broadcast"] == true) then
-         addr_category = addr_category .. " <abbr title=\"".. i18n("broadcast") .."\"><span class='badge bg-dark'>" ..i18n("short_broadcast").. "</span></abbr>"
+         addr_category = addr_category .. " <abbr data-bs-toggle='tooltip' title=\"".. i18n("broadcast") .."\"><span class='badge bg-dark'>" ..i18n("short_broadcast").. "</span></abbr>"
       end
 
       if(host["broadcast_domain_host"] == true) then
-         addr_category = addr_category .. " <span class='badge bg-info' style='cursor: help;'><i class='fas fa-sitemap' title='"..i18n("hosts_stats.label_broadcast_domain_host").."'></i></span>"
+         addr_category = addr_category .. " <span class='badge bg-info' style='cursor: help;'><i class='fas fa-sitemap' data-bs-toggle='tooltip' title='"..i18n("hosts_stats.label_broadcast_domain_host").."'></i></span>"
       end
 
       if(host["privatehost"] == true) then
-         addr_category = addr_category .. ' <abbr title=\"'.. i18n("details.label_private_ip") ..'\"><span class="badge bg-warning">'..i18n("details.label_short_private_ip")..'</span></abbr>'
+         addr_category = addr_category .. ' <abbr data-bs-toggle="tooltip" title=\"'.. i18n("details.label_private_ip") ..'\"><span class="badge bg-warning">'..i18n("details.label_short_private_ip")..'</span></abbr>'
       end
 
       if(host["dhcpHost"] == true) then
-         addr_category = addr_category .. ' <i class=\"fas fa-bolt\" title=\"'..i18n("details.label_dhcp")..'\"></i>'
+         addr_category = addr_category .. ' <i class=\"fas fa-bolt\" data-bs-toggle="tooltip" title=\"'..i18n("details.label_dhcp")..'\"></i>'
       end
    end
 
@@ -496,24 +496,24 @@ function format_utils.formatMainAddressCategory(host)
       end
 
       if(host["is_blacklisted"] == true) then
-	 addr_category = addr_category .. " <i class=\'fas fa-ban fa-sm\' title=\'"..i18n("hosts_stats.blacklisted").."\'></i>"
+	 addr_category = addr_category .. " <i class=\'fas fa-ban fa-sm\' data-bs-toggle='tooltip' title=\'"..i18n("hosts_stats.blacklisted").."\'></i>"
       end
 
       if(host["crawlerBotScannerHost"] == true) then
-	 addr_category = addr_category .. " <i class=\'fas fa-spider fa-sm\' title=\'"..i18n("hosts_stats.crawler_bot_scanner").."\'></i>"
+	 addr_category = addr_category .. " <i class=\'fas fa-spider fa-sm\' data-bs-toggle='tooltip' title=\'"..i18n("hosts_stats.crawler_bot_scanner").."\'></i>"
       end
 
 
       if(host["is_multicast"] == true) then
-         addr_category = addr_category .. " <abbr title=\"".. i18n("multicast") .."\"><span class='badge bg-primary'>" ..i18n("short_multicast").. "</span></abbr>"
+         addr_category = addr_category .. " <abbr data-bs-toggle='tooltip' title=\"".. i18n("multicast") .."\"><span class='badge bg-primary'>" ..i18n("short_multicast").. "</span></abbr>"
       elseif(host["localhost"] == true) then
-         addr_category = addr_category .. ' <abbr title=\"'.. i18n("details.label_local_host") ..'\"><span class="badge bg-success">'..i18n("details.label_short_local_host")..'</span></abbr>'
+         addr_category = addr_category .. ' <abbr data-bs-toggle="tooltip" title=\"'.. i18n("details.label_local_host") ..'\"><span class="badge bg-success">'..i18n("details.label_short_local_host")..'</span></abbr>'
       else
-         addr_category = addr_category .. ' <abbr title=\"'.. i18n("details.label_remote") ..'\"><span class="badge bg-secondary">'..i18n("details.label_short_remote")..'</span></abbr>'
+         addr_category = addr_category .. ' <abbr data-bs-toggle="tooltip" title=\"'.. i18n("details.label_remote") ..'\"><span class="badge bg-secondary">'..i18n("details.label_short_remote")..'</span></abbr>'
       end
 
       if(host.is_blackhole == true) then
-	 addr_category = addr_category .. ' <abbr title=\"'.. i18n("details.label_blackhole") ..'\"><span class="badge bg-info">'..i18n("details.label_short_blackhole")..'</span></abbr>'
+	 addr_category = addr_category .. ' <abbr data-bs-toggle="tooltip" title=\"'.. i18n("details.label_blackhole") ..'\"><span class="badge bg-info">'..i18n("details.label_short_blackhole")..'</span></abbr>'
       end
    end
 

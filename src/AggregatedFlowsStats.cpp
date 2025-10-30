@@ -30,7 +30,7 @@ AggregatedFlowsStats::AggregatedFlowsStats(const IpAddress* c, const IpAddress* 
   key = vlan_id = flow_device_ip = proto_key = 0;
   l4_proto = _l4_proto;
   proto_name = info_key = NULL;
-  server = client = NULL;
+  server = client = host = NULL;
   incFlowStats(c, s, bytes_sent, bytes_rcvd, score);
 }
 

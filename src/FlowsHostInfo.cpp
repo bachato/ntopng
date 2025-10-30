@@ -23,6 +23,15 @@
 
 /* ************************************************ */
 
+FlowsHostInfo::FlowsHostInfo(IpAddress* _ip, Host* _host) { 
+    ip = NULL;
+    host = NULL;
+    if (_ip) ip = _ip;
+    if (host) host = _host; 
+};
+
+/* ************************************************ */
+
 const char* FlowsHostInfo::getIP(char* buf, u_int16_t buf_len) {
   return (ip ? ip->print(buf, buf_len) : (char *)"");
 }
@@ -42,7 +51,7 @@ const char* FlowsHostInfo::getIPHex(char* buf, u_int16_t buf_len) {
 /* ************************************************ */
 
 bool FlowsHostInfo::isHostInMem() { 
-  return (host != NULL); 
+  return (host ? true : false); 
 }
 
 /* ************************************************ */

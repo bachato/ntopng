@@ -68,6 +68,7 @@ const criteria_list_def = [
     { label: _i18n("server"), value: 3, param: "server", table_id: "aggregated_server", enterprise_m: false, search_enabled: false, asn_mode: true },
     { label: _i18n("src_as_dst_as"), value: 9, param: "src_as_dst_as", table_id: "aggregated_src_as_dst_as", enterprise_m: true, search_enabled: false, asn_mode: true },
     { label: _i18n("src_as_transit_as_dst_as"), value: 10, param: "src_as_transit_as_dst_as", table_id: "aggregated_src_as_transit_as_dst_as", enterprise_m: true, search_enabled: false, asn_mode: true },
+    { label: _i18n("db_explorer.host_data"), value: 11, param: "host", table_id: "host", enterprise_m: true, search_enabled: true, asn_mode: true },
 ];
 
 const loading = ref(false)
@@ -385,6 +386,14 @@ const map_table_def_columns = async (columns) => {
                         return format_as_name(data_field);
                     }
                 });
+        } else if (selected_criteria.value.value == 11) {
+            // src_as_transit_as_dst_as case
+            columns.push(
+                {
+                    title_i18n: "db_explorer.host_data", sortable: true, name: 'host', data_field: 'host', class: ['text-nowrap'], responsivePriority: 1, render_func: (data_field, rowData) => {
+                        return format_host_name(data_field, rowData)
+                    }
+                });
         }
     }
 
@@ -407,10 +416,10 @@ const map_table_def_columns = async (columns) => {
         title_i18n: "total_score", sortable: true, name: 'score', data_field: 'tot_score', class: ['text-center'], responsivePriority: 1
     });
 
-    if (selected_criteria.value.value != 2 && selected_criteria.value.value != 4 && selected_criteria.value.value != 7 && selected_criteria.value.value != 9 && selected_criteria.value.value != 10)
+    if (selected_criteria.value.value != 2 && selected_criteria.value.value != 4 && selected_criteria.value.value != 7 && selected_criteria.value.value != 9 && selected_criteria.value.value != 10 && selected_criteria.value.value != 11)
         columns.push({ title_i18n: "clients", sortable: true, name: 'num_clients', data_field: 'num_clients', class: ['text-nowrap ', 'text-center'], responsivePriority: 1 });
 
-    if (selected_criteria.value.value != 3 && selected_criteria.value.value != 4 && selected_criteria.value.value != 7 && selected_criteria.value.value != 9 && selected_criteria.value.value != 10)
+    if (selected_criteria.value.value != 3 && selected_criteria.value.value != 4 && selected_criteria.value.value != 7 && selected_criteria.value.value != 9 && selected_criteria.value.value != 10 && selected_criteria.value.value != 11)
         columns.push({ title_i18n: "servers", sortable: true, name: 'num_servers', data_field: 'num_servers', class: ['text-nowrap ', 'text-center'], responsivePriority: 1 });
 
     columns.push({
@@ -444,6 +453,17 @@ const format_client_name = function (data, rowData) {
         return `${data.label} ${alert_label} ${data.extra_labels}`;
     } else {
         return `<a href="${http_prefix}/lua/flows_stats.lua?client=${data.ip}&vlan=${data.vlan_id}">${data.label}</a> ${alert_label} ${data.extra_labels} <a href="${http_prefix}/lua/host_details.lua?host=${data.ip}&vlan=${data.vlan_id}" data-bs-toggle='tooltip' title=''><i class='fas fa-laptop'></i></a>`;
+    }
+}
+const format_host_name = function (data, rowData) {
+    if (!data.in_memory) {
+        return `${data.extra_labels}`;
+    } else {
+        let title = ''
+        if (data.ip !== data.label) {
+            title = ` data-bs-toggle='tooltip' title='${data.ip}' `
+        }
+        return `<a href="${http_prefix}/lua/flows_stats.lua?flowhosts_type=${data.ip}&vlan=${data.vlan_id}" ${title}>${data.label}</a> ${data.extra_labels} <a href="${http_prefix}/lua/host_details.lua?host=${data.ip}&vlan=${data.vlan_id}" data-bs-toggle='tooltip' title=''><i class='fas fa-laptop'></i></a>`;
     }
 }
 
@@ -508,6 +528,9 @@ const format_flows_icon = function (data, rowData) {
     else if (selected_criteria.value.value == 10) {
         url = `${http_prefix}/lua/flows_stats.lua?asn=${rowData.src_as?.asn || 0}`;
         if (add_host) url = url + `&host=` + props.context.host;
+    }
+    else if (selected_criteria.value.value == 11) {
+        url = `${http_prefix}/lua/flows_stats.lua?flowhosts_type=${rowData.host?.ip}&vlan=${rowData.host?.vlan_id}`;
     }
 
     if (exporter && exporter !== "") {

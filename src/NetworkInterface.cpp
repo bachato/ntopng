@@ -11811,6 +11811,68 @@ bool NetworkInterface::compute_client_server_srv_port_app_proto_flow_stats(Gener
 
 /* **************************************************** */
 
+bool NetworkInterface::compute_host_flow_stats(GenericHashEntry *node,
+								 void *user_data, bool *matched) {
+    Flow *f = (Flow *)node;
+    struct aggregated_stats *stats = (struct aggregated_stats*)user_data;
+
+    if (!matchAggregatedFlow(f, stats))
+        return false;
+    
+    u_int64_t vlan_id = f->get_vlan_id();
+    std::unordered_map<u_int64_t, AggregatedFlowsStats *>::iterator it;
+    u_int64_t cli_key = (((u_int64_t)f->get_cli_ip_addr()->key()) << 32) | ((u_int64_t)vlan_id);
+    u_int64_t srv_key = (((u_int64_t)f->get_srv_ip_addr()->key()) << 32) | ((u_int64_t)vlan_id);
+
+    // Client
+    it = stats->count.find(cli_key);
+
+    if (it == stats->count.end()) {
+        AggregatedFlowsStats *fs =
+        new (std::nothrow) AggregatedFlowsStats(f->get_cli_ip_addr(), f->get_srv_ip_addr(), f->get_protocol(),
+                            f->get_bytes_cli2srv(), f->get_bytes_srv2cli(), f->getScore());
+
+        if (fs != NULL) {
+            fs->setKey(cli_key);
+            fs->setHost(f->get_cli_ip_addr(), f->get_cli_host());
+            fs->setVlanId(vlan_id);
+            stats->count[cli_key] = fs;
+        }
+    } else {
+        it->second->incFlowStats(f->get_cli_ip_addr(), f->get_srv_ip_addr(),
+                    f->get_bytes_cli2srv(), f->get_bytes_srv2cli(),
+                    f->getScore());
+    }
+
+    // Server, first check if client and server are different, otherwise
+    // in case of the same client/server the stats are going to be incorrect
+    if (cli_key != srv_key) {
+        it = stats->count.find(srv_key);
+
+        if (it == stats->count.end()) {
+            AggregatedFlowsStats *fs =
+            new (std::nothrow) AggregatedFlowsStats(f->get_cli_ip_addr(), f->get_srv_ip_addr(), f->get_protocol(),
+                                f->get_bytes_srv2cli(), f->get_bytes_cli2srv(), f->getScore());
+
+            if (fs != NULL) {
+                fs->setKey(srv_key);
+                fs->setHost(f->get_srv_ip_addr(), f->get_srv_host());
+                fs->setVlanId(vlan_id);
+                    stats->count[srv_key] = fs;
+            }
+        } else {
+            it->second->incFlowStats(f->get_cli_ip_addr(), f->get_srv_ip_addr(),
+                        f->get_bytes_srv2cli(), f->get_bytes_cli2srv(),
+                        f->getScore());
+        }
+    }
+    *matched = true;
+
+    return (false); /* false = keep on walking */
+}
+
+/* **************************************************** */
+
 /* Sort aggregated live flows compare functions */
 
 static bool asc_application_name_cmp(AggregatedFlowsStats *a, AggregatedFlowsStats *b) {
@@ -11833,6 +11895,13 @@ static bool asc_srv_ip_hex_cmp(AggregatedFlowsStats *a,
   char a_buf[48], b_buf[48];
   return strcmp(a->getSrvIPHex(a_buf, sizeof(a_buf)),
                 b->getSrvIPHex(b_buf, sizeof(b_buf))) < 0;
+}
+
+static bool asc_host_ip_hex_cmp(AggregatedFlowsStats *a,
+                               AggregatedFlowsStats *b) {
+  char a_buf[48], b_buf[48];
+  return strcmp(a->getHostIPHex(a_buf, sizeof(a_buf)),
+                b->getHostIPHex(b_buf, sizeof(b_buf))) < 0;
 }
 
 static bool asc_srv_cli_ip_hex_cmp(AggregatedFlowsStats *a,
@@ -11960,7 +12029,7 @@ void NetworkInterface::build_lua_rsp(lua_State *vm,
     char buf[128];
     u_int8_t add_client = false, add_server = false, add_app_proto = false,
       add_info = false, add_srv_port = false, add_src_as = false,
-      add_dst_as = false, add_transit_as = false;
+      add_dst_as = false, add_transit_as = false, add_host = false;
 
     lua_newtable(vm);
 
@@ -11999,6 +12068,10 @@ void NetworkInterface::build_lua_rsp(lua_State *vm,
 
     case 10:
       add_src_as = add_dst_as = add_transit_as = true;
+      break;
+
+    case 11:
+      add_host = true;
       break;
 
     default:
@@ -12041,6 +12114,16 @@ void NetworkInterface::build_lua_rsp(lua_State *vm,
       lua_push_str_table_entry(vm, "client_name",
                                flow_stats->getCliName(buf, sizeof(buf)));
       lua_push_bool_table_entry(vm, "is_cli_in_mem", flow_stats->isCliInMem());
+    }
+
+    if (add_host) {
+      lua_push_uint64_table_entry(vm, "vlan_id",
+                                  (u_int64_t)flow_stats->getHostVLANId());
+      lua_push_str_table_entry(vm, "ip",
+                               flow_stats->getHostIP(buf, sizeof(buf)));
+      lua_push_str_table_entry(vm, "name",
+                               flow_stats->getHostName(buf, sizeof(buf)));
+      lua_push_bool_table_entry(vm, "is_host_in_mem", flow_stats->isHostInMem());
     }
 
     if (add_server) {
@@ -12198,6 +12281,16 @@ void NetworkInterface::sort_and_filter_flow_stats(lua_State *vm,
     }
     break;
 
+  case AnalysisCriteria::host:
+    {
+        std::unordered_map<u_int64_t, AggregatedFlowsStats *>::iterator it;
+
+        for (it = stats->count.begin(); it != stats->count.end(); ++it) {
+            vector.push_back(it->second);
+        }
+    }
+    break;
+
   default:
     {
       /* Client / Server / Client-Server / Client-Server-SrvPort */
@@ -12228,6 +12321,8 @@ void NetworkInterface::sort_and_filter_flow_stats(lua_State *vm,
       sorter = &asc_cli_ip_hex_cmp;
     else if (!strcmp(sortColumn, "server"))
       sorter = &asc_srv_ip_hex_cmp;
+    else if (!strcmp(sortColumn, "host"))
+      sorter = &asc_host_ip_hex_cmp;
     else if (!strcmp(sortColumn, "client_and_server"))
       sorter = &asc_srv_cli_ip_hex_cmp;
     else if (!strcmp(sortColumn, "srv_port"))
@@ -12378,6 +12473,11 @@ void NetworkInterface::getFilteredLiveFlowsStats(lua_State *vm) {
 	     compute_src_as_transit_as_dst_as_flow_stats, &stats);
     break;
 #endif
+  case AnalysisCriteria::host:
+    /* client server server port app_proto criteria flows stats case */
+    walker(&begin_slot, true /* walk_all */, walker_flows,
+	   compute_host_flow_stats, &stats);
+    break;
 
   default:
     /* client criteria flows stats case */

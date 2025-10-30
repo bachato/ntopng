@@ -241,7 +241,7 @@ function click_button_hosts(event) {
         deviceIP: row.exporter_ip,
         ifIdx: row.interface_id
     }
-    window.location.href = linksUtils.getAggregatedFlowsURL(filters, "src_as_dst_as", http_prefix)
+    window.location.href = linksUtils.getAggregatedFlowsURL(filters, "host", http_prefix)
 }
 
 /* ************************************** */

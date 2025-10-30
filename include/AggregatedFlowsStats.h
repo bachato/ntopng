@@ -34,6 +34,7 @@ class AggregatedFlowsStats {
   u_int8_t l4_proto;
   FlowsHostInfo* client;
   FlowsHostInfo* server;
+  FlowsHostInfo* host;
   u_int16_t vlan_id;
   u_int16_t srv_port;
   char* proto_name;
@@ -55,6 +56,7 @@ class AggregatedFlowsStats {
   inline u_int8_t getL4Protocol() { return (l4_proto); };
   inline u_int16_t getSrvPort() { return (srv_port); };
   inline u_int16_t getVlanId() { return vlan_id; };
+  inline u_int16_t getHostVLANId() { return (host ? host->getVLANId() : 0); };
   inline u_int16_t getCliVLANId() { return (client ? client->getVLANId() : 0); };
   inline u_int16_t getSrvVLANId() { return (server ? server->getVLANId() : 0); };
   inline u_int32_t getNumClients() { return (clients.size()); };
@@ -68,12 +70,16 @@ class AggregatedFlowsStats {
   inline char* getProtoName() { return (proto_name ? proto_name : (char *)""); };
   inline char* getInfoKey() { return (info_key ? info_key : (char *)""); };
  
+  inline const char* getHostIP(char* buf, u_int len) { return (host ? host->getIP(buf, len) : (char *)""); };
   inline const char* getCliIP(char* buf, u_int len) { return (client ? client->getIP(buf, len) : (char *)""); };
   inline const char* getSrvIP(char* buf, u_int len) { return (server ? server->getIP(buf, len) : (char *)""); };
   
   inline IpAddress* getClientIPaddr() { return(client ? client->getIPaddr() : NULL); }
   inline IpAddress* getServerIPaddr() { return(server ? server->getIPaddr() : NULL); }
 
+  inline const char* getHostName(char* buf, u_int len) {
+    return (host ? host->getHostName(buf, len) : (char *)"");
+  };
   inline const char* getCliName(char* buf, u_int len) {
     return (client ? client->getHostName(buf, len) : (char *)"");
   };
@@ -85,6 +91,9 @@ class AggregatedFlowsStats {
   };
   inline const char* getSrvIPHex(char* buf, u_int len) {
     return (server ? server->getIPHex(buf, len) : (char *)"");
+  };
+  inline const char* getHostIPHex(char* buf, u_int len) {
+    return (host ? host->getIPHex(buf, len) : (char *)"");
   };
   inline const char* getFlowDeviceIP(char* buf, u_int len) {
     return (flow_device_ip != 0 ? Utils::intoaV4(flow_device_ip, buf, len) : (char *)"");
@@ -119,7 +128,11 @@ class AggregatedFlowsStats {
   inline void setTransitAS(u_int32_t as) { transit_as = as; };
 
   void setFlowIPVLANDeviceIP(Flow *f);
-
+  inline void setHost(IpAddress* _ip, Host* _host) {
+    if(!host) { host = new (std::nothrow) FlowsHostInfo(_ip, _host); }
+  };
+  
+  inline bool isHostInMem() { return (host->isHostInMem()); };
   inline bool isCliInMem() { return (client->isHostInMem()); };
   inline bool isSrvInMem() { return (server->isHostInMem()); };
   inline void setIsNotGuessed(bool isNotGuessed) { is_not_guessed = isNotGuessed; };
