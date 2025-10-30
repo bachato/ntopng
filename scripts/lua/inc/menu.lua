@@ -266,7 +266,7 @@ else
 	       url = '/lua/index.lua'
             }, {
 	       entry = page_utils.menu_entries.assets_dashboard,
-	       hidden = not (ntop.isEnterpriseL() and is_clickhouse_enabled) or interface.isViewed() or infrastructure_view,
+	       hidden = not (ntop.isEnterpriseL() and is_clickhouse_enabled) or interface.isViewed() or infrastructure_view or isASNModeEnabled(),
 	       url = "/lua/pro/assets_dashboard.lua"
 	       }, {
 	       entry = page_utils.menu_entries.traffic_report,
@@ -289,7 +289,7 @@ else
 	 entries = {
             {
 	       entry = page_utils.menu_entries.active_monitoring,
-	       hidden = is_windows,
+	       hidden = is_windows or interface.isZMQInterface(),
 	       url = "/lua/active_monitoring.lua"
             }, {
 	       entry = page_utils.menu_entries.network_discovery,
@@ -312,7 +312,7 @@ else
             {
 	       entry = page_utils.menu_entries.vulnerability_scan,
 	       url = '/lua/vulnerability_scan.lua',
-	       hidden = not vs_utils.is_available()
+	       hidden = not vs_utils.is_available() or interface.isZMQInterface()
             }
 	 }
    })
@@ -764,11 +764,11 @@ page_utils.add_menubar_section({
       entries = {
 	 {
             entry = page_utils.menu_entries.access_control_list,
-            hidden = not is_admin or not ntop.isEnterpriseL(),
+            hidden = not is_admin or not ntop.isEnterpriseL() or isASNModeEnabled(),
             url = '/lua/pro/admin/access_control_list.lua'
 	 }, {
             entry = page_utils.menu_entries.device_protocols,
-            hidden = not is_admin,
+            hidden = not is_admin or isASNModeEnabled(),
             url = '/lua/admin/edit_device_protocols.lua'
 	    }, {
             entry = page_utils.menu_entries.device_exclusions,
@@ -804,7 +804,7 @@ page_utils.add_menubar_section({
             url = '/lua/pro/admin/edit_alert_exclusions.lua?subdir=host'
 								      }, {entry = page_utils.menu_entries.divider}, {
             entry = page_utils.menu_entries.profiles,
-            hidden = not is_admin or not ntop.isPro() or is_nedge,
+            hidden = not is_admin or not ntop.isPro() or is_nedge or isASNModeEnabled(),
             url = '/lua/pro/admin/edit_profiles.lua'
 														    }
       }
