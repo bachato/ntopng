@@ -12286,7 +12286,22 @@ void NetworkInterface::sort_and_filter_flow_stats(lua_State *vm,
         std::unordered_map<u_int64_t, AggregatedFlowsStats *>::iterator it;
 
         for (it = stats->count.begin(); it != stats->count.end(); ++it) {
-            vector.push_back(it->second);
+            // check search
+            bool add = true;
+            if ((search_string)) {
+                // Not null
+                char buf[64];
+                ntop->getTrace()->traceEvent(TRACE_NORMAL, "Checking %s | %s", it->second->getHostName(buf, sizeof(buf)), buf);
+                if (!strcasestr(it->second->getHostName(buf, sizeof(buf)), search_string) &&
+                    !strcasestr(it->second->getHostIP(buf, sizeof(buf)), search_string)) {
+                    // TODO: the search on hostnames for view interface does not work, because
+                    // the hosts instances are not available for the viewed interfaces
+                    add = false;
+                }
+            }
+            if (add) {
+                vector.push_back(it->second);
+            }
         }
     }
     break;
