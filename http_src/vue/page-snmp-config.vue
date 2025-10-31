@@ -26,22 +26,6 @@
                 </div>
               </td>
             </tr>
-            <tr>
-              <td>
-                <div class="d-flex align-items-center">
-                  <div class="col-11">
-                    <b>{{ _i18n('prefs.exclude_from_usage') }}</b><br>
-                    <small>{{ _i18n('prefs.exclude_from_usage_description') }}</small>
-                  </div>
-                  <div class="col-1 form-group d-flex justify-content-end">
-                    <div class="form-check form-switch">
-                      <input ref="toggle_exclude_from_usage_page" class="form-check-input" type="checkbox" value="0"
-                        @click="change_toggle_exclude_from_usage_page">
-                    </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
           </tbody>
         </table>
         <div class="d-flex justify-content-end me-1">
@@ -70,8 +54,6 @@ const post_url = `${http_prefix}/lua/pro/rest/v2/edit/snmp/device/config.lua`;
 const disable_save = ref(true);
 const toggle_snmp_qos_mib_polling_changed = ref(false);
 const toggle_snmp_qos_mib_polling = ref(null);
-const toggle_exclude_from_usage_page_changed = ref(false);
-const toggle_exclude_from_usage_page = ref(null);
 const props = defineProps({
   context: Object,
 });
@@ -88,14 +70,6 @@ onMounted(async () => {
     toggle_snmp_qos_mib_polling.value.value = '1';
     toggle_snmp_qos_mib_polling.value.setAttribute('checked', 'checked');
   }
-  if (device_config.toggle_exclude_from_usage_page == false ||
-    device_config.toggle_exclude_from_usage_page == '') {
-    toggle_exclude_from_usage_page.value.value = '0';
-    toggle_exclude_from_usage_page.value.removeAttribute('checked');
-  } else {
-    toggle_exclude_from_usage_page.value.value = '1';
-    toggle_exclude_from_usage_page.value.setAttribute('checked', 'checked');
-  }
 });
 
 function change_toggle_snmp_qos_mib_polling() {
@@ -106,16 +80,8 @@ function change_toggle_snmp_qos_mib_polling() {
   update_save_button_state()
 }
 
-function change_toggle_exclude_from_usage_page() {
-  toggle_exclude_from_usage_page_changed.value = !toggle_exclude_from_usage_page_changed.value;
-  toggle_exclude_from_usage_page.value.value == '1' ?
-    toggle_exclude_from_usage_page.value.value = '0' :
-    toggle_exclude_from_usage_page.value.value = '1';
-  update_save_button_state()
-}
-
 function update_save_button_state() {
-  disable_save.value = !toggle_snmp_qos_mib_polling_changed.value && !toggle_exclude_from_usage_page_changed.value;
+  disable_save.value = !toggle_snmp_qos_mib_polling_changed.value;
 }
 
 async function reload_page() {
@@ -123,7 +89,6 @@ async function reload_page() {
   const params = {
     csrf: props.context.csrf,
     toggle_snmp_qos_mib_polling: toggle_snmp_qos_mib_polling.value.value,
-    toggle_exclude_from_usage_page: toggle_exclude_from_usage_page.value.value,
     ...extra_params
   };
   const headers = {
