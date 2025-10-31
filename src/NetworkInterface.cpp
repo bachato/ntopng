@@ -5523,6 +5523,7 @@ static bool flow_search_walker(GenericHashEntry *h, void *user_data, bool *match
   struct flowHostRetriever *retriever = (struct flowHostRetriever *)user_data;
   Flow *f = (Flow *)h;
   const TcpInfo *tcp_info;
+  u_int32_t prev_actNumEntries = retriever->actNumEntries;
 
   if (retriever->actNumEntries >= retriever->maxNumEntries)
     return (true); /* Limit reached - stop iterating */
@@ -5546,6 +5547,7 @@ static bool flow_search_walker(GenericHashEntry *h, void *user_data, bool *match
     }
 
     retriever->elems[retriever->actNumEntries].flow = f;
+
     retriever->totBytesSent += f->get_bytes_cli2srv();
     retriever->totBytesRcvd += f->get_bytes_srv2cli();
 
@@ -5673,6 +5675,11 @@ static bool flow_search_walker(GenericHashEntry *h, void *user_data, bool *match
     *matched = true;
   }
 
+  if (prev_actNumEntries != retriever->actNumEntries) {
+    /* Flow added to entries, inc uses to avoid concurrency issues while walking and processing.. */
+    f->incUses();
+  }
+
   return (false); /* false = keep on walking */
 }
 
@@ -5685,6 +5692,7 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
   IpAddress *ip_addr = NULL;
   struct flowHostRetriever *r = (struct flowHostRetriever *)user_data;
   Host *h = (Host *)he;
+  u_int32_t prev_actNumEntries = r->actNumEntries;
 
   if (r->actNumEntries >= r->maxNumEntries)
     return(true); /* Limit reached */
@@ -5778,12 +5786,10 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
   }
 
   r->elems[r->actNumEntries].hostValue = h;
-  h->incUses(); /* (***) */
 
   switch (r->sorter) {
   case column_ip:
-    r->elems[r->actNumEntries++].hostValue =
-      h; /* hostValue was already set */
+    r->elems[r->actNumEntries++].hostValue = h; /* hostValue was already set */
     break;
 
   case column_alerts:
@@ -5791,13 +5797,11 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
     break;
 
   case column_name:
-    r->elems[r->actNumEntries++].stringValue =
-      strdup(h->get_visual_name(buf, sizeof(buf)));
+    r->elems[r->actNumEntries++].stringValue = strdup(h->get_visual_name(buf, sizeof(buf)));
     break;
 
   case column_country:
-    r->elems[r->actNumEntries++].stringValue =
-      strdup(h->get_country(buf, sizeof(buf)));
+    r->elems[r->actNumEntries++].stringValue = strdup(h->get_country(buf, sizeof(buf)));
     break;
 
   case column_os:
@@ -5845,15 +5849,13 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
     break;
 
   case column_local_network:
-    ntop->getLocalNetworkIp(h->get_local_network_id(), &ip_addr,
-			    &network_prefix);
+    ntop->getLocalNetworkIp(h->get_local_network_id(), &ip_addr, &network_prefix);
     r->elems[r->actNumEntries].ipValue = ip_addr;
     r->elems[r->actNumEntries++].numericValue = network_prefix;
     break;
 
   case column_mac:
-    r->elems[r->actNumEntries++].numericValue =
-      Utils::macaddr_int(h->get_mac());
+    r->elems[r->actNumEntries++].numericValue = Utils::macaddr_int(h->get_mac());
     break;
   case column_mac_location_filter:
   #ifdef HAVE_NEDGE
@@ -5864,13 +5866,11 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
     break;
 
   case column_tcp_udp_unresp_as_client:
-    r->elems[r->actNumEntries++].numericValue =
-      h->getNumContactedPeersAsClientTCPUDPNoTX();
+    r->elems[r->actNumEntries++].numericValue = h->getNumContactedPeersAsClientTCPUDPNoTX();
     break;
 
   case column_tcp_udp_unresp_as_server:
-    r->elems[r->actNumEntries++].numericValue =
-      h->getNumContactsFromPeersAsServerTCPUDPNoTX();
+    r->elems[r->actNumEntries++].numericValue = h->getNumContactsFromPeersAsServerTCPUDPNoTX();
     break;
 
     /* Criteria */
@@ -5881,8 +5881,7 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
     r->elems[r->actNumEntries++].numericValue = h->getNumBytesRcvd();
     break;
   case column_traffic_unknown:
-    r->elems[r->actNumEntries++].numericValue =
-      h->get_ndpi_stats()->getProtoBytes(NDPI_PROTOCOL_UNKNOWN);
+    r->elems[r->actNumEntries++].numericValue = h->get_ndpi_stats()->getProtoBytes(NDPI_PROTOCOL_UNKNOWN);
     break;
   case column_num_flows_as_client:
     r->elems[r->actNumEntries++].numericValue = h->getNumOutgoingFlows();
@@ -5891,28 +5890,22 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
     r->elems[r->actNumEntries++].numericValue = h->getNumIncomingFlows();
     break;
   case column_total_num_alerted_flows_as_client:
-    r->elems[r->actNumEntries++].numericValue =
-      h->getTotalNumAlertedOutgoingFlows();
+    r->elems[r->actNumEntries++].numericValue = h->getTotalNumAlertedOutgoingFlows();
     break;
   case column_total_num_alerted_flows_as_server:
-    r->elems[r->actNumEntries++].numericValue =
-      h->getTotalNumAlertedIncomingFlows();
+    r->elems[r->actNumEntries++].numericValue = h->getTotalNumAlertedIncomingFlows();
     break;
   case column_total_num_unreachable_flows_as_client:
-    r->elems[r->actNumEntries++].numericValue =
-      h->getTotalNumUnreachableOutgoingFlows();
+    r->elems[r->actNumEntries++].numericValue = h->getTotalNumUnreachableOutgoingFlows();
     break;
   case column_total_num_unreachable_flows_as_server:
-    r->elems[r->actNumEntries++].numericValue =
-      h->getTotalNumUnreachableIncomingFlows();
+    r->elems[r->actNumEntries++].numericValue = h->getTotalNumUnreachableIncomingFlows();
     break;
   case column_total_num_retx_sent:
-    r->elems[r->actNumEntries++].numericValue =
-      h->getTcpPacketSentStats()->get_retr();
+    r->elems[r->actNumEntries++].numericValue = h->getTcpPacketSentStats()->get_retr();
     break;
   case column_total_num_retx_rcvd:
-    r->elems[r->actNumEntries++].numericValue =
-      h->getTcpPacketRcvdStats()->get_retr();
+    r->elems[r->actNumEntries++].numericValue = h->getTcpPacketRcvdStats()->get_retr();
     break;
   case column_total_alerts:
     r->elems[r->actNumEntries++].numericValue = h->getTotalAlerts();
@@ -5931,6 +5924,12 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
   }
 
   *matched = true;
+
+  if (prev_actNumEntries != r->actNumEntries) {
+    /* Host added to entries, inc uses to avoid concurrency issues while walking and processing.. */
+    h->incUses();
+  }
+
   return (false); /* false = keep on walking */
 }
 
@@ -6342,16 +6341,17 @@ int NetworkInterface::sortFlows(u_int32_t *begin_slot, bool walk_all,
   if (retriever == NULL) return (-1);
 
   retriever->pag = p;
-  retriever->host = host, retriever->location = location_all;
+  retriever->host = host;
+  retriever->location = location_all;
   retriever->server = server;
   retriever->client = client;
   retriever->flow_info = flow_info;
   retriever->ndpi_proto = -1;
   retriever->iface_index = -1;
-  retriever->actNumEntries = 0,
-    retriever->maxNumEntries = getFlowsHashSize(),
-    retriever->allowed_hosts = allowed_hosts,
-    retriever->currentSize = FLOWHOSTRETRIEVER_BLOCK_SIZE;
+  retriever->actNumEntries = 0;
+  retriever->maxNumEntries = getFlowsHashSize();
+  retriever->allowed_hosts = allowed_hosts;
+  retriever->currentSize = FLOWHOSTRETRIEVER_BLOCK_SIZE;
 
   retriever->elems = (struct flowHostRetrieveList *)calloc(sizeof(struct flowHostRetrieveList), retriever->currentSize);
 
@@ -6564,41 +6564,40 @@ int NetworkInterface::getFlows(lua_State *vm, u_int32_t *begin_slot,
     for (int i = p->toSkip(), num = 0; i < (int)retriever.actNumEntries; i++) {
       Flow *f = retriever.elems[i].flow;
 
-      /* Safety check: flow may have been deleted after sortFlows() */
-      if (f && f->get_state() && f->get_state() != hash_entry_state_idle) {
-        lua_newtable(vm);
+      lua_newtable(vm);
 
-        f->lua(vm, allowed_hosts, highDetails, true);
+      f->lua(vm, allowed_hosts, highDetails, true);
 
-        lua_pushinteger(vm, num + 1);
-        lua_insert(vm, -2);
-        lua_settable(vm, -3);
+      lua_pushinteger(vm, num + 1);
+      lua_insert(vm, -2);
+      lua_settable(vm, -3);
 
-        if (++num >= (int)p->maxHits()) break;
-      }
+      if (++num >= (int)p->maxHits()) break;
     }
   } else {
     for (int i = (retriever.actNumEntries - 1 - p->toSkip()), num = 0; i >= 0; i--) {
       Flow *f = retriever.elems[i].flow;
 
-      /* Safety check: flow may have been deleted after sortFlows() */
-      if (f && f->get_state() && f->get_state() != hash_entry_state_idle) {
-        lua_newtable(vm);
+      lua_newtable(vm);
 
-        f->lua(vm, allowed_hosts, highDetails, true);
+      f->lua(vm, allowed_hosts, highDetails, true);
 
-        lua_pushinteger(vm, num + 1);
-        lua_insert(vm, -2);
-        lua_settable(vm, -3);
+      lua_pushinteger(vm, num + 1);
+      lua_insert(vm, -2);
+      lua_settable(vm, -3);
 
-        if (++num >= (int)p->maxHits()) break;
-      }
+      if (++num >= (int)p->maxHits()) break;
     }
   }
 
   lua_pushstring(vm, "flows");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
+
+  for (u_int i = 0; i < retriever.actNumEntries; i++) {
+    if (retriever.elems[i].flow)
+      retriever.elems[i].flow->decUses(); /* incUses in flow_search_walker */
+  }
 
   if (retriever.elems) free(retriever.elems);
 
@@ -6652,6 +6651,11 @@ int NetworkInterface::getFlowsGroup(lua_State *vm, AddressTree *allowed_hosts,
   if (gper->getNumEntries() > 0) gper->lua(vm);
 
   delete gper;
+
+  for (u_int i = 0; i < retriever.actNumEntries; i++) {
+    if (retriever.elems[i].flow)
+      retriever.elems[i].flow->decUses(); /* incUses in flow_search_walker */
+  }
 
   if (retriever.elems) free(retriever.elems);
 
@@ -7192,7 +7196,7 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
 
   for (u_int i = 0; i < retriever.actNumEntries; i++) {
     if (retriever.elems[i].hostValue)
-      retriever.elems[i].hostValue->decUses(); /* See (***) */
+      retriever.elems[i].hostValue->decUses(); /* incUses in host_search_walker */
   }
 
   // it's up to us to clean sorted data
