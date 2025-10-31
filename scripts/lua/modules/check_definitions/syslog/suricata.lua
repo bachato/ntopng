@@ -315,7 +315,14 @@ function syslog_module.hooks.handleEvent(syslog_conf, message, host, priority)
       interface.processFlow(flow)
    end
 
-   interface.incSyslogStats(1, 0, num_unhandled, num_alerts, 0, num_collected_flows)
+   interface.incSyslogStats(
+      1, -- num_received_events
+      0, -- num_malformed
+      num_unhandled, -- num_unhandled
+      num_alerts, -- num_alerts
+      0, -- num_host_correlations
+      num_collected_flows -- num_collected_flows
+   )
 end 
 
 -- #################################################################

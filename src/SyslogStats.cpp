@@ -43,8 +43,10 @@ void SyslogStats::resetStats() {
 /* *************************************** */
 
 void SyslogStats::incStats(u_int32_t _num_total_events,
-                           u_int32_t _num_malformed, u_int32_t _num_dispatched,
-                           u_int32_t _num_unhandled, u_int32_t _num_alerts,
+                           u_int32_t _num_malformed,
+                           u_int32_t _num_dispatched,
+                           u_int32_t _num_unhandled,
+                           u_int32_t _num_alerts,
                            u_int32_t _num_host_correlations,
                            u_int32_t _num_collected_flows) {
   num_total_events += _num_total_events;
