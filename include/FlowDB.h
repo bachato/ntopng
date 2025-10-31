@@ -35,9 +35,6 @@ class FlowDB : public DB {
   u_int64_t checkpointExportedFlows;
   u_int32_t checkpointDroppedFlows, checkpointQueueDroppedFlows;
 
- protected:
-  bool running;
-
  public:
   FlowDB(NetworkInterface *_iface);
   virtual ~FlowDB(){};
@@ -60,8 +57,6 @@ class FlowDB : public DB {
 
   virtual void archiveData(time_t epoch_begin, time_t epoch_end) {}
 
-  inline void startDBLoop() { if (startDumpLoop()) running = true; };
-  inline int isRunning() { return (running); };
   virtual void lua(lua_State *vm, bool since_last_checkpoint);
   virtual void getStats(u_int64_t *flow_export_count, u_int64_t *flow_export_drops,
 			u_int64_t *flow_export_rate, bool since_last_checkpoint);  
