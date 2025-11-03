@@ -171,6 +171,14 @@ end
 
 -- #####################################
 
+local function dt_format_tcp_stats(s)
+   -- TODO Implement
+
+   return dt_format_generic(s)
+end
+
+-- #####################################
+
 local function dt_format_info(info)
    if not isEmptyString(profile) then
       info = string.gsub(info, " ", "")
@@ -1156,7 +1164,12 @@ local flow_columns = {
    ['DST_MAC'] =              { tag = "srv_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
    ['COMMUNITY_ID'] =         { tag = "community_id", format_func = format_flow_info, i18n = i18n("flow_fields_description.community_id"), order = 10, db_type = "String", db_raw_type = "String" },
    ['CLIENT_FINGERPRINT'] =   { tag = "cli_fingerprint", dt_func = dt_format_generic, order = 11, db_type = "String", db_raw_type = "String" },
-   ['TCP_FINGERPRINT'] = { tag = "tcp_fingerprint", dt_func = dt_format_generic, order = 11, db_type = "String", db_raw_type = "String" },
+   ['TCP_FINGERPRINT'] =      { tag = "tcp_fingerprint", dt_func = dt_format_generic, order = 11, db_type = "String", db_raw_type = "String" },
+
+
+   ['TCP_STATS_SRC_TO_DST'] = { tag = "tcp_stats_src_to_dst", dt_func = dt_format_tcp_stats, order = 11, db_type = "String", db_raw_type = "String" },
+   ['TCP_STATS_SRC_TO_DST'] = { tag = "tcp_stats_src_to_dst", dt_func = dt_format_tcp_stats, order = 11, db_type = "String", db_raw_type = "String" },
+   
    ['SRC_ASN'] =              { tag = "cli_asn", simple_dt_func = simple_format_src_asn, db_type = "Number", db_raw_type = "Uint32" },
    ['DST_ASN'] =              { tag = "srv_asn", simple_dt_func = simple_format_dst_asn, db_type = "Number", db_raw_type = "Uint32" },
    ['PROBE_IP'] =             { tag = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", db_type = "Number", db_raw_type = "Uint32" },

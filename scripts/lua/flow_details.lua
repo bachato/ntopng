@@ -581,6 +581,8 @@ else
       getFlowLabel(flow, true, not ifstats.isViewed --[[ don't add hyperlinks, viewed interface don't have hosts --]],
          nil, nil, false --[[ add flags ]]))
 
+   -- tprint(flow["tcp_stats"])
+   
    if (flow.periodic_flow) then
       print(" <span class='badge bg-warning text-dark'>" .. i18n("periodic_flow") .. "</span>")
    end

@@ -167,6 +167,9 @@ template = {
    ['FLOW_VERDICT'] =  NTOP_BASE_ID+522,
    ['L7_RISK_SCORE'] = NTOP_BASE_ID+527,
    ['L7_INFO'] = NTOP_BASE_ID+539,
+   ['TCP_STATS_SRC_TO_DST'] = NTOP_BASE_ID+601,
+   ['TCP_STATS_DST_TO_SRC'] = NTOP_BASE_ID+602,
+
    
    -- SIP
    ['SIP_CALL_ID'] = NTOP_BASE_ID+130,
@@ -281,7 +284,7 @@ template = {
    ['DNS_TTL_ANSWER'] = NTOP_BASE_ID+352,
    ['DNS_RESPONSE'] = NTOP_BASE_ID+398,
 
-      -- TLS Protocol
+   -- TLS Protocol
    ['TLS_VERSION'] = NTOP_BASE_ID+495,
    ['TLS_CERT_NOT_BEFORE'] = NTOP_BASE_ID+496,
    ['TLS_CERT_AFTER'] = NTOP_BASE_ID+497,

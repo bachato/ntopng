@@ -33,6 +33,11 @@ typedef struct {
 } TCPSeqNum;
 
 typedef struct {
+  /* 0...254, 255 means more events */
+  u_int8_t num_syn, num_rst, num_fin, num_zero_window;
+} tcp_stats;
+
+typedef struct {
   /* TCP stats */
   TCPSeqNum tcp_seq_s2d, tcp_seq_d2s;
   u_int16_t cli2srv_window, srv2cli_window;
@@ -212,6 +217,8 @@ private:
   } external_alert;
 
   char *tcp_fingerprint;
+  tcp_stats tcp_stats_src2dst, tcp_stats_dst2src;
+  
   bool trigger_immediate_periodic_update; /* needed to process external alerts */
   time_t next_call_periodic_update; /* The time at which the periodic lua script
                                        on this flow shall be called */
@@ -417,7 +424,8 @@ private:
   void processHostName(char *host_name);
 #endif
   void updateMac();
-
+  void decodeTCPstats(u_int32_t v, tcp_stats *stats);
+  
 public:
   Flow(NetworkInterface *_iface, int32_t iface_idx,
        u_int16_t _vlanId,
@@ -998,6 +1006,7 @@ public:
            bool asListElement);
   void lua_get_min_info(lua_State *vm);
   void lua_duration_info(lua_State *vm);
+  void lua_dump_tcp_stats(lua_State *vm, const tcp_stats *s, const char *label) const;
   void lua_snmp_info(lua_State *vm);
   void lua_device_protocol_allowed_info(lua_State *vm);
   void lua_get_flow_connection_state(lua_State *vm);
@@ -1568,6 +1577,8 @@ public:
   inline void incNumProcessedPkts()     { numFlowProcessedPkts++;                  }
   inline void setNumPktsMarker()        { numPktsMarkerSet = numFlowProcessedPkts; }
 #endif
+
+  void updateTCPStats(u_int32_t cli_stats, u_int32_t srv_stats);
 };
 
 #endif /* _FLOW_H_ */

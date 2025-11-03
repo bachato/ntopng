@@ -53,7 +53,9 @@ Flow::Flow(NetworkInterface *_iface,
   collected_qoe.src_to_dst = collected_qoe.dst_to_src = NTOP_QOE_UNKNOWN, has_collected_qoe = 0;
   tcp = NULL;
   c_mac_updated = s_mac_updated = false;
-
+  memset(&tcp_stats_src2dst, 0, sizeof(tcp_stats_src2dst));
+  memset(&tcp_stats_dst2src, 0, sizeof(tcp_stats_dst2src));
+  
 #ifdef NTOPNG_PRO
   udp = NULL;
 #endif
@@ -5294,9 +5296,9 @@ void Flow::updateTcpWindow(u_int16_t window, bool src2dst_direction) {
   /* The update depends on the direction of the flow */
   if(window == 0) {
     if(src2dst_direction)
-      src2dst_tcp_zero_window = 1;
+      src2dst_tcp_zero_window = 1, tcp_stats_src2dst.num_zero_window++;
     else
-      dst2src_tcp_zero_window = 1;
+      dst2src_tcp_zero_window = 1, tcp_stats_dst2src.num_zero_window++;
   }
 }
 
@@ -5435,6 +5437,18 @@ void Flow::updateTcpFlags(const struct bpf_timeval *when, u_int8_t flags,
   } else {
     /* Packet Interface */
 
+    if((flags & TH_SYN) == TH_SYN) {
+      if(src2dst_direction) tcp_stats_src2dst.num_syn++; else tcp_stats_dst2src.num_syn++;
+    }
+    
+    if((flags & TH_FIN) == TH_FIN) {
+      if(src2dst_direction) tcp_stats_src2dst.num_fin++; else tcp_stats_dst2src.num_fin++;
+    }
+    
+    if((flags & TH_RST) == TH_RST) {
+      if(src2dst_direction) tcp_stats_src2dst.num_rst++; else tcp_stats_dst2src.num_rst++;
+    }
+    
     /* Update syn alerts counters. In case of cumulative flags, the AND is used as
      * possibly other flags can be present  */
     if(flags_3wh == TH_SYN) {
@@ -7627,10 +7641,24 @@ void Flow::getSIPInfo(ndpi_serializer *serializer) const {
 
 /* ***************************************************** */
 
+void Flow::lua_dump_tcp_stats(lua_State *vm, const tcp_stats *s, const char *label) const {
+  lua_newtable(vm);
+
+  lua_push_uint32_table_entry(vm, "num_syn", s->num_syn);
+  lua_push_uint32_table_entry(vm, "num_rst", s->num_rst);
+  lua_push_uint32_table_entry(vm, "num_fin", s->num_fin);
+  lua_push_uint32_table_entry(vm, "num_zero_window", s->num_zero_window);
+  
+  lua_pushstring(vm, label);
+  lua_insert(vm, -2);
+  lua_settable(vm, -3);    
+}
+
+/* ***************************************************** */
+
 void Flow::lua_get_tcp_info(lua_State *vm) const {
   if(get_protocol() == IPPROTO_TCP) {
-    lua_push_bool_table_entry(
-			      vm, "tcp.seq_problems",
+    lua_push_bool_table_entry(vm, "tcp.seq_problems",
 			      (stats.get_cli2srv_tcp_retr() || stats.get_cli2srv_tcp_ooo() ||
 			       stats.get_cli2srv_tcp_lost() || stats.get_cli2srv_tcp_keepalive() ||
 			       stats.get_srv2cli_tcp_retr() || stats.get_srv2cli_tcp_ooo() ||
@@ -7672,6 +7700,14 @@ void Flow::lua_get_tcp_info(lua_State *vm) const {
     lua_push_bool_table_entry(vm, "tcp_connecting", isTCPConnecting());
     lua_push_bool_table_entry(vm, "tcp_closed", isTCPClosed());
     lua_push_bool_table_entry(vm, "tcp_reset", isTCPReset());
+
+    lua_newtable(vm);
+    lua_dump_tcp_stats(vm, &tcp_stats_src2dst, "src2dst");
+    lua_dump_tcp_stats(vm, &tcp_stats_dst2src, "dst2src");
+    lua_pushstring(vm, "tcp_stats");
+    lua_insert(vm, -2);
+    lua_settable(vm, -3);    
+
   }
 }
 
@@ -9273,3 +9309,19 @@ void Flow::updateMac() {
 }
 
 /* *************************************** */
+
+void Flow::decodeTCPstats(u_int32_t v, tcp_stats *stats) {
+  v = ntohl(v);
+
+  stats->num_syn         = (v & 0xFF000000) >> 24;
+  stats->num_rst         = (v & 0x00FF0000) >> 16;
+  stats->num_fin         = (v & 0x0000FF00) >> 8;
+  stats->num_zero_window = v & 0x000000FF;;  
+}
+
+/* *************************************** */
+
+void Flow::updateTCPStats(u_int32_t cli_stats, u_int32_t srv_stats) {
+  if(cli_stats) decodeTCPstats(cli_stats, &tcp_stats_src2dst);
+  if(srv_stats) decodeTCPstats(srv_stats, &tcp_stats_dst2src);
+}

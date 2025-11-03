@@ -152,6 +152,8 @@ ZMQParserInterface::ZMQParserInterface(const char *endpoint,
   addMapping("UNIQUE_SOURCE_ID", UNIQUE_SOURCE_ID, NTOP_PEN);
   addMapping("NPROBE_SOURCE_ID", NPROBE_SOURCE_ID, NTOP_PEN);
   addMapping("TCP_FINGERPRINT", TCP_FINGERPRINT, NTOP_PEN);
+  addMapping("TCP_STATS_SRC_TO_DST", TCP_STATS_SRC_TO_DST, NTOP_PEN);
+  addMapping("TCP_STATS_DST_TO_SRC", TCP_STATS_DST_TO_SRC, NTOP_PEN);  
 
   /* eBPF / Process */
   addMapping("SRC_PROC_PID", SRC_PROC_PID, NTOP_PEN);
@@ -1245,6 +1247,14 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow *const flow,
       flow->setTCPFingerprint(value->string);
     break;
 
+  case TCP_STATS_SRC_TO_DST:
+    flow->setTCPStats(value->int_num, true);
+    break;
+
+  case TCP_STATS_DST_TO_SRC:
+    flow->setTCPStats(value->int_num, false);
+    break;
+    
   case TLS_CIPHER:
     flow->setTLSCipher(value->int_num);
     break;
@@ -2542,7 +2552,6 @@ u_int32_t ZMQParserInterface::parseTLVFlows(const char *payload, int payload_siz
   }
 
   while (ndpi_deserialize_get_item_type(&deserializer, &kt) != ndpi_serialization_unknown) {
-
     rc = parseSingleTLVFlow(&deserializer, n);
 
     if (rc < 0)

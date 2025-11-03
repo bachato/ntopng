@@ -604,9 +604,9 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     if(flow->get_protocol() == IPPROTO_ICMP)
       flow->setICMPTypeCode(zflow->icmp_type_code);
 
-    if (flow->isDNS()) flow->updateDNS(zflow);
+    if (flow->isDNS())  flow->updateDNS(zflow);
     if (flow->isHTTP()) flow->updateHTTP(zflow);
-    if (flow->isTLS()) flow->updateTLS(zflow);
+    if (flow->isTLS())  flow->updateTLS(zflow);
 
     if (flow->isSMTP()) {
       if (zflow->getSMTPMailFrom())
@@ -652,6 +652,8 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     if (zflow->getBittorrentHash()) flow->setBittorrentHash(zflow->getBittorrentHash(),
 							    strlen(zflow->getBittorrentHash()));
 
+    flow->updateTCPStats(zflow->get_tcp_stats(true), zflow->get_tcp_stats(false));
+    
     if (zflow->getRiskInfo()) {
       json_object *o, *obj;
       enum json_tokener_error jerr = json_tokener_success;

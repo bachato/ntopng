@@ -41,7 +41,8 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   char *l7_json;
   char *smtp_rcp_to, *smtp_mail_from;
   u_int32_t src_ip_addr_pre_nat, dst_ip_addr_pre_nat,
-              src_ip_addr_post_nat, dst_ip_addr_post_nat;
+    src_ip_addr_post_nat, dst_ip_addr_post_nat;
+  u_int32_t tcp_stats_src_to_dst, tcp_stats_dst_to_src;
   u_int8_t tls_unsafe_cipher, flow_verdict;
   ndpi_os os_hint;
   u_int16_t tls_cipher;
@@ -178,9 +179,11 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   inline void setQoEDst2Src(u_int8_t t)   { qoe.dst_to_src = t; }
   inline void setOSHint(ndpi_os t) { os_hint = t;        }
   inline ndpi_os getOSHint()       { return(os_hint);    }
-
+  inline void setTCPStats(u_int32_t value, bool cli2src) {
+    if(cli2src) tcp_stats_src_to_dst = value; else tcp_stats_dst_to_src = value;
+  }
   u_int32_t get_private_flow_id();
-
+  inline u_int32_t get_tcp_stats(bool cli2srv) { return(cli2srv ? tcp_stats_src_to_dst : tcp_stats_dst_to_src); }
   void print();
 };
 

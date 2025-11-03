@@ -191,6 +191,8 @@ flow_consts.flow_fields_description = {
    ["PAYLOAD_HASH"] = i18n("flow_fields_description.payload_hash"),
    ["SRC_AS_MAP"] = i18n("flow_fields_description.src_as_map"),
    ["DST_AS_MAP"] = i18n("flow_fields_description.dst_as_map"),
+   ["TCP_STATS_SRC_TO_DST"] = i18n("flow_fields_description.tcp_stats_src_to_dst"),
+   ["TCP_STATS_DST_TO_SRC"] = i18n("flow_fields_description.tcp_stats_dst_to_src"),
 
    -- BGP Update Listener
    ["SRC_AS_PATH_1"] = i18n("flow_fields_description.src_as_path_1"),
