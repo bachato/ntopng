@@ -17,6 +17,7 @@ local asn = _GET["asn"]
 local criteria_as = _GET["criteria_as"]
 local tableId = "ingress_egress_as_stats"
 local page = _GET["page"]
+local is_asn_mode_enabled = isASNModeEnabled()
 
 if (not criteria_as) or (criteria_as == "traffic_between_ases") then
     tableId = "traffic_between_ases"
@@ -25,8 +26,14 @@ else
 end
 
 sendHTTPContentTypeHeader('text/html')
-page_utils.print_header_and_set_active_menu_entry(
-    page_utils.menu_entries.autonomous_systems)
+
+if not is_asn_mode_enabled then
+    page_utils.print_header_and_set_active_menu_entry(
+        page_utils.menu_entries.autonomous_systems)
+else
+    page_utils.print_header_and_set_active_menu_entry(
+        page_utils.menu_entries.autonomous_systems_asn_mode)
+end
 dofile(dirs.installdir .. "/scripts/lua/inc/menu.lua")
 
 page_utils.print_navbar(i18n("asn_id", {id = format_utils.formatASN(asn)}),
