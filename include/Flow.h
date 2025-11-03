@@ -530,7 +530,7 @@ public:
   bool isTLS() const;
   inline bool isEncryptedProto() const {
     return (ndpi_is_encrypted_proto(iface->get_ndpi_struct(),
-                                    ndpiDetectedProtocol));
+                                    ndpiDetectedProtocol.proto));
   }
   inline bool isSSH() const     { return (isProto(NDPI_PROTOCOL_SSH));            }
   inline bool isMining() const  { return (isProto(NDPI_PROTOCOL_MINING));         }
@@ -614,8 +614,8 @@ public:
   void formatECSAppProto(json_object *my_object);
   void formatECSObserver(json_object *my_object);
 
-  inline u_int16_t getLowerProtocol() { return (ndpi_get_lower_proto(ndpiDetectedProtocol)); }
-  inline u_int16_t getUpperProtocol() { return (ndpi_get_upper_proto(ndpiDetectedProtocol)); }
+  inline u_int16_t getLowerProtocol() { return (ndpi_get_lower_proto(ndpiDetectedProtocol.proto)); }
+  inline u_int16_t getUpperProtocol() { return (ndpi_get_upper_proto(ndpiDetectedProtocol.proto)); }
 
   inline void updateJA4C(char *j) {
     if (j && (j[0] != '\0') && (protos.tls.ja4.client_hash == NULL))
@@ -907,7 +907,7 @@ public:
   inline ICMPinfo *getICMPInfo() const { return (isICMP() ? icmp_info : NULL); }
   inline ndpi_protocol_breed_t get_protocol_breed() const {
     return (ndpi_get_proto_breed(iface->get_ndpi_struct(),
-				 isDetectionCompleted() ? ndpi_get_upper_proto(ndpiDetectedProtocol)
+				 isDetectionCompleted() ? ndpi_get_upper_proto(ndpiDetectedProtocol.proto)
 				 : NDPI_PROTOCOL_UNKNOWN));
   };
   inline const char *get_protocol_breed_name() const {

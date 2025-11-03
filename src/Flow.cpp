@@ -701,7 +701,7 @@ void Flow::processDetectedProtocol(u_int8_t *payload, u_int16_t payload_len) {
   if(srv_h) srv_h->incnDPIFlows(stats_protocol);
   iface->incnDPIFlows(stats_protocol);
 
-  l7proto = ndpi_get_lower_proto(ndpiDetectedProtocol);
+  l7proto = ndpi_get_lower_proto(ndpiDetectedProtocol.proto);
 
   /* Domain Concats Alert */
   if(ndpiFlow)
@@ -778,7 +778,7 @@ void Flow::processDetectedProtocolData() {
 
   if(ndpiFlow == NULL) return;
 
-  l7proto = ndpi_get_lower_proto(ndpiDetectedProtocol);
+  l7proto = ndpi_get_lower_proto(ndpiDetectedProtocol.proto);
 
   if((l7proto != NDPI_PROTOCOL_DNS)
      && (l7proto != NDPI_PROTOCOL_DHCP) /* host_server_name in DHCP is for the
@@ -1119,7 +1119,7 @@ bool Flow::needsExtraDissection() {
    * ndpi_detection_giveup won't be called. */
   return ((ndpif = get_ndpi_flow())
 	  && (!extra_dissection_completed)
-	  && (ndpi_extra_dissection_possible(iface->get_ndpi_struct(), ndpif)));
+	  && (ndpiDetectedProtocol.state != NDPI_STATE_CLASSIFIED));
 }
 
 /* *************************************** */
@@ -1247,7 +1247,7 @@ void Flow::processDNSPacket(const u_char *ip_packet, u_int16_t ip_len,
     just in case for safety. What can change is the application protocol, e.g.,
     a DNS.Google can become DNS.Facebook.
   */
-  switch (ndpi_get_lower_proto(proto_id)) {
+  switch (ndpi_get_lower_proto(proto_id.proto)) {
   case NDPI_PROTOCOL_DNS:
     ndpiDetectedProtocol = proto_id; /* Override! */
 
@@ -1356,10 +1356,7 @@ void Flow::processIEC60870Packet(bool tx_direction, const u_char *payload,
  * detected. It is safe to call endProtocolDissection() multiple times. */
 void Flow::endProtocolDissection(bool src2dst_direction) {
   if(!detection_completed) {
-    u_int8_t proto_guessed;
-
-    updateProtocol(ndpi_detection_giveup(iface->get_ndpi_struct(), ndpiFlow,
-                                         &proto_guessed));
+    updateProtocol(ndpi_detection_giveup(iface->get_ndpi_struct(), ndpiFlow));
     setRisk(ndpi_flow_risk_bitmap | ndpiFlow->risk);
     setProtocolDetectionCompleted(NULL, 0, iface->getTimeLastPktRcvd());
   }
@@ -1390,10 +1387,7 @@ void Flow::setExtraDissectionCompleted(bool src2dst_direction) {
 				 "setDetectedProtocol");
     return;
   } else if(needsExtraDissection()) {
-    u_int8_t proto_guessed;
-
-    updateProtocol(ndpi_detection_giveup(iface->get_ndpi_struct(), ndpiFlow,
-                                         &proto_guessed));
+    updateProtocol(ndpi_detection_giveup(iface->get_ndpi_struct(), ndpiFlow));
     setRisk(ndpi_flow_risk_bitmap | ndpiFlow->risk);
   }
 
@@ -2283,7 +2277,7 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
     break;
   }
 
-  switch (ndpi_get_lower_proto(ndpiDetectedProtocol)) {
+  switch (ndpi_get_lower_proto(ndpiDetectedProtocol.proto)) {
   case NDPI_PROTOCOL_HTTP:
     if(cli_host && cli_host->getHTTPstats())
       cli_host->getHTTPstats()->incStats(true /* Client */,
@@ -6845,7 +6839,7 @@ void Flow::fillZMQFlowCategory(ndpi_protocol *res) {
       return;
   }
 
-  switch (ndpi_get_lower_proto(*res)) {
+  switch (ndpi_get_lower_proto(res->proto)) {
   case NDPI_PROTOCOL_DNS:
     dst_name = getDNSQuery();
     break;
@@ -8512,7 +8506,7 @@ void Flow::swap() {
 /* *************************************** */
 
 void Flow::updateTCPHostServices(Host *cli_h, Host *srv_h) {
-  switch (ndpi_get_lower_proto(ndpiDetectedProtocol)) {
+  switch (ndpi_get_lower_proto(ndpiDetectedProtocol.proto)) {
   case NDPI_PROTOCOL_SSH:
   case NDPI_PROTOCOL_TLS:
     if(tcp) {
@@ -8536,7 +8530,7 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
 
   get_actual_peers(&cli_h, &srv_h);
 
-  switch (ndpi_get_lower_proto(ndpiDetectedProtocol)) {
+  switch (ndpi_get_lower_proto(ndpiDetectedProtocol.proto)) {
   case NDPI_PROTOCOL_DHCP:
     if(getConfidence() == NDPI_CONFIDENCE_DPI) {
       if(cli_port == htons(67)) {
@@ -8833,7 +8827,7 @@ void Flow::accountBidirectionalTCPProtocolServices() {
     get_actual_peers(&cli_h, &srv_h);
 
     for(int i=0; i<2; i++) {
-      switch (i == 0 ? ndpi_get_lower_proto(ndpiDetectedProtocol) : ndpi_get_upper_proto(ndpiDetectedProtocol)) {
+      switch (i == 0 ? ndpi_get_lower_proto(ndpiDetectedProtocol.proto) : ndpi_get_upper_proto(ndpiDetectedProtocol.proto)) {
       case NDPI_PROTOCOL_MAIL_SMTPS:
       case NDPI_PROTOCOL_MAIL_SMTP:
 	{
@@ -8963,7 +8957,7 @@ void Flow::accountBidirectionalUDPProtocolServices() {
 
   get_actual_peers(&cli_h, &srv_h);
 
-  switch (ndpi_get_lower_proto(ndpiDetectedProtocol)) {
+  switch (ndpi_get_lower_proto(ndpiDetectedProtocol.proto)) {
   case NDPI_PROTOCOL_NTP:
     if((getConfidence() == NDPI_CONFIDENCE_DPI)
        || (isTCP() && isTCPEstablished())

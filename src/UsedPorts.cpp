@@ -100,7 +100,7 @@ void UsedPorts::setLuaArray(
 
       snprintf(str, sizeof(str), "%s:%u", isTCP ? "tcp" : "udp", it->first);
       lua_push_str_table_entry(vm, str,
-			       ndpi_protocol2name(iface->get_ndpi_struct(), it->second, buf,
+			       ndpi_protocol2name(iface->get_ndpi_struct(), it->second.proto, buf,
 						  sizeof(buf)));
     }
   }

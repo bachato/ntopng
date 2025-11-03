@@ -558,7 +558,7 @@ public:
   };
   inline char *get_ndpi_full_proto_name(ndpi_protocol protocol, char *buf,
                                         u_int buf_len) const {
-    return (ndpi_protocol2name(get_ndpi_struct(), protocol, buf, buf_len));
+    return (ndpi_protocol2name(get_ndpi_struct(), protocol.proto, buf, buf_len));
   }
   inline u_int get_flow_size() {
     return (ndpi_detection_get_sizeof_ndpi_flow_struct());

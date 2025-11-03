@@ -119,7 +119,7 @@ PartializableFlowTrafficStats PartializableFlowTrafficStats::operator-(const Par
   */
   NON_NEGATIVE_DIFF(cur.is_flow_alerted, fts.is_flow_alerted);
 
-  switch (ndpi_get_lower_proto(ndpiDetectedProtocol)) {
+  switch (ndpi_get_lower_proto(ndpiDetectedProtocol.proto)) {
   case NDPI_PROTOCOL_HTTP:
     NON_NEGATIVE_DIFF(cur.protos.http.num_get, fts.protos.http.num_get);
     NON_NEGATIVE_DIFF(cur.protos.http.num_post, fts.protos.http.num_post);

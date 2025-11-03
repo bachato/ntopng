@@ -1524,7 +1524,7 @@ TrafficShaper *Host::get_shaper(ndpi_protocol ndpiProtocol) {
         TRACE_NORMAL, "[shaper] [%s@%u][ndpiProtocol=%d/%s] => [shaper_id=%d]",
         ip.print(buf, sizeof(buf)), vlan_id,
         ndpiProtocol.proto.app_protocol,
-        ndpi_protocol2name(iface->get_ndpi_struct(), ndpiProtocol, buf1,
+        ndpi_protocol2name(iface->get_ndpi_struct(), ndpiProtocol.proto, buf1,
                            sizeof(buf1)),
         shaper_id);
   }
@@ -1585,7 +1585,7 @@ bool Host::checkQuota(ndpi_protocol ndpiProtocol,
 
   ntop->getTrace()->traceEvent(
       TRACE_NORMAL, "[QUOTA (%s)] [%s@%u] => %s %s",
-      ndpi_protocol2name(iface->get_ndpi_struct(), ndpiProtocol, protobuf,
+      ndpi_protocol2name(iface->get_ndpi_struct(), ndpiProtocol.proto, protobuf,
                          sizeof(protobuf)),
       ip.print(buf, sizeof(buf)), vlan_id,
       is_above ? (char *)"EXCEEDED" : (char *)"ok",
