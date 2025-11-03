@@ -251,6 +251,7 @@ import { default as BarComponent } from "./dashboard-bar.vue";
 import { default as LateralPieComponent } from "./dashboard-lateral-pie.vue";
 import { default as BoxOverview } from "./dashboard-box-overview.vue";
 import { default as TimeseriesComponent } from "./dashboard-timeseries.vue";
+import { default as TopTimeseriesComponent } from "./dashboard-top-timeseries.vue";
 import { default as SankeyComponent } from "./dashboard-sankey.vue";
 import { default as SelectSearch } from "./select-search.vue";
 import { default as dataUtils } from "../utilities/data-utils";
@@ -269,6 +270,7 @@ const components_dict = {
     "lateral-pie": LateralPieComponent,
     "box-overview": BoxOverview,
     "timeseries": TimeseriesComponent,
+    "top-timeseries": TopTimeseriesComponent,
     "bar": BarComponent,
     "table": TableComponent,
     "sankey": SankeyComponent,
@@ -908,7 +910,11 @@ function check_diff_params(previous_params, current_params) {
 
 /* Callback to request REST data from components */
 function get_component_data_func(component) {
-    const get_component_data = async (url, query_params, post_params, refresh_epoch) => {
+    const get_component_data = async (url, query_params, post_params, refresh_epoch, skip) => {
+        if (skip === true) {
+            component.isLoading = false;
+            return;
+        }
         if (!isFirstLoading.value) {
             component.isLoading = true;
         }
