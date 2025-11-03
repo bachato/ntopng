@@ -533,6 +533,7 @@ local community_timeseries = {
                 color = timeseries_info.get_timeseries_color('packets')
             }
         },
+        exclude_asn_mode = true,
         nedge_exclude = true
     }, {
         schema = "iface:tcp_flags",
@@ -892,7 +893,8 @@ local community_timeseries = {
                 label = i18n('graphs.metric_labels.lost_pkts'),
                 color = timeseries_info.get_timeseries_color('packets')
             }
-        }
+        },
+        exclude_asn_mode = true,
     }, {
         schema = "host:tcp_tx_stats",
         id = timeseries_id.host,
@@ -914,7 +916,8 @@ local community_timeseries = {
                 label = i18n('graphs.metric_labels.lost_pkts'),
                 color = timeseries_info.get_timeseries_color('packets')
             }
-        }
+        },
+        exclude_asn_mode = true,
     }, {
         schema = "host:echo_reply_packets",
         id = timeseries_id.host,
@@ -1106,7 +1109,8 @@ local community_timeseries = {
             },
             packets_egress = {label = i18n('if_stats_overview.egress_packets')},
             packets_inner = {label = 'Inner Packets'}
-        }
+        },
+        exclude_asn_mode = true,
     }, {
         schema = "subnet:tcp_out_of_order",
         id = timeseries_id.network,
@@ -1120,7 +1124,8 @@ local community_timeseries = {
             },
             packets_egress = {label = i18n('if_stats_overview.egress_packets')},
             packets_inner = {label = 'Inner Packets'}
-        }
+        },
+        exclude_asn_mode = true,
     }, {
         schema = "subnet:tcp_lost",
         id = timeseries_id.network,
@@ -1141,7 +1146,8 @@ local community_timeseries = {
                 label = 'Inner Packets',
                 color = timeseries_info.get_timeseries_color('bytes')
             }
-        }
+        },
+        exclude_asn_mode = true,
     }, {
         schema = "subnet:tcp_keep_alive",
         id = timeseries_id.network,
@@ -1162,7 +1168,8 @@ local community_timeseries = {
                 label = 'Inner Packets',
                 color = timeseries_info.get_timeseries_color('bytes')
             }
-        }
+        },
+        exclude_asn_mode = true,
     }, {
         schema = "subnet:rtt",
         id = timeseries_id.network,
@@ -1177,7 +1184,8 @@ local community_timeseries = {
                 color = timeseries_info.get_timeseries_color('default')
             }
         },
-        nedge_exclude = true
+        nedge_exclude = true,
+        exclude_asn_mode = true,
     }, -- as_details.lua (ASN): --
     {
         schema = "asn:traffic",
@@ -1214,6 +1222,7 @@ local community_timeseries = {
                 color = timeseries_info.get_timeseries_color('default')
             }
         },
+        exclude_asn_mode = true,
         nedge_exclude = true
     }, {
         schema = "asn:traffic_sent",
@@ -1570,7 +1579,8 @@ local community_timeseries = {
                 label = i18n('graphs.rtt_as_server'),
                 color = timeseries_info.get_timeseries_color('default')
             }
-        }
+        },
+        exclude_asn_mode = true,
     }, {
         schema = "pod:rtt_variance",
         id = timeseries_id.pod,
@@ -1627,7 +1637,8 @@ local community_timeseries = {
                 label = i18n('graphs.rtt_as_server'),
                 color = timeseries_info.get_timeseries_color('default')
             }
-        }
+        },
+        exclude_asn_mode = true,
     }, {
         schema = "container:rtt_variance",
         id = timeseries_id.container,
@@ -1645,7 +1656,8 @@ local community_timeseries = {
                 label = i18n('graphs.variance_as_server'),
                 color = timeseries_info.get_timeseries_color('default')
             }
-        }
+        },
+        exclude_asn_mode = true,
     }, -- hash_table_details.lua (Hash Table): --
     {
         schema = "ht:state",
@@ -2205,11 +2217,11 @@ end
 
 -- #################################
 
-local function add_top_vlan_timeseries(tags, timeseries)
+local function add_top_vlan_timeseries(tags, timeseries, is_asn_mode_enabled)
     local vlan_ts_enabled = ntop.getCache("ntopng.prefs.vlan_rrd_creation")
 
     -- Top l7 Protocols
-    if vlan_ts_enabled then
+    if (vlan_ts_enabled) and (not is_asn_mode_enabled) then
         local series = ts_utils.listSeries("vlan:ndpi", table.clone(tags),
                                            tags.epoch_begin) or {}
         local tmp_tags = table.clone(tags)
@@ -2261,12 +2273,12 @@ end
 
 -- #################################
 
-local function add_top_host_pool_timeseries(tags, timeseries)
+local function add_top_host_pool_timeseries(tags, timeseries, is_asn_mode_enabled)
     local host_pool_ts_enabled = ntop.getCache(
                                      "ntopng.prefs.host_pools_rrd_creation")
 
     -- Top l7 Protocols
-    if host_pool_ts_enabled then
+    if (host_pool_ts_enabled) and (not is_asn_mode_enabled) then
         local series = ts_utils.listSeries("host_pool:ndpi", table.clone(tags),
                                            tags.epoch_begin) or {}
         local tmp_tags = table.clone(tags)
@@ -2392,7 +2404,7 @@ end
 
 -- #################################
 
-local function add_top_asn_timeseries(tags, timeseries)
+local function add_top_asn_timeseries(tags, timeseries, is_asn_mode_enabled)
     require "lua_utils_gui"
     local asn_ts_enabled = ntop.getCache("ntopng.prefs.asn_rrd_creation")
 
@@ -2449,7 +2461,7 @@ local function add_top_asn_timeseries(tags, timeseries)
     end
 
     -- Top l7 Protocols
-    if asn_ts_enabled then
+    if (asn_ts_enabled) and (not is_asn_mode_enabled) then
         local series = ts_utils.listSeries("asn:ndpi", table.clone(tags),
                                            tags.epoch_begin) or {}
         tmp_tags = table.clone(tags)
@@ -2598,7 +2610,7 @@ end
 
 -- #################################
 
-local function add_top_host_timeseries(tags, timeseries)
+local function add_top_host_timeseries(tags, timeseries, is_asn_mode_enabled)
     local host_ts_creation = ntop.getPref("ntopng.prefs.hosts_ts_creation")
     local host_ts_enabled = ntop.getCache(
                                 "ntopng.prefs.host_ndpi_timeseries_creation")
@@ -2658,7 +2670,7 @@ local function add_top_host_timeseries(tags, timeseries)
     end
 
     -- Top l7 Protocols
-    if has_top_protocols then
+    if (has_top_protocols) and (not is_asn_mode_enabled) then
         local series = ts_utils.listSeries("host:ndpi", table.clone(tags),
                                            tags.epoch_begin) or {}
         local tmp_tags = table.clone(tags)
@@ -2755,7 +2767,7 @@ end
 
 -- #################################
 
-local function add_top_interface_timeseries(tags, timeseries)
+local function add_top_interface_timeseries(tags, timeseries, is_asn_mode_enabled)
     local interface_ts_enabled = ntop.getCache(
                                      "ntopng.prefs.interface_ndpi_timeseries_creation")
     local has_top_protocols = interface_ts_enabled == "both" or
@@ -2847,7 +2859,7 @@ local function add_top_interface_timeseries(tags, timeseries)
     end
 
     -- Top l7 Protocols
-    if has_top_protocols then
+    if (has_top_protocols) and (not is_asn_mode_enabled) then
         local id = getIfacenDPITsName()
         local is_full_ts = ifaceFullnDPITs()
         local series = ts_utils.listSeries(id, table.clone(tags),
@@ -3029,7 +3041,7 @@ end
 
 -- #################################
 
-local function add_flowdev_interfaces_timeseries(tags, timeseries)
+local function add_flowdev_interfaces_timeseries(tags, timeseries, is_asn_mode_enabled)
     require "lua_utils_gui"
     local ts_suffix = "" -- this is used just for influxdb
     local are_l7_ts_enabled = areExportersTimeseriesPerApplicationEnabled()
@@ -3065,7 +3077,7 @@ local function add_flowdev_interfaces_timeseries(tags, timeseries)
     local series = ts_utils.listSeries("flowdev:ndpi" .. ts_suffix,
                                        table.clone(tags), tags.epoch_begin) or
                        {}
-    if not table.empty(series) and are_l7_ts_enabled then
+    if not table.empty(series) and (are_l7_ts_enabled) and (not is_asn_mode_enabled) then
         timeseries[#timeseries + 1] = {
             schema = "top:flowdev:ndpi" .. ts_suffix,
             disable_perc_95_ts = true,
@@ -3338,7 +3350,7 @@ end
 
 -- #################################
 
-local function add_top_flow_port_timeseries(tags, timeseries)
+local function add_top_flow_port_timeseries(tags, timeseries, is_asn_mode_enabled)
     local tmp_tags = table.clone(tags)
     local ts_suffix = "" -- this is used just for influxdb
     local are_l7_ts_enabled = areExportersTimeseriesPerApplicationEnabled()
@@ -3349,7 +3361,7 @@ local function add_top_flow_port_timeseries(tags, timeseries)
     if highExporterTimeseriesResolution() and ts_utils.getDriverName() ==
         "influxdb" then ts_suffix = "_min" end
 
-    if not table.empty(series) and are_l7_ts_enabled then
+    if not table.empty(series) and (are_l7_ts_enabled) and (not is_asn_mode_enabled) then
         timeseries[#timeseries + 1] = {
             schema = "top:flowdev_port:ndpi" .. ts_suffix,
             chart_type = "line",
@@ -3501,53 +3513,53 @@ end
 
 -- #################################
 
-local function add_top_timeseries(tags, prefix, timeseries)
+local function add_top_timeseries(tags, prefix, timeseries, is_asn_mode_enabled)
     if prefix == 'iface' then
         -- Add the top interface timeseries
-        timeseries = add_top_interface_timeseries(tags, timeseries)
+        timeseries = add_top_interface_timeseries(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == 'host' then
         -- Add the top host timeseries
-        timeseries = add_top_host_timeseries(tags, timeseries)
+        timeseries = add_top_host_timeseries(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == 'asn' then
         -- Add the top asn timeseries
-        timeseries = add_top_asn_timeseries(tags, timeseries)
+        timeseries = add_top_asn_timeseries(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == 'host_pool' then
         -- Add the top host pool timeseries
-        timeseries = add_top_host_pool_timeseries(tags, timeseries)
+        timeseries = add_top_host_pool_timeseries(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == 'vlan' then
         -- Add the top vlan timeseries
-        timeseries = add_top_vlan_timeseries(tags, timeseries)
+        timeseries = add_top_vlan_timeseries(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == 'mac' then
         -- Add the top mac timeseries
-        timeseries = add_top_mac_timeseries(tags, timeseries)
+        timeseries = add_top_mac_timeseries(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == 'am' then
         -- Add the active monitoring timeseries
-        timeseries = add_active_monitoring_timeseries(tags, timeseries)
+        timeseries = add_active_monitoring_timeseries(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == 'subnet' then
         -- Add the active monitoring timeseries
-        timeseries = add_top_network_timeseries(tags, timeseries)
+        timeseries = add_top_network_timeseries(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == timeseries_id.observation_point then
         -- Add top observation points timeseries
-        timeseries = add_top_obs_point_timeseries(tags, timeseries)
+        timeseries = add_top_obs_point_timeseries(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == timeseries_id.snmp_interface then
-        timeseries = choose_traffic_serie(tags, timeseries)
+        timeseries = choose_traffic_serie(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == timeseries_id.snmp_device then
         -- Add the interfaces timeseries
-        timeseries = add_snmp_interfaces_timeseries(tags, timeseries)
+        timeseries = add_snmp_interfaces_timeseries(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == timeseries_id.all_asn then
         -- Add the interfaces timeseries
-        timeseries = add_all_asn_timeseries(tags, timeseries)
+        timeseries = add_all_asn_timeseries(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == timeseries_id.flow_dev then
         -- Add the interfaces timeseries
-        timeseries = add_flowdev_interfaces_timeseries(tags, timeseries)
+        timeseries = add_flowdev_interfaces_timeseries(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == timeseries_id.flow_port then
         -- Add the top interface timeseries
-        timeseries = add_top_flow_port_timeseries(tags, timeseries)
+        timeseries = add_top_flow_port_timeseries(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == timeseries_id.blacklist then
         -- Add the top interface timeseries
-        timeseries = add_top_blacklist_hits_timeseries(tags, timeseries)
+        timeseries = add_top_blacklist_hits_timeseries(tags, timeseries, is_asn_mode_enabled)
     elseif prefix == timeseries_id.redis then
-        timeseries = add_redis_command_timeseries(tags, timeseries)
+        timeseries = add_redis_command_timeseries(tags, timeseries, is_asn_mode_enabled)
     end
     if timeseries ~= nil then end
     return timeseries
@@ -3620,6 +3632,8 @@ function timeseries_info.retrieve_specific_timeseries(tags, prefix, include_empt
         timeseries_list = table.merge(community_timeseries, pro_timeseries)
     end
 
+    local is_ntopng_asn_mode = isASNModeEnabled()
+
     for _, info in pairs(timeseries_list) do
         if (prefix ~= nil) then
             if info.id ~= prefix then goto skip end
@@ -3631,6 +3645,10 @@ function timeseries_info.retrieve_specific_timeseries(tags, prefix, include_empt
 
             -- Remove from ntopng the timeseries only for nEdge
             if (info.nedge_only) and (not ntop.isnEdge()) then
+                goto skip
+            end
+
+            if (info.exclude_asn_mode) and (is_ntopng_asn_mode) then
                 goto skip
             end
 
@@ -3653,7 +3671,7 @@ function timeseries_info.retrieve_specific_timeseries(tags, prefix, include_empt
         ::skip::
     end
 
-    timeseries = add_top_timeseries(tags, prefix, timeseries)
+    timeseries = add_top_timeseries(tags, prefix, timeseries, is_ntopng_asn_mode)
     return timeseries
 end
 
