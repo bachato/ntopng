@@ -889,7 +889,7 @@ function getExporterInfo(unique_source_id) -- Exporter unique_source_id
 					}, exporter_info)
 		  end
 	       end
-	    elseif probe_info["probe.uuid_num"] == unique_source_id then
+	    elseif probe_info["probe.source_id"] == unique_source_id then
 	       return {
 		  exporter_ip = probe_info["remote.if_addr"],
 		  probe_ip = probe_info["probe.ip"],
@@ -913,7 +913,7 @@ function getProbeFromUUID(nprobe_uuid)
    if ifstats.probes then
       for interface_id, probe_list in pairs(ifstats.probes or {}) do
 	 for probe_id, probe_info in pairs(probe_list or {}) do
-	    if nprobe_uuid == probe_info["probe.uuid_num"] then
+	    if nprobe_uuid == probe_info["probe.source_id"] then
 	       return probe_info
 	    end
 	 end
@@ -933,7 +933,7 @@ function getProbeInfoFromExporterIP(ip)
 	    probe_info.exporters or {}) do
 	    if exporter_ip == ip then
 	       return {
-		  probe_uuid = tostring(probe_info["probe.uuid_num"]),
+		  probe_uuid = tostring(probe_info["probe.source_id"]),
 		  exporter_uuid = tostring(
 		     exporter_info["unique_source_id"])
 	       }

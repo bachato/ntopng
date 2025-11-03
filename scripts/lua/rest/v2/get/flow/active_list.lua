@@ -278,7 +278,7 @@ for _, value in ipairs(flows_stats.flows) do
 
                     -- get probe uuid if ips match
                     if probe_ip == device_ip then
-                        probe_uuid = probe_info["probe.uuid_num"]
+                        probe_uuid = probe_info["probe.source_id"]
                     end
                 end
             end

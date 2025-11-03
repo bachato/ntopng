@@ -504,7 +504,10 @@ u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
         snprintf(zrs.uuid, sizeof(zrs.uuid),
                  "%s", json_object_get_string(z));
 
-      if (json_object_object_get_ex(w, "uuid_num", &z) /* uuid_num (old) == unique_source_id (new) */
+      /* Note: all the below refer to the nprobe_source_id
+       * - uuid_num (old)
+       * - unique_source_id (new) */
+      if (json_object_object_get_ex(w, "uuid_num", &z)
 	  || json_object_object_get_ex(w, "unique_source_id", &z)) {
         zrs.nprobe_source_id = (u_int32_t)json_object_get_int64(z);
       } if (json_object_object_get_ex(w, "ip", &z))

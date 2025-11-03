@@ -155,7 +155,7 @@ const map_table_def_columns = (columns) => {
             if (row.is_in_memory) {
                 host_link = ` <a href=${host_url}host=${value}> <i class="fas fa-laptop"></i></a>`
             }
-            return `<a href=${exporter_url}probe_uuid=${row.probe_uuid_num}>${probe_ip}</a>${host_link}`
+            return `<a href=${exporter_url}probe_uuid=${row.probe_source_id}>${probe_ip}</a>${host_link}`
         },
         "probe_public_ip": (value, row) => {
             return value
@@ -186,10 +186,10 @@ const map_table_def_columns = (columns) => {
         "dropped_flows": (value, row) => {
             let diff_value = value
             if (!first_open.value) {
-                const old_value = localStorage.getItem("probe_dropped_flows." + row.probe_uuid_num)
+                const old_value = localStorage.getItem("probe_dropped_flows." + row.probe_source_id)
                 diff_value = (value - Number(old_value)) / 10
             }
-            localStorage.setItem("probe_dropped_flows." + row.probe_uuid_num, value)
+            localStorage.setItem("probe_dropped_flows." + row.probe_source_id, value)
             if (!value) {
                 return '';
             } else {
@@ -251,10 +251,10 @@ const map_table_def_columns = (columns) => {
         "exported_flows": (value, row) => {
             let diff_value = value
             if (!first_open.value) {
-                const old_value = localStorage.getItem("probe_exported_flows." + row.probe_uuid_num)
+                const old_value = localStorage.getItem("probe_exported_flows." + row.probe_source_id)
                 diff_value = (value - Number(old_value)) / 10
             }
-            localStorage.setItem("probe_exported_flows." + row.probe_uuid_num, value)
+            localStorage.setItem("probe_exported_flows." + row.probe_source_id, value)
             if (!value) {
                 return '';
             } else {

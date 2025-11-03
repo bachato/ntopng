@@ -52,7 +52,7 @@ for interface_id, probes_list in pairs(ifstats.probes or {}) do
                 probe_info["drops.sflow_pkt_sample_drops"] + probe_info["drops.elk_flow_drops"]
             exported_flows = probe_info["zmq.num_flow_exports"]
             probe_interface = probe_info["remote.name"]
-            local ports_table = interface.getFlowDeviceInfo(probe_info["probe.uuid_num"], true)
+            local ports_table = interface.getFlowDeviceInfo(probe_info["probe.source_id"], true)
             for _, ports in pairs(ports_table or {}) do
                 num_ports = num_ports + table.len(ports)
             end
@@ -78,7 +78,7 @@ for interface_id, probes_list in pairs(ifstats.probes or {}) do
             probe_ip = probe_ip,
             probe_name = probe_name,
             probe_uuid = probe_info["probe.uuid"],
-            probe_uuid_num = probe_info["probe.uuid_num"],
+            probe_source_id = probe_info["probe.source_id"],
             probe_public_ip = probe_info["probe.public_ip"],
             probe_edition = probe_info["probe.probe_edition"],
             probe_license = probe_info["probe.probe_license"] or i18n("if_stats_overview.no_license"),
