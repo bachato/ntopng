@@ -500,17 +500,24 @@ u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
         snprintf(zrs.remote_probe_public_address,
                  sizeof(zrs.remote_probe_public_address), "%s", ip);
       }
+
+
+      /* This is an ID (number) actually used to identify a probe in ntopng
+       * and also named probe_uuid somewhere in the code.
+       * Note: all the below refer to the nprobe_source_id:
+       * - uuid_num (old)
+       * - unique_source_id (new) */
+      if (json_object_object_get_ex(w, "uuid_num", &z)
+	  || json_object_object_get_ex(w, "unique_source_id", &z))
+        zrs.nprobe_source_id = (u_int32_t)json_object_get_int64(z);
+
+      /* This is a UUID (string) - printed on the probes table only
+       * Do not confuse this with the probe source_id (aka uuid_num) */
       if (json_object_object_get_ex(w, "uuid", &z))
         snprintf(zrs.uuid, sizeof(zrs.uuid),
                  "%s", json_object_get_string(z));
 
-      /* Note: all the below refer to the nprobe_source_id
-       * - uuid_num (old)
-       * - unique_source_id (new) */
-      if (json_object_object_get_ex(w, "uuid_num", &z)
-	  || json_object_object_get_ex(w, "unique_source_id", &z)) {
-        zrs.nprobe_source_id = (u_int32_t)json_object_get_int64(z);
-      } if (json_object_object_get_ex(w, "ip", &z))
+      if (json_object_object_get_ex(w, "ip", &z))
 	  snprintf(zrs.remote_probe_address, sizeof(zrs.remote_probe_address),
 		   "%s", json_object_get_string(z));
       if (json_object_object_get_ex(w, "version", &z))
