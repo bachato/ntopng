@@ -54,27 +54,16 @@ local function format_post_nat_info(flow, info)
         return flow
     end
 
-    tprint(flow)
     -- Format all info
-    --[[
-    local pre_nat_flow = nat_values.pre_nat_src_ip .. ":" ..
-                             nat_values.pre_nat_src_port ..
-                             ' <i class="fas fa-exchange-alt fa-lg"></i> ' ..
-                             nat_values.post_nat_src_ip .. ":" ..
-                             nat_values.post_nat_src_port
-    local post_nat_flow = nat_values.post_nat_src_ip .. ":" ..
+    local post_nat_flow = nat_values.post_nat_src_ip .. " : " ..
                               nat_values.post_nat_src_port ..
                               ' <i class="fas fa-exchange-alt fa-lg"></i> ' ..
-                              nat_values.post_nat_dst_ip .. ":" ..
+                              nat_values.post_nat_dst_ip .. " : " ..
                               nat_values.post_nat_dst_port
-    flow[#flow + 1] = {
-        name = i18n('db_explorer.pre_nat_info'),
-        values = {pre_nat_flow}
-    }
     flow[#flow + 1] = {
         name = i18n('db_explorer.post_nat_info'),
         values = {post_nat_flow}
-    }]]
+    }
 
     return flow
 end
@@ -873,6 +862,7 @@ function historical_flow_details_formatter.formatHistoricalFlowDetails(flow)
             json.decode(flow["PROTOCOL_INFO_JSON"] or '') or {}
         local info = historical_flow_utils.format_clickhouse_record(flow)
         flow_details[#flow_details + 1] = format_historical_flow_label(flow)
+        flow_details = format_post_nat_info(flow_details, flow, info)
         flow_details[#flow_details + 1] = format_historical_protocol_label(flow)
         flow_details[#flow_details + 1] =
             format_historical_last_first_seen(flow, info)
@@ -957,8 +947,6 @@ function historical_flow_details_formatter.formatHistoricalFlowDetails(flow)
                 flow_details[#flow_details + 1] = format_historical_info(flow)
             end
         end
-
-        --flow_details = format_post_nat_info(flow_details, flow, info)
 
         if (flow["PROBE_IP"] and not isEmptyString(flow['PROBE_IP']) and
             (flow['PROBE_IP'] ~= '0.0.0.0')) then
