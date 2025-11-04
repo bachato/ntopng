@@ -5296,9 +5296,9 @@ void Flow::updateTcpWindow(u_int16_t window, bool src2dst_direction) {
   /* The update depends on the direction of the flow */
   if(window == 0) {
     if(src2dst_direction)
-      src2dst_tcp_zero_window = 1, tcp_stats_src2dst.num_zero_window++;
+      src2dst_tcp_zero_window = 1, Utils::inc8bitNoOverflow(&tcp_stats_src2dst.num_zero_window);
     else
-      dst2src_tcp_zero_window = 1, tcp_stats_dst2src.num_zero_window++;
+      dst2src_tcp_zero_window = 1, Utils::inc8bitNoOverflow(&tcp_stats_dst2src.num_zero_window);
   }
 }
 
@@ -5438,15 +5438,24 @@ void Flow::updateTcpFlags(const struct bpf_timeval *when, u_int8_t flags,
     /* Packet Interface */
 
     if((flags & TH_SYN) == TH_SYN) {
-      if(src2dst_direction) tcp_stats_src2dst.num_syn++; else tcp_stats_dst2src.num_syn++;
+      if(src2dst_direction)
+	Utils::inc8bitNoOverflow(&tcp_stats_src2dst.num_syn);
+      else
+	Utils::inc8bitNoOverflow(&tcp_stats_dst2src.num_syn);
     }
     
     if((flags & TH_FIN) == TH_FIN) {
-      if(src2dst_direction) tcp_stats_src2dst.num_fin++; else tcp_stats_dst2src.num_fin++;
+      if(src2dst_direction)
+	Utils::inc8bitNoOverflow(&tcp_stats_src2dst.num_fin);
+      else
+	Utils::inc8bitNoOverflow(&tcp_stats_dst2src.num_fin);
     }
     
     if((flags & TH_RST) == TH_RST) {
-      if(src2dst_direction) tcp_stats_src2dst.num_rst++; else tcp_stats_dst2src.num_rst++;
+      if(src2dst_direction)
+	Utils::inc8bitNoOverflow(&tcp_stats_src2dst.num_rst);
+      else
+	Utils::inc8bitNoOverflow(&tcp_stats_dst2src.num_rst);
     }
     
     /* Update syn alerts counters. In case of cumulative flags, the AND is used as
@@ -9322,6 +9331,8 @@ void Flow::decodeTCPstats(u_int32_t v, tcp_stats *stats) {
 /* *************************************** */
 
 void Flow::updateTCPStats(u_int32_t cli_stats, u_int32_t srv_stats) {
+  /* ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%08X][%08X]", cli_stats, srv_stats); */
+  
   if(cli_stats) decodeTCPstats(cli_stats, &tcp_stats_src2dst);
   if(srv_stats) decodeTCPstats(srv_stats, &tcp_stats_dst2src);
 }

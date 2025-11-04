@@ -353,6 +353,9 @@ class Utils {
 			       bool (*callback)(char *, char *, void *user_data), void *user_data);
 
   static DeviceType osType2deviceType(ndpi_os t);
+
+/* Increment the counter up to 255 without wrapping */
+  static void inc8bitNoOverflow(u_int8_t *v) { if(*v < 0xFF) (*v)++; }
 };
 
 #endif /* _UTILS_H_ */

@@ -11,7 +11,7 @@ pragma_once_lua_utils_print = true
 
 local clock_start = os.clock()
 
-local dscp_consts = require "dscp_consts"
+local dscp_consts  = require "dscp_consts"
 
 -- ##############################################
 
@@ -414,6 +414,36 @@ end
 
 -- print TCP flags
 function printTCPFlags(flags) print(formatTCPFlags(flags)) end
+
+-- ###########################################
+
+function printTCPStats(stats)
+   local format_utils = require "format_utils"
+
+   if((stats.num_syn+stats.num_fin+stats.num_rst+stats.num_zero_window) == 0) then
+      return
+   end
+   
+   print("<br>"..i18n("flow_details.tcp_stats_breakdown") .."<ul>\n")
+   
+   if(stats.num_syn > 0) then
+      print("<li>"..'<span class="badge bg-info" data-bs-toggle="tooltip" data-bs-placement="bottom" title="SYN">S</span> '..  format_utils.formatPackets(stats.num_syn) .. "</li>\n")
+   end
+
+   if(stats.num_fin > 0) then
+      print("<li>"..'<span class="badge bg-info" data-bs-toggle="tooltip" data-bs-placement="bottom" title="FIN">F</span> '.. format_utils.formatPackets(stats.num_fin) .. "</li>\n")
+   end
+   
+   if(stats.num_rst > 0) then
+      print("<li>"..'<span class="badge bg-danger" data-bs-toggle="tooltip" data-bs-placement="bottom" title="RST">R</span> '.. format_utils.formatPackets(stats.num_rst) .. "</li>\n")
+   end
+   
+   if(stats.num_zero_window > 0) then
+      print("<li>0-window: " ..  format_utils.formatPackets(stats.num_zero_window) .. "</li>\n")
+   end
+   
+   print("</ul>\n")
+end
 
 -- ###########################################
 

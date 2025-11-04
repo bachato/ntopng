@@ -1317,13 +1317,17 @@ else
          printTCPFlags(json_flags["CLIENT_TCP_FLAGS"])
       else
          printTCPFlags(flow["cli2srv.tcp_flags"])
+	 print("<br>\n")
+	 printTCPStats(flow.tcp_stats.src2dst)
       end
-      print(
-         "</td><td nowrap>" .. server_to_client_label .. ": ")
+      print("</td><td nowrap>" .. server_to_client_label .. ": ")
+      
       if (json_flags ~= nil) then
          printTCPFlags(json_flags["SERVER_TCP_FLAGS"])
       else
          printTCPFlags(flow["srv2cli.tcp_flags"])
+	 print("<br>\n")
+	 printTCPStats(flow.tcp_stats.dst2src)
       end
 
       print("</td></tr>\n")
