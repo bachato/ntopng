@@ -39,19 +39,22 @@ for interface_id, probes_list in pairs(ifstats.probes or {}) do
         local exported_flows = 0
         local probe_interface
         local num_ports = 0
-        local flow_exporters_num = table.len(probe_info.exporters)
+        local flow_exporters_num = table.len(probe_info.exporters or {})
         local is_probe_in_memory = false
-        local probe_ip = probe_info["probe.ip"]
+        local probe_ip = probe_info["probe.ip"] or ""
         local probe_name = getProbeName(probe_ip, true, true, false)  
 
-        if probe_info["probe.mode"] == "packet_collection" then
+        if probe_info["probe.mode"] and probe_info["probe.mode"] == "packet_collection" then
             flow_exporters_num = 1 -- Packet exporter
-            flow_drops = probe_info["drops.elk_flow_drops"] + probe_info["drops.flow_collection_udp_socket_drops"] +
-                probe_info["drops.export_queue_full"] + probe_info["drops.too_many_flows"] +
-                probe_info["drops.flow_collection_drops"] +
-                probe_info["drops.sflow_pkt_sample_drops"] + probe_info["drops.elk_flow_drops"]
-            exported_flows = probe_info["zmq.num_flow_exports"]
-            probe_interface = probe_info["remote.name"]
+            flow_drops = probe_info["drops.elk_flow_drops"] or 0) + 
+                (probe_info["drops.flow_collection_udp_socket_drops"] or 0) +
+                (probe_info["drops.export_queue_full"] or 0) + 
+                (probe_info["drops.too_many_flows"] or 0) +
+                (probe_info["drops.flow_collection_drops"] or 0) +
+                (probe_info["drops.sflow_pkt_sample_drops"] or 0) + 
+                (probe_info["drops.elk_flow_drops"] or 0)
+            exported_flows = probe_info["zmq.num_flow_exports"] or 0)
+            probe_interface = probe_info["remote.name"] or ""
             local ports_table = interface.getFlowDeviceInfo(probe_info["probe.source_id"], true)
             for _, ports in pairs(ports_table or {}) do
                 num_ports = num_ports + table.len(ports)
@@ -74,13 +77,13 @@ for interface_id, probes_list in pairs(ifstats.probes or {}) do
 
         res[#res + 1] = {
             probe_interface = probe_interface,
-            probe_version = probe_info["probe.probe_version"],
+            probe_version = probe_info["probe.probe_version"] or "",
             probe_ip = probe_ip,
             probe_name = probe_name,
-            probe_uuid = probe_info["probe.uuid"],
+            probe_uuid = probe_info["probe.uuid"] or "",
             probe_source_id = probe_info["probe.source_id"],
-            probe_public_ip = probe_info["probe.public_ip"],
-            probe_edition = probe_info["probe.probe_edition"],
+            probe_public_ip = probe_info["probe.public_ip"] or "",
+            probe_edition = probe_info["probe.probe_edition"] or "",
             probe_license = probe_info["probe.probe_license"] or i18n("if_stats_overview.no_license"),
             probe_maintenance = probe_info["probe.probe_maintenance"] or i18n("if_stats_overview.expired_maintenance"),
             probe_last_update = (probe_info["probe.last_update"] or 0),

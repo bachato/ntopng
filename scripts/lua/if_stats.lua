@@ -883,9 +883,8 @@ if ((page == "overview") or (page == nil)) then
         for _, v in pairs(ifstats.probes or {}) do
             for _, v1 in pairs(v or {}) do
                 for _, v2 in pairs(v or {}) do
-                    if (v2["packets.total"] ~= nil) then probe_total_packets = probe_total_packets + v2["packets.total"] end
-                    if (v2["packets.drops"] ~= nil) then probe_total_packet_drops = probe_total_packet_drops +
-                        v2["packets.drops"] end
+                    probe_total_packets = probe_total_packets + (v2["packets.total"] or 0)
+                    probe_total_packet_drops = probe_total_packet_drops + (v2["packets.drops"] or 0)
                 end
             end
         end

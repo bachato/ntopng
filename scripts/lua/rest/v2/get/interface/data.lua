@@ -134,8 +134,8 @@ function dumpInterfaceStats(ifid)
 
         for interface_id, probes_list in pairs(ifstats.probes or {}) do
             for source_id, probe_info in pairs(probes_list or {}) do
-                tot_pkt = tot_pkt + probe_info["packets.total"]
-                tot_pkt_drops = tot_pkt_drops + probe_info["packets.drops"]
+                tot_pkt = tot_pkt + (probe_info["packets.total"] or 0)
+                tot_pkt_drops = tot_pkt_drops + (probe_info["packets.drops"] or 0)
             end
         end
 

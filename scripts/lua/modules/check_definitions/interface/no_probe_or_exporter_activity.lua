@@ -35,26 +35,27 @@ local function check_exporter_activity(params)
 
    for interface_id, probes_list in pairs(ifstats.probes or {}) do
       for source_id, probe_info in pairs(probes_list or {}) do
-	 if(probe_info["probe.last_update"] == nil) then probe_info["probe.last_update"] = 0 end
-	 
-	 if not(probe_info["probe.last_update"] < time_limit) then
-	    if(debug) then tprint("[NOK] Probe ["..probe_info["probe.ip"].."]: "..probe_info["probe.last_update"]) end
+         local probe_last_update = probe_info["probe.last_update"] or 0
+	 local probe_ip = probe_info["probe.ip"] or ""
+ 
+	 if not(probe_last_update < time_limit) then
+	    if(debug) then tprint("[NOK] Probe ["..probe_ip.."]: " .. probe_last_update) end
 	    
-	    if(probe_info["probe.last_update"] < time_limit) then
-	       params.entity_info.name = params.entity_info.name .. '@' .. probe_info["probe.ip"]
-	       local no_probe_activity_type = alert_consts.alert_types.alert_no_probe_activity.new(params.entity_info.name, probe_info["probe.last_update"])
+	    if probe_last_update < time_limit then
+	       params.entity_info.name = params.entity_info.name .. '@' .. probe_ip
+	       local no_probe_activity_type = alert_consts.alert_types.alert_no_probe_activity.new(params.entity_info.name, probe_last_update)
 	       no_probe_activity_type:set_info(params)
 	       no_probe_activity_type:trigger(params.alert_entity, nil, params.cur_alerts)
 	    end	    
 	 else
 	    -- Probe is ok, let's now check the exporters
-	    if(debug) then tprint("[OK] Probe ["..probe_info["probe.ip"].."]: "..probe_info["probe.last_update"]) end
+	    if(debug) then tprint("[OK] Probe ["..probe_ip.."]: " .. probe_last_update) end
 	    
-	    for ip_addr, exp in pairs(probe_info.exporters) do
+	    for ip_addr, exp in pairs(probe_info.exporters or {}) do
 	       if(exp.time_last_used == nil) then exp.time_last_used = 0 end
 	       
 	       if(exp.time_last_used < time_limit) then
-		  if(debug) then tprint("[NOK] Exporter "..ip_addr.."[probe "..probe_info["probe.ip"].."]: "..exp.time_last_used) end
+		  if(debug) then tprint("[NOK] Exporter "..ip_addr.."[probe "..probe_ip.."]: "..exp.time_last_used) end
 		  
 		  params.entity_info.name = params.entity_info.name .. '@' .. ip_addr
 		  
@@ -62,7 +63,7 @@ local function check_exporter_activity(params)
 		  no_exporter_activity_type:set_info(params)
 		  no_exporter_activity_type:trigger(params.alert_entity, nil, params.cur_alerts)
 	       else
-		  if(debug) then tprint("[OK] Exporter "..ip_addr.." [probe "..probe_info["probe.ip"].."]: "..exp.time_last_used) end
+		  if(debug) then tprint("[OK] Exporter "..ip_addr.." [probe "..probe_ip.."]: "..exp.time_last_used) end
 	       end
 	    end
 	 end
