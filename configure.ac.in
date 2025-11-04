@@ -478,11 +478,17 @@ dnl> Remove heading spaces
 AC_DEFINE_UNQUOTED(NTOPNG_PRO, 1, [Building ntopng professional])
 
 dnl> if test "$MACHINE" = "aarch64"; then
-dnl> i echo "Native ClickHouse support diabled on this architecture"
-dnl> ielse
+dnl>  echo "Native ClickHouse support diabled on this architecture"
+dnl> else
  AC_DEFINE_UNQUOTED(HAVE_CLICKHOUSE, 1, [Building with ClickHouse support])
-dnl> ifi
+dnl> fi
 
+CLICKHOUSE_HOME=${PWD}/../clickhouse-cpp
+if ! test -d ${CLICKHOUSE_HOME}; then
+   CLICKHOUSE_HOME=${PWD}/third-party/clickhouse-cpp
+fi
+echo "Using clickhouse-cpp stored at ${CLICKHOUSE_HOME}"
+   
 AC_DEFINE_UNQUOTED(NTOPNG_PRO_GIT_RELEASE, "r${PRO_GIT_RELEASE}", [ntopng professional release])
 AC_DEFINE_UNQUOTED(NTOPNG_PRO_GIT_DATE, "${PRO_GIT_DATE}", [ntopng professional date])
 DUMMY=`cd ./pro; ${MAKE} build`
@@ -910,6 +916,7 @@ AC_SUBST(STABLE_SUFFIX)
 AC_SUBST(LIBS)
 AC_SUBST(FUZZ_MAKEFILE_INC)
 AC_SUBST(FUZZ_OBJECTS)
+AC_SUBST(CLICKHOUSE_HOME)
 AC_CONFIG_HEADERS(include/config.h)
 AC_CONFIG_FILES(packages/ntopng.spec)
 AC_CONFIG_FILES(packages/ntopng-data.spec)
