@@ -149,18 +149,18 @@ for _, value in ipairs(flows_stats.flows) do
     -- ASN data extraction
     local cli_asn = value['src_as']
     local srv_asn = value['dst_as']
+    local cli_peer_as = value.src_peer_as
+    local srv_peer_as = value.dst_peer_as
     local transit_asn = 0
     local transit_asn_ip = ""
 
     -- Get transit asn from flow
-    if (value.src_peer_as ~= value.src_as) then
-        transit_asn = value.src_peer_as
+    if ((cli_peer_as) and (cli_peer_as ~= cli_asn)) then
+        transit_asn = cli_peer_as
         transit_asn_ip = cli_ip
-    else
-        if (value.dst_peer_as ~= value.dst_as) then
-            transit_asn = value.dst_peer_as
-            transit_asn_ip = srv_ip
-        end
+    elseif ((srv_peer_as) and (srv_peer_as ~= srv_asn)) then
+        transit_asn = srv_peer_as
+        transit_asn_ip = srv_ip
     end
 
     local cli_asn_data = {

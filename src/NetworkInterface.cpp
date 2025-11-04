@@ -5524,6 +5524,8 @@ static bool flow_search_walker(GenericHashEntry *h, void *user_data, bool *match
   Flow *f = (Flow *)h;
   const TcpInfo *tcp_info;
   u_int32_t prev_actNumEntries = retriever->actNumEntries;
+  u_int32_t as = 0;
+  char as_name[64];
 
   if (retriever->actNumEntries >= retriever->maxNumEntries)
     return (true); /* Limit reached - stop iterating */
@@ -5587,14 +5589,16 @@ static bool flow_search_walker(GenericHashEntry *h, void *user_data, bool *match
       retriever->elems[retriever->actNumEntries++].numericValue = f->get_duration();
       break;
     case column_cli_asn:
-      retriever->elems[retriever->actNumEntries++].numericValue = f->getSrcAS();
+      f->getSrcAS(&as, as_name);
+      retriever->elems[retriever->actNumEntries++].numericValue = as;
       break;
     case column_srv_asn:
-      retriever->elems[retriever->actNumEntries++].numericValue = f->getDstAS();
+      f->getDstAS(&as, as_name);
+      retriever->elems[retriever->actNumEntries++].numericValue = as;
       break;
     case column_transit_asn:
-      retriever->elems[retriever->actNumEntries++].numericValue =
-          0;  // f->getTransitAS();
+      f->getTransitAS(&as);
+      retriever->elems[retriever->actNumEntries++].numericValue = as;
       break;
     case column_score:
       {

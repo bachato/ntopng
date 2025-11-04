@@ -47,7 +47,7 @@ Flow::Flow(NetworkInterface *_iface,
     vlanId = _vlanId, protocol = _protocol, cli_port = _cli_port,
     srv_port = _srv_port, privateFlowId = _private_flow_id;
   flow_dropped_counts_increased = 0, protocolErrorCode = 0;
-  srcAS = dstAS = srcPeerAS = dstPeerAS = 0, rttSec = 0;
+  srcAS = dstAS = srcPeerAS = dstPeerAS = transitAS = 0, rttSec = 0;
   srcASName = dstASName = NULL;
   src2dst_tcp_flags = dst2src_tcp_flags = 0;
   collected_qoe.src_to_dst = collected_qoe.dst_to_src = NTOP_QOE_UNKNOWN, has_collected_qoe = 0;
@@ -3048,13 +3048,12 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   getSrcAS(&asn, asname);
   lua_push_int32_table_entry(vm, "src_as", asn);
   lua_push_str_table_entry(vm, "src_as_name", asname ? asname : "");
+  if(getSrcPeerAS() && (asn != getSrcPeerAS())) lua_push_int32_table_entry(vm, "src_peer_as", getSrcPeerAS());
 
   getDstAS(&asn, asname);
   lua_push_int32_table_entry(vm, "dst_as", asn);
   lua_push_str_table_entry(vm, "dst_as_name", asname ? asname : "");
-
-  if(srcPeerAS != 0) lua_push_int32_table_entry(vm, "src_peer_as", srcPeerAS);
-  if(dstPeerAS != 0) lua_push_int32_table_entry(vm, "dst_peer_as", dstPeerAS);
+  if(getDstPeerAS() && (asn != getDstPeerAS())) lua_push_int32_table_entry(vm, "dst_peer_as", getDstPeerAS());
 
   lua_snmp_info(vm);
 
@@ -9280,6 +9279,27 @@ void Flow::getDstAS(u_int32_t *as, char *as_name) {
   }
   *as = dstAS;
   as_name = dstASName ? dstASName : (char*) "";
+}
+
+/* *************************************** */
+
+void Flow::getTransitAS(u_int32_t *as) {
+    if (transitAS == 0) {
+        // There are two possible transits, one from the source
+        // and the other from the destination, give priority to the source
+        u_int32_t src_as = 0, dst_as = 0;
+        char as_name[64];
+        getSrcAS(&src_as, as_name);
+        getDstAS(&dst_as, as_name);
+        if ((getSrcPeerAS()) && (src_as != getSrcPeerAS())) {
+            // Source transit
+            transitAS = getSrcPeerAS();
+        } else if ((getDstPeerAS()) && (dst_as != getDstPeerAS())) {
+            // Destination Transit
+            transitAS = getDstPeerAS();
+        }
+    }
+    *as = transitAS;
 }
 
 /* *************************************** */

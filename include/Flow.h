@@ -1547,6 +1547,7 @@ public:
   inline u_int16_t getPostNATDstPort() { return(collection ? ntohs(collection->nat.dst_port_post_nat) : 0);    };
   void getSrcAS(u_int32_t *as, char *as_name);
   void getDstAS(u_int32_t *as, char *as_name);
+  void getTransitAS(u_int32_t *as);
   TransitAS getTransitASType();
   void setBittorrentHash(char *hash, u_int len);
   inline bool isFlowAccounted()        { return iface_flow_accounted; };
@@ -1561,7 +1562,6 @@ public:
 
   u_int32_t getSrcAS()     { return(srcAS);     }
   u_int32_t getDstAS()     { return(dstAS);     }
-  u_int32_t getTransitAS() { return(transitAS); }
   u_int32_t getSrcPeerAS() { return(srcPeerAS); }
   u_int32_t getDstPeerAS() { return(dstPeerAS); }
 
