@@ -35,6 +35,8 @@ local function check_exporter_activity(params)
 
    for interface_id, probes_list in pairs(ifstats.probes or {}) do
       for source_id, probe_info in pairs(probes_list or {}) do
+	 if(probe_info["probe.last_update"] == nil) then probe_info["probe.last_update"] = 0 end
+	 
 	 if not(probe_info["probe.last_update"] < time_limit) then
 	    if(debug) then tprint("[NOK] Probe ["..probe_info["probe.ip"].."]: "..probe_info["probe.last_update"]) end
 	    
@@ -49,6 +51,8 @@ local function check_exporter_activity(params)
 	    if(debug) then tprint("[OK] Probe ["..probe_info["probe.ip"].."]: "..probe_info["probe.last_update"]) end
 	    
 	    for ip_addr, exp in pairs(probe_info.exporters) do
+	       if(exp.time_last_used == nil) then exp.time_last_used = 0 end
+	       
 	       if(exp.time_last_used < time_limit) then
 		  if(debug) then tprint("[NOK] Exporter "..ip_addr.."[probe "..probe_info["probe.ip"].."]: "..exp.time_last_used) end
 		  
