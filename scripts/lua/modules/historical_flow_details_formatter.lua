@@ -310,15 +310,19 @@ end
 -- ###############################################
 
 local function format_historical_tcp_flags(flow, info)
+   tprint(info)
+   
     return {
         name = i18n("tcp_flags"),
         values = {
             [1] = i18n("client") ..
                 " <i class=\"fas fa-long-arrow-alt-right\"></i> " ..
-                i18n("server") .. ": " .. info.src2dst_tcp_flags.label,
+	       i18n("server") .. ": " .. info.src2dst_tcp_flags.label
+	       .. formatTCPStats(info.protocol_info_json.tcp_flags_analysis.cli2srv),
             [2] = i18n("server") ..
                 " <i class=\"fas fa-long-arrow-alt-right\"></i> " ..
-                i18n("client") .. ": " .. info.dst2src_tcp_flags.label
+	       i18n("client") .. ": " .. info.dst2src_tcp_flags.label
+	       .. formatTCPStats(info.protocol_info_json.tcp_flags_analysis.srv2cli),
         }
     }
 end

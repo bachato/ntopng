@@ -832,13 +832,13 @@ function formatTCPFlags(flags)
     local out = ''
 
     if (hasbit(flags, 0x02)) then
-        out = out .. '<span class="badge bg-info" data-bs-toggle="tooltip" data-bs-placement="bottom" title="SYN">S</span> '
+        out = out .. '<span class="badge bg-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="SYN">S</span> '
     end
     if (hasbit(flags, 0x10)) then
         out = out .. '<span class="badge bg-info" data-bs-toggle="tooltip" data-bs-placement="bottom" title="ACK">A</span> '
     end
     if (hasbit(flags, 0x01)) then
-        out = out .. '<span class="badge bg-info" data-bs-toggle="tooltip" data-bs-placement="bottom" title="FIN">F</span> '
+        out = out .. '<span class="badge bg-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="FIN">F</span> '
     end
     if (hasbit(flags, 0x08)) then
         out = out .. '<span class="badge bg-info" data-bs-toggle="tooltip" data-bs-placement="bottom" title="PSH">P</span> '

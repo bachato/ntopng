@@ -580,8 +580,6 @@ else
    print("<tr><th width=10%>" .. i18n("flow_details.flow_peers_client_server") .. "</th><td colspan=2>" ..
       getFlowLabel(flow, true, not ifstats.isViewed --[[ don't add hyperlinks, viewed interface don't have hosts --]],
          nil, nil, false --[[ add flags ]]))
-
-   -- tprint(flow["tcp_stats"])
    
    if (flow.periodic_flow) then
       print(" <span class='badge bg-warning text-dark'>" .. i18n("periodic_flow") .. "</span>")
@@ -1318,7 +1316,7 @@ else
       else
          printTCPFlags(flow["cli2srv.tcp_flags"])
 	 print("<br>\n")
-	 printTCPStats(flow.tcp_stats.src2dst)
+	 printTCPStats(flow.tcp_stats.cli2srv)
       end
       print("</td><td nowrap>" .. server_to_client_label .. ": ")
       
@@ -1327,7 +1325,7 @@ else
       else
          printTCPFlags(flow["srv2cli.tcp_flags"])
 	 print("<br>\n")
-	 printTCPStats(flow.tcp_stats.dst2src)
+	 printTCPStats(flow.tcp_stats.srv2cli)
       end
 
       print("</td></tr>\n")

@@ -417,32 +417,41 @@ function printTCPFlags(flags) print(formatTCPFlags(flags)) end
 
 -- ###########################################
 
-function printTCPStats(stats)
+function formatTCPStats(stats)
    local format_utils = require "format_utils"
-
+   local ret = ""
+   
    if((stats.num_syn+stats.num_fin+stats.num_rst+stats.num_zero_window) == 0) then
-      return
+      return(ret)
    end
    
-   print("<br>"..i18n("flow_details.tcp_stats_breakdown") .."<ul>\n")
+   ret = ret .. "<br>"..i18n("flow_details.tcp_stats_breakdown") .."<ul>\n"
    
    if(stats.num_syn > 0) then
-      print("<li>"..'<span class="badge bg-info" data-bs-toggle="tooltip" data-bs-placement="bottom" title="SYN">S</span> '..  format_utils.formatPackets(stats.num_syn) .. "</li>\n")
+      ret = ret .. "<li>"..'<span class="badge bg-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="SYN">S</span> '..  format_utils.formatPackets(stats.num_syn) .. "</li>\n"
    end
 
    if(stats.num_fin > 0) then
-      print("<li>"..'<span class="badge bg-info" data-bs-toggle="tooltip" data-bs-placement="bottom" title="FIN">F</span> '.. format_utils.formatPackets(stats.num_fin) .. "</li>\n")
+      ret = ret .. "<li>"..'<span class="badge bg-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="FIN">F</span> '.. format_utils.formatPackets(stats.num_fin) .. "</li>\n"
    end
    
    if(stats.num_rst > 0) then
-      print("<li>"..'<span class="badge bg-danger" data-bs-toggle="tooltip" data-bs-placement="bottom" title="RST">R</span> '.. format_utils.formatPackets(stats.num_rst) .. "</li>\n")
+      ret = ret .. "<li>"..'<span class="badge bg-danger" data-bs-toggle="tooltip" data-bs-placement="bottom" title="RST">R</span> '.. format_utils.formatPackets(stats.num_rst) .. "</li>\n"
    end
    
    if(stats.num_zero_window > 0) then
-      print("<li>0-window: " ..  format_utils.formatPackets(stats.num_zero_window) .. "</li>\n")
+      ret = ret .. "<li>0-window: " ..  format_utils.formatPackets(stats.num_zero_window) .. "</li>\n"
    end
    
-   print("</ul>\n")
+   ret = ret .. "</ul>\n"
+
+   return(ret)
+end
+
+-- ###########################################
+
+function printTCPStats(stats)
+   print(formatTCPStats(stats))
 end
 
 -- ###########################################

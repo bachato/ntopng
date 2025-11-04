@@ -53,8 +53,7 @@ Flow::Flow(NetworkInterface *_iface,
   collected_qoe.src_to_dst = collected_qoe.dst_to_src = NTOP_QOE_UNKNOWN, has_collected_qoe = 0;
   tcp = NULL;
   c_mac_updated = s_mac_updated = false;
-  memset(&tcp_stats_src2dst, 0, sizeof(tcp_stats_src2dst));
-  memset(&tcp_stats_dst2src, 0, sizeof(tcp_stats_dst2src));
+  memset(&tcp_stats, 0, sizeof(tcp_stats));
   
 #ifdef NTOPNG_PRO
   udp = NULL;
@@ -5295,9 +5294,9 @@ void Flow::updateTcpWindow(u_int16_t window, bool src2dst_direction) {
   /* The update depends on the direction of the flow */
   if(window == 0) {
     if(src2dst_direction)
-      src2dst_tcp_zero_window = 1, Utils::inc8bitNoOverflow(&tcp_stats_src2dst.num_zero_window);
+      src2dst_tcp_zero_window = 1, Utils::inc8bitNoOverflow(&tcp_stats.cli2srv.num_zero_window);
     else
-      dst2src_tcp_zero_window = 1, Utils::inc8bitNoOverflow(&tcp_stats_dst2src.num_zero_window);
+      dst2src_tcp_zero_window = 1, Utils::inc8bitNoOverflow(&tcp_stats.srv2cli.num_zero_window);
   }
 }
 
@@ -5438,23 +5437,23 @@ void Flow::updateTcpFlags(const struct bpf_timeval *when, u_int8_t flags,
 
     if((flags & TH_SYN) == TH_SYN) {
       if(src2dst_direction)
-	Utils::inc8bitNoOverflow(&tcp_stats_src2dst.num_syn);
+	Utils::inc8bitNoOverflow(&tcp_stats.cli2srv.num_syn);
       else
-	Utils::inc8bitNoOverflow(&tcp_stats_dst2src.num_syn);
+	Utils::inc8bitNoOverflow(&tcp_stats.srv2cli.num_syn);
     }
     
     if((flags & TH_FIN) == TH_FIN) {
       if(src2dst_direction)
-	Utils::inc8bitNoOverflow(&tcp_stats_src2dst.num_fin);
+	Utils::inc8bitNoOverflow(&tcp_stats.cli2srv.num_fin);
       else
-	Utils::inc8bitNoOverflow(&tcp_stats_dst2src.num_fin);
+	Utils::inc8bitNoOverflow(&tcp_stats.srv2cli.num_fin);
     }
     
     if((flags & TH_RST) == TH_RST) {
       if(src2dst_direction)
-	Utils::inc8bitNoOverflow(&tcp_stats_src2dst.num_rst);
+	Utils::inc8bitNoOverflow(&tcp_stats.cli2srv.num_rst);
       else
-	Utils::inc8bitNoOverflow(&tcp_stats_dst2src.num_rst);
+	Utils::inc8bitNoOverflow(&tcp_stats.srv2cli.num_rst);
     }
     
     /* Update syn alerts counters. In case of cumulative flags, the AND is used as
@@ -7649,7 +7648,7 @@ void Flow::getSIPInfo(ndpi_serializer *serializer) const {
 
 /* ***************************************************** */
 
-void Flow::lua_dump_tcp_stats(lua_State *vm, const tcp_stats *s, const char *label) const {
+void Flow::lua_dump_tcp_stats(lua_State *vm, const TCPStats *s, const char *label) const {
   lua_newtable(vm);
 
   lua_push_uint32_table_entry(vm, "num_syn", s->num_syn);
@@ -7710,8 +7709,8 @@ void Flow::lua_get_tcp_info(lua_State *vm) const {
     lua_push_bool_table_entry(vm, "tcp_reset", isTCPReset());
 
     lua_newtable(vm);
-    lua_dump_tcp_stats(vm, &tcp_stats_src2dst, "src2dst");
-    lua_dump_tcp_stats(vm, &tcp_stats_dst2src, "dst2src");
+    lua_dump_tcp_stats(vm, &tcp_stats.cli2srv, "cli2srv");
+    lua_dump_tcp_stats(vm, &tcp_stats.srv2cli, "srv2cli");
     lua_pushstring(vm, "tcp_stats");
     lua_insert(vm, -2);
     lua_settable(vm, -3);    
@@ -7831,6 +7830,9 @@ void Flow::setProtocolJSONInfo() {
 #endif
   getVerdictInfo(&s);
 
+  if(protocol == IPPROTO_TCP)
+    getTCPFlagsAnalysis(&s);
+  
   json = ndpi_serializer_get_buffer(&s, &json_len);
 
   if(json_protocol_info) free(json_protocol_info);
@@ -7845,6 +7847,28 @@ void Flow::getJSONRiskInfo(ndpi_serializer *serializer) {
   if(serializer && riskInfo) {
     ndpi_serialize_string_raw(serializer, "flow_risk_info", riskInfo, strlen(riskInfo));
   }
+}
+
+/* *************************************** */
+
+void Flow::getTCPFlagsJSON(ndpi_serializer *serializer, TCPStats *stats, const char *label) {
+  ndpi_serialize_start_of_block(serializer, label);
+  ndpi_serialize_string_uint32(serializer, "num_syn", stats->num_syn);
+  ndpi_serialize_string_uint32(serializer, "num_rst", stats->num_rst);
+  ndpi_serialize_string_uint32(serializer, "num_fin", stats->num_fin);
+  ndpi_serialize_string_uint32(serializer, "num_zero_window", stats->num_zero_window);  
+  ndpi_serialize_end_of_block(serializer);
+}
+
+/* ***************************************************** */
+
+void Flow::getTCPFlagsAnalysis(ndpi_serializer *serializer) {
+  ndpi_serialize_start_of_block(serializer, "tcp_flags_analysis");
+
+  getTCPFlagsJSON(serializer,  &tcp_stats.cli2srv, "cli2srv");
+  getTCPFlagsJSON(serializer,  &tcp_stats.srv2cli, "srv2cli");
+
+  ndpi_serialize_end_of_block(serializer);
 }
 
 /* ***************************************************** */
@@ -9339,7 +9363,7 @@ void Flow::updateMac() {
 
 /* *************************************** */
 
-void Flow::decodeTCPstats(u_int32_t v, tcp_stats *stats) {
+void Flow::decodeTCPstats(u_int32_t v, TCPStats *stats) {
   v = ntohl(v);
 
   stats->num_syn         = (v & 0xFF000000) >> 24;
@@ -9353,6 +9377,6 @@ void Flow::decodeTCPstats(u_int32_t v, tcp_stats *stats) {
 void Flow::updateTCPStats(u_int32_t cli_stats, u_int32_t srv_stats) {
   /* ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%08X][%08X]", cli_stats, srv_stats); */
   
-  if(cli_stats) decodeTCPstats(cli_stats, &tcp_stats_src2dst);
-  if(srv_stats) decodeTCPstats(srv_stats, &tcp_stats_dst2src);
+  if(cli_stats) decodeTCPstats(cli_stats, &tcp_stats.cli2srv);
+  if(srv_stats) decodeTCPstats(srv_stats, &tcp_stats.srv2cli);
 }
