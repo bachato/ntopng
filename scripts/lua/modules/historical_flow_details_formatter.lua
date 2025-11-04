@@ -310,8 +310,6 @@ end
 -- ###############################################
 
 local function format_historical_tcp_flags(flow, info)
-   tprint(info)
-   
     return {
         name = i18n("tcp_flags"),
         values = {
