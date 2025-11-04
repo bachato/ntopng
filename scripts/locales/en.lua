@@ -6944,6 +6944,7 @@ local lang = {
       ["carbon_copy"] = "CC",
       ["email_recipient"] = "Email Recipient",
       ["email_sender"] = "Email Sender",
+      ["email_receiver"] = "Email Receiver",
       ["smtp_password"] = "SMTP Password",
       ["smtp_port"] = "SMTP Port",
       ["smtp_server"] = "SMTP Server",
