@@ -24,15 +24,22 @@
 /* Include the code only if the user has radius */
 #ifdef HAVE_RADIUS
 
+static bool radius_debug = false;
+
 /* *************************************** */
 
 Radius::Radius(bool _use_chap) {
+  char val[16];
+
   /*
     https://it.wikipedia.org/wiki/Password_authentication_protocol
     https://en.wikipedia.org/wiki/Challenge-Handshake_Authentication_Protocol
   */
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+ 
+  radius_debug = ((ntop->getRedis()->get((char *)PREF_RADIUS_DEBUG, val, sizeof(val)) >= 0) &&
+                  (val[0] == '1'));
+
   result = 0, use_chap = _use_chap; /* true = CHAP, false = PAP */
   radiusAuthServer = radiusAcctServer = radiusSecret = radiusAdminGroup =
     radiusUnprivCapabilitiesGroup = authServer = NULL;
@@ -292,8 +299,9 @@ bool Radius::updateLoginInfo() {
   ntop->getRedis()->get((char *)PREF_RADIUS_UNPRIV_CAP_GROUP, radiusUnprivCapabilitiesGroup, MAX_RADIUS_LEN);
 
   if((radiusAuthServer[0] == '\0') || (radiusAcctServer[0] == '\0')) {
-    ntop->getTrace()->traceEvent(TRACE_DEBUG, "No Radius server configured for authentication or accounting [Auth: %s][Acct: %s]",
-				 radiusAuthServer, radiusAcctServer);
+    if (radius_debug)
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "No Radius server configured for authentication or accounting [Auth: %s][Acct: %s]",
+				   radiusAuthServer, radiusAcctServer);
     return(false);
   }
     
@@ -302,11 +310,12 @@ bool Radius::updateLoginInfo() {
   else
     use_chap = false;
   
-  ntop->getTrace()->traceEvent(TRACE_DEBUG,
-                               "Radius: server - %s/%s | secret - %s | admin "
-                               "group - %s | capabilities group - %s | auth. protocol - %s",
-                               radiusAuthServer, radiusAcctServer, radiusSecret, radiusAdminGroup,
-                               radiusUnprivCapabilitiesGroup, buf);
+  if (radius_debug)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL,
+                                 "Radius: server - %s/%s | secret - %s | admin "
+                                 "group - %s | capabilities group - %s | auth. protocol - %s",
+                                 radiusAuthServer, radiusAcctServer, radiusSecret, radiusAdminGroup,
+                                 radiusUnprivCapabilitiesGroup, buf);
 
   return true;
 }
@@ -368,7 +377,8 @@ bool Radius::authenticate(const char *user, const char *password,
     }
   }
 
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "Radius: performing auth for user %s", user);
+  if (radius_debug)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Radius: performing auth for user %s", user);
 
   /* ****************************** */
 
@@ -406,20 +416,16 @@ bool Radius::authenticate(const char *user, const char *password,
   } else {
     /* Do not display messages for user 'admin' */
 
-    if (strcmp(user, "admin")) {
+    if (strcmp(user, "admin") != 0) {
       switch (result) {
       case TIMEOUT_RC:
-	ntop->getTrace()->traceEvent(
-				     TRACE_WARNING, "Radius Authentication timeout for user \"%s\"",
-				     user);
+	ntop->getTrace()->traceEvent(TRACE_WARNING, "Radius Authentication timeout for user \"%s\"", user);
 	break;
       case REJECT_RC:
-	ntop->getTrace()->traceEvent(TRACE_WARNING, "Radius Authentication rejected for user \"%s\"",
-				     user);
+	ntop->getTrace()->traceEvent(TRACE_WARNING, "Radius Authentication rejected for user \"%s\"", user);
 	break;
       default:
-	ntop->getTrace()->traceEvent(TRACE_WARNING, "Radius Authentication failure[%d]: user \"%s\"",
-				     result, user);
+	ntop->getTrace()->traceEvent(TRACE_WARNING, "Radius Authentication failure [%d] for user \"%s\"", result, user);
       }
     }
   }
@@ -451,8 +457,9 @@ bool Radius::startSession(RadiusTraffic *info) {
     goto radius_auth_out;
   }
 
-  ntop->getTrace()->traceEvent(TRACE_DEBUG,
-			       "Radius: performing accounting start for: %s", info->username);
+  if (radius_debug)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL,
+			         "Radius: performing accounting start for: %s", info->username);
 
   /* ****************************** */
 
@@ -503,8 +510,9 @@ bool Radius::updateSession(RadiusTraffic *info) {
     goto radius_auth_out;
   }
 
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "Radius: performing accounting interim-update for: %s",
-			       info->username);
+  if (radius_debug)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Radius: performing accounting interim-update for: %s",
+			         info->username);
 
   /* ****************************** */
 
@@ -512,8 +520,9 @@ bool Radius::updateSession(RadiusTraffic *info) {
   result = rc_acct(rh, 0 /* any port */, send);
 
   if (result == OK_RC) {
-    ntop->getTrace()->traceEvent(TRACE_DEBUG,
-                                 "Radius: Accounting Update Succedeed");
+    if (radius_debug)
+      ntop->getTrace()->traceEvent(TRACE_NORMAL,
+                                   "Radius: Accounting Update Succedeed");
     radius_ret = true;
   } else {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Radius: Accounting update failed with result: %d", result);
@@ -559,7 +568,8 @@ bool Radius::stopSession(RadiusTraffic *info) {
     }
   }
 
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "Radius: performing accounting stop for: %s", info->username);
+  if (radius_debug)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Radius: performing accounting stop for: %s", info->username);
 
   /* ****************************** */
 
@@ -567,7 +577,8 @@ bool Radius::stopSession(RadiusTraffic *info) {
   result = rc_acct(rh, 0 /* any port */, send);
 
   if (result == OK_RC) {
-    ntop->getTrace()->traceEvent(TRACE_DEBUG,
+    if (radius_debug)
+      ntop->getTrace()->traceEvent(TRACE_NORMAL,
                                  "Radius: Accounting stop Succedeed");
     radius_ret = true;
   } else
