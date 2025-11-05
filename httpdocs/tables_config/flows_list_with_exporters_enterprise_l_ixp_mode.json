@@ -21,7 +21,7 @@
 			],
 			"min-width" : "80px",
 			"max-width" : "80px",
-			"render_v_node_type": "button_array",
+			"render_v_node_type": "button_list",
 			"button_def_array": [
 				{
 					"id": "live_flows",
