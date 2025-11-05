@@ -55,6 +55,17 @@ schema:addMetric("pps")
 
 -- ##############################################
 
+schema = ts_utils.newSchema("iface:throughput_bps", {
+   step=1,
+   is_critical_ts=true,
+   metrics_type = ts_utils.metrics.gauge,
+   aggregation_function = ts_utils.aggregation.max
+})
+schema:addTag("ifid")
+schema:addMetric("bps")
+
+-- ##############################################
+
 schema = ts_utils.newSchema("iface:zmq_recv_flows", {step=1, rrd_fname = "zmq_rcvd_flows"})
 schema:addTag("ifid")
 schema:addMetric("flows")

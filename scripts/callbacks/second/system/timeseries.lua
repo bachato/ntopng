@@ -73,6 +73,8 @@ for i = 1, num_runs do
 
             ts_utils.append("iface:throughput_pps",
                             {ifid = ifstats.id, pps = pps}, when)
+            ts_utils.append("iface:throughput_bps",
+                            {ifid = ifstats.id, bps = bps}, when)
             ts_utils.append("iface:traffic",
                             {ifid = ifstats.id, bytes = ifstats.stats.bytes},
                             when)
