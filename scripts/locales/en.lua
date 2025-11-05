@@ -747,6 +747,7 @@ local lang = {
   ["reset_if_title"] = "Reset Interface Stats",
   ["reset_ifs_message"] = "Are you sure to reset all Interfaces stats?",
   ["reset_ifs_title"] = "Reset Interfaces Stats",
+  ["resolution"] = "Chart Resolution",
   ["restore"] = "Restore",
   ["restore_checks"] = "Restore Checks Defaults",
   ["retransmission"] = "Retransmission",

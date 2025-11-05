@@ -5,7 +5,15 @@
                 _i18n("asn_configuration.filter")
                         }}: </b></span>
                 <SelectSearch v-model:selected_option="current_selected_option" theme="bootstrap-5"
-                    :options="asn_type_option" @select_option="add_filter">
+                    :options="asn_type_option" @select_option="add_filter" :dropdown_size="'small'">
+                </SelectSearch>
+            </div>
+            <div class="dropdown me-3 d-flex">
+                <span class="no-wrap d-flex align-items-center filters-label me-2"><b>{{
+                    _i18n("resolution")
+                        }}: </b></span>
+                <SelectSearch v-model:selected_option="selected_resolution" theme="bootstrap-5"
+                    :options="resolution_options" @select_option="select_resolution" :dropdown_size="'small'">
                 </SelectSearch>
             </div>
         </div>
@@ -19,7 +27,8 @@
                     :epoch_begin="epoch_begin" :epoch_end="epoch_end" :i18n_title="chart_title"
                     :ifid="props.context.ifid.toString()" :max_width="12" :max_height="4" :params="params"
                     :get_component_data="get_component_data" :set_component_attr="set_component_attr"
-                    :csrf="props.context.csrf">
+                    :csrf="props.context.csrf" :show_resolution="true" :select_resolution="select_resolution"
+                    :resolution_options="resolution_options">
                 </DashboardTimeseries>
             </Transition>
         </div>
@@ -92,6 +101,14 @@ const asn_type_option = ref([{
     value: "other_as",
     label: i18n("asn_configuration.other_asn")
 }])
+const resolution_options = ref([
+    { value: "30_min", label: i18n('show_alerts.presets.30_min'), currently_active: false },
+    { value: "hour", label: i18n('show_alerts.presets.hour'), currently_active: false },
+    { value: "12_hours", label: i18n('show_alerts.presets.12_hours'), currently_active: false },
+    { value: "day", label: i18n('show_alerts.presets.day'), currently_active: true },
+    { value: "week", label: i18n('show_alerts.presets.week'), currently_active: false },
+])
+const selected_resolution = ref(resolution_options[3])
 
 const params = {
     post_params: {
@@ -131,7 +148,35 @@ onBeforeMount(async () => {
         current_selected_option.value = asn_type_option.value[0]
     }
     ntopng_url_manager.set_key_to_url(current_selected_option.value.key, current_selected_option.value.value)
+    let requested_resolution = ntopng_url_manager.get_url_entry("chart_resolution")
+    if (!requested_resolution) {
+        const resolution = localStorage.getItem('ntopng.timeseries.chartResolution.' + timeseries_id)
+        if (resolution) {
+            requested_resolution = resolution
+        } else {
+            requested_resolution = "day" // Default 1 day
+        }
+    }
+    resolution_options.value.forEach(el => {
+        if (el.value === requested_resolution) {
+            selected_resolution.value = el
+        }
+    })
+    select_resolution(selected_resolution.value, true)
 });
+
+/* *************************************************** */
+
+const select_resolution = async (value, skip_reload) => {
+    const timeframes = ntopng_utility.get_timeframes_dict();
+    if (timeframes[value.value]) {
+        epoch_begin.value = epoch_end.value - timeframes[value.value]
+    }
+    if (!skip_reload) {
+        timeseries_chart.value.refreshChart();
+    }
+    localStorage.setItem('ntopng.timeseries.chartResolution.' + timeseries_id, value.value)
+}
 
 /* *************************************************** */
 
@@ -201,7 +246,7 @@ const map_table_def_columns = (columns) => {
             const asName = row["asname"];
 
             let return_value = "";
-            let icon = formatIconAS(value,row);
+            let icon = formatIconAS(value, row);
 
             if (asName.length > 0) {
                 return_value += `${row["asname"]}`;
