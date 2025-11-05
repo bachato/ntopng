@@ -46,7 +46,7 @@ for interface_id, probes_list in pairs(ifstats.probes or {}) do
 
         if probe_info["probe.mode"] and probe_info["probe.mode"] == "packet_collection" then
             flow_exporters_num = 1 -- Packet exporter
-            flow_drops = probe_info["drops.elk_flow_drops"] or 0) + 
+            flow_drops = (probe_info["drops.elk_flow_drops"] or 0) + 
                 (probe_info["drops.flow_collection_udp_socket_drops"] or 0) +
                 (probe_info["drops.export_queue_full"] or 0) + 
                 (probe_info["drops.too_many_flows"] or 0) +
