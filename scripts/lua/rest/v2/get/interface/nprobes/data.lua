@@ -53,7 +53,7 @@ for interface_id, probes_list in pairs(ifstats.probes or {}) do
                 (probe_info["drops.flow_collection_drops"] or 0) +
                 (probe_info["drops.sflow_pkt_sample_drops"] or 0) + 
                 (probe_info["drops.elk_flow_drops"] or 0)
-            exported_flows = probe_info["zmq.num_flow_exports"] or 0)
+            exported_flows = (probe_info["zmq.num_flow_exports"] or 0)
             probe_interface = probe_info["remote.name"] or ""
             local ports_table = interface.getFlowDeviceInfo(probe_info["probe.source_id"], true)
             for _, ports in pairs(ports_table or {}) do
