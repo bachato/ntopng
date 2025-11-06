@@ -57,7 +57,7 @@ if criteria_as == "ingress_egress_traffic_criteria" then
             }
         }, {
             select_query = {
-                "out_device", "out_iface_index", "bytes_sent", "bytes_rcvd",
+                "out_device", "out_iface_index2", "bytes_sent", "bytes_rcvd",
                 "total_bytes"
             },
             where_query = {"asn"},

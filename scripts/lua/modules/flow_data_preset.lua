@@ -109,6 +109,16 @@ local columns = {
             generateLink = generateExporterInterfaceLink
         }
     },
+    out_iface_index2 = {
+        column_id = "OUTPUT_SNMP",
+        filters = "OUTPUT_SNMP",
+        is_key = true,
+        formatter = {
+            funct = format_portidx_name,
+            column_dependent = "out_device",
+            generateLink = generateExporterInterfaceLink
+        }
+    },
     interface = {
         formatter = {
             funct = format_portidx_name,
