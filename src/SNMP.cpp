@@ -124,8 +124,7 @@ void SNMP::handle_async_response(struct snmp_pdu *pdu, const char *agent_ip) {
     } break;
 
     case ASN_OCTET_STR: {
-      // ntop->getTrace()->traceEvent(TRACE_WARNING, "%s = %s", rsp_oid,
-      // vp->val.string);
+      // ntop->getTrace()->traceEvent(TRACE_WARNING, "%s = %s", rsp_oid, vp->val.string);
       char buf[512];
       bool is_printable = true;
       u_int i, len = min(sizeof(buf) - 1, vp->val_len);
@@ -133,6 +132,7 @@ void SNMP::handle_async_response(struct snmp_pdu *pdu, const char *agent_ip) {
       for (i = 0; i < len; i++) {
 	if((!isprint(vp->val.string[i]))
 	   && (!isspace(vp->val.string[i]))
+	   && (!ispunct(vp->val.string[i]))
 	   // && (vp->val.string[i] < 191) /* Windows-1252 */
 	   ) {
 	  is_printable = false;

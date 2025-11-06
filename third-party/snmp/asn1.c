@@ -592,7 +592,11 @@ int asn1_parse_string_type(ASN1Parser *parser, int *type, char **dest)
     /* Check for IPv4 addresses */
     u_int8_t v1 = (*dest)[0] & 0xFF, v2 = (*dest)[1] & 0xFF, v3 = (*dest)[2] & 0xFF, v4 = (*dest)[3] & 0xFF;
 
-    if(isalnum(v1) && isalnum(v2) && isalnum(v3) && isalnum(v4))
+    if((isalnum(v1)    || ispunct(v1))
+       && (isalnum(v2) || ispunct(v2))
+       && (isalnum(v3) || ispunct(v3))
+       && (isalnum(v4) || ispunct(v4))
+      )
       /* this looks like a string */;
     else {
       char tmp[24];
