@@ -2181,6 +2181,10 @@ int Prefs::setOption(int optkey, char *optarg) {
 #endif
 #endif /* HAVE_NEDGE */
 
+    else {
+      ntop->getTrace()->traceEvent(TRACE_ERROR, "Unsupported export format '%s'", optarg);
+    }
+
     break;
 
 #ifndef WIN32
