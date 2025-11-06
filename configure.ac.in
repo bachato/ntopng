@@ -467,6 +467,8 @@ else
   APP=ntopng
 fi
 
+CLICKHOUSE_HOME=${PWD}/third-party/clickhouse-cpp
+
 if test -d "pro"; then :
 AC_MSG_RESULT(yes)
 PRO_OBJECTS='$(patsubst pro/src/%.cpp, pro/src/%.o, $(wildcard pro/src/*.cpp)) $(patsubst pro/src/flow_checks/%.cpp, pro/src/flow_checks/%.o, $(wildcard pro/src/flow_checks/*.cpp)) $(patsubst pro/src/host_checks/%.cpp, pro/src/host_checks/%.o, $(wildcard pro/src/host_checks/*.cpp))'
@@ -483,9 +485,9 @@ dnl> else
  AC_DEFINE_UNQUOTED(HAVE_CLICKHOUSE, 1, [Building with ClickHouse support])
 dnl> fi
 
-CLICKHOUSE_HOME=${PWD}/../clickhouse-cpp
-if ! test -d ${CLICKHOUSE_HOME}; then
-   CLICKHOUSE_HOME=${PWD}/third-party/clickhouse-cpp
+TMP_CLICKHOUSE_HOME=${PWD}/../clickhouse-cpp
+if test -d ${TMP_CLICKHOUSE_HOME}; then
+ CLICKHOUSE_HOME=${TMP_CLICKHOUSE_HOME}
 fi
 echo "Using clickhouse-cpp stored at ${CLICKHOUSE_HOME}"
    
