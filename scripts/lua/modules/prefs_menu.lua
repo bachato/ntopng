@@ -189,6 +189,10 @@ local menu_subpages = {{
             title = i18n("prefs.toggle_flow_swap_heuristic"),
             description = i18n("prefs.toggle_flow_swap_heuristic_description")
         },
+        toggle_skip_dpi_for_collected_flows = {
+            title = i18n("prefs.toggle_skip_dpi_for_collected_flows"),
+            description = i18n("prefs.toggle_skip_dpi_for_collected_flows_description")
+        },
         active_local_host_cache_interval = {
             title = i18n("prefs.active_local_host_cache_interval_title"),
             description = i18n("prefs.active_local_host_cache_interval_description")

@@ -2462,6 +2462,7 @@ local known_parameters = {
     ["active_local_host_cache_interval"] = validateNumber,
     ["mac_address_cache_duration"] = validateNumber,
     ["toggle_flow_swap_heuristic"] = validateBool,
+    ["toggle_skip_dpi_for_collected_flows"] = validateBool,
     ["auth_session_duration"] = validateNumber,
     ["local_host_cache_duration"] = validateNumber,
     ["intf_rrd_raw_days"] = validateNumber,

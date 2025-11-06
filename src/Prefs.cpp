@@ -101,6 +101,7 @@ Prefs::Prefs(Ntop *_ntop) {
     CONST_DEFAULT_BEHAVIOUR_ANALYSIS_LEARNING_PERIOD;
   mac_address_cache_duration = MAX_MAC_IDLE;
   enable_flow_swap_heuristic = true; /* Enabled by default */
+  skip_dpi_for_collected_flows = false; /* Disabled by default */
   behaviour_analysis_learning_status_during_learning = service_allowed;
   behaviour_analysis_learning_status_post_learning = service_allowed;
   iec60870_learning_period = CONST_IEC104_LEARNING_TIME;
@@ -960,6 +961,8 @@ void Prefs::reloadPrefsFromRedis() {
 							     MAX_MAC_IDLE),
     enable_flow_swap_heuristic = getDefaultBoolPrefsValue(CONST_RUNTIME_ENABLE_FLOW_SWAP_HEURISTIC,
 							     true),
+    skip_dpi_for_collected_flows = getDefaultBoolPrefsValue(CONST_RUNTIME_SKIP_DPI_FOR_COLLECTED_FLOWS,
+							     false),
     enable_assets_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false);
 
     log_to_file = getDefaultBoolPrefsValue(CONST_RUNTIME_PREFS_LOG_TO_FILE, false);

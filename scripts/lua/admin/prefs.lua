@@ -1478,6 +1478,12 @@ if auth.has_capability(auth.capabilities.preferences) then
             pref = "enable_flow_swap_heuristic"
         })
 
+        prefsToggleButton(subpage_active, {
+            field = "toggle_skip_dpi_for_collected_flows",
+            default = "0",
+            pref = "skip_dpi_for_collected_flows"
+        })
+
         print('</table>')
 
         print('<table class="table">')

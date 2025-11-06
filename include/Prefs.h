@@ -70,6 +70,7 @@ class Prefs {
     devices_learning_period, mac_address_cache_duration;
   u_int32_t host_port_learning_period;
   bool enable_flow_swap_heuristic;
+  bool skip_dpi_for_collected_flows;
 #ifdef NTOPNG_PRO
   ndpi_bitmap* modbus_allowed_function_codes;
   u_int modbus_too_many_exceptions;
@@ -739,6 +740,7 @@ class Prefs {
   inline u_int32_t macAddressCacheDuration() { return (mac_address_cache_duration); };
   inline u_int32_t hostPortLearningPeriod() { return (host_port_learning_period); };
   inline bool isFlowSwapHeuristicEnabled() { return (enable_flow_swap_heuristic); };
+  inline bool skipDPIforCollectedFlows() { return (skip_dpi_for_collected_flows); };
   inline bool are_alerts_disabled() { return (disable_alerts); };
   inline bool dontEmitFlowAlerts() {
     return (disable_alerts || !emit_flow_alerts);

@@ -61,10 +61,10 @@ void GenericHashEntry::updateSeen() { updateSeen(iface->getTimeLastPktRcvd()); }
 void GenericHashEntry::set_state(HashEntryState s) {
   if ((s < hash_entry_state          /* Can't go back */
        || (s != hash_entry_state + 1 /* Only ahead, one state at time */
-           /* Only exception is for flows, which can go from allocated to
-              protocoldetected without stepping on not yet detected */
-           && !(hash_entry_state == hash_entry_state_allocated &&
-                s == hash_entry_state_flow_protocoldetected))) &&
+           /* Exception: flows which can go from allocated to protocoldetected without stepping on not yet detected */
+           && !(hash_entry_state == hash_entry_state_allocated && s == hash_entry_state_flow_protocoldetected)
+           /* Exception: collected flows which can go from allocated to active without stepping on not yet detected or protocoldetected when the preference is enabled */
+           && !(!iface->isPacketInterface() && ntop->getPrefs()->skipDPIforCollectedFlows() && hash_entry_state == hash_entry_state_allocated && s == hash_entry_state_active))) &&
       (!iface || iface->isRunning()))
     ntop->getTrace()->traceEvent(
         TRACE_ERROR, "Internal error: invalid state transition %d -> %d",

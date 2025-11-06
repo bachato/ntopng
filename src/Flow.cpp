@@ -304,35 +304,43 @@ Flow::Flow(NetworkInterface *_iface,
   hash_entry_id = 0;
   set_hash_entry_state_allocated();
 
-  switch (protocol) {
-  case IPPROTO_TCP:
-  case IPPROTO_UDP:
-    if(iface->is_ndpi_enabled()) allocDPIMemory();
+  if (iface->isPacketInterface() || !ntop->getPrefs()->skipDPIforCollectedFlows()) {
+    /* Allocate nDPI memory for protocol detection only for packet interfaces.
+     * Collector interfaces (ZMQ) receive protocol information from the probe,
+     * so DPI memory allocation is not needed and we can skip the
+     * hash_entry_state_flow_notyetdetected state to optimize flow processing
+     * when the preference "Skip Local DPI for Collected Flows" is enabled. */
+    switch (protocol) {
+    case IPPROTO_TCP:
+    case IPPROTO_UDP:
+      if(iface->is_ndpi_enabled()) allocDPIMemory();
 
-    if(protocol == IPPROTO_UDP) set_hash_entry_state_flow_notyetdetected();
+      if(protocol == IPPROTO_UDP) set_hash_entry_state_flow_notyetdetected();
     break;
 
-  case IPPROTO_ICMP:
-    ndpiDetectedProtocol.proto.app_protocol = NDPI_PROTOCOL_IP_ICMP,
+    case IPPROTO_ICMP:
+      ndpiDetectedProtocol.proto.app_protocol = NDPI_PROTOCOL_IP_ICMP;
       ndpiDetectedProtocol.proto.master_protocol = NDPI_PROTOCOL_UNKNOWN;
 
-    /* Use nDPI to check potential flow risks */
-    if(iface->is_ndpi_enabled()) allocDPIMemory();
-    set_hash_entry_state_flow_notyetdetected();
+      /* Use nDPI to check potential flow risks for packet interfaces only */
+      if(iface->is_ndpi_enabled()) allocDPIMemory();
+
+      set_hash_entry_state_flow_notyetdetected();
     break;
 
-  case IPPROTO_ICMPV6:
-    ndpiDetectedProtocol.proto.app_protocol = NDPI_PROTOCOL_IP_ICMPV6,
+    case IPPROTO_ICMPV6:
+      ndpiDetectedProtocol.proto.app_protocol = NDPI_PROTOCOL_IP_ICMPV6;
       ndpiDetectedProtocol.proto.master_protocol = NDPI_PROTOCOL_UNKNOWN;
 
-    /* Use nDPI to check potential flow risks */
-    if(iface->is_ndpi_enabled()) allocDPIMemory();
-    set_hash_entry_state_flow_notyetdetected();
+      if(iface->is_ndpi_enabled()) allocDPIMemory();
+
+      set_hash_entry_state_flow_notyetdetected();
     break;
 
-  default:
-    setDetectedProtocol(ndpi_guess_undetected_protocol(iface->get_ndpi_struct(), NULL, protocol), true);
+    default:
+      setDetectedProtocol(ndpi_guess_undetected_protocol(iface->get_ndpi_struct(), NULL, protocol), true);
     break;
+    }
   }
 
   computeKey();
@@ -1106,9 +1114,15 @@ void Flow::processExtraDissectedInformation() {
 
   /*
     We need to change state here as in Lua scripts we need to know
-    all metadata available
+    all metadata available.
+    For collector interfaces, protocol is already detected by probe,
+    so we can skip the protocoldetected state and go directly to active
+    when the preference "Skip Local DPI for Collected Flows" is enabled.
   */
-  set_hash_entry_state_flow_protocoldetected();
+  if(iface->isPacketInterface() || !ntop->getPrefs()->skipDPIforCollectedFlows())
+    set_hash_entry_state_flow_protocoldetected();
+  else
+    set_hash_entry_state_active(); /* ZMQ flows go directly to active */
 }
 
 /* *************************************** */
@@ -1429,17 +1443,19 @@ void Flow::setExtraDissectionCompleted(bool src2dst_direction) {
       }
 
       stats.setDetectedProtocol(&ndpiDetectedProtocol);
-      updateHostBlacklists();
     }
 
     setErrorCode(ndpi_get_flow_error_code(ndpiFlow));
+  }
 
-    if(ndpiDetectedProtocol.protocol_by_ip != NDPI_PROTOCOL_UNKNOWN) {
-      char *p = ndpi_get_proto_name(iface->get_ndpi_struct(),
-                                    ndpiDetectedProtocol.protocol_by_ip);
+  updateHostBlacklists();
 
-      setAddressFamilyProtocol(p);
-    }
+  /* Set address family protocol for all interfaces (packet and collector) */
+  if(ndpiDetectedProtocol.protocol_by_ip != NDPI_PROTOCOL_UNKNOWN) {
+    char *p = ndpi_get_proto_name(iface->get_ndpi_struct(),
+                                  ndpiDetectedProtocol.protocol_by_ip);
+
+    setAddressFamilyProtocol(p);
   }
 
   /*
