@@ -8904,8 +8904,12 @@ void Flow::addPostNATPort(u_int32_t _src_port_post_nat,
 
 void Flow::accountBidirectionalTCPProtocolServices() {
   if(isThreeWayHandshakeOK()
-     // && (getConfidence() == NDPI_CONFIDENCE_DPI) /* Won't work with flow collection */
-     && isTCPReallyBidirectional()) {
+     && isTCPReallyBidirectional()
+     && !hasRisk(NDPI_PROBING_ATTEMPT)) { 
+    // It's important to check the probing attempt, because there can be cases
+    // where otherwise a server is set incorrectly, see:
+    // https://github.com/ntop/ntopng/issues/9808
+    // Also this function is called at the flow_end, so it should be already set.
     Host *cli_h, *srv_h;
 
     get_actual_peers(&cli_h, &srv_h);
