@@ -347,9 +347,8 @@ const import_snmp_devices_rest = async function (params) {
 
     if (result == null) {
         modal_import_snmp_devices.value.show_bad_feedback(_i18n("import_snmp_devices_error"));
-    } else if (result.rc < 0) {
+    } else if (result.rsp?.err && result.rsp?.err < 0) {
         modal_import_snmp_devices.value.show_bad_feedback(result.rsp.feedback);
-        table_snmp_devices.value.refresh_table();
     } else {
         import_with_success.value = true;
         modal_import_snmp_devices.value.close();
