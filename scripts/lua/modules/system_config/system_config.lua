@@ -1072,11 +1072,11 @@ end
 -- ##############################################
 
 function system_config:_enableDisableDhcpService()
-  local isc_dhcp_server = require "isc_dhcp_server"
+  local dhcp_server_utils = require "dhcp_server_utils"
   if self:isDhcpServerEnabled() then
-    isc_dhcp_server.startDHCPService()
+    dhcp_server_utils.startDHCPService()
   else
-    isc_dhcp_server.stopDHCPService()
+    dhcp_server_utils.stopDHCPService()
   end
 end
 

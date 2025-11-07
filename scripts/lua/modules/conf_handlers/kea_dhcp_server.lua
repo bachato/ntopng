@@ -5,11 +5,8 @@
 local sys_utils = require "sys_utils"
 local json = require "dkjson"
 
-local service_name = "kea-dhcp4-server"
-
-local redis_key = "ntopng.nedge.dhcp.kea.enabled"
-
 local kea_dhcp_server = {}
+kea_dhcp_server.service_name = "kea-dhcp4-server"
 
 -- ###############################################################
 
@@ -34,42 +31,6 @@ local function netmask2cidr(netmask)
   end
 
   return cidr
-end
-
--- ###############################################################
-
--- This function is used to check if the DHCP server status is up
--- and if not, restart it.
-function kea_dhcp_server.checkRestartDHCPService()
-  if ntop.isnEdge() then
-    if (ntop.getCache(redis_key) or '0') == '1' then
-      if not sys_utils.isActiveService(service_name) then
-        sys_utils.restartService(service_name)
-      end
-    end
-  end
-end
-
--- ###############################################################
-
--- This function is used to start the DHCP server
-function kea_dhcp_server.startDHCPService()
-  if ntop.isnEdge() then
-    ntop.setCache(redis_key, '1')
-    sys_utils.enableService(service_name)
-    sys_utils.restartService(service_name)
-  end
-end
-
--- ###############################################################
-
--- This function is used to stop the DHCP server
-function kea_dhcp_server.stopDHCPService()
-  if ntop.isnEdge() then
-    ntop.setCache(redis_key, '0')
-    sys_utils.disableService(service_name)
-    sys_utils.stopService(service_name)
-  end
 end
 
 -- ###############################################################
