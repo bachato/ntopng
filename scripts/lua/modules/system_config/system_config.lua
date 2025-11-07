@@ -4,6 +4,8 @@
 
 local dirs = ntop.getDirs()
 
+package.path = dirs.installdir .. "/scripts/lua/modules/conf_handlers/?.lua;" .. package.path
+
 local json = require("dkjson")
 local os_utils = require "os_utils"
 local sys_utils = require "sys_utils"
@@ -1070,11 +1072,11 @@ end
 -- ##############################################
 
 function system_config:_enableDisableDhcpService()
-  local dhcp_service_utils = require "dhcp_service_utils"
+  local isc_dhcp_server = require "isc_dhcp_server"
   if self:isDhcpServerEnabled() then
-    dhcp_service_utils.startDHCPService()
+    isc_dhcp_server.startDHCPService()
   else
-    dhcp_service_utils.stopDHCPService()
+    isc_dhcp_server.stopDHCPService()
   end
 end
 

@@ -7,11 +7,11 @@ local service_name = "isc-dhcp-server"
 
 local redis_key = "ntopng.nedge.dhcp.enabled"
 
-local dhcp_service_utils = {}
+local isc_dhcp_server = {}
 
 -- This function is used to check if the DHCP server status is up 
 -- and if not, restart it.
-function dhcp_service_utils.checkRestartDHCPService()
+function isc_dhcp_server.checkRestartDHCPService()
   if ntop.isnEdge() then
     if (ntop.getCache(redis_key) or '0') == '1' then
       if not sys_utils.isActiveService(service_name) then
@@ -25,7 +25,7 @@ end
 
 -- This function is used to check if the DHCP server status is up 
 -- and if not, restart it.
-function dhcp_service_utils.startDHCPService()
+function isc_dhcp_server.startDHCPService()
   if ntop.isnEdge() then
     ntop.setCache(redis_key, '1')
     sys_utils.enableService(service_name)
@@ -37,7 +37,7 @@ end
 
 -- This function is used to check if the DHCP server status is up 
 -- and if not, restart it.
-function dhcp_service_utils.stopDHCPService()
+function isc_dhcp_server.stopDHCPService()
   if ntop.isnEdge() then
     ntop.setCache(redis_key, '0')
     sys_utils.disableService(service_name)
@@ -45,4 +45,4 @@ function dhcp_service_utils.stopDHCPService()
   end
 end
 
-return dhcp_service_utils
+return isc_dhcp_server
