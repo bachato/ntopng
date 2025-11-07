@@ -3,7 +3,6 @@
 --
 
 local sys_utils = require "sys_utils"
-local ipv4_utils = require "ipv4_utils"
 local service_name = "isc-dhcp-server"
 
 local redis_key = "ntopng.nedge.dhcp.enabled"
@@ -44,58 +43,6 @@ function isc_dhcp_server.stopDHCPService()
     sys_utils.disableService(service_name)
     sys_utils.stopService(service_name)
   end
-end
-
--- ###############################################################
-
--- Validates if a DHCP range bound is valid
--- @param lan_config The LAN configuration table
--- @param lan_network The LAN network address
--- @param broadcast The broadcast address
--- @param range_bound The range bound to validate (first_ip or last_ip)
--- @return true if valid, false otherwise
-local function isValidDhcpRangeBound(lan_config, lan_network, broadcast, range_bound)
-   return (lan_config.ip ~= range_bound) and
-      (broadcast ~= range_bound) and ipv4_utils.includes(lan_network, lan_config.netmask, range_bound)
-end
-
--- ###############################################################
-
--- Validates if a DHCP range is valid
--- @param lan_config The LAN configuration table
--- @param first_ip The first IP in the DHCP range
--- @param last_ip The last IP in the DHCP range
--- @return true if valid, false otherwise
-function isc_dhcp_server.isValidDhcpRange(lan_config, first_ip, last_ip)
-   local lan_network = ntop.networkPrefix(lan_config.ip, ipv4_utils.netmask(lan_config.netmask))
-   local broadcast = ipv4_utils.broadcast_address(lan_config.ip, lan_config.netmask)
-
-   if isValidDhcpRangeBound(lan_config, lan_network, broadcast, first_ip) and
-      isValidDhcpRangeBound(lan_config, lan_network, broadcast, last_ip) then
-      local base_ip = ipv4_utils.maskIp(lan_config.ip, lan_config.netmask)
-      return (ipv4_utils.cmp(base_ip,   first_ip) < 0) and
-             (ipv4_utils.cmp(broadcast, last_ip) > 0) and
-             (ipv4_utils.cmp(first_ip,  last_ip) <= 0)
-   end
-
-   return false
-end
-
--- ###############################################################
-
--- Validates if a DHCP range is valid for any of the provided LAN configurations
--- @param lan_configs Array of LAN configuration tables
--- @param first_ip The first IP in the DHCP range
--- @param last_ip The last IP in the DHCP range
--- @return true if valid for at least one LAN, false otherwise
-function isc_dhcp_server.hasValidDhcpRange(lan_configs, first_ip, last_ip)
-   for _, lan_config in ipairs(lan_configs) do
-      if isc_dhcp_server.isValidDhcpRange(lan_config, first_ip, last_ip) then
-         return true
-      end
-   end
-
-   return false
 end
 
 -- ###############################################################
