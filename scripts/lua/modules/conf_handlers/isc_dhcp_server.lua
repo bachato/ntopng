@@ -3,6 +3,7 @@
 --
 
 local sys_utils = require "sys_utils"
+
 local service_name = "isc-dhcp-server"
 
 local redis_key = "ntopng.nedge.dhcp.enabled"
