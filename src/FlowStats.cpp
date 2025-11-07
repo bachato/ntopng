@@ -106,18 +106,20 @@ void FlowStats::incStats(Bitmap128 alert_bitmap, u_int8_t l4_protocol,
     if ((srcPeerAS || dstPeerAS) && (srcPeerAS != dstPeerAS)) {
         /* Transit */
         u_int32_t srcAS, dstAS;
-        char *asname = NULL; /* Not interested */
-        flow->getSrcAS(&srcAS, asname);
-        flow->getDstAS(&dstAS, asname);
+        char *asname;
+	
+        flow->getSrcAS(&srcAS, &asname);
+        flow->getDstAS(&dstAS, &asname);
         if (srcAS != srcPeerAS) transit_asn_list.insert(srcPeerAS);
         if (dstAS != dstPeerAS) transit_asn_list.insert(dstPeerAS);
     }
 
     /* Track source and destination AS numbers */
     u_int32_t srcAS = 0, dstAS = 0;
-    char src_as_name[32], dst_as_name[32];
-    flow->getSrcAS(&srcAS, src_as_name);
-    flow->getDstAS(&dstAS, dst_as_name);
+    char *src_as_name, *dst_as_name;
+    
+    flow->getSrcAS(&srcAS, &src_as_name);
+    flow->getDstAS(&dstAS, &dst_as_name);
 
     if (srcAS > 0) {
       std::map<u_int32_t, u_int32_t>::iterator it = src_asn.find(srcAS);

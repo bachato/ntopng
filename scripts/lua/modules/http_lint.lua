@@ -2101,6 +2101,8 @@ local known_parameters = {
     ["lost"] = validateListOfTypeInline(validateFilters(validateNumber)),
 
     ["asn"] = validateFilters(validateNumber), -- An ASN number
+    ["src_asn"] = validateFilters(validateNumber), -- An ASN number
+    ["dst_asn"] = validateFilters(validateNumber), -- An ASN number
     ["country_id"] = validateNumber, -- A Country Code
     ["module"] = validateTopModule, -- A top script module
     ["step"] = validateNumber, -- A step value

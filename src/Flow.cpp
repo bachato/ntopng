@@ -3032,7 +3032,7 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   bool has_json_info = false;
   u_char community_id[200];
   char buf[64];
-  char *asname = NULL;
+  char *asname;
   u_int32_t asn = 0;
 
   if(ptree) {
@@ -3060,12 +3060,12 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   char *json = alerts_json; /* Copying ref as it may be moved to the shadow meantime */
   if (json) lua_push_str_table_entry(vm, "json_alert", json);
 
-  getSrcAS(&asn, asname);
+  getSrcAS(&asn, &asname);
   lua_push_int32_table_entry(vm, "src_as", asn);
   lua_push_str_table_entry(vm, "src_as_name", asname ? asname : "");
   if(getSrcPeerAS() && (asn != getSrcPeerAS())) lua_push_int32_table_entry(vm, "src_peer_as", getSrcPeerAS());
 
-  getDstAS(&asn, asname);
+  getDstAS(&asn, &asname);
   lua_push_int32_table_entry(vm, "dst_as", asn);
   lua_push_str_table_entry(vm, "dst_as_name", asname ? asname : "");
   if(getDstPeerAS() && (asn != getDstPeerAS())) lua_push_int32_table_entry(vm, "dst_peer_as", getDstPeerAS());
@@ -9285,7 +9285,7 @@ void Flow::setServerName(char *value /* Allocated by caller */) {
 
 /* *************************************** */
 
-void Flow::getSrcAS(u_int32_t *as, char *as_name) {
+void Flow::getSrcAS(u_int32_t *as, char **as_name) {
   if(!srcAS) {
     Host *h = get_cli_host();
 
@@ -9295,18 +9295,20 @@ void Flow::getSrcAS(u_int32_t *as, char *as_name) {
     } else {
       u_int32_t asn;
       char *asname;
+      
       ntop->getGeolocation()->getAS(get_cli_ip_addr(), &asn, &asname);
       srcAS = asn;
       srcASName = asname;
     }
   }
+  
   *as = srcAS;
-  as_name = srcASName ? srcASName : (char*) "";
+  *as_name = srcASName ? srcASName : (char*) "";
 }
 
 /* *************************************** */
 
-void Flow::getDstAS(u_int32_t *as, char *as_name) {
+void Flow::getDstAS(u_int32_t *as, char **as_name) {
   if(!dstAS) {
     Host *h = get_srv_host();
 
@@ -9316,34 +9318,41 @@ void Flow::getDstAS(u_int32_t *as, char *as_name) {
     } else {
       u_int32_t asn;
       char *asname;
+      
       ntop->getGeolocation()->getAS(get_srv_ip_addr(), &asn, &asname);
       dstAS = asn;
       dstASName = asname;
     }
   }
+  
   *as = dstAS;
-  as_name = dstASName ? dstASName : (char*) "";
+  *as_name = dstASName ? dstASName : (char*) "";
 }
 
 /* *************************************** */
 
-void Flow::getTransitAS(u_int32_t *as) {
-    if (transitAS == 0) {
-        // There are two possible transits, one from the source
-        // and the other from the destination, give priority to the source
-        u_int32_t src_as = 0, dst_as = 0;
-        char as_name[64];
-        getSrcAS(&src_as, as_name);
-        getDstAS(&dst_as, as_name);
-        if ((getSrcPeerAS()) && (src_as != getSrcPeerAS())) {
-            // Source transit
-            transitAS = getSrcPeerAS();
-        } else if ((getDstPeerAS()) && (dst_as != getDstPeerAS())) {
-            // Destination Transit
-            transitAS = getDstPeerAS();
-        }
+void Flow::getTransitAS(u_int32_t *as, char **as_name) {
+  if (transitAS == 0) {
+    // There are two possible transits, one from the source
+    // and the other from the destination, give priority to the source
+    u_int32_t src_as = 0, dst_as = 0;
+    char *src_as_name, *dst_as_name;
+    
+    getSrcAS(&src_as, &src_as_name);
+    getDstAS(&dst_as, &dst_as_name);
+    
+    if ((getSrcPeerAS()) && (src_as != getSrcPeerAS())) {
+      // Source transit
+      transitAS = getSrcPeerAS();
+      *as_name = src_as_name ? src_as_name : (char*) "";
+    } else if ((getDstPeerAS()) && (dst_as != getDstPeerAS())) {
+      // Destination Transit
+      transitAS = getDstPeerAS();
+      *as_name = dst_as_name ? dst_as_name : (char*) "";
     }
-    *as = transitAS;
+  }
+  
+  *as = transitAS;
 }
 
 /* *************************************** */
@@ -9352,8 +9361,8 @@ TransitAS Flow::getTransitASType() {
   u_int32_t src_asn = 0, dst_asn = 0;
   char *asname = NULL;
 
-  getSrcAS(&src_asn, asname);
-  getDstAS(&dst_asn, asname);
+  getSrcAS(&src_asn, &asname);
+  getDstAS(&dst_asn, &asname);
 
   if (!srcPeerAS && !dstPeerAS) {
     return all_flow;

@@ -344,11 +344,11 @@ void NetworkInterface::init(const char *interface_name) {
 #ifdef HAVE_NEDGE
   policer = NULL;
 #endif
-  
+
 #ifdef NTOPNG_PRO
   custom_app_stats = NULL;
   flow_devices_stats = NULL;
-  
+
   /* Behavior init variables */
   next5MinPeriodicUpdate = nextMinPeriodicUpdate = 0;
   score_behavior = new BehaviorAnalysis();
@@ -2131,7 +2131,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 	if MAC addresses are still set to Unknown (00:00:00:00:00:00)
       */
       u_int8_t e_mac[6] = { 0x0 };
-      
+
       if(src2dst_direction) {
 	u_int8_t *m = flow->getCliMacRaw();
 
@@ -2561,10 +2561,10 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 #ifdef SHAPER_DEBUG
         char buf[64];
         ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] [shapers] %d [%ld Kbps] %d [%ld Kbps] -> %s\n",
-                               flow->get_detected_protocol_name(buf, sizeof(buf)),
-			       shaper_cl->get_shaper_id(), shaper_cli->get_max_rate_kbit_sec(),
-			       shaper_srv->get_shaper_id(), shaper_srv->get_max_rate_kbit_sec(),
-                               pass_verdict ? "pass" : "DROP");
+				     flow->get_detected_protocol_name(buf, sizeof(buf)),
+				     shaper_cl->get_shaper_id(), shaper_cli->get_max_rate_kbit_sec(),
+				     shaper_srv->get_shaper_id(), shaper_srv->get_max_rate_kbit_sec(),
+				     pass_verdict ? "pass" : "DROP");
 #endif
 
       } else {
@@ -5035,7 +5035,8 @@ struct flowHostRetriever {
   /* Used by getActiveFlowsStats */
   nDPIStats *ndpi_stats;
   FlowStats *stats;
-
+  std::unordered_map<u_int32_t, std::string> *asn_names;
+  
   /* Paginator */
   Paginator *pag;
 };
@@ -5268,9 +5269,9 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
       // Just in or out interface needs to match
       if ((f->getFlowDeviceIP() != deviceIP) ||
           ((retriever->pag->ifaceIndexFilter(&ifaceIndex) &&
-           f->getFlowDeviceInIndex() != ifaceIndex) &&
-          (retriever->pag->ifaceIndexFilter(&ifaceIndex) &&
-           f->getFlowDeviceOutIndex() != ifaceIndex)))
+	    f->getFlowDeviceInIndex() != ifaceIndex) &&
+	   (retriever->pag->ifaceIndexFilter(&ifaceIndex) &&
+	    f->getFlowDeviceOutIndex() != ifaceIndex)))
         return (false);
     }
 
@@ -5322,26 +5323,29 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
     }
 
     if (retriever->pag && retriever->pag->asnFilter(&asn_filter)) {
-      char *asname = NULL;
+      char *asname;
       u_int32_t src_asn = 0, dst_asn = 0;
-      f->getSrcAS(&src_asn, asname);
-      f->getDstAS(&dst_asn, asname);
+      
+      f->getSrcAS(&src_asn, &asname);
+      f->getDstAS(&dst_asn, &asname);
       if (src_asn != asn_filter && dst_asn != asn_filter)
 	return (false);
     }
 
     if (retriever->pag && retriever->pag->asnSrcFilter(&asn_src_filter)) {
-      char *asname = NULL;
+      char *asname;
       u_int32_t src_asn = 0;
-      f->getSrcAS(&src_asn, asname);
+      
+      f->getSrcAS(&src_asn, &asname);
       if (src_asn != asn_src_filter)
 	return (false);
     }
 
     if (retriever->pag && retriever->pag->asnDstFilter(&asn_dst_filter)) {
-      char *asname = NULL;
+      char *asname;
       u_int32_t dst_asn = 0;
-      f->getDstAS(&dst_asn, asname);
+      
+      f->getDstAS(&dst_asn, &asname);
       if (dst_asn != asn_dst_filter)
 	return (false);
     }
@@ -5525,7 +5529,7 @@ static bool flow_search_walker(GenericHashEntry *h, void *user_data, bool *match
   const TcpInfo *tcp_info;
   u_int32_t prev_actNumEntries = retriever->actNumEntries;
   u_int32_t as = 0;
-  char as_name[64];
+  char *as_name;
 
   if (retriever->actNumEntries >= retriever->maxNumEntries)
     return (true); /* Limit reached - stop iterating */
@@ -5589,15 +5593,15 @@ static bool flow_search_walker(GenericHashEntry *h, void *user_data, bool *match
       retriever->elems[retriever->actNumEntries++].numericValue = f->get_duration();
       break;
     case column_cli_asn:
-      f->getSrcAS(&as, as_name);
+      f->getSrcAS(&as, &as_name);
       retriever->elems[retriever->actNumEntries++].numericValue = as;
       break;
     case column_srv_asn:
-      f->getDstAS(&as, as_name);
+      f->getDstAS(&as, &as_name);
       retriever->elems[retriever->actNumEntries++].numericValue = as;
       break;
     case column_transit_asn:
-      f->getTransitAS(&as);
+      f->getTransitAS(&as, &as_name);
       retriever->elems[retriever->actNumEntries++].numericValue = as;
       break;
     case column_score:
@@ -5862,9 +5866,9 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
     r->elems[r->actNumEntries++].numericValue = Utils::macaddr_int(h->get_mac());
     break;
   case column_mac_location_filter:
-  #ifdef HAVE_NEDGE
+#ifdef HAVE_NEDGE
     r->elems[r->actNumEntries++].numericValue = h_mac ? h_mac->locate() : MacLocation::located_on_unknown_interface;
-  #endif
+#endif
   case column_pool_id:
     r->elems[r->actNumEntries++].numericValue = h->get_host_pool();
     break;
@@ -6444,13 +6448,17 @@ static bool flow_sum_stats(GenericHashEntry *flow, void *user_data,
   Flow *f = (Flow *)flow;
 
   if (flow_matches(f, retriever)) {
+    u_int32_t as;
+    char *as_name;
+    
     if(retriever->host) {
       /* Add this info only in case some filter host is requested */
       stats->updateTalkingHosts(f);
     }
-    if(f->getWLANSSID()) {
+    
+    if(f->getWLANSSID())
       stats->updateWLANSSID(f);
-    }
+    
     retriever->totBytesSent += f->get_bytes_cli2srv();
     retriever->totBytesRcvd += f->get_bytes_srv2cli();
     retriever->totThpt += f->get_bytes_thpt();
@@ -6459,6 +6467,16 @@ static bool flow_sum_stats(GenericHashEntry *flow, void *user_data,
 #endif
     if (!retriever->only_traffic_stats) f->sumStats(ndpi_stats, stats);
 
+    if(retriever->asn_names != NULL) {
+      f->getSrcAS(&as, &as_name);
+      if((as != 0) && (as_name != NULL))
+	(*retriever->asn_names)[as] = std::string(as_name);
+      
+      f->getDstAS(&as, &as_name);
+      if((as != 0) && (as_name != NULL))
+	(*retriever->asn_names)[as] = std::string(as_name);
+    }
+    
     *matched = true;
   }
 
@@ -6470,7 +6488,8 @@ static bool flow_sum_stats(GenericHashEntry *flow, void *user_data,
 void NetworkInterface::getActiveFlowsStats(nDPIStats *ndpi_stats, FlowStats *stats, AddressTree *allowed_hosts,
 					   Host *h, Host *talking_with_host, Host *client, Host *server,
 					   char *flow_info, Paginator *p, lua_State *vm, bool only_traffic_stats) {
-  flowHostRetriever retriever;
+  struct flowHostRetriever retriever;
+  std::unordered_map<u_int32_t, std::string> asn_names;
   u_int32_t begin_slot = 0;
   bool walk_all = true;
 #ifdef NTOPNG_PRO
@@ -6498,7 +6517,8 @@ void NetworkInterface::getActiveFlowsStats(nDPIStats *ndpi_stats, FlowStats *sta
   retriever.only_traffic_stats = only_traffic_stats;
   retriever.observationPointId = getLuaVMUservalue(vm, observationPointId);
   retriever.flow_info = flow_info;
-
+  retriever.asn_names = &asn_names; /* Trick to enable C++ to initialize asn_names */
+  
   walker(&begin_slot, walk_all, walker_flows, flow_sum_stats, &retriever);
 
   lua_newtable(vm);
@@ -6507,6 +6527,17 @@ void NetworkInterface::getActiveFlowsStats(nDPIStats *ndpi_stats, FlowStats *sta
   lua_push_uint64_table_entry(vm, "totBytesSent", retriever.totBytesSent);
   lua_push_uint64_table_entry(vm, "totBytesRcvd", retriever.totBytesRcvd);
 
+  lua_newtable(vm);
+  for(std::unordered_map<u_int32_t, std::string>::iterator it = asn_names.begin(); it != asn_names.end(); ++it) {
+    char buf[16];
+
+    snprintf(buf, sizeof(buf), "%u", it->first);
+    lua_push_str_table_entry(vm, buf, it->second.c_str());
+  }
+  lua_pushstring(vm, "asn_names");
+  lua_insert(vm, -2);
+  lua_settable(vm, -3);
+  
 #ifdef NTOPNG_PRO
   /* Handle the QoE*/
   retriever.qoe->lua_qoe_stats(vm);
@@ -9444,7 +9475,7 @@ static bool find_mac_hosts(GenericHashEntry *h, void *user_data,
   if (host->getMac() == info->m) {
     host->lua(info->vm, NULL /* Already checked */, false, false, false, false, true);
   }
-  
+
   return false; /* false = keep on walking */
 }
 
@@ -11733,7 +11764,7 @@ bool NetworkInterface::compute_client_server_srv_port_flow_stats(GenericHashEntr
 
   if (!matchAggregatedFlow(f, stats))
     return false;
-  
+
   u_int64_t vlan_id = f->get_vlan_id();
   std::unordered_map<u_int64_t, AggregatedFlowsStats *>::iterator it;
   u_int64_t key = (((u_int64_t)f->get_cli_ip_addr()->key()) << 16) +
@@ -11820,63 +11851,63 @@ bool NetworkInterface::compute_client_server_srv_port_app_proto_flow_stats(Gener
 /* **************************************************** */
 
 bool NetworkInterface::compute_host_flow_stats(GenericHashEntry *node,
-								 void *user_data, bool *matched) {
-    Flow *f = (Flow *)node;
-    struct aggregated_stats *stats = (struct aggregated_stats*)user_data;
+					       void *user_data, bool *matched) {
+  Flow *f = (Flow *)node;
+  struct aggregated_stats *stats = (struct aggregated_stats*)user_data;
 
-    if (!matchAggregatedFlow(f, stats))
-        return false;
-    
-    u_int64_t vlan_id = f->get_vlan_id();
-    std::unordered_map<u_int64_t, AggregatedFlowsStats *>::iterator it;
-    u_int64_t cli_key = (((u_int64_t)f->get_cli_ip_addr()->key()) << 32) | ((u_int64_t)vlan_id);
-    u_int64_t srv_key = (((u_int64_t)f->get_srv_ip_addr()->key()) << 32) | ((u_int64_t)vlan_id);
+  if (!matchAggregatedFlow(f, stats))
+    return false;
 
-    // Client
-    it = stats->count.find(cli_key);
+  u_int64_t vlan_id = f->get_vlan_id();
+  std::unordered_map<u_int64_t, AggregatedFlowsStats *>::iterator it;
+  u_int64_t cli_key = (((u_int64_t)f->get_cli_ip_addr()->key()) << 32) | ((u_int64_t)vlan_id);
+  u_int64_t srv_key = (((u_int64_t)f->get_srv_ip_addr()->key()) << 32) | ((u_int64_t)vlan_id);
+
+  // Client
+  it = stats->count.find(cli_key);
+
+  if (it == stats->count.end()) {
+    AggregatedFlowsStats *fs =
+      new (std::nothrow) AggregatedFlowsStats(f->get_cli_ip_addr(), f->get_srv_ip_addr(), f->get_protocol(),
+					      f->get_bytes_cli2srv(), f->get_bytes_srv2cli(), f->getScore());
+
+    if (fs != NULL) {
+      fs->setKey(cli_key);
+      fs->setHost(f->get_cli_ip_addr(), f->get_cli_host());
+      fs->setVlanId(vlan_id);
+      stats->count[cli_key] = fs;
+    }
+  } else {
+    it->second->incFlowStats(f->get_cli_ip_addr(), f->get_srv_ip_addr(),
+			     f->get_bytes_cli2srv(), f->get_bytes_srv2cli(),
+			     f->getScore());
+  }
+
+  // Server, first check if client and server are different, otherwise
+  // in case of the same client/server the stats are going to be incorrect
+  if (cli_key != srv_key) {
+    it = stats->count.find(srv_key);
 
     if (it == stats->count.end()) {
-        AggregatedFlowsStats *fs =
-        new (std::nothrow) AggregatedFlowsStats(f->get_cli_ip_addr(), f->get_srv_ip_addr(), f->get_protocol(),
-                            f->get_bytes_cli2srv(), f->get_bytes_srv2cli(), f->getScore());
+      AggregatedFlowsStats *fs =
+	new (std::nothrow) AggregatedFlowsStats(f->get_cli_ip_addr(), f->get_srv_ip_addr(), f->get_protocol(),
+						f->get_bytes_srv2cli(), f->get_bytes_cli2srv(), f->getScore());
 
-        if (fs != NULL) {
-            fs->setKey(cli_key);
-            fs->setHost(f->get_cli_ip_addr(), f->get_cli_host());
-            fs->setVlanId(vlan_id);
-            stats->count[cli_key] = fs;
-        }
+      if (fs != NULL) {
+	fs->setKey(srv_key);
+	fs->setHost(f->get_srv_ip_addr(), f->get_srv_host());
+	fs->setVlanId(vlan_id);
+	stats->count[srv_key] = fs;
+      }
     } else {
-        it->second->incFlowStats(f->get_cli_ip_addr(), f->get_srv_ip_addr(),
-                    f->get_bytes_cli2srv(), f->get_bytes_srv2cli(),
-                    f->getScore());
+      it->second->incFlowStats(f->get_cli_ip_addr(), f->get_srv_ip_addr(),
+			       f->get_bytes_srv2cli(), f->get_bytes_cli2srv(),
+			       f->getScore());
     }
+  }
+  *matched = true;
 
-    // Server, first check if client and server are different, otherwise
-    // in case of the same client/server the stats are going to be incorrect
-    if (cli_key != srv_key) {
-        it = stats->count.find(srv_key);
-
-        if (it == stats->count.end()) {
-            AggregatedFlowsStats *fs =
-            new (std::nothrow) AggregatedFlowsStats(f->get_cli_ip_addr(), f->get_srv_ip_addr(), f->get_protocol(),
-                                f->get_bytes_srv2cli(), f->get_bytes_cli2srv(), f->getScore());
-
-            if (fs != NULL) {
-                fs->setKey(srv_key);
-                fs->setHost(f->get_srv_ip_addr(), f->get_srv_host());
-                fs->setVlanId(vlan_id);
-                    stats->count[srv_key] = fs;
-            }
-        } else {
-            it->second->incFlowStats(f->get_cli_ip_addr(), f->get_srv_ip_addr(),
-                        f->get_bytes_srv2cli(), f->get_bytes_cli2srv(),
-                        f->getScore());
-        }
-    }
-    *matched = true;
-
-    return (false); /* false = keep on walking */
+  return (false); /* false = keep on walking */
 }
 
 /* **************************************************** */
@@ -11906,7 +11937,7 @@ static bool asc_srv_ip_hex_cmp(AggregatedFlowsStats *a,
 }
 
 static bool asc_host_ip_hex_cmp(AggregatedFlowsStats *a,
-                               AggregatedFlowsStats *b) {
+				AggregatedFlowsStats *b) {
   char a_buf[48], b_buf[48];
   return strcmp(a->getHostIPHex(a_buf, sizeof(a_buf)),
                 b->getHostIPHex(b_buf, sizeof(b_buf))) < 0;
@@ -12291,26 +12322,26 @@ void NetworkInterface::sort_and_filter_flow_stats(lua_State *vm,
 
   case AnalysisCriteria::host:
     {
-        std::unordered_map<u_int64_t, AggregatedFlowsStats *>::iterator it;
+      std::unordered_map<u_int64_t, AggregatedFlowsStats *>::iterator it;
 
-        for (it = stats->count.begin(); it != stats->count.end(); ++it) {
-            // check search
-            bool add = true;
-            if ((search_string)) {
-                // Not null
-                char buf[64];
-                ntop->getTrace()->traceEvent(TRACE_NORMAL, "Checking %s | %s", it->second->getHostName(buf, sizeof(buf)), buf);
-                if (!strcasestr(it->second->getHostName(buf, sizeof(buf)), search_string) &&
-                    !strcasestr(it->second->getHostIP(buf, sizeof(buf)), search_string)) {
-                    // TODO: the search on hostnames for view interface does not work, because
-                    // the hosts instances are not available for the viewed interfaces
-                    add = false;
-                }
-            }
-            if (add) {
-                vector.push_back(it->second);
-            }
-        }
+      for (it = stats->count.begin(); it != stats->count.end(); ++it) {
+	// check search
+	bool add = true;
+	if ((search_string)) {
+	  // Not null
+	  char buf[64];
+	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Checking %s | %s", it->second->getHostName(buf, sizeof(buf)), buf);
+	  if (!strcasestr(it->second->getHostName(buf, sizeof(buf)), search_string) &&
+	      !strcasestr(it->second->getHostIP(buf, sizeof(buf)), search_string)) {
+	    // TODO: the search on hostnames for view interface does not work, because
+	    // the hosts instances are not available for the viewed interfaces
+	    add = false;
+	  }
+	}
+	if (add) {
+	  vector.push_back(it->second);
+	}
+      }
     }
     break;
 
@@ -13336,9 +13367,10 @@ public:
 
   AggregatedASNFlowKey(Flow *f) {
     u_int32_t _src_asn = 0, _dst_asn = 0;
-    char *asName = NULL;
-    f->getSrcAS(&_src_asn, asName);
-    f->getDstAS(&_dst_asn, asName);
+    char *asName;
+    
+    f->getSrcAS(&_src_asn, &asName);
+    f->getDstAS(&_dst_asn, &asName);
 
     ip_protocol_version = f->get_cli_ip_addr()->getVersion();
     src_asn      = _src_asn;
@@ -13420,9 +13452,9 @@ private:
   }
 
 public:
-    u_int32_t first_seen, last_seen;
-    u_int64_t src2dst_bytes, dst2src_bytes;
-    u_int32_t src2dst_packets, dst2src_packets;
+  u_int32_t first_seen, last_seen;
+  u_int64_t src2dst_bytes, dst2src_bytes;
+  u_int32_t src2dst_packets, dst2src_packets;
 
   AggregatedASNFlowValue(Flow *f) {
     first_seen      = f->get_first_seen();

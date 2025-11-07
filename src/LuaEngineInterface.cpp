@@ -4613,8 +4613,7 @@ static int ntop_get_active_flows_stats(lua_State *vm) {
   }
 
   if (curr_iface) {
-    curr_iface->getActiveFlowsStats(
-				    &ndpi_stats, &stats, get_allowed_nets(vm), host, talking_with_host,
+    curr_iface->getActiveFlowsStats(&ndpi_stats, &stats, get_allowed_nets(vm), host, talking_with_host,
 				    client, server, flow_info, p, vm, only_traffic_stats);
   } else
     lua_pushnil(vm);
