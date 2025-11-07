@@ -1083,11 +1083,11 @@ end
 -- ##############################################
 
 function system_config:_enableDisableSmcrouteService(enable_smcroute)
-  local smcroute_service_utils = require "smcroute_service_utils"
+  local smcroute = require "conf_handlers.smcroute"
   if (enable_smcroute) then
-    smcroute_service_utils.startSmcrouteService()
+    smcroute.startSmcrouteService()
   else
-    smcroute_service_utils.stopSmcrouteService()
+    smcroute.stopSmcrouteService()
   end
 end
 
