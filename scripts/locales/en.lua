@@ -6140,7 +6140,7 @@ local lang = {
     ["after_reset_request"] = "<b>Restart</b> %{product} to make the configuration factory reset effective.",
     ["checks"] = "Behavioural Checks",
     ["config_import"] = "Import <span class='item'>{{ type }}</span> Configuration",
-    ["everything"] = "Entire %{product} configuration (includes users, preferences, and all configurations below)",
+    ["everything"] = "Entire %{product} configuration (includes users, preferences, and all configurations below). It is recommended to run this action on a clean intallation only (or after a Factory Reset).",
     ["export_policy"] = "Export nProbe IPS Policy",
     ["infrastructure_instances"] = "Infrastructure Instances",
     ["manage_configuration"] = "Manage Configurations",
