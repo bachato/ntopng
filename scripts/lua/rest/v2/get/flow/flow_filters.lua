@@ -150,6 +150,14 @@ local application_filters = {
 
 local ndpicatstats = flowstats["ndpi_categories"]
 local tmp_list = {}
+local max_asn_len = 32
+
+local function formatASN(asn, asn_cache)
+   local name = shortenString(asn_cache[asn] or "", max_asn_len)
+
+   return(string.format("%d (%s)", asn, name))
+end
+
 for key, value in pairs(ndpicatstats) do
    local name = getCategoryLabel(key, value.category)
    tmp_list[name] = {
@@ -433,7 +441,7 @@ if (not isEmptyString(asn)) then
       {
 	 key = "asn",
 	 value = asn,
-	 label = flowstats.asn_names[asn] or ""
+	 label = formatASN(asn, flowstats.asn_names)
       }
    }
    rsp[#rsp + 1] = {
@@ -451,7 +459,7 @@ if flowstats["src_asn"] and table.len(flowstats["src_asn"]) > 0 then
 
    for as_num, count in pairsByKeys(flowstats["src_asn"], asc) do
       if tonumber(as_num) and tonumber(as_num) > 0 then
-	 local as_label = format_utils.formatASN(tonumber(as_num))
+	 local as_label = formatASN(as_num, flowstats.asn_names)
 	 tmp_list[as_label] = {
 	    key = "src_asn",
 	    value = as_num,
@@ -482,7 +490,7 @@ if flowstats["dst_asn"] and table.len(flowstats["dst_asn"]) > 0 then
 
    for as_num, count in pairsByKeys(flowstats["dst_asn"], asc) do
       if tonumber(as_num) and tonumber(as_num) > 0 then
-	 local as_label = format_utils.formatASN(tonumber(as_num))
+	 local as_label = formatASN(as_num, flowstats.asn_names)
 	 tmp_list[as_label] = {
 	    key = "dst_asn",
 	    value = as_num,
