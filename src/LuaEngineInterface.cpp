@@ -1969,7 +1969,7 @@ static int ntop_append_mac_event(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
   char *mac, *event_message;
   u_int32_t _mac[6];
-  
+
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
     return(ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   else
@@ -1984,12 +1984,12 @@ static int ntop_append_mac_event(lua_State *vm) {
       || (!mac)
       || (!event_message)
       || (!sscanf(mac, "%02X:%02X:%02X:%02X:%02X:%02X", &_mac[0], &_mac[1],
-		  &_mac[2], &_mac[3], &_mac[4], &_mac[5])))    
+		  &_mac[2], &_mac[3], &_mac[4], &_mac[5])))
     return(ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   else {
     Mac *m;
     u_int8_t maca[6];
-    
+
     for(int i = 0; i < 6; i++) maca[i] = (u_int8_t)_mac[i];
 
     m = curr_iface->getMac(maca, false /* create_if_not_present */, false /* is_inline_call*/);
@@ -1999,7 +1999,7 @@ static int ntop_append_mac_event(lua_State *vm) {
     else
       m->logMacEvent(event_message);
   }
-  
+
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 #endif
@@ -2010,7 +2010,7 @@ static int ntop_get_interface_mac_hosts(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
   char *mac = NULL;
   bool verbose = false;
-  
+
   if (lua_type(vm, 1) == LUA_TSTRING)  mac = (char *)lua_tostring(vm, 1);
   if (lua_type(vm, 2) == LUA_TBOOLEAN) verbose = (bool)lua_toboolean(vm, 2);
 
@@ -5725,7 +5725,7 @@ static int ntop_exec_in_memory_sql_query(lua_State *vm) {
     db->execSQLQuery(vm, sql, false, false);
 
   // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", sql);
-  
+
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
@@ -5855,27 +5855,29 @@ static int ntop_interface_trigger_traffic_alert(lua_State *vm) {
 /* **************************************************************** */
 
 static int ntop_update_ranking(lua_State *vm) {
-  char *key, *values;
-  u_int32_t epoch;
-  NetworkInterface *curr_iface = getCurrentInterface(vm);
 #ifdef NTOPNG_PRO
+  u_int32_t epoch;
+  char *key, *values;
+  NetworkInterface *curr_iface = getCurrentInterface(vm);
+
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
   else
     epoch = (u_int32_t)lua_tonumber(vm, 1);
-	     
+
   if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
   else
     key = (char*)lua_tostring(vm, 2);
-  
+
   if (ntop_lua_check(vm, __FUNCTION__, 3, LUA_TSTRING) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
   else
     values = (char*)lua_tostring(vm, 3);
 
   curr_iface->updateRanking(vm, epoch, key, values);
-#endif  
+#endif
+
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
@@ -6059,7 +6061,7 @@ static luaL_Reg _ntop_interface_reg[] = {
 #ifdef HAVE_NEDGE
   { "appendMacEvent", ntop_append_mac_event },
 #endif
-  
+
   /* Anomalies */
   { "getAnomalies", ntop_get_interface_anomalies },
 
