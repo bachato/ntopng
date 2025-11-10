@@ -91,7 +91,7 @@ For example:
 
 .. code:: bash 
 
-    ./ntopng -F "clickhouse;127.0.0.1@9440s;ntopng;default;default`
+    ./ntopng -F "clickhouse;127.0.0.1@9000,9440s;ntopng;default;default`
 
 Securing the Connection in ClickHouse Cloud
 ===========================================
