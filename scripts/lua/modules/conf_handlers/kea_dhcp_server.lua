@@ -5,6 +5,7 @@
 local sys_utils = require "sys_utils"
 local json = require "dkjson"
 
+local KEA_CONF_PATH = "/etc/kea/kea-dhcp4.conf"
 local KEA_CONF_EXT_PATH = "/etc/ntopng/kea-dhcp4-ext.conf"
 
 local kea_dhcp_server = {}
@@ -203,21 +204,32 @@ function kea_dhcp_server.writeDhcpServerConfiguration(dhcp_config, all_interface
     end
   end
 
-  -- Write the Kea DHCP4 configuration file in JSON format
-  local f = sys_utils.openFile("/etc/kea/kea-dhcp4.conf", "w")
-  if not f then
-    traceError(TRACE_ERROR, TRACE_CONSOLE, "Cannot open /etc/kea/kea-dhcp4.conf for writing")
-    return false
+  -- Create backup of existing configuration if it doesn't exist
+  local KEA_CONF_BKP_PATH = KEA_CONF_PATH .. ".bkp"
+  if sys_utils.file_exists(KEA_CONF_PATH) and 
+     not sys_utils.file_exists(KEA_CONF_BKP_PATH) then
+    -- Copy the existing configuration to backup
+    local result = os.execute("cp " .. KEA_CONF_PATH .. " " .. KEA_CONF_BKP_PATH)
+    if result ~= 0 then
+      traceError(TRACE_WARNING, TRACE_CONSOLE, "Failed to create backup of " .. KEA_CONF_PATH)
+    end
   end
 
   local json_str = json.encode(kea_config, { indent = true })
   if not json_str then
     traceError(TRACE_ERROR, TRACE_CONSOLE, "Failed to encode Kea configuration to JSON")
-    f:close()
+    return false
+  end
+
+  -- Write the Kea DHCP4 configuration file in JSON format
+  local f = sys_utils.openFile(KEA_CONF_PATH, "w")
+  if not f then
+    traceError(TRACE_ERROR, TRACE_CONSOLE, "Cannot open " .. KEA_CONF_PATH .. " for writing")
     return false
   end
 
   f:write(json_str)
+
   f:close()
 
   return true
