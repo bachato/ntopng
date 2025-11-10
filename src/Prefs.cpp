@@ -1113,12 +1113,9 @@ void Prefs::reloadPrefsFromRedis() {
 
 #ifdef NTOPNG_PRO
   // reset value
-#if 1
-  asset_inventory_enabled = false; /* FIX */
-#else
+  /* TODO: add a preference in the prefs page */
   asset_inventory_enabled = getDefaultPrefsValue(CONST_PREFS_ASSET_INVENTORY_ENABLED,
 						 CONST_DEFAULT_ASSET_INVENTORY_ENABLED);
-#endif
   snmp_trap_enabled = getDefaultPrefsValue(CONST_PREFS_SNMP_TRAP_ENABLED,
 					   CONST_DEFAULT_SNMP_TRAP_ENABLED);
 #endif

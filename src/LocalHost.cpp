@@ -231,7 +231,6 @@ void LocalHost::periodic_stats_update(const struct timeval *tv, bool force_updat
     /* If at least CONST_ASSETS_PERIODIC_UPDATE are past and the map was updated, dump the info */
     float diff = Utils::msTimevalDiff(tv, &last_periodic_asset_update) / 1000; /* in Sec */
     Mac *cur_mac = getMac();
-
     if(cur_mac) asset_map_updated |= cur_mac->isAssetUpdated();
 
     if ((diff > CONST_ASSETS_PERIODIC_UPDATE) && asset_map_updated) {

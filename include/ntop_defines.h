@@ -830,7 +830,7 @@
 #define CONST_PREFS_ASSET_INVENTORY_ENABLED \
   NTOPNG_PREFS_PREFIX ".toggle_asset_inventory" // same name as lua prefs.lua
 #define CONST_DEFAULT_ASSET_INVENTORY_ENABLED \
-  0  // disabled by default
+  1  // enabled by default
 
 #define CONST_PREFS_SNMP_TRAP_ENABLED \
   NTOPNG_PREFS_PREFIX ".toggle_snmp_trap" // same name as lua prefs.lua
