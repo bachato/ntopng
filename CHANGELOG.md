@@ -36,16 +36,12 @@
 - Add more detailed flow exporter IP flow layout
 
 ## Changes
-- Replace ISC DHCP server with Kea DHCP server
 - Remove pre-NAT information display from flows and statistics
 - Rework exporters and probes statistics implementation
 - Unify all exporters interfaces pages
-- Move DHCP server functions to dedicated modules (dhcp_utils, isc_dhcp_server, kea_dhcp_server)
-- Merge smcroute_service_utils and smcroute modules
 - Rework flow collection with better probe/exporter/interface tracking
 - Change timeseries charts to stacked mode for better visualization
 - Remove VLAN 0 from various displays
-- Rework nedge shapers configuration for simplicity
 - Change MAC address formatting for consistency
 - Update flow aggregation with new aggregation functions
 - Add support for arbitrary nDPI protocol IDs in shapers
@@ -91,6 +87,7 @@
 - Add support for DHCP active leases pagination
 - Fix captive portal issues
 - Enhance traffic accounting for nEdge interfaces
+- Rework nedge shapers configuration (simplified)
 
 #### ntopng 6.4 (April 2025)
 
