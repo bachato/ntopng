@@ -5,6 +5,14 @@ For more information about howto use ClickHouse in ntopng please see
 # Usage Recommendations
 We recommend you to [read this document](https://clickhouse.com/docs/en/operations/tips), in particular, if your system has limited resources such as memory and disk
 
+# Data Retention on Large Deployments
+When ntopng enforces retetion by deleting old data, it drops partitions that fall outside of the retentiong window. As clickhouse has restrictions on dropping data, retention won't happen if that amount of data to drop exceeds the configured maximum. In order to avoid this problem we recommend you to make sure that the ```/etc/clickhouse-server/config.xml``` file contains the following line
+
+```
+<max_partition_size_to_drop>0</max_partition_size_to_drop>
+```
+
+Once you have modified the above file, don't forget to restart clickhouse-server.
 
 # Clickhouse Is Eating All My Disk/Memory
 You can instruct ntopng to limit disk space usage by setting data retention in preferences to a low value. By default we store 30 days but that can take a lot of disk space on large networks In this case you can reduce it a bit (e.g. to 7 days).
