@@ -7,7 +7,7 @@ package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 
 require "lua_utils"
 
-fname = "ndpi_protocols.txt"
+fname = "ndpi_application_protocols.txt"
 
 sendHTTPContentTypeHeader('text/plain', 'attachment; filename="'..fname..'"')
 interface.dumpnDPIProtocolId()

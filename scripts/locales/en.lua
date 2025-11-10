@@ -1,7 +1,5 @@
 local lang = {
    ["abort"] = "Abort",
-   ["download_applications"] = "Download nDPI Applications",
-   ["download_categories"] = "Download nDPI Categories",
    ["access_control_list"] = "Access Control List",
    ["acknowledge"] = "Acknowledge",
    ["acknowledge_alerts"] = "Acknowledge Alerts",
@@ -275,6 +273,8 @@ local lang = {
    ["download_icon"] = "<i class='fas fa-arrow-down'></i>",
    ["download_x"] = "%{what} Download",
    ["downloaders"] = "Download Volume",
+   ["download_applications"] = "Download Applications",
+   ["download_categories"] = "Download Categories",
    ["drilldown"] = "Drilldown",
    ["drop_reason"] = {
       ["user_action"] = "User Action",
