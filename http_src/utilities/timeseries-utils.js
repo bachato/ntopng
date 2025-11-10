@@ -45,7 +45,7 @@ function splitTsArrayStacked(tsOptionsArray, tsGroupsArray) {
 	let tsOptionsArrayNotStacked = [];
 	let tsGroupsArrayNotStacked = [];
 	tsGroupsArray.forEach((tsGroup, i) => {
-		if (tsGroup.metric.draw_stacked == true) {
+		if (tsGroup.metric?.draw_stacked == true) {
 			tsOptionsArrayStacked.push(tsOptionsArray[i]);
 			tsGroupsArrayStacked.push(tsGroup);
 		} else {
