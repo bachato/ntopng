@@ -5,6 +5,16 @@ local driver = {}
 
 local os_utils = require("os_utils")
 local ts_common = require("ts_common")
+local snmp_utils = nil
+local snmp_cached_dev = nil
+
+if ntop.isEnterprise() then
+    local dirs = ntop.getDirs()
+    package.path = dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" ..
+                       package.path
+    snmp_utils = require "snmp_utils"
+    snmp_cached_dev = require "snmp_cached_dev"
+end
 
 require("rrd_paths")
 
@@ -202,7 +212,8 @@ local function getConsolidationFunction(schema)
         return (aggregation_to_consolidation[fn])
     end
 
-     traceError(TRACE_ERROR, TRACE_CONSOLE, "unknown aggregation function: %s", fn)
+    traceError(TRACE_ERROR, TRACE_CONSOLE, "unknown aggregation function: %s",
+               fn)
 
     return ("AVERAGE")
 end
@@ -980,18 +991,15 @@ function driver:timeseries_top(options, top_tags)
 
     for top_item, value in pairsByValues(available_items, rev) do
         if value > 0 then
-            package.path =
-                dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" ..
-                    package.path
-            local snmp_utils = require "snmp_utils"
-            local snmp_cached_dev = require "snmp_cached_dev"
-            local cached_device = snmp_cached_dev:create(options.tags.device)
-            local ifindex = available_tags[top_item][1].if_index or
-                                available_tags[top_item][1].port
-            local ext_label = nil
-            if cached_device then
-                ext_label = snmp_utils.get_snmp_interface_label(
-                                cached_device["interfaces"][ifindex])
+            if snmp_utils and snmp_cached_dev then
+                local cached_device = snmp_cached_dev:create(options.tags.device)
+                local ifindex = available_tags[top_item][1].if_index or
+                                    available_tags[top_item][1].port
+                local ext_label = nil
+                if cached_device then
+                    ext_label = snmp_utils.get_snmp_interface_label(
+                                    cached_device["interfaces"][ifindex])
+                end
             end
             if isEmptyString(ext_label) then ext_label = ifindex end
             -- Special case, top protocol timeseries, here the ext_label needs to be the protocol
