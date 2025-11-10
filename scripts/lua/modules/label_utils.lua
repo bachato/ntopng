@@ -504,16 +504,17 @@ end
 -- ##############################################
 
 function getFullVlanName(vlan_id, compact, return_untagged)
-    local alias = getVlanAlias(vlan_id)
-
     -- In case of vlan 0, return empty string as name
     -- fix for untagged vlan (#7998)
+    -- Also do not check redis in case of vlan 0
     if tonumber(vlan_id) == 0 then
         if (return_untagged) then
             return i18n('no_vlan')
         end
         return ''
     end
+
+    local alias = getVlanAlias(vlan_id)
 
     if not isEmptyString(alias) then
         if not isEmptyString(alias) and alias ~= tostring(vlan_id) then

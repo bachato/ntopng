@@ -8,35 +8,53 @@ local throughput_type = getThroughputType()
 local now = os.time()
 
 function vlan2record(ifId, vlan)
-   local record = {}
-   record["key"] = tostring(vlan["vlan_id"])
+    local record = {}
+    record["key"] = tostring(vlan["vlan_id"])
 
-   local vlan_link = "<A HREF='"..ntop.getHttpPrefix()..'/lua/hosts_stats.lua?vlan='..vlan["vlan_id"].."' title='VLAN "..vlan["vlan_id"].."'>"..getFullVlanName(vlan["vlan_id"],false,true)..'</A>'
-   vlan_link = vlan_link .. " <A HREF='" .. ntop.getHttpPrefix() .. "/lua/vlan_details.lua?vlan=" .. vlan["vlan_id"] .. "&page=config" .. "'><i class='fas fa-cog fa-sm'></i></A>"
-   record["column_vlan"] = vlan_link
+    local vlan_link = "<A HREF='" .. ntop.getHttpPrefix() ..
+                          '/lua/hosts_stats.lua?vlan=' .. vlan["vlan_id"] ..
+                          "' title='VLAN " .. vlan["vlan_id"] .. "'>" ..
+                          getFullVlanName(vlan["vlan_id"], false, true) ..
+                          '</A>'
+    if record["key"] ~= "0" then
+        vlan_link = vlan_link .. " <A HREF='" .. ntop.getHttpPrefix() ..
+                        "/lua/vlan_details.lua?vlan=" .. vlan["vlan_id"] ..
+                        "&page=config" ..
+                        "'><i class='fas fa-cog fa-sm'></i></A>"
+    end
+    record["column_vlan"] = vlan_link
 
-   record["column_score"] = vlan["score"] > 0 and format_utils.formatValue(vlan["score"]) or ''
-   record["column_hosts"] = format_utils.formatValue(vlan["num_hosts"])
-   record["column_since"] = secondsToTime(now - vlan["seen.first"] + 1)
+    record["column_score"] = vlan["score"] > 0 and
+                                 format_utils.formatValue(vlan["score"]) or ''
+    record["column_hosts"] = format_utils.formatValue(vlan["num_hosts"])
+    record["column_since"] = secondsToTime(now - vlan["seen.first"] + 1)
 
-   local sent2rcvd = round((vlan["bytes.sent"] * 100) / (vlan["bytes.sent"] + vlan["bytes.rcvd"]), 0)
-   record["column_breakdown"] = "<div class='progress'><div class='progress-bar bg-warning' style='width: "
-      .. sent2rcvd .."%;'>Sent</div><div class='progress-bar bg-success' style='width: " .. (100-sent2rcvd) .. "%;'>Rcvd</div></div>"
+    local sent2rcvd = round((vlan["bytes.sent"] * 100) /
+                                (vlan["bytes.sent"] + vlan["bytes.rcvd"]), 0)
+    record["column_breakdown"] =
+        "<div class='progress'><div class='progress-bar bg-warning' style='width: " ..
+            sent2rcvd ..
+            "%;'>Sent</div><div class='progress-bar bg-success' style='width: " ..
+            (100 - sent2rcvd) .. "%;'>Rcvd</div></div>"
 
-   if(throughput_type == "pps") then
-      record["column_thpt"] = pktsToSize(vlan["throughput_pps"])
-   else
-      record["column_thpt"] = bitsToSize(8*vlan["throughput_bps"])
-   end
+    if (throughput_type == "pps") then
+        record["column_thpt"] = pktsToSize(vlan["throughput_pps"])
+    else
+        record["column_thpt"] = bitsToSize(8 * vlan["throughput_bps"])
+    end
 
-   record["column_traffic"] = bytesToSize(vlan["bytes.sent"] + vlan["bytes.rcvd"])
+    record["column_traffic"] = bytesToSize(
+                                   vlan["bytes.sent"] + vlan["bytes.rcvd"])
 
-   record["column_chart"] = ""
+    record["column_chart"] = ""
 
-   if areVlanTimeseriesEnabled(ifId) then
-      record["column_chart"] = '<A HREF="'..ntop.getHttpPrefix()..'/lua/vlan_details.lua?vlan='..vlan["vlan_id"]..'&page=historical"><i class=\'fas fa-chart-area fa-lg\'></i></A>'
-   end
+    if areVlanTimeseriesEnabled(ifId) then
+        record["column_chart"] = '<A HREF="' .. ntop.getHttpPrefix() ..
+                                     '/lua/vlan_details.lua?vlan=' ..
+                                     vlan["vlan_id"] ..
+                                     '&page=historical"><i class=\'fas fa-chart-area fa-lg\'></i></A>'
+    end
 
-   return record
+    return record
 end
 
