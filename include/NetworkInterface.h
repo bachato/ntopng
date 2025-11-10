@@ -1442,6 +1442,9 @@ public:
   bool updateRanking(lua_State *vm, u_int32_t epoch, char *key, char *values);
 #endif
   inline bool hasMACs() { return(macs_hash); }
+
+  void nDPIDumpHostBasedProtocols(struct mg_connection *mg_conn);
+  void nDPIDumpHostBasedCategories(struct mg_connection *mg_conn);      
 };
 
 #endif /* _NETWORK_INTERFACE_H_ */

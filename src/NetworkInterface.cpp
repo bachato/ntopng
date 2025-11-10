@@ -5036,7 +5036,7 @@ struct flowHostRetriever {
   nDPIStats *ndpi_stats;
   FlowStats *stats;
   std::unordered_map<u_int32_t, std::string> *asn_names;
-  
+
   /* Paginator */
   Paginator *pag;
 };
@@ -5325,7 +5325,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
     if (retriever->pag && retriever->pag->asnFilter(&asn_filter)) {
       char *asname;
       u_int32_t src_asn = 0, dst_asn = 0;
-      
+
       f->getSrcAS(&src_asn, &asname);
       f->getDstAS(&dst_asn, &asname);
       if (src_asn != asn_filter && dst_asn != asn_filter)
@@ -5335,7 +5335,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
     if (retriever->pag && retriever->pag->asnSrcFilter(&asn_src_filter)) {
       char *asname;
       u_int32_t src_asn = 0;
-      
+
       f->getSrcAS(&src_asn, &asname);
       if (src_asn != asn_src_filter)
 	return (false);
@@ -5344,7 +5344,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
     if (retriever->pag && retriever->pag->asnDstFilter(&asn_dst_filter)) {
       char *asname;
       u_int32_t dst_asn = 0;
-      
+
       f->getDstAS(&dst_asn, &asname);
       if (dst_asn != asn_dst_filter)
 	return (false);
@@ -6450,15 +6450,15 @@ static bool flow_sum_stats(GenericHashEntry *flow, void *user_data,
   if (flow_matches(f, retriever)) {
     u_int32_t as;
     char *as_name;
-    
+
     if(retriever->host) {
       /* Add this info only in case some filter host is requested */
       stats->updateTalkingHosts(f);
     }
-    
+
     if(f->getWLANSSID())
       stats->updateWLANSSID(f);
-    
+
     retriever->totBytesSent += f->get_bytes_cli2srv();
     retriever->totBytesRcvd += f->get_bytes_srv2cli();
     retriever->totThpt += f->get_bytes_thpt();
@@ -6471,12 +6471,12 @@ static bool flow_sum_stats(GenericHashEntry *flow, void *user_data,
       f->getSrcAS(&as, &as_name);
       if((as != 0) && (as_name != NULL))
 	(*retriever->asn_names)[as] = std::string(as_name);
-      
+
       f->getDstAS(&as, &as_name);
       if((as != 0) && (as_name != NULL))
 	(*retriever->asn_names)[as] = std::string(as_name);
     }
-    
+
     *matched = true;
   }
 
@@ -6518,7 +6518,7 @@ void NetworkInterface::getActiveFlowsStats(nDPIStats *ndpi_stats, FlowStats *sta
   retriever.observationPointId = getLuaVMUservalue(vm, observationPointId);
   retriever.flow_info = flow_info;
   retriever.asn_names = &asn_names; /* Trick to enable C++ to initialize asn_names */
-  
+
   walker(&begin_slot, walk_all, walker_flows, flow_sum_stats, &retriever);
 
   lua_newtable(vm);
@@ -6537,7 +6537,7 @@ void NetworkInterface::getActiveFlowsStats(nDPIStats *ndpi_stats, FlowStats *sta
   lua_pushstring(vm, "asn_names");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
-  
+
 #ifdef NTOPNG_PRO
   /* Handle the QoE*/
   retriever.qoe->lua_qoe_stats(vm);
@@ -13368,7 +13368,7 @@ public:
   AggregatedASNFlowKey(Flow *f) {
     u_int32_t _src_asn = 0, _dst_asn = 0;
     char *asName;
-    
+
     f->getSrcAS(&_src_asn, &asName);
     f->getDstAS(&_dst_asn, &asName);
 
@@ -13589,3 +13589,23 @@ void NetworkInterface::incStats(bool ingressPacket, time_t when, u_int16_t eth_p
   if(src_mac) src_mac->incSentStats(when, 1, pkt_len);
   if(dst_mac) dst_mac->incRcvdStats(when, 1, pkt_len);
 };
+
+/* **************************************************** */
+
+static void hash_walker(char *key, u_int64_t value, void *data) {
+  struct mg_connection *mg_conn = (struct mg_connection*)data;
+
+  mg_printf(mg_conn, "%s\t%llu\n", key, (unsigned long long)value);
+}
+
+/* Dumps protocolId of nDPI protocols defined with hostnames */
+void NetworkInterface::nDPIDumpHostBasedProtocols(struct mg_connection *mg_conn) {
+  ndpi_dump_host_based_protocol_id(ndpi_struct, hash_walker, (void*)mg_conn);
+}
+
+/* **************************************************** */
+
+/* Dumps categoryId of nDPI protocols defined with hostnames */
+void NetworkInterface::nDPIDumpHostBasedCategories(struct mg_connection *mg_conn) {
+  ndpi_dump_host_based_category_id(ndpi_struct, hash_walker, (void*)mg_conn);
+}

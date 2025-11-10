@@ -5683,6 +5683,37 @@ static int ntop_clickhouse_archive_data(lua_State *vm) {
 
 /* ****************************************** */
 
+static int ntop_dump_host_based_protocol_id(lua_State *vm) {
+  NetworkInterface *curr_iface = getLuaVMUserdata(vm, iface);
+  struct mg_connection *conn = getLuaVMUserdata(vm, conn);
+  
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (curr_iface && conn)
+    curr_iface->nDPIDumpHostBasedProtocols(conn);
+
+  lua_pushnil(vm);
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+/* ****************************************** */
+
+static int ntop_dump_host_based_category_id(lua_State *vm) {
+  NetworkInterface *curr_iface = getLuaVMUserdata(vm, iface);
+  struct mg_connection *conn = getLuaVMUserdata(vm, conn);
+  
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (curr_iface && conn)
+    curr_iface->nDPIDumpHostBasedCategories(conn);
+
+  lua_pushnil(vm);
+  
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_swap_hostname_ip_cache(lua_State *vm) {
   NetworkInterface *curr_iface = getLuaVMUserdata(vm, iface);
 
@@ -5940,6 +5971,8 @@ static luaL_Reg _ntop_interface_reg[] = {
   { "getnDPIProtoBreed", ntop_get_ndpi_protocol_breed },
   { "getnDPIProtocols", ntop_get_ndpi_protocols },
   { "getnDPICategories", ntop_get_ndpi_categories },
+  { "dumpnDPIProtocolId", ntop_dump_host_based_protocol_id },
+  { "dumpnDPICategoryId", ntop_dump_host_based_category_id },  
   { "getHostsInfo", ntop_get_interface_hosts_info },
   { "getLocalHostsInfo", ntop_get_interface_local_hosts_info },
   { "getLocalHostsInfoNoTX", ntop_get_interface_local_hosts_no_tx_info },
