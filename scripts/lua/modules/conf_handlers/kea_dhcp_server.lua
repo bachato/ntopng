@@ -5,6 +5,8 @@
 local sys_utils = require "sys_utils"
 local json = require "dkjson"
 
+local KEA_CONF_EXT_PATH = "/etc/ntopng/kea-dhcp4-ext.conf"
+
 local kea_dhcp_server = {}
 kea_dhcp_server.service_name = "kea-dhcp4-server"
 
@@ -181,6 +183,23 @@ function kea_dhcp_server.writeDhcpServerConfiguration(dhcp_config, all_interface
       -- Parse and convert ISC format options to Kea JSON format
       -- This is a simplified version and may need enhancement
       -- depending on the specific option format used
+    end
+  end
+
+  -- Check for external configuration file and merge if present
+  local ext_config_f = sys_utils.openFile(KEA_CONF_EXT_PATH, "r")
+  if ext_config_f then
+    local ext_config_json = ext_config_f:read("*all")
+    ext_config_f:close()
+
+    if not isEmptyString(ext_config_json) then
+      local ext_config, pos, err = json.decode(ext_config_json)
+      if ext_config then
+        -- Merge external configuration with generated configuration
+        kea_config = table.merge(kea_config, ext_config)
+      else
+        traceError(TRACE_WARNING, TRACE_CONSOLE, "Failed to parse " .. KEA_CONF_EXT_PATH .. ": " .. (err or "unknown error"))
+      end
     end
   end
 
