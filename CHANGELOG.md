@@ -1,5 +1,97 @@
 # Changelog
 
+#### ntopng 6.6 (November 2025)
+
+## Breakthroughs
+- New Autonomous Systems Dashboards, Sankeys, and comprehensive AS statistics
+- Enhanced flow exporters and probes statistics with dedicated pages
+- Improved SNMP devices import/export
+- Major flow collection code rework and optimizations
+- Native support for ClickHouse Cloud with SSL connections
+- Direct flows dump mode for real-time ClickHouse export
+
+## Improvements
+- Add comprehensive AS ranking detection and alerting with configurable thresholds
+- Implement ASN traffic rules for better AS-level traffic management
+- Enhance ASN live flow aggregation
+- Add conditional ASN aggregation type based on ASN mode
+- Add ASN alerts to alert system
+- Add Transit Only AS filter and tables
+- Add flow exporter/probe statistics with dedicated interfaces and exporters pages
+- Optimize SNMP polling by removing unnecessary double polling on system and interfaces
+- Add SNMP interface roles (core, distribution, access, etc.) for better network topology visualization
+- Implement SNMP devices CSV import/export with SNMPv3 support
+- Enhance asset inventory with SNMP Bridge MIB integration
+- Optimize SNMP caching and interface name lookup
+- Improve ClickHouse connection handling with SSL/TLS support for ClickHouse Cloud
+- Optimize exporters/probes statistics with better data structures and reduced memory footprint
+- Add support for nProbe Source ID (NPROBE_SOURCE_ID) custom field
+- Implement --direct-flows-dump option to dump flows directly when collected
+- Improve historical flow filtering and export capabilities
+- Add throughput charts based on interface probe stats
+- Improve Redis operations with optimized caching
+- Add safety checks across flow collection and statistics code
+- Optimize Host Pools with support for up to 4096 pools
+- Improve packet dumper for traffic extraction
+- Add more detailed flow exporter IP flow layout
+
+## Changes
+- Replace ISC DHCP server with Kea DHCP server
+- Remove pre-NAT information display from flows and statistics
+- Rework exporters and probes statistics implementation
+- Unify all exporters interfaces pages
+- Move DHCP server functions to dedicated modules (dhcp_utils, isc_dhcp_server, kea_dhcp_server)
+- Merge smcroute_service_utils and smcroute modules
+- Rework flow collection with better probe/exporter/interface tracking
+- Change timeseries charts to stacked mode for better visualization
+- Remove VLAN 0 from various displays
+- Rework nedge shapers configuration for simplicity
+- Change MAC address formatting for consistency
+- Update flow aggregation with new aggregation functions
+- Add support for arbitrary nDPI protocol IDs in shapers
+- Remove obsolete code and cleanup
+
+## Fixes
+- Fix SNMP interface name not correctly displayed
+- Fix historical flow filters and export functionality
+- Fix exporter interfaces statistics not working correctly
+- Fix traffic rules modal size and resource loading
+- Fix past timeseries not working correctly when opening pages
+- Fix host pools timeseries charts
+- Fix host location sorting and filtering in nEdge
+- Fix nedge footer and interface issues
+- Fix flow historical filters and labels
+- Fix download records in historical flows
+- Fix traffic profile edit modal
+- Fix various issues with asset queries and visualization
+- Fix clickhouse flow export date and retention
+- Fix server ports formatting
+- Fix hidden hosts not working correctly
+- Fix active monitoring RTT and throughput checks
+- Fix clickhouse connection timeout handling
+- Fix policy test from system interface
+- Fix DHCP leases page for nEdge
+- Fix traffic profiles page glitches
+- Fix various nedge host sorting issues
+- Fix historical flow incorrect labels and columns
+
+## nEdge
+- Dynamic blacklist support
+- Add dynamic blacklist support with per-user/pool configuration
+- Implement nEdge policy violation check
+- Add toggle to block blacklisted flows
+- Add max flow size configuration
+- Improve multicast/broadcast forwarding configuration
+- Fix inter-LAN filtering rules page
+- Add Kea DHCP server support (in addition to ISC DHCP server)
+- Improve DHCP leases visualization with Vue.js
+- Add packet dump support for nEdge
+- Fix location-based filtering and sorting
+- Improve quotas reset functionality
+- Add support for DHCP active leases pagination
+- Fix captive portal issues
+- Enhance traffic accounting for nEdge interfaces
+
 #### ntopng 6.4 (April 2025)
 
 ## Breakthroughs
