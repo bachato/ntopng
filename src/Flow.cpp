@@ -547,13 +547,13 @@ Flow::~Flow() {
     tcp = NULL;
   }
 
-  if(c_mac && (!c_mac_updated)) {
+  if(iface->hasMACs() && c_mac && (!c_mac_updated)) {
     char buf[256];
 
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Client MAC not updated %s", print(buf, sizeof(buf)));
   }
 
-  if(s_mac && (!s_mac_updated)) {
+  if(iface->hasMACs() && s_mac && (!s_mac_updated)) {
     char buf[256];
 
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Server MAC not updated %s", print(buf, sizeof(buf)));
