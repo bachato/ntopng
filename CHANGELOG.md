@@ -5,7 +5,7 @@
 ## Breakthroughs
 - New Autonomous Systems Dashboards, Sankeys, and comprehensive AS statistics
 - Enhanced flow exporters and probes statistics with dedicated pages
-- Improved SNMP devices import/export
+- Improved SNMP devices polling
 - Major flow collection code rework and optimizations
 - Native support for ClickHouse Cloud with SSL connections
 - Direct flows dump mode for real-time ClickHouse export
@@ -16,6 +16,7 @@
 - Enhance ASN live flow aggregation
 - Add conditional ASN aggregation type based on ASN mode
 - Add ASN alerts to alert system
+- Optimized SNMP access to interface names
 - Add Transit Only AS filter and tables
 - Add flow exporter/probe statistics with dedicated interfaces and exporters pages
 - Optimize SNMP polling by removing unnecessary double polling on system and interfaces
@@ -34,6 +35,9 @@
 - Optimize Host Pools with support for up to 4096 pools
 - Improve packet dumper for traffic extraction
 - Add more detailed flow exporter IP flow layout
+- Add support for other HTTP methods other than GET/POST; also reworked/simplified code
+- Improved chart visualization
+- Improved slightly visualization on mobile
 
 ## Changes
 - Remove pre-NAT information display from flows and statistics
@@ -46,6 +50,7 @@
 - Update flow aggregation with new aggregation functions
 - Add support for arbitrary nDPI protocol IDs in shapers
 - Remove obsolete code and cleanup
+- Disabled various functionalities in ASN Mode
 
 ## Fixes
 - Fix SNMP interface name not correctly displayed
@@ -62,6 +67,7 @@
 - Fix various issues with asset queries and visualization
 - Fix clickhouse flow export date and retention
 - Fix server ports formatting
+- Fix several menu not correctly mapped
 - Fix hidden hosts not working correctly
 - Fix active monitoring RTT and throughput checks
 - Fix clickhouse connection timeout handling
@@ -70,6 +76,11 @@
 - Fix traffic profiles page glitches
 - Fix various nedge host sorting issues
 - Fix historical flow incorrect labels and columns
+- Fix assets not correctly dumped into the DB
+- Fix various timeseries charts not correctly displayed
+- Fix RRD top timeseries not correctly working in edge cases
+- Fix various links not working
+- Fix missing retention for hourly tables
 
 ## nEdge
 - Dynamic blacklist support
