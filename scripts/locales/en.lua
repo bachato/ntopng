@@ -6541,6 +6541,7 @@ local lang = {
     ["custom"] = "Custom",
     ["custom_datetime"] = "Current Time",
     ["custom_datetime_descr"] = "Manually sets the date and time of the system.",
+    ["custom_kea_dhcp_ext"] = "Custom JSON entries for the KEA DHCP Server configuration file can be added to <i>/etc/ntopng/kea-dhcp4-ext.conf</i>",
     ["custom_policy"] = "Custom Policy",
     ["data_reset"] = "Data Reset",
     ["data_reset_msg"] = "Do you really want to reset all the device data? Data include stored timeseries, flows, alerts, Redis caches and host counters. Device configuration and system setup won't be affected by the reset.<br>This will cause %{product} to restart and can cause this web GUI to becomes unresponsive for a few seconds.",
@@ -6792,8 +6793,8 @@ local lang = {
     ["x_shaper_per_host_descr"] = "The %{shaper} maximum per-host bandwidth allocation. 0 for unlimited.",
     ["you_can_assign_routing_policy"] = "You can assign routing policies to <a href=\"%{url}\">Users</a>.",
     ["you_can_assign_shapers_to_users_protocols"] = "You can assign bandwidth policies to <a href=\"%{url}\">Users</a> specific applications or set them globally as a <a href=\"%{url2}\">Fallback Policy</a>.",
-    ["you_can_set_static_dhcp_lease_here"] = "You can configure static DHCP leases <a href=\"%{url}\">here</a>.",
-    ["you_can_use_gateways_in_policies"] = "You can specify gateways priorities in <a href=\"%{url}\">Routing Policies</a>.",
+    ["you_can_set_static_dhcp_lease_here"] = "Static DHCP leases can be configured in <a href=\"%{url}\">DHCP Static Leases</a>.",
+    ["you_can_use_gateways_in_policies"] = "Gateways priorities can be configured in <a href=\"%{url}\">Routing Policies</a>.",
     ["invalid_src_host_location"] = "Using default shaper as source host is on WAN interface. Check interface wiring",
     ["page_repeater_config"] = {
       ["interface"] = "Network Interface",

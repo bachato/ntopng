@@ -24,6 +24,8 @@ local function serviceExists(service_name)
   return not isEmptyString(result)
 end
 
+-- ###############################################################
+
 -- Detect which DHCP server is available on the system and return
 -- the appropriate DHCP server module (kea_dhcp_server or dhcp_server_utils)
 function dhcp_server_utils.getDhcpServerHandler()
@@ -46,6 +48,13 @@ function dhcp_server_utils.getDhcpServerHandler()
   end
 
   return cached_module
+end
+
+-- ###############################################################
+
+function dhcp_server_utils.getDhcpServerName()
+  local dhcp_handler = dhcp_server_utils.getDhcpServerHandler()
+  return dhcp_handler.service_name
 end
 
 -- ###############################################################

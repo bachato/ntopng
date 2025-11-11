@@ -828,7 +828,10 @@ function printPageSection(section_name)
 end
 
 function printSaveButton(some_content)
-   print('<tr><td colspan=2 style="text-align:right;">' .. (some_content or "") .. '<button type="submit" class="btn btn-primary" style="width:115px" disabled="disabled">'..i18n("save")..'</button></td></tr>')
+   if not isEmptyString(some_content) then
+      print('<tr><td colspan=2>' .. (some_content or "") .. '</td></tr>')
+   end
+   print('<tr><td colspan=2 style="text-align: right;"><button type="submit" class="btn btn-primary" style="width:115px" disabled="disabled">'..i18n("save")..'</button></td></tr>')
 end
 
 function prefsSkipRedis(skip)
