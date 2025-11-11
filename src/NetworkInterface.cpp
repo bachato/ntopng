@@ -1870,8 +1870,9 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
 
     l4_proto = ip6->ip6_hdr.ip6_un1_nxt;
 
-    if ((l4_proto == 0x3C /* IPv6 destination option */) ||
-        (l4_proto == 0x0 /* Hop-by-hop option */)) {
+    if(((l4_proto == 0x3C /* IPv6 destination option */) ||
+        (l4_proto == 0x0 /* Hop-by-hop option */))
+       && (trusted_ip_len > (sizeof(const struct ndpi_ipv6hdr) + ipv6_shift + 2))) {
       u_int8_t *options = (u_int8_t *)ip6 + ipv6_shift;
 
       l4_proto = options[0];
@@ -3087,7 +3088,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	} else if ((sport == L2TP_PORT) && (dport == L2TP_PORT)) {
 	  u_int offset = ip_offset + ip_len + sizeof(struct ndpi_udphdr);
 
-	  if((offset+sizeof(struct l2tp_header)) > h->caplen) {
+	  if((offset+sizeof(struct l2tp_header)) < h->caplen) {
 	    struct l2tp_header *l2tp = (struct l2tp_header*)&packet[offset];
 	    u_int16_t proto, flags = ntohs(l2tp->flags);
 
@@ -3117,6 +3118,20 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	      /* IPv6 */
 	      eth_type = ETHERTYPE_IPV6;
 	      ip6 = (struct ndpi_ipv6hdr *)&packet[offset];
+	    } else if(proto == 0x003d /* PPP Multi-Link */) {
+	      offset += 4;
+	      proto = (packet[offset] << 8) + packet[offset+1];
+	      offset += 2;
+
+	      if(proto == 0x0021) {
+		eth_type = ETHERTYPE_IP;
+		iph = (struct ndpi_iphdr *)&packet[offset];
+		ip6 = NULL;
+	      } else if(proto == 0x0057) {
+		eth_type = ETHERTYPE_IPV6;
+		ip6 = (struct ndpi_ipv6hdr *)&packet[offset];
+		iph = NULL;
+	      }		
 	    } else {
 	      incStats(ingressPacket, h->ts.tv_sec, 0,
 		       NDPI_PROTOCOL_UNKNOWN,
