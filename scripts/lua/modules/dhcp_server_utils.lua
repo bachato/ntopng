@@ -2,6 +2,7 @@
 -- (C) 2013-24 - ntop.org
 --
 
+require "ntop_utils"
 local sys_utils = require "sys_utils"
 
 local dhcp_enabled_key = "ntopng.nedge.dhcp.kea.enabled"

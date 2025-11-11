@@ -25,7 +25,7 @@ local function netmask2cidr(netmask)
   for octet in string.gmatch(netmask, "%d+") do
     local num = tonumber(octet)
     for i = 7, 0, -1 do
-      if bit.band(num, bit.lshift(1, i)) ~= 0 then
+      if (num & (1 << i)) ~= 0 then
         cidr = cidr + 1
       else
         return cidr
@@ -206,13 +206,8 @@ function kea_dhcp_server.writeDhcpServerConfiguration(dhcp_config, all_interface
 
   -- Create backup of existing configuration if it doesn't exist
   local KEA_CONF_BKP_PATH = KEA_CONF_PATH .. ".bkp"
-  if sys_utils.file_exists(KEA_CONF_PATH) and 
-     not sys_utils.file_exists(KEA_CONF_BKP_PATH) then
-    -- Copy the existing configuration to backup
-    local result = os.execute("cp " .. KEA_CONF_PATH .. " " .. KEA_CONF_BKP_PATH)
-    if result ~= 0 then
-      traceError(TRACE_WARNING, TRACE_CONSOLE, "Failed to create backup of " .. KEA_CONF_PATH)
-    end
+  if ntop.exists(KEA_CONF_PATH) and not ntop.exists(KEA_CONF_BKP_PATH) then
+    os.execute("cp " .. KEA_CONF_PATH .. " " .. KEA_CONF_BKP_PATH)
   end
 
   local json_str = json.encode(kea_config, { indent = true })
