@@ -48,7 +48,7 @@ Flow::Flow(NetworkInterface *_iface,
     srv_port = _srv_port, privateFlowId = _private_flow_id;
   flow_dropped_counts_increased = 0, protocolErrorCode = 0;
   srcAS = dstAS = srcPeerAS = dstPeerAS = transitAS = 0, rttSec = 0;
-  srcASName = dstASName = NULL;
+  srcASName = dstASName = NULL, _srcASNameBuf = _dstASNameBuf = NULL;
   src2dst_tcp_flags = dst2src_tcp_flags = 0;
   collected_qoe.src_to_dst = collected_qoe.dst_to_src = NTOP_QOE_UNKNOWN, has_collected_qoe = 0;
   tcp = NULL;
@@ -669,6 +669,8 @@ Flow::~Flow() {
   if(external_alert.source) free(external_alert.source);
 
   if(customFlowAlert.msg)   free(customFlowAlert.msg);
+  if(_srcASNameBuf)         free(_srcASNameBuf);
+  if(_dstASNameBuf)         free(_dstASNameBuf);
 }
 
 /* *************************************** */
@@ -9297,14 +9299,15 @@ void Flow::getSrcAS(u_int32_t *as, char **as_name) {
 
     if(h) {
       srcAS = h->get_asn();
-      srcASName = h->get_asname();
+      srcASName = h->get_asname(); /* Not to free */
     } else {
+      /* View Interface */
       u_int32_t asn;
       char *asname;
 
-      ntop->getGeolocation()->getAS(get_cli_ip_addr(), &asn, &asname);
+      ntop->getGeolocation()->getAS(get_cli_ip_addr(), &asn, &asname /* to free */);
       srcAS = asn;
-      srcASName = asname;
+      srcASName = _srcASNameBuf = asname;
     }
   }
 
@@ -9320,14 +9323,15 @@ void Flow::getDstAS(u_int32_t *as, char **as_name) {
 
     if(h) {
       dstAS = h->get_asn();
-      dstASName = h->get_asname();
+      dstASName = h->get_asname(); /* Not to free */
     } else {
+      /* View Interface */
       u_int32_t asn;
       char *asname;
 
-      ntop->getGeolocation()->getAS(get_srv_ip_addr(), &asn, &asname);
+      ntop->getGeolocation()->getAS(get_srv_ip_addr(), &asn, &asname /* to free */);
       dstAS = asn;
-      dstASName = asname;
+      dstASName = _dstASNameBuf = asname;
     }
   }
 

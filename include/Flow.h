@@ -113,7 +113,7 @@ private:
   u_int16_t vlanId;
   u_int32_t srcAS, dstAS; /* Calculated via GeoIP */
   u_int32_t transitAS;
-  char *srcASName, *dstASName;
+  char *srcASName, *dstASName, *_srcASNameBuf, *_dstASNameBuf;
   u_int32_t srcPeerAS, dstPeerAS; /* Collected via NetFLow/IPFIX */
   u_int32_t protocolErrorCode;
   u_int8_t protocol, flow_verdict;
