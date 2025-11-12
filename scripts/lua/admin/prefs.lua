@@ -2207,14 +2207,6 @@ if auth.has_capability(auth.capabilities.preferences) then
                 min = 1,
                 max = 365 * 10
             })
-        
-        -- export flows for retention, only if ch and enterprise XL
-        prefsToggleButton(subpage_active, {
-            field = "toggle_data_archive_before_ttl_delete",
-            default = "0",
-            pref = "data_archive_before_ttl_delete",
-            hidden = not showAggregateFlowsPrefs
-        })
         prefsInputFieldPrefs(subpage_active.entries["aggregated_asn_data_retention"].title,
             subpage_active.entries["aggregated_asn_data_retention"].description, "ntopng.prefs.",
             "aggregated_asn_data_retention_days", data_retention_utils.getAggregatedAsnDataRetention(), "number",
@@ -2228,6 +2220,13 @@ if auth.has_capability(auth.capabilities.preferences) then
             showAggregateFlowsPrefs, nil, nil, {
                 min = 2,
                 max = 365 * 10
+            })
+        -- export flows for retention, only if ch and enterprise XL
+        prefsToggleButton(subpage_active, {
+            field = "toggle_data_archive_before_ttl_delete",
+            default = "0",
+            pref = "data_archive_before_ttl_delete",
+            hidden = not showAggregateFlowsPrefs
             })
         prefsInputFieldPrefs(subpage_active.entries["toggle_flow_aggregated_limit"].title,
             subpage_active.entries["toggle_flow_aggregated_limit"].description, "ntopng.prefs.",
