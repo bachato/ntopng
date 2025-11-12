@@ -1022,7 +1022,7 @@ void Flow::processExtraDissectedInformation() {
       if(ndpiFlow->http.response_status_code == 200) {
 	if(srv_host
 	   && (ndpiFlow->host_server_name[0] != '\0')
-	   && (ndpiFlow->http.nat_ip == NULL) /* THis is not a proxy */
+	   && (ndpiFlow->http.nat_ip == NULL) /* This is not a proxy */
 	   )
 	  srv_host->setServerName(host_server_name);
 
