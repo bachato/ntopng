@@ -28,7 +28,7 @@ end
 -- ###############################################################
 
 -- Detect which DHCP server is available on the system and return
--- the appropriate DHCP server module (kea_dhcp_server or dhcp_server_utils)
+-- the appropriate DHCP server module (kea_dhcp_server or isc_dhcp_server)
 function dhcp_server_utils.getDhcpServerHandler()
   if cached_module then
     return cached_module
@@ -45,7 +45,7 @@ function dhcp_server_utils.getDhcpServerHandler()
     cached_module = require "conf_handlers.kea_dhcp_server"
   else
     traceError(TRACE_INFO, TRACE_CONSOLE, "Using ISC DHCP server")
-    cached_module = require "conf_handlers.dhcp_server_utils"
+    cached_module = require "conf_handlers.isc_dhcp_server"
   end
 
   return cached_module
