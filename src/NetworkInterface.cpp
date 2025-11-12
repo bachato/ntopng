@@ -9778,7 +9778,7 @@ TimeseriesExporter *NetworkInterface::getInfluxDBTSExporter() {
 
 /* *************************************** */
 
-TimeseriesExporter *NetworkInterface::getRRDTSExporter() {
+TimeseriesExporter* NetworkInterface::getRRDTSExporter() {
   if (!rrd_ts_exporter)
     rrd_ts_exporter = new (nothrow) RRDTimeseriesExporter(this);
 
