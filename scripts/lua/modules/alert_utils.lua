@@ -267,8 +267,8 @@ end
 -- #################################
 
 function alert_utils.getConfigsetURL(script_key, subdir)
-    return string.format('%s/lua/admin/edit_configset.lua?subdir=%s&check=%s#all', ntop.getHttpPrefix(), subdir,
-        script_key)
+    return string.format('%s/lua/admin/edit_configset.lua?subdir=%s&check=%s#all', ntop.getHttpPrefix(), subdir or "all",
+        script_key or "all")
 end
 
 -- #################################
