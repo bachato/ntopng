@@ -336,7 +336,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     if (out_of_sequence) {
 #ifdef ABSOLUTE_COUNTERS_DEBUG
       char flowbuf[265];
-      
+
       ntop->getTrace()->traceEvent(TRACE_WARNING,
 				   "A flow received an update with absolute values smaller than the "
 				   "current values. "
@@ -606,7 +606,12 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 
     if (flow->isDNS())  flow->updateDNS(zflow);
     if (flow->isHTTP()) flow->updateHTTP(zflow);
-    if (flow->isTLS())  flow->updateTLS(zflow);
+    if (flow->isTLS())  {
+      flow->updateTLS(zflow);
+
+      if (zflow->getJA4cHash())
+	flow->updateJA4C(zflow->getJA4cHash());
+    }
 
     if (flow->isSMTP()) {
       if (zflow->getSMTPMailFrom())
@@ -648,12 +653,11 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 								   zflow->getTCPFingerprint()));
     }
 
-    if (zflow->getJA4cHash())       flow->updateJA4C(zflow->getJA4cHash());
     if (zflow->getBittorrentHash()) flow->setBittorrentHash(zflow->getBittorrentHash(),
 							    strlen(zflow->getBittorrentHash()));
 
     flow->updateTCPStats(zflow->get_tcp_stats(true), zflow->get_tcp_stats(false));
-    
+
     if (zflow->getRiskInfo()) {
       json_object *o, *obj;
       enum json_tokener_error jerr = json_tokener_success;
