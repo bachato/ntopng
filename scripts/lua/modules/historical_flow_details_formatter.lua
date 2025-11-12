@@ -123,7 +123,8 @@ local function format_historical_verdict(flow, protocol_info_json, flow_details)
                 }
             }
             -- Add strike to protocol
-            flow_details[2].values[1] = '<strike>' .. flow_details[2].values[1] .. '</strike>'
+            flow_details[2].values[1] =
+                '<strike>' .. flow_details[2].values[1] .. '</strike>'
         end
     end
 
@@ -309,27 +310,42 @@ end
 
 -- ###############################################
 
+local function format_historical_tcp_fingerprint(flow)
+    return {
+        name = i18n("details.tcp_fingerprint"),
+        values = {{flow["TCP_FINGERPRINT"]}}
+    }
+end
+
+-- ###############################################
+
 local function format_historical_tcp_flags(flow, info)
     local client_to_server_flags = ""
     local server_to_client_flags = ""
     local proto_info = info.protocol_info_json
-    if proto_info and proto_info.tcp_flags_analysis and proto_info.tcp_flags_analysis.cli2srv then
-        client_to_server_flags = formatTCPStats(info.protocol_info_json.tcp_flags_analysis.cli2srv)
+    if proto_info and proto_info.tcp_flags_analysis and
+        proto_info.tcp_flags_analysis.cli2srv then
+        client_to_server_flags = formatTCPStats(
+                                     info.protocol_info_json.tcp_flags_analysis
+                                         .cli2srv)
     end
-    if proto_info and proto_info.tcp_flags_analysis and proto_info.tcp_flags_analysis.srv2cli then
-        server_to_client_flags = formatTCPStats(info.protocol_info_json.tcp_flags_analysis.srv2cli)
+    if proto_info and proto_info.tcp_flags_analysis and
+        proto_info.tcp_flags_analysis.srv2cli then
+        server_to_client_flags = formatTCPStats(
+                                     info.protocol_info_json.tcp_flags_analysis
+                                         .srv2cli)
     end
     return {
         name = i18n("tcp_flags"),
         values = {
             [1] = i18n("client") ..
                 " <i class=\"fas fa-long-arrow-alt-right\"></i> " ..
-	       i18n("server") .. ": " .. info.src2dst_tcp_flags.label
-	       .. client_to_server_flags,
+                i18n("server") .. ": " .. info.src2dst_tcp_flags.label ..
+                client_to_server_flags,
             [2] = i18n("server") ..
                 " <i class=\"fas fa-long-arrow-alt-right\"></i> " ..
-	       i18n("client") .. ": " .. info.dst2src_tcp_flags.label
-	       .. server_to_client_flags,
+                i18n("client") .. ": " .. info.dst2src_tcp_flags.label ..
+                server_to_client_flags
         }
     }
 end
@@ -878,7 +894,8 @@ function historical_flow_details_formatter.formatHistoricalFlowDetails(flow)
         flow_details[#flow_details + 1] =
             format_historical_last_first_seen(flow, info)
         if protocol_info_json and protocol_info_json.verdict then
-            flow_details = format_historical_verdict(flow, protocol_info_json, flow_details)
+            flow_details = format_historical_verdict(flow, protocol_info_json,
+                                                     flow_details)
         end
         flow_details[#flow_details + 1] =
             historical_flow_details_formatter.format_historical_total_traffic(
@@ -919,6 +936,8 @@ function historical_flow_details_formatter.formatHistoricalFlowDetails(flow)
         end
 
         if (info["l4proto"]) and (info["l4proto"]["label"] == 'TCP') then
+            flow_details[#flow_details + 1] =
+                format_historical_tcp_fingerprint(flow, info)
             flow_details[#flow_details + 1] =
                 format_historical_tcp_flags(flow, info)
 
