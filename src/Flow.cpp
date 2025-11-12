@@ -54,7 +54,7 @@ Flow::Flow(NetworkInterface *_iface,
   tcp = NULL;
   c_mac_updated = s_mac_updated = false;
   memset(&tcp_stats, 0, sizeof(tcp_stats));
-  
+
 #ifdef NTOPNG_PRO
   udp = NULL;
 #endif
@@ -5451,27 +5451,31 @@ void Flow::updateTcpFlags(const struct bpf_timeval *when, u_int8_t flags,
   } else {
     /* Packet Interface */
 
+    if((get_packets() == 0) /* Packet count is implemented later in the code */
+       && ((flags & (TH_SYN|TH_ACK)) == (TH_SYN|TH_ACK)))
+      request_swap(); /* This flow will be swapped as we have received the SYN|ACK as first packet */
+
     if((flags & TH_SYN) == TH_SYN) {
       if(src2dst_direction)
 	Utils::inc8bitNoOverflow(&tcp_stats.cli2srv.num_syn);
       else
 	Utils::inc8bitNoOverflow(&tcp_stats.srv2cli.num_syn);
     }
-    
+
     if((flags & TH_FIN) == TH_FIN) {
       if(src2dst_direction)
 	Utils::inc8bitNoOverflow(&tcp_stats.cli2srv.num_fin);
       else
 	Utils::inc8bitNoOverflow(&tcp_stats.srv2cli.num_fin);
     }
-    
+
     if((flags & TH_RST) == TH_RST) {
       if(src2dst_direction)
 	Utils::inc8bitNoOverflow(&tcp_stats.cli2srv.num_rst);
       else
 	Utils::inc8bitNoOverflow(&tcp_stats.srv2cli.num_rst);
     }
-    
+
     /* Update syn alerts counters. In case of cumulative flags, the AND is used as
      * possibly other flags can be present  */
     if(flags_3wh == TH_SYN) {
@@ -7671,10 +7675,10 @@ void Flow::lua_dump_tcp_stats(lua_State *vm, const TCPStats *s, const char *labe
   lua_push_uint32_table_entry(vm, "num_rst", s->num_rst);
   lua_push_uint32_table_entry(vm, "num_fin", s->num_fin);
   lua_push_uint32_table_entry(vm, "num_zero_window", s->num_zero_window);
-  
+
   lua_pushstring(vm, label);
   lua_insert(vm, -2);
-  lua_settable(vm, -3);    
+  lua_settable(vm, -3);
 }
 
 /* ***************************************************** */
@@ -7729,7 +7733,7 @@ void Flow::lua_get_tcp_info(lua_State *vm) const {
     lua_dump_tcp_stats(vm, &tcp_stats.srv2cli, "srv2cli");
     lua_pushstring(vm, "tcp_stats");
     lua_insert(vm, -2);
-    lua_settable(vm, -3);    
+    lua_settable(vm, -3);
 
   }
 }
@@ -7848,7 +7852,7 @@ void Flow::setProtocolJSONInfo() {
 
   if(protocol == IPPROTO_TCP)
     getTCPFlagsAnalysis(&s);
-  
+
   json = ndpi_serializer_get_buffer(&s, &json_len);
 
   if(json_protocol_info) free(json_protocol_info);
@@ -7872,7 +7876,7 @@ void Flow::getTCPFlagsJSON(ndpi_serializer *serializer, TCPStats *stats, const c
   ndpi_serialize_string_uint32(serializer, "num_syn", stats->num_syn);
   ndpi_serialize_string_uint32(serializer, "num_rst", stats->num_rst);
   ndpi_serialize_string_uint32(serializer, "num_fin", stats->num_fin);
-  ndpi_serialize_string_uint32(serializer, "num_zero_window", stats->num_zero_window);  
+  ndpi_serialize_string_uint32(serializer, "num_zero_window", stats->num_zero_window);
   ndpi_serialize_end_of_block(serializer);
 }
 
@@ -8905,7 +8909,7 @@ void Flow::addPostNATPort(u_int32_t _src_port_post_nat,
 void Flow::accountBidirectionalTCPProtocolServices() {
   if(isThreeWayHandshakeOK()
      && isTCPReallyBidirectional()
-     && !hasRisk(NDPI_PROBING_ATTEMPT)) { 
+     && !hasRisk(NDPI_PROBING_ATTEMPT)) {
     // It's important to check the probing attempt, because there can be cases
     // where otherwise a server is set incorrectly, see:
     // https://github.com/ntop/ntopng/issues/9808
@@ -9295,13 +9299,13 @@ void Flow::getSrcAS(u_int32_t *as, char **as_name) {
     } else {
       u_int32_t asn;
       char *asname;
-      
+
       ntop->getGeolocation()->getAS(get_cli_ip_addr(), &asn, &asname);
       srcAS = asn;
       srcASName = asname;
     }
   }
-  
+
   *as = srcAS;
   *as_name = srcASName ? srcASName : (char*) "";
 }
@@ -9318,13 +9322,13 @@ void Flow::getDstAS(u_int32_t *as, char **as_name) {
     } else {
       u_int32_t asn;
       char *asname;
-      
+
       ntop->getGeolocation()->getAS(get_srv_ip_addr(), &asn, &asname);
       dstAS = asn;
       dstASName = asname;
     }
   }
-  
+
   *as = dstAS;
   *as_name = dstASName ? dstASName : (char*) "";
 }
@@ -9337,10 +9341,10 @@ void Flow::getTransitAS(u_int32_t *as, char **as_name) {
     // and the other from the destination, give priority to the source
     u_int32_t src_as = 0, dst_as = 0;
     char *src_as_name, *dst_as_name;
-    
+
     getSrcAS(&src_as, &src_as_name);
     getDstAS(&dst_as, &dst_as_name);
-    
+
     if ((getSrcPeerAS()) && (src_as != getSrcPeerAS())) {
       // Source transit
       transitAS = getSrcPeerAS();
@@ -9351,7 +9355,7 @@ void Flow::getTransitAS(u_int32_t *as, char **as_name) {
       *as_name = dst_as_name ? dst_as_name : (char*) "";
     }
   }
-  
+
   *as = transitAS;
 }
 
@@ -9398,14 +9402,14 @@ void Flow::decodeTCPstats(u_int32_t v, TCPStats *stats) {
   stats->num_syn         = (v & 0xFF000000) >> 24;
   stats->num_rst         = (v & 0x00FF0000) >> 16;
   stats->num_fin         = (v & 0x0000FF00) >> 8;
-  stats->num_zero_window = v & 0x000000FF;;  
+  stats->num_zero_window = v & 0x000000FF;;
 }
 
 /* *************************************** */
 
 void Flow::updateTCPStats(u_int32_t cli_stats, u_int32_t srv_stats) {
   /* ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%08X][%08X]", cli_stats, srv_stats); */
-  
+
   if(cli_stats) decodeTCPstats(cli_stats, &tcp_stats.cli2srv);
   if(srv_stats) decodeTCPstats(srv_stats, &tcp_stats.srv2cli);
 }
