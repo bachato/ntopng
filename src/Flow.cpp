@@ -1186,7 +1186,9 @@ void Flow::processPacket(bool src2dst_direction,
 
   if(payload_len > 0) non_zero_payload_observed = 1;
 
-  if(detected) {
+  if(detected && (proto_id.state != NDPI_STATE_PARTIAL)) {
+    ndpiDetectedProtocol.state = proto_id.state;
+
     if(ndpiFlow->risk != 0) {
       if(srv_host) {
         /* Ignore unsafe protocols for broadcast packets (e.g. SMBv1) */
