@@ -991,17 +991,15 @@ function driver:timeseries_top(options, top_tags)
 
     for top_item, value in pairsByValues(available_items, rev) do
         if value > 0 then
-            if snmp_utils and snmp_cached_dev then
-                local cached_device = snmp_cached_dev:create(options.tags.device)
-                local ifindex = available_tags[top_item][1].if_index or
-                                    available_tags[top_item][1].port
-                local ext_label = nil
-                if cached_device then
-                    ext_label = snmp_utils.get_snmp_interface_label(
-                                    cached_device["interfaces"][ifindex])
-                end
+            local ifindex = available_tags[top_item][1].if_index or
+                                available_tags[top_item][1].port
+            -- Interface index available, probe, exporter, ecc.
+            if options.tags.device and ifindex then
+                ext_label = format_portidx_name(options.tags.device, ifindex,
+                                                true)
+                if isEmptyString(ext_label) then ext_label = ifindex end
             end
-            if isEmptyString(ext_label) then ext_label = ifindex end
+
             -- Special case, top protocol timeseries, here the ext_label needs to be the protocol
             if available_tags[top_item][1].protocol then
                 ext_label = top_item
