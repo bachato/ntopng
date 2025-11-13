@@ -954,6 +954,10 @@ function get_component_data_func(component) {
 
             } else {
                 /* Request fresh data */
+                if (!url) {
+                    component.isLoading = false
+                    return;
+                }
 
                 /* If infrastructure monitor, call the aggregator endpoint */
                 if (props.context.is_infrastructure && !url.includes("infrastructure")) {

@@ -5,7 +5,8 @@
 <template>
     <div>
         <TimeseriesChart ref="chart" :id="id" :chart_type="chart_type" :base_url_request="base_url"
-            :get_custom_chart_options="get_chart_options" :register_on_status_change="false" :disable_fixed_height="true">
+            :get_custom_chart_options="get_chart_options" :register_on_status_change="false"
+            :disable_fixed_height="true">
         </TimeseriesChart>
     </div>
 </template>
@@ -129,7 +130,7 @@ async function format_exporters(params_to_format) {
         /* Already populated, return */
         return;
     }
-    
+
     const exporters_url = "lua/pro/rest/v2/get/flowdevices/stats.lua"
     const exporters_list = await ntopng_utility.http_request(`${http_prefix}/${exporters_url}?ifid=${props.ifid}&gui=true`) || [];
     if (exporters_list) {
@@ -217,13 +218,12 @@ async function get_timeseries_groups_from_metric(metric_schema, source_def) {
 
 /* *************************************************** */
 
-async function retrieve_basic_info() {
+async function retrieve_basic_info(multi_ts_requests) {
     /* Return the timeseries group, info found in the json */
     if (timeseries_groups.value.length == 0) {
-        for (const value of ts_request.value) {
+        for (const value of multi_ts_requests) {
             const metric_schema = value?.ts_schema;
             const source_def = value.source_def;
-            delete value.source_def /* Remove the property otherwise it's going to be added to the REST */
             const group = await get_timeseries_groups_from_metric(metric_schema, source_def);
             timeseries_groups.value.push(group);
         }
@@ -246,16 +246,15 @@ function remove_extra_params() {
 /* This function run the REST API with the data */
 async function get_chart_options() {
     await resolve_any_params();
-    await retrieve_basic_info();
     remove_extra_params();
     const url = base_url.value;
 
     const query_params = props.params.url_params
     query_params.csrf = props.csrf
-    query_params.ifid = props.ifid,
-    query_params.epoch_begin = props.epoch_begin,
-    query_params.epoch_end= props.epoch_end
-    
+    query_params.ifid = props.ifid
+    query_params.epoch_begin = props.epoch_begin
+    query_params.epoch_end = props.epoch_end
+
     const post_params = {
         csrf: props.csrf,
         ifid: props.ifid,
@@ -267,13 +266,12 @@ async function get_chart_options() {
         }
     }
     let ts_query = {}
-    if(ts_request.value[0].ts_schema ==="top:flowdev_port:traffic"){
+    if (ts_request.value[0].ts_schema === "top:flowdev_port:traffic") {
         ts_query = {
             ts_query: `ifid:$IFID$,device:$DEVICE$,port:$PORT$`,
             ts_schema: `flowdev_port:traffic`,
         }
-    }
-    if(ts_request.value[0].ts_schema ==="top:asn:traffic"){
+    } else if (ts_request.value[0].ts_schema === "top:asn:traffic") {
         ts_query = {
             ts_query: `ifid:$IFID$,asn:$ASN$`,
             ts_schema: `asn:traffic`,
@@ -283,33 +281,37 @@ async function get_chart_options() {
     const url_params = ntopng_url_manager.obj_to_url_params(query_params);
     const top_url = `${http_prefix}${url}?${url_params}`;
     const top_data = await ntopng_utility.http_request(top_url)
-    const ts_requests = [];
-    if (ts_request.value[0].ts_schema === "top:flowdev_port:traffic"){
-        top_data?.forEach((el) => {
-            const tmp_query = { ...ts_query };
+    ts_request.value.source_def = [props.ifid]
+    const ts_source = []
+    let multi_ts_requests = [];
+    top_data?.forEach((el, i) => {
+        const tmp_query = { ...ts_query };
+        if (ts_request.value[0].ts_schema === "top:flowdev_port:traffic") {
             tmp_query.ts_query = tmp_query.ts_query.replace('$IFID$', el.ifid);
             tmp_query.ts_query = tmp_query.ts_query.replace('$DEVICE$', el.exporter_ip);
             tmp_query.ts_query = tmp_query.ts_query.replace('$PORT$', el.interface_id);
             tmp_query.tskey = `${el.interface_id}`;
-            tmp_query.ts_unify = true
-            ts_requests.push(tmp_query);
-        })
-    }
-    else if (ts_request.value[0].ts_schema === "top:asn:traffic"){
-        top_data?.forEach((el) => {
-            const tmp_query = { ...ts_query };
+        } else if (ts_request.value[0].ts_schema === "top:asn:traffic") {
             tmp_query.ts_query = tmp_query.ts_query.replace('$IFID$', props.ifid);
             tmp_query.ts_query = tmp_query.ts_query.replace('$ASN$', el.asn);
             tmp_query.tskey = `${el.asn}`;
-            tmp_query.ts_unify = true
-            ts_requests.push(tmp_query);
-        })
-    }
-    post_params.ts_requests = ts_requests;
+        }
+        if (i == 0) {
+            const val = ts_request.value.find((source) =>
+                source.ts_query === `ifid:${props.ifid}`
+            )
+            val.source_def = [props.ifid];
+            ts_source.push(val);
+        }
+        tmp_query.ts_unify = true
+        multi_ts_requests.push(tmp_query);
+    })
+    await retrieve_basic_info(ts_source);
+    post_params.ts_requests = multi_ts_requests;
     const data_url = `${http_prefix}/lua/pro/rest/v2/get/timeseries/ts_multi.lua?${url_params}`;
+    props.get_component_data()
     let result = await ntopng_utility.http_post_request(data_url, post_params);
-    let previous_data = await props.get_component_data(undefined, undefined, undefined, undefined, true);
-    
+
     /* Format the result in the format needed by Dygraph */
     result = timeseriesUtils.tsArrayToOptionsArray(result, timeseries_groups.value, group_option_mode, '');
     if (result[0]) {
