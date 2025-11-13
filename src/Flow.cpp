@@ -118,8 +118,8 @@ Flow::Flow(NetworkInterface *_iface,
   host_server_name = NULL, flow_source = packet_to_flow;
   icmp_info = _icmp_info ? new (std::nothrow) ICMPinfo(*_icmp_info) : NULL;
   ndpiFlow = NULL, confidence = NDPI_CONFIDENCE_UNKNOWN;
-  json_info = NULL, tlv_info = NULL, twh_over = 0,
-    dissect_next_http_packet = 0;
+  json_info = NULL, tlv_info = NULL, twh_over = 0;
+  dissect_next_http_packet = 0;
   periodic_stats_base = NULL;
   bt_hash = NULL, ebpf = NULL, iec104 = NULL, stun_mapped_address = NULL;
   twh_over_view = 0, shapers_profile_set = 0;
@@ -1176,6 +1176,26 @@ void Flow::processPacket(bool src2dst_direction,
     endProtocolDissection(src2dst_direction);
   }
 
+#if 0
+  switch(proto_id.state) {
+    case NDPI_STATE_INSPECTING:
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "DPI State = Inspecting");
+    break;
+    case NDPI_STATE_PARTIAL:
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "DPI State = Partial");
+    break;
+    case NDPI_STATE_MONITORING:
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "DPI State = Monitoring");
+    break;
+    case NDPI_STATE_CLASSIFIED:
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "DPI State = Classified");
+    break;
+    default:
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "DPI State = %d", proto_id.state);
+    break;
+  }
+#endif
+
 #ifdef NTOPNG_PRO
   // Update the profile even if the detection is not yet completed.
   // Indeed, even if the L7 detection is not yet completed
@@ -1188,9 +1208,12 @@ void Flow::processPacket(bool src2dst_direction,
 
   if(payload_len > 0) non_zero_payload_observed = 1;
 
-  if(detected && (proto_id.state != NDPI_STATE_PARTIAL)) {
-    ndpiDetectedProtocol.state = proto_id.state;
+  if(detected) {
+    updateProtocol(proto_id);
+    setProtocolDetectionCompleted(payload, payload_len, h->ts.tv_sec);
+  }
 
+  if(detected && (proto_id.state != NDPI_STATE_PARTIAL)) {
     if(ndpiFlow->risk != 0) {
       if(srv_host) {
         /* Ignore unsafe protocols for broadcast packets (e.g. SMBv1) */
@@ -1211,9 +1234,6 @@ void Flow::processPacket(bool src2dst_direction,
 
       addRisk(ndpiFlow->risk);
     }
-
-    updateProtocol(proto_id);
-    setProtocolDetectionCompleted(payload, payload_len, h->ts.tv_sec);
   }
 
   /*
@@ -6433,11 +6453,13 @@ void Flow::dissectHTTP(bool src2dst_direction, char *payload,
       }
     }
   } else { /* Server to Client */
+
+    /* Note: responses are not dissected if the request has not been seen */
     if(dissect_next_http_packet) {
       char *space;
 
-      // payload[10]=0; ntop->getTrace()->traceEvent(TRACE_WARNING, "[len:
-      // %u][%s]", payload_len, payload);
+      //payload[10]=0; ntop->getTrace()->traceEvent(TRACE_WARNING, "[len: %u][%s]", payload_len, payload);
+
       dissect_next_http_packet = 0;
 
       if((space = (char *)memchr(payload, ' ', payload_len)) != NULL) {

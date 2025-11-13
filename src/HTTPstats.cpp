@@ -489,10 +489,8 @@ json_object *HTTPstats::getJSONObject() {
 /* ******************************************* */
 
 void HTTPstats::incStats(bool as_client, const FlowHTTPStats *fts) {
-  struct http_query_stats *q =
-      as_client ? &query[AS_SENDER] : &query[AS_RECEIVER];
-  struct http_response_stats *r =
-      as_client ? &response[AS_RECEIVER] : &response[AS_SENDER];
+  struct http_query_stats *q = as_client ? &query[AS_SENDER] : &query[AS_RECEIVER];
+  struct http_response_stats *r = as_client ? &response[AS_RECEIVER] : &response[AS_SENDER];
 
   if (fts->num_get) q->num_get += fts->num_get;
   if (fts->num_post) q->num_post += fts->num_post;
