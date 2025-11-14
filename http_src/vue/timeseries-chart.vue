@@ -113,8 +113,11 @@ export default {
 
             return `${this.$props.base_url_request || ''}?${url_params}`;
         },
+        ensure_path: function (obj, path) {
+            return path.reduce((acc, key) => (acc[key] ??= {}), obj);
+        },
         get_chart_options: async function (url_request) {
-            let chart_options = null;
+            let chart_options = {};
             const date_format = await ntopng_utility.get_date_format(false, this.$props.csrf, http_prefix);
 
             /* Retrieve the chart options */
@@ -123,17 +126,17 @@ export default {
             } else {
                 chart_options = await this.$props.get_custom_chart_options(url_request);
             }
+            if (!chart_options) {
+                chart_options = {}
+            }
+            const xAxis = this.ensure_path(chart_options, ["axes", "x"]);
             /* Set the date depending on the server date */
-            if (!chart_options?.axes?.x?.axisLabelFormatter) {
-                chart_options.axes.x.axisLabelFormatter = function (date) {
-                    return ntopng_utility.from_utc_to_server_date_format(date, date_format);
-                };
-            }
-            if (!chart_options?.axes.x?.valueFormatter) {
-                chart_options.axes.x.valueFormatter = function (date) {
-                    return ntopng_utility.from_utc_to_server_date_format(date, date_format);
-                };
-            }
+            xAxis.axisLabelFormatter ??= function (date) {
+                return ntopng_utility.from_utc_to_server_date_format(date, date_format);
+            };
+            xAxis.valueFormatter ??= function (date) {
+                return ntopng_utility.from_utc_to_server_date_format(date, date_format);
+            };
             /* Emit the chart_reloaded event */
             this.$emit('chart_reloaded', chart_options);
             if (this.stacked === null && !chart_options.blockStacked) {

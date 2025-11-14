@@ -92,7 +92,7 @@
 					"limit" : 180,
 					"version" : 4,
                     "ts_requests": {
-						"$ANY_IFID$" : {
+						"$CURRENT_IFID$" : {
 							"ts_query": "ifid:$IFID$",
 							"ts_schema": "top:asn:traffic"
 						}
@@ -118,7 +118,7 @@
 					"limit" : 180,
 					"version" : 4,
                     "ts_requests": {
-						"$ANY_IFID$" : {
+						"$CURRENT_IFID$" : {
 							"ts_query": "ifid:$IFID$",
 							"ts_schema": "top:flowdev_port:traffic",
 							"tskey": "$IFID$"
@@ -145,7 +145,7 @@
 					"limit" : 180,
 					"version" : 4,
                     "ts_requests": {
-						"$ANY_IFID$" : {
+						"$CURRENT_IFID$" : {
 							"ts_query": "ifid:$IFID$",
 							"ts_schema": "top:flowdev_port:traffic",
 							"tskey": "$IFID$"

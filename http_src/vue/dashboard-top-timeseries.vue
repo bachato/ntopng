@@ -26,6 +26,7 @@ const timeseries_groups = ref([]);
 const group_option_mode = timeseriesUtils.getGroupOptionMode('1_chart_x_yaxis');
 const height = ref(null);
 const ts_request = ref([]);
+const multi_ts_requests = ref([]);
 
 /* *************************************************** */
 
@@ -106,18 +107,15 @@ function substitute_network(params_to_format, current_network) {
 /* This function is used to substitute to the $IFID$ found in the
  * configuration the correct interface id
  */
-async function format_ifids(params_to_format) {
+async function format_current_ifid(params_to_format) {
     if (ts_request.value.length > 0) {
         /* Already populated, return */
         return;
     }
-    const ifid_url = "lua/rest/v2/get/ntopng/interfaces.lua"
-    const ifid_list = await ntopng_utility.http_request(`${http_prefix}/${ifid_url}`) || [];
-    ifid_list.forEach((iface) => {
-        let new_formatted_params = substitute_ifid(params_to_format, iface.ifid);
-        new_formatted_params.source_def = [iface.ifid]
-        ts_request.value.push(new_formatted_params);
-    });
+    // The ifid is already available from the props, no request is needed
+    let new_formatted_params = substitute_ifid(params_to_format, props.ifid);
+    new_formatted_params.source_def = [props.ifid]
+    ts_request.value.push(new_formatted_params);
 }
 
 /* *************************************************** */
@@ -181,8 +179,8 @@ async function resolve_any_params() {
     const params = props.params.post_params?.ts_requests;
     for (const any_param in (params || {})) {
         switch (any_param) {
-            case '$ANY_IFID$':
-                await format_ifids(params[any_param]);
+            case '$CURRENT_IFID$':
+                await format_current_ifid(params[any_param]);
                 break;
             case '$ANY_EXPORTER$':
                 await format_exporters(params[any_param]);
@@ -218,10 +216,10 @@ async function get_timeseries_groups_from_metric(metric_schema, source_def) {
 
 /* *************************************************** */
 
-async function retrieve_basic_info(multi_ts_requests) {
+async function retrieve_basic_info(request) {
     /* Return the timeseries group, info found in the json */
     if (timeseries_groups.value.length == 0) {
-        for (const value of multi_ts_requests) {
+        for (const value of request) {
             const metric_schema = value?.ts_schema;
             const source_def = value.source_def;
             const group = await get_timeseries_groups_from_metric(metric_schema, source_def);
@@ -245,16 +243,9 @@ function remove_extra_params() {
 
 /* This function run the REST API with the data */
 async function get_chart_options() {
-    await resolve_any_params();
-    remove_extra_params();
-    const url = base_url.value;
-
-    const query_params = props.params.url_params
-    query_params.csrf = props.csrf
-    query_params.ifid = props.ifid
-    query_params.epoch_begin = props.epoch_begin
-    query_params.epoch_end = props.epoch_end
-
+    // Also initialize the Tops, in this way just a request when opening
+    // the chart has to be done
+    await init();
     const post_params = {
         csrf: props.csrf,
         ifid: props.ifid,
@@ -265,6 +256,67 @@ async function get_chart_options() {
             ts_requests: ts_request.value
         }
     }
+    //ts_request.value.source_def = [props.ifid]
+    post_params.ts_requests = multi_ts_requests.value;
+    const data_url = `${http_prefix}/lua/pro/rest/v2/get/timeseries/ts_multi.lua`;
+    props.get_component_data()
+    let result = await ntopng_utility.http_post_request(data_url, post_params);
+    
+    /* Format the result in the format needed by Dygraph */
+    result = timeseriesUtils.tsArrayToOptionsArray(result, timeseries_groups.value, group_option_mode, '');
+    if (result[0]) {
+        result[0].height = height.value;
+    }
+    return result?.[0];
+}
+
+/* *************************************************** */
+
+/* Run the init here */
+onBeforeMount(async () => {
+    // Initialize the height of the chart
+    height.value = (props.max_height || 4) * height_per_row;
+});
+
+/* *************************************************** */
+
+onMounted(async () => { });
+
+/* *************************************************** */
+
+/* Defining the needed info by the get_chart_options function */
+async function init() {
+    await resolve_any_params();
+    remove_extra_params();
+    await getTopInfo();
+}
+
+/* *************************************************** */
+
+/* Watch - detect changes on epoch_begin / epoch_end and refresh the component */
+watch(() => [props.epoch_begin, props.epoch_end, props.filters], (cur_value, old_value) => {
+    refreshChart();
+}, { flush: 'pre', deep: true });
+
+/* *************************************************** */
+
+async function getTopInfo() {
+    // In this way this request is done only the first time
+    if (multi_ts_requests.value.length > 0) {
+        return;
+    }
+    // Format the GET request
+    const url = base_url.value;
+    const ts_source = []
+    const query_params = props.params.url_params
+    query_params.csrf = props.csrf
+    query_params.ifid = props.ifid
+    query_params.epoch_begin = props.epoch_begin
+    query_params.epoch_end = props.epoch_end
+    const url_params = ntopng_url_manager.obj_to_url_params(query_params);
+    const top_url = `${http_prefix}${url}?${url_params}`;
+    const top_data = await ntopng_utility.http_request(top_url)
+    // Retrieve the top data and update the ts_requests used by the ts_multi.lua
     let ts_query = {}
     if (ts_request.value[0].ts_schema === "top:flowdev_port:traffic") {
         ts_query = {
@@ -277,15 +329,9 @@ async function get_chart_options() {
             ts_schema: `asn:traffic`,
         }
     }
-
-    const url_params = ntopng_url_manager.obj_to_url_params(query_params);
-    const top_url = `${http_prefix}${url}?${url_params}`;
-    const top_data = await ntopng_utility.http_request(top_url)
-    ts_request.value.source_def = [props.ifid]
-    const ts_source = []
-    let multi_ts_requests = [];
     top_data?.forEach((el, i) => {
         const tmp_query = { ...ts_query };
+        // Substitute the parameters
         if (ts_request.value[0].ts_schema === "top:flowdev_port:traffic") {
             tmp_query.ts_query = tmp_query.ts_query.replace('$IFID$', el.ifid);
             tmp_query.ts_query = tmp_query.ts_query.replace('$DEVICE$', el.exporter_ip);
@@ -304,45 +350,9 @@ async function get_chart_options() {
             ts_source.push(val);
         }
         tmp_query.ts_unify = true
-        multi_ts_requests.push(tmp_query);
+        multi_ts_requests.value.push(tmp_query);
     })
     await retrieve_basic_info(ts_source);
-    post_params.ts_requests = multi_ts_requests;
-    const data_url = `${http_prefix}/lua/pro/rest/v2/get/timeseries/ts_multi.lua?${url_params}`;
-    props.get_component_data()
-    let result = await ntopng_utility.http_post_request(data_url, post_params);
-
-    /* Format the result in the format needed by Dygraph */
-    result = timeseriesUtils.tsArrayToOptionsArray(result, timeseries_groups.value, group_option_mode, '');
-    if (result[0]) {
-        result[0].height = height.value;
-    }
-    return result?.[0];
-}
-
-/* *************************************************** */
-
-/* Watch - detect changes on epoch_begin / epoch_end and refresh the component */
-watch(() => [props.epoch_begin, props.epoch_end, props.filters], (cur_value, old_value) => {
-    refreshChart();
-}, { flush: 'pre', deep: true });
-
-/* *************************************************** */
-
-/* Run the init here */
-onBeforeMount(async () => {
-    await init();
-});
-
-/* *************************************************** */
-
-onMounted(async () => { });
-
-/* *************************************************** */
-
-/* Defining the needed info by the get_chart_options function */
-async function init() {
-    height.value = (props.max_height || 4) * height_per_row;
 }
 
 /* *************************************************** */
@@ -351,7 +361,9 @@ async function init() {
 async function refreshChart() {
     if (chart.value) {
         const result = await get_chart_options();
-        chart.value.update_chart_series(result.data);
+        if (result?.data) {
+            chart.value.update_chart_series(result.data);
+        }
     }
 }
 
