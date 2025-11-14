@@ -8579,11 +8579,19 @@ void Flow::swap() {
   alert_info.is_srv_attacker = f1,
     alert_info.is_srv_victim = f2;
 
+  Utils::swap8(&cli2srv_tos, &srv2cli_tos);
+  
   if(tcp != NULL) {
+    TCPStats t;
+    
     memcpy(&ts, &tcp->tcp_seq_s2d, sizeof(TCPSeqNum));
     memcpy(&tcp->tcp_seq_d2s, &tcp->tcp_seq_s2d, sizeof(TCPSeqNum));
     memcpy(&tcp->tcp_seq_s2d, &ts, sizeof(TCPSeqNum));
     Utils::swap16(&tcp->cli2srv_window, &tcp->srv2cli_window);
+
+    memcpy(&t, &tcp_stats.cli2srv, sizeof(TCPStats));
+    memcpy(&tcp_stats.cli2srv, &tcp_stats.srv2cli, sizeof(TCPStats));
+    memcpy(&tcp_stats.srv2cli, &tcp_stats.cli2srv, sizeof(TCPStats));
   }
 
   cli2srvPktTime = srv2cliPktTime;
