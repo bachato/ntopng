@@ -1177,6 +1177,7 @@ void Flow::processPacket(bool src2dst_direction,
   }
 
 #if 0
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "DPI %sDetected", detected ? "" : "NOT YET ");
   switch(proto_id.state) {
     case NDPI_STATE_INSPECTING:
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "DPI State = Inspecting");
@@ -1549,6 +1550,9 @@ void Flow::updateHostBlacklists() {
 
 void Flow::updateProtocol(ndpi_protocol proto_id) {
   u_int16_t *ptr16;
+
+  if (ndpiDetectedProtocol.state != NDPI_STATE_CLASSIFIED)
+    ndpiDetectedProtocol.state = proto_id.state;
 
   /* NOTE: in order to avoid inconsistent states, only overwrite the
    * protocools if UNKNOWN. */
