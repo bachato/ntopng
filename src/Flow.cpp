@@ -4799,9 +4799,10 @@ void Flow::housekeep(time_t t) {
       break;
 
   case hash_entry_state_flow_protocoldetected:
-    if(!is_swap_requested()) /* The flow will be swapped, hook execution will
-				occur on the swapped flow. */
+    if(!is_swap_requested()) {
+      /* The flow will be swapped, hook execution will occur on the swapped flow. */
       iface->execProtocolDetectedChecks(this);
+    }
     break;
 
   case hash_entry_state_active:
@@ -4821,8 +4822,9 @@ void Flow::housekeep(time_t t) {
       have been swapped but actually it is not.
     */
     if(getInterface()->read_from_pcap_dump_done()
-       && is_swap_requested() && !is_swap_done())
+       && is_swap_requested() && !is_swap_done()) {
       iface->execProtocolDetectedChecks(this);
+    }
     break;
 
   case hash_entry_state_idle:
@@ -4830,9 +4832,10 @@ void Flow::housekeep(time_t t) {
      * after calling housekeep in this state */
 
     if(is_swap_requested() &&
-       !is_swap_done()) /* Swap requested but never performed (no more
-			   packets seen) */
+       !is_swap_done()) {
+      /* Swap requested but never performed (no more packets seen) */
       iface->execProtocolDetectedChecks(this);
+    }
 
     if(!is_swap_requested() /* Swap not requested */
        || (is_swap_requested() &&
