@@ -451,12 +451,19 @@ function formatSerie(tsOptionsArray, tsGroupsArray, tsCompare, useFullName) {
 
 /* *********************************************** */
 
+function getDefaultConfig(config) {
+    return dygraphConfig.buildChartOptions(config);
+}
+
+/* *********************************************** */
+
 const dygraphFormat = function () {
     return {
         formatSerie,
         formatSimpleSerie,
         getSerieId,
         getSerieName,
+        getDefaultConfig,
     };
 }();
 

@@ -35,12 +35,12 @@ function getDefaultConfig() {
 
 /* This function put the correct formatters in the configuration */
 function changeFormatters(config, options) {
-    if (options.formatters.length > 1) {
+    if (options?.formatters?.length > 1) {
         /* Multiple formatters */
         /* NOTE: at most 2 formatters can be used */
         config.axes.y1 = getAxisConfiguration(formatterUtils.getFormatter(options.formatters[0]));
         config.axes.y2 = getAxisConfiguration(formatterUtils.getFormatter(options.formatters[1]));
-    } else if (options.formatters.length == 1) {
+    } else if (options?.formatters?.length == 1) {
         /* Single formatter */
         config.axes.y = getAxisConfiguration(formatterUtils.getFormatter(options.formatters[0]));
     }
@@ -119,19 +119,17 @@ function getDefaultLegendFormatter(options) {
 
 /* This function merges the default config with the options requested */
 function buildChartOptions(options) {
-    const interpolated_colors = colorsInterpolation.transformColors(options.colors);
-    const highlight_color = getHighlightColor();
     const config = getDefaultConfig();
     const legendFormatter = getDefaultLegendFormatter(options);
 
     config.customBars = options.customBars;
-    config.labels = options.labels;
+    config.labels = (options.labels) ? options.labels : ["Time"];
     config.series = options.properties;
-    config.data = options.serie;
+    config.data = (options.serie) ? options.serie : [];
     config.stackedGraph = options.stacked;
     config.valueRange = options.value_range;
-    config.highlightSeriesBackgroundColor = highlight_color;
-    config.colors = interpolated_colors;
+    config.highlightSeriesBackgroundColor = getHighlightColor();
+    config.colors = (options.colors) ? colorsInterpolation.transformColors(options.colors || []) : [];
     config.disableTsList = options.disable_ts_list;
     config.yRangePad = options.yRangePad || 1;
     config.legendFormatter = legendFormatter;

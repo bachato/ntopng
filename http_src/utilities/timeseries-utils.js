@@ -88,7 +88,7 @@ function tsArrayToOptionsArrayRaw(tsOptionsArray, tsGroupsArray, groupsOptionsMo
 			let DygraphOptions = tsArrayToOptions(tsOptionsArray2, tsGroupsArray2, tsCompare, useFullName);
 			DygraphOptionsArray.push(DygraphOptions);
 		}
-		return DygraphOptionsArray;
+        if (DygraphOptionsArray.length > 0) return DygraphOptionsArray;
 	} else if (groupsOptionsMode.value == groupsOptionsModesEnum["1_chart_x_metric"].value) {
 		useFullName = tsOptionsArray.length > 1 || (tsGroupsArray.length > 0
 			&& tsGroupsArray[0].source_type.display_full_name === true);
@@ -97,9 +97,11 @@ function tsArrayToOptionsArrayRaw(tsOptionsArray, tsGroupsArray, groupsOptionsMo
 			let options = tsArrayToOptions([tsOptions], [tsGroupsArray[i]], tsCompare, useFullName);
 			optionsArray.push(options);
 		});
-		return optionsArray;
+		if (optionsArray.length > 0) return optionsArray;
 	}
-	return [];
+    // In this case, no option has been correctly built, simply return the default config empty
+    const config = dygraphFormat.getDefaultConfig({});
+	return [config];
 }
 
 /* *********************************************** */
