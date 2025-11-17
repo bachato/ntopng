@@ -1946,7 +1946,7 @@ local lang = {
     ["target"] = "Target",
   },
   ["category_lists"] = {
-    ["category_lists"] = "Blacklists",
+    ["category_lists"] = "Threat Intelligence",
     ["connection_time_out"] = "The server connection timeout out after %{duration} seconds",
     ["disable_some_list"] = "Please disable some lists in order to fix this.",
     ["download_succeeded"] = "List '%{name}' downloaded successfully",
