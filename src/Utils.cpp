@@ -4294,26 +4294,44 @@ int Utils::dropWriteCapabilities() {
 
 /* ******************************* */
 
-/* Return IP is network byte order */
+/* Return IP in network byte order */
 u_int32_t Utils::findInterfaceGatewayIPv4(const char *ifname) {
 #ifndef WIN32
   char cmd[128];
   FILE *fp;
+  u_int32_t rc = 0;
 
   snprintf(cmd, sizeof(cmd),
-           "netstat -rn | grep '%s' | grep 'UG' | awk '{print $2}'", ifname);
+           "netstat -rn 2>/dev/null | grep '%s' | grep 'UG' | awk '{print $2}'", ifname);
 
   if ((fp = popen(cmd, "r")) != NULL) {
     char line[256];
-    u_int32_t rc = 0;
 
-    if (fgets(line, sizeof(line), fp) != NULL) rc = inet_addr(line);
+    if (fgets(line, sizeof(line), fp) != NULL)
+      rc = inet_addr(line);
 
     pclose(fp);
-    return (rc);
-  } else
+  }
+
+  /* Note: netstat is deprecated (e.g. not available on latest Ubuntu), try with ip */
+  if (rc == 0) {
+    snprintf(cmd, sizeof(cmd),
+             "ip -4 route list 0.0.0.0/0 dev %s 2>/dev/null | awk '{print $3}'", ifname);
+
+    if ((fp = popen(cmd, "r")) != NULL) {
+      char line[256];
+
+      if (fgets(line, sizeof(line), fp) != NULL)
+        rc = inet_addr(line);
+
+      pclose(fp);
+    }
+  }
+
+  return (rc);
+#else
+  return (0);
 #endif
-    return (0);
 }
 
 /* ******************************* */
