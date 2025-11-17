@@ -330,7 +330,7 @@ else
     page_utils.add_menubar_section({
         section = page_utils.menu_sections.alerts,
         hidden = not prefs.are_alerts_enabled or
-            not auth.has_capability(auth.capabilities.alerts) or is_pcap_dump or
+            not auth.has_capability(auth.capabilities.alerts) or
             is_db_view_interface or infrastructure_view,
         entries = {
             {
@@ -339,9 +339,9 @@ else
             }, {
                 entry = page_utils.menu_entries.alerts_graph,
                 url = "/lua/pro/alerts_graph.lua",
-                hidden = (not ntop.isEnterpriseL() and
-                    not ntop.isnEdgeEnterprise()) or
-                    (not ntop.isClickHouseEnabled())
+                hidden = (not ntop.isEnterpriseL() and not ntop.isnEdgeEnterprise()) or
+                         (not ntop.isClickHouseEnabled()) or
+                         (is_pcap_dump)
             }, {
                 entry = page_utils.menu_entries.alerts_geomap,
                 url = "/lua/pro/alerts_geomap.lua",
@@ -349,10 +349,12 @@ else
             }, {
                 entry = page_utils.menu_entries.alerts_analysis,
                 url = "/lua/pro/enterprise/alerts_analysis.lua",
-                hidden = (not ntop.isEnterprise())
-            }, {entry = page_utils.menu_entries.divider}, {
+                hidden = (not ntop.isEnterprise()) or is_pcap_dump
+            }, {
+                entry = page_utils.menu_entries.divider
+            }, {
                 entry = page_utils.menu_sections.notifications,
-                hidden = not is_admin,
+                hidden = (not is_admin) or is_pcap_dump,
                 url = '/lua/admin/endpoint_notifications_list.lua'
             }
         }
