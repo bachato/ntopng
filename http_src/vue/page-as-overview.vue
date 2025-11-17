@@ -102,8 +102,8 @@ const customerIcon = '<i class="fa-solid fa-house-flag" data-bs-toggle="tooltip"
 const subCustomerIcon = '<i class="fa-solid fa-house-laptop" data-bs-toggle="tooltip" data-bs-placement="top" title="' + _i18n("asn_configuration.sub_customer_asn_title") + '"></i>'
 const remoteIcon = '<i class="fa-solid fa-house-fire" data-bs-toggle="tooltip" data-bs-placement="top" title="' + _i18n("asn_configuration.remote_asn_title") + '"></i>'
 const sankey_format_list = [
-    { key: "criteria_as", value: 'traffic_between_ases', label: _i18n('as_overview.as_traffic_criteria') },
     { key: "criteria_as", value: 'ingress_egress_traffic_criteria', label: _i18n('as_overview.ingress_egress_traffic_criteria') },
+    { key: "criteria_as", value: 'traffic_between_ases', label: _i18n('as_overview.as_traffic_criteria') },
 ];
 const time_preset_list = [
     { value: "live", label: i18n('live'), currently_active: true },
