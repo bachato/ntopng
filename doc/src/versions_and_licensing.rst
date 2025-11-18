@@ -536,6 +536,13 @@ Models Comparison Table
      - ✓
      - ✓
      - ✓
+   * - Hourly Historical Flow Aggregation
+     - ✗
+     - ✗
+     - x
+     - ✓
+     - ✓
+     - ✓
    * - Custom Interface Disaggregation \*\*\*
      - ✗
      - ✗
