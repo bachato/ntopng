@@ -1,7 +1,7 @@
 html,
 body,
 #particles-js {
-  background-color: #0d1117 !important;
+  background-color: #0D1117 !important;
   color: #E2E2E2;
 }
 
@@ -321,7 +321,7 @@ ul.navbar-nav li.nav-item.active> a.active {
 }
 
 .breadcrumb {
-  background-color: #0d1117 !important;
+  background-color: #0D1117 !important;
 }
 
 .breadcrumb-item.active {
@@ -344,11 +344,6 @@ ul.navbar-nav li.nav-item.active> a.active {
 .list-group-item-action:focus,
 .list-group-item-action:hover {
   color: #F39F53;
-}
-
-.dropdown-menu .dropdown-item:hover {
-  background-color: #E2E2E2 !important;
-  color: #0D1117;
 }
 
 .popover {
@@ -397,7 +392,7 @@ ul.navbar-nav li.nav-item.active> a.active {
 
 .table-hover tbody tr:hover {
   color: #E2E2E2 !important;
-  background-color: #1f2226 !important;
+  background-color: #1F2226 !important;
 }
 
 .table .thead-light th {
@@ -429,17 +424,6 @@ ul.navbar-nav li.nav-item> a.btn-outline-dark:hover {
   color: #212529 !important;
   background-color: #F8F9FA !important;
   border-color: #F8F9FA !important;
-}
-
-.pagination .page-item .page-link,
-.list-group-item {
-  background-color: #2D2D2D !important;
-  border: 1px solid #262626;
-  color: #FFFFFF;
-}
-
-.pagination .page-item.disabled .page-link {
-  color: #636363 !important;
 }
 
 .pagination .page-item.active .page-link {
@@ -503,7 +487,7 @@ ul.navbar-nav li.nav-item.active> a.active {
 
 .form-control,
 .form-select,
-.btn[role= 'combobox'] {
+.btn[role = 'combobox'] {
   color: #D1D1D1 !important;
   background-color: #181818 !important;
   border: 1px solid #3C3C3C !important;
@@ -643,10 +627,10 @@ g text.tick {
 .highlighted-json {
   white-space: pre-wrap;
   font-family: monospace;
-  color: white;
+  color: #FFFFFF;
   padding: 10px;
-  border: 1px solid #ccc;
-  background-color: #3e3d3d;
+  border: 1px solid #CCCCCC;
+  background-color: #3E3D3D;
 }
 
 .btn-check:active+ .btn-outline-primary,
@@ -779,8 +763,8 @@ label {
 
 .select2-selection {
   color: #D1D1D1 !important;
-  background-color: #0D1117 !important;
-  border-color: #3c3c3c !important;
+  background-color: #181818!important;
+  border-color: #3C3C3C !important;
 }
 
 .select2-selection__rendered {
@@ -797,7 +781,7 @@ label {
 .select2-search__field {
   border-color: #3C3C3C !important;
   color: #D1D1D1 !important;
-  background-color: #0d1117 !important;
+  background-color: #181818!important;
 }
 
 /* Datatables.net pagination button */
@@ -833,24 +817,24 @@ table.dataTable thead th.sorting::after {
 }
 
 .dygraph-axis-label {
-  color: #e2e2e2;
+  color: #E2E2E2;
 }
 
 .dygraph-legend {
-  background: #e2e2e2;
+  background: #E2E2E2;
 }
 
 .form-check-label {
-  color: #e2e2e2;
+  color: #E2E2E2;
 }
 
 .dropdown-menu {
-  background-color: #565e64;
+  background-color: #565E64;
   color: #EEEEEE;
 }
 
 .btn-info {
-  background-color: #0dcaf0 !important;
+  background-color: #0DCAF0 !important;
 }
 
 .link-button {
@@ -887,22 +871,22 @@ table.dataTable thead th.sorting::after {
 
 .ntopng-table {
   background-color: #232323 !important;
-  color: #e0e0e0 !important;
+  color: #E0E0E0 !important;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
 }
 
 .ntopng-table thead th {
-  background-color: #2a2a2a !important;
-  color: #f0f0f0 !important;
-  border-bottom: 1px solid #444 !important;
+  background-color: #2A2A2A !important;
+  color: #F0F0F0 !important;
+  border-bottom: 1px solid #444444 !important;
 }
 
 .ntopng-table th:not(:last-child)::after {
-  background: #333 !important;
+  background: #333333 !important;
 }
 
 .ntopng-table th:not(:last-child):hover::after {
-  background: #555 !important;
+  background: #555555 !important;
 }
 
 .ntopng-table th.resizing::after {
@@ -914,8 +898,8 @@ table.dataTable thead th.sorting::after {
 }
 
 .ntopng-table tbody tr td {
-  color: #e0e0e0 !important;
-  border-bottom: 1px solid #333 !important;
+  color: #E0E0E0 !important;
+  border-bottom: 1px solid #333333 !important;
 }
 
 .ntopng-table tbody tr:hover {
@@ -923,11 +907,11 @@ table.dataTable thead th.sorting::after {
 }
 
 .table.table-striped.table-bordered {
-@extend .ntopng-table;
+  @extend .ntopng-table;
 }
 
 .wrap-column {
-  color: #e0e0e0 !important;
+  color: #E0E0E0 !important;
 }
 
 // pagination buttons
@@ -943,23 +927,23 @@ table.dataTable thead th.sorting::after {
 }
 
 .centered-message {
-  color: #aaa !important;
+  color: #AAAAAA !important;
 }
 
 .query {
-  color: #999 !important;
+  color: #999999 !important;
 }
 
 .badge.bg-secondary {
-  background-color: #333 !important;
-  color: #ccc !important;
+  background-color: #333333 !important;
+  color: #CCCCCC !important;
 }
 
 .badge.bg-secondary:hover {
-  background-color: #444 !important;
+  background-color: #444444 !important;
 }
 
 .detail-value {
-  color: #e2e2e2;
-  font-weight: normal;
+  color: #E2E2E2;
+  font-weight: 400;
 }
