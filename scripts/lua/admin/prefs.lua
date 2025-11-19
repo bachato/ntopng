@@ -2221,6 +2221,13 @@ if auth.has_capability(auth.capabilities.preferences) then
                 min = 2,
                 max = 365 * 10
             })
+        prefsInputFieldPrefs(subpage_active.entries["vs_reports_data_retention"].title,
+            subpage_active.entries["vs_reports_data_retention"].description, "ntopng.prefs.",
+            "vs_reports_retention_days", data_retention_utils.getAggregatedVSReportRetention(), "number",
+            showAggregateFlowsPrefs, nil, nil, {
+                min = 2,
+                max = 365 * 10
+            })
         -- export flows for retention, only if ch and enterprise XL
         prefsToggleButton(subpage_active, {
             field = "toggle_data_archive_before_ttl_delete",
