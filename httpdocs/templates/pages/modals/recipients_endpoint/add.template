@@ -4,7 +4,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="add-recipient-modal-title">{{ i18n("endpoint_notifications.add_new_recipient") }}</h5>
-                <div class="modal-close">
+                <div class="modal-close ms-auto">
                     <div class="confirm-closing" style="display: none;">
                         <span class='mx-2' style="vertical-align: middle;"><b>{{ i18n("endpoint_notifications.validation.abort_add_recipient") }}</b></span>
                         <div class="btn-group btn-group-sm">
