@@ -3186,13 +3186,12 @@ void Ntop::checkShutdownWhenDone() {
 
     /* Test Script (Runtime Analysis) */
     if (ntop->getPrefs()->get_test_runtime_script_path()) {
-      const char *test_runtime_script_path =
-          ntop->getPrefs()->get_test_runtime_script_path();
+      const char *test_runtime_script_path = ntop->getPrefs()->get_test_runtime_script_path();
 
       /* Execute as Bash script */
-      ntop->getTrace()->traceEvent(TRACE_NORMAL,
-                                   "> Running Runtime Script '%s'",
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "> Running Runtime Script '%s'",
                                    test_runtime_script_path);
+      sleep(10); /* Allow concurrent activities and flushing to complete before running the test */
       Utils::exec(test_runtime_script_path);
     }
 
