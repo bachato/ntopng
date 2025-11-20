@@ -52,7 +52,6 @@ class ZMQCollectorInterface : public ZMQParserInterface {
   inline char *getEndpoint(u_int8_t id) {
     return ((id < num_subscribers) ? subscriber[id].endpoint : (char *)"");
   };
-  virtual void checkPointCounters(bool drops_only);
   virtual bool isPacketInterface() const { return (false); };
   void collect_flows();
   virtual bool is_ndpi_enabled() const { return (true /* Needed by blacklists and risks */); };

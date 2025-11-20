@@ -93,7 +93,7 @@ class ZMQParserInterface : public ParserInterface {
         num_flows,   /* flows processed */
         num_dropped_flows; /* flows unhandles (received but no room in the flow hash) */
     u_int32_t num_events, num_counters, num_hello, num_listening_ports, num_templates,
-        num_options, num_network_events, num_snmp_interfaces;
+        num_options, num_snmp_interfaces;
   } recvStats, recvStatsCheckpoint;
   inline void updateFlowMaxIdle() {
     returned_flow_max_idle = max(remote_idle_timeout, flow_max_idle);
@@ -132,6 +132,7 @@ class ZMQParserInterface : public ParserInterface {
                               void *data);
 
   u_int32_t periodicStatsUpdateFrequency() const;
+  virtual void checkPointCounters(bool drops_only);
   virtual void setRemoteStats(nProbeStats *zrs);
 #ifdef NTOPNG_PRO
   virtual bool getCustomAppDetails(u_int32_t remapped_app_id,

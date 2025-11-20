@@ -94,10 +94,13 @@ void ZCCollectorInterface::collect_flows() {
       if (data[0] == '{') {
         //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Event: %s", data);
         parseEvent((char *)data, buffer->len, 0, (void *)this);
+        recvStats.num_events++;
       } else {
         //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Data");
-        parseTLVFlows((char *)data, buffer->len, this);
+        recvStats.num_flows += parseTLVFlows((char *)data, buffer->len, this);
       }
+
+      recvStats.zmq_msg_rcvd++;
     } else if (rc == 0) {
       _usleep(1);
       purgeIdle(time(NULL));
