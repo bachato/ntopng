@@ -5,6 +5,7 @@ local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/alert_store/?.lua;" .. package.path
 
 require "ntop_utils"
+require "check_redis_prefs"
 local os_utils = require "os_utils"
 
 -- ##############################################
@@ -57,7 +58,7 @@ end
 -- @brief Call instance:db_cleanup for every available alert_store instance
 function alert_store_utils.housekeeping(ifid)
     -- NOTE: Clickhouse housekeeping is done daily in clickhouseDeleteOldPartitions
-    if not ntop.isClickHouseEnabled() then
+    if not hasClickHouseSupport() then
         local all_instances = alert_store_utils.all_instances_factory()
         for _, instance in pairs(all_instances) do
             instance:housekeeping(ifid)
