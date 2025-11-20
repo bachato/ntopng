@@ -623,7 +623,7 @@ bool SNMP::send_snmp_request(char *agent_host, u_int version, char *community,
   if((rc = snmp_sess_send(snmpSession->session_ptr, pdu)) == 0) {
     snmp_free_pdu(pdu);
     snmp_perror("snmp_sess_send");
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "SNMP send error [rc: %d]", rc);
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "SNMP send error [rc: %d][%s]", rc, agent_host);
     return(false);
   }
 
