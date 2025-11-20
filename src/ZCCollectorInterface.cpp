@@ -89,19 +89,15 @@ void ZCCollectorInterface::collect_flows() {
     rc = pfring_zc_recv_pkt(zq, &buffer, 0 /* wait_for_packet */);
 
     if (rc > 0) {
-      u_char *json = pfring_zc_pkt_buff_data(buffer, zq);
-      const char *master = "{ \"if.name\"";
+      u_char *data = pfring_zc_pkt_buff_data(buffer, zq);
 
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", json);
-      // fprintf(stdout, "+"); fflush(stdout);
-
-      if (strncmp((char *)json, master, strlen(master)) == 0) {
-        parseEvent((char *)json, buffer->len, 0, (void *)this);
+      if (data[0] == '{') {
+        //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Event: %s", data);
+        parseEvent((char *)data, buffer->len, 0, (void *)this);
       } else {
-        json[buffer->len] = '\0';
-        parseJSONFlows((char *)json, buffer->len);
+        //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Data");
+        parseTLVFlows((char *)data, buffer->len, this);
       }
-      // fprintf(stdout, "."); fflush(stdout);
     } else if (rc == 0) {
       _usleep(1);
       purgeIdle(time(NULL));
