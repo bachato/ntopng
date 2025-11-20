@@ -212,9 +212,9 @@ export default {
 
 <style>
 .dygraph-legend {
-    color: #111111;
-    background-color: #FFFFFF !important;
-    border-color: #a7a6a6;
+    color: var(--ntop-text-color);
+    background-color: var(--timeseries-legend-bg-color) !important;
+    border-color: var(--timeseries-legend-border-color);
     border-style: solid;
     border-width: thin;
     z-index: 80 !important;
