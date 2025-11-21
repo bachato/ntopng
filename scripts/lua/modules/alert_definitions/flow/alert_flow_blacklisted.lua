@@ -43,15 +43,13 @@ end
 -- @param alert_type_params Table `alert_type_params` as built in the `:init` method
 -- @return A human-readable string
 function alert_flow_blacklisted.format(ifid, alert, alert_type_params)
-    local blacklist = ""
-    if not isEmptyString(alert_type_params["custom_cat_file"]) then
-        blacklist = alert_type_params["custom_cat_file"]
+    local is_cat_blacklisted = alert_type_params["cat_blacklisted"]
+
+    local res = ""
+    if is_cat_blacklisted then
+        local href = string.format("<a href='%s/lua/admin/edit_categories.lua?tab=protocols'><i class='fas fa-cog'></i></a>", ntop.getHttpPrefix())
+        res = string.format("%s", i18n("blacklisted_category", { config_href = href }))
     end
-    -- This alert has been split into 3 alerts, this triggers only for the category
-    local res = i18n("flow_details.blacklisted_flow_detailed", {
-        who = i18n("category"),
-        blacklist = blacklist
-    })
 
     return res
 end
