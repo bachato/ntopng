@@ -139,7 +139,7 @@ if ifstats.zmqRecvStats and ifstats.zmqRecvStats_since_reset then
     ifstats.zmqRecvStats = override_stats(ifstats.zmqRecvStats, ifstats.zmqRecvStats_since_reset)
 end
 
-local probes_stats = ifstats.probes or {}
+local probes_stats = {}
 
 if interface.isView() then
     local view_id = interface.getId()
@@ -184,6 +184,12 @@ if interface.isView() then
     ifstats.exporters = exporters_stats
 
     interface.select(ifname) -- Go back to the View interface
+else
+    for ifid, probes in pairs(ifstats.probes or {}) do
+        for k, v in pairs(probes or {}) do
+            probes_stats[k] = v
+        end
+    end
 end
 
 local ext_interfaces = {}
