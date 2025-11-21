@@ -285,7 +285,7 @@ function protos_utils.clearOldApplications()
         protos_utils.parseProtosTxt()
     local key = getCustomnDPIProtoCategoriesKey()
     local app_cat_mapping = ntop.getHashAllCache(key) or {}
-    if app_id_mapping then
+    if (app_id_mapping) and (table.len(app_id_mapping) > 0) then
         for application_id, category_id in pairs(app_cat_mapping) do
             if not app_id_mapping[application_id] then
                 traceError(TRACE_NORMAL, TRACE_CONSOLE,
@@ -295,9 +295,15 @@ function protos_utils.clearOldApplications()
                 ntop.delHashCache(key, application_id)
             end
         end
-    else
+    else 
+        -- Simply check for old protocols no more present, in this way
+        -- all the "old" redis keys used are removed
         for application_id, category_id in pairs(app_cat_mapping) do
-            ntop.delHashCache(key, application_id)
+            -- getnDPIProtoName returns nil if no protocol with that id is found
+            -- If no name is found, the protocol is no more available
+            if not interface.getnDPIProtoName(tonumber(application_id)) then
+                ntop.delHashCache(key, application_id)
+            end
         end
     end
 end
