@@ -2818,6 +2818,18 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
     ethernet = (struct ndpi_ethhdr *)&packet[eth_offset];
     ip_offset = sizeof(struct ndpi_ethhdr) + eth_offset;
     eth_type = ntohs(ethernet->h_proto);
+  } else if (datalink_type == 276 /* Linux Cooked Capture v2 */) {
+    if (h->caplen < 20) {
+      incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
+	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len,
+	       1, NULL /* srcMac */, NULL /* dstMac */);
+      goto dissect_packet_end;
+    }
+
+    ethernet = (struct ndpi_ethhdr *)&dummy_ethernet;
+    if (sender_mac) memcpy(&dummy_ethernet.h_source, sender_mac, 6);
+    eth_type = (packet[eth_offset] << 8) + packet[eth_offset + 1];
+    ip_offset = 20 + eth_offset;
   } else if (datalink_type == 113 /* Linux Cooked Capture */) {
     if (h->caplen < 16) {
       incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
