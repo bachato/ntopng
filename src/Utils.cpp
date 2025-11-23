@@ -27,6 +27,7 @@
 
 #ifndef WIN32
 #include <ifaddrs.h>
+#include <sys/resource.h>
 #endif
 
 // #define TRACE_CAPABILITIES
@@ -7835,3 +7836,27 @@ const char* Utils::deviceType2str(DeviceType devtype) {
 
   return("Unknown (internal error)"); /* NOTREACHED */
 }
+
+/* ******************************************* */
+
+bool Utils::setProcessLimit(int resource, u_int32_t upper_limit) {
+#ifndef WIN32
+  struct rlimit new_limit;
+
+  new_limit.rlim_cur = (rlim_t)upper_limit; /* Soft limit (enforced by the kernel) */
+  new_limit.rlim_max = (rlim_t)upper_limit; /* Hard limit (max value the soft limit can reach) */
+
+  if (setrlimit(RLIMIT_NOFILE, &new_limit) == -1) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Failed to set resource limit [resource: %d][limit: %u]: %s",
+				 resource, upper_limit, strerror(errno));
+    return(false);
+  }
+  
+  ntop->getTrace()->traceEvent(TRACE_INFO,
+			       "Set resource limit succeeded [resource: %d][limit: %u]",
+			       resource, upper_limit);
+#endif
+  
+  return(true);
+}
+ 
