@@ -36,9 +36,11 @@ extern "C" {
   workloads.
 
   In case you want to use the "classic" API please:
-  
-  #define USE_STANDARD_FDSE 
 */
+
+#if NETSNMP_API_VERSION < 5008000
+  #define USE_STANDARD_FDSET 
+#endif
 
 /* ******************************* */
 
@@ -744,7 +746,7 @@ void SNMP::snmp_fetch_responses(lua_State *_vm, u_int timeout) {
     numfds = 0;
     tvp.tv_sec = timeout, tvp.tv_usec = 0;
 
-#ifdef USE_STANDARD_FDSE
+#ifdef USE_STANDARD_FDSET
     FD_ZERO(&fdset);
 
     snmp_sess_select_info(snmpSession->session_ptr, &numfds, &fdset, &tvp, &block);
@@ -782,7 +784,7 @@ void SNMP::snmp_fetch_responses(lua_State *_vm, u_int timeout) {
 
       numfds = 0;
 
-#ifdef USE_STANDARD_FDSE
+#ifdef USE_STANDARD_FDSET
       snmp_select_info(&numfds, &fdset, NULL, &block);      
       count = select(numfds, &fdset, NULL, NULL, &tvp);
 #else
@@ -806,7 +808,7 @@ void SNMP::snmp_fetch_responses(lua_State *_vm, u_int timeout) {
     }
   }
 
-#if !defined(USE_STANDARD_FDSE)
+#if !defined(USE_STANDARD_FDSET)
   netsnmp_large_fd_set_cleanup(&fdset);
 #endif
   
