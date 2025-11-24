@@ -30,6 +30,16 @@ extern "C" {
 
 #ifdef HAVE_LIBSNMP
 
+/*
+  In case of large installations with many devices to poll
+  libsnmp offers and alternative API for handling large
+  workloads.
+
+  In case you want to use the "classic" API please:
+  
+  #define USE_STANDARD_FDSE 
+*/
+
 /* ******************************* */
 
 SNMP::SNMP() {
@@ -722,17 +732,29 @@ void SNMP::snmp_fetch_responses(lua_State *_vm, u_int timeout) {
 
   for (unsigned int i = 0; i < sessions.size(); i++) {
     int numfds;
+#ifdef USE_STANDARD_FDSET    
     fd_set fdset;
+#else
+    netsnmp_large_fd_set fdset;
+#endif
     struct timeval tvp;
     int count, block = 0;
     SNMPSession *snmpSession = sessions.at(i);
 
     numfds = 0;
-    FD_ZERO(&fdset);
     tvp.tv_sec = timeout, tvp.tv_usec = 0;
 
-    snmp_sess_select_info(snmpSession->session_ptr, &numfds, &fdset, &tvp, &block);
+#ifdef USE_STANDARD_FDSE
+    FD_ZERO(&fdset);
 
+    snmp_sess_select_info(snmpSession->session_ptr, &numfds, &fdset, &tvp, &block);
+#else
+    netsnmp_large_fd_set_init(&fdset, 1024 /* max # file descriptors */);
+    snmp_sess_select_info2(snmpSession->session_ptr, &numfds, &fdset, &tvp, &block);
+
+    netsnmp_large_fd_set_cleanup(&fdset);
+#endif
+    
     /*
       Experiments run have shown that:
 
@@ -751,13 +773,23 @@ void SNMP::snmp_fetch_responses(lua_State *_vm, u_int timeout) {
 
     if((timeout > 0 /* The caller is willing to wait up to a timeout */)
        || (block == 0 /* The caller doesn't want to wait so the select is only performed when it doesn't block */)) {
+      int block = 0;
+      
       /* ntop->getTrace()->traceEvent(TRACE_WARNING, "%s(timeout: %u)[count: %u]", __FUNCTION__, tvp.tv_sec, count); */
 
       if((timeout > 0) && (tvp.tv_sec == 0))
 	tvp.tv_sec = 1; /* Set a minimum timeout in case it has been cleared by snmp_sess_select_info */
 
-      count = select(numfds, &fdset, NULL, NULL, &tvp);
+      numfds = 0;
 
+#ifdef USE_STANDARD_FDSE
+      snmp_select_info(&numfds, &fdset, NULL, &block);      
+      count = select(numfds, &fdset, NULL, NULL, &tvp);
+#else
+      snmp_select_info2(&numfds, &fdset, NULL, &block);      
+      count = select(numfds, &fdset.lfs_read, NULL, NULL, &tvp);
+#endif
+      
       if(count > 0) {
         vm = _vm;
         snmp_sess_read(snmpSession->session_ptr, &fdset); /* Will trigger asynch_response() */
@@ -774,6 +806,10 @@ void SNMP::snmp_fetch_responses(lua_State *_vm, u_int timeout) {
     }
   }
 
+#if !defined(USE_STANDARD_FDSE)
+  netsnmp_large_fd_set_cleanup(&fdset);
+#endif
+  
   if(add_nil) lua_pushnil(_vm);
 }
 
