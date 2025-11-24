@@ -7,9 +7,9 @@
 	"chart" : [{
 		"chart_id" : "l7_traffic",
 		"chart_type" : "topk-timeseries",
-		"unit_measure": "bps",
+		"unit_measure": "bps_no_scale",
 		"params" : {
-			"count" : "THROUGHPUT"
+			"count" : "l7_traffic"
 		}
 	}],
 	"visualization_type" : "table",

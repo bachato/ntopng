@@ -13,7 +13,7 @@ function getDefaultConfig() {
     return {
         labelsSeparateLines: true,
         legend: "follow",
-        connectSeparatedPoints: true,
+        connectSeparatedPoints: false,
         includeZero: true,
         drawPoints: true,
         highlightSeriesBackgroundAlpha: 0.7,
