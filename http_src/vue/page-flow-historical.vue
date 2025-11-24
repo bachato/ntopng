@@ -376,7 +376,9 @@ const f_map_chart_options = async (chart_options) => {
     if (formatter_type == null) {
         formatter_type = "number";
     }
-    chart_options.yaxis.labels.formatter = FormatterUtils.getFormatter(formatter_type);
+    if (chart_options?.yaxis?.labels) {
+        chart_options.yaxis.labels.formatter = FormatterUtils.getFormatter(formatter_type);
+    }
     return chart_options;
 };
 
@@ -519,8 +521,8 @@ const map_table_def_columns = async (columns) => {
         "THROUGHPUT": (throughput, row) => {
             return FormatterUtils.getFormatter("bps_no_scale")(throughput);
         },
-        "l4proto": (value, row) => { 
-            let l4proto_string = DataTableRenders.filterize('l4proto', value.value, value.label) 
+        "l4proto": (value, row) => {
+            let l4proto_string = DataTableRenders.filterize('l4proto', value.value, value.label)
             if (row.protocol_info_json && row.protocol_info_json.verdict && row.protocol_info_json.verdict.pass === 0)
                 l4proto_string = `<strike>${l4proto_string}</strike>`
             return l4proto_string
