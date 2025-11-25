@@ -36,30 +36,31 @@ In the above example the network adapter Intel(R) PRO/1000 MT Desktop is associa
 
 Manipulating ntopng Windows Service Settings
 --------------------------------------------
-Windows services are started and stopped using the Services application part of the Windows administrative tools. When ntopng is used as service, command line options need to be specified at service registration and can be modified only by removing and re-adding the service. The ntopng installer registers ntopng as a service with the default options. The default registered service options can be changed using these commands:
+Windows services are started and stopped using the Services application part of the Windows administrative tools. When ntopng is used as service, command line options need to be specified at service registration and can be modified only by removing and re-adding the service. The ntopng installer registers ntopng as a service with the default options. 
+
+In order to run ntopng with custom options it's suggested to use nssm; it can be downloaded from `here <https://nssm.cc/download>`_.
+
+.. note::
+
+   There are two folders inside the downloaded folder, one for 32bit systems and one for 64bit systems.
+
+Extract everything and run the nssm.exe program from the CMD:
 
 .. code:: bash
 
-   c:\Program Files\ntopng>ntopng /r
-   ntopng removed.
+    C:\nssm\nssm.exe install ntopng
 
-   c:\Program Files\ntopng>ntopng /i -i 1
-   ntopng installed.
-   NOTE: the default password for the 'admin' user has been set to 'admin'.
-   c:\Program Files\ntopng>
+After running this command a GUI is going to open, where it is possible to customize the process, with the executable path of the process to run (ntopng in this case) and the arguments to use when running.
 
+.. warning::
 
-Note that when you install the ntopng service (/i) you can specify a configuration file (the format is the same one used on Linux) instead of specifying the individual options. Example
+   In windows, a configuration file can't be used as a parameter like on Linux, so all the options needs to be specified in the Arguments section.
 
-.. code:: bash
+.. warning::
 
-   c:\Program Files\ntopng>ntopng c:\Documents\ntopng.conf
+   In windows, before the arguments there must be a :code:`/c`, for example :code:`/c -i 1 -i tcp://127.0.0.1:5556 -m 192.168.2.0/24`.
 
-Please make sure to
-
-  - Specify an absolute configuration file path (i.e. c:\....) and not a local one.
-  - Store the file in a directory that is readeable by the Windows service manager.
-
+After correctly configuring the process, the service needs to be launched (by either using the :code:`sc start ntopng` command from the CMD or by using the Windows Services).
    
 Troubleshooting
 ---------------
