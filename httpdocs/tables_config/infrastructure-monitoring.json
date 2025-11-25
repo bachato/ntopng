@@ -1,0 +1,135 @@
+{
+	"id": "active_monitoring",
+	"data_url": "lua/pro/rest/v2/get/infrastructure/instance.lua",
+	"use_current_page": false,
+	"enable_search": true,
+	"paging": false,
+	"display_empty_rows": true,
+	"default_sort": {
+		"column_id": "target",
+		"sort": 1
+	},
+	"columns": [
+		{
+			"id": "actions",
+			"title_i18n": "actions",
+			"sortable": false,
+			"sticky": true,
+			"class": [
+				"text-nowrap",
+				"text-center"
+			],
+			"render_v_node_type": "button_list",
+			"button_def_array": [
+				{
+					"id": "timeseries",
+					"icon": "fas fa-chart-area",
+					"title_i18n": "prefs.timeseries",
+					"class": [],
+					"event_id": "click_button_timeseries"
+				},
+				{
+					"id": "edit",
+					"icon": "fas fa-edit",
+					"title_i18n": "edit",
+					"class": [],
+					"event_id": "click_button_edit"
+				},
+				{
+					"id": "delete",
+					"icon": "fas fa fa-trash",
+					"title_i18n": "delete",
+					"class": [],
+					"event_id": "click_button_delete"
+				}
+			]
+		},
+		{
+			"title_i18n": "infrastructure_dashboard.name",
+			"data_field": "name",
+			"sortable": true,
+			"min-width": "180px",
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
+			"title_i18n": "infrastructure_dashboard.url",
+			"data_field": "url",
+			"sortable": false,
+			"min-width": "160px",
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
+			"title_i18n": "infrastructure_dashboard.status",
+			"data_field": "status",
+			"sortable": true,
+			"min-width": "90px",
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
+			"title_i18n": "infrastructure_dashboard.collected_stats.throughput",
+			"data_field": "throughput",
+			"sortable": true,
+			"min-width": "90px",
+			"class": [
+				"text-nowrap",
+				"text-center"
+			]
+		},
+		{
+			"title_i18n": "infrastructure_dashboard.collected_stats.hosts",
+			"data_field": "hosts",
+			"sortable": true,
+			"min-width": "90px",
+			"class": [
+				"text-nowrap",
+				"text-center"
+			]
+		},
+		{
+			"title_i18n": "infrastructure_dashboard.collected_stats.flows",
+			"data_field": "flows",
+			"sortable": true,
+			"min-width": "90px",
+			"class": [
+				"text-nowrap",
+				"text-center"
+			]
+		},
+		{
+			"title_i18n": "infrastructure_dashboard.collected_stats.engaged_alerts",
+			"data_field": "engaged_alerts",
+			"sortable": true,
+			"min-width": "90px",
+			"class": [
+				"text-nowrap",
+				"text-center"
+			]
+		},
+		{
+			"title_i18n": "infrastructure_dashboard.collected_stats.flow_alerts",
+			"data_field": "flow_alerts",
+			"sortable": true,
+			"min-width": "90px",
+			"class": [
+				"text-nowrap",
+				"text-center"
+			]
+		},
+		{
+			"title_i18n": "infrastructure_dashboard.collected_stats.last_update",
+			"data_field": "last_update",
+			"sortable": true,
+			"min-width": "90px",
+			"class": [
+				"text-nowrap",
+				"text-center"
+			]
+		}
+	]
+}
