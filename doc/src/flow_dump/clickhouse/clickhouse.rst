@@ -109,7 +109,3 @@ For example:
    Securing the connection when using ClickHouse Cloud is highly recommended,
    moreover ClickHouse Cloud by default only accepts secured connections
 
-ClickHouse Is Eating All My Disk/Memory !
------------------------------------------
-
-The defaut ClickHouse package configuration is not optimizes for reducing disk and memory usage. In order to avoid this problem please `refer to this guide <https://github.com/ntop/ntopng/blob/dev/doc/README.clickhouse.md>`_ that explain in detail how to optimize the database configuration.

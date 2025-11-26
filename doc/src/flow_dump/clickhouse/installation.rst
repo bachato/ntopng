@@ -57,3 +57,10 @@ For example:
 
 .. note::
   Even when using ClickHouse Cloud, clickhouse-client is needed in the local machine.
+
+ClickHouse Tuning
+-----------------
+
+The defaut ClickHouse service configuration is not optimized in terms of memory and disk utilization.
+In order to reduce utilization of such resources please `refer to this guide <https://github.com/ntop/ntopng/blob/dev/doc/README.clickhouse.md>`_ 
+that explain in detail how to optimize the database configuration.
