@@ -270,6 +270,7 @@ async function get_chart_options() {
     result = timeseriesUtils.tsArrayToOptionsArray(result, timeseries_groups.value, group_option_mode, '');
     if (result[0]) {
         result[0].height = height.value;
+        result[0].connectSeparatedPoints = true;
     }
     return result?.[0];
 }
