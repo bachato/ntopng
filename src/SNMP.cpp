@@ -39,8 +39,10 @@ extern "C" {
 */
 
 #if NETSNMP_API_VERSION < 5008000
-  #define USE_STANDARD_FDSET 
+#define USE_STANDARD_FDSET 
 #endif
+
+#define USE_STANDARD_FDSET /* Use it anyway */
 
 /* ******************************* */
 
