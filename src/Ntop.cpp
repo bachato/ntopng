@@ -4119,7 +4119,7 @@ void Ntop::setZoneInfo() {
       }
     }
   }
-#ifdef __FreeBSD__
+#ifdef __FreeBSD__ 
   /* Last resort, in FreeBSD, it is possible the tz is inside /var/db/zoneinfo */
   if (!zoneinfo) {
     FILE *fd = fopen("/var/db/zoneinfo", "r");  
@@ -4136,9 +4136,7 @@ void Ntop::setZoneInfo() {
         fclose(fd);
     }
   }
-#endif
-#endif
-
+#endif /* FreeBSD */
 #else
   zoneinfo = getWindowsTimezone();
 #endif /* WIN32 */
