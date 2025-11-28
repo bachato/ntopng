@@ -97,6 +97,8 @@ function kea_dhcp_server.writeDhcpServerConfiguration(dhcp_config, all_interface
       }
       subnet_id = subnet_id + 1
 
+      --[[ Do not add options, which are handles via /etc/ntopng/kea-dhcp4-ext.conf
+
       -- Add custom options if present
       if not isEmptyString(lan_dhcp_config["option_114"]) then
         table.insert(subnet_config["option-data"], {
@@ -122,6 +124,8 @@ function kea_dhcp_server.writeDhcpServerConfiguration(dhcp_config, all_interface
           -- the one generated here to handle custom options.
         end
       end
+
+      --]]
 
       table.insert(subnet4_configs, subnet_config)
     end
