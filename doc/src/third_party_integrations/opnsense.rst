@@ -5,7 +5,7 @@ OPNsense
 
 ntopng can be installed on OPNsense as plugin using the Web interface (recommended)
 or using the command line. In both cases the ntop repository for FreeBSD should be
-configured as described at https://packages.ntop.org/FreeBSD/.
+configured as described at https://www.ntop.org/support/documentation/software-installation/.
 
 .. warning::
 
@@ -23,7 +23,7 @@ Log into the OPNsense Shell as administrator (select option 8).
 
   OPNsense Shell
 
-And install the repository using the command provided at https://packages.ntop.org/FreeBSD/
+And install the repository using the command provided at https://www.ntop.org/support/documentation/software-installation/
 (you can cut&paste the command below).
 
 .. code:: bash
