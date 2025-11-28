@@ -4079,43 +4079,9 @@ const char* Ntop::getPersistentCustomListNameById(u_int8_t list_id) {
 
 void Ntop::setZoneInfo() {
 #ifndef WIN32
-
-#ifdef __FreeBSD__
-  FILE *fd = fopen("/var/db/zoneinfo", "r");
-
-  zoneinfo = NULL;
-
-  if (fd != NULL) {
-    char timezone[64];
-
-    if (fgets(timezone, sizeof(timezone), fd)) {
-      int len = strlen(timezone);
-
-      if (len > 0) timezone[len - 1] = '\0';
-      zoneinfo = strdup(timezone);
-    }
-
-    fclose(fd);
-  } else {
-    /* Last resort */
-    const char *command_buf =
-        "find /usr/share/zoneinfo -type f | xargs md5sum | grep `md5sum --quiet "
-        "/etc/localtime` | tail -1 | cut -d '/' -f 5-";
-    FILE *fp;
-
-    if ((fp = popen(command_buf, "r")) != NULL) {
-      char line[256];
-
-      if (fgets(line, sizeof(line), fp) != NULL) zoneinfo = strdup(line);
-
-      pclose(fp);
-    }
-  }
-
-#else
   char *tz = NULL;
   u_int num_slash = 0;
-  char buf[64];
+  char buf[128];
 
   buf[0] = '\0';
   zoneinfo = NULL;
@@ -4131,6 +4097,7 @@ void Ntop::setZoneInfo() {
 
   /* Read timezone from /etc/localtime (if TZ is not set) */
   if (tz == NULL) {
+    /* Check if the softlink is defined */
     ssize_t rc = readlink("/etc/localtime", buf, sizeof(buf));
 
     if (rc > 0) {
@@ -4152,6 +4119,24 @@ void Ntop::setZoneInfo() {
       }
     }
   }
+#ifdef __FreeBSD__
+  /* Last resort, in FreeBSD, it is possible the tz is inside /var/db/zoneinfo */
+  if (!zoneinfo) {
+    FILE *fd = fopen("/var/db/zoneinfo", "r");  
+    if (fd != NULL) {
+        char timezone[128];
+
+        if (fgets(timezone, sizeof(timezone), fd)) {
+        int len = strlen(timezone);
+
+        if (len > 0) timezone[len - 1] = '\0';
+        zoneinfo = strdup(timezone);
+        }
+
+        fclose(fd);
+    }
+  }
+#endif
 #endif
 
 #else
