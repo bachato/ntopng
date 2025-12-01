@@ -758,8 +758,6 @@ void SNMP::snmp_fetch_responses(lua_State *_vm, u_int timeout) {
     netsnmp_large_fd_set_cleanup(&fdset);
 #endif
 
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "numfds=%u", numfds);
-    
     /*
       Experiments run have shown that:
 
