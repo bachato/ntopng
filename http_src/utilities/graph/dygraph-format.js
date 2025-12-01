@@ -46,11 +46,7 @@ function formatSerieColors(palette_list) {
     let colors1 = d3v7.schemeCategory10;
     colors_list.forEach((s, index) => {
         if (s.palette == 0) {
-            if (palette_list.find((element, j) => (element.color === s.color && j !== index))) {
-                palette_list[index] = colors0[count0 % colors0.length];
-            } else {
-                palette_list[index] = s.color;
-            }
+            palette_list[index] = colors0[count0 % colors0.length];
             count0 += 1;
         } else if (s.palette == 1) {
             palette_list[index] = colors1[count1 % colors1.length];

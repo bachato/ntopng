@@ -6,7 +6,8 @@
 <template>
     <div>
         <TimeseriesChart ref="chart" :id="id" :chart_type="chart_type" :base_url_request="base_url"
-            :get_custom_chart_options="get_chart_options" :register_on_status_change="false" :disable_fixed_height="true">
+            :get_custom_chart_options="get_chart_options" :register_on_status_change="false"
+            :disable_fixed_height="true">
         </TimeseriesChart>
     </div>
 </template>
@@ -220,6 +221,8 @@ async function get_timeseries_groups_from_metric(metric_schema, source_def) {
 async function retrieve_basic_info() {
     /* Return the timeseries group, info found in the json */
     if (timeseries_groups.value.length == 0) {
+        /* Order the request just the first time */
+        order_ts_request();
         for (const value of ts_request.value) {
             const metric_schema = value?.ts_schema;
             const source_def = value.source_def;
@@ -228,6 +231,12 @@ async function retrieve_basic_info() {
             timeseries_groups.value.push(group);
         }
     }
+}
+
+/* *************************************************** */
+
+function order_ts_request() {
+    ts_request.value.sort((a, b) => a.tskey.localeCompare(b.tskey));
 }
 
 /* *************************************************** */
