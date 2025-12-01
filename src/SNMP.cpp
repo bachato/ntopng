@@ -749,7 +749,6 @@ void SNMP::snmp_fetch_responses(lua_State *_vm, u_int timeout) {
 
 #ifdef USE_STANDARD_FDSET
     FD_ZERO(&fdset);
-
     snmp_sess_select_info(snmpSession->session_ptr, &numfds, &fdset, &tvp, &block);
 #else
     netsnmp_large_fd_set_init(&fdset, 1024 /* max # file descriptors */);
@@ -776,14 +775,10 @@ void SNMP::snmp_fetch_responses(lua_State *_vm, u_int timeout) {
 
     if((timeout > 0 /* The caller is willing to wait up to a timeout */)
        || (block == 0 /* The caller doesn't want to wait so the select is only performed when it doesn't block */)) {
-      int block = 0;
-      
       /* ntop->getTrace()->traceEvent(TRACE_WARNING, "%s(timeout: %u)[count: %u]", __FUNCTION__, tvp.tv_sec, count); */
 
       if((timeout > 0) && (tvp.tv_sec == 0))
 	tvp.tv_sec = 1; /* Set a minimum timeout in case it has been cleared by snmp_sess_select_info */
-
-      numfds = 0;
 
 #ifdef USE_STANDARD_FDSET
       snmp_select_info(&numfds, &fdset, NULL, &block);      
