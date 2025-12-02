@@ -6176,7 +6176,7 @@ bool Utils::nwInterfaceExists(char *if_name) {
  #else
 #ifdef __linux__
   char path[64];
-  char base_if[64];
+  char base_if[32];
   struct stat buf;
   char *colon;
 
