@@ -4838,7 +4838,7 @@ char *Utils::get_real_name(const char *ifname_alias) {
     return NULL;
 
   if (Utils::ntop_findalldevs(&devpointer) == 0) {
-
+    /* Lookup real interface */
     for (cur = devpointer; cur; cur = cur->next) {
       if (cur->ifindex != -1 && cur->ifindex == ifindex /* same id */ &&
           cur->name && strcmp(cur->name, ifname_alias) == 0 /* actual interface */) {
@@ -4846,6 +4846,7 @@ char *Utils::get_real_name(const char *ifname_alias) {
       }
     }
 
+    /* Lookup alias interface */
     for (cur = devpointer; cur; cur = cur->next) {
       if (cur->ifindex != -1 && cur->ifindex == ifindex /* same id */ &&
           cur->name && strcmp(cur->name, ifname_alias) != 0 /* alias */) {
@@ -5590,11 +5591,24 @@ bool Utils::isPingSupported() {
  */
 char *Utils::ifname2devname(const char *ifname, char *devname,
                             int devname_size) {
-  const char *colon;
-  char *at;
+  const char *colon = NULL;
+  char *at = NULL;
+#ifdef HAVE_PF_RING
+  char prefix[16];
 
   /* strip prefix ":" */
   colon = strchr(ifname, ':');
+
+  if (colon) {
+    int len = colon-ifname;
+    if (len >= (int) sizeof(prefix)) len = sizeof(prefix)-1;
+    strncpy(prefix, ifname, len);
+    prefix[len] = '\0';
+    if (!pfring_is_module_prefix(prefix))
+      colon = NULL;
+  }
+#endif
+
   strncpy(devname, colon != NULL ? colon + 1 : ifname, devname_size);
   devname[devname_size - 1] = '\0';
 
