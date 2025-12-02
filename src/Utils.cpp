@@ -4703,8 +4703,10 @@ int Utils::get_ifindex(const char *ifname) {
   memset(&ifr, 0, sizeof(ifr));
   strncpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name)-1);
 
-  if (ioctl(sockfd, SIOCGIFINDEX, &ifr) == -1)
+  if (ioctl(sockfd, SIOCGIFINDEX, &ifr) == -1) {
+    close(sockfd);
     return -1;
+  }
 
 #ifdef __linux__
   ifindex = ifr.ifr_ifindex;
@@ -4712,6 +4714,8 @@ int Utils::get_ifindex(const char *ifname) {
   ifindex = ifr.ifr_index;
 #endif
 #endif
+
+  close(sockfd);
 
   return ifindex;
 }
