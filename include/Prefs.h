@@ -695,7 +695,7 @@ class Prefs {
     reproduce_at_original_speed = true;
   };
   inline bool purgeHostsFlowsOnPcapFiles() {
-    return (pcap_file_purge_hosts_flows || dump_flows_on_clickhouse);
+    return (pcap_file_purge_hosts_flows /* || dump_flows_on_clickhouse */);
   };
   inline bool disablePurge() { return (disable_purge);  };
   inline void enableBehaviourAnalysis() { enable_behaviour_analysis = true; };
