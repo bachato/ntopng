@@ -665,8 +665,7 @@ fi
 
 SNMP_LIB=
 SNMP_INC=
-if test "${with_nedge+set}" != set; then
-  if test $SYSTEM = "Darwin"; then
+if test $SYSTEM = "Darwin"; then
     dnl>
     dnl> MacOS Note on NET-SNMP
     dnl>
@@ -680,20 +679,19 @@ if test "${with_nedge+set}" != set; then
     dnl>   AC_DEFINE_UNQUOTED(HAVE_LIBSNMP, 1, [has net-snmp])
     dnl> fi
     SNMP_LIB=
-  else
-    AC_CHECK_LIB([snmp], [init_snmp])
-
-    if test "x$ac_cv_lib_snmp_init_snmp" = xyes; then :
-      SNMP_LIB="-lsnmp"
-     else
+else
       AC_CHECK_LIB([netsnmp], [init_snmp])
 
       if test "x$ac_cv_lib_netsnmp_init_snmp" = xyes; then :
          SNMP_LIB="-lnetsnmp"
          AC_DEFINE_UNQUOTED(HAVE_LIBSNMP, 1, [has net-snmp])
-      fi
-    fi
-   fi
+	 AC_CHECK_LIB([netsnmp], [snmp_sess_select_info2], AC_DEFINE_UNQUOTED(HAVE_LIBSNMP_LARGE_FD, 1, [has large file descriptors]))
+       else
+        AC_CHECK_LIB([snmp], [init_snmp])
+         if test "x$ac_cv_lib_snmp_init_snmp" = xyes; then :
+          SNMP_LIB="-lsnmp"
+	 fi
+       fi
 fi
 
 if test "${with_nedge+set}" != set; then

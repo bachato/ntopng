@@ -30,6 +30,12 @@ extern "C" {
 
 #ifdef HAVE_LIBSNMP
 
+#include <net-snmp/library/snmp_assert.h>
+#include <net-snmp/library/large_fd_set.h>
+
+//#include <net-snmp/session_api.h>
+
+
 /*
   In case of large installations with many devices to poll
   libsnmp offers and alternative API for handling large
@@ -39,7 +45,7 @@ extern "C" {
 */
 
 #if NETSNMP_API_VERSION < 5008000
-#define USE_STANDARD_FDSET 
+// #define USE_STANDARD_FDSET
 #endif
 
 
@@ -732,14 +738,18 @@ bool SNMP::send_snmp_set_request(char *agent_host, char *community,
 
 void SNMP::snmp_fetch_responses(lua_State *_vm, u_int timeout) {
   bool add_nil = true;
+#ifdef HAVE_LIBSNMP_LARGE_FD
+  netsnmp_large_fd_set fdset;
+#else
+  fd_set fdset;
+#endif
+
+#ifdef HAVE_LIBSNMP_LARGE_FD
+  netsnmp_large_fd_set_init(&fdset, 1024 /* max # file descriptors */);
+#endif
 
   for (unsigned int i = 0; i < sessions.size(); i++) {
     int numfds;
-#ifdef USE_STANDARD_FDSET    
-    fd_set fdset;
-#else
-    netsnmp_large_fd_set fdset;
-#endif
     struct timeval tvp;
     int count, block = 0;
     SNMPSession *snmpSession = sessions.at(i);
@@ -747,14 +757,12 @@ void SNMP::snmp_fetch_responses(lua_State *_vm, u_int timeout) {
     numfds = 0;
     tvp.tv_sec = timeout, tvp.tv_usec = 0;
 
-#ifdef USE_STANDARD_FDSET
+#ifdef HAVE_LIBSNMP_LARGE_FD
+    NETSNMP_LARGE_FD_ZERO(&fdset);
+    snmp_sess_select_info2(snmpSession->session_ptr, &numfds, &fdset, &tvp, &block);
+#else
     FD_ZERO(&fdset);
     snmp_sess_select_info(snmpSession->session_ptr, &numfds, &fdset, &tvp, &block);
-#else
-    netsnmp_large_fd_set_init(&fdset, 1024 /* max # file descriptors */);
-    snmp_sess_select_info2(snmpSession->session_ptr, &numfds, &fdset, &tvp, &block);
-
-    netsnmp_large_fd_set_cleanup(&fdset);
 #endif
 
     /*
@@ -780,17 +788,21 @@ void SNMP::snmp_fetch_responses(lua_State *_vm, u_int timeout) {
       if((timeout > 0) && (tvp.tv_sec == 0))
 	tvp.tv_sec = 1; /* Set a minimum timeout in case it has been cleared by snmp_sess_select_info */
 
-#ifdef USE_STANDARD_FDSET
-      snmp_select_info(&numfds, &fdset, NULL, &block);      
-      count = select(numfds, &fdset, NULL, NULL, &tvp);
+#ifdef HAVE_LIBSNMP_LARGE_FD
+      snmp_select_info2(&numfds, &fdset, NULL, &block);
+      count = netsnmp_large_fd_set_select(fdset.lfs_setsize, &fdset, NULL, NULL, &tvp);
 #else
-      snmp_select_info2(&numfds, &fdset, NULL, &block);      
-      count = select(numfds, &fdset.lfs_read, NULL, NULL, &tvp);
+      snmp_select_info(&numfds, &fdset, NULL, &block);
+      count = select(numfds, &fdset, NULL, NULL, &tvp);
 #endif
-      
+
       if(count > 0) {
         vm = _vm;
-        snmp_sess_read(snmpSession->session_ptr, &fdset); /* Will trigger asynch_response() */
+#ifdef HAVE_LIBSNMP_LARGE_FD
+	snmp_sess_read2(snmpSession->session_ptr, &fdset); /* Will trigger asynch_response() */
+#else
+	snmp_sess_read(snmpSession->session_ptr, &fdset); /* Will trigger asynch_response() */
+#endif
 
         /* Add a nil in case no response was pushed in the stack */
         if(lua_gettop(vm) > 0) add_nil = false;
@@ -804,10 +816,11 @@ void SNMP::snmp_fetch_responses(lua_State *_vm, u_int timeout) {
     }
   }
 
-#if !defined(USE_STANDARD_FDSET)
-  netsnmp_large_fd_set_cleanup(&fdset);
+#ifdef HAVE_LIBSNMP_LARGE_FD
+  // netsnmp_large_fd_set_cleanup(&fdset);
+  netsnmp_large_fd_set_resize(&fdset, 0);
 #endif
-  
+
   if(add_nil) lua_pushnil(_vm);
 }
 
