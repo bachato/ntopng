@@ -4838,6 +4838,14 @@ char *Utils::get_real_name(const char *ifname_alias) {
     return NULL;
 
   if (Utils::ntop_findalldevs(&devpointer) == 0) {
+
+    for (cur = devpointer; cur; cur = cur->next) {
+      if (cur->ifindex != -1 && cur->ifindex == ifindex /* same id */ &&
+          cur->name && strcmp(cur->name, ifname_alias) == 0 /* actual interface */) {
+        goto found;
+      }
+    }
+
     for (cur = devpointer; cur; cur = cur->next) {
       if (cur->ifindex != -1 && cur->ifindex == ifindex /* same id */ &&
           cur->name && strcmp(cur->name, ifname_alias) != 0 /* alias */) {
@@ -4846,6 +4854,7 @@ char *Utils::get_real_name(const char *ifname_alias) {
       }
     }
 
+   found:
     Utils::ntop_freealldevs(devpointer);
   }
 #endif
