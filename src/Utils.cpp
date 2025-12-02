@@ -4713,9 +4713,9 @@ int Utils::get_ifindex(const char *ifname) {
 #else
   ifindex = ifr.ifr_index;
 #endif
-#endif
 
   close(sockfd);
+#endif
 
   return ifindex;
 }
