@@ -6172,9 +6172,16 @@ bool Utils::nwInterfaceExists(char *if_name) {
  #else
 #ifdef __linux__
   char path[64];
+  char base_if[64];
   struct stat buf;
+  char *colon;
 
-  snprintf(path, sizeof(path), "/sys/class/net/%s", if_name);
+  /* Handle virtual interfaces like eno1:1 by stripping the :X suffix */
+  snprintf(base_if, sizeof(base_if), "%s", if_name);
+  if((colon = strchr(base_if, ':')) != NULL)
+    *colon = '\0';
+
+  snprintf(path, sizeof(path), "/sys/class/net/%s", base_if);
   return((stat(path, &buf) == 0) ? true : false);
 #else
   bool found = false;
