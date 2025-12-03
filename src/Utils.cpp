@@ -4832,39 +4832,50 @@ void Utils::ntop_freealldevs(ntop_if_t *alldevsp) {
 
 /* ****************************************************** */
 
-char *Utils::get_real_name(const char *ifname_alias) {
+char *Utils::get_real_name(const char *ifname_alias, ntop_if_t *devlist) {
+  ntop_if_t *cur;
   char *real_name = NULL;
-#if not defined(WIN32)
-  ntop_if_t *devpointer, *cur;
-  int ifindex = Utils::get_ifindex(ifname_alias);
 
+  int ifindex = Utils::get_ifindex(ifname_alias);
   if (ifindex == -1)
     return NULL;
 
+  /* Lookup real interface */
+  for (cur = devlist; cur; cur = cur->next) {
+    if (cur->ifindex != -1 && cur->ifindex == ifindex /* same id */ &&
+        cur->name && strcmp(cur->name, ifname_alias) == 0 /* actual interface */) {
+      goto found;
+    }
+  }
+
+  /* Lookup alias interface */
+  for (cur = devlist; cur; cur = cur->next) {
+    if (cur->ifindex != -1 && cur->ifindex == ifindex /* same id */ &&
+        cur->name && strcmp(cur->name, ifname_alias) != 0 /* alias */) {
+      real_name = strdup(cur->name);
+      break;
+    }
+  }
+
+ found:
+  return real_name;
+}
+
+/* ****************************************************** */
+
+char *Utils::get_real_name(const char *ifname_alias) {
+#if not defined(WIN32)
+  ntop_if_t *devpointer;
+  char *real_name = NULL;
+
   if (Utils::ntop_findalldevs(&devpointer) == 0) {
-    /* Lookup real interface */
-    for (cur = devpointer; cur; cur = cur->next) {
-      if (cur->ifindex != -1 && cur->ifindex == ifindex /* same id */ &&
-          cur->name && strcmp(cur->name, ifname_alias) == 0 /* actual interface */) {
-        goto found;
-      }
-    }
-
-    /* Lookup alias interface */
-    for (cur = devpointer; cur; cur = cur->next) {
-      if (cur->ifindex != -1 && cur->ifindex == ifindex /* same id */ &&
-          cur->name && strcmp(cur->name, ifname_alias) != 0 /* alias */) {
-        real_name = strdup(cur->name);
-        break;
-      }
-    }
-
-   found:
+    real_name = Utils::get_real_name(ifname_alias, devpointer);
     Utils::ntop_freealldevs(devpointer);
+    return real_name;
   }
 #endif
 
-  return real_name;
+  return NULL;
 }
 
 /* ****************************************************** */

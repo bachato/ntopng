@@ -3978,9 +3978,13 @@ void Ntop::initPing() {
     /* Pinger per interface */
     ntop_if_t *devpointer, *cur;
     if (Utils::ntop_findalldevs(&devpointer) == 0) {
-      for (cur = devpointer; cur; cur = cur->next)
-        if (cur->name)
-          getPing(cur->name);
+      for (cur = devpointer; cur; cur = cur->next) {
+        if (cur->name) {
+          char *real_name = Utils::get_real_name(cur->name, devpointer);
+          if (real_name) free(real_name); /* alias - skip */
+          else getPing(cur->name);
+        }
+      }
       Utils::ntop_freealldevs(devpointer);
     }
 
