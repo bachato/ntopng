@@ -139,7 +139,7 @@ local function draw_graph(iec, total, mapping)
          label = mapping[tonumber(k)]
       end
 
-      print("{ id: " .. i .. ", label: \"" .. label .. "\" },\n")
+      print("{ id: " .. i .. ", label: \"" .. (label or k) .. "\" },\n")
       nodes_id[k] = i
       i = i + 1
    end
