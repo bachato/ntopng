@@ -4835,18 +4835,26 @@ void Utils::ntop_freealldevs(ntop_if_t *alldevsp) {
 char *Utils::get_real_name(const char *ifname_alias, ntop_if_t *devlist) {
   ntop_if_t *cur;
   char *real_name = NULL;
+  char alias[32];
+  char *col;
+  int ifindex;
 
-  int ifindex = Utils::get_ifindex(ifname_alias);
+  strncpy(alias, ifname_alias, sizeof(alias));
+  alias[sizeof(alias)-1] = '\0';
+
+  col = strchr(alias, ':');
+  if (!col) return NULL; /* likely a real interface */
+
+#ifdef HAVE_PF_RING
+  *col = '\0';
+
+  if (pfring_is_module_prefix(alias))
+    return NULL; /* pf_ring zc or other module */
+#endif
+
+  ifindex = Utils::get_ifindex(ifname_alias);
   if (ifindex == -1)
     return NULL;
-
-  /* Lookup real interface */
-  for (cur = devlist; cur; cur = cur->next) {
-    if (cur->ifindex != -1 && cur->ifindex == ifindex /* same id */ &&
-        cur->name && strcmp(cur->name, ifname_alias) == 0 /* actual interface */) {
-      goto found;
-    }
-  }
 
   /* Lookup alias interface */
   for (cur = devlist; cur; cur = cur->next) {
@@ -4857,7 +4865,6 @@ char *Utils::get_real_name(const char *ifname_alias, ntop_if_t *devlist) {
     }
   }
 
- found:
   return real_name;
 }
 
