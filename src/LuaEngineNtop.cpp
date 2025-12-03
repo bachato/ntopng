@@ -1525,7 +1525,7 @@ static int non_blocking_connect(int sock, struct sockaddr_in *sa, int timeout) {
     goto done;
 
   // we are waiting for connect to complete now
-  if ((ret = Utils::pollSocket(sock, timeout*1000)) < 0)
+  if ((ret = Utils::pollSocket(sock, timeout ? (timeout*1000) : -1 /* wait */)) < 0)
     return -1;
 
   if (ret == 0) {
