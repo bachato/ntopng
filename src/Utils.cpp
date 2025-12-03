@@ -6045,6 +6045,11 @@ int Utils::pollSocket(int sock, int timeout /* msec */) {
   fd_set rset;
   struct timeval tv;
 
+  if (sock > FD_SETSIZE) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to poll socket %d (too many file descriptors)");
+    return -1;
+  }
+
   FD_ZERO(&rset);
   FD_SET(sock, &rset);
 
