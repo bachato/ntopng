@@ -75,14 +75,7 @@ void MDNS::initializeResolver() {
     mdns_dest.sin_addr.s_addr = gatewayIPv4;
     if (sendto(udp_sock, mdnsbuf, dns_query_len, 0,
                (struct sockaddr *)&mdns_dest, sizeof(struct sockaddr_in)) > 0) {
-      fd_set rset;
-      struct timeval tv;
-
-      FD_ZERO(&rset);
-      FD_SET(udp_sock, &rset);
-
-      tv.tv_sec = 2, tv.tv_usec = 0;
-      if (select(udp_sock + 1, &rset, NULL, NULL, &tv) > 0) {
+      if (Utils::pollSocket(udp_sock, 2000) > 0) {
         struct sockaddr_in from;
         socklen_t from_len = sizeof(from);
         int len = recvfrom(udp_sock, mdnsbuf, sizeof(mdnsbuf), 0,
@@ -375,6 +368,7 @@ void MDNS::fetchResolveResponses(lua_State *vm, int32_t timeout_sec) {
   lua_newtable(vm);
 
   while (true) {
+#ifdef WIN32
     fd_set rset;
     struct timeval tv;
 
@@ -384,6 +378,14 @@ void MDNS::fetchResolveResponses(lua_State *vm, int32_t timeout_sec) {
     tv.tv_sec = timeout_sec, tv.tv_usec = 0;
 
     if (select(batch_udp_sock + 1, &rset, NULL, NULL, &tv) > 0) {
+#else
+    struct pollfd pfd;
+
+    pfd.fd = batch_udp_sock;
+    pfd.events = POLLIN;
+
+    if (poll(&pfd, 1, timeout_sec * 1000) > 0) {
+#endif
       struct sockaddr_in from;
       char mdnsbuf[512];
       socklen_t from_len = sizeof(from);

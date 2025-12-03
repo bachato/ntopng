@@ -332,6 +332,7 @@ class Utils {
   static bool endsWith(const char *base, const char *str);
   static int openSocket(int domain, int type, int protocol, const char *label);
   static void closeSocket(int socket);
+  static int pollSocket(int sock, int timeout /* msec */);
   static const char **getMessagingTopics();
   static char *toHex(char *in, u_int in_len, char *out, u_int out_len);
   static bool fromHex(char *in, u_int in_len, char *out, u_int out_len);

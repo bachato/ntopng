@@ -6040,6 +6040,29 @@ void Utils::closeSocket(int sock) {
 
 /* ******************************************* */
 
+int Utils::pollSocket(int sock, int timeout /* msec */) {
+#ifdef WIN32
+  fd_set rset;
+  struct timeval tv;
+
+  FD_ZERO(&rset);
+  FD_SET(sock, &rset);
+
+  tv.tv_sec = timeout/1000;
+  tv.tv_usec = (timeout%1000)*1000;
+  return select(sock + 1, &rset, NULL, NULL, &tv);
+#else
+  struct pollfd pfd;
+
+  pfd.fd = sock;
+  pfd.events = POLLIN;
+
+  return poll(&pfd, 1, timeout);
+#endif
+}
+
+/* ******************************************* */
+
 static const char *message_topics[] = {
     "flow",  "event",           "counter",     "template", "option",
     "hello", "listening-ports", "snmp-ifaces", "custom-ie", NULL};
