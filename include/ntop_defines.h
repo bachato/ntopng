@@ -1094,7 +1094,7 @@
 #define NTOP_UNKNOWN_CATEGORY_STR "???"
 #define NTOP_UNKNOWN_CATEGORY_ID 0
 
-#define CLICKHOUSE_MAX_NUM_ROWS_TO_LUA 1000
+#define CLICKHOUSE_MAX_NUM_ROWS_TO_LUA 100000
 
 // sqlite (StoreManager and subclasses) related fields
 #define STORE_MANAGER_MAX_QUERY 2048
