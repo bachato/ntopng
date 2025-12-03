@@ -3980,12 +3980,17 @@ void Ntop::initPing() {
     if (Utils::ntop_findalldevs(&devpointer) == 0) {
       for (cur = devpointer; cur; cur = cur->next) {
         if (cur->name) {
+          struct sockaddr_in6 sin6;
           char *real_name = Utils::get_real_name(cur->name, devpointer);
-          if (real_name) {
-	    free(real_name); /* alias - skip */
-	  } else {
+          if (real_name == NULL /* real interface (not an alias) */ ||
+              /* Check if there is an IP for the interface */
+              Utils::readIPv4(cur->name) ||
+	      Utils::readIPv6(cur->name, &sin6.sin6_addr)) {
             getPing(cur->name);
 	  }
+
+          if (real_name)
+	    free(real_name);
         }
       }
       Utils::ntop_freealldevs(devpointer);
