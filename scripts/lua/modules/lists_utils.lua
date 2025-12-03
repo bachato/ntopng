@@ -727,6 +727,9 @@ function lists_utils.reset_blacklist_url(list_name, enabled)
     if not isEmptyString(lists_metadata) then
         current_lists = json.decode(lists_metadata)
     end
+    if not current_lists[list_name] then
+        current_lists[list_name] = {}
+    end
     current_lists[list_name].url = default_url
     ntop.setPref(METADATA_KEY, json.encode(current_lists))
 end
