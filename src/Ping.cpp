@@ -278,9 +278,9 @@ int Ping::ping(char *_addr, bool use_v6) {
 /* ****************************************** */
 
 void Ping::pollResults() {
-  int bytes, fd_max = max(sd, sd6);
-  fd_set mask;
-  struct timeval wait_time;
+  int bytes;
+  int sock_mask[2];
+  int num_socks = 0;
   char thread_name[64];
 
   if (ifname)
@@ -295,30 +295,27 @@ void Ping::pollResults() {
 #endif
 
   while (running && (!ntop->getGlobals()->isShutdown())) {
-    FD_ZERO(&mask);
-    if (sd >= 0) FD_SET(sd, &mask);
-    if (sd6 >= 0) FD_SET(sd6, &mask);
 
-    wait_time.tv_sec = 1, wait_time.tv_usec = 0;
+    num_socks = 0; 
+    if (sd >= 0)  sock_mask[num_socks++] = sd;
+    if (sd6 >= 0) sock_mask[num_socks++] = sd6;
 
-    if (select(fd_max + 1, &mask, 0, 0, &wait_time) > 0) {
+    if (num_socks && Utils::pollSockets(sock_mask, num_socks, 1000) > 0) {
       unsigned char buf[1024];
 
-      if ((sd >= 0) && FD_ISSET(sd, &mask)) {
+      if (sd >= 0 && sock_mask[0] == sd) {
         struct sockaddr_in addr;
         socklen_t len = sizeof(addr);
 
-        bytes =
-            recvfrom(sd, buf, sizeof(buf), 0, (struct sockaddr *)&addr, &len);
+        bytes = recvfrom(sd, buf, sizeof(buf), 0, (struct sockaddr *)&addr, &len);
         handleICMPResponse(buf, bytes, &addr.sin_addr, NULL);
       }
 
-      if ((sd6 >= 0) && FD_ISSET(sd6, &mask)) {
+      if (sd6 >= 0 && sock_mask[num_socks-1] == sd6) {
         struct sockaddr_in6 addr;
         socklen_t len = sizeof(addr);
 
-        bytes =
-            recvfrom(sd6, buf, sizeof(buf), 0, (struct sockaddr *)&addr, &len);
+        bytes = recvfrom(sd6, buf, sizeof(buf), 0, (struct sockaddr *)&addr, &len);
         handleICMPResponse(buf, bytes, NULL, &addr.sin6_addr);
       }
     }

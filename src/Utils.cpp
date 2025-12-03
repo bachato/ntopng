@@ -6034,6 +6034,7 @@ void Utils::closeSocket(int sock) {
 
 /* ******************************************* */
 
+/* Poll a socket and bahaves like a poll() (same timeout and return value) */
 int Utils::pollSocket(int sock, int timeout /* msec */) {
 #ifdef WIN32
   fd_set rset;
@@ -6058,6 +6059,53 @@ int Utils::pollSocket(int sock, int timeout /* msec */) {
 
   return poll(&pfd, 1, timeout);
 #endif
+}
+
+/* ******************************************* */
+
+/* Poll a list of sockets and bahaves like a poll() (same timeout and return value) 
+ * Sockets which are not ready are cleared from the array (set to -1) */
+int Utils::pollSockets(int socks[], int num, int timeout /* msec */) {
+  int rc;
+#ifdef WIN32
+  fd_set rset;
+  struct timeval tv;
+  int max_fd = 0;
+
+  FD_ZERO(&rset);
+  for (int i = 0; i < num; i++) {
+    if (socks[i] > FD_SETSIZE) {
+      ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to poll socket %d (too many file descriptors)");
+      return -1;
+    }
+    if (socks[i] > max_fd) max_fd = socks[i];
+    FD_SET(socks[i], &rset);
+  }
+
+  tv.tv_sec = timeout/1000;
+  tv.tv_usec = (timeout%1000)*1000;
+
+  rc = select(max_fd + 1, &rset, NULL, NULL, &tv);
+
+  for (int i = 0; i < num; i++)
+    if (rc <= 0 || !FD_ISSET(socks[i], &rset)
+      socks[i] = -1;
+#else
+  struct pollfd pfd[num];
+
+  for (int i = 0; i < num; i++) { 
+    pfd[i].fd = socks[i];
+    pfd[i].events = POLLIN;
+  }
+
+  rc = poll(pfd, num, timeout);
+
+  for (int i = 0; i < num; i++)
+    if (rc <= 0 || !(pfd[i].revents & POLLIN))
+      socks[i] = -1;
+#endif
+
+  return rc;
 }
 
 /* ******************************************* */
