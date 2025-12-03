@@ -4355,15 +4355,9 @@ bool Utils::execCmd(char *cmd, std::string *out) {
     int fd = fileno(fp);
 
     while(!ntop->getGlobals()->isShutdownRequested()) {
-      struct timeval ts;
-      fd_set rset;
       int ret;
 
-      FD_ZERO(&rset);
-      FD_SET(fd, &rset);
-      ts.tv_sec = 1, ts.tv_usec = 0;
-
-      ret = select(fd + 1, &rset, NULL, NULL, &ts);
+      ret = Utils::pollSocket(fd, 1000);
 
       if(ret < 0)
 	break;
@@ -6266,7 +6260,9 @@ bool Utils::readModbusDeviceInfo(char *device_ip, u_int8_t timeout_sec, lua_Stat
   int sockfd = -1;
   int retval;
   bool rc = false;
+#ifndef WIN32
   struct timeval tv_timeout;
+#endif
   char response[512], modbus_query[] = {
     0x0, 0x0, /* Trsnsaction Id */
     0x0, 0x0, /* Protocol Id    */
@@ -6330,14 +6326,9 @@ bool Utils::readModbusDeviceInfo(char *device_ip, u_int8_t timeout_sec, lua_Stat
   if(retval <= 0)
     rc = false;
   else {
-    fd_set rset;
     int ret;
 
-    tv_timeout.tv_sec = timeout_sec, tv_timeout.tv_usec = 0;
-
-    FD_ZERO(&rset);
-    FD_SET(sockfd, &rset);
-    ret = select(sockfd + 1, &rset, NULL, NULL, &tv_timeout);
+    ret = Utils::pollSocket(sockfd, timeout_sec*1000);
 
     if(ret > 0) {
       int len = read(sockfd, response, sizeof(response));
@@ -7633,7 +7624,6 @@ bool Utils::readEthernetIPDeviceInfo(char *device_ip, u_int8_t timeout_sec, lua_
   int sockfd = -1;
   int retval;
   bool rc = false;
-  struct timeval tv_timeout;
   u_char response[512], etherip_query[] = {
     0x63, 0x0,           /* Command */
     0x0,  0x0,           /* Lenght  */
@@ -7668,14 +7658,9 @@ bool Utils::readEthernetIPDeviceInfo(char *device_ip, u_int8_t timeout_sec, lua_
   if(retval <= 0)
     rc = false;
   else {
-    fd_set rset;
     int ret;
 
-    tv_timeout.tv_sec = timeout_sec, tv_timeout.tv_usec = 0;
-
-    FD_ZERO(&rset);
-    FD_SET(sockfd, &rset);
-    ret = select(sockfd + 1, &rset, NULL, NULL, &tv_timeout);
+    ret = Utils::pollSocket(sockfd, timeout_sec*1000);
 
     if(ret > 0) {
       struct sockaddr_in from;

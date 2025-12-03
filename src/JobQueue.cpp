@@ -97,18 +97,13 @@ void JobQueue::idleTask() {
 
   /* Manage running jobs */
   for(std::map<u_int32_t /* id */, std::pair<FILE*, std::string> >::iterator it = running_jobs.begin(); it != running_jobs.end(); ) {
-    fd_set rset;
     int ret, fd = fileno(it->second.first);
-    struct timeval ts;
     u_int32_t id = it->first;
     bool deleted_item = false;
     
     while(true) {
-      ts.tv_sec = 0, ts.tv_usec = 0;
 
-      FD_ZERO(&rset);
-      FD_SET(fd, &rset);    
-      ret = select(fd + 1, &rset, NULL, NULL, &ts);
+      ret = Utils::pollSocket(fd, 0);
 
       if(ret < 0) {
 	/* Something went wrong */

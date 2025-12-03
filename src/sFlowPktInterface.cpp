@@ -57,17 +57,11 @@ sFlowPktInterface::~sFlowPktInterface() {
 
 void sFlowPktInterface::sflowPacketPollLoop() {
   while (isRunning()) {
-    fd_set flowMask;
     int rc;
-    struct timeval wait_time;
     
-    FD_ZERO(&flowMask);
-    FD_SET(sock_fd, &flowMask);
+    rc = Utils::pollSocket(sock_fd, 1000);
 
-    wait_time.tv_sec = 1, wait_time.tv_usec = 0;
-    rc = select(sock_fd+1, &flowMask, NULL, NULL, &wait_time);
-
-    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "select() returned %d", rc);
+    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Poll returned %d", rc);
     
     if(rc > 0) {
       char buffer[2048];

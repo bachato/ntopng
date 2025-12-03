@@ -1496,9 +1496,6 @@ static int non_blocking_connect(int sock, struct sockaddr_in *sa, int timeout) {
   int flags = 0, error = 0, ret = 0;
   fd_set rset, wset;
   socklen_t len = sizeof(error);
-  struct timeval ts;
-
-  ts.tv_sec = timeout, ts.tv_usec = 0;
 
   // clear out descriptor sets for select
   // add socket to the descriptor sets
@@ -1528,7 +1525,7 @@ static int non_blocking_connect(int sock, struct sockaddr_in *sa, int timeout) {
     goto done;
 
   // we are waiting for connect to complete now
-  if ((ret = select(sock + 1, &rset, &wset, NULL, (timeout) ? &ts : NULL)) < 0)
+  if ((ret = Utils::pollSocket(sock, timeout*1000)) < 0)
     return -1;
 
   if (ret == 0) {
@@ -1606,15 +1603,9 @@ static int ntop_tcp_probe(lua_State *vm) {
     char buf[512];
 
     while (true) {
-      fd_set rset;
-      struct timeval tv;
       int rc;
 
-      FD_ZERO(&rset);
-      FD_SET(sockfd, &rset);
-
-      tv.tv_sec = timeout, tv.tv_usec = 0;
-      rc = select(sockfd + 1, &rset, NULL, NULL, &tv);
+      rc = Utils::pollSocket(sockfd, timeout*1000);
       timeout = 0;
 
       if (rc <= 0)

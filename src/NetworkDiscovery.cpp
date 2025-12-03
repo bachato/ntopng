@@ -354,14 +354,7 @@ void NetworkDiscovery::arpScan(lua_State *vm) {
 
   /* Purge existing packets */
   while (!ntop->getGlobals()->isShutdown()) {
-    fd_set rset;
-    struct timeval tv;
-
-    FD_ZERO(&rset);
-    FD_SET(fd, &rset);
-
-    tv.tv_sec = 0, tv.tv_usec = 0;
-    if (select(fd + 1, &rset, NULL, NULL, &tv) > 0)
+    if (Utils::pollSocket(fd, 0) > 0)
       pcap_next(pd, &h);
     else
       break;
@@ -461,14 +454,7 @@ void NetworkDiscovery::arpScan(lua_State *vm) {
   /* Collect possibly pending replies */
   while (true) {
     if (fd != -1) {
-      fd_set rset;
-      struct timeval tv;
-
-      FD_ZERO(&rset);
-      FD_SET(fd, &rset);
-
-      tv.tv_sec = 0, tv.tv_usec = 0;
-      if (select(fd + 1, &rset, NULL, NULL, &tv) <= 0) break;
+      if (Utils::pollSocket(fd, 0) <= 0) break;
     }
 
     reply = (struct arp_packet *) pcap_next(pd, &h);
@@ -848,8 +834,6 @@ void NetworkDiscovery::discover(lua_State *vm, u_int timeout) {
   struct sockaddr_in sin;
   char msg[1024];
   u_int16_t ssdp_port = htons(1900);
-  struct timeval tv;
-  fd_set fdset;
 
   const char *ifname = iface->altDiscoverableName();
   if (ifname == NULL) ifname = iface->get_name();
@@ -860,9 +844,6 @@ void NetworkDiscovery::discover(lua_State *vm, u_int timeout) {
   if (udp_sock == -1) return;
 
   if (timeout < 1) timeout = 1;
-
-  tv.tv_sec = timeout;
-  tv.tv_usec = 0;
 
   /* SSDP */
   sin.sin_addr.s_addr = inet_addr("239.255.255.250"), sin.sin_family = AF_INET,
@@ -920,10 +901,7 @@ void NetworkDiscovery::discover(lua_State *vm, u_int timeout) {
 #endif /* MDNS_MULTICAST_DISCOVERY */
 
   /* Receive replies */
-  FD_ZERO(&fdset);
-  FD_SET(udp_sock, &fdset);
-
-  while (select(udp_sock + 1, &fdset, NULL, NULL, &tv) > 0) {
+  while (Utils::pollSocket(udp_sock, timeout*1000) > 0) {
     struct sockaddr_in from = {0};
     socklen_t s = sizeof(from);
     char ipbuf[32];

@@ -368,24 +368,7 @@ void MDNS::fetchResolveResponses(lua_State *vm, int32_t timeout_sec) {
   lua_newtable(vm);
 
   while (true) {
-#ifdef WIN32
-    fd_set rset;
-    struct timeval tv;
-
-    FD_ZERO(&rset);
-    FD_SET(batch_udp_sock, &rset);
-
-    tv.tv_sec = timeout_sec, tv.tv_usec = 0;
-
-    if (select(batch_udp_sock + 1, &rset, NULL, NULL, &tv) > 0) {
-#else
-    struct pollfd pfd;
-
-    pfd.fd = batch_udp_sock;
-    pfd.events = POLLIN;
-
-    if (poll(&pfd, 1, timeout_sec * 1000) > 0) {
-#endif
+    if (Utils::pollSocket(batch_udp_sock, timeout_sec*1000) > 0) {
       struct sockaddr_in from;
       char mdnsbuf[512];
       socklen_t from_len = sizeof(from);
