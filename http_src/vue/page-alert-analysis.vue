@@ -154,7 +154,7 @@ onBeforeMount(() => {
   const bubble_mode = ntopng_url_manager.get_url_entry('bubble_mode');
   
   if(!bubble_mode) ntopng_url_manager.set_key_to_url('bubble_mode', 0) /* First Entry */
-  if(!timeframe) ntopng_url_manager.set_key_to_url('timeframe', 300) /* Default 5 min */
+  if(!timeframe) ntopng_url_manager.set_key_to_url('timeframe', 3600) /* Default 5 min */
   if(!vlan) ntopng_url_manager.set_key_to_url('vlan', '') /* Default no vlan */
   
   ntopng_url_manager.set_key_to_url('ifid', props.ifid) /* Current interface */

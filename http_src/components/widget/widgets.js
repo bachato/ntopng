@@ -36,7 +36,6 @@ const DEFINED_EVENTS = {
         const { series } = config.w.config;
         if (seriesIndex === -1) return;
         if (series === undefined) return;
-
         const serie = series[seriesIndex];
         if (serie.base_url !== undefined) {
             const default_url = (serie.start_url || '') 
