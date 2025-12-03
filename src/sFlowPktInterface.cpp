@@ -34,14 +34,14 @@ sFlowPktInterface::sFlowPktInterface(const char *_name) : NetworkInterface(_name
   svrAddr.sin_addr.s_addr = htonl(INADDR_ANY);
   svrAddr.sin_port = htons(port);
 
-  sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
+  sock_fd = Utils::openSocket(AF_INET, SOCK_DGRAM, 0, "sFlowPktInterface");
   if(sock_fd < 0)
     throw "Unable to create collection socket";
   
   if(::bind(sock_fd, (struct sockaddr *)&svrAddr, sizeof(svrAddr)) == -1) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Cannot bind at port %d [%s]",
 				 port, strerror(errno));
-    close(sock_fd);
+    Utils::closeSocket(sock_fd);
     throw "bind error";
   } else
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "Waiting for flows at port %d", port);
@@ -50,7 +50,7 @@ sFlowPktInterface::sFlowPktInterface(const char *_name) : NetworkInterface(_name
 /* **************************************************** */
 
 sFlowPktInterface::~sFlowPktInterface() {
-  close(sock_fd);
+  Utils::closeSocket(sock_fd);
 }
 
 /* **************************************************** */

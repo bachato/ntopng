@@ -4696,7 +4696,7 @@ int Utils::get_ifindex(const char *ifname) {
   int sockfd;
   struct ifreq ifr;
 
-  sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+  sockfd = Utils::openSocket(AF_INET, SOCK_DGRAM, 0, "get_ifindex");
   if (sockfd < 0)
     return -1;
 
@@ -4704,7 +4704,7 @@ int Utils::get_ifindex(const char *ifname) {
   strncpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name)-1);
 
   if (ioctl(sockfd, SIOCGIFINDEX, &ifr) == -1) {
-    close(sockfd);
+    Utils::closeSocket(sockfd);
     return -1;
   }
 
@@ -4714,7 +4714,7 @@ int Utils::get_ifindex(const char *ifname) {
   ifindex = ifr.ifr_index;
 #endif
 
-  close(sockfd);
+  Utils::closeSocket(sockfd);
 #endif
 
   return ifindex;
