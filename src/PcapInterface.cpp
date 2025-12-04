@@ -252,6 +252,7 @@ static void *packetPollLoop(void *ptr) {
   PcapInterface *iface = (PcapInterface *)ptr;
   std::vector<std::string> *pcap_files_queue = iface->get_pcap_files_queue();
   int fds[MAX_NUM_PCAP_INTERFACES] = { -1 };
+  int socks[MAX_NUM_PCAP_INTERFACES] = { -1 };
   std::string curr_file;
   const char *fname = NULL;
   
@@ -348,22 +349,15 @@ static void *packetPollLoop(void *ptr) {
 #endif
 
     while (iface->isRunning() && (!ntop->getGlobals()->isShutdown())) {
-      int max_fd = 0;
 #ifndef WIN32
-      fd_set rset;
-      struct timeval tv;
+      int timeout;
       bool do_break = false;
 #ifdef DEBUG_POLLING
       bool found = false;
 #endif
 
-      FD_ZERO(&rset);
-
-      for(u_int8_t i=0; i < iface->get_num_ifaces(); i++) {
-	FD_SET(fds[i], &rset);
-
-	if(fds[i] > max_fd) max_fd = fds[i];
-      }
+      for(u_int8_t i=0; i < iface->get_num_ifaces(); i++)
+        socks[i] = fds[i];
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
       /*
@@ -380,12 +374,12 @@ static void *packetPollLoop(void *ptr) {
 	of non-blocking mode; call pcap_getnonblock() to determine whether a
 	handle is in non-blocking mode.
       */
-      tv.tv_sec = 0, tv.tv_usec = 10000 /* it must be < pcap_open_live() timeout */;
+      timeout = 10 /* (msec) it must be < pcap_open_live() timeout */;
 #else
-      tv.tv_sec = 1, tv.tv_usec = 0;
+      timeout = 1000;
 #endif
 
-      if(select(max_fd + 1, &rset, NULL, NULL, &tv) == 0) {
+      if(Utils::pollSockets(socks, iface->get_num_ifaces(), timeout) == 0) {
 	for(u_int8_t i=0; i < iface->get_num_ifaces(); i++) {
 	  if(!iface->read_from_stdin() &&
 	     !Utils::nwInterfaceExists(iface->getPcapIfaceName(i))) {
@@ -409,7 +403,7 @@ static void *packetPollLoop(void *ptr) {
       
       for(u_int8_t i=0; i < iface->get_num_ifaces(); i++) {
 #if !(defined(__APPLE__) || defined(__FreeBSD__))
-	if(FD_ISSET(fds[i], &rset))
+	if(socks[i] == fds[i] /* ready */)
 #endif
 	  {
 	    if(iface->processNextPacket(iface->get_pcap_handle(i),

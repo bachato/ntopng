@@ -211,9 +211,6 @@ void NetworkDiscovery::sendArpNetwork(void *data, u_int32_t netp,
   u_int32_t first_ip, last_ip, host_ip;
   const u_int max_num_ips = 1024;
   struct arp_packet *reply;
-  fd_set rset;
-  int max_sock = 0;
-  struct timeval tv;
   struct pcap_pkthdr h;
   char macbuf[32], ipbuf[32];
   arp_data *arp_d = (arp_data *)data;
@@ -230,8 +227,6 @@ void NetworkDiscovery::sendArpNetwork(void *data, u_int32_t netp,
 
   if ((last_ip - first_ip) > max_num_ips) last_ip = first_ip + max_num_ips;
 
-  if (mdns_sock > max_sock) max_sock = mdns_sock;
-
   if (debug_mode) {
     char buf0[32], buf1[32], buf2[32];
     u_int32_t first_ip_nbo = htonl(first_ip);
@@ -247,6 +242,8 @@ void NetworkDiscovery::sendArpNetwork(void *data, u_int32_t netp,
   for (int num_runs = 0; num_runs < 2; num_runs++) {
     for (host_ip = first_ip; host_ip < last_ip; host_ip++) {
       int sel_rc = 0;
+      int socks[2];
+      int num_socks = 0;
 
       arp->arph.arp_tpa = ntohl(host_ip);
 
@@ -256,19 +253,12 @@ void NetworkDiscovery::sendArpNetwork(void *data, u_int32_t netp,
       // Inject packet
       if (pcap_sendpacket(pd, (const u_char *)arp, sizeof(*arp)) == -1) break;
 
-      FD_ZERO(&rset);
+      if (arp_d->fd != -1) socks[num_socks++] = arp_d->fd;
+      if (mdns_sock != -1) socks[num_socks++] = mdns_sock;
 
-      if (arp_d->fd != -1) {
-        FD_SET(arp_d->fd, &rset);
-        if (arp_d->fd > max_sock) max_sock = arp_d->fd;
-      }
-      if (mdns_sock != -1) FD_SET(mdns_sock, &rset);
+      if (num_socks) sel_rc = Utils::pollSockets(socks, num_socks, 0 /* Don't wait at all */);
 
-      tv.tv_sec = 0, tv.tv_usec = 0; /* Don't wait at all */
-
-      if (max_sock != 0) sel_rc = select(max_sock + 1, &rset, NULL, NULL, &tv);
-
-      if ((arp_d->fd == -1) || FD_ISSET(arp_d->fd, &rset))
+      if ((arp_d->fd == -1) || (socks[0] == arp_d->fd /* ready */))
         reply = (struct arp_packet *)pcap_next(pd, &h);
       else
         reply = NULL;
@@ -294,7 +284,7 @@ void NetworkDiscovery::sendArpNetwork(void *data, u_int32_t netp,
         }
       }
 
-      if ((sel_rc > 0) && FD_ISSET(mdns_sock, &rset)) {
+      if ((sel_rc > 0) && (mdns_sock != -1) && (socks[num_socks-1] == mdns_sock /* ready */)) {
         struct sockaddr_in from;
         socklen_t from_len = sizeof(from);
         int len = recvfrom(mdns_sock, (char *)mdnsreply, sizeof(*mdnsreply), 0,
@@ -323,10 +313,8 @@ void NetworkDiscovery::arpScan(lua_State *vm) {
   char macbuf[32], ipbuf[32], mdnsbuf[256];
   u_char mdnsreply[1500];
   struct arp_packet arp, *reply;
-  fd_set rset;
-  struct timeval tv;
   struct pcap_pkthdr h;
-  int mdns_sock, max_sock = 0;
+  int mdns_sock;
   ndpi_dns_packet_header *dns_h;
   u_int dns_query_len = 0;
   struct sockaddr_in mdns_dest;
@@ -373,7 +361,6 @@ void NetworkDiscovery::arpScan(lua_State *vm) {
     u_int last_dot = 0;
     char *queries;
 
-    if (mdns_sock > max_sock) max_sock = mdns_sock;
     dns_h = (struct ndpi_dns_packet_header *)mdnsbuf;
     dns_h->tr_id = 0;
     dns_h->flags = 0 /* query */;
@@ -492,11 +479,7 @@ void NetworkDiscovery::arpScan(lua_State *vm) {
     }
 
     while (true) {
-      FD_ZERO(&rset);
-      FD_SET(mdns_sock, &rset);
-
-      tv.tv_sec = 1, tv.tv_usec = 0;
-      if (select(max_sock + 1, &rset, NULL, NULL, &tv) > 0) {
+      if (Utils::pollSocket(mdns_sock, 1000) > 0) {
         struct sockaddr_in from;
         socklen_t from_len = sizeof(from);
         int len = recvfrom(mdns_sock, (char *)mdnsreply, sizeof(mdnsreply), 0,
