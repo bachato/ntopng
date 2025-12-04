@@ -361,9 +361,7 @@ async function getTopInfo() {
 async function refreshChart() {
     if (chart.value) {
         const result = await get_chart_options();
-        if (result?.data) {
-            chart.value.update_chart_series(result.data);
-        }
+        chart.value.update_chart_series(result);
     }
 }
 

@@ -176,6 +176,10 @@ async function format_networks(params_to_format) {
  */
 async function resolve_any_params() {
     /* Clear the Array */
+    if (ts_request.value.length > 0) {
+        /* Already populated, return */
+        return;
+    }
     ts_request.value = [];
     /* Here possible ANY, can be found in the post_params */
     const params = props.params.post_params?.ts_requests;
@@ -230,6 +234,7 @@ async function retrieve_basic_info() {
             const group = await get_timeseries_groups_from_metric(metric_schema, source_def);
             timeseries_groups.value.push(group);
         }
+        remove_extra_params();
     }
 }
 
@@ -256,7 +261,6 @@ function remove_extra_params() {
 async function get_chart_options() {
     await resolve_any_params();
     await retrieve_basic_info();
-    remove_extra_params();
     const url = base_url.value;
     const post_params = {
         csrf: props.csrf,
@@ -315,7 +319,7 @@ async function init() {
 async function refreshChart() {
     if (chart.value) {
         const result = await get_chart_options();
-        chart.value.update_chart_series(result.data);
+        chart.value.update_chart_series(result);
     }
 }
 

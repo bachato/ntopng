@@ -191,10 +191,10 @@ export default {
                 this.chart.updateOptions({ 'stackedGraph': stacked });
             }
         },
-        update_chart_series: function (series) {
-            if (series == null) { return; }
+        update_chart_series: function (options) {
+            if (options == null) { return; }
             if (this.chart) {
-                this.chart.updateOptions({ 'file': series });
+                this.chart.updateOptions({ 'file': options.data, 'colors': options.colors, 'label': options.labels });
             }
         },
         on_zoomed: function (minDate, maxDate) {
