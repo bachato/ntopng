@@ -61,7 +61,7 @@ function alert_elephant_flow.format(ifid, alert, alert_type_params)
 
    if alert_type_params and (alert_type_params["l2r_bytes"] or alert_type_params["r2l_bytes"]) then
 
-      res = string.format("%s<sup><i class='fas fa-info-circle' aria-hidden='true' title='"..i18n("flow_details.elephant_flow_descr").."'></i></sup>", res)
+      res = string.format("%s<sup><i class='fas fa-info-circle' data-bs-toggle='tooltip' data-bs-placement='bottom' aria-hidden='true' title='"..i18n("flow_details.elephant_flow_descr").."'></i></sup>", res)
 
       if alert_type_params["l2r_bytes"] and 
          alert_type_params["l2r_threshold"] and
