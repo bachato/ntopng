@@ -1003,10 +1003,10 @@ public:
     return (actual_db ? actual_db->execSQLQuery(vm, sql, limit_rows, wait_for_db_created)
 	    : -1);
   };
-  inline int execSQLQuery2CSV(const char *sql, bool dump_in_json_format,
-                              struct mg_connection *conn) {
+  inline int execSQLQuery2CSV(const char *sql, const char *delimiter, const char *null_value, 
+                              bool dump_in_json_format, struct mg_connection *conn) {
     DB *actual_db = db ? db : flows_db;
-    return (actual_db ? actual_db->execSQLQuery2CSV(sql, dump_in_json_format, conn)
+    return (actual_db ? actual_db->execSQLQuery2CSV(sql, delimiter, null_value, dump_in_json_format, conn)
             : -1);
   }
   inline void archiveDBData(time_t epoch_begin, time_t epoch_end) {

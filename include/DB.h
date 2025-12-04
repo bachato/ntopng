@@ -51,7 +51,8 @@ class DB {
     return (-1);
   }
 
-  virtual int execSQLQuery2CSV(const char *sql, bool dump_in_json_format,
+  virtual int execSQLQuery2CSV(const char *sql, const char *delimiter,
+                               const char *null_value, bool dump_in_json_format,
                                struct mg_connection *mg_conn) {
     return (-1);
   }
