@@ -49,7 +49,7 @@ class SNMP {
 #endif
   u_int8_t getbulk_max_num_repetitions;
 
-  void configure_timeout(SNMPSession *snmpSession);  
+  void configure_timeout(void *snmpSession);  
   bool send_snmp_request(char *agent_host, u_int version, char *community,
                          char *level, char *username, char *auth_protocol,
                          char *auth_passphrase, char *privacy_protocol,

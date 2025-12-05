@@ -69,7 +69,9 @@ SNMP::~SNMP() {
 
 /* ******************************* */
 
-void SNMP::configure_timeout(SNMPSession *snmpSession) {
+void SNMP::configure_timeout(void *_snmpSession) {
+  SNMPSession *snmpSession = (SNMPSession *) _snmpSession;
+  
   /* Avoid long delays on disconnected devices */
   snmpSession->session.timeout = 1000000; /* usec (1s) */
   snmpSession->session.retries = 1;       /* num retries (2 total) */
