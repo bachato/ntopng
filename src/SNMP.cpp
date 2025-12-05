@@ -649,17 +649,21 @@ bool SNMP::send_snmp_request(char *agent_host, u_int version, char *community,
   }
 
   /* Send the request */
+  struct timeval start, end;
+  gettimeofday(&start, NULL);
   if((rc = snmp_sess_send(snmpSession->session_ptr, pdu)) == 0) {
     int liberr, snmperr;
     char *errstr = NULL;
+
+    gettimeofday(&end, NULL);
 
     /* Get detailed error information */
     snmp_sess_error(snmpSession->session_ptr, &liberr, &snmperr, &errstr);
 
     snmp_free_pdu(pdu);
     ntop->getTrace()->traceEvent(TRACE_WARNING,
-      "SNMP send error [rc: %d][host: %s][error: %s]",
-      rc, agent_host, errstr ? errstr : "unknown");
+      "SNMP send error [rc: %d][%.03fs][host: %s][error: %s]",
+      rc, Utils::msTimevalDiff(&end, &start)/1000, agent_host, errstr ? errstr : "unknown");
 
     if(errstr) free(errstr);  /* Must free the error string */
     return(false);
