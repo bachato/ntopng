@@ -671,6 +671,11 @@ bool SNMP::send_snmp_request(char *agent_host, u_int version, char *community,
 
     gettimeofday(&end, NULL);
 
+    /* Note: in case of SNMPv3, if the device is unreachable snmp_sess_send() call
+     * takes "session.timeout × session.retries" time. This because Net-SNMP has 
+     * to discover the engineID before it can build a proper encrypted packet
+     * and this is done in snmp_sess_send by sending an empty get. */
+
     /* Get detailed error information */
     snmp_sess_error(snmpSession->session_ptr, &liberr, &snmperr, &errstr);
 
