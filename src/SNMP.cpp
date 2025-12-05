@@ -56,6 +56,7 @@ SNMP::SNMP() {
   batch_mode = false;
 #ifdef HAVE_LIBSNMP
   init_snmp("ntopng");
+  snmp_disable_stderrlog();  /* Suppress SNMP library error messages to stderr */
 #endif
   getbulk_max_num_repetitions = 10;
 }
@@ -390,9 +391,18 @@ bool SNMP::send_snmpv1v2c_request(char *agent_host, char *community,
   } else {
     /* Send the request */
     if((rc = snmp_sess_send(snmpSession->session_ptr, pdu)) == 0) {
+      int liberr, snmperr;
+      char *errstr = NULL;
+
+      /* Get detailed error information */
+      snmp_sess_error(snmpSession->session_ptr, &liberr, &snmperr, &errstr);
+
       snmp_free_pdu(pdu);
-      snmp_perror("snmp_sess_send");
-      ntop->getTrace()->traceEvent(TRACE_WARNING, "SNMP send error [rc: %d]", rc);
+      ntop->getTrace()->traceEvent(TRACE_WARNING,
+        "SNMP send error [rc: %d][error: %s]",
+        rc, errstr ? errstr : "unknown");
+
+      if(errstr) free(errstr);  /* Must free the error string */
       return(false);
     }
   }
@@ -640,9 +650,18 @@ bool SNMP::send_snmp_request(char *agent_host, u_int version, char *community,
 
   /* Send the request */
   if((rc = snmp_sess_send(snmpSession->session_ptr, pdu)) == 0) {
+    int liberr, snmperr;
+    char *errstr = NULL;
+
+    /* Get detailed error information */
+    snmp_sess_error(snmpSession->session_ptr, &liberr, &snmperr, &errstr);
+
     snmp_free_pdu(pdu);
-    snmp_perror("snmp_sess_send");
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "SNMP send error [rc: %d][%s]", rc, agent_host);
+    ntop->getTrace()->traceEvent(TRACE_WARNING,
+      "SNMP send error [rc: %d][host: %s][error: %s]",
+      rc, agent_host, errstr ? errstr : "unknown");
+
+    if(errstr) free(errstr);  /* Must free the error string */
     return(false);
   }
 
@@ -725,9 +744,18 @@ bool SNMP::send_snmp_set_request(char *agent_host, char *community,
 
   /* Send the request */
   if((rc = snmp_sess_send(snmpSession->session_ptr, pdu)) == 0) {
+    int liberr, snmperr;
+    char *errstr = NULL;
+
+    /* Get detailed error information */
+    snmp_sess_error(snmpSession->session_ptr, &liberr, &snmperr, &errstr);
+
     snmp_free_pdu(pdu);
-    snmp_perror("snmp_sess_send");
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "SNMP send error [rc: %d]", rc);
+    ntop->getTrace()->traceEvent(TRACE_WARNING,
+      "SNMP send error [rc: %d][error: %s]",
+      rc, errstr ? errstr : "unknown");
+
+    if(errstr) free(errstr);  /* Must free the error string */
     return(false);
   }
 
