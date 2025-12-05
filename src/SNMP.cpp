@@ -69,6 +69,14 @@ SNMP::~SNMP() {
 
 /* ******************************* */
 
+void SNMP::configure_timeout(SNMPSession *snmpSession) {
+  /* Avoid long delays on disconnected devices */
+  snmpSession->session.timeout = 1000000; /* usec (1s) */
+  snmpSession->session.retries = 1;       /* num retries (2 total) */
+}
+
+/* ******************************* */
+
 /*
   http://www.net-snmp.org/docs/README.thread.html
   https://github.com/bluecmd/python3-netsnmp/blob/master/netsnmp/client_intf.c
@@ -331,6 +339,8 @@ bool SNMP::send_snmpv1v2c_request(char *agent_host, char *community,
     snmp_sess_init(&snmpSession->session);
     snmpSession->session.peername = agent_host;
 
+    configure_timeout(snmpSession);
+
     /* set the SNMP version number */
     snmpSession->session.version = (version == 0) ? SNMP_VERSION_1 : SNMP_VERSION_2c;
 
@@ -472,6 +482,8 @@ bool SNMP::send_snmp_request(char *agent_host, u_int version, char *community,
   if(initSession) {
     snmp_sess_init(&snmpSession->session);
     snmpSession->session.peername = agent_host;
+
+    configure_timeout(snmpSession);
 
     if(version <= 1) {
       /* SNMP v1/v2c */
@@ -712,6 +724,8 @@ bool SNMP::send_snmp_set_request(char *agent_host, char *community,
   if(initSession) {
     snmp_sess_init(&snmpSession->session);
     snmpSession->session.peername = agent_host;
+
+    configure_timeout(snmpSession);
 
     /* set the SNMP version number */
     snmpSession->session.version =
