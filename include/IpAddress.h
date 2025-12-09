@@ -30,7 +30,7 @@ struct ipAddress {
 
   u_int8_t dnsServer : 1, dhcpServer : 1, smtpServer : 1, ntpServer : 1,
     imapServer : 1, popServer : 1, gateway: 1,   httpServer : 1;
-  u_int8_t sshServer : 1, rdpServer : 1, unused : 6;
+  u_int8_t sshServer : 1, rdpServer : 1, modbusServer : 1, unused : 5;
   
   union {
     struct ndpi_in6_addr ipv6;
@@ -127,6 +127,8 @@ class IpAddress {
   inline void setDhcpServer() { addr.dhcpServer = true; }
   inline bool isDnsServer() const { return (addr.dnsServer); }
   inline void setDnsServer() { addr.dnsServer = true; }
+  inline bool isModbusServer() const { return (addr.modbusServer); }
+  inline void setModbusServer() { addr.modbusServer = true; }
   inline bool isSmtpServer() const { return (addr.smtpServer); }
   inline void setSmtpServer() { addr.smtpServer = true; }
   inline bool isImapServer() const { return (addr.imapServer); }

@@ -8013,6 +8013,14 @@ void Flow::getProtocolJSONInfo(ndpi_serializer *serializer) {
     getSSHInfo(serializer);
     ndpi_serialize_end_of_block(serializer);
     break;
+
+#ifdef NTOPNG_PRO
+  case NDPI_PROTOCOL_MODBUS:
+    ndpi_serialize_start_of_block(serializer, "modbus");
+    getModbusInfo(serializer);
+    ndpi_serialize_end_of_block(serializer);
+    break;
+#endif
   }
 
   if(getErrorCode() != 0)

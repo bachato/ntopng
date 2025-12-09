@@ -1208,6 +1208,7 @@ public:
 		    bool src2dst_direction, u_int32_t ack_id);
   void updateTCPWinScale(bool src2dst_direction, u_int8_t winscale);
   void updateTCPWin(bool src2dst_direction, u_int16_t win);
+  void getModbusInfo(ndpi_serializer *serializer);
 
 #if !defined(HAVE_NEDGE)
   inline void updateProfile() { trafficProfile = iface->getFlowProfile(this); }

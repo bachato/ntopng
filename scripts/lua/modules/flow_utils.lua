@@ -2845,3 +2845,15 @@ function format_flow_info_field(flow)
 end
 
 -- #######################
+
+-- A one line flow description
+-- This uses the information from flow.getInfo()
+function formatModbusInfo(proto_info)
+    local info = {}
+
+    if proto_info.modbus then
+        info = proto_info.modbus
+    end
+
+    return info
+end

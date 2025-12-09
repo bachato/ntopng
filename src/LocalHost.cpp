@@ -733,6 +733,13 @@ void LocalHost::setDnsServer() {
 
 /* *************************************** */
 
+void LocalHost::setModbusServer() {
+  Host::setModbusServer();
+  addDataToAssets((char *) "modbus_server", (char *) "true");
+}
+
+/* *************************************** */
+
 void LocalHost::setSmtpServer() {
   Host::setSmtpServer();
   addDataToAssets((char *) "smtp_server", (char *) "true");

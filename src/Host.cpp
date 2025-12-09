@@ -1963,7 +1963,7 @@ void Host::updateView(IpAddress *ipa) {
   if(ipa->isHttpServer())   setHttpServer();
   if(ipa->isSshServer())    setSshServer();
   if(ipa->isRdpServer())    setRdpServer();
-  if(ipa->isRdpServer())    setRdpServer();
+  if(ipa->isModbusServer()) setModbusServer();
 }
 
 /* *************************************** */
@@ -2696,6 +2696,13 @@ void Host::setDhcpServer() {
 void Host::setDnsServer() {
   if(!isDnsServer())
     host_services_bitmap |= 1 << HOST_IS_DNS_SERVER;
+}
+
+/* *************************************** */
+
+void Host::setModbusServer() {
+  if(!isModbusServer())
+    host_services_bitmap |= 1 << HOST_IS_MODBUS_SERVER;
 }
 
 /* *************************************** */

@@ -2123,6 +2123,24 @@ function historical_flow_utils.convertFlowToAlert(flow)
    return alert
 end
 
+-- #####################################
+
+-- Given a flow returned from clickhouse, transform into the flow_alert format
+function historical_flow_utils.convertToLiveFlowFormat(historical_flow)
+   -- TODO: currently only used for modbus, add here when needed the other info
+   local flow = {}
+   if historical_flow["PROTOCOL_INFO_JSON"] then
+      require "flow_utils"
+      local json = require "dkjson"
+      local proto_info = json.decode(historical_flow["PROTOCOL_INFO_JSON"])
+      local modbus_info = formatModbusInfo(proto_info.proto)
+      flow.modbus = modbus_info
+   end
+
+   return flow
+end
+
+-- #####################################
 
 return historical_flow_utils
 

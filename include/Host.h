@@ -243,6 +243,11 @@ class Host : public GenericHashEntry,
     return (host_services_bitmap & (1 << HOST_IS_DNS_SERVER));
   }
   virtual void setDnsServer();
+  
+  inline bool isModbusServer() const {
+    return (host_services_bitmap & (1 << HOST_IS_MODBUS_SERVER));
+  }
+  virtual void setModbusServer();
 
   inline bool isSmtpServer() const {
     return (host_services_bitmap & (1 << HOST_IS_SMTP_SERVER));

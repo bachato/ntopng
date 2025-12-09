@@ -1,0 +1,31 @@
+{
+	"id": "modbus_general_stats",
+	"data_url": "lua/pro/rest/v2/get/flow/modbus/general_stats.lua",
+	"use_current_page": false,
+	"enable_search": true,
+	"paging": false,
+	"display_empty_rows": false,
+	"default_sort": {
+		"column_id": "name",
+		"sort": 1
+	},
+	"columns": [
+		{
+			"title_i18n": "if_stats_config.metric",
+			"data_field": "name",
+			"min-width": "80px",
+			"sortable": true,
+			"class": []
+		},
+		{
+			"title_i18n": "value",
+			"data_field": "value",
+			"min-width": "80px",
+			"sortable": true,
+			"class": [
+				"text-nowrap",
+				"text-center"
+			]
+		}
+	]
+}
