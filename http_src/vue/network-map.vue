@@ -3,13 +3,13 @@
   <div v-if="empty_map" class="alert alert-info">
     {{ empty_message }}
   </div>
-  <div class="d-flex justify-content-center align-items-center resizable-y-container" style="width: 100%; height: 60vh;"
-    :id=map_id>
+  <div class="d-flex justify-content-center align-items-center resizable-y-container" style="width: 100%;"
+    :style="'height: ' + height" :id=map_id>
   </div>
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, ref } from "vue";
+import { onMounted, onBeforeMount, onBeforeUnmount, ref } from "vue";
 import { ntopng_map_manager } from '../utilities/map/ntopng_vis_network_utils';
 import { ntopng_events_manager, ntopng_url_manager } from '../services/context/ntopng_globals_services';
 
@@ -20,6 +20,7 @@ const props = defineProps({
   url: String,
   url_params: Object,
   map_id: String,
+  height: String
 });
 
 const dataRequest = {
@@ -39,12 +40,24 @@ const url_params = ref({});
 const datasets = ref(null);
 const options = ref(null);
 const all_nodes = ref(null);
+const height = ref('60vh')
+
+onBeforeMount(() => {
+  if (props.height) {
+    height.value = props.height
+  }
+})
 
 onMounted(async () => {
   const container = document.getElementById(props.map_id);
   load_scale();
   await request_info();
   options.value = ntopng_map_manager.get_default_options();
+  const labels_color = getComputedStyle(document.documentElement)
+    .getPropertyValue('--ntop-text-color')
+    .trim();
+  options.value.nodes.font.color = labels_color // Set the color like the one defined in white-mode.scss
+  options.value.edges.font.color = labels_color // Set the color like the one defined in white-mode.scss
   network = new vis.Network(container, datasets.value, options.value);
   set_event_listener();
 })
@@ -295,3 +308,37 @@ const reload = async () => {
 
 defineExpose({ reload, destroy, is_max_entry_reached, autolayout, update_url_params });
 </script>
+
+<style>
+.vis-tooltip {
+  visibility: hidden;
+  color: var(--ntop-text-color) !important;
+  background-color: var(--timeseries-legend-bg-color) !important;
+  border-color: var(--timeseries-legend-border-color);
+  border-style: solid;
+  border-width: thin;
+  z-index: 99999 !important;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .15);
+  border-radius: 0.375rem;
+  position: fixed;
+  width: auto;
+  max-width: 240px;
+  word-wrap: break-word;
+  padding: 8px !important;
+  line-height: 1.3;
+  font-size: 14px;
+}
+
+.vis-tooltip>span {
+  color: var(--ntop-text-color);
+  padding-left: 5px;
+  padding-right: 2px;
+  margin-left: -5px;
+  background-color: #FFFFFF !important;
+  display: inline-block;
+}
+
+.vis-tooltip>span:first-child {
+  margin-top: 2px;
+}
+</style>
