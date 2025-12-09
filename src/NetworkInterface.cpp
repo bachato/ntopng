@@ -6074,6 +6074,7 @@ static bool mac_search_walker(GenericHashEntry *he, void *user_data,
 static bool as_search_walker(GenericHashEntry *he, void *user_data,
                              bool *matched) {
   struct flowHostRetriever *r = (struct flowHostRetriever *)user_data;
+  u_int32_t prev_actNumEntries = r->actNumEntries;
   AutonomousSystem *as = (AutonomousSystem *)he;
 
   if (r->actNumEntries >= r->maxNumEntries) return (true); /* Limit reached */
@@ -6124,6 +6125,11 @@ static bool as_search_walker(GenericHashEntry *he, void *user_data,
     break;
   }
 
+  if (prev_actNumEntries != r->actNumEntries) {
+    /* AS added to entries, inc uses to avoid concurrency issues while walking and processing */
+    as->incUses();
+  }
+
   *matched = true;
   return (false); /* false = keep on walking */
 }
@@ -6133,6 +6139,7 @@ static bool as_search_walker(GenericHashEntry *he, void *user_data,
 static bool obs_point_search_walker(GenericHashEntry *he, void *user_data,
                                     bool *matched) {
   struct flowHostRetriever *r = (struct flowHostRetriever *)user_data;
+  u_int32_t prev_actNumEntries = r->actNumEntries;
   ObservationPoint *obs_point = (ObservationPoint *)he;
 
   if (r->actNumEntries >= r->maxNumEntries) return (true); /* Limit reached */
@@ -6173,6 +6180,11 @@ static bool obs_point_search_walker(GenericHashEntry *he, void *user_data,
     break;
   }
 
+  if (prev_actNumEntries != r->actNumEntries) {
+    /* ObsPoint added to entries, inc uses to avoid concurrency issues while walking and processing */
+    obs_point->incUses();
+  }
+
   *matched = true;
   return (false); /* false = keep on walking */
 }
@@ -6182,6 +6194,7 @@ static bool obs_point_search_walker(GenericHashEntry *he, void *user_data,
 static bool country_search_walker(GenericHashEntry *he, void *user_data,
                                   bool *matched) {
   struct flowHostRetriever *r = (struct flowHostRetriever *)user_data;
+  u_int32_t prev_actNumEntries = r->actNumEntries;
   Country *country = (Country *)he;
 
   if (r->actNumEntries >= r->maxNumEntries) return (true); /* Limit reached */
@@ -6222,6 +6235,11 @@ static bool country_search_walker(GenericHashEntry *he, void *user_data,
     break;
   }
 
+  if (prev_actNumEntries != r->actNumEntries) {
+    /* Country added to entries, inc uses to avoid concurrency issues while walking and processing */
+    country->incUses();
+  }
+
   *matched = true;
   return (false); /* false = keep on walking */
 }
@@ -6231,6 +6249,7 @@ static bool country_search_walker(GenericHashEntry *he, void *user_data,
 static bool vlan_search_walker(GenericHashEntry *he, void *user_data,
                                bool *matched) {
   struct flowHostRetriever *r = (struct flowHostRetriever *)user_data;
+  u_int32_t prev_actNumEntries = r->actNumEntries;
   VLAN *vl = (VLAN *)he;
 
   if (r->actNumEntries >= r->maxNumEntries) return (true); /* Limit reached */
@@ -6268,6 +6287,11 @@ static bool vlan_search_walker(GenericHashEntry *he, void *user_data,
     ntop->getTrace()->traceEvent(
 				 TRACE_WARNING, "Internal error: column %d not handled", r->sorter);
     break;
+  }
+
+  if (prev_actNumEntries != r->actNumEntries) {
+    /* VLAN added to entries, inc uses to avoid concurrency issues while walking and processing */
+    vl->incUses();
   }
 
   *matched = true;
@@ -9287,6 +9311,12 @@ int NetworkInterface::getActiveASList(lua_State *vm, const Paginator *p,
   lua_insert(vm, -2);
   lua_settable(vm, -3);
 
+  // Decrease reference counter for all AS entries (see incUses in as_search_walker)
+  for (u_int i = 0; i < retriever.actNumEntries; i++) {
+    if (retriever.elems[i].asValue)
+      retriever.elems[i].asValue->decUses();
+  }
+
   // finally free the elements regardless of the sorted kind
   if (retriever.elems) free(retriever.elems);
 
@@ -9337,6 +9367,12 @@ int NetworkInterface::getActiveObsPointsList(lua_State *vm,
   lua_insert(vm, -2);
   lua_settable(vm, -3);
 
+  // Decrease reference counter for all ObsPoint entries (see incUses in obs_point_search_walker)
+  for (u_int i = 0; i < retriever.actNumEntries; i++) {
+    if (retriever.elems[i].obsPointValue)
+      retriever.elems[i].obsPointValue->decUses();
+  }
+
   // finally free the elements regardless of the sorted kind
   if (retriever.elems) free(retriever.elems);
 
@@ -9386,6 +9422,12 @@ int NetworkInterface::getActiveCountriesList(lua_State *vm,
   lua_pushstring(vm, "Countries");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
+
+  // Decrease reference counter for all Country entries (see incUses in country_search_walker)
+  for (u_int i = 0; i < retriever.actNumEntries; i++) {
+    if (retriever.elems[i].countryVal)
+      retriever.elems[i].countryVal->decUses();
+  }
 
   // finally free the elements regardless of the sorted kind
   if (retriever.elems) free(retriever.elems);
@@ -9439,6 +9481,12 @@ int NetworkInterface::getActiveVLANList(lua_State *vm, char *sortColumn,
   lua_pushstring(vm, "VLANs");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
+
+  // Decrease reference counter for all VLAN entries (see incUses in vlan_search_walker)
+  for (u_int i = 0; i < retriever.actNumEntries; i++) {
+    if (retriever.elems[i].vlanValue)
+      retriever.elems[i].vlanValue->decUses();
+  }
 
   // finally free the elements regardless of the sorted kind
   if (retriever.elems) free(retriever.elems);
