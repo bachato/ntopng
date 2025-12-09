@@ -550,7 +550,7 @@ local flow_key = _GET["flow_key"]
 local flow_hash_id = _GET["flow_hash_id"]
 
 flow = interface.findFlowByKeyAndHashId(tonumber(flow_key), tonumber(flow_hash_id))
-tprint(flow)
+--tprint(flow)
 
 local ifid = interface.name2id(ifname)
 local label = getFlowLabel(flow, nil, nil, nil, nil, nil, false)
