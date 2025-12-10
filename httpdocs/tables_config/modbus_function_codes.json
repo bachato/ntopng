@@ -11,7 +11,7 @@
 	},
 	"columns": [
 		{
-			"title_i18n": "flow_details.modbus_function",
+			"title_i18n": "id",
 			"data_field": "modbus_function_code",
 			"min-width": "80px",
 			"sortable": true,

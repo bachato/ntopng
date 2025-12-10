@@ -11,7 +11,7 @@
 	},
 	"columns": [
 		{
-			"title_i18n": "flow_details.modbus_register",
+			"title_i18n": "id",
 			"data_field": "modbus_register",
 			"min-width": "80px",
 			"sortable": true,
