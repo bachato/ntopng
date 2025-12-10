@@ -1,0 +1,31 @@
+{
+	"id": "s7comm_functions",
+	"data_url": "lua/pro/rest/v2/get/flow/s7comm/functions.lua",
+	"use_current_page": false,
+	"enable_search": true,
+	"paging": false,
+	"display_empty_rows": true,
+	"default_sort": {
+		"column_id": "num_uses",
+		"sort": 2
+	},
+	"columns": [
+		{
+			"title_i18n": "id",
+			"data_field": "s7comm_function",
+			"min-width": "80px",
+			"sortable": true,
+			"class": []
+		},
+		{
+			"title_i18n": "flow_details.num_uses",
+			"data_field": "num_uses",
+			"min-width": "80px",
+			"sortable": true,
+			"class": [
+				"text-nowrap",
+				"text-center"
+			]
+		}
+	]
+}

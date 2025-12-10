@@ -2855,5 +2855,9 @@ function formatModbusInfo(proto_info)
         info = proto_info.modbus
     end
 
+    if proto_info.s7comm then
+        info = proto_info.s7comm
+    end
+
     return info
 end

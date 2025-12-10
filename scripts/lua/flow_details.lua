@@ -550,17 +550,19 @@ local flow_key = _GET["flow_key"]
 local flow_hash_id = _GET["flow_hash_id"]
 
 flow = interface.findFlowByKeyAndHashId(tonumber(flow_key), tonumber(flow_hash_id))
---tprint(flow)
+-- tprint(flow)
 
 local ifid = interface.name2id(ifname)
 local label = getFlowLabel(flow, nil, nil, nil, nil, nil, false)
 local title = i18n("flow") .. ": " .. label
 local url = ntop.getHttpPrefix() .. "/lua/flow_details.lua?flow_key=" .. flow_key .. "&flow_hash_id=" .. flow_hash_id
 
+tprint(flow)
 page_utils.print_navbar(title, url, {{
    active = isEmptyString(page) or page == "overview",
    page_name = "overview",
-   label = i18n("overview")
+   label = "<i class=\"fas fa-lg fa-home\" data-bs-toggle=\"tooltip\" data-bs-placement=\"bottom\" title=\"" .. i18n("overview") ..
+      "\"></i>"
 }, {
    hidden = not (flow.modbus) or not ntop.isEnterpriseL(),
    active = page == "modbus",
