@@ -613,6 +613,12 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 	flow->updateJA4C(zflow->getJA4cHash());
     }
 
+#ifdef NTOPNG_PRO
+    if (flow->isModbus()) {
+      flow->updateOTStats(zflow);
+    }
+#endif
+
     if (flow->isSMTP()) {
       if (zflow->getSMTPMailFrom())
         flow->setSMTPMailFrom(zflow->getSMTPMailFrom());

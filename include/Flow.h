@@ -704,6 +704,7 @@ public:
                              u_int16_t payload_len,
 			     const struct pcap_pkthdr *h);
 #ifdef NTOPNG_PRO
+  void updateOTStats(ParsedFlow *zflow);
   void processModbusPacket(bool is_query, const u_char *payload,
 			   u_int16_t payload_len,
 			   const struct pcap_pkthdr *h);
