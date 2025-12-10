@@ -73,7 +73,7 @@ const generate_html_tooltip = (x) => {
   const container = document.createElement("div");
   /* Necessary, otherwise it will go in conflict with other css */
   //container.style.color = "#111111";
-  container.innerHTML = `<b>${x.label}</b><br><br>${i18n('db_explorer.host_data')}: ${x.id}`;
+  container.innerHTML = `<b>${x.label}</b>`;
   return container;
 }
 

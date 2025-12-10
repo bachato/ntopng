@@ -26,17 +26,27 @@
         <div class="mt-2 row">
             <Transition name="add-effect" mode="out-in">
                 <div class="position-relative col-6">
-                    <TableWithConfig ref="table_modbus_registers" :table_id="'modbus_registers'" :showLoading="true"
-                        :f_map_columns="mapTableColumns" :f_sort_rows="columnsSorting"
+                    <TableWithConfig ref="table_modbus_function_codes" :table_id="'modbus_function_codes'"
+                        :showLoading="true" :f_map_columns="mapTableColumns" :f_sort_rows="columnsSorting"
                         :get_extra_params_obj="getExtraParameters">
+                        <template v-slot:custom_header>
+                            <div class="dropdown me-3 d-inline-block">
+                                <h4>{{ _i18n('flow_details.modbus_function_codes') }}</h4>
+                            </div>
+                        </template> <!-- Dropdown filters -->
                     </TableWithConfig>
                 </div>
             </Transition>
             <Transition name="add-effect" mode="out-in">
                 <div class="position-relative col-6">
-                    <TableWithConfig ref="table_modbus_function_codes" :table_id="'modbus_function_codes'"
-                        :showLoading="true" :f_map_columns="mapTableColumns" :f_sort_rows="columnsSorting"
+                    <TableWithConfig ref="table_modbus_registers" :table_id="'modbus_registers'" :showLoading="true"
+                        :f_map_columns="mapTableColumns" :f_sort_rows="columnsSorting"
                         :get_extra_params_obj="getExtraParameters">
+                        <template v-slot:custom_header>
+                            <div class="dropdown me-3 d-inline-block">
+                                <h4>{{ _i18n('flow_details.modbus_registers') }}</h4>
+                            </div>
+                        </template> <!-- Dropdown filters -->
                     </TableWithConfig>
                 </div>
             </Transition>
