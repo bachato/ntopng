@@ -1107,8 +1107,8 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow *const flow,
 #if 0
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[value: %s][master: %u][app: %u]",
 				 value->string ? value->string : "(int)",
-				 flow->l7_proto.master_protocol,
-				 flow->l7_proto.app_protocol);
+				 flow->l7_proto.proto.master_protocol,
+				 flow->l7_proto.proto.app_protocol);
 #endif
     break;
 

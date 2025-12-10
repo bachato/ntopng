@@ -485,6 +485,7 @@ using namespace clickhouse;
 #ifdef NTOPNG_PRO
 #include "FlowRTP.h"
 #include "ModbusStats.h"
+#include "S7CommStats.h"
 #include "MessageBroker.h"
 #include "NatsBroker.h"
 #endif

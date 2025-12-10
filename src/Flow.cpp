@@ -289,6 +289,7 @@ Flow::Flow(NetworkInterface *_iface,
 
 #ifdef NTOPNG_PRO
   modbus = NULL;
+  s7comm = NULL;
   lateral_movement = false;
   periodicity_status = periodicity_status_unknown;
 #ifndef HAVE_NEDGE
@@ -599,6 +600,7 @@ Flow::~Flow() {
   if(iec104) delete iec104;
 #ifdef NTOPNG_PRO
   if(modbus) delete modbus;
+  if(s7comm) delete s7comm;
 #endif
 
   if(suspicious_dga_domain) free(suspicious_dga_domain);
@@ -3317,6 +3319,7 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
 
 #ifdef NTOPNG_PRO
     if(modbus) modbus->lua(vm);
+    if(s7comm) s7comm->lua(vm);
 #endif
 
     if(!has_json_info) lua_push_str_table_entry(vm, "moreinfo.json", "{}");
@@ -5692,6 +5695,7 @@ std::string Flow::getFlowInfo(bool isLuaRequest) {
     if(iec104) return (iec104->getFlowInfo());
 #ifdef NTOPNG_PRO
     if(modbus) return (modbus->getFlowInfo());
+    if(s7comm) return (s7comm->getFlowInfo());
 #endif
 
     if(isDNS() && protos.dns.last_query) {
@@ -8018,6 +8022,14 @@ void Flow::getProtocolJSONInfo(ndpi_serializer *serializer) {
   case NDPI_PROTOCOL_MODBUS:
     ndpi_serialize_start_of_block(serializer, "modbus");
     getModbusInfo(serializer);
+    ndpi_serialize_end_of_block(serializer);
+    break;
+#endif
+
+#ifdef NTOPNG_PRO
+  case NDPI_PROTOCOL_S7COMM:
+    ndpi_serialize_start_of_block(serializer, "s7comm");
+    getS7CommInfo(serializer);
     ndpi_serialize_end_of_block(serializer);
     break;
 #endif
