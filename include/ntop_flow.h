@@ -248,13 +248,14 @@
 #define TLS_CIPHER NTOP_BASE_ID + 493
 #define SSL_UNSAFE_CIPHER NTOP_BASE_ID + 494
 #define L7_PROTO_RISK NTOP_BASE_ID + 509
-#define HASSHC_HASH NTOP_BASE_ID + 525
-#define HASSHS_HASH NTOP_BASE_ID + 526
-#define FLOW_VERDICT NTOP_BASE_ID + 522
+#define HASSHC_HASH   NTOP_BASE_ID + 525
+#define HASSHS_HASH   NTOP_BASE_ID + 526
+#define FLOW_VERDICT  NTOP_BASE_ID + 522
 #define L7_ERROR_CODE NTOP_BASE_ID + 554
-#define L7_RISK_INFO NTOP_BASE_ID + 555
-#define JA4C_HASH NTOP_BASE_ID + 576
-#define FLOW_SOURCE  NTOP_BASE_ID+579 /* 0 = packets, 1 = collected NetFlow/IPFIX, 2 = collected sFlow/nfLite */
+#define L7_RISK_INFO  NTOP_BASE_ID + 555
+#define JA4C_HASH     NTOP_BASE_ID + 576
+#define FLOW_SOURCE   NTOP_BASE_ID + 579 /* 0 = packets, 1 = collected NetFlow/IPFIX, 2 = collected sFlow/nfLite */
+#define OT_INFO       NTOP_BASE_ID + 603 /* OT protocols info (JSON) */
 
 /* eBPF / Process */
 #define SRC_PROC_PID NTOP_BASE_ID + 168

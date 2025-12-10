@@ -37,6 +37,7 @@ ParsedFlow::ParsedFlow() : ParsedFlowCore(), ParsedeBPF() {
   ja4c_hash = NULL;
   external_alert = NULL;
   flow_risk_info = NULL;
+  ot_info = NULL;
   tls_cipher = tls_unsafe_cipher = http_ret_code = 0;
   dns_query_type = dns_ret_code = dns_query_id = 0;
   ndpi_flow_risk_bitmap = 0;
@@ -134,6 +135,11 @@ ParsedFlow::ParsedFlow(const ParsedFlow &pf) : ParsedFlowCore(pf), ParsedeBPF(pf
     flow_risk_info = strdup(pf.flow_risk_info);
   else
     flow_risk_info = NULL;
+
+  if (pf.ot_info)
+    ot_info = strdup(pf.ot_info);
+  else
+    ot_info = NULL;
 
   if (pf.ndpi_flow_risk_name)
     ndpi_flow_risk_name = strdup(pf.ndpi_flow_risk_name);
@@ -255,6 +261,9 @@ void ParsedFlow::fromLua(lua_State *L, int index) {
       } else if (!strcmp(key, "flow_risk_info")) {
 	if (flow_risk_info) free(flow_risk_info);
 	flow_risk_info = strdup(lua_tostring(L, -1));
+      } else if (!strcmp(key, "ot_info")) {
+	if (ot_info) free(ot_info);
+	ot_info = strdup(lua_tostring(L, -1));
       } else if (!strcmp(key, "first_switched_iso8601")) {
 	first_switched = Utils::str2epoch(lua_tostring(L, -1));
       } else if (!strcmp(key, "last_switched_iso8601")) {
@@ -368,6 +377,7 @@ void ParsedFlow::freeMemory() {
   if (ja4c_hash)            { free(ja4c_hash); ja4c_hash = NULL; }
   if (external_alert)       { free(external_alert); external_alert = NULL; }
   if (flow_risk_info)       { free(flow_risk_info); flow_risk_info = NULL; }
+  if (ot_info)              { free(ot_info); ot_info = NULL; }
   if (ndpi_flow_risk_name)  { free(ndpi_flow_risk_name); ndpi_flow_risk_name = NULL; }
   if (smtp_rcp_to)          { free(smtp_rcp_to); smtp_rcp_to = NULL; }
   if (smtp_mail_from)       { free(smtp_mail_from); smtp_mail_from = NULL; }

@@ -154,6 +154,7 @@ ZMQParserInterface::ZMQParserInterface(const char *endpoint,
   addMapping("TCP_FINGERPRINT", TCP_FINGERPRINT, NTOP_PEN);
   addMapping("TCP_STATS_SRC_TO_DST", TCP_STATS_SRC_TO_DST, NTOP_PEN);
   addMapping("TCP_STATS_DST_TO_SRC", TCP_STATS_DST_TO_SRC, NTOP_PEN);  
+  addMapping("OT_INFO", OT_INFO, NTOP_PEN);  
 
   /* eBPF / Process */
   addMapping("SRC_PROC_PID", SRC_PROC_PID, NTOP_PEN);
@@ -1278,6 +1279,10 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow *const flow,
   case L7_RISK_INFO:
     if (value->string && value->string[0])
       flow->setRiskInfo(value->string);
+    break;
+
+  case OT_INFO:
+    flow->setOTInfo(value->string);
     break;
 
   case FLOW_SOURCE:
