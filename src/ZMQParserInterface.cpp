@@ -35,7 +35,7 @@ ZMQParserInterface::ZMQParserInterface(const char *endpoint,
                                        const char *custom_interface_type)
   : ParserInterface(endpoint, custom_interface_type) {
   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-
+  next_msg_time = 0;
   memset(&cumulative_remote_stats, 0, sizeof(cumulative_remote_stats));
   memset(&last_cumulative_remote_stats_update, 0, sizeof(last_cumulative_remote_stats_update));
 
@@ -556,12 +556,18 @@ u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
       if (check_clock_drift /* Skip message with drops to avoid miscalculations */
           && ((zrs.local_time - polling_start_time) > 5)) {
         if (abs(time_delta) >= 10) {
-          ntop->getTrace()->traceEvent(TRACE_NORMAL,
-                                       "Remote probe clock drift %u sec "
-                                       "detected (local: %u remote: %u [%s])",
-                                       abs(time_delta), zrs.local_time,
-                                       zrs.remote_time,
-                                       zrs.remote_probe_address);
+	  u_int32_t now = (u_int32_t)time(NULL);
+	  
+	  if(next_msg_time < now) {
+	    next_msg_time = now + 10 /* silence alaert fo 10+ sec */;
+	    
+	    ntop->getTrace()->traceEvent(TRACE_NORMAL,
+					 "Remote probe clock drift %u sec "
+					 "detected (local: %u remote: %u [%s])",
+					 abs(time_delta), zrs.local_time,
+					 zrs.remote_time,
+					 zrs.remote_probe_address);
+	  }
         }
       } else
         zrs.remote_time = zrs.local_time; /* Avoid clock drift messages during

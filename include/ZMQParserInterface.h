@@ -33,6 +33,7 @@ class ZMQParserInterface : public ParserInterface {
   typedef std::map<string, u_int32_t> counters_map_t;
   std::unordered_map<u_int32_t, bool> cloud_flow_exporters;
   u_int16_t top_vlan_id;
+  u_int32_t next_msg_time;
   std::unordered_map<std::string, u_int16_t> name_to_vlan;
   labels_map_t labels_map; /* Contains mappings between labels and integer IDs
                               (PEN and ID) */
