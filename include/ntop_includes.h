@@ -484,6 +484,7 @@ using namespace clickhouse;
 #include "RemoteHost.h"
 #ifdef NTOPNG_PRO
 #include "FlowRTP.h"
+#include "OTStats.h"
 #include "ModbusStats.h"
 #include "S7CommStats.h"
 #include "MessageBroker.h"
