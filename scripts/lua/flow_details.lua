@@ -562,7 +562,7 @@ page_utils.print_navbar(title, url, {{
    label = "<i class=\"fas fa-lg fa-home\" data-bs-toggle=\"tooltip\" data-bs-placement=\"bottom\" title=\"" .. i18n("overview") ..
       "\"></i>"
 }, {
-   hidden = not (flow.modbus) or not ntop.isEnterpriseL(),
+   hidden = not flow or not (flow.modbus) or not ntop.isEnterpriseL(),
    active = page == "modbus",
    page_name = "modbus",
    label = i18n("details.label_modbus_server")
