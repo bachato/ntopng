@@ -2849,11 +2849,21 @@ end
 -- A one line flow description
 -- This uses the information from flow.getInfo()
 function formatModbusInfo(proto_info)
-    local info = {}
+    local info = nil
 
     if proto_info.modbus then
         info = proto_info.modbus
     end
+
+    return info
+end
+
+-- #######################
+
+-- A one line flow description
+-- This uses the information from flow.getInfo()
+function formatS7CommInfo(proto_info)
+    local info = nil
 
     if proto_info.s7comm then
         info = proto_info.s7comm

@@ -2133,8 +2133,12 @@ function historical_flow_utils.convertToLiveFlowFormat(historical_flow)
       require "flow_utils"
       local json = require "dkjson"
       local proto_info = json.decode(historical_flow["PROTOCOL_INFO_JSON"])
-      local modbus_info = formatModbusInfo(proto_info.proto)
-      flow.modbus = modbus_info
+      if proto_info and proto_info.proto then
+         local modbus_info = formatModbusInfo(proto_info.proto)
+         local s7comm_info = formatS7CommInfo(proto_info.proto)
+         flow.modbus = modbus_info
+         flow.s7comm = s7comm_info
+      end
    end
 
    return flow
