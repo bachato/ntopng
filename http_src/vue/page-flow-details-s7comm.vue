@@ -3,15 +3,29 @@
         <div class="row">
             <Transition name="add-effect" mode="out-in">
                 <div class="position-relative col-6">
+                    <div class="card card-shadow">
+                        <div class="card-body">
+                            <NetworkMap ref="s7comm_map" :empty_message="no_transitions_message" :height="'30vh'"
+                                :page_csrf="props.context.csrf" :url="s7comm_map_url" :url_params="getExtraParameters()"
+                                :map_id="'s7comm_transition_map'">
+                            </NetworkMap>
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+            <Transition name="add-effect" mode="out-in">
+                <div class="position-relative col-6">
                     <BootstrapTable id="s7comm_bootstrap_table" :columns="stats_columns" :rows="stats_rows"
                         :print_html_column="(col) => print_stats_column(col)"
                         :print_html_row="(col, row) => print_stats_row(col, row)">
                     </BootstrapTable>
                 </div>
             </Transition>
+        </div>
+        <div class="mt-2 row">
             <Transition name="add-effect" mode="out-in">
                 <div class="position-relative col-6">
-                    <TableWithConfig ref="table_s7comm_function_codes" :table_id="'s7comm_functions'"
+                    <TableWithConfig ref="table_s7comm_function_codes" :table_id="'s7comm_function_codes'"
                         :showLoading="true" :f_map_columns="mapTableColumns" :f_sort_rows="columnsSorting"
                         :get_extra_params_obj="getExtraParameters">
                         <template v-slot:custom_header>
@@ -28,6 +42,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeMount, computed } from "vue";
+import { default as NetworkMap } from "./network-map.vue";
 import { default as BootstrapTable } from "./bootstrap-table.vue";
 import { default as sortingFunctions } from "../utilities/sorting-utils.js";
 import { default as TableWithConfig } from "./table-with-config.vue";
@@ -43,6 +58,8 @@ const table_s7comm_functions = ref(null);
 const stats_rows = ref([]);
 const s7comm_general_stats_url = '/lua/pro/rest/v2/get/flow/s7comm/general_stats.lua'
 const no_transitions_message = i18n('flow_details.s7comm_no_transitions')
+const s7comm_map = ref(null)
+const s7comm_map_url = `${http_prefix}/lua/pro/rest/v2/get/flow/s7comm/map.lua`
 const stats_columns = ref([{
     name: _i18n("map_page.info"),
     id: "info"
@@ -111,7 +128,7 @@ function print_stats_row(col, row) {
 
 function columnsSorting(col, r0, r1) {
     if (col != null) {
-        if (col.id == "s7comm_function") {
+        if (col.id == "s7comm_function_code") {
             return sortingFunctions.sortByName(r0.s7comm_function_code, r1.s7comm_function_code, col.sort);
         } else if (col.id == "num_uses") {
             return sortingFunctions.sortByNumber(r0.num_uses, r1.num_uses, col.sort);
@@ -125,7 +142,7 @@ function columnsSorting(col, r0, r1) {
 
 const mapTableColumns = (columns) => {
     let map_columns = {
-        "s7comm_function": (value) => {
+        "s7comm_function_code": (value) => {
             return value;
         },
         "num_uses": (value) => {

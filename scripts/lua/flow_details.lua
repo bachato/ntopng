@@ -550,6 +550,7 @@ local flow_key = _GET["flow_key"]
 local flow_hash_id = _GET["flow_hash_id"]
 
 flow = interface.findFlowByKeyAndHashId(tonumber(flow_key), tonumber(flow_hash_id))
+ --tprint(flow)
 
 local ifid = interface.name2id(ifname)
 local label = getFlowLabel(flow, nil, nil, nil, nil, nil, false)
@@ -566,6 +567,11 @@ page_utils.print_navbar(title, url, {{
    active = page == "modbus",
    page_name = "modbus",
    label = i18n("details.label_modbus_server")
+}, {
+   hidden = not (flow.s7comm) or not ntop.isEnterpriseL(),
+   active = page == "s7comm",
+   page_name = "s7comm",
+   label = i18n("details.label_s7comm_server")
 }})
 
 if isEmptyString(page) or page == "overview" then
@@ -2409,6 +2415,16 @@ elseif page == "modbus" then
 
    template.render("pages/vue_page.template", {
       vue_page_name = "PageFlowDetailsModbus",
+      page_context = json_context
+   })
+elseif page == "s7comm" then
+   local json = require "dkjson"
+   local json_context = json.encode({
+      csrf = ntop.getRandomCSRFValue()
+   })
+
+   template.render("pages/vue_page.template", {
+      vue_page_name = "PageFlowDetailsS7Comm",
       page_context = json_context
    })
 end

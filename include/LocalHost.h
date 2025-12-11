@@ -207,6 +207,7 @@ class LocalHost : public Host {
   void setDnsServer();
   void setSmtpServer();
   void setModbusServer();
+  void setModbusServer();
   void setNtpServer();
   void setImapServer();
   void setPopServer();

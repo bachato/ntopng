@@ -740,6 +740,13 @@ void LocalHost::setModbusServer() {
 
 /* *************************************** */
 
+void LocalHost::setS7CommServer() {
+  Host::setS7CommServer();
+  addDataToAssets((char *) "s7comm_server", (char *) "true");
+}
+
+/* *************************************** */
+
 void LocalHost::setSmtpServer() {
   Host::setSmtpServer();
   addDataToAssets((char *) "smtp_server", (char *) "true");

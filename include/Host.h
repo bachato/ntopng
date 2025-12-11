@@ -248,6 +248,11 @@ class Host : public GenericHashEntry,
     return (host_services_bitmap & (1 << HOST_IS_MODBUS_SERVER));
   }
   virtual void setModbusServer();
+    
+  inline bool isS7CommServer() const {
+    return (host_services_bitmap & (1 << HOST_IS_S7COMM_SERVER));
+  }
+  virtual void setS7CommServer();
 
   inline bool isSmtpServer() const {
     return (host_services_bitmap & (1 << HOST_IS_SMTP_SERVER));

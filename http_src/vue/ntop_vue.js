@@ -94,6 +94,7 @@ import { default as PageExporterInterfaceOverview } from "./page-exporter-interf
 
 /* Flow Details pages */
 import { default as PageFlowDetailsModbus } from "./page-flow-details-modbus.vue"
+import { default as PageFlowDetailsS7Comm } from "./page-flow-details-s7comm.vue"
 
 /* Config pages */
 import { default as PageSNMPConfig } from "./page-snmp-config.vue"
@@ -206,6 +207,7 @@ let ntopVue = {
 
     /* Flow Details pages */
     PageFlowDetailsModbus: PageFlowDetailsModbus,
+    PageFlowDetailsS7Comm: PageFlowDetailsS7Comm,
     
     /* SNMP */
     PageSNMPDevices: PageSNMPDevices,

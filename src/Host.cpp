@@ -1964,6 +1964,7 @@ void Host::updateView(IpAddress *ipa) {
   if(ipa->isSshServer())    setSshServer();
   if(ipa->isRdpServer())    setRdpServer();
   if(ipa->isModbusServer()) setModbusServer();
+  if(ipa->isS7CommServer()) setS7CommServer();
 }
 
 /* *************************************** */
@@ -2703,6 +2704,13 @@ void Host::setDnsServer() {
 void Host::setModbusServer() {
   if(!isModbusServer())
     host_services_bitmap |= 1 << HOST_IS_MODBUS_SERVER;
+}
+
+/* *************************************** */
+
+void Host::setS7CommServer() {
+  if(!isS7CommServer())
+    host_services_bitmap |= 1 << HOST_IS_S7COMM_SERVER;
 }
 
 /* *************************************** */
