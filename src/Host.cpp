@@ -694,15 +694,17 @@ void Host::lua_get_services(lua_State *vm) const {
 
   lua_newtable(vm);
 
-  if(isDhcpServer()) lua_push_bool_table_entry(vm, "dhcp", true);
-  if(isDnsServer())  lua_push_bool_table_entry(vm, "dns", true);
-  if(isSmtpServer()) lua_push_bool_table_entry(vm, "smtp", true);
-  if(isPopServer())  lua_push_bool_table_entry(vm, "pop", true);
-  if(isImapServer()) lua_push_bool_table_entry(vm, "imap", true);
-  if(isNtpServer())  lua_push_bool_table_entry(vm, "ntp", true);
-  if(isHttpServer()) lua_push_bool_table_entry(vm, "http", true);
-  if(isSshServer())  lua_push_bool_table_entry(vm, "ssh", true);
-  if(isRdpServer())  lua_push_bool_table_entry(vm, "rdp", true);
+  if(providesService(HOST_SERVICE_DHCP))   lua_push_bool_table_entry(vm, "dhcp", true);
+  if(providesService(HOST_SERVICE_DNS))    lua_push_bool_table_entry(vm, "dns", true);
+  if(providesService(HOST_SERVICE_NTP))    lua_push_bool_table_entry(vm, "ntp", true);
+  if(providesService(HOST_SERVICE_SMTP))   lua_push_bool_table_entry(vm, "smtp", true);
+  if(providesService(HOST_SERVICE_IMAP))   lua_push_bool_table_entry(vm, "imap", true);
+  if(providesService(HOST_SERVICE_POP))    lua_push_bool_table_entry(vm, "pop", true);
+  if(providesService(HOST_SERVICE_HTTP))   lua_push_bool_table_entry(vm, "http", true);
+  if(providesService(HOST_SERVICE_SSH))    lua_push_bool_table_entry(vm, "ssh", true);
+  if(providesService(HOST_SERVICE_RDP))    lua_push_bool_table_entry(vm, "rdp", true);
+  if(providesService(HOST_SERVICE_MODBUS)) lua_push_bool_table_entry(vm, "modbus", true);
+  if(providesService(HOST_SERVICE_S7COMM)) lua_push_bool_table_entry(vm, "s7comm", true);
   
   lua_pushstring(vm, "services");
   lua_insert(vm, -2);
@@ -1954,17 +1956,9 @@ void Host::checkStatsReset() {
   have been observed on the shadow IP address
 */
 void Host::updateView(IpAddress *ipa) {
-  if(ipa->isDhcpServer())   setDhcpServer();
-  if(ipa->isDnsServer())    setDnsServer();
-  if(ipa->isSmtpServer())   setSmtpServer();
-  if(ipa->isImapServer())   setImapServer();
-  if(ipa->isPopServer())    setPopServer();
-  if(ipa->isNtpServer())    setNtpServer();
-  if(ipa->isHttpServer())   setHttpServer();
-  if(ipa->isSshServer())    setSshServer();
-  if(ipa->isRdpServer())    setRdpServer();
-  if(ipa->isModbusServer()) setModbusServer();
-  if(ipa->isS7CommServer()) setS7CommServer();
+  for (int i = 1; i <= NUM_HOST_SERVICES; i++)
+    if (ipa->providesService(i) && !providesService(i))
+      setService(i);
 }
 
 /* *************************************** */
@@ -2687,79 +2681,9 @@ void Host::visit(std::vector<ActiveHostWalkerInfo> *v, HostWalkMode mode) {
 
 /* *************************************** */
 
-void Host::setDhcpServer() {
-  if(!isDhcpServer())
-    host_services_bitmap |= 1 << HOST_IS_DHCP_SERVER;
-}
-
-/* *************************************** */
-
-void Host::setDnsServer() {
-  if(!isDnsServer())
-    host_services_bitmap |= 1 << HOST_IS_DNS_SERVER;
-}
-
-/* *************************************** */
-
-void Host::setModbusServer() {
-  if(!isModbusServer())
-    host_services_bitmap |= 1 << HOST_IS_MODBUS_SERVER;
-}
-
-/* *************************************** */
-
-void Host::setS7CommServer() {
-  if(!isS7CommServer())
-    host_services_bitmap |= 1 << HOST_IS_S7COMM_SERVER;
-}
-
-/* *************************************** */
-
-void Host::setSmtpServer() {
-  if(!isSmtpServer())
-    host_services_bitmap |= 1 << HOST_IS_SMTP_SERVER;
-}
-
-/* *************************************** */
-
-void Host::setNtpServer() {
-  if(!isNtpServer())
-    host_services_bitmap |= 1 << HOST_IS_NTP_SERVER;
-}
-
-/* *************************************** */
-
-void Host::setImapServer() {
-  if(!isImapServer())
-    host_services_bitmap |= 1 << HOST_IS_IMAP_SERVER;
-}
-
-/* *************************************** */
-
-void Host::setPopServer() {
-  if(!isPopServer())
-    host_services_bitmap |= 1 << HOST_IS_POP_SERVER;
-}
-
-/* *************************************** */
-
-void Host::setHttpServer() {
-  if(!isHttpServer())
-    host_services_bitmap |= 1 << HOST_IS_HTTP_SERVER;
-}
-
-/* *************************************** */
-
-void Host::setSshServer() {
-  if(!isSshServer())
-    host_services_bitmap |= 1 << HOST_IS_SSH_SERVER;
-}
-
-/* *************************************** */
-
-void Host::setRdpServer() {
-  if(!isRdpServer())
-    host_services_bitmap |= 1 << HOST_IS_RDP_SERVER;
+void Host::setService(int service_enum) {
+  if(!providesService(service_enum))
+    host_services_bitmap |= 1 << service_enum;
 }
 
 /* *************************************** */

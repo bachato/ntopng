@@ -39,7 +39,7 @@ bool UnexpectedDNSServer::isAllowedHost(Flow *f) {
           TRACE_NORMAL,
           "Checking Unexpected DNS Server [IP %s] [Is DNS: %s] [Is Configured "
           "DNS: %s]",
-          ip->print(buf, sizeof(buf)), ip->isDnsServer() ? "Yes" : "No",
+          ip->print(buf, sizeof(buf)), ip->providesService(HOST_SERVICE_DNS) ? "Yes" : "No",
           ntop->getPrefs()->isDNSServer(ip, f->get_vlan_id()) ? "Yes" : "No");
 #endif
 

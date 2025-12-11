@@ -28,10 +28,9 @@ struct ipAddress {
   u_int8_t ipVersion : 3 /* Either 4 or 6 */, loopbackIP : 1, privateIP : 1,
       multicastIP : 1, broadcastIP : 1, blacklistedIP : 1, localIP : 1;
 
-  u_int8_t dnsServer : 1, dhcpServer : 1, smtpServer : 1, ntpServer : 1,
-    imapServer : 1, popServer : 1, gateway: 1,   httpServer : 1;
-  u_int8_t sshServer : 1, rdpServer : 1, modbusServer : 1, s7commServer : 1, unused : 4;
-  
+  u_int8_t gateway : 1, unused : 7;
+  u_int16_t services_bitmap;
+
   union {
     struct ndpi_in6_addr ipv6;
     u_int32_t ipv4; /* Host byte code */
@@ -123,28 +122,15 @@ class IpAddress {
   inline u_int8_t getVersion() const { return (addr.ipVersion); };
   inline void setVersion(u_int8_t version) { addr.ipVersion = version; };
 
-  inline bool isDhcpServer() const { return (addr.dhcpServer); }
-  inline void setDhcpServer() { addr.dhcpServer = true; }
-  inline bool isDnsServer() const { return (addr.dnsServer); }
-  inline void setDnsServer() { addr.dnsServer = true; }
-  inline bool isModbusServer() const { return (addr.modbusServer); }
-  inline void setModbusServer() { addr.modbusServer = true; }
-  inline bool isS7CommServer() const { return (addr.s7commServer); }
-  inline void setS7CommServer() { addr.s7commServer = true; }
-  inline bool isSmtpServer() const { return (addr.smtpServer); }
-  inline void setSmtpServer() { addr.smtpServer = true; }
-  inline bool isImapServer() const { return (addr.imapServer); }
-  inline void setImapServer() { addr.imapServer = true; }
-  inline bool isPopServer() const { return (addr.popServer); }
-  inline void setPopServer() { addr.popServer = true; }
-  inline bool isNtpServer() const { return (addr.ntpServer); }
-  inline void setNtpServer() { addr.ntpServer = true; }
-  inline bool isHttpServer() const { return (addr.httpServer); }
-  inline void setHttpServer() { addr.httpServer = true; }
-  inline bool isSshServer() const { return (addr.sshServer); }
-  inline void setSshServer() { addr.sshServer = true; }
-  inline bool isRdpServer() const { return (addr.rdpServer); }
-  inline void setRdpServer() { addr.rdpServer = true; }
+  inline bool providesService(int service_enum) const {
+    return (addr.services_bitmap & (1 << service_enum));
+  }
+  inline void setService(int service_enum) {
+    if(!(addr.services_bitmap & (1 << service_enum)))
+      addr.services_bitmap |= 1 << service_enum;
+  }
+  inline u_int16_t getServicesMap() { return addr.services_bitmap; }
+
   inline bool isGateway() const { return (addr.gateway); }
   inline void setGateway(bool is_gateway) { addr.gateway = is_gateway; }
   /* NOTE: update Host::updateView() when adding new services */

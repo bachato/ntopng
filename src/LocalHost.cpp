@@ -719,79 +719,27 @@ void LocalHost::lua_get_fingerprints(lua_State *vm) {
 
 /* *************************************** */
 
-void LocalHost::setDhcpServer() {
-  Host::setDhcpServer();
-  addDataToAssets((char *) "dhcp_server", (char *) "true");
-}
+void LocalHost::setService(int service_enum) {
+  Host::setService(service_enum);
 
-/* *************************************** */
+  const char *service_name = NULL;
 
-void LocalHost::setDnsServer() {
-  Host::setDnsServer();
-  addDataToAssets((char *) "dns_server", (char *) "true");
-}
+  switch(service_enum) {
+    case HOST_SERVICE_DHCP:   service_name = "dhcp_server"; break;
+    case HOST_SERVICE_DNS:    service_name = "dns_server"; break;
+    case HOST_SERVICE_NTP:    service_name = "ntp_server"; break;
+    case HOST_SERVICE_SMTP:   service_name = "smtp_server"; break;
+    case HOST_SERVICE_IMAP:   service_name = "imap_server"; break;
+    case HOST_SERVICE_POP:    service_name = "pop_server"; break;
+    case HOST_SERVICE_HTTP:   service_name = "http_server"; break;
+    case HOST_SERVICE_SSH:    service_name = "ssh_server"; break;
+    case HOST_SERVICE_RDP:    service_name = "rdp_server"; break;
+    case HOST_SERVICE_MODBUS: service_name = "modbus_server"; break;
+    case HOST_SERVICE_S7COMM: service_name = "s7comm_server"; break;
+  }
 
-/* *************************************** */
-
-void LocalHost::setModbusServer() {
-  Host::setModbusServer();
-  addDataToAssets((char *) "modbus_server", (char *) "true");
-}
-
-/* *************************************** */
-
-void LocalHost::setS7CommServer() {
-  Host::setS7CommServer();
-  addDataToAssets((char *) "s7comm_server", (char *) "true");
-}
-
-/* *************************************** */
-
-void LocalHost::setSmtpServer() {
-  Host::setSmtpServer();
-  addDataToAssets((char *) "smtp_server", (char *) "true");
-}
-
-/* *************************************** */
-
-void LocalHost::setNtpServer() {
-  Host::setNtpServer();
-  addDataToAssets((char *) "ntp_server", (char *) "true");
-}
-
-/* *************************************** */
-
-void LocalHost::setImapServer() {
-  Host::setImapServer();
-  addDataToAssets((char *) "imap_server", (char *) "true");
-}
-
-/* *************************************** */
-
-void LocalHost::setPopServer() {
-  Host::setPopServer();
-  addDataToAssets((char *) "pop_server", (char *) "true");
-}
-
-/* *************************************** */
-
-void LocalHost::setHttpServer() {
-  Host::setHttpServer();
-  addDataToAssets((char *) "http_server", (char *) "true");
-}
-
-/* *************************************** */
-
-void LocalHost::setSshServer() {
-  Host::setSshServer();
-  addDataToAssets((char *) "ssh_server", (char *) "true");
-}
-
-/* *************************************** */
-
-void LocalHost::setRdpServer() {
-  Host::setRdpServer();
-  addDataToAssets((char *) "rdp_server", (char *) "true");
+  if(service_name)
+    addDataToAssets((char *) service_name, (char *) "true");
 }
 
 /* *************************************** */

@@ -38,7 +38,7 @@ void DomainNamesContacts::periodicUpdate(Host *h, HostAlert *engaged_alert) {
 
   /* If the host is a DNS or SMTP server, the alert is not triggered
   for both statically specified and dynamically identified hosts.*/
-  if (h->isDnsServer() || h->isSmtpServer() ||
+  if (h->providesService(HOST_SERVICE_DNS) || h->providesService(HOST_SERVICE_SMTP) ||
       ntop->getPrefs()->isDNSServer(ip, h->get_vlan_id()) ||
       ntop->getPrefs()->isSMTPServer(ip, h->get_vlan_id()))
     return;

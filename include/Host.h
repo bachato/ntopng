@@ -234,68 +234,20 @@ class Host : public GenericHashEntry,
     return getNumBlacklistedAsSrv() - getCheckpointBlacklistedAsSrv();
   }
 
-  inline bool isDhcpServer() const {
-    return (host_services_bitmap & (1 << HOST_IS_DHCP_SERVER));
+  inline bool providesService(int service_enum) const {
+    return (host_services_bitmap & (1 << service_enum));
   }
-  virtual void setDhcpServer();
-  
-  inline bool isDnsServer() const {
-    return (host_services_bitmap & (1 << HOST_IS_DNS_SERVER));
-  }
-  virtual void setDnsServer();
-  
-  inline bool isModbusServer() const {
-    return (host_services_bitmap & (1 << HOST_IS_MODBUS_SERVER));
-  }
-  virtual void setModbusServer();
-    
-  inline bool isS7CommServer() const {
-    return (host_services_bitmap & (1 << HOST_IS_S7COMM_SERVER));
-  }
-  virtual void setS7CommServer();
 
-  inline bool isSmtpServer() const {
-    return (host_services_bitmap & (1 << HOST_IS_SMTP_SERVER));
-  }
-  virtual void setSmtpServer();
-
-  inline bool isImapServer() const {
-    return (host_services_bitmap & (1 << HOST_IS_IMAP_SERVER));
-  }
-  virtual void setImapServer();
-
-  inline bool isPopServer() const {
-    return (host_services_bitmap & (1 << HOST_IS_POP_SERVER));
-  }
-  virtual void setPopServer();
-
-  inline bool isNtpServer() const {
-    return (host_services_bitmap & (1 << HOST_IS_NTP_SERVER));
-  }
-  virtual void setNtpServer();
-
-  inline bool isHttpServer() const {
-    return (host_services_bitmap & (1 << HOST_IS_HTTP_SERVER));
-  }
-  virtual void setHttpServer();
-
-  inline bool isSshServer() const {
-    return (host_services_bitmap & (1 << HOST_IS_SSH_SERVER));
-  }
-  virtual void setSshServer();
-
-  inline bool isRdpServer() const {
-    return (host_services_bitmap & (1 << HOST_IS_RDP_SERVER));
-  }
-  virtual void setRdpServer();
+  virtual void setService(int service_enum);
 
   inline u_int16_t getServicesMap() { return (host_services_bitmap); }
   /*
-    NOTE: update the fucntion below when a new isXXXServer is added
+    NOTE: update the fucntion below when a new service is added
     Return true if this host is a server for known protocols
   */
   inline bool isProtocolServer() const {
-    return (isDhcpServer() || isDnsServer() || isSmtpServer() || isNtpServer());
+    return (providesService(HOST_SERVICE_DHCP) || providesService(HOST_SERVICE_DNS) ||
+            providesService(HOST_SERVICE_SMTP) || providesService(HOST_SERVICE_NTP));
   }
   inline void incrRemoteAccess() {
     if (num_remote_access == 255)

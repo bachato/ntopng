@@ -37,7 +37,7 @@ class SMTPServerContacts : public ServerContacts {
     return new SMTPServerContactsAlert(c, f, cli_pctg, _contacts,
                                        _contacts_threshold);
   };
-  bool isServer(Host *h) { return h->isSmtpServer(); };
+  bool isServer(Host *h) { return h->providesService(HOST_SERVICE_SMTP); };
 
  public:
   SMTPServerContacts();

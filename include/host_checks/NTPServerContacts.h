@@ -37,7 +37,7 @@ class NTPServerContacts : public ServerContacts {
     return new NTPServerContactsAlert(c, f, cli_pctg, _contacts,
                                       _contacts_threshold);
   };
-  bool isServer(Host *h) { return h->isNtpServer(); };
+  bool isServer(Host *h) { return h->providesService(HOST_SERVICE_NTP); };
 
  public:
   NTPServerContacts();

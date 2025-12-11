@@ -37,7 +37,7 @@ class DNSServerContacts : public ServerContacts {
     return new DNSServerContactsAlert(c, f, cli_pctg, _contacts,
                                       _contacts_threshold);
   };
-  bool isServer(Host *h) { return h->isNtpServer(); };
+  bool isServer(Host *h) { return h->providesService(HOST_SERVICE_DNS); };
 
  public:
   DNSServerContacts();

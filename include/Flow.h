@@ -1590,6 +1590,9 @@ public:
 #endif
 
   void updateTCPStats(u_int32_t cli_stats, u_int32_t srv_stats);
+
+  void setCliService(int service_enum);
+  void setSrvService(int service_enum);
 };
 
 #endif /* _FLOW_H_ */
