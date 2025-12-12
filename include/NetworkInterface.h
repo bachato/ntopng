@@ -1193,8 +1193,12 @@ public:
 
   virtual bool read_from_stdin() const { return (false); };
   virtual bool read_from_pcap_dump() const { return (false); };
+
   virtual bool read_from_pcap_dump_done() const { return (false); };
   virtual void set_read_from_pcap_dump_done() { ; };
+
+  virtual bool pcap_dump_processing_done() const { return (false); };
+  virtual void set_pcap_dump_processing_done() { ; };
   /*
     Issue a request for user scripts reload. This is called by ntopng when user
     scripts should be reloaded, e.g., after a configuration change.

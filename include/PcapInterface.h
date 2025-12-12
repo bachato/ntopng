@@ -34,7 +34,7 @@ class PcapInterface : public NetworkInterface {
   unsigned int ifname_indexes[MAX_NUM_PCAP_INTERFACES];
   int iface_datalink[MAX_NUM_PCAP_INTERFACES];
   char *pcap_path;
-  bool read_pkts_from_pcap_dump, read_pkts_from_pcap_dump_done,
+  bool read_pkts_from_pcap_dump, read_pkts_from_pcap_dump_done, processing_from_pcap_dump_done,
     read_pkts_from_directory, emulate_traffic_directions, read_from_stdin_pipe,
     delete_pcap_when_done;
   ProtoStats prev_stats_in, prev_stats_out;
@@ -85,6 +85,10 @@ class PcapInterface : public NetworkInterface {
     return (read_pkts_from_pcap_dump_done);
   };
   void set_read_from_pcap_dump_done() { read_pkts_from_pcap_dump_done = true; };
+  bool pcap_dump_processing_done() const {
+    return (processing_from_pcap_dump_done);
+  };
+  void set_pcap_dump_processing_done() { processing_from_pcap_dump_done = true; };
   void sendTermination();
   bool reproducePcapOriginalSpeed() const;
   virtual void updateDirectionStats();

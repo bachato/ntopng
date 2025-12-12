@@ -45,7 +45,7 @@ PcapInterface::PcapInterface(const char *name, u_int8_t ifIdx,
   num_ifaces = 0, pcap_list = NULL;
   memset(&last_pcap_stat, 0, sizeof(last_pcap_stat));
   emulate_traffic_directions = false;
-  read_pkts_from_pcap_dump = read_pkts_from_pcap_dump_done = false,
+  read_pkts_from_pcap_dump = read_pkts_from_pcap_dump_done = false, processing_from_pcap_dump_done = false,
     read_pkts_from_directory = false, read_from_stdin_pipe = false;
 
   firstPktTS.tv_sec = 0;
@@ -447,6 +447,8 @@ static void *packetPollLoop(void *ptr) {
   /* Do two full scans to make sure all stats are updated */
   for (int i = 0; i < 2; i++)
     iface->purgeIdle(time(NULL), false, true /* Full scan */);
+
+  iface->set_pcap_dump_processing_done();
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Terminated packet polling for %s",
                                iface->get_description());
