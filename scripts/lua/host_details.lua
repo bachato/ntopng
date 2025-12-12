@@ -924,6 +924,14 @@ else
                     print(' <span class="badge bg-success">' ..
                               i18n("details.label_rdp_server") .. '</span>')
                 end
+                if (host.services.modbus) then
+                    print(' <span class="badge bg-success">' ..
+                              i18n("details.label_modbus_server") .. '</span>')
+                end
+                if (host.services.s7comm) then
+                    print(' <span class="badge bg-success">' ..
+                              i18n("details.label_s7comm_server") .. '</span>')
+                end
             end
 
             if (host["dhcp_server"] == true) then
