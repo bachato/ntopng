@@ -2997,7 +2997,7 @@ local function validateParameter(k, v)
 
             -- Success, all the table keys have been validated successfully
             return true, "OK", v
-        elseif k:starts('custom_fields') then
+        elseif type(k) == "string" and k:starts('custom_fields') then
             -- Possible error, try the last check for historical custom_fields
             local tmp_1 = k:split("_")
             local i = 3
