@@ -548,6 +548,10 @@ local menu_subpages = {{
             title = i18n("prefs.toggle_snmp_rrds_title"),
             description = i18n("prefs.toggle_snmp_rrds_description")
         },
+        snmp_devices_exporters_rrds_resolution = {
+            title = i18n("prefs.snmp_devices_exporters_rrds_resolution_title"),
+            description = i18n("prefs.snmp_devices_exporters_rrds_resolution_description")
+        },
         toggle_snmp_polling = {
             title = i18n("prefs.toggle_snmp_polling_title"),
             description = i18n("prefs.toggle_snmp_polling_description")

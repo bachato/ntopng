@@ -3231,6 +3231,9 @@ end
 -- #################################
 
 local function choose_traffic_serie(tags, timeseries)
+   if areSNMPExporterTimeseriesDisabled() then
+      return timeseries
+   end
    local tot = 0
    local tot_serie = ts_utils.queryTotal("snmp_if:traffic_min", tags.epoch_begin, tags.epoch_end, tags)
    for _, value in pairs(tot_serie or {}) do

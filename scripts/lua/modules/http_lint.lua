@@ -2542,6 +2542,7 @@ local known_parameters = {
     ["toggle_date_type"] = validateSingleWord,
 
     ["exporters_ts_resolution"] = validateNumber,
+    ["snmp_devices_exporters_rrd"] = validateNumber,
 
     -- Other
     ["send_test_email"] = validateEmpty,

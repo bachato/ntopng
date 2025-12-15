@@ -2007,8 +2007,17 @@ if auth.has_capability(auth.capabilities.preferences) then
             field = "toggle_snmp_rrds",
             default = "0",
             pref = "snmp_devices_rrd_creation",
-            disabled = disabled
+            disabled = disabled,
+            to_switch = { "row_snmp_devices_exporters_rrd" }
         })
+
+        local resolutions_labels = { i18n('disabled'), "1m", "5m" }
+        local resolutions_values = { "0", "60", "300" }
+
+        multipleTableButtonPrefs(subpage_active.entries["snmp_devices_exporters_rrds_resolution"].title,
+            subpage_active.entries["snmp_devices_exporters_rrds_resolution"].description, resolutions_labels,
+            resolutions_values, "60", "primary", "snmp_devices_exporters_rrd", "ntopng.prefs.snmp_devices_exporters_rrd",
+            nil, nil, nil, nil, areSnmpTimeseriesEnabled())
 
         prefsToggleButton(subpage_active, {
             field = "toggle_snmp_polling",
