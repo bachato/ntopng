@@ -731,7 +731,7 @@ class Prefs {
   };
   inline u_int64_t* getIEC104AllowedTypeIDs() { return (iec104_allowed_typeids);   };
   inline u_int32_t getIEC60870LearingPeriod() { return (iec60870_learning_period); };
-  inline u_int32_t getModbusLearingPeriod()   { return (modbus_learning_period); };
+  inline u_int32_t getModbusLearningPeriod()   { return (modbus_learning_period); };
 #ifdef NTOPNG_PRO
   inline bool isAssetInventoryEnabled() { return(asset_inventory_enabled && !isASNModeEnabled()); };
   inline bool isSNMPTrapEnabled() { return snmp_trap_enabled; };
