@@ -108,7 +108,9 @@ extern void win_usleep(__int64 usec);
 }
 #endif
 
+#ifndef strdup
 #define strdup(a) _strdup(a)
+#endif
 #define strncasecmp _strnicmp
 #define inet_pton(a, b, c) win_inet_pton(a, b, c)
 

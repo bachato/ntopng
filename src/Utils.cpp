@@ -6088,7 +6088,7 @@ int Utils::pollSockets(int socks[], int num, int timeout /* msec */) {
   rc = select(max_fd + 1, &rset, NULL, NULL, &tv);
 
   for (int i = 0; i < num; i++)
-    if (rc <= 0 || !FD_ISSET(socks[i], &rset)
+    if (rc <= 0 || !FD_ISSET(socks[i], &rset))
       socks[i] = -1;
 #else
   struct pollfd pfd[num];
@@ -6112,7 +6112,7 @@ int Utils::pollSockets(int socks[], int num, int timeout /* msec */) {
 
 static const char *message_topics[] = {
     "flow",  "event",           "counter",     "template", "option",
-    "hello", "listening-ports", "snmp-ifaces", "custom-ie", NULL};
+    "hello", "listening-ports", "snmp-ifaces", "custom-ie", NULL };
 
 const char **Utils::getMessagingTopics() {
   return ((const char **)message_topics);
