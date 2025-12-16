@@ -540,7 +540,10 @@ typedef enum {
   flow_alert_ndpi_obfuscated_traffic = 105,
   flow_alert_nedge_policy_violation = 106,
   flow_alert_ndpi_mismatching_protocol_with_ip = 107,
-  
+  flow_alert_s7comm_unexpected_function_code = 108,
+  flow_alert_s7comm_too_many_errors = 109,
+  flow_alert_s7comm_invalid_transition = 110,
+
   MAX_DEFINED_FLOW_ALERT_TYPE, /* Leave it as last member */
 
   MAX_FLOW_ALERT_TYPE =

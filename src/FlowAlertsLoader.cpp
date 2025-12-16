@@ -127,6 +127,12 @@ FlowAlertsLoader::FlowAlertsLoader() {
                 ModbusTooManyExceptionsAlert::getDefaultScore());
   registerAlert(ModbusInvalidTransitionAlert::getClassType(),
                 ModbusInvalidTransitionAlert::getDefaultScore());
+  registerAlert(S7CommUnexpectedFunctionCodeAlert::getClassType(),
+                S7CommUnexpectedFunctionCodeAlert::getDefaultScore());
+  registerAlert(S7CommTooManyErrorsAlert::getClassType(),
+                S7CommTooManyErrorsAlert::getDefaultScore());
+  registerAlert(S7CommInvalidTransitionAlert::getClassType(),
+                S7CommInvalidTransitionAlert::getDefaultScore());
   registerAlert(BlacklistedClientContactAlert::getClassType(),
                 BlacklistedClientContactAlert::getDefaultScore());
   registerAlert(BlacklistedServerContactAlert::getClassType(),
