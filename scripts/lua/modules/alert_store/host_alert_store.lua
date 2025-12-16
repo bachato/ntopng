@@ -419,8 +419,8 @@ function host_alert_store:format_record(value, no_html)
             shown_label = host,
             reference = reference_html,
             country = interface.getHostCountry(host),
-            is_local = alert_info.alert_generation and alert_info.alert_generation.host_info and alert_info.alert_generation.host_info.localhost,
-            is_multicast = alert_info.alert_generation and alert_info.alert_generation.host_info and alert_info.alert_generation.host_info.is_multicast
+	    is_local = alert_info.alert_generation and alert_info.alert_generation.host_info and (type(alert_info.alert_generation.host_info) == "table") and alert_info.alert_generation.host_info.localhost,
+	    is_multicast = alert_info.alert_generation and alert_info.alert_generation.host_info and (type(alert_info.alert_generation.host_info) == "table") and alert_info.alert_generation.host_info.is_multicast
         }
 
         -- Long, unshortened label
