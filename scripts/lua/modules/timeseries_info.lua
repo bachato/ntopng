@@ -3578,10 +3578,10 @@ function timeseries_info.retrieve_specific_timeseries(tags, prefix, include_empt
 
          if not include_empty_ts then
             -- Remove empty timeseries but exclude the ones starting with top: from the check
-            if not (info.schema:match("^top:")) then
+            -- Also don't consider timeseries with always_visibile option
+            if not (info.schema:match("^top:")) and not (info.always_visibile) then
                local tmp_tags = table.clone(tags)
 
-               local tot = 0
                local tot_serie = ts_utils.queryTotal(info.schema, tags.epoch_begin, tags.epoch_end, tmp_tags)
                if not tot_serie then
                   goto skip
