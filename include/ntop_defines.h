@@ -644,7 +644,8 @@
 #define CONST_DEVICES_LEARNING_TIME 7200 /* 2 hours */
 #define CONST_HOST_PORT_LEARNING_TIME 7200 /* 2 hours */
 #define CONST_IEC104_LEARNING_TIME 21600 /* 6 hours */
-#define CONST_MODBUS_LEARNING_TIME 3600  /* 1 hour */
+#define CONST_MODBUS_LEARNING_TIME 21600 /* 6 hours */
+#define CONST_S7COMM_LEARNING_TIME 21600 /* 6 hours */
 #define CONST_INFLUXDB_KEY_EXPORTED_POINTS \
   "ntopng.cache.influxdb.num_exported_points"
 #define CONST_INFLUXDB_FLUSH_TIME 10         /* sec */
@@ -806,6 +807,8 @@
   NTOPNG_PREFS_PREFIX ".iec60870_learning_period"
 #define CONST_PREFS_MODBUS_ANALYSIS_LEARNING_PERIOD \
   NTOPNG_PREFS_PREFIX ".modbus_learning_period"
+#define CONST_PREFS_S7COMM_ANALYSIS_LEARNING_PERIOD \
+  NTOPNG_PREFS_PREFIX ".s7comm_learning_period"
 #define CONST_PREFS_HOST_PORT_LEARNING_PERIOD \
   NTOPNG_PREFS_PREFIX ".host_port_learning_period"
 #define CONST_PREFS_DEVICES_ANALYSIS_LEARNING_PERIOD \

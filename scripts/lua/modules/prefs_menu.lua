@@ -518,6 +518,10 @@ local menu_subpages = {{
         modbus_learning_period = {
             title = i18n("prefs.modbus_learning_period_title"),
             description = i18n("prefs.modbus_learning_period_description")
+        },
+        s7comm_learning_period = {
+            title = i18n("prefs.s7comm_learning_period_title"),
+            description = i18n("prefs.s7comm_learning_period_description")
         }
     }
 }, {

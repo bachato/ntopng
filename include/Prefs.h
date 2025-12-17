@@ -67,7 +67,8 @@ class Prefs {
     tls_quic_hostnaming;
   u_int32_t behaviour_analysis_learning_period;
   u_int32_t iec60870_learning_period, modbus_learning_period,
-    devices_learning_period, mac_address_cache_duration;
+    s7comm_learning_period, devices_learning_period,
+    mac_address_cache_duration;
   u_int32_t host_port_learning_period;
   bool enable_flow_swap_heuristic;
   bool skip_dpi_for_collected_flows;
@@ -732,6 +733,7 @@ class Prefs {
   inline u_int64_t* getIEC104AllowedTypeIDs() { return (iec104_allowed_typeids);   };
   inline u_int32_t getIEC60870LearingPeriod() { return (iec60870_learning_period); };
   inline u_int32_t getModbusLearningPeriod()   { return (modbus_learning_period); };
+  inline u_int32_t getS7CommLearningPeriod()   { return (s7comm_learning_period); };
 #ifdef NTOPNG_PRO
   inline bool isAssetInventoryEnabled() { return(asset_inventory_enabled && !isASNModeEnabled()); };
   inline bool isSNMPTrapEnabled() { return snmp_trap_enabled; };

@@ -106,6 +106,7 @@ Prefs::Prefs(Ntop *_ntop) {
   behaviour_analysis_learning_status_post_learning = service_allowed;
   iec60870_learning_period = CONST_IEC104_LEARNING_TIME;
   modbus_learning_period = CONST_MODBUS_LEARNING_TIME;
+  s7comm_learning_period = CONST_S7COMM_LEARNING_TIME;
   devices_learning_period = CONST_DEVICES_LEARNING_TIME;
   host_port_learning_period = CONST_HOST_PORT_LEARNING_TIME;
   auth_session_duration = HTTP_SESSION_DURATION;
@@ -1186,6 +1187,8 @@ void Prefs::refreshBehaviourAnalysis() {
 						  CONST_IEC104_LEARNING_TIME);
   modbus_learning_period = getDefaultPrefsValue(CONST_PREFS_MODBUS_ANALYSIS_LEARNING_PERIOD,
 						CONST_MODBUS_LEARNING_TIME);
+  s7comm_learning_period = getDefaultPrefsValue(CONST_PREFS_S7COMM_ANALYSIS_LEARNING_PERIOD,
+						CONST_S7COMM_LEARNING_TIME);
   devices_learning_period = getDefaultPrefsValue(CONST_PREFS_DEVICES_ANALYSIS_LEARNING_PERIOD,
 						 CONST_DEVICES_LEARNING_TIME);
   host_port_learning_period = getDefaultPrefsValue(CONST_PREFS_HOST_PORT_LEARNING_PERIOD,
@@ -2917,6 +2920,8 @@ void Prefs::lua(lua_State *vm) {
                               iec60870_learning_period);
   lua_push_uint64_table_entry(vm, "modbus_learning_period",
                               modbus_learning_period);
+  lua_push_uint64_table_entry(vm, "s7comm_learning_period",
+                              s7comm_learning_period);
   lua_push_uint64_table_entry(vm, "mac_address_cache_duration",
                               mac_address_cache_duration);
   lua_push_bool_table_entry(vm, "enable_flow_swap_heuristic",

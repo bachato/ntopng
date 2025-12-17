@@ -1261,11 +1261,11 @@ if auth.has_capability(auth.capabilities.preferences) then
 
         print('<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n("prefs.ot_protocols") ..
             '</th></tr></thead>')
-        -- By default 1 hour of learning
+        -- By default 6 hours of learning
         prefsInputFieldPrefs(subpage_active.entries["iec60870_learning_period"].title,
             subpage_active.entries["iec60870_learning_period"].description, "ntopng.prefs.", "iec60870_learning_period",
-            prefs.iec60870_learning_period or 3600, "number", nil, nil, nil, {
-                min = 21600,
+            prefs.iec60870_learning_period or 21600, "number", nil, nil, nil, {
+                min = 3600,
                 tformat = "hd"
             })
 
@@ -1273,6 +1273,14 @@ if auth.has_capability(auth.capabilities.preferences) then
         prefsInputFieldPrefs(subpage_active.entries["modbus_learning_period"].title,
             subpage_active.entries["modbus_learning_period"].description, "ntopng.prefs.", "modbus_learning_period",
             prefs.modbus_learning_period or 21600, "number", is_behaviour_analysis_enabled, nil, nil, {
+                min = 3600,
+                tformat = "hd"
+            })
+
+        -- By default 6 hours of learning
+        prefsInputFieldPrefs(subpage_active.entries["s7comm_learning_period"].title,
+            subpage_active.entries["s7comm_learning_period"].description, "ntopng.prefs.", "s7comm_learning_period",
+            prefs.s7comm_learning_period or 21600, "number", is_behaviour_analysis_enabled, nil, nil, {
                 min = 3600,
                 tformat = "hd"
             })
