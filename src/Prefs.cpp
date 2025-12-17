@@ -3059,10 +3059,22 @@ void Prefs::resetDeferredInterfacesToRegister() {
 
 bool Prefs::addDeferredInterfaceToRegister(const char *ifname) {
   if(num_deferred_interfaces_to_register < UNLIMITED_NUM_INTERFACES) {
-    deferred_interfaces_to_register[num_deferred_interfaces_to_register] =
+    bool isView = !strncmp(ifname, "view:", 5);
+    if (isView && is_pro_edition()) {
+      /* View interface only available with pro version */
+#ifdef NTOPNG_PRO
+      deferred_interfaces_to_register[num_deferred_interfaces_to_register] =
       strdup(ifname);
-    num_deferred_interfaces_to_register++;
-    return true;
+      num_deferred_interfaces_to_register++;
+      return true;
+#endif
+    } else if (!isView) {
+      deferred_interfaces_to_register[num_deferred_interfaces_to_register] =
+      strdup(ifname);
+      num_deferred_interfaces_to_register++;
+      return true;
+    }
+    return true; // Simply ignore the -i view option
   } else {
     return false;
   }
