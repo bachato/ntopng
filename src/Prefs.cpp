@@ -262,6 +262,8 @@ Prefs::Prefs(Ntop *_ntop) {
 #ifdef NTOPNG_PRO
   modbus_allowed_function_codes = NULL; /* All allowed */
   modbus_too_many_exceptions = 5;
+  s7comm_allowed_function_codes = NULL; /* All allowed */
+  s7comm_too_many_errors = 5;
 #endif
 }
 
@@ -345,6 +347,8 @@ Prefs::~Prefs() {
 #ifdef NTOPNG_PRO
   if(modbus_allowed_function_codes)
     ndpi_bitmap_free(modbus_allowed_function_codes);
+  if(s7comm_allowed_function_codes)
+    ndpi_bitmap_free(s7comm_allowed_function_codes);
 #endif
 
   if(gateway)  delete gateway;
@@ -3308,6 +3312,43 @@ void Prefs::setModbusAllowedFunctionCodes(const char *function_codes) {
 	  int f_code = atoi(p);
 
 	  ndpi_bitmap_set(modbus_allowed_function_codes, f_code);
+
+	  p = strtok_r(NULL, ",", &tmp);
+	}
+      }
+    }
+
+    free(buf);
+  }
+}
+
+/* *************************************** */
+
+void Prefs::setS7CommAllowedFunctionCodes(const char *function_codes) {
+  char *p, *buf, *tmp;
+
+  if(!function_codes) return;
+
+  if((strcmp(function_codes, "-1") == 0)) {
+    if(s7comm_allowed_function_codes != NULL) {
+      ndpi_bitmap_free(s7comm_allowed_function_codes);
+      s7comm_allowed_function_codes = NULL;
+    }
+  } else if((buf = strdup(function_codes))) {
+    if(s7comm_allowed_function_codes == NULL) {
+      if((s7comm_allowed_function_codes = ndpi_bitmap_alloc()) == NULL)
+	ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to allocate bitmap memory");
+    }
+
+    if(s7comm_allowed_function_codes) {
+      ndpi_bitmap_free(s7comm_allowed_function_codes);
+
+      if((s7comm_allowed_function_codes = ndpi_bitmap_alloc()) != NULL) {
+	p = strtok_r(buf, ",", &tmp);
+	while(p != NULL) {
+	  int f_code = atoi(p);
+
+	  ndpi_bitmap_set(s7comm_allowed_function_codes, f_code);
 
 	  p = strtok_r(NULL, ",", &tmp);
 	}

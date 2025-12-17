@@ -75,6 +75,8 @@ class Prefs {
 #ifdef NTOPNG_PRO
   ndpi_bitmap* modbus_allowed_function_codes;
   u_int modbus_too_many_exceptions;
+  ndpi_bitmap* s7comm_allowed_function_codes;
+  u_int s7comm_too_many_errors;
   bool data_archive_before_ttl_delete, asset_inventory_enabled, snmp_trap_enabled;
 #endif
   ServiceAcceptance behaviour_analysis_learning_status_during_learning,
@@ -740,6 +742,9 @@ class Prefs {
   inline ndpi_bitmap* getModbusAllowedFunctionCodes() { return (modbus_allowed_function_codes);  };
   inline void         setModbusTooManyExceptionsThreshold(u_int v) { modbus_too_many_exceptions = v;     }
   inline u_int        getModbusTooManyExceptionsThreshold()        { return(modbus_too_many_exceptions); }
+  inline ndpi_bitmap* getS7CommAllowedFunctionCodes() { return (s7comm_allowed_function_codes);  };
+  inline void         setS7CommTooManyErrorsThreshold(u_int v) { s7comm_too_many_errors = v;     }
+  inline u_int        getS7CommTooManyErrorsThreshold()        { return(s7comm_too_many_errors); }
 #endif
   inline u_int32_t devicesLearingPeriod() { return (devices_learning_period); };
   inline u_int32_t macAddressCacheDuration() { return (mac_address_cache_duration); };
@@ -763,6 +768,7 @@ class Prefs {
   };
 #ifdef NTOPNG_PRO
   void setModbusAllowedFunctionCodes(const char *function_codes);
+  void setS7CommAllowedFunctionCodes(const char *function_codes);
 #endif
   void setIEC104AllowedTypeIDs(const char* type_ids);
   void validate();

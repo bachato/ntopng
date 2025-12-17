@@ -2384,6 +2384,7 @@ local known_parameters = {
     ["behaviour_analysis_learning_status_post_learning"] = validateNumber,
     ["iec60870_learning_period"] = validateNumber,
     ["modbus_learning_period"] = validateNumber,
+    ["s7comm_learning_period"] = validateNumber,
     ["devices_learning_period"] = validateNumber,
     ["host_port_learning_period"] = validateNumber,
     ["toggle_src_and_dst_using_ports"] = validateBool,
