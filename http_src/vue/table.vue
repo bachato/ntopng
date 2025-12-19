@@ -85,7 +85,8 @@
                             <template v-for="(col, col_index) in processedColumns">
                                 <th v-if="col.visible" scope="col" :class="[
                                     { 'pointer': col.sortable, 'unset': !col.sortable, },
-                                    { 'sticky-column-th': col.sticky }
+                                    { 'sticky-column-th': col.sticky },
+                                    col.classes
                                 ]" style="white-space: nowrap;" :style="[
                                     (col.min_width ? 'min-width: ' + col.min_width + ';' : ''),
                                     (col.max_width ? 'max-width: ' + col.max_width + ';' : ''),
