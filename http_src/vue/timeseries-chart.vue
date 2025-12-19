@@ -1,8 +1,8 @@
 <!-- (C) 2022 - ntop.org     -->
 <template>
-    <div style="overflow-x: auto; white-space: nowrap; margin-bottom: 10px;min-height:31px;"> <!-- legend-wrapper -->
+    <div class="mb-2" style="overflow-x: auto; white-space: nowrap;"> <!-- legend-wrapper -->
         <div class="d-flex align-items-center"> <!-- legend-div -->
-            <div class="form-check form-switch form-control-sm ms-1" data-bs-toggle="tooltip"
+            <div v-if="!$props.hide_stacked" class="form-check form-switch form-control-sm ms-1" data-bs-toggle="tooltip"
                 :title="block_stacked ? i18n('stacked_blocked_title') : i18n('stacked_unblocked_title')">
                 <input type="checkbox" class="form-check-input" @click="changeStacked" :checked="stacked"
                     :disabled="block_stacked">
@@ -37,6 +37,7 @@ export default {
         get_params_url_request: Function,
         get_custom_chart_options: Function,
         disable_fixed_height: Boolean,
+        hide_stacked: Boolean,
     },
     emits: ["apply", "hidden", "showed", "chart_reloaded", "zoom"],
     /** This method is the first method of the component called, it's called before html template creation. */
