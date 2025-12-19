@@ -1,18 +1,18 @@
 <!-- (C) 2024 - ntop.org     -->
 <template>
-    <div class="card h-100 overflow-hidden">
+    <div>
         <DateTimeRangePicker style="margin-top:0.5rem;" class="ms-1" :id="id_date_time_picker" :enable_refresh="false"
             ref="date_time_picker" @epoch_change="epoch_change" :custom_time_interval_list="time_preset_list">
         </DateTimeRangePicker>
-        <div class="m-2 mt-0">
+        <div class="position-relative">
             <TimeseriesChart ref="chart" :id="chart_id" :chart_type="chart_type" :base_url_request="base_url"
-                :get_custom_chart_options="get_chart_options" :register_on_status_change="false">
+                :get_custom_chart_options="get_chart_options" :register_on_status_change="false" :hide_stacked="true">
             </TimeseriesChart>
         </div>
-        <div class="m-2 mb-3">
-            <TableWithConfig ref="table_snmp_usage" :table_id="table_id" :csrf="csrf" :showLoading="true" :f_map_columns="map_table_def_columns"
-                :get_extra_params_obj="get_extra_params_obj" :f_sort_rows="columns_sorting"
-                @custom_event="on_table_custom_event">
+        <div class="position-relative">
+            <TableWithConfig ref="table_snmp_usage" :table_id="table_id" :csrf="csrf" :showLoading="true"
+                :f_map_columns="map_table_def_columns" :get_extra_params_obj="get_extra_params_obj"
+                :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event">
             </TableWithConfig>
         </div>
 
@@ -73,6 +73,14 @@ const note_list = [
     i18n('snmp.chart_congestion_rate_color'),
 ];
 
+const getLinkIcon = (link_type) => {
+    if (link_type == 'uplink') {
+        return `<i class="fa-solid fa-circle-arrow-up" data-bs-toggle="tooltip" data-bs-placement="bottom" title="${i18n("page_stats.usage.uplink")}" style="color: #C6D9FD"></i>`
+    } else {
+        return `<i class="fa-solid fa-circle-arrow-down" data-bs-toggle="tooltip" data-bs-placement="bottom" title="${i18n("page_stats.usage.downlink")}" style="color: #90EE90"></i>`
+    }
+}
+
 /* ************************************** */
 
 const map_table_def_columns = (columns) => {
@@ -86,33 +94,42 @@ const map_table_def_columns = (columns) => {
             const epoch_begin = ntopng_url_manager.get_url_entry("epoch_begin");
             const epoch_end = ntopng_url_manager.get_url_entry("epoch_end");
             const url = `${http_prefix}/lua/pro/enterprise/snmp_interface_details.lua?host=${row.ip}&snmp_port_idx=${row.ifid}&page=historical&ifid=-1&epoch_end=${epoch_end}&epoch_begin=${epoch_begin}&timeseries_groups_mode=1_chart_x_metric&timeseries_groups=snmp_interface;-1%2B${row.ip}%2B${row.ifid};snmp_if:usage;uplink=true:false:false:false|downlink=true:false:false:false`
-            return `<a href=${url}>${value}</a>`
-        },
-        "type": (type, row) => {
-            if (type == 'uplink') {
-                return `${i18n('out_usage')} <i class="fa-solid fa-circle-arrow-up" style="color: #C6D9FD"></i>`
-            } else {
-                return `${i18n('in_usage')} <i class="fa-solid fa-circle-arrow-down" style="color: #90EE90"></i>`
-            }
+            return `<a href=${url} data-bs-toggle='tooltip' data-bs-placement='bottom' title='${row.ifid}'>${value} (${row.ifid})</a>`
         },
         "speed": (value, row) => {
-            const formatted_speed = formatterUtils.getFormatter("speed")(value);
-            return `${formatted_speed} <a href='${create_config_url_link(row)}'><i class="fas fa-cog"></i></a>`
+            const uplink_speed = formatterUtils.getFormatter("speed")(value.uplink ? value.uplink : 0);
+            const downlink_speed = formatterUtils.getFormatter("speed")(value.downlink ? value.downlink : 0);
+            return `${downlink_speed} ${getLinkIcon("downlink")} / ${uplink_speed} ${getLinkIcon("uplink")} <a href='${create_config_url_link(row)}'><i class="fas fa-cog"></i></a>`
+        },
+        "score": (value, row) => {
+            const uplink_score = value.uplink ? value.uplink : 0;
+            const downlink_score = value.downlink ? value.downlink : 0;
+            return `${downlink_score} / ${uplink_score}`
         },
         "min": (value, row) => {
-            return formatter(value);
+            const uplink_min = formatter(value.uplink ? value.uplink : 0);
+            const downlink_min = formatter(value.downlink ? value.downlink : 0);
+            return `${downlink_min} / ${uplink_min}`
         },
         "max": (value, row) => {
-            return formatter(value);
+            const uplink_max = formatter(value.uplink ? value.uplink : 0);
+            const downlink_max = formatter(value.downlink ? value.downlink : 0);
+            return `${downlink_max} / ${uplink_max}`
         },
         "average": (value, row) => {
-            return formatter(value);
+            const uplink_average = formatter(value.uplink ? value.uplink : 0);
+            const downlink_average = formatter(value.downlink ? value.downlink : 0);
+            return `${downlink_average} / ${uplink_average}`
         },
         "last_value": (value, row) => {
-            return formatter(value);
+            const uplink_last_value = formatter(value.uplink ? value.uplink : 0);
+            const downlink_last_value = formatter(value.downlink ? value.downlink : 0);
+            return `${downlink_last_value} / ${uplink_last_value}`
         },
         "congestion_rate": (value, row) => {
-            return formatter(value);
+            const uplink_congestion_rate = formatter(value.uplink ? value.uplink : 0);
+            const downlink_congestion_rate = formatter(value.downlink ? value.downlink : 0);
+            return `${downlink_congestion_rate} / ${uplink_congestion_rate}`
         }
     };
     columns.forEach((c) => {
@@ -157,20 +174,30 @@ function columns_sorting(col, r0, r1) {
             const lower_value = -1;
             return sortingFunctions.sortByNumberWithNormalizationValue(r0_col, r1_col, col.sort, lower_value);
         } else if (col.id == "min") {
+            const r0_val = (r0_col.uplink ? r0_col.uplink : 0) + (r0_col.downlink ? r0_col.downlink : 0)
+            const r1_val = (r1_col.uplink ? r1_col.uplink : 0) + (r1_col.downlink ? r1_col.downlink : 0)
             const lower_value = -1;
-            return sortingFunctions.sortByNumberWithNormalizationValue(r0_col, r1_col, col.sort, lower_value);
+            return sortingFunctions.sortByNumberWithNormalizationValue(r0_val, r1_val, col.sort, lower_value);
         } else if (col.id == "max") {
+            const r0_val = (r0_col.uplink ? r0_col.uplink : 0) + (r0_col.downlink ? r0_col.downlink : 0)
+            const r1_val = (r1_col.uplink ? r1_col.uplink : 0) + (r1_col.downlink ? r1_col.downlink : 0)
             const lower_value = -1;
-            return sortingFunctions.sortByNumberWithNormalizationValue(r0_col, r1_col, col.sort, lower_value);
+            return sortingFunctions.sortByNumberWithNormalizationValue(r0_val, r1_val, col.sort, lower_value);
         } else if (col.id == "average") {
+            const r0_val = (r0_col.uplink ? r0_col.uplink : 0) + (r0_col.downlink ? r0_col.downlink : 0)
+            const r1_val = (r1_col.uplink ? r1_col.uplink : 0) + (r1_col.downlink ? r1_col.downlink : 0)
             const lower_value = -1;
-            return sortingFunctions.sortByNumberWithNormalizationValue(r0_col, r1_col, col.sort, lower_value);
+            return sortingFunctions.sortByNumberWithNormalizationValue(r0_val, r1_val, col.sort, lower_value);
         } else if (col.id == "congestion_rate") {
+            const r0_val = (r0_col.uplink ? r0_col.uplink : 0) + (r0_col.downlink ? r0_col.downlink : 0)
+            const r1_val = (r1_col.uplink ? r1_col.uplink : 0) + (r1_col.downlink ? r1_col.downlink : 0)
             const lower_value = -1;
-            return sortingFunctions.sortByNumberWithNormalizationValue(r0_col, r1_col, col.sort, lower_value);
+            return sortingFunctions.sortByNumberWithNormalizationValue(r0_val, r1_val, col.sort, lower_value);
         } else if (col.id == "last_value") {
+            const r0_val = (r0_col.uplink ? r0_col.uplink : 0) + (r0_col.downlink ? r0_col.downlink : 0)
+            const r1_val = (r1_col.uplink ? r1_col.uplink : 0) + (r1_col.downlink ? r1_col.downlink : 0)
             const lower_value = -1;
-            return sortingFunctions.sortByNumberWithNormalizationValue(r0_col, r1_col, col.sort, lower_value);
+            return sortingFunctions.sortByNumberWithNormalizationValue(r0_val, r1_val, col.sort, lower_value);
         }
     }
 
@@ -230,7 +257,7 @@ function click_button_interface_configuration(event) {
 
 function fillEmptyValues(config) {
     if (config.data && config.data.length > 0) {
-        for(let i = config.data.length; i < max_interfaces; i++) {
+        for (let i = config.data.length; i < max_interfaces; i++) {
             config.data[i] = [i, null];
         }
     }
@@ -329,5 +356,31 @@ onMounted(async () => {
 .dygraph-axis-label.dygraph-axis-label-x {
     font-size: 12px;
     transform: rotate(-90deg) translate(-20px, 0);
+}
+
+.add-effect-move,
+/* apply transition to moving elements */
+.add-effect-enter-active,
+.add-effect-leave-active {
+    transition: all 0.35s ease;
+}
+
+/* Transform: positive pixels, the effects let enters the component
+ * from the right, negative pixels from the left
+ */
+.add-effect-enter-from {
+    opacity: 0;
+    transform: translateX(-60px);
+}
+
+.add-effect-leave-to {
+    opacity: 0;
+    transform: translateX(0px);
+}
+
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.add-effect-leave-active {
+    position: absolute;
 }
 </style>

@@ -3,7 +3,7 @@
 	"data_url": "lua/pro/rest/v2/get/snmp/metric/usage.lua",
 	"use_current_page": false,
 	"enable_search": true,
-	"paging": true,
+	"paging": false,
 	"display_empty_rows": true,
 	"default_sort": {
 		"column_id": "ip",
@@ -66,25 +66,9 @@
 			]
 		},
 		{
-			"title_i18n": "snmp.interface_alias",
-			"data_field": "alias",
-			"sortable": true,
-			"class": [
-				"text-nowrap"
-			]
-		},
-		{
-			"title_i18n": "page_stats.type",
-			"data_field": "type",
-			"sortable": true,
-			"class": [
-				"text-nowrap"
-			]
-		},
-		{
 			"title_i18n": "if_stats_config.link_speed",
 			"data_field": "speed",
-			"sortable": true,
+			"sortable": false,
 			"class": [
 				"text-nowrap",
 				"text-center"
@@ -100,7 +84,7 @@
 			]
 		},
 		{
-			"title_i18n": "page_stats.congestion_rate",
+			"title_i18n": "page_stats.usage.congestion_rate",
 			"data_field": "congestion_rate",
 			"sortable": true,
 			"class": [
@@ -109,7 +93,7 @@
 			]
 		},
 		{
-			"title_i18n": "page_stats.min",
+			"title_i18n": "page_stats.usage.min",
 			"data_field": "min",
 			"sortable": true,
 			"class": [
@@ -118,7 +102,7 @@
 			]
 		},
 		{
-			"title_i18n": "page_stats.max",
+			"title_i18n": "page_stats.usage.max",
 			"data_field": "max",
 			"sortable": true,
 			"class": [
@@ -127,7 +111,7 @@
 			]
 		},
 		{
-			"title_i18n": "page_stats.average",
+			"title_i18n": "page_stats.usage.average",
 			"data_field": "average",
 			"sortable": true,
 			"class": [
@@ -136,7 +120,7 @@
 			]
 		},
 		{
-			"title_i18n": "page_stats.last_value",
+			"title_i18n": "page_stats.usage.last_value",
 			"data_field": "last_value",
 			"sortable": true,
 			"class": [

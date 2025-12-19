@@ -106,7 +106,7 @@
 			"sortable": false,
 			"class": [
 				"text-nowrap",
-				"text-end"
+				"text-center"
 			]
 		},
 		{
