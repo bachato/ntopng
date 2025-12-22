@@ -628,7 +628,8 @@ bool NetworkInterface::nDPILoadHostnameCategory(char *what, u_int16_t id, char *
 					   (ndpi_protocol_category_t)id,
 					   NDPI_PROTOCOL_UNRATED) == 0);
   else
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "Internal error: invalid nDPI state");
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Internal error: invalid nDPI state [%s]",
+				 what ? what : "<NULL>");
 
   return success;
 }
@@ -2943,28 +2944,32 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
   switch (eth_type) {
   case ETHERTYPE_PPPoE:
     ip_offset += 6 /* PPPoE */;
-    /* Now we need to skip the PPP header */
-    if (packet[ip_offset] == 0x0)
-      eth_type = packet[ip_offset + 1], ip_offset += 2; /* 2 Byte protocol */
-    else
-      eth_type = packet[ip_offset], ip_offset += 1; /* 1 Byte protocol */
 
-    switch (eth_type) {
-    case 0x21:
-      eth_type = ETHERTYPE_IP;
-      break;
-
-    case 0x57:
-      eth_type = ETHERTYPE_IPV6;
-      break;
-
-    default:
-      incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IP,
-	       NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
-	       len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
-      goto dissect_packet_end;
-    }
-    goto decode_packet_eth;
+    if((ip_offset+1) < h->caplen) {
+      /* Now we need to skip the PPP header */
+      if (packet[ip_offset] == 0x0)
+	eth_type = packet[ip_offset + 1], ip_offset += 2; /* 2 Byte protocol */
+      else
+	eth_type = packet[ip_offset], ip_offset += 1; /* 1 Byte protocol */
+      
+      switch (eth_type) {
+      case 0x21:
+	eth_type = ETHERTYPE_IP;
+	break;
+	
+      case 0x57:
+	eth_type = ETHERTYPE_IPV6;
+	break;
+	
+      default:
+	incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IP,
+		 NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
+		 len_on_wire, 1, NULL /* srcMac */, NULL /* dstMac */);
+	goto dissect_packet_end;
+      }
+      goto decode_packet_eth;
+    } else
+      return(pass_verdict);
     break;
 
   case ETHERTYPE_IP:
