@@ -3951,6 +3951,20 @@ static int ntop_get_dirs(lua_State *vm) {
 
 /* ****************************************** */
 
+static int ntop_enable_assets_log(lua_State *vm) {
+  bool enable_assets_log = false;
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK) {
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  }
+  enable_assets_log = (bool) lua_tonumber(vm, 1);
+  ntop->getPrefs()->do_enable_assets_log(enable_assets_log);
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_get_all_paths(lua_State *vm) {
   const char *path, *filename;
 
@@ -8209,6 +8223,7 @@ static luaL_Reg _ntop_reg[] = {
     { "isShuttingDown", ntop_is_shutting_down },
     { "limitResourcesUsage", ntop_limit_resources_usage },
     { "getAllPaths", ntop_get_all_paths },
+    { "enableAssetsLog", ntop_enable_assets_log },
 
     /* Execute commands */
     { "execCmd", ntop_exec_cmd },

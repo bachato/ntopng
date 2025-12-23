@@ -1977,6 +1977,9 @@ if auth.has_capability(auth.capabilities.preferences) then
         })
 
         if ntop.isEnterpriseM() then
+            if _POST["toggle_asset_log"] then
+                ntop.enableAssetsLog(tonumber(_POST["toggle_asset_log"]))
+            end
             prefsToggleButton(subpage_active, {
                 field = "toggle_assets_log",
                 default = "0",
