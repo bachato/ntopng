@@ -3008,26 +3008,40 @@ local function add_flowdev_interfaces_timeseries(tags, timeseries, is_asn_mode_e
       tmp_tags.ifid = getSystemInterfaceId()
       tmp_tags.port = nil
       tmp_tags.protocol = nil
-      -- Add this unique serie if snmp timeseries are enabled
-      timeseries[#timeseries + 1] = {
-         schema = "top:snmp_if:traffic_min",
-         id = timeseries_id.flow_dev,
-         label = i18n("page_stats.top.top_traffic_snmp"),
-         type = "top",
-         draw_stacked = true,
-         priority = 2,
-         measure_unit = "bps",
-         scale = i18n("graphs.metric_labels.traffic"),
-         timeseries = {
-            bytes = {
-               label = i18n('graphs.metric_labels.traffic'),
-               draw_type = "line",
-               color = timeseries_info.get_timeseries_color('bytes')
-            }
-         },
-         disable_perc_95_ts = true,
-         always_visibile = true
-      }
+      local schema = "snmp_if:traffic"
+      local label = i18n("page_stats.top.top_traffic_snmp")
+      if (highSNMPExporterTimeseriesResolution()) then
+         schema = "snmp_if:traffic_min"
+         label = i18n("page_stats.top.top_traffic_snmp_min")
+      end
+   
+      local tot = 0
+      local tot_serie = ts_utils.queryTotal("top:" .. schema, tags.epoch_begin, tags.epoch_end, tags)
+      for _, value in pairs(tot_serie or {}) do
+         tot = tot + tonumber(value)
+      end
+      if tot > 0 then
+         -- Add this unique serie if snmp timeseries are enabled
+         timeseries[#timeseries + 1] = {
+            schema = "top:" .. schema,
+            id = timeseries_id.flow_dev,
+            label = label,
+            type = "top",
+            draw_stacked = true,
+            priority = 2,
+            measure_unit = "bps",
+            scale = i18n("graphs.metric_labels.traffic"),
+            timeseries = {
+               bytes = {
+                  label = i18n('graphs.metric_labels.traffic'),
+                  draw_type = "line",
+                  color = timeseries_info.get_timeseries_color('bytes')
+               }
+            },
+            disable_perc_95_ts = true,
+            always_visibile = true
+         }
+      end
    end
    local series = ts_utils.listSeries("flowdev:ndpi" .. ts_suffix, table.clone(tags), tags.epoch_begin) or {}
    if not table.empty(series) and (are_l7_ts_enabled) and (not is_asn_mode_enabled) then
@@ -3234,37 +3248,21 @@ local function choose_traffic_serie(tags, timeseries)
    if areSNMPExporterTimeseriesDisabled() then
       return timeseries
    end
+
+   local schema = "snmp_if:traffic"
+   if (highSNMPExporterTimeseriesResolution()) then
+      schema = "snmp_if:traffic_min"
+   end
+   
    local tot = 0
-   local tot_serie = ts_utils.queryTotal("snmp_if:traffic_min", tags.epoch_begin, tags.epoch_end, tags)
+   local tot_serie = ts_utils.queryTotal(schema, tags.epoch_begin, tags.epoch_end, tags)
    for _, value in pairs(tot_serie or {}) do
       tot = tot + tonumber(value)
    end
 
-   if (tot > 0) then
+   if tot > 0 then
       timeseries[#timeseries + 1] = {
-         schema = "snmp_if:traffic_min",
-         id = timeseries_id.snmp_interface,
-         label = i18n("graphs.traffic_rxtx"),
-         priority = 2,
-         measure_unit = "bps",
-         scale = i18n("graphs.metric_labels.traffic"),
-         timeseries = {
-            bytes_sent = {
-               label = i18n('graphs.metric_labels.out_bytes'),
-               color = timeseries_info.get_timeseries_color('bytes_sent')
-            },
-            bytes_rcvd = {
-               invert_direction = true,
-               label = i18n('graphs.metric_labels.in_bytes'),
-               color = timeseries_info.get_timeseries_color('bytes_rcvd')
-            }
-         },
-         always_visibile = true,
-         default_visible = true
-      }
-   else
-      timeseries[#timeseries + 1] = {
-         schema = "snmp_if:traffic",
+         schema = schema,
          id = timeseries_id.snmp_interface,
          label = i18n("graphs.traffic_rxtx"),
          priority = 2,
@@ -3362,36 +3360,7 @@ local function add_top_flow_port_timeseries(tags, timeseries, is_asn_mode_enable
       tmp_tags.ifid = getSystemInterfaceId()
       tmp_tags.port = nil
       tmp_tags.protocol = nil
-      local tot = 0
-      local tot_serie = ts_utils.queryTotal("snmp_if:traffic_min", tags.epoch_begin, tags.epoch_end, tmp_tags)
-      for _, value in pairs(tot_serie or {}) do
-         tot = tot + tonumber(value)
-      end
-
-      if (tot > 0) then
-         -- Add this unique serie if snmp timeseries are enabled
-         timeseries[#timeseries + 1] = {
-            schema = "snmp_if:traffic_min",
-            id = timeseries_id.flow_port,
-            label = i18n("graphs.traffic_rxtx_snmp_min"), -- i18n("graphs.traffic_rxtx")
-            priority = 2,
-            measure_unit = "bps",
-            scale = i18n("graphs.metric_labels.traffic"),
-            timeseries = {
-               bytes_sent = {
-                  label = i18n('graphs.metric_labels.out_bytes'),
-                  color = timeseries_info.get_timeseries_color('bytes_sent')
-               },
-               bytes_rcvd = {
-                  invert_direction = true,
-                  label = i18n('graphs.metric_labels.in_bytes'),
-                  color = timeseries_info.get_timeseries_color('bytes_rcvd')
-               }
-            },
-            always_visibile = true,
-            default_visible = true
-         }
-      end
+      timeseries = choose_traffic_serie(tmp_tags, timeseries)
    end
 
    return timeseries

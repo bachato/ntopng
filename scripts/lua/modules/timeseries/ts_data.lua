@@ -134,7 +134,7 @@ function ts_data.get_timeseries(http_context)
 
     if options.tags.ifid then interface.select(options.tags.ifid) end
 
-    if options.schema == 'snmp_if:traffic_min' and options.tags.port then
+    if (options.schema == 'snmp_if:traffic_min' or options.schema == 'snmp_if:traffic') and options.tags.port then
         options.tags.if_index = options.tags.port
         options.tags.ifid = getSystemInterfaceId()
         options.tags.port = nil

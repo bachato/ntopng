@@ -7215,7 +7215,8 @@ local lang = {
       ["top_traffic"] = "Top Traffic",
       ["top_traffic_netflow"] = "Top Traffic",
       ["top_traffic_sflow"] = "Top Traffic",
-      ["top_traffic_snmp"] = "Top Traffic (SNMP min)",
+      ["top_traffic_snmp"] = "Top Traffic (SNMP)",
+      ["top_traffic_snmp_min"] = "Top Traffic (SNMP min)",
     },
   },
   ["peers_page"] = {
