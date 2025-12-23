@@ -833,8 +833,10 @@
 #define CONST_DEFAULT_NETBOX_ENABLED \
   0  // disabled by default
   
+// *** NOTE: changed from toggle_asset_inventory to enable_asset_inventory
+// due to old incosistencies in the key
 #define CONST_PREFS_ASSET_INVENTORY_ENABLED \
-  NTOPNG_PREFS_PREFIX ".toggle_asset_inventory" // same name as lua prefs.lua
+  NTOPNG_PREFS_PREFIX ".enable_asset_inventory" // same name as lua prefs.lua
 #define CONST_DEFAULT_ASSET_INVENTORY_ENABLED \
   1  // enabled by default
 

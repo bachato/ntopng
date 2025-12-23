@@ -1317,7 +1317,7 @@ if auth.has_capability(auth.capabilities.preferences) then
         prefsToggleButton(subpage_active, {
             field = "toggle_assets_inventory",
             default = "1",
-            pref = "toggle_asset_inventory"
+            pref = "enable_asset_inventory"
         })
 
         -- ######################
