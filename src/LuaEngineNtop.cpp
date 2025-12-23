@@ -3965,6 +3965,20 @@ static int ntop_enable_assets_log(lua_State *vm) {
 
 /* ****************************************** */
 
+static int ntop_assets_enabled(lua_State *vm) {
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+#ifdef NTOPNG_PRO
+  lua_pushboolean(vm, ntop->getPrefs()->isAssetInventoryEnabled());
+#else
+  lua_pushboolean(vm, false);
+#endif
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_get_all_paths(lua_State *vm) {
   const char *path, *filename;
 
@@ -8223,7 +8237,10 @@ static luaL_Reg _ntop_reg[] = {
     { "isShuttingDown", ntop_is_shutting_down },
     { "limitResourcesUsage", ntop_limit_resources_usage },
     { "getAllPaths", ntop_get_all_paths },
+
+    /* Assets Inventory */
     { "enableAssetsLog", ntop_enable_assets_log },
+    { "assetsEnabled", ntop_assets_enabled },
 
     /* Execute commands */
     { "execCmd", ntop_exec_cmd },
