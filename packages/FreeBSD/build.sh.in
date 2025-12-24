@@ -36,7 +36,6 @@ cp -r usr ${STAGEDIR}
 mkdir -p ${STAGEDIR}/usr/local/bin ${STAGEDIR}/usr/local/share/ntopng
 cp ../../ntopng ${STAGEDIR}/usr/local/bin/
 strip ${STAGEDIR}/usr/local/bin/ntopng
-cp ../wizard/ntopng-config ${STAGEDIR}/usr/local/bin/
 mkdir -p ${STAGEDIR}/usr/local/etc/ntopng
 
 # Sample configuration file
@@ -103,10 +102,8 @@ EOF
 ####################
 
 if ! id "ntopng" >/dev/null 2>&1; then
-  pw useradd ntopng -s /sbin/nologin -d /nonexistent -c "ntopng user" -w no
+  sudo pw useradd ntopng -s /sbin/nologin -d /nonexistent -c "ntopng user" -w no
 fi
-chown ntopng:ntopng /usr/local/bin/ntopng-config
-chmod ugo+s /usr/local/bin/ntopng-config
 chown -R ntopng:ntopng /usr/local/etc/ntopng
 EOF
 
