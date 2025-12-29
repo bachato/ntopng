@@ -6,16 +6,59 @@
 	"paging": false,
 	"display_empty_rows": true,
 	"columns": [
+		{
+			"id": "actions",
+			"title_i18n": "actions",
+			"sortable": false,
+			"sticky": true,
+			"min-width": "80px",
+			"max-width": "80px",
+			"class": [
+				"text-nowrap",
+				"text-center"
+			],
+			"render_v_node_type": "button_list",
+			"button_def_array": [
+				{
+					"id": "timeseries",
+					"icon": "fas fa-chart-area",
+					"title_i18n": "prefs.timeseries",
+					"class": [],
+					"event_id": "click_button_timeseries"
+				},
+				{
+					"id": "jump_to_stats",
+					"icon": "fa-solid fa-magnifying-glass-plus",
+					"title_i18n": "jump_to_stats",
+					"class": [],
+					"event_id": "click_button_jump_to_stats"
+				},
+				{
+					"id": "jump_to_snmp",
+					"icon": "fas fa-satellite-dish",
+					"title_i18n": "jump_to_snmp",
+					"class": [],
+					"event_id": "click_button_jump_to_snmp"
+				},
                 {
-                    "id": "exporter_name",
-                    "title_i18n": "flow_devices.exporter",
-                    "data_field": "exporter_name",
-                    "sortable": true,
-                    "min-width": "30px",
-                    "class": [
-                        "text-nowrap"
-                    ]
-                },
+                    "id": "configuration",
+                    "icon": "fas fa-cog",
+                    "title_i18n": "configuration",
+                    "class": [],
+                    "event_id": "click_button_configuration"
+                }
+			]
+		},
+		{
+			"id": "exporter_name",
+			"title_i18n": "flow_devices.exporter",
+			"data_field": "exporter_name",
+			"sortable": true,
+			"min-width": "30px",
+			"class": [
+				"text-nowrap"
+			]
+		},
 		{
 			"title_i18n": "flow_devices.interface",
 			"data_field": "snmp_ifname",
@@ -31,7 +74,7 @@
 			"sortable": true,
 			"min-width": "40px",
 			"class": [
-                                "text-center",
+				"text-center",
 				"text-nowrap"
 			]
 		},
@@ -41,7 +84,7 @@
 			"sortable": true,
 			"min-width": "40px",
 			"class": [
-                                "text-center",
+				"text-center",
 				"text-nowrap"
 			]
 		},
@@ -51,11 +94,9 @@
 			"sortable": true,
 			"min-width": "40px",
 			"class": [
-                                "text-center",
+				"text-center",
 				"text-nowrap"
 			]
 		}
 	]
 }
-
-

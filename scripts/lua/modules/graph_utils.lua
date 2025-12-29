@@ -404,7 +404,7 @@ function graph_utils.drawNewGraphs(source_value_object)
 
     -- Interface stats
     local ifstats = interface.getStats()
-    local ifid = ifstats.id
+    local ifid = (source_value_object.ifid) or (ifstats.id)
 
     -- Check extraction permissions
     local traffic_extraction_permitted =

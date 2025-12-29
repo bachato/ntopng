@@ -11,6 +11,49 @@
 	},
 	"columns": [
 		{
+			"id": "actions",
+			"title_i18n": "actions",
+			"sortable": false,
+			"sticky": true,
+			"class": [
+				"text-nowrap",
+				"text-center"
+			],
+			"min-width" : "80px",
+			"max-width" : "80px",
+			"render_v_node_type": "button_list",
+			"button_def_array": [
+				{
+					"id": "timeseries",
+					"icon": "fas fa-lg fa-chart-area",
+					"title_i18n": "prefs.timeseries",
+					"class": [],
+					"event_id": "click_button_timeseries"
+				},
+				{
+					"id": "live_flows",
+					"icon": "fas fa-stream",
+					"title_i18n": "active_flows",
+					"class": [],
+					"event_id": "click_button_live_flows"
+				},
+				{
+					"id": "live_hosts",
+					"icon": "fas fa-laptop",
+					"title_i18n": "active_hosts",
+					"class": [],
+					"event_id": "click_button_live_hosts"
+				},
+				{
+					"id": "configuration",
+					"icon": "fas fa-cog",
+					"title_i18n": "configuration",
+					"class": [],
+					"event_id": "click_button_configuration"
+				}
+			]
+		},
+		{
 			"id": "ip",
 			"title_i18n": "flow_devices.exporter",
 			"data_field": "ip",

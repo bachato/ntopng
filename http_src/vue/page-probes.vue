@@ -150,12 +150,7 @@ const map_table_def_columns = (columns) => {
             if (!dataUtils.isEmptyOrNull(row['probe_name'])) {
                 probe_ip = `${row['probe_name']}`;
             }
-
-            let host_link = ""
-            if (row.is_in_memory) {
-                host_link = ` <a href=${host_url}host=${value}> <i class="fas fa-laptop"></i></a>`
-            }
-            return `<a href=${exporter_url}probe_uuid=${row.probe_source_id}>${probe_ip}</a>${host_link}`
+            return `<a href=${exporter_url}probe_uuid=${row.probe_source_id}>${probe_ip}</a>`
         },
         "probe_public_ip": (value, row) => {
             return value

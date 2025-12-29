@@ -19,7 +19,8 @@
             </Sankey>
         </div>
         <TableWithConfig ref="table_probes" :table_id="table_id" :csrf="csrf" :f_map_columns="map_table_def_columns"
-            :f_sort_rows="columns_sorting" :get_extra_params_obj="get_extra_params_obj">
+            :f_sort_rows="columns_sorting" :get_extra_params_obj="get_extra_params_obj"
+            @custom_event="on_table_custom_event">
         </TableWithConfig>
 
         <NoteList :note_list="note_list"> </NoteList>
@@ -37,6 +38,7 @@ import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as NoteList } from "./note-list.vue";
 import { default as formatterUtils } from "../utilities/formatter-utils";
 import { default as dataUtils } from "../utilities/data-utils.js";
+import linksUtils from "../utilities/links-utils.js";
 
 const props = defineProps({
     context: Object,
@@ -158,20 +160,7 @@ const map_table_def_columns = (columns) => {
                 exporter_ip = `${row['name']}`;
             }
 
-            let timeseries_link = ""
-            // Add timeseries icon if timeseries are enabled
-            if (row['timeseries_enabled']) {
-                let timeseriesUrl = `${chart_url}ip=${value}&page=historical&ifid=${row['ifid']}`;
-                timeseries_link = ` <a href="${timeseriesUrl}"><i class="fas fa-chart-area fa-lg"></i></a>`;
-            }
-
-            let host_link = ""
-            if (row.is_in_memory) {
-                const host_details_url = `${http_prefix}/lua/host_details.lua?`
-                host_link = ` <a href=${host_details_url}host=${value}><i class="fas fa-laptop"></i></a>`
-            }
-
-            return `<a href="${exporter_interfaces_url}ip=${value}&exporter_uuid=${row.exporter_uuid}&probe_uuid=${row.probe_uuid}&probe_ip=${row.probe_ip}">${exporter_ip}</a>${host_link}${timeseries_link}`;
+            return `<a href="${exporter_interfaces_url}ip=${value}&exporter_uuid=${row.exporter_uuid}&probe_uuid=${row.probe_uuid}&probe_ip=${row.probe_ip}">${exporter_ip}</a> `;
         },
         "probe_ip": (value, row) => {
             let probe_ip = value;
@@ -281,10 +270,73 @@ const map_table_def_columns = (columns) => {
 
     columns.forEach((c) => {
         c.render_func = map_columns[c.data_field];
+        if (c.id == "actions") {
+            const visible_dict = {
+                live_hosts: true,
+                live_flows: true,
+                configuration: true,
+                timeseries: props.context.showTimeseries
+            };
+            c.button_def_array.forEach((b) => {
+                b.f_map_class = (current_class, row) => {
+                    // if is not defined is enabled
+                    if (!visible_dict[b.id]) {
+                        current_class.push("disabled");
+                    }
+                    return current_class;
+                }
+            });
+        }
     });
 
     return columns;
 };
+
+/* ************************************** */
+
+function click_button_configuration(event) {
+    const row = event.row;
+    const url = linksUtils.getExporterDetailsPageURL({ ip: row.ip, probe_uuid: row.probe_uuid }, http_prefix)
+    window.location.href = `${url}&page=config`
+}
+
+/* ************************************** */
+
+function click_button_live_flows(event) {
+    const row = event.row;
+    window.location.href = `${http_prefix}/lua/flows_stats.lua?deviceIP=${row["ip"]}`;
+}
+
+/* ************************************** */
+
+function click_button_live_hosts(event) {
+    const row = event.row;
+    window.location.href = `${http_prefix}/lua/hosts_stats.lua?deviceIP=${row["ip"]}`;
+}
+
+/* ************************************** */
+
+function click_button_timeseries(event) {
+    const row = event.row;
+    debugger;
+    const url = linksUtils.getExporterTimeseriesPageURL({ ip: row.ip, ifid: row.ifid, probe_uuid: row.probe_uuid }, http_prefix)
+    window.location.href = url;
+}
+
+/* ************************************** */
+
+function on_table_custom_event(event) {
+    let events_managed = {
+        "click_button_live_flows": click_button_live_flows,
+        "click_button_configuration": click_button_configuration,
+        "click_button_timeseries": click_button_timeseries,
+        "click_button_live_hosts": click_button_live_hosts,
+    };
+    if (events_managed[event.event_id] == null) {
+        return;
+    }
+    events_managed[event.event_id](event);
+}
 
 function columns_sorting(col, r0, r1) {
     if (col != null) {

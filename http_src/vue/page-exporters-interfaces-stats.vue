@@ -200,7 +200,6 @@ const map_table_def_columns = (columns) => {
                 flows: true,
                 exporters_stats: showSankey,
                 timeseries: props.context.showTimeseries,
-                hosts: true,
             };
             c.button_def_array.forEach((b) => {
                 b.f_map_class = (current_class, row) => {

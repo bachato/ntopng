@@ -8,8 +8,6 @@ require "lua_utils"
 local ts_utils = require("ts_utils")
 local info = ntop.getInfo()
 local page_utils = require("page_utils")
-local format_utils = require("format_utils")
-local os_utils = require "os_utils"
 
 sendHTTPContentTypeHeader('text/html')
 

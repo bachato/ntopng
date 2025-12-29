@@ -222,11 +222,11 @@ print [[`;
 
 prefs = ntop.getPrefs()
 local iface_names = interface.getIfNames()
+local current_ifid = interface.getId()
 
 num_ifaces = 0
 for k, v in pairs(iface_names) do num_ifaces = num_ifaces + 1 end
 
-interface.select(ifname)
 local ifs = interface.getStats()
 local is_pcap_dump = interface.isPcapDumpInterface()
 local is_packet_interface = interface.isPacketInterface()
@@ -1061,7 +1061,7 @@ else
     observationPoints = nil
 end
 
-interface.select(ifs.id .. "")
+interface.select(current_ifid)
 
 local context = {
     ifnames = ifnames,

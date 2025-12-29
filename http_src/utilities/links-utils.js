@@ -30,9 +30,23 @@ const getExporterDetailsPageURL = (exporter_info, http_prefix) => {
 
 /* ******************************************************************** */
 
+/* Returns the URL of the exporters details */
+const getExporterTimeseriesPageURL = (exporter_info, http_prefix) => {
+    return `${http_prefix}/lua/pro/enterprise/exporter_details.lua?ip=${exporter_info.ip}&ifid=${exporter_info.ifid}&probe_uuid=${exporter_info.probe_uuid}`
+}
+
+/* ******************************************************************** */
+
+/* Returns the URL of the exporters details */
+const getExporterInterfaceConfigPageURL = (exporter_ip, interface_id, ifid, http_prefix) => {
+    return `${http_prefix}/lua/pro/exporter_interface_overview.lua?deviceIP=${exporter_ip}&ifIdx=${interface_id}&ifid=${ifid}&page=config`
+}
+
+/* ******************************************************************** */
+
 /* Returns the URL of the exporter details */
 const getExporterInterfaceDetailsPageURL = (exporter_ip, interface_id, ifid, http_prefix) => {
-    return `${http_prefix}/lua/pro/enterprise/flowdevice_interface_details.lua?ip=${exporter_ip}&snmp_port_idx=${interface_id}&ifid=${ifid}`
+    return `${http_prefix}/lua/pro/exporter_interface_overview.lua?deviceIP=${exporter_ip}&ifIdx=${interface_id}&ifid=${ifid}`
 }
 
 /* ******************************************************************** */
@@ -76,7 +90,9 @@ const linksUtils = function () {
         getSNMPDetailsPageURL,
         getSNMPInterfaceDetailsPageURL,
         getAggregatedFlowsURL,
-        getFlowExporterInterfaceOverviewPageURL
+        getFlowExporterInterfaceOverviewPageURL,
+        getExporterTimeseriesPageURL,
+        getExporterInterfaceConfigPageURL
     };
 }();
 

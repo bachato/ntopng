@@ -987,7 +987,7 @@ function generateExporterInterfaceLink(ip, interface)
       exporter_uuid, exporter_ifid = exporters_utils.getExporterUUID(ip)
 
       return string.format(
-	 "%s/lua/pro/enterprise/flowdevice_interface_details.lua?ip=%s&snmp_port_idx=%s&ifid=%s",
+	 "%s/lua/pro/exporter_interface_overview?deviceIP=%s&ifIdx=%s&ifid=%s",
 	 ntop.getHttpPrefix(), ip, interface, exporter_ifid)
    end
 

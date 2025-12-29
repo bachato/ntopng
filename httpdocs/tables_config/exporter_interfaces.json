@@ -27,12 +27,26 @@
 					"event_id": "click_button_timeseries"
 				},
 				{
+					"id": "jump_to_stats",
+					"icon": "fa-solid fa-magnifying-glass-plus",
+					"title_i18n": "jump_to_stats",
+					"class": [],
+					"event_id": "click_button_jump_to_stats"
+				},
+				{
 					"id": "jump_to_snmp",
 					"icon": "fas fa-satellite-dish",
 					"title_i18n": "jump_to_snmp",
 					"class": [],
 					"event_id": "click_button_jump_to_snmp"
-				}
+				},
+                {
+                    "id": "configuration",
+                    "icon": "fas fa-cog",
+                    "title_i18n": "configuration",
+                    "class": [],
+                    "event_id": "click_button_configuration"
+                }
 			]
 		},
 		{

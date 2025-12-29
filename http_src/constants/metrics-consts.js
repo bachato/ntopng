@@ -476,7 +476,7 @@ const sources_types = [
 	},
 	{
 		id: "flow_device",
-		regex_page_url: "lua\/pro\/enterprise\/exporters",
+		regex_page_url: "lua\/pro\/enterprise\/exporter_details",
 		label: i18n("page_stats.source_def.flow_device"),
 		query: "flowdev",
 		source_def_array: [{
@@ -496,7 +496,7 @@ const sources_types = [
 	},
 	{
 		id: "flow_interface",
-		regex_page_url: "lua\/pro\/enterprise\/flowdevice_interface_details",
+		regex_page_url: "lua\/pro\/exporter_interface_overview.lua",
 		label: i18n("page_stats.source_def.flow_interface"),
 		query: "flowdev_port",
 		source_def_array: [{

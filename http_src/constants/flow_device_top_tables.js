@@ -87,7 +87,7 @@ const top_flow_interface = {
 					const ifid = ntopng_url_manager.get_url_entry('ifid');
 					const port = service.tags.port;
 					const host = service.tags.device;
-					const interface_url = `${http_prefix}/lua/pro/enterprise/flowdevice_interface_details.lua?snmp_port_idx=${port}&ip=${host}&page=historical&ts_query=ifid:${ifid},device:${host},port:${port}&ts_schema=host:details&epoch_begin=${context.status.epoch_begin}&epoch_end=${context.status.epoch_end}`;
+					const interface_url = `${http_prefix}/lua/pro/exporter_interface_overview.lua?ifIdx=${port}&deviceIP=${host}&page=historical&ts_query=ifid:${ifid},device:${host},port:${port}&ts_schema=host:details&epoch_begin=${context.status.epoch_begin}&epoch_end=${context.status.epoch_end}`;
 
 					window.open(interface_url);
 				}
