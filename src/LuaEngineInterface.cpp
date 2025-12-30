@@ -5634,7 +5634,7 @@ static int ntop_clickhouse_exec_csv_query(lua_State *vm) {
   const char *sql;
   const char *delimiter = "|";
   const char *null_value = " ";
-  bool use_json = false;
+  bool use_json = false, remove_headers = false;
   struct mg_connection *conn = getLuaVMUserdata(vm, conn);
 
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -5656,7 +5656,10 @@ static int ntop_clickhouse_exec_csv_query(lua_State *vm) {
   if (lua_type(vm, 4) == LUA_TSTRING) /* optional */
     null_value = lua_tostring(vm, 4);
 
-  curr_iface->execSQLQuery2CSV(sql, delimiter, null_value, use_json, conn);
+  if (lua_type(vm, 5) == LUA_TBOOLEAN) /* optional */
+    remove_headers = lua_toboolean(vm, 5);
+
+  curr_iface->execSQLQuery2CSV(sql, delimiter, null_value, use_json, remove_headers, conn);
 #endif
 
   lua_pushnil(vm); /* Data is pushed via the HTTP server */
