@@ -6091,8 +6091,15 @@ int Utils::pollSockets(int socks[], int num, int timeout /* msec */) {
     if (rc <= 0 || !FD_ISSET(socks[i], &rset))
       socks[i] = -1;
 #else
-  struct pollfd pfd[num];
+  const u_int max_num_sockets = 4096;
+  struct pollfd pfd[max_num_sockets];
 
+  if(num > max_num_sockets) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Too many file descriptors %u/%u",
+				 num, max_num_sockets);
+    num = max_num_sockets;
+  }
+  
   for (int i = 0; i < num; i++) { 
     pfd[i].fd = socks[i];
     pfd[i].events = POLLIN;
