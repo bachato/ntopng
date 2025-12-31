@@ -487,6 +487,7 @@ using namespace clickhouse;
 #include "OTStats.h"
 #include "ModbusStats.h"
 #include "S7CommStats.h"
+#include "ProfinetStats.h"
 #include "MessageBroker.h"
 #include "NatsBroker.h"
 #endif

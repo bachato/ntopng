@@ -573,6 +573,11 @@ page_utils.print_navbar(title, url, {{
    active = page == "s7comm",
    page_name = "s7comm",
    label = i18n("details.label_s7comm_server")
+}, {
+   hidden = not flow or not (flow.profinet) or not ntop.isEnterpriseL(),
+   active = page == "profinet",
+   page_name = "profinet",
+   label = i18n("details.label_profinet_server")
 }})
 
 if isEmptyString(page) or page == "overview" then
@@ -2416,6 +2421,16 @@ elseif page == "modbus" then
 
    template.render("pages/vue_page.template", {
       vue_page_name = "PageFlowDetailsModbus",
+      page_context = json_context
+   })
+elseif page == "profinet" then
+   local json = require "dkjson"
+   local json_context = json.encode({
+      csrf = ntop.getRandomCSRFValue()
+   })
+
+   template.render("pages/vue_page.template", {
+      vue_page_name = "PageFlowDetailsProfinet",
       page_context = json_context
    })
 elseif page == "s7comm" then

@@ -705,6 +705,7 @@ void Host::lua_get_services(lua_State *vm) const {
   if(providesService(HOST_SERVICE_RDP))    lua_push_bool_table_entry(vm, "rdp", true);
   if(providesService(HOST_SERVICE_MODBUS)) lua_push_bool_table_entry(vm, "modbus", true);
   if(providesService(HOST_SERVICE_S7COMM)) lua_push_bool_table_entry(vm, "s7comm", true);
+  if(providesService(HOST_SERVICE_PROFINET)) lua_push_bool_table_entry(vm, "profinet", true);
   
   lua_pushstring(vm, "services");
   lua_insert(vm, -2);

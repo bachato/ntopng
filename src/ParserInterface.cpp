@@ -614,7 +614,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     }
 
 #ifdef NTOPNG_PRO
-    if (flow->isModbus() || flow->isS7Comm()) {
+    if (flow->isModbus() || flow->isS7Comm() || flow->isProfinet()) {
       flow->updateOTStats(zflow);
     }
 #endif

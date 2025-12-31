@@ -932,6 +932,10 @@ else
                     print(' <span class="badge bg-success">' ..
                               i18n("details.label_s7comm_server") .. '</span>')
                 end
+                if (host.services.profinet) then
+                    print(' <span class="badge bg-success">' ..
+                              i18n("details.label_profinet_server") .. '</span>')
+                end
             end
 
             if (host["dhcp_server"] == true) then

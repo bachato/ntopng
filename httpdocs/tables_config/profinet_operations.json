@@ -1,0 +1,51 @@
+{
+	"id": "profinet_operations",
+	"data_url": "lua/pro/rest/v2/get/flow/profinet/operations.lua",
+	"use_current_page": false,
+	"enable_search": true,
+	"paging": false,
+	"display_empty_rows": true,
+	"default_sort": {
+		"column_id": "num_uses",
+		"sort": 2
+	},
+	"columns": [
+		{
+			"title_i18n": "flow_details.operation",
+			"data_field": "operation",
+			"min-width": "80px",
+			"sortable": true,
+			"class": []
+		},
+		{
+			"title_i18n": "flow_details.num_requests",
+			"data_field": "num_requests",
+			"min-width": "80px",
+			"sortable": true,
+			"class": [
+				"text-nowrap",
+				"text-center"
+			]
+		},
+		{
+			"title_i18n": "flow_details.num_responses_errored",
+			"data_field": "num_responses_errored",
+			"min-width": "80px",
+			"sortable": true,
+			"class": [
+				"text-nowrap",
+				"text-center"
+			]
+		},
+		{
+			"title_i18n": "flow_details.num_responses_ok",
+			"data_field": "num_responses_ok",
+			"min-width": "80px",
+			"sortable": true,
+			"class": [
+				"text-nowrap",
+				"text-center"
+			]
+		}
+	]
+}

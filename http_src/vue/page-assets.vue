@@ -191,6 +191,9 @@ const map_table_def_columns = (columns) => {
             if (!dataUtils.isEmptyOrNull(host.is_s7comm_server)) {
                 icons = `${icons} <span class="badge bg-success">${i18n("details.label_s7comm_server")}</span>`
             }
+            if (!dataUtils.isEmptyOrNull(host.is_profinet_server)) {
+                icons = `${icons} <span class="badge bg-success">${i18n("details.label_profinet_server")}</span>`
+            }
 
             const host_url = create_button_host_details(row);
 

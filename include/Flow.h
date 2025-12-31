@@ -204,6 +204,7 @@ private:
 #ifdef NTOPNG_PRO
   ModbusStats *modbus;
   S7CommStats *s7comm;
+  ProfinetStats *profinet;
 #endif
   char *suspicious_dga_domain; /* Stores the suspicious DGA domain for flows
                                   with NDPI_SUSPICIOUS_DGA_DOMAIN */
@@ -555,6 +556,7 @@ public:
   inline bool isIEC60870() const { return (isProto(NDPI_PROTOCOL_IEC60870));      }
   inline bool isModbus()   const { return (isProto(NDPI_PROTOCOL_MODBUS));        }
   inline bool isS7Comm()   const { return (isProto(NDPI_PROTOCOL_S7COMM));        }
+  inline bool isProfinet()   const { return (isProto(NDPI_PROTOCOL_PROFINET_IO));        }
   inline bool isMDNS() const     { return (isProto(NDPI_PROTOCOL_MDNS));          }
   inline bool isSSDP() const     { return (isProto(NDPI_PROTOCOL_SSDP));          }
   inline bool isNetBIOS() const  { return (isProto(NDPI_PROTOCOL_NETBIOS));       }
@@ -1213,6 +1215,7 @@ public:
   void updateTCPWin(bool src2dst_direction, u_int16_t win);
   void getModbusInfo(ndpi_serializer *serializer);
   void getS7CommInfo(ndpi_serializer *serializer);
+  void getProfinetInfo(ndpi_serializer *serializer);
 
 #if !defined(HAVE_NEDGE)
   inline void updateProfile() { trafficProfile = iface->getFlowProfile(this); }

@@ -2871,3 +2871,17 @@ function formatS7CommInfo(proto_info)
 
     return info
 end
+
+-- #######################
+
+-- A one line flow description
+-- This uses the information from flow.getInfo()
+function formatProfinetInfo(proto_info)
+    local info = nil
+
+    if proto_info.profinet then
+        info = proto_info.profinet
+    end
+
+    return info
+end

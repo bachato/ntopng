@@ -736,6 +736,7 @@ void LocalHost::setService(int service_enum) {
     case HOST_SERVICE_RDP:    service_name = "rdp_server"; break;
     case HOST_SERVICE_MODBUS: service_name = "modbus_server"; break;
     case HOST_SERVICE_S7COMM: service_name = "s7comm_server"; break;
+    case HOST_SERVICE_PROFINET: service_name = "profinet_server"; break;
   }
 
   if(service_name)
