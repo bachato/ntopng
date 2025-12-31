@@ -40,19 +40,6 @@
         <div class="mt-2 row">
             <Transition name="add-effect" mode="out-in">
                 <div class="position-relative col-6">
-                    <TableWithConfig ref="table_profinet_function_codes" :table_id="'profinet_function_codes'"
-                        :showLoading="true" :f_map_columns="mapTableColumns" :f_sort_rows="columnsSorting"
-                        :get_extra_params_obj="getExtraParameters">
-                        <template v-slot:custom_header>
-                            <div class="dropdown me-3 d-inline-block">
-                                <h4>{{ _i18n('flow_details.profinet_functions') }}</h4>
-                            </div>
-                        </template> <!-- Dropdown filters -->
-                    </TableWithConfig>
-                </div>
-            </Transition>
-            <Transition name="add-effect" mode="out-in">
-                <div class="position-relative col-6">
                     <TableWithConfig ref="table_profinet_operations" :table_id="'profinet_operations'"
                         :showLoading="true" :f_map_columns="mapTableColumns" :f_sort_rows="columnsSorting"
                         :get_extra_params_obj="getExtraParameters">
@@ -82,7 +69,6 @@ const props = defineProps({
 });
 
 const _i18n = (t) => i18n(t);
-const table_profinet_function_codes = ref(null);
 const table_profinet_operations = ref(null);
 const general_info_stats_rows = ref([]);
 const no_transitions_message = i18n('flow_details.s7comm_no_transitions')
@@ -138,7 +124,6 @@ onBeforeMount(() => { })
 /* ************************************** */
 
 function reloadTables() {
-    table_profinet_function_codes.value.refresh_table()
     table_profinet_operations.value.refresh_table()
 }
 
@@ -162,12 +147,8 @@ function print_stats_row(col, row) {
 
 function columnsSorting(col, r0, r1) {
     if (col != null) {
-        if (col.id == "profinet_function_code") {
-            return sortingFunctions.sortByName(r0.profinet_function_code, r1.profinet_function_code, col.sort);
-        } else if (col.id == "operation") {
+        if (col.id == "operation") {
             return sortingFunctions.sortByName(r0.operation, r1.operation, col.sort);
-        } else if (col.id == "num_uses") {
-            return sortingFunctions.sortByNumber(r0.num_uses, r1.num_uses, col.sort);
         } else if (col.id == "num_requests") {
             return sortingFunctions.sortByNumber(r0.num_requests, r1.num_requests, col.sort);
         } else if (col.id == "num_responses_errored") {
@@ -184,12 +165,6 @@ function columnsSorting(col, r0, r1) {
 
 const mapTableColumns = (columns) => {
     let map_columns = {
-        "profinet_function_code": (value) => {
-            return value;
-        },
-        "num_uses": (value) => {
-            return FormatterUtils.getFormatter("full_number")(value || 0);
-        },
         "operation": (value) => {
             return value;
         },
