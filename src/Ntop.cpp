@@ -390,9 +390,11 @@ Ntop::~Ntop() {
   if (trap_collector) delete trap_collector;
 #endif
 
-  for(u_int i=0; i<device_max_type; i++)
-    ndpi_bitmask_free(&deviceProtocolPresets[i].clientAllowed),
-      ndpi_bitmask_free(&deviceProtocolPresets[i].serverAllowed);
+  for(u_int i=0; i<device_max_type; i++) {
+    DeviceProtocolBitmask *b = getDeviceAllowedProtocols((DeviceType)i);
+    ndpi_bitmask_free(&b->clientAllowed);
+    ndpi_bitmask_free(&b->serverAllowed);
+  }
 }
 
 /* ******************************************* */
@@ -3366,12 +3368,10 @@ void Ntop::initAllowedProtocolPresets() {
     throw "Allocation error";
 
   for (u_int i = 0; i < device_max_type; i++) {
-    DeviceProtocolBitmask *b;
+    DeviceProtocolBitmask *b = getDeviceAllowedProtocols((DeviceType)i);
 
-    ndpi_bitmask_alloc(&deviceProtocolPresets[i].clientAllowed, num_protocols),
-      ndpi_bitmask_alloc(&deviceProtocolPresets[i].serverAllowed, num_protocols);
-
-    b = getDeviceAllowedProtocols((DeviceType)i);
+    ndpi_bitmask_alloc(&b->clientAllowed, num_protocols);
+    ndpi_bitmask_alloc(&b->serverAllowed, num_protocols);
 
     ndpi_bitmask_set_all(&b->clientAllowed);
     ndpi_bitmask_set_all(&b->serverAllowed);
