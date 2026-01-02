@@ -5850,7 +5850,7 @@ local lang = {
     ["received_traffic"] = "Received Traffic",
     ["remote_flow_lifetime"] = "Flow Lifetime",
     ["remote_probe"] = "nProbe",
-    ["remote_probe_collecting_from_x_devices"] = "Collecting from <a href=\"%{url}\">%{num} nProbe</a>.",
+    ["remote_probe_collecting_from_x_devices"] = "Collecting from <a href=\"%{url}\">%{num} nProbe(s)</a>.",
     ["remote_probe_collecting_from_x_devices_no_link"] = "Collecting from %{num} nProbe(s).",
     ["remote_probe_collector_mode"] = "Collector Mode",
     ["remote_probe_edition"] = "Edition",
