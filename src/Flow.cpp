@@ -60,26 +60,12 @@ Flow::Flow(NetworkInterface *_iface,
 #endif
 
   if(ntop->getPrefs()->fullStatsEnabled() && getInterface()->isPacketInterface()) {
-    if(protocol == IPPROTO_TCP) {
-      tcp = (FlowTCP*)calloc(1, sizeof(FlowTCP));
-
-      if(tcp != NULL) {
-	ndpi_init_data_analysis(&tcp->tcpWin.cli_to_srv, 0);
-	ndpi_init_data_analysis(&tcp->tcpWin.srv_to_cli, 0);
-	ndpi_init_data_analysis(&tcp->rtt.cli_to_srv, 0);
-	ndpi_init_data_analysis(&tcp->rtt.srv_to_cli, 0);
-      }
-    }
+    if(protocol == IPPROTO_TCP)
+      allocTCPStats();
 #ifdef NTOPNG_PRO
     else {
-      if(protocol == IPPROTO_UDP) {
-	udp = (FlowUDP*)calloc(1, sizeof(FlowUDP));
-
-	if(udp != NULL) {
-	  ndpi_init_data_analysis(&udp->rtt.cli_min_rtt, 0);
-	  ndpi_init_data_analysis(&udp->rtt.srv_min_rtt, 0);
-	}
-      }
+      if(protocol == IPPROTO_UDP)
+	allocUDPStats();
     }
 #endif
   }
@@ -358,6 +344,34 @@ Flow::Flow(NetworkInterface *_iface,
 
   computeKey();
   deferredInitialization();
+}
+
+/* *************************************** */
+
+void Flow::allocTCPStats() {
+  if(tcp != NULL) return;
+  
+  tcp = (FlowTCP*)calloc(1, sizeof(FlowTCP));
+  
+  if(tcp != NULL) {
+    ndpi_init_data_analysis(&tcp->tcpWin.cli_to_srv, 0);
+    ndpi_init_data_analysis(&tcp->tcpWin.srv_to_cli, 0);
+    ndpi_init_data_analysis(&tcp->rtt.cli_to_srv, 0);
+    ndpi_init_data_analysis(&tcp->rtt.srv_to_cli, 0);
+  }  
+}
+
+/* *************************************** */
+
+void Flow::allocUDPStats() {
+  if(udp != NULL) return;
+  
+  udp = (FlowUDP*)calloc(1, sizeof(FlowUDP));
+  
+  if(udp != NULL) {
+    ndpi_init_data_analysis(&udp->rtt.cli_min_rtt, 0);
+    ndpi_init_data_analysis(&udp->rtt.srv_min_rtt, 0);
+  }
 }
 
 /* *************************************** */

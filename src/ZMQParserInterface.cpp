@@ -1165,6 +1165,7 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow *const flow,
     /* TODO add lost in/out to nProbe and here */
   case CLIENT_NW_LATENCY_MS: {
     float client_nw_latency;
+    
     client_nw_latency = value->double_num;
     flow->tcp.clientNwLatency.tv_sec = client_nw_latency / 1e3;
     flow->tcp.clientNwLatency.tv_usec =

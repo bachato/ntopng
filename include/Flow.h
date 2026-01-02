@@ -434,6 +434,8 @@ private:
   void updateMac();
   void decodeTCPstats(u_int32_t v, TCPStats *stats);
   void getTCPFlagsJSON(ndpi_serializer *serializer, TCPStats *stats, const char *label);
+  void allocTCPStats();
+  void allocUDPStats();
   
 public:
   Flow(NetworkInterface *_iface, int32_t iface_idx,
@@ -1319,21 +1321,25 @@ public:
   };
 
   inline void setFlowRTT(const struct timeval *const tv, bool client) {
+    allocTCPStats();
+    
     if(tcp != NULL) {
       if (client) {
-	memcpy(&tcp->clientRTT3WH, tv, sizeof(*tv));
-
+	tcp->clientRTT3WH = Utils::timeval2ms(tv);
+	
 	if (cli_host)
 	  cli_host->updateNetworkRTT(tcp->clientRTT3WH);
       } else {
-	memcpy(&tcp->serverRTT3WH, tv, sizeof(*tv));
+	tcp->serverRTT3WH = Utils::timeval2ms(tv);
 
 	if (srv_host)
 	  srv_host->updateNetworkRTT(tcp->serverRTT3WH);
       }
     }
   }
+  
   inline void setFlowTcpWindow(u_int16_t window_val, bool client) {
+    allocTCPStats();
     if(tcp != NULL) {
       if (client)
 	tcp->cli2srv_window = window_val;
@@ -1342,6 +1348,8 @@ public:
     }
   }
   inline void setRTT() {
+    allocTCPStats();
+    
     if(tcp != NULL)
       rttSec = (tcp->serverRTT3WH + tcp->clientRTT3WH)/1000.;
   }
