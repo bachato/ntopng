@@ -288,6 +288,10 @@ private:
     } tls;
 
     struct {
+      u_int8_t igmp_type;
+    } igmp;
+    
+    struct {
       struct {
         u_int8_t icmp_type, icmp_code;
       } cli2srv, srv2cli;
@@ -568,6 +572,7 @@ public:
   inline bool isSMTPS() const       { return (isProto(NDPI_PROTOCOL_MAIL_SMTPS)); }
   inline bool isHTTP() const        { return (isProto(NDPI_PROTOCOL_HTTP));       }
   inline bool isHTTP_PROXY() const  { return (isProto(NDPI_PROTOCOL_HTTP_PROXY)); }
+  inline bool isIGMP() const        { return (isProto(NDPI_PROTOCOL_IP_IGMP));    }
   inline bool isICMP() const {
     return (isProto(NDPI_PROTOCOL_IP_ICMP) || isProto(NDPI_PROTOCOL_IP_ICMPV6));
   }
@@ -1596,6 +1601,7 @@ public:
 
   void setCliService(int service_enum);
   void setSrvService(int service_enum);
+  inline void setIGMPType(u_int8_t t) { protos.igmp.igmp_type = t; }
 };
 
 #endif /* _FLOW_H_ */

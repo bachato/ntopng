@@ -999,3 +999,17 @@ end
 function isSystemInterface(ifid)
    return (getSystemInterfaceId() == tostring(ifid))
 end
+
+-- ##############################################
+
+function igmpType2String(v)
+   if(v == 0x11) then
+      return("Membership Query")
+   elseif((v == 0x12) or (v == 0x16) or (v == 0x22)) then
+	 return("Membership Report")
+   elseif(v == 0x17) then
+	 return("Leave Group")
+   else
+      return(v)
+   end
+end

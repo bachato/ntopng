@@ -320,6 +320,15 @@ Flow::Flow(NetworkInterface *_iface,
       if(protocol == IPPROTO_UDP) set_hash_entry_state_flow_notyetdetected();
     break;
 
+    case IPPROTO_IGMP:
+      ndpiDetectedProtocol.proto.app_protocol = NDPI_PROTOCOL_IP_IGMP;
+      ndpiDetectedProtocol.proto.master_protocol = NDPI_PROTOCOL_UNKNOWN;
+      ndpi_confidence = NDPI_CONFIDENCE_DPI;
+
+      setDetectedProtocol(ndpi_guess_undetected_protocol(iface->get_ndpi_struct(),
+							 NULL, NDPI_PROTOCOL_IP_IGMP), true);
+    break;
+
     case IPPROTO_ICMP:
       ndpiDetectedProtocol.proto.app_protocol = NDPI_PROTOCOL_IP_ICMP;
       ndpiDetectedProtocol.proto.master_protocol = NDPI_PROTOCOL_UNKNOWN;
@@ -330,6 +339,7 @@ Flow::Flow(NetworkInterface *_iface,
       set_hash_entry_state_flow_notyetdetected();
     break;
 
+    
     case IPPROTO_ICMPV6:
       ndpiDetectedProtocol.proto.app_protocol = NDPI_PROTOCOL_IP_ICMPV6;
       ndpiDetectedProtocol.proto.master_protocol = NDPI_PROTOCOL_UNKNOWN;
@@ -340,8 +350,9 @@ Flow::Flow(NetworkInterface *_iface,
     break;
 
     default:
-      setDetectedProtocol(ndpi_guess_undetected_protocol(iface->get_ndpi_struct(), NULL, protocol), true);
-    break;
+      setDetectedProtocol(ndpi_guess_undetected_protocol(iface->get_ndpi_struct(),
+							 NULL, protocol), true);
+      break;
     }
   }
 
@@ -3172,8 +3183,16 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
       lua_pushstring(vm, "icmp");
       lua_insert(vm, -2);
       lua_settable(vm, -3);
+    } else if(isIGMP()) {
+      lua_newtable(vm);
+      
+      lua_push_uint32_table_entry(vm, "type", protos.igmp.igmp_type);
+      
+      lua_pushstring(vm, "igmp");
+      lua_insert(vm, -2);
+      lua_settable(vm, -3);
     }
-
+    
     lua_push_int32_table_entry(vm, "cli.devtype",
                                (cli_host && cli_host->getMac())
 			       ? cli_host->getMac()->getDeviceType()
@@ -5722,6 +5741,11 @@ std::string Flow::getFlowInfo(bool isLuaRequest) {
       info_field = std::string("Desktop Sharing");
     } else if(isMining() && protos.mining.currency) {
       info_field = std::string(protos.mining.currency);
+    } else if(isIGMP()) {
+      char str[16];
+      
+      snprintf(str, sizeof(str), "%u", protos.igmp.igmp_type);
+      info_field = std::string(str);
     } else if(isSIP()) {
       if(protos.sip.call_id)
 	info_field = std::string(protos.sip.call_id);

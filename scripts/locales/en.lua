@@ -419,6 +419,7 @@ local lang = {
    ["icmp"] = "ICMP",
    ["icmp_code"] = "ICMP Code",
    ["icmp_type"] = "ICMP Type",
+   ["igmp_type"] = "IGMP Type",
    ["icmpv4"] = "ICMPv4",
    ["icmpv6"] = "ICMPv6",
    ["id"] = "ID",

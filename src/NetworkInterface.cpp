@@ -2412,6 +2412,11 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
       }
       break;
 
+    case NDPI_PROTOCOL_IP_IGMP:
+      if(trusted_l4_packet_len > 0)
+	flow->setIGMPType(l4[0]);
+      break;
+      
     case NDPI_PROTOCOL_NETBIOS:
       flow->dissectNetBIOS(payload, trusted_payload_len);
       break;

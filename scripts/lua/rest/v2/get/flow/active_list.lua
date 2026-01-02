@@ -322,6 +322,8 @@ for _, value in ipairs(flows_stats.flows) do
    and (value["info"] ~= "")) then
       local tc = split(value["info"], ",")
       record["info"] = icmp_utils.get_icmp_label(tc[1], tc[2])
+   elseif(record.l4_proto.id == 2) then
+      record["info"] = igmpType2String(tonumber(value["info"]))
    else
       record["info"] = value["info"]
    end

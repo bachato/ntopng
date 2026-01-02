@@ -1633,6 +1633,11 @@ if isEmptyString(page) or page == "overview" then
          print("</td></tr>\n")
       end
 
+      if(flow.igmp ~= nil) then
+         print("<tr><th width=10%>" .. i18n("igmp_type") .. "</th><td colspan=2>" .. igmpType2String(flow.igmp.type))
+         print("</td></tr>\n")
+      end
+      
       if (flow["protos.stun.mapped_ip_address"] ~= nil) then
          local elems = split(flow["protos.stun.mapped_ip_address"], ":")
          local ip = elems[1]
