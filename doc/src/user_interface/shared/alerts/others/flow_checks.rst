@@ -1042,7 +1042,7 @@ Alert is sent when Server message block is detected.
 Susp. Device Protocol
 ~~~~~~~~~~~~~~~~~~~~~
 
-Warns about an unusual application used by a device
+Warns about an unusual application protocol used by a device. Allowed protocols can be configured from the Allowed Applications page.
 
 The goal is notify that the system has detected a strange behavior from an host.
 
