@@ -51,6 +51,7 @@ Prefs::Prefs(Ntop *_ntop) {
   enable_users_login = true, disable_localhost_login = false;
   enable_dns_resolution = sniff_dns_responses = sniff_name_responses =
     sniff_local_name_responses = true, limited_resources_mode = false;
+  enable_flow_deduplication = false;
   use_promiscuous_mode = true, do_reforge_timestamps = false;
   resolve_all_host_ip = false, service_license_check = false;
   add_vlan_tags_to_cloud_exporters = false, disable_purge = false;
@@ -977,14 +978,14 @@ void Prefs::reloadPrefsFromRedis() {
     active_local_hosts_cache_interval = getDefaultPrefsValue(CONST_RUNTIME_ACTIVE_LOCAL_HOSTS_CACHE_INTERVAL,
 							     CONST_DEFAULT_ACTIVE_LOCAL_HOSTS_CACHE_INTERVAL),
     mac_address_cache_duration = getDefaultPrefsValue(CONST_RUNTIME_MAC_ADDRESS_CACHE_DURATION,
-							     MAX_MAC_IDLE),
+						      MAX_MAC_IDLE),
     enable_flow_swap_heuristic = getDefaultBoolPrefsValue(CONST_RUNTIME_ENABLE_FLOW_SWAP_HEURISTIC,
-							     true),
+							  true),
     skip_dpi_for_collected_flows = getDefaultBoolPrefsValue(CONST_RUNTIME_SKIP_DPI_FOR_COLLECTED_FLOWS,
-							     false),
-    enable_assets_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false);
-
-    log_to_file = getDefaultBoolPrefsValue(CONST_RUNTIME_PREFS_LOG_TO_FILE, false);
+							    false),
+    enable_assets_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false),
+    enable_flow_deduplication = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_FLOW_DEDUPLICATION, false);
+  log_to_file = getDefaultBoolPrefsValue(CONST_RUNTIME_PREFS_LOG_TO_FILE, false);
   intf_rrd_raw_days = getDefaultPrefsValue(CONST_INTF_RRD_RAW_DAYS, INTF_RRD_RAW_DAYS),
     intf_rrd_1min_days = getDefaultPrefsValue(CONST_INTF_RRD_1MIN_DAYS, INTF_RRD_1MIN_DAYS),
     intf_rrd_1h_days = getDefaultPrefsValue(CONST_INTF_RRD_1H_DAYS, INTF_RRD_1H_DAYS),
@@ -1036,7 +1037,7 @@ void Prefs::reloadPrefsFromRedis() {
     max_num_bytes_per_tiny_flow = getDefaultPrefsValue(CONST_MAX_NUM_BYTES_PER_TINY_FLOW,
 						       CONST_DEFAULT_MAX_NUM_BYTES_PER_TINY_FLOW),
     max_extracted_pcap_bytes = getDefaultPrefsValue(CONST_MAX_EXTR_PCAP_BYTES, CONST_DEFAULT_MAX_EXTR_PCAP_BYTES);
-    max_extracted_pcap_files = getDefaultPrefsValue(CONST_MAX_EXTR_PCAP_FILES, CONST_DEFAULT_MAX_EXTR_PCAP_FILES);
+  max_extracted_pcap_files = getDefaultPrefsValue(CONST_MAX_EXTR_PCAP_FILES, CONST_DEFAULT_MAX_EXTR_PCAP_FILES);
 
   ewma_alpha_percent = getDefaultPrefsValue(CONST_EWMA_ALPHA_PERCENT,
 					    CONST_DEFAULT_EWMA_ALPHA_PERCENT);
@@ -1140,7 +1141,7 @@ void Prefs::reloadPrefsFromRedis() {
 #endif
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
   ntopng_assets_inventory_enabled = getDefaultPrefsValue(CONST_PREFS_NTOPNG_ASSETS_INVENTORY_ENABLED,
-							    CONST_DEFAULT_NTOPNG_ASSETS_INVENTORY_ENABLED);
+							 CONST_DEFAULT_NTOPNG_ASSETS_INVENTORY_ENABLED);
 #endif
 
 #if defined(NTOPNG_PRO)
@@ -2779,6 +2780,8 @@ void Prefs::lua(lua_State *vm) {
                             resolve_all_host_ip);
   lua_push_bool_table_entry(vm, "is_dns_resolution_enabled",
                             enable_dns_resolution);
+  lua_push_bool_table_entry(vm, "is_flow_deduplication_enabled",
+                            enable_flow_deduplication);
   lua_push_bool_table_entry(vm, "is_autologout_enabled", enable_auto_logout);
   lua_push_bool_table_entry(vm, "is_interface_name_only",
                             enable_interface_name_only);

@@ -31,7 +31,7 @@ ParserInterface::ParserInterface(const char *endpoint,
   if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 
-  num_companion_interfaces = 0;
+  num_companion_interfaces = 0, num_deduplicated_flows = 0;
   companion_interfaces =
     new (std::nothrow) NetworkInterface *[MAX_NUM_COMPANION_INTERFACES]();
 
@@ -236,7 +236,24 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
   }
 
   if(flow) {
-    /* Fix interaface Id (if zero) */
+    /* Fix interface Id (if zero) */
+
+    if(!new_flow) {
+      if(ntop->getPrefs()->isFlowDedupEnabled()
+	 && (flow->getFlowDeviceIP() != zflow->exporter_device_ip)) {
+#ifdef DEDUPLICATION_DEBUG
+	char b1[32], b2[32], buf[256];
+
+	ntop->getTrace()->traceEvent(TRACE_NORMAL, "flow=%s vs exporter_ip=%s",
+				     Utils::intoaV4(flow->getFlowDeviceIP(), b1, sizeof(b1)),
+				     Utils::intoaV4(zflow->exporter_device_ip, b2, sizeof(b2)));
+
+	ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", flow->print(buf, sizeof(buf)));
+#endif
+	num_deduplicated_flows++;
+	return(true); /* Flow handled albeit discarded */
+      }
+    }
 
     if(zflow->inIndex != 0) {
       if(src2dst_direction)

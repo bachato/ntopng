@@ -53,6 +53,7 @@ class Prefs {
   Ntop* ntop;
   bool enable_dns_resolution, sniff_dns_responses, sniff_name_responses,
     sniff_local_name_responses, pcap_file_purge_hosts_flows,
+    enable_flow_deduplication,
     categorization_enabled, resolve_all_host_ip, change_user, daemonize,
     enable_auto_logout, enable_auto_logout_at_runtime, use_promiscuous_mode,
     enable_ixia_timestamps, full_stats_enabled,
@@ -821,6 +822,7 @@ class Prefs {
   void setCustomGeoIPDir(char *d);
 
   inline bool fullStatsEnabled()           { return(full_stats_enabled);               }
+  inline bool isFlowDedupEnabled()         { return(enable_flow_deduplication);        }
 };
 
 #endif /* _PREFS_H_ */
