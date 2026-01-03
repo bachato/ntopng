@@ -364,6 +364,7 @@ void Flow::allocTCPStats() {
 /* *************************************** */
 
 void Flow::allocUDPStats() {
+#ifdef NTOPNG_PRO
   if(udp != NULL) return;
   
   udp = (FlowUDP*)calloc(1, sizeof(FlowUDP));
@@ -372,6 +373,7 @@ void Flow::allocUDPStats() {
     ndpi_init_data_analysis(&udp->rtt.cli_min_rtt, 0);
     ndpi_init_data_analysis(&udp->rtt.srv_min_rtt, 0);
   }
+#endif
 }
 
 /* *************************************** */
