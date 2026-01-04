@@ -983,8 +983,11 @@ void Prefs::reloadPrefsFromRedis() {
 							  true),
     skip_dpi_for_collected_flows = getDefaultBoolPrefsValue(CONST_RUNTIME_SKIP_DPI_FOR_COLLECTED_FLOWS,
 							    false),
-    enable_assets_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false),
-    enable_flow_deduplication = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_FLOW_DEDUPLICATION, false);
+    enable_assets_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false);
+
+    if(is_enterprise_xl_edition())
+      enable_flow_deduplication = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_FLOW_DEDUPLICATION, false);
+  
   log_to_file = getDefaultBoolPrefsValue(CONST_RUNTIME_PREFS_LOG_TO_FILE, false);
   intf_rrd_raw_days = getDefaultPrefsValue(CONST_INTF_RRD_RAW_DAYS, INTF_RRD_RAW_DAYS),
     intf_rrd_1min_days = getDefaultPrefsValue(CONST_INTF_RRD_1MIN_DAYS, INTF_RRD_1MIN_DAYS),

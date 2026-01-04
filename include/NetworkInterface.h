@@ -97,7 +97,7 @@ protected:
 				     error   */
   std::atomic<u_int32_t> num_active_probes; /* Count active ZMQ probes */
   u_int32_t num_host_dropped_alerts, num_flow_dropped_alerts,
-    num_other_dropped_alerts, last_purge_idle;
+    num_other_dropped_alerts, last_purge_idle, num_deduplicated_flows;
   u_int64_t num_written_alerts, num_alerts_queries, score_as_cli, score_as_srv;
   u_int64_t num_new_flows;
   time_t last_ndpi_reload;

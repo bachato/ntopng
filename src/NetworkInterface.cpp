@@ -274,7 +274,7 @@ void NetworkInterface::init(const char *interface_name) {
     totalNumHosts = numTotalRxOnlyHosts = numLocalHosts = numLocalRxOnlyHosts = 0,
     arp_requests = arp_replies = 0, has_mac_addresses = false,
     checkpointPktCount = checkpointBytesCount = checkpointPktDropCount =
-    checkpointDroppedAlertsCount = 0,
+    checkpointDroppedAlertsCount = 0, num_deduplicated_flows = 0,
     checkpointTrafficSent = 0, checkpointTrafficRcvd = 0,
     checkpointPacketsSent = 0, checkpointPacketsRcvd = 0,
     pollLoopCreated = false, bridge_interface = false, mdns = NULL,
@@ -2416,7 +2416,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
       if(trusted_l4_packet_len > 0)
 	flow->setIGMPType(l4[0]);
       break;
-      
+
     case NDPI_PROTOCOL_NETBIOS:
       flow->dissectNetBIOS(payload, trusted_payload_len);
       break;
@@ -2956,16 +2956,16 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	eth_type = packet[ip_offset + 1], ip_offset += 2; /* 2 Byte protocol */
       else
 	eth_type = packet[ip_offset], ip_offset += 1; /* 1 Byte protocol */
-      
+
       switch (eth_type) {
       case 0x21:
 	eth_type = ETHERTYPE_IP;
 	break;
-	
+
       case 0x57:
 	eth_type = ETHERTYPE_IPV6;
 	break;
-	
+
       default:
 	incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IP,
 		 NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
@@ -3153,7 +3153,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 		eth_type = ETHERTYPE_IPV6;
 		ip6 = (struct ndpi_ipv6hdr *)&packet[offset];
 		iph = NULL;
-	      }		
+	      }
 	    } else {
 	      incStats(ingressPacket, h->ts.tv_sec, 0,
 		       NDPI_PROTOCOL_UNKNOWN,
@@ -5813,8 +5813,8 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
 #endif
       (r->ipVersionFilter &&
        (((r->ipVersionFilter == 4) && (!h->get_ip()->isIPv4())) ||
-        ((r->ipVersionFilter == 6) && (!h->get_ip()->isIPv6())))) || 
-      (r->map_search && r->map_search[0] && 
+        ((r->ipVersionFilter == 6) && (!h->get_ip()->isIPv6())))) ||
+      (r->map_search && r->map_search[0] &&
         (strncmp(ipstr, r->map_search, strlen(r->map_search)) != 0 &&
          strncmp(namestr, r->map_search, strlen(r->map_search)) != 0))
     )
@@ -7892,10 +7892,11 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
                               bytes_thpt.getTrend());
   lua_push_float_table_entry(vm, "throughput_pps", pkts_thpt.getThpt());
   lua_push_uint64_table_entry(vm, "throughput_trend_pps", pkts_thpt.getTrend());
+  lua_push_uint32_table_entry(vm, "num_deduplicated_flows", num_deduplicated_flows);
+
   l4Stats.luaStats(vm);
 
   if(fullStats) {
-
     usedPorts.lua(vm, this);
 
     lua_newtable(vm); /* db */
