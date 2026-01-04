@@ -218,7 +218,7 @@ private:
     json_object *json;
   } external_alert;
 
-  char *tcp_fingerprint;
+  char *tcp_fingerprint, *ndpi_fingerprint;
   struct {
     TCPStats cli2srv, srv2cli;
   } tcp_stats;
@@ -1449,14 +1449,9 @@ public:
   inline char *getTLSCertificateSubjectDN() {
     return (isTLS() ? protos.tls.subjectDN : NULL);
   }
-  inline void setTLSCertificateIssuerDN(char *issuer) {
-    if (protos.tls.issuerDN) free(protos.tls.issuerDN);
-    protos.tls.issuerDN = strdup(issuer);
-  }
-  inline void setTCPFingerprint(char *fp) {
-    if (tcp_fingerprint) free(tcp_fingerprint);
-    tcp_fingerprint = strdup(fp);
-  }
+  void setTLSCertificateIssuerDN(char *issuer);
+  void setTCPFingerprint(char *fp);
+  void setnDPIFingerprint(char *fp);
   inline char *getTCPFingerprint() { return(tcp_fingerprint); }
   
   inline void setTOS(u_int8_t tos, bool is_cli_tos) {

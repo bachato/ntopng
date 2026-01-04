@@ -868,9 +868,39 @@ if isEmptyString(page) or page == "overview" then
       print("<tr><th width=33%>" .. i18n("details.duration") .. "</th><td nowrap colspan=2<div id=duration>" ..
                secondsToTime(flow["seen.last"] - flow["seen.first"]) .. "</div></td>\n")
 
+      num = 0
+      if(flow.tcp_fingerprint) then num = num + 1 end
+      if(flow.ndpi_fingerprint) then num = num + 1 end
+      if(flow["protos.tls.ja4.client_hash"]) then num = num + 1 end
+
+      print("<tr><th width=33% rowspan="..num..">" .. i18n("details.fingerprint") .. "</th>")
+
+      num = 0
       if (flow.tcp_fingerprint) then
-         print("<tr><th width=33%>" .. i18n("details.tcp_fingerprint") .. "</th><td nowrap colspan=2<div id=duration>" ..
-                  flow.tcp_fingerprint .. "</div></td>\n")
+         print("<th width=33%>" .. i18n("details.tcp_fingerprint") .. "</th><td nowrap colspan=2<div id=duration>" ..
+	       flow.tcp_fingerprint .. "</td></tr>\n")
+	 num = 1
+      end
+
+
+      if (flow.ndpi_fingerprint) then
+	 if(num == 1) then print("<tr>") end
+         print("<th width=33%>" .. i18n("details.ndpi_fingerprint") .. "</th><td nowrap colspan=2<div id=duration>" ..
+	       flow.ndpi_fingerprint .. "</td></tr>\n")
+	 num = 1
+      end
+
+      if ((flow["protos.tls.ja4.client_hash"] ~= nil)) then
+	 if(num == 1) then print("<tr>") end
+         print('<th width=10%><A HREF="https://github.com/FoxIO-LLC/ja4">JA4</A></th><td>')
+         if (flow["protos.tls.ja4.client_malicious"]) then
+            print('<font color=red><i class="fas fa-ban" title="' .. i18n("alerts_dashboard.malicious_signature_detected") ..
+                     '"></i></font> ')
+         end
+
+         ja4url(flow["protos.tls.ja4.client_hash"], nil, 'ja4c')
+         print("</td></tr>")
+	 num = 1
       end
 
       if flow["bytes"] > 0 then
@@ -1210,17 +1240,6 @@ if isEmptyString(page) or page == "overview" then
 
       if (flow["protos.tls.subjectDN"] ~= nil) then
          print('<tr><th width=10%>TLS subjectDN</A></th><td colspan=2>' .. flow["protos.tls.subjectDN"] .. '</td></tr>\n')
-      end
-
-      if ((flow["protos.tls.ja4.client_hash"] ~= nil)) then
-         print('<tr><th width=10%><A HREF="https://github.com/FoxIO-LLC/ja4">JA4</A></th><td>')
-         if (flow["protos.tls.ja4.client_malicious"]) then
-            print('<font color=red><i class="fas fa-ban" title="' .. i18n("alerts_dashboard.malicious_signature_detected") ..
-                     '"></i></font> ')
-         end
-
-         ja4url(flow["protos.tls.ja4.client_hash"], nil, 'ja4c')
-         print("</td></tr>")
       end
 
       if (flow["protos.tls.client_alpn"] ~= nil) then

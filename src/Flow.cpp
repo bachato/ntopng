@@ -71,7 +71,7 @@ Flow::Flow(NetworkInterface *_iface,
   }
 
   collection = NULL;
-  tcp_fingerprint = NULL;
+  tcp_fingerprint = NULL, ndpi_fingerprint = NULL;
   predominant_alert.id = flow_alert_normal,
     predominant_alert.category = alert_category_other,
     predominant_alert_score = 0;
@@ -477,6 +477,9 @@ void Flow::freeDPIMemory() {
     if((tcp_fingerprint == NULL) && ndpiFlow->tcp.fingerprint)
       setHostTCPFingerprint(ndpiFlow->tcp.fingerprint, ndpiFlow->tcp.os_hint);
 
+    if((ndpi_fingerprint == NULL) && ndpiFlow->ndpi.fingerprint)
+      setnDPIFingerprint(ndpiFlow->ndpi.fingerprint);
+    
     ndpi_free_flow(ndpiFlow);
     ndpiFlow = NULL;
   }
@@ -602,7 +605,8 @@ Flow::~Flow() {
   if (rtp) delete(rtp);
 #endif
 
-  if(tcp_fingerprint) free(tcp_fingerprint);
+  if(tcp_fingerprint)        free(tcp_fingerprint);
+  if(ndpi_fingerprint)       free(ndpi_fingerprint);
   if(riskInfo)               free(riskInfo);
   if(end_reason)             free(end_reason);
 
@@ -3132,6 +3136,9 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   if(details_level >= details_high) {
     if(tcp_fingerprint)
       lua_push_str_table_entry(vm, "tcp_fingerprint", tcp_fingerprint);
+
+    if(ndpi_fingerprint)
+      lua_push_str_table_entry(vm, "ndpi_fingerprint", ndpi_fingerprint);
 
     if(swap_done) lua_push_bool_table_entry(vm, "flow_swapped", true);
     lua_push_uint32_table_entry(vm, "flow_source", flow_source);
@@ -9327,8 +9334,7 @@ void Flow::setHostTCPFingerprint(char *fp, ndpi_os os_hint) {
       ntop->getTrace()->traceEvent(TRACE_DEBUG, "** Unknown TCP fingerprint %s [%s]",
 				   fp, log);
 
-      ntop->getRedis()->hashSet(CONST_STR_UNKNOWN_TCP_FINGERPRINTS,
-				fp, log);
+      ntop->getRedis()->hashSet(CONST_STR_UNKNOWN_TCP_FINGERPRINTS, fp, log);
     }
 
     setTCPFingerprint(fp);
@@ -9476,3 +9482,32 @@ void Flow::updateTCPStats(u_int32_t cli_stats, u_int32_t srv_stats) {
   if(cli_stats) decodeTCPstats(cli_stats, &tcp_stats.cli2srv);
   if(srv_stats) decodeTCPstats(srv_stats, &tcp_stats.srv2cli);
 }
+
+/* *************************************** */
+
+void Flow::setTLSCertificateIssuerDN(char *issuer) {
+  if(issuer != NULL) {
+    if (protos.tls.issuerDN) free(protos.tls.issuerDN);
+    protos.tls.issuerDN = strdup(issuer);
+  }
+}
+
+/* *************************************** */
+
+void Flow::setTCPFingerprint(char *fp) {
+  if(fp != NULL) {
+    if (tcp_fingerprint) free(tcp_fingerprint);
+    tcp_fingerprint = strdup(fp);
+  }
+}
+
+/* *************************************** */
+
+void Flow::setnDPIFingerprint(char *fp) {
+  if(fp != NULL) {
+    if (ndpi_fingerprint) free(ndpi_fingerprint);
+    ndpi_fingerprint = strdup(fp);
+  }
+}
+
+/* *************************************** */
