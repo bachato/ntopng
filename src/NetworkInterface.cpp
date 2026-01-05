@@ -622,17 +622,19 @@ bool NetworkInterface::nDPILoadIPCategory(char *what,
 /* *************************************** */
 
 bool NetworkInterface::nDPILoadHostnameCategory(char *what, u_int16_t id, char *list_name) {
-  bool success = true;
+  bool success = false;
 
   // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s(%p) [%s]", __FUNCTION__, ndpi_struct_shadow, what);
 
-  if (what && ndpi_struct_shadow)
+  if(what == NULL)
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL hostname category");
+  
+  else if(ndpi_struct_shadow == NULL)
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Internal error: invalid nDPI state");
+  else
     success = (ndpi_load_hostname_category(ndpi_struct_shadow, what,
 					   (ndpi_protocol_category_t)id,
 					   NDPI_PROTOCOL_UNRATED) == 0);
-  else
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "Internal error: invalid nDPI state [%s]",
-				 what ? what : "<NULL>");
 
   return success;
 }
@@ -642,10 +644,12 @@ bool NetworkInterface::nDPILoadHostnameCategory(char *what, u_int16_t id, char *
 int NetworkInterface::setDomainMask(const char *domain, u_int64_t domain_mask) {
   // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s(%p) [%s]", __FUNCTION__, ndpi_struct_shadow, domain);
 
-  if(domain && ndpi_struct_shadow)
-    return(ndpi_add_host_risk_mask(ndpi_struct_shadow, (char*)domain, domain_mask));
-  else
+  if(domain == NULL)
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL domain");  
+  else if(ndpi_struct_shadow == NULL)
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Internal error: invalid nDPI state");
+  else
+    return(ndpi_add_host_risk_mask(ndpi_struct_shadow, (char*)domain, domain_mask));
 
   return(-1);
 }
