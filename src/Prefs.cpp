@@ -265,6 +265,7 @@ Prefs::Prefs(Ntop *_ntop) {
   modbus_too_many_exceptions = 5;
   s7comm_allowed_function_codes = NULL; /* All allowed */
   s7comm_too_many_errors = 5;
+  profinet_too_many_errors = 5;
 #endif
 }
 

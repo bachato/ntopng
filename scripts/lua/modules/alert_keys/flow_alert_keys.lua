@@ -117,6 +117,7 @@ local flow_alert_keys = {
    flow_alert_s7comm_unexpected_function_code      = 108,
    flow_alert_s7comm_too_many_errors               = 109,
    flow_alert_s7comm_invalid_transition            = 110,
+   flow_alert_profinet_too_many_errors             = 111,
 
    -- NOTE: do not go beyond the size of the alert_map bitmal inside Flow.h (currently 128)
 }

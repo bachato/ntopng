@@ -133,6 +133,8 @@ FlowAlertsLoader::FlowAlertsLoader() {
                 S7CommTooManyErrorsAlert::getDefaultScore());
   registerAlert(S7CommInvalidTransitionAlert::getClassType(),
                 S7CommInvalidTransitionAlert::getDefaultScore());
+  registerAlert(ProfinetTooManyErrorsAlert::getClassType(),
+                ProfinetTooManyErrorsAlert::getDefaultScore());
   registerAlert(BlacklistedClientContactAlert::getClassType(),
                 BlacklistedClientContactAlert::getDefaultScore());
   registerAlert(BlacklistedServerContactAlert::getClassType(),

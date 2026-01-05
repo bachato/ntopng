@@ -1621,6 +1621,8 @@ extern NtopngLuaContext* getUserdata(struct lua_State *vm);
   "ntopng.checks.s7comm_too_many_errors_enabled"
 #define CHECKS_S7COMM_UNEXPECTED_FUNCTION_CODE \
   "ntopng.checks.s7comm_unexpected_function_code_enabled"
+#define CHECKS_PROFINET_TOO_MANY_ERRORS \
+  "ntopng.checks.profinet_too_many_errors_enabled"
 
 #define CUSTOM_FLOW_NDPI_SCRIPT \
   "scripts/callbacks/checks/flows/custom_flow_protocol_detected_script.lua"

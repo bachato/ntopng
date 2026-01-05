@@ -101,6 +101,7 @@
 #include "flow_alerts/S7CommUnexpectedFunctionCodeAlert.h"
 #include "flow_alerts/S7CommTooManyErrorsAlert.h"
 #include "flow_alerts/S7CommInvalidTransitionAlert.h"
+#include "flow_alerts/ProfinetTooManyErrorsAlert.h"
 #include "flow_alerts/DataExfiltrationAlert.h"
 #include "flow_alerts/ElephantFlowAlert.h"
 #include "flow_alerts/LateralMovementAlert.h"
