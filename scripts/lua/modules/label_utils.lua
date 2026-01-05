@@ -533,6 +533,7 @@ end
 
 -- ##############################################
 
+local vlan_cached_list = {}
 function getFullVlanName(vlan_id, compact, return_untagged)
     -- In case of vlan 0, return empty string as name
     -- fix for untagged vlan (#7998)
@@ -544,7 +545,11 @@ function getFullVlanName(vlan_id, compact, return_untagged)
         return ''
     end
 
-    local alias = getVlanAlias(vlan_id)
+    local alias = ""
+    if not vlan_cached_list[vlan_id] then
+        vlan_cached_list[vlan_id] = getVlanAlias(vlan_id) or ""
+    end
+    alias = vlan_cached_list[vlan_id]
 
     if not isEmptyString(alias) then
         if not isEmptyString(alias) and alias ~= tostring(vlan_id) then
