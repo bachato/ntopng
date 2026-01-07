@@ -5,6 +5,7 @@ local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 package.path = dirs.installdir .. "/scripts/lua/modules/pools/?.lua;" .. package.path
 require "lua_utils_generic"
+require "lua_utils_gui"
 require "check_redis_prefs"
 -- Instantiate host pools
 
