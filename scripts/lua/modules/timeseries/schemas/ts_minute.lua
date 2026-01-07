@@ -233,8 +233,7 @@ schema:addMetric("scoreAsServer")
 
 if ntop.isEnterpriseXL() then
     schema = ts_utils.newSchema("iface:deduplicated_flows", {
-        step = 60,
-        metrics_type = ts_utils.metrics.gauge
+        step = 60
     })
     schema:addTag("ifid")
     schema:addMetric("num_flows")
