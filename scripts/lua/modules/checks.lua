@@ -2059,21 +2059,20 @@ local function runHostChecks(granularity, checks_var, do_trace)
 
     if (do_trace) then print("checkHostAlerts()\n") end
 
-    for mod_key, hook_fn in pairs(
-                                checks_var.available_modules.hooks[granularity]) do
+    for mod_key, hook_fn in pairs(checks_var.available_modules.hooks[granularity]) do
         local check = checks_var.available_modules.modules[mod_key]
         local conf = checks.getTargetHookConfig(checks_var.iface_config, check,
                                                 granularity)
 
-        --      if (conf.enabled) then
-        invokeScriptHook(check, checks_var.configset, hook_fn, {
-            granularity = granularity,
-            alert_entity = entity_info,
-            entity_info = info,
-            check_config = conf.script_conf,
-            check = check
-        })
-        --      end
+        if (conf.enabled) then
+            invokeScriptHook(check, checks_var.configset, hook_fn, {
+                granularity = granularity,
+                alert_entity = entity_info,
+                entity_info = info,
+                check_config = conf.script_conf,
+                check = check
+            })
+        end
     end
 end
 
