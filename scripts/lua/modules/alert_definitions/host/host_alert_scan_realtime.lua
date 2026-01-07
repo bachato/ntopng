@@ -21,11 +21,11 @@ local i18n = require "i18n"
 local host_alert_scan_realtime = classes.class(alert)
 
 local alert_table = {
-   [0] = i18n("alert.scan_realtime.incomplete_flows"),
-   [1] = i18n("alert.scan_realtime.rx_only_scan"),
-   [2] = i18n("alert.scan_realtime.syn_scan"),
-   [3] = i18n("alert.scan_realtime.fin_scan"),
-   [4] = i18n("alert.scan_realtime.rst_scan"),
+   [0] = { descr = i18n("alert.scan_realtime.incomplete_flows") },
+   [1] = { descr = i18n("alert.scan_realtime.rx_only_scan"), is_victim = true },
+   [2] = { descr = i18n("alert.scan_realtime.syn_scan") },
+   [3] = { descr = i18n("alert.scan_realtime.fin_scan") },
+   [4] = { descr = i18n("alert.scan_realtime.rst_scan") },
 }
 
 -- ##############################################
@@ -62,13 +62,16 @@ end
 function host_alert_scan_realtime.format(ifid, alert, alert_type_params)
   local alert_consts = require("alert_consts")
   local entity = alert_consts.formatHostAlert(ifid, alert["ip"], alert["vlan_id"])
-  local i18n_key
+  local i18n_key = "alert_messages.scan_realtime"
   local alerts = ""
   for i, alert in ipairs(alert_type_params.alerts) do
-    alerts = alerts .. alert_table[alert] .. ", "
+    alerts = alerts .. alert_table[alert].descr .. ", "
+    if alert_table[alert].is_victim then
+      i18n_key = "alert_messages.scan_realtime_victim"
+    end
   end
   alerts = string.sub(alerts, 1, -3)
-  return i18n("alert_messages.scan_realtime",{
+  return i18n(i18n_key, {
     entity = entity,
     alerts = alerts
   })
