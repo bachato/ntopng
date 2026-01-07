@@ -103,6 +103,7 @@
 #include "flow_checks/S7CommUnexpectedFunctionCode.h"
 #include "flow_checks/S7CommTooManyErrors.h"
 #include "flow_checks/S7CommInvalidTransition.h"
+#include "flow_checks/ProfinetTooManyErrors.h"
 #include "flow_checks/TCPConnectionFailed.h"
 #include "flow_checks/FlowRiskTLSCertValidityTooLong.h"
 #include "flow_checks/FlowRiskTLSCertificateExpired.h"
