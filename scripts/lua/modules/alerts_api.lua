@@ -145,8 +145,11 @@ function alerts_api.addAlertGenerationInfo(alert_type_params, entity_info, curre
     if entity_info.alert_entity.entity_id == alert_consts.alertEntity("host") then
         local hostkey = entity_info.entity_val
         local attributes_json = interface.getHostAttributes(hostkey)
-        if attributes_json then
-            alert_type_params.alert_generation.host_info = json.decode(attributes_json)
+        if (attributes_json) then
+            local attributes_json = json.decode(attributes_json)
+            if (attributes_json) then -- Check if the json was correctly parsed
+                alert_type_params.alert_generation.host_info = attributes_json
+            end
         end
     end
 end
@@ -207,11 +210,9 @@ function alerts_api.store(entity_info, type_info, when)
         return (false)
     end
 
-    local force = false
     local ifid = interface.getId()
     local granularity_sec = type_info.granularity and type_info.granularity.granularity_seconds or 0
-    local granularity_id = type_info.granularity and type_info.granularity.granularity_id or -1
-
+    
     type_info.alert_type_params = type_info.alert_type_params or {}
     addAlertGenerationInfo(type_info.alert_type_params, entity_info)
 
