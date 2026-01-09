@@ -885,8 +885,11 @@ if isEmptyString(page) or page == "overview" then
 
       if (flow.ndpi_fingerprint) then
 	 if(num == 1) then print("<tr>") end
-         print("<th width=33%>" .. i18n("details.ndpi_fingerprint") .. "</th><td nowrap colspan=2<div id=duration>" ..
-	       flow.ndpi_fingerprint .. "</td></tr>\n")
+         print("<th width=33%>" .. i18n("details.ndpi_fingerprint") .. "</th><td nowrap colspan=2<div id=duration>" .. flow.ndpi_fingerprint)
+	 if(flow.tls_blocks) then
+	    print("<p><pre>".. flow.tls_blocks .."</pre>")
+	 end
+	 print("</td></tr>\n")
 	 num = 1
       end
 

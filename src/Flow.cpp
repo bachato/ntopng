@@ -71,7 +71,7 @@ Flow::Flow(NetworkInterface *_iface,
   }
 
   collection = NULL;
-  tcp_fingerprint = NULL, ndpi_fingerprint = NULL;
+  tcp_fingerprint = NULL, ndpi_fingerprint = NULL, tls_blocks = NULL;
   predominant_alert.id = flow_alert_normal,
     predominant_alert.category = alert_category_other,
     predominant_alert_score = 0;
@@ -325,7 +325,7 @@ Flow::Flow(NetworkInterface *_iface,
       set_hash_entry_state_flow_notyetdetected();
     break;
 
-    
+
     case IPPROTO_ICMPV6:
       ndpiDetectedProtocol.proto.app_protocol = NDPI_PROTOCOL_IP_ICMPV6;
       ndpiDetectedProtocol.proto.master_protocol = NDPI_PROTOCOL_UNKNOWN;
@@ -350,15 +350,15 @@ Flow::Flow(NetworkInterface *_iface,
 
 void Flow::allocTCPStats() {
   if(tcp != NULL) return;
-  
+
   tcp = (FlowTCP*)calloc(1, sizeof(FlowTCP));
-  
+
   if(tcp != NULL) {
     ndpi_init_data_analysis(&tcp->tcpWin.cli_to_srv, 0);
     ndpi_init_data_analysis(&tcp->tcpWin.srv_to_cli, 0);
     ndpi_init_data_analysis(&tcp->rtt.cli_to_srv, 0);
     ndpi_init_data_analysis(&tcp->rtt.srv_to_cli, 0);
-  }  
+  }
 }
 
 /* *************************************** */
@@ -366,9 +366,9 @@ void Flow::allocTCPStats() {
 void Flow::allocUDPStats() {
 #ifdef NTOPNG_PRO
   if(udp != NULL) return;
-  
+
   udp = (FlowUDP*)calloc(1, sizeof(FlowUDP));
-  
+
   if(udp != NULL) {
     ndpi_init_data_analysis(&udp->rtt.cli_min_rtt, 0);
     ndpi_init_data_analysis(&udp->rtt.srv_min_rtt, 0);
@@ -479,7 +479,28 @@ void Flow::freeDPIMemory() {
 
     if((ndpi_fingerprint == NULL) && ndpiFlow->ndpi.fingerprint)
       setnDPIFingerprint(ndpiFlow->ndpi.fingerprint);
-    
+
+#ifdef DUMP_TLS_BLOCKS
+    if((protocol == IPPROTO_TCP)
+       && (tls_blocks == NULL)
+       && ndpiFlow->l4.tcp.tls.tls_blocks) {
+      ndpi_serializer serializer;
+
+      if(ndpi_init_serializer(&serializer, ndpi_serialization_format_json) <  0)
+	; /* Something went wrong */
+      else {
+	char *json;
+	u_int32_t buflen;
+
+	ndpi_serialize_tls_blocks(iface->get_ndpi_struct(), &serializer, ndpiFlow);
+
+	json = ndpi_serializer_get_buffer(&serializer, &buflen);
+	tls_blocks = strdup(json);
+	ndpi_term_serializer(&serializer);
+      }
+    }
+#endif
+
     ndpi_free_flow(ndpiFlow);
     ndpiFlow = NULL;
   }
@@ -607,6 +628,7 @@ Flow::~Flow() {
 
   if(tcp_fingerprint)        free(tcp_fingerprint);
   if(ndpi_fingerprint)       free(ndpi_fingerprint);
+  if(tls_blocks)             free(tls_blocks);
   if(riskInfo)               free(riskInfo);
   if(end_reason)             free(end_reason);
 
@@ -3140,6 +3162,9 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
     if(ndpi_fingerprint)
       lua_push_str_table_entry(vm, "ndpi_fingerprint", ndpi_fingerprint);
 
+    if(tls_blocks)
+      lua_push_str_table_entry(vm, "tls_blocks", tls_blocks);
+
     if(swap_done) lua_push_bool_table_entry(vm, "flow_swapped", true);
     lua_push_uint32_table_entry(vm, "flow_source", flow_source);
     lua_push_bool_table_entry(vm, "cli.allowed_host", src_match);
@@ -3208,14 +3233,14 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
       lua_settable(vm, -3);
     } else if(isIGMP()) {
       lua_newtable(vm);
-      
+
       lua_push_uint32_table_entry(vm, "type", protos.igmp.igmp_type);
-      
+
       lua_pushstring(vm, "igmp");
       lua_insert(vm, -2);
       lua_settable(vm, -3);
     }
-    
+
     lua_push_int32_table_entry(vm, "cli.devtype",
                                (cli_host && cli_host->getMac())
 			       ? cli_host->getMac()->getDeviceType()
@@ -5766,7 +5791,7 @@ std::string Flow::getFlowInfo(bool isLuaRequest) {
       info_field = std::string(protos.mining.currency);
     } else if(isIGMP()) {
       char str[16];
-      
+
       snprintf(str, sizeof(str), "%u", protos.igmp.igmp_type);
       info_field = std::string(str);
     } else if(isSIP()) {
@@ -8662,10 +8687,10 @@ void Flow::swap() {
     alert_info.is_srv_victim = f2;
 
   Utils::swap8(&cli2srv_tos, &srv2cli_tos);
-  
+
   if(tcp != NULL) {
     TCPStats t;
-    
+
     memcpy(&ts, &tcp->tcp_seq_s2d, sizeof(TCPSeqNum));
     memcpy(&tcp->tcp_seq_d2s, &tcp->tcp_seq_s2d, sizeof(TCPSeqNum));
     memcpy(&tcp->tcp_seq_s2d, &ts, sizeof(TCPSeqNum));
@@ -8732,7 +8757,7 @@ void Flow::updateTCPHostServices(Host *cli_h, Host *srv_h) {
 }
 
 /* *************************************** */
-  
+
 void Flow::setCliService(int service_enum) {
   Host *cli_h, *srv_h;
 
@@ -8752,7 +8777,7 @@ void Flow::setCliService(int service_enum) {
 }
 
 /* *************************************** */
-  
+
 void Flow::setSrvService(int service_enum) {
   Host *cli_h, *srv_h;
 

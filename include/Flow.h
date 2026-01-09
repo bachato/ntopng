@@ -218,7 +218,7 @@ private:
     json_object *json;
   } external_alert;
 
-  char *tcp_fingerprint, *ndpi_fingerprint;
+  char *tcp_fingerprint, *ndpi_fingerprint, *tls_blocks;
   struct {
     TCPStats cli2srv, srv2cli;
   } tcp_stats;

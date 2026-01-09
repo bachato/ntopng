@@ -592,7 +592,7 @@ char* AddressTree::serialize(char *buf, u_int buf_len) {
   u_int32_t buflen;
   char *json;
 
-  if(ndpi_init_serializer(&serializer, ndpi_serialization_format_json) <  0)
+  if(ndpi_init_serializer(&serializer, ndpi_serialization_format_json) < 0)
     return(NULL);
 
   updateLock.rdlock(__FILE__, __LINE__);

@@ -443,15 +443,16 @@ struct ndpi_detection_module_struct *NetworkInterface::initnDPIStruct() {
     NULL
   };
   const struct ndpi_keys_struct ndpi_keys[] = {
-    { NULL,   "flow.track_payload",                    "1"  },
+    { NULL,   "flow.track_payload",                      "1"  },
     /* { "tls",  "metadata.ja4r_fingerprint",             "1"  }, */
-    { NULL,   "packets_limit_per_flow",                "64" },
-    { "stun", "monitoring",                            "1"  },
-    { "stun", "max_packets_extra_dissection",          "32" },
+    { NULL,   "packets_limit_per_flow",                  "64" },
+    { "stun", "monitoring",                              "1"  },
+    { "stun", "max_packets_extra_dissection",            "32" },
     /* ndpiReader --cfg "tls,blocks_analysis,1" --cfg "tls,metadata.ja_ignore_ephemeral_tls_extn,1" ... */
-    { "tls",  "max_num_blocks_to_analyze",             "8"  },
-    { "tls",  "metadata.ndpifp_ignore_sni_tls_extn",   "1"  },
-    { "tls",  "metadata.ja_ignore_ephemeral_tls_extn", "1"  },
+    { "tls",  "max_num_blocks_to_analyze",               "8"  },
+    { "tls",  "metadata.ndpifp_ignore_sni_tls_extn",     "1"  },
+    { "tls",  "metadata.ja_ignore_ephemeral_tls_extn",   "1"  },
+    { NULL,   "metadata.ndpi_fingerprint_ignore_tcp_fp", "1"  },
     { NULL, NULL, NULL }
   };
 
