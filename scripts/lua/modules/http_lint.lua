@@ -3016,6 +3016,10 @@ local function validateParameter(k, v)
         else
             if (trace_failures) then
                 error("[LINT] Validation error: Unknown key '" .. k .. "' [" .. tostring(v) .. "]: missing validation perhaps?\n")
+                tprint("POST: ")
+                tprint(_POST)
+                tprint("GET: ")
+                tprint(_GET)
             end
             return false, nil
         end
