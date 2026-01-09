@@ -449,7 +449,8 @@ struct ndpi_detection_module_struct *NetworkInterface::initnDPIStruct() {
     { "stun", "monitoring",                            "1"  },
     { "stun", "max_packets_extra_dissection",          "32" },
     /* ndpiReader --cfg "tls,blocks_analysis,1" --cfg "tls,metadata.ja_ignore_ephemeral_tls_extn,1" ... */
-    { "tls",  "blocks_analysis",                       "1"  },
+    { "tls",  "max_num_blocks_to_analyze",             "8"  },
+    { "tls",  "metadata.ndpifp_ignore_sni_tls_extn",   "1"  },
     { "tls",  "metadata.ja_ignore_ephemeral_tls_extn", "1"  },
     { NULL, NULL, NULL }
   };
