@@ -1229,6 +1229,7 @@ else
             local host_vulnerabilities = vs_utils.retrieve_host(host["ip"])
 
             if host_vulnerabilities ~= nil and
+                host_vulnerabilities.scan_type and
                 host_vulnerabilities.num_vulnerabilities_found and
                 host_vulnerabilities.num_vulnerabilities_found > 0 then
                 if (host_vulnerabilities.last_scan.time == nil) then
