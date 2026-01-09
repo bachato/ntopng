@@ -51,6 +51,16 @@ end
 
 -- ##############################################
 
+function Alert:set_alert_type_params(alert_type_params)
+    if (alert_type_params) and (table.len(alert_type_params) > 0) then
+        self.alert_type_params = alert_type_params
+        return true
+    end
+    return false
+end
+
+-- ##############################################
+
 function Alert:_build_type_info()
     local type_info = {
         -- Keys necessary for the engine
