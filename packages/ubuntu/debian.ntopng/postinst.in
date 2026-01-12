@@ -20,11 +20,37 @@ esac
 
 umask 022
 
+#####
+
+CONFIG_FILE=/etc/ntopng/ntopng.conf
+CH_CLIENT="/usr/bin/clickhouse-client"
+
+CH_CONFIGURED=`grep '\-F\=sclickhouse' $CONFIG_FILE | wc -l`
+
+if test $CH_CONFIGURED -eq 0; then
+    if test -x $CH_CLIENT; then
+	OUT=`/usr/bin/clickhouse-client "SHOW DATABASES" > /dev/null 2>&1`
+	STATUS="$?"
+	if test $STATUS -eq 0; then
+	    echo "-F=clickhouse" > $CONFIG_FILE
+	    echo "ClickHouse detected and configured in $CONFIG_FILE"
+	else
+	    echo "You seem to have ClickHouse installed with a non default"
+	    echo "setup that prevents automatic ntopng configuration."
+	    echo "We invite you to configure manually /etc/ntopng/ntopng.conf"
+	    echo "# ClickHouse" > $CONFIG_FILE
+	    echo "-F=\"clickhouse;127.0.0.1@9000,9004;ntopng;default;\"" > $CONFIG_FILE
+	fi
+    fi
+fi
+
+###
+
 if ! grep -q 'ntop:' /etc/group; then
     echo 'Creating ntop group'
     /usr/sbin/groupadd -r ntop
 fi
-if ! /usr/bin/id -u ntopng > /dev/null 2>&1; then 
+if ! /usr/bin/id -u ntopng > /dev/null 2>&1; then
     echo "Creating ntopng user..."
     /usr/sbin/useradd -M -N -g ntop -r -s /bin/false ntopng
 fi
@@ -81,7 +107,7 @@ echo "Rebuilding ld cache..."
 CMDLINE=$(tr -d '\0' < /proc/1/cmdline)
 if [ ! -z "${CMDLINE##*system*}" ] && [ ! -z "${CMDLINE##*init*}" ]; then
   # We're in a container
-  exit 0  
+  exit 0
 fi
 
 #
