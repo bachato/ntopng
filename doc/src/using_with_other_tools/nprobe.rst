@@ -248,6 +248,41 @@ Example:
 
 Note: unless a private key is provided, ntopng generates a public/private keypair and stores it under /var/lib/ntopng/key.{pub,priv}
 
+Tuning
+======
+
+ZMQ uses TCP buffers for communication between nProbe and ntopng. Proper tuning of these buffers is essential for optimal performance in high-traffic environments with an high flow rate.
+
+ntopng sets the ZMQ receive buffer via :code:`ZMQ_RCVBUF` and uses 8388608 (8 MB) as the default value. However, the actual buffer size may be limited by the system-wide maximum receive buffer size.
+
+To check the current system-wide limit, run:
+
+.. code:: bash
+
+   cat /proc/sys/net/core/rmem_max
+
+If the output shows a value lower than 8388608 (e.g., 212992), you should increase it to avoid performance bottlenecks and potential flow loss.
+
+To temporarily increase the receive buffer size, use:
+
+.. code:: bash
+
+   sudo sysctl -w net.core.rmem_default=16777216
+
+This change will be lost after a system reboot.
+
+To make the change permanent, add the following line to either :code:`/etc/sysctl.conf` or :code:`/etc/sysctl.d/99-zmq.conf`:
+
+.. code:: text
+
+   net.core.rmem_default=16777216
+
+After editing the file, apply the changes with:
+
+.. code:: bash
+
+   sudo sysctl -p
+
 
 Quick Start
 ===========
