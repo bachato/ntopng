@@ -2984,12 +2984,14 @@ u_int8_t Ntop::getNumberProfiles() {
   u_int8_t num_profiles = 0;
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
+#ifdef HAVE_NBPF
   for (int i = 0; i < get_num_interfaces(); i++) {
     NetworkInterface *iface;
 
     if ((iface = ntop->getInterface(i)) != NULL)
       num_profiles = iface->getNumProfiles();
   }
+#endif
 #endif
 #endif
 

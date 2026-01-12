@@ -193,10 +193,12 @@ NetworkInterface::NetworkInterface(const char *name,
 #ifdef HAVE_NEDGE
   policer = NULL; /* possibly instantiated by subclass PacketBridge */
 #else
+#ifdef HAVE_NBPF
   flow_profiles = ntop->getPro()->has_valid_license() ? new (std::nothrow)
     FlowProfiles(id) : NULL;
   if (flow_profiles) flow_profiles->loadProfiles();
   shadow_flow_profiles = NULL;
+#endif
 #endif
 
   /* Lazy, instantiated on demand */
@@ -367,8 +369,10 @@ void NetworkInterface::init(const char *interface_name) {
   ifMTU = CONST_DEFAULT_MAX_PACKET_SIZE, mtuWarningShown = false;
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
+#ifdef HAVE_NBPF
   flow_profiles = shadow_flow_profiles = NULL;
   sub_interfaces = NULL;
+#endif
 #endif
 #endif
 #ifdef NTOPNG_PRO
@@ -753,8 +757,10 @@ void NetworkInterface::checkDisaggregationMode() {
 
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
+#ifdef HAVE_NBPF
   sub_interfaces = ntop->getPrefs()->is_enterprise_m_edition()
     ? new (std::nothrow) SubInterfaces(this) : NULL;
+#endif
 #endif
 #endif
 }
@@ -1074,9 +1080,11 @@ NetworkInterface::~NetworkInterface() {
 #ifdef HAVE_NEDGE
   if (policer) delete (policer);
 #else
+#ifdef HAVE_NBPF
   if (flow_profiles) delete (flow_profiles);
   if (shadow_flow_profiles) delete (shadow_flow_profiles);
   if (sub_interfaces) delete (sub_interfaces);
+#endif
 #endif
   if (custom_app_stats) delete custom_app_stats;
   if (flow_devices_stats) delete flow_devices_stats;
@@ -1726,14 +1734,17 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
     bool processed = false;
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
+#ifdef HAVE_NBPF
     /* Custom disaggregation */
     if (sub_interfaces && (sub_interfaces->getNumSubInterfaces() > 0)) {
       processed = sub_interfaces->processPacket(if_index, bridge_iface_idx,
 						datalink_type, *ingressPacket,
 						when, packet_time, eth, vlan_id, iph,
-						ip6, ip_offset, encapsulation_overhead, len_on_wire, h, packet,
+						ip6, ip_offset, encapsulation_overhead,
+						len_on_wire, h, packet,
 						ndpiProtocol, srcHost, dstHost, hostFlow);
     }
+#endif
 #endif
 #endif
 
@@ -4891,9 +4902,12 @@ Host *NetworkInterface::getHost(char *host_ip, u_int16_t vlan_id,
 
 static bool update_flow_profile(GenericHashEntry *h, void *user_data,
                                 bool *matched) {
+#ifdef HAVE_NBPF
   Flow *flow = (Flow *)h;
 
   flow->updateProfile();
+#endif
+  
   *matched = true;
 
   return (false); /* false = keep on walking */
@@ -4904,6 +4918,7 @@ static bool update_flow_profile(GenericHashEntry *h, void *user_data,
 void NetworkInterface::updateFlowProfiles() {
   if (isView()) return;
 
+#ifdef HAVE_NBPF
   if (ntop->getPro()->has_valid_license()) {
     FlowProfiles *newP;
     u_int32_t begin_slot = 0;
@@ -4924,6 +4939,7 @@ void NetworkInterface::updateFlowProfiles() {
     if (flows_hash)
       walker(&begin_slot, walk_all, walker_flows, update_flow_profile, NULL);
   }
+#endif
 }
 
 #endif
@@ -7837,8 +7853,13 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
 #ifndef HAVE_NEDGE
   lua_push_bool_table_entry(
 			    vm, "hasSubInterfaces",
+#ifdef HAVE_NBPF
 			    (sub_interfaces && sub_interfaces->getNumSubInterfaces()) ||
-			    (flowHashingMode != flowhashing_none));
+			    (flowHashingMode != flowhashing_none)
+#else
+			    false
+#endif
+			    );
 #endif
 #endif
 
@@ -8106,7 +8127,9 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
   if (!isView()) {
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
+#ifdef HAVE_NBPF
     if (flow_profiles) flow_profiles->lua(vm);
+#endif
 #endif
 #endif
   }

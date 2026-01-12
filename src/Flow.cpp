@@ -280,7 +280,9 @@ Flow::Flow(NetworkInterface *_iface,
   lateral_movement = false;
   periodicity_status = periodicity_status_unknown;
 #ifndef HAVE_NEDGE
+#ifdef HAVE_NBPF
   trafficProfile = NULL;
+#endif
 #else
   cli_shaper_id = srv_shaper_id = DEFAULT_SHAPER_ID;
   memset(&flowShapers, 0, sizeof(flowShapers));
@@ -1260,7 +1262,9 @@ void Flow::processPacket(bool src2dst_direction,
   // the flow already carries information on all the other fields,
   // e.g., IP src and DST, vlan, L4 proto, etc
 #ifndef HAVE_NEDGE
+#ifdef HAVE_NBPF
   updateProfile();
+#endif
 #endif
 #endif
 
@@ -1560,7 +1564,9 @@ void Flow::setExtraDissectionCompleted(bool src2dst_direction) {
 #ifdef HAVE_NEDGE
     updateFlowShapers(true);
 #else
+#ifdef HAVE_NBPF
     updateProfile();
+#endif
 #endif
 
     shapers_profile_set = 1;
@@ -1702,7 +1708,9 @@ void Flow::setProtocolDetectionCompleted(u_int8_t *payload,
 #ifdef HAVE_NEDGE
     updateFlowShapers(true);
 #else
+#ifdef HAVE_NBPF
     updateProfile();
+#endif
 #endif
 
     shapers_profile_set = 1;
@@ -2601,11 +2609,13 @@ void Flow::hosts_periodic_stats_update(NetworkInterface *iface, Host *cli_host,
 
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
+#ifdef HAVE_NBPF
     /* Update profile stats */
     if (ntop->getPro()->has_valid_license()) {
       if(trafficProfile)
 	trafficProfile->incBytes(diff_sent_bytes + diff_rcvd_bytes);
     }
+#endif
 #endif
 #endif
   }
@@ -3195,8 +3205,10 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
 
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
+#ifdef HAVE_NBPF
     if((!mask_flow) && trafficProfile && ntop->getPro()->has_valid_license())
       lua_push_str_table_entry(vm, "profile", trafficProfile->getName());
+#endif
 #endif
 #endif
 
@@ -3885,10 +3897,12 @@ void Flow::formatECSNetwork(json_object *my_object, const IpAddress *addr) {
 
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
+#ifdef HAVE_NBPF
     // Traffic profile information, if any
     if(trafficProfile && trafficProfile->getName())
       json_object_object_add(network_object, "profile",
                              json_object_new_string(trafficProfile->getName()));
+#endif
 #endif
 #endif
 

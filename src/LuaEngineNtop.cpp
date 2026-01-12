@@ -6345,8 +6345,11 @@ static int ntop_check_sub_interface_syntax(lua_State *vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   filter = (char *)lua_tostring(vm, 1);
 
-  lua_pushboolean(
-      vm, curr_iface ? curr_iface->checkSubInterfaceSyntax(filter) : false);
+  lua_pushboolean(vm,
+#ifdef HAVE_NBPF
+		  curr_iface ? curr_iface->checkSubInterfaceSyntax(filter) :
+#endif
+		  false);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
@@ -6369,7 +6372,11 @@ static int ntop_check_filter_syntax(lua_State *vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   filter = (char *)lua_tostring(vm, 1);
 
-  lua_pushboolean(vm, curr_iface ? curr_iface->checkFilterSyntax(filter) : false);
+  lua_pushboolean(vm,
+#ifdef HAVE_NBPF
+		  curr_iface ? curr_iface->checkFilterSyntax(filter) :
+#endif
+		  false);
 #endif
   
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));

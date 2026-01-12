@@ -96,10 +96,12 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
+#ifdef HAVE_NBPF
     /* Custom disaggregation */
     if (sub_interfaces && (sub_interfaces->getNumSubInterfaces() > 0)) {
       processed = sub_interfaces->processFlow(zflow);
     }
+#endif
 #endif
 #endif
 

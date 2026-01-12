@@ -178,7 +178,9 @@ private:
   bool lateral_movement;
   PeriodicityStatus periodicity_status;
 #ifndef HAVE_NEDGE
+#ifdef HAVE_NBPF
   FlowProfile *trafficProfile;
+#endif
 #else
   u_int32_t numFlowProcessedPkts, numPktsMarkerSet;
   u_int8_t routing_table_id;
@@ -1225,12 +1227,16 @@ public:
   void getProfinetInfo(ndpi_serializer *serializer);
 
 #if !defined(HAVE_NEDGE)
+#ifdef HAVE_NBPF
   inline void updateProfile() { trafficProfile = iface->getFlowProfile(this); }
+#endif
 #endif
   inline char *get_profile_name() {
     return (
 #if !defined(HAVE_NEDGE)
+#ifdef HAVE_NBPF
       trafficProfile ? trafficProfile->getName() :
+#endif
 #endif
       (char *)""
       );

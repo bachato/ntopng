@@ -225,8 +225,10 @@ protected:
 #ifdef HAVE_NEDGE
   L7Policer *policer;
 #else
+#ifdef HAVE_NBPF
   FlowProfiles *flow_profiles, *shadow_flow_profiles;
   SubInterfaces *sub_interfaces;
+#endif
 #endif
   CustomAppStats *custom_app_stats;
   FlowDevicesStats *flow_devices_stats;
@@ -1024,6 +1026,7 @@ public:
 #ifdef NTOPNG_PRO
   void updateFlowProfiles();
 #ifndef HAVE_NEDGE
+#ifdef HAVE_NBPF
   inline FlowProfile *getFlowProfile(Flow *f) {
     return (flow_profiles ? flow_profiles->getFlowProfile(f) : NULL);
   }
@@ -1034,6 +1037,7 @@ public:
   inline bool checkSubInterfaceSyntax(char *filter) {
     return (sub_interfaces ? sub_interfaces->checkSyntax(filter) : false);
   }
+#endif
 #endif
 
   void initL7Policer();
@@ -1421,7 +1425,9 @@ public:
                                                            void *user_data, bool *matched);
 
 #ifndef HAVE_NEDGE
+#ifdef HAVE_NBPF
   inline u_int8_t getNumProfiles() { return (flow_profiles) ? flow_profiles->getNumProfiles() : 0; }
+#endif
 #else
   u_int32_t dropHostTraffic(char *host_ip, AddressTree *allowed_hosts);
 #endif
