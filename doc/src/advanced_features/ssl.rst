@@ -61,7 +61,7 @@ Ubuntu and Centos
 .. code-block:: bash
 
    cd /tmp/
-   openssl req -new -x509 -sha256 -extensions v3_ca -nodes -days 365 -out cert.pem
+   openssl req -new -x509 -sha256 -extensions v3_ca -nodes -days 365 -out cert.pem -subj "/C=EU/CN=ntopng.local"
    cat privkey.pem cert.pem > /usr/share/ntopng/httpdocs/ssl/ntopng-cert.pem
    /bin/rm -f privkey.pem cert.pem
    systemctl restart ntopng
@@ -73,7 +73,7 @@ HomeBrew Formula
 .. code-block:: bash
 
    cd /tmp/
-   openssl req -new -x509 -sha256 -extensions v3_ca -nodes -days 365 -out cert.pem
+   openssl req -new -x509 -sha256 -extensions v3_ca -nodes -days 365 -out cert.pem -subj "/C=EU/CN=ntopng.local"
    mkdir /usr/share/ntopng/httpdocs/ssl/
    cat privkey.pem cert.pem > /usr/share/ntopng/httpdocs/ssl/ntopng-cert.pem
    /bin/rm -f privkey.pem cert.pem
