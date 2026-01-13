@@ -60,6 +60,18 @@ schema:addMetric("bytes_rcvd")
 
 -- ##############################################
 
+schema = ts_utils.newSchema("host_pool:throughput_bps", {
+   step = 300,
+   is_critical_ts = true,
+   metrics_type = ts_utils.metrics.gauge,
+   aggregation_function = ts_utils.aggregation.max
+})
+schema:addTag("ifid")
+schema:addTag("pool")
+schema:addMetric("bps")
+
+-- ##############################################
+
 schema = ts_utils.newSchema("host_pool:hosts", {
     step = 300,
     metrics_type = ts_utils.metrics.gauge

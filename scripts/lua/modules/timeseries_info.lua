@@ -1555,6 +1555,20 @@ local community_timeseries = {{
    always_visibile = true,
    default_visible = true
 }, {
+   schema = "host_pool:throughput_bps",
+   id = timeseries_id.host_pool,
+   label = i18n("graphs.throughput_bps"),
+   description = i18n("graphs.throughput_bps"),
+   priority = 0,
+   measure_unit = "bps",
+   scale = i18n('graphs.metric_labels.traffic'),
+   timeseries = {
+      bps = {
+         label = i18n('graphs.metric_labels.throughput'),
+         color = timeseries_info.get_timeseries_color('bytes')
+      }
+   },
+}, {
    schema = "host_pool:blocked_flows",
    id = timeseries_id.host_pool,
    label = i18n("graphs.blocked_flows"),
@@ -3014,7 +3028,7 @@ local function add_flowdev_interfaces_timeseries(tags, timeseries, is_asn_mode_e
          schema = "snmp_if:traffic_min"
          label = i18n("page_stats.top.top_traffic_snmp_min")
       end
-   
+
       local tot = 0
       local tot_serie = ts_utils.queryTotal("top:" .. schema, tags.epoch_begin, tags.epoch_end, tags)
       for _, value in pairs(tot_serie or {}) do
@@ -3253,7 +3267,7 @@ local function choose_traffic_serie(tags, timeseries)
    if (highSNMPExporterTimeseriesResolution()) then
       schema = "snmp_if:traffic_min"
    end
-   
+
    local tot = 0
    local tot_serie = ts_utils.queryTotal(schema, tags.epoch_begin, tags.epoch_end, tags)
    for _, value in pairs(tot_serie or {}) do

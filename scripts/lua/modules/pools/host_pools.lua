@@ -499,6 +499,12 @@ function host_pools:updateRRDs(ifid, dump_ndpi, verbose, when)
             bytes_rcvd = pool_stats["bytes.rcvd"]
         }, when)
 
+        ts_utils.append("host_pool:throughput_bps", {
+            ifid = ifid,
+            pool = pool_id,
+            bps = pool_stats["throughput_bps"]
+        }, when)
+
         if pool_id ~= tonumber(host_pools.DEFAULT_POOL_ID) then
             local flows_dropped = pool_stats["flows.dropped"] or 0
 
