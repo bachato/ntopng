@@ -814,7 +814,7 @@ CREATE TABLE IF NOT EXISTS `mitre_table_info`  ON CLUSTER '$CLUSTER' (
 
 /* ASSET */
 
-CREATE TABLE IF NOT EXISTS `assets` (
+CREATE TABLE IF NOT EXISTS `assets` ON CLUSTER '$CLUSTER' (
 `type` String,
 `key` String,
 `ifid` UInt8,
@@ -832,7 +832,7 @@ CREATE TABLE IF NOT EXISTS `assets` (
 `version` UInt64, -- Used to not have duplicates
 `os_type` String DEFAULT '',
 `model` String DEFAULT ''
-) ENGINE = ReplacingMergeTree(version) PRIMARY KEY (`type`, `key`) ORDER BY (`type`, `key`);
+) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/{cluster}/tables/{database}/{table}', '{replica}', version) PRIMARY KEY (`type`, `key`) ORDER BY (`type`, `key`);
 @
 ALTER TABLE assets ADD COLUMN IF NOT EXISTS `os_type` String;
 @
