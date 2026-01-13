@@ -499,9 +499,9 @@ u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
     if (json_object_object_get_ex(o, "probe", &w)) {
       if (json_object_object_get_ex(w, "public_ip", &z)) {
         const char *ip = json_object_get_string(z);
-        //nprobe_ip = ntohl(inet_addr(ip));
         snprintf(zrs.remote_probe_public_address,
                  sizeof(zrs.remote_probe_public_address), "%s", ip);
+        //nprobe_ip = ntohl(inet_addr(ip));
       }
 
 
@@ -520,9 +520,12 @@ u_int8_t ZMQParserInterface::parseEvent(const char *payload, int payload_size,
         snprintf(zrs.uuid, sizeof(zrs.uuid),
                  "%s", json_object_get_string(z));
 
-      if (json_object_object_get_ex(w, "ip", &z))
+      if (json_object_object_get_ex(w, "ip", &z)) {
+          const char *ip = json_object_get_string(z);
 	  snprintf(zrs.remote_probe_address, sizeof(zrs.remote_probe_address),
-		   "%s", json_object_get_string(z));
+		   "%s", ip);
+          //nprobe_ip = ntohl(inet_addr(zrs.remote_probe_address));
+      }
       if (json_object_object_get_ex(w, "version", &z))
         snprintf(zrs.remote_probe_version, sizeof(zrs.remote_probe_version),
                  "%s", json_object_get_string(z));
