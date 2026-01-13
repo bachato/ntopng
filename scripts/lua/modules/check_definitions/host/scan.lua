@@ -179,7 +179,8 @@ local function scan_check(params)
          "IS_SRV_BLACKLISTED AS dst_blacklisted, " .. "SRC_LABEL AS src_name, " .. "DST_LABEL AS dst_name " .. "FROM flows " ..
          "WHERE INTERFACE_ID=%u " .. "AND (FIRST_SEEN >= %u AND FIRST_SEEN <= %u AND LAST_SEEN <= %u) " .. "AND L7_PROTO != 5 " ..
          "AND DST2SRC_PACKETS <= 1 " .. "GROUP BY vlan_id, ip_src, ip_dst, src_location, dst_location, " ..
-         "src_blacklisted, dst_blacklisted, src_name, dst_name " .. "HAVING count_dst_ports >= %u " .. "ORDER BY total_flows DESC " ..
+         "src_blacklisted, dst_blacklisted, src_name, dst_name " .. "HAVING count_dst_ports >= %u " .. 
+         "AND ip_src IS NOT NULL AND ip_dst IS NOT NULL ORDER BY total_flows DESC " ..
          "LIMIT 1000", tonumber(interface.getId()), interval_begin, interval_end, interval_end, threshold)
 
    local results_port_query = interface.execSQLQuery(q_port)
@@ -197,7 +198,8 @@ local function scan_check(params)
                                            "WHERE INTERFACE_ID=%u " .. "AND (FIRST_SEEN >= %u AND FIRST_SEEN <= %u AND LAST_SEEN <= %u) " ..
                                            "AND L7_PROTO != 5 " .. "AND DST2SRC_PACKETS <= 1 " ..
                                            "GROUP BY vlan_id, ip_src, ip_dst, dst_port, src_location, " .. "src_blacklisted, src_name " ..
-                                           "HAVING count_src_ports >= %u " .. "ORDER BY total_flows DESC " .. "LIMIT 500",
+                                           "HAVING count_src_ports >= %u AND ip_src IS NOT NULL AND ip_dst IS NOT NULL " .. 
+                                           "ORDER BY total_flows DESC " .. "LIMIT 500",
       tonumber(interface.getId()), interval_begin, interval_end, interval_end, 50)
    local results_service_down = interface.execSQLQuery(q_service_down)
    for _, row in ipairs(results_service_down) do
@@ -228,7 +230,7 @@ local function scan_check(params)
          "CLIENT_LOCATION AS src_location, " .. "IS_CLI_BLACKLISTED AS src_blacklisted, " .. "SRC_LABEL AS src_name " .. "FROM flows " ..
          "WHERE INTERFACE_ID=%u " .. "AND (FIRST_SEEN >= %u AND FIRST_SEEN <= %u AND LAST_SEEN <= %u) " .. "AND L7_PROTO != 5 " ..
          "AND DST2SRC_PACKETS <= 1 " .. "GROUP BY vlan_id, ip_src, dst_port, src_location, " .. "src_blacklisted, src_name " ..
-         "HAVING count_ip_dst >= %u " .. "ORDER BY total_flows DESC " .. "LIMIT 1000", tonumber(interface.getId()), interval_begin,
+         "HAVING count_ip_dst >= %u AND ip_src IS NOT NULL " .. "ORDER BY total_flows DESC " .. "LIMIT 1000", tonumber(interface.getId()), interval_begin,
       interval_end, interval_end, 50)
    local results_service = interface.execSQLQuery(q_service)
    local service_attackers = {}
@@ -264,7 +266,7 @@ local function scan_check(params)
          "MAX(LAST_SEEN) AS last_seen, " .. "CLIENT_LOCATION AS src_location, " .. "IS_CLI_BLACKLISTED AS src_blacklisted, " ..
          "SRC_LABEL AS src_name " .. "FROM flows " .. "WHERE INTERFACE_ID=%u " ..
          "AND (FIRST_SEEN >= %u AND FIRST_SEEN <= %u AND LAST_SEEN <= %u) " .. "AND L7_PROTO != 5 " .. "AND DST2SRC_PACKETS <= 1 " ..
-         "GROUP BY vlan_id, ip_src, dst_network, src_location, " .. "src_blacklisted, src_name " .. "HAVING count_ip_dst >= %u " ..
+         "GROUP BY vlan_id, ip_src, dst_network, src_location, " .. "src_blacklisted, src_name " .. "HAVING count_ip_dst >= %u AND ip_src IS NOT NULL " ..
          "ORDER BY total_flows DESC " .. "LIMIT 1000", tonumber(interface.getId()), interval_begin, interval_end, interval_end, 100)
    local results_network = interface.execSQLQuery(q_network)
    for _, row in ipairs(results_network) do
