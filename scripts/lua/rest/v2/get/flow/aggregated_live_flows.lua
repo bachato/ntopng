@@ -20,7 +20,7 @@ end
 -- ############################################
 -- Set up input variables 
 
-local ifid = _GET["ifid"]
+local ifid = _GET["ifid"] or interface.getId()
 local vlan = tonumber(_GET["vlan_id"] or -1)
 local device_ip = _GET["deviceIP"]
 local ifIdx     = tonumber(_GET["ifIdx"] or -1)
