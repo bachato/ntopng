@@ -323,6 +323,12 @@ local rest_utils = {
                 str = "ADD_POOL_FAILED_TOO_MANY_POOLS_ENTERPRISE"
             },
 
+            clickhouse_missing = {
+                http_code = 409,
+                rc = -61,
+                str = "CLICKHOUSE_MISSING"
+            },
+
             -- nEdge
             dhcp_active_leases_not_nedge = {
                 http_code = 409,

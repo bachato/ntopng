@@ -8215,6 +8215,7 @@ local lang = {
     ["DELETE_POOL_FAILED"] = "Unable to delete a pool with the submitted params",
     ["DHCP_ACTIVE_LEASES_NOT_NEDGE"] = "Build is not nEdge.",
     ["DHCP_ACTIVE_LEASES_NOT_ROUTING_MODE"] = "Listing DHCP leases is only available in routing mode.",
+    ["CLICKHOUSE_MISSING"] = "ClickHouse Database is missing from the configuration.",
     ["EDIT_POOL_FAILED"] = "Unable to edit a pool with the submitted params",
     ["INFRASTRUCTURE_INSTANCE_ALREADY_EXISTING"] = "Duplicated instance.",
     ["INFRASTRUCTURE_INSTANCE_CHECK_AUTH_FAILED"] = "Authorization failed. Invalid token",
