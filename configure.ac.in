@@ -622,6 +622,7 @@ if test "${with_nedge+set}" != set; then
   if test -f "${PF_RING_HOME}/userland/lib/libpfring.a"; then
      echo "${PF_RING_HOME}/userland/libpcap/libpcap.a"
      if test -f "${PF_RING_HOME}/userland/libpcap/libpcap.a"; then
+       LIBPCAP="${PF_RING_HOME}/userland/libpcap/libpcap.a"
        LIBS="${LIBS} ${PF_RING_HOME}/userland/lib/libpfring.a -L${PF_RING_HOME}/userland/libpcap/ `${PF_RING_HOME}/userland/lib/pfring_config --libs`"
        CXXFLAGS="${CXXFLAGS} -I${PF_RING_HOME}/kernel -I${PF_RING_HOME}/userland/lib -I${PF_RING_HOME}/userland/libpcap"
        echo "Using PF_RING installed in ${PF_RING_HOME}"
