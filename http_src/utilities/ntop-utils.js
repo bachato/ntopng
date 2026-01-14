@@ -292,7 +292,7 @@ export default class NtopUtils {
             return "-";
 
         var sizes = ['fps', 'Kfps', 'Mfps', 'Gfps', 'Tfps'];
-        if (fps == 0) return '0';
+        if (fps == 0) return '0 fps';
         if ((fps > 0) && (fps < NTOPNG_MIN_VISUAL_VALUE)) return ('< ' + NTOPNG_MIN_VISUAL_VALUE + ' fps');
         var res = NtopUtils.scaleValue(fps, sizes, 1000);
 
