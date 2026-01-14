@@ -211,14 +211,14 @@ if test $CH_CONFIGURED -eq 0; then
 	OUT=`/usr/bin/clickhouse-client "SHOW DATABASES" > /dev/null 2>&1`
 	STATUS="$?"
 	if test $STATUS -eq 0; then
-	    echo "-F=clickhouse" > $CONFIG_FILE
+	    echo "-F=clickhouse" >> $CONFIG_FILE
 	    echo "ClickHouse detected and configured in $CONFIG_FILE"
 	else
 	    echo "You seem to have ClickHouse installed with a non default"
 	    echo "setup that prevents automatic ntopng configuration."
 	    echo "We invite you to configure manually /etc/ntopng/ntopng.conf"
-	    echo "# ClickHouse" > $CONFIG_FILE
-	    echo "-F=\"clickhouse;127.0.0.1@9000,9004;ntopng;default;\"" > $CONFIG_FILE
+	    echo "# ClickHouse" >> $CONFIG_FILE
+	    echo "-F=\"clickhouse;127.0.0.1@9000,9004;ntopng;default;\"" >> $CONFIG_FILE
 	fi
     fi
 fi
