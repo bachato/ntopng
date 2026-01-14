@@ -12,8 +12,7 @@ Contrary to tools based on signatures, ntopng is a behavioural-based tool. Below
 
 
 Alerts triggered by ntopng are stored in a databased (SQLite or ClickHouse) and can be visualized 
-and managed using the built-in Alerts Explorer, in addition to delivering them to external endpoints
-by using :ref:`DeliveringAlertsToRecipients`.
+and managed using the built-in Alerts Explorer, in addition to delivering them to external endpoints.
 
 Alerts are organized in the Alerts Explorer according to the entity (subject for which the alert has 
 been generated), whose list includes Host, Interface, Network, Flow, etc. as described in :ref:`BasicConceptAlerts`.
