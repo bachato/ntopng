@@ -12,6 +12,7 @@ section.
     ids_acceleration
     interfaces/index
     live_pcap_download
+    deduplication
     oem
     snapshots
     syslog
