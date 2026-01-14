@@ -532,10 +532,16 @@ bool NetworkInterface::initnDPIReload() {
   ndpiReloadInProgress = true;
   cleanShadownDPI();
 
-  /* No need to dedicate another variable for the reload, we can use the shadow
-   * itself */
+  /* No need to dedicate another variable for the reload, we can use the shadow itself */
   //ntop->getTrace()->traceEvent(TRACE_NORMAL, "nDPI reload started");
   ndpi_struct_shadow = initnDPIStruct();
+
+  if(ndpi_struct_shadow == NULL) {
+    ntop->getTrace()->traceEvent(TRACE_ERROR, "Internal error: nDPI initialization failed");
+    ndpiReloadInProgress = false;
+    return(false);
+  }
+
   return (true);
 }
 
@@ -572,7 +578,7 @@ void NetworkInterface::finalizenDPIReload() {
     ndpi_struct = ndpi_struct_shadow;
     ndpi_struct_shadow = old_struct;
 
-    /* Update hosts policies based on nDPi configuration */
+    /* Update hosts policies based on nDPI configuration */
     reloadHostsBlacklist();
 
     ntop->getTrace()->traceEvent(TRACE_DEBUG, "nDPI reload completed");
@@ -634,7 +640,7 @@ bool NetworkInterface::nDPILoadHostnameCategory(char *what, u_int16_t id, char *
 
   if(what == NULL)
     ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL hostname category");
-  
+
   else if(ndpi_struct_shadow == NULL)
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Internal error: invalid nDPI state");
   else
@@ -651,7 +657,7 @@ int NetworkInterface::setDomainMask(const char *domain, u_int64_t domain_mask) {
   // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s(%p) [%s]", __FUNCTION__, ndpi_struct_shadow, domain);
 
   if(domain == NULL)
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL domain");  
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "NULL domain");
   else if(ndpi_struct_shadow == NULL)
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Internal error: invalid nDPI state");
   else
@@ -2970,7 +2976,7 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
   case ETHERTYPE_PPPoE:
     ip_offset += 6 /* PPPoE */;
 
-    if((ip_offset+1) < h->caplen) {
+    if((u_int32_t)(ip_offset+1) < (u_int32_t)h->caplen) {
       /* Now we need to skip the PPP header */
       if (packet[ip_offset] == 0x0)
 	eth_type = packet[ip_offset + 1], ip_offset += 2; /* 2 Byte protocol */
@@ -4907,7 +4913,7 @@ static bool update_flow_profile(GenericHashEntry *h, void *user_data,
 
   flow->updateProfile();
 #endif
-  
+
   *matched = true;
 
   return (false); /* false = keep on walking */
@@ -5144,7 +5150,7 @@ static bool flows_search(Flow *f, char *search) {
       return true;
     }
   }
-  
+
   // Server Mac
   if (Mac *srv_mac = f->getSrvMac()) {
     if (strstr(srv_mac->print(buf, sizeof(buf)), search) != nullptr) {
@@ -5159,7 +5165,7 @@ static bool flows_search(Flow *f, char *search) {
       f->setSearchedField("cli_mac");
       return true;
     }
-  }  
+  }
 
   // Ports, client and server
   sprintf(buf, "%d", f->get_cli_port());
@@ -5172,7 +5178,7 @@ static bool flows_search(Flow *f, char *search) {
     f->setSearchedField("srv_port");
     return true;
   }
-  
+
   // Autonomous System
   char *asname;
   u_int32_t src_asn = 0, dst_asn = 0;
