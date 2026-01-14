@@ -24,6 +24,10 @@ and it works only with flow collection (i.e. ZMQ) and not with packet interfaces
 
 When enabled ntopng will discard flows exported from different devices (e.g. router-1 and router-2) with the same flow key (usually VLAN/protocol/IP src/IP dst/port src/port dst). This is an indicator of a deduplication as the same flow has been observed simultaneouly by more than one exporter. You do not need to configure anything other than the prefeence, as ntopng will take care of exporters configuration that can be dynamic (i.e. the traffic topology can change overtime according to network status or backup link activated as necessary).
 
+When enabled, you can monitor deduplication statistics in the interface details page and also visualize a timeseries of deduplicated flows.
+
+.. figure:: ../img/deduplication_stats.png
+
 Note that:
 
 - the overall system performance will be better if you enable deduplication at the nProbe side, as the probe will only export flows that are not duplicated. Instead, discarding duplicated flows on the ntopng side will have a more limited impact as the flow has been exported by nProbe, collected by ntopng and then discarded.
