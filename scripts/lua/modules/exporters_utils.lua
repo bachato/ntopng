@@ -244,7 +244,7 @@ function exporters_utils.getProbeUUID(exporter_ip)
    if not isEmptyString(exporter_ip) then
       local exporter_uuid = nil
       local flow_exporters = interface.getFlowDevices()
-      
+
       -- Resolve exporter UUID
       for ifid, info in pairs(flow_exporters or {}) do
          for uuid, exporter_info in pairs(info or {}) do
@@ -360,12 +360,15 @@ function exporters_utils.printNavbar(ifid, page, ip, probe_uuid)
 
       if not isEmptyString(ip) then
          local _, tmp1 = exporters_utils.getProbeUUID(ip)
-         
-         conf_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporter_interfaces.lua?ip=" .. ip .. "&ifid=" .. tmp1 or "" ..
-                       "&page=config&probe_uuid=" .. probe_uuid
-         timeseries_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporter_details.lua?ip=" .. ip .. "&ifid=" .. tmp1 or "" ..
-                             "&page=historical&probe_uuid=" .. probe_uuid
-         snmp_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/snmp_device_details.lua?host=" .. ip
+         if not isEmptyString(tmp1) then
+            -- tmp1 is not available in case no exporter is available, 
+            -- e.g. nprobe not currently exporting flows
+            conf_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporter_interfaces.lua?ip=" .. ip .. "&ifid=" .. tmp1 or "" ..
+                          "&page=config&probe_uuid=" .. probe_uuid
+            timeseries_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporter_details.lua?ip=" .. ip .. "&ifid=" .. tmp1 or "" ..
+                                "&page=historical&probe_uuid=" .. probe_uuid
+            snmp_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/snmp_device_details.lua?host=" .. ip
+         end
       end
    end
 
