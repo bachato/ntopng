@@ -371,7 +371,7 @@ protected:
   int sortFlows(u_int32_t *begin_slot, bool walk_all,
                 struct flowHostRetriever *retriever, AddressTree *allowed_hosts,
                 Host *host, Host *client, Host *server, char *flow_info,
-                Paginator *p, const char *sortColumn);
+                Paginator *p, const char *sortColumn, char *search = NULL);
 
   void addRedisSitesKey();
   void removeRedisSitesKey();
@@ -844,7 +844,7 @@ public:
                         bool diff = false, bool fullStats = false) const;
   int getFlows(lua_State *vm, u_int32_t *begin_slot, bool walk_all,
                AddressTree *allowed_hosts, Host *host, Host *talking_with_host,
-               Host *client, Host *server, char *flow_info, Paginator *p);
+               Host *client, Host *server, char *flow_info, Paginator *p, char *search = NULL);
   int getFlowsTraffic(lua_State *vm, u_int32_t *begin_slot, bool walk_all,
                       AddressTree *allowed_hosts, Host *host, Paginator *p);
   int getFlowsGroup(lua_State *vm, AddressTree *allowed_hosts, Paginator *p,

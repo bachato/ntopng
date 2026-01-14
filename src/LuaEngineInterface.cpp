@@ -2884,15 +2884,14 @@ static int ntop_get_interface_macs_manufacturers(lua_State *vm) {
 
 static int ntop_get_interface_flows_info(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
-  char buf[64];
-  char *host_ip = NULL, *talking_with_ip = NULL, *server_ip = NULL,
-    *client_ip = NULL;
-  u_int16_t vlan_id = (u_int16_t)-1;
   Host *host = NULL, *talking_with_host = NULL, *client = NULL, *server = NULL;
-  char *flow_info = NULL;
-  Paginator *p = NULL;
+  char *host_ip = NULL, *talking_with_ip = NULL, *server_ip = NULL,
+    *client_ip = NULL, *search = NULL, *flow_info = NULL;
+  char buf[64];
+  u_int16_t vlan_id = (u_int16_t)-1;
   u_int32_t begin_slot = 0;
   bool walk_all = true;
+  Paginator *p = NULL;
 
   if (!curr_iface)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
@@ -2940,10 +2939,16 @@ static int ntop_get_interface_flows_info(lua_State *vm) {
     if (strlen(tmp) > 0) flow_info = tmp;
   }
 
+  if (lua_type(vm, 7) == LUA_TSTRING) {
+    /* Search parameter, only correct if not empty */
+    char *tmp = ((char *)lua_tostring(vm, 7));
+    if (tmp && strlen(tmp) > 0) search = tmp;
+  }
+
   if ((curr_iface) && (!host_ip || host))
     curr_iface->getFlows(vm, &begin_slot, walk_all, get_allowed_nets(vm),
 			 host, talking_with_host, client, server, flow_info,
-			 p);
+			 p, search);
   else
     lua_pushnil(vm);
 

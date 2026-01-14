@@ -124,6 +124,7 @@ Flow::Flow(NetworkInterface *_iface,
   alerts_json = NULL, alerts_json_shadow = NULL;
   end_reason = NULL;
   ndpiFlowRiskName = NULL;
+  searched_field[0] = '\0';
 #ifdef NTOPNG_PRO
   viewFlowStats = NULL;
 #endif
@@ -3139,6 +3140,11 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   lua_push_int32_table_entry(vm, "iface_index", getInterface() ? getInterface()->get_id() : -1);
   lua_get_port(vm, true /* Client */);
   lua_get_port(vm, false /* Server */);
+
+  if (searched_field[0] != '\0') {
+    lua_push_str_table_entry(vm, "searched_field", searched_field);
+    resetSearchedField();
+  }
 
   mask_flow = isMaskedFlow();  // mask_cli_host || mask_dst_host;
 

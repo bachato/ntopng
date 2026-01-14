@@ -301,6 +301,9 @@ const map_table_def_columns = (columns) => {
                     info = `<span class="badge bg-${span_mode}">${row.application.http_method}</span> ${status_code} ${info}`
                 }
             }
+            if (!dataUtils.isEmptyOrNull(row["searched_field"])) {
+                info = `(Search matching field: ${i18n("flow_details." + row["searched_field"])}) ${info}`
+            }
             return info
         },
         "flow_exporter": (value) => {

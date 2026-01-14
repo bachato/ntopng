@@ -5106,6 +5106,115 @@ struct flowHostRetriever {
 
 /* **************************************************** */
 
+static bool flows_search(Flow *f, char *search) {
+  char buf[128];
+
+  if (Host *srv_host = f->get_srv_host()) {
+    // Server IP
+    if (strstr(srv_host->get_ip()->print(buf, sizeof(buf)), search) != nullptr) {
+      f->setSearchedField("srv_ip");
+      return true;
+    }
+    // Server Name
+    if (strstr(srv_host->get_visual_name(buf, sizeof(buf)), search) != nullptr) {
+      f->setSearchedField("srv_name");
+      return true;
+    }
+  } else {
+    if (strstr(f->get_srv_ip_addr()->print(buf, sizeof(buf)), search) != nullptr) {
+      f->setSearchedField("srv_ip");
+      return true;
+    }
+  }
+
+  if (Host *cli_host = f->get_cli_host()) {
+    // Client IP
+    if (strstr(cli_host->get_ip()->print(buf, sizeof(buf)), search) != nullptr) {
+      f->setSearchedField("cli_ip");
+      return true;
+    }
+    // Client Name
+    if (strstr(cli_host->get_visual_name(buf, sizeof(buf)), search) != nullptr) {
+      f->setSearchedField("cli_name");
+      return true;
+    }
+  } else {
+    if (strstr(f->get_cli_ip_addr()->print(buf, sizeof(buf)), search) != nullptr) {
+      f->setSearchedField("cli_ip");
+      return true;
+    }
+  }
+  
+  // Server Mac
+  if (Mac *srv_mac = f->getSrvMac()) {
+    if (strstr(srv_mac->print(buf, sizeof(buf)), search) != nullptr) {
+      f->setSearchedField("srv_mac");
+      return true;
+    }
+  }
+
+  // Client Mac
+  if (Mac *cli_mac = f->getCliMac()) {
+    if (strstr(cli_mac->print(buf, sizeof(buf)), search) != nullptr) {
+      f->setSearchedField("cli_mac");
+      return true;
+    }
+  }  
+
+  // Ports, client and server
+  sprintf(buf, "%d", f->get_cli_port());
+  if (strstr(buf, search) != nullptr) {
+    f->setSearchedField("cli_port");
+    return true;
+  }
+  sprintf(buf, "%d", f->get_srv_port());
+  if (strstr(buf, search) != nullptr) {
+    f->setSearchedField("srv_port");
+    return true;
+  }
+  
+  // Autonomous System
+  char *asname;
+  u_int32_t src_asn = 0, dst_asn = 0;
+
+  f->getSrcAS(&src_asn, &asname);
+  if (strstr(asname, search) != nullptr) {
+    f->setSearchedField("cli_asn");
+    return true;
+  }
+  f->getDstAS(&dst_asn, &asname);
+  if (strstr(asname, search) != nullptr) {
+    f->setSearchedField("srv_asn");
+    return true;
+  }
+
+  // Info Field
+  if (strstr(f->getFlowInfo(false).c_str(), search) != nullptr) {
+    f->setSearchedField("info");
+    return true;
+  }
+
+  // TCP Fingerprint
+  if (f->getTCPFingerprint()) {
+    if (strstr(f->getTCPFingerprint(), search) != nullptr) {
+      f->setSearchedField("tcp_fingerprint");
+      return true;
+    }
+  }
+
+  // JA4 Fingerprint
+  if (f->getJa4CliHash()) {
+    if (strstr(f->getJa4CliHash(), search) != nullptr) {
+      f->setSearchedField("ja4_fingerprint");
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/* **************************************************** */
+
 static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
   int ndpi_proto_master_proto, ndpi_proto_app_proto, ndpi_cat;
   u_int16_t port;
@@ -5156,6 +5265,10 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
 				   f->get_observation_point_id(), retriever->observationPointId);
 #endif
       return (false);
+    }
+
+    if (retriever->map_search) {
+      if (!flows_search(f, retriever->map_search)) return (false);
     }
 
     if (retriever->server) {
@@ -6436,7 +6549,7 @@ int NetworkInterface::sortFlows(u_int32_t *begin_slot, bool walk_all,
                                 struct flowHostRetriever *retriever,
                                 AddressTree *allowed_hosts, Host *host,
                                 Host *client, Host *server, char *flow_info,
-                                Paginator *p, const char *sortColumn) {
+                                Paginator *p, const char *sortColumn, char *search) {
   int (*sorter)(const void *_a, const void *_b);
 
   if (retriever == NULL) return (-1);
@@ -6453,6 +6566,7 @@ int NetworkInterface::sortFlows(u_int32_t *begin_slot, bool walk_all,
   retriever->maxNumEntries = getFlowsHashSize();
   retriever->allowed_hosts = allowed_hosts;
   retriever->currentSize = FLOWHOSTRETRIEVER_BLOCK_SIZE;
+  retriever->map_search = search;
 
   retriever->elems = (struct flowHostRetrieveList *)calloc(sizeof(struct flowHostRetrieveList), retriever->currentSize);
 
@@ -6651,7 +6765,7 @@ int NetworkInterface::getFlows(lua_State *vm, u_int32_t *begin_slot,
                                bool walk_all, AddressTree *allowed_hosts,
                                Host *host, Host *talking_with_host,
                                Host *client, Host *server, char *flow_info,
-                               Paginator *p) {
+                               Paginator *p, char *search) {
   struct flowHostRetriever retriever;
   char sortColumn[32];
   DetailsLevel highDetails;
@@ -6678,7 +6792,7 @@ int NetworkInterface::getFlows(lua_State *vm, u_int32_t *begin_slot,
   retriever.talking_with_host = talking_with_host;
 
   if (sortFlows(begin_slot, walk_all, &retriever, allowed_hosts, host, client,
-                server, flow_info, p, sortColumn) < 0)
+                server, flow_info, p, sortColumn, search) < 0)
     return (-1);
 
   lua_newtable(vm);
@@ -6750,7 +6864,7 @@ int NetworkInterface::getFlowsGroup(lua_State *vm, AddressTree *allowed_hosts,
   retriever.observationPointId = getLuaVMUservalue(vm, observationPointId);
 
   if (sortFlows(&begin_slot, walk_all, &retriever, allowed_hosts, NULL, NULL,
-                NULL, NULL, p, groupColumn) < 0) {
+                NULL, NULL, p, groupColumn, NULL) < 0) {
     return (-1);
   }
 

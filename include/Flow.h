@@ -114,6 +114,7 @@ private:
   u_int32_t srcAS, dstAS; /* Calculated via GeoIP */
   u_int32_t transitAS;
   char *srcASName, *dstASName, *_srcASNameBuf, *_dstASNameBuf;
+  char searched_field[64];
   u_int32_t srcPeerAS, dstPeerAS; /* Collected via NetFLow/IPFIX */
   u_int32_t protocolErrorCode;
   u_int8_t protocol, flow_verdict;
@@ -1459,6 +1460,11 @@ public:
   void setTCPFingerprint(char *fp);
   void setnDPIFingerprint(char *fp);
   inline char *getTCPFingerprint() { return(tcp_fingerprint); }
+
+  inline void setSearchedField(const char *field) {
+    snprintf(searched_field, sizeof(searched_field), "%s", field);
+  }
+  inline void resetSearchedField() { searched_field[0] = '\0'; }
   
   inline void setTOS(u_int8_t tos, bool is_cli_tos) {
     if (is_cli_tos) cli2srv_tos = tos; else srv2cli_tos = tos;

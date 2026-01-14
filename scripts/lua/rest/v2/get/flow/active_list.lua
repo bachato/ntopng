@@ -21,6 +21,7 @@ end
 -- Trick to handle the application and the categories togheter
 local application = _GET["application"]
 local ip_version_or_host = _GET["flowhosts_type"]
+local search = _GET["map_search"] or ""
 local ifid = _GET["ifid"] or interface.getId()
 local current_ifid = interface.getId()
 
@@ -103,7 +104,7 @@ end
 
 local rsp = {}
 local flows_stats = interface.getFlowsInfo(flows_filter["hostFilter"], flows_filter, flows_filter["talkingWith"], flows_filter["client"],
-   flows_filter["server"], flows_filter["flow_info"])
+   flows_filter["server"], flows_filter["flow_info"], search)
 
 if not flows_stats then
    rest_utils.extended_answer(rest_utils.consts.success.ok, {}, {
@@ -367,6 +368,10 @@ for _, value in ipairs(flows_stats.flows) do
 
    if ((value.qoe ~= nil) and (value.qoe.score ~= nil)) then
       record["qoe"] = value.qoe.score.overall
+   end
+
+   if not isEmptyString(value["searched_field"]) then
+      record["searched_field"] = value["searched_field"]
    end
 
    rsp[#rsp + 1] = record
