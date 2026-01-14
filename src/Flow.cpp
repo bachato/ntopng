@@ -1206,7 +1206,6 @@ void Flow::processPacket(bool src2dst_direction,
                          u_int16_t ip_len, u_int64_t packet_time,
                          u_int8_t *payload, u_int16_t payload_len,
                          u_int16_t src_port) {
-  bool detected;
   ndpi_protocol proto_id;
   /* Note: do not call endProtocolDissection before
    * ndpi_detection_process_packet. In case of early giveup (e.g. sampled
@@ -1225,9 +1224,7 @@ void Flow::processPacket(bool src2dst_direction,
     ndpi_flow_risk_bitmap = 0;
   }
 
-  detected = ndpi_is_protocol_detected(proto_id);
-
-  if(!detected && hasDissectedTooManyPackets()) {
+  if((proto_id.state != NDPI_STATE_CLASSIFIED) && hasDissectedTooManyPackets()) {
     /*
       Perform a giveup and finalize all additional operations such as
       the processing of extra dissection data.
@@ -1236,7 +1233,6 @@ void Flow::processPacket(bool src2dst_direction,
   }
 
 #if 0
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "DPI %sDetected", detected ? "" : "NOT YET ");
   switch(proto_id.state) {
     case NDPI_STATE_INSPECTING:
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "DPI State = Inspecting");
@@ -1270,7 +1266,7 @@ void Flow::processPacket(bool src2dst_direction,
 
   if(payload_len > 0) non_zero_payload_observed = 1;
 
-  if(detected) {
+  if(proto_id.state == NDPI_STATE_CLASSIFIED) {
     updateProtocol(proto_id);
     setProtocolDetectionCompleted(payload, payload_len, h->ts.tv_sec);
 
@@ -1620,14 +1616,15 @@ void Flow::updateProtocol(ndpi_protocol proto_id) {
   if(ndpiDetectedProtocol.proto.master_protocol == NDPI_PROTOCOL_UNKNOWN)
     ndpiDetectedProtocol.proto.master_protocol = proto_id.proto.master_protocol;
 
-  if((ndpiDetectedProtocol.proto.app_protocol == NDPI_PROTOCOL_UNKNOWN) ||
-     (/*
+  if(ndpiDetectedProtocol.proto.app_protocol == NDPI_PROTOCOL_UNKNOWN)
+#if 0
+     || (/*
 	Update the protocols when adding a subprotocol, not when things
 	are totally different
       */
-      (ndpiDetectedProtocol.proto.master_protocol ==
-       ndpiDetectedProtocol.proto.app_protocol) &&
+      (ndpiDetectedProtocol.proto.master_protocol ==  ndpiDetectedProtocol.proto.app_protocol) &&
       (ndpiDetectedProtocol.proto.app_protocol != proto_id.proto.app_protocol)))
+#endif
     ndpiDetectedProtocol.proto.app_protocol = proto_id.proto.app_protocol;
 
   if(ndpiDetectedProtocol.proto.master_protocol == ndpiDetectedProtocol.proto.app_protocol)
