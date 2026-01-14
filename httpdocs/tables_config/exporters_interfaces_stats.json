@@ -90,6 +90,7 @@
 			"title_i18n": "bytes_sent",
 			"data_field": "bytes_sent",
 			"sortable": true,
+			"exclude_from_search": true,
 			"class": [
 				"text-nowrap",
 				"text-right"
@@ -100,6 +101,7 @@
 			"title_i18n": "bytes_rcvd",
 			"data_field": "bytes_rcvd",
 			"sortable": true,
+			"exclude_from_search": true,
 			"class": [
 				"text-nowrap",
 				"text-right"
@@ -110,6 +112,7 @@
 			"title_i18n": "total_bytes",
 			"data_field": "total_bytes",
 			"sortable": true,
+			"exclude_from_search": true,
 			"class": [
 				"text-nowrap",
 				"text-right"

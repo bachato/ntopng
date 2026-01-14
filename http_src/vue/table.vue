@@ -433,6 +433,7 @@ async function set_columns_wrap() {
             max_width: column_max_width(c),
             order: col_opt?.order || i,
             sticky: c?.sticky,
+            exclude_from_search: c?.exclude_from_search,
             classes,
             style,
             data: c,
@@ -640,6 +641,7 @@ function filterRows(rows, searchTerm) {
         // Check each visible column for the search term
         return processedColumns.value.some(col => {
             if (!col.visible) return false;
+            if (col.exclude_from_search) return false;
 
             let cellContent = '';
 
