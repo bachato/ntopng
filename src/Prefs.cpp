@@ -3066,7 +3066,7 @@ void Prefs::resetDeferredInterfacesToRegister() {
 
 bool Prefs::addDeferredInterfaceToRegister(const char *ifname) {
   if(num_deferred_interfaces_to_register < UNLIMITED_NUM_INTERFACES) {
-    bool isView = !strncmp(ifname, "view:", 5);
+    bool isView = strstr(ifname, "view:");
     if (isView) {
       /* View interface only available with pro version */
 #ifdef NTOPNG_PRO
