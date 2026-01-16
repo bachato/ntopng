@@ -20,7 +20,7 @@ end
 -- ############################################
 -- Set up input variables 
 
-local ifid = _GET["ifid"] or interface.getId()
+local ifid = _GET["ifid"]
 local vlan = tonumber(_GET["vlan_id"] or -1)
 local device_ip = _GET["deviceIP"]
 local ifIdx     = tonumber(_GET["ifIdx"] or -1)
@@ -45,8 +45,6 @@ end
 if (isEmptyString(device_ip)) then
     device_ip = nil
 end
-
-interface.select(ifid)
 
 -- ############################################
 
@@ -76,10 +74,10 @@ end
 -- ############################################
 
 if isEmptyString(ifid) then
-    rc = rest_utils.consts.err.invalid_interface
-    rest_utils.answer(rc)
-    return
+    ifid = inteface.getId()
 end
+
+interface.select(ifid)
 
 local res = {}
 local num_entries = 0
