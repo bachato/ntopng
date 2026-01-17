@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2013-25 - ntop.org
+ * (C) 2013-26 - ntop.org
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,22 +25,21 @@
 #include "ntop_includes.h"
 
 class FlowRiskSlowDoSAlert : public FlowRiskAlert {
-    private:
-    public:
-        // Replace with NDPI_SLOW_DOS once implemented.
-        static ndpi_risk_enum getClassRisk() { return NDPI_SUSPICIOUS_ENTROPY; /*NDPI_SLOW_DOS;*/ }
-        static FlowAlertType getClassType() {
-            return FlowRiskAlerts::getFlowRiskAlertType(getClassRisk());
-        }
-        static u_int8_t getDefaultScore() {
-            return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
-        }
+private:
+public:
+  static ndpi_risk_enum getClassRisk() { return NDPI_SLOW_DOS; }
+  static FlowAlertType getClassType() {
+    return FlowRiskAlerts::getFlowRiskAlertType(getClassRisk());
+  }
+  static u_int8_t getDefaultScore() {
+    return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
+  }
 
-        FlowRiskSlowDoSAlert(FlowCheck *c, Flow *f) : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
-        ~FlowRiskSlowDoSAlert(){};
+  FlowRiskSlowDoSAlert(FlowCheck *c, Flow *f) : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
+  ~FlowRiskSlowDoSAlert(){};
 
-        FlowAlertType getAlertType() const { return getClassType(); }
-        ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }
+  FlowAlertType getAlertType() const { return getClassType(); }
+  ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }
 };
 
 #endif /* _FR_SLOW_DOS_ALERT_H_ */
