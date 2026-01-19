@@ -481,19 +481,19 @@ tag_utils.defined_tags = {
     out_of_order = {
         value_type = 'number',
         i18n_label = i18n('db_search.tags.out_of_order'),
-        operators = { 'eq', 'neq', 'lt', 'gt', 'gte', 'lte' },
+        operators = { 'eq', 'lt', 'gt', 'gte', 'lte' },
         hourly_available = false,
     },
     lost = {
         value_type = 'number',
         i18n_label = i18n('db_search.tags.lost'),
-        operators = { 'eq', 'neq', 'lt', 'gt', 'gte', 'lte' },
+        operators = { 'eq', 'lt', 'gt', 'gte', 'lte' },
         hourly_available = false,
     },
     retransmissions = {
         value_type = 'number',
         i18n_label = i18n('db_search.tags.retransmissions'),
-        operators = { 'eq', 'neq', 'lt', 'gt', 'gte', 'lte' },
+        operators = { 'eq', 'lt', 'gt', 'gte', 'lte' },
         hourly_available = false,
     },
     flows_number = {
