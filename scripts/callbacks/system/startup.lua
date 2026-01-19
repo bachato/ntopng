@@ -1,5 +1,5 @@
 --
--- (C) 2013-24 - ntop.org
+-- (C) 2013-26 - ntop.org
 --
 --
 -- This script is executed once at startup similar to /etc/rc.local on Unix

@@ -1,5 +1,5 @@
 --
--- (C) 2021-25 - ntop.org
+-- (C) 2021-26 - ntop.org
 --
 -- This file contains a small set of utility functions
 

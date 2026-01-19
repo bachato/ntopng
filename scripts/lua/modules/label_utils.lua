@@ -1,5 +1,5 @@
 --
--- (C) 2014-24 - ntop.org
+-- (C) 2014-26 - ntop.org
 --
 -- This file contains a small set of utility functions for managing labels, e.g. aliases
 require "ntop_utils"

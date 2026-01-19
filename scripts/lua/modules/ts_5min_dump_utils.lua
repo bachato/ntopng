@@ -1,5 +1,5 @@
 --
--- (C) 2019-25 - ntop.org
+-- (C) 2019-26 - ntop.org
 --
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/pools/?.lua;" .. package.path

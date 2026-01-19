@@ -1,5 +1,5 @@
 --
--- (C) 2020-24 - ntop.org
+-- (C) 2020-26 - ntop.org
 --
 
 local alert_entities_utils = {}

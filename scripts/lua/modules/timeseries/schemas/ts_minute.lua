@@ -1,5 +1,5 @@
 --
--- (C) 2019-24 - ntop.org
+-- (C) 2019-26 - ntop.org
 --
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/timeseries/?.lua;" .. package.path

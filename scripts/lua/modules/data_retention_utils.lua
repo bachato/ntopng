@@ -1,5 +1,5 @@
 --
--- (C) 2014-24 - ntop.org
+-- (C) 2014-26 - ntop.org
 --
 local DEFAULT_DATA_RETENTION_DAYS = 30
 local DEFAULT_AGGREGATED_ASN_DATA_RETENTION_DAYS = 60

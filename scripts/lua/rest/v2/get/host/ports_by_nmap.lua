@@ -1,4 +1,4 @@
--- (C) 2013-24 - ntop.org
+-- (C) 2013-26 - ntop.org
 --
 dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
