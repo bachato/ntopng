@@ -242,11 +242,11 @@ Licenses on a Container
 An article that explain everything in details on how to deploy a license inside a container can be found here:
 `Deploying Licenses inside Conteainers <https://www.ntop.org/faq/my-license-does-not-work-inside-a-container-what-can-i-do/>`_
 
-Models Comparison Table
+Versions Comparison Table
 -----------------------
 
-.. list-table:: Features by Model
-   :widths: 40 10 10 10 10 10 10
+.. list-table:: Features by Version
+   :widths: 40 25 25 25 25 25 25
    :header-rows: 1
 
    * - Feature
@@ -620,6 +620,13 @@ Models Comparison Table
      - Bundle L
      - Bundle XL
      - ✗
+   * - Flow Collection Deduplication
+     - ✗
+     - ✗
+     - ✗
+     - ✗
+     - ✓
+     - ✓
    * - Smart Recording license Included (n2disk 1Gbit) \*\* \*\*\*
      - ✗
      - ✗
