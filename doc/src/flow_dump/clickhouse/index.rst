@@ -5,6 +5,10 @@ ClickHouse (Flow Dump)
 
 ntopng (Enterprise M or better license is required) for using ClickHouse to store historical flows and alerts. Enterprise XL instead is required for using aggregated flow and other advanced features.
 
+.. warning::
+
+   ClickHouse support is not available on Windows.
+
 
 .. toctree::
     :maxdepth: 2
