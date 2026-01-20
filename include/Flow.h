@@ -107,6 +107,8 @@ private:
 					      Ntop::getPersistentCustomListNameById()
 					      and it MUST NOT BE FREED */
   ndpi_confidence_t ndpi_confidence;
+  ndpi_protocol_category_t flow_category;
+  ndpi_protocol_breed_t flow_breed;
   u_int32_t privateFlowId; /* Used to store specific flow info such as DNS TransactionId or SIP CallId */
   u_int8_t cli2srv_tos, srv2cli_tos; /* RFC 2474, 3168 */
   u_int16_t cli_port, srv_port;
@@ -931,19 +933,12 @@ public:
     return (isICMP() ? protos.icmp.max_icmp_payload_size : 0);
   };
   inline ICMPinfo *getICMPInfo() const { return (isICMP() ? icmp_info : NULL); }
-  inline ndpi_protocol_breed_t get_protocol_breed() const {
-    return (ndpi_get_proto_breed(iface->get_ndpi_struct(),
-				 isDetectionCompleted() ? ndpi_get_upper_proto(ndpiDetectedProtocol.proto)
-				 : NDPI_PROTOCOL_UNKNOWN));
-  };
+  inline ndpi_protocol_breed_t get_protocol_breed() const { return(flow_breed); }
   inline const char *get_protocol_breed_name() const {
     return (ndpi_get_proto_breed_name(get_protocol_breed()));
   };
-  inline ndpi_protocol_category_t get_protocol_category() const {
-    return (ndpi_get_proto_category(
-	      iface->get_ndpi_struct(),
-	      isDetectionCompleted() ? ndpiDetectedProtocol : getConstNdpiUnknownProtocol()));
-  };
+  inline ndpi_protocol_category_t get_protocol_category() const { return(flow_category); };
+  
   inline const char *get_protocol_category_name() const {
     return (ndpi_category_get_name(iface->get_ndpi_struct(),
                                    get_protocol_category()));

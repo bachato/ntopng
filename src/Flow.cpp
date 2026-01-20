@@ -52,6 +52,7 @@ Flow::Flow(NetworkInterface *_iface,
   src2dst_tcp_flags = dst2src_tcp_flags = 0;
   collected_qoe.src_to_dst = collected_qoe.dst_to_src = NTOP_QOE_UNKNOWN, has_collected_qoe = 0;
   tcp = NULL;
+  flow_category = NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, flow_breed = NDPI_PROTOCOL_UNRATED;
   c_mac_updated = s_mac_updated = false;
   memset(&tcp_stats, 0, sizeof(tcp_stats));
 
@@ -1215,7 +1216,8 @@ void Flow::processPacket(bool src2dst_direction,
 
   proto_id = ndpi_detection_process_packet(iface->get_ndpi_struct(),
 					   ndpiFlow, ip_packet, ip_len, packet_time, NULL);
-
+  flow_category = proto_id.category, flow_breed = proto_id.breed;
+  
   if((ndpi_flow_risk_bitmap != 0) && (ndpiFlow->risk == 0)) {
     /*
       Probably an exception has cleared the risk that was previously
