@@ -30,7 +30,7 @@
                                         </select>
                                     </div>
                                     <CustomSwitch v-if="props.context.is_enterprise_xl" v-model:value="flows_aggregated"
-                                        class="me-2" :change_label_side="true" :label="flow_type_label" style=""
+                                        class="me-0" :change_label_side="true" :label="flow_type_label" style=""
                                         icon="fa-truck-fast" :title="flow_type_label" @change_value="change_flow_type">
                                     </CustomSwitch>
                                     <CustomSwitch v-model:value="any_interface"
