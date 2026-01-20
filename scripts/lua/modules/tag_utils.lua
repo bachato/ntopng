@@ -1663,10 +1663,10 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                     end
                     if cached_interfaces and cached_interfaces["interfaces"] then
                         local interfaces = cached_interfaces["interfaces"]
-                        for interface_id, interface_info in pairs(interfaces) do
-                            local interface_name = interface_id
-                            if interface_info.name then
-                                interface_name = interface_info.name
+                        for if_index, if_info in pairs(interfaces) do
+                            local interface_name = if_index
+                            if if_info.name then
+                                interface_name = if_info.name
                             end
                             local label = interface_name .. ' · ' .. probe_label
                             if hide_exporters_name then
@@ -1674,7 +1674,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                             end
 
                             interfaces_list[label] = {
-                                value = probe_ip .. "_" .. interface_id,
+                                value = probe_ip .. "_" .. if_index,
                                 label = label,
                                 show_only_value = probe_ip
                             }
@@ -1687,13 +1687,13 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                     local interfaces = interface.getFlowDeviceInfoByIP(exporter_ip)
 
                     for _, interfaces_table in pairs(interfaces or {}) do
-                        for interface_id, _ in pairsByKeys(interfaces_table) do
-                            local label = format_portidx_name(exporter_ip, interface_id, true)
+                        for if_index, _ in pairsByKeys(interfaces_table) do
+                            local label = format_portidx_name(exporter_ip, if_index, true)
                             if not hide_exporters_name then
                                 label = exporter_ip .. ' · ' .. label
                             end
                             interfaces_list[tostring(label)] = {
-                                value = exporter_ip .. "_" .. interface_id,
+                                value = exporter_ip .. "_" .. if_index,
                                 label = label,
                                 show_only_value = exporter_ip
                             }
