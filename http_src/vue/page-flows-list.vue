@@ -3,7 +3,8 @@
     <div class="m-2 mb-3">
         <TableWithConfig ref="table_flows_list" :table_id="table_id" :csrf="csrf" :f_map_columns="map_table_def_columns"
             :showLoading="true" :get_extra_params_obj="get_extra_params_obj" :f_sort_rows="columns_sorting"
-            @custom_event="on_table_custom_event" @rows_loaded="change_filter_labels">
+            :handleLoadedColumns="handleLoadedColumns" @custom_event="on_table_custom_event"
+            @rows_loaded="change_filter_labels">
             <template v-slot:custom_header>
                 <div class="dropdown me-3 d-inline-block" v-for="item in filter_table_array">
                     <span class="no-wrap d-flex align-items-center filters-label"><b>{{ item["basic_label"]
@@ -47,21 +48,7 @@ const props = defineProps({
 
 // conditionally render tables
 const table_id = computed(() => {
-    if (props.context?.is_enterprise_l) {
-        if (props.context?.ASNModeEnabled) {
-            return 'flows_list_with_exporters_enterprise_l_ixp_mode'
-        } else if (props.context?.has_exporters) {
-            return 'flows_list_with_exporters_enterprise_l'
-        } else {
-            return 'flows_list_enterprise_l'
-        }
-    } else {
-        if (props.context?.has_exporters) {
-            return 'flows_list_with_exporters'
-        } else {
-            return 'flows_list'
-        }
-    }
+    return 'flows_list'
 })
 
 const table_flows_list = ref(null);
@@ -95,6 +82,42 @@ const thpt_trend_icons = {
 }
 const loading = ref(false);
 const interval_id = ref(null);
+
+/*******************************************************/
+
+/* This function dinamycally modify the columns in order to 
+ * change visibility of the columns based on license and available 
+ * data (e.g. flow exporters)
+ */
+const handleLoadedColumns = (columns) => {
+    let modified_columns = columns
+    if (props.context.has_exporters === false) {
+        /* Remove the column Exporter IP, In/Out interface in case ntopng has no exporters */
+        modified_columns = columns.filter((element) => {
+            return ((element.id !== "flow_exporter")
+                && (element.id !== "in_index")
+                && (element.id !== "out_index"))
+        })
+    }
+    if (props.context.is_enterprise_l === false) {
+        /* Remove the column QoE in case ntopng is not Enterprise L, not available/computed in that version */
+        modified_columns = columns.filter((element) => {
+            return ((element.id !== "qoe")
+                && (element.id !== "cli_asn")
+                && (element.id !== "srv_asn")
+                && (element.id !== "transit_asn"))
+        })
+    }
+    if (props.context.ASNModeEnabled === false) {
+        /* Remove the column QoE in case ntopng is not Enterprise L, not available/computed in that version */
+        modified_columns = columns.filter((element) => {
+            return ((element.id !== "cli_asn")
+                && (element.id !== "srv_asn")
+                && (element.id !== "transit_asn"))
+        })
+    }
+    return modified_columns
+}
 
 /* ************************************** */
 
@@ -399,8 +422,7 @@ const map_table_def_columns = (columns) => {
 
 /* ************************************** */
 // format_port returns the display value as the first element and the hover as the second
-function format_port(port_number, service_name, show_number)
-{
+function format_port(port_number, service_name, show_number) {
     if (show_number)
         return [port_number, service_name]
     else return [service_name, port_number]

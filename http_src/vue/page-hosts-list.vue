@@ -3,11 +3,12 @@
     <div class="m-2 mb-3">
         <TableWithConfig ref="table_hosts_list" :table_id="table_id" :csrf="csrf" :showLoading="true"
             :f_map_columns="map_table_def_columns" :get_extra_params_obj="get_extra_params_obj"
-            :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event">
+            :f_sort_rows="columns_sorting" :handleLoadedColumns="handleLoadedColumns"
+            @custom_event="on_table_custom_event">
             <template v-slot:custom_header>
                 <div class="dropdown me-3 d-inline-block" v-for="item in filter_table_array">
                     <span class="no-wrap d-flex align-items-center my-auto me-2 filters-label"><b>{{ item["basic_label"]
-                    }}</b></span>
+                            }}</b></span>
                     <SelectSearch v-model:selected_option="item['current_option']" theme="bootstrap-5"
                         dropdown_size="small" :disabled="loading" :options="item['options']"
                         @select_option="add_table_filter">
@@ -43,10 +44,7 @@ const props = defineProps({
 /* ************************************** */
 
 const loading = ref(false);
-let table_id = props.context?.has_vlans ? ref('hosts_list_with_vlans') : ref('hosts_list')
-if (props.context.isNedge) {
-    table_id = props.context?.has_vlans ? ref('nedge_hosts_list_with_vlans') : ref('nedge_hosts_list')
-}
+const table_id = ref('hosts_list')
 const table_hosts_list = ref(null);
 const csrf = props.context.csrf;
 const filter_table_array = ref([]);
@@ -66,6 +64,25 @@ const thpt_trend_icons = {
     1: "<i class='fas fa-arrow-up'></i>",
     2: "<i class='fas fa-arrow-down'></i>",
     3: "<i class='fas fa-minus'></i>",
+}
+
+/*******************************************************/
+
+/* This function dinamycally modify the columns in order to 
+ * change visibility of the columns based on license and available 
+ * data (e.g. flow exporters)
+ */
+const handleLoadedColumns = (columns) => {
+    let modified_columns = columns
+    if (props.context.has_vlans === false) {
+        /* Remove the column QoE in case ntopng is not Enterprise L, not available/computed in that version */
+        modified_columns = columns.filter(element => element.id !== "vlan")
+    }
+    if (props.context.isNedge === false) {
+        /* Remove the column QoE in case ntopng is not Enterprise L, not available/computed in that version */
+        modified_columns = columns.filter(element => element.id !== "location")
+    }
+    return modified_columns
 }
 
 /* ************************************** */
