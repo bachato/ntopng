@@ -47,6 +47,7 @@ page_utils.print_navbar(i18n("hosts"), base_url .. "?", {{
     url = ntop.getHttpPrefix() .. "/lua/as_overview.lua?asn=" .. (asn or 0)
 }})
 
+
 if page == "active_hosts" then
     local json = require "dkjson" 
     local vlans = interface.getVLANsList()

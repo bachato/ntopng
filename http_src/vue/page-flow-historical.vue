@@ -218,11 +218,11 @@ const handleLoadedColumns = (columns) => {
     let modified_columns = columns
     if (any_interface.value === false) {
         /* Remove the column ntopng_interface in case the "any_interface toggle" is disabled */
-        modified_columns = columns.filter(element => element.id !== "ntopng_interface")
+        modified_columns = modified_columns.filter(element => element.id !== "ntopng_interface")
     }
     if (props.context.is_enterprise_l === false) {
         /* Remove the column QoE in case ntopng is not Enterprise L, not available/computed in that version */
-        modified_columns = columns.filter(element => element.id !== "qoe_score")
+        modified_columns = modified_columns.filter(element => element.id !== "qoe_score")
     }
     return modified_columns
 }

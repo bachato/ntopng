@@ -93,7 +93,7 @@ const handleLoadedColumns = (columns) => {
     let modified_columns = columns
     if (props.context.has_exporters === false) {
         /* Remove the column Exporter IP, In/Out interface in case ntopng has no exporters */
-        modified_columns = columns.filter((element) => {
+        modified_columns = modified_columns.filter((element) => {
             return ((element.id !== "flow_exporter")
                 && (element.id !== "in_index")
                 && (element.id !== "out_index"))
@@ -101,7 +101,7 @@ const handleLoadedColumns = (columns) => {
     }
     if (props.context.is_enterprise_l === false) {
         /* Remove the column QoE in case ntopng is not Enterprise L, not available/computed in that version */
-        modified_columns = columns.filter((element) => {
+        modified_columns = modified_columns.filter((element) => {
             return ((element.id !== "qoe")
                 && (element.id !== "cli_asn")
                 && (element.id !== "srv_asn")
@@ -110,7 +110,7 @@ const handleLoadedColumns = (columns) => {
     }
     if (props.context.ASNModeEnabled === false) {
         /* Remove the column QoE in case ntopng is not Enterprise L, not available/computed in that version */
-        modified_columns = columns.filter((element) => {
+        modified_columns = modified_columns.filter((element) => {
             return ((element.id !== "cli_asn")
                 && (element.id !== "srv_asn")
                 && (element.id !== "transit_asn"))

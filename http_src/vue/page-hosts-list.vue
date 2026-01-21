@@ -76,11 +76,11 @@ const handleLoadedColumns = (columns) => {
     let modified_columns = columns
     if (props.context.has_vlans === false) {
         /* Remove the column QoE in case ntopng is not Enterprise L, not available/computed in that version */
-        modified_columns = columns.filter(element => element.id !== "vlan")
+        modified_columns = modified_columns.filter(element => element.id !== "vlan")
     }
     if (props.context.isNedge === false) {
         /* Remove the column QoE in case ntopng is not Enterprise L, not available/computed in that version */
-        modified_columns = columns.filter(element => element.id !== "location")
+        modified_columns = modified_columns.filter(element => element.id !== "location")
     }
     return modified_columns
 }
