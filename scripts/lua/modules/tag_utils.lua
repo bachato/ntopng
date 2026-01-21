@@ -849,10 +849,10 @@ tag_utils.defined_tags = {
         operators = { 'eq', 'neq' },
         hourly_available = false,
     },
-    interface_id = {
+    ntopng_interface = {
         type = tag_utils.input_types.select,
         value_type = 'interface_id',
-        i18n_label = i18n('db_search.tags.interface_id'),
+        i18n_label = i18n('db_search.tags.ntopng_interface'),
         operators = { 'eq', 'neq' },
         hourly_available = true,
     },

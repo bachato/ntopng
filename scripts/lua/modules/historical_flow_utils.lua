@@ -1172,7 +1172,7 @@ local flow_columns = {
    ['INFO'] =                 { tag = "info",         dt_func = dt_format_info, format_func = format_flow_info, i18n = i18n("info"), order = 11, db_type = "String", db_raw_type = "String" },
    ['PROFILE'] =              { db_type = "String", db_raw_type = "String" },
    ['NTOPNG_INSTANCE_NAME'] = { db_type = "String", db_raw_type = "String" },
-   ['INTERFACE_ID'] =         { tag = "interface_id", dt_func = dt_format_interface, db_type = "Number", db_raw_type = "Uint16" },
+   ['INTERFACE_ID'] =         { tag = "ntopng_interface", dt_func = dt_format_interface, db_type = "Number", db_raw_type = "Uint16" },
    ['STATUS'] =               { tag = "alert_id",       dt_func = dt_format_flow_alert_id, format_func = format_flow_alert_id, i18n = i18n("status"), simple_dt_func = format_flow_alert_id , order = 8, db_type = "Number", db_raw_type = "Uint8" },
    ['SRC_COUNTRY_CODE'] =     { tag = "cli_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
    ['DST_COUNTRY_CODE'] =     { tag = "srv_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
@@ -1281,6 +1281,7 @@ local aggregated_flow_columns = {
    ['DST_NETWORK_ID'] =       { tag = "srv_network", dt_func = dt_format_network, db_type = "Number", db_raw_type = "Uint32" },
    ['WLAN_SSID'] =            { tag = "wlan_ssid", db_type = "String", db_raw_type = "String" },
    ['WTP_MAC_ADDRESS'] =      { tag = "apn_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
+   ['INTERFACE_ID'] =         { tag = "ntopng_interface", dt_func = dt_format_interface, db_type = "Number", db_raw_type = "Uint16" },
 }
 -- Extra columns (e.g. result of SQL functions)
 local additional_flow_columns = {

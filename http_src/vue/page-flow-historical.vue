@@ -33,9 +33,9 @@
                                         class="me-0" :change_label_side="true" :label="flow_type_label" style=""
                                         icon="fa-truck-fast" :title="flow_type_label" @change_value="change_flow_type">
                                     </CustomSwitch>
-                                    <CustomSwitch v-model:value="any_interface"
-                                        class="me-2" :change_label_side="true" :label="any_interface_label" style=""
-                                        icon="fa-layer-group" :title="any_interface_label" @change_value="change_any_interface">
+                                    <CustomSwitch v-model:value="any_interface" class="me-2" :change_label_side="true"
+                                        :label="any_interface_label" style="" icon="fa-layer-group"
+                                        :title="any_interface_label" @change_value="change_any_interface">
                                     </CustomSwitch>
                                 </template>
                                 <template v-slot:extra_range_buttons>
@@ -81,8 +81,8 @@
                         </div>
                         <TableWithConfig ref="table_flows" :table_id="table_id" :table_config_id="table_config_id"
                             :csrf="context.csrf" :showLoading="true" :f_map_columns="map_table_def_columns"
-                            :get_extra_params_obj="get_extra_params_obj" @loaded="on_table_loaded"
-                            @custom_event="on_table_custom_event">
+                            :get_extra_params_obj="get_extra_params_obj" :handleLoadedColumns="handleLoadedColumns"
+                            @loaded="on_table_loaded" @custom_event="on_table_custom_event">
                             <template v-slot:custom_header>
                                 <Dropdown v-for="(t, t_index) in top_table_array"
                                     :f_on_open="get_open_top_table_dropdown(t, t_index)"
@@ -210,6 +210,25 @@ async function get_modal_columns_names() {
 
 /*******************************************************/
 
+/* This function dinamycally modify the columns in order to 
+ * change visibility of the columns based on license and available 
+ * data (e.g. flow exporters)
+ */
+const handleLoadedColumns = (columns) => {
+    let modified_columns = columns
+    if (any_interface.value === false) {
+        /* Remove the column ntopng_interface in case the "any_interface toggle" is disabled */
+        modified_columns = columns.filter(element => element.id !== "ntopng_interface")
+    }
+    if (props.context.is_enterprise_l === false) {
+        /* Remove the column QoE in case ntopng is not Enterprise L, not available/computed in that version */
+        modified_columns = columns.filter(element => element.id !== "qoe_score")
+    }
+    return modified_columns
+}
+
+/*******************************************************/
+
 const href_analyse_records = computed(() => {
     if (count_page_components_reloaded.value < 0) { throw "never run"; }
     const analyse_endpoint = props.context.analyse.endpoint;
@@ -276,7 +295,7 @@ function init_params() {
     if (selected_query_preset.value.value == null) {
         selected_query_preset.value.value = "";
     }
-    table_config_id.value = props.context.is_enterprise_l ? `flow_historical_l` : `flow_historical`;
+    table_config_id.value = `flow_historical`;
     const aggregated = ntopng_url_manager.get_url_entry("aggregated");
     if (aggregated == "true") {
         table_config_id.value = `flow_historical_aggregated`;
@@ -284,8 +303,8 @@ function init_params() {
         min_time_interval_id.value = "hour";
         round_time.value = true;
     }
-    const any = ntopng_url_manager.get_url_entry("any");
-    if (any == "true") {
+    const any_interface_url = ntopng_url_manager.get_url_entry("any_interface");
+    if (any_interface_url == "true") {
         any_interface.value = true;
     }
 }
@@ -404,9 +423,9 @@ function change_flow_type() {
 
 function change_any_interface() {
     if (any_interface.value == false) {
-        ntopng_url_manager.delete_params(["any"]);
+        ntopng_url_manager.delete_params(["any_interface"]);
     } else {
-        ntopng_url_manager.set_key_to_url("any", "true");
+        ntopng_url_manager.set_key_to_url("any_interface", "true");
     }
     ntopng_url_manager.reload_url();
 }

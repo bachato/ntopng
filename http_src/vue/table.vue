@@ -199,6 +199,7 @@ const props = defineProps({
     f_sort_rows: Function,          // Function for custom row sorting
     f_get_column_classes: Function, // Function to get CSS classes for column
     f_get_column_style: Function,   // Function to get inline styles for column
+    handleLoadedColumns: Function,
     enable_search: Boolean,         // Enable search functionality
     display_empty_rows: Boolean,    // Show empty rows to maintain table height  
     show_autorefresh: Number,       // autorefresh seconds, if null or 0 autorefresh switch will not showed
@@ -439,6 +440,16 @@ async function set_columns_wrap() {
             data: c,
         };
     });
+
+    /* If defined this function is called to modify the loaded columns */
+    if (props.handleLoadedColumns) {
+        const tmp_loaded_columns = props.handleLoadedColumns(processedColumns.value);
+        if (typeof(tmp_loaded_columns) !== 'object' || tmp_loaded_columns.length == 0) {
+            console.error('Incorrectly handled columns, no columns are available, rolling back to the default columns (Table: ' + props.id + ')')
+        } else {
+            processedColumns.value = tmp_loaded_columns
+        }
+    }
 
     // save column config to server
     await set_columns_visibility();
