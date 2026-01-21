@@ -11,7 +11,7 @@ Quality of Experience (QoE) measures how satisfied users are with a network serv
 
 .. note::
 
- This feature is available only from Enterprise L license.
+ QoE is available only from Enterprise L license, whereas less capable versions include only basic traffic indicators (e.g. TCP retransmissions) instead of a comprehensive QoE value.
        
 
 .. toctree::
