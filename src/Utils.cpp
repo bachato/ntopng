@@ -6065,7 +6065,7 @@ int Utils::pollSocket(int sock, int timeout /* msec */) {
 
 /* Poll a list of sockets and bahaves like a poll() (same timeout and return value) 
  * Sockets which are not ready are cleared from the array (set to -1) */
-int Utils::pollSockets(int socks[], int num, int timeout /* msec */) {
+int Utils::pollSockets(int socks[], u_int num, int timeout /* msec */) {
   int rc;
 #ifdef WIN32
   fd_set rset;

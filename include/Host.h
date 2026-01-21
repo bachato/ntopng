@@ -71,12 +71,12 @@ class Host : public GenericHashEntry,
     char *http;        /* The HTTP Host: name */
     char *server_name; /* TLS/HTTP or other protocols requesting the host with a
                           specific server name */
-    char *dhcp;  /* name from a DHCP reply */
+    char *dhcp;        /* name from a DHCP reply */
   } names;
 
   char *ssdpLocation;
 
-  /* END Host data: */
+  /* END Host data */
 
   /* Counters used by host alerts */
   AttackVictimCounter flow_flood, icmp_flood, dns_flood, snmp_flood, rst_scan;
@@ -109,7 +109,7 @@ class Host : public GenericHashEntry,
 
   /*
     Both OS and device type are duplicated in MAC and host as
-    for a device begind a router, the device type must be on the host
+    for a device behind a router, the device type must be on the host
     (e.g. a laptop) otherwise the device type would be wrongly set
     to a router
   */
