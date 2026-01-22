@@ -23,13 +23,15 @@ umask 022
 #####
 
 CONFIG_FILE=/etc/ntopng/ntopng.conf
-CH_CLIENT="/usr/bin/clickhouse-client"
 
-CH_CONFIGURED=`grep '\-F\=clickhouse' $CONFIG_FILE | wc -l`
+if test -f $CONFIG_FILE; then
+ CH_CONFIGURED=`grep '\-F\=clickhouse' $CONFIG_FILE | wc -l`
 
-if test $CH_CONFIGURED -eq 0; then
+ if test $CH_CONFIGURED -eq 0; then
+     CH_CLIENT="/usr/bin/clickhouse-client"
+     
     if test -x $CH_CLIENT; then
-	OUT=`/usr/bin/clickhouse-client "SHOW DATABASES" > /dev/null 2>&1`
+	OUT=`$CH_CLIENT "SHOW DATABASES" > /dev/null 2>&1`
 	STATUS="$?"
 	if test $STATUS -eq 0; then
 	    echo "-F=clickhouse" >> $CONFIG_FILE
@@ -42,6 +44,7 @@ if test $CH_CONFIGURED -eq 0; then
 	    echo "-F=\"clickhouse;127.0.0.1@9000,9004;ntopng;default;\"" >> $CONFIG_FILE
 	fi
     fi
+ fi
 fi
 
 ###
