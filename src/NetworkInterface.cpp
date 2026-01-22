@@ -2354,7 +2354,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
     }
   }
 
-  if (flow->isDetectionCompleted() && (!isSampledTraffic())) {
+  if ((flow->getDetectionState() >= NDPI_STATE_PARTIAL) && (!isSampledTraffic())) {
     switch(ndpi_get_lower_proto(flow->get_detected_protocol().proto)) {
     case NDPI_PROTOCOL_DHCP:
       if (*srcHost) {

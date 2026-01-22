@@ -764,17 +764,11 @@ public:
   void check_swap();
 
   bool isThreeWayHandshakeOK() const;
-  inline bool isDetectionCompleted() const {
-    return (detection_completed ? true : false);
-  };
 
-  inline bool isOneWay() const {
-    return (get_packets() && (!get_packets_cli2srv() || !get_packets_srv2cli()));
-  };
-
-  inline bool isBidirectional() const {
-    return (get_packets_cli2srv() && get_packets_srv2cli());
-  };
+  inline ndpi_classification_state getDetectionState() { return(ndpiDetectedProtocol.state); }
+  inline bool isDetectionCompleted() const { return (detection_completed ? true : false); };
+  inline bool isOneWay() const { return (get_packets() && (!get_packets_cli2srv() || !get_packets_srv2cli())); };
+  inline bool isBidirectional() const { return (get_packets_cli2srv() && get_packets_srv2cli()); };
 
   /*
     Find a simple criteria to ignore probing attempts selecting
@@ -811,18 +805,10 @@ public:
             !srv_ip_addr->isBroadMulticastAddress());
   };
 
-  inline u_int32_t get_cli_ipv4() const {
-    return (cli_host->get_ip()->get_ipv4());
-  };
+  inline u_int32_t get_cli_ipv4() const { return (cli_host->get_ip()->get_ipv4()); };
 
-  inline u_int32_t get_srv_ipv4() const {
-    return (srv_host->get_ip()->get_ipv4());
-  };
-
-  inline ndpi_protocol get_detected_protocol() const {
-    return (isDetectionCompleted() ? ndpiDetectedProtocol
-	    : getConstNdpiUnknownProtocol());
-  };
+  inline u_int32_t get_srv_ipv4() const { return (srv_host->get_ip()->get_ipv4()); };
+  inline ndpi_protocol get_detected_protocol() const { return (ndpiDetectedProtocol); }
 
   inline struct ndpi_flow_struct *get_ndpi_flow() const { return (ndpiFlow); };
   inline const struct ndpi_in6_addr *get_cli_ipv6() const {

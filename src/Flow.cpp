@@ -1293,6 +1293,8 @@ void Flow::processPacket(bool src2dst_direction,
 
       addRisk(ndpiFlow->risk);
     }
+  } else if(proto_id.state == NDPI_STATE_PARTIAL) {
+    updateProtocol(proto_id);
   }
 
   /*
@@ -1611,8 +1613,7 @@ void Flow::updateHostBlacklists() {
 void Flow::updateProtocol(ndpi_protocol proto_id) {
   u_int16_t *ptr16;
 
-  if (ndpiDetectedProtocol.state != NDPI_STATE_CLASSIFIED)
-    ndpiDetectedProtocol.state = proto_id.state;
+  ndpiDetectedProtocol.state = proto_id.state;
 
   /* NOTE: in order to avoid inconsistent states, only overwrite the
    * protocools if UNKNOWN. */
@@ -1620,14 +1621,6 @@ void Flow::updateProtocol(ndpi_protocol proto_id) {
     ndpiDetectedProtocol.proto.master_protocol = proto_id.proto.master_protocol;
 
   if(ndpiDetectedProtocol.proto.app_protocol == NDPI_PROTOCOL_UNKNOWN)
-#if 0
-     || (/*
-	Update the protocols when adding a subprotocol, not when things
-	are totally different
-      */
-      (ndpiDetectedProtocol.proto.master_protocol ==  ndpiDetectedProtocol.proto.app_protocol) &&
-      (ndpiDetectedProtocol.proto.app_protocol != proto_id.proto.app_protocol)))
-#endif
     ndpiDetectedProtocol.proto.app_protocol = proto_id.proto.app_protocol;
 
   if(ndpiDetectedProtocol.proto.master_protocol == ndpiDetectedProtocol.proto.app_protocol)
