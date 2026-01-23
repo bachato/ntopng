@@ -319,7 +319,7 @@ async function init() {
 async function refreshChart() {
     if (chart.value) {
         const result = await get_chart_options();
-        chart.value.update_chart_series(result);
+        chart.value.updateChartSeries(result);
     }
 }
 

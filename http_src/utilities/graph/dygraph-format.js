@@ -442,7 +442,8 @@ function formatSerie(tsOptionsArray, tsGroupsArray, tsCompare, useFullName) {
      */
     formatFullSerie(config);
     formatSerieColors(config.colors);
-    return dygraphConfig.buildChartOptions(config);
+    const chart_config = dygraphConfig.buildChartOptions(config)
+    return chart_config;
 }
 
 /* *********************************************** */

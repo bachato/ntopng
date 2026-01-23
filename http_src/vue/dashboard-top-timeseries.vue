@@ -261,7 +261,7 @@ async function get_chart_options() {
     const data_url = `${http_prefix}/lua/pro/rest/v2/get/timeseries/ts_multi.lua`;
     props.get_component_data()
     let result = await ntopng_utility.http_post_request(data_url, post_params);
-    
+
     /* Format the result in the format needed by Dygraph */
     result = timeseriesUtils.tsArrayToOptionsArray(result, timeseries_groups.value, group_option_mode, '');
     if (result[0]) {
@@ -361,7 +361,7 @@ async function getTopInfo() {
 async function refreshChart() {
     if (chart.value) {
         const result = await get_chart_options();
-        chart.value.update_chart_series(result);
+        chart.value.updateChartSeries(result);
     }
 }
 

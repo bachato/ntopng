@@ -517,8 +517,7 @@ function update_url_params() {
 
 function update_charts(charts_options) {
     charts_options.forEach((options, i) => {
-        // charts.value[i].update_chart_options({ yaxis: options.yaxis });
-        charts.value[i].update_chart_series(options);
+        charts.value[i].updateChartSeries(options);
     });
 }
 
@@ -866,7 +865,7 @@ function show_modal_download_file() {
 async function download_chart_png(filename) {
     let chart_image_array_promise = charts.value.map(async (chart) => {
         let canvas = new Image();
-        chart.get_image(canvas);
+        chart.getImage(canvas);
         return new Promise(async (resolve, reject) => {
             canvas.onload = function () {
                 resolve(canvas);
