@@ -3789,7 +3789,7 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
 
 /* **************************************************** */
 
-/* Thos method finally dumps a flow */
+/* This method finally dumps a flow */
 bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
   char *json = NULL;
   bool rc = true;
@@ -3797,7 +3797,15 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
   /* Checkpoint flow traffic counters for the dump */
   f->update_partial_traffic_stats_db_dump();
 
-  if (f->get_partial_bytes()) /* Make sure data is not at zero */ {
+  if (f->get_partial_bytes()) {
+    /*
+      Dump only flows with non-zero bytes
+
+      NOTE:
+      in case you have set long flow timeouts (e.g. 5 or 10 mins)
+      you can find in the DB flows whose duration can be more than
+      the scan periodicity (~1 min) and capped to the flow timeout
+    */
 
     if (flows_db
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO) && !defined(HAVE_NEDGE)
@@ -3852,7 +3860,6 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
     }
 #endif
 #endif
-
   } /* get_partial_bytes > 0 */
 
   if (!rc)
