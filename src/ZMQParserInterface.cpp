@@ -2112,9 +2112,9 @@ int ZMQParserInterface::parseSingleJSONFlow(json_object *o) {
   struct json_object_iterator itEnd = json_object_iter_end(o);
   int ret = 0;
 
-  /* Reset data */
   flow.direction = UNKNOWN_FLOW_DIRECTION;
 
+  /* Iterate through all key-value pairs in the JSON flow object */
   while (!json_object_iter_equal(&it, &itEnd)) {
     const char *key = json_object_iter_peek_name(&it);
     json_object *jvalue = json_object_iter_peek_value(&it);
@@ -2123,6 +2123,7 @@ int ZMQParserInterface::parseSingleJSONFlow(json_object *o) {
     ParsedValue value = {0};
     bool add_to_additional_fields = false;
 
+    /* Extract the value based on its JSON type */
     switch (type) {
     case json_type_int:
       value.int_num = json_object_get_int64(jvalue);
@@ -2136,14 +2137,15 @@ int ZMQParserInterface::parseSingleJSONFlow(json_object *o) {
       break;
     case json_type_string:
       value.string = json_object_get_string(jvalue);
+      /* Special case: "json" key contains embedded JSON with additional fields */
       if (strcmp(key, "json") == 0)
 	additional_o = json_tokener_parse(value.string);
       break;
     case json_type_object:
-      /* This is handled by parseNProbeAgentField or addAdditionalField */
+      /* Complex objects are handled by parseNProbeAgentField or stored as additional fields */
       break;
     case json_type_array:
-      /* This is handled by parseNProbeAgentField or addAdditionalField */
+      /* Arrays are handled by parseNProbeAgentField or stored as additional fields */
       break;
     default:
       ntop->getTrace()->traceEvent(TRACE_WARNING, "JSON type %u not supported [key: %s]\n", type, key);
@@ -2154,14 +2156,30 @@ int ZMQParserInterface::parseSingleJSONFlow(json_object *o) {
       u_int32_t pen, key_id;
       bool res;
 
+      /*
+       * Convert field name/number to PEN and field ID
+       * - "123" -> pen=0, key_id=123
+       * - "35632.100" -> pen=35632, key_id=100
+       * - String keys are looked up in the labels map
+       * - Unknown keys -> pen=UNKNOWN_PEN, key_id=UNKNOWN_FLOW_ELEMENT
+       */
       getKeyId((char *)key, strlen(key), &pen, &key_id);
 
+      /*
+       * Try to parse the field based on its PEN
+       * parsePENZeroField/parsePENNtopField return
+       * res = true if field was recognized and value was stored in flow
+       * res = false if field ID not recognized
+       */
       switch (pen) {
-      case 0: /* No PEN */
+      case 0: /* No PEN (standard fields) */
 	res = parsePENZeroField(&flow, key_id, &value);
 	if (res) break;
-	/* Dont'break when res == false for backward compatibility: attempt to
-	 * parse Zero-PEN as Ntop-PEN */
+	/*
+	 * Fall through for backward compatibility:
+	 * Some fields may have been exported without PEN but are actually
+	 * ntop proprietary fields, so attempt to parse as NTOP_PEN.
+	 */
       case NTOP_PEN:
 	res = parsePENNtopField(&flow, key_id, &value);
 	break;
@@ -2171,9 +2189,11 @@ int ZMQParserInterface::parseSingleJSONFlow(json_object *o) {
 	break;
       }
 
+      /* If the field was not handled by PEN, try alternative parsing */
       if (!res) {
         switch (key_id) {
-	case 0:  // json additional object added by Flow::serialize()
+	case 0:
+	  /* Handle embedded "json" object containing additional fields */
 	  if (additional_o != NULL) {
 	    struct json_object_iterator additional_it    = json_object_iter_begin(additional_o);
 	    struct json_object_iterator additional_itEnd = json_object_iter_end(additional_o);
@@ -2184,8 +2204,6 @@ int ZMQParserInterface::parseSingleJSONFlow(json_object *o) {
 	      const char *additional_value = json_object_get_string(additional_v);
 
 	      if ((additional_key != NULL) && (additional_value != NULL)) {
-		// ntop->getTrace()->traceEvent(TRACE_NORMAL, "Additional
-		// field: %s", additional_key);
 		flow.addAdditionalField(additional_key, json_object_new_string(additional_value));
 	      }
 	      json_object_iter_next(&additional_it);
@@ -2193,16 +2211,19 @@ int ZMQParserInterface::parseSingleJSONFlow(json_object *o) {
 	  }
 	  break;
 	case UNKNOWN_FLOW_ELEMENT:
-	  /* Attempt to parse it as an nProbe mini field */
+	  /* Attempt to parse as nProbe Agent/eBPF field (uses string key matching) */
 	  if (parseNProbeAgentField(&flow, key, &value, jvalue)) {
+	    /* Mark flow as having eBPF data for special handling */
 	    if (!flow.hasParsedeBPF()) {
 	      flow.setParsedeBPF();
 	      flow.absolute_packet_octet_counters = true;
 	    }
 	    break;
 	  }
+	  /* fallthrough - field not recognized, store as additional */
 	default:
 #ifdef NTOPNG_PRO
+	  /* Check if this is a custom application field */
 	  if (custom_app_maps ||
 	      (custom_app_maps = new (std::nothrow) CustomAppMaps()))
 	    custom_app_maps->checkCustomApp(key, &value, &flow);
@@ -2214,18 +2235,18 @@ int ZMQParserInterface::parseSingleJSONFlow(json_object *o) {
         } /* switch */
       }
 
+      /* Store unrecognized fields as additional fields for potential later use */
       if (add_to_additional_fields) {
-        // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Additional field: %s",
-        // key);
         flow.addAdditionalField(key, json_object_get(jvalue));
       }
 
+      /* Free the parsed embedded JSON object if any */
       if (additional_o) json_object_put(additional_o);
     } /* if */
 
     /* Move to the next element */
     json_object_iter_next(&it);
-  }  // while json_object_iter_equal
+  }  /* while json_object_iter_equal */
 
   if (preprocessFlow(&flow)) ret = 1;
 
