@@ -5433,10 +5433,12 @@ void Utils::tlv2serializer(ndpi_serializer *tvl_serializer, ndpi_serializer *ser
 
       case ndpi_serialization_string:
         ndpi_deserialize_value_string(&deserializer, &vs);
-        bkp = vs.str[vs.str_len];
-        vs.str[vs.str_len] = '\0';
-        ndpi_serialize_string_string(serializer, key, vs.str);
-        vs.str[vs.str_len] = bkp;
+        if (vs.str) {
+          bkp = vs.str[vs.str_len];
+          vs.str[vs.str_len] = '\0';
+          ndpi_serialize_string_string(serializer, key, vs.str);
+          vs.str[vs.str_len] = bkp;
+        }
         break;
 
       default:
@@ -6100,14 +6102,14 @@ int Utils::pollSockets(int socks[], u_int num, int timeout /* msec */) {
     num = max_num_sockets;
   }
   
-  for (int i = 0; i < num; i++) { 
+  for (u_int i = 0; i < num; i++) { 
     pfd[i].fd = socks[i];
     pfd[i].events = POLLIN;
   }
 
   rc = poll(pfd, num, timeout);
 
-  for (int i = 0; i < num; i++)
+  for (u_int i = 0; i < num; i++)
     if (rc <= 0 || !(pfd[i].revents & POLLIN))
       socks[i] = -1;
 #endif
