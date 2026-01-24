@@ -680,9 +680,9 @@ bool SNMP::send_snmp_request(char *agent_host, u_int version, char *community,
     snmp_sess_error(snmpSession->session_ptr, &liberr, &snmperr, &errstr);
 
     snmp_free_pdu(pdu);
-    ntop->getTrace()->traceEvent(TRACE_WARNING,
-      "SNMP send error [rc: %d][%.03fs][host: %s][error: %s]",
-      rc, Utils::msTimevalDiff(&end, &start)/1000, agent_host, errstr ? errstr : "unknown");
+    ntop->getTrace()->traceEvent(TRACE_INFO,
+				 "SNMP send error [rc: %d][%.03fs][host: %s][error: %s]",
+				 rc, Utils::msTimevalDiff(&end, &start)/1000, agent_host, errstr ? errstr : "unknown");
 
     if(errstr) free(errstr);  /* Must free the error string */
     return(false);
