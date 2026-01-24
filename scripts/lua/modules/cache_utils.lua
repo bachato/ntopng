@@ -60,11 +60,19 @@ end
 -- ##############################################
 
 function cache_utils.sethostname(ipaddr, name)
-   if(debugme) then
-      tprint("cache_utils.sethostname(".. ipaddr .. ", ".. name..")")
+   local val = name or ipaddr
+
+   if(not isEmptyString(val)) then
+      if(debugme) then
+	 tprint("cache_utils.sethostname(".. ipaddr .. ", ".. name..")")
+      end
+      
+      return(ntop.setLuaCache("host."..ipaddr, val))
+   else
+      tprint("Empty cache_utils.sethostname() value")
+      tprint(debug.traceback())
+      return(false)
    end
-   
-   return(ntop.setLuaCache("host."..ipaddr, name or ipaddr))
 end
 
 -- ##############################################
@@ -87,18 +95,34 @@ end
 -- ##############################################
 
 function cache_utils.setifname(ipaddr, ifid, ifname)
+   local val
+   
    if(ifname == nil) then
       tprint("cache_utils.setifname() ERROR on interface "..ipaddr.." / "..ifid)
       tprint(debug.traceback())
    end
-   
-   return(ntop.setLuaCache("iface."..ipaddr.."@"..ifid, ifname or ifid))
+
+   val = ifname or ifid
+
+   if(not isEmptyString(val)) then
+      return(ntop.setLuaCache("iface."..ipaddr.."@"..ifid, val))
+   else
+      tprint("Empty cache_utils.setifname() value")
+      tprint(debug.traceback())
+      return(false)
+   end
 end
 
 -- ##############################################
 
 function cache_utils.set(key, val)
-   ntop.setLuaCache(key, val)
+   if(not isEmptyString(val)) then      
+      ntop.setLuaCache(key, val)
+   else
+      tprint("Empty cache_utils.set() value")
+      tprint(debug.traceback())
+      return(false)
+   end
 end
 
 -- ##############################################
