@@ -1617,15 +1617,8 @@ void Flow::updateProtocol(ndpi_protocol proto_id) {
 
   /* NOTE: in order to avoid inconsistent states, only overwrite the
    * protocools if UNKNOWN. */
-  if(ndpiDetectedProtocol.proto.master_protocol == NDPI_PROTOCOL_UNKNOWN)
-    ndpiDetectedProtocol.proto.master_protocol = proto_id.proto.master_protocol;
-
-  if(ndpiDetectedProtocol.proto.app_protocol == NDPI_PROTOCOL_UNKNOWN)
-    ndpiDetectedProtocol.proto.app_protocol = proto_id.proto.app_protocol;
-
-  if(ndpiDetectedProtocol.proto.master_protocol == ndpiDetectedProtocol.proto.app_protocol)
-    ndpiDetectedProtocol.proto.master_protocol = NDPI_PROTOCOL_UNKNOWN;
-
+  ndpiDetectedProtocol.proto.master_protocol = proto_id.proto.master_protocol;
+  ndpiDetectedProtocol.proto.app_protocol = proto_id.proto.app_protocol;
   ndpiDetectedProtocol.protocol_by_ip = proto_id.protocol_by_ip;
 
   /* NOTE: only overwrite the category if it was not set.
