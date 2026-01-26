@@ -3823,7 +3823,7 @@ local lang = {
     ["snmp_ifname"] = "SNMP Interface",
     ["snmp_location"] = "SNMP Location",
     ["snmp_no_device_found"] = "No matching SNMP device found",
-    ["snmp_polling"] = "Flow/SNMP ratio needs at least 30 minutes of SNMP and flow data",
+    ["snmp_polling"] = "Flow/SNMP ratio is computed comparing collected flow data vs SNMP data. It needs at least 30 minutes of SNMP and flow data",
     ["snmp_ratio"] = "Flow/SNMP Ratio",
     ["snmp_ratio_descr"] = "The Flow/SNMP Ratio is calculated by dividing the total interface traffic obtained using flows, by the total traffic of the same interface read via SNMP. As in flow-based analysis non-IP and layer 2 headers are not accounted, <br>typical ratio values are between 0.8 and 0.9 (i.e. 0.9 means that 90%% of the received traffic as observed via SNMP has been reported in flows).<br>Ratio is computed using the traffic over the latest 5 minutes, as periodic SNMP walks are performed at 5-minute intervals. Ratio is only computed when the following conditions are met",
     ["this_page_contains_couters"] = "This page contains interface counters as they have been collected via sFlow. If SNMP is configured, you can also see the <A HREF=\"%{url}\">SNMP view</A> of this device",

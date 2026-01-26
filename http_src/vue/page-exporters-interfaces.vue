@@ -103,7 +103,10 @@ function create_18n_str(i18n_name) {
 
 // Function to display notes on the footer of the table
 async function get_notes(snmp_port_idx) {
-   let url = exporter_notes_url + `ip=${get_ip_from_url()}&snmp_port_idx=${snmp_port_idx}`
+   let url = exporter_notes_url + `ip=${get_ip_from_url()}`;
+
+   if (snmp_port_idx) exporter_notes_url += `&snmp_port_idx=${snmp_port_idx}`;
+
    const rsp = await ntopng_utility.http_request(url);
 
    note_list.value = rsp.map(el => el.content);
@@ -119,9 +122,10 @@ function get_ip_from_url() {
 }
 
 const map_table_def_columns = (columns) => {
+   get_notes();
    let map_columns = {
       "ifindex": (value, row) => {
-         get_notes(value)
+         get_notes(value);
          const snmp_interface_url = `${snmp_interface_details_url}ip=${get_ip_from_url()}&page=config&snmp_port_idx=${value}&ifid=${props.context.ifid}`
          if (row.snmp_interface_available)
             return `<a href=${snmp_interface_url}>${value}</i></a>`
