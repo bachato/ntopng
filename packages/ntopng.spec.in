@@ -204,7 +204,7 @@ fi
 CONFIG_FILE=/etc/ntopng/ntopng.conf
 CH_CLIENT="/usr/bin/clickhouse-client"
 
-CH_CONFIGURED=`grep '\-F\=clickhouse' $CONFIG_FILE | wc -l`
+CH_CONFIGURED=`grep -e '\-F\=clickhouse' -e '\-F="clickhouse' $CONFIG_FILE | wc -l`
 
 if test $CH_CONFIGURED -eq 0; then
     if test -x $CH_CLIENT; then
