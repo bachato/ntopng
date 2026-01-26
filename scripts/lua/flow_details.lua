@@ -895,8 +895,11 @@ if isEmptyString(page) or page == "overview" then
 	 print(flow.ndpi_fingerprint)
 
 	 if(flow.tls_blocks) then
-	    print("<p><pre>".. flow.tls_blocks .."</pre>")
+	    print("<p>")
+	    print_copy_button('tls_blocks', flow.tls_blocks)	    
+	    print(flow.tls_blocks)
 	 end
+	 
 	 print("</td></tr>\n")
 	 num = 1
       end
