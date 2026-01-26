@@ -258,6 +258,7 @@ local function ja4url(what, safety, label)
    if (what == nil) then
       print("&nbsp;")
    else
+      print_copy_button('ja4_fingerprint', what)
       print(what)
 
       if ((safety ~= nil) and (safety ~= "safe")) then
@@ -872,21 +873,27 @@ if isEmptyString(page) or page == "overview" then
       if(flow.tcp_fingerprint) then num = num + 1 end
       if(flow.ndpi_fingerprint) then num = num + 1 end
       if(flow["protos.tls.ja4.client_hash"]) then num = num + 1 end
-      if num > 0 then 
+      if num > 0 then
          print("<tr><th width=33% rowspan="..num..">" .. i18n("details.fingerprint") .. "</th>")
       end
 
       num = 0
       if (flow.tcp_fingerprint) then
-         print("<th width=33%>" .. i18n("details.tcp_fingerprint") .. "</th><td nowrap colspan=2<div id=duration>" ..
-	       flow.tcp_fingerprint .. "</td></tr>\n")
+         print("<th width=33%>" .. i18n("details.tcp_fingerprint") .. "</th><td nowrap colspan=2<div id=duration>" )
+	 print_copy_button('tcp_fingerprint', flow.tcp_fingerprint)
+
+	 print(flow.tcp_fingerprint .. "</td></tr>\n")
 	 num = 1
       end
 
 
       if (flow.ndpi_fingerprint) then
 	 if(num == 1) then print("<tr>") end
-         print("<th width=33%>" .. i18n("details.ndpi_fingerprint") .. "</th><td nowrap colspan=2<div id=duration>" .. flow.ndpi_fingerprint)
+         print("<th width=33%>" .. i18n("details.ndpi_fingerprint") .. "</th><td nowrap colspan=2<div id=ndpi_fingerprint>" )
+
+	 print_copy_button('ndpi_fingerprint', flow.ndpi_fingerprint)
+	 print(flow.ndpi_fingerprint)
+
 	 if(flow.tls_blocks) then
 	    print("<p><pre>".. flow.tls_blocks .."</pre>")
 	 end
@@ -1660,7 +1667,7 @@ if isEmptyString(page) or page == "overview" then
          print("<tr><th width=10%>" .. i18n("igmp_type") .. "</th><td colspan=2>" .. igmpType2String(flow.igmp.type))
          print("</td></tr>\n")
       end
-      
+
       if (flow["protos.stun.mapped_ip_address"] ~= nil) then
          local elems = split(flow["protos.stun.mapped_ip_address"], ":")
          local ip = elems[1]
