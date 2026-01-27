@@ -360,24 +360,24 @@ void ZMQParserInterface::addMapping(const char *sym, u_int32_t num,
 
 bool ZMQParserInterface::getKeyId(char *sym, u_int32_t sym_len,
                                   u_int32_t *const pen,
-                                  u_int32_t *const field) const {
-  u_int32_t cur_pen, cur_field;
+                                  u_int32_t *const key_id) const {
+  u_int32_t cur_pen, cur_key_id;
   string label(sym);
   labels_map_t::const_iterator it;
   bool is_num, is_dotted;
 
-  *pen = UNKNOWN_PEN, *field = UNKNOWN_FLOW_ELEMENT;
+  *pen = UNKNOWN_PEN, *key_id = UNKNOWN_FLOW_ELEMENT;
 
   is_num = Utils::isNumber(sym, sym_len, &is_dotted);
 
   if (is_num && is_dotted) {
-    if (sscanf(sym, "%u.%u", &cur_pen, &cur_field) != 2) return false;
-    *pen = cur_pen, *field = cur_field;
+    if (sscanf(sym, "%u.%u", &cur_pen, &cur_key_id) != 2) return false;
+    *pen = cur_pen, *key_id = cur_key_id;
   } else if (is_num) {
-    cur_field = atoi(sym);
-    *pen = 0, *field = cur_field;
+    cur_key_id = atoi(sym);
+    *pen = 0, *key_id = cur_key_id;
   } else if ((it = labels_map.find(label)) != labels_map.end()) {
-    *pen = it->second.first, *field = it->second.second;
+    *pen = it->second.first, *key_id = it->second.second;
   } else {
     return false;
   }
@@ -2121,7 +2121,6 @@ int ZMQParserInterface::parseSingleJSONFlow(json_object *o) {
     json_object *additional_o = NULL;
     enum json_type type = json_object_get_type(jvalue);
     ParsedValue value = {0};
-    bool add_to_additional_fields = false;
 
     /* Extract the value based on its JSON type */
     switch (type) {
@@ -2158,10 +2157,10 @@ int ZMQParserInterface::parseSingleJSONFlow(json_object *o) {
 
       /*
        * Convert field name/number to PEN and field ID
-       * - "123" -> pen=0, key_id=123
-       * - "35632.100" -> pen=35632, key_id=100
-       * - String keys are looked up in the labels map
-       * - Unknown keys -> pen=UNKNOWN_PEN, key_id=UNKNOWN_FLOW_ELEMENT
+       * - "123"       -> pen = 0     key_id = 123
+       * - "35632.100" -> pen = 35632 key_id = 100
+       * - Non-numeric string -> looked up in the labels map
+       * - Unknown key -> pen = UNKNOWN_PEN (-1) key_id = UNKNOWN_FLOW_ELEMENT (-1)
        */
       getKeyId((char *)key, strlen(key), &pen, &key_id);
 
@@ -2174,7 +2173,7 @@ int ZMQParserInterface::parseSingleJSONFlow(json_object *o) {
       switch (pen) {
       case 0: /* No PEN (standard fields) */
 	res = parsePENZeroField(&flow, key_id, &value);
-	if (res) break;
+	if (res) break; /* Successfully parsed */
 	/*
 	 * Fall through for backward compatibility:
 	 * Some fields may have been exported without PEN but are actually
@@ -2228,16 +2227,11 @@ int ZMQParserInterface::parseSingleJSONFlow(json_object *o) {
 	      (custom_app_maps = new (std::nothrow) CustomAppMaps()))
 	    custom_app_maps->checkCustomApp(key, &value, &flow);
 #endif
-	  ntop->getTrace()->traceEvent(
-				       TRACE_DEBUG, "Not handled ZMQ field %u/%s", key_id, key);
-	  add_to_additional_fields = true;
+	  ntop->getTrace()->traceEvent(TRACE_DEBUG, "Not handled ZMQ field %u/%s", key_id, key);
+          /* Store unrecognized fields as additional fields for potential later use */
+          flow.addAdditionalField(key, json_object_get(jvalue));
 	  break;
         } /* switch */
-      }
-
-      /* Store unrecognized fields as additional fields for potential later use */
-      if (add_to_additional_fields) {
-        flow.addAdditionalField(key, json_object_get(jvalue));
       }
 
       /* Free the parsed embedded JSON object if any */
@@ -2279,7 +2273,6 @@ int ZMQParserInterface::parseSingleTLVFlow(ndpi_deserializer *deserializer,
     ndpi_string key, vs;
     char key_str[64];
     u_int8_t vbkp = 0;
-    bool add_to_additional_fields = false;
     bool key_is_string = false, value_is_string = false;
 
     // ntop->getTrace()->traceEvent(TRACE_NORMAL, "TLV key type = %u value type = %u", kt, et);
@@ -2450,21 +2443,14 @@ int ZMQParserInterface::parseSingleTLVFlow(ndpi_deserializer *deserializer,
 	    (custom_app_maps = new (std::nothrow) CustomAppMaps()))
 	  custom_app_maps->checkCustomApp(key_str, &value, &flow);
 #endif
+
 	ntop->getTrace()->traceEvent(TRACE_DEBUG, "Not handled ZMQ field %u.%u", pen, key_id);
-	add_to_additional_fields = true;
+        // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Additional field: %s (Key-ID: %u PEN: %u)", key_str, key_id, pen);
+
+        flow.addAdditionalField(deserializer);
+
 	break;
       } /* switch */
-    }
-
-    if (add_to_additional_fields) {
-      // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Additional field: %s
-      // (Key-ID: %u PEN: %u)", key_str, key_id, pen);
-#if 1
-      flow.addAdditionalField(deserializer);
-#else
-      flow.addAdditionalField(key_str, value_is_string ? json_object_new_string(value.string)
-			      : json_object_new_int64(value.int_num));
-#endif
     }
 
     /* Restoring backed up character at the end of the string in place of '\0'
