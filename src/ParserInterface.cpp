@@ -517,6 +517,12 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     p.proto.master_protocol = zflow->l7_proto.proto.master_protocol;
     p.category = NDPI_PROTOCOL_CATEGORY_UNSPECIFIED;
 
+#if 0
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "L7 Protocol [master: %u][app: %u]",
+				 p.proto.master_protocol,
+				 p.proto.app_protocol);
+#endif
+
     /*
       First, there's an attempt to guess the protocol so that custom protocols
       defined in ntopng will still be applied to the protocols detected by
@@ -569,8 +575,8 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     if (/* If nprobe acts is in collector-passthrough mode L7_PROTO is not
            present, using the protocol guess on the ntopng side is desirable in
            this case */
-        ((zflow->l7_proto.proto.app_protocol == NDPI_PROTOCOL_UNKNOWN) &&
-         (zflow->l7_proto.proto.master_protocol == NDPI_PROTOCOL_UNKNOWN)) ||
+        ((p.proto.app_protocol == NDPI_PROTOCOL_UNKNOWN) &&
+         (p.proto.master_protocol == NDPI_PROTOCOL_UNKNOWN)) ||
         /* If the protocol is greater than NDPI_MAX_SUPPORTED_PROTOCOLS, it
            means it is a custom protocol so the application protocol received
            from nprobe can be overridden */
@@ -588,6 +594,12 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
        to possibly override the category, according to the rules specified
        in ntopng */
     flow->fillZMQFlowCategory(&p);
+
+#if 0
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Setting L7 Protocol [master: %u][app: %u]",
+				 p.proto.master_protocol,
+				 p.proto.app_protocol);
+#endif
 
     /* Here everything is setup and it is possible to set the actual protocol to
      * the flow */
