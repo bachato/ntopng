@@ -12,7 +12,6 @@ import formatterUtils from "../formatter-utils";
 function getDefaultConfig() {
     return {
         labelsSeparateLines: true,
-        legend: "follow",
         connectSeparatedPoints: false,
         includeZero: true,
         drawPoints: true,

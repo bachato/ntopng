@@ -21,14 +21,20 @@
             </div>
         </div>
     </div>
-    <div ref="graph_container" style="position: relative;">
+    <div>
         <template v-if="disable_fixed_height == true">
-            <div class="mb-3 w-100" ref="chart_shown"></div>
-            <div class="mb-3 w-100 d-none" ref="chart_hidden"></div>
+            <div class="mb-3 w-100 position-relative" ref="chart_shown">
+            </div>
+            <div class="mb-3 w-100 d-none position-relative" ref="chart_hidden">
+            </div>
+            <div class="dygraph-legend" ref="legend" style="display:none;"></div>
         </template>
         <template v-else>
-            <div class="mb-3 w-100" style="min-height:320px;" ref="chart_shown"></div>
-            <div class="mb-3 w-100 d-none" style="min-height:320px;" ref="chart_hidden"></div>
+            <div class="mb-3 w-100 position-relative" style="min-height:320px;" ref="chart_shown">
+            </div>
+            <div class="mb-3 w-100 d-none position-relative" style="min-height:320px;" ref="chart_hidden">
+            </div>
+            <div class="dygraph-legend" ref="legend" style="display:none;"></div>
         </template>
     </div>
 </template>
@@ -51,7 +57,7 @@ const props = defineProps({
 });
 
 const chart = ref(null)
-const graph_container = ref(null)
+const legend = ref(null);
 const chart_shown = ref(null)
 const chart_hidden = ref(null)
 const stacked = ref(null)
@@ -187,13 +193,44 @@ const retrieveOptionsAndDraw = async function (url_request) {
 
 /* *************************************************** */
 
+const followLegend = async function (event) {
+    const containerRect = chart_shown.value.getBoundingClientRect();
+    const mouseX = event.clientX - containerRect.left;
+    const mouseY = event.clientY - containerRect.top;
+
+    const offset = 50;
+
+    let left = mouseX + offset;
+    let top = mouseY - offset;
+
+    // clamping
+    left = Math.min(left, containerRect.width - legend.value.offsetWidth - 2);
+    top = Math.min(top, containerRect.height - legend.value.offsetHeight - 2);
+
+    legend.value.style.left = `${left}px`;
+    legend.value.style.top = `${top}px`;
+    legend.value.style.display = 'block';
+}
+
+/* *************************************************** */
+
+const hideLegend = async function () {
+    legend.value.style.display = 'none';
+}
+
+/* *************************************************** */
+
 const drawChart = async function (options, drawOnHidden) {
     const data = options.data || [];
     options.data = null;
     options.zoomCallback = onZoomed;
+    options.labelsDiv = legend.value
+    options.highlightCallback = followLegend
+    options.unhighlightCallback = hideLegend
     if (options.blockStacked) {
         block_stacked.value = true
     }
+
     timeseries_list.value = [];
     let visibility = [];
     let id = 0;
@@ -234,8 +271,8 @@ const getImage = function (image) {
 const updateChartSeries = async function (options) {
     if (options == null || !chart.value) { return; }
     /* There is a possibility: that the timeseries number changes, for example, before there was the DNS, now there is not
-        * for that reason we have to check if the timeseries options are the same or not
-        */
+     * for that reason we have to check if the timeseries options are the same or not
+     */
     let recreateChart = false;
     for (const serie_name in options.series) {
         if (!timeseries_list.value.find((element) => { return (element.name === serie_name) })) {
@@ -259,8 +296,9 @@ const updateChartSeries = async function (options) {
         chart_shown.value.classList.remove('d-none');
         chart.value.resize()
         chart_hidden.value.innerHTML = ""
+    } else {
+        chart.value.updateOptions({ 'file': options.data, 'colors': options.colors, 'labels': options.labels });
     }
-    chart.value.updateOptions({ 'file': options.data, 'colors': options.colors, 'labels': options.labels });
 }
 
 /* *************************************************** */
@@ -298,8 +336,8 @@ defineExpose({ updateChartSeries, getImage });
     border-color: var(--timeseries-legend-border-color);
     border-style: solid;
     border-width: thin;
-/*  z-index: 80 !important;
-    position: absolute; */
+    z-index: 80 !important;
+    position: absolute;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .15);
     border-radius: 0.375rem;
     width: auto;
