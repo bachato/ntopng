@@ -1618,15 +1618,8 @@ void Flow::updateProtocol(ndpi_protocol proto_id) {
   /* NOTE: in order to avoid inconsistent states, only overwrite the
    * protocools if UNKNOWN. */
 
-  if(ndpiDetectedProtocol.proto.master_protocol == NDPI_PROTOCOL_UNKNOWN)
-    ndpiDetectedProtocol.proto.master_protocol = proto_id.proto.master_protocol;
-
-  if(ndpiDetectedProtocol.proto.app_protocol == NDPI_PROTOCOL_UNKNOWN)
-    ndpiDetectedProtocol.proto.app_protocol = proto_id.proto.app_protocol;
-
-  if(ndpiDetectedProtocol.proto.master_protocol == ndpiDetectedProtocol.proto.app_protocol)
-    ndpiDetectedProtocol.proto.master_protocol = NDPI_PROTOCOL_UNKNOWN;
-
+  ndpiDetectedProtocol.proto.master_protocol = proto_id.proto.master_protocol;
+  ndpiDetectedProtocol.proto.app_protocol = proto_id.proto.app_protocol;
   ndpiDetectedProtocol.protocol_by_ip = proto_id.protocol_by_ip;
 
   /* NOTE: only overwrite the category if it was not set.
@@ -6998,6 +6991,8 @@ void Flow::fillZMQFlowCategory(ndpi_protocol *res) {
   const char *dst_name = NULL;
   const IpAddress *cli_ip = get_cli_ip_addr(), *srv_ip = get_srv_ip_addr();
 
+  res->state = NDPI_STATE_CLASSIFIED;
+    
   if(ndpiFlow && cli_ip && srv_ip && cli_ip->isIPv4()) {
     if(ndpi_fill_ip_protocol_category(ndpi_struct, ndpiFlow,
 				      cli_ip->get_ipv4(),
