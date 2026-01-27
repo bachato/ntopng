@@ -1,7 +1,7 @@
 .. _FlowsDump:
 
-Flows Dump
-##########
+Flows Dump (ClickHouse)
+#######################
 
 Ntopng supports flows dump towards multiple downstream databases, namely ClickHouse, Elasticsearch and Syslog. Flows dump is enabled using option :code:`-F`.
 
