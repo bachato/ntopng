@@ -329,38 +329,43 @@ void Redis::addToCache(const char *key, const char *value, u_int expire_secs) {
 
 /* **************************************** */
 
-int Redis::get(char *key, char *rsp, u_int rsp_len, bool cache_it) {
-  int rc;
-  bool cacheable = false;
+/*
+  NOTE:
+  the returned string must be freed by the caller
+*/
+char* Redis::get(char *key, bool cache_it) {
+  char *rsp = NULL;
+  bool cacheable = cache_it && isCacheable(key);
   redisReply *reply;
   std::map<std::string, StringCache>::iterator it;
-
+  
   l->lock(__FILE__, __LINE__);
 
-  if ((it = stringCache.find(key)) != stringCache.end()) {
-    StringCache *cached = &it->second;
+  if(cacheable) {
+    if ((it = stringCache.find(key)) != stringCache.end()) {
+      StringCache *cached = &it->second;
 
-    if ((cached->expire > 0) && (time(NULL) >= cached->expire)) {
+      if ((cached->expire > 0) && (time(NULL) >= cached->expire)) {
 #ifdef CACHE_DEBUG
-      printf("**** Cache expired %s\n", key);
+	printf("**** Cache expired %s\n", key);
 #endif
 
-      stringCache.erase(it);
-      rsp[0] = '\0';
-    } else
-      snprintf(rsp, rsp_len, "%s", cached->value.c_str());
+	stringCache.erase(it);
+      } else
+	rsp = strdup(cached->value.c_str());
 
 #ifdef CACHE_DEBUG
-    printf("**** Read from cache %s=%s\n", key, rsp);
+      printf("**** Read from cache %s=%s\n", key, rsp);
 #endif
-    l->unlock(__FILE__, __LINE__);
-    return (rsp[0] == '\0' ? -1 : 0);
-  } else {
+      l->unlock(__FILE__, __LINE__);
+      return(rsp);
+    } else {
 #ifdef CACHE_DEBUG
-    printf("**** Unable to find on cache %s\n", key);
+      printf("**** Unable to find on cache %s\n", key);
 #endif
+    }
   }
-
+  
   stats.num_get++;
   reply = (redisReply *)redisCommand(redis, "GET %s", key);
   if (!reply) reconnectRedis(true);
@@ -368,7 +373,79 @@ int Redis::get(char *key, char *rsp, u_int rsp_len, bool cache_it) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "%s",
                                  reply->str ? reply->str : "???");
 
-  cacheable = isCacheable(key);
+  if (reply && reply->str) {
+    rsp = strdup(reply->str ? reply->str : "");
+  }
+  
+  if (cacheable && (rsp != NULL)) {
+    u_int expire_sec = 0;
+
+    if (reply) freeReplyObject(reply);
+    stats.num_ttl++;
+    reply = (redisReply *)redisCommand(redis, "TTL %s", key);
+    if (!reply) reconnectRedis(true);
+    if (reply && (reply->type != REDIS_REPLY_INTEGER))
+      ntop->getTrace()->traceEvent(TRACE_ERROR, "%s",
+                                   reply->str ? reply->str : "???");
+
+    if (reply && (((int32_t)reply->integer)) >= 0) expire_sec = reply->integer;
+
+#ifdef CACHE_DEBUG
+    printf("**** ADD TO CACHE %s=%s [expire_sec=%u]\n", key, rsp, expire_sec);
+#endif
+
+    addToCache(key, rsp, expire_sec);
+  }
+
+  if (reply) freeReplyObject(reply);
+  l->unlock(__FILE__, __LINE__);
+
+  return (rsp);
+}
+
+/* **************************************** */
+
+int Redis::get(char *key, char *rsp, u_int rsp_len, bool cache_it) {
+  int rc;
+  bool cacheable = isCacheable(key);
+  redisReply *reply;
+  std::map<std::string, StringCache>::iterator it;
+  
+  l->lock(__FILE__, __LINE__);
+
+  if(cacheable) {
+    if ((it = stringCache.find(key)) != stringCache.end()) {
+      StringCache *cached = &it->second;
+
+      if ((cached->expire > 0) && (time(NULL) >= cached->expire)) {
+#ifdef CACHE_DEBUG
+	printf("**** Cache expired %s\n", key);
+#endif
+
+	stringCache.erase(it);
+	rsp[0] = '\0';
+      } else
+	snprintf(rsp, rsp_len, "%s", cached->value.c_str());
+
+#ifdef CACHE_DEBUG
+      printf("**** Read from cache %s=%s\n", key, rsp);
+#endif
+      l->unlock(__FILE__, __LINE__);
+      return (rsp[0] == '\0' ? -1 : 0);
+    } else {
+#ifdef CACHE_DEBUG
+      printf("**** Unable to find on cache %s\n", key);
+#endif
+    }
+  }
+  
+  stats.num_get++;
+  reply = (redisReply *)redisCommand(redis, "GET %s", key);
+  if (!reply) reconnectRedis(true);
+  if (reply && (reply->type == REDIS_REPLY_ERROR))
+    ntop->getTrace()->traceEvent(TRACE_ERROR, "%s",
+                                 reply->str ? reply->str : "???");
+
   if (reply && reply->str) {
     snprintf(rsp, rsp_len, "%s", reply->str ? reply->str : ""), rc = 0;
   } else {
@@ -397,15 +474,6 @@ int Redis::get(char *key, char *rsp, u_int rsp_len, bool cache_it) {
 
   if (reply) freeReplyObject(reply);
   l->unlock(__FILE__, __LINE__);
-
-  if (cacheable && (rc == -1)) {
-    /* Don't fill redis with default empty strings.
-       Those empty strings have already been set
-       into the memory cache by addToCache, leave
-       them out from redis */
-    /* Add default */
-    // set(key, (char*)"", 0);
-  }
 
   return (rc);
 }

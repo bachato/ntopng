@@ -5680,7 +5680,6 @@ static int ntop_info_redis(lua_State *vm) {
 
 static int ntop_get_redis(lua_State *vm) {
   char *key, *rsp = NULL;
-  u_int rsp_len = CONST_MAX_LEN_REDIS_VALUE;
   Redis *redis = ntop->getRedis();
 
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -5690,26 +5689,7 @@ static int ntop_get_redis(lua_State *vm) {
   if ((key = (char *)lua_tostring(vm, 1)) == NULL)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
 
-  if ((rsp = (char *)malloc(rsp_len)) != NULL) {
-    rsp[0] = '\0';
-
-    if (redis->get(key, rsp, rsp_len) == 0 &&
-        strnlen(rsp, rsp_len) >= rsp_len - 1) {
-      /*
-        Huge response, let's read its length and realloc the buffer for the
-        response
-      */
-      u_int actual_len = redis->len(key);
-      char *more_rsp;
-
-      if (actual_len++ /* ++ for the \0 */ > 0 &&
-          (more_rsp = (char *)realloc(rsp, actual_len)) != NULL) {
-        rsp = more_rsp;
-        redis->get(key, rsp, actual_len);
-      } else
-        rsp[0] = '\0';
-    }
-  }
+  rsp = redis->get(key);
 
   if (rsp) {
     lua_pushfstring(vm, "%s", rsp);
