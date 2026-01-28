@@ -528,28 +528,40 @@ end
 
 -- ################################################################################
 
-function discover.devtype2string(devtype)
-    devtype = tonumber(devtype)
-    for k, v in pairs(id2label) do
-        if (k == devtype) then
-            return v[2]
-        end
-    end
+local dtype_str_cache = nil
 
-    return ("") -- unknown
+function discover.devtype2string(devtype)
+   devtype = tonumber(devtype)
+   
+   if(dtype_str_cache == nil) then
+      dtype_str_cache = {}
+      
+      for k, v in pairs(id2label) do
+	 dtype_str_cache[k] = v[2]
+      end
+   end
+
+   return(dtype_str_cache[devtype] or "") -- unknown
 end
 
 -- ################################################################################
 
-function discover.devtype2stringId(devtype)
-    devtype = tonumber(devtype)
-    for k, v in pairs(id2label) do
-        if (k == devtype) then
-            return v[1]
-        end
-    end
+local dtype_cache = nil
 
-    return ("") -- unknown
+function discover.devtype2stringId(devtype)
+   local ret
+   
+   devtype = tonumber(devtype)
+
+   if(dtype_cache == nil) then
+      dtype_cache = {}
+      
+      for k, v in pairs(id2label) do
+	 dtype_cache[k] = v[1]
+      end
+   end
+
+   return(dtype_cache[devtype] or "") -- unknown
 end
 
 -- ################################################################################
