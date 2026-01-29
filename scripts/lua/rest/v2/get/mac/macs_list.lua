@@ -22,7 +22,7 @@ local manufacturer  = _GET["manufacturer"]
 local location  = _GET["location"] or ""
 local device_type   = tonumber(_GET["device_type"])
 
-########################################
+-- ########################################
 
 function macHosts(mac)
    require "lua_utils_gui"
@@ -41,7 +41,7 @@ function macHosts(mac)
    return {host_label='', num_hosts, has_name = false}
 end
 
-########################################
+-- ########################################
 
 local c_order = true
 local lua_order = asc
