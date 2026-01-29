@@ -1455,6 +1455,7 @@ public:
 
   void nDPIDumpHostBasedProtocols(struct mg_connection *mg_conn);
   void nDPIDumpHostBasedCategories(struct mg_connection *mg_conn);      
+  bool aggregateSiteFlows(lua_State *vm);
 };
 
 #endif /* _NETWORK_INTERFACE_H_ */

@@ -227,7 +227,7 @@ private:
   struct {
     TCPStats cli2srv, srv2cli;
   } tcp_stats;
-    
+
   bool trigger_immediate_periodic_update; /* needed to process external alerts */
   time_t next_call_periodic_update; /* The time at which the periodic lua script
                                        on this flow shall be called */
@@ -295,7 +295,7 @@ private:
     struct {
       u_int8_t igmp_type;
     } igmp;
-    
+
     struct {
       struct {
         u_int8_t icmp_type, icmp_code;
@@ -318,7 +318,7 @@ private:
   } protos;
 
   struct {
-    u_int32_t device_ip;
+    u_int32_t device_ip, next_hop;
     u_int32_t in_index, out_index;
     u_int16_t observation_point_id;
   } flow_device;
@@ -441,7 +441,7 @@ private:
   void getTCPFlagsJSON(ndpi_serializer *serializer, TCPStats *stats, const char *label);
   void allocTCPStats();
   void allocUDPStats();
-  
+
 public:
   Flow(NetworkInterface *_iface, int32_t iface_idx,
        u_int16_t _vlanId,
@@ -924,7 +924,7 @@ public:
     return (ndpi_get_proto_breed_name(get_protocol_breed()));
   };
   inline ndpi_protocol_category_t get_protocol_category() const { return(flow_category); };
-  
+
   inline const char *get_protocol_category_name() const {
     return (ndpi_category_get_name(iface->get_ndpi_struct(),
                                    get_protocol_category()));
@@ -1312,11 +1312,11 @@ public:
 
   inline void setFlowRTT(const struct timeval *const tv, bool client) {
     allocTCPStats();
-    
+
     if(tcp != NULL) {
       if (client) {
 	tcp->clientRTT3WH = Utils::timeval2ms(tv);
-	
+
 	if (cli_host)
 	  cli_host->updateNetworkRTT(tcp->clientRTT3WH);
       } else {
@@ -1327,7 +1327,7 @@ public:
       }
     }
   }
-  
+
   inline void setFlowTcpWindow(u_int16_t window_val, bool client) {
     allocTCPStats();
     if(tcp != NULL) {
@@ -1339,7 +1339,7 @@ public:
   }
   inline void setRTT() {
     allocTCPStats();
-    
+
     if(tcp != NULL)
       rttSec = (tcp->serverRTT3WH + tcp->clientRTT3WH)/1000.;
   }
@@ -1371,6 +1371,9 @@ public:
 
   inline void setFlowDeviceInIndex(u_int32_t idx)  { if(idx != 0) flow_device.in_index = idx; };
   inline void setFlowDeviceOutIndex(u_int32_t idx) { if(idx != 0) flow_device.out_index = idx; };
+
+  inline void setFlowDeviceNextHop(u_int32_t nh) { flow_device.next_hop = nh;    }
+  inline u_int32_t getFlowDeviceNextHop()        { return(flow_device.next_hop); }
 
   inline const u_int16_t getScore() const { return (flow_score); };
 
@@ -1444,19 +1447,19 @@ public:
   void setnDPIFingerprint(char *fp);
   inline char *getTCPFingerprint() { return(tcp_fingerprint); }
   inline char *getnDPIFingerprint() { return(ndpi_fingerprint); }
-  
-  /* For now, the check is only on the nDPI fingerprint, but it will 
-    need to be extended to the TCP fingerprint and JA4 when they are 
+
+  /* For now, the check is only on the nDPI fingerprint, but it will
+    need to be extended to the TCP fingerprint and JA4 when they are
     merged into the fingerprints block of proto_json_info.*/
-  inline bool isFingerprintAvailable() { 
+  inline bool isFingerprintAvailable() {
     return getnDPIFingerprint() != nullptr;
   }
-  
+
   inline void setSearchedField(const char *field) {
     snprintf(searched_field, sizeof(searched_field), "%s", field);
   }
   inline void resetSearchedField() { searched_field[0] = '\0'; }
-  
+
   inline void setTOS(u_int8_t tos, bool is_cli_tos) {
     if (is_cli_tos) cli2srv_tos = tos; else srv2cli_tos = tos;
   }
@@ -1572,7 +1575,7 @@ public:
   void getSrcAS(u_int32_t *as, char **as_name);
   void getDstAS(u_int32_t *as, char **as_name);
   void getTransitAS(u_int32_t *as, char **as_nam);
-  
+
   TransitAS getTransitASType();
   void setBittorrentHash(char *hash, u_int len);
   inline bool isFlowAccounted()        { return iface_flow_accounted; };

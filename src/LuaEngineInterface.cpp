@@ -5705,7 +5705,7 @@ static int ntop_clickhouse_archive_data(lua_State *vm) {
 static int ntop_dump_host_based_protocol_id(lua_State *vm) {
   NetworkInterface *curr_iface = getLuaVMUserdata(vm, iface);
   struct mg_connection *conn = getLuaVMUserdata(vm, conn);
-  
+
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
   if (curr_iface && conn)
@@ -5720,14 +5720,14 @@ static int ntop_dump_host_based_protocol_id(lua_State *vm) {
 static int ntop_dump_host_based_category_id(lua_State *vm) {
   NetworkInterface *curr_iface = getLuaVMUserdata(vm, iface);
   struct mg_connection *conn = getLuaVMUserdata(vm, conn);
-  
+
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
   if (curr_iface && conn)
     curr_iface->nDPIDumpHostBasedCategories(conn);
 
   lua_pushnil(vm);
-  
+
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
@@ -5753,6 +5753,17 @@ static int ntop_aggregate_asn_flows(lua_State *vm) {
 
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   lua_pushboolean(vm, curr_iface->aggregateASNModeFlows(vm));
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
+static int ntop_aggregate_site_flows(lua_State *vm) {
+  NetworkInterface *curr_iface = getLuaVMUserdata(vm, iface);
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  curr_iface->aggregateSiteFlows(vm);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
@@ -5991,7 +6002,7 @@ static luaL_Reg _ntop_interface_reg[] = {
   { "getnDPIProtocols", ntop_get_ndpi_protocols },
   { "getnDPICategories", ntop_get_ndpi_categories },
   { "dumpnDPIProtocolId", ntop_dump_host_based_protocol_id },
-  { "dumpnDPICategoryId", ntop_dump_host_based_category_id },  
+  { "dumpnDPICategoryId", ntop_dump_host_based_category_id },
   { "getHostsInfo", ntop_get_interface_hosts_info },
   { "getLocalHostsInfo", ntop_get_interface_local_hosts_info },
   { "getLocalHostsInfoNoTX", ntop_get_interface_local_hosts_no_tx_info },
@@ -6254,6 +6265,7 @@ static luaL_Reg _ntop_interface_reg[] = {
   /* Aggregated Flows */
   { "aggregateASNFlows", ntop_aggregate_asn_flows },
   { "execInMemoryQuery", ntop_exec_in_memory_sql_query },
+  { "aggregateSiteFlows", ntop_aggregate_site_flows },
 
 #ifdef NTOPNG_PRO
   /* Ranking */

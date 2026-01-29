@@ -1050,6 +1050,7 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow *const flow,
     break;
   case IPV4_NEXT_HOP:
     if (value->string && strcmp(value->string, "0.0.0.0")) return false;
+    flow->setIPv4NextHop(ntohl((value->string != NULL) ? inet_addr((char *)value->string) : value->int_num));
     break;
   case SRC_AS:
     flow->src_as = value->int_num;

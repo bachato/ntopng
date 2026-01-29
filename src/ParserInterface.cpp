@@ -258,6 +258,8 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
       }
     }
 
+    flow->setFlowDeviceNextHop(zflow->getIPv4NextHop());
+    
     if(zflow->inIndex != 0) {
       if(src2dst_direction)
 	flow->setFlowDeviceInIndex(zflow->inIndex);

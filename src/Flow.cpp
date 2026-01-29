@@ -1217,7 +1217,7 @@ void Flow::processPacket(bool src2dst_direction,
   proto_id = ndpi_detection_process_packet(iface->get_ndpi_struct(),
 					   ndpiFlow, ip_packet, ip_len, packet_time, NULL);
   flow_category = proto_id.category, flow_breed = proto_id.breed;
-  
+
   if((ndpi_flow_risk_bitmap != 0) && (ndpiFlow->risk == 0)) {
     /*
       Probably an exception has cleared the risk that was previously
@@ -6992,7 +6992,7 @@ void Flow::fillZMQFlowCategory(ndpi_protocol *res) {
   const IpAddress *cli_ip = get_cli_ip_addr(), *srv_ip = get_srv_ip_addr();
 
   res->state = NDPI_STATE_CLASSIFIED;
-    
+
   if(ndpiFlow && cli_ip && srv_ip && cli_ip->isIPv4()) {
     if(ndpi_fill_ip_protocol_category(ndpi_struct, ndpiFlow,
 				      cli_ip->get_ipv4(),

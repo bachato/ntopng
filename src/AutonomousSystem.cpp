@@ -143,16 +143,18 @@ void AutonomousSystem::lua(lua_State *vm, DetailsLevel details_level,
         lua_newtable(vm);
         char buf[32], buf2[64];
         IpAddress exporter;
+	TrafficCounter &stats = it->second;
+
         exporter.set(htonl(it->first.first));
-        TrafficCounter &stats = it->second;
+
         lua_push_uint64_table_entry(vm, "bytes_sent", stats.getSent());
         lua_push_uint64_table_entry(vm, "bytes_rcvd", stats.getRcvd());
-        snprintf(buf2, sizeof(buf2), "%s_%d", exporter.print(buf, sizeof(buf)),
-                 it->first.second);
+        snprintf(buf2, sizeof(buf2), "%s_%d", exporter.print(buf, sizeof(buf)), it->first.second);
         lua_pushstring(vm, buf2);
         lua_insert(vm, -2);
         lua_settable(vm, -3);
       }
+
       lua_pushstring(vm, "exporters");
       lua_insert(vm, -2);
       lua_settable(vm, -3);
@@ -164,9 +166,8 @@ void AutonomousSystem::lua(lua_State *vm, DetailsLevel details_level,
                               getTotalAlertedNumFlowsAsClient());
   lua_push_uint64_table_entry(vm, "as_server",
                               getTotalAlertedNumFlowsAsServer());
-  lua_push_uint64_table_entry(
-      vm, "total",
-      getTotalAlertedNumFlowsAsClient() + getTotalAlertedNumFlowsAsServer());
+  lua_push_uint64_table_entry(vm, "total",
+			      getTotalAlertedNumFlowsAsClient() + getTotalAlertedNumFlowsAsServer());
   lua_pushstring(vm, "alerted_flows");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
