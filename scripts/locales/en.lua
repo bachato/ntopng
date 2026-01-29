@@ -794,6 +794,7 @@ local lang = {
   ["script_contents"] = "Script File",
   ["scripts"] = "Scripts",
   ["search"] = "Search",
+  ["search_box"] = "Search an Host, Network, ...",
   ["search_host"] = "Search",
   ["seen_since"] = "Seen Since",
   ["sent"] = "Sent",

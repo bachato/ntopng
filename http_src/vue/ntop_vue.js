@@ -117,6 +117,7 @@ import { default as TabList } from "./tab-list.vue";
 import { default as Sankey } from "./sankey.vue";
 import { default as NoteList } from "./note-list.vue";
 import { default as Loading } from "./loading.vue";
+import { default as SearchBox } from "./components/search-box.vue";
 
 // dashboard
 import { default as Dashboard } from "./dashboard.vue";
@@ -263,6 +264,7 @@ let ntopVue = {
     AlertInfo: AlertInfo,
     Chart: Chart,
     TimeseriesChart: TimeseriesChart,
+    SearchBox: SearchBox,
     Datatable: Datatable,
     DateTimeRangePicker: DateTimeRangePicker,
     NetworkMap: NetworkMap,

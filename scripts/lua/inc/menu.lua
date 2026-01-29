@@ -1160,28 +1160,13 @@ print([[
 -- append searchbox
 
 if not infrastructure_view then
-
+    local json = require "dkjson"
+    local json_context = json.encode({
+        ifid = current_ifid
+    })
     print("<li class='nav-item'>")
-    print(template_utils.gen("typeahead_input.html", {
-        typeahead = {
-            base_id = "host_search",
-            action = "", -- see makeFindHostBeforeSubmitCallback
-            json_key = "ip",
-            query_field = "host",
-            class = "typeahead-dropdown-right search-container",
-            query_url = ntop.getHttpPrefix() .. "/lua/rest/v2/get/host/find.lua",
-            query_title = i18n("search_host"),
-            style = "",
-            before_submit = [[NtopUtils.makeFindHostBeforeSubmitCallback("]] ..
-                ntop.getHttpPrefix() .. [[")]],
-            max_items = "'all'" --[[ let source script decide ]] ,
-            parameters = {
-                ifid = ternary(is_system_interface, getSystemInterfaceId(), ifId)
-            }
-        }
-    }))
+    template_utils.render("pages/vue_page.template", { vue_page_name = "SearchBox", page_context = json_context })
     print("</li>")
-
 end
 
 -- #########################################

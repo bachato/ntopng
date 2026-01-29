@@ -699,64 +699,6 @@ export default class NtopUtils {
         $('a[href="' + hash + '"]', nav_object).tab('show');
     }
 
-    static _add_find_host_link(form, name, data) {
-        let input = form.find(`input[name="${name}"]`);
-        if (input.length > 0) {
-            input.val(data);
-        } else {
-            $('<input>').attr({
-                type: 'hidden',
-                name: name,
-                value: data,
-            }).appendTo(form);
-        }
-    }
-
-    /* Used while searching hosts a and macs with typeahead */
-    static makeFindHostBeforeSubmitCallback(http_prefix) {
-        return function (form, data) {
-            if (data.context && data.context == "historical") {
-                form.attr("action", http_prefix + "/lua/pro/db_search.lua");
-                if (data.type == "ip") {
-                    NtopUtils._add_find_host_link(form, "ip", data.ip);
-                } else if (data.type == "mac") {
-                    NtopUtils._add_find_host_link(form, "mac", data.mac);
-                } else if (data.type == "community_id") {
-                    NtopUtils._add_find_host_link(form, "community_id", data.community_id);
-                } else if (data.type == "ja3_client") {
-                    NtopUtils._add_find_host_link(form, "ja3_client", data.ja3_client);
-                } else if (data.type == "ja3_server") {
-                    NtopUtils._add_find_host_link(form, "ja3_server", data.ja3_server);
-                } else /* "hostname" */ {
-                    NtopUtils._add_find_host_link(form, "name", data.hostname ? data.hostname : data.name);
-                }
-            } else {
-                if (data.type == "mac") {
-                    form.attr("action", http_prefix + "/lua/mac_details.lua");
-                } else if (data.type == "network") {
-                    form.attr("action", http_prefix + "/lua/hosts_stats.lua");
-                    NtopUtils._add_find_host_link(form, "network", data.network);
-                } else if (data.type == "snmp") {
-                    form.attr("action", http_prefix + "/lua/pro/enterprise/snmp_interface_details.lua");
-                    NtopUtils._add_find_host_link(form, "snmp_port_idx", data.snmp_port_idx);
-                } else if (data.type == "snmp_device") {
-                    form.attr("action", http_prefix + "/lua/pro/enterprise/snmp_device_details.lua");
-                } else if (data.type == "asn") {
-                    form.attr("action", http_prefix + "/lua/hosts_stats.lua");
-                    NtopUtils._add_find_host_link(form, "asn", data.asn);
-                } else {
-                    form.attr("action", http_prefix + "/lua/host_details.lua");
-                    NtopUtils._add_find_host_link(form, "mode", "restore");
-                }
-            }
-            if (data.ifid) {
-                NtopUtils._add_find_host_link(form, "ifid", data.ifid);
-            }
-
-            return true;
-        }
-    }
-
     static tstampToDateString(html_tag, format, tdiff) {
         tdiff = tdiff || 0;
         var timestamp = parseInt(html_tag.html()) + tdiff;
