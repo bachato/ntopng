@@ -34,9 +34,7 @@
                     "id": "delete_exporter_site",
                     "icon": "fas fa fa-trash",
                     "title_i18n": "delete",
-                    "class": [
-                        "btn-info"
-                    ],
+                    "class": [],
                     "event_id": "click_button_delete_exporter_site"
                 }
 			]
