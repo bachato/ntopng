@@ -5759,6 +5759,7 @@ static int ntop_aggregate_asn_flows(lua_State *vm) {
 
 /* ****************************************** */
 
+#ifdef NTOPNG_PRO
 static int ntop_aggregate_site_flows(lua_State *vm) {
 #ifdef NTOPNG_PRO
   NetworkInterface *curr_iface = getLuaVMUserdata(vm, iface);
@@ -5770,6 +5771,7 @@ static int ntop_aggregate_site_flows(lua_State *vm) {
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
+#endif
 
 /* ****************************************** */
 
@@ -6268,9 +6270,9 @@ static luaL_Reg _ntop_interface_reg[] = {
   /* Aggregated Flows */
   { "aggregateASNFlows", ntop_aggregate_asn_flows },
   { "execInMemoryQuery", ntop_exec_in_memory_sql_query },
+#ifdef NTOPNG_PRO
   { "aggregateSiteFlows", ntop_aggregate_site_flows },
 
-#ifdef NTOPNG_PRO
   /* Ranking */
   { "updateRanking", ntop_update_ranking },
 #endif

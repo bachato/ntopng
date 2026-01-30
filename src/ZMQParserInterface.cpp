@@ -745,6 +745,8 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow *const flow,
                                            ParsedValue *value) {
   IpAddress ip_aux; /* used to check empty IPs */
 
+  // ntop->getTrace()->traceEvent(TRACE_WARNING, "Field: %u", field);
+  
   switch (field) {
   case IN_SRC_MAC:
   case OUT_SRC_MAC:
@@ -1049,7 +1051,7 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow *const flow,
     if (value->int_num != 0) return false;
     break;
   case IPV4_NEXT_HOP:
-    if (value->string && strcmp(value->string, "0.0.0.0")) return false;
+    if (value->string && (!strcmp(value->string, "0.0.0.0"))) return false;
     flow->setIPv4NextHop(ntohl((value->string != NULL) ? inet_addr((char *)value->string) : value->int_num));
     break;
   case SRC_AS:
