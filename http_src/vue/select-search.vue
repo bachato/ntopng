@@ -82,14 +82,35 @@ watch(() => props.options, (current_value, old_value) => {
     set_input();
 }, { flush: 'pre' });
 
-// Initialize component with options and selection
+/**
+ * Initialize component with options and selection state.
+ * This function orchestrates the complete setup process by calling:
+ * 1. set_options() - processes and categorizes options
+ * 2. set_selected_option() - sets single selection state
+ * 3. set_selected_values() - sets multiple selection state
+ */
 function set_input() {
     set_options();
     set_selected_option();
     set_selected_values();
 }
 
-// Process raw options and separate them into regular and grouped options
+/**
+ * Process raw options array and separate them into regular and grouped options.
+ * This function performs several transformations:
+ * 1. Creates a shallow copy of each option to avoid mutation
+ * 2. Ensures each option has a value (uses label as fallback)
+ * 3. Separates options based on the presence of 'group' property
+ * 4. Groups options by their group property using a dictionary
+ * 5. Converts the groups dictionary to an array format
+ * 
+ * The resulting structure:
+ * - options_2: Array of options without groups
+ * - groups_options_2: Array of grouped options with structure {group: string, options: array}
+ * 
+ * @throws Will skip processing if props.options is null
+ * @sideeffect Updates options_2, groups_options_2, and increments refresh_options
+ */
 function set_options() {
     options_2.value = [];
     groups_options_2.value = [];
@@ -117,8 +138,35 @@ function set_options() {
     refresh_options.value += 1; // Trigger re-render
 }
 
-// Custom search matcher function for Select2
-// Supports case-insensitive searching and filtering within option groups
+/**
+ * Custom search matcher function for Select2 with hierarchical search support.
+ * This function implements case-insensitive searching that works across nested option groups.
+ * 
+ * Algorithm:
+ * 1. Normalize search term and text to lowercase for case-insensitive comparison
+ * 2. If no search term is provided, return all data (no filtering)
+ * 3. Check if the parent item's text contains the search term
+ * 4. If no match, recursively search through child items (for grouped options)
+ * 5. If children match, return the parent with filtered children only
+ * 6. Return null if neither parent nor children match
+ * 
+ * @param {Object} params - Select2 search parameters
+ * @param {string} params.term - The search term entered by the user
+ * @param {Object} data - The option data object from Select2
+ * @param {string} data.text - Display text of the option
+ * @param {Array} [data.children] - Child options for grouped items
+ * @returns {Object|null} - Modified data object with filtered children, original data, or null if no match
+ * 
+ * @example
+ * // Returns data unchanged
+ * matchCustom({term: ''}, {text: 'Option 1'})
+ * 
+ * // Returns data if text contains 'opt'
+ * matchCustom({term: 'opt'}, {text: 'Option 1'})
+ * 
+ * // Returns parent with filtered children
+ * matchCustom({term: 'child'}, {text: 'Parent', children: [{text: 'Child 1'}, {text: 'Other'}]})
+ */
 function matchCustom(params, data) {
     // `params.term` should be the term that is used for searching
     // `data.text` is the text that is displayed for the data object
@@ -162,7 +210,27 @@ function matchCustom(params, data) {
     return null;
 }
 
-// Initialize or re-initialize the Select2 plugin
+/**
+ * Initialize or re-initialize the Select2 plugin with Vue integration.
+ * This is the core rendering function that:
+ * 1. Destroys existing Select2 instance if not first render
+ * 2. Initializes Select2 with custom configuration
+ * 3. Sets up event handlers for selection changes
+ * 4. Synchronizes Vue state with Select2 state
+ * 
+ * Configuration includes:
+ * - Custom matcher for hierarchical search
+ * - Theme customization
+ * - Tagging support (when enabled)
+ * - Size variants via CSS classes
+ * 
+ * Event handling:
+ * - select2:select: Handles both regular selections and custom tag creation
+ * - select2:unselect: Manages removal from multiple selections
+ * 
+ * @sideeffect Modifies DOM, sets up jQuery event listeners, updates first_time_render flag
+ * @throws May throw if Select2 initialization fails or jQuery is not available
+ */
 const render = () => {
     let select2Div = select2.value;
     if (first_time_render == false) {
@@ -225,7 +293,20 @@ const render = () => {
     change_select_2_selected_value();
 };
 
-// Update Select2's displayed value based on current selection
+/**
+ * Synchronize Select2's displayed value with Vue's internal state.
+ * This function ensures the Select2 UI reflects the current selection state.
+ * 
+ * For single select mode:
+ * - Extracts value from selected option object
+ * - Sets Select2 value and triggers change event
+ * 
+ * For multiple select mode:
+ * - Uses the array of selected values
+ * - Updates Select2 with all selected values
+ * 
+ * @sideeffect Modifies Select2 DOM element value and triggers change events
+ */
 function change_select_2_selected_value() {
     let select2Div = select2.value;
     if (!props.multiple) {
@@ -238,7 +319,24 @@ function change_select_2_selected_value() {
     }
 }
 
-// Determine if an option should be marked as selected
+/**
+ * Determine if an option should be marked as selected in the rendered HTML.
+ * This function handles the logic for both single and multiple selection modes.
+ * 
+ * Single select logic:
+ * 1. Compares option value with selected option value (strict equality)
+ * 2. Special handling for zero values: also matches by label if value is 0 or "0"
+ * 
+ * Multiple select logic:
+ * 1. Checks if value exists in selected_values array
+ * 2. Falls back to option's own 'selected' property
+ * 
+ * @param {Object} item - The option object to check
+ * @param {string|number} item.value - Option value
+ * @param {string} item.label - Option display label
+ * @param {boolean} [item.selected] - Optional pre-selected flag
+ * @returns {boolean} - True if the option should be marked as selected
+ */
 function is_selected(item) {
     if (!props.multiple) {
         const is_zero_value = selected_option_2.value.value == 0 || selected_option_2.value.value == "0";
@@ -247,7 +345,14 @@ function is_selected(item) {
     return selected_values.value.find((v) => v == item.value) != null || item.selected;
 }
 
-// Initialize selected values array for multiple select mode
+/**
+ * Initialize selected values array from props for multiple select mode.
+ * This function converts an array of option objects into an array of values.
+ * Each option's value is extracted (with label as fallback) and added to selected_values.
+ * 
+ * @sideeffect Updates selected_values reactive array
+ * @note Only executes in multiple select mode and when selected_options is provided
+ */
 function set_selected_values() {
     if (props.selected_options == null || !props.multiple) {
         return;
@@ -259,7 +364,14 @@ function set_selected_values() {
     });
 }
 
-// Set the currently selected option for single select mode
+/**
+ * Set the internal selected option state for single select mode.
+ * This function handles null/undefined cases by falling back to the first option
+ * when no selection is provided and not in multiple select mode.
+ * 
+ * @param {Object|null} selected_option - The option to select, or null for default
+ * @sideeffect Updates selected_option_2 reactive reference
+ */
 function set_selected_option(selected_option) {
     if (selected_option == null && !props.multiple) {
         selected_option = get_props_selected_option();
@@ -267,7 +379,13 @@ function set_selected_option(selected_option) {
     selected_option_2.value = selected_option;
 }
 
-// Get the selected option from props with fallback
+/**
+ * Get the selected option from props with safe fallback logic.
+ * This function provides a default selection when none is specified.
+ * 
+ * @returns {Object} - The selected option from props, or the first option if none selected
+ * @throws May return undefined if props.options is empty
+ */
 function get_props_selected_option() {
     if (props.selected_option == null) {
         return props.options[0];
@@ -275,7 +393,16 @@ function get_props_selected_option() {
     return props.selected_option;
 }
 
-// Extract value from selected option object
+/**
+ * Extract the display value from a selected option object.
+ * This function handles the optional nature of the 'value' property by using
+ * label as a fallback when value is not provided.
+ * 
+ * @param {Object|null} selected_option - The option object
+ * @param {string|number} [selected_option.value] - Optional value property
+ * @param {string} selected_option.label - Display label (used as fallback value)
+ * @returns {string|number} - The value to use for Select2
+ */
 function get_value_from_selected_option(selected_option) {
     if (selected_option == null) {
         selected_option = get_props_selected_option();
@@ -289,20 +416,49 @@ function get_value_from_selected_option(selected_option) {
     return value;
 }
 
-// Convert array of values to array of option objects
+/**
+ * Convert an array of string/number values to an array of full option objects.
+ * This function maps each value through find_option_from_value_or_label to
+ * retrieve the complete option object with all its properties.
+ * 
+ * @param {Array<string|number>} values - Array of option values
+ * @returns {Array<Object>} - Array of corresponding option objects
+ */
 function find_options_from_values(values) {
     let options = values.map((v) => find_option_from_value_or_label(v));
     return options;
 }
 
-// Find original option object from value or label
+/**
+ * Find the original option object from the props.options array by value or label.
+ * This function bridges between the internal processed options and the original
+ * props to ensure event emissions contain the original option objects.
+ * 
+ * Process:
+ * 1. Finds the processed option in options_2 or groups_options_2
+ * 2. Uses that option's value or label to locate the original in props.options
+ * 
+ * @param {string|number} value - The value to search for
+ * @returns {Object} - The original option object from props.options
+ */
 function find_option_from_value_or_label(value) {
     let option_2 = find_option_2_from_value(value);
     let option = props.options.find((o) => (o.value === option_2.value) || (o.label == option_2.label));
     return option;
 }
 
-// Find option from internal options_2 or groups_options_2 by value
+/**
+ * Find an option from the internal processed collections by its value.
+ * This function searches through both regular and grouped options using
+ * strict equality comparison (===) for accurate matching.
+ * 
+ * Search order:
+ * 1. Regular options (options_2)
+ * 2. Grouped options (groups_options_2)
+ * 
+ * @param {string|number} value - The value to search for
+ * @returns {Object|null} - The found option object or null if not found
+ */
 function find_option_2_from_value(value) {
     if (value == null) {
         value = get_value_from_selected_option();
@@ -321,10 +477,17 @@ function find_option_2_from_value(value) {
     return null;
 }
 
-// Expose render function to parent components
-defineExpose({ render });
-
-// Clean up Select2 instance and event listeners
+/**
+ * Clean up Select2 instance and event listeners to prevent memory leaks.
+ * This function safely destroys the Select2 plugin and removes all jQuery
+ * event handlers attached to the element.
+ * 
+ * Error handling:
+ * - Wraps destruction in try-catch to prevent unmount errors
+ * - Logs errors without throwing to avoid disrupting component lifecycle
+ * 
+ * @sideeffect Removes Select2 from DOM, clears event listeners
+ */
 function destroy() {
     try {
         $(select2.value).select2('destroy');
@@ -339,5 +502,8 @@ function destroy() {
 onBeforeUnmount(() => {
     destroy();
 });
+
+// Expose render function to parent components
+defineExpose({ render });
 
 </script>
