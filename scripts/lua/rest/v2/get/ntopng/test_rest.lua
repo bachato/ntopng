@@ -38,4 +38,24 @@ local res = {
    }}
 }
 
+if _GET["enabled"] and _GET["enabled"] == "true" then
+   res = {
+      nodes = {{
+         label = "Test Node 1",
+         link = "/lua/flows_stats.lua",
+         node_id = "test_node_1"
+      }, {
+         label = "Test Node 2",
+         link = "/lua/flows_stats.lua",
+         node_id = "test_node_2"
+      }},
+      links = {{
+         label = "Test Link",
+         source_node_id = "test_node_1",
+         target_node_id = "test_node_2",
+         value = 6375108
+      }}
+   }
+end
+
 rest_utils.answer(rc, res)
