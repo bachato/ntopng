@@ -5760,10 +5760,13 @@ static int ntop_aggregate_asn_flows(lua_State *vm) {
 /* ****************************************** */
 
 static int ntop_aggregate_site_flows(lua_State *vm) {
+#ifdef NTOPNG_PRO
   NetworkInterface *curr_iface = getLuaVMUserdata(vm, iface);
-
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   curr_iface->aggregateSiteFlows(vm);
+#else
+  lua_pushnil(vm);
+#endif
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
