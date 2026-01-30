@@ -1450,12 +1450,12 @@ public:
   bool aggregateASNModeFlows(lua_State *vm);
 #ifdef NTOPNG_PRO
   bool updateRanking(lua_State *vm, u_int32_t epoch, char *key, char *values);
+  bool aggregateSiteFlows(lua_State *vm);
 #endif
   inline bool hasMACs() { return(macs_hash); }
 
   void nDPIDumpHostBasedProtocols(struct mg_connection *mg_conn);
   void nDPIDumpHostBasedCategories(struct mg_connection *mg_conn);      
-  bool aggregateSiteFlows(lua_State *vm);
 };
 
 #endif /* _NETWORK_INTERFACE_H_ */

@@ -1661,6 +1661,8 @@ extern NtopngLuaContext* getUserdata(struct lua_State *vm);
 #define CONST_WHITELISTED_NETWORKS_CONFIGURATION_REDIS_KEY       "ntopng.prefs.nw_policy_whitelisted_networks"
 #endif
 
+#define CONST_FLOW_DEV_EXPORTER_SITES_ID                         "ntopng.flow_dev_exporter_sites"
+
 #define NTOP_QOE_MAX        100
 #define NTOP_QOE_UNKNOWN    255
 #define NTOP_QOE_EXCELLENT   90
