@@ -93,6 +93,9 @@ import { default as PageNetworksList } from "./page-networks-list.vue"
 import { default as PageDHCPLeases } from "./page-DHCP-leases.vue"
 import { default as PageExporterInterfaceOverview } from "./page-exporter-interface-overview.vue"
 
+/* Testing page */
+import { default as PageTest } from "./page-test.vue";
+
 /* Flow Details pages */
 import { default as PageFlowDetailsModbus } from "./page-flow-details-modbus.vue"
 import { default as PageFlowDetailsS7Comm } from "./page-flow-details-s7comm.vue"
@@ -208,6 +211,9 @@ let ntopVue = {
     PageTrafficProfiles: PageTrafficProfiles,
     PageDHCPLeases: PageDHCPLeases,
     PageExporterInterfaceOverview: PageExporterInterfaceOverview,
+
+    /* Testing page */
+    PageTest: PageTest,
 
     /* Flow Details pages */
     PageFlowDetailsModbus: PageFlowDetailsModbus,
