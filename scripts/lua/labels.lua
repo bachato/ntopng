@@ -16,14 +16,15 @@ dofile(dirs.installdir .. "/scripts/lua/inc/menu.lua")
 
 local page = _GET["page"]
 
-page_utils.print_navbar(i18n("labels_page.labels"), ntop.getHttpPrefix() .. "/lua/labels.lua", {{
+page_utils.print_navbar(i18n("labels_page.labels"), ntop.getHttpPrefix() .. "/lua/labels.lua", {
+    --[[{
     active = page == "overview" or page == nil,
     page_name = "overview",
     label = "<i class=\"fas fa-lg fa-home\"  data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" title=\"" ..
         i18n("labels_page.labels") .. "\"></i>"
-},{
-    active = page == "exporter_sites",
-    hidden = not ntop.isEnterpriseL(),
+},]]{
+    active = true,
+    hidden = not ntop.isEnterpriseM(),
     page_name = "exporter_sites",
     label = i18n("exporter_sites_page.exporter_sites")
 }})
@@ -37,16 +38,16 @@ local context = {
 
 local json_context = json.encode(context)
 
-if page == "exporter_sites" then
+--if page == "exporter_sites" then
     template_utils.render("pages/vue_page.template", {
         vue_page_name = "PageExporterSites",
         page_context  = json_context
     })
-else
+--[[else
     template_utils.render("pages/vue_page.template", {
         vue_page_name = "PageLabels",
         page_context  = json_context
     })
-end
+end]]
 
 dofile(dirs.installdir .. "/scripts/lua/inc/footer.lua")
