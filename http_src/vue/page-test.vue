@@ -12,7 +12,7 @@
                 </Transition>
                 <Transition name="add-effect" mode="out-in">
                     <div class="position-relative">
-                        <NetworkMap ref="network_map_test" :empty_message="no_data_message" :height="'50vh'"
+                        <NetworkMap ref="network_map_test" :empty_message="no_data_message"
                             :page_csrf="props.context.csrf" :url="network_map_test_url"
                             :url_params="getExtraParameters()" :map_id="'network_map_test'">
                         </NetworkMap>
