@@ -15,7 +15,7 @@
                 </button>
               </div>
             </div>
-            <template v-for="(value, key, index) in available_filters">
+            <template v-for="(value, key, index) in props.context.available_filters">
               <div class="m-1" v-if="value.length > 0">
                 <div style="min-width: 14rem;">
                   <label class="my-auto me-1">{{ _i18n('bubble_map.' + key) }}: </label>
@@ -57,10 +57,7 @@ import NtopUtils from "../utilities/ntop-utils";
 
 const _i18n = (t) => i18n(t);
 const props = defineProps({
-  ifid: String,
-  page_csrf: String,
-  charts_options: Array,
-  available_filters: Object,
+  context: Object
 })
 
 const loading = ref(true);
@@ -96,7 +93,7 @@ const reload = function() {
 const format_options = function(mode_id) {
   let options = {}
 
-  props.charts_options.forEach((option_list) => {
+  props.context.charts_options.forEach((option_list) => {
     if(option_list.mode_id == mode_id)
       options = option_list;
   })
@@ -157,9 +154,9 @@ onBeforeMount(() => {
   if(!timeframe) ntopng_url_manager.set_key_to_url('timeframe', 3600) /* Default 5 min */
   if(!vlan) ntopng_url_manager.set_key_to_url('vlan', '') /* Default no vlan */
   
-  ntopng_url_manager.set_key_to_url('ifid', props.ifid) /* Current interface */
+  ntopng_url_manager.set_key_to_url('ifid', props.context.ifid) /* Current interface */
 
-  for(const [name, filters] of Object.entries(props.available_filters)) {
+  for(const [name, filters] of Object.entries(props.context.available_filters)) {
     filters.forEach((filter) => {
       filter.filter_name = name
       if(filter.currently_active)

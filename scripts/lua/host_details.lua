@@ -2088,11 +2088,15 @@ setInterval(update_icmp_table, 5000);
 
    </div>]]
    elseif (page == "flows_sankey") then
-      print(template.gen("pages/sankey_host.template", {
+      -- template render
+      local json_context = json.encode({
          host = host_ip,
          is_local = host["localhost"]
-      }))
-
+      })
+      template.render("pages/vue_page.template", {
+         vue_page_name = "PageHostDetailsFlowSankey",
+         page_context = json_context
+      })
    elseif (page == "snmp" and ntop.isEnterpriseM() and isAllowedSystemInterface()) then
       local snmp_config = require "snmp_config"
       local snmp_devices = snmp_config.get_all_configured_devices()

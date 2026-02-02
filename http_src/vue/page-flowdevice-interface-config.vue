@@ -50,13 +50,10 @@ const downlink_speed = ref(null);
 const prev_downlink_speed = ref('');
 const disabled = ref(true);
 const props = defineProps({
-  ifid: String,
-  csrf: String,
-  device_ip: String,
-  port_index: String,
+  context: Object
 });
 
-const get_interface_config_url = `${http_prefix}/lua/pro/rest/v2/get/flowdevice/interface/config.lua?device_ip=${props.device_ip}&port_index=${props.port_index}&ifid=${props.ifid}`
+const get_interface_config_url = `${http_prefix}/lua/pro/rest/v2/get/flowdevice/interface/config.lua?device_ip=${props.context.device_ip}&port_index=${props.context.port_index}&ifid=${props.context.ifid}`
 const update_interface_config_url = `${http_prefix}/lua/pro/rest/v2/set/flowdevice/interface/config.lua`
 
 onMounted(async () => {
@@ -75,10 +72,10 @@ async function getFlowDeviceInterfaceConfig() {
 
 const updateInterfaceConfig = async function () {
   const params = {
-    ifid: props.ifid,
-    csrf: props.csrf,
-    device_ip: props.device_ip,
-    port_index: props.port_index,
+    ifid: props.context.ifid,
+    csrf: props.context.csrf,
+    device_ip: props.context.device_ip,
+    port_index: props.context.port_index,
     alias: custom_name.value.value,
     uplink_speed: Number(uplink_speed.value.value) * BIT_VALUE,
     downlink_speed: Number(downlink_speed.value.value) * BIT_VALUE,

@@ -33,7 +33,7 @@ import { ntopng_utility, ntopng_url_manager } from "../services/context/ntopng_g
 import { default as Sankey } from "./sankey.vue";
 
 const props = defineProps({
-    is_local: Boolean
+    context: Object
 });
 
 const _i18n = (t) => i18n(t);

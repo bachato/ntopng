@@ -46,10 +46,7 @@ const _i18n = (t) => i18n(t);
 const timeout_delete = 1 * 500;
 
 const props = defineProps({
-    url: String,
-    ifid: Number,
-    csrf: String,
-    columns_config: Array
+    context: Object
 });
 
 const table_config = ref({});
@@ -97,7 +94,7 @@ async function set_default_policy(policy) {
     let headers = {
         'Content-Type': 'application/json'
     };
-    let body = JSON.stringify({ default_policy: policy, csrf: props.csrf});
+    let body = JSON.stringify({ default_policy: policy, csrf: props.context.csrf});
     let res = await ntopng_utility.http_request(set_policy_url, { method: "post", headers, body});
     load_default_policy(policy);
     refresh_table();    
@@ -107,7 +104,7 @@ function set_rule(rule, url) {
     let headers = {
         'Content-Type': 'application/json'
     };
-    let body = JSON.stringify({ ...rule, csrf: props.csrf});
+    let body = JSON.stringify({ ...rule, csrf: props.context.csrf});
     
     ntopng_utility.http_request(url, { method: "post", headers, body});
     refresh_table();    
@@ -121,7 +118,7 @@ function set_datatable_config() {
     const datatableButton = [];
     
     let params = { 
-	    ifid: ntopng_url_manager.get_url_entry("ifid") || props.ifid,	
+	    ifid: ntopng_url_manager.get_url_entry("ifid") || props.context.ifid,	
     };
     let url_params = ntopng_url_manager.obj_to_url_params(params);
     
@@ -142,7 +139,7 @@ function set_datatable_config() {
     
     let defaultDatatableConfig = {
 	table_buttons: datatableButton,
-	data_url: `${props.url}?${url_params}`,
+	data_url: `${props.context.url}?${url_params}`,
 	enable_search: false,
     };
     
@@ -216,7 +213,7 @@ async function delete_rule(rule) {
     let headers = {
         'Content-Type': 'application/json'
     };
-    let body = JSON.stringify({ rule_id: rule.rule_id, csrf: props.csrf});
+    let body = JSON.stringify({ rule_id: rule.rule_id, csrf: props.context.csrf});
     
     ntopng_utility.http_request(add_url, { method: "post", headers, body});
     refresh_table();    
