@@ -9,26 +9,11 @@ require "lua_utils"
 require "db_utils"
 require "rrd_paths"
 
-local top_talkers_utils = require "top_talkers_utils"
-local graph_common = require "graph_common"
-
 local ts_utils = require("ts_utils")
-
-local iface_behavior_update_freq = 300 -- Seconds
 
 -- ########################################################
 
 local graph_utils = {}
-
--- ########################################################
-
-graph_utils.graph_colors_old = {
-    '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2',
-    '#7f7f7f', '#bcbd22', '#17becf', -- https://github.com/mbostock/d3/wiki/Ordinal-Scales
-    '#ffbb78', '#1f77b4', '#aec7e8', '#2ca02c', '#98df8a', '#d62728', '#ff9896',
-    '#9467bd', '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f',
-    '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5'
-}
 
 -- ########################################################
 
@@ -45,11 +30,7 @@ local function hue2rgb(p, q, t)
     return p
 end
 
-local function addAlphaToHex(hex, alpha)
-    local alphaHex = string.format("%02x", math.floor(alpha * 255 + 0.5))
-    return hex .. alphaHex
-end
-
+-- ########################################################
 
 function generateColorPalette(n, alpha)
     local colors = {}
@@ -150,67 +131,6 @@ graph_utils.graph_colors = generateColorPalette(30)
 
 function graph_utils.get_html_color(index)
     return graph_utils.graph_colors[(index % #graph_utils.graph_colors) + 1]
-end
-
--- ########################################################
-
--- @brief Ensure that the provided series have the same number of points. This is a
--- requirement for the charts.
--- @param series a list of series to fix. The format of each serie is the one
--- returned by ts_utils.query
--- @note the series are modified in place
-function graph_utils.normalizeSeriesPoints(series)
-    -- local format_utils = require "format_utils"
-
-    -- for idx, data in ipairs(series) do
-    --    for _, s in ipairs(data.series) do
-    -- 	 if not s.tags.protocol then
-    -- 	    tprint({step = data.step, num = #s.data, start = format_utils.formatEpoch(data.start), count = s.count, label = s.label})
-    -- 	 end
-    --    end
-    -- end
-
-    local max_count = 0
-    local min_step = math.huge
-    local ts_common = require("ts_common")
-
-    for _, serie in pairs(series) do
-        max_count = math.max(max_count, #serie.series[1].data)
-        min_step = math.min(min_step, serie.step)
-    end
-
-    if max_count > 0 then
-        for _, serie in pairs(series) do
-            local count = #serie.series[1].data
-
-            if count ~= max_count then
-                serie.count = max_count
-
-                for _, serie_data in pairs(serie.series) do
-                    -- The way this function perform the upsampling is partial.
-                    -- Only points are upsampled, times are not adjusted.
-                    -- In addition, the max_count is fixed and this causes series
-                    -- with different lengths to be upsampled differently.
-                    -- For example a 240-points timeseries with lenght 1-day
-                    -- and a 10 points timeseris with length 1-hour would result
-                    -- the the 1-hour timeseries being divided into 240 points, actually
-                    -- ending up in having a much smaller step.
-                    -- TODO: adjust timeseries times.
-                    -- TODO: handle series with different start and end times.
-                    serie_data.data = ts_common.upsampleSerie(serie_data.data,
-                                                              max_count)
-                    -- The new step needs to be adjusted as well. The new step is smaller
-                    -- than the new step. To calculate it, multiply the old step by the fraction
-                    -- of old vs new points.
-                    local new_step = round(serie.step * count / max_count, 0)
-                    serie.step = new_step
-
-                    serie_data.step = new_step
-                    serie_data.count = max_count
-                end
-            end
-        end
-    end
 end
 
 -- ########################################################
@@ -378,22 +298,6 @@ function graph_utils.stackedProgressBars(total, bars, other_label, formatter,
     return table.concat(res)
 end
 
--- ########################################################
-
-local function getMinZoomResolution(schema)
-    local schema_obj = ts_utils.getSchema(schema)
-
-    if schema_obj then
-        if schema_obj.options.step >= 300 then
-            return '30m'
-        elseif schema_obj.options.step >= 60 then
-            return '5m'
-        end
-    end
-
-    return '1m'
-end
-
 -- #################################################
 
 function graph_utils.drawNewGraphs(source_value_object)
@@ -512,14 +416,14 @@ function graph_utils.drawNewGraphs(source_value_object)
 
     local context = {
         traffic_extraction_permitted = traffic_extraction_permitted,
-        sources_types_enabled = json.encode(sources_types_enabled),
-        source_value_object = json.encode(source_value_object),
-        sources_types_top_enabled = json.encode(sources_types_top_enabled),
-        is_dark_mode = ntop.getPref("ntopng.user." .. _SESSION["user"] ..
-                                        ".theme") == "dark"
+        sources_types_enabled = sources_types_enabled,
+        source_value_object = source_value_object,
+        sources_types_top_enabled = sources_types_top_enabled,
+        is_ntop_pro = ntop.isPro(),
+        is_history_enabled = hasClickHouseSupport(),
     }
-    template_utils.render("pages/components/historical_interface.template",
-                          context)
+    local json_context = json.encode(context)
+    template_utils.render("pages/vue_page.template", { vue_page_name = "PageStats", page_context = json_context })
 end
 
 -- #################################################
