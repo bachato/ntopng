@@ -88,7 +88,7 @@ const showed = () => { };
 
 const props = defineProps({
   page_csrf: String,
-  ifid: String,
+  ifid: Number,
 });
 
 function reset_modal_form() {

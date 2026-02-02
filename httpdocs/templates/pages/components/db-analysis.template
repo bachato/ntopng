@@ -3,13 +3,6 @@
 Base template for datatables.
 #}
 
-<!-- defines base_path globals const-->
-<script type='text/javascript'>
-const base_path = '{* ntop.getHttpPrefix() *}';
-const default_ifid = '{* interface.getId() *}';
-const navbar_context = {* navbar *};
-</script>
-
 <div id="navbar">
 <page-navbar
 	id="page_navbar"
@@ -22,7 +15,7 @@ const navbar_context = {* navbar *};
 </div>
 
 <div class='row'>
-  <div class='col-9'>
+  <div class='col-12'>
     <div class="mb-2">
       <div class="w-100">
         <div clas="range-container d-flex flex-wrap">
@@ -78,7 +71,10 @@ const navbar_context = {* navbar *};
 </div>
 
 <script type='text/javascript'>
-i18n_ext.showing_x_to_y_rows = "{{ i18n('showing_x_to_y_rows', {x='_START_', y='_END_', tot='_TOTAL_'}) }}";
+  const base_path = '{* ntop.getHttpPrefix() *}';
+  const default_ifid = '{* interface.getId() *}';
+  const navbar_context = {* navbar *};
+  i18n_ext.showing_x_to_y_rows = "{{ i18n('showing_x_to_y_rows', {x='_START_', y='_END_', tot='_TOTAL_'}) }}";
     let pageCsrf = "{{ ntop.getRandomCSRFValue() }}";
   let table = undefined;
   let VUE_APP;
@@ -109,99 +105,96 @@ i18n_ext.showing_x_to_y_rows = "{{ i18n('showing_x_to_y_rows', {x='_START_', y='
   let aggregation_criteria = ntopng_url_manager.get_url_entry("query_preset");
 
   selected_custom_queries = custom_queries_list.find((c) => c.value == aggregation_criteria);
-
   function start_navbar() {
-      let navbar_vue_options = {
-	  components: {	  
-   	      // 'page-navbar': Vue.defineAsyncComponent( () => ntopng_vue_loader.loadModule(`${base_path}/vue/components/page-navbar.vue`, ntopng_vue_loader.loadOptions) ),
-   	      'page-navbar': ntopVue.PageNavbar,
-	  },
-	  /**
-	   * First method called when the component is created.
-	   */
-	  created() {},
-	  mounted() {
-	  },
-	  data() {
-	      return {
-		  navbar_context: navbar_context,
-	      };
-	  },
-	  methods: {
-	      click_item: function(item) {
-	      ntopng_url_manager.set_key_to_url('page', item.page_name);
-	      ntopng_url_manager.set_key_to_url('query_preset', '');
-	      ntopng_url_manager.reload_url();
-	      },
-	  },
-      };
-      const navbar_vue = ntopVue.Vue.createApp(navbar_vue_options);
-      const vue_app = navbar_vue.mount("#navbar");
-      return vue_app;
+    return start_vue(
+      "navbar",
+      {
+        'page-navbar': ntopVue.PageNavbar
+      },
+      {
+        navbar_context,
+        click_item(item) {
+          ntopng_url_manager.set_key_to_url('page', item.page_name)
+          ntopng_url_manager.set_key_to_url('query_preset', '')
+          ntopng_url_manager.reload_url()
+        }
       }
-
-  function start_range_picker() {
-      let datatable_vue_options = {
-	  props: {
-	      id: String,
-	  },
-	  components: {	  
-   	      'range-picker': ntopVue.RangePicker,
-   	      'select-search': ntopVue.SelectSearch,
-	  },
-	  /**
-	   * First method called when the component is created.
-	   */
-	  created() {},
-	  mounted() {},
-	  data() {
-	      return {
-          custom_queries_list: custom_queries_list,
-          selected_custom_queries: selected_custom_queries,
-	      };
-	  },
-	  methods: {
-	    set_query_preset_in_url: function(elem) {
-	      ntopng_url_manager.set_key_to_url('query_preset', elem.value);
-	      ntopng_url_manager.reload_url();
-      }
-    },
-      };
-
-      const datatable_vue = ntopVue.Vue.createApp(datatable_vue_options);
-      const vue_app = datatable_vue.mount("#datatable-vue");
-      return vue_app;
+    )
   }
 
-  $(document).ready(async function(){
-      setTimeout(() => start_navbar(), 0);
-      if (ntopng_url_manager.get_url_entry("ifid") == null) {
-	  ntopng_url_manager.add_obj_to_url({ifid: default_ifid});
+  function start_range_picker() {
+    return start_vue(
+      "datatable-vue",
+      {
+        'range-picker': ntopVue.RangePicker,
+        'select-search': ntopVue.SelectSearch
+      },
+      {
+        custom_queries_list,
+        selected_custom_queries,
+        set_query_preset_in_url(elem) {
+          ntopng_url_manager.set_key_to_url('query_preset', elem.value)
+          ntopng_url_manager.reload_url()
+        }
       }
-      if (ntopng_url_manager.get_url_entry("epoch_begin") == null
-      	 || ntopng_url_manager.get_url_entry("epoch_end") == null) {
-	 let default_epoch_begin = Number.parseInt((Date.now() - 1000 * 30 * 60) / 1000);
-	 let default_epoch_end = Number.parseInt(Date.now() / 1000);
-	 ntopng_url_manager.set_key_to_url("epoch_begin", default_epoch_begin);
-	 ntopng_url_manager.set_key_to_url("epoch_end", default_epoch_end);
-      }
-      
-      VUE_APP = start_range_picker();
-      
-      await ntopng_sync.on_ready("range_picker");
-      NtopUtils.hideOverlays();
+    )
+  }
+
+  function start_vue(id, components, context) {
+
+    if (!window.vueApps) {
+      window.vueApps = {}
+    }
+
+    if (window.vueApps[id]) {
+      window.vueApps[id].unmount()
+      window.vueApps[id] = null
+    }
+
+    const app = ntopVue.Vue.createApp({
+      data() {
+        return context
+      },
+      components
+    })
+
+    window.vueApps[id] = app.mount(`#${id}`)
+    return window.vueApps[id]
+  }
+
+ $(document).ready(async function () {
+    setTimeout(() => start_navbar(), 0)
+
+    if (ntopng_url_manager.get_url_entry("ifid") == null) {
+      ntopng_url_manager.add_obj_to_url({ ifid: default_ifid })
+    }
+
+    if (
+      ntopng_url_manager.get_url_entry("epoch_begin") == null ||
+      ntopng_url_manager.get_url_entry("epoch_end") == null
+    ) {
+      const now = Date.now()
+      ntopng_url_manager.set_key_to_url("epoch_begin", Math.floor((now - 30 * 60 * 1000) / 1000))
+      ntopng_url_manager.set_key_to_url("epoch_end", Math.floor(now / 1000))
+    }
+
+    VUE_APP = start_range_picker()
+
+    await ntopng_sync.on_ready("range_picker")
+    NtopUtils.hideOverlays()
 
     ntopng_status_manager.on_status_change("datatable", (new_status) => {
-	let url_params = ntopng_url_manager.get_url_params();
-	{% for _, chart_opts in ipairs(charts) do %}
-        if("{{ chart_opts.chart_type }}" === "geomap") {
-            redraw_hosts(null, true, url_params + "&chart_id={{ chart_opts.chart_id }}");
+      const url_params = ntopng_url_manager.get_url_params()
+
+      {% for _, chart_opts in ipairs(charts) do %}
+        if ("{{ chart_opts.chart_type }}" === "geomap") {
+          redraw_hosts(null, true, url_params + "&chart_id={{ chart_opts.chart_id }}")
         } else {
-	    let obj_params = ntopng_url_manager.get_url_object();
-            obj_params["chart_id"] = "{{ chart_opts.chart_id }}";
-            WidgetUtils.getWidgetByName("{{ chart_opts.chart_id }}").update(obj_params);
+          const obj_params = ntopng_url_manager.get_url_object()
+          obj_params.chart_id = "{{ chart_opts.chart_id }}"
+          WidgetUtils.getWidgetByName("{{ chart_opts.chart_id }}").update(obj_params)
         }
-	{% end %}
-    }, false);
-});
+      {% end %}
+    }, false)
+  })
 </script>

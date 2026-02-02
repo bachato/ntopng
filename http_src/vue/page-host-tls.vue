@@ -37,8 +37,7 @@ export default {
     'datatable': Datatable,
   },
   props: {
-    page_csrf: String,
-    url_params: Object,
+    context: Object,
   },
   /**
    * First method called when the component is created.

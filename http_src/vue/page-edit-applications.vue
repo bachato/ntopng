@@ -13,8 +13,8 @@
 
   <div v-show="!hidden" ref="update_message" class="alert alert-info">{{ message }}</div>
 
-  <ModalAddApplication ref="modal_add_application" :category_list="category_list" :page_csrf="page_csrf" :ifid="ifid"
-    @add="_add">
+  <ModalAddApplication ref="modal_add_application" :category_list="category_list" :page_csrf="props.context.page_csrf"
+    :ifid="props.context.ifid" @add="_add">
   </ModalAddApplication>
   <ModalDeleteApplication ref="modal_delete_application" @remove="_remove">
   </ModalDeleteApplication>
@@ -52,16 +52,15 @@ const add_application_url = `${http_prefix}/lua/rest/v2/edit/application/applica
 const delete_application_url = `${http_prefix}/lua/rest/v2/delete/application/application.lua`
 
 const _i18n = (t) => i18n(t);
+
 const props = defineProps({
-  page_csrf: String,
-  ifid: String,
-  has_protos_file: Boolean,
-})
+  context: Object,
+});
 
 const _remove = async (params) => {
   const url_params = {
-    csrf: props.page_csrf,
-    ifid: props.ifid
+    csrf: props.context.page_csrf,
+    ifid: props.context.ifid
   }
 
   const url = NtopUtils.buildURL(delete_application_url, {
@@ -85,8 +84,8 @@ const _add = async (params) => {
   params.is_edit_page = null;
 
   const url_params = {
-    csrf: props.page_csrf,
-    ifid: props.ifid
+    csrf: props.context.page_csrf,
+    ifid: props.context.ifid
   }
 
   const url = NtopUtils.buildURL(add_application_url, {
@@ -164,7 +163,7 @@ const add_action_column = function (rowData) {
   }
 
   const actions = [
-    { class: `pointer ${props.has_protos_file ? '' : 'disabled'}`, handler: edit_handler, icon: 'fa-edit', title: i18n('edit') },
+    { class: `pointer ${props.context.has_protos_file ? '' : 'disabled'}`, handler: edit_handler, icon: 'fa-edit', title: i18n('edit') },
   ]
 
   if (rowData.is_custom) {
@@ -190,7 +189,7 @@ const download_categories = () => {
 function start_datatable() {
   const datatableButton = [];
 
-  if (props.has_protos_file) {
+  if (props.context.has_protos_file) {
     datatableButton.push({
       text: '<i class="fas fa-plus"></i>',
       className: 'btn-link',
@@ -217,7 +216,7 @@ function start_datatable() {
 
   let defaultDatatableConfig = {
     table_buttons: datatableButton,
-    data_url: NtopUtils.buildURL(`${http_prefix}/lua/rest/v2/get/ntopng/applications.lua`, { ifid: props.ifid }),
+    data_url: NtopUtils.buildURL(`${http_prefix}/lua/rest/v2/get/ntopng/applications.lua`, { ifid: props.context.ifid }),
     enable_search: true,
     table_config: {
       serverSide: false,

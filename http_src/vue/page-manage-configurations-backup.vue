@@ -8,7 +8,7 @@
       <div class="card  card-shadow">
         <div class="card-body">
           <Loading :isLoading="loading"></Loading>
-          <div id="manage_configurations_backup" :class="[ loading ? 'ntopng-gray-out' : '' ]">
+          <div id="manage_configurations_backup" :class="[loading ? 'ntopng-gray-out' : '']">
             <Datatable ref="table_manage_configurations_backup" :id="table_config.id" :key="table_config.data_url"
               :table_buttons="table_config.table_buttons" :columns_config="table_config.columns_config"
               :data_url="table_config.data_url" :table_config="table_config.table_config">
@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount } from "vue";
+import { ref, onBeforeMount, onMounted } from "vue";
 import { default as Datatable } from "./datatable.vue";
 import { default as Loading } from "./loading.vue"
 
@@ -63,6 +63,10 @@ const reload_table = () => {
 
 onBeforeMount(async () => {
   await set_datatable_config();
+});
+
+onMounted(() => {
+  loading.value = false;
 });
 
 const trigger_download = function (row) {

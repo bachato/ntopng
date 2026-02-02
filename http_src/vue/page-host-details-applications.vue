@@ -72,19 +72,13 @@ export default {
     'tab-list': TabList,
   },
   props: {
-    page_csrf: String,
-    url_params: Object,
-    view: String,
-    is_ch_enabled: Boolean,
-    is_locale: String,
-    ts_l7_enabled: Boolean,
-    ts_cat_enabled: Boolean
+    context: Object
   },
   /**
    * First method called when the component is created.
    */
   created() {
-    this.applications_tab = ntopng_url_manager.get_url_entry("view") || this.$props.view
+    this.applications_tab = ntopng_url_manager.get_url_entry("view") || this.$props.context.view
     this.tab_list.forEach((i) => {
       this.applications_tab == i.id ? i.active = true : i.active = false
     });
@@ -137,12 +131,12 @@ export default {
       tab_list: [
         { 
           title: i18n('host_details.applications_tab'),
-          active: (this.$props.view == 'applications'),
+          active: (this.$props.context.view == 'applications'),
           id: 'applications'
         },
         { 
           title: i18n('host_details.categories_tab'),
-          active: (this.$props.view == 'categories'),
+          active: (this.$props.context.view == 'categories'),
           id: 'categories'
         },
       ]
@@ -150,9 +144,9 @@ export default {
   },
   methods: {
     add_action_column: function(columns, name, value) {
-      const host = `${this.$props.url_params.host}`
-      const vlan = `${this.$props.url_params.vlan}`
-      const ifid = `${this.$props.url_params.ifid}`
+      const host = `${this.$props.context.url_params.host}`
+      const vlan = `${this.$props.context.url_params.vlan}`
+      const ifid = `${this.$props.context.url_params.ifid}`
       let handlerId = "page-stats-action-jump-historical";
       columns.push({ columnName: i18n("actions"), width: '5%', name: 'actions', className: 'text-center', orderable: false, responsivePriority: 0, handlerId, render: (data, type, service) => {
         const jump_to_historical = {
@@ -207,7 +201,7 @@ function start_datatable(PageVue) {
     }
   });
   
-  let tmp_params = url_params;
+  let tmp_params = PageVue.$props.context.url_params;
   tmp_params['view'] = 'applications'
   
   let defaultDatatableConfig = {
@@ -230,8 +224,8 @@ function start_datatable(PageVue) {
 
   let columns = [
     { columnName: i18n("host_details.application"), targets: 0, width: '20', name: 'application', data: 'application', className: 'text-nowrap', responsivePriority: 1, render: (data) => {
-      if (PageVue.$props.is_locale == "1" && PageVue.$props.ts_l7_enabled === true) {
-        return `<a href="${http_prefix}/lua/host_details.lua?host=${PageVue.$props.url_params.host}@${PageVue.$props.url_params.vlan}&page=historical&ifid=${PageVue.$props.url_params.ifid}&protocol=${data.label}&ts_schema=host:ndpi" target="_blank">${data.label}</a>`
+      if (PageVue.$props.context.is_locale == "1" && PageVue.$props.context.ts_l7_enabled === true) {
+        return `<a href="${http_prefix}/lua/host_details.lua?host=${PageVue.$props.context.url_params.host}@${PageVue.$props.context.url_params.vlan}&page=historical&ifid=${PageVue.$props.context.url_params.ifid}&protocol=${data.label}&ts_schema=host:ndpi" target="_blank">${data.label}</a>`
       } else
         return `${data.label}`;
       } 
@@ -265,7 +259,7 @@ function start_datatable(PageVue) {
     },
   ];
 
-  if(is_ch_enabled)
+  if(PageVue.$props.context.is_ch_enabled)
     PageVue.add_action_column(columns, 'l7proto', 'application');
   
   let applicationsConfig = ntopng_utility.clone(defaultDatatableConfig);
@@ -281,14 +275,14 @@ function start_datatable(PageVue) {
 
   columns = [
     { columnName: i18n("host_details.category"), targets: 0, name: 'category', data: 'category', className: 'text-nowrap', responsivePriority: 1, render: (data) => {
-      if (PageVue.$props.is_locale == "1" && PageVue.$props.ts_cat_enabled === true)
-        return `<a href="${http_prefix}/lua/host_details.lua?host=${PageVue.$props.url_params.host}@${PageVue.$props.url_params.vlan}&ts_schema=host:ndpi_categories&page=historical&category=${data.label}" target="_blank">${data.label}</a>`
+      if (PageVue.$props.context.is_locale == "1" && PageVue.$props.context.ts_cat_enabled === true)
+        return `<a href="${http_prefix}/lua/host_details.lua?host=${PageVue.$props.context.url_params.host}@${PageVue.$props.context.url_params.vlan}&ts_schema=host:ndpi_categories&page=historical&category=${data.label}" target="_blank">${data.label}</a>`
       else
         return `${data.label}`;
       } 
     },
     { columnName: i18n("host_details.applications"), targets: 0, name: 'applications', data: 'applications', orderable: false, className: 'text-nowrap', responsivePriority: 1, render: (data) => {
-        if(PageVue.$props.is_locale == "1")
+        if(PageVue.$props.context.is_locale == "1")
           return `${data.label || ''} <a href="${http_prefix}/${data.href}${data.category_id}">${data.more_protos || ''}</a>`
         else
           return `${data.label || ''}`;
@@ -309,7 +303,7 @@ function start_datatable(PageVue) {
     },
   ];
 
-  if(is_ch_enabled)
+  if(PageVue.$props.context.is_ch_enabled)
     PageVue.add_action_column(columns, 'l7cat', 'category');
   
   let categoriesConfig = ntopng_utility.clone(defaultDatatableConfig);

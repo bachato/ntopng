@@ -36,7 +36,7 @@
                         </div>
                     </div>
                     <div>
-                        <TableWithConfig ref="table_server_ports" :csrf="csrf" :table_id="table_id" :showLoading="true"
+                        <TableWithConfig ref="table_server_ports" :csrf="props.context.csrf" :table_id="table_id" :showLoading="true"
                             :f_map_columns="map_table_def_columns" :get_extra_params_obj="get_extra_params_obj"
                             @custom_event="on_table_custom_event">
                             <template v-slot:custom_header>
@@ -82,22 +82,9 @@ const filter_table_array = ref([]);
 const filter_table_dropdown_array = ref([])
 
 const props = defineProps({
-    is_ntop_enterprise_m: Boolean,
-    csrf: String,
-    vlans: Array,
-    ifid: Number,
-    aggregation_criteria: String,
-    page: Number,
-    sort: String,
-    order: String,
-    start: Number,
-    length: Number,
-    host: String,
+    context: Object,
 });
-const context = ref({
-    csrf: props.csrf,
-    ifid: props.ifid
-})
+
 const _i18n = (t) => i18n(t);
 
 /* L4 Protocol List */
@@ -118,7 +105,7 @@ let port_list = ref([]);
 let application_list = ref([]);
 
 const criteria_list = function () {
-    if (props.is_ntop_enterprise_m) {
+    if (props.context.is_ntop_enterprise_m) {
         return ref(criteria_list_def);
     }
     else {
@@ -135,7 +122,7 @@ onMounted(async () => {
     let port = ntopng_url_manager.get_url_entry('port');
     let l4_proto = ntopng_url_manager.get_url_entry('protocol');
     const l7_proto = ntopng_url_manager.get_url_entry('application');  
-    ntopng_url_manager.set_key_to_url('ifid', props.ifid); /* Current interface */
+    ntopng_url_manager.set_key_to_url('ifid', props.context.ifid); /* Current interface */
 
 
     if (port != null && port.localeCompare("") != 0 &&
@@ -289,7 +276,7 @@ function add_table_filter(opt, event) {
 async function update_dropdown_menus(is_application_selected, app, port) {
     ntopng_url_manager.set_key_to_url("protocol", selected_criteria.value.value);
     const vlan_id = ntopng_url_manager.get_url_entry("vlan_id") || "";
-    const url = `${http_prefix}/lua/pro/rest/v2/get/host/server_ports.lua?protocol=${selected_criteria.value.value}&ifid=${props.ifid}&vlan_id=${vlan_id}`;
+    const url = `${http_prefix}/lua/pro/rest/v2/get/host/server_ports.lua?protocol=${selected_criteria.value.value}&ifid=${props.context.ifid}&vlan_id=${vlan_id}`;
     let res = await ntopng_utility.http_request(url, null, null, true);
     let ports = [];
     application_list.value = [];

@@ -55,8 +55,8 @@ const config_traffic_table = ref({});
 
 const _i18n = (t) => i18n(t);
 const props = defineProps({
-  page_csrf: String,
-})
+  context: Object,
+});
 
 const get_f_get_custom_chart_options = () => {
   console.log("get_f_");

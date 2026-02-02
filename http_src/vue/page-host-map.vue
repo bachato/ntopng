@@ -8,7 +8,7 @@
         <div class='align-items-center justify-content-end mb-3' style='height: 70vh;'>
           <div class="d-flex ms-auto flex-row-reverse">
             <label class="my-auto me-1"></label>
-            <div class="m-1" v-for="(value, key, index) in available_filters">
+            <div class="m-1" v-for="(value, key, index) in props.context.available_filters">
               <template v-if="value.length > 0">
                 <div style="min-width: 18rem;">
                   <label class="my-auto me-1">{{ _i18n('bubble_map.' + key) }}: </label>
@@ -47,12 +47,10 @@ import { ntopng_url_manager } from "../services/context/ntopng_globals_services"
 import NtopUtils from "../utilities/ntop-utils";
 
 const _i18n = (t) => i18n(t);
+
 const props = defineProps({
-  ifid: String,
-  page_csrf: String,
-  charts_options: Array,
-  available_filters: Object,
-})
+    context: Object,
+});
 
 /* By default use the first entry */
 const currently_selected_chart = 0
@@ -81,7 +79,7 @@ const format_request = function() {
 const format_options = function(mode_id) {
   let options = {}
 
-  props.charts_options.forEach((option_list) => {
+  props.context.charts_options.forEach((option_list) => {
     if(option_list.mode_id == mode_id)
       options = option_list;
   })
@@ -136,9 +134,9 @@ onBeforeMount(() => {
   
   if(!bubble_mode) ntopng_url_manager.set_key_to_url('bubble_mode', 0) /* First Entry */
   
-  ntopng_url_manager.set_key_to_url('ifid', props.ifid) /* Current interface */
+  ntopng_url_manager.set_key_to_url('ifid', props.context.ifid) /* Current interface */
 
-  for(const [name, filters] of Object.entries(props.available_filters)) {
+  for(const [name, filters] of Object.entries(props.context.available_filters)) {
     filters.forEach((filter) => {
       filter.filter_name = name
       if(filter.currently_active)
