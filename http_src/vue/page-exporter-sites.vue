@@ -23,6 +23,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { default as TableWithConfig } from "./table-with-config.vue";
+import { default as dataUtils } from "../utilities/data-utils.js";
 import { default as sortingFunctions } from "../utilities/sorting-utils.js";
 import { default as ModalEditExporterSite } from "./modal-edit-exporter-site.vue";
 
@@ -54,11 +55,12 @@ const map_table_def_columns = (columns) => {
         "description": (value, row) => {
             return value
         },
-        "latitude": (value, row) => {
-            return value
-        },
-        "longitude": (value, row) => {
-            return value
+        "location": (value, row) => {
+            let location = ''
+            if (!dataUtils.isZeroOrEmptyString(row.latitude) && !dataUtils.isZeroOrEmptyString(row.longitude)) {
+                location = `${row.latitude}° ${_i18n('exporter_sites_page.exporter_site_latitude')}, ${row.longitude}° ${_i18n('exporter_sites_page.exporter_site_longitude')}`
+            }
+            return location
         },
     };
 

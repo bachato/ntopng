@@ -19,6 +19,12 @@ const isEmptyString = (value) => {
   return !!(value == null || value === "");
 }
 
+/* This function check if value is not set (null or empty).
+ * Do check for 0. */
+const isZeroOrEmptyString = (value) => {
+  return !!(value == null || value == "" || value == 0);
+}
+
 /* This function check if value is null, or an empty array */
 const isEmptyArrayOrNull = (value) => {
   return !!(value == null || value.length === 0);
@@ -30,6 +36,7 @@ const dataUtils = function () {
   return {
     isEmptyString,
     isEmptyOrNull,
+    isZeroOrEmptyString,
     isEmptyArrayOrNull,
   };
 }();

@@ -53,7 +53,6 @@ let first_time_render = true; // Flag to track initial render
 
 // Lifecycle hook: Initialize component when mounted
 onMounted(() => {
-    if (!props.options) { return; }
     if (!props.disable_change || !first_time_render) {
         set_input();
     }

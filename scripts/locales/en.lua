@@ -3218,6 +3218,8 @@ local lang = {
     ["exporter_site_name"] = "Site",
     ["reserved_message"] = "Reserved Exporter Site",
     ["exporter_site_location"] = "Location",
+    ["exporter_site_latitude"] = "N",
+    ["exporter_site_longitude"] = "E",
   },
   ["external_stats"] = {
     ["capture_drops"] = "Dropped Packets",

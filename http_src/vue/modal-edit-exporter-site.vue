@@ -115,8 +115,8 @@ const emit = defineEmits(["edit"]);
 
 const exporter_site_name = ref("");
 const exporter_site_description = ref("");
-const exporter_site_lat = ref(null);
-const exporter_site_lng = ref(null);
+const exporter_site_lat = ref(0);
+const exporter_site_lng = ref(0);
 
 const name_error = ref("");
 const isEditMode = ref(false);
@@ -175,8 +175,8 @@ const showAdd = () => {
     currentItem.value = null;
     exporter_site_name.value = "";
     exporter_site_description.value = "";
-    exporter_site_lat.value = null;
-    exporter_site_lng.value = null;
+    exporter_site_lat.value = 0;
+    exporter_site_lng.value = 0;
     name_error.value = "";
     isEditMode.value = false;
 

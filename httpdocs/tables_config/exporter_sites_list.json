@@ -59,20 +59,13 @@
 		},
         {
 			"title_i18n": "exporter_sites_page.exporter_site_location",
-			"data_field": "latitude",
+			"data_field": "location",
 			"sortable": false,
-			"min-width" : "180px",
+			"min-width" : "60px",
+			"max-width" : "80px",
 			"class": [
-				"text-nowrap"
-			]
-		},
-		{
-			"title_i18n": "exporter_sites_page.exporter_site_location",
-			"data_field": "longitude",
-			"sortable": false,
-			"min-width" : "180px",
-			"class": [
-				"text-nowrap"
+				"text-nowrap",
+				"text-center"
 			]
 		}
 	]
