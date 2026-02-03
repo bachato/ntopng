@@ -1777,6 +1777,7 @@ local lang = {
     ["top_srv"] = "Top Servers",
     ["top_srv_networks"] = "Top Server Networks",
     ["top_vlan"] = "Top VLANs",
+    ["top_exporter_sites"] = "Top Exporter Sites",
     ["total_alerts"] = "Total Alerts",
     ["trailing_msg"] = "Time Window",
     ["trailing_msg_compact"] = "Window",
