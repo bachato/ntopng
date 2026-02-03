@@ -707,6 +707,33 @@ end
 
 -- #####################################
 
+local function dt_format_exporter_site(exporter_site_id)
+   local exporter_site = {
+      title     = i18n("unknown"),
+      label     = i18n("unknown"),
+      value     = tonumber(exporter_site_id) or 0,
+   }
+
+   if tonumber(exporter_site["value"]) ~= 0 then
+      local exporter_site_utils = require "exporter_site_utils"
+      local sites = exporter_site_utils.getExporterSites() or {}
+      for _, site in pairs(sites) do
+         if site.id == tonumber(exporter_site_id) then
+            exporter_site["title"] = site.name
+            exporter_site["label"] = site.name
+            break
+         end
+      end
+   else
+      exporter_site["title"] = i18n("default")
+      exporter_site["label"] = i18n("default")
+   end
+
+   return exporter_site
+end
+
+-- #####################################
+
 local function dt_format_thpt(thpt)
    return bitsToSize(tonumber(thpt) or 0)
 end
@@ -1190,6 +1217,7 @@ local flow_columns = {
    ['SRC_ASN'] =              { tag = "cli_asn", simple_dt_func = simple_format_src_asn, db_type = "Number", db_raw_type = "Uint32" },
    ['DST_ASN'] =              { tag = "srv_asn", simple_dt_func = simple_format_dst_asn, db_type = "Number", db_raw_type = "Uint32" },
    ['PROBE_IP'] =             { tag = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", db_type = "Number", db_raw_type = "Uint32" },
+   ['EXPORTER_SITE'] =        { tag = "exporter_site", dt_func = dt_format_exporter_site, db_type = "Number", db_raw_type = "Uint16" },
    ['OBSERVATION_POINT_ID'] = { tag = "observation_point_id", dt_func = dt_format_obs_point, format_func = format_flow_observation_point, i18n = i18n("details.observation_point_id"), order = 12 , db_type = "Number", db_raw_type = "Uint16" },
    ['SRC2DST_TCP_FLAGS'] =    { tag = "src2dst_tcp_flags", dt_func = dt_format_tcp_flags, db_type = "Number", db_raw_type = "Uint8" },
    ['DST2SRC_TCP_FLAGS'] =    { tag = "dst2src_tcp_flags", dt_func = dt_format_tcp_flags, db_type = "Number", db_raw_type = "Uint8" },
@@ -1271,6 +1299,7 @@ local aggregated_flow_columns = {
    ['SRC_MAC'] =              { tag = "cli_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
    ['DST_MAC'] =              { tag = "srv_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
    ['PROBE_IP'] =             { tag = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", db_type = "Number", db_raw_type = "Uint32" },
+   ['EXPORTER_SITE'] =        { tag = "exporter_site", dt_func = dt_format_exporter_site, db_type = "Number", db_raw_type = "Uint16" },
    ['SRC_COUNTRY_CODE'] =     { tag = "cli_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
    ['DST_COUNTRY_CODE'] =     { tag = "srv_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
    ['SRC_ASN'] =              { tag = "cli_asn", simple_dt_func = simple_format_src_asn, db_type = "Number", db_raw_type = "Uint32" },
@@ -1390,6 +1419,7 @@ historical_flow_utils.extra_where_tags = {
    ["cli_fingerprint"] = "CLIENT_FINGERPRINT",
    ["tcp_fingerprint"] = "TCP_FINGERPRINT",
    ["duration"] = "DURATION",
+   ["exporter_site"] = "EXPORTER_SITE", -- required?
 }
 
 historical_flow_utils.topk_tags_v4 = {
@@ -1566,6 +1596,7 @@ function historical_flow_utils.get_tags()
    flow_defined_tags["post_nat_dst_port"] = tag_utils.defined_tags["post_nat_dst_port"]
    flow_defined_tags["verdict"] = tag_utils.defined_tags["verdict"]
    flow_defined_tags["ndpi_fingerprint"] = tag_utils.defined_tags["ndpi_fingerprint"]
+   flow_defined_tags["exporter_site"] = tag_utils.defined_tags["exporter_site"] -- required?
 
    return flow_defined_tags
 end

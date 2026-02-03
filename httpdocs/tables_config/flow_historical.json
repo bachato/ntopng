@@ -356,6 +356,16 @@
 			]
 		},
 		{
+			"title_i18n": "db_search.tags.exporter_site",
+			"data_field": "exporter_site",
+			"sortable": true,
+			"min-width": "120px",
+			"render_type": "formatExporterSite",
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
 			"title_i18n": "db_search.tags.cli_network",
 			"data_field": "cli_network",
 			"sortable": false,

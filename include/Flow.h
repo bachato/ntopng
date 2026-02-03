@@ -321,6 +321,7 @@ private:
     u_int32_t device_ip, next_hop;
     u_int32_t in_index, out_index;
     u_int16_t observation_point_id;
+    u_int16_t site_id;
   } flow_device;
 
   /* eBPF Information */
@@ -1374,6 +1375,9 @@ public:
 
   inline void setFlowDeviceNextHop(u_int32_t nh) { flow_device.next_hop = nh;    }
   inline u_int32_t getFlowDeviceNextHop()        { return(flow_device.next_hop); }
+
+  inline void setFlowExporterSiteId(u_int16_t id) { flow_device.site_id = id;   }
+  inline u_int16_t getFlowExporterSiteId()        { return(flow_device.site_id); }
 
   inline const u_int16_t getScore() const { return (flow_score); };
 

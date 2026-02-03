@@ -91,6 +91,10 @@ const historical_flows_table = {
 	    "data": "probe_ip",
 	},
 	{
+	    "name": "exporter_site",
+	    "data": "exporter_site",
+	},
+	{
 	    "name": "cli_network",
 	    "data": "cli_network",
 	},

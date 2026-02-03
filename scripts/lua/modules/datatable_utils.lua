@@ -406,6 +406,13 @@ local all_datatable_columns_def_by_tag = {
       class = { "no-wrap" },
       render_type = "formatProbeIP",
    },
+   ['exporter_site'] = {
+      title_i18n = "db_search.tags.exporter_site",
+      data_field = "exporter_site",
+      sortable = true,
+      class = { "no-wrap" },
+      render_type = "formatExporterSite",
+   },
    ['network'] = build_datatable_column_def_network('network', "db_search.tags.network"),
    ['cli_network'] = build_datatable_column_def_network('cli_network', "db_search.tags.cli_network"),
    ['srv_network'] = build_datatable_column_def_network('srv_network', "db_search.tags.srv_network"),

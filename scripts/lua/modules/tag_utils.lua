@@ -314,6 +314,13 @@ tag_utils.defined_tags = {
         operators = { 'eq', 'neq' },
         hourly_available = false,
     },
+    exporter_site = {
+        type = tag_utils.input_types.select,
+        value_type = 'exporter_site',
+        i18n_label = i18n('db_search.tags.exporter_site'),
+        operators = { 'eq', 'neq' },
+        hourly_available = true,
+    },
     vlan_id = {
         value_type = 'vlan_id',
         i18n_label = i18n('db_search.tags.vlan_id'),
@@ -1567,6 +1574,17 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
 
         for _, device_info in pairsByKeys(full_dev_list, asc) do
             filter.options[#filter.options + 1] = device_info
+        end
+    elseif tag.value_type == "exporter_site" then
+        filter.value_type = 'array'
+        filter.options = {}
+        local exporter_site_utils = require "exporter_site_utils"
+        local sites = exporter_site_utils.getExporterSites() or {}
+        for _, site in pairs(sites) do
+            filter.options[#filter.options + 1] = {
+                value = site.id,
+                label = site.name
+            }
         end
     elseif tag.value_type == "ip_version" then
         filter.value_type = 'array'
