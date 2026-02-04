@@ -4941,6 +4941,37 @@ static int ntop_has_radius_support(lua_State *vm) {
 
 /* ****************************************** */
 
+static int ntop_log_radius(lua_State *vm) {
+  char *event_type, *message;
+  bool logged = false;
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+#ifdef HAVE_RADIUS
+  Radius *radius = ntop->getRadius();
+
+  if (radius) {
+    if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    event_type = (char *)lua_tostring(vm, 1);
+
+    if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
+      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    message = (char *)lua_tostring(vm, 2);
+
+    radius->logRadius(event_type, "%s", message);
+
+    logged = true;
+  }
+#endif
+
+  lua_pushboolean(vm, logged);
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_has_ldap_support(lua_State *vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -8240,6 +8271,7 @@ static luaL_Reg _ntop_reg[] = {
     { "isLocalAddress", ntop_is_local_address },
     { "md5", ntop_md5 },
     { "hasRadiusSupport", ntop_has_radius_support },
+    { "logRadius", ntop_log_radius },
     { "hasLdapSupport", ntop_has_ldap_support },
     { "resetStats", ntop_reset_stats },
     { "getCurrentScriptsDir", ntop_get_current_scripts_dir },

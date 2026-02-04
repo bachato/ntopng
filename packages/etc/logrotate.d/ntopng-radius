@@ -1,0 +1,9 @@
+/var/lib/ntopng/radius.log {
+	maxsize 10M
+	daily
+	missingok
+	rotate 7
+	copytruncate
+	compress
+	delaycompress
+}

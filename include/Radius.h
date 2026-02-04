@@ -43,6 +43,8 @@ class Radius {
   Radius(bool _use_chap = true);
   ~Radius();
 
+  void logRadius(const char *event_type, const char *format, ...);
+
   bool updateLoginInfo();
 
   bool authenticate(const char *user, const char *password,

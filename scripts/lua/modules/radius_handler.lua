@@ -48,7 +48,10 @@ function radius_handler.accountingStart(name, username, password)
 
    -- In case the info are already on redis, means that the  system is restarted
    -- or the same request has been done twice, so just skip this
-   if is_accounting_on then return true end
+   if is_accounting_on then
+      ntop.logRadius("ACCT_START", string.format("Accounting start skipped for MAC [%s] - session already active", name))
+      return true
+   end
 
 
    local session_id = tostring(math.random(100000000000000000,
@@ -58,7 +61,7 @@ function radius_handler.accountingStart(name, username, password)
    math.randomseed(current_time)
 
    local msg = string.format("Accounting start requested for MAC [%s] with username [%s][IP: %s]", name, username, ip_address or "")
-   traceError(TRACE_DEBUG, TRACE_CONSOLE, msg)
+   ntop.logRadius("ACCT_START", msg)
    interface.appendMacEvent(name, msg)
 
    local accounting_started =
@@ -100,7 +103,7 @@ function radius_handler.accountingStop(name, terminate_cause, info)
    ntop.delCache(string.format(redis_accounting_key, name))
 
    local msg = string.format("Accounting stop requested for MAC [%s]", name)
-   traceError(TRACE_DEBUG, TRACE_CONSOLE, msg)
+   ntop.logRadius("ACCT_STOP", msg)
    interface.appendMacEvent(name, msg)
 
    -- Check in case no user_data is found
@@ -197,8 +200,8 @@ function radius_handler.accountingUpdate(name, info)
 	 packets_rcvd = info["packets.rcvd"]
       end
 
-      traceError(TRACE_DEBUG, TRACE_CONSOLE, string.format(
-		    "Accounting update [MAC: %s][IP: %s][In Bytes: %d][Out Bytes: %d][Radius In Bytes: %d][Radius Out Bytes: %d]",
+      ntop.logRadius("ACCT_UPDATE", string.format(
+		    "Accounting update requested [MAC: %s][IP: %s][In Bytes: %d][Out Bytes: %d][Radius In Bytes (KB): %d][Radius Out Bytes (KB): %d]",
 		    name, ip_address or "", info["bytes.rcvd"],
 		    info["bytes.sent"], bytes_rcvd, bytes_sent))
 

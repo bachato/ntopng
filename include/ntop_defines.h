@@ -613,7 +613,6 @@
 #define CONST_OLD_DEFAULT_NTOP_USER "nobody"
 #define CONST_DEFAULT_NTOP_USER "ntopng"
 #define CONST_TOO_EARLY "TooEarly"
-#define CONST_ACTIVITY_LOG_FILE "ntopng-activities.log"
 
 #define CONST_LUA_OK 1
 #define CONST_LUA_ERROR 0
@@ -1261,6 +1260,7 @@
   NTOPNG_PREFS_PREFIX ".radius.radius_unpriv_capabilties_group"
 #define PREF_RADIUS_EXT_AUTHE_LOCAL_AUTHO NTOPNG_PREFS_PREFIX ".radius.external_auth_for_local_users_enabled"
 #define PREF_RADIUS_DEBUG NTOPNG_PREFS_PREFIX ".radius_debug"
+#define CONST_RADIUS_LOG_FILE "radius.log"
 
 #ifdef HAVE_RADIUS
 #define MAX_RADIUS_LEN 256

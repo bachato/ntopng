@@ -699,6 +699,7 @@ class Ntop {
 #endif
 
 #ifdef HAVE_RADIUS
+  inline Radius *getRadius() { return radiusAcc; };
   inline void updateRadiusLoginInfo() { radiusAcc->updateLoginInfo(); };
   inline bool radiusAuthenticate(const char *username, const char *password,  
                                 bool *has_unprivileged_capabilities,
