@@ -6,7 +6,6 @@ Network devices (routers, switches, firewalls) generate NetFlow, sFlow, IPFIX, o
   
 .. toctree::
     :maxdepth: 2
-    :caption: User's Guide
 
     nprobe.rst
     exporters.rst

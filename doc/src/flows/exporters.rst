@@ -32,10 +32,20 @@ Exporters in ntopng
 Flow exporters are accessed from the menu on the left sidebar:
 
 .. figure:: ../img/ntopng_exporters.png
+	    :width: 50%
+   
+Exporters are listed under the nProbe instance that collects flows from. You can read statistics abotu collected flows, drops and active license.
+
+Sites
+-----
+
+On large networks you can define sites on which exporters are active so you can cluster them based on their location.
+
+.. figure:: ../img/sites.png
 	    
-Exporters are listed under the nProbe instance that collects flows from. You can read statistics abotu collected flows, drops and active license. On large networks you can define sites on which exporters are active so you can cluster them based on their location. Sites can be configured from the above menu and you set its location under the configuration menu entry.
+Sites can be configured from the above menu and you set its location under the configuration menu entry.
 
 .. figure:: ../img/exporters_stats.png
-
-
-Exporter sites are reports in various ntopng pages such as the live flow page or the dashboard. If you have enabled historical flows you can search for flows according to a site.
+	    :width: 50%
+	
+Exporter sites are reported in various ntopng pages such as the live flow page or the dashboard. If you have enabled historical flows you can search for flows according to a site.
