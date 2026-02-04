@@ -13,9 +13,8 @@ ntopng can be used in combination with other ntop tools. Documentation to use nt
    how_to_start/index
    cli_options/index
    user_interface/index
-   interfaces/index
-   alerts/index
    using_with_other_tools/index
+   flows/index
    scada/index
    qoe/index
    operating_ntopng_on_large_networks
