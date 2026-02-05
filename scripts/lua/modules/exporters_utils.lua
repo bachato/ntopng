@@ -328,12 +328,12 @@ end
 -- @param ip string Exporter IP
 -- @param probe_uuid string Probe UUID
 --
-function exporters_utils.printNavbar(ifid, page, ip, probe_uuid)
+function exporters_utils.printNavbar(ifid, page, ip, probe_uuid, num_exporters)
    local page_utils = require("page_utils")
    -- URLs and state flags initialization
    local interfaces_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporter_interfaces.lua"
    local exporter_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporters.lua"
-   local exporter_map_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporters_map.lua"
+   local exporter_map_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporters_map.lua?probe_uuid="..probe_uuid
 
    local snmp_available = false
    local nprobe_info = nil
@@ -391,7 +391,7 @@ function exporters_utils.printNavbar(ifid, page, ip, probe_uuid)
       label = i18n("flow_devices.exporters_interfaces")
    }, {
       url = exporter_map_url,
-      hidden = page ~= "exporters",
+      hidden = page ~= "exporters" or num_exporters < 2 or not(isASNModeEnabled()),
       page_name = "exporter_map",
       label = "<i class=\"fas fa-lg fa-map\" data-bs-toggle=\"tooltip\" " .. "title=\"" .. i18n("exporter_sites_page.exporters_map") .. "\"></i>"
    }, {
