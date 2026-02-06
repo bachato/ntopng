@@ -67,6 +67,10 @@ typedef struct {
 } FlowUDP;
 
 typedef struct {
+  u_int32_t exporter_ipv4, ipv4_next_hop;
+} DuplicatedFlowInfo;
+
+typedef struct {
   u_int32_t prevAdjacentAS, nextAdjacentAS;
   u_int32_t vrfId;
 
@@ -134,6 +138,7 @@ private:
      predominant of a flow, which is written into `predominant_alert`.
   */
   Bitmap128 alerts_map;
+  DuplicatedFlowInfo dedupStats[CONST_MAX_NUM_DEDUP_STATS];
   std::map<FlowAlertTypeEnum, FlowAlert *> triggered_alerts;
   FlowAlertType predominant_alert;   /* This is the predominant alert */
   u_int16_t predominant_alert_score; /* The score associated to the predominant alert */
@@ -1615,6 +1620,7 @@ public:
   void setCliService(int service_enum);
   void setSrvService(int service_enum);
   inline void setIGMPType(u_int8_t t) { protos.igmp.igmp_type = t; }
+  void addDedupInfo(u_int32_t exporter_ipv4, u_int32_t ipv4_next_hop);
 };
 
 #endif /* _FLOW_H_ */

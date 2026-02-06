@@ -254,7 +254,8 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 	ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", flow->print(buf, sizeof(buf)));
 #endif
 	num_deduplicated_flows++;
-
+	flow->addDedupInfo(zflow->exporter_device_ip, zflow->getIPv4NextHop());
+       
 	if(flow_devices_stats) {
 	  /*
 	    Even if the flow is duplicated, we need to increment

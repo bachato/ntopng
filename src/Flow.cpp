@@ -55,7 +55,8 @@ Flow::Flow(NetworkInterface *_iface,
   flow_category = NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, flow_breed = NDPI_PROTOCOL_UNRATED;
   c_mac_updated = s_mac_updated = false;
   memset(&tcp_stats, 0, sizeof(tcp_stats));
-
+  memset(dedupStats, 0, sizeof(dedupStats));
+  
 #ifdef NTOPNG_PRO
   udp = NULL;
 #endif
@@ -3428,8 +3429,27 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
 #if defined(NTOPNG_PRO)
     lua_get_qoe_score(vm);
 #endif
-  }
 
+    if(dedupStats[0].exporter_ipv4 != 0) {     
+      lua_newtable(vm);
+
+      for(u_int i=0; i<CONST_MAX_NUM_DEDUP_STATS; i++) {
+	char b1[32], b2[32];
+	
+	if(dedupStats[i].exporter_ipv4 != 0)
+	  lua_push_str_table_entry(vm,
+				   Utils::intoaV4(dedupStats[i].exporter_ipv4, b1, sizeof(b1)),
+				   Utils::intoaV4(dedupStats[i].ipv4_next_hop, b2, sizeof(b2)));
+	else
+	  break;
+      }
+	
+      lua_pushstring(vm, "deduplication");
+      lua_insert(vm, -2);
+      lua_settable(vm, -3);      
+    }
+  }
+  
   lua_get_status(vm);
 
   lua_push_str_table_entry(vm, "proto.ndpi",
@@ -9563,3 +9583,16 @@ void Flow::setnDPIFingerprint(char *fp) {
 }
 
 /* *************************************** */
+
+void Flow::addDedupInfo(u_int32_t exporter_ipv4, u_int32_t ipv4_next_hop) {
+  if(exporter_ipv4 == 0) return;
+
+  for(u_int i=0; i<CONST_MAX_NUM_DEDUP_STATS; i++) {
+    if(dedupStats[i].exporter_ipv4 == 0) {
+      dedupStats[i].exporter_ipv4 = exporter_ipv4,
+	dedupStats[i].ipv4_next_hop = ipv4_next_hop;
+
+      break;
+    }
+  }
+}

@@ -551,7 +551,8 @@ local flow_key = _GET["flow_key"]
 local flow_hash_id = _GET["flow_hash_id"]
 
 flow = interface.findFlowByKeyAndHashId(tonumber(flow_key), tonumber(flow_hash_id))
- --tprint(flow)
+
+-- tprint(flow.deduplication)
 
 local ifid = interface.name2id(ifname)
 local label = getFlowLabel(flow, nil, nil, nil, nil, nil, false)
@@ -2035,6 +2036,20 @@ if isEmptyString(page) or page == "overview" then
             end
          end
 
+	 if(flow.deduplication ~= nil) then
+	    local len = table.len(flow.deduplication)+1
+	    
+	    print("<tr><th rowspan=\""..len.."\">" .. i18n("dedup_flows") .. "</th>")
+	    print("<th>" .. i18n("flow_exporter") .. "</th><th>" .. i18n("next_hop") .. "</th></tr>\n")
+	    
+	    for k,v in pairs(flow.deduplication) do	       
+	       print("<tr><td><a href=" .. "/lua/host_details.lua?host="..k..">"..k.."</A></td>")
+	       print("<td>"..v.."</td></tr>")	       
+	    end
+
+	    print("</table></td></tr>")
+	 end
+	 
          local function format_custom_field(key, value, snmpdevice)
             local formatted_value = handleCustomFlowField(key, value, snmpdevice)
 
