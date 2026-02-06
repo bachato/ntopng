@@ -5,18 +5,37 @@
 /* ***************************************** */
 
 const defaultColors = [
-    "#C6D9FD",
-    "#90EE90",
-    "#EE8434",
-    "#C95D63",
-    "#AE8799",
-    "#717EC3",
-    "#496DDB",
-    "#5A7ADE",
-    "#6986E1",
-    "#7791E4",
-    "#839BE6",
-    "#8EA4E8",
+    // Group 1: Blues (6 colors)
+    "#001F3F", // Navy
+    "#0074D9", // Blue
+    "#7FDBFF", // Aqua
+    "#39CCCC", // Teal
+    "#3D9970", // Olive
+    "#2ECC40", // Green
+
+    // Group 2: Purples/Pinks (6 colors)
+    "#B10DC9", // Purple
+    "#FF4136", // Red
+    "#FF851B", // Orange
+    "#FFDC00", // Yellow
+    "#F012BE", // Fuchsia
+    "#85144B", // Maroon
+
+    // Group 3: Earth tones (6 colors)
+    "#FF6B6B", // Coral Red
+    "#4ECDC4", // Turquoise
+    "#45B7D1", // Sky Blue
+    "#96CEB4", // Sage Green
+    "#FFEAA7", // Pale Yellow
+    "#DDA0DD", // Plum
+
+    // Group 4: Additional distinct colors (6 colors)
+    "#98D8C8", // Mint
+    "#F7DC6F", // Golden Yellow
+    "#BB8FCE", // Lavender
+    "#82E0AA", // Light Green
+    "#F8C471", // Peach
+    "#5DADE2", // Light Blue
 ];
 
 /* ***************************************** */
