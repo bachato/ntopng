@@ -312,7 +312,7 @@ tag_utils.defined_tags = {
         value_type = 'probe_ip',
         i18n_label = i18n('db_search.tags.probe_ip'),
         operators = { 'eq', 'neq' },
-        hourly_available = false,
+        hourly_available = true,
     },
     exporter_site = {
         type = tag_utils.input_types.select,
@@ -1580,11 +1580,14 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
         filter.options = {}
         local exporter_site_utils = require "exporter_site_utils"
         local sites = exporter_site_utils.getExporterSites() or {}
-        for _, site in pairs(sites) do
-            filter.options[#filter.options + 1] = {
-                value = site.id,
-                label = site.name
-            }
+        local exporters = interface.getFlowDevices() or {}
+        if #sites > 0 and #exporters > 0 then
+            for _, site in pairs(sites) do
+                filter.options[#filter.options + 1] = {
+                    value = site.id,
+                    label = site.name
+                }
+            end
         end
     elseif tag.value_type == "ip_version" then
         filter.value_type = 'array'

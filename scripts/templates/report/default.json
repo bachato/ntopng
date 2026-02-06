@@ -3,6 +3,9 @@
 	"readonly" : true,
 	"filters" : [
 		{
+			"name" : "exporter_site"
+		},
+		{
 			"name" : "probe_ip"
 		},
 		{

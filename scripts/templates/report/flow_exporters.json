@@ -6,15 +6,15 @@
 	},
 	"filters" : [
 		{
-			"name" : "probe_ip",
-			"nested" : [
-				{
-					"name" : "output_snmp"
-				},
-				{
-					"name" : "input_snmp"
-				}
-			]
+			"name" : "probe_ip"
+		},
+		{
+			"name" : "output_snmp",
+			"show_only_if_selected" : "probe_ip"
+		},
+		{
+			"name" : "input_snmp",
+			"show_only_if_selected" : "probe_ip"
 		},
 		{
 			"name" : "network"
@@ -27,6 +27,9 @@
 		},
 		{
 			"name" : "l7proto"
+		},
+		{
+			"name" : "exporter_site"
 		}
 	],
 	"components" : [
