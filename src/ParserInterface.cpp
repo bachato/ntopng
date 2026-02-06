@@ -254,12 +254,26 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 	ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", flow->print(buf, sizeof(buf)));
 #endif
 	num_deduplicated_flows++;
+
+	if(flow_devices_stats) {
+	  /*
+	    Even if the flow is duplicated, we need to increment
+	    interface statistics
+	  */
+	  flow_devices_stats->incStats(now,
+				       zflow->unique_source_id, flow->getFlowDeviceInIndex(),
+				       flow->getStatsProtocol(),
+				       zflow->out_pkts, zflow->out_bytes,
+				       zflow->in_pkts, zflow->in_bytes,
+				       zflow->nprobe_source_id);
+	}
+
 	return(true); /* Flow handled albeit discarded */
       }
     }
 
     flow->setFlowDeviceNextHop(zflow->getIPv4NextHop());
-    
+
     if(zflow->inIndex != 0) {
       if(src2dst_direction)
 	flow->setFlowDeviceInIndex(zflow->inIndex);
