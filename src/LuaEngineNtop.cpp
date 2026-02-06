@@ -1030,7 +1030,7 @@ static int ntop_match_custom_category(lua_State *vm) {
   NetworkInterface *iface;
   ndpi_protocol_category_t match;
   ndpi_protocol_breed_t breed;
-  
+
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
   iface = ntop->getFirstInterface();
@@ -1868,7 +1868,7 @@ static int ntop_inet_ntoa(lua_State *vm) {
 /* ****************************************** */
 
 static int ntop_ip_to_number(lua_State *vm) {
-    char *device_ip = NULL;    
+    char *device_ip = NULL;
     struct in_addr addr;
 
     ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -1876,7 +1876,7 @@ static int ntop_ip_to_number(lua_State *vm) {
     if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
         return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
     device_ip = (char *)lua_tostring(vm, 1);
-    
+
     if (inet_pton(AF_INET, device_ip, &addr) != 1)
         return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
@@ -2680,7 +2680,7 @@ static int ntop_get_ping_interface_names(lua_State *vm) {
 #ifndef WIN32
   if (cping)
     cping->getAllInterfaces(vm);
-#endif  
+#endif
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
@@ -4942,13 +4942,13 @@ static int ntop_has_radius_support(lua_State *vm) {
 /* ****************************************** */
 
 static int ntop_log_radius(lua_State *vm) {
-  char *event_type, *message;
   bool logged = false;
 
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
 #ifdef HAVE_RADIUS
   Radius *radius = ntop->getRadius();
+  char *event_type, *message;
 
   if (radius) {
     if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
@@ -6372,13 +6372,13 @@ static int ntop_check_sub_interface_syntax(lua_State *vm) {
 #ifdef NTOPNG_PRO
 static int ntop_check_filter_syntax(lua_State *vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  
+
 #ifdef HAVE_NEDGE
   lua_pushboolean(vm, true); /* TODO need to implement the logic */
 #else
   char *filter;
   NetworkInterface *curr_iface = getCurrentInterface(vm);
-  
+
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   filter = (char *)lua_tostring(vm, 1);
@@ -6389,7 +6389,7 @@ static int ntop_check_filter_syntax(lua_State *vm) {
 #endif
 		  false);
 #endif
-  
+
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 #endif
@@ -6873,7 +6873,7 @@ static int ntop_rrd_tune(lua_State *vm) {
   const char *filename;
   const char **argv;
   int argc, status, offset = 1;
-  int extra_args = 1; /* Program name arg*/
+  int extra_args = 1; /* Program name arg */
 
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -6888,17 +6888,15 @@ static int ntop_rrd_tune(lua_State *vm) {
   filename = argv[1];
 
   reset_rrd_state();
-  status = rrd_tune(
-      argc,
-      (std::conditional<
-          std::is_same<decltype(rrd_tune), int(int, const char **)>::value,
-          const char **, char **>::type)argv);
+  status = rrd_tune(argc, (std::conditional<std::is_same<decltype(rrd_tune), int(int, const char **)>::value,
+			   const char **, char **>::type)argv);
 
   if (status != 0) {
     char *err = rrd_get_error();
 
     if (err != NULL) {
       char error_buf[256];
+
       snprintf(error_buf, sizeof(error_buf),
                "Unable to run rrd_tune on %s [%s]", filename, err);
 
@@ -7597,7 +7595,7 @@ static int ntop_recipient_register(lua_State *vm) {
 static int ndpi_is_custom_application(lua_State *vm) {
   u_int16_t app_id;
   NetworkInterface *iface = getCurrentInterface(vm);
-  
+
   if((iface == NULL)
      || (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK))
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
@@ -7737,7 +7735,7 @@ static int ntop_get_asn_name(lua_State *vm) {
 static int ntop_get_as_name_from_asn(lua_State *vm) {
   u_int32_t asn;
   char as_name[128];
-    
+
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
   else
@@ -7746,7 +7744,7 @@ static int ntop_get_as_name_from_asn(lua_State *vm) {
   if(ntop->getGeolocation()->getASName(asn, as_name, sizeof(as_name)))
     lua_pushstring(vm, as_name);
   else
-    lua_pushnil(vm); 
+    lua_pushnil(vm);
 
   return(ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
@@ -8214,12 +8212,12 @@ static int reload_networks_policy_configuration(lua_State *vm) {
 
 static int ntop_get_lua_cache(lua_State *vm) {
   std::string ret;
-  
+
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  
+
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-  
+
   ret = ntop->getLuaCache(std::string((char *)lua_tostring(vm, 1)));
 
   lua_pushstring(vm, ret.c_str());
@@ -8230,7 +8228,7 @@ static int ntop_get_lua_cache(lua_State *vm) {
 
 static int ntop_set_lua_cache(lua_State *vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  
+
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
@@ -8239,7 +8237,7 @@ static int ntop_set_lua_cache(lua_State *vm) {
 
   ntop->setLuaCache(std::string((char *)lua_tostring(vm, 1)),
 		    std::string((char *)lua_tostring(vm, 2)));
-  
+
   lua_pushnil(vm);
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
@@ -8247,7 +8245,7 @@ static int ntop_set_lua_cache(lua_State *vm) {
 /* **************************************************************** */
 
 static int ntop_dump_lua_cache(lua_State *vm) {
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);  
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   ntop->dumpLuaCache(vm);
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
@@ -8727,7 +8725,7 @@ static luaL_Reg _ntop_reg[] = {
     { "getLuaCache",  ntop_get_lua_cache  },
     { "setLuaCache",  ntop_set_lua_cache  },
     { "dumpLuaCache", ntop_dump_lua_cache },
-    
+
     {NULL, NULL}
 };
 
