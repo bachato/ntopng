@@ -335,7 +335,7 @@ void Redis::addToCache(const char *key, const char *value, u_int expire_secs) {
 */
 char* Redis::getWithAlloc(char *key, bool cache_it) {
   char *rsp = NULL;
-  bool cacheable = cache_it && isCacheable(key);
+  bool cacheable = cache_it || isCacheable(key);
   redisReply *reply;
   std::map<std::string, StringCache>::iterator it;
   
