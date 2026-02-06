@@ -3216,6 +3216,9 @@ local lang = {
     ["dropped_packets_descr"] = "Capture Drops (probe mode): nProbe packet drops hence not accounted in exported flows (drops are reported by nProbe).",
   },
   ["exporter_sites_page"] = {
+    ["delete_exporter_site"] = "Are you sure to delete the selected Exoporter Site? This action cannot be undone.",
+    ["delete_exporter_site_title"] = "Delete Site",
+    ["exporter_sites_chord"] = "Chord test",
     ["exporters_map"] = "Exporters Map",
     ["exporters_map_notes"] = "The chart depicts exporters/sites traffic volume. For node A with an arc towards node B, the percentage on A is the amount of traffic A sent to B, and the same arc on B reports the amount of traffic B sent to A.",
     ["sites_map"] = "Sites Map",
