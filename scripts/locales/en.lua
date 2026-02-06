@@ -3217,7 +3217,7 @@ local lang = {
   },
   ["exporter_sites_page"] = {
     ["exporters_map"] = "Exporters Map",
-    ["exporters_map_notes"] = "The chart above shows a connection chart where each edge is traffic, and each node is an exporter",
+    ["exporters_map_notes"] = "The chart depicts exporters/sites traffic volume. For node A with an arc towards node B, the percentage on A is the amount of traffic A sent to B, and the same arc on B reports the amount of traffic B sent to A.",
     ["sites_map"] = "Sites Map",
     ["sites_map_notes"] = "The chart above shows a connection chart where each edge is traffic, and each node is a site",
     ["exporter_sites"] = "Exporter Sites",
