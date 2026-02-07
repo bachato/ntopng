@@ -412,7 +412,7 @@ function exporters_utils.printNavbar(ifid, page, ip, probe_uuid, num_exporters)
       label = i18n("flow_devices.exporters_interfaces")
    }, {
       url = exporter_map_url,
-      hidden = page ~= "exporters" or num_exporters < 2 or not(isASNModeEnabled()),
+      hidden = (num_exporters < 2) or not(isASNModeEnabled()),
       page_name = "exporter_map",
       label = "<i class=\"fas fa-lg fa-map\" data-bs-toggle=\"tooltip\" " .. "title=\"" .. i18n("exporter_sites_page.exporters_map") .. "\"></i>"
    }, {
