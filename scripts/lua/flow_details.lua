@@ -552,7 +552,7 @@ local flow_hash_id = _GET["flow_hash_id"]
 
 flow = interface.findFlowByKeyAndHashId(tonumber(flow_key), tonumber(flow_hash_id))
 
--- tprint(flow.deduplication)
+-- tprint(flow)
 
 local ifid = interface.name2id(ifname)
 local label = getFlowLabel(flow, nil, nil, nil, nil, nil, false)
@@ -897,10 +897,10 @@ if isEmptyString(page) or page == "overview" then
 
 	 if(flow.tls_blocks) then
 	    print("<p>")
-	    print_copy_button('tls_blocks', flow.tls_blocks)	    
+	    print_copy_button('tls_blocks', flow.tls_blocks)
 	    print(flow.tls_blocks)
 	 end
-	 
+
 	 print("</td></tr>\n")
 	 num = 1
       end
@@ -2010,9 +2010,14 @@ if isEmptyString(page) or page == "overview" then
          info = removeProtocolFields("RTP", info)
 
          local snmpdevice = nil
+	 local next_hop   = nil
 
          if (ntop.isPro() and not isEmptyString(flow["device_ip"])) then
             snmpdevice = flow["device_ip"]
+         end
+
+         if (ntop.isPro() and not isEmptyString(flow["next_hop"])) then
+            next_hop = flow["next_hop"]
          end
 
          if ((flow["observation_point_id"] ~= nil) and (flow["observation_point_id"] ~= 0)) then
@@ -2024,8 +2029,18 @@ if isEmptyString(page) or page == "overview" then
 
          if ((snmpdevice ~= nil) and (snmpdevice ~= "0.0.0.0")) then
             local exporter_info_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/flowdevice_details.lua?ip=" .. snmpdevice
-            print("<tr><th>" .. i18n("details.flow_exporter") .. "</th>")
-            print("<td colspan=\"2\">" .. "<a href=" .. exporter_info_url .. ">" .. snmpdevice .. "</a></td></tr>")
+
+            print("<tr><th>" .. i18n("details.flow_exporter") .. " / "..  i18n("next_hop") .. "</th>")
+            print("<td>" .. "<a href=" .. exporter_info_url .. ">" .. snmpdevice .. "</a></td>")
+
+
+	    if(next_hop == nil) then
+	       next_hop = ""
+	    else
+	       next_hop = "<A HREF=\"".. ntop.getHttpPrefix() .."/lua/host_details.lua?host=" .. next_hop .. "\">".. next_hop .."</A>"
+	    end
+
+	    print("<td>".. next_hop .."</tr></tr>")
 
             if (flow["in_index"] or flow["out_index"]) then
                if ((flow["in_index"] == flow["out_index"]) and (flow["in_index"] == 0)) then
@@ -2038,18 +2053,18 @@ if isEmptyString(page) or page == "overview" then
 
 	 if(flow.deduplication ~= nil) then
 	    local len = table.len(flow.deduplication)+1
-	    
+
 	    print("<tr><th rowspan=\""..len.."\">" .. i18n("dedup_flows") .. "</th>")
 	    print("<th>" .. i18n("flow_exporter") .. "</th><th>" .. i18n("next_hop") .. "</th></tr>\n")
-	    
-	    for k,v in pairs(flow.deduplication) do	       
+
+	    for k,v in pairs(flow.deduplication) do
 	       print("<tr><td><a href=" .. "/lua/host_details.lua?host="..k..">"..k.."</A></td>")
-	       print("<td>"..v.."</td></tr>")	       
+	       print("<td><a href=" .. "/lua/host_details.lua?host="..v..">"..v.."</A></td></tr>")
 	    end
 
-	    print("</table></td></tr>")
+	    print("</td></tr>")
 	 end
-	 
+
          local function format_custom_field(key, value, snmpdevice)
             local formatted_value = handleCustomFlowField(key, value, snmpdevice)
 
@@ -2105,11 +2120,11 @@ if isEmptyString(page) or page == "overview" then
                empty_value = isEmptyString(value)
             end
 
-            if not empty_value and key ~= "CLIENT_TCP_FLAGS" and key ~= "SERVER_TCP_FLAGS" then
+            if not empty_value and key ~= "CLIENT_TCP_FLAGS" and key ~= "SERVER_TCP_FLAGS"  and key ~= "L7_RISK_SCORE" then
                if num == 0 then
                   print("<tr><th colspan=3>" .. i18n("flow_details.additional_flow_elements") .. "</th></tr>\n")
                end
-
+	       
                if type(value) == "table" then
                   print("<tr><th width=10%>" .. getFlowKey(key) .. "</th>")
                   for _, value in pairs(value or {}) do
@@ -2117,8 +2132,7 @@ if isEmptyString(page) or page == "overview" then
                   end
                   print("</tr>\n")
                else
-                  print("<tr><th width=10%>" .. getFlowKey(key) .. "</th><td colspan=2>" .. format_custom_field(key, value, snmpdevice) ..
-                           "</td></tr>\n")
+                  print("<tr><th width=10%>" .. getFlowKey(key) .. "</th><td colspan=2>" .. format_custom_field(key, value, snmpdevice) .. "</td></tr>\n")
                end
 
                num = num + 1

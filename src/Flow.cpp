@@ -3942,9 +3942,13 @@ void Flow::formatECSNetwork(json_object *my_object, const IpAddress *addr) {
       json_object_object_add(network_object, "exporter",
                              json_object_new_string(intoaV4(flow_device.device_ip, buf, sizeof(buf))));
 
+    if(flow_device.next_hop)
+      json_object_object_add(network_object, "next_hop",
+			     json_object_new_string(intoaV4(flow_device.next_hop, buf, sizeof(buf))));
+    
     json_object_object_add(network_object, "info",
 			   json_object_new_string(getFlowInfo(false).c_str()));
-
+    
     json_object_object_add(my_object, "network", network_object);
   }
 }
@@ -4512,8 +4516,13 @@ void Flow::formatGenericFlow(json_object *my_object) {
     json_object_object_add(my_object,
 			   Utils::jsonLabel(EXPORTER_IPV4_ADDRESS, "EXPORTER_IPV4_ADDRESS",
 					    jsonbuf, sizeof(jsonbuf)),
-			   json_object_new_string(
-						  intoaV4(flow_device.device_ip, buf, sizeof(buf))));
+			   json_object_new_string(intoaV4(flow_device.device_ip, buf, sizeof(buf))));
+
+  if(flow_device.next_hop)
+    json_object_object_add(my_object,
+			   Utils::jsonLabel(IPV4_NEXT_HOP, "IPV4_NEXT_HOP",
+					    jsonbuf, sizeof(jsonbuf)),
+			   json_object_new_string(intoaV4(flow_device.next_hop, buf, sizeof(buf))));
 
   if(bt_hash)
     json_object_object_add(my_object,
@@ -7473,9 +7482,16 @@ void Flow::lua_duration_info(lua_State *vm) {
 void Flow::lua_snmp_info(lua_State *vm) {
   char str[16];
   u_int32_t device_ip = htonl(flow_device.device_ip);
+  u_int32_t next_hop  = htonl(flow_device.next_hop);
 
   inet_ntop(AF_INET, &(device_ip), str, INET_ADDRSTRLEN);
   lua_push_str_table_entry(vm, "device_ip", str);
+
+  if(next_hop != 0) {
+    inet_ntop(AF_INET, &(next_hop), str, INET_ADDRSTRLEN);
+    lua_push_str_table_entry(vm, "next_hop", str);
+  }
+  
   lua_push_uint64_table_entry(vm, "in_index", flow_device.in_index);
   lua_push_uint64_table_entry(vm, "out_index", flow_device.out_index);
   lua_push_uint64_table_entry(vm, "observation_point_id",
