@@ -298,22 +298,22 @@ local function build_navbar_title(ip, nprobe_info)
    local navbar_title = i18n("flow_devices.nprobe_instances")
 
    if nprobe_info then
-      
+
       local overview_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/nprobe.lua?page=overview"
       navbar_title = "<a href='".. overview_url .."'>" .. navbar_title .. "</a>"
-      
+
       local breadcrumb = "<span> | "
       local probe_ip = nprobe_info["probe.ip"]
       local probe_name = getProbeName(probe_ip, true, true, false)
 
       if not isEmptyString(ip) and ip ~= probe_ip then
          local probe_uuid = tostring(nprobe_info["probe.source_id"])
-         local exporters_url = ntop.getHttpPrefix() 
+         local exporters_url = ntop.getHttpPrefix()
                                  .. "/lua/pro/enterprise/exporters.lua?probe_uuid=" .. probe_uuid
-         
-         breadcrumb = breadcrumb .. "<a href='".. exporters_url .."'>" 
+
+         breadcrumb = breadcrumb .. "<a href='".. exporters_url .."'>"
                                  .. i18n("flow_devices.probe") .. " " .. probe_name .. "</a>"
-         
+
          local exporter_name = getProbeName(ip, true, true, false)
          breadcrumb = breadcrumb .. " / " .. i18n("flow_devices.exporter") .. " " .. exporter_name
          if exporter_name ~= ip then
@@ -322,10 +322,10 @@ local function build_navbar_title(ip, nprobe_info)
       else
          -- clickable probe IP in the breadcrumb
          local probe_uuid = tostring(nprobe_info["probe.source_id"])
-         local exporters_url = ntop.getHttpPrefix() 
+         local exporters_url = ntop.getHttpPrefix()
                                  .. "/lua/pro/enterprise/exporters.lua?probe_uuid=" .. probe_uuid
-         
-         breadcrumb = breadcrumb .. "<a href='".. exporters_url .."'>" 
+
+         breadcrumb = breadcrumb .. "<a href='".. exporters_url .."'>"
                                  .. i18n("flow_devices.probe") .. " " .. probe_name .. "</a>"
       end
 
@@ -350,18 +350,22 @@ end
 --
 function exporters_utils.printNavbar(ifid, page, ip, probe_uuid, num_exporters)
    local page_utils = require("page_utils")
-   probe_uuid = probe_uuid or ""
    -- URLs and state flags initialization
    local interfaces_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporter_interfaces.lua"
    local exporter_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporters.lua"
-   local exporter_map_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporters_map.lua?probe_uuid="..probe_uuid
-
+   local exporter_map_url
    local snmp_available = false
    local nprobe_info = nil
    local probe_ip = nil
    local conf_url = ""
    local timeseries_url = ""
    local snmp_url = ""
+
+   probe_uuid = probe_uuid or ""
+   exporter_map_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporters_map.lua?probe_uuid="..probe_uuid
+
+   if(num_exporters == nil) then num_exporters = 0 end
+
 
    -- Resolve probe information if available
    if not isEmptyString(probe_uuid) then
@@ -388,7 +392,7 @@ function exporters_utils.printNavbar(ifid, page, ip, probe_uuid, num_exporters)
       if not isEmptyString(ip) then
          local _, tmp1 = exporters_utils.getProbeUUID(ip)
          if not isEmptyString(tmp1) then
-            -- tmp1 is not available in case no exporter is available, 
+            -- tmp1 is not available in case no exporter is available,
             -- e.g. nprobe not currently exporting flows
             conf_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporter_interfaces.lua?ip=" .. ip .. "&ifid=" .. tmp1 ..
                           "&page=config&probe_uuid=" .. probe_uuid
