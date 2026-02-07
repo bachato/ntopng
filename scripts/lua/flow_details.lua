@@ -32,11 +32,17 @@ local icmp_utils = require("icmp_utils")
 local alert_consts = require("alert_consts")
 local mitre_utils = require("mitre_utils")
 local auth = require "auth"
+local exporter_site_utils = nil
 
 local page = _GET["page"]
 
 if ntop.isPro() then
    package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
+   exporter_site_utils = require "exporter_site_utils"
+
+end
+
+if ntop.isPro() then
    shaper_utils = require("shaper_utils")
    if ntop.isEnterpriseL() then
       qoe_utils = require "qoe_utils"
@@ -97,6 +103,29 @@ function formatASN(v, peer_as, ip, is_client_as)
    end
 
    print("<td>" .. asn .. "</td>\n")
+end
+
+local function formatExporter(ip)
+   local ret
+   local site = nil
+   
+   if(exporter_site_utils ~= nil) then
+      ip, site = exporter_site_utils.map_exporter_ip(ip)
+   end
+   
+   ret = "<a href=" .. ntop.getHttpPrefix() .. "/lua/pro/enterprise/flowdevice_details.lua?ip=" .. ip .. ">" .. ip
+
+   if(site ~= nil) then
+      ret = ret .. " (".. site ..")"
+   end
+
+   ret = ret .. "</a>"
+
+   return(ret)
+end
+
+local function formatNextHop(ip)
+   return(formatExporter(ip))
 end
 
 local function colorNotZero(v)
@@ -2028,16 +2057,16 @@ if isEmptyString(page) or page == "overview" then
          end
 
          if ((snmpdevice ~= nil) and (snmpdevice ~= "0.0.0.0")) then
-            local exporter_info_url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/flowdevice_details.lua?ip=" .. snmpdevice
+            local exporter_info_url = formatExporter(snmpdevice)
 
             print("<tr><th>" .. i18n("details.flow_exporter") .. " / "..  i18n("next_hop") .. "</th>")
-            print("<td>" .. "<a href=" .. exporter_info_url .. ">" .. snmpdevice .. "</a></td>")
+            print("<td>" .. exporter_info_url .. "</td>")
 
 
 	    if(next_hop == nil) then
 	       next_hop = ""
 	    else
-	       next_hop = "<A HREF=\"".. ntop.getHttpPrefix() .."/lua/host_details.lua?host=" .. next_hop .. "\">".. next_hop .."</A>"
+	       next_hop = formatNextHop(next_hop)
 	    end
 
 	    print("<td>".. next_hop .."</tr></tr>")
@@ -2058,8 +2087,8 @@ if isEmptyString(page) or page == "overview" then
 	    print("<th>" .. i18n("flow_exporter") .. "</th><th>" .. i18n("next_hop") .. "</th></tr>\n")
 
 	    for k,v in pairs(flow.deduplication) do
-	       print("<tr><td><a href=" .. "/lua/host_details.lua?host="..k..">"..k.."</A></td>")
-	       print("<td><a href=" .. "/lua/host_details.lua?host="..v..">"..v.."</A></td></tr>")
+	       print("<tr><td>".. formatExporter(k) .. "</td>")
+	       print("<td>" .. formatNextHop(v) .."</td></tr>")
 	    end
 
 	    print("</td></tr>")
