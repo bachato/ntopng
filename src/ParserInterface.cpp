@@ -255,7 +255,8 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 #endif
 	num_deduplicated_flows++;
 	flow->addDedupInfo(zflow->exporter_device_ip, zflow->getIPv4NextHop());
-       
+
+#ifdef NTOPNG_PRO
 	if(flow_devices_stats) {
 	  /*
 	    Even if the flow is duplicated, we need to increment
@@ -268,6 +269,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 				       zflow->in_pkts, zflow->in_bytes,
 				       zflow->nprobe_source_id);
 	}
+#endif
 
 	return(true); /* Flow handled albeit discarded */
       }
