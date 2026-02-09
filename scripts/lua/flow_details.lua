@@ -113,7 +113,7 @@ local function formatExporter(ip)
       ip, site = exporter_site_utils.map_exporter_ip(ip)
    end
    
-   ret = "<a href=" .. ntop.getHttpPrefix() .. "/lua/pro/enterprise/flowdevice_details.lua?ip=" .. ip .. ">" .. ip
+   ret = "<a href=" .. ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporter_interfaces.lua?ip=" .. ip .. ">" .. ip
 
    if(site ~= nil) then
       ret = ret .. " (".. site ..")"

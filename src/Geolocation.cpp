@@ -188,6 +188,10 @@ Geolocation::~Geolocation() {
 
 /* *************************************** */
 
+/*
+  IMPORTANT:
+  if *asname != NULL, then the caller MUST free *asname
+ */
 bool Geolocation::getAS(IpAddress *addr, u_int32_t *asn, char **asname) {
   if (asn) *asn = 0;
   if (asname) *asname = NULL;

@@ -8243,12 +8243,15 @@ static int ntop_set_lua_cache(lua_State *vm) {
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
-  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
+  if(lua_type(vm, 2) == LUA_TSTRING)
+    ntop->setLuaCache(std::string((char *)lua_tostring(vm, 1)),
+		      std::string((char *)lua_tostring(vm, 2)));
+  else if(lua_type(vm, 2) == LUA_TNUMBER)
+    ntop->setLuaCache(std::string((char *)lua_tostring(vm, 1)),
+		      std::to_string(lua_tonumber(vm, 2)));
+  else
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-
-  ntop->setLuaCache(std::string((char *)lua_tostring(vm, 1)),
-		    std::string((char *)lua_tostring(vm, 2)));
-
+  
   lua_pushnil(vm);
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
