@@ -808,14 +808,14 @@ CREATE TABLE IF NOT EXISTS `vulnerability_scan_report` ON CLUSTER '$CLUSTER' (
 
 /* MITRE */
 
-CREATE TABLE IF NOT EXISTS `mitre_table_info`  ON CLUSTER '$CLUSTER' (
+CREATE TABLE IF NOT EXISTS `mitre_table_info` ON CLUSTER '$CLUSTER' (
 `ALERT_ID` UInt16,
 `ENTITY_ID` UInt16,
 `TACTIC` UInt16,
 `TECHNIQUE` UInt16,
 `SUB_TECHNIQUE` UInt16,
 `MITRE_ID` String
-) ENGINE = ReplacingMergeTree() PRIMARY KEY (ALERT_ID, ENTITY_ID) ORDER BY (ALERT_ID, ENTITY_ID);
+) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/{cluster}/tables/{database}/{table}', '{replica}') PRIMARY KEY (`ALERT_ID`, `ENTITY_ID`) ORDER BY (`ALERT_ID`, `ENTITY_ID`);
 
 @
 
