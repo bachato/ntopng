@@ -18,7 +18,7 @@
 				"icon" : "fas fa-gauge-simple-high",
 				"i18n_name" : "infrastructure_dashboard.total_throughput",
 				"link" : {
-					"url" : "/lua/pro/enterprise/infrastructure_dashboard.lua",
+					"url" : "/lua/pro/enterprise/infrastructure_config.lua",
 					"url_params" : {}
 				},
 				"counter_path" : "throughput_bps",
@@ -42,7 +42,7 @@
 				"icon" : "fas fa-signal",
 				"i18n_name" : "infrastructure_dashboard.active_instances",
 				"link" : {
-					"url" : "/lua/pro/enterprise/infrastructure_dashboard.lua",
+					"url" : "/lua/pro/enterprise/infrastructure_config.lua",
 					"url_params" : {}
 				},
 				"counter_path" : "active_instances",
@@ -66,7 +66,7 @@
 				"icon" : "fas fa-plug-circle-xmark",
 				"i18n_name" : "infrastructure_dashboard.offline_instances",
 				"link" : {
-					"url" : "/lua/pro/enterprise/infrastructure_dashboard.lua",
+					"url" : "/lua/pro/enterprise/infrastructure_config.lua",
 					"url_params" : {}
 				},
 				"counter_path" : "offline_instances",

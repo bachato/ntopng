@@ -293,7 +293,7 @@ else
                 entry = page_utils.menu_entries.infrastructure_dashboard,
                 hidden = (not ntop.isEnterpriseL() and
                     not ntop.isnEdgeEnterprise()) or not is_admin,
-                url = '/lua/pro/enterprise/infrastructure_dashboard.lua'
+                url = '/lua/pro/enterprise/infrastructure_config.lua'
             }, {
                 entry = page_utils.menu_entries.snmp_monitoring,
                 hidden = (not ntop.isEnterpriseM() and
@@ -622,7 +622,7 @@ local poller_entries = {
         entry = page_utils.menu_entries.infrastructure_dashboard,
         hidden = (not ntop.isEnterpriseL() and not ntop.isnEdgeEnterprise()) or
             not is_admin,
-        url = '/lua/pro/enterprise/infrastructure_dashboard.lua'
+        url = '/lua/pro/enterprise/infrastructure_config.lua'
     }
 }
 
