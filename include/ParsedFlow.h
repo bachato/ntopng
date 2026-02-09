@@ -40,9 +40,10 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   char *ot_info;
   char *external_alert;
   char *l7_json;
+  IpAddress next_hop;
   char *smtp_rcp_to, *smtp_mail_from;
   u_int32_t src_ip_addr_pre_nat, dst_ip_addr_pre_nat,
-    src_ip_addr_post_nat, dst_ip_addr_post_nat, ipv4_next_hop;
+    src_ip_addr_post_nat, dst_ip_addr_post_nat;
   u_int32_t tcp_stats_src_to_dst, tcp_stats_dst_to_src;
   u_int8_t tls_unsafe_cipher, flow_verdict;
   ndpi_os os_hint;
@@ -128,7 +129,7 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   inline void setPreNATDstPort(u_int16_t v) { dst_port_pre_nat = v; };
   inline void setPostNATSrcPort(u_int16_t v) { src_port_post_nat = v; };
   inline void setPostNATDstPort(u_int16_t v) { dst_port_post_nat = v; };
-  inline void setIPv4NextHop(u_int32_t v) { ipv4_next_hop = v; }
+  inline void setNextHop(IpAddress *v) { next_hop.set(v); }
   inline void setWLANSSID(const char *str) { if(wlan_ssid != NULL) free(wlan_ssid);  if(str) { wlan_ssid = strdup(str);} else wlan_ssid = NULL; }
   inline void setWTPMACAddress(const char *str) { Utils::parseMac(wtp_mac_address, str); }
 
@@ -152,7 +153,7 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   inline char* getSMTPMailFrom(bool setToNull = false) { char *r = smtp_mail_from; if(setToNull) smtp_mail_from = NULL; return(r); }
   inline char* getDHCPClientName(bool setToNull = false) { char *r = dhcp_client_name; if(setToNull) dhcp_client_name = NULL; return(r); }
   inline char* getSIPCallId(bool setToNull = false) { char *r = sip_call_id; if(setToNull) sip_call_id = NULL; return(r); }
-  inline u_int32_t getIPv4NextHop() { return(ipv4_next_hop); }
+  inline IpAddress* getNextHop() { return(&next_hop); }
   inline char* getWLANSSID(bool setToNull = false) { char *r = wlan_ssid; if(setToNull) wlan_ssid = NULL; return(r); }
   inline u_int8_t *getWTPMACAddress() { return wtp_mac_address; }
 

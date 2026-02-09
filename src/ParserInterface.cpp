@@ -254,7 +254,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 	ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", flow->print(buf, sizeof(buf)));
 #endif
 	num_deduplicated_flows++;
-	flow->addDedupInfo(zflow->exporter_device_ip, zflow->getIPv4NextHop());
+	flow->addDedupInfo(zflow->exporter_device_ip, zflow->getNextHop());
 
 #ifdef NTOPNG_PRO
 	if(flow_devices_stats) {
@@ -275,7 +275,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
       }
     }
 
-    flow->setFlowDeviceNextHop(zflow->getIPv4NextHop());
+    flow->setFlowDeviceNextHop(zflow->getNextHop());
 
     if(zflow->inIndex != 0) {
       if(src2dst_direction)

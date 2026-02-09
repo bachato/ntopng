@@ -101,6 +101,7 @@ ZMQParserInterface::ZMQParserInterface(const char *endpoint,
   addMapping("IPV4_SRC_MASK", IPV4_SRC_MASK);
   addMapping("IPV4_DST_MASK", IPV4_DST_MASK);
   addMapping("IPV4_NEXT_HOP", IPV4_NEXT_HOP);
+  addMapping("IPV6_NEXT_HOP", IPV6_NEXT_HOP);
   addMapping("SRC_AS", SRC_AS);
   addMapping("DST_AS", DST_AS);
   addMapping("BGP_NEXT_ADJACENT_ASN", BGP_NEXT_ADJACENT_ASN);
@@ -1051,8 +1052,17 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow *const flow,
     if (value->int_num != 0) return false;
     break;
   case IPV4_NEXT_HOP:
-    if (value->string && (!strcmp(value->string, "0.0.0.0"))) return false;
-    flow->setIPv4NextHop(ntohl((value->string != NULL) ? inet_addr((char *)value->string) : value->int_num));
+  case IPV6_NEXT_HOP:
+    if (flow->getNextHop()->isEmpty()) {
+      IpAddress a;
+	
+      if (value->string)
+	a.set((char *)value->string);
+      else
+	a.set(ntohl(value->int_num));
+
+      flow->setNextHop(&a);
+    }
     break;
   case SRC_AS:
     flow->src_as = value->int_num;

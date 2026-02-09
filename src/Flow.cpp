@@ -3439,7 +3439,7 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
 	if(dedupStats[i].exporter_ipv4 != 0)
 	  lua_push_str_table_entry(vm,
 				   Utils::intoaV4(dedupStats[i].exporter_ipv4, b1, sizeof(b1)),
-				   Utils::intoaV4(dedupStats[i].ipv4_next_hop, b2, sizeof(b2)));
+				   dedupStats[i].next_hop.print(b2, sizeof(b2)));
 	else
 	  break;
       }
@@ -3942,9 +3942,9 @@ void Flow::formatECSNetwork(json_object *my_object, const IpAddress *addr) {
       json_object_object_add(network_object, "exporter",
                              json_object_new_string(intoaV4(flow_device.device_ip, buf, sizeof(buf))));
 
-    if(flow_device.next_hop)
+    if(!flow_device.next_hop.isEmpty())
       json_object_object_add(network_object, "next_hop",
-			     json_object_new_string(intoaV4(flow_device.next_hop, buf, sizeof(buf))));
+			     json_object_new_string(flow_device.next_hop.print(buf, sizeof(buf))));
     
     json_object_object_add(network_object, "info",
 			   json_object_new_string(getFlowInfo(false).c_str()));
@@ -4518,11 +4518,11 @@ void Flow::formatGenericFlow(json_object *my_object) {
 					    jsonbuf, sizeof(jsonbuf)),
 			   json_object_new_string(intoaV4(flow_device.device_ip, buf, sizeof(buf))));
 
-  if(flow_device.next_hop)
+  if(!flow_device.next_hop.isEmpty())
     json_object_object_add(my_object,
 			   Utils::jsonLabel(IPV4_NEXT_HOP, "IPV4_NEXT_HOP",
 					    jsonbuf, sizeof(jsonbuf)),
-			   json_object_new_string(intoaV4(flow_device.next_hop, buf, sizeof(buf))));
+			   json_object_new_string(flow_device.next_hop.print(buf, sizeof(buf))));
 
   if(bt_hash)
     json_object_object_add(my_object,
@@ -7480,17 +7480,14 @@ void Flow::lua_duration_info(lua_State *vm) {
 /* ***************************************************** */
 
 void Flow::lua_snmp_info(lua_State *vm) {
-  char str[16];
+  char str[32];
   u_int32_t device_ip = htonl(flow_device.device_ip);
-  u_int32_t next_hop  = htonl(flow_device.next_hop);
 
   inet_ntop(AF_INET, &(device_ip), str, INET_ADDRSTRLEN);
   lua_push_str_table_entry(vm, "device_ip", str);
 
-  if(next_hop != 0) {
-    inet_ntop(AF_INET, &(next_hop), str, INET_ADDRSTRLEN);
-    lua_push_str_table_entry(vm, "next_hop", str);
-  }
+  if(!flow_device.next_hop.isEmpty())
+    lua_push_str_table_entry(vm, "next_hop", flow_device.next_hop.print(str, sizeof(str)));  
   
   lua_push_uint64_table_entry(vm, "in_index", flow_device.in_index);
   lua_push_uint64_table_entry(vm, "out_index", flow_device.out_index);
@@ -9600,13 +9597,13 @@ void Flow::setnDPIFingerprint(char *fp) {
 
 /* *************************************** */
 
-void Flow::addDedupInfo(u_int32_t exporter_ipv4, u_int32_t ipv4_next_hop) {
+void Flow::addDedupInfo(u_int32_t exporter_ipv4, IpAddress *ipv4_next_hop) {
   if(exporter_ipv4 == 0) return;
 
   for(u_int i=0; i<CONST_MAX_NUM_DEDUP_STATS; i++) {
     if(dedupStats[i].exporter_ipv4 == 0) {
       dedupStats[i].exporter_ipv4 = exporter_ipv4,
-	dedupStats[i].ipv4_next_hop = ipv4_next_hop;
+	dedupStats[i].next_hop.set(ipv4_next_hop);
 
       break;
     }

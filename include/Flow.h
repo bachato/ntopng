@@ -67,7 +67,8 @@ typedef struct {
 } FlowUDP;
 
 typedef struct {
-  u_int32_t exporter_ipv4, ipv4_next_hop;
+  u_int32_t exporter_ipv4;
+  IpAddress next_hop;
 } DuplicatedFlowInfo;
 
 typedef struct {
@@ -323,7 +324,8 @@ private:
   } protos;
 
   struct {
-    u_int32_t device_ip, next_hop;
+    u_int32_t device_ip;
+    IpAddress next_hop;
     u_int32_t in_index, out_index;
     u_int16_t observation_point_id;
     u_int16_t site_id;
@@ -1378,8 +1380,8 @@ public:
   inline void setFlowDeviceInIndex(u_int32_t idx)  { if(idx != 0) flow_device.in_index = idx; };
   inline void setFlowDeviceOutIndex(u_int32_t idx) { if(idx != 0) flow_device.out_index = idx; };
 
-  inline void setFlowDeviceNextHop(u_int32_t nh) { flow_device.next_hop = nh;    }
-  inline u_int32_t getFlowDeviceNextHop()        { return(flow_device.next_hop); }
+  inline void setFlowDeviceNextHop(IpAddress *nh) { flow_device.next_hop.set(nh);    }
+  inline IpAddress* getFlowDeviceNextHop()        { return(&flow_device.next_hop); }
 
   inline void setFlowExporterSiteId(u_int16_t id) { flow_device.site_id = id;   }
   inline u_int16_t getFlowExporterSiteId()        { return(flow_device.site_id); }
@@ -1620,7 +1622,7 @@ public:
   void setCliService(int service_enum);
   void setSrvService(int service_enum);
   inline void setIGMPType(u_int8_t t) { protos.igmp.igmp_type = t; }
-  void addDedupInfo(u_int32_t exporter_ipv4, u_int32_t ipv4_next_hop);
+  void addDedupInfo(u_int32_t exporter_ipv4, IpAddress *next_hop);
 };
 
 #endif /* _FLOW_H_ */
