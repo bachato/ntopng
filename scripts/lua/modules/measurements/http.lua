@@ -43,7 +43,7 @@ local function check(measurement, hosts, granularity)
 			 nil, false --[[ don't follow redirects ]])
     end
 
-    if(rv and rv.HTTP_STATS and (rv.HTTP_STATS.TOTAL_TIME > 0)) then
+    if(rv and not rv.IS_PARTIAL and rv.HTTP_STATS and (rv.HTTP_STATS.TOTAL_TIME > 0)) then
       local total_time = rv.HTTP_STATS.TOTAL_TIME * 1000
       local lookup_time = (rv.HTTP_STATS.NAMELOOKUP_TIME or 0) * 1000
       local connect_time = (rv.HTTP_STATS.APPCONNECT_TIME or 0) * 1000
