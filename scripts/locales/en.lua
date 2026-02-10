@@ -1,4 +1,4 @@
-local lang = {
+'local lang = {
    ["abort"] = "Abort",
    ["access_control_list"] = "Access Control List",
    ["acknowledge"] = "Acknowledge",
@@ -8735,6 +8735,9 @@ local lang = {
     ["object_id"] = "ObjectID",
     ["out_bytes"] = "Out Bytes",
     ["out_errors"] = "Out Errors",
+    ["other_exporter"] = "Other Flow Exporter",
+    ["other_router"] = "Other Router",
+    ["other_site"] = "Other Site",
     ["per_interface_settings"] = "These settings only affect interface \"%{iface}\". Check out <a href=\"%{url}\">%{global}</a> for a global configuration.",
     ["ping_all_snmp_devices"] = "Ping All SNMP Devices",
     ["ping_all_snmp_devices_confirm"] = "Do you really want to ping all the SNMP devices?",
