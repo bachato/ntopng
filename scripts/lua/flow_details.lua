@@ -105,29 +105,6 @@ function formatASN(v, peer_as, ip, is_client_as)
    print("<td>" .. asn .. "</td>\n")
 end
 
-local function formatExporter(ip)
-   local ret
-   local site = nil
-   
-   if(exporter_site_utils ~= nil) then
-      ip, site = exporter_site_utils.map_exporter_ip(ip)
-   end
-   
-   ret = "<a href=" .. ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporter_interfaces.lua?ip=" .. ip .. ">" .. ip
-
-   if(site ~= nil) then
-      ret = ret .. " (".. site ..")"
-   end
-
-   ret = ret .. "</a>"
-
-   return(ret)
-end
-
-local function formatNextHop(ip)
-   return(formatExporter(ip))
-end
-
 local function colorNotZero(v)
    if (v == 0) then
       return ("0")
@@ -2056,17 +2033,22 @@ if isEmptyString(page) or page == "overview" then
             print("<td colspan=\"2\">" .. custom_name .. "</td></tr>")
          end
 
+	 local flow_trajectory = {}
+	 local nodes_names = {}
+	 
          if ((snmpdevice ~= nil) and (snmpdevice ~= "0.0.0.0")) then
-            local exporter_info_url = formatExporter(snmpdevice)
+            local exporter_info_url, exporter_ip, exporter_name = formatExporter(snmpdevice)
 
+	    nodes_names[exporter_ip] = exporter_name
+	    
             print("<tr><th>" .. i18n("details.flow_exporter") .. " / "..  i18n("next_hop") .. "</th>")
             print("<td>" .. exporter_info_url .. "</td>")
-
 
 	    if(next_hop == nil) then
 	       next_hop = ""
 	    else
-	       next_hop = formatNextHop(next_hop)
+	       next_hop, next_hop_ip, next_hop_name = formatNextHop(next_hop)
+	       nodes_names[next_hop_ip] = next_hop_name
 	    end
 
 	    print("<td>".. next_hop .."</tr></tr>")
@@ -2078,20 +2060,157 @@ if isEmptyString(page) or page == "overview" then
                   printFlowSNMPInfo(snmpdevice, flow["in_index"], flow["out_index"])
                end
             end
+
+	    flow_trajectory[exporter_ip] = next_hop_ip
          end
 
 	 if(flow.deduplication ~= nil) then
 	    local len = table.len(flow.deduplication)+1
 
-	    print("<tr><th rowspan=\""..len.."\">" .. i18n("dedup_flows") .. "</th>")
+	    print("<tr><th rowspan=\""..(len+1).."\">" .. i18n("dedup_flows") .. "</th>")
 	    print("<th>" .. i18n("flow_exporter") .. "</th><th>" .. i18n("next_hop") .. "</th></tr>\n")
 
 	    for k,v in pairs(flow.deduplication) do
-	       print("<tr><td>".. formatExporter(k) .. "</td>")
-	       print("<td>" .. formatNextHop(v) .."</td></tr>")
-	    end
+	       local ret, exp_ip, exp_name = formatExporter(k)
+	       local ret1, next_hop_ip, next_hop_name = formatNextHop(v)
+	       
+	       print("<tr><td>".. ret .. "</td><td>" .. ret1 .."</td></tr>")
 
-	    print("</td></tr>")
+	       flow_trajectory[exp_ip] = next_hop_ip
+	       nodes_names[exp_ip] = exp_name
+	       nodes_names[next_hop_ip] = next_hop_name
+	    end
+	    
+	    print("</td></tr>")	    
+	 end
+
+	 if(table.len(flow_trajectory) > 0) then
+	    	    print('<tr><th colspan=2>')
+print [[
+	       <div id="mynetwork" style="height: 400px;"></div>
+	       <script type="text/javascript">
+	       // create an array with nodes
+	    var nodes = new vis.DataSet([
+]]
+
+local nodes = {}
+local next_hops = {}
+local i=1
+local client_id
+local server_id
+
+if(nodes[flow["cli.ip"]] == nil) then
+   nodes[flow["cli.ip"]] = i
+   print('{ id: '..i..', label: "'..flow["cli.ip"]..'", first: true, color: "#FFCA28" },')
+   client_id = i
+   i = i + 1
+end
+
+if(nodes[flow["srv.ip"]] == nil) then
+   nodes[flow["srv.ip"]] = i
+   print('{ id: '..i..', label: "'..flow["srv.ip"]..'", color: "#FF7043" },')
+   server_id = i
+   i = i + 1
+end
+
+for k,v in pairs(flow_trajectory) do
+   if(nodes[k] == nil) then
+      nodes[k] = i
+      print('{ id: '..i..', label: "'.. (nodes_names[k] or k)..'" },')
+      i = i + 1
+   end
+   
+   if(nodes[v] == nil) then
+      nodes[v] = i
+      print ('{ id: '..i..', label: "'..(nodes_names[v] or v)..'" },')
+      i = i + 1
+   end
+
+   next_hops[v] = true
+end
+
+print [[
+				       ]);
+
+	    // create an array with edges
+	    var edges = new vis.DataSet([
+]]
+
+for k,v in pairs(flow_trajectory) do
+   print ('{ from: '..nodes[k]..', to: '..nodes[v]..'},')
+end
+
+-- Add server node edge
+for exp_ip,next_hop in pairs(flow_trajectory) do
+   if(flow_trajectory[next_hop] == nil) then
+      print ('{ from: '..nodes[next_hop]..', to: '..server_id..' },')
+   end
+end
+
+-- Add client node edge
+local head = {}
+for exp_ip,next_hop in pairs(flow_trajectory) do
+   if(next_hops[exp_ip] == nil) then
+      print ('{ from: '..client_id..', to: '..nodes[exp_ip]..' },')
+   end
+end
+
+print [[
+				       ]);
+
+	    // create a network
+	    var container = document.getElementById("mynetwork");
+	    var data = {
+	       nodes: nodes,
+	       edges: edges,
+	    };
+
+        var options = {
+          autoResize: true,
+          nodes: {
+            shape: "dot",
+            scaling: {
+              label: {
+                min: 2,
+                max: 80,
+              },
+            },]]
+   if (page_utils.is_dark_mode_enabled()) then
+      print [[
+            font: {
+               color: '#E2E2E2'
+            },
+      ]]
+   end
+   print [[
+          },
+          edges: {
+              width: 0.15,
+              color: { inherit: "from" },
+              smooth: {
+                  type: "continuous",
+                  roundness: 0
+              },
+          },
+          physics: {
+              barnesHut: {
+                  springConstant: 0,
+                  avoidOverlap: 0.3,
+                  gravitationalConstant: -1000,
+                  damping: 0.65,
+                  centralGravity: 0
+              },
+              stabilization: {
+                  onlyDynamicEdges: false
+              }
+          },
+        };
+
+	    var network = new vis.Network(container, data, options);
+	    </script>
+	       ]]
+	    print('</th></tr>\n')
+
 	 end
 
          local function format_custom_field(key, value, snmpdevice)

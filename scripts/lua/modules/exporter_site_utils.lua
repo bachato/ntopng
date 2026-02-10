@@ -35,6 +35,7 @@ local DEFAULT_SITE = {
 
 local iface_to_exporter = nil
 local exporter_to_site  = nil
+local exporter_to_name  = nil
 
 --
 -- Caches exporters information in memory
@@ -46,6 +47,7 @@ local function cache_exporters()
 
 	 iface_to_exporter = {}
 	 exporter_to_site  = {}
+	 exporter_to_name  = {}
 	 
 	 local ifstats = interface.getStats()
 	 
@@ -53,6 +55,7 @@ local function cache_exporters()
 	    for probe_ip, probe_info in pairsByKeys(probe_list or {}) do
 	       for exporter_ip, exporter_info in pairsByKeys(probe_info.exporters or {}) do
 		  local ifaces = snmp_cached_dev:get_interfaces(exporter_ip)
+		  local system = snmp_cached_dev:get_system(exporter_ip)
 		  local ret = exporter_site_utils.getFlowDevExporterSite(exporter_ip)
 		  local site_name = ret.name
 
@@ -65,6 +68,7 @@ local function cache_exporters()
 		  end
 
 		  exporter_to_site[exporter_ip] = site_name
+		  exporter_to_name[exporter_ip] = system.system.name or exporter_ip
 	       end
 	    end
 	 end
@@ -405,7 +409,41 @@ function exporter_site_utils.map_exporter_ip(exp_ip)
       site = DEFAULT_SITE.name
    end
 
-   return exp_ip, site
+   return exp_ip, site, exporter_to_name[exp_ip] or exp_ip
+end
+
+-- ##############################################
+
+function exporter_site_utils.map_host_to_exporter_ip(host_ip)
+   local site
+   local exp_ip
+   
+   if ntop.isPro() then
+      cache_exporters()
+
+      -- tprint(iface_to_exporter)
+      exp_ip = iface_to_exporter[host_ip]
+
+      if(exp_ip ~= nil) then
+	 site = exporter_to_site[exp_ip]
+	 
+	 if(site == nil) then
+	    for k,v in pairs(iface_to_exporter) do
+	       if(v == exp_ip) then
+		  exp_ip = k
+		  site = exporter_to_site(k)
+		  break
+	       end
+	    end
+	 end
+      else
+	 exp_ip = host_ip
+      end
+   else
+      site = DEFAULT_SITE.name
+   end
+
+   return exp_ip, site, exporter_to_name[exp_ip] or exp_ip
 end
 
 -- ##############################################

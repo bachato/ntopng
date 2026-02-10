@@ -25,12 +25,13 @@ local http_utils = require "http_utils"
 local rest_utils = require "rest_utils"
 local snmp_utils
 local cache_utils = require "cache_utils"
+local exporter_site_utils
 
 if ntop.isPro() then
-   package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" ..
-      package.path
+   package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
    require "flow_exporter_utils"
    snmp_utils = require "snmp_utils"
+   exporter_site_utils = require "exporter_site_utils"
 end
 -- For backward compatibility override these functions
 sendHTTPContentTypeHeader = rest_utils.sendHTTPContentTypeHeader
@@ -1001,7 +1002,7 @@ function format_portidx_name(device_ip, portidx, short_version)
    if tonumber(device_ip) then
       device_ip = ntop.inet_ntoa(device_ip)
    end
-   
+
    cached_val = cache_utils.getifname(device_ip, portidx)
 
    if (cached_val ~= nil) then
@@ -1598,6 +1599,61 @@ function formatHTMLaTag(real_value, name, url)
    end
 
    return link
+end
+
+function formatExporter(ip)
+   if ntop.isPro() then
+      local ret
+      local site = nil
+      local exporter_name
+
+      if(exporter_site_utils ~= nil) then
+	 ip, site, exporter_name = exporter_site_utils.map_exporter_ip(ip)
+      end
+
+      ret = "<a href=\"" .. ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporter_interfaces.lua?ip=" .. ip .. "\">" .. exporter_name
+
+      if(site ~= nil) then
+	 ret = ret .. " (".. site ..")"
+      end
+
+      ret = ret .. "</a>"
+
+      return ret, ip, exporter_name or ip
+   else
+      return ip, ip, ip
+   end
+end
+
+function formatNextHop(ip)
+   if ntop.isPro() then
+      local ret
+      local site = nil
+      local ip1
+      local exporter_name
+      
+      if(exporter_site_utils ~= nil) then
+	 ip1, site, exporter_name = exporter_site_utils.map_host_to_exporter_ip(ip)
+      end
+
+      if(ip1 ~= ip) then
+	 ret = "<a href=\"" .. ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporter_interfaces.lua?ip=" .. ip1 .. "\">" .. exporter_name
+
+	 if(site ~= nil) then
+	    ret = ret .. " (".. site ..")</A>"
+	 end
+
+	 ret = ret .. " ["..  "<a href=\"" .. ntop.getHttpPrefix() .. "/lua/host_details.lua?host=" .. ip .. "\">" .. ip .. "</a>".."]"
+      else
+	 ret = "<a href=" .. ntop.getHttpPrefix() .. "/lua/host_details.lua?host=" .. ip1 .. ">" .. ip1 .. "</a>"
+      end
+
+      ret = ret .. "</a>"
+
+      return ret, ip1, exporter_name or ip1
+   else
+      return ip, ip, ip
+   end
 end
 
 --

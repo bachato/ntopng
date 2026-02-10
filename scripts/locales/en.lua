@@ -1,4 +1,4 @@
-'local lang = {
+local lang = {
    ["abort"] = "Abort",
    ["access_control_list"] = "Access Control List",
    ["acknowledge"] = "Acknowledge",
