@@ -2085,7 +2085,8 @@ if isEmptyString(page) or page == "overview" then
 	 end
 
 	 if(table.len(flow_trajectory) > 0) then
-	    	    print('<tr><th colspan=2>')
+	    print('<tr><th colspan=2>')
+	    if(table.len(flow.deduplication)== 0) then  print('<th></th>') end
 print [[
 	       <div id="mynetwork" style="height: 400px;"></div>
 	       <script type="text/javascript">
