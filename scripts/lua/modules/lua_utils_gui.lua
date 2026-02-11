@@ -1619,9 +1619,9 @@ function formatExporter(ip)
 
       ret = ret .. "</a>"
 
-      return ret, ip, exporter_name or ip
+      return ret, ip, exporter_name or ip, site
    else
-      return ip, ip, ip
+      return ip, ip, ip, nil
    end
 end
 
@@ -1650,9 +1650,9 @@ function formatNextHop(ip)
 
       ret = ret .. "</a>"
 
-      return ret, ip1, exporter_name or ip1
+      return ret, ip1, exporter_name or ip1, site
    else
-      return ip, ip, ip
+      return ip, ip, ip, nil
    end
 end
 

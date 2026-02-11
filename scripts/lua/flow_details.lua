@@ -39,7 +39,6 @@ local page = _GET["page"]
 if ntop.isPro() then
    package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
    exporter_site_utils = require "exporter_site_utils"
-
 end
 
 if ntop.isPro() then
@@ -110,6 +109,16 @@ local function colorNotZero(v)
       return ("0")
    else
       return ('<span style="color: red">' .. formatValue(v) .. "</span>")
+   end
+end
+
+local function firstDottedElement(str)
+   if(isIPv4(str)) then
+      return str
+   else
+      local items = split(str, "%.")
+      
+      return(items[1])
    end
 end
 
@@ -2037,18 +2046,18 @@ if isEmptyString(page) or page == "overview" then
 	 local nodes_names = {}
 	 
          if ((snmpdevice ~= nil) and (snmpdevice ~= "0.0.0.0")) then
-            local exporter_info_url, exporter_ip, exporter_name = formatExporter(snmpdevice)
+            local exporter_info_url, exporter_ip, exporter_name, site = formatExporter(snmpdevice)
 
-	    nodes_names[exporter_ip] = exporter_name
-	    
+	    nodes_names[exporter_ip] = { firstDottedElement(exporter_name), site }
+
             print("<tr><th>" .. i18n("details.flow_exporter") .. " / "..  i18n("next_hop") .. "</th>")
             print("<td>" .. exporter_info_url .. "</td>")
 
 	    if(next_hop == nil) then
 	       next_hop = ""
 	    else
-	       next_hop, next_hop_ip, next_hop_name = formatNextHop(next_hop)
-	       nodes_names[next_hop_ip] = next_hop_name
+	       next_hop, next_hop_ip, next_hop_name, next_hop_site = formatNextHop(next_hop)
+	       nodes_names[next_hop_ip] = { firstDottedElement(next_hop_name), next_hop_site }
 	    end
 
 	    print("<td>".. next_hop .."</tr></tr>")
@@ -2071,22 +2080,21 @@ if isEmptyString(page) or page == "overview" then
 	    print("<th>" .. i18n("flow_exporter") .. "</th><th>" .. i18n("next_hop") .. "</th></tr>\n")
 
 	    for k,v in pairs(flow.deduplication) do
-	       local ret, exp_ip, exp_name = formatExporter(k)
-	       local ret1, next_hop_ip, next_hop_name = formatNextHop(v)
+	       local ret, exp_ip, exp_name, site = formatExporter(k)
+	       local ret1, next_hop_ip, next_hop_name, next_hope_site = formatNextHop(v)
 	       
 	       print("<tr><td>".. ret .. "</td><td>" .. ret1 .."</td></tr>")
 
 	       flow_trajectory[exp_ip] = next_hop_ip
-	       nodes_names[exp_ip] = exp_name
-	       nodes_names[next_hop_ip] = next_hop_name
+	       nodes_names[exp_ip] = { firstDottedElement(exp_name), site }
+	       nodes_names[next_hop_ip] = { firstDottedElement(next_hop_name), next_hope_site }
 	    end
 	    
 	    print("</td></tr>")	    
 	 end
 
 	 if(table.len(flow_trajectory) > 0) then
-	    print('<tr><th colspan=2>')
-	    if(table.len(flow.deduplication)== 0) then  print('<th></th>') end
+	    	    print('<tr><th colspan=2>')
 print [[
 	       <div id="mynetwork" style="height: 400px;"></div>
 	       <script type="text/javascript">
@@ -2102,28 +2110,51 @@ local server_id
 
 if(nodes[flow["cli.ip"]] == nil) then
    nodes[flow["cli.ip"]] = i
-   print('{ id: '..i..', label: "'..flow["cli.ip"]..'", first: true, color: "#FFCA28" },')
+   print('{ id: '..i..', label: "'..flow["cli.ip"]..' (Client)", first: true, color: "#FFCA28" },')
    client_id = i
    i = i + 1
 end
 
 if(nodes[flow["srv.ip"]] == nil) then
    nodes[flow["srv.ip"]] = i
-   print('{ id: '..i..', label: "'..flow["srv.ip"]..'", color: "#FF7043" },')
+   print('{ id: '..i..', label: "'..flow["srv.ip"]..' (Server)", color: "#FF7043" },')
    server_id = i
    i = i + 1
 end
 
 for k,v in pairs(flow_trajectory) do
    if(nodes[k] == nil) then
+      local name
+      
+      if(nodes_names[k] ~= nil) then
+	 local ret = nodes_names[k]
+	 local site  = ret[2]
+
+	 name = ret[1]
+	 if(site ~= nil) then name = name .. " (" .. site .. ")" end	 	 
+      end
+
+      if(name == nil) then name = k end
       nodes[k] = i
-      print('{ id: '..i..', label: "'.. (nodes_names[k] or k)..'" },')
+      print('{ id: '..i..', label: "'.. name ..'" },')
       i = i + 1
    end
    
    if(nodes[v] == nil) then
+      local name
+      
+      if(nodes_names[v] ~= nil) then
+	 local ret = nodes_names[v]
+	 local site  = ret[2]
+
+	 name = ret[1]
+	 if(site ~= nil) then name = name .. " (" .. site .. ")" end
+      else
+	 name = v
+      end
+      
       nodes[v] = i
-      print ('{ id: '..i..', label: "'..(nodes_names[v] or v)..'" },')
+      print ('{ id: '..i..', label: "'.. name ..'" },')
       i = i + 1
    end
 
@@ -2138,13 +2169,13 @@ print [[
 ]]
 
 for k,v in pairs(flow_trajectory) do
-   print ('{ from: '..nodes[k]..', to: '..nodes[v]..'},')
+   print ('{ from: '..nodes[k]..', to: '..nodes[v]..', arrows: "to"},')
 end
 
 -- Add server node edge
 for exp_ip,next_hop in pairs(flow_trajectory) do
    if(flow_trajectory[next_hop] == nil) then
-      print ('{ from: '..nodes[next_hop]..', to: '..server_id..' },')
+      print ('{ from: '..nodes[next_hop]..', to: '..server_id..', arrows: "to" },')
    end
 end
 
@@ -2152,7 +2183,7 @@ end
 local head = {}
 for exp_ip,next_hop in pairs(flow_trajectory) do
    if(next_hops[exp_ip] == nil) then
-      print ('{ from: '..client_id..', to: '..nodes[exp_ip]..' },')
+      print ('{ from: '..client_id..', to: '..nodes[exp_ip]..', arrows: "to" },')
    end
 end
 
