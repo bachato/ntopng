@@ -441,6 +441,8 @@ const updateChartSeries = async function (options) {
     } else {
         chart.value.updateOptions({ 'file': options.data, 'colors': options.colors, 'labels': options.labels });
     }
+    // Alwais reset the zoom after updating
+    chart.value.resetZoom()
 }
 
 /* *************************************************** */
