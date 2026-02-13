@@ -1543,17 +1543,23 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
             }
         end
     elseif tag.value_type == "probe_ip" then
+        local exporter_site_utils = require "exporter_site_utils"
         filter.options = {}
         local full_dev_list = {}
 
         -- Add both Flow devices
         if interface.getFlowDevices then -- Pro Only
             for exporter_ip, _ in pairs(getExporterList()) do
+                local group = nil
                 local probe_name = getProbeName(exporter_ip)
+                if ntop.isEnterpriseM() then
+                    group = exporter_site_utils.getFlowDevExporterSite(exporter_ip).name
+                end
                 full_dev_list[exporter_ip] = {
                     value = exporter_ip,
                     label = probe_name,
-                    display_more_filters = true
+                    display_more_filters = true,
+                    group = group
                 }
             end
         end
@@ -1561,12 +1567,17 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
         if interface.getSFlowDevices then -- Pro Only
             for interface, device_list in pairs(interface.getSFlowDevices() or {}) do
                 for probe, _ in pairsByValues(device_list or {}, asc) do
+                    local group = nil
                     local probe_name = getProbeName(probe)
+                    if ntop.isEnterpriseM() then
+                        group = exporter_site_utils.getFlowDevExporterSite(probe).name
+                    end
                     -- local label = format_name_value(probe_name, probe)
                     full_dev_list[probe] = {
                         value = probe,
                         label = probe_name,
-                        display_more_filters = true
+                        display_more_filters = true,
+                        group = group
                     }
                 end
             end
@@ -1676,6 +1687,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 -- SNMP devices
                 local snmp_cached_dev = require "snmp_cached_dev"
                 local snmp_config = require "snmp_config"
+                local exporter_site_utils = require "exporter_site_utils"
                 local devices = {}
                 if isEmptyString(probe_ip_requested) then
                     devices = snmp_config.get_all_configured_devices()
@@ -1700,19 +1712,20 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                     if cached_interfaces and cached_interfaces["interfaces"] then
                         local interfaces = cached_interfaces["interfaces"]
                         for if_index, if_info in pairs(interfaces) do
-                            local interface_name = if_index
-                            if if_info.name then
-                                interface_name = if_info.name
-                            end
-                            local label = interface_name .. ' · ' .. probe_label
-                            if hide_exporters_name then
-                                label = interface_name
+                            local label = format_portidx_name(probe_ip, if_index, true)
+                            local group = nil
+                            if not hide_exporters_name then
+                                if ntop.isEnterpriseM() then
+                                    group = exporter_site_utils.getFlowDevExporterSite(probe_ip).name
+                                end
+                                label = probe_label .. ' - ' .. label
                             end
 
                             interfaces_list[label] = {
                                 value = probe_ip .. "_" .. if_index,
                                 label = label,
-                                show_only_value = probe_ip
+                                show_only_value = probe_ip,
+                                group = group
                             }
                         end
                     end
@@ -1725,13 +1738,18 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                     for _, interfaces_table in pairs(interfaces or {}) do
                         for if_index, _ in pairsByKeys(interfaces_table) do
                             local label = format_portidx_name(exporter_ip, if_index, true)
+                            local group = nil
                             if not hide_exporters_name then
-                                label = exporter_ip .. ' · ' .. label
+                                if ntop.isEnterpriseM() then
+                                    group = exporter_site_utils.getFlowDevExporterSite(exporter_ip).name
+                                end
+                                label = exporter_ip .. ' - ' .. label
                             end
                             interfaces_list[tostring(label)] = {
                                 value = exporter_ip .. "_" .. if_index,
                                 label = label,
-                                show_only_value = exporter_ip
+                                show_only_value = exporter_ip,
+                                group = group
                             }
                         end
                     end
