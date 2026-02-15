@@ -148,22 +148,22 @@ local function draw_graph(iec, total, mapping)
         // value corresponds with the age of the person
         nodes = [
 ]]
-   local i = 1
-   for k, _ in pairs(nodes) do
-      local label
+local i = 1
+for k, _ in pairs(nodes) do
+   local label
 
-      if (mapping == nil) then
-         label = iec104_typeids2str(tonumber(k))
-      else
-         label = mapping[tonumber(k)]
-      end
-
-      print("{ id: " .. i .. ", label: \"" .. (label or k) .. "\" },\n")
-      nodes_id[k] = i
-      i = i + 1
+   if (mapping == nil) then
+      label = iec104_typeids2str(tonumber(k))
+   else
+      label = mapping[tonumber(k)]
    end
 
-   print [[
+   print("{ id: " .. i .. ", label: \"" .. (label or k) .. "\" },\n")
+   nodes_id[k] = i
+   i = i + 1
+end
+
+print [[
    ];
 
         // create connections between people
@@ -171,46 +171,46 @@ local function draw_graph(iec, total, mapping)
         edges = [
 ]]
 
-   local uni = {}
-   local bi = {}
+local uni = {}
+local bi = {}
 
-   for k, v in pairs(iec) do
-      local keys = split(k, ",")
+for k, v in pairs(iec) do
+   local keys = split(k, ",")
 
-      if (iec[keys[2] .. "," .. keys[1]] == nil) then
-         uni[k] = v
+   if (iec[keys[2] .. "," .. keys[1]] == nil) then
+      uni[k] = v
+   else
+      if (keys[2] < keys[1]) then
+	 bi[keys[2] .. "," .. keys[1]] = v
       else
-         if (keys[2] < keys[1]) then
-            bi[keys[2] .. "," .. keys[1]] = v
-         else
-            bi[keys[1] .. "," .. keys[2]] = v
-         end
+	 bi[keys[1] .. "," .. keys[2]] = v
       end
    end
+end
 
-   for k, v in pairs(uni) do
-      local keys = split(k, ",")
-      local label = string.format("%.3f %%", (v * 100) / total)
+for k, v in pairs(uni) do
+   local keys = split(k, ",")
+   local label = string.format("%.3f %%", (v * 100) / total)
 
-      nodes[keys[1]] = true
-      nodes[keys[2]] = true
+   nodes[keys[1]] = true
+   nodes[keys[2]] = true
 
-      print("{ from: " .. nodes_id[keys[1]] .. ", to: " .. nodes_id[keys[2]] .. ", value: " .. v .. ", title: \"" .. label ..
-               "\", arrows: \"to\" },\n")
-   end
+   print("{ from: " .. nodes_id[keys[1]] .. ", to: " .. nodes_id[keys[2]] .. ", value: " .. v .. ", title: \"" .. label ..
+	 "\", arrows: \"to\" },\n")
+end
 
-   for k, v in pairs(bi) do
-      local keys = split(k, ",")
-      local label = string.format("%.3f %%", (v * 100) / total)
+for k, v in pairs(bi) do
+   local keys = split(k, ",")
+   local label = string.format("%.3f %%", (v * 100) / total)
 
-      nodes[keys[1]] = true
-      nodes[keys[2]] = true
+   nodes[keys[1]] = true
+   nodes[keys[2]] = true
 
-      print("{ from: " .. nodes_id[keys[1]] .. ", to: " .. nodes_id[keys[2]] .. ", value: " .. v .. ", title: \"" .. label ..
-               "\", arrows: \"to,from\" },\n")
-   end
+   print("{ from: " .. nodes_id[keys[1]] .. ", to: " .. nodes_id[keys[2]] .. ", value: " .. v .. ", title: \"" .. label ..
+	 "\", arrows: \"to,from\" },\n")
+end
 
-   print [[
+print [[
         ];
 
         // Instantiate our network object.
@@ -229,14 +229,14 @@ local function draw_graph(iec, total, mapping)
                 max: 80,
               },
             },]]
-   if (page_utils.is_dark_mode_enabled()) then
-      print [[
+	    if (page_utils.is_dark_mode_enabled()) then
+	       print [[
             font: {
                color: '#E2E2E2'
             },
       ]]
-   end
-   print [[
+	    end
+	    print [[
           },
           edges: {
               width: 0.15,
@@ -279,7 +279,7 @@ local function ja4url(what, safety, label)
       if ((safety ~= nil) and (safety ~= "safe")) then
          print(
             ' [ <i class="fas fa-exclamation-triangle" aria-hidden=true style="color: orange;"></i> <A HREF=https://en.wikipedia.org/wiki/Cipher_suite>' ..
-               capitalize(safety) .. ' Cipher</A> ]')
+	    capitalize(safety) .. ' Cipher</A> ]')
       end
    end
 end
@@ -296,23 +296,23 @@ if isAdministrator() then
       local proto_name = interface.getnDPIProtoName(proto_id)
 
       if protos_utils.addAppRule(proto_name, {
-         match = "host",
-         value = _POST["custom_hosts"]
+				    match = "host",
+				    value = _POST["custom_hosts"]
       }) then
          local info = ntop.getInfo()
 
          alert_banners[#alert_banners + 1] = {
             type = "success",
             text = i18n("custom_categories.protos_reboot_necessary", {
-               product = info.product
+			   product = info.product
             })
          }
       else
          alert_banners[#alert_banners + 1] = {
             type = "danger",
             text = i18n("flow_details.could_not_add_host_to_category", {
-               host = _POST["custom_hosts"],
-               category = proto_name
+			   host = _POST["custom_hosts"],
+			   category = proto_name
             })
          }
       end
@@ -327,9 +327,9 @@ if isAdministrator() then
          alert_banners[#alert_banners + 1] = {
             type = "success",
             text = i18n("flow_details.host_successfully_added_to_category", {
-               host = _POST["custom_hosts"],
-               category = (i18n("ndpi_categories." .. label) or label),
-               url = ntop.getHttpPrefix() .. "/lua/admin/edit_categories.lua?l7proto=" .. category_id
+			   host = _POST["custom_hosts"],
+			   category = (i18n("ndpi_categories." .. label) or label),
+			   url = ntop.getHttpPrefix() .. "/lua/admin/edit_categories.lua?l7proto=" .. category_id
             })
          }
       else
@@ -338,8 +338,8 @@ if isAdministrator() then
          alert_banners[#alert_banners + 1] = {
             type = "danger",
             text = i18n("flow_details.could_not_add_host_to_category", {
-               host = _POST["custom_hosts"],
-               category = (i18n("ndpi_categories." .. label) or label)
+			   host = _POST["custom_hosts"],
+			   category = (i18n("ndpi_categories." .. label) or label)
             })
          }
       end
@@ -360,7 +360,7 @@ local function printAddCustomHostRule(full_url)
 
    for cat_name, cat_id in pairsByKeys(categories, asc_insensitive) do
       cat_select_dropdown = cat_select_dropdown .. [[<option value="cat_]] .. cat_id .. [[">]] ..
-                               (i18n("ndpi_categories." .. cat_name) or cat_name) .. [[</option>]]
+	 (i18n("ndpi_categories." .. cat_name) or cat_name) .. [[</option>]]
    end
    cat_select_dropdown = cat_select_dropdown .. "</select>"
 
@@ -377,45 +377,45 @@ local function printAddCustomHostRule(full_url)
    local matched_category = ntop.matchCustomCategory(full_url)
 
    existing_note = "<br>" .. i18n("flow_details.existing_rules_note", {
-      name = i18n("custom_categories.apps_and_categories"),
-      url = ntop.getHttpPrefix() .. "/lua/admin/edit_categories.lua"
-   })
+				     name = i18n("custom_categories.apps_and_categories"),
+				     url = ntop.getHttpPrefix() .. "/lua/admin/edit_categories.lua"
+				 })
 
    if matched_category ~= nil then
       local cat_name = interface.getnDPICategoryName(matched_category)
 
       existing_note = existing_note .. "<br><br>" .. i18n("details.note") .. ": " .. i18n("custom_categories.similar_host_found", {
-         host = page_utils.safe_html(full_url),
-         category = (i18n("ndpi_categories." .. cat_name) or cat_name)
-      }) .. "<br><br>"
+											     host = page_utils.safe_html(full_url),
+											     category = (i18n("ndpi_categories." .. cat_name) or cat_name)
+											 }) .. "<br><br>"
    end
 
    local rule_type_selection = ""
    if protos_utils.hasProtosFile() then
       rule_type_selection = i18n("flow_details.rule_type") .. ":" ..
-                               [[<br><select id="new_rule_type" onchange="new_rule_dropdown_select(this)" class="form-select">
+	 [[<br><select id="new_rule_type" onchange="new_rule_dropdown_select(this)" class="form-select">
             <option value="application">]] .. i18n("application") .. [[</option>
             <option value="category" selected>]] .. i18n("category") .. [[</option>
          </select><br>]]
    end
 
    print(template.gen("modal_confirm_dialog.html", {
-      dialog = {
-         id = "add_to_customized_categories",
-         action = "addToCustomizedCategories()",
-         custom_alert_class = "",
-         custom_dialog_class = "dialog-body-full-height",
-         title = i18n("custom_categories.custom_host_category"),
-         message = rule_type_selection .. i18n("custom_categories.select_url_category") .. "<br>" .. cat_select_dropdown ..
-            app_select_dropdown .. "<br>" .. i18n("custom_categories.the_following_url_will_be_added") ..
-            '<br><input id="categories_url_add" class="form-control" required value="' .. short_url .. '">' .. existing_note,
-         confirm = i18n("custom_categories.add"),
-         cancel = i18n("cancel")
-      }
+			 dialog = {
+			    id = "add_to_customized_categories",
+			    action = "addToCustomizedCategories()",
+			    custom_alert_class = "",
+			    custom_dialog_class = "dialog-body-full-height",
+			    title = i18n("custom_categories.custom_host_category"),
+			    message = rule_type_selection .. i18n("custom_categories.select_url_category") .. "<br>" .. cat_select_dropdown ..
+			       app_select_dropdown .. "<br>" .. i18n("custom_categories.the_following_url_will_be_added") ..
+			       '<br><input id="categories_url_add" class="form-control" required value="' .. short_url .. '">' .. existing_note,
+			    confirm = i18n("custom_categories.add"),
+			    cancel = i18n("cancel")
+			 }
    }))
 
    print(' <a href="#" onclick="$(\'#add_to_customized_categories\').modal(\'show\'); return false;"><i title="' ..
-            i18n("custom_categories.add_to_categories") .. '" class="fas fa-plus"></i></a>')
+	 i18n("custom_categories.add_to_categories") .. '" class="fas fa-plus"></i></a>')
 
    print [[<script>
    function addToCustomizedCategories() {
@@ -429,8 +429,8 @@ local function printAddCustomHostRule(full_url)
       var params = {};
       params.custom_hosts = target_url;
       params.csrf = "]]
-   print(ntop.getRandomCSRFValue())
-   print [[";
+      print(ntop.getRandomCSRFValue())
+      print [[";
       if(is_category)
          params.category = target_value;
       else
@@ -457,7 +457,7 @@ local function displayContainer(cont, label)
    if not isEmptyString(cont["id"]) then
       -- short 12-chars UUID as in docker
       print("<tr><th width=10%>" .. i18n("containers_stats.container") .. "</th><td colspan=2><a href='" .. ntop.getHttpPrefix() ..
-               "/lua/flows_stats.lua?container=" .. cont["id"] .. "'>" .. format_utils.formatContainer(cont) .. "</a></td></tr>\n")
+	    "/lua/flows_stats.lua?container=" .. cont["id"] .. "'>" .. format_utils.formatContainer(cont) .. "</a></td></tr>\n")
    end
 
    local k8s_name = cont["k8s.name"]
@@ -471,7 +471,7 @@ local function displayContainer(cont, label)
    if not isEmptyString(k8s_pod) then
       k8s_rows[#k8s_rows + 1] = {i18n("flow_details.k8s_pod"),
                                  '<a href="' .. ntop.getHttpPrefix() .. '/lua/containers_stats.lua?pod=' .. k8s_pod .. '">' .. k8s_pod ..
-         '</a>'}
+				    '</a>'}
    end
    if not isEmptyString(k8s_ns) then
       k8s_rows[#k8s_rows + 1] = {i18n("flow_details.k8s_ns"), k8s_ns}
@@ -513,12 +513,12 @@ local function displayProc(proc, label)
    print(label)
 
    print("<tr><th width=10%>" .. i18n("flow_details.user_name") .. "</th><td colspan=2><A HREF=\"" .. ntop.getHttpPrefix() ..
-            "/lua/username_details.lua?uid=" .. proc.uid .. "&username=" .. proc.user_name .. "&" .. hostinfo2url(flow, "cli") .. "\">" ..
-            proc.user_name .. "</A></td></tr>\n")
+	 "/lua/username_details.lua?uid=" .. proc.uid .. "&username=" .. proc.user_name .. "&" .. hostinfo2url(flow, "cli") .. "\">" ..
+	 proc.user_name .. "</A></td></tr>\n")
 
    print("<tr><th width=10%>" .. i18n("flow_details.process_pid_name") .. "</th><td colspan=2><A HREF=\"" .. ntop.getHttpPrefix() ..
-            "/lua/process_details.lua?pid=" .. proc.pid .. "&pid_name=" .. proc.name .. "&" .. hostinfo2url(flow, "srv") .. "\">" ..
-            proc.name .. "</a> ")
+	 "/lua/process_details.lua?pid=" .. proc.pid .. "&pid_name=" .. proc.name .. "&" .. hostinfo2url(flow, "srv") .. "\">" ..
+	 proc.name .. "</a> ")
    if proc.pid then
       print("[" .. i18n("flow_details.process_pid") .. ": " .. proc.pid .. "]")
    end
@@ -528,8 +528,8 @@ local function displayProc(proc, label)
 
    if not isEmptyString(proc.father_name) then
       print(" " .. i18n("flow_details.son_of_father_process") .. " <a href ='" .. ntop.getHttpPrefix() .. "/lua/process_details.lua?pid=" ..
-               proc.father_pid .. "&pid_name=" .. proc.father_name .. "&" .. hostinfo2url(flow, "srv") .. "'>" .. proc.father_name ..
-               "</a> ")
+	    proc.father_pid .. "&pid_name=" .. proc.father_name .. "&" .. hostinfo2url(flow, "srv") .. "'>" .. proc.father_name ..
+	    "</a> ")
       if proc.father_pid then
          print(i18n("flow_details.process_pid") .. ": " .. proc.father_pid)
       end
@@ -541,9 +541,9 @@ local function displayProc(proc, label)
 
    if ((proc.actual_memory ~= nil) and (proc.actual_memory > 0)) then
       print("<tr><th width=10%>" .. i18n("graphs.actual_memory") .. "</th><td colspan=2>" .. bytesToSize(proc.actual_memory * 1024) ..
-               "</td></tr>\n")
+	    "</td></tr>\n")
       print("<tr><th width=10%>" .. i18n("graphs.peak_memory") .. "</th><td colspan=2>" .. bytesToSize(proc.peak_memory * 1024) ..
-               "</td></tr>\n")
+	    "</td></tr>\n")
    end
 end
 
@@ -558,7 +558,7 @@ end
 
 print(
    '<div style=\"display:none;\" id=\"flow_purged\" class=\"alert alert-danger\"><i class="fas fa-exclamation-triangle fa-lg"></i>&nbsp;' ..
-      i18n("flow_details.now_purged") .. '</div>')
+   i18n("flow_details.now_purged") .. '</div>')
 
 throughput_type = getThroughputType()
 
@@ -576,31 +576,31 @@ local url = ntop.getHttpPrefix() .. "/lua/flow_details.lua?flow_key=" .. flow_ke
 
 --tprint(flow)
 page_utils.print_navbar(title, url, {{
-   active = isEmptyString(page) or page == "overview",
-   page_name = "overview",
-   label = "<i class=\"fas fa-lg fa-home\" data-bs-toggle=\"tooltip\" data-bs-placement=\"bottom\" title=\"" .. i18n("overview") ..
-      "\"></i>"
-}, {
-   hidden = not flow or not (flow.modbus) or not ntop.isEnterpriseL(),
-   active = page == "modbus",
-   page_name = "modbus",
-   label = i18n("details.label_modbus_server")
-}, {
-   hidden = not flow or not (flow.s7comm) or not ntop.isEnterpriseL(),
-   active = page == "s7comm",
-   page_name = "s7comm",
-   label = i18n("details.label_s7comm_server")
-}, {
-   hidden = not flow or not (flow.profinet) or not ntop.isEnterpriseL(),
-   active = page == "profinet",
-   page_name = "profinet",
-   label = i18n("details.label_profinet_server")
+			      active = isEmptyString(page) or page == "overview",
+			      page_name = "overview",
+			      label = "<i class=\"fas fa-lg fa-home\" data-bs-toggle=\"tooltip\" data-bs-placement=\"bottom\" title=\"" .. i18n("overview") ..
+				 "\"></i>"
+				     }, {
+			      hidden = not flow or not (flow.modbus) or not ntop.isEnterpriseL(),
+			      active = page == "modbus",
+			      page_name = "modbus",
+			      label = i18n("details.label_modbus_server")
+					}, {
+			      hidden = not flow or not (flow.s7comm) or not ntop.isEnterpriseL(),
+			      active = page == "s7comm",
+			      page_name = "s7comm",
+			      label = i18n("details.label_s7comm_server")
+					   }, {
+			      hidden = not flow or not (flow.profinet) or not ntop.isEnterpriseL(),
+			      active = page == "profinet",
+			      page_name = "profinet",
+			      label = i18n("details.label_profinet_server")
 }})
 
 if isEmptyString(page) or page == "overview" then
    if (flow == nil) then
       print('<div class=\"alert alert-danger\"><i class="fas fa-exclamation-triangle fa-lg"></i> ' ..
-               i18n("flow_details.flow_cannot_be_found_message") .. ' ' .. purgedErrorString() .. '</div>')
+	    i18n("flow_details.flow_cannot_be_found_message") .. ' ' .. purgedErrorString() .. '</div>')
    else
       local client_to_server_label = i18n("client") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("server")
       local server_to_client_label = i18n("server") .. " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. i18n("client")
@@ -621,8 +621,8 @@ if isEmptyString(page) or page == "overview" then
       end
 
       print("<tr><th width=10%>" .. i18n("flow_details.flow_peers_client_server") .. "</th><td colspan=2>" ..
-               getFlowLabel(flow, true, not ifstats.isViewed --[[ don't add hyperlinks, viewed interface don't have hosts --]] , nil, nil,
-            false --[[ add flags ]] ))
+	    getFlowLabel(flow, true, not ifstats.isViewed --[[ don't add hyperlinks, viewed interface don't have hosts --]] , nil, nil,
+			 false --[[ add flags ]] ))
 
       if (flow.periodic_flow) then
          print(" <span class='badge bg-warning text-dark'>" .. i18n("periodic_flow") .. "</span>")
@@ -697,7 +697,7 @@ if isEmptyString(page) or page == "overview" then
                badge_type = 'warning'
             end
             print(" [" .. i18n("ndpi_confidence") .. ": " .. "<span class=\"badge bg-" .. badge_type .. "\" title=\"" ..
-                     flow["proto.ndpi_confidence"] .. "\">" .. flow["proto.ndpi_confidence"] .. "</span>" .. "]")
+		  flow["proto.ndpi_confidence"] .. "\">" .. flow["proto.ndpi_confidence"] .. "</span>" .. "]")
          elseif ((flow.confidence) and (not isEmptyString(flow.confidence))) then
             print(" [" .. i18n("ndpi_confidence") .. ": " .. format_confidence_badge(flow.confidence) .. "]")
          end
@@ -724,7 +724,7 @@ if isEmptyString(page) or page == "overview" then
 
       if (flow["protos.tls.certificate"] ~= nil) then
          historicalProtoHostHref(ifid, flow["cli.ip"], flow["proto.l4"], flow["proto.ndpi_id"],
-            page_utils.safe_html(flow["protos.tls.certificate"] or ''))
+				 page_utils.safe_html(flow["protos.tls.certificate"] or ''))
       end
 
       if ((flow["protos.tls_version"] ~= nil) and (flow["protos.tls_version"] ~= 0)) then
@@ -746,7 +746,7 @@ if isEmptyString(page) or page == "overview" then
             print(' <form class="form-inline float-right" style="margin-bottom: 0px;" method="post">')
             print('<input type="hidden" name="drop_flow_policy" value="true">')
             print('<button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-ban"></i> ' ..
-                     i18n("flow_details.drop_flow_traffic_btn") .. '</button>')
+		  i18n("flow_details.drop_flow_traffic_btn") .. '</button>')
             print('<input id="csrf" name="csrf" type="hidden" value="' .. ntop.getRandomCSRFValue() .. '" />\n')
             print('</form>')
          end
@@ -774,12 +774,12 @@ if isEmptyString(page) or page == "overview" then
 
          if flow["cli.pool_id"] ~= nil then
             c = c .. " (<a href='" .. host_pools_nedge.getUserUrl(flow["cli.pool_id"]) .. "'>" ..
-                   host_pools_nedge.poolIdToUsername(flow["cli.pool_id"]) .. "</a>)"
+	       host_pools_nedge.poolIdToUsername(flow["cli.pool_id"]) .. "</a>)"
          end
 
          if flow["srv.pool_id"] ~= nil then
             s = s .. " (<a href='" .. host_pools_nedge.getUserUrl(flow["srv.pool_id"]) .. "'>" ..
-                   host_pools_nedge.poolIdToUsername(flow["srv.pool_id"]) .. "</a>)"
+	       host_pools_nedge.poolIdToUsername(flow["srv.pool_id"]) .. "</a>)"
          end
 
          local shaper
@@ -853,22 +853,22 @@ if isEmptyString(page) or page == "overview" then
 
             if (cli_show) then
                print("<td>" .. i18n("device_protocols.devtype_as_proto_client", {
-                  devtype = discover.devtype2string(flow["cli.devtype"]),
-                  proto = interface.getnDPIProtoName(forbidden_proto)
-               }) .. "</td>")
+				       devtype = discover.devtype2string(flow["cli.devtype"]),
+				       proto = interface.getnDPIProtoName(forbidden_proto)
+				   }) .. "</td>")
                print("<td><a href=\"" .. getDeviceProtocolPoliciesUrl("device_type=" .. flow["cli.devtype"]) .. "&l7proto=" ..
-                        forbidden_proto .. "\">")
+		     forbidden_proto .. "\">")
                print(i18n(ternary(forbidden_peer ~= "cli", "allowed", "forbidden")))
                print("</a></td></tr><tr>")
             end
 
             if (srv_show) then
                print("<td>" .. i18n("device_protocols.devtype_as_proto_server", {
-                  devtype = discover.devtype2string(flow["srv.devtype"]),
-                  proto = interface.getnDPIProtoName(forbidden_proto)
-               }) .. "</td>")
+				       devtype = discover.devtype2string(flow["srv.devtype"]),
+				       proto = interface.getnDPIProtoName(forbidden_proto)
+				   }) .. "</td>")
                print("<td><a href=\"" .. getDeviceProtocolPoliciesUrl("device_type=" .. flow["srv.devtype"]) .. "&l7proto=" ..
-                        forbidden_proto .. "\">")
+		     forbidden_proto .. "\">")
                print(i18n(ternary(forbidden_peer ~= "srv", "allowed", "forbidden")))
                print("</a></td></tr><tr>")
             end
@@ -876,14 +876,14 @@ if isEmptyString(page) or page == "overview" then
       end
 
       print("<tr><th width=33%>" .. i18n("details.first_last_seen") .. "</th><td nowrap width=33%><div id=first_seen>" ..
-               formatEpoch(flow["seen.first"]) .. " [" .. secondsToTime(os.time() - flow["seen.first"]) .. " " .. i18n("details.ago") .. "]" ..
-               "</div></td>\n")
+	    formatEpoch(flow["seen.first"]) .. " [" .. secondsToTime(os.time() - flow["seen.first"]) .. " " .. i18n("details.ago") .. "]" ..
+	    "</div></td>\n")
       print(
          "<td nowrap><div id=last_seen>" .. formatEpoch(flow["seen.last"]) .. " [" .. secondsToTime(os.time() - flow["seen.last"]) .. " " ..
-            i18n("details.ago") .. "]" .. "</div></td></tr>\n")
+	 i18n("details.ago") .. "]" .. "</div></td></tr>\n")
 
       print("<tr><th width=33%>" .. i18n("details.duration") .. "</th><td nowrap colspan=2<div id=duration>" ..
-               secondsToTime(flow["seen.last"] - flow["seen.first"]) .. "</div></td>\n")
+	    secondsToTime(flow["seen.last"] - flow["seen.first"]) .. "</div></td>\n")
 
       num = 0
       if(flow.tcp_fingerprint) then num = num + 1 end
@@ -925,7 +925,7 @@ if isEmptyString(page) or page == "overview" then
          print('<th width=10%><A HREF="https://github.com/FoxIO-LLC/ja4">JA4</A></th><td>')
          if (flow["protos.tls.ja4.client_malicious"]) then
             print('<font color=red><i class="fas fa-ban" title="' .. i18n("alerts_dashboard.malicious_signature_detected") ..
-                     '"></i></font> ')
+		  '"></i></font> ')
          end
 
          ja4url(flow["protos.tls.ja4.client_hash"], nil, 'ja4c')
@@ -936,16 +936,16 @@ if isEmptyString(page) or page == "overview" then
       if flow["bytes"] > 0 then
          if (flow.num_flow_processed_pkts ~= nil) then
             print("<tr><th width=33%>" .. i18n("details.num_processed_pkts") .. "</th><td nowrap colspan=2>" ..
-                     formatPackets(flow.num_flow_processed_pkts) .. " [Marker " .. formatPackets(flow.num_flow_marker_pkts) ..
-                     "]</td></tr>\n")
+		  formatPackets(flow.num_flow_processed_pkts) .. " [Marker " .. formatPackets(flow.num_flow_marker_pkts) ..
+		  "]</td></tr>\n")
          end
 
          print("<tr><th width=10% rowspan=3>" .. i18n("details.total_traffic") .. "</th><td>" .. i18n("total") .. ": <span id=volume>" ..
-                  bytesToSize(flow["bytes"]) .. "</span> <span id=volume_trend></span></td>")
+	       bytesToSize(flow["bytes"]) .. "</span> <span id=volume_trend></span></td>")
          if ((ifstats.type ~= "zmq") and ((flow["proto.l4"] == "TCP") or (flow["proto.l4"] == "UDP")) and (flow["goodput_bytes"] > 0)) then
             print("<td><A class=\"ntopng-external-link\" HREF=\"https://en.wikipedia.org/wiki/Goodput\">" .. i18n("details.goodput") ..
-                     "</A> <i class=\"fas fa-external-link-alt\"></i> : <span id=goodput_volume>" .. bytesToSize(flow["goodput_bytes"]) ..
-                     "</span> (<span id=goodput_percentage>")
+		  "</A> <i class=\"fas fa-external-link-alt\"></i> : <span id=goodput_volume>" .. bytesToSize(flow["goodput_bytes"]) ..
+		  "</span> (<span id=goodput_percentage>")
             pctg = round(((flow["goodput_bytes"] * 100) / flow["bytes"]), 2)
             if (pctg < 50) then
                pctg = "<font color=red>" .. pctg .. "</font>"
@@ -960,9 +960,9 @@ if isEmptyString(page) or page == "overview" then
          end
 
          print("<tr><td nowrap>" .. client_to_server_label .. ": <span id=cli2srv>" .. formatPackets(flow["cli2srv.packets"]) .. " / " ..
-                  bytesToSize(flow["cli2srv.bytes"]) .. "</span> <span id=sent_trend></span></td><td nowrap>" .. server_to_client_label ..
-                  ": <span id=srv2cli>" .. formatPackets(flow["srv2cli.packets"]) .. " / " .. bytesToSize(flow["srv2cli.bytes"]) ..
-                  "</span> <span id=rcvd_trend></span></td></tr>\n")
+	       bytesToSize(flow["cli2srv.bytes"]) .. "</span> <span id=sent_trend></span></td><td nowrap>" .. server_to_client_label ..
+	       ": <span id=srv2cli>" .. formatPackets(flow["srv2cli.packets"]) .. " / " .. bytesToSize(flow["srv2cli.bytes"]) ..
+	       "</span> <span id=rcvd_trend></span></td></tr>\n")
 
          print("<tr><td colspan=2>")
          cli2srv = round((flow["cli2srv.bytes"] * 100) / flow["bytes"], 0)
@@ -975,14 +975,14 @@ if isEmptyString(page) or page == "overview" then
             srv_name = srv_name .. ":" .. flow["srv.port"]
          end
          print('<div class="progress"><div class="progress-bar bg-warning" style="width: ' .. cli2srv .. '%;">' .. cli_name ..
-                  '</div><div class="progress-bar bg-success" style="width: ' .. (100 - cli2srv) .. '%;">' .. srv_name .. '</div></div>')
+	       '</div><div class="progress-bar bg-success" style="width: ' .. (100 - cli2srv) .. '%;">' .. srv_name .. '</div></div>')
          print("</td></tr>\n")
       end
 
       if (flow.iec104 and (table.len(flow.iec104.typeid) > 0)) then
          print(
             "<tr><th rowspan=6 width=10%><A class='ntopng-external-link' href='https://en.wikipedia.org/wiki/IEC_60870-5'>IEC 60870-5-104  <i class='fas fa-external-link-alt'></i></A></th><th>" ..
-               i18n("flow_details.iec104_mask") .. "</th><td>")
+	    i18n("flow_details.iec104_mask") .. "</th><td>")
 
          total = 0
          for k, v in pairsByKeys(flow.iec104.typeid, rev) do
@@ -1043,7 +1043,7 @@ if isEmptyString(page) or page == "overview" then
          end
          if ((flow.iec104.ack_time.average > 1000) or (flow.iec104.ack_time.stddev > 1000)) then
             print(string.format("%.3f sec (%s%.3f sec%s)", flow.iec104.ack_time.average / 1000, on, (flow.iec104.ack_time.stddev / 1000),
-               off))
+				off))
          else
             print(string.format("%.3f ms (%s%.3f msec%s)", flow.iec104.ack_time.average, on, flow.iec104.ack_time.stddev, off))
          end
@@ -1066,7 +1066,7 @@ if isEmptyString(page) or page == "overview" then
 
          print("<tr><th>" .. i18n("flow_details.iec104_msg_loss") .. "</th><td>")
          print("<i class=\"fas fa-long-arrow-alt-left\"></i> " .. colorNotZero(flow.iec104.pkt_lost.rx) ..
-                  ", <i class=\"fas fa-long-arrow-alt-right\"></i> " .. colorNotZero(flow.iec104.pkt_lost.tx) .. " / ")
+	       ", <i class=\"fas fa-long-arrow-alt-right\"></i> " .. colorNotZero(flow.iec104.pkt_lost.tx) .. " / ")
 
          if (flow.iec104.stats.retransmitted_msgs == 0) then
             print("0")
@@ -1079,12 +1079,12 @@ if isEmptyString(page) or page == "overview" then
 
          local url = "/lua/rest/v2/get/flow/l7/iec104.lua?flow_key=" .. flow_key .. "&flow_hash_id=" .. flow_hash_id .. "&ifid=" .. ifid
          print("<tr><th>" .. i18n("download") .. "&nbsp;<i class=\"fas fa-download fa-lg\"></i></th><td><A HREF=\"" .. url ..
-                  "\" download=\"iec104-" .. flow_key .. ".json\">JSON</A></td></tr>")
+	       "\" download=\"iec104-" .. flow_key .. ".json\">JSON</A></td></tr>")
       end
 
       -- qoe_utils is defined only if ntop is Enterprise L
       if (qoe_utils and (flow.qoe ~= nil) and (flow.qoe.score ~= nil) and
-         (qoe_utils.validQoE(flow.qoe.score.cli_to_srv) or qoe_utils.validQoE(flow.qoe.score.srv_to_cli))) then
+	  (qoe_utils.validQoE(flow.qoe.score.cli_to_srv) or qoe_utils.validQoE(flow.qoe.score.srv_to_cli))) then
          print("<tr><th width=10%>" .. i18n("flow_details.qoe_long") .. "</th>")
          print("<td>" .. qoe_utils.formatQoE(flow.qoe.score.cli_to_srv) .. "</td>")
          print("<td>" .. qoe_utils.formatQoE(flow.qoe.score.srv_to_cli) .. "</td>")
@@ -1101,9 +1101,9 @@ if isEmptyString(page) or page == "overview" then
             print("<tr><th width=10%>" .. i18n("flow_details.rtt_breakdown") .. "</th><td colspan=2>")
             print(
                '<div class="progress"><div class="progress-bar bg-warning" style="width: ' .. (cli2srv * 100 / rtt) .. '%;">' .. cli2srv ..
-                  ' ms (client)</div>')
+	       ' ms (client)</div>')
             print('<div class="progress-bar bg-success" style="width: ' .. (srv2cli * 100 / rtt) .. '%;">' .. srv2cli ..
-                     ' ms (server)</div></div>')
+		  ' ms (server)</div></div>')
             print("</td></tr>\n")
 
             c = interface.getAddressInfo(flow["cli.ip"])
@@ -1113,7 +1113,7 @@ if isEmptyString(page) or page == "overview" then
                -- Inspired by https://gist.github.com/geraldcombs/d38ed62650b1730fb4e90e2462f16125
                print(
                   "<tr><th width=10%><A class='ntopng-external-link' style='max-width:300px' href=\"https://en.wikipedia.org/wiki/Velocity_factor\">" ..
-                     i18n("flow_details.rtt_distance") .. " <i class=\"fas fa-external-link-alt\"></i></A></th><td>")
+		  i18n("flow_details.rtt_distance") .. " <i class=\"fas fa-external-link-alt\"></i></A></th><td>")
                local c_vacuum_km_s = 299792
                local c_vacuum_mi_s = 186000
                local fiber_vf = .67
@@ -1129,7 +1129,7 @@ if isEmptyString(page) or page == "overview" then
 
       if (flow["tcp.appl_latency"] ~= nil and flow["tcp.appl_latency"] > 0) then
          print("<tr><th width=10%>" .. i18n("flow_details.application_latency") .. "</th><td colspan=2>" ..
-                  msToTime(flow["tcp.appl_latency"]) .. "</td></tr>\n")
+	       msToTime(flow["tcp.appl_latency"]) .. "</td></tr>\n")
       end
 
       if not ntop.isnEdge() then
@@ -1140,19 +1140,19 @@ if isEmptyString(page) or page == "overview" then
             end
             print(">" .. i18n("flow_details.packet_inter_arrival_time") .. "</th><td nowrap>" .. client_to_server_label .. ": ")
             print(msToTime(flow["interarrival.cli2srv"]["min"]) .. " / " .. msToTime(flow["interarrival.cli2srv"]["avg"]) .. " / " ..
-                     msToTime(flow["interarrival.cli2srv"]["max"]))
+		  msToTime(flow["interarrival.cli2srv"]["max"]))
             print("</td>\n")
             if (flow["srv2cli.packets"] < 2) then
                print("<td>&nbsp;")
             else
                print("<td nowrap>" .. server_to_client_label .. ": ")
                print(msToTime(flow["interarrival.srv2cli"]["min"]) .. " / " .. msToTime(flow["interarrival.srv2cli"]["avg"]) .. " / " ..
-                        msToTime(flow["interarrival.srv2cli"]["max"]))
+		     msToTime(flow["interarrival.srv2cli"]["max"]))
             end
             print("</td></tr>\n")
             if (flow["flow.idle"] == true) then
                print("<tr><td colspan=2><i class='fas fa-clock-o'></i> <small>" .. i18n("flow_details.looks_like_idle_flow_message") ..
-                        "</small></td></tr>")
+		     "</small></td></tr>")
             end
          end
 
@@ -1161,8 +1161,8 @@ if isEmptyString(page) or page == "overview" then
             print("<tr><th width=10% rowspan=" .. rowspan .. ">" .. i18n("flow_details.ip_packet_analysis") .. "</th>")
             print("<th>&nbsp;</th><th>" .. client_to_server_label .. " / " .. server_to_client_label .. "</th></tr>\n")
             print("<tr><th>" .. i18n("details.fragments") .. "</th><td align=right><span id=c2sFrag>" ..
-                     formatPackets(flow["cli2srv.fragments"]) .. "</span> / <span id=s2cFrag>" .. formatPackets(flow["srv2cli.fragments"]) ..
-                     "</span></td></tr>\n")
+		  formatPackets(flow["cli2srv.fragments"]) .. "</span> / <span id=s2cFrag>" .. formatPackets(flow["srv2cli.fragments"]) ..
+		  "</span></td></tr>\n")
          end
 
          if flow["proto.l4"] == "TCP" then
@@ -1188,23 +1188,23 @@ if isEmptyString(page) or page == "overview" then
 
                if (((flow["cli2srv.retransmissions"] or 0) + (flow["srv2cli.retransmissions"] or 0)) > 0) then
                   print("<tr><th>" .. i18n("details.retransmissions") .. "</th><td align=right><span id=c2sretr>" ..
-                           formatPackets(flow["cli2srv.retransmissions"] or 0) .. "</span> / <span id=s2cretr>" ..
-                           formatPackets(flow["srv2cli.retransmissions"] or 0) .. "</span></td></tr>\n")
+			formatPackets(flow["cli2srv.retransmissions"] or 0) .. "</span> / <span id=s2cretr>" ..
+			formatPackets(flow["srv2cli.retransmissions"] or 0) .. "</span></td></tr>\n")
                end
                if (((flow["cli2srv.out_of_order"] or 0) + (flow["srv2cli.out_of_order"] or 0)) > 0) then
                   print("<tr><th>" .. i18n("details.out_of_order") .. "</th><td align=right><span id=c2sOOO>" ..
-                           formatPackets(flow["cli2srv.out_of_order"] or 0) .. "</span> / <span id=s2cOOO>" ..
-                           formatPackets(flow["srv2cli.out_of_order"] or 0) .. "</span></td></tr>\n")
+			formatPackets(flow["cli2srv.out_of_order"] or 0) .. "</span> / <span id=s2cOOO>" ..
+			formatPackets(flow["srv2cli.out_of_order"] or 0) .. "</span></td></tr>\n")
                end
                if (((flow["cli2srv.lost"] or 0) + (flow["srv2cli.lost"] or 0)) > 0) then
                   print("<tr><th>" .. i18n("details.lost") .. "</th><td align=right><span id=c2slost>" ..
-                           formatPackets(flow["cli2srv.lost"] or 0) .. "</span> / <span id=s2clost>" ..
-                           formatPackets(flow["srv2cli.lost"] or 0) .. "</span></td></tr>\n")
+			formatPackets(flow["cli2srv.lost"] or 0) .. "</span> / <span id=s2clost>" ..
+			formatPackets(flow["srv2cli.lost"] or 0) .. "</span></td></tr>\n")
                end
                if (((flow["cli2srv.keep_alive"] or 0) + (flow["srv2cli.keep_alive"] or 0)) > 0) then
                   print("<tr><th>" .. i18n("details.keep_alive") .. "</th><td align=right><span id=c2skeep_alive>" ..
-                           formatPackets(flow["cli2srv.keep_alive"] or 0) .. "</span> / <span id=s2ckeep_alive>" ..
-                           formatPackets(flow["srv2cli.keep_alive"] or 0) .. "</span></td></tr>\n")
+			formatPackets(flow["cli2srv.keep_alive"] or 0) .. "</span> / <span id=s2ckeep_alive>" ..
+			formatPackets(flow["srv2cli.keep_alive"] or 0) .. "</span></td></tr>\n")
                end
             end
 
@@ -1218,12 +1218,12 @@ if isEmptyString(page) or page == "overview" then
 
          -- TLS, so use https
          print(format_external_link(page_utils.safe_html(flow["protos.tls.client_requested_server_name"]),
-            page_utils.safe_html(flow["protos.tls.client_requested_server_name"]), false, "https"))
+				    page_utils.safe_html(flow["protos.tls.client_requested_server_name"]), false, "https"))
          if (flow["category"] ~= nil) then
             print(" " .. getCategoryIcon(flow["protos.tls.client_requested_server_name"], flow["category"]))
          end
          historicalProtoHostHref(ifid, flow["cli.ip"], nil, flow["proto.ndpi_id"],
-            page_utils.safe_html(flow["protos.tls.client_requested_server_name"] or ''), flow["vlan"])
+				 page_utils.safe_html(flow["protos.tls.client_requested_server_name"] or ''), flow["vlan"])
          printAddCustomHostRule(flow["protos.tls.client_requested_server_name"])
          print("</td>")
 
@@ -1275,20 +1275,20 @@ if isEmptyString(page) or page == "overview" then
       if (flow["protos.tls.client_alpn"] ~= nil) then
          print(
             '<tr><th width=10%><a href="https://en.wikipedia.org/wiki/Application-Layer_Protocol_Negotiation" data-bs-toggle="tooltip" title="ALPN">TLS ALPN</A></th><td colspan=2>' ..
-               page_utils.safe_html(flow["protos.tls.client_alpn"]) .. '</td></tr>\n')
+	    page_utils.safe_html(flow["protos.tls.client_alpn"]) .. '</td></tr>\n')
       end
 
       if (flow["protos.tls.client_tls_supported_versions"] ~= nil) then
          print('<tr><th width=10%><a href="https://tools.ietf.org/html/rfc7301" data-bs-toggle="tooltip">' ..
-                  i18n("flow_details.client_tls_supported_versions") .. '</A></th><td colspan=2>' ..
-                  page_utils.safe_html(flow["protos.tls.client_tls_supported_versions"]) .. '</td></tr>\n')
+	       i18n("flow_details.client_tls_supported_versions") .. '</A></th><td colspan=2>' ..
+	       page_utils.safe_html(flow["protos.tls.client_tls_supported_versions"]) .. '</td></tr>\n')
       end
 
       if ((flow["tcp.max_thpt.cli2srv"] ~= nil) and (flow["tcp.max_thpt.cli2srv"] > 0)) then
          print("<tr><th width=10%>" ..
-                  '<a class="ntopng-external-link" style="max-width:300px"  data-bs-toggle="tooltip" href="https://en.wikipedia.org/wiki/TCP_tuning">' ..
-                  i18n("flow_details.max_estimated_tcp_throughput") .. " <i class=\"fas fa-external-link-alt\"></i></a><td nowrap> " ..
-                  client_to_server_label .. ": ")
+	       '<a class="ntopng-external-link" style="max-width:300px"  data-bs-toggle="tooltip" href="https://en.wikipedia.org/wiki/TCP_tuning">' ..
+	       i18n("flow_details.max_estimated_tcp_throughput") .. " <i class=\"fas fa-external-link-alt\"></i></a><td nowrap> " ..
+	       client_to_server_label .. ": ")
          print(bitsToSize(flow["tcp.max_thpt.cli2srv"]))
          print("</td><td> " .. server_to_client_label .. ": ")
          print(bitsToSize(flow["tcp.max_thpt.srv2cli"]))
@@ -1297,7 +1297,7 @@ if isEmptyString(page) or page == "overview" then
 
       if ((flow["cli2srv.trend"] ~= nil) and false) then
          print("<tr><th width=10%>" .. i18n("flow_details.throughput_trend") .. "</th><td nowrap>" .. flow["cli.ip"] ..
-                  " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. flow["srv.ip"] .. ": ")
+	       " <i class=\"fas fa-long-arrow-alt-right\"></i> " .. flow["srv.ip"] .. ": ")
          print(flow["cli2srv.trend"])
          print("</td><td>" .. flow["cli.ip"] .. " <i class=\"fas fa-long-arrow-alt-left\"></i> " .. flow["srv.ip"] .. ": ")
          print(flow["srv2cli.trend"])
@@ -1346,8 +1346,8 @@ if isEmptyString(page) or page == "overview" then
             end
 
             flow_msg = flow_msg .. i18n("flow_details.flow_reset_by_resetter_msg", {
-               resetter = resetter
-            })
+					   resetter = resetter
+				       })
          elseif flow["tcp_closed"] then
             flow_msg = flow_msg .. i18n("flow_details.flow_completed_msg")
          elseif flow["tcp_connecting"] then
@@ -1360,10 +1360,10 @@ if isEmptyString(page) or page == "overview" then
 
          if (flow["major_conn_state"] ~= 0) then
             flow_msg = "<ul><li>" .. i18n(string.format("flow_fields_description.major_connection_states.%u", flow["major_conn_state"])) ..
-                          " (" .. i18n(string.format("flow_fields_description.minor_connection_states_info.%u", flow["minor_conn_state"])) ..
-                          ").<li>" .. i18n(string.format("flow_fields_description.minor_connection_states.%u", flow["minor_conn_state"])) ..
-                          " (" .. i18n(string.format("flow_fields_description.minor_connection_states_info.%u", flow["minor_conn_state"])) ..
-                          ").<li>" .. flow_msg .. "</ul>"
+	       " (" .. i18n(string.format("flow_fields_description.minor_connection_states_info.%u", flow["minor_conn_state"])) ..
+	       ").<li>" .. i18n(string.format("flow_fields_description.minor_connection_states.%u", flow["minor_conn_state"])) ..
+	       " (" .. i18n(string.format("flow_fields_description.minor_connection_states_info.%u", flow["minor_conn_state"])) ..
+	       ").<li>" .. flow_msg .. "</ul>"
          end
 
          print(flow_msg)
@@ -1382,23 +1382,23 @@ if isEmptyString(page) or page == "overview" then
 
          if icmp["unreach"] then
             local unreachable_flow = interface.findFlowByTuple(flow["cli.ip"], flow["srv.ip"], flow["vlan"], icmp["unreach"]["dst_port"],
-               icmp["unreach"]["src_port"], icmp["unreach"]["protocol"])
+							       icmp["unreach"]["src_port"], icmp["unreach"]["protocol"])
 
             print("<br>" .. i18n("flow") .. ": ")
             if unreachable_flow then
                print(" <a class='btn btn-sm border ms-1 btn-info' HREF='" .. ntop.getHttpPrefix() .. "/lua/flow_details.lua?flow_key=" ..
-                        unreachable_flow["ntopng.key"] .. "&flow_hash_id=" .. unreachable_flow["hash_entry_id"] ..
-                        "'><i class='fas fa-search-plus'></i></a>")
+		     unreachable_flow["ntopng.key"] .. "&flow_hash_id=" .. unreachable_flow["hash_entry_id"] ..
+		     "'><i class='fas fa-search-plus'></i></a>")
                print(" " .. getFlowLabel(unreachable_flow, true, true))
             else
                -- The flow hasn't been found so very likely it is no longer active or it hasn't been seen.
                -- Still print the flow using data found in the original datagram found in the icmp packet
                print(getFlowLabel({
-                  ["cli.ip"] = icmp["unreach"]["src_ip"],
-                  ["srv.ip"] = icmp["unreach"]["dst_ip"],
-                  ["cli.port"] = icmp["unreach"]["src_port"],
-                  ["srv.port"] = icmp["unreach"]["dst_port"]
-               }, false, false))
+			   ["cli.ip"] = icmp["unreach"]["src_ip"],
+			   ["srv.ip"] = icmp["unreach"]["dst_ip"],
+			   ["cli.port"] = icmp["unreach"]["src_port"],
+			   ["srv.port"] = icmp["unreach"]["dst_port"]
+				  }, false, false))
             end
             print("")
          end
@@ -1412,8 +1412,8 @@ if isEmptyString(page) or page == "overview" then
          local severity = alert_consts.alertSeverityById(map_score_to_severity(flow.score.flow_score))
 
          print("\n<tr><th width=10%>" .. i18n("flow_details.flow_score") .. " / " .. i18n("flow_details.flow_score_breakdown") ..
-                  "</th><td>" .. '<span style="color:' .. severity.color .. '">' .. format_utils.formatValue(flow.score.flow_score) ..
-                  "</span></td>\n")
+	       "</th><td>" .. '<span style="color:' .. severity.color .. '">' .. format_utils.formatValue(flow.score.flow_score) ..
+	       "</span></td>\n")
 
          local score_category_network = flow.score.host_categories_total["0"]
          local score_category_security = flow.score.host_categories_total["1"]
@@ -1423,9 +1423,9 @@ if isEmptyString(page) or page == "overview" then
          score_category_security = 100 - score_category_network
 
          print('<td><div class="progress"><div class="progress-bar bg-warning" style="width: ' .. score_category_network .. '%;">' ..
-                  i18n("flow_details.score_category_network"))
+	       i18n("flow_details.score_category_network"))
          print('</div><div class="progress-bar bg-success" style="width: ' .. score_category_security .. '%;">' ..
-                  i18n("flow_details.score_category_security") .. '</div></div></td>\n')
+	       i18n("flow_details.score_category_security") .. '</div></div></td>\n')
          print("</tr>\n")
       end
 
@@ -1506,7 +1506,7 @@ if isEmptyString(page) or page == "overview" then
             print("<table class=\"table table-bordered table-striped\" width=100%>\n")
 
             print("<tr><th>" .. i18n("description") .. "</th><th>" .. i18n("score") .. "</th><th>" .. i18n("info") .. "</th><th>" ..
-                     i18n("mitre_id") .. "</th><th>" .. i18n("remediation") .. "</th><th>" .. i18n("actions") .. "</th></tr>\n")
+		  i18n("mitre_id") .. "</th><th>" .. i18n("remediation") .. "</th><th>" .. i18n("actions") .. "</th></tr>\n")
             for _, score_alerts in pairsByKeys(alerts_by_score, rev) do
                for _, score_alert in pairsByField(score_alerts, "message", asc) do
                   local alert_key = nil
@@ -1537,7 +1537,7 @@ if isEmptyString(page) or page == "overview" then
                         end
                         flow.alert_id = alert_risk
                         riskLabel = alert_utils.formatFlowAlertMessage(ifid, alert_utils.formatAlertFromFlow(flow), alert_json, false, true,
-                           true)
+								       true)
                      end
                   end
 
@@ -1556,10 +1556,10 @@ if isEmptyString(page) or page == "overview" then
                   local additional = ""
                   local severity = alert_consts.alertSeverityById(map_score_to_severity(score_alert.score))
                   local msg = string.format('<td> %s </td><td style=\"text-align: center;\"> %s </td><td> %s %s %s</td>',
-                     score_alert.message .. alert_source,
-                     '<span style="color:' .. severity.color .. '">' .. (score_alert.score or 0) .. '</span>', riskLabel,
-                     (score_alert.alert_risk > 0 and flow_risk_utils.get_remediation_documentation_link(alert_risk, alert_src)) or '',
-                     status_icon or '')
+					    score_alert.message .. alert_source,
+					    '<span style="color:' .. severity.color .. '">' .. (score_alert.score or 0) .. '</span>', riskLabel,
+					    (score_alert.alert_risk > 0 and flow_risk_utils.get_remediation_documentation_link(alert_risk, alert_src)) or '',
+					    status_icon or '')
 
                   print(msg)
 
@@ -1589,21 +1589,21 @@ if isEmptyString(page) or page == "overview" then
 
                      print(
                         '<td style=\"text-align: center;\">' .. flow_risk_utils.get_remediation_documentation_link(alert_risk, alert_src) ..
-                           '</td>')
+			'</td>')
 
                      print('<td nowrap>')
 
                      -- Add rules to disable the check
                      if auth.has_capability(auth.capabilities.checks) and ntop.isEnterpriseM() then
                         print(string.format(
-                           '<a href="#alerts_filter_dialog" alert_id=%u alert_label="%s" class="btn btn-sm btn-warning" role="button"><i class="fas fa-bell-slash"></i></a>',
-                           score_alert.alert_id, score_alert.alert_label))
+				 '<a href="#alerts_filter_dialog" alert_id=%u alert_label="%s" class="btn btn-sm btn-warning" role="button"><i class="fas fa-bell-slash"></i></a>',
+				 score_alert.alert_id, score_alert.alert_label))
                      end
 
                      -- If available, add a cog to configure the check
                      if alert_id_to_flow_check[score_alert.alert_id] then
                         print(string.format('&nbsp;<a href="%s" class="btn btn-sm btn-info" role="button"><i class="fas fa-cog"></i></a>',
-                           alert_utils.getConfigsetURL(alert_id_to_flow_check[score_alert.alert_id], "flow")))
+					    alert_utils.getConfigsetURL(alert_id_to_flow_check[score_alert.alert_id], "flow")))
                      end
 
                      -- Add an anchor to the historical alert
@@ -1621,8 +1621,8 @@ if isEmptyString(page) or page == "overview" then
                         local srv_port = flow["srv.port"] .. tag_utils.SEPARATOR .. "eq"
 
                         print(string.format(
-                           '&nbsp;<a href="%s/lua/alert_stats.lua?status=historical&page=flow&epoch_begin=%u&epoch_end=%u&l7_proto=%s&cli_ip=%s&cli_port=%s&srv_ip=%s&srv_port=%s" class="btn btn-sm btn-info" role="button"><i class="fas fa-exclamation-triangle"></i></a>',
-                           ntop.getHttpPrefix(), epoch_begin, epoch_end, l7_proto, cli_ip, cli_port, srv_ip, srv_port))
+				 '&nbsp;<a href="%s/lua/alert_stats.lua?status=historical&page=flow&epoch_begin=%u&epoch_end=%u&l7_proto=%s&cli_ip=%s&cli_port=%s&srv_ip=%s&srv_port=%s" class="btn btn-sm btn-info" role="button"><i class="fas fa-exclamation-triangle"></i></a>',
+				 ntop.getHttpPrefix(), epoch_begin, epoch_end, l7_proto, cli_ip, cli_port, srv_ip, srv_port))
                      end
 
                      print('</td>')
@@ -1639,8 +1639,8 @@ if isEmptyString(page) or page == "overview" then
 
       if (flow.l7_json ~= nil) then
          print("<tr><th width=10%>" .. i18n("flow_details.l7_json") ..
-                  "</th><td colspan=2 style='overflow-wrap: anywhere !important; max-width: 200px; white-space: pre-wrap; word-break: keep-all; font-family: \"courier new\", courier, monospace;font-size: 13px;'>" ..
-                  flow.l7_json .. "</td></tr>\n")
+	       "</th><td colspan=2 style='overflow-wrap: anywhere !important; max-width: 200px; white-space: pre-wrap; word-break: keep-all; font-family: \"courier new\", courier, monospace;font-size: 13px;'>" ..
+	       flow.l7_json .. "</td></tr>\n")
 
       end
 
@@ -1648,7 +1648,7 @@ if isEmptyString(page) or page == "overview" then
 
       if (flow.entropy and flow.entropy.client and flow.entropy.server) then
          print("<tr><th width=10%><A class='ntopng-external-link' href=\"https://en.wikipedia.org/wiki/Entropy_(information_theory)\">" ..
-                  i18n("flow_details.entropy") .. " <i class=\"fas fa-external-link-alt\"></i></A></th>")
+	       i18n("flow_details.entropy") .. " <i class=\"fas fa-external-link-alt\"></i></A></th>")
          print("<td>" .. client_to_server_label .. ": " .. string.format("%.3f", flow.entropy.client) .. "</td>")
          print("<td>" .. server_to_client_label .. ": " .. string.format("%.3f", flow.entropy.server) .. "</td>")
          print("</tr>\n")
@@ -1656,9 +1656,9 @@ if isEmptyString(page) or page == "overview" then
          if (flow.entropy.icmp ~= nil) then
             print("<tr><th width=10%>" .. i18n("flow_details.icmp_entropy") .. "</th>")
             print("<td colspan=2>" .. i18n("flow_details.icmp_entropy_min_max") .. ": " .. string.format("%.3f", flow.entropy.icmp.min) ..
-                     " - " .. string.format("%.3f", flow.entropy.icmp.max) .. " [")
+		  " - " .. string.format("%.3f", flow.entropy.icmp.max) .. " [")
             print(i18n("flow_details.icmp_entropy_diff") .. ": " .. string.format("%.3f", flow.entropy.icmp.max - flow.entropy.icmp.min) ..
-                     "]")
+		  "]")
 
             if (icmp_utils.is_suspicious_entropy(flow.entropy.icmp.min, flow.entropy.icmp.max)) then
                print(" <span class=\"badge bg-warning\">" .. i18n("suspicious_payload") .. "</span>")
@@ -1671,7 +1671,7 @@ if isEmptyString(page) or page == "overview" then
       if ((flow.community_id ~= nil) and (flow.community_id ~= "")) then
          print(
             "<tr><th width=10%><A class='ntopng-external-link' href=\"https://github.com/corelight/community-id-spec\">CommunityId <i class=\"fas fa-external-link-alt\"></i></A></th><td colspan=2>" ..
-               flow.community_id)
+	    flow.community_id)
          print_copy_button('community_id', flow.community_id)
          print("</td></tr>\n")
       end
@@ -1716,26 +1716,26 @@ if isEmptyString(page) or page == "overview" then
          print("<tr><th width=10%>" .. i18n("flow_details.actual_peak_throughput") .. "</th><td width=10%>")
          if (throughput_type == "bps") then
             print("<span id='flow-throughput' class='peity'>" .. bitsToSize(8 * flow["throughput_bps"]) ..
-                     "</span> <span id=throughput_trend></span>")
+		  "</span> <span id=throughput_trend></span>")
          elseif (throughput_type == "pps") then
             print("<span id='flow-throughput' class='peity'>" .. pktsToSize(flow["throughput_bps"]) ..
-                     "</span> <span id=throughput_trend></span>")
+		  "</span> <span id=throughput_trend></span>")
          end
 
          if (throughput_type == "bps") then
             print(" / <span id=top-flow-throughput>" .. bitsToSize(8 * flow["top_throughput_bps"]) ..
-                     "</span> <span id=top_throughput_trend></span>")
+		  "</span> <span id=top_throughput_trend></span>")
          elseif (throughput_type == "pps") then
             print(" / <span id=top-flow-throughput>" .. pktsToSize(flow["top_throughput_bps"]) ..
-                     "</span> <span id=top_throughput_trend></span>")
+		  "</span> <span id=top_throughput_trend></span>")
          end
 
          if (throughput_type == "bps") then
             print(" / <span id=average-flow-throughput>" .. bitsToSize(8 * flow["average_throughput_bps"]) ..
-                     "</span> <span id=average_throughput_trend></span>")
+		  "</span> <span id=average_throughput_trend></span>")
          elseif (throughput_type == "pps") then
             print(" / <span id=average-flow-throughput>" .. pktsToSize(flow["average_throughput_bps"]) ..
-                     "</span> <span id=average_throughput_trend></span>")
+		  "</span> <span id=average_throughput_trend></span>")
          end
 
          print("</td><td><span id=thpt-load-chart>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</span>")
@@ -1758,14 +1758,14 @@ if isEmptyString(page) or page == "overview" then
          end
          if (flow.client_container ~= nil) then
             displayContainer(flow.client_container,
-               "<tr><th colspan=3>" .. i18n("flow_details.client_container_information") .. "</th></tr>\n")
+			     "<tr><th colspan=3>" .. i18n("flow_details.client_container_information") .. "</th></tr>\n")
          end
          if (flow.server_process ~= nil) then
             displayProc(flow.server_process, "<tr><th colspan=3>" .. i18n("flow_details.server_process_information") .. "</th></tr>\n")
          end
          if (flow.server_container ~= nil) then
             displayContainer(flow.server_container,
-               "<tr><th colspan=3>" .. i18n("flow_details.server_container_information") .. "</th></tr>\n")
+			     "<tr><th colspan=3>" .. i18n("flow_details.server_container_information") .. "</th></tr>\n")
          end
       end
 
@@ -1775,8 +1775,8 @@ if isEmptyString(page) or page == "overview" then
          print("<tr><th width=10%>" .. i18n("flow_details.dns_query") .. "</th><td colspan=2>")
 
          local dns_info = format_dns_query_info({
-            last_query_type = flow["protos.dns.last_query_type"],
-            last_return_code = flow["protos.dns.last_return_code"]
+	       last_query_type = flow["protos.dns.last_query_type"],
+	       last_return_code = flow["protos.dns.last_return_code"]
          })
 
          if dns_info["last_query_type"] ~= 0 then
@@ -1791,11 +1791,11 @@ if isEmptyString(page) or page == "overview" then
             print(shortHostName(flow["protos.dns.last_query"]))
          else
             print(format_external_link(page_utils.safe_html(flow["protos.dns.last_query"]),
-               page_utils.safe_html(shortHostName(flow["protos.dns.last_query"])), false, "dns"))
+				       page_utils.safe_html(shortHostName(flow["protos.dns.last_query"])), false, "dns"))
          end
 
          historicalProtoHostHref(ifid, flow["cli.ip"], flow["proto.l4"], flow["proto.ndpi_id"],
-            page_utils.safe_html(flow["protos.dns.last_query"] or ''))
+				 page_utils.safe_html(flow["protos.dns.last_query"] or ''))
 
          if (flow["category"] ~= nil) then
             print(" " .. getCategoryIcon(flow["protos.dns.last_query"], flow["category"]))
@@ -1819,23 +1819,23 @@ if isEmptyString(page) or page == "overview" then
       if not isEmptyString(flow["protos.ssh.hassh.client_hash"]) or not isEmptyString(flow["protos.ssh.hassh.server_hash"]) then
          print("<tr><th><A HREF='https://engineering.salesforce.com/open-sourcing-hassh-abed3ae5044c'>HASSH</A></th><td>")
          print("<b>" .. i18n("client") .. ":</b> " .. hostinfo2detailshref(flow2hostinfo(flow, "cli"), {
-            page = "ssh"
-         }, flow["protos.ssh.hassh.client_hash"]) .. "</td>")
+									      page = "ssh"
+												       }, flow["protos.ssh.hassh.client_hash"]) .. "</td>")
          print("<td><b>" .. i18n("server") .. ":</b> " .. hostinfo2detailshref(flow2hostinfo(flow, "srv"), {
-            page = "ssh"
-         }, flow["protos.ssh.hassh.server_hash"]) .. "</a></td>")
+										  page = "ssh"
+													   }, flow["protos.ssh.hassh.server_hash"]) .. "</a></td>")
          print("</td>")
       end
 
       if (not isEmptyString(flow["protos.ssh.client_signature"])) then
          print("<tr><th>" .. i18n("flow_details.ssh_signature") .. "</th><td><b>" .. i18n("client") .. ":</b> " ..
-                  (flow["protos.ssh.client_signature"] or '') .. "</td><td><b>" .. i18n("server") .. ":</b> " ..
-                  (flow["protos.ssh.server_signature"] or '') .. "</td></tr>\n")
+	       (flow["protos.ssh.client_signature"] or '') .. "</td><td><b>" .. i18n("server") .. ":</b> " ..
+	       (flow["protos.ssh.server_signature"] or '') .. "</td></tr>\n")
       end
 
       if (not isEmptyString(flow["bittorrent_hash"])) then
          print("<tr><th>" .. i18n("flow_details.bittorrent_hash") .. "</th><td colspan=4><A HREF=\"https://www.google.it/search?q=" ..
-                  flow["bittorrent_hash"] .. "\">" .. flow["bittorrent_hash"] .. "</A></td></tr>\n")
+	       flow["bittorrent_hash"] .. "\">" .. flow["bittorrent_hash"] .. "</A></td></tr>\n")
       end
 
       if (flow["protos.http.last_url"] ~= nil) then
@@ -1881,7 +1881,7 @@ if isEmptyString(page) or page == "overview" then
 
          if (not isEmptyString(flow["protos.http.last_user_agent"])) then
             print("<tr><th>" .. i18n("flow_details.user_agent") .. "</th><td colspan=2>" .. flow["protos.http.last_user_agent"] ..
-                     "</td></tr>")
+		  "</td></tr>")
          end
 
          if (not isEmptyString(flow["protos.http.last_server"])) then
@@ -1912,7 +1912,7 @@ if isEmptyString(page) or page == "overview" then
                color = "badge bg-warning"
             end
             print("<tr><th>" .. i18n("flow_details.response_code") .. "</th><td colspan=2><span class='" .. color .. "'>" ..
-                     (http_utils.getResponseStatusCode(flow["protos.http.last_return_code"]) or '') .. "</span></td></tr>\n")
+		  (http_utils.getResponseStatusCode(flow["protos.http.last_return_code"]) or '') .. "</span></td></tr>\n")
          end
       else
          if ((flow["host_server_name"] ~= nil) and (flow["protos.dns.last_query"] == nil)) then
@@ -1922,7 +1922,7 @@ if isEmptyString(page) or page == "overview" then
                proto = "https"
             end
             print(format_external_link(page_utils.safe_html(flow["host_server_name"]), page_utils.safe_html(flow["host_server_name"]),
-               false, proto))
+				       false, proto))
             if not isEmptyString(flow["protos.http.server_name"]) then
                printAddCustomHostRule(flow["protos.http.server_name"])
             end
@@ -1932,8 +1932,8 @@ if isEmptyString(page) or page == "overview" then
 
       if (flow["profile"] ~= nil) then
          print("<tr><th width=10%><A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/pro/admin/edit_profiles.lua\">" ..
-                  i18n("flow_details.profile_name") .. "</A></th><td colspan=2><span class='badge bg-primary'>" .. flow["profile"] ..
-                  "</span></td></tr>\n")
+	       i18n("flow_details.profile_name") .. "</A></th><td colspan=2><span class='badge bg-primary'>" .. flow["profile"] ..
+	       "</span></td></tr>\n")
       end
 
       if ((flow.src_as ~= 0) or (flow.dst_as ~= 0)) then
@@ -2070,7 +2070,11 @@ if isEmptyString(page) or page == "overview" then
                end
             end
 
-	    flow_trajectory[exporter_ip] = { next_hop =  next_hop_ip, return_path = false }
+	    if(flow_trajectory[exporter_ip] == nil) then
+	       flow_trajectory[exporter_ip] = {}
+	    end
+
+	    table.insert(flow_trajectory[exporter_ip], { next_hop =  next_hop_ip, return_path = false })
          end
 
 	 if(flow.deduplication ~= nil) then
@@ -2087,7 +2091,11 @@ if isEmptyString(page) or page == "overview" then
 	       if(v.return_path == true) then print(" <span class='badge bg-secondary'>".. i18n("dedup_flow_swapped").."</span>") end
 	       print("</td></tr>")
 
-	       flow_trajectory[exp_ip] = { next_hop = next_hop_ip, return_path = v.return_path }
+	       if(flow_trajectory[exp_ip] == nil) then
+		  flow_trajectory[exp_ip] = {}
+	       end
+	       table.insert(flow_trajectory[exp_ip], { next_hop = next_hop_ip, return_path = v.return_path })
+
 	       nodes_names[exp_ip] = { firstDottedElement(exp_name), site }
 	       nodes_names[next_hop_ip] = { firstDottedElement(next_hop_name), next_hope_site }
 	    end
@@ -2096,13 +2104,17 @@ if isEmptyString(page) or page == "overview" then
 	 end
 
 	 if(table.len(flow_trajectory) > 0) then
-	    	    print('<tr><th colspan=2>')
-print [[
+	    print('<tr>')
+	    if(table.len(flow.deduplication) == 0) then print("<td></td>") end
+	    print('<th colspan=2>')
+	    print [[
 	       <div id="mynetwork" style="height: 400px;"></div>
 	       <script type="text/javascript">
 	       // create an array with nodes
 	    var nodes = new vis.DataSet([
 ]]
+
+-- tprint(flow_trajectory)
 
 local nodes = {}
 local next_hops = {}
@@ -2112,57 +2124,59 @@ local server_id
 
 if(nodes[flow["cli.ip"]] == nil) then
    nodes[flow["cli.ip"]] = i
-   print('{ id: '..i..', label: "'..flow["cli.ip"]..' (Client)", first: true, color: "#FFCA28" },')
+   print('{ id: '..i..', label: "'..flow["cli.ip"]..' (Client)", first: true, color: "#FFCA28" },\n')
    client_id = i
    i = i + 1
 end
 
 if(nodes[flow["srv.ip"]] == nil) then
    nodes[flow["srv.ip"]] = i
-   print('{ id: '..i..', label: "'..flow["srv.ip"]..' (Server)", color: "#FF7043" },')
+   print('{ id: '..i..', label: "'..flow["srv.ip"]..' (Server)", color: "#FF7043" },\n')
    server_id = i
    i = i + 1
 end
 
-for exporter_ip,v in pairs(flow_trajectory) do
-   local next_hop = v.next_hop
+for exporter_ip,x in pairs(flow_trajectory) do
+   for _,v in pairs(x) do
+      local next_hop = v.next_hop
 
-   if(nodes[exporter_ip] == nil) then
-      local name
+      if(nodes[exporter_ip] == nil) then
+	 local name
 
-      if(nodes_names[exporter_ip] ~= nil) then
-	 local ret = nodes_names[exporter_ip]
-	 local site  = ret[2]
+	 if(nodes_names[exporter_ip] ~= nil) then
+	    local ret = nodes_names[exporter_ip]
+	    local site  = ret[2]
 
-	 name = ret[1]
-	 if(site ~= nil) then name = name .. " (" .. site .. ")" end
+	    name = ret[1]
+	    if(site ~= nil) then name = name .. " (" .. site .. ")" end
+	 end
+
+	 if(name == nil) then name = exporter_ip end
+	 nodes[exporter_ip] = i
+	 print('{ id: '..i..', label: "'.. name ..'" },\n')
+	 i = i + 1
       end
 
-      if(name == nil) then name = exporter_ip end
-      nodes[exporter_ip] = i
-      print('{ id: '..i..', label: "'.. name ..'" },\n')
-      i = i + 1
-   end
+      if(nodes[next_hop] == nil) then
+	 local name
 
-   if(nodes[next_hop] == nil) then
-      local name
+	 if(nodes_names[next_hop] ~= nil) then
+	    local ret = nodes_names[next_hop]
+	    local site  = ret[2]
 
-      if(nodes_names[next_hop] ~= nil) then
-	 local ret = nodes_names[next_hop]
-	 local site  = ret[2]
+	    name = ret[1]
+	    if(site ~= nil) then name = name .. " (" .. site .. ")" end
+	 else
+	    name = next_hop
+	 end
 
-	 name = ret[1]
-	 if(site ~= nil) then name = name .. " (" .. site .. ")" end
-      else
-	 name = next_hop
+	 nodes[next_hop] = i
+	 print ('{ id: '..i..', label: "'.. name ..'" },\n')
+	 i = i + 1
       end
 
-      nodes[next_hop] = i
-      print ('{ id: '..i..', label: "'.. name ..'" },\n')
-      i = i + 1
+      next_hops[next_hop] = true
    end
-
-   next_hops[next_hop] = true
 end
 
 print [[
@@ -2172,38 +2186,44 @@ print [[
 	    var edges = new vis.DataSet([
 ]]
 
-for exporter_ip,v in pairs(flow_trajectory) do
-   local next_hop = v.next_hop
-   local return_path = v.return_path
+for exporter_ip,x in pairs(flow_trajectory) do
+   for _,v in pairs(x) do
+      local next_hop = v.next_hop
+      local return_path = v.return_path
 
-   print ('{ from: "'.. nodes[exporter_ip] ..'", to: "'.. nodes[next_hop] ..'", arrows: "to"},\n')
+      print ('{ from: "'.. nodes[exporter_ip] ..'", to: "'.. nodes[next_hop] ..'", arrows: "to"},\n')
+   end
 end
 
 -- Add server node edge
-for exporter_ip,v in pairs(flow_trajectory) do
-   local next_hop = v.next_hop
-   local return_path = v.return_path
+for exporter_ip,x in pairs(flow_trajectory) do
+   for _,v in pairs(x) do
+      local next_hop = v.next_hop
+      local return_path = v.return_path
 
-   if(flow_trajectory[next_hop] == nil) then
-      if(return_path == false) then
-	 print ('{ from: "'..nodes[next_hop]..'", to: "'..server_id..'", arrows: "to" },\n')
-      else
-	 print ('{ from: "'..nodes[next_hop]..'", to: "'..client_id..'", arrows: "to" },\n')
+      if(flow_trajectory[next_hop] == nil) then
+	 if(return_path == false) then
+	    print ('{ from: "'..nodes[next_hop]..'", to: "'..server_id..'", arrows: "to" },\n')
+	 else
+	    print ('{ from: "'..nodes[next_hop]..'", to: "'..client_id..'", arrows: "to" },\n')
+	 end
       end
    end
 end
 
 -- Add client node edge
 local head = {}
-for exporter_ip,v in pairs(flow_trajectory) do
-   local next_hop = v.next_hop
-   local return_path = v.return_path
+for exporter_ip,x in pairs(flow_trajectory) do
+   for _,v in pairs(x) do
+      local next_hop = v.next_hop
+      local return_path = v.return_path
 
-   if(next_hops[exporter_ip] == nil) then
-      if(return_path == false) then
-	 print ('{ from: "'..client_id..'", to: "'..nodes[exporter_ip]..'", arrows: "to" },\n')
-      else
-	 print ('{ from: "'..server_id..'", to: "'..nodes[exporter_ip]..'", arrows: "to" },\n')
+      if(next_hops[exporter_ip] == nil) then
+	 if(return_path == false) then
+	    print ('{ from: "'..client_id..'", to: "'..nodes[exporter_ip]..'", arrows: "to" },\n')
+	 else
+	    print ('{ from: "'..server_id..'", to: "'..nodes[exporter_ip]..'", arrows: "to" },\n')
+	 end
       end
    end
 end
@@ -2230,14 +2250,14 @@ print [[
                 max: 80,
               },
             },]]
-   if (page_utils.is_dark_mode_enabled()) then
-      print [[
+	    if (page_utils.is_dark_mode_enabled()) then
+	       print [[
             font: {
                color: '#E2E2E2'
             },
       ]]
-   end
-   print [[
+	    end
+	    print [[
           },
           edges: {
               width: 0.15,
@@ -2264,7 +2284,7 @@ print [[
 	    var network = new vis.Network(container, data, options);
 	    </script>
 	       ]]
-	    print('</th></tr>\n')
+	       print('</th></tr>\n')
 
 	 end
 
@@ -2277,8 +2297,8 @@ print [[
 
             if (tonumber(formatted_value)) then
                formatted_value = format_high_num_value_for_tables({
-                  value = formatted_value
-               }, "value")
+		     value = formatted_value
+								  }, "value")
             end
 
             return formatted_value
@@ -2361,7 +2381,7 @@ print [[
 
          print(
             "<tr><th width=10%>Payload</th><td colspan=2 style='overflow-wrap: anywhere !important; max-width: 200px; white-space: pre-wrap; word-break: keep-all; font-family: \"courier new\", courier, monospace;font-size: 13px;'>" ..
-               payload .. "</td></tr>\n")
+	    payload .. "</td></tr>\n")
       end
 
       print("</table>\n")
@@ -2547,33 +2567,33 @@ print [[
             $.ajax({
                      type: 'GET',
                      url: ']]
-   print(ntop.getHttpPrefix())
-   print [[/lua/flow_stats.lua',
+		     print(ntop.getHttpPrefix())
+		     print [[/lua/flow_stats.lua',
                      data: { ifid: "]]
-   print(tostring(ifid))
-   print [[", ]]
-   if (flow_key ~= nil) then
-      print [[flow_key: "]]
-      print(string.format("%u", flow_key))
-      print [[", ]]
-   end
-   print [[flow_hash_id: "]]
-   print(string.format("%u", flow_hash_id))
-   print [[", ]]
-   print [[ },
+		     print(tostring(ifid))
+		     print [[", ]]
+		     if (flow_key ~= nil) then
+			print [[flow_key: "]]
+			print(string.format("%u", flow_key))
+			print [[", ]]
+		     end
+		     print [[flow_hash_id: "]]
+		     print(string.format("%u", flow_hash_id))
+		     print [[", ]]
+		     print [[ },
                      success: function(content) {
                            if(content == "{}") {
       ]]
 
-   -- If the flow is already idle, another error message is already shown
-   if (flow ~= nil) then
-      print [[
+      -- If the flow is already idle, another error message is already shown
+      if (flow ~= nil) then
+	 print [[
                            var e = document.getElementById('flow_purged');
                            e.style.display = "block";
       ]]
-   end
+      end
 
-   print [[
+      print [[
                            } else {
                            var rsp = jQuery.parseJSON(content);
                            $('#first_seen').html(rsp["seen.first"]);
@@ -2686,32 +2706,32 @@ print [[
 elseif page == "modbus" then
    local json = require "dkjson"
    local json_context = json.encode({
-      csrf = ntop.getRandomCSRFValue()
+	 csrf = ntop.getRandomCSRFValue()
    })
 
    template.render("pages/vue_page.template", {
-      vue_page_name = "PageFlowDetailsModbus",
-      page_context = json_context
+		      vue_page_name = "PageFlowDetailsModbus",
+		      page_context = json_context
    })
 elseif page == "profinet" then
    local json = require "dkjson"
    local json_context = json.encode({
-      csrf = ntop.getRandomCSRFValue()
+	 csrf = ntop.getRandomCSRFValue()
    })
 
    template.render("pages/vue_page.template", {
-      vue_page_name = "PageFlowDetailsProfinet",
-      page_context = json_context
+		      vue_page_name = "PageFlowDetailsProfinet",
+		      page_context = json_context
    })
 elseif page == "s7comm" then
    local json = require "dkjson"
    local json_context = json.encode({
-      csrf = ntop.getRandomCSRFValue()
+	 csrf = ntop.getRandomCSRFValue()
    })
 
    template.render("pages/vue_page.template", {
-      vue_page_name = "PageFlowDetailsS7Comm",
-      page_context = json_context
+		      vue_page_name = "PageFlowDetailsS7Comm",
+		      page_context = json_context
    })
 end
 dofile(dirs.installdir .. "/scripts/lua/inc/footer.lua")
