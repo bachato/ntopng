@@ -56,7 +56,7 @@ Flow::Flow(NetworkInterface *_iface,
   c_mac_updated = s_mac_updated = false;
   memset(&tcp_stats, 0, sizeof(tcp_stats));
   memset(dedupStats, 0, sizeof(dedupStats));
-  
+
 #ifdef NTOPNG_PRO
   udp = NULL;
 #endif
@@ -3430,26 +3430,31 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
     lua_get_qoe_score(vm);
 #endif
 
-    if(dedupStats[0].exporter_ipv4 != 0) {     
+    if(dedupStats[0].exporter_ipv4 != 0) {
       lua_newtable(vm);
 
       for(u_int i=0; i<CONST_MAX_NUM_DEDUP_STATS; i++) {
 	char b1[32], b2[32];
-	
-	if(dedupStats[i].exporter_ipv4 != 0)
-	  lua_push_str_table_entry(vm,
-				   Utils::intoaV4(dedupStats[i].exporter_ipv4, b1, sizeof(b1)),
-				   dedupStats[i].next_hop.print(b2, sizeof(b2)));
-	else
+
+	if(dedupStats[i].exporter_ipv4 != 0) {
+	  lua_newtable(vm);
+	  lua_push_str_table_entry(vm, "exporter_ip", Utils::intoaV4(dedupStats[i].exporter_ipv4, b1, sizeof(b1)));
+	  lua_push_str_table_entry(vm, "next_hop",    dedupStats[i].next_hop.print(b2, sizeof(b2)));
+	  lua_push_bool_table_entry(vm, "return_path", dedupStats[i].return_path);
+
+	  lua_pushnumber(vm, i);
+	  lua_insert(vm, -2);
+	  lua_settable(vm, -3);	    
+	} else
 	  break;
       }
-	
+
       lua_pushstring(vm, "deduplication");
       lua_insert(vm, -2);
-      lua_settable(vm, -3);      
+      lua_settable(vm, -3);
     }
   }
-  
+
   lua_get_status(vm);
 
   lua_push_str_table_entry(vm, "proto.ndpi",
@@ -3945,10 +3950,10 @@ void Flow::formatECSNetwork(json_object *my_object, const IpAddress *addr) {
     if(!flow_device.next_hop.isEmpty())
       json_object_object_add(network_object, "next_hop",
 			     json_object_new_string(flow_device.next_hop.print(buf, sizeof(buf))));
-    
+
     json_object_object_add(network_object, "info",
 			   json_object_new_string(getFlowInfo(false).c_str()));
-    
+
     json_object_object_add(my_object, "network", network_object);
   }
 }
@@ -5796,7 +5801,24 @@ void Flow::timeval_diff(struct timeval *begin, const struct timeval *end,
 std::string Flow::getFlowInfo(bool isLuaRequest) {
   std::string info_field = std::string("");
 
-  if(!isMaskedFlow()) {
+  if(dedupStats[0].exporter_ipv4 != 0) {
+    u_int i;
+    bool swap_found = false;
+			    
+    for(i=0; i<CONST_MAX_NUM_DEDUP_STATS; i++) {
+      if(dedupStats[i].exporter_ipv4 == 0)
+	break;
+      else
+	swap_found |= dedupStats[i].return_path;
+    }
+
+    if(i > 0) {
+      char buf[16];
+
+      snprintf(buf, sizeof(buf), "%u %sExp.", i+1, swap_found ? "Bidir. " : "");
+      info_field = std::string(buf);
+    }
+  } else if(!isMaskedFlow()) {
     if(iec104) return (iec104->getFlowInfo());
 #ifdef NTOPNG_PRO
     if(modbus) return (modbus->getFlowInfo());
@@ -7487,8 +7509,8 @@ void Flow::lua_snmp_info(lua_State *vm) {
   lua_push_str_table_entry(vm, "device_ip", str);
 
   if(!flow_device.next_hop.isEmpty())
-    lua_push_str_table_entry(vm, "next_hop", flow_device.next_hop.print(str, sizeof(str)));  
-  
+    lua_push_str_table_entry(vm, "next_hop", flow_device.next_hop.print(str, sizeof(str)));
+
   lua_push_uint64_table_entry(vm, "in_index", flow_device.in_index);
   lua_push_uint64_table_entry(vm, "out_index", flow_device.out_index);
   lua_push_uint64_table_entry(vm, "observation_point_id",
@@ -9597,13 +9619,24 @@ void Flow::setnDPIFingerprint(char *fp) {
 
 /* *************************************** */
 
-void Flow::addDedupInfo(u_int32_t exporter_ipv4, IpAddress *ipv4_next_hop) {
+void Flow::addDedupInfo(u_int32_t exporter_ipv4, IpAddress *ipv4_next_hop,
+			bool src2dst_direction) {
   if(exporter_ipv4 == 0) return;
 
+  /* Check for duplicates first */
+  for(u_int i=0; i<CONST_MAX_NUM_DEDUP_STATS; i++) {
+    if((dedupStats[i].exporter_ipv4 == exporter_ipv4)
+       && dedupStats[i].next_hop.equal(ipv4_next_hop)) {
+      return; /* Duplicate */
+    }
+  }
+
+  
   for(u_int i=0; i<CONST_MAX_NUM_DEDUP_STATS; i++) {
     if(dedupStats[i].exporter_ipv4 == 0) {
       dedupStats[i].exporter_ipv4 = exporter_ipv4,
-	dedupStats[i].next_hop.set(ipv4_next_hop);
+	dedupStats[i].next_hop.set(ipv4_next_hop),
+	dedupStats[i].return_path = !src2dst_direction;;
 
       break;
     }

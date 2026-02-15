@@ -229,6 +229,7 @@ local lang = {
    ["date_to"] = "End Date/Time:",
    ["day"] = "Day",
    ["dedup_flows"] = "Duplicated Flows",
+   ["dedup_flow_swapped"] = "Return Path",
    ["default"] = "Default",
    ["default_interface_speed"] = "Advertised Interface Speed",
    ["default_serie_name"] = "Series 1",

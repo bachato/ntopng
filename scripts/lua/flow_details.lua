@@ -117,7 +117,7 @@ local function firstDottedElement(str)
       return str
    else
       local items = split(str, "%.")
-      
+
       return(items[1])
    end
 end
@@ -2044,7 +2044,7 @@ if isEmptyString(page) or page == "overview" then
 
 	 local flow_trajectory = {}
 	 local nodes_names = {}
-	 
+
          if ((snmpdevice ~= nil) and (snmpdevice ~= "0.0.0.0")) then
             local exporter_info_url, exporter_ip, exporter_name, site = formatExporter(snmpdevice)
 
@@ -2070,7 +2070,7 @@ if isEmptyString(page) or page == "overview" then
                end
             end
 
-	    flow_trajectory[exporter_ip] = next_hop_ip
+	    flow_trajectory[exporter_ip] = { next_hop =  next_hop_ip, return_path = false }
          end
 
 	 if(flow.deduplication ~= nil) then
@@ -2080,17 +2080,19 @@ if isEmptyString(page) or page == "overview" then
 	    print("<th>" .. i18n("flow_exporter") .. "</th><th>" .. i18n("next_hop") .. "</th></tr>\n")
 
 	    for k,v in pairs(flow.deduplication) do
-	       local ret, exp_ip, exp_name, site = formatExporter(k)
-	       local ret1, next_hop_ip, next_hop_name, next_hope_site = formatNextHop(v)
-	       
-	       print("<tr><td>".. ret .. "</td><td>" .. ret1 .."</td></tr>")
+	       local ret, exp_ip, exp_name, site = formatExporter(v.exporter_ip)
+	       local ret1, next_hop_ip, next_hop_name, next_hope_site = formatNextHop(v.next_hop)
 
-	       flow_trajectory[exp_ip] = next_hop_ip
+	       print("<tr><td>".. ret .. "</td><td>" .. ret1)
+	       if(v.return_path == true) then print(" <span class='badge bg-secondary'>".. i18n("dedup_flow_swapped").."</span>") end
+	       print("</td></tr>")
+
+	       flow_trajectory[exp_ip] = { next_hop = next_hop_ip, return_path = v.return_path }
 	       nodes_names[exp_ip] = { firstDottedElement(exp_name), site }
 	       nodes_names[next_hop_ip] = { firstDottedElement(next_hop_name), next_hope_site }
 	    end
-	    
-	    print("</td></tr>")	    
+
+	    print("</td></tr>")
 	 end
 
 	 if(table.len(flow_trajectory) > 0) then
@@ -2122,43 +2124,45 @@ if(nodes[flow["srv.ip"]] == nil) then
    i = i + 1
 end
 
-for k,v in pairs(flow_trajectory) do
-   if(nodes[k] == nil) then
+for exporter_ip,v in pairs(flow_trajectory) do
+   local next_hop = v.next_hop
+
+   if(nodes[exporter_ip] == nil) then
       local name
-      
-      if(nodes_names[k] ~= nil) then
-	 local ret = nodes_names[k]
+
+      if(nodes_names[exporter_ip] ~= nil) then
+	 local ret = nodes_names[exporter_ip]
 	 local site  = ret[2]
 
 	 name = ret[1]
-	 if(site ~= nil) then name = name .. " (" .. site .. ")" end	 	 
+	 if(site ~= nil) then name = name .. " (" .. site .. ")" end
       end
 
-      if(name == nil) then name = k end
-      nodes[k] = i
-      print('{ id: '..i..', label: "'.. name ..'" },')
+      if(name == nil) then name = exporter_ip end
+      nodes[exporter_ip] = i
+      print('{ id: '..i..', label: "'.. name ..'" },\n')
       i = i + 1
    end
-   
-   if(nodes[v] == nil) then
+
+   if(nodes[next_hop] == nil) then
       local name
-      
-      if(nodes_names[v] ~= nil) then
-	 local ret = nodes_names[v]
+
+      if(nodes_names[next_hop] ~= nil) then
+	 local ret = nodes_names[next_hop]
 	 local site  = ret[2]
 
 	 name = ret[1]
 	 if(site ~= nil) then name = name .. " (" .. site .. ")" end
       else
-	 name = v
+	 name = next_hop
       end
-      
-      nodes[v] = i
-      print ('{ id: '..i..', label: "'.. name ..'" },')
+
+      nodes[next_hop] = i
+      print ('{ id: '..i..', label: "'.. name ..'" },\n')
       i = i + 1
    end
 
-   next_hops[v] = true
+   next_hops[next_hop] = true
 end
 
 print [[
@@ -2168,24 +2172,43 @@ print [[
 	    var edges = new vis.DataSet([
 ]]
 
-for k,v in pairs(flow_trajectory) do
-   print ('{ from: '..nodes[k]..', to: '..nodes[v]..', arrows: "to"},')
+for exporter_ip,v in pairs(flow_trajectory) do
+   local next_hop = v.next_hop
+   local return_path = v.return_path
+
+   print ('{ from: "'.. nodes[exporter_ip] ..'", to: "'.. nodes[next_hop] ..'", arrows: "to"},\n')
 end
 
 -- Add server node edge
-for exp_ip,next_hop in pairs(flow_trajectory) do
+for exporter_ip,v in pairs(flow_trajectory) do
+   local next_hop = v.next_hop
+   local return_path = v.return_path
+
    if(flow_trajectory[next_hop] == nil) then
-      print ('{ from: '..nodes[next_hop]..', to: '..server_id..', arrows: "to" },')
+      if(return_path == false) then
+	 print ('{ from: "'..nodes[next_hop]..'", to: "'..server_id..'", arrows: "to" },\n')
+      else
+	 print ('{ from: "'..nodes[next_hop]..'", to: "'..client_id..'", arrows: "to" },\n')
+      end
    end
 end
 
 -- Add client node edge
 local head = {}
-for exp_ip,next_hop in pairs(flow_trajectory) do
-   if(next_hops[exp_ip] == nil) then
-      print ('{ from: '..client_id..', to: '..nodes[exp_ip]..', arrows: "to" },')
+for exporter_ip,v in pairs(flow_trajectory) do
+   local next_hop = v.next_hop
+   local return_path = v.return_path
+
+   if(next_hops[exporter_ip] == nil) then
+      if(return_path == false) then
+	 print ('{ from: "'..client_id..'", to: "'..nodes[exporter_ip]..'", arrows: "to" },\n')
+      else
+	 print ('{ from: "'..server_id..'", to: "'..nodes[exporter_ip]..'", arrows: "to" },\n')
+      end
    end
 end
+
+--
 
 print [[
 				       ]);
@@ -2304,7 +2327,7 @@ print [[
                if num == 0 then
                   print("<tr><th colspan=3>" .. i18n("flow_details.additional_flow_elements") .. "</th></tr>\n")
                end
-	       
+
                if type(value) == "table" then
                   print("<tr><th width=10%>" .. getFlowKey(key) .. "</th>")
                   for _, value in pairs(value or {}) do
