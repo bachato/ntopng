@@ -9618,6 +9618,7 @@ void Flow::setnDPIFingerprint(char *fp) {
 void Flow::addDedupInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
 			bool src2dst_direction) {
   std::vector<DuplicatedFlowInfo>::iterator it;
+  DuplicatedFlowInfo d;
   
   if((exporter_ipv4 == 0) || next_hop->isEmpty())
     return;
@@ -9628,14 +9629,7 @@ void Flow::addDedupInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
       return; /* Duplicated */
     }
   }
-  
-  for(it = dedupStats.begin(); it != dedupStats.end(); it++) {
-    if(it->exporter_ipv4 == 0) {
-      it->exporter_ipv4 = exporter_ipv4,
-	it->next_hop.set(next_hop),
-	it->return_path = !src2dst_direction;;
 
-      break;
-    }
-  }
+  d.exporter_ipv4 = exporter_ipv4, d.next_hop.set(next_hop), d.return_path = !src2dst_direction;
+  dedupStats.push_back(d);
 }
