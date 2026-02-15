@@ -140,7 +140,7 @@ private:
      predominant of a flow, which is written into `predominant_alert`.
   */
   Bitmap128 alerts_map;
-  DuplicatedFlowInfo dedupStats[CONST_MAX_NUM_DEDUP_STATS];
+  std::vector<DuplicatedFlowInfo> dedupStats;
   std::map<FlowAlertTypeEnum, FlowAlert *> triggered_alerts;
   FlowAlertType predominant_alert;   /* This is the predominant alert */
   u_int16_t predominant_alert_score; /* The score associated to the predominant alert */

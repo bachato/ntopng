@@ -54,8 +54,7 @@ Flow::Flow(NetworkInterface *_iface,
   tcp = NULL;
   flow_category = NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, flow_breed = NDPI_PROTOCOL_UNRATED;
   c_mac_updated = s_mac_updated = false;
-  memset(&tcp_stats, 0, sizeof(tcp_stats));
-  memset(dedupStats, 0, sizeof(dedupStats));
+  memset(&tcp_stats, 0, sizeof(tcp_stats));  
 
 #ifdef NTOPNG_PRO
   udp = NULL;
@@ -3430,19 +3429,22 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
     lua_get_qoe_score(vm);
 #endif
 
-    if(dedupStats[0].exporter_ipv4 != 0) {
+    if(dedupStats.size() > 0) {
+      std::vector<DuplicatedFlowInfo>::iterator it;
+      int i = 0;
+      
       lua_newtable(vm);
 
-      for(u_int i=0; i<CONST_MAX_NUM_DEDUP_STATS; i++) {
+      for(it = dedupStats.begin(); it != dedupStats.end(); it++) {
 	char b1[32], b2[32];
 
-	if(dedupStats[i].exporter_ipv4 != 0) {
+	if(it->exporter_ipv4 != 0) {
 	  lua_newtable(vm);
-	  lua_push_str_table_entry(vm, "exporter_ip", Utils::intoaV4(dedupStats[i].exporter_ipv4, b1, sizeof(b1)));
-	  lua_push_str_table_entry(vm, "next_hop",    dedupStats[i].next_hop.print(b2, sizeof(b2)));
-	  lua_push_bool_table_entry(vm, "return_path", dedupStats[i].return_path);
+	  lua_push_str_table_entry(vm, "exporter_ip", Utils::intoaV4(it->exporter_ipv4, b1, sizeof(b1)));
+	  lua_push_str_table_entry(vm, "next_hop",    it->next_hop.print(b2, sizeof(b2)));
+	  lua_push_bool_table_entry(vm, "return_path", it->return_path);
 
-	  lua_pushnumber(vm, i);
+	  lua_pushnumber(vm, i++);
 	  lua_insert(vm, -2);
 	  lua_settable(vm, -3);	    
 	} else
@@ -5801,23 +5803,17 @@ void Flow::timeval_diff(struct timeval *begin, const struct timeval *end,
 std::string Flow::getFlowInfo(bool isLuaRequest) {
   std::string info_field = std::string("");
 
-  if(dedupStats[0].exporter_ipv4 != 0) {
-    u_int i;
+  if(dedupStats.size() > 0) {
+    std::vector<DuplicatedFlowInfo>::iterator it;
     bool swap_found = false;
-			    
-    for(i=0; i<CONST_MAX_NUM_DEDUP_STATS; i++) {
-      if(dedupStats[i].exporter_ipv4 == 0)
-	break;
-      else
-	swap_found |= dedupStats[i].return_path;
-    }
-
-    if(i > 0) {
-      char buf[16];
-
-      snprintf(buf, sizeof(buf), "%u %sExp.", i+1, swap_found ? "Bidir. " : "");
-      info_field = std::string(buf);
-    }
+    char buf[16];
+    
+    for(it = dedupStats.begin(); it != dedupStats.end(); it++)
+      swap_found |= it->return_path;    
+    
+    snprintf(buf, sizeof(buf), "%u %sExp.",
+	     (unsigned int)(dedupStats.size()+1), swap_found ? "Bidir. " : "");
+    info_field = std::string(buf);
   } else if(!isMaskedFlow()) {
     if(iec104) return (iec104->getFlowInfo());
 #ifdef NTOPNG_PRO
@@ -9619,24 +9615,25 @@ void Flow::setnDPIFingerprint(char *fp) {
 
 /* *************************************** */
 
-void Flow::addDedupInfo(u_int32_t exporter_ipv4, IpAddress *ipv4_next_hop,
+void Flow::addDedupInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
 			bool src2dst_direction) {
-  if(exporter_ipv4 == 0) return;
+  std::vector<DuplicatedFlowInfo>::iterator it;
+  
+  if((exporter_ipv4 == 0) || next_hop->isEmpty())
+    return;
 
   /* Check for duplicates first */
-  for(u_int i=0; i<CONST_MAX_NUM_DEDUP_STATS; i++) {
-    if((dedupStats[i].exporter_ipv4 == exporter_ipv4)
-       && dedupStats[i].next_hop.equal(ipv4_next_hop)) {
-      return; /* Duplicate */
+  for(it = dedupStats.begin(); it != dedupStats.end(); it++) {
+    if((it->exporter_ipv4 == exporter_ipv4) && it->next_hop.equal(next_hop)) {
+      return; /* Duplicated */
     }
   }
-
   
-  for(u_int i=0; i<CONST_MAX_NUM_DEDUP_STATS; i++) {
-    if(dedupStats[i].exporter_ipv4 == 0) {
-      dedupStats[i].exporter_ipv4 = exporter_ipv4,
-	dedupStats[i].next_hop.set(ipv4_next_hop),
-	dedupStats[i].return_path = !src2dst_direction;;
+  for(it = dedupStats.begin(); it != dedupStats.end(); it++) {
+    if(it->exporter_ipv4 == 0) {
+      it->exporter_ipv4 = exporter_ipv4,
+	it->next_hop.set(next_hop),
+	it->return_path = !src2dst_direction;;
 
       break;
     }
