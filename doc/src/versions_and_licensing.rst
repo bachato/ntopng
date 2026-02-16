@@ -1,11 +1,11 @@
 .. _AvailableVersions:
-  
+
 Available Versions & Licensing
 ##############################
 
 The ntopng software comes in four versions: Community, Professional, Enterprise M, Enterprise L, and Enterprise L Bundle. Each version unlocks additional features with respect to the smaller one.
 
-The full list of features and differences between versions is available in the ntopng 
+The full list of features and differences between versions is available in the ntopng
 `Product Page <https://www.ntop.org/products/traffic-analysis/ntop/>`_.
 
 ntopng Community
@@ -37,11 +37,16 @@ The Enterprise L Bundle unlocks ntopng Enterprise L, nProbe Pro (Flow Collection
 .. warning::
    ntopng and nProbe must be on the same machine to have them unlocked with the ntopng Enterprise L Bundle license. The bundle license must be placed under :code:`/etc/ntopng/ntopng.license`.
 
+ntopng Enterprise XL/XXL/XXXL
+-------------------
+
+The Enterprise XL/XXL/XXXL version offer additional features and releases some limitations in terms of number of hosts, SNMP devices and flow collectors number. Below in this page there is a compatison table the highlights the differences across editions..
+
 Licensing
 ---------
 
 The Community edition does not need any license. Professional and Enterprise
-versions require a license. ntopng automatically switches to one of these four versions, 
+versions require a license. ntopng automatically switches to one of these four versions,
 depending on the presence of a license.
 
 License is per-server and is released according to the EULA (End User
@@ -140,7 +145,7 @@ Installing The Key
 
 Upon successful generation, the license key will be printed in the browser. At this point you have two options:
 
-You can copy the license key in a plain text file :code:`/etc/ntopng.license`, e.g., 
+You can copy the license key in a plain text file :code:`/etc/ntopng.license`, e.g.,
 
 .. code:: bash
 
@@ -205,7 +210,7 @@ In order to use the LM simply do ```ntopng --license-mgr <licensemgr>.conf <othe
 Below you can find an example of license manager configuration file for ntopng:
 
 .. code:: bash
-	  
+
 	  LICENSE_MANAGER=127.0.0.1:9999
 
 	  #
@@ -256,7 +261,9 @@ Versions Comparison Table
      - L
      - XL
      - XXL
+     - XXXL
    * - Monitor Remote Hosts using active monitoring (ICMP, HTTP/S, Throughput, SpeedTest)
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -270,7 +277,9 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Identify application protocols (Facebook, Youtube, BitTorrent, etc) in the network
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -284,7 +293,9 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Group hosts by VLAN, Operating System, Country, and Autonomous Systems
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -298,7 +309,9 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Discover the devices connected to your Local Network (Network Discovery)
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -312,7 +325,9 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Visualise the top HTTP sites contacted by an host
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -326,7 +341,9 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Generate alerts (for Flows, Hosts, Interfaces, …) when certain conditions are detected (Threshold Crossed, Suspicious Behaviour, …)
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -340,7 +357,9 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Get alerts notifications as Email, Discord, Telegram, WebHook, Slack, Syslog messages or execute Shell Scripts
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -354,7 +373,9 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - CollCollect data from nProbe to treat remote nProbe-monitored interfaces and flow exporter devices (for example routers and switches) as if they were localect data from remote nProbe-monitored interfaces and flow exporters
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -368,7 +389,9 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Group local hosts into logical sets of IP and MAC addresses known as host pools
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -382,8 +405,10 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Aggregate multiple interfaces traffic in a single view
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -396,8 +421,10 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Integrate ntopng login with LDAP authentication servers \* \*\*
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -410,8 +437,10 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Have access to other ntopng Checks (Alerts)
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -424,9 +453,11 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Visualize and historicise other ntopng data (Interface Score Anomalies, Top Talkers, …)
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -438,10 +469,12 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Automatic (periodic) graphical reports
      - ✗
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -452,9 +485,11 @@ Versions Comparison Table
      - ✗
      - ✓
      - ✓
+     - ✓
    * - Query SNMP devices data, such as port status, traffic and and MAC address information
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -466,9 +501,11 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Identify attackers and victims through an alerts dashboard in realtime and in the past
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -480,9 +517,11 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Explore and filter flow alerts in the past
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -494,9 +533,11 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Have access to other ntopng Checks (Alerts, such as SNMP Alerts)
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -508,9 +549,11 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Visualize and historicise NetFlow/sFlow devices data
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -522,9 +565,11 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Apply per-protocol daily traffic and time quotas to your clients \*
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -536,6 +581,7 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Hourly Historical Flow Aggregation
      - ✗
      - ✗
@@ -543,9 +589,11 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Custom Interface Disaggregation \*\*\*
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -557,9 +605,11 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Hosts Map (find the hosts outliers)
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -571,10 +621,12 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Identity Management with Firewalls and Active Directory
      - ✗
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -585,10 +637,12 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Native nTap Support
      - ✗
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -599,7 +653,9 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - OT/SCADA: IEC 60870-5-104 Traffic Analysis
+     - ✓
      - ✓
      - ✓
      - ✓
@@ -613,6 +669,7 @@ Versions Comparison Table
      - ✓
      - ✓
      - ✓
+     - ✓
    * - Continuous Recording license Included (n2disk 1Gbit) \*\* \*\*\*
      - ✗
      - ✗
@@ -620,11 +677,13 @@ Versions Comparison Table
      - Bundle L
      - Bundle XL
      - ✗
+     - x
    * - Flow Collection Deduplication
      - ✗
      - ✗
      - ✗
      - ✗
+     - ✓
      - ✓
      - ✓
    * - Smart Recording license Included (n2disk 1Gbit) \*\* \*\*\*
@@ -634,6 +693,7 @@ Versions Comparison Table
      - ✗
      - Bundle XL
      - ✗
+     - x
    * - Flow Collection license Included (nProbe Pro) \*\*\*
      - ✗
      - ✗
@@ -641,6 +701,7 @@ Versions Comparison Table
      - Bundle L
      - ✗
      - ✗
+     - x
    * - Flow Collection license Included (nProbe Enterprise S) \*\*\*
      - ✗
      - ✗
@@ -648,6 +709,7 @@ Versions Comparison Table
      - ✗
      - Bundle XL
      - ✗
+     - x
    * - Maximum Number of Live (Local) Hosts (suggested)
      - 256
      - 256
@@ -655,6 +717,7 @@ Versions Comparison Table
      - 4K
      - 32K
      - 128K
+     - 256K
    * - Maximum Number of Live Flows (suggested)
      - 128K
      - 1M
@@ -662,9 +725,11 @@ Versions Comparison Table
      - 8M
      - 16M
      - 32M
+     - 64M
    * - Max Number of Host Pools
      - 3
      - 3
+     - 4096
      - 4096
      - 4096
      - 4096
@@ -676,6 +741,7 @@ Versions Comparison Table
      - Unlimited \*\*\*\*
      - Unlimited \*\*\*\*
      - Unlimited \*\*\*\*
+     - Unlimited \*\*\*\*
    * - Maximum Number of Monitored Interfaces (-i)
      - 8
      - 8
@@ -683,9 +749,11 @@ Versions Comparison Table
      - 32
      - 64
      - 64
+     - 64
    * - Mark and historicize traffic with user-defined traffic profiles to match hosts, ports and applications using the BPF syntax (number of profiles) [total/per ntopng]
      - -
      - 16
+     - 128
      - 128
      - 128
      - 128
@@ -697,6 +765,7 @@ Versions Comparison Table
      - 32
      - 128
      - 512
+     - 1024
    * - Max Number of Flow Exporters (e.g. NetFlow router) [total/per ntopng]
      - -
      - 4
@@ -704,6 +773,7 @@ Versions Comparison Table
      - 128
      - 256
      - 512
+     - 1024
    * - Flow Exporters/Interfaces combinations [total/per ntopng]
      - -
      - 128
@@ -711,6 +781,7 @@ Versions Comparison Table
      - 512
      - 2K
      - 8K
+     - 16K
 
 
 ✓ = Feature available, ✗ = Feature NOT available
