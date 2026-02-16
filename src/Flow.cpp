@@ -2002,7 +2002,7 @@ bool Flow::dump(time_t t, bool last_dump_before_free) {
 
   /* Add protocol information in the JSON field (if not already set by alerts) */
   setProtocolJSONInfo();
-  getInterface()->dumpFlow(get_last_seen(), this);
+  getInterface()->dumpFlow(this);
 
   return (true);
 }
@@ -5082,7 +5082,8 @@ bool Flow::get_partial_traffic_stats_view(PartializableFlowTrafficStats *partial
 bool Flow::update_partial_traffic_stats_db_dump() {
   bool first_partial;
 
-  if(!get_partial_traffic_stats(&last_db_dump.partial, &last_db_dump.delta,
+  if(!get_partial_traffic_stats(&last_db_dump.partial,
+				&last_db_dump.delta,
 				&first_partial))
     return (false);
 

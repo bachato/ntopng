@@ -1207,7 +1207,7 @@ bool NetworkInterface::enqueueHostAlert(HostAlert *alert) {
 
 /* **************************************************** */
 
-int NetworkInterface::dumpFlow(time_t when, Flow *f) {
+int NetworkInterface::dumpFlow(Flow *f) {
   SPSCQueue<Flow *> *queue;
   int rc = -1;
 #ifdef DEBUG_FLOW_DUMP
@@ -1243,7 +1243,9 @@ int NetworkInterface::dumpFlow(time_t when, Flow *f) {
 #endif
 
 #ifdef DEBUG_FLOW_DUMP
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] Queueing flow to dump [%s]", __FUNCTION__, status_str);
+    ntop->getTrace()->traceEvent(TRACE_NORMAL,
+				 "[%s] Queueing flow to dump [%s]",
+				 __FUNCTION__, status_str);
 #endif
 
     rc = 0;
@@ -3810,7 +3812,7 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
 /* **************************************************** */
 
 /* This method finally dumps a flow */
-bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
+bool NetworkInterface::dumpFlowOut(Flow *f, time_t now) {
   char *json = NULL;
   bool rc = true;
 
@@ -3835,16 +3837,15 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
         || ntop->get_export_interface()
 #endif
 	) {
-
       json = f->serialize(export_format_GENERIC);
+      
       if (json) {
-
         if (flows_db)
-          rc = flows_db->dumpFlow(when, f, json);
+          rc = flows_db->dumpFlow(now, f, json);
 
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO) && !defined(HAVE_NEDGE)
         if (kafka_exporter)
-          kafka_exporter->dumpFlow(when, f, json);
+          kafka_exporter->dumpFlow(now, f, json);
 #endif
 
 #if defined(HAVE_ZMQ) && !defined(HAVE_NEDGE)
@@ -3865,7 +3866,7 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
     if (es_exporter) {
       json = f->serialize(export_format_ECS);
       if (json) {
-        es_exporter->dumpFlow(when, f, json);
+        es_exporter->dumpFlow(now, f, json);
         free(json);
       }
     }
@@ -3874,7 +3875,7 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t when) {
     if (syslog_exporter) {
       json = f->serialize(export_format_SYSLOG);
       if (json) {
-        syslog_exporter->dumpFlow(when, f, json);
+        syslog_exporter->dumpFlow(now, f, json);
         free(json);
       }
     }
