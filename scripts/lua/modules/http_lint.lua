@@ -2822,7 +2822,6 @@ local known_parameters = {
    ["blacklist_name"] = validateUnquoted,
    ["reset_url"] = validateBool,
    ["as"] = validateNumber,
-   ["exporter_uuid"] = validateUUID,
    ["exporter_source_id"] = validateUUID,
    ["probe_uuid"] = validateUUID,
    ["probe_source_id"] = validateUUID,

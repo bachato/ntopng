@@ -155,7 +155,7 @@ const map_table_def_columns = (columns) => {
         "probe_public_ip": (value, row) => {
             return value
         },
-        "probe_source_id": (value, row) => {
+        "probe_uuid": (value, row) => {
             return value
         },
         "probe_interface": (value, row) => {
@@ -204,11 +204,10 @@ const map_table_def_columns = (columns) => {
         "captured_packets": (value, row) => {
             let diff_value = value
             if (!first_open.value) {
-                // is row.exporter_uuid defined?
-                const old_value = localStorage.getItem("exporter_captured_packets." + row.exporter_uuid + row.ip)
+                const old_value = localStorage.getItem("exporter_captured_packets." + row.exporter_source_id + row.ip)
                 diff_value = (value - Number(old_value)) / 10
             }
-            localStorage.setItem("exporter_captured_packets." + row.exporter_uuid + row.ip, value)
+            localStorage.setItem("exporter_captured_packets." + row.exporter_source_id + row.ip, value)
             if (!value)
                 return '';
             let formatted_value = formatterUtils.formatAccounting(Math.abs(value))
@@ -226,11 +225,10 @@ const map_table_def_columns = (columns) => {
         "dropped_packets": (value, row) => {
             let diff_value = value
             if (!first_open.value) {
-                // is row.exporter_uuid defined?
-                const old_value = localStorage.getItem("exporter_dropped_packets." + row.exporter_uuid + row.ip)
+                const old_value = localStorage.getItem("exporter_dropped_packets." + row.exporter_source_id + row.ip)
                 diff_value = (value - Number(old_value)) / 10
             }
-            localStorage.setItem("exporter_dropped_packets." + row.exporter_uuid + row.ip, value)
+            localStorage.setItem("exporter_dropped_packets." + row.exporter_source_id + row.ip, value)
             if (!value)
                 return '';
             let formatted_value = formatterUtils.formatAccounting(Math.abs(value))

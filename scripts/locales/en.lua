@@ -5921,6 +5921,7 @@ local lang = {
     ["remote_probe_showing_first_x_devices"] = "Showing the first %{num}.",
     ["remote_probe_time"] = "nProbe Time Drift",
     ["remote_probe_uuid"] = "nProbe UUID",
+    ["probe_source_id"] = "ID",
     ["reset_counters"] = "Reset Counters",
     ["rrd_timeseries"] = "RRD Timeseries",
     ["send_error"] = "Send Error",

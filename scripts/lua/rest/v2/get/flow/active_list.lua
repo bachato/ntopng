@@ -240,7 +240,7 @@ for _, value in ipairs(flows_stats.flows) do
 
    -- snmp interface index
    if (value["in_index"] ~= nil and value["out_index"] ~= nil) then
-      local probe_uuid = 0
+      local probe_source_id = 0
       local in_port_name = ""
       local out_port_name = ""
       local device_ip = value["device_ip"]
@@ -258,7 +258,7 @@ for _, value in ipairs(flows_stats.flows) do
 
                -- get probe uuid if ips match
                if probe_ip == device_ip then
-                  probe_uuid = probe_info["probe.source_id"]
+                  probe_source_id = probe_info["probe.source_id"]
                end
             end
          end
@@ -269,7 +269,7 @@ for _, value in ipairs(flows_stats.flows) do
             ip = device_ip,
             name = device_ip,
             label = getProbeName(device_ip, false, false, false),
-            probe_uuid = probe_uuid
+            probe_source_id = probe_source_id
          },
          in_port = {
             index = value["in_index"],

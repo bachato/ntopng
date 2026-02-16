@@ -933,7 +933,7 @@ function getProbeInfoFromExporterIP(ip)
 	    probe_info.exporters or {}) do
 	    if exporter_ip == ip then
 	       return {
-		  probe_uuid = tostring(probe_info["probe.source_id"]),
+		  probe_source_id = tostring(probe_info["probe.source_id"]),
 		  exporter_source_id = tostring(
 		     exporter_info["unique_source_id"])
 	       }
@@ -960,15 +960,15 @@ function generateExporterLink(ip)
       -- Fallback SNMP not available, use exporter link
       local exporters_utils = require "exporters_utils"
       local exporter_source_id = nil
-      local probe_uuid = nil
+      local probe_source_id = nil
       local exporter_ifid = nil
 
       if tonumber(ip) then ip = ntop.inet_ntoa(ip) end
       exporter_source_id, exporter_ifid = exporters_utils.getExporterID(ip)
-      probe_uuid = exporters_utils.getProbeID(ip)
+      probe_source_id = exporters_utils.getProbeID(ip)
       return string.format(
-	 "%s/lua/pro/enterprise/exporters.lua?ip=%s&exporter_source_id=%s&probe_uuid=%s",
-	 ntop.getHttpPrefix(), ip, exporter_source_id, probe_uuid)
+	 "%s/lua/pro/enterprise/exporters.lua?ip=%s&exporter_source_id=%s&probe_source_id=%s",
+	 ntop.getHttpPrefix(), ip, exporter_source_id, probe_source_id)
    end
 
    return nil

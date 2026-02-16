@@ -36,7 +36,7 @@ local exporters_utils = {}
 -- @param exporter_ip string Exporter IP address
 -- @param new_ports_list table List of interface statistics (ports)
 -- @param res table Destination table where formatted entries are appended
--- @param uuid_list table Contains probe_uuid, exporter_uuid and ifid
+-- @param uuid_list table Contains probe_source_id, exporter_source_id and ifid
 -- @param add_role_to_interfaces boolean Whether to enrich interfaces with SNMP role
 --
 local function formatInterfaceData(exporter_ip, new_ports_list, res, uuid_list, add_role_to_interfaces)
@@ -63,8 +63,8 @@ local function formatInterfaceData(exporter_ip, new_ports_list, res, uuid_list, 
             interface_name = interface_name,
             exporter_ip = exporter_ip,
             exporter_name = exporter_name,
-            exporter_uuid = uuid_list.exporter_uuid,
-            probe_uuid = uuid_list.probe_uuid,
+            exporter_source_id = uuid_list.exporter_source_id,
+            probe_source_id = uuid_list.probe_source_id,
             ifid = uuid_list.ifid, -- ntop interface ID
             bytes_sent = info["bytes.out_bytes"],
             bytes_rcvd = info["bytes.in_bytes"],
@@ -116,7 +116,7 @@ function exporters_utils.getAllInterfacesList(add_role_to_interfaces)
 
                   formatInterfaceData(exporter_ip, ports_table, list, {
                      probe_source_id = source_id,
-                     exporter_source_id = unique_source_id,
+                     exporter_source_id = exporter_info.unique_source_id,
                      ifid = ifid
                   }, add_role_to_interfaces)
                end

@@ -350,7 +350,7 @@ const map_table_def_columns = (columns) => {
                     tag_filter2 = ` tag-filter2="interface_filter" tag-value2="${value.seen_on_interface.id}" `
                 }
 
-                return `<a href="${flow_exporter_url}?probe_uuid=${value.device.probe_uuid}${ifid}">${flow_exporter_icon}</a> <a href="#" class="tableFilter" data-bs-toggle='tooltip' data-bs-placement='bottom' title='${value.device.label}' tag-filter="deviceIP" tag-value="${value.device.ip}" ${tag_filter2}>${value.device.name}${ifid_name}</a>`
+                return `<a href="${flow_exporter_url}?probe_source_id=${value.device.probe_source_id}">${flow_exporter_icon}</a> <a href="#" class="tableFilter" data-bs-toggle='tooltip' data-bs-placement='bottom' title='${value.device.label}' tag-filter="deviceIP" tag-value="${value.device.ip}" ${tag_filter2}>${value.device.name}${ifid_name}</a>`
             }
             return ''
         },
