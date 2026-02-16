@@ -3653,6 +3653,14 @@ static int ntop_is_enterprise_xxl(lua_State *vm) {
 
 /* ****************************************** */
 
+static int ntop_is_enterprise_xxxl(lua_State *vm) {
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  lua_pushboolean(vm, ntop->getPrefs()->is_enterprise_xxxl_edition());
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_is_nedge(lua_State *vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   lua_pushboolean(vm, ntop->getPrefs()->is_nedge_pro_edition());
@@ -4237,6 +4245,8 @@ static int ntop_get_info(lua_State *vm) {
                               ntop->getPrefs()->is_enterprise_xl_edition());
     lua_push_bool_table_entry(vm, "version.enterprise_xxl_edition",
                               ntop->getPrefs()->is_enterprise_xxl_edition());
+    lua_push_bool_table_entry(vm, "version.enterprise_xxxl_edition",
+                              ntop->getPrefs()->is_enterprise_xxxl_edition());
 
     lua_push_bool_table_entry(vm, "version.nedge_edition",
                               ntop->getPrefs()->is_nedge_pro_edition());
@@ -4530,7 +4540,9 @@ static int ntop_snmp_max_num_engines(lua_State *vm) {
   u_int16_t num = 0;
 
 #ifdef NTOPNG_PRO
-  if (ntop->getPro()->has_valid_enterprise_xxl_license())
+  if (ntop->getPro()->has_valid_enterprise_xxxl_license())
+    num = NTOPNG_MAX_NUM_SNMP_DEVICES_ENT_XXXL;
+  else if (ntop->getPro()->has_valid_enterprise_xxl_license())
     num = NTOPNG_MAX_NUM_SNMP_DEVICES_ENT_XXL;
   else if (ntop->getPro()->has_valid_enterprise_xl_license())
     num = NTOPNG_MAX_NUM_SNMP_DEVICES_ENT_XL;

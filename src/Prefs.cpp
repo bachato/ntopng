@@ -639,7 +639,7 @@ void usage() {
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
   printf(
 	 "                                    | clickhouse    Dump in ClickHouse "
-	 "(Enterprise M/L/XL/XXL)\n"
+	 "(Enterprise M and better)\n"
 	 "                                    |   Format:\n"
 	 "                                    |   clickhouse;<host[@<tcp-"
 	 "port>,<mysql-port>]|socket>;<dbname>;<user>;<pw>\n"
@@ -3156,6 +3156,18 @@ bool Prefs::is_enterprise_xxl_edition() {
   return
 #ifdef NTOPNG_PRO
     ntop->getPro()->has_valid_enterprise_xxl_license()
+#else
+    false
+#endif
+    ;
+}
+
+/* *************************************** */
+
+bool Prefs::is_enterprise_xxxl_edition() {
+  return
+#ifdef NTOPNG_PRO
+    ntop->getPro()->has_valid_enterprise_xxxl_license()
 #else
     false
 #endif
