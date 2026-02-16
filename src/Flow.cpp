@@ -137,7 +137,8 @@ Flow::Flow(NetworkInterface *_iface,
   last_db_dump.in_progress = false;
 
   memset(&protos, 0, sizeof(protos));
-  memset(&flow_device, 0, sizeof(flow_device));
+  flow_device.device_ip = flow_device.in_index = flow_device.out_index =
+    flow_device.observation_point_id = flow_device.site_id = 0;
 
   flow_score = 0;
 

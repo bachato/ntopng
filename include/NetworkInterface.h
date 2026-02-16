@@ -308,7 +308,7 @@ protected:
 
   DB *db; /* alerts, etc. (SQLite) */
 
-  FlowDB *flows_db; /* flows, alerts, etc. (ClickHouse) */
+  FlowDB *clickhouse_flows_db; /* flows, alerts, etc. (ClickHouse only) */
 
 #ifndef HAVE_NEDGE
   FlowDB *es_exporter;
@@ -659,8 +659,8 @@ public:
                         DSCPStats *_dscpStats, SyslogStats *_syslogStats,
                         RoundTripStats *_downloadStats,
                         RoundTripStats *_uploadStats) const;
-  inline DB *getDB() const { return db ? db : flows_db; };
-  inline FlowDB *getFlowsDB() const { return flows_db; };
+  inline DB *getDB() const { return db ? db : clickhouse_flows_db; };
+  inline FlowDB *getFlowsDB() const { return clickhouse_flows_db; };
 #ifndef HAVE_NEDGE
   inline FlowDB *getESExporter() const { return es_exporter; };
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
@@ -1001,18 +1001,18 @@ public:
 
   inline int execSQLQuery(lua_State *vm, const char *sql, bool limit_rows,
                           bool wait_for_db_created = false) {
-    DB *actual_db = db ? db : flows_db;
+    DB *actual_db = db ? db : clickhouse_flows_db;
     return (actual_db ? actual_db->execSQLQuery(vm, sql, limit_rows, wait_for_db_created)
 	    : -1);
   };
   inline int execSQLQuery2CSV(const char *sql, const char *delimiter, const char *null_value, 
                               bool dump_in_json_format, bool remove_headers, struct mg_connection *conn) {
-    DB *actual_db = db ? db : flows_db;
+    DB *actual_db = db ? db : clickhouse_flows_db;
     return (actual_db ? actual_db->execSQLQuery2CSV(sql, delimiter, null_value, dump_in_json_format, remove_headers, conn)
             : -1);
   }
   inline void archiveDBData(time_t epoch_begin, time_t epoch_end) {
-    DB *actual_db = db ? db : flows_db;
+    DB *actual_db = db ? db : clickhouse_flows_db;
     if (actual_db) actual_db->archiveData(epoch_begin, epoch_end);
   }
 
@@ -1020,7 +1020,7 @@ public:
   void allocateStructures(bool disable_dump = false);
   void getsDPIStats(lua_State *vm);
   inline bool isDbCreated() {
-    DB *actual_db = db ? db : flows_db;
+    DB *actual_db = db ? db : clickhouse_flows_db;
     return (actual_db ? actual_db->isDbCreated() : true); 
   };
 #ifdef NTOPNG_PRO

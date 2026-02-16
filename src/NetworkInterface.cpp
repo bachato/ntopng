@@ -332,7 +332,7 @@ void NetworkInterface::init(const char *interface_name) {
   download_stats = upload_stats = NULL;
 
   db = NULL;
-  flows_db = NULL;
+  clickhouse_flows_db = NULL;
 #ifndef HAVE_NEDGE
   es_exporter = NULL;
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
@@ -1057,9 +1057,9 @@ NetworkInterface::~NetworkInterface() {
     delete db;
   }
 
-  if (flows_db) {
-    flows_db->shutdown();
-    delete flows_db;
+  if (clickhouse_flows_db) {
+    clickhouse_flows_db->shutdown();
+    delete clickhouse_flows_db;
   }
 
   if (host_pools) delete host_pools; /* note: this requires ndpi_struct */
@@ -1261,7 +1261,7 @@ int NetworkInterface::dumpFlow(Flow *f) {
 #ifdef NTOPNG_PRO
 
 void NetworkInterface::flushFlowDump() {
-  if (flows_db) flows_db->flush();
+  if (clickhouse_flows_db) clickhouse_flows_db->flush();
 }
 
 #endif
@@ -3726,7 +3726,7 @@ u_int64_t NetworkInterface::dequeueHostAlertsFromChecks(u_int budget) {
 /* **************************************************** */
 
 void NetworkInterface::incNumQueueDroppedFlows(u_int32_t num) {
-  if (flows_db) flows_db->incNumQueueDroppedFlows(num);
+  if (clickhouse_flows_db) clickhouse_flows_db->incNumQueueDroppedFlows(num);
 };
 
 /* **************************************************** */
@@ -3804,7 +3804,7 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
   // flushFlowDump();
 #endif
 
-  if (flows_db) flows_db->checkIdle(when);
+  if (clickhouse_flows_db) clickhouse_flows_db->checkIdle(when);
 
   return (num_done);
 }
@@ -3820,6 +3820,7 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t now) {
   f->update_partial_traffic_stats_db_dump();
 
   if (f->get_partial_bytes()) {
+    
     /*
       Dump only flows with non-zero bytes
 
@@ -3829,7 +3830,7 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t now) {
       the scan periodicity (~1 min) and capped to the flow timeout
     */
 
-    if (flows_db
+    if (clickhouse_flows_db
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO) && !defined(HAVE_NEDGE)
         || kafka_exporter
 #endif
@@ -3837,29 +3838,41 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t now) {
         || ntop->get_export_interface()
 #endif
 	) {
-      json = f->serialize(export_format_GENERIC);
-      
-      if (json) {
-        if (flows_db)
-          rc = flows_db->dumpFlow(now, f, json);
+      bool generate_json = false;
 
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO) && !defined(HAVE_NEDGE)
-        if (kafka_exporter)
-          kafka_exporter->dumpFlow(now, f, json);
+      if(kafka_exporter) generate_json = true;
+#endif
+#if defined(HAVE_ZMQ) && !defined(HAVE_NEDGE)
+      if (ntop->get_export_interface())
+	generate_json = true;
+#endif
+
+      if (clickhouse_flows_db)
+	rc = clickhouse_flows_db->dumpFlow(now, f, NULL);
+
+      if(generate_json) {
+	json = f->serialize(export_format_GENERIC);
+      
+	if (json) {
+#if defined(HAVE_KAFKA) && defined(NTOPNG_PRO) && !defined(HAVE_NEDGE)
+	  if (kafka_exporter)
+	    kafka_exporter->dumpFlow(now, f, json);
 #endif
 
 #if defined(HAVE_ZMQ) && !defined(HAVE_NEDGE)
-        if (ntop->get_export_interface())
-          ntop->get_export_interface()->export_data(json);
+	  if (ntop->get_export_interface())
+	    ntop->get_export_interface()->export_data(json);
 #endif
 
-        free(json);
+	  free(json);
 
 #ifdef DEBUG_FLOW_DUMP
-        ntop->getTrace()->traceEvent(TRACE_NORMAL, "Dumped active flow");
+	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Dumped active flow");
 #endif
 
-      } /* json != NULL */
+	} /* json != NULL */
+      }
     }
 
 #ifndef HAVE_NEDGE
@@ -3884,7 +3897,7 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t now) {
   } /* get_partial_bytes > 0 */
 
   if (!rc)
-    incDBNumDroppedFlows(flows_db);
+    incDBNumDroppedFlows(clickhouse_flows_db);
 
   f->decUses(); /* Add done, decrease the reference counter */
   f->set_dump_done();
@@ -4163,7 +4176,7 @@ void NetworkInterface::shutdown() {
     if (flowAlertsDequeueLoopCreated) pthread_join(flowChecksLoop, &res);
     if (hostAlertsDequeueLoopCreated) pthread_join(hostChecksLoop, &res);
 
-    if (flows_db) flows_db->flush();
+    if (clickhouse_flows_db) clickhouse_flows_db->flush();
   }
 }
 
@@ -4356,7 +4369,7 @@ void NetworkInterface::periodicStatsUpdate() {
 #endif
   struct timeval tv = periodicUpdateInitTime();
 
-  if (flows_db) flows_db->updateStats(&tv);
+  if (clickhouse_flows_db) clickhouse_flows_db->updateStats(&tv);
 
   checkReloadHostsBroadcastDomain();
 
@@ -8007,7 +8020,7 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
 #endif
 
   lua_push_bool_table_entry(vm, "isFlowDumpDisabled", isFlowDumpDisabled());
-  lua_push_bool_table_entry(vm, "isFlowDumpRunning", flows_db != NULL);
+  lua_push_bool_table_entry(vm, "isFlowDumpRunning", clickhouse_flows_db != NULL);
   lua_push_uint64_table_entry(vm, "seen.last", getTimeLastPktRcvd());
   lua_push_bool_table_entry(vm, "inline", get_inline_interface());
   lua_push_bool_table_entry(vm, "vlan", hasSeenVLANTaggedPackets());
@@ -8077,7 +8090,7 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
 #if defined(NTOPNG_PRO)
     if (!isView()) { /* Standard non-view interface */
 #endif
-      if (flows_db) flows_db->lua(vm, false /* Overall */);
+      if (clickhouse_flows_db) clickhouse_flows_db->lua(vm, false /* Overall */);
 #if defined(NTOPNG_PRO)
     } else /* View interfaces: merge drops/exports */
       (dynamic_cast<ViewInterface*>(this))->luaDBStats(vm, false /* Overall */);
@@ -8151,7 +8164,7 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
 #if defined(NTOPNG_PRO)
   if (!isView()) { /* Standard non-view interface */
 #endif
-    if (flows_db) flows_db->lua(vm, true /* Since last checkpoint */);
+    if (clickhouse_flows_db) clickhouse_flows_db->lua(vm, true /* Since last checkpoint */);
 #if defined(NTOPNG_PRO)
   } else /* View interfaces: merge drops/exports */
     (dynamic_cast<ViewInterface*>(this))->luaDBStats(vm, true /* Since last checkpoint */);
@@ -8985,7 +8998,7 @@ static bool virtual_http_hosts_walker(GenericHashEntry *node, void *data,
 /* **************************************** */
 
 bool NetworkInterface::alert_store_query(lua_State *vm, const char *sql, bool limit_rows) {
-  DB *alerts_db = db ? db : flows_db;
+  DB *alerts_db = db ? db : clickhouse_flows_db;
 
   if (!alerts_db) return false;
 
@@ -9190,7 +9203,7 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
       flow_dump_disabled_by_backend = true;
 
     if (!isViewed() && !disable_dump) {
-      if (flows_db == NULL && db == NULL) /* ClickHouse disabled, use SQLite for alerts, assets, etc. */
+      if (clickhouse_flows_db == NULL && db == NULL) /* ClickHouse disabled, use SQLite for alerts, assets, etc. */
         db = new SQLiteDB(this);
 
       alertsQueue = new AlertsQueue(this);
@@ -9270,7 +9283,7 @@ void NetworkInterface::checkPointCounters(bool drops_only) {
   checkpointDroppedAlertsCount = getNumDroppedAlerts();
   checkpointPktDropCount = getNumPacketDrops();
 
-  if (flows_db) flows_db->checkPointCounters(drops_only);
+  if (clickhouse_flows_db) clickhouse_flows_db->checkPointCounters(drops_only);
 }
 
 /* **************************************************** */
@@ -10230,22 +10243,22 @@ bool NetworkInterface::initFlowDB() {
   if (!ntop->getPrefs()->do_dump_flows_on_clickhouse())
     return false;
 
-  if (flows_db != NULL)
+  if (clickhouse_flows_db != NULL)
     return true;
 
-  flows_db = new (std::nothrow) ClickHouseDB(this);
+  clickhouse_flows_db = new (std::nothrow) ClickHouseDB(this);
 
-  if (flows_db == NULL || flows_db->isDbCreated() == false) {
+  if (clickhouse_flows_db == NULL || clickhouse_flows_db->isDbCreated() == false) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Running without ClickHouse support, please check the clickhouse service");
     ntop->getPrefs()->dontUseClickHouse();
-    if (flows_db) {
-      delete flows_db;
-      flows_db = NULL;
+    if (clickhouse_flows_db) {
+      delete clickhouse_flows_db;
+      clickhouse_flows_db = NULL;
     }
   }
 #endif
 
-  return flows_db != NULL;
+  return clickhouse_flows_db != NULL;
 }
 
 /* *************************************** */
@@ -10274,8 +10287,8 @@ void NetworkInterface::initFlowDump() {
 
   startFlowDumping();
 
-  if (flows_db)
-    flows_db->startDBLoop();
+  if (clickhouse_flows_db)
+    clickhouse_flows_db->startDBLoop();
 
 #ifndef HAVE_NEDGE
   if (ntop->getPrefs()->do_dump_flows_on_es() && es_exporter == NULL) {
