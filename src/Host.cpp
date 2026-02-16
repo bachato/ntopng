@@ -246,7 +246,7 @@ void Host::updateSynAckAlertsCounter(time_t when, bool synack_sent) {
   This method is executed in the thread which processes packets/flows
   so it must be ultra-fast. Do NOT perform any time-consuming operation here.
  */
-void Host::housekeep(time_t t) {
+void Host::housekeep(time_t now) {
   switch (get_state()) {
     case hash_entry_state_active:
       iface->execHostChecks(this);
@@ -1283,13 +1283,12 @@ bool Host::is_hash_entry_state_idle_transition_ready() {
 
 #if DEBUG_HOST_IDLE_TRANSITION
   char buf[64];
-  ntop->getTrace()->traceEvent(
-      TRACE_WARNING,
-      "Idle check [%s][local: %u][get_host_max_idle: %u][last seen: %u][ready: "
-      "%u]",
-      ip.print(buf, sizeof(buf)), isLocalHost(),
-      ntop->getPrefs()->get_host_max_idle(isLocalHost()), last_seen,
-      res ? 1 : 0);
+  ntop->getTrace()->traceEvent(TRACE_WARNING,
+			       "Idle check [%s][local: %u][get_host_max_idle: %u][last seen: %u][ready: "
+			       "%u]",
+			       ip.print(buf, sizeof(buf)), isLocalHost(),
+			       ntop->getPrefs()->get_host_max_idle(isLocalHost()), last_seen,
+			       res ? 1 : 0);
 #endif
 
   return res;

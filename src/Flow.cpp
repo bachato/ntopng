@@ -1973,7 +1973,7 @@ char* Flow::print(char *buf, u_int buf_len, bool full_report) const {
 
 /* *************************************** */
 
-bool Flow::dump(time_t t, bool last_dump_before_free) {
+bool Flow::dump(time_t now, bool last_dump_before_free) {
   bool rc = false;
 
   if(!ntop->getPrefs()->is_tiny_flows_export_enabled() && isTiny()) {
@@ -1996,7 +1996,7 @@ bool Flow::dump(time_t t, bool last_dump_before_free) {
   if(!last_dump_before_free) {
     if((getInterface()->getIfType() == interface_type_PCAP_DUMP &&
 	(!getInterface()->read_from_pcap_dump_done())) ||
-       !timeToPeriodicDump(t) || last_db_dump.in_progress) {
+       (!timeToPeriodicDump(now)) || last_db_dump.in_progress) {
       return (rc); /* Don't call too often periodic flow dump */
     }
   }
@@ -2803,7 +2803,7 @@ void Flow::periodic_stats_update(const struct timeval *tv, bool force_update) {
  * Call actual dump() after checking if flow dump is enabled and supported by the interface
  * This is called by Flow::housekeep when status is active or idle
  */
-void Flow::dumpCheck(time_t t, bool last_dump_before_free) {
+void Flow::dumpCheck(time_t now, bool last_dump_before_free) {
   if((ntop->getPrefs()->is_flows_dump_enabled()
 #ifdef HAVE_ZMQ
 #ifndef HAVE_NEDGE
@@ -2816,7 +2816,7 @@ void Flow::dumpCheck(time_t t, bool last_dump_before_free) {
 	 || (!ntop->getPrefs()->do_dump_flows_direct() /* Direct dump not enabled */))
 #endif
      ) {
-    dump(t, last_dump_before_free);
+    dump(now, last_dump_before_free);
   }
 }
 
@@ -4876,7 +4876,7 @@ void Flow::decAllFlowScores() {
   transition after calling this (see purgeIdle), in other cases the transition
   is done in this class (e.g. set_hash_entry_state_flow_notyetdetected)
 */
-void Flow::housekeep(time_t t) {
+void Flow::housekeep(time_t now) {
   switch (get_state()) {
   case hash_entry_state_allocated:
     /* This code can be executed multiple times, until there is a call to
@@ -4898,7 +4898,7 @@ void Flow::housekeep(time_t t) {
     if(iface->get_ndpi_struct() && get_ndpi_flow()) {
       if(likely(!getInterface()->read_from_pcap_dump())) {
 	/* NOT processing pcap files, at most 5 seconds since the last packet */
-	if((t - get_last_seen()) > 5 /* sec */) endProtocolDissection(true);
+	if((now - get_last_seen()) > 5 /* sec */) endProtocolDissection(true);
       } else {
 	/* pcap files - wait until all the file has been processed */
 	if(getInterface()->read_from_pcap_dump_done())
@@ -4925,9 +4925,9 @@ void Flow::housekeep(time_t t) {
     /*
       The hook for periodicUpdate is checked when increasing flow stats inline
       to guarantee timely execution.
-      hookPeriodicUpdateCheck(t);
+      hookPeriodicUpdateCheck(now);
     */
-    dumpCheck(t, false /* NOT the last dump before delete */);
+    dumpCheck(now, false /* NOT the last dump before delete */);
 
     /*
       Swap requested but not yet performed (no more packets seen).
@@ -4960,7 +4960,7 @@ void Flow::housekeep(time_t t) {
       iface->execFlowEndChecks(this);
     }
 
-    dumpCheck(t, true /* LAST dump before delete */);
+    dumpCheck(now, true /* LAST dump before delete */);
     flow_end_stats_update();
 
 #ifdef NTOPNG_PRO
@@ -5026,7 +5026,7 @@ void Flow::housekeep(time_t t) {
     operations (e.g., changes in the flow status, flow alerts, etc.) are done
     before the flow is propagated to the view.
   */
-  getInterface()->viewEnqueue(t, this);
+  getInterface()->viewEnqueue(now, this);
 }
 
 /* *************************************** */
@@ -8016,30 +8016,32 @@ void Flow::setNormalToAlertedCounters() {
 /* ***************************************************** */
 
 void Flow::setProtocolJSONInfo() {
-  ndpi_serializer s;
-  char *json = NULL;
-  u_int32_t json_len = 0;
-
-  if(ndpi_init_serializer(&s, ndpi_serialization_format_json) == -1)
-    return;
-
-  getProtocolJSONInfo(&s);
-  getCustomFieldsInfo(&s);
-  getJSONRiskInfo(&s);
+  if(json_protocol_info == NULL /* Not yet set */) {
+    ndpi_serializer s;
+    char *json = NULL;
+    u_int32_t json_len = 0;
+  
+    if(ndpi_init_serializer(&s, ndpi_serialization_format_json) == -1)
+      return;
+  
+    getProtocolJSONInfo(&s);
+    getCustomFieldsInfo(&s);
+    getJSONRiskInfo(&s);
 #ifdef NTOPNG_PRO
-  getQoEInfo(&s);
+    getQoEInfo(&s);
 #endif
-  getVerdictInfo(&s);
+    getVerdictInfo(&s);
+  
+    if(protocol == IPPROTO_TCP)
+      getTCPFlagsAnalysis(&s);
+  
+    json = ndpi_serializer_get_buffer(&s, &json_len);
+  
+    if(json_protocol_info) free(json_protocol_info);
+    json_protocol_info = strdup(json ? json : "");
 
-  if(protocol == IPPROTO_TCP)
-    getTCPFlagsAnalysis(&s);
-
-  json = ndpi_serializer_get_buffer(&s, &json_len);
-
-  if(json_protocol_info) free(json_protocol_info);
-  json_protocol_info = strdup(json ? json : "");
-
-  ndpi_term_serializer(&s);
+    ndpi_term_serializer(&s);
+  }
 }
 
 /* ***************************************************** */

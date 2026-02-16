@@ -3817,7 +3817,8 @@ bool NetworkInterface::dumpFlowOut(Flow *f, time_t now) {
   bool rc = true;
 
   /* Checkpoint flow traffic counters for the dump */
-  f->update_partial_traffic_stats_db_dump();
+  if(f->update_partial_traffic_stats_db_dump() == false)
+    return(false);
 
   if (f->get_partial_bytes()) {
     

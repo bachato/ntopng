@@ -168,7 +168,6 @@ void PeriodicActivities::startPeriodicActivitiesLoop() {
 	sec_min_activities[num_sec_min_activities++] = ta;
     }
 
-
     if (ad[i].periodicity >= 60 /* no delay for sub-minute scripts */) {
       char script_dir[64];
 
