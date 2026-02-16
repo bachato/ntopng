@@ -38,9 +38,9 @@ The Enterprise L Bundle unlocks ntopng Enterprise L, nProbe Pro (Flow Collection
    ntopng and nProbe must be on the same machine to have them unlocked with the ntopng Enterprise L Bundle license. The bundle license must be placed under :code:`/etc/ntopng/ntopng.license`.
 
 ntopng Enterprise XL/XXL/XXXL
--------------------
+-----------------------------
 
-The Enterprise XL/XXL/XXXL version offer additional features and releases some limitations in terms of number of hosts, SNMP devices and flow collectors number. Below in this page there is a compatison table the highlights the differences across editions..
+The Enterprise XL/XXL/XXXL version offer additional features and releases some limitations in terms of number of hosts, SNMP devices and flow collectors number. Below in this page there is a compatison table the highlights the differences across editions.
 
 Licensing
 ---------
@@ -251,7 +251,7 @@ Versions Comparison Table
 -----------------------
 
 .. list-table:: Features by Version
-   :widths: 40 25 25 25 25 25 25
+   :widths: 40 25 25 25 25 25 25 25
    :header-rows: 1
 
    * - Feature
