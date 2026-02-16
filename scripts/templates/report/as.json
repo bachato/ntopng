@@ -1,241 +1,346 @@
 {
-	"name" : "AS Report",
-	"readonly" : true,
-	"filters" : [
+	"name": "AS Report",
+	"readonly": true,
+	"filters": [
 		{
-			"name" : "probe_ip"
+			"name": "probe_ip"
 		},
 		{
-			"name" : "output_snmp",
-			"show_only_if_selected" : "probe_ip"
+			"name": "output_snmp",
+			"show_only_if_selected": "probe_ip"
 		},
 		{
-			"name" : "input_snmp",
-			"show_only_if_selected" : "probe_ip"
+			"name": "input_snmp",
+			"show_only_if_selected": "probe_ip"
 		},
 		{
-			"name" : "vlan_id"
+			"name": "vlan_id"
 		},
 		{
-			"name" : "network"
+			"name": "network"
 		},
 		{
-			"name" : "l4proto"
+			"name": "l4proto"
 		},
 		{
-			"name" : "l7cat"
+			"name": "l7cat"
 		},
 		{
-			"name" : "l7proto"
+			"name": "l7proto"
 		},
 		{
-			"name" : "host_pool"
+			"name": "host_pool"
 		},
 		{
-			"name" : "wlan_ssid"
+			"name": "wlan_ssid"
 		},
 		{
-			"name" : "exporter_site"
+			"name": "exporter_site"
 		}
 	],
-	"components" : [
-	{
-		"component" : "timeseries",
-		"id" : "top_as_chart",
-		"i18n_name" : "graphs.top_customer_asn",
-		"width" : 12,
-		"height" : 4,
-		"params" : {
-			"url" : "/lua/pro/rest/v2/get/timeseries/ts_multi.lua",
-			"url_params" : { },
-			"post_params" : {
-				"limit" : 180,
-				"version" : 4,
-				"ts_requests": {
-					"ifid" : {
-						"ts_query": "ifid:$IFID$",
-						"ts_schema": "top:asn:traffic",
-						"ts_filter": "customer",
-						"tskey": "$IFID$"
+	"components": [
+		{
+			"component": "top-timeseries",
+			"id": "top_active_asn",
+			"i18n_name": "graphs.top_customer_asn",
+			"time_window": "day",
+			"time_offset": "",
+			"width": 12,
+			"height": 4,
+			"params": {
+				"url": "/lua/rest/v2/get/asn/get_top_asn.lua",
+				"url_params": {
+					"show_as": "all"
+				},
+				"post_params": {
+					"limit": 180,
+					"version": 4,
+					"ts_requests": {
+						"$CURRENT_IFID$": {
+							"ts_query": "ifid:$IFID$",
+							"ts_schema": "top:asn:traffic"
+						}
+					}
+				},
+				"source_type": "interface"
+			}
+		},
+		{
+			"component": "table",
+			"id": "top_asn",
+			"i18n_name": "report.top_asn",
+			"width": 12,
+			"height": 4,
+			"time_window": "day",
+			"time_offset": "",
+			"params": {
+				"url": "/lua/pro/rest/v2/get/db/historical_db_search.lua",
+				"url_params": {
+					"query_preset": "top_as",
+					"aggregated": true,
+					"start": 0,
+					"length": 20
+				},
+				"table_type": "db_search",
+				"columns": [
+					{
+						"id": "asn",
+						"data_type": "asn",
+						"i18n_name": "as"
+					},
+					{
+						"id": "total_bytes",
+						"data_type": "bytes",
+						"i18n_name": "volume"
+					}
+				]
+			}
+		},
+		{
+			"component": "table",
+			"id": "top_receiver_as",
+			"i18n_name": "report.top_receiver_as",
+			"width": 6,
+			"height": 4,
+			"params": {
+				"url": "/lua/pro/rest/v2/get/db/historical_db_search.lua",
+				"url_params": {
+					"query_preset": "top_receiver_as",
+					"aggregated": true,
+					"start": 0,
+					"length": 20
+				},
+				"table_type": "db_search",
+				"columns": [
+					{
+						"id": "asn",
+						"data_type": "asn",
+						"i18n_name": "as"
+					},
+					{
+						"id": "total_bytes",
+						"data_type": "bytes",
+						"i18n_name": "volume"
+					}
+				]
+			}
+		},
+		{
+			"component": "table",
+			"id": "top_sender_as",
+			"i18n_name": "report.top_sender_as",
+			"width": 6,
+			"height": 4,
+			"params": {
+				"url": "/lua/pro/rest/v2/get/db/historical_db_search.lua",
+				"url_params": {
+					"query_preset": "top_sender_as",
+					"aggregated": true,
+					"start": 0,
+					"length": 20
+				},
+				"table_type": "db_search",
+				"columns": {
+					{
+						"id": "asn",
+						"data_type": "asn",
+						"i18n_name": "as"
+					},
+					{
+						"id": "total_bytes",
+						"data_type": "bytes",
+						"i18n_name": "volume"
 					}
 				}
+			}
+		},
+		{
+			"component": "table",
+			"id": "latency_by_as",
+			"i18n_name": "queries.latency_by_as",
+			"width": 12,
+			"height": 4,
+			"time_window": "day",
+			"time_offset": "",
+			"requires": {
+				"modules": [
+					"packet_interface"
+				]
 			},
-			"source_type" : "interface"
-		}
-	},
-	{
-		"component" : "table",
-		"id" : "top_asn",
-		"i18n_name" : "report.top_asn",
-		"width" : 12,
-		"height" : 4,
-		"time_window" : "day",
-		"time_offset" : "",
-		"params" : {
-			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
-			 "url_params" : {
-					"query_preset" : "top_as",
-					"aggregated" : true,
-					"start" : 0,
-					"length" : 20
-			 },
-			 "table_type" : "db_search",
-			 "columns" : [
-					{ "id" : "asn",	"data_type" : "asn", "i18n_name" : "as" },
-					{ "id" : "total_bytes", "data_type" : "bytes",	 "i18n_name" : "volume" }
-			 ]
-		}
-	},
-	{
-		"component" : "table",
-		"id" : "top_receiver_as",
-		"i18n_name" : "report.top_receiver_as",
-		"width" : 6,
-		"height" : 4,
-		"params" : {
-			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
-			 "url_params" : {
-					"query_preset" : "top_receiver_as",
-					"aggregated" : true,
-					"start" : 0,
-					"length" : 20
-			 },
-			 "table_type" : "db_search",
-			 "columns" : [
-					{ "id" : "asn",		"data_type" : "asn",	 "i18n_name" : "as" },
-					{ "id" : "total_bytes", "data_type" : "bytes", "i18n_name" : "volume" }
-			 ]
-		}
-	},
-	{
-		"component" : "table",
-		"id" : "top_sender_as",
-		"i18n_name" : "report.top_sender_as",
-		"width" : 6,
-		"height" : 4,
-		"params" : {
-			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
-			 "url_params" : {
-					"query_preset" : "top_sender_as",
-					"aggregated" : true,
-					"start" : 0,
-					"length" : 20
-			 },
-			 "table_type" : "db_search",
-			 "columns" : {
-					{ "id" : "asn",		"data_type" : "asn",	 "i18n_name" : "as" },
-					{ "id" : "total_bytes", "data_type" : "bytes", "i18n_name" : "volume" }
-			 }
-		}
-	},
-	{
-		"component" : "table",
-		"id" : "latency_by_as",
-		"i18n_name" : "queries.latency_by_as",
-		"width" : 12,
-		"height" : 4,
-		"time_window" : "day",
-		"time_offset" : "",
-		"requires" : {
-			"modules" : [ "packet_interface" ]
+			"params": {
+				"url": "/lua/pro/rest/v2/get/db/historical_db_search.lua",
+				"url_params": {
+					"query_preset": "latency_by_asn",
+					"aggregated": false,
+					"start": 0,
+					"length": 20
+				},
+				"table_type": "db_search",
+				"columns": [
+					{
+						"id": "cli_asn",
+						"data_type": "asn",
+						"i18n_name": "db_search.cli_as"
+					},
+					{
+						"id": "srv_asn",
+						"data_type": "asn",
+						"i18n_name": "db_search.srv_as"
+					},
+					{
+						"id": "avg_client_nw_latency",
+						"data_type": "ms",
+						"i18n_name": "avg_client_nw_latency"
+					},
+					{
+						"id": "avg_server_nw_latency",
+						"data_type": "ms",
+						"i18n_name": "avg_server_nw_latency"
+					}
+				]
+			}
 		},
-		"params" : {
-			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
-			 "url_params" : {
-					"query_preset" : "latency_by_asn",
-					"aggregated" : false,
-					"start" : 0,
-					"length" : 20
-			 },
-			 "table_type" : "db_search",
-			 "columns" : [
-					{ "id" : "cli_asn", "data_type" : "asn", "i18n_name" : "db_search.cli_as" },
-					{ "id" : "srv_asn", "data_type" : "asn", "i18n_name" : "db_search.srv_as" },
-					{ "id" : "avg_client_nw_latency", "data_type" : "ms", "i18n_name" : "avg_client_nw_latency" },
-					{ "id" : "avg_server_nw_latency", "data_type" : "ms", "i18n_name" : "avg_server_nw_latency" }
-			 ]
-		}
-	},
-	{
-		"component" : "table",
-		"id" : "top_as_exporter_if",
-		"i18n_name" : "report.top_as_exporter_if",
-		"width" : 12,
-		"height" : 4,
-		"requires" : {
-			"modules" : [ "zmq_interface" ]
+		{
+			"component": "table",
+			"id": "top_as_exporter_if",
+			"i18n_name": "report.top_as_exporter_if",
+			"width": 12,
+			"height": 4,
+			"requires": {
+				"modules": [
+					"zmq_interface"
+				]
+			},
+			"params": {
+				"url": "/lua/pro/rest/v2/get/db/historical_db_search.lua",
+				"url_params": {
+					"query_preset": "top_as_exporter_if",
+					"aggregated": true,
+					"start": 0,
+					"length": 20
+				},
+				"table_type": "db_search",
+				"columns": [
+					{
+						"id": "asn",
+						"data_type": "asn",
+						"i18n_name": "as"
+					},
+					{
+						"id": "probe_ip",
+						"data_type": "host",
+						"i18n_name": "db_search.probe_ip"
+					},
+					{
+						"id": "snmp_interface",
+						"data_type": "object",
+						"i18n_name": "if_id"
+					},
+					{
+						"id": "total_bytes",
+						"data_type": "bytes",
+						"i18n_name": "total_bytes"
+					}
+				]
+			}
 		},
-		"params" : {
-			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
-			 "url_params" : {
-					"query_preset" : "top_as_exporter_if",
-					"aggregated" : true,
-					"start" : 0,
-					"length" : 20
-			 },
-			 "table_type" : "db_search",
-			 "columns" : [
-					{ "id" : "asn",		"data_type" : "asn",	 "i18n_name" : "as" },
-					{ "id" : "probe_ip",	"data_type" : "host",	 "i18n_name" : "db_search.probe_ip" },
-					{ "id" : "snmp_interface", "data_type" : "object", "i18n_name" : "if_id" },
-					{ "id" : "total_bytes", "data_type" : "bytes", "i18n_name" : "total_bytes" }
-			 ]
-		}
-	},
-	{
-		"component" : "table",
-		"id" : "top_sender_as_exporter_if",
-		"i18n_name" : "report.top_sender_as_exporter_if",
-		"width" : 12,
-		"height" : 4,
-		"requires" : {
-			"modules" : [ "zmq_interface" ]
+		{
+			"component": "table",
+			"id": "top_sender_as_exporter_if",
+			"i18n_name": "report.top_sender_as_exporter_if",
+			"width": 12,
+			"height": 4,
+			"requires": {
+				"modules": [
+					"zmq_interface"
+				]
+			},
+			"params": {
+				"url": "/lua/pro/rest/v2/get/db/historical_db_search.lua",
+				"url_params": {
+					"query_preset": "top_sender_as_exporter_if",
+					"aggregated": true,
+					"start": 0,
+					"length": 20
+				},
+				"table_type": "db_search",
+				"columns": [
+					{
+						"id": "asn",
+						"data_type": "asn",
+						"i18n_name": "as"
+					},
+					{
+						"id": "probe_ip",
+						"data_type": "host",
+						"i18n_name": "db_search.probe_ip"
+					},
+					{
+						"id": "snmp_interface",
+						"data_type": "object",
+						"i18n_name": "if_id"
+					},
+					{
+						"id": "in_bytes",
+						"data_type": "bytes",
+						"i18n_name": "in_bytes"
+					},
+					{
+						"id": "out_bytes",
+						"data_type": "bytes",
+						"i18n_name": "out_bytes"
+					}
+				]
+			}
 		},
-		"params" : {
-			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
-			 "url_params" : {
-					"query_preset" : "top_sender_as_exporter_if",
-					"aggregated" : true,
-					"start" : 0,
-					"length" : 20
-			 },
-			 "table_type" : "db_search",
-			 "columns" : [
-					{ "id" : "asn",		"data_type" : "asn",	 "i18n_name" : "as" },
-					{ "id" : "probe_ip",	"data_type" : "host",	 "i18n_name" : "db_search.probe_ip" },
-					{ "id" : "snmp_interface", "data_type" : "object", "i18n_name" : "if_id" },
-					{ "id" : "in_bytes", "data_type" : "bytes", "i18n_name" : "in_bytes" },
-					{ "id" : "out_bytes", "data_type" : "bytes", "i18n_name" : "out_bytes" }
-			 ]
+		{
+			"component": "table",
+			"id": "top_receiver_as_exporter_if",
+			"i18n_name": "report.top_receiver_as_exporter_if",
+			"width": 12,
+			"height": 4,
+			"requires": {
+				"modules": [
+					"zmq_interface"
+				]
+			},
+			"params": {
+				"url": "/lua/pro/rest/v2/get/db/historical_db_search.lua",
+				"url_params": {
+					"query_preset": "top_receiver_as_exporter_if",
+					"aggregated": true,
+					"start": 0,
+					"length": 20
+				},
+				"table_type": "db_search",
+				"columns": [
+					{
+						"id": "asn",
+						"data_type": "asn",
+						"i18n_name": "as"
+					},
+					{
+						"id": "probe_ip",
+						"data_type": "host",
+						"i18n_name": "db_search.probe_ip"
+					},
+					{
+						"id": "snmp_interface",
+						"data_type": "object",
+						"i18n_name": "if_id"
+					},
+					{
+						"id": "in_bytes",
+						"data_type": "bytes",
+						"i18n_name": "in_bytes"
+					},
+					{
+						"id": "out_bytes",
+						"data_type": "bytes",
+						"i18n_name": "out_bytes"
+					}
+				]
+			}
 		}
-	},
-	{
-		"component" : "table",
-		"id" : "top_receiver_as_exporter_if",
-		"i18n_name" : "report.top_receiver_as_exporter_if",
-		"width" : 12,
-		"height" : 4,
-		"requires" : {
-			"modules" : [ "zmq_interface" ]
-		},
-		"params" : {
-			 "url" : "/lua/pro/rest/v2/get/db/historical_db_search.lua",
-			 "url_params" : {
-					"query_preset" : "top_receiver_as_exporter_if",
-					"aggregated" : true,
-					"start" : 0,
-					"length" : 20
-			 },
-			 "table_type" : "db_search",
-			 "columns" : [
-					{ "id" : "asn",		"data_type" : "asn",	 "i18n_name" : "as" },
-					{ "id" : "probe_ip",	"data_type" : "host",	 "i18n_name" : "db_search.probe_ip" },
-					{ "id" : "snmp_interface", "data_type" : "object", "i18n_name" : "if_id" },
-					{ "id" : "in_bytes", "data_type" : "bytes", "i18n_name" : "in_bytes" },
-					{ "id" : "out_bytes", "data_type" : "bytes", "i18n_name" : "out_bytes" }
-			 ]
-		}
-	}
 	]
 }
-
