@@ -131,7 +131,7 @@ async function format_exporters(params_to_format) {
         /* Already populated, return */
         return;
     }
-    const exporters_url = "lua/pro/rest/v2/get/flowdevices/stats.lua"
+    const exporters_url = "lua/pro/rest/v2/get/flowdevices/list.lua"
     const exporters_list = await ntopng_utility.http_request(`${http_prefix}/${exporters_url}?ifid=${props.ifid}&gui=true`) || [];
     if (exporters_list) {
         exporters_list.forEach((exporter) => {

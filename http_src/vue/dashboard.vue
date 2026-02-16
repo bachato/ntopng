@@ -997,6 +997,8 @@ function get_component_data_func(component) {
 
             }
         }
+        /* Safety check */
+        component.isLoading = false;
         return info.data;
     };
     return get_component_data

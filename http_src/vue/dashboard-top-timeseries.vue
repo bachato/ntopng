@@ -316,7 +316,10 @@ async function getTopInfo() {
     // Format the GET request
     const url = base_url.value;
     const ts_source = []
-    const query_params = props.params.url_params
+    const query_params = {
+        ...props.params.url_params,
+        ...{}
+    };
     query_params.csrf = props.csrf
     query_params.ifid = props.ifid
     query_params.epoch_begin = props.epoch_begin
