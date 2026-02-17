@@ -378,6 +378,8 @@ using namespace std;
 #include "ServiceMap.h"
 #include "PeriodicityMap.h"
 #include "ACLFlow.h"
+#include "TLSProtocolInfo.h"
+#include "TLSProtocols.h"
 #endif
 #include "PortDetails.h"
 #include "HostsPorts.h"

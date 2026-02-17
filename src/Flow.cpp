@@ -54,7 +54,7 @@ Flow::Flow(NetworkInterface *_iface,
   tcp = NULL;
   flow_category = NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, flow_breed = NDPI_PROTOCOL_UNRATED;
   c_mac_updated = s_mac_updated = false;
-  memset(&tcp_stats, 0, sizeof(tcp_stats));  
+  memset(&tcp_stats, 0, sizeof(tcp_stats));
 
 #ifdef NTOPNG_PRO
   udp = NULL;
@@ -503,6 +503,20 @@ void Flow::freeDPIMemory() {
 	tls_blocks = strdup(json);
 	ndpi_term_serializer(&serializer);
       }
+    }
+#endif
+
+#ifdef DUMP_TLS_BLOCKS
+    if((protocol == IPPROTO_TCP)
+       && ndpiFlow->l4.tcp.tls.tls_blocks
+       && (ndpiFlow->protos.tls_quic.ja4_client[0] != '\0')
+       ) {
+      u_char *enc = ndpi_encode_tls_blocks(ndpiFlow->l4.tcp.tls.tls_blocks,
+					   ndpiFlow->l4.tcp.tls.num_tls_blocks);
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s][%s][%s]",
+				   ndpiFlow->protos.tls_quic.ja4_client, enc,
+				   ndpiFlow->host_server_name);
+      ndpi_free(enc);
     }
 #endif
 
@@ -3433,7 +3447,7 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
     if(dedupStats.size() > 0) {
       std::vector<DuplicatedFlowInfo>::iterator it;
       int i = 0;
-      
+
       lua_newtable(vm);
 
       for(it = dedupStats.begin(); it != dedupStats.end(); it++) {
@@ -3447,7 +3461,7 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
 
 	  lua_pushnumber(vm, i++);
 	  lua_insert(vm, -2);
-	  lua_settable(vm, -3);	    
+	  lua_settable(vm, -3);
 	} else
 	  break;
       }
@@ -5809,10 +5823,10 @@ std::string Flow::getFlowInfo(bool isLuaRequest) {
     std::vector<DuplicatedFlowInfo>::iterator it;
     bool swap_found = false;
     char buf[16];
-    
+
     for(it = dedupStats.begin(); it != dedupStats.end(); it++)
-      swap_found |= it->return_path;    
-    
+      swap_found |= it->return_path;
+
     snprintf(buf, sizeof(buf), "%u %sExp.",
 	     (unsigned int)(dedupStats.size()+1), swap_found ? "Bidir. " : "");
     info_field = std::string(buf);
@@ -8020,10 +8034,10 @@ void Flow::setProtocolJSONInfo() {
     ndpi_serializer s;
     char *json = NULL;
     u_int32_t json_len = 0;
-  
+
     if(ndpi_init_serializer(&s, ndpi_serialization_format_json) == -1)
       return;
-  
+
     getProtocolJSONInfo(&s);
     getCustomFieldsInfo(&s);
     getJSONRiskInfo(&s);
@@ -8031,12 +8045,12 @@ void Flow::setProtocolJSONInfo() {
     getQoEInfo(&s);
 #endif
     getVerdictInfo(&s);
-  
+
     if(protocol == IPPROTO_TCP)
       getTCPFlagsAnalysis(&s);
-  
+
     json = ndpi_serializer_get_buffer(&s, &json_len);
-  
+
     if(json_protocol_info) free(json_protocol_info);
     json_protocol_info = strdup(json ? json : "");
 
@@ -9623,7 +9637,7 @@ void Flow::addDedupInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
 			bool src2dst_direction) {
   std::vector<DuplicatedFlowInfo>::iterator it;
   DuplicatedFlowInfo d;
-  
+
   if((exporter_ipv4 == 0) || next_hop->isEmpty())
     return;
 
