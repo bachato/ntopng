@@ -62,7 +62,7 @@ class Prefs {
     enable_mac_ndpi_stats, enable_activities_debug, enable_behaviour_analysis,
     enable_asn_behaviour_analysis, enable_network_behaviour_analysis,
     enable_iface_l7_behaviour_analysis, emit_flow_alerts, emit_host_alerts,
-    dump_flows_on_clickhouse, use_mac_in_flow_key, do_reforge_timestamps,
+    dump_flows_on_clickhouse, readonly_flows_dump, use_mac_in_flow_key, do_reforge_timestamps,
     add_vlan_tags_to_cloud_exporters, collect_blacklist_stats,
     fail_on_invalid_license, limited_resources_mode, fingerprint_stats,
     tls_quic_hostnaming;
@@ -363,8 +363,9 @@ class Prefs {
   inline bool is_runtime_flows_dump_enabled() const {
     return (enable_runtime_flows_dump);
   };
+  inline bool is_readonly_flows_dump() { return(readonly_flows_dump); };
   inline bool is_flows_dump_enabled() {
-    return (do_dump_flows() && is_runtime_flows_dump_enabled());
+    return (do_dump_flows() && is_runtime_flows_dump_enabled() && !readonly_flows_dump);
   };
   int32_t getDefaultPrefsValue(const char* pref_key, int32_t default_value);
   void getDefaultStringPrefsValue(const char* pref_key, char** buffer,

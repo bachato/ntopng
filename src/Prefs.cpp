@@ -180,6 +180,7 @@ Prefs::Prefs(Ntop *_ntop) {
   data_archive_before_ttl_delete = false;
 #endif
   enable_runtime_flows_dump = true;
+  readonly_flows_dump = false;
   enable_activities_debug = false;
   snmp_polling = true;
   active_monitoring = network_discovery = starttls = false;
@@ -719,13 +720,12 @@ void usage() {
   printf(
          "[--dump-queue-len] <len>            | Set the in-memory ClickHouse dump queue length (Default: %u)\n"
          "[--dump-queue-block-size] <size>    | Set the in-memory ClickHouse data block size (Default: %u)\n"
-	 "[--direct-flows-dump]               | Dump collected flows directly before "
-	 "any additional processing\n",
+	 "[--direct-flows-dump]               | Dump collected flows directly before any additional processing\n"
+	 "[--readonly-flows-dump]             | Keep ClickHouse connected for reading but disable flow dump (writing)\n",
          CLICKHOUSE_MAX_DUMP_BLOCKS,
          CLICKHOUSE_MAX_DUMP_ROWS_PER_BLOCK
          );
 #endif
-
   printf(
 	 "[--export-flows|-I] <endpoint>      | Export flows with the specified "
 	 "endpoint\n"
@@ -1315,6 +1315,7 @@ static const struct option long_options[] = {
   {"simulate-macs",           no_argument,       NULL, 224},
   {"insecure",                no_argument,       NULL, 225},
   {"offline",                 no_argument,       NULL, 226},
+  {"readonly-flows-dump",     no_argument,       NULL, 227},
 #ifdef NTOPNG_PRO
   {"dump-queue-len",          no_argument,       NULL, 248},
   {"dump-queue-block-size",   no_argument,       NULL, 249},
@@ -2368,6 +2369,11 @@ int Prefs::setOption(int optkey, char *optarg) {
   case 226:
     ntop->toggleForcedOffline(true);
     ntop->toggleOffline(true);
+    break;
+
+  case 227:
+    readonly_flows_dump = true;
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Read-only flows dump set");
     break;
 
 #ifdef NTOPNG_PRO
