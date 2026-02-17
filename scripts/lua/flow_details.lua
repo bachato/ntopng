@@ -2157,6 +2157,10 @@ for exporter_ip,x in pairs(flow_trajectory) do
 	 i = i + 1
       end
 
+      if (not next_hop) then
+         goto continue
+      end
+
       if(nodes[next_hop] == nil) then
 	 local name
 
@@ -2176,6 +2180,7 @@ for exporter_ip,x in pairs(flow_trajectory) do
       end
 
       next_hops[next_hop] = true
+      ::continue::
    end
 end
 
@@ -2191,7 +2196,9 @@ for exporter_ip,x in pairs(flow_trajectory) do
       local next_hop = v.next_hop
       local return_path = v.return_path
 
-      print ('{ from: "'.. nodes[exporter_ip] ..'", to: "'.. nodes[next_hop] ..'", arrows: "to"},\n')
+      if next_hop then
+         print ('{ from: "'.. nodes[exporter_ip] ..'", to: "'.. nodes[next_hop] ..'", arrows: "to"},\n')
+      end
    end
 end
 
@@ -2201,7 +2208,7 @@ for exporter_ip,x in pairs(flow_trajectory) do
       local next_hop = v.next_hop
       local return_path = v.return_path
 
-      if(flow_trajectory[next_hop] == nil) then
+      if(flow_trajectory[next_hop] == nil and next_hop) then
 	 if(return_path == false) then
 	    print ('{ from: "'..nodes[next_hop]..'", to: "'..server_id..'", arrows: "to" },\n')
 	 else
