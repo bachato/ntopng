@@ -2157,10 +2157,6 @@ for exporter_ip,x in pairs(flow_trajectory) do
 	 i = i + 1
       end
 
-      if (not next_hop) then
-         goto continue
-      end
-
       if(nodes[next_hop] == nil) then
 	 local name
 
@@ -2174,13 +2170,16 @@ for exporter_ip,x in pairs(flow_trajectory) do
 	    name = next_hop
 	 end
 
-	 nodes[next_hop] = i
-	 print ('{ id: '..i..', label: "'.. name ..'" },\n')
-	 i = i + 1
+	 if(next_hop ~= nil) then
+	    nodes[next_hop] = i
+	    print ('{ id: '..i..', label: "'.. name ..'" },\n')
+	    i = i + 1
+	 end
       end
 
+      if(next_hop ~= nil) then
       next_hops[next_hop] = true
-      ::continue::
+      end
    end
 end
 
@@ -2196,8 +2195,8 @@ for exporter_ip,x in pairs(flow_trajectory) do
       local next_hop = v.next_hop
       local return_path = v.return_path
 
-      if next_hop then
-         print ('{ from: "'.. nodes[exporter_ip] ..'", to: "'.. nodes[next_hop] ..'", arrows: "to"},\n')
+      if(next_hop ~= nil) then
+	 print ('{ from: "'.. nodes[exporter_ip] ..'", to: "'.. nodes[next_hop] ..'", arrows: "to"},\n')
       end
    end
 end
@@ -2208,12 +2207,16 @@ for exporter_ip,x in pairs(flow_trajectory) do
       local next_hop = v.next_hop
       local return_path = v.return_path
 
-      if(flow_trajectory[next_hop] == nil and next_hop) then
-	 if(return_path == false) then
-	    print ('{ from: "'..nodes[next_hop]..'", to: "'..server_id..'", arrows: "to" },\n')
-	 else
-	    print ('{ from: "'..nodes[next_hop]..'", to: "'..client_id..'", arrows: "to" },\n')
+      if(next_hop ~= nil) then
+	 if(flow_trajectory[next_hop] == nil) then
+	    if(return_path == false) then
+	       print ('{ from: "'..nodes[next_hop]..'", to: "'..server_id..'", arrows: "to" },\n')
+	    else
+	       print ('{ from: "'..nodes[next_hop]..'", to: "'..client_id..'", arrows: "to" },\n')
+	    end
 	 end
+      else
+	 print ('{ from: "'..nodes[exporter_ip]..'", to: "'..server_id..'", arrows: "to" },\n')
       end
    end
 end
