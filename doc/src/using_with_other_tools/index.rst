@@ -11,4 +11,5 @@ section.
     nprobe_collector_mode
     nprobe_ips
     nprobeagent
+    cento
     n2disk
