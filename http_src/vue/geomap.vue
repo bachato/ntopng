@@ -447,12 +447,12 @@ function animatePulseElement(element) {
 // Handle window resize
 const handleResize = async () => {
     await nextTick();
-    
+
     // Close tooltip on resize
     if (tooltip.value.show) {
         closeTooltip();
     }
-    
+
     // Re-display the data dots after map is reinitialized
     if (geomapDataArray.value && geomapDataArray.value.length > 0) {
         displayData();
@@ -482,10 +482,10 @@ function buildCountryNameToIdMap() {
 onMounted(async () => {
     try {
         // Use the imported world atlas data
-        topoData.value = worldAtlasData;        
+        topoData.value = worldAtlasData;
         // Build country mapping after data is loaded
         countryMapping.value = buildCountryNameToIdMap();
-        
+
     } catch (error) {
         console.error('Error loading map data:', error);
         isLoading.value = false;
@@ -524,6 +524,40 @@ watch(() => props.geomapDataArray, async (newData) => {
         await initializeMap();
     }
 }, { immediate: true, deep: true });
+
+const redraw = async () => {
+    if (!mapContainer.value || !svgElement.value || !worldData) return;
+
+    await nextTick(); 
+
+    const rect = mapContainer.value.getBoundingClientRect();
+    width = rect.width;
+    height = rect.height;
+
+    svg
+        .attr('width', width)
+        .attr('height', height)
+        .attr('viewBox', [0, 0, width, height]);
+
+    projection
+        .translate([width / 2, height / 2])
+        .scale((width) / (2 * Math.PI) * 0.9);
+
+    path = d3.geoPath().projection(projection);
+
+    g.selectAll('path.country')
+        .attr('d', path);
+
+    g.selectAll('path.country-borders')
+        .attr('d', path(topojson.mesh(topoData.value, topoData.value.objects.countries, (a, b) => a !== b)));
+
+    if (geomapDataArray.value && geomapDataArray.value.length > 0) {
+        displayData();
+    }
+};
+
+// Expose methods to parent components
+defineExpose({ redraw });
 </script>
 
 <style scoped>

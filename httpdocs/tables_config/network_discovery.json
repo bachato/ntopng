@@ -15,7 +15,7 @@
 			"title_i18n": "ip_address",
 			"data_field": "ip",
 			"sortable": true,
-			"sticky": true,
+			"sticky": false,
 			"class": [
 				"text-nowrap",
 				"text-center"
