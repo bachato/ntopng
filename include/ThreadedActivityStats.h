@@ -71,7 +71,6 @@ class ThreadedActivityStats {
   ThreadedActivityState state;
 
   void updateTimeseriesStats(bool write, ticks cur_ticks);
-  void luaTimeseriesStats(lua_State *vm);
 
  public:
   ThreadedActivityStats(const ThreadedActivity *ta);
@@ -87,6 +86,7 @@ class ThreadedActivityStats {
   /* Timeseries stats and drops for writes */
   void updateTimeseriesWriteStats(ticks cur_ticks);
   void incTimeseriesWriteDrops(u_long num_drops);
+  void incTimeseriesStats(ThreadedActivityStats *oth_tas);
 
   void updateStatsQueuedTime(time_t queued_time);
   void updateStatsBegin(struct timeval *begin);
@@ -101,7 +101,8 @@ class ThreadedActivityStats {
   }
   inline void setAlertsDrops() { ta_stats.alerts.has_drops = true; }
 
-  void lua(lua_State *vm);
+  void luaTimeseriesStats(lua_State *vm);
+  void lua(lua_State *vm, bool includeTimeseriesStats = true);
 
   inline ThreadedActivityState getState() { return (state); }
   void setState(ThreadedActivityState s);

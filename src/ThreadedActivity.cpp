@@ -588,9 +588,14 @@ void ThreadedActivity::schedulePeriodicActivity(ThreadPool *pool,
 /* ******************************************* */
 
 void ThreadedActivity::lua(NetworkInterface *iface, lua_State *vm) {
+  ThreadedActivityStats tot_ts_stats(this);
   ThreadedActivityStats *ta;
   std::map<std::string, ThreadedActivityStats *>::iterator it;
-  
+
+  /* Sum TS write stats from all scripts */
+  for (it = threaded_activity_stats.begin(); it != threaded_activity_stats.end(); ++it)
+    tot_ts_stats.incTimeseriesStats(it->second);
+
   it = threaded_activity_stats.begin();
 
   if (it != threaded_activity_stats.end())
@@ -601,10 +606,11 @@ void ThreadedActivity::lua(NetworkInterface *iface, lua_State *vm) {
   if (ta) {
     lua_newtable(vm);
 
-    ta->lua(vm);
+    ta->lua(vm, false);
 
-    lua_push_str_table_entry(vm, "state",
-                             Utils::get_state_label(ta->getState()));
+    tot_ts_stats.luaTimeseriesStats(vm);
+
+    lua_push_str_table_entry(vm, "state", Utils::get_state_label(ta->getState()));
     lua_push_uint64_table_entry(vm, "periodicity", getPeriodicity());
     lua_push_uint64_table_entry(vm, "max_duration_secs", getMaxDuration());
     lua_push_uint64_table_entry(vm, "deadline_secs", deadline_approaching_secs);
