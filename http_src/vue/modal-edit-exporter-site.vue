@@ -14,19 +14,10 @@
                     </label>
                 </div>
                 <div class="col-md-9">
-                    <input
-                        id="exporter_site_name"
-                        type="text"
-                        class="form-control"
-                        :class="{ 'is-invalid': name_error }"
-                        v-model="exporter_site_name"
-                        @input="validateName"
+                    <input id="exporter_site_name" type="text" class="form-control"
+                        :class="{ 'is-invalid': name_error }" v-model="exporter_site_name" @input="validateName"
                         :title="isReserved ? _i18n('exporter_sites_page.reserved_message') : ''"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="top"
-                        :disabled="isReserved"
-                        required
-                    />
+                        data-bs-toggle="tooltip" data-bs-placement="top" :disabled="isReserved" required />
                     <div v-if="name_error" class="invalid-feedback">
                         {{ name_error }}
                     </div>
@@ -41,16 +32,10 @@
                     </label>
                 </div>
                 <div class="col-md-9">
-                    <textarea
-                        id="exporter_site_description"
-                        class="form-control"
-                        rows="3"
+                    <textarea id="exporter_site_description" class="form-control" rows="3"
                         v-model="exporter_site_description"
                         :title="isReserved ? _i18n('exporter_sites_page.reserved_message') : ''"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="top"
-                        :disabled="isReserved"
-                    ></textarea>
+                        data-bs-toggle="tooltip" data-bs-placement="top" :disabled="isReserved"></textarea>
                 </div>
             </div>
 
@@ -66,21 +51,19 @@
                     <!-- Lat / Lng -->
                     <div class="row mb-2">
                         <div class="col">
-                            <input type="number"
-                                step="0.000001"
-                                class="form-control"
-                                placeholder="Latitude"
+                            <input type="number" step="0.000001" class="form-control" placeholder="Latitude"
                                 v-model.number="exporter_site_lat" />
                         </div>
                         <div class="col">
-                            <input type="number"
-                                step="0.000001"
-                                class="form-control"
-                                placeholder="Longitude"
+                            <input type="number" step="0.000001" class="form-control" placeholder="Longitude"
                                 v-model.number="exporter_site_lng" />
                         </div>
                     </div>
                 </div>
+            </div>
+            <div>
+                <Geomap :geomapDataArray="geomapDataArray" :tooltipFormatter="formatTooltipData" :glowDots="true"
+                    :style="['height: 50vh']"/>
             </div>
             <div v-if="errorMessage" class="alert alert-danger mb-3">
                 {{ errorMessage }}
@@ -89,12 +72,7 @@
 
         <template v-slot:footer>
             <div class="d-flex justify-content-end w-100">
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    @click="handleSubmit"
-                    :disabled="!is_form_valid"
-                >
+                <button type="button" class="btn btn-primary" @click="handleSubmit" :disabled="!is_form_valid">
                     {{ _i18n("save") }}
                 </button>
             </div>
@@ -106,10 +84,12 @@
 <script setup>
 import { ref, computed, nextTick } from "vue";
 import { default as modal } from "./modal.vue";
+import { default as Geomap } from "./geomap.vue";
 
 const _i18n = (t) => i18n(t);
 
 const modal_id = ref(null);
+const geomapDataArray = ref([]);
 
 const emit = defineEmits(["edit"]);
 
@@ -153,6 +133,19 @@ const validateName = () => {
         name_error.value = "";
     }
 };
+
+/* ************************************** */
+
+function formatTooltipData(site) {
+    return `
+        <div class="custom-tooltip-content">
+            <h6>${site.name}</h6>
+            <hr/>
+            <div>${site.description ?? ''}</div>
+            <small>${site.lat}, ${site.lng}</small>
+        </div>
+    `;
+}
 
 const handleSubmit = () => {
     validateName();

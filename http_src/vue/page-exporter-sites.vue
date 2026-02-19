@@ -1,34 +1,28 @@
 <!-- (C) 2026 - ntop.org -->
 <template>
-    <div class="mt-3">
-        <Geomap
-            :geomapDataArray="geomapDataArray"
-            :tooltipFormatter="formatTooltipData"
-            :glowDots="false"
-            :style="['height: 75vh']"
-        />
+    <div class="row">
+        <div class="col-6">
+            <TableWithConfig ref="exporter_sites_list" :table_id="table_id" :csrf="csrf" :showLoading="true"
+                @custom_event="on_table_custom_event" :f_map_columns="map_table_def_columns"
+                :get_extra_params_obj="get_extra_params_obj" :f_sort_rows="columns_sorting">
+                <template v-slot:custom_buttons>
+                    <button class="btn btn-link" type="button" @click="addExporterSite">
+                        <i class="fas fa-plus" data-bs-toggle="tooltip" data-bs-placement="top"
+                            :title="_i18n('exporter_sites_page.add_exporter_site')"></i>
+                    </button>
+                </template>
+            </TableWithConfig>
+        </div>
+        <div class="col-6">
+            <Geomap :geomapDataArray="geomapDataArray" :tooltipFormatter="formatTooltipData" :glowDots="true"
+                :style="['height: 50vh']" />
+        </div>
     </div>
-    <div class="m-2 mb-3">
-        <TableWithConfig ref="exporter_sites_list" :table_id="table_id" :csrf="csrf" :showLoading="true"
-        @custom_event="on_table_custom_event" :f_map_columns="map_table_def_columns"
-        :get_extra_params_obj="get_extra_params_obj"
-        :f_sort_rows="columns_sorting">
-            <template v-slot:custom_buttons>
-                <button class="btn btn-link" type="button" @click="addExporterSite">
-                <i class="fas fa-plus" data-bs-toggle="tooltip" data-bs-placement="top"
-                    :title="_i18n('exporter_sites_page.add_exporter_site')"></i>
-                </button>
-            </template>
-        </TableWithConfig>
-        <ModalEditExporterSite 
-            ref="exporterSiteModal" 
-            :errorMessage="modalErrorMessage"
-            @edit="handleEditExporterSite" @add="handleAddExporterSite"> 
-        </ModalEditExporterSite>
-        <ModalDeleteExporterSite
-            ref="exporterSiteModalDelete" @delete="handleDeleteExporterSite">
-        </ModalDeleteExporterSite>
-  </div>
+    <ModalEditExporterSite ref="exporterSiteModal" :errorMessage="modalErrorMessage" @edit="handleEditExporterSite"
+        @add="handleAddExporterSite">
+    </ModalEditExporterSite>
+    <ModalDeleteExporterSite ref="exporterSiteModalDelete" @delete="handleDeleteExporterSite">
+    </ModalDeleteExporterSite>
 </template>
 
 <script setup>
@@ -104,7 +98,7 @@ function columns_sorting(col, r0, r1) {
             return sortingFunctions.sortByName(r0.name, r1.name, col.sort);
         }
     }
- }
+}
 
 /* ************************************** */
 
@@ -127,9 +121,9 @@ function on_table_custom_event(event) {
 }
 
 const click_button_edit_exporter_site = (event) => {
-    if(event.row.id === 0) return;
+    if (event.row.id === 0) return;
     editingExporterSiteId.value = event.row.id;
-    
+
     const exporter_site_data = {
         exporter_site_name: event.row.name,
         exporter_site_description: event.row.description,
@@ -142,8 +136,8 @@ const click_button_edit_exporter_site = (event) => {
 };
 
 async function click_button_delete_exporter_site(event) {
-    if(event.row.id === 0) return;
-    
+    if (event.row.id === 0) return;
+
     const exporter_site_data = {
         exporter_site_name: event.row.name,
         exporter_site_description: event.row.description,
@@ -178,7 +172,7 @@ const showDeleteModal = (item) => {
 
 const handleEditExporterSite = async (data) => {
     modalErrorMessage.value = "";
-    
+
     const exporter_site_id = editingExporterSiteId.value;
     const new_exporter_site_name = data.exporter_site_name;
     const new_exporter_site_description = data.exporter_site_description;
@@ -213,7 +207,7 @@ const handleEditExporterSite = async (data) => {
         }
 
         refresh_sites();
-        exporterSiteModal.value.close();        
+        exporterSiteModal.value.close();
 
     } catch (e) {
         console.error('Error during exporter site edit:', e);
@@ -224,7 +218,7 @@ const handleEditExporterSite = async (data) => {
 
 const handleAddExporterSite = async (data) => {
     modalErrorMessage.value = "";
-    
+
     const headers = { 'Content-Type': 'application/json' };
 
     const addParams = {
@@ -243,7 +237,7 @@ const handleAddExporterSite = async (data) => {
             headers,
             body: JSON.stringify(addParams)
         });
-        
+
         if (res?.success === false) {
             modalErrorMessage.value = res.msg || _i18n("error");
             return;
@@ -262,7 +256,7 @@ const handleAddExporterSite = async (data) => {
 const handleDeleteExporterSite = async (item) => {
     if (item) {
         const exporter_site = item.exporter_site_id;
-    
+
         const requestParams = {
             csrf: props.context.csrf,
             exporter_site: exporter_site
@@ -289,20 +283,20 @@ const handleDeleteExporterSite = async (item) => {
 
 /* ************************************** */
 
-async function loadSitesMap(){
-    try{
+async function loadSitesMap() {
+    try {
         const requestParams = {
-            csrf: props.context.csrf        
+            csrf: props.context.csrf
         };
 
         const headers = { 'Content-Type': 'application/json' };
-        const res = await ntopng_utility.http_request(list_exporter_sites_url,{
-            method:'post',
+        const res = await ntopng_utility.http_request(list_exporter_sites_url, {
+            method: 'post',
             headers,
             body: JSON.stringify(requestParams)
         });
-        
-        if(!Array.isArray(res)){
+
+        if (!Array.isArray(res)) {
             geomapDataArray.value = [];
             return;
         }
@@ -318,7 +312,7 @@ async function loadSitesMap(){
                 lat: Number(site.latitude),
                 lng: Number(site.longitude)
             }));
-    }catch(e){
+    } catch (e) {
         console.error("Map sites load error:", e);
         geomapDataArray.value = [];
     }
@@ -326,7 +320,7 @@ async function loadSitesMap(){
 
 /* ************************************** */
 
-function formatTooltipData(site){
+function formatTooltipData(site) {
     return `
         <div class="custom-tooltip-content">
             <h6>${site.name}</h6>
@@ -339,7 +333,7 @@ function formatTooltipData(site){
 
 /* ************************************** */
 
-const refresh_sites = async (item) =>{
+const refresh_sites = async (item) => {
     exporter_sites_list.value.refresh_table(true);
     await loadSitesMap();
 }
