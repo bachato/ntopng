@@ -1,4 +1,5 @@
 // Copyright (c) 2004-2013 Sergey Lyubka
+// Copyright (c) 2013-2026 ntop.org
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -1567,7 +1568,6 @@ static int64_t push(FILE *fp, SOCKET sock, SSL *ssl, const char *buf,
 
   sent = 0;
   while (sent < len) {
-
     // How many bytes we send in this iteration
     k = len - sent > INT_MAX ? INT_MAX : (int) (len - sent);
 
