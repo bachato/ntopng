@@ -44,17 +44,28 @@ typedef struct {
                                       during the last run */
   bool last_slow; /* True if slow timeseries updates have been detected during
                      the last run */
-  threaded_activity_timeseries_delta_stats_t
-      last; /* Keep stats for the last run */
+  threaded_activity_timeseries_delta_stats_t last; /* Keep stats for the last run */
 } threaded_activity_timeseries_stats_t;
 
 typedef struct {
   struct {
     threaded_activity_timeseries_stats_t write;
   } timeseries;
+
   struct {
     bool has_drops;
   } alerts;
+  
+  struct {
+    /*
+      Total number of SNMP calls (get, get-next, get-bulk...) divided per MIB type
+      - fat MIBS are those that require heavy polling as they
+      contain many MOs (e.g. bridge MIB)
+      - "other" MIBs are all the other MIBs
+    */
+    u_long num_calls_fat_mibs_v1_v2c, num_calls_fat_mibs_v3;
+    u_long num_calls_other_mibs_v1_v2c, num_calls_other_mibs_v3;
+  } snmp;
 } threaded_activity_stats_t;
 
 class ThreadedActivityStats {
