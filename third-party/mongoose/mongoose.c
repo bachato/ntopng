@@ -2969,13 +2969,28 @@ static void handle_file_request(struct mg_connection *conn, const char *path,
   int64_t cl, r1, r2;
   struct vec mime_vec;
   int n;
+  char gz_path[PATH_MAX];
+  struct file gz_file = STRUCT_FILE_INITIALIZER;
+  int use_gzip = 0;
 
   get_mime_type(conn->ctx, path, &mime_vec);
+
+  // Serve pre-compressed .gz file if the browser accepts gzip and it exists
+  hdr = mg_get_header(conn, "Accept-Encoding");
+  if (hdr != NULL && strstr(hdr, "gzip") != NULL) {
+    mg_snprintf(conn, gz_path, sizeof(gz_path), "%s.gz", path);
+    if (mg_stat(conn, gz_path, &gz_file)) {
+      use_gzip = 1;
+      filep->size = gz_file.size;
+      filep->modification_time = gz_file.modification_time;
+    }
+  }
+
   cl = filep->size;
   conn->status_code = 200;
   range[0] = '\0';
 
-  if (!mg_fopen(conn, path, "rb", filep)) {
+  if (!mg_fopen(conn, use_gzip ? gz_path : path, "rb", filep)) {
     send_http_error(conn, 500, http_500_error,
 		    "fopen(%s): %s", path, strerror(ERRNO));
     return;
@@ -3012,9 +3027,12 @@ static void handle_file_request(struct mg_connection *conn, const char *path,
 		   "Content-Length: %" INT64_FMT "\r\n"
 		   "Connection: %s\r\n"
 		   "Accept-Ranges: bytes\r\n"
+		   "%s"
 		   "%s\r\n",
 		   conn->status_code, msg, date, lm, etag, (int) mime_vec.len,
-		   mime_vec.ptr, cl, suggest_connection_header(conn), range);
+		   mime_vec.ptr, cl, suggest_connection_header(conn),
+		   use_gzip ? "Content-Encoding: gzip\r\n" : "",
+		   range);
 
 #ifdef DEBUG /* ntop */
   printf(
@@ -3027,10 +3045,13 @@ static void handle_file_request(struct mg_connection *conn, const char *path,
 	 "Content-Length: %" INT64_FMT "\n"
 	 "Connection: %s\n"
 	 "Accept-Ranges: bytes\n"
+	 "%s"
 	 "%s\n",
 	 __FUNCTION__,
 	 conn->status_code, msg, date, lm, etag, (int) mime_vec.len,
-	 mime_vec.ptr, cl, suggest_connection_header(conn), range);
+	 mime_vec.ptr, cl, suggest_connection_header(conn),
+	 use_gzip ? "Content-Encoding: gzip\n" : "",
+	 range);
 #endif
 
   if (strcmp(conn->request_info.request_method, "HEAD") != 0) {
