@@ -37,6 +37,7 @@ NtopngLuaContext::NtopngLuaContext() {
   host = NULL, network = NULL, flow = NULL;
   localuser = false, observationPointId = 0, engine = NULL;
   capabilities = 0;
+  buffer_http_response = false;
   memset(&pkt_capture, 0, sizeof(pkt_capture));
   memset(&live_capture, 0, sizeof(live_capture));
   next_reload = deadline = 0, threaded_activity = NULL;

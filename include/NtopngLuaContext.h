@@ -51,6 +51,10 @@ public:
   /* Capabilities bitmap */
   u_int64_t capabilities;
 
+  /* HTTP response buffering (used for gzip compression on REST API calls) */
+  bool buffer_http_response;
+  std::string http_response_buffer;
+
   /* Packet capture */
   struct {
     bool captureInProgress;

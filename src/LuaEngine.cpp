@@ -274,6 +274,18 @@ static int ntop_lua_http_print(lua_State *vm) {
 
   /* ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__); */
 
+  NtopngLuaContext *ctx = getLuaVMContext(vm);
+  const bool buffering = ctx && ctx->buffer_http_response;
+
+  /* Route output either into the response buffer (REST API gzip path)
+   * or directly to the socket (normal path). */
+  auto write_out = [&](const char *data, size_t len) {
+    if (buffering)
+      ctx->http_response_buffer.append(data, len);
+    else
+      mg_write(conn, data, len);
+  };
+
   /* Handle binary blob */
   if ((lua_type(vm, 2) == LUA_TSTRING) &&
       (printtype = (char *)lua_tostring(vm, 2)) != NULL)
@@ -286,7 +298,7 @@ static int ntop_lua_http_print(lua_State *vm) {
         int len = strlen(str);
 
         if (len <= 1)
-          mg_printf(conn, "%c", str[0]);
+          write_out(str, 1);
         else
           return (CONST_LUA_PARAM_ERROR);
       }
@@ -297,26 +309,28 @@ static int ntop_lua_http_print(lua_State *vm) {
 
   switch (t = lua_type(vm, 1)) {
     case LUA_TNIL:
-      mg_printf(conn, "%s", "nil");
+      write_out("nil", 3);
       break;
 
     case LUA_TBOOLEAN: {
       int v = lua_toboolean(vm, 1);
+      const char *bstr = v ? "true" : "false";
 
-      mg_printf(conn, "%s", v ? "true" : "false");
+      write_out(bstr, strlen(bstr));
     } break;
 
     case LUA_TSTRING: {
-      char *str = (char *)lua_tostring(vm, 1);
+      size_t len;
+      const char *str = lua_tolstring(vm, 1, &len);
 
-      if (str && (strlen(str) > 0)) mg_printf(conn, "%s", str);
+      if (str && len > 0) write_out(str, len);
     } break;
 
     case LUA_TNUMBER: {
       char str[64];
+      int len = snprintf(str, sizeof(str), "%f", (float)lua_tonumber(vm, 1));
 
-      snprintf(str, sizeof(str), "%f", (float)lua_tonumber(vm, 1));
-      mg_printf(conn, "%s", str);
+      if (len > 0) write_out(str, (size_t)len);
     } break;
 
     case LUA_TTABLE: {
@@ -324,13 +338,17 @@ static int ntop_lua_http_print(lua_State *vm) {
 
       while (lua_next(vm, -2) != 0) {
         const char *key = lua_tostring(vm, -2);
+        char buf[1024];
+        int len;
 
-        if (lua_isstring(vm, -1))
-          mg_printf(conn, "%s = %s", key, lua_tostring(vm, -1));
-        else if (lua_isnumber(vm, -1))
-          mg_printf(conn, "%s = %d", key, (int)lua_tonumber(vm, -1));
-        else if (lua_istable(vm, -1)) {
-          mg_printf(conn, "%s", key);
+        if (lua_isstring(vm, -1)) {
+          len = snprintf(buf, sizeof(buf), "%s = %s", key, lua_tostring(vm, -1));
+          if (len > 0) write_out(buf, (size_t)len);
+        } else if (lua_isnumber(vm, -1)) {
+          len = snprintf(buf, sizeof(buf), "%s = %d", key, (int)lua_tonumber(vm, -1));
+          if (len > 0) write_out(buf, (size_t)len);
+        } else if (lua_istable(vm, -1)) {
+          write_out(key, strlen(key));
           // PrintTable(vm);
         }
 
@@ -1070,6 +1088,106 @@ void build_redirect(const char *url, const char *query_string,
 
 /* ****************************************** */
 
+/* Compress and send a buffered HTTP response accumulated during Lua execution.
+ * Splits the buffer at the \r\n\r\n boundary, optionally gzip-compresses the
+ * body when the client advertises Accept-Encoding: gzip, injects the matching
+ * Content-Encoding / Vary / Content-Length headers, and writes everything to
+ * the socket in one go via mg_write (binary-safe). */
+static void flushBufferedHTTPResponse(struct mg_connection *conn,
+                                      const struct mg_request_info *request_info,
+                                      NtopngLuaContext *ctx) {
+  const std::string &response = ctx->http_response_buffer;
+
+  if (response.empty()) {
+    ctx->buffer_http_response = false;
+    return;
+  }
+
+  static const char *CRLF2 = "\r\n\r\n";
+  size_t boundary = response.find(CRLF2);
+
+  if (boundary == std::string::npos) {
+    /* No proper HTTP header block; send the raw buffer as-is. */
+    mg_write(conn, response.data(), response.size());
+    ctx->buffer_http_response = false;
+    ctx->http_response_buffer.clear();
+    return;
+  }
+
+  const char *accept_enc = mg_get_header(conn, "Accept-Encoding");
+  bool try_gzip = accept_enc && (strstr(accept_enc, "gzip") != NULL);
+
+  /* Isolate the header block (no trailing \r\n\r\n) and the body. */
+  std::string headers(response, 0, boundary);
+  const char *body_data = response.data() + boundary + 4;
+  size_t       body_size = response.size() - (boundary + 4);
+
+  /* Don't re-compress if the script already set Content-Encoding. */
+  if (try_gzip && headers.find("Content-Encoding") != std::string::npos)
+    try_gzip = false;
+
+  /* Compression only pays off above ~1 KB. */
+  if (try_gzip && body_size < 1024)
+    try_gzip = false;
+
+#ifdef HAVE_ZLIB
+  if (try_gzip) {
+    z_stream zs = {};
+    /* windowBits = 15 | 16 produces gzip framing instead of raw deflate. */
+    if (deflateInit2(&zs, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15 | 16, 8,
+                     Z_DEFAULT_STRATEGY) == Z_OK) {
+      uLong max_comp = deflateBound(&zs, (uLong)body_size);
+      char *comp_buf = (char *)malloc(max_comp);
+
+      if (comp_buf) {
+        zs.next_in   = (Bytef *)body_data;
+        zs.avail_in  = (uInt)body_size;
+        zs.next_out  = (Bytef *)comp_buf;
+        zs.avail_out = (uInt)max_comp;
+
+        if (deflate(&zs, Z_FINISH) == Z_STREAM_END) {
+          size_t comp_len = zs.total_out;
+          deflateEnd(&zs);
+
+          std::string final_headers =
+              headers +
+              "\r\nContent-Encoding: gzip"
+              "\r\nVary: Accept-Encoding"
+              "\r\nContent-Length: " + std::to_string(comp_len) +
+              "\r\n\r\n";
+
+          mg_write(conn, final_headers.data(), final_headers.size());
+          mg_write(conn, comp_buf, comp_len);
+          free(comp_buf);
+          ctx->buffer_http_response = false;
+          ctx->http_response_buffer.clear();
+          return;
+        }
+
+        deflateEnd(&zs);
+        free(comp_buf);
+      } else {
+        deflateEnd(&zs);
+      }
+    }
+  }
+#endif /* HAVE_ZLIB */
+
+  /* Fallback: send uncompressed, but still add Content-Length. */
+  std::string final_headers =
+      headers +
+      "\r\nContent-Length: " + std::to_string(body_size) +
+      "\r\n\r\n";
+
+  mg_write(conn, final_headers.data(), final_headers.size());
+  if (body_size > 0) mg_write(conn, body_data, body_size);
+
+  ctx->buffer_http_response = false;
+  ctx->http_response_buffer.clear();
+}
+
+/* ****************************************** */
+
 int LuaEngine::handle_script_request(struct mg_connection *conn,
                                      const struct mg_request_info *request_info,
                                      char *script_path, bool *attack_attempt,
@@ -1488,6 +1606,15 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
   if (is_interface_allowed)
     getLuaVMUservalue(L, allowed_ifname) = iface->get_name();
 
+  /* Enable response buffering for REST API endpoints so that
+   * flushBufferedHTTPResponse() can apply gzip compression afterwards. */
+  NtopngLuaContext *ctx = getLuaVMContext(L);
+
+  if (ctx && strncmp(request_info->uri, "/lua/", 5) == 0) {
+    ctx->buffer_http_response = true;
+    ctx->http_response_buffer.clear();
+  }
+
 #ifdef NTOPNG_PRO
   if (ntop->getPro()->has_valid_license())
     rc = __ntop_lua_handlefile(L, script_path, true);
@@ -1496,6 +1623,18 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
     rc = luaL_dofile(L, script_path);
 
   //    lua_settop(L, 0);
+
+  /* Flush the buffered response (compresses if client supports gzip). On
+   * script error the buffer is simply discarded; the error page is sent
+   * by redirect_to_error_page() which writes directly to the socket. */
+  if (ctx && ctx->buffer_http_response) {
+    if (rc == 0)
+      flushBufferedHTTPResponse(conn, request_info, ctx);
+    else {
+      ctx->buffer_http_response = false;
+      ctx->http_response_buffer.clear();
+    }
+  }
 
   if (rc != 0) {
     const char *err = lua_tostring(L, -1);
