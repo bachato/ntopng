@@ -55,7 +55,6 @@
     "install": "^0.13.0",
     "mini-css-extract-plugin": "^2.5.3",
     "minimist": "^1.2.6",
-    "node-sass": "^7.0.1",
     "onchange": "^7.1.0",
     "postcss": "^8.5.2",
     "postcss-cli": "^9.1.0",

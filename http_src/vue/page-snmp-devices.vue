@@ -23,7 +23,7 @@
                         <ModalDeleteSNMPDevice ref="modal_delete_snmp_device" @delete="delete_row"
                             @ping_all="exec_ping_all" @prune="delete_unresponsive" @delete_all="delete_all">
                         </ModalDeleteSNMPDevice>
-                        <button class="btn btn-link" type="button" ref="add_snmp_device" @click="add_snmp_device">
+                        <button class="btn btn-link" type="button" @click="add_snmp_device">
                             <i class="fas fa-plus"></i>
                         </button>
                         <button class="btn btn-link" type="button" @click="import_snmp_devices">
@@ -38,7 +38,7 @@
                     <template v-slot:custom_header>
                         <div class="dropdown me-3 d-inline-block" v-for="item in filter_table_array">
                             <span class="no-wrap d-flex align-items-center filters-label"><b>{{ item["basic_label"]
-                                    }}</b></span>
+                            }}</b></span>
                             <SelectSearch v-model:selected_option="item['current_option']" theme="bootstrap-5"
                                 dropdown_size="small" :disabled="loading" :options="item['options']"
                                 @select_option="add_table_filter">
@@ -68,13 +68,13 @@
                 </button>
             </template>
             <template v-if="props.context.buttonsVisibility.isAdministrator">
-                <button type="button" ref="delete_all_unresponsive" @click="delete_all_unresponsive_devices"
+                <button type="button" @click="delete_all_unresponsive_devices"
                     class="btn btn-danger ms-1"
                     :class="{ disabled: props.context.buttonsVisibility.pruneDevices == 0 }">
                     <i class="fas fa-trash"></i>
                     {{ _i18n("snmp.delete_unresponsive_devices") }}
                 </button>
-                <button type="button" ref="delete_all" @click="delete_all_devices" class="btn btn-danger ms-1"
+                <button type="button" @click="delete_all_devices" class="btn btn-danger ms-1"
                     :class="{ disabled: total_rows == 0 }">
                     <i class="fas fa-trash"></i>
                     {{ _i18n("snmp.delete_all_devices") }}
@@ -158,7 +158,7 @@ const map_table_def_columns = (columns) => {
                 rsp = `<i class='fas fa-sync' data-bs-toggle='tooltip' data-bs-placement='top' title='${_i18n('snmp.polling_in_progress')}'></i>`
             }
             if (row.is_unreachable) {
-                rsp =  `<span class='badge bg-warning' data-bs-toggle='tooltip' data-bs-placement='top' title='${_i18n('snmp.snmp_device_does_not_respond')}'>
+                rsp = `<span class='badge bg-warning' data-bs-toggle='tooltip' data-bs-placement='top' title='${_i18n('snmp.snmp_device_does_not_respond')}'>
                             <i class="fas fa-exclamation-triangle"></i>
                         </span> ${rsp}`;
             }
