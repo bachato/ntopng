@@ -593,8 +593,10 @@ void ThreadedActivity::lua(NetworkInterface *iface, lua_State *vm) {
   std::map<std::string, ThreadedActivityStats *>::iterator it;
 
   /* Sum TS write stats from all scripts */
-  for (it = threaded_activity_stats.begin(); it != threaded_activity_stats.end(); ++it)
-    tot_ts_stats.incTimeseriesStats(it->second);
+  for (it = threaded_activity_stats.begin(); it != threaded_activity_stats.end(); ++it) {
+    tot_ts_stats.sumTimeseriesStats(it->second);
+    tot_ts_stats.sumSNMPStats(it->second);
+  }
 
   it = threaded_activity_stats.begin();
 
@@ -609,6 +611,7 @@ void ThreadedActivity::lua(NetworkInterface *iface, lua_State *vm) {
     ta->lua(vm, false);
 
     tot_ts_stats.luaTimeseriesStats(vm);
+    tot_ts_stats.luaSNMPStats(vm);
 
     lua_push_str_table_entry(vm, "state", Utils::get_state_label(ta->getState()));
     lua_push_uint64_table_entry(vm, "periodicity", getPeriodicity());

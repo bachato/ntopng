@@ -103,7 +103,7 @@ void ThreadedActivityStats::updateStatsEnd(u_long duration_ms) {
 
 /* ******************************************* */
 
-void ThreadedActivityStats::incTimeseriesStats(ThreadedActivityStats *oth_tas) {
+void ThreadedActivityStats::sumTimeseriesStats(ThreadedActivityStats *oth_tas) {
   threaded_activity_timeseries_stats_t *cur_stats = &ta_stats.timeseries.write;
   threaded_activity_timeseries_stats_t *oth_stats = &oth_tas->ta_stats.timeseries.write;
   
@@ -112,6 +112,18 @@ void ThreadedActivityStats::incTimeseriesStats(ThreadedActivityStats *oth_tas) {
   cur_stats->last_max_call_duration_ms = max_val(cur_stats->last_max_call_duration_ms, oth_stats->last_max_call_duration_ms); 
   if (cur_stats->last_avg_call_duration_ms == 0) cur_stats->last_avg_call_duration_ms = oth_stats->last_avg_call_duration_ms;
   if (oth_stats->last_slow) cur_stats->last_slow = true;
+}
+
+/* ******************************************* */
+
+void ThreadedActivityStats::sumSNMPStats(ThreadedActivityStats *oth_tas) {
+  threaded_activity_snmp_stats_t *cur_stats = &ta_stats.snmp.calls;
+  threaded_activity_snmp_stats_t *oth_stats = &oth_tas->ta_stats.snmp.calls;
+  
+  cur_stats->num_calls_fat_mibs_v1_v2c += oth_stats->num_calls_fat_mibs_v1_v2c;
+  cur_stats->num_calls_fat_mibs_v3 += oth_stats->num_calls_fat_mibs_v3;
+  cur_stats->num_calls_other_mibs_v1_v2c += oth_stats->num_calls_other_mibs_v1_v2c;
+  cur_stats->num_calls_other_mibs_v3 += oth_stats->num_calls_other_mibs_v3;
 }
 
 /* ******************************************* */
@@ -143,6 +155,30 @@ void ThreadedActivityStats::luaTimeseriesStats(lua_State *vm) {
   lua_settable(vm, -3);
 
   lua_pushstring(vm, "timeseries");
+  lua_insert(vm, -2);
+  lua_settable(vm, -3);
+}
+
+/* ******************************************* */
+
+void ThreadedActivityStats::luaSNMPStats(lua_State *vm) {
+  threaded_activity_snmp_stats_t *cur_stats = &ta_stats.snmp.calls;
+
+  lua_newtable(vm);
+
+  lua_newtable(vm); /* "calls" */
+
+  /* Overall totals */
+  lua_push_uint64_table_entry(vm, "fat_mibs_v1_v2c", (u_int64_t)cur_stats->num_calls_fat_mibs_v1_v2c);
+  lua_push_uint64_table_entry(vm, "fat_mibs_v3", (u_int64_t)cur_stats->num_calls_fat_mibs_v3);
+  lua_push_uint64_table_entry(vm, "other_mibs_v1_v2c", (u_int64_t)cur_stats->num_calls_other_mibs_v1_v2c);
+  lua_push_uint64_table_entry(vm, "other_mibs_v3", (u_int64_t)cur_stats->num_calls_other_mibs_v3);
+
+  lua_pushstring(vm, "calls");
+  lua_insert(vm, -2);
+  lua_settable(vm, -3);
+
+  lua_pushstring(vm, "snmp");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
 }
