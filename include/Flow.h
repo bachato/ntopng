@@ -69,6 +69,7 @@ typedef struct {
 typedef struct {
   u_int32_t exporter_ipv4;
   IpAddress next_hop;
+  u_int32_t in_index, out_index;
   bool return_path;
 } DuplicatedFlowInfo;
 
@@ -1623,7 +1624,9 @@ public:
   void setCliService(int service_enum);
   void setSrvService(int service_enum);
   inline void setIGMPType(u_int8_t t) { protos.igmp.igmp_type = t; }
-  void addDedupInfo(u_int32_t exporter_ipv4, IpAddress *next_hop, bool src2dst_direction);
+  void addDedupInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
+		    u_int32_t in_index, u_int32_t out_index,
+		    bool src2dst_direction);
 };
 
 #endif /* _FLOW_H_ */

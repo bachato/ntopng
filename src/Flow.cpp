@@ -3458,6 +3458,8 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
 	  lua_push_str_table_entry(vm, "exporter_ip", Utils::intoaV4(it->exporter_ipv4, b1, sizeof(b1)));
 	  lua_push_str_table_entry(vm, "next_hop",    it->next_hop.print(b2, sizeof(b2)));
 	  lua_push_bool_table_entry(vm, "return_path", it->return_path);
+	  lua_push_int32_table_entry(vm, "input_idx", it->in_index);
+	  lua_push_int32_table_entry(vm, "output_idx", it->out_index);
 
 	  lua_pushnumber(vm, i++);
 	  lua_insert(vm, -2);
@@ -9634,6 +9636,7 @@ void Flow::setnDPIFingerprint(char *fp) {
 /* *************************************** */
 
 void Flow::addDedupInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
+			u_int32_t in_index, u_int32_t out_index,
 			bool src2dst_direction) {
   std::vector<DuplicatedFlowInfo>::iterator it;
   DuplicatedFlowInfo d;
@@ -9648,6 +9651,8 @@ void Flow::addDedupInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
     }
   }
 
-  d.exporter_ipv4 = exporter_ipv4, d.next_hop.set(next_hop), d.return_path = !src2dst_direction;
+  d.exporter_ipv4 = exporter_ipv4, d.next_hop.set(next_hop), d.return_path = !src2dst_direction,
+    d.in_index = in_index, d.out_index = out_index;
+  
   dedupStats.push_back(d);
 }

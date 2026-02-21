@@ -2081,14 +2081,16 @@ if isEmptyString(page) or page == "overview" then
 	    local len = table.len(flow.deduplication)+1
 
 	    print("<tr><th rowspan=\""..(len+1).."\">" .. i18n("dedup_flows") .. "</th>")
-	    print("<th>" .. i18n("flow_exporter") .. "</th><th>" .. i18n("next_hop") .. "</th></tr>\n")
+	    print("<th>" .. i18n("flow_exporter") .. " / " .. i18n("next_hop") .. "</th><th>" .. i18n("flows_page.inIfIdx") .. " / ".. i18n("flows_page.outIfIdx") .. "</th></tr>\n")
 
 	    for k,v in pairs(flow.deduplication) do
 	       local ret, exp_ip, exp_name, site = formatExporter(v.exporter_ip)
 	       local ret1, next_hop_ip, next_hop_name, next_hope_site = formatNextHop(v.next_hop)
-
-	       print("<tr><td>".. ret .. "</td><td>" .. ret1)
+	       tprint(v)
+	       print("<tr><td>".. ret .. " / " .. ret1)
 	       if(v.return_path == true) then print(" <span class='badge bg-secondary'>".. i18n("dedup_flow_swapped").."</span>") end
+	       print("</td><td>")
+	       printFlowSNMPInfo(v.exporter_ip, v.input_idx, v.output_idx, true)
 	       print("</td></tr>")
 
 	       if(flow_trajectory[exp_ip] == nil) then
