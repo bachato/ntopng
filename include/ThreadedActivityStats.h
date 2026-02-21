@@ -80,6 +80,7 @@ class ThreadedActivityStats {
   u_long num_not_executed, num_is_slow;
   u_long max_duration_ms, last_duration_ms;
   int progress;
+  bool snmp_fat_mib_call;
   time_t scheduled_time, deadline;
   static ticks tickspersec;
   bool not_executed, is_slow;
@@ -105,7 +106,9 @@ class ThreadedActivityStats {
 
   /* SNMP calls stats */
   void sumSNMPStats(ThreadedActivityStats *oth_tas);
-
+  void incSNMPStats(u_int8_t version);
+  void setFatMIBMode(bool fatMibCall) { snmp_fat_mib_call = fatMibCall; }
+  
   void updateStatsQueuedTime(time_t queued_time);
   void updateStatsBegin(struct timeval *begin);
   void updateStatsEnd(u_long duration_ms);

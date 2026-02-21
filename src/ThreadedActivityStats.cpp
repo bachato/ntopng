@@ -35,6 +35,7 @@ ThreadedActivityStats::ThreadedActivityStats(const ThreadedActivity *ta) {
   num_not_executed = num_is_slow = 0;
   not_executed = is_slow = false;
   progress = 0;
+  snmp_fat_mib_call = false;
   state = threaded_activity_state_unknown;
 }
 
@@ -106,10 +107,10 @@ void ThreadedActivityStats::updateStatsEnd(u_long duration_ms) {
 void ThreadedActivityStats::sumTimeseriesStats(ThreadedActivityStats *oth_tas) {
   threaded_activity_timeseries_stats_t *cur_stats = &ta_stats.timeseries.write;
   threaded_activity_timeseries_stats_t *oth_stats = &oth_tas->ta_stats.timeseries.write;
-  
+
   cur_stats->tot_calls += oth_stats->tot_calls;
   cur_stats->tot_drops += oth_stats->tot_drops;
-  cur_stats->last_max_call_duration_ms = max_val(cur_stats->last_max_call_duration_ms, oth_stats->last_max_call_duration_ms); 
+  cur_stats->last_max_call_duration_ms = max_val(cur_stats->last_max_call_duration_ms, oth_stats->last_max_call_duration_ms);
   if (cur_stats->last_avg_call_duration_ms == 0) cur_stats->last_avg_call_duration_ms = oth_stats->last_avg_call_duration_ms;
   if (oth_stats->last_slow) cur_stats->last_slow = true;
 }
@@ -119,7 +120,7 @@ void ThreadedActivityStats::sumTimeseriesStats(ThreadedActivityStats *oth_tas) {
 void ThreadedActivityStats::sumSNMPStats(ThreadedActivityStats *oth_tas) {
   threaded_activity_snmp_stats_t *cur_stats = &ta_stats.snmp.calls;
   threaded_activity_snmp_stats_t *oth_stats = &oth_tas->ta_stats.snmp.calls;
-  
+
   cur_stats->num_calls_fat_mibs_v1_v2c += oth_stats->num_calls_fat_mibs_v1_v2c;
   cur_stats->num_calls_fat_mibs_v3 += oth_stats->num_calls_fat_mibs_v3;
   cur_stats->num_calls_other_mibs_v1_v2c += oth_stats->num_calls_other_mibs_v1_v2c;
@@ -254,5 +255,33 @@ void ThreadedActivityStats::setState(ThreadedActivityState next_state) {
 #endif
 
     state = next_state;
+  }
+}
+
+/* ******************************************* */
+
+void ThreadedActivityStats::incSNMPStats(u_int8_t version) {
+  if(snmp_fat_mib_call) {
+    switch(version) {
+    case 0: /* v1 */
+    case 1: /* v2c */
+      ta_stats.snmp.calls.num_calls_fat_mibs_v1_v2c++;
+      break;
+
+    case 2: /* v3 */
+      ta_stats.snmp.calls.num_calls_fat_mibs_v3++;
+      break;
+    }
+  } else {
+    switch(version) {
+    case 0: /* v1 */
+    case 1: /* v2c */
+      ta_stats.snmp.calls.num_calls_other_mibs_v1_v2c++;
+      break;
+
+    case 2: /* v3 */
+      ta_stats.snmp.calls.num_calls_other_mibs_v3++;
+      break;
+    }
   }
 }
