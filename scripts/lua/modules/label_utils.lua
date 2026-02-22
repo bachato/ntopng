@@ -95,37 +95,41 @@ end
 -- Attempt at retrieving an host label from an host_info, using local caches and DNS resolution.
 -- This can be more expensive if compared to only using information found inside host_info.
 local function hostinfo2label_resolved(host_info, show_vlan, shorten_len, skip_resolution)
-    local ip = host_info["ip"] or host_info["host"]
-    local res
+   local ip = host_info["ip"] or host_info["host"]
+   local res
 
-    -- If local broadcast domain host and DHCP, try to get the label associated
-    -- to the MAC address
-    if host_info["mac"] and (host_info["broadcast_domain_host"] or host_info["dhcpHost"]) then
-        res = getHostAltName(host_info["mac"])
-    end
+   if(not(isEmptyString(ip))) then
+      -- If local broadcast domain host and DHCP, try to get the label associated
+      -- to the MAC address
+      if host_info["mac"] and (host_info["broadcast_domain_host"] or host_info["dhcpHost"]) then
+	 res = getHostAltName(host_info["mac"])
+      end
+      
+      -- In case no resolution is requested, directly skip this part
+      if (isEmptyString(res)) and (not skip_resolution) then
+	 -- Try and get the resolved name
+	 res = ntop.getResolvedName(ip)
 
-    -- In case no resolution is requested, directly skip this part
-    if (isEmptyString(res)) and (not skip_resolution) then
-        -- Try and get the resolved name
-        res = ntop.getResolvedName(ip)
-
-        if((not isEmptyString(res)) and (res ~= ip)) then
+	 if((not isEmptyString(res)) and (res ~= ip)) then
             res = string.lower(res)
 
 	    if(host_info.names == nil) then
-                host_info.names = {}
+	       host_info.names = {}
 	    end
 
 	    host_info.names["DNS (Cache) Resolution"] = res
 	    interface.setHostResolvedName(ip, res);
 	    -- tprint(ip .. " = " .. res)
-        else
+	 else
             -- Nothing found, just fallback to the IP address
             res = ip
-        end
-    end
-
-    return label2formattedlabel(res, host_info, show_vlan, shorten_len)
+	 end
+      end
+   else
+      res = "Unknown"
+   end
+   
+   return label2formattedlabel(res, host_info, show_vlan, shorten_len)
 end
 
 -- ##############################################
