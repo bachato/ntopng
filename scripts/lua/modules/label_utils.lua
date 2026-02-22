@@ -359,7 +359,8 @@ end
 
 function getHostAltName(host_info)
     local host_key
-
+    local alt_name
+    
     -- Check if there is an alias for the host@vlan
     -- Note: this is not used for backward compatibility (see setHostAltName)
     -- if type(host_info) == "table" and host_info["vlan"] then
@@ -375,10 +376,15 @@ function getHostAltName(host_info)
         host_key = host_info
     end
 
-    local alt_name = ntop.getCache(getHostAltNamesKey(host_key)) or ""
-    -- In case the alt_name and the key are the same, return nil
-    if (not isEmptyString(alt_name)) and (string.lower(alt_name) == string.lower(host_key)) then
-        return nil
+    local k = getHostAltNamesKey(host_key)
+    if(k ~= nil) then
+       alt_name = ntop.getCache(k) or ""
+       -- In case the alt_name and the key are the same, return nil
+       if (not isEmptyString(alt_name)) and (string.lower(alt_name) == string.lower(host_key)) then
+	  return nil
+       end
+    else
+       alt_name = ""
     end
 
     return alt_name

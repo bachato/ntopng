@@ -464,7 +464,10 @@ end
 -- @return nil
 local function _set_endpoint_recipient_params(recipient_data, safe_params)
     -- Write the endpoint recipient config into another hash
-    local k = _get_recipient_details_key(recipient_data.recipient_id)
+   local k = _get_recipient_details_key(recipient_data.recipient_id)
+
+   if(k == nil) then return end
+   
     -- Add the preference to silence the same alerts for a specific recipient, by default is set to true (1)
     ntop.setCache("ntopng.prefs.silence_multiple_alerts." .. recipient_data.recipient_id,
         ternary(recipient_data.silence_alerts and recipient_data.silence_alerts == "false", '0', '1'))
