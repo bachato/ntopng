@@ -47,7 +47,8 @@ class Prefs {
   char *http_index_page;
   char *influx_internal_db_name;
   bool influx_internal_available;
-  bool enable_client_x509_auth, reproduce_at_original_speed, disable_purge;
+  bool enable_client_x509_auth, reproduce_at_original_speed, disable_purge,
+    strict_startup;
   char* zmq_publish_events_url, *http_log_path;
   const char *clickhouse_client, *clickhouse_cluster_name;
   Ntop* ntop;
@@ -707,7 +708,8 @@ class Prefs {
   inline bool purgeHostsFlowsOnPcapFiles() {
     return (pcap_file_purge_hosts_flows /* || dump_flows_on_clickhouse */);
   };
-  inline bool disablePurge() { return (disable_purge);  };
+  inline bool disablePurge()    { return (disable_purge);   };
+  inline bool isStrictStartup() { return (strict_startup); };
   inline void enableBehaviourAnalysis() { enable_behaviour_analysis = true; };
   inline bool isBehavourAnalysisEnabled() {
     return (enable_behaviour_analysis);

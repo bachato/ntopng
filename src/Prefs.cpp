@@ -54,7 +54,8 @@ Prefs::Prefs(Ntop *_ntop) {
   enable_flow_deduplication = false;
   use_promiscuous_mode = true, do_reforge_timestamps = false;
   resolve_all_host_ip = false, service_license_check = false;
-  add_vlan_tags_to_cloud_exporters = false, disable_purge = false;
+  add_vlan_tags_to_cloud_exporters = false, disable_purge = false,
+    strict_startup = false;
   max_num_hosts = MAX_NUM_INTERFACE_HOSTS,
     max_num_flows = MAX_NUM_INTERFACE_HOSTS;
   attacker_max_num_flows_per_sec = victim_max_num_flows_per_sec =
@@ -551,6 +552,8 @@ void usage() {
 	 "(debug only)\n"
 	 "[--offline]                         | Run in offline mode (avoid "
 	 "contacting remote sites, including blacklists) \n"
+	 "[--strict-startup]                  | Exit on startup if critical subsystems "
+	 "(e.g. ClickHouse) fail to initialize\n"
 	 "[--insecure]                        | Allow connections to TLS sites "
 	 "with invalid certificates \n"
 #if HAVE_ZMQ
@@ -1316,6 +1319,7 @@ static const struct option long_options[] = {
   {"insecure",                no_argument,       NULL, 225},
   {"offline",                 no_argument,       NULL, 226},
   {"readonly-flows-dump",     no_argument,       NULL, 227},
+  {"strict-startup",          no_argument,       NULL, 228},
 #ifdef NTOPNG_PRO
   {"dump-queue-len",          no_argument,       NULL, 248},
   {"dump-queue-block-size",   no_argument,       NULL, 249},
@@ -2374,6 +2378,10 @@ int Prefs::setOption(int optkey, char *optarg) {
   case 227:
     readonly_flows_dump = true;
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "Read-only flows dump set");
+    break;
+
+  case 228:
+    strict_startup = true;
     break;
 
 #ifdef NTOPNG_PRO

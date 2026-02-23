@@ -10250,6 +10250,12 @@ bool NetworkInterface::initFlowDB() {
   clickhouse_flows_db = new (std::nothrow) ClickHouseDB(this);
 
   if (clickhouse_flows_db == NULL || clickhouse_flows_db->isDbCreated() == false) {
+
+    if (ntop->getPrefs()->isStrictStartup()) {
+      ntop->getTrace()->traceEvent(TRACE_ERROR, "Startup aborted due to --strict-startup: ClickHouse connection failed");
+      exit(EXIT_FAILURE);
+    }
+
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Running without ClickHouse support, please check the clickhouse service");
     ntop->getPrefs()->dontUseClickHouse();
     if (clickhouse_flows_db) {
