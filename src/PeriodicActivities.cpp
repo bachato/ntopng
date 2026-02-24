@@ -82,7 +82,7 @@ void PeriodicActivities::lua(NetworkInterface *iface, lua_State *vm) {
 /* **************************************************** */
 
 static void *startActivity(void *ptr) {
-  Utils::setThreadName("ntopng-periodic");
+  Utils::setThreadName("n-periodic");
 
   ((PeriodicActivities *)ptr)->run();
 

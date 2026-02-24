@@ -27,7 +27,7 @@
 /* **************************************************** */
 
 static void *doRun(void *ptr) {
-  Utils::setThreadName("ntopng-th-pool");
+  Utils::setThreadName("n-th-pool");
 
   ((ThreadPool *)ptr)->run();
   return (NULL);
@@ -145,7 +145,7 @@ void ThreadPool::run() {
       q->run();
       delete q;
 
-      Utils::setThreadName("ntopng-idle-thpool");
+      Utils::setThreadName("n-idle-thpool");
     }
   }
 

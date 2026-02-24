@@ -121,6 +121,8 @@ void ZCCollectorInterface::collect_flows() {
 static void *packetPollLoop(void *ptr) {
   ZCCollectorInterface *iface = (ZCCollectorInterface *)ptr;
 
+  iface->setPollerThreadName();
+
   /* Wait until the initialization completes */
   while (iface->isStartingUp()) sleep(1);
 

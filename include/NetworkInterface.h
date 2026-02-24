@@ -439,6 +439,7 @@ public:
   NetworkInterface(const char *name, const char *custom_interface_type = NULL);
   virtual ~NetworkInterface();
 
+  void setPollerThreadName();
   bool initFlowChecksLoop(); /* Initialize the loop to dequeue flows for the
                                 execution of user script hooks */
   bool initHostChecksLoop(); /* Same as above but for hosts */

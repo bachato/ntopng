@@ -92,6 +92,8 @@ void sFlowPktInterface::sflowPacketPollLoop() {
 static void *packetPollLoop(void *ptr) {
   sFlowPktInterface *iface = (sFlowPktInterface *)ptr;
 
+  iface->setPollerThreadName();
+
   /* Wait until the initialization completes */
   while (iface->isStartingUp()) sleep(1);
 

@@ -54,9 +54,9 @@ void QueuedThreadData::run() {
 			       hourly_daily_activity ? "hour/daily" : "sec/min");
 #endif
   if (iface->get_id() == -1)
-    snprintf(name, sizeof(name), "ntopng-S-%s", label);
+    snprintf(name, sizeof(name), "n-s-%s", label);
   else
-    snprintf(name, sizeof(name), "ntopng-%d-%s", iface->get_id(), label);
+    snprintf(name, sizeof(name), "n-%d-%s", iface->get_id(), label);
       
   Utils::setThreadName(name);
 

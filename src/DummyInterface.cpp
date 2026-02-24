@@ -82,6 +82,9 @@ void DummyInterface::forgeFlow(u_int iteration) {
 
 static void* packetPollLoop(void* ptr) {
   DummyInterface* iface = (DummyInterface*)ptr;
+
+  iface->setPollerThreadName();
+
   u_int32_t iteration = 0;
 
   /* Wait until the initialization completes */

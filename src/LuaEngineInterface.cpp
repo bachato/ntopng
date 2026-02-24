@@ -4143,7 +4143,7 @@ static int ntop_reload_host_prefs(lua_State *vm) {
 
 static void *pcapDumpLoop(void *ptr) {
   NtopngLuaContext *c = (NtopngLuaContext *)ptr;
-  Utils::setThreadName("ntopng-pcap");
+  Utils::setThreadName("n-pcap-dump");
 
   while (c->pkt_capture.captureInProgress) {
     u_char *pkt;

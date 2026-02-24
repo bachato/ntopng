@@ -250,6 +250,9 @@ static bool idle_flow_account(GenericHashEntry *h, void *user_data, bool *matche
 
 static void *packetPollLoop(void *ptr) {
   PcapInterface *iface = (PcapInterface *)ptr;
+
+  iface->setPollerThreadName();
+
   std::vector<std::string> *pcap_files_queue = iface->get_pcap_files_queue();
   int fds[MAX_NUM_PCAP_INTERFACES] = { -1 };
   int socks[MAX_NUM_PCAP_INTERFACES] = { -1 };

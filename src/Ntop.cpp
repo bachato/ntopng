@@ -678,7 +678,7 @@ void Ntop::start() {
   gettimeofday(&begin, NULL);
   _usleep((5 - begin.tv_sec % 5) * 1e6 - begin.tv_usec);
 
-  Utils::setThreadName("ntopng-main");
+  Utils::setThreadName("n-main");
 
   globals->setInitialized(); /* We're ready to go */
 

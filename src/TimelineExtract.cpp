@@ -273,7 +273,7 @@ bool TimelineExtract::extractLive(struct mg_connection *conn,
 
 static void *extractionThread(void *ptr) {
   TimelineExtract *extr = (TimelineExtract *)ptr;
-  Utils::setThreadName("ntopng-extract");
+  Utils::setThreadName("n-extract");
 
   extr->extractToDisk(extr->getID(), extr->getNetworkInterface(),
                       extr->getFrom(), extr->getTo(), extr->getFilter(),

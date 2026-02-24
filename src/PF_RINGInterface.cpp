@@ -286,6 +286,8 @@ void PF_RINGInterface::multiPacketPollLoop() {
 static void *packetPollLoop(void *ptr) {
   PF_RINGInterface *iface = (PF_RINGInterface *)ptr;
 
+  iface->setPollerThreadName();
+
   /* Wait until the initialization completes */
   while (iface->isStartingUp()) sleep(1);
 

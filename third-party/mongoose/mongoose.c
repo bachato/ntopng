@@ -5269,7 +5269,7 @@ static void *worker_thread(void *thread_func_param) {
   struct mg_context *ctx = (struct mg_context *)thread_func_param;
   struct mg_connection *conn;
 
-  Utils::setThreadName("ntopng-http-worker");
+  Utils::setThreadName("n-http-worker");
   
   conn = (struct mg_connection *) calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE);
   if (conn == NULL) {
@@ -5405,7 +5405,7 @@ static void *master_thread(void *thread_func_param) {
   struct pollfd *pfd;
   int i;
 
-  Utils::setThreadName("ntopng-mongoose");
+  Utils::setThreadName("n-mongoose");
   
   // Increase priority of the master thread
 #if defined(_WIN32)

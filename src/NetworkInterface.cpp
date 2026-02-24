@@ -3912,7 +3912,7 @@ void NetworkInterface::flowAlertsDequeueLoop() {
   u_int64_t n;
   char buf[16];
 
-  snprintf(buf, sizeof(buf), "ntopng-%d-fchek", get_id());
+  snprintf(buf, sizeof(buf), "n-fcheck-%d", get_id());
   Utils::setThreadName(buf);
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL,
@@ -3971,7 +3971,7 @@ void NetworkInterface::hostAlertsDequeueLoop() {
   u_int64_t n;
   char buf[16];
 
-  snprintf(buf, sizeof(buf), "ntopng-%d-hcheck", get_id());
+  snprintf(buf, sizeof(buf), "n-hcheck-%d", get_id());
   Utils::setThreadName(buf);
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL,
@@ -4033,7 +4033,7 @@ void NetworkInterface::dumpFlowLoop() {
   const u_int idle_flows_budget = 65536;
   const u_int active_flows_budget = idle_flows_budget / 3; /* lower priority */
 
-  snprintf(buf, sizeof(buf), "ntopng-%d-fdump", get_id());
+  snprintf(buf, sizeof(buf), "n-fdump-%d", get_id());
   Utils::setThreadName(buf);
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Started flow dump loop on interface %s [id: %u]...",
@@ -4124,6 +4124,16 @@ void NetworkInterface::startFlowDumping() {
 
 /* **************************************************** */
 
+void NetworkInterface::setPollerThreadName() {
+  char buf[16];
+
+  snprintf(buf, sizeof(buf), "n-poll-%d", get_id());
+
+  Utils::setThreadName(buf);
+}
+
+/* **************************************************** */
+
 void NetworkInterface::startPacketPolling() {
   if (pollLoopCreated) {
     if ((cpu_affinity != -1) && (ntop->getNumCPUs() > 1)) {
@@ -4134,12 +4144,6 @@ void NetworkInterface::startPacketPolling() {
         ntop->getTrace()->traceEvent(TRACE_NORMAL, "Setting affinity of interface %s to core %d",
 				     get_description(), cpu_affinity);
     }
-
-#ifdef __linux__
-    char buf[16];
-    snprintf(buf, sizeof(buf), "ntopng-%d-pkt", get_id());
-    pthread_setname_np(pollLoop, buf);
-#endif
   }
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Started polling on interface '%s' [id: %u]...",
