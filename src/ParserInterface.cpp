@@ -794,21 +794,23 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 			       zflow->in_bytes, zflow->out_bytes);
 #endif
 
-#ifdef DEBUG
-  char a[32], b[32];
-
-  ntop->getTrace()->traceEvent(TRACE_WARNING, "Direction: %u [ntop: %s][%s -> %s]", zflow->direction,
-			       flow->isLocalToRemote() ? "L->R" : "R->L",
-			       flow->get_cli_ip_addr()->print(a, sizeof(a)),
-			       flow->get_srv_ip_addr()->print(b, sizeof(b)));
-#endif
-
-  if (zflow->direction == UNKNOWN_FLOW_DIRECTION) {
+  bool unknown_direction = (zflow->direction == UNKNOWN_FLOW_DIRECTION);
+  if (unknown_direction) {
     if (flow->isLocalToRemote())
       zflow->direction = 1 /* TX */;
     else
       zflow->direction = 0 /* RX */;
   }
+#ifdef DEBUG
+  char a[32], b[32];
+
+  ntop->getTrace()->traceEvent(TRACE_WARNING, "%sFlow Direction: %u (%s) [%s -> %s]",
+			       unknown_direction ? "Computed " : "",
+			       zflow->direction,
+			       flow->isLocalToRemote() ? "L->R" : "R->L",
+			       flow->get_cli_ip_addr()->print(a, sizeof(a)),
+			       flow->get_srv_ip_addr()->print(b, sizeof(b)));
+#endif
 
   if (zflow->direction == 0 /* RX */) {
     if (zflow->in_pkts)
