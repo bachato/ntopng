@@ -570,6 +570,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 
     guessed_protocol.proto.app_protocol = ndpi_map_ndpi_id_to_user_proto_id(get_ndpi_struct(), guessed_protocol.proto.app_protocol);
     guessed_protocol.proto.master_protocol = ndpi_map_ndpi_id_to_user_proto_id(get_ndpi_struct(), guessed_protocol.proto.master_protocol);
+    p.category = guessed_protocol.category;
 
     flow->setFlowVerdict(zflow->getFlowVerdict());
     flow->setJSONInfo(zflow->getAdditionalFieldsJSON());

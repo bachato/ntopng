@@ -1652,6 +1652,8 @@ void Flow::updateProtocol(ndpi_protocol proto_id) {
 
   if ((*ptr16 > 1024) && ((*ptr16 - 1024) == NDPI_PROTOCOL_CATEGORY_MALWARE))
     ndpiDetectedProtocol.category = NDPI_PROTOCOL_CATEGORY_MALWARE;
+
+  flow_category = ndpiDetectedProtocol.category;
 }
 
 /* *************************************** */
@@ -9653,6 +9655,6 @@ void Flow::addDedupInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
 
   d.exporter_ipv4 = exporter_ipv4, d.next_hop.set(next_hop), d.return_path = !src2dst_direction,
     d.in_index = in_index, d.out_index = out_index;
-  
+
   dedupStats.push_back(d);
 }
