@@ -30,7 +30,7 @@ To connect ntopng and ClickHouse, both running on the same machine, the followin
 
 .. code:: bash
 
-    ./ntopng -F "clickhouse;127.0.0.1;ntopng;default;default"
+    ntopng -F "clickhouse;127.0.0.1;ntopng;default;default"
 
 In the example above, `127.0.0.1` is used to connect using IPv4 (using the symbolic string :code:`localhost` could resolve to an IPv6 address). A user :code:`default`, identified with password :code:`default`, with read and write permissions on database :code:`ntopng` is indicated as well. As shortcut you can use :code:`-F clickhouse` for :code:`F="clickhouse;127.0.0.1;ntopng;default;default"`
 
@@ -38,7 +38,7 @@ The above example with a ClickHouse cluster would be:
 
 .. code:: bash
 
-    ./ntopng -F "clickhouse-cluster;127.0.0.1;ntopng;default;default;ntop_cluster"
+    ntopng -F "clickhouse-cluster;127.0.0.1;ntopng;default;default;ntop_cluster"
 
 
 
@@ -91,7 +91,7 @@ For example:
 
 .. code:: bash 
 
-    ./ntopng -F "clickhouse;127.0.0.1@9000,9440s;ntopng;default;default`
+    ntopng -F "clickhouse;127.0.0.1@9000,9440s;ntopng;default;default`
 
 Securing the Connection in ClickHouse Cloud
 ===========================================
@@ -102,10 +102,25 @@ For example:
 
 .. code:: bash 
 
-    ./ntopng -F "clickhouse-cloud;127.0.0.1@9440,3306s;ntopng;default,default;default`
+    ntopng -F "clickhouse-cloud;127.0.0.1@9440,3306s;ntopng;default,default;default`
 
 .. note::
 
    Securing the connection when using ClickHouse Cloud is highly recommended,
    moreover ClickHouse Cloud by default only accepts secured connections
+
+Strict Startup
+--------------
+
+By default, if ntopng fails to connect to ClickHouse at startup, it logs an error and continues running without ClickHouse support. To change this behaviour and force ntopng to exit when the ClickHouse connection cannot be established, use the :code:`--strict-startup` option.
+Example:
+
+.. code:: bash
+
+    ntopng -F "clickhouse" --strict-startup
+
+When :code:`--strict-startup` is set and ClickHouse fails to initialize (e.g. the service is down), ntopng prints an error and terminates immediately.
+This is particularly useful in production deployments where running without ClickHouse is not acceptable and a hard failure is preferable to silent data loss.
+
+In any case, in case of runtime failures with the ClickHouse connection, ntopng keeps running and the connection is automatically restored when connectivity comes back.
 
