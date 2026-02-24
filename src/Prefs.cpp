@@ -51,7 +51,6 @@ Prefs::Prefs(Ntop *_ntop) {
   enable_users_login = true, disable_localhost_login = false;
   enable_dns_resolution = sniff_dns_responses = sniff_name_responses =
     sniff_local_name_responses = true, limited_resources_mode = false;
-  enable_flow_deduplication = false;
   use_promiscuous_mode = true, do_reforge_timestamps = false;
   resolve_all_host_ip = false, service_license_check = false;
   add_vlan_tags_to_cloud_exporters = false, disable_purge = false,
@@ -988,9 +987,6 @@ void Prefs::reloadPrefsFromRedis() {
     skip_dpi_for_collected_flows = getDefaultBoolPrefsValue(CONST_RUNTIME_SKIP_DPI_FOR_COLLECTED_FLOWS,
 							    false),
     enable_assets_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false);
-
-    if(is_enterprise_xl_edition())
-      enable_flow_deduplication = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_FLOW_DEDUPLICATION, false);
   
   log_to_file = getDefaultBoolPrefsValue(CONST_RUNTIME_PREFS_LOG_TO_FILE, false);
   intf_rrd_raw_days = getDefaultPrefsValue(CONST_INTF_RRD_RAW_DAYS, INTF_RRD_RAW_DAYS),
@@ -2799,7 +2795,7 @@ void Prefs::lua(lua_State *vm) {
   lua_push_bool_table_entry(vm, "is_dns_resolution_enabled",
                             enable_dns_resolution);
   lua_push_bool_table_entry(vm, "is_flow_deduplication_enabled",
-                            enable_flow_deduplication);
+                            isFlowDedupEnabled());
   lua_push_bool_table_entry(vm, "is_autologout_enabled", enable_auto_logout);
   lua_push_bool_table_entry(vm, "is_interface_name_only",
                             enable_interface_name_only);

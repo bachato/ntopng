@@ -116,8 +116,10 @@ local function colorNotZero(v)
 end
 
 local function firstDottedElement(str)
-   if(isIPv4(str)) then
-      return str
+   if(isIPv4(str)
+      -- the string does not contain a dot
+      or (string.find(str, ".", 1, true) == nil)) then
+   return str
    else
       local items = split(str, "%.")
 

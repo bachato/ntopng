@@ -690,7 +690,6 @@
   NTOPNG_PREFS_PREFIX ".enable_query_performance_log"
 #define CONST_PREFS_ENABLE_ACCESS_LOG NTOPNG_PREFS_PREFIX ".enable_access_log"
 #define CONST_PREFS_ENABLE_ASSETS_LOG NTOPNG_PREFS_PREFIX ".enable_assets_log"
-#define CONST_PREFS_ENABLE_FLOW_DEDUPLICATION NTOPNG_PREFS_PREFIX ".enable_flow_deduplication"
 #define CONST_PREFS_ENABLE_SQL_LOG NTOPNG_PREFS_PREFIX ".enable_sql_log"
 #define CONST_TOP_TALKERS_ENABLED NTOPNG_PREFS_PREFIX ".host_top_sites_creation"
 #define CONST_SITES_COLLECTION_ENABLED NTOPNG_PREFS_PREFIX ".sites_collection"
