@@ -8,14 +8,17 @@ package.path = dirs.installdir .. "/scripts/lua/modules/timeseries/?.lua;" ..
 
 -- do NOT include lua_utils here, it's not necessary, keep it light!
 local callback_utils = require "callback_utils"
+local scripts_triggers = require "scripts_triggers"
+
 -- Toggle debug
 local enable_second_debug = false
 local ifnames = interface.getIfNames()
+local create_rrd = scripts_triggers.isRrdInterfaceCreation()
 
 -- ###########################################
 
 local function interface_rrd_creation_enabled(ifid)
-    return (ntop.getPref("ntopng.prefs.interface_rrd_creation") ~= "0")
+   return (create_rrd)
 end
 
 -- ###########################################

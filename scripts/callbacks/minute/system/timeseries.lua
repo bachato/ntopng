@@ -21,9 +21,10 @@ local when = os.time()
 prefs_dump_utils.check_dump_prefs_to_disk()
 
 -- #####################################
+local create_rrd = scripts_triggers.isRrdInterfaceCreation()
 
 -- Dump periodic activities duration if the telementry timeseries preference is enabled
-if scripts_triggers.isRrdInterfaceCreation() then
+if create_rrd then
    local ts_dump = require "ts_min_dump_utils"
 
    ts_dump.update_internals_periodic_activities_stats(when, ifstats, false)
@@ -31,7 +32,7 @@ end
 
 -- #####################################
 
-if scripts_triggers.isRrdInterfaceCreation() then
+if create_rrd then
    if areAlertsEnabled() then
       ts_utils.append("iface:engaged_alerts", {ifid=getSystemInterfaceId(), engaged_alerts=ifstats.num_alerts_engaged}, when)
       ts_utils.append("iface:dropped_alerts", {ifid=getSystemInterfaceId(), dropped_alerts=ifstats.num_dropped_alerts}, when)
