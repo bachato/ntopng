@@ -2088,7 +2088,7 @@ if isEmptyString(page) or page == "overview" then
 	    for k,v in pairs(flow.deduplication) do
 	       local ret, exp_ip, exp_name, site = formatExporter(v.exporter_ip)
 	       local ret1, next_hop_ip, next_hop_name, next_hope_site = formatNextHop(v.next_hop)
-	       tprint(v)
+	       --tprint(v)
 	       print("<tr><td>".. ret .. " / " .. ret1)
 	       if(v.return_path == true) then print(" <span class='badge bg-secondary'>".. i18n("dedup_flow_swapped").."</span>") end
 	       print("</td><td>")
