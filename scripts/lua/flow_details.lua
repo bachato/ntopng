@@ -2175,62 +2175,67 @@ if isEmptyString(page) or page == "overview" then
 	       graph_nodes[#graph_nodes + 1] = node
 	    end
 
-	    -- Build graph_edges
-	    local graph_edges = {}
+	    if(table.len(flow_trajectory) > 0) then
+	       -- Build graph_edges
+	       local graph_edges = {}
 
-	    for exporter_ip, x in pairs(flow_trajectory) do
-	       for _, v in pairs(x) do
-		  local next_hop = v.next_hop
-		  local return_path = v.return_path
-		  if next_hop ~= nil then
-		     local edge = { from = nodes[exporter_ip], to = nodes[next_hop] }
-		     if return_path then edge["return_path"] = true end
-		     graph_edges[#graph_edges + 1] = edge
+	       for exporter_ip, x in pairs(flow_trajectory) do
+		  for _, v in pairs(x) do
+		     local next_hop = v.next_hop
+		     local return_path = v.return_path
+		     if next_hop ~= nil then
+			local edge = { from = nodes[exporter_ip], to = nodes[next_hop] }
+			if return_path then edge["return_path"] = true end
+			graph_edges[#graph_edges + 1] = edge
+		     end
 		  end
 	       end
-	    end
 
-	    for exporter_ip, x in pairs(flow_trajectory) do
-	       for _, v in pairs(x) do
-		  local next_hop = v.next_hop
-		  local return_path = v.return_path
-		  if next_hop ~= nil then
-		     if flow_trajectory[next_hop] == nil then
+	       for exporter_ip, x in pairs(flow_trajectory) do
+		  for _, v in pairs(x) do
+		     local next_hop = v.next_hop
+		     local return_path = v.return_path
+		     if next_hop ~= nil then
+			if flow_trajectory[next_hop] == nil then
+			   if return_path then
+			      graph_edges[#graph_edges + 1] = { from = nodes[next_hop], to = client_id, return_path = true }
+			   else
+			      graph_edges[#graph_edges + 1] = { from = nodes[next_hop], to = server_id }
+			   end
+			end
+		     else
+			graph_edges[#graph_edges + 1] = { from = nodes[exporter_ip], to = server_id }
+		     end
+		  end
+	       end
+
+	       for exporter_ip, x in pairs(flow_trajectory) do
+		  for _, v in pairs(x) do
+		     local return_path = v.return_path
+		     if next_hops[exporter_ip] == nil then
 			if return_path then
-			   graph_edges[#graph_edges + 1] = { from = nodes[next_hop], to = client_id, return_path = true }
+			   if(server_id ~= nodes[exporter_ip]) then
+			      graph_edges[#graph_edges + 1] = { from = server_id, to = nodes[exporter_ip], return_path = true }
+			   end
 			else
-			   graph_edges[#graph_edges + 1] = { from = nodes[next_hop], to = server_id }
+			   if(client_id ~=  nodes[exporter_ip]) then
+			      graph_edges[#graph_edges + 1] = { from = client_id, to = nodes[exporter_ip] }
+			   end
 			end
 		     end
-		  else
-		     graph_edges[#graph_edges + 1] = { from = nodes[exporter_ip], to = server_id }
 		  end
 	       end
+	       
+	       local json_context = json.encode({ nodes = graph_nodes, edges = graph_edges })
+	       print('<div style="width:100%; max-width:100%; overflow:hidden;">')
+	       template.render("pages/vue_page.template", {
+				  vue_page_name = "PageExportersGraph",
+				  page_context  = json_context
+	       })
+	       print('</div>')
 	    end
-
-	    for exporter_ip, x in pairs(flow_trajectory) do
-	       for _, v in pairs(x) do
-		  local return_path = v.return_path
-		  if next_hops[exporter_ip] == nil then
-		     if return_path then
-			graph_edges[#graph_edges + 1] = { from = server_id, to = nodes[exporter_ip], return_path = true }
-		     else
-			graph_edges[#graph_edges + 1] = { from = client_id, to = nodes[exporter_ip] }
-		     end
-		  end
-	       end
-	    end
-
-	    local json_context = json.encode({ nodes = graph_nodes, edges = graph_edges })
-       print('<div style="width:100%; max-width:100%; overflow:hidden;">')
-	    template.render("pages/vue_page.template", {
-	       vue_page_name = "PageExportersGraph",
-	       page_context  = json_context
-	    })
-       print('</div>')
-
-	       print('</th></tr>\n')
-
+	    
+	    print('</th></tr>\n')	    
 	 end
 
          local function format_custom_field(key, value, snmpdevice)
