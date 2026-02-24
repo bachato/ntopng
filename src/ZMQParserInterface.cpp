@@ -922,9 +922,16 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow *const flow,
 #endif
     break;
   case DIRECTION:
-    if (value->string != NULL)
-      flow->direction = atoi(value->string);
-    else
+    if (value->string != NULL) {
+      if (strcmp(value->string, "L2R") == 0)
+        flow->direction = 1 /* TX */;
+      else if (strcmp(value->string, "R2L") == 0)
+        flow->direction = 0 /* RX */;
+      else if ((strcmp(value->string, "L2L") == 0) || (strcmp(value->string, "R2R") == 0))
+        flow->direction = UNKNOWN_FLOW_DIRECTION;
+      else
+        flow->direction = atoi(value->string);
+    } else
       flow->direction = value->int_num;
     break;
   case ICMP_TYPE:

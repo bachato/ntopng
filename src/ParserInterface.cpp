@@ -801,12 +801,14 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
     else
       zflow->direction = 0 /* RX */;
   }
+
 #ifdef DEBUG
   char a[32], b[32];
 
-  ntop->getTrace()->traceEvent(TRACE_WARNING, "%sFlow Direction: %u (%s) [%s -> %s]",
+  ntop->getTrace()->traceEvent(TRACE_WARNING, "%sFlow Direction: %u (%s) [ntopng: %s][%s -> %s]",
 			       unknown_direction ? "Computed " : "",
 			       zflow->direction,
+			       zflow->direction ? "L->R" : "R->L",
 			       flow->isLocalToRemote() ? "L->R" : "R->L",
 			       flow->get_cli_ip_addr()->print(a, sizeof(a)),
 			       flow->get_srv_ip_addr()->print(b, sizeof(b)));
