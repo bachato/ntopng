@@ -494,6 +494,8 @@ void SyslogCollectorInterface::collect_events() {
 static void *messagePollLoop(void *ptr) {
   SyslogCollectorInterface *iface = (SyslogCollectorInterface *)ptr;
 
+  iface->setPollerThreadName();
+
   /* Wait until the initialization completes */
   while (iface->isStartingUp()) sleep(1);
 

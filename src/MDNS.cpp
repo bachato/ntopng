@@ -24,7 +24,11 @@
 /* ******************************* */
 
 static void *resolverCheckFctn(void *ptr) {
-  Utils::setThreadName("n-mdns-res");
+  static std::atomic<u_int32_t> counter = 0;
+  char name[16];
+
+  snprintf(name, sizeof(name), "n-mdns-res-%d", counter++);
+  Utils::setThreadName(name);
   MDNS *m = (MDNS *)ptr;
 
   m->initializeResolver();

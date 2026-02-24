@@ -273,7 +273,10 @@ bool TimelineExtract::extractLive(struct mg_connection *conn,
 
 static void *extractionThread(void *ptr) {
   TimelineExtract *extr = (TimelineExtract *)ptr;
-  Utils::setThreadName("n-extract");
+  char name[16];
+
+  snprintf(name, sizeof(name), "n-extract");
+  Utils::setThreadName(name);
 
   extr->extractToDisk(extr->getID(), extr->getNetworkInterface(),
                       extr->getFrom(), extr->getTo(), extr->getFilter(),

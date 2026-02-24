@@ -27,7 +27,11 @@
 /* **************************************************** */
 
 static void *doRun(void *ptr) {
-  Utils::setThreadName("n-th-pool");
+  static std::atomic<u_int32_t> counter = 0;
+  char name[16];
+
+  snprintf(name, sizeof(name), "n-th-pool-%d", counter++);
+  Utils::setThreadName(name);
 
   ((ThreadPool *)ptr)->run();
   return (NULL);
@@ -144,8 +148,6 @@ void ThreadPool::run() {
     } else {
       q->run();
       delete q;
-
-      Utils::setThreadName("n-idle-thpool");
     }
   }
 

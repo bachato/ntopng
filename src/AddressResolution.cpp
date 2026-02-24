@@ -214,8 +214,11 @@ void *resolveLoop(void *ptr) {
   Redis *r = ntop->getRedis();
   u_int no_resolution_loops = 0;
   const u_int max_num_idle_loops = 1;
+  static std::atomic<u_int32_t> counter = 0;
+  char name[16];
 
-  Utils::setThreadName("n-dns-res");
+  snprintf(name, sizeof(name), "n-dns-res-%d", counter++);
+  Utils::setThreadName(name);
 
   while (!ntop->getGlobals()->isShutdown()) {
     char numeric_ip[64];

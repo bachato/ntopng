@@ -49,10 +49,11 @@ void QueuedThreadData::run() {
   char *label = slash ? &slash[1] : script_path;
 
 #ifdef TASK_DEBUG
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "(**) Started task [%s][%s][%s]",
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "(**) Started task [%s][%s][%s][label=%s]",
 			       script_path, iface->get_name(),
-			       hourly_daily_activity ? "hour/daily" : "sec/min");
+			       hourly_daily_activity ? "hour/daily" : "sec/min", label);
 #endif
+
   if (iface->get_id() == -1)
     snprintf(name, sizeof(name), "n-s-%s", label);
   else
