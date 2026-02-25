@@ -1959,11 +1959,13 @@ local community_timeseries = {{
    scale = i18n('graphs.metric_labels.load'),
    timeseries = {
       cpu_utilization_pct = {
+         use_serie_name = true,
          label = i18n('about.cpu_load'),
          color = timeseries_info.get_timeseries_color('default')
       }
    },
-   always_visibile = true
+   disable_default_ago_ts = true,
+   draw_stacked = false
 },
 -- { schema = "iface:engaged_alerts",          id = timeseries_id.system, label = i18n("graphs.engaged_alerts"),            priority = 0, measure_unit = "number", scale = i18n('graphs.metric_labels.alerts'), timeseries = { engaged_alerts     = { label = i18n('graphs.engaged_alerts'),            color = timeseries_info.get_timeseries_color('alerts') }}},
 -- { schema = "iface:dropped_alerts",          id = timeseries_id.system, label = i18n("graphs.dropped_alerts"),            priority = 0, measure_unit = "number", scale = i18n('graphs.metric_labels.alerts'), timeseries = { dropped_alerts     = { label = i18n('graphs.dropped_alerts'),            color = timeseries_info.get_timeseries_color('alerts') }}},

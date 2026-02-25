@@ -996,6 +996,8 @@ function driver:timeseries_top(options, top_tags)
       id = "packets"
    elseif ends(options.schema, "hits") then
       id = "hits"
+   elseif ends(options.schema, "thread_cpu_load") then
+      id = "cpu_utilization_pct"
    end
 
    for top_item, value in pairsByValues(available_items, rev) do
