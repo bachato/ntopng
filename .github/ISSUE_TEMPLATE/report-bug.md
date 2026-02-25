@@ -15,9 +15,9 @@ Pre-Submit Checklist: (check applicable sources for existing issues)
 
 **Environment**:
 * OS name: [e.g. Ubuntu]
-* OS version: [e.g. 18.04]
+* OS version: [e.g. 24.04]
 * Architecture: [e.g. amd64]
-* ntopng version/revision: [e.g. 5.1.211223]
+* ntopng version/revision: [e.g. 6.7.260225]
 
 **What happened**:
 
