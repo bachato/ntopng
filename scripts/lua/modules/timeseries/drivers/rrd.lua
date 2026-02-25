@@ -991,6 +991,7 @@ function driver:timeseries_top(options, top_tags)
    local top_series = {}
    local count = 0
    local id = "bytes"
+   local show_empty = false
 
    if ends(options.schema, "packets") then
       id = "packets"
@@ -998,10 +999,11 @@ function driver:timeseries_top(options, top_tags)
       id = "hits"
    elseif ends(options.schema, "thread_cpu_load") then
       id = "cpu_utilization_pct"
+      show_empty = true
    end
 
    for top_item, value in pairsByValues(available_items, rev) do
-      if value > 0 then
+      if value > 0 or show_empty then
          local ifindex = available_tags[top_item][1].if_index or available_tags[top_item][1].port
          local ext_label = nil
          -- Interface index available, probe, exporter, ecc.
