@@ -1641,10 +1641,14 @@ void Flow::updateProtocol(ndpi_protocol proto_id) {
    * This prevents overwriting already determined category (e.g. by IP or Host)
    */
   if (ndpiDetectedProtocol.category == NDPI_PROTOCOL_CATEGORY_UNSPECIFIED) {
+#if 0
     u_int16_t *a = (u_int16_t*)&ndpiDetectedProtocol.category;
     u_int16_t *b = (u_int16_t*)&proto_id.category;
 
     *a = *b; /* trick to avoid runtime errors with custom categories */
+#else
+    ndpiDetectedProtocol.category = proto_id.category;
+#endif
   }
 
   /* trick to avoid runtime errors with custom categories */
