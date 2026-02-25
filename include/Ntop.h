@@ -132,6 +132,15 @@ class Ntop {
   char *local_network_aliases[CONST_MAX_NUM_NETWORKS];
   AddressTree local_network_tree, cloud_local_network_tree;
 
+  /* Threads info */
+  struct ThreadInfo {
+    std::string name;
+    struct timespec last_cpu_ts;   /* last CPU clock sample */
+    struct timespec last_elapsed_ts;  /* cpu time of last clock sample */
+  };
+  std::map<pthread_t, ThreadInfo> threads_info;
+  Mutex threads_info_m;
+
   /* Local Autonomous Systems */
   std::map<u_int32_t, bool> local_asn;
 
@@ -506,6 +515,7 @@ class Ntop {
 #endif
   void setScriptsDir();
   void lua_periodic_activities_stats(NetworkInterface *iface, lua_State *vm);
+  void lua_threadsInfo(lua_State *vm);
   void getUsers(lua_State *vm);
   bool getLocalNetworkAlias(lua_State *vm, u_int32_t network_id);
   bool isUserAdministrator(lua_State *vm);
@@ -566,6 +576,7 @@ class Ntop {
   void shutdownPeriodicActivities();
   void shutdownInterfaces();
   void shutdownAll();
+  void registerThread(const char *name, pthread_t id);
   void runHousekeepingTasks();
   void runPeriodicHousekeepingTasks();
   void runShutdownTasks();

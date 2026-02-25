@@ -276,7 +276,7 @@ static void *extractionThread(void *ptr) {
   char name[16];
 
   snprintf(name, sizeof(name), "n-extract");
-  Utils::setThreadName(name);
+  ntop->registerThread(name, pthread_self());
 
   extr->extractToDisk(extr->getID(), extr->getNetworkInterface(),
                       extr->getFrom(), extr->getTo(), extr->getFilter(),

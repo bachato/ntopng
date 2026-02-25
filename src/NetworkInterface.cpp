@@ -3913,7 +3913,7 @@ void NetworkInterface::flowAlertsDequeueLoop() {
   char buf[16];
 
   snprintf(buf, sizeof(buf), "n-fcheck-%d", get_id());
-  Utils::setThreadName(buf);
+  ntop->registerThread(buf, pthread_self());
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL,
 			       "Started flow user script hooks loop on interface '%s' [id: %u]...",
@@ -3972,7 +3972,7 @@ void NetworkInterface::hostAlertsDequeueLoop() {
   char buf[16];
 
   snprintf(buf, sizeof(buf), "n-hcheck-%d", get_id());
-  Utils::setThreadName(buf);
+  ntop->registerThread(buf, pthread_self());
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL,
 			       "Started host user script hooks loop on interface '%s' [id: %u]...",
@@ -4034,7 +4034,7 @@ void NetworkInterface::dumpFlowLoop() {
   const u_int active_flows_budget = idle_flows_budget / 3; /* lower priority */
 
   snprintf(buf, sizeof(buf), "n-fdump-%d", get_id());
-  Utils::setThreadName(buf);
+  ntop->registerThread(buf, pthread_self());
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Started flow dump loop on interface %s [id: %u]...",
 			       get_description(), get_id());
@@ -4129,7 +4129,7 @@ void NetworkInterface::setPollerThreadName() {
 
   snprintf(buf, sizeof(buf), "n-poll-%d", get_id());
 
-  Utils::setThreadName(buf);
+  ntop->registerThread(buf, pthread_self());
 }
 
 /* **************************************************** */

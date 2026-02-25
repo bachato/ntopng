@@ -4146,7 +4146,7 @@ static void *pcapDumpLoop(void *ptr) {
   char name[16];
 
   snprintf(name, sizeof(name), "n-pcap-dump");
-  Utils::setThreadName(name);
+  ntop->registerThread(name, pthread_self());
 
   while (c->pkt_capture.captureInProgress) {
     u_char *pkt;

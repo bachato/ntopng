@@ -4099,6 +4099,17 @@ static int ntop_system_host_stat(lua_State *vm) {
 
 /* ****************************************** */
 
+static int ntop_threads_info(lua_State *vm) {
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  lua_newtable(vm);
+  ntop->lua_threadsInfo(vm);
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_get_system_alerts_stats(lua_State *vm) {
   NetworkInterface *iface;
 
@@ -8314,6 +8325,7 @@ static luaL_Reg _ntop_reg[] = {
     { "dumpBinaryFile", ntop_dump_binary_file },
     { "checkLicense", ntop_check_license },
     { "systemHostStat", ntop_system_host_stat },
+    { "threadsInfo", ntop_threads_info },
     { "getSystemAlertsStats", ntop_get_system_alerts_stats },
     { "refreshCPULoad", ntop_refresh_cpu_load },
     { "getCookieAttributes", ntop_get_cookie_attributes },

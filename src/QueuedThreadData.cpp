@@ -59,7 +59,7 @@ void QueuedThreadData::run() {
   else
     snprintf(name, sizeof(name), "n-%d-%s", iface->get_id(), label);
       
-  Utils::setThreadName(name);
+  ntop->registerThread(name, pthread_self());
 
   pa->incRunningTasks(hourly_daily_activity);
   j->set_state_running(iface, script_path);

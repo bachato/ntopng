@@ -31,7 +31,7 @@ static void *doRun(void *ptr) {
   char name[16];
 
   snprintf(name, sizeof(name), "n-th-pool-%d", counter++);
-  Utils::setThreadName(name);
+  ntop->registerThread(name, pthread_self());
 
   ((ThreadPool *)ptr)->run();
   return (NULL);

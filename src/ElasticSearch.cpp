@@ -30,7 +30,7 @@ static void *esLoop(void *ptr) {
   char name[16];
 
   snprintf(name, sizeof(name), "n-es-%d", es->getNetworkInterface()->get_id());
-  Utils::setThreadName(name);
+  ntop->registerThread(name, pthread_self());
   es->pushEStemplate();  // sends ES ntopng template
   es->indexESdata();
 

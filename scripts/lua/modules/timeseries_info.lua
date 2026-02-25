@@ -1949,6 +1949,21 @@ local community_timeseries = {{
          color = timeseries_info.get_timeseries_color('default')
       }
    }
+}, {
+   schema = "top:system:thread_cpu_load",
+   id = timeseries_id.system,
+   label = i18n("graphs.threads_cpu_load"),
+   description = i18n("graphs.metric_descr.threads_cpu_load"),
+   priority = 0,
+   measure_unit = "percentage",
+   scale = i18n('graphs.metric_labels.load'),
+   timeseries = {
+      cpu_utilization_pct = {
+         label = i18n('about.cpu_load'),
+         color = timeseries_info.get_timeseries_color('default')
+      }
+   },
+   always_visibile = true
 },
 -- { schema = "iface:engaged_alerts",          id = timeseries_id.system, label = i18n("graphs.engaged_alerts"),            priority = 0, measure_unit = "number", scale = i18n('graphs.metric_labels.alerts'), timeseries = { engaged_alerts     = { label = i18n('graphs.engaged_alerts'),            color = timeseries_info.get_timeseries_color('alerts') }}},
 -- { schema = "iface:dropped_alerts",          id = timeseries_id.system, label = i18n("graphs.dropped_alerts"),            priority = 0, measure_unit = "number", scale = i18n('graphs.metric_labels.alerts'), timeseries = { dropped_alerts     = { label = i18n('graphs.dropped_alerts'),            color = timeseries_info.get_timeseries_color('alerts') }}},

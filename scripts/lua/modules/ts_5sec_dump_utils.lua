@@ -33,12 +33,30 @@ function ts_dump.dump_cpu_stats(ifid, when)
         }, when)
     end
 
-		if cpu_load then
-			ts_utils.append("system:cpu_load", {
-					ifid = ifid,
-					load_percentage = cpu_load
-			}, when)			
-		end
+    if cpu_load then
+	ts_utils.append("system:cpu_load", {
+			ifid = ifid,
+			load_percentage = cpu_load
+	}, when)			
+    end
+end
+
+-- ########################################################
+
+function ts_dump.dump_thread_cpu_stats(ifid, when)
+    local threads_info = ntop.threadsInfo()
+    if not threads_info then return end
+
+    for thread_name, stats in pairs(threads_info) do
+        local cpu_pct = stats["cpu_utilization_pct"]
+        if cpu_pct ~= nil then
+            ts_utils.append("system:thread_cpu_load", {
+                ifid       = ifid,
+                thread_name = thread_name,
+                cpu_utilization_pct = cpu_pct
+            }, when)
+        end
+    end
 end
 
 -- ########################################################

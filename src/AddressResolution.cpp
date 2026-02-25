@@ -218,7 +218,7 @@ void *resolveLoop(void *ptr) {
   char name[16];
 
   snprintf(name, sizeof(name), "n-dns-res-%d", counter++);
-  Utils::setThreadName(name);
+  ntop->registerThread(name, pthread_self());
 
   while (!ntop->getGlobals()->isShutdown()) {
     char numeric_ip[64];

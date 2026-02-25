@@ -28,7 +28,7 @@ static void *resolverCheckFctn(void *ptr) {
   char name[16];
 
   snprintf(name, sizeof(name), "n-mdns-res-%d", counter++);
-  Utils::setThreadName(name);
+  ntop->registerThread(name, pthread_self());
   MDNS *m = (MDNS *)ptr;
 
   m->initializeResolver();

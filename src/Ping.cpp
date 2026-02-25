@@ -288,7 +288,7 @@ void Ping::pollResults() {
   else
     snprintf(thread_name, sizeof(thread_name), "n-ping");
 
-  Utils::setThreadName(thread_name);
+  ntop->registerThread(thread_name, pthread_self());
 
 #ifdef TRACE_PING
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Started polling...");
