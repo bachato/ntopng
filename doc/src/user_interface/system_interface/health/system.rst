@@ -20,8 +20,20 @@ Here a few information are available:
 - ntopng Storage Usage;
 - Log Trace (for debugging);
 
-By clicking the chart icon, the `Historical Charts`_ page is going to be displayed.
+By clicking on the chart icon, the `Historical Charts`_ page is going to be displayed.
 Clicking instead on the wrench, an other monitoring page is going to be shown with the state of ntopng queues, periodic activities and behavioral checks.
+
+Historical Charts
+^^^^^^^^^^^^^^^^^
+
+The Historical Charts page displays charts with performance metrics for the ntopng process itself.
+
+ntopng records CPU utilization for the system and for each of its internal threads at 5-second granularity.
+
+A per-thread CPU load chart is available under the **Threads CPU Load** entry and shows how CPU time
+is distributed across the individual threads (e.g. packet processing, periodic activities, etc.).
+Monitoring per-thread CPU load is useful to correlate CPU spikes with specific ntopng activities and
+diagnose performance bottlenecks when ntopng is under heavy traffic load.
 
 .. _Internals:
 
