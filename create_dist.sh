@@ -1,9 +1,15 @@
 #!/bin/bash
 
+#
+# In case you have never used npm do
+#
+# npm install
+#
+
 branch_name=`git branch | head | cut -d ' ' -f 2`
 
 echo "-- Compiling Dist -- "
-npm run build:dev || exit 1
+npm run build || exit 1
 
 echo "-- Pushing code -- "
 cd httpdocs/dist
