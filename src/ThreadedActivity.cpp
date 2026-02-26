@@ -427,13 +427,13 @@ bool ThreadedActivity::isValidScript(char *dir, char *path) {
 
   if ((ntop->getPrefs()->getTimeseriesDriver() != ts_driver_influxdb) &&
       (strstr(path, "influxdb") != NULL)) {
-    ntop->getTrace()->traceEvent(TRACE_INFO, "Skipping %s%s", dir, path);
+    ntop->getTrace()->traceEvent(TRACE_DEBUG, "Skipping %s%s", dir, path);
     return (false);
   }
 
   if ((!ntop->getPrefs()->do_dump_flows_on_clickhouse()) &&
       (strstr(path, "clickhouse") != NULL)) {
-    ntop->getTrace()->traceEvent(TRACE_INFO, "Skipping %s%s", dir, path);
+    ntop->getTrace()->traceEvent(TRACE_DEBUG, "Skipping %s%s", dir, path);
     return (false);
   }
 

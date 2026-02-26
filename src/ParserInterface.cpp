@@ -803,10 +803,10 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
       zflow->direction = 0 /* RX */;
   }
 
-#ifdef DEBUG
+#if 1 //#ifdef DEBUG
   char a[32], b[32];
 
-  ntop->getTrace()->traceEvent(TRACE_WARNING, "%sFlow Direction: %u (%s) [ntopng: %s][%s -> %s]",
+  ntop->getTrace()->traceEvent(TRACE_INFO, "%sFlow Direction: %u (%s) [ntopng: %s][%s -> %s]",
 			       unknown_direction ? "Computed " : "",
 			       zflow->direction,
 			       zflow->direction ? "L->R" : "R->L",

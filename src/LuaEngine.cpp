@@ -700,7 +700,7 @@ int LuaEngine::load_script(char *script_path,
 int LuaEngine::run_loaded_script() {
   int rv = 0;
 
-  ntop->getTrace()->traceEvent(TRACE_INFO, "Running %s", loaded_script_path);
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "Running %s", loaded_script_path);
   if (!loaded_script_path) return (-1);
 
   /* Copy the lua_chunk to be able to possibly run it again next time */

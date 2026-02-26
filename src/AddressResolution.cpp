@@ -155,13 +155,13 @@ void AddressResolution::resolveHostName(const char *_numeric_ip, char *symbolic,
       m.unlock(__FILE__, __LINE__);
     } else {
       m.lock(__FILE__, __LINE__);
-      ntop->getTrace()->traceEvent(TRACE_INFO, "ADDRESS RESOLUTION FAILED %s",
+      ntop->getTrace()->traceEvent(TRACE_DEBUG, "ADDRESS RESOLUTION FAILED %s",
                                    numeric_ip); /* TODO */
       num_resolved_fails++;
       m.unlock(__FILE__, __LINE__);
 
       ntop->getTrace()->traceEvent(
-          TRACE_INFO, "Error resolution failure for %s [%d/%s/%s]", numeric_ip,
+          TRACE_DEBUG, "Error resolution failure for %s [%d/%s/%s]", numeric_ip,
           rc, gai_strerror(rc), strerror(errno));
       ntop->getRedis()->setResolvedAddress(
           numeric_ip, numeric_ip); /* So we avoid to continuously resolver the
