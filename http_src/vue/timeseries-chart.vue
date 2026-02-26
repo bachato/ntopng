@@ -492,7 +492,7 @@ defineExpose({ updateChartSeries, getImage });
     border-color: var(--timeseries-legend-border-color);
     border-style: solid;
     border-width: thin;
-    z-index: 80 !important;
+    z-index: 9999 !important;
     position: absolute;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .15);
     border-radius: 0.375rem;

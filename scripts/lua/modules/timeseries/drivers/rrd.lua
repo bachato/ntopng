@@ -1039,7 +1039,7 @@ function driver:timeseries_top(options, top_tags)
          }
       end
 
-      if #top_series >= options.top then
+      if (not show_empty) and (#top_series >= options.top) then
          break
       end
    end

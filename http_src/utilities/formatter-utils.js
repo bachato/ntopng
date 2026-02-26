@@ -153,6 +153,14 @@ const types = {
         max_value: 100,
         absolute_value: true,
     },
+    percentage_no_limit: {
+        id: "percentage_no_limit",
+        um: ["%"],
+        step: 101,
+        decimal: 1,
+        scale_values: null,
+        absolute_value: true,
+    },
     ratio: {
         id: "ratio",
         um: [""],

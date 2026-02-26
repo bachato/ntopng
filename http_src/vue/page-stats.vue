@@ -2,7 +2,7 @@
 <template>
     <div class="col-12 mb-2 mt-2">
         <AlertInfo></AlertInfo>
-        <div class="card h-100 overflow-hidden" style="position: relative;">
+        <div class="position-relative">
             <Loading :isLoading="loading"></Loading>
             <DateTimeRangePicker style="margin-top:0.5rem;" class="ms-1" :id="id_date_time_picker"
                 :enable_refresh="true" ref="date_time_picker" @epoch_change="epoch_change"
@@ -10,16 +10,17 @@
                 <template v-slot:begin>
                 </template>
                 <template v-slot:extra_buttons>
-                    <button v-if="props.context.enable_snapshots" class="btn btn-link btn-sm" @click="show_modal_snapshot"
-                        :title="_i18n('page_stats.manage_snapshots_btn')"><i
+                    <button v-if="props.context.enable_snapshots" class="btn btn-link btn-sm"
+                        @click="show_modal_snapshot" :title="_i18n('page_stats.manage_snapshots_btn')"><i
                             class="fas fa-lg fa-camera-retro"></i></button>
                     <button v-if="props.context.traffic_extraction_permitted" class="btn btn-link btn-sm"
                         @click="show_modal_traffic_extraction" :title="_i18n('traffic_recording.pcap_download')"><i
                             class="fas fa-lg fa-download"></i></button>
                     <button :disabled="is_safari" class="btn btn-link btn-sm" @click="show_modal_download_file"
                         :title="image_button_title"><i class="fas fa-lg fa-file-image"></i></button>
-                    <button v-if="props.context.is_history_enabled" class="btn btn-link btn-sm" @click="jump_to_historical_flows"
-                        :title="_i18n('page_stats.historical_flows')"><i class="fas fa-search-plus"></i></button>
+                    <button v-if="props.context.is_history_enabled" class="btn btn-link btn-sm"
+                        @click="jump_to_historical_flows" :title="_i18n('page_stats.historical_flows')"><i
+                            class="fas fa-search-plus"></i></button>
                 </template>
             </DateTimeRangePicker>
             <!-- select metric -->
@@ -51,43 +52,39 @@
             </TransitionGroup>
         </div>
 
-        <div class="mt-4 card card-shadow">
-            <Transition name="list" mode="out-in">
-                <div class="card-body" v-if="enable_stats_table">
-                    <BootstrapTable id="page_stats_bootstrap_table" :columns="stats_columns" :rows="stats_rows"
-                        :print_html_column="(col) => print_stats_column(col)"
-                        :print_html_row="(col, row) => print_stats_row(col, row)">
-                    </BootstrapTable>
-                </div>
-            </Transition>
-        </div>
+        <Transition name="list" mode="out-in">
+            <div class="position-relative mt-5" v-if="enable_stats_table">
+                <BootstrapTable id="page_stats_bootstrap_table" :columns="stats_columns" :rows="stats_rows"
+                    :print_html_column="(col) => print_stats_column(col)"
+                    :print_html_row="(col, row) => print_stats_row(col, row)">
+                </BootstrapTable>
+            </div>
+        </Transition>
 
-        <div class="mt-4 card card-shadow" v-if="props.context.is_ntop_pro">
-            <Transition name="list" mode="out-in">
-                <div v-if="selected_top_table?.table_config_def" class="card-body">
-                    <div class="inline select2-size me-2 mt-2">
-                        <SelectSearch v-model:selected_option="selected_top_table" :options="top_table_options">
-                        </SelectSearch>
-                    </div>
-                    <Datatable :key="selected_top_table?.value" ref="top_table_ref"
-                        :table_buttons="selected_top_table.table_config_def.table_button"
-                        :columns_config="selected_top_table.table_config_def.columns_config"
-                        :data_url="selected_top_table.table_config_def.data_url"
-                        :enable_search="selected_top_table.table_config_def.enable_search"
-                        :table_config="selected_top_table.table_config_def.table_config">
-                    </Datatable>
+        <Transition name="list" mode="out-in">
+            <div class="mt-4 position-relative" v-if="props.context.is_ntop_pro && selected_top_table?.table_config_def">
+                <div class="inline select2-size me-2 mt-2">
+                    <SelectSearch v-model:selected_option="selected_top_table" :options="top_table_options">
+                    </SelectSearch>
                 </div>
-            </Transition>
-        </div>
+                <Datatable :key="selected_top_table?.value" ref="top_table_ref"
+                    :table_buttons="selected_top_table.table_config_def.table_button"
+                    :columns_config="selected_top_table.table_config_def.columns_config"
+                    :data_url="selected_top_table.table_config_def.data_url"
+                    :enable_search="selected_top_table.table_config_def.enable_search"
+                    :table_config="selected_top_table.table_config_def.table_config">
+                </Datatable>
+            </div>
+        </Transition>
     </div>
 
-    <ModalSnapshot v-if="props.context.enable_snapshots" ref="modal_snapshot" :csrf="props.context.csrf" :page="page_snapshots"
-        @added_snapshot="refresh_snapshots" @deleted_snapshots="refresh_snapshots"
+    <ModalSnapshot v-if="props.context.enable_snapshots" ref="modal_snapshot" :csrf="props.context.csrf"
+        :page="page_snapshots" @added_snapshot="refresh_snapshots" @deleted_snapshots="refresh_snapshots"
         @deleted_all_snapshots="refresh_snapshots">
     </ModalSnapshot>
 
-    <ModalTimeseries v-if="props.context.is_ntop_pro" ref="modal_timeseries" :sources_types_enabled="props.context.sources_types_enabled"
-        @apply="apply_modal_timeseries">
+    <ModalTimeseries v-if="props.context.is_ntop_pro" ref="modal_timeseries"
+        :sources_types_enabled="props.context.sources_types_enabled" @apply="apply_modal_timeseries">
     </ModalTimeseries>
 
     <ModalTrafficExtraction id="page_stats_modal_traffic_extraction" ref="modal_traffic_extraction">
@@ -277,7 +274,7 @@ async function init() {
     if (timeseries_groups.length == 1) {
         push_custom_metric = false;
         metric_ts_schema = timeseries_groups[0]?.metric?.schema;
-        metric_query =  timeseries_groups[0]?.metric?.query;
+        metric_query = timeseries_groups[0]?.metric?.query;
     }
 
     if (push_custom_metric == true) {
