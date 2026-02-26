@@ -111,7 +111,7 @@ typedef struct {
 
 typedef struct {
   u_int8_t header_over;
-  char *outbuf;  
+  char *outbuf;
   u_int num_bytes, outbuf_len;
   lua_State *vm;
   bool return_content;
@@ -1680,11 +1680,11 @@ static void readCurlStats(CURL *curl, HTTPTranferStats *stats, lua_State *vm) {
   curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD_T, &stats->bytes_upload);
 #else
   // TODO: Deprecated with new curl versions, working on current ntopng curl version, use the commented lines above
-  // Deprecated since curl 7.55.0 -> https://curl.se/libcurl/c/CURLINFO_SIZE_DOWNLOAD.html  
+  // Deprecated since curl 7.55.0 -> https://curl.se/libcurl/c/CURLINFO_SIZE_DOWNLOAD.html
   curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD, &stats->bytes_download);
   curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD, &stats->bytes_upload);
 #endif
-  
+
   if (vm) {
     lua_newtable(vm);
 
@@ -2248,17 +2248,17 @@ static size_t curl_writefunc_to_lua(char *buffer, size_t size, size_t nitems,
     if(avail_space <= len) {
       char *ptr;
       u_int new_len;
-      
+
       new_len = state->outbuf_len + ndpi_max(len, 1024);
-      
+
       ptr = (char*)realloc(state->outbuf, new_len);
-      
+
       if(ptr != NULL) {
 	state->outbuf = ptr, state->outbuf_len = new_len;
-	avail_space = state->outbuf_len - state->num_bytes - 1;	
+	avail_space = state->outbuf_len - state->num_bytes - 1;
       }
     }
-    
+
     if (avail_space > 0) {
       int buff_diff = min(avail_space, len);
 
@@ -2292,14 +2292,14 @@ static size_t curl_hdf(char *buffer, size_t size, size_t nitems, void *userp) {
   if(avail_space <= len) {
     char *ptr;
     u_int new_len;
-    
+
     new_len = state->outbuf_len + ndpi_max(len, 1024);
-    
+
     ptr = (char*)realloc(state->outbuf, new_len);
-    
+
     if(ptr != NULL) {
       state->outbuf = ptr, state->outbuf_len = new_len;
-      avail_space = state->outbuf_len - state->num_bytes - 1;	
+      avail_space = state->outbuf_len - state->num_bytes - 1;
     }
   }
 
@@ -2425,7 +2425,7 @@ bool Utils::httpGetPostPutPatch(lua_State *vm, char *url,
 
       if(method == method_post)
 	curl_easy_setopt(curl, CURLOPT_POST, 1L);
-      
+
       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, form_data);
       curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(form_data));
 
@@ -2446,13 +2446,13 @@ bool Utils::httpGetPostPutPatch(lua_State *vm, char *url,
 
     if (headers != NULL) curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-    
+
     switch(method) {
     case method_get:
     case method_post:
       /* They are handled automatically with the code above */
       break;
-      
+
     case method_put:
       curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
       break;
@@ -2708,7 +2708,7 @@ char* Utils::getURL(char *url, char *buf, u_int buf_len) {
     snprintf(buf, buf_len, "%s/lua%s",
            ntop->get_HTTPserver()->get_scripts_dir(), &url[4]);
 #endif
-    
+
   ntop->fixPath(buf);
   if ((stat(buf, &s) == 0) && (S_ISREG(s.st_mode))) {
     u_int l = strlen(ntop->get_HTTPserver()->get_scripts_dir());
@@ -4738,7 +4738,7 @@ int Utils::ntop_findalldevs(ntop_if_t **alldevsp) {
   while (pfdev != NULL) {
     /* merge with info from pcap */
     pdev = pdevs;
-    
+
     while (pdev != NULL) {
       if (pfdev->system_name && strcmp(pfdev->system_name, pdev->name) == 0)
         break;
@@ -4762,7 +4762,7 @@ int Utils::ntop_findalldevs(ntop_if_t **alldevsp) {
         tail = cur;
       }
     }
-    
+
     pfdev = pfdev->next;
   }
 #endif
@@ -6065,7 +6065,7 @@ int Utils::pollSocket(int sock, int timeout /* msec */) {
 
 /* ******************************************* */
 
-/* Poll a list of sockets and bahaves like a poll() (same timeout and return value) 
+/* Poll a list of sockets and bahaves like a poll() (same timeout and return value)
  * Sockets which are not ready are cleared from the array (set to -1) */
 int Utils::pollSockets(int socks[], u_int num, int timeout /* msec */) {
   int rc;
@@ -6101,8 +6101,8 @@ int Utils::pollSockets(int socks[], u_int num, int timeout /* msec */) {
 				 num, max_num_sockets);
     num = max_num_sockets;
   }
-  
-  for (u_int i = 0; i < num; i++) { 
+
+  for (u_int i = 0; i < num; i++) {
     pfd[i].fd = socks[i];
     pfd[i].events = POLLIN;
   }
@@ -6172,28 +6172,28 @@ bool Utils::fromHex(char *in, u_int in_len, char *out, u_int out_len) {
 
 void Utils::swap8(u_int8_t *a, u_int8_t *b) {
   u_int8_t c = *a;
-  
+
   *a = *b;
   *b = c;
 }
 
 void Utils::swap16(u_int16_t *a, u_int16_t *b) {
   u_int16_t c = *a;
-  
+
   *a = *b;
   *b = c;
 }
 
 void Utils::swap32(u_int32_t *a, u_int32_t *b) {
   u_int32_t c = *a;
-  
+
   *a = *b;
   *b = c;
 }
 
 void Utils::swap64(u_int64_t *a, u_int64_t *b) {
   u_int64_t c = *a;
-  
+
   *a = *b;
   *b = c;
 }
@@ -6211,7 +6211,7 @@ void Utils::swapLen(void *a, void *b, u_int len) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "swapLen(%u) failed", len);
     return;
   }
-  
+
   memcpy(buf, a, len);
   memcpy(a, b, len);
   memcpy(b, buf, len);
@@ -6268,6 +6268,8 @@ IpAddress* Utils::parseHostString(char *host_ip, u_int16_t *vlan_id /* out */) {
 /* ******************************************* */
 
 bool Utils::nwInterfaceExists(char *if_name) {
+  if(if_name == NULL) return(false);
+
 #ifdef WIN32
  return(true);
  #else
@@ -7852,7 +7854,7 @@ const char* Utils::learningMode2str(OSLearningMode mode) {
 
   case os_learning_user_set_via_lua:
     return("Set by User via Lua");
-    
+
   case os_learning_dhcp:
     return("Learnt from DHCP");
   }
@@ -7897,12 +7899,12 @@ DeviceType Utils::osType2deviceType(ndpi_os t) {
   case ndpi_os_macos:
     return(device_workstation);
     break;
-    
+
   case ndpi_os_ios_ipad_os:
   case ndpi_os_android:
     return(device_phone);
     break;
-    
+
   case ndpi_os_unknown:
   case ndpi_os_MAX_OS:
     break;
@@ -7917,40 +7919,40 @@ const char* Utils::deviceType2str(DeviceType devtype) {
   switch(devtype) {
   case device_printer:
     return("Printer");
-    
+
   case device_video:
     return("Video");
-    
+
   case device_workstation:
     return("Workstation");
-    
+
   case device_laptop:
     return("Laptop");
-    
+
   case device_tablet:
     return("Tablet");
-    
+
   case device_phone:
     return("Phone");
-    
+
   case device_tv:
     return("TV");
-    
+
   case device_networking:
     return("Networking");
-    
+
   case device_wifi:
     return("WiFi");
-    
+
   case device_nas:
     return("NAS");
-    
+
   case device_multimedia:
     return("Multimedia");
-    
+
   case device_iot:
     return("IoT");
-    
+
   case device_unknown:
   case device_max_type:
     return("Unknown");
@@ -7973,12 +7975,11 @@ bool Utils::setProcessLimit(int resource, u_int32_t upper_limit) {
 				 resource, upper_limit, strerror(errno));
     return(false);
   }
-  
+
   ntop->getTrace()->traceEvent(TRACE_INFO,
 			       "Set resource limit succeeded [resource: %d][limit: %u]",
 			       resource, upper_limit);
 #endif
-  
+
   return(true);
 }
- 
