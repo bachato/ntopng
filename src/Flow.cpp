@@ -489,24 +489,30 @@ void Flow::freeDPIMemory() {
     if((protocol == IPPROTO_TCP)
        && (tls_blocks == NULL)
        && ndpiFlow->l4.tcp.tls.tls_blocks) {
-      ndpi_serializer serializer;
+      if(true) {
+	tls_blocks = strdup((const char*)ndpi_encode_tls_blocks(ndpiFlow->l4.tcp.tls.tls_blocks,
+								ndpiFlow->l4.tcp.tls.num_tls_blocks));
+      } else {
+	ndpi_serializer serializer;
 
-      if(ndpi_init_serializer(&serializer, ndpi_serialization_format_json) <  0)
-	; /* Something went wrong */
-      else {
-	char *json;
-	u_int32_t buflen;
+	if(ndpi_init_serializer(&serializer, ndpi_serialization_format_json) <  0)
+	  ; /* Something went wrong */
+	else {
+	  char *json;
+	  u_int32_t buflen;
 
-	ndpi_serialize_tls_blocks(iface->get_ndpi_struct(), &serializer, ndpiFlow);
+	  ndpi_serialize_tls_blocks(iface->get_ndpi_struct(), &serializer, ndpiFlow);
 
-	json = ndpi_serializer_get_buffer(&serializer, &buflen);
-	tls_blocks = strdup(json);
-	ndpi_term_serializer(&serializer);
+	  json = ndpi_serializer_get_buffer(&serializer, &buflen);
+	  tls_blocks = strdup(json);
+	  ndpi_term_serializer(&serializer);
+	}
       }
     }
 #endif
 
 #ifdef DUMP_TLS_BLOCKS
+#if 0
     if((protocol == IPPROTO_TCP)
        && ndpiFlow->l4.tcp.tls.tls_blocks
        && (ndpiFlow->protos.tls_quic.ja4_client[0] != '\0')
@@ -518,6 +524,7 @@ void Flow::freeDPIMemory() {
 				   ndpiFlow->host_server_name);
       ndpi_free(enc);
     }
+#endif
 #endif
 
     ndpi_free_flow(ndpiFlow);
@@ -7713,12 +7720,12 @@ void Flow::getDedupInfo(ndpi_serializer *serializer) {
 
     char key[16];
     char b1[32], b2[32];
-    
+
     // Generate a numeric key for JSON block
     snprintf(key, sizeof(key), "%d", i++);
 
     ndpi_serialize_start_of_block(serializer, key);
-    
+
     // Serialize exporter IP as string
     ndpi_serialize_string_string(serializer, "exporter_ip",
       Utils::intoaV4(it->exporter_ipv4, b1, sizeof(b1)));
@@ -7730,7 +7737,7 @@ void Flow::getDedupInfo(ndpi_serializer *serializer) {
     // Serialize boolean indicating return path
     ndpi_serialize_string_boolean(serializer, "return_path",
       it->return_path);
-    
+
     // Serialize input and output indexes
     ndpi_serialize_string_uint32(serializer, "input_idx",
       it->in_index);
