@@ -58,7 +58,7 @@ PcapInterface::PcapInterface(const char *name, u_int8_t ifIdx,
     /* The file exists so we need to check if it's a text file or a pcap file */
 
     num_ifaces = 1;
-    
+
     if (strcmp(name, "-") == 0 || !strncmp(name, "stdin", 5)) {
       /* stdin */
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "Reading packets from stdin...");
@@ -240,7 +240,7 @@ void PcapInterface::cleanupPcapDumpDir() {
 */
 static bool idle_flow_account(GenericHashEntry *h, void *user_data, bool *matched) {
   Flow *f = (Flow*)h;
-  
+
   f->accountFlowTraffic(true);
 
   return(false);
@@ -258,7 +258,7 @@ static void *packetPollLoop(void *ptr) {
   int socks[MAX_NUM_PCAP_INTERFACES] = { -1 };
   std::string curr_file;
   const char *fname = NULL;
-  
+
   /* Wait until the initialization completes */
   while (iface->isStartingUp()) sleep(1);
 
@@ -305,11 +305,11 @@ static void *packetPollLoop(void *ptr) {
 	fname = curr_file.c_str();
 
 	pcap_files_queue->erase(pcap_files_queue->begin()); /* Remove head */
-	
+
         if (fname != NULL) {
 	  char pcap_error_buffer[PCAP_ERRBUF_SIZE];
 	  pcap_t *file_pcap_handle;
-	  
+
           if ((file_pcap_handle = pcap_open_offline(fname, pcap_error_buffer)) ==  NULL) {
             ntop->getTrace()->traceEvent(TRACE_ERROR,
                                          "Unable to open file '%s': %s", fname,
@@ -334,6 +334,8 @@ static void *packetPollLoop(void *ptr) {
 #ifndef WIN32
     for(u_int8_t i=0; i < iface->get_num_ifaces(); i++) {
       pcap_t *pd = iface->get_pcap_handle(i);
+
+      if(!pd) continue;
 
       fds[i] = pcap_get_selectable_fd(pd);
 
@@ -384,6 +386,8 @@ static void *packetPollLoop(void *ptr) {
 
       if(Utils::pollSockets(socks, iface->get_num_ifaces(), timeout) == 0) {
 	for(u_int8_t i=0; i < iface->get_num_ifaces(); i++) {
+	  if(iface->getPcapIfaceName(i) == NULL) continue;
+
 	  if(!iface->read_from_stdin() &&
 	     !Utils::nwInterfaceExists(iface->getPcapIfaceName(i))) {
 	    ntop->getTrace()->traceEvent(TRACE_WARNING,
@@ -403,8 +407,10 @@ static void *packetPollLoop(void *ptr) {
       if(iface->idle()) {
 	continue;
       }
-      
+
       for(u_int8_t i=0; i < iface->get_num_ifaces(); i++) {
+	if(iface->get_pcap_handle(i) == NULL) continue;
+
 #if !(defined(__APPLE__) || defined(__FreeBSD__))
 	if(socks[i] == fds[i] /* ready */)
 #endif
@@ -441,12 +447,12 @@ static void *packetPollLoop(void *ptr) {
   if(iface->read_from_pcap_dump()) {
     FlowHash *fh = iface->get_flows_hash();
     u_int32_t begin_slot = 0;
-    
+
     iface->set_read_from_pcap_dump_done();
 
     fh->walk(&begin_slot, true /* walk_all */, idle_flow_account, NULL /* user_data */);
   }
-  
+
   /* Do two full scans to make sure all stats are updated */
   for (int i = 0; i < 2; i++)
     iface->purgeIdle(time(NULL), false, true /* Full scan */);
@@ -605,12 +611,14 @@ bool PcapInterface::reproducePcapOriginalSpeed() const {
 /* **************************************************** */
 
 bool PcapInterface::reopen(u_int8_t iface_id) {
-  pcap_close(pcap_handle[iface_id]);
-  
+  if(pcap_handle[iface_id]) pcap_close(pcap_handle[iface_id]);
+
   Utils::gainWriteCapabilities();
 
   while(!ntop->getGlobals()->isShutdown()) {
     char pcap_error_buffer[PCAP_ERRBUF_SIZE];
+
+    if(pcap_ifaces[iface_id] == NULL) continue;
 
     ntop->getTrace()->traceEvent(TRACE_INFO, "Trying to open %s", pcap_ifaces[iface_id]);
 
@@ -743,7 +751,7 @@ bool PcapInterface::processNextPacket(pcap_t *pd, int32_t if_index, int datalink
   if(++num_pkts != ethStats.getNumPackets())
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Received %u / processed %u", num_pkts,  ethStats.getNumPackets());
 #endif
-  
+
   return(true);
 }
 
@@ -764,7 +772,7 @@ bool PcapInterface::loadPcapFilesFromDir() {
   int fnum;
   struct dirent **pent;
   const char *pcap_extn = ".pcap";
-  
+
   ntop->getTrace()->traceEvent(TRACE_INFO, "Scanning %s", ifname);
 
   fnum = scandir(ifname, &pent, NULL, alphasort_case_insensitive);
@@ -784,7 +792,7 @@ bool PcapInterface::loadPcapFilesFromDir() {
       if(dp->d_name[0] != '.') {
 	if(strcmp(&dp->d_name[strlen(dp->d_name)-strlen(pcap_extn)], pcap_extn) == 0) {
 	  pcap_files_queue.push_back(std::string(buf));
-	} else if(stat(buf, &st) == 0 /* OK */) {	  
+	} else if(stat(buf, &st) == 0 /* OK */) {
 	  ntop->getTrace()->traceEvent(TRACE_INFO, "Skipping file %s: invalid extension", dp->d_name);
 	} else {
 	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Skipping file %s", dp->d_name);
