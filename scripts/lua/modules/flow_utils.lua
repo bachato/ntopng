@@ -1839,7 +1839,8 @@ function printFlowSNMPInfo(snmpdevice, input_idx, output_idx, as_row)
 
     if(as_row == true) then
        print("<span class=\"badge bg-info\">" .. "<a href=" .. url_input .. ">"
-	     .. (inputidx_name or "") .. "</span></a> / ")
+	     .. (inputidx_name or "") .. "</span></a>"
+	     .. ' <i class="fas fa-long-arrow-alt-right"></i> ')
        print("<span class=\"badge bg-info\">" .. "<a href=" .. url_output .. ">" ..
 	     (outputidx_name or "") .. "</span></a>")
 
