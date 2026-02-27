@@ -1644,18 +1644,22 @@ function formatNextHop(ip)
 
       if(ip1 ~= ip) then
 	 ret = "<a href=\"" .. ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporter_interfaces.lua?ip=" .. ip1 .. "\">" .. exporter_name
-
+	 
 	 if(site ~= nil) then
 	    ret = ret .. " (".. site ..")</A>"
 	 end
-
-	 ret = ret .. " ["..  "<a href=\"" .. ntop.getHttpPrefix() .. "/lua/host_details.lua?host=" .. ip .. "\">" .. ip .. "</a>".."]"
+	 
+	 ret = ret .. " ["..  "<a href=\"" .. ntop.getHttpPrefix() .. "/lua/host_details.lua?host=" .. ip .. "\">" .. ip .. "</a>".."]"      
       else
-	 ret = "<a href=" .. ntop.getHttpPrefix() .. "/lua/host_details.lua?host=" .. ip1 .. ">" .. ip1 .. "</a>"
+	 if(ip == "0.0.0.0") then
+	    ret = ip
+	 else
+	    ret = "<a href=" .. ntop.getHttpPrefix() .. "/lua/host_details.lua?host=" .. ip1 .. ">" .. ip1 .. "</a>"
+	 end
       end
 
       ret = ret .. "</a>"
-
+      
       return ret, ip1, exporter_name or ip1, site
    else
       return ip, ip, ip, nil

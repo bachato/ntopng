@@ -5834,7 +5834,7 @@ void Flow::timeval_diff(struct timeval *begin, const struct timeval *end,
 std::string Flow::getFlowInfo(bool isLuaRequest) {
   std::string info_field = std::string("");
 
-  if(exporterStats.size() > 0) {
+  if(exporterStats.size() > 1) {
     std::vector<ExporterFlowInfo>::iterator it;
     bool swap_found = false;
     char buf[16];
@@ -5843,7 +5843,7 @@ std::string Flow::getFlowInfo(bool isLuaRequest) {
       swap_found |= it->return_path;
 
     snprintf(buf, sizeof(buf), "%u %sExp.",
-	     (unsigned int)(exporterStats.size()+1), swap_found ? "Bidir. " : "");
+	     (unsigned int)(exporterStats.size()), swap_found ? "Bidir. " : "");
     info_field = std::string(buf);
   } else if(!isMaskedFlow()) {
     if(iec104) return (iec104->getFlowInfo());
@@ -9705,7 +9705,7 @@ void Flow::addExporterInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
   std::vector<ExporterFlowInfo>::iterator it;
   ExporterFlowInfo d;
 
-  if((exporter_ipv4 == 0) || next_hop->isEmpty())
+  if(exporter_ipv4 == 0)
     return;
 
   /* Check for duplicates first */

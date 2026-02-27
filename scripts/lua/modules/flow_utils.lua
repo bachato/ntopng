@@ -23,7 +23,7 @@ end
 -- The same base id of the ntop_flow.h file
 local ntop_base_id = 57472
 
--- Keep in sync with the defines in ntop_flow.h, 
+-- Keep in sync with the defines in ntop_flow.h,
 -- otherwise it could happen that some fields are not mapped
 local flow_label_id = {
     [tostring(ntop_base_id + 524)] = 'COMMUNITY_ID'
@@ -101,8 +101,7 @@ function formatInterfaceId(id, idx, snmpdevice)
         return ("Unknown")
     else
         if (snmpdevice ~= nil) then
-            return ('<A HREF="/lua/flows_stats.lua?deviceIP=' .. snmpdevice .. '&' .. idx .. '=' .. id .. '">' .. id ..
-                       '</A>')
+            return ('<A HREF="/lua/flows_stats.lua?deviceIP=' .. snmpdevice .. '&' .. idx .. '=' .. id .. '">' .. id .. '</A>')
         else
             return (id)
         end
@@ -267,7 +266,7 @@ function getFlowsFilter()
     end
 
     if category ~= nil and category ~= "" then
-        if tonumber(category) then 
+        if tonumber(category) then
             pageinfo["l7categoryFilter"] = tonumber(category)
         else
             pageinfo["l7categoryFilter"] = interface.getnDPICategoryId(category)
@@ -311,8 +310,8 @@ function getFlowsFilter()
         if status == "direct" or
             status == "transit" then -- AS Transit
             pageinfo["transitAS"] = status
-        elseif status == "connecting" or 
-            status == "closed" or 
+        elseif status == "connecting" or
+            status == "closed" or
             status == "enstablished" or
             status == "reset" then -- TCP Flow State
             pageinfo["tcpFlowStateFilter"] = status
@@ -691,7 +690,7 @@ local function formatFlowHost(flow, cli_or_srv, historical_bounds, hyperlink_suf
 
     host_name = host_name .. format_utils.formatFullAddressCategory(host)
 
-    local mac    
+    local mac
     mac = flow[cli_or_srv..".mac"]
 
     return hostinfo2detailshref(flow2hostinfo(flow, cli_or_srv), hyperlink_params, host_name, tooltip, true --[[ perform link existance checks --]] ), mac
@@ -757,7 +756,7 @@ function getFlowLabel(flow, show_macs, add_hyperlinks, historical_bounds, hyperl
 
 	    if isEmptyString(n) then
 	       local name = shortenString(ntop.getASName(flow["cli.ip"]), 43)
-	       
+
 	       if isEmptyString(name) then
 		  n = "ASN "..flow.cli_as
 	       else
@@ -781,7 +780,7 @@ function getFlowLabel(flow, show_macs, add_hyperlinks, historical_bounds, hyperl
 
         if ((flow.dst_as ~= nil) and (flow.dst_as ~= 0)) then
 	    local n = flow.dst_as_name
-	    
+
 	    if isEmptyString(n) then
 	       local name = shortenString(ntop.getASName(flow["srv.ip"]), 43)
 
@@ -791,7 +790,7 @@ function getFlowLabel(flow, show_macs, add_hyperlinks, historical_bounds, hyperl
 		  n = name
 	       end
 	    end
-	    
+
             dst_as = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. flow.dst_as .. "\">" .. shortenString(n, 14) .. "</A>"
             srv_mac = ""
         else
@@ -1099,7 +1098,7 @@ function getRTPInfo(infoPar)
     local returnString = ""
     local infoFlow, posFlow, errFlow = json.decode(infoPar["moreinfo.json"], 1, nil)
 
-    if infoFlow ~= nil then       
+    if infoFlow ~= nil then
         call_id = getFlowValue(infoFlow, "RTP_SIP_CALL_ID")
 
         if tostring(call_id) ~= "" then
@@ -1144,13 +1143,13 @@ function getSIPTableRows(flow, info)
     if (sip_found == 1) then
         sip_found = isThereSIPCall(info)
     end
-    
+
     if (sip_found == 1) then
         string_table = string_table .. "<tr><th colspan=3 >" .. i18n("flow_details.sip_protocol_information") ..
                            "</th></tr>\n"
 
 	call_id = flow["protos.sip_call_id"] or getFlowValue(info, "SIP_CALL_ID")
-	
+
         if ((call_id == nil) or (call_id == "")) then
             string_table = string_table .. "<tr id=\"call_id_tr\" style=\"display: none;\"><th width=33%> " ..
                                i18n("flow_details.call_id") .. " " .. call_id_ico ..
@@ -1209,7 +1208,7 @@ function getSIPTableRows(flow, info)
         local string_table_5 = ""
         local show_rtp_stream = 0
 
-	local sip_rtp_ipv4_src_addr = getFlowValue(info, "SIP_RTP_IPV4_SRC_ADDR")	
+	local sip_rtp_ipv4_src_addr = getFlowValue(info, "SIP_RTP_IPV4_SRC_ADDR")
         if ((sip_rtp_ipv4_src_addr ~= nil) and (sip_rtp_ipv4_src_addr ~= "")) then
 	   sip_rtp_src_addr = 1
 	   string_table_1 = sip_rtp_ipv4_src_addr
@@ -1222,7 +1221,7 @@ function getSIPTableRows(flow, info)
 	      end
 
 	      show_rtp_stream = 1
-	   end	  
+	   end
         end
 
 	if(show_rtp_stream == 1) then
@@ -1241,7 +1240,7 @@ function getSIPTableRows(flow, info)
 	      string_table_2 = string_table_2 .. "</A>"
 	      show_rtp_stream = 1
 	   end
-	   
+
 	   local sip_rtp_ipv4_dst_addr = getFlowValue(info, "SIP_RTP_IPV4_DST_ADDR")
 	   if ((sip_rtp_src_addr == 1) or
             ((sip_rtp_ipv4_dst_addr ~= nil) and
@@ -1250,10 +1249,10 @@ function getSIPTableRows(flow, info)
 	      string_table_3 = " <i class=\"fas fa-exchange-alt fa-lg\"></i> "
 	      show_rtp_stream = 1
 	   end
-	   
+
 	   if ((sip_rtp_ipv4_dst_addr ~= nil) and (sip_rtp_ipv4_dst_addr ~= "")) then
 	      sip_rtp_dst_addr = 1
-	      string_table_4 = sip_rtp_ipv4_dst_addr	    
+	      string_table_4 = sip_rtp_ipv4_dst_addr
 	      if (string_table_4 ~= "0.0.0.0") then
 		 sip_rtp_dst_address_ip = string_table_4
 		 interface.select(ifname)
@@ -1261,11 +1260,11 @@ function getSIPTableRows(flow, info)
 		 if (rtp_host ~= nil) then
                     string_table_4 = hostinfo2detailshref(rtp_host, nil, sip_rtp_dst_address_ip)
                 end
-		 
+
 		 show_rtp_stream = 1
 	      end
 	   end
-	   
+
 	   local sip_rtp_l4_dst_port = getFlowValue(info, "SIP_RTP_L4_DST_PORT")
 	   if ((sip_rtp_l4_dst_port ~= nil)
 	      and (sip_rtp_l4_dst_port ~= "")
@@ -1280,7 +1279,7 @@ function getSIPTableRows(flow, info)
 	      show_rtp_stream = 1
 	   end
 	end
-	
+
         if (show_rtp_stream == 1) then
             string_table = string_table .. "<tr id=\"rtp_stream_tr\" style=\"display: table-row;\"><th width=33%>" ..
                                i18n("flow_details.rtp_stream_peers") ..
@@ -1433,7 +1432,7 @@ function getRTPTableRows(info)
         -- TWO-WAY CALL-QUALITY INDICATORS
         string_table = string_table .. "<tr><th>" .. i18n("flow_details.call_quality_indicators") .. "</th><th>" ..
                            i18n("flow_details.forward") .. "</th><th>" .. i18n("flow_details.reverse") .. "</th></tr>"
-        
+
                            -- JITTER
         if isFlowValueDefined(info, "RTP_IN_JITTER") then
             local rtp_in_jitter = getFlowValue(info, "RTP_IN_JITTER") / 100
@@ -1702,122 +1701,129 @@ end
 
 -- #######################
 
-function buildExportersGraph(flow_trajectory, nodes_names, cli_ip, srv_ip)
-    if(table.len(flow_trajectory) > 0) then
-	    local nodes = {}
-	    local next_hops = {}
-	    local i = 1
-	    local client_id
-	    local server_id
+function buildExportersGraph(flow_trajectory, node_names, cli_ip, srv_ip)
+   if(table.len(flow_trajectory) > 0) then
+      local nodes = {}
+      local next_hops = {}
+      local i = 1
+      local client_id
+      local server_id
 
-	    if nodes[cli_ip] == nil then
-	        nodes[cli_ip] = i
-	        client_id = i
-	        i = i + 1
+      if nodes[cli_ip] == nil then
+	 nodes[cli_ip] = i
+	 client_id = i
+	 i = i + 1
+      end
+
+      if nodes[srv_ip] == nil then
+	 nodes[srv_ip] = i
+	 server_id = i
+	 i = i + 1
+      end
+
+      for exporter_ip, x in pairs(flow_trajectory) do
+	 for _, v in pairs(x) do
+	    local next_hop = v.next_hop
+	    if nodes[exporter_ip] == nil then
+	       nodes[exporter_ip] = i
+	       i = i + 1
 	    end
-
-	    if nodes[srv_ip] == nil then
-	        nodes[srv_ip] = i
-	        server_id = i
-	        i = i + 1
+	    if next_hop ~= nil and nodes[next_hop] == nil then
+	       nodes[next_hop] = i
+	       i = i + 1
 	    end
-
-	    for exporter_ip, x in pairs(flow_trajectory) do
-            for _, v in pairs(x) do
-                local next_hop = v.next_hop
-                if nodes[exporter_ip] == nil then
-                    nodes[exporter_ip] = i
-                    i = i + 1
-                end
-                if next_hop ~= nil and nodes[next_hop] == nil then
-                    nodes[next_hop] = i
-                    i = i + 1
-                end
-                if next_hop ~= nil then
-                    next_hops[next_hop] = true
-                end
-            end
+	    if next_hop ~= nil then
+	       next_hops[next_hop] = true
 	    end
+	 end
+      end
 
-	    -- Build graph_nodes
-	    local graph_nodes = {}
-	    for ip, id in pairs(nodes) do
-            local label, color
-            if ip == cli_ip then
-                label = ip .. " (Client)"
-                color = "#FFCA28"
-            elseif ip == srv_ip then
-                label = ip .. " (Server)"
-                color = "#FF7043"
-            else
-                if nodes_names[ip] ~= nil then
-                    local ret = nodes_names[ip]
-                    local site = ret[2]
-                    label = ret[1]
-                    if site ~= nil then label = label .. " (" .. site .. ")" end
-                else
-                    label = ip
-                end
-            end
-            local node = { id = id, label = label }
-            if color ~= nil then node["color"] = color end
-            if ip == cli_ip then node["first"] = true end
-            graph_nodes[#graph_nodes + 1] = node
+      -- Build graph_nodes
+      local graph_nodes = {}
+      for ip, id in pairs(nodes) do
+	 local label, color
+	 if ip == cli_ip then
+	    label = ip .. " (Client)"
+	    color = "#FFCA28"
+	 elseif ip == srv_ip then
+	    label = ip .. " (Server)"
+	    color = "#FF7043"
+	 else
+	    if node_names[ip] ~= nil then
+	       local ret = node_names[ip]
+	       local site = ret[2]
+	       label = ret[1]
+	       if site ~= nil then label = label .. " (" .. site .. ")" end
+	    else
+	       label = ip
 	    end
+	 end
+	 local node = { id = id, label = label }
+	 if color ~= nil then node["color"] = color end
+	 if ip == cli_ip then node["first"] = true end
+	 graph_nodes[#graph_nodes + 1] = node
+      end
 
-	    if(table.len(flow_trajectory) > 0) then
-            -- Build graph_edges
-            local graph_edges = {}
+      if(table.len(flow_trajectory) > 0) then
+	 -- Build graph_edges
+	 local graph_edges = {}
 
-            for exporter_ip, x in pairs(flow_trajectory) do
-                for _, v in pairs(x) do
-                    local next_hop = v.next_hop
-                    local return_path = v.return_path
-                    if next_hop ~= nil then
-                        local edge = { from = nodes[exporter_ip], to = nodes[next_hop] }
-                        if return_path then edge["return_path"] = true end
-                        graph_edges[#graph_edges + 1] = edge
-                    end
-                end
-            end
+	 -- Add dummy node from client (id 1) to server (id 2)
+	 for k,v in pairs(flow_trajectory) do
+	    if(table.len(v) == 0) then
+	       graph_edges[#graph_edges + 1] = { from = 1, to = 2 }
+	    end
+	 end
 
-            for exporter_ip, x in pairs(flow_trajectory) do
-                for _, v in pairs(x) do
-                    local next_hop = v.next_hop
-                    local return_path = v.return_path
-                    if next_hop ~= nil then
-                        if flow_trajectory[next_hop] == nil then
-                            if return_path then
-                                graph_edges[#graph_edges + 1] = { from = nodes[next_hop], to = client_id, return_path = true }
-                            else
-                                graph_edges[#graph_edges + 1] = { from = nodes[next_hop], to = server_id }
-                            end
-                        end
-                    else
-                        graph_edges[#graph_edges + 1] = { from = nodes[exporter_ip], to = server_id }
-                    end
-                end
-            end
+	 for exporter_ip, x in pairs(flow_trajectory) do
+	    for _, v in pairs(x) do
+	       local next_hop = v.next_hop
+	       local return_path = v.return_path
+	       if next_hop ~= nil then
+		  local edge = { from = nodes[exporter_ip], to = nodes[next_hop] }
+		  if return_path then edge["return_path"] = true end
+		  graph_edges[#graph_edges + 1] = edge
+	       end
+	    end
+	 end
 
-            for exporter_ip, x in pairs(flow_trajectory) do
-                for _, v in pairs(x) do
-                    local return_path = v.return_path
-                    if next_hops[exporter_ip] == nil then
-                        if return_path then
-                            if(server_id ~= nodes[exporter_ip]) then
-                                graph_edges[#graph_edges + 1] = { from = server_id, to = nodes[exporter_ip], return_path = true }
-                            end
-                        else
-                            if(client_id ~=  nodes[exporter_ip]) then
-                                graph_edges[#graph_edges + 1] = { from = client_id, to = nodes[exporter_ip] }
-                            end
-                        end
-                    end
-                end
-            end
-            return graph_nodes, graph_edges
-	    end	    
-	end 
+	 for exporter_ip, x in pairs(flow_trajectory) do
+	    for _, v in pairs(x) do
+	       local next_hop = v.next_hop
+	       local return_path = v.return_path
+	       if next_hop ~= nil then
+		  if flow_trajectory[next_hop] == nil then
+		     if return_path then
+			graph_edges[#graph_edges + 1] = { from = nodes[next_hop], to = client_id, return_path = true }
+		     else
+			graph_edges[#graph_edges + 1] = { from = nodes[next_hop], to = server_id }
+		     end
+		  end
+	       else
+		  graph_edges[#graph_edges + 1] = { from = nodes[exporter_ip], to = server_id }
+	       end
+	    end
+	 end
+
+	 for exporter_ip, x in pairs(flow_trajectory) do
+	    for _, v in pairs(x) do
+	       local return_path = v.return_path
+	       if next_hops[exporter_ip] == nil then
+		  if return_path then
+		     if(server_id ~= nodes[exporter_ip]) then
+			graph_edges[#graph_edges + 1] = { from = server_id, to = nodes[exporter_ip], return_path = true }
+		     end
+		  else
+		     if(client_id ~=  nodes[exporter_ip]) then
+			graph_edges[#graph_edges + 1] = { from = client_id, to = nodes[exporter_ip] }
+		     end
+		  end
+	       end
+	    end
+	 end
+	 return graph_nodes, graph_edges
+      end
+   end
 end
 
 -- #######################
@@ -1829,21 +1835,27 @@ function printFlowSNMPInfo(snmpdevice, input_idx, output_idx, as_row)
     local url_output = "#"
 
     if ntop.isEnterprise() then
-       url_input = ntop.getHttpPrefix() .. 
-	  '/lua/pro/enterprise/snmp_interface_details.lua?host='.. snmpdevice .. 
+       url_input = ntop.getHttpPrefix() ..
+	  '/lua/pro/enterprise/snmp_interface_details.lua?host='.. snmpdevice ..
 	  '&snmp_port_idx='.. input_idx
-       url_output = ntop.getHttpPrefix() .. 
-	  '/lua/pro/enterprise/snmp_interface_details.lua?host='.. snmpdevice .. 
+       url_output = ntop.getHttpPrefix() ..
+	  '/lua/pro/enterprise/snmp_interface_details.lua?host='.. snmpdevice ..
 	  '&snmp_port_idx='.. output_idx
     end
 
     if(as_row == true) then
-       print("<span class=\"badge bg-info\">" .. "<a href=" .. url_input .. ">"
-	     .. (inputidx_name or "") .. "</span></a>"
-	     .. ' <i class="fas fa-long-arrow-alt-right"></i> ')
-       print("<span class=\"badge bg-info\">" .. "<a href=" .. url_output .. ">" ..
-	     (outputidx_name or "") .. "</span></a>")
-
+       if(inputidx_name ~= "0") then
+	  print("<span class=\"badge bg-info\">" .. "<a href=" .. url_input .. ">"
+		.. (inputidx_name or "") .. "</span></a>")
+       end
+       
+       if(outputidx_name ~= "0") then
+	  print(' <i class="fas fa-long-arrow-alt-right"></i> ')
+	  
+	  print("<span class=\"badge bg-info\">" .. "<a href=" .. url_output .. ">" ..
+		(outputidx_name or "") .. "</span></a>")
+       end
+       
     else
        print("<tr><th rowspan='2'>" .. i18n("details.flow_snmp_localization") .. "</th><th>"
 	     .. i18n("flows_page.inIfIdx") ..
@@ -1957,9 +1969,9 @@ end
 
 local function printFlowDevicesFilterDropdown(base_url, page_params)
     local snmp_cached_dev = require "snmp_cached_dev"
-    local flowdevs = interface.getFlowDevices()      
+    local flowdevs = interface.getFlowDevices()
     local observationPointId = ntop.getUserObservationPointId() or 0
-    
+
     --[[
     if observationPointId ~= 0 then
         local obs_info = interface.getObsPointsInfo()["ObsPoints"]
@@ -2165,7 +2177,7 @@ function printTabList(base_url, page_params, active)
             </div>
             </div>
          </div>
-         
+
       ]]
     end
 end
@@ -2209,7 +2221,7 @@ function printActiveFlowsDropdown(base_url, page_params, ifstats, flowstats, is_
     -- table.clone needed to modify some parameters while keeping the original unchanged
     local flowhosts_type_params = table.clone(page_params)
     flowhosts_type_params["flowhosts_type"] = nil
-    
+
     print [['\
        <div class="btn-group">\
 	  <button class="btn btn-link dropdown-toggle" data-bs-toggle="dropdown">]]
@@ -2858,7 +2870,7 @@ function getFlowsTableTitle(base_url)
         if (client_info) then
             client_name = client_info.names.resolved
         end
-        
+
         if (_GET["server"] ~= nil) then
             local server_info = interface.getHostInfo(_GET["server"])
             local server_name = ""
@@ -2986,7 +2998,7 @@ function format_flow_info_field(flow)
     local info = ""
 
     if not isEmptyString(flow["info"]) then
-        
+
     end
     return info
 end

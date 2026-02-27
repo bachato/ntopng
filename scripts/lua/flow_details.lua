@@ -2049,7 +2049,6 @@ if isEmptyString(page) or page == "overview" then
 	       nodes_names[next_hop_ip] = { firstDottedElement(next_hop_name), next_hop_site }
 	    end
 
-
 	    if(flow_trajectory[exporter_ip] == nil) then
 	       flow_trajectory[exporter_ip] = {}
 	    end
@@ -2074,10 +2073,13 @@ if isEmptyString(page) or page == "overview" then
 	       if(flow_trajectory[exp_ip] == nil) then
 		  flow_trajectory[exp_ip] = {}
 	       end
-	       table.insert(flow_trajectory[exp_ip], { next_hop = next_hop_ip, return_path = v.return_path })
+
+	       if(next_hop_ip ~= "0.0.0.0") then
+		  table.insert(flow_trajectory[exp_ip], { next_hop = next_hop_ip, return_path = v.return_path })
+		  nodes_names[next_hop_ip] = { firstDottedElement(next_hop_name), next_hope_site }
+	       end
 
 	       nodes_names[exp_ip] = { firstDottedElement(exp_name), site }
-	       nodes_names[next_hop_ip] = { firstDottedElement(next_hop_name), next_hope_site }
 	    end
 
 	    print("</td></tr>")
@@ -2088,16 +2090,16 @@ if isEmptyString(page) or page == "overview" then
 	    if(table.len(flow.exporters) == 0) then print("<td></td>") end
 	    print('<th colspan=2 style="height: 400px; width: 66%; max-width: 66%; overflow: hidden;">')
 
-	    tprint(flow_trajectory)
+	    --tprint(flow_trajectory)
 	    local nodes, edges = buildExportersGraph(flow_trajectory, nodes_names, flow["cli.ip"], flow["srv.ip"])
-	    
+
 	    local json_context = json.encode({ nodes = nodes, edges = edges })
 	    print('<div style="width:100%; max-width:100%; overflow:hidden;">')
 	    template.render("pages/vue_page.template", {
 			       vue_page_name = "PageExportersGraph",
 			       page_context  = json_context
 	    })
-      
+
       print('</div>')
       print('</th></tr>\n')
 	 end
