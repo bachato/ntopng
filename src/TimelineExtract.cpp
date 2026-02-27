@@ -275,7 +275,7 @@ static void *extractionThread(void *ptr) {
   TimelineExtract *extr = (TimelineExtract *)ptr;
   char name[16];
 
-  snprintf(name, sizeof(name), "n-extract");
+  snprintf(name, sizeof(name), "extract");
   ntop->registerThread(name, pthread_self());
 
   extr->extractToDisk(extr->getID(), extr->getNetworkInterface(),

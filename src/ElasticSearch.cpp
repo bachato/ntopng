@@ -29,7 +29,7 @@ static void *esLoop(void *ptr) {
   ElasticSearch *es = (ElasticSearch *)ptr;
   char name[16];
 
-  snprintf(name, sizeof(name), "n-es-%d", es->getNetworkInterface()->get_id());
+  snprintf(name, sizeof(name), "es-%d", es->getNetworkInterface()->get_id());
   ntop->registerThread(name, pthread_self());
   es->pushEStemplate();  // sends ES ntopng template
   es->indexESdata();

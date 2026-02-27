@@ -284,9 +284,9 @@ void Ping::pollResults() {
   char thread_name[64];
 
   if (ifname)
-    snprintf(thread_name, sizeof(thread_name), "n-ping-%s", ifname);
+    snprintf(thread_name, sizeof(thread_name), "ping-%s", ifname);
   else
-    snprintf(thread_name, sizeof(thread_name), "n-ping");
+    snprintf(thread_name, sizeof(thread_name), "ping");
 
   ntop->registerThread(thread_name, pthread_self());
 

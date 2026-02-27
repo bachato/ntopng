@@ -42,7 +42,7 @@
 static void *pollerFctn(void *ptr) {
   ContinuousPing *cp = (ContinuousPing *)ptr;
 
-  ntop->registerThread("n-cping", pthread_self());
+  ntop->registerThread("cping", pthread_self());
 
   while ((!ntop->getGlobals()->isShutdownRequested()) &&
          (!ntop->getGlobals()->isShutdown()))

@@ -30,7 +30,7 @@ static void *doRun(void *ptr) {
   static std::atomic<u_int32_t> counter = 0;
   char name[16];
 
-  snprintf(name, sizeof(name), "n-th-pool-%d", counter++);
+  snprintf(name, sizeof(name), "th-pool-%d", counter++);
   ntop->registerThread(name, pthread_self());
 
   ((ThreadPool *)ptr)->run();

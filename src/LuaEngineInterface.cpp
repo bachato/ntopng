@@ -4145,7 +4145,7 @@ static void *pcapDumpLoop(void *ptr) {
   NtopngLuaContext *c = (NtopngLuaContext *)ptr;
   char name[16];
 
-  snprintf(name, sizeof(name), "n-pcap-dump");
+  snprintf(name, sizeof(name), "pcap-dump");
   ntop->registerThread(name, pthread_self());
 
   while (c->pkt_capture.captureInProgress) {

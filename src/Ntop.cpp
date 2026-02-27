@@ -678,7 +678,7 @@ void Ntop::start() {
   gettimeofday(&begin, NULL);
   _usleep((5 - begin.tv_sec % 5) * 1e6 - begin.tv_usec);
 
-  registerThread("n-main", pthread_self());
+  registerThread("main", pthread_self());
 
   globals->setInitialized(); /* We're ready to go */
 

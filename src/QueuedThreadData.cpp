@@ -55,9 +55,9 @@ void QueuedThreadData::run() {
 #endif
 
   if (iface->get_id() == -1)
-    snprintf(name, sizeof(name), "n-s-%s", label);
+    snprintf(name, sizeof(name), "q-s-%s", label);
   else
-    snprintf(name, sizeof(name), "n-%d-%s", iface->get_id(), label);
+    snprintf(name, sizeof(name), "q-%d-%s", iface->get_id(), label);
       
   ntop->registerThread(name, pthread_self());
 

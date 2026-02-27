@@ -3912,7 +3912,7 @@ void NetworkInterface::flowAlertsDequeueLoop() {
   u_int64_t n;
   char buf[16];
 
-  snprintf(buf, sizeof(buf), "n-fcheck-%d", get_id());
+  snprintf(buf, sizeof(buf), "fcheck-%d", get_id());
   ntop->registerThread(buf, pthread_self());
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL,
@@ -3971,7 +3971,7 @@ void NetworkInterface::hostAlertsDequeueLoop() {
   u_int64_t n;
   char buf[16];
 
-  snprintf(buf, sizeof(buf), "n-hcheck-%d", get_id());
+  snprintf(buf, sizeof(buf), "hcheck-%d", get_id());
   ntop->registerThread(buf, pthread_self());
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL,
@@ -4033,7 +4033,7 @@ void NetworkInterface::dumpFlowLoop() {
   const u_int idle_flows_budget = 65536;
   const u_int active_flows_budget = idle_flows_budget / 3; /* lower priority */
 
-  snprintf(buf, sizeof(buf), "n-fdump-%d", get_id());
+  snprintf(buf, sizeof(buf), "fdump-%d", get_id());
   ntop->registerThread(buf, pthread_self());
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Started flow dump loop on interface %s [id: %u]...",
@@ -4127,7 +4127,7 @@ void NetworkInterface::startFlowDumping() {
 void NetworkInterface::setPollerThreadName() {
   char buf[16];
 
-  snprintf(buf, sizeof(buf), "n-poll-%d", get_id());
+  snprintf(buf, sizeof(buf), "poll-%d", get_id());
 
   ntop->registerThread(buf, pthread_self());
 }
