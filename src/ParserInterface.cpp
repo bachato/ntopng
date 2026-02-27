@@ -241,7 +241,16 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
   if(flow) {
     /* Fix interface Id (if zero) */
 
-    if(!new_flow) {
+    if(new_flow) {
+      flow->setFlowDeviceNextHop(zflow->getNextHop());
+      if(zflow->inIndex != 0) flow->setFlowDeviceInIndex(zflow->inIndex);
+      if(zflow->outIndex != 0)flow->setFlowDeviceOutIndex(zflow->outIndex);
+      
+      flow->addExporterInfo(zflow->exporter_device_ip, zflow->getNextHop(),
+			    zflow->inIndex, zflow->outIndex,
+			    src2dst_direction);
+    } else {
+      /* Existing flow */
       if(ntop->getPrefs()->isFlowDedupEnabled()
 	 && (flow->getFlowDeviceIP() != zflow->exporter_device_ip)) {
 #ifdef DEDUPLICATION_DEBUG
@@ -254,9 +263,9 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 	ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", flow->print(buf, sizeof(buf)));
 #endif
 	num_deduplicated_flows++;
-	flow->addDedupInfo(zflow->exporter_device_ip, zflow->getNextHop(),
-			   zflow->inIndex, zflow->outIndex,
-			   src2dst_direction);
+	flow->addExporterInfo(zflow->exporter_device_ip, zflow->getNextHop(),
+			      zflow->inIndex, zflow->outIndex,
+			      src2dst_direction);
 
 #ifdef NTOPNG_PRO
 	if(flow_devices_stats) {
@@ -276,22 +285,6 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 	return(true); /* Flow handled albeit discarded */
       }
     }
-
-    flow->setFlowDeviceNextHop(zflow->getNextHop());
-
-    if(zflow->inIndex != 0) {
-      if(src2dst_direction)
-	flow->setFlowDeviceInIndex(zflow->inIndex);
-      else
-	flow->setFlowDeviceOutIndex(zflow->inIndex);
-    }
-
-    if(zflow->outIndex != 0) {
-      if(src2dst_direction)
-	flow->setFlowDeviceOutIndex(zflow->outIndex);
-      else
-	flow->setFlowDeviceInIndex(zflow->outIndex);
-    }
   } else
     return(false);
 
@@ -310,11 +303,11 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 
     if (!flow_devices_stats->checkExporterInterfaces(zflow->unique_source_id,
 					       flow->getFlowDeviceInIndex(),
-					       flow->getFlowDeviceOutIndex(),
-					       zflow->exporter_device_ip,
-					       zflow->nprobe_source_id,
-					       zflow->nprobe_ip,
-					       &exporter_site_id)) {
+						     flow->getFlowDeviceOutIndex(),
+						     zflow->exporter_device_ip,
+						     zflow->nprobe_source_id,
+						     zflow->nprobe_ip,
+						     &exporter_site_id)) {
       exportersLimitReached();
       return(false);
     }

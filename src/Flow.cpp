@@ -3457,13 +3457,13 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
     lua_get_qoe_score(vm);
 #endif
 
-    if(dedupStats.size() > 0) {
-      std::vector<DuplicatedFlowInfo>::iterator it;
+    if(exporterStats.size() > 0) {
+      std::vector<ExporterFlowInfo>::iterator it;
       int i = 0;
 
       lua_newtable(vm);
 
-      for(it = dedupStats.begin(); it != dedupStats.end(); it++) {
+      for(it = exporterStats.begin(); it != exporterStats.end(); it++) {
 	char b1[32], b2[32];
 
 	if(it->exporter_ipv4 != 0) {
@@ -5834,16 +5834,16 @@ void Flow::timeval_diff(struct timeval *begin, const struct timeval *end,
 std::string Flow::getFlowInfo(bool isLuaRequest) {
   std::string info_field = std::string("");
 
-  if(dedupStats.size() > 0) {
-    std::vector<DuplicatedFlowInfo>::iterator it;
+  if(exporterStats.size() > 0) {
+    std::vector<ExporterFlowInfo>::iterator it;
     bool swap_found = false;
     char buf[16];
 
-    for(it = dedupStats.begin(); it != dedupStats.end(); it++)
+    for(it = exporterStats.begin(); it != exporterStats.end(); it++)
       swap_found |= it->return_path;
 
     snprintf(buf, sizeof(buf), "%u %sExp.",
-	     (unsigned int)(dedupStats.size()+1), swap_found ? "Bidir. " : "");
+	     (unsigned int)(exporterStats.size()+1), swap_found ? "Bidir. " : "");
     info_field = std::string(buf);
   } else if(!isMaskedFlow()) {
     if(iec104) return (iec104->getFlowInfo());
@@ -7704,16 +7704,17 @@ void Flow::getFingerprintInfo(ndpi_serializer *serializer) {
 
 /* ***************************************************** */
 
-/* Serialize deduplication information for the flow */
-void Flow::getDedupInfo(ndpi_serializer *serializer) {
-  if(serializer == NULL) return;
-  if(!isDedupAvailable()) return;
-
+void Flow::serializeExporters(ndpi_serializer *serializer) {
   int i = 0;
+  
+  if(serializer == NULL) return;
+  if(exporterStats.size() == 0) return;
 
+  ndpi_serialize_start_of_block(serializer, "exporters");
+      
   // Iterate over all stored duplicated flow records
-  for(std::vector<DuplicatedFlowInfo>::iterator it = dedupStats.begin();
-    it != dedupStats.end(); ++it) {
+  for(std::vector<ExporterFlowInfo>::iterator it = exporterStats.begin();
+      it != exporterStats.end(); ++it) {
 
     if(it->exporter_ipv4 == 0)
       break;
@@ -7728,24 +7729,26 @@ void Flow::getDedupInfo(ndpi_serializer *serializer) {
 
     // Serialize exporter IP as string
     ndpi_serialize_string_string(serializer, "exporter_ip",
-      Utils::intoaV4(it->exporter_ipv4, b1, sizeof(b1)));
+				 Utils::intoaV4(it->exporter_ipv4, b1, sizeof(b1)));
 
     // Serialize next hop address
     ndpi_serialize_string_string(serializer, "next_hop",
-      it->next_hop.print(b2, sizeof(b2)));
+				 it->next_hop.print(b2, sizeof(b2)));
 
     // Serialize boolean indicating return path
     ndpi_serialize_string_boolean(serializer, "return_path",
-      it->return_path);
+				  it->return_path);
 
     // Serialize input and output indexes
     ndpi_serialize_string_uint32(serializer, "input_idx",
-      it->in_index);
+				 it->in_index);
     ndpi_serialize_string_uint32(serializer, "output_idx",
-      it->out_index);
+				 it->out_index);
 
     ndpi_serialize_end_of_block(serializer);
   }
+
+  ndpi_serialize_end_of_block(serializer);
 }
 
 /* ***************************************************** */
@@ -8294,12 +8297,7 @@ void Flow::getProtocolJSONInfo(ndpi_serializer *serializer) {
 
   ndpi_serialize_end_of_block(serializer); /* proto block */
 
-  /* additional exporters block*/
-  if (isDedupAvailable()) {
-    ndpi_serialize_start_of_block(serializer, "additional_exporters");
-    getDedupInfo(serializer);
-    ndpi_serialize_end_of_block(serializer);
-  }
+  serializeExporters(serializer);
 
   if(ebpf && ebpf->process_info_set) {
     ndpi_serialize_start_of_block(serializer, "process");
@@ -9701,17 +9699,17 @@ void Flow::setnDPIFingerprint(char *fp) {
 
 /* *************************************** */
 
-void Flow::addDedupInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
-			u_int32_t in_index, u_int32_t out_index,
-			bool src2dst_direction) {
-  std::vector<DuplicatedFlowInfo>::iterator it;
-  DuplicatedFlowInfo d;
+void Flow::addExporterInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
+			   u_int32_t in_index, u_int32_t out_index,
+			   bool src2dst_direction) {
+  std::vector<ExporterFlowInfo>::iterator it;
+  ExporterFlowInfo d;
 
   if((exporter_ipv4 == 0) || next_hop->isEmpty())
     return;
 
   /* Check for duplicates first */
-  for(it = dedupStats.begin(); it != dedupStats.end(); it++) {
+  for(it = exporterStats.begin(); it != exporterStats.end(); it++) {
     if((it->exporter_ipv4 == exporter_ipv4) && it->next_hop.equal(next_hop)) {
       return; /* Duplicated */
     }
@@ -9720,5 +9718,5 @@ void Flow::addDedupInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
   d.exporter_ipv4 = exporter_ipv4, d.next_hop.set(next_hop), d.return_path = !src2dst_direction,
     d.in_index = in_index, d.out_index = out_index;
 
-  dedupStats.push_back(d);
+  exporterStats.push_back(d);
 }

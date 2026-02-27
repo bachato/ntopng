@@ -71,7 +71,7 @@ typedef struct {
   IpAddress next_hop;
   u_int32_t in_index, out_index;
   bool return_path;
-} DuplicatedFlowInfo;
+} ExporterFlowInfo;
 
 typedef struct {
   u_int32_t prevAdjacentAS, nextAdjacentAS;
@@ -141,7 +141,7 @@ private:
      predominant of a flow, which is written into `predominant_alert`.
   */
   Bitmap128 alerts_map;
-  std::vector<DuplicatedFlowInfo> dedupStats;
+  std::vector<ExporterFlowInfo> exporterStats;
   std::map<FlowAlertTypeEnum, FlowAlert *> triggered_alerts;
   FlowAlertType predominant_alert;   /* This is the predominant alert */
   u_int16_t predominant_alert_score; /* The score associated to the predominant alert */
@@ -1061,7 +1061,7 @@ public:
              u_int32_t _private_flow_id, u_int8_t _protocol,
              const ICMPinfo *const icmp_info, bool *src2srv_direction) const;
   void getFingerprintInfo(ndpi_serializer *serializer);
-  void getDedupInfo(ndpi_serializer *serializer);
+  void serializeExporters(ndpi_serializer *serializer);
   void sumStats(nDPIStats *ndpi_stats, FlowStats *stats);
   bool dump(time_t t, bool last_dump_before_free);
   bool match(AddressTree *ptree);
@@ -1469,10 +1469,6 @@ public:
     return getnDPIFingerprint() != nullptr;
   }
 
-  inline bool isDedupAvailable() {
-    return dedupStats.size() > 0;
-  }
-
   inline void setSearchedField(const char *field) {
     snprintf(searched_field, sizeof(searched_field), "%s", field);
   }
@@ -1629,9 +1625,9 @@ public:
   void setCliService(int service_enum);
   void setSrvService(int service_enum);
   inline void setIGMPType(u_int8_t t) { protos.igmp.igmp_type = t; }
-  void addDedupInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
-		    u_int32_t in_index, u_int32_t out_index,
-		    bool src2dst_direction);
+  void addExporterInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
+		       u_int32_t in_index, u_int32_t out_index,
+		       bool src2dst_direction);
 };
 
 #endif /* _FLOW_H_ */

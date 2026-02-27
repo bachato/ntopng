@@ -2069,13 +2069,13 @@ if isEmptyString(page) or page == "overview" then
 	    table.insert(flow_trajectory[exporter_ip], { next_hop =  next_hop_ip, return_path = false })
          end
 
-	 if(flow.deduplication ~= nil) then
-	    local len = table.len(flow.deduplication)+1
+	 if(flow.exporters ~= nil) then
+	    local len = table.len(flow.exporters)+1
 
 	    print("<tr><th rowspan=\""..(len+1).."\">" .. i18n("dedup_flows") .. "</th>")
 	    print("<th>" .. i18n("flow_exporter") .. " / " .. i18n("next_hop") .. "</th><th>" .. i18n("flows_page.inIfIdx") .. " / ".. i18n("flows_page.outIfIdx") .. "</th></tr>\n")
 
-	    for k,v in pairs(flow.deduplication) do
+	    for k,v in pairs(flow.exporters) do
 	       local ret, exp_ip, exp_name, site = formatExporter(v.exporter_ip)
 	       local ret1, next_hop_ip, next_hop_name, next_hope_site = formatNextHop(v.next_hop)
 	       --tprint(v)
@@ -2099,7 +2099,7 @@ if isEmptyString(page) or page == "overview" then
 
 	 if(table.len(flow_trajectory) > 0) then
       print('<tr>')
-	   if(table.len(flow.deduplication) == 0) then print("<td></td>") end
+	   if(table.len(flow.exporters) == 0) then print("<td></td>") end
 	   print('<th colspan=2 style="height: 400px; width: 66%; max-width: 66%; overflow: hidden;">')
 	   
       local nodes, edges = buildExportersGraph(flow_trajectory, nodes_names, flow["cli.ip"], flow["srv.ip"])
