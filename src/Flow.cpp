@@ -3473,6 +3473,7 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
 	  lua_push_bool_table_entry(vm, "return_path", it->return_path);
 	  lua_push_int32_table_entry(vm, "input_idx", it->in_index);
 	  lua_push_int32_table_entry(vm, "output_idx", it->out_index);
+	  lua_push_int32_table_entry(vm, "source", it->source);
 
 	  lua_pushnumber(vm, i++);
 	  lua_insert(vm, -2);
@@ -7745,6 +7746,9 @@ void Flow::serializeExporters(ndpi_serializer *serializer) {
     ndpi_serialize_string_uint32(serializer, "output_idx",
 				 it->out_index);
 
+    ndpi_serialize_string_uint32(serializer, "source",
+				 it->source); /* FlowSource */
+    
     ndpi_serialize_end_of_block(serializer);
   }
 
@@ -9701,6 +9705,7 @@ void Flow::setnDPIFingerprint(char *fp) {
 
 void Flow::addExporterInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
 			   u_int32_t in_index, u_int32_t out_index,
+			   FlowSource source,
 			   bool src2dst_direction) {
   std::vector<ExporterFlowInfo>::iterator it;
   ExporterFlowInfo d;
@@ -9716,7 +9721,7 @@ void Flow::addExporterInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
   }
 
   d.exporter_ipv4 = exporter_ipv4, d.next_hop.set(next_hop), d.return_path = !src2dst_direction,
-    d.in_index = in_index, d.out_index = out_index;
+    d.in_index = in_index, d.out_index = out_index, d.source = source;
 
   exporterStats.push_back(d);
 }

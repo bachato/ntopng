@@ -248,6 +248,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
       
       flow->addExporterInfo(zflow->exporter_device_ip, zflow->getNextHop(),
 			    zflow->inIndex, zflow->outIndex,
+			    zflow->getFlowSource(),
 			    src2dst_direction);
     } else {
       /* Existing flow */
@@ -265,6 +266,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 	num_deduplicated_flows++;
 	flow->addExporterInfo(zflow->exporter_device_ip, zflow->getNextHop(),
 			      zflow->inIndex, zflow->outIndex,
+			      zflow->getFlowSource(),
 			      src2dst_direction);
 
 #ifdef NTOPNG_PRO

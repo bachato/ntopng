@@ -70,6 +70,7 @@ typedef struct {
   u_int32_t exporter_ipv4;
   IpAddress next_hop;
   u_int32_t in_index, out_index;
+  FlowSource source; /* sFlow / NetFlow */
   bool return_path;
 } ExporterFlowInfo;
 
@@ -1627,6 +1628,7 @@ public:
   inline void setIGMPType(u_int8_t t) { protos.igmp.igmp_type = t; }
   void addExporterInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
 		       u_int32_t in_index, u_int32_t out_index,
+		       FlowSource source,
 		       bool src2dst_direction);
 };
 

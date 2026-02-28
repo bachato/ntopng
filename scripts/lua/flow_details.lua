@@ -2063,10 +2063,27 @@ if isEmptyString(page) or page == "overview" then
 	    for k,v in pairs(flow.exporters) do
 	       local ret, exp_ip, exp_name, site = formatExporter(v.exporter_ip)
 	       local ret1, next_hop_ip, next_hop_name, next_hope_site = formatNextHop(v.next_hop)
-	       --tprint(v)
+	       local source_label = ""
+	       
+	       -- tprint(v)
+
+	       if(v.source > 0) then
+		  source_label = " <span class=\"badge bg-secondary\">"
+		  
+		  if(v.source == 1) then
+		     source_label = source_label .. "NetFlow / IPFIX"
+		  elseif(v.source == 2) then
+		     source_label = source_label .."sFlow"
+		  end
+		  
+		  source_label = source_label .. "</span>"
+	       end
+
+	       tprint(source_label)
+	       
 	       print("<tr><td>".. ret .. ' <i class="fas fa-long-arrow-alt-right"></i> ' .. ret1)
 	       if(v.return_path == true) then print(" <span class='badge bg-secondary'>".. i18n("dedup_flow_swapped").."</span>") end
-	       print("</td><td>")
+	       print(source_label.. "</td><td>")
 	       printFlowSNMPInfo(v.exporter_ip, v.input_idx, v.output_idx, true)
 	       print("</td></tr>")
 
