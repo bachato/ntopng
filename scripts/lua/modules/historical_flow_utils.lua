@@ -1597,6 +1597,7 @@ function historical_flow_utils.get_tags()
    flow_defined_tags["verdict"] = tag_utils.defined_tags["verdict"]
    flow_defined_tags["ndpi_fingerprint"] = tag_utils.defined_tags["ndpi_fingerprint"]
    flow_defined_tags["exporter_site"] = tag_utils.defined_tags["exporter_site"] -- required?
+   flow_defined_tags["asn"] = tag_utils.defined_tags["asn"]
 
    return flow_defined_tags
 end
