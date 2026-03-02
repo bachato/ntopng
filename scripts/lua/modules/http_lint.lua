@@ -2734,6 +2734,7 @@ local known_parameters = {
    ["lan_recovery_netmask"] = validateIPV4,
    ["dhcp_server_enabled"] = validateBool,
    ["ntp_sync_enabled"] = validateBool,
+   ["is_live"] = validateBool,
    ["activate_remote_assist"] = validateBool,
    ["dhcp_first_ip"] = validateIPV4,
    ["dhcp_last_ip"] = validateIPV4,

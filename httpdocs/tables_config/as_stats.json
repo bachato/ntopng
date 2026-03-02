@@ -6,7 +6,7 @@
 	"paging": false,
 	"display_empty_rows": true,
 	"default_sort": {
-		"column_id": "traffic",
+		"column_id": "throughput",
 		"sort": 2
 	},
 	"columns": [
@@ -59,9 +59,19 @@
 				"text-nowrap"
 			]
 		},
+		{
+            "id": "name",
+            "title_i18n": "name",
+            "data_field": "asname",
+			"sortable": true,
+			"class": [
+                "text-left",
+				"text-nowrap"
+			]
+		},
         {
             "id": "num_hosts",
-            "title_i18n": "hosts",
+            "title_i18n": "current_hosts",
             "data_field": "num_hosts",
             "sortable": true,
             "class": [
@@ -76,26 +86,6 @@
 			"sortable": true,
 			"class": [
                 "text-center",
-				"text-nowrap"
-			]
-		},
-		{
-            "id": "avg_host_score",
-			"title_i18n": "avg_host_score",
-			"data_field": "avg_host_score",
-			"sortable": true,
-			"class": [
-                "text-center",
-				"text-nowrap"
-			]
-		},
-		{
-            "id": "name",
-            "title_i18n": "name",
-            "data_field": "asname",
-			"sortable": true,
-			"class": [
-                "text-left",
 				"text-nowrap"
 			]
 		},

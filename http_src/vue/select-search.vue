@@ -4,13 +4,13 @@
         :disabled="disabled">
         <!-- Render regular options (without groups) -->
         <option class="no-wrap  p-0" v-for="(item, i) in options_2" :selected="is_selected(item)" :value="item.value"
-            :disabled="item.disabled">
+            :disabled="item.disabled" :data-icon="item.icon">
             {{ item.label }}
         </option>
-        <!-- Render grouped options -->
+        <!-- Render grouped options with optgroup elements -->
         <optgroup v-for="(item, i) in groups_options_2" :label="item.group">
             <option v-for="(opt, j) in item.options" :selected="is_selected(opt)" :value="opt.value"
-                :disabled="opt.disabled">
+                :disabled="opt.disabled" :data-icon="item.icon">
                 {{ opt.label }}
             </option>
         </optgroup>
@@ -20,66 +20,83 @@
 <script setup>
 import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";
 
+/* *************************************************** */
+/* Reactive references and state variables */
+/* *************************************************** */
+
 // Reference to the native select element for Select2 initialization
 const select2 = ref(null);
-
-// const selected2_option = ref({});
 
 // Define component events for parent communication
 const emit = defineEmits(['update:selected_option', 'update:selected_options', 'select_option', 'unselect_option', 'change_selected_options']);
 
 // Reactive state for internal option management
 const options_2 = ref([]); // Regular options (without groups)
-const groups_options_2 = ref([]); // Grouped options
-const selected_option_2 = ref({}); // Currently selected option (single select)
-const selected_values = ref([]); // Array of selected values (multiple select)
+const groups_options_2 = ref([]); // Grouped options structure
+const selected_option_2 = ref({}); // Currently selected option (single select mode)
+const selected_values = ref([]); // Array of selected values (multiple select mode)
 const refresh_options = ref(0); // Counter to trigger option re-rendering
 
-// Component props definition
+/* *************************************************** */
+/* Component props definition */
+/* *************************************************** */
+
 const props = defineProps({
-    id: String,
-    options: Array, // Source options array
-    selected_option: Object, // Currently selected option (single mode)
-    selected_options: Array, // Currently selected options (multiple mode)
-    multiple: Boolean, // Whether multiple selection is allowed
-    add_tag: Boolean, // Whether to allow adding custom tags
-    disable_change: Boolean, // Whether to disable option updates
-    theme: String, // Select2 theme
-    dropdown_size: String, // Size variant for dropdown
-    disabled: Boolean // Whether the select is disabled
+    id: String,                    // Unique component identifier
+    options: Array,                // Source options array from parent
+    selected_option: Object,       // Currently selected option (single mode)
+    selected_options: Array,       // Currently selected options (multiple mode)
+    multiple: Boolean,             // Whether multiple selection is allowed
+    add_tag: Boolean,              // Whether to allow adding custom tags
+    disable_change: Boolean,       // Whether to disable automatic option updates
+    theme: String,                 // Select2 theme (e.g., 'bootstrap-5')
+    dropdown_size: String,         // Size variant for dropdown ('small' or default)
+    disabled: Boolean              // Whether the select element is disabled
 });
 
-let first_time_render = true; // Flag to track initial render
+let first_time_render = true;      // Flag to track initial render state
 
-// Lifecycle hook: Initialize component when mounted
+/* *************************************************** */
+/* Lifecycle hooks */
+/* *************************************************** */
+
+// Initialize component when mounted to DOM
 onMounted(() => {
     if (!props.disable_change || !first_time_render) {
-        set_input();
+        set_input();  // Setup options and selection state
     }
 });
+
+/* *************************************************** */
+/* Watchers for reactive prop changes */
+/* *************************************************** */
 
 // Watch for changes in selected_option prop (single select mode)
 watch(() => props.selected_option, (cur_value, old_value) => {
     set_selected_option(cur_value);
-    change_select_2_selected_value();
+    change_select_2_selected_value();  // Sync Select2 UI with new selection
 }, { flush: 'pre' });
 
 // Watch for changes in selected_options prop (multiple select mode)
 watch(() => props.selected_options, (cur_value, old_value) => {
     set_selected_values(cur_value);
-    change_select_2_selected_value();
+    change_select_2_selected_value();  // Sync Select2 UI with new selections
 }, { flush: 'pre' });
 
-// Watch for option refresh trigger
+// Watch for option refresh trigger and re-render when needed
 watch([refresh_options], (cur_value, old_value) => {
-    render();
+    render();  // Re-initialize Select2 with updated options
 }, { flush: 'post' });
 
-// Watch for changes in options prop
+// Watch for changes in the options prop from parent
 watch(() => props.options, (current_value, old_value) => {
     if (props.disable_change == true || current_value == null) { return; }
-    set_input();
+    set_input();  // Reprocess options when they change
 }, { flush: 'pre' });
+
+/* *************************************************** */
+/* Initialization functions */
+/* *************************************************** */
 
 /**
  * Initialize component with options and selection state.
@@ -89,10 +106,14 @@ watch(() => props.options, (current_value, old_value) => {
  * 3. set_selected_values() - sets multiple selection state
  */
 function set_input() {
-    set_options();
-    set_selected_option();
-    set_selected_values();
+    set_options();           // Process raw options into internal structures
+    set_selected_option();   // Initialize single selection state
+    set_selected_values();   // Initialize multiple selection state
 }
+
+/* *************************************************** */
+/* Option processing functions */
+/* *************************************************** */
 
 /**
  * Process raw options array and separate them into regular and grouped options.
@@ -117,25 +138,29 @@ function set_options() {
     if (props.options == null) { return; }
     let groups_dict = {};
     props.options.forEach((option) => {
-        let opt_2 = { ...option };
+        let opt_2 = { ...option };  // Create shallow copy to avoid mutation
         // Use label as value if value is not provided
         if (opt_2.value == null) {
             opt_2.value = opt_2.label;
         }
         // Separate options with groups from regular options
         if (option.group == null) {
-            options_2.value.push(opt_2);
+            options_2.value.push(opt_2);  // Regular option (no group)
         } else {
             if (groups_dict[option.group] == null) {
-                groups_dict[option.group] = { group: opt_2.group, options: [] };
+                groups_dict[option.group] = { group: opt_2.group, options: [] };  // Initialize group
             }
-            groups_dict[option.group].options.push(opt_2);
+            groups_dict[option.group].options.push(opt_2);  // Add option to group
         }
     });
-    // Convert groups dictionary to array
+    // Convert groups dictionary to array format for rendering
     groups_options_2.value = ntopng_utility.object_to_array(groups_dict);
     refresh_options.value += 1; // Trigger re-render
 }
+
+/* *************************************************** */
+/* Select2 custom matcher for hierarchical search */
+/* *************************************************** */
 
 /**
  * Custom search matcher function for Select2 with hierarchical search support.
@@ -209,6 +234,44 @@ function matchCustom(params, data) {
     return null;
 }
 
+/* *************************************************** */
+/* Select2 option formatting with icons */
+/* *************************************************** */
+
+/**
+ * Format option display with optional icon.
+ * This function enhances option rendering by adding icon support through Font Awesome or similar icon libraries.
+ * 
+ * @param {Object} option - Select2 option object
+ * @param {string} option.id - Option identifier
+ * @param {string} option.text - Option display text
+ * @param {HTMLElement} option.element - Original DOM element containing data-icon attribute
+ * @returns {string|jQuery} - Formatted HTML string or jQuery object with icon if present
+ */
+const formatOption = (option) => {
+    if (!option.id) {
+        return option.text;  // Return plain text for placeholder
+    }
+
+    const icon_class = option?.element?.dataset?.icon;  // Get icon class from data-icon attribute
+
+    if (!icon_class) {
+        return option.text;  // No icon, return plain text
+    }
+
+    // Return HTML with icon and text
+    return $(`
+        <span>
+            <i class="${icon_class}"></i>
+            ${option.text}
+        </span>
+    `);
+}
+
+/* *************************************************** */
+/* Select2 initialization and rendering */
+/* *************************************************** */
+
 /**
  * Initialize or re-initialize the Select2 plugin with Vue integration.
  * This is the core rendering function that:
@@ -233,38 +296,45 @@ function matchCustom(params, data) {
 const render = () => {
     let select2Div = select2.value;
     if (first_time_render == false) {
-        destroy();
+        destroy();  // Clean up existing Select2 instance
     }
     if (!$(select2Div).hasClass("select2-hidden-accessible")) {
         $(select2Div).select2({
-            matcher: matchCustom,
-            width: '100%',
-            theme: props.theme ? props.theme : 'bootstrap-5',
-            dropdownParent: $(select2Div).parent(),
-            dropdownAutoWidth: true,
-            tags: props.add_tag && !props.multiple,
-            selectionCssClass: props.dropdown_size == "small" ? 'select2--small' : '',
-            dropdownCssClass: props.dropdown_size == "small" ? 'select2--small' : ''
+            templateResult: formatOption,      // Custom rendering with icons
+            templateSelection: formatOption,   // Custom rendering for selected item
+            matcher: matchCustom,               // Hierarchical search matcher
+            width: '100%',                       // Full width
+            theme: props.theme ? props.theme : 'bootstrap-5',  // Theme (default to bootstrap-5)
+            dropdownParent: $(select2Div).parent(),  // Parent container for dropdown
+            dropdownAutoWidth: true,                   // Auto-adjust dropdown width
+            tags: props.add_tag && !props.multiple,   // Enable tagging only in single mode
+            selectionCssClass: props.dropdown_size == "small" ? 'select2--small' : '',  // Size variant
+            dropdownCssClass: props.dropdown_size == "small" ? 'select2--small' : ''    // Size variant
         });
+        
         // Handle option selection event
         $(select2Div).on('select2:select', function (e) {
             let data = e.params.data;
             if (data.element === null) {
+                // Handle custom tag creation (no DOM element)
                 //TODO: implement for multiselect
                 let option = { label: data.text, value: data.id };
                 emit('update:selected_option', option);
                 emit('select_option', option);
                 return;
             }
-            let value = data.element._value;
-            let option = find_option_from_value_or_label(value);
+            let value = data.element._value;  // Get actual value from DOM element
+            let option = find_option_from_value_or_label(value);  // Find original option object
+            
             if (value !== props.selected_option) {
                 emit('update:selected_option', option);
                 emit('select_option', option);
             }
+            
             if (!props.multiple) {
-                return;
+                return;  // Single select - done
             }
+            
             // Update selected values for multiple select
             selected_values.value = selected_values.value.filter((v) => v != value);
             selected_values.value.push(value);
@@ -272,12 +342,13 @@ const render = () => {
             emit('update:selected_options', options);
             emit('change_selected_options', options);
         });
+        
         // Handle option unselection event (multiple select only)
         $(select2Div).on('select2:unselect', function (e) {
             let data = e.params.data;
             let value = data.element._value;
             if (!props.multiple) {
-                return;
+                return;  // Unselect only relevant for multiple mode
             }
             selected_values.value = selected_values.value.filter((v) => v != value);
             let option = find_option_from_value_or_label(value);
@@ -289,8 +360,12 @@ const render = () => {
     }
     first_time_render = false;
     // this.$forceUpdate();
-    change_select_2_selected_value();
+    change_select_2_selected_value();  // Sync initial selection
 };
+
+/* *************************************************** */
+/* Select2-Vue synchronization functions */
+/* *************************************************** */
 
 /**
  * Synchronize Select2's displayed value with Vue's internal state.
@@ -318,6 +393,10 @@ function change_select_2_selected_value() {
     }
 }
 
+/* *************************************************** */
+/* Selection state management */
+/* *************************************************** */
+
 /**
  * Determine if an option should be marked as selected in the rendered HTML.
  * This function handles the logic for both single and multiple selection modes.
@@ -338,6 +417,7 @@ function change_select_2_selected_value() {
  */
 function is_selected(item) {
     if (!props.multiple) {
+        // Special handling for zero values to ensure proper matching
         const is_zero_value = selected_option_2.value.value == 0 || selected_option_2.value.value == "0";
         return item.value == selected_option_2.value.value || (is_zero_value && item.label == selected_option_2.value.label);
     }
@@ -358,7 +438,7 @@ function set_selected_values() {
     }
     selected_values.value = [];
     props.selected_options.forEach((opt) => {
-        let value = opt.value || opt.label;
+        let value = opt.value || opt.label;  // Use label as fallback if value missing
         selected_values.value.push(value);
     });
 }
@@ -373,7 +453,7 @@ function set_selected_values() {
  */
 function set_selected_option(selected_option) {
     if (selected_option == null && !props.multiple) {
-        selected_option = get_props_selected_option();
+        selected_option = get_props_selected_option();  // Fall back to default
     }
     selected_option_2.value = selected_option;
 }
@@ -387,7 +467,7 @@ function set_selected_option(selected_option) {
  */
 function get_props_selected_option() {
     if (props.selected_option == null) {
-        return props.options[0];
+        return props.options[0];  // Default to first option
     }
     return props.selected_option;
 }
@@ -410,10 +490,14 @@ function get_value_from_selected_option(selected_option) {
     if (selected_option.value != null) {
         value = selected_option.value;
     } else {
-        value = selected_option.label;
+        value = selected_option.label;  // Use label as fallback
     }
     return value;
 }
+
+/* *************************************************** */
+/* Option lookup utility functions */
+/* *************************************************** */
 
 /**
  * Convert an array of string/number values to an array of full option objects.
@@ -462,10 +546,11 @@ function find_option_2_from_value(value) {
     if (value == null) {
         value = get_value_from_selected_option();
     }
-    // let option = options_2.value.find((o) => o.value == value);
+    // Search regular options first
     let option = options_2.value.find((o) => o.value === value);
     if (option != null) { return option; }
-    // Search in grouped options
+    
+    // Search in grouped options if not found in regular options
     for (let i = 0; i < groups_options_2.value.length; i += 1) {
         let g = groups_options_2.value[i];
         option = g.options.find((o) => o.value === value);
@@ -475,6 +560,10 @@ function find_option_2_from_value(value) {
     }
     return null;
 }
+
+/* *************************************************** */
+/* Cleanup functions */
+/* *************************************************** */
 
 /**
  * Clean up Select2 instance and event listeners to prevent memory leaks.
@@ -499,10 +588,10 @@ function destroy() {
 
 // Lifecycle hook: Clean up before component unmounts
 onBeforeUnmount(() => {
-    destroy();
+    destroy();  // Prevent memory leaks
 });
 
-// Expose render function to parent components
+// Expose render function to parent components for manual re-rendering
 defineExpose({ render });
 
 </script>

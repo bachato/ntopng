@@ -112,6 +112,7 @@ void AutonomousSystem::updateRoundTripTime(u_int32_t rtt_msecs) {
 void AutonomousSystem::lua(lua_State *vm, DetailsLevel details_level,
                            bool asListElement, bool diff) {
   lua_newtable(vm);
+  ((GenericTrafficElement *)this)->lua(vm, true);
 
   lua_push_uint64_table_entry(vm, "asn", asn);
   lua_push_str_table_entry(vm, "asname", asname ? asname : (char *)"");
@@ -119,11 +120,11 @@ void AutonomousSystem::lua(lua_State *vm, DetailsLevel details_level,
   lua_push_uint64_table_entry(vm, "bytes.sent", sent.getNumBytes());
   lua_push_uint64_table_entry(vm, "bytes.rcvd", rcvd.getNumBytes());
 
-  if (details_level >= details_high) {
-    ((GenericTrafficElement *)this)->lua(vm, true);
+  lua_push_uint64_table_entry(vm, "seen.first", first_seen);
+  lua_push_uint64_table_entry(vm, "seen.last", last_seen);
 
-    lua_push_uint64_table_entry(vm, "seen.first", first_seen);
-    lua_push_uint64_table_entry(vm, "seen.last", last_seen);
+  if (details_level >= details_high) {
+
     lua_push_uint64_table_entry(vm, "duration", get_duration());
 
     lua_push_uint64_table_entry(vm, "num_hosts", getNumHosts());

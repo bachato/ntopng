@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef _FLOW_STATUS_STATS_H_
-#define _FLOW_STATUS_STATS_H_
+#ifndef _ASN_STATS_H_
+#define _ASN_STATS_H_
 
 #include "ntop_includes.h"
 
@@ -28,32 +28,33 @@ class Flow; /* Forward */
 
 /* *************************************** */
 
-class FlowStats {
+/* This class is used to collect information from live flows and
+ * store those info here, in order to do any kind of computation 
+ * with ASN and be more "free" to just get ASN stats instead of all
+ * the stats if interested in the live info.
+ * Also this class is used by FlowStats.cpp for the same reason (but that is
+ * used to get all the info from the flows)
+ */
+typedef struct {
+  u_int64_t bytes_sent;
+  u_int64_t bytes_rcvd;
+  u_int64_t total_bytes;
+} ASNTrafficStats;
+
+class ASNStats {
  private:
-  u_int32_t counters[BITMAP_NUM_BITS];
-  u_int32_t protocols[0x100];
-  u_int32_t alert_levels[ALERT_LEVEL_MAX_LEVEL];
-  u_int32_t dscps[64];  // 64 values available for dscp
-  u_int32_t host_pools[UNLIMITED_NUM_HOST_POOLS];
-  std::map<std::string, u_int16_t> talking_hosts;
-  std::map<std::string, u_int16_t> wlan_ssid;
-  ASNStats *asn_stats;
+  std::set<u_int32_t> transit_asn;
+  std::map<u_int32_t, ASNTrafficStats> src_asn, dst_asn;
 
  public:
-  FlowStats();
-  ~FlowStats();
+  ASNStats();
+  ~ASNStats();
 
-  void incStats(Bitmap128 alert_bitmap, u_int8_t l4_protocol,
-                AlertLevel alert_level, u_int8_t dscp_cli2srv,
-                u_int8_t dscp_srv2cli, Flow *flow);
+  void incStats(Flow *flow);
 
-  void updateTalkingHosts(Flow *f);
-  void updateWLANSSID(Flow *f);
-
-  void lua(lua_State *vm);
+  void lua(lua_State *vm, bool show_all_stats = false);
 
   void resetStats();
-  void resetTalkingHosts() { talking_hosts.clear(); };
 };
 
-#endif /* _FLOW_STATUS_STATS_H_ */
+#endif /* _ASN_STATS_H_ */

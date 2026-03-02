@@ -5150,6 +5150,7 @@ struct flowHostRetriever {
   /* Used by getActiveFlowsStats */
   nDPIStats *ndpi_stats;
   FlowStats *stats;
+  ASNStats *asn_stats;
   std::unordered_map<u_int32_t, std::string> *asn_names;
 
   /* Paginator */
@@ -6694,6 +6695,33 @@ int NetworkInterface::sortFlows(u_int32_t *begin_slot, bool walk_all,
 
 /* **************************************************** */
 
+static bool flow_sum_asn_stats(GenericHashEntry *flow, void *user_data,
+                           bool *matched) {
+  flowHostRetriever *retriever = (flowHostRetriever *)user_data;
+  ASNStats* asn_stats = retriever->asn_stats;
+  Flow* f = (Flow*)flow;
+
+  if (flow_matches(f, retriever)) {
+    if (retriever->asn_names != NULL) {
+      u_int32_t as;
+      char *as_name;
+      f->getSrcAS(&as, &as_name);
+      if ((as != 0) && (as_name != NULL))
+        (*retriever->asn_names)[as] = std::string(as_name);
+
+      f->getDstAS(&as, &as_name);
+      if ((as != 0) && (as_name != NULL))
+        (*retriever->asn_names)[as] = std::string(as_name);
+    }
+
+    asn_stats->incStats(f);
+    *matched = true;
+  }
+  return (false); /* false = keep on walking */
+}
+
+/* **************************************************** */
+
 static bool flow_sum_stats(GenericHashEntry *flow, void *user_data,
                            bool *matched) {
   flowHostRetriever *retriever = (flowHostRetriever *)user_data;
@@ -6735,6 +6763,46 @@ static bool flow_sum_stats(GenericHashEntry *flow, void *user_data,
   }
 
   return (false); /* false = keep on walking */
+}
+
+/* **************************************************** */
+
+void NetworkInterface::getLiveASNStats(ASNStats *asn_stats, AddressTree *allowed_hosts, 
+                        Paginator *p, lua_State *vm) {
+  struct flowHostRetriever retriever;
+  std::unordered_map<u_int32_t, std::string> asn_names;
+  u_int32_t begin_slot = 0;
+  bool walk_all = true;
+
+  memset(&retriever, 0, sizeof(retriever));
+  retriever.pag = p;
+  retriever.actNumEntries = 0;
+  retriever.maxNumEntries = getFlowsHashSize();
+  retriever.allowed_hosts = allowed_hosts;
+  retriever.asn_stats = asn_stats;
+  retriever.asn_names = &asn_names; /* Trick to enable C++ to initialize asn_names */
+  
+  retriever.host = NULL;
+  retriever.talking_with_host = NULL;
+  retriever.client = NULL;
+  retriever.server = NULL;
+  retriever.location = location_all;
+  retriever.ndpi_proto = -1;
+
+  walker(&begin_slot, walk_all, walker_flows, flow_sum_asn_stats, &retriever);
+
+  lua_newtable(vm);
+  lua_newtable(vm);
+  for(std::unordered_map<u_int32_t, std::string>::iterator it = asn_names.begin(); it != asn_names.end(); ++it) {
+    char buf[16];
+
+    snprintf(buf, sizeof(buf), "%u", it->first);
+    lua_push_str_table_entry(vm, buf, it->second.c_str());
+  }
+  lua_pushstring(vm, "asn_names");
+  lua_insert(vm, -2);
+  lua_settable(vm, -3);
+  asn_stats->lua(vm, true);
 }
 
 /* **************************************************** */
@@ -9932,7 +10000,7 @@ bool NetworkInterface::setMacDeviceType(char *strmac, DeviceType dtype,
 
 /* **************************************** */
 
-bool NetworkInterface::getASInfo(lua_State *vm, u_int32_t asn) {
+bool NetworkInterface::getASInfo(lua_State *vm, u_int32_t asn, DetailsLevel details_level) {
   struct as_find_info info;
   bool ret;
   u_int32_t begin_slot = 0;
@@ -9944,7 +10012,7 @@ bool NetworkInterface::getASInfo(lua_State *vm, u_int32_t asn) {
   walker(&begin_slot, walk_all, walker_ases, find_as_by_asn, (void *)&info);
 
   if (info.as) {
-    info.as->lua(vm, details_higher, false);
+    info.as->lua(vm, details_level, false);
     ret = true;
   } else
     ret = false;

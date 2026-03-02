@@ -23,6 +23,7 @@
 #define _NETWORK_INTERFACE_H_
 
 #include "ntop_includes.h"
+#include "ntop_typedefs.h"
 
 /** @defgroup NetworkInterface Network Interface
  * ............
@@ -728,6 +729,8 @@ public:
                      Host **srcHost, Host **dstHost, Flow **flow,
 		     bool *new_flow, u_int8_t *sender_mac);
   void processInterfaceStats(sFlowInterfaceStats *stats);
+  void getLiveASNStats(ASNStats *asn_stats, AddressTree *allowed_hosts, 
+                        Paginator *p, lua_State *vm);
   void getActiveFlowsStats(nDPIStats *stats, FlowStats *status_stats,
                            AddressTree *allowed_hosts, Host *h,
                            Host *talking_with_host, Host *client, Host *server,
@@ -1119,7 +1122,7 @@ public:
   bool getMacInfo(lua_State *vm, char *mac);
   bool resetMacStats(lua_State *vm, char *mac, bool delete_data);
   bool setMacDeviceType(char *strmac, DeviceType dtype, bool alwaysOverwrite);
-  bool getASInfo(lua_State *vm, u_int32_t asn);
+  bool getASInfo(lua_State *vm, u_int32_t asn, DetailsLevel details_level = details_higher);
   bool getObsPointInfo(lua_State *vm, u_int16_t obs_point);
   bool getCountryInfo(lua_State *vm, const char *country);
   bool getVLANInfo(lua_State *vm, u_int16_t vlan_id);

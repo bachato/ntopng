@@ -1,48 +1,93 @@
 <template>
     <div>
+        <!-- Filter and Time Resolution Controls -->
         <div class="button-group mb-2 d-flex align-items-center">
-            <div class="dropdown me-3 d-flex"><span class="no-wrap d-flex align-items-center filters-label me-2"><b>{{
-                _i18n("asn_configuration.filter")
-                        }}: </b></span>
-                <SelectSearch v-model:selected_option="current_selected_option" theme="bootstrap-5"
-                    :options="asn_type_option" @select_option="add_filter" :dropdown_size="'small'">
-                </SelectSearch>
+            <!-- ASN Type Filter Dropdown -->
+            <div class="dropdown me-3 d-flex">
+                <span class="no-wrap d-flex align-items-center filters-label me-2">
+                    <b>{{ _i18n("asn_configuration.filter") }}: </b>
+                </span>
+                <SelectSearch 
+                    v-model:selected_option="current_selected_option" 
+                    theme="bootstrap-5"
+                    :options="asn_type_option" 
+                    @select_option="add_filter" 
+                    :dropdown_size="'small'"
+                />
             </div>
+            
+            <!-- Time Resolution Dropdown (only shown when chart is visible and timeseries is enabled) -->
             <div v-if="(showChart) && props.context.showTimeseries" class="dropdown me-3 d-flex">
-                <span class="no-wrap d-flex align-items-center filters-label me-2"><b>{{
-                    _i18n("resolution")
-                        }}: </b></span>
-                <SelectSearch v-model:selected_option="selected_resolution" theme="bootstrap-5"
-                    :options="resolution_options" @select_option="select_resolution" :dropdown_size="'small'">
-                </SelectSearch>
+                <span class="no-wrap d-flex align-items-center filters-label me-2">
+                    <b>{{ _i18n("time") }}: </b>
+                </span>
+                <SelectSearch 
+                    v-model:selected_option="selected_resolution" 
+                    theme="bootstrap-5"
+                    :options="resolution_options" 
+                    @select_option="select_resolution" 
+                    :dropdown_size="'small'"
+                />
             </div>
         </div>
+
+        <!-- Timeseries Chart Section -->
         <div v-if="(showChart) && props.context.showTimeseries" class="position-relative" style="height: 330px;">
-            <Loading :isLoading="loading"></Loading>
+            <!-- Loading Overlay -->
+            <Loading :isLoading="loadingChart" />
+            
+            <!-- Chart Title -->
             <div class="widget-name">
                 <h6 class="m-0">{{ chart_title }}</h6>
             </div>
+            
+            <!-- Chart Component with Transition Effect -->
             <Transition name="add-effect" mode="out-in">
-                <DashboardTimeseries ref="timeseries_chart" :key="timeseries_key" :id="timeseries_id"
-                    :epoch_begin="epoch_begin" :epoch_end="epoch_end" :i18n_title="chart_title"
-                    :ifid="props.context.ifid.toString()" :max_width="12" :max_height="4" :params="params"
-                    :get_component_data="get_component_data" :set_component_attr="set_component_attr"
-                    :csrf="props.context.csrf" :show_resolution="true" :select_resolution="select_resolution"
-                    :resolution_options="resolution_options">
-                </DashboardTimeseries>
+                <DashboardTimeseries 
+                    ref="timeseries_chart" 
+                    :key="timeseries_key" 
+                    :id="timeseries_id"
+                    :epoch_begin="epoch_begin" 
+                    :epoch_end="epoch_end" 
+                    :i18n_title="chart_title"
+                    :ifid="props.context.ifid.toString()" 
+                    :max_width="12" 
+                    :max_height="4" 
+                    :params="params"
+                    :get_component_data="get_component_data" 
+                    :csrf="props.context.csrf" 
+                    @update-requested="updateChart"
+                    @chart-updated="updateChartDone"
+                />
             </Transition>
         </div>
+
+        <!-- ASN Statistics Table Section -->
         <div class="position-relative">
-            <TableWithConfig ref="table_as_stats" :table_id="table_id" :csrf="props.context.csrf" :showLoading="true"
-                :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting"
-                :get_extra_params_obj="get_extra_params_obj" @custom_event="on_table_custom_event">
-            </TableWithConfig>
+            <TableWithConfig 
+                ref="table_as_stats" 
+                :table_id="table_id" 
+                :csrf="props.context.csrf" 
+                :showLoading="true"
+                :f_map_columns="map_table_def_columns" 
+                :f_sort_rows="columns_sorting"
+                :handleLoadedColumns="handleLoadedColumns" 
+                :get_extra_params_obj="get_extra_params_obj"
+                @custom_event="on_table_custom_event"
+            />
         </div>
     </div>
 </template>
 
-
 <script setup>
+/**
+ * ASN Statistics Component
+ * Displays ASN (Autonomous System Number) statistics with timeseries chart and data table
+ * Supports filtering by ASN type (customer, sub-customer, remote, etc.) and time resolution
+ * 
+ * @component AsStats
+ */
+
 import { ref, onBeforeMount, computed } from "vue";
 import { default as sortingFunctions } from "../utilities/sorting-utils.js";
 import { default as TableWithConfig } from "./table-with-config.vue";
@@ -52,64 +97,67 @@ import { default as Loading } from "./loading.vue"
 import FormatterUtils from "../utilities/formatter-utils.js";
 import NtopUtils from "../utilities/ntop-utils.js";
 
+// Internationalization helper
 const _i18n = (t) => i18n(t);
 
+// Component Props
 const props = defineProps({
+    /** Context object containing configuration and runtime data */
     context: Object,
 });
 
+// Time Constants
 const current_time = Math.floor(Date.now() / 1000);
-const seconds_one_day = 3600 * 24;
+const SECONDS_ONE_DAY = 3600 * 24;
+const SECONDS_FIFTEEN_MINUTES = 15 * 60;
 
-// render table in httpdocs/tables_config/as_stats.json if context.ASNModeEnabled is false, else render the IXP mode table: httpdocs/tables_config/as_stats_ixp_mode.json
-const table_id = computed(() => {
-    return props.context?.ASNModeEnabled ? 'as_stats_ixp_mode' : 'as_stats';
-});
+// Table Configuration
+// Renders table from httpdocs/tables_config/as_stats.json if context.ASNModeEnabled is false,
+// otherwise renders the IXP mode table from httpdocs/tables_config/as_stats_ixp_mode.json
+const table_id = 'as_stats';
 
-const chart_title = _i18n('top_active_asn')
+// Chart Configuration
+const chart_title = _i18n('top_active_asn');
 const timeseries_id = ref('top_asn');
-const loading = ref(true);
+const loadingChart = ref(true);
 const timeseries_chart = ref(null);
 const table_as_stats = ref(null);
-const epoch_begin = ref(current_time - seconds_one_day); // Get one day ago
+const epoch_begin = ref(current_time - SECONDS_ONE_DAY); // Default: one day ago
 const epoch_end = ref(current_time);
 const showSankey = props.context.showSankey;
 const showChart = ref(props.context.isEnterprise);
-const current_selected_option = ref([])
-const customerIcon = '<i class="fa-solid fa-house-flag" data-bs-toggle="tooltip" data-bs-placement="top" title="' + _i18n("asn_configuration.customer_asn_title") + '"></i>'
-const subCustomerIcon = '<i class="fa-solid fa-house-laptop" data-bs-toggle="tooltip" data-bs-placement="top" title="' + _i18n("asn_configuration.sub_customer_asn_title") + '"></i>'
-const remoteIcon = '<i class="fa-solid fa-house-fire" data-bs-toggle="tooltip" data-bs-placement="top" title="' + _i18n("asn_configuration.remote_asn_title") + '"></i>'
+const isLive = ref(true);
+const current_selected_option = ref([]);
+
+// ASN Type Icons with Tooltips
+const customerIcon = '<i class="fa-solid fa-house-flag" data-bs-toggle="tooltip" data-bs-placement="top" title="' + _i18n("asn_configuration.customer_asn_title") + '"></i>';
+const subCustomerIcon = '<i class="fa-solid fa-house-laptop" data-bs-toggle="tooltip" data-bs-placement="top" title="' + _i18n("asn_configuration.sub_customer_asn_title") + '"></i>';
+const remoteIcon = '<i class="fa-solid fa-house-fire" data-bs-toggle="tooltip" data-bs-placement="top" title="' + _i18n("asn_configuration.remote_asn_title") + '"></i>';
+
+// Component Keys for Re-rendering
 const timeseries_key = ref(false);
-const asn_type_option = ref([{
-    key: "show_as",
-    value: "all",
-    label: i18n("asn_configuration.all_asn")
-}, {
-    key: "show_as",
-    value: "my_as",
-    label: i18n("asn_configuration.customer_asn_title")
-}, {
-    key: "show_as",
-    value: "my_customer_as",
-    label: i18n("asn_configuration.sub_customer_asn_title")
-}, {
-    key: "show_as",
-    value: "remote_as",
-    label: i18n("asn_configuration.remote_asn_title")
-}, {
-    key: "show_as",
-    value: "other_as",
-    label: i18n("asn_configuration.other_asn")
-}])
+
+// ASN Type Filter Options
+const asn_type_option = ref([
+    { key: "show_as", value: "all", label: i18n("asn_configuration.all_asn") },
+    { key: "show_as", value: "my_as", label: i18n("asn_configuration.customer_asn_title") },
+    { key: "show_as", value: "my_customer_as", label: i18n("asn_configuration.sub_customer_asn_title") },
+    { key: "show_as", value: "remote_as", label: i18n("asn_configuration.remote_asn_title") },
+    { key: "show_as", value: "other_as", label: i18n("asn_configuration.other_asn") }
+]);
+
+// Time Resolution Options
 const resolution_options = ref([
+    { value: "live", label: i18n('show_alerts.presets.live'), icon: "fa-solid fa-circle fa-2xs text-danger", currently_active: false },
     { value: "30_min", label: i18n('show_alerts.presets.30_min'), currently_active: false },
     { value: "hour", label: i18n('show_alerts.presets.hour'), currently_active: false },
     { value: "12_hours", label: i18n('show_alerts.presets.12_hours'), currently_active: false },
     { value: "day", label: i18n('show_alerts.presets.day'), currently_active: true },
     { value: "week", label: i18n('show_alerts.presets.week'), currently_active: false },
-])
-const selected_resolution = ref(resolution_options[3])
+]);
+const selected_resolution = ref(resolution_options[0]);
 
+// Chart Query Parameters
 const params = {
     post_params: {
         limit: 180,
@@ -122,110 +170,182 @@ const params = {
         }
     },
     source_type: "interface"
-}
+};
 
+// Time Series Query Template
 const ts_query = {
     ts_query: `ifid:$IFID$,asn:$ASN$`,
     ts_schema: `asn:traffic`,
-}
+};
+
+/**
+ * Updates chart loading state when update is requested
+ */
+const updateChart = () => {
+    loadingChart.value = true;
+};
+
+/**
+ * Updates chart loading state when update is complete
+ */
+const updateChartDone = () => {
+    loadingChart.value = false;
+};
 
 /* *************************************************** */
-
-const set_component_attr = async (attr, value) => {
-    component[attr] = value;
-}
-
+// Lifecycle Hooks
 /* *************************************************** */
 
-onBeforeMount(async () => {
+/**
+ * Component initialization before mounting
+ * Loads saved filter preferences from URL or localStorage
+ */
+onBeforeMount(() => {
+    // Load ASN filter from URL
     const selected_as = ntopng_url_manager.get_url_entry("show_as");
     if (selected_as) {
         const option = asn_type_option.value.find((el) => el.value === selected_as);
         if (option) {
-            current_selected_option.value = option
+            current_selected_option.value = option;
         }
     } else {
-        current_selected_option.value = asn_type_option.value[0]
+        current_selected_option.value = asn_type_option.value[0];
     }
-    ntopng_url_manager.set_key_to_url(current_selected_option.value.key, current_selected_option.value.value)
-    let requested_resolution = ntopng_url_manager.get_url_entry("chart_resolution")
+    ntopng_url_manager.set_key_to_url(current_selected_option.value.key, current_selected_option.value.value);
+    
+    // Load time resolution from URL or localStorage
+    let requested_resolution = ntopng_url_manager.get_url_entry("chart_resolution");
     if (!requested_resolution) {
-        const resolution = localStorage.getItem('ntopng.timeseries.chartResolution.' + timeseries_id)
+        const resolution = localStorage.getItem('ntopng.timeseries.chartResolution.' + timeseries_id);
         if (resolution) {
-            requested_resolution = resolution
+            requested_resolution = resolution;
         } else {
-            requested_resolution = "day" // Default 1 day
+            requested_resolution = "live"; // Default is live
         }
     }
+    
+    // Set selected resolution
     resolution_options.value.forEach(el => {
         if (el.value === requested_resolution) {
-            selected_resolution.value = el
+            selected_resolution.value = el;
         }
-    })
-    select_resolution(selected_resolution.value, true)
+    });
+    select_resolution(selected_resolution.value, true);
 });
 
 /* *************************************************** */
+// Event Handlers
+/* *************************************************** */
 
-const select_resolution = async (value, skip_reload) => {
+/**
+ * Handles time resolution selection
+ * @param {Object} value - Selected resolution option
+ * @param {boolean} isFirstLoad - Whether this is the initial component load
+ */
+const select_resolution = (value, isFirstLoad) => {
+    // Retrieve the timeframe value
     const timeframes = ntopng_utility.get_timeframes_dict();
-    if (timeframes[value.value]) {
-        epoch_begin.value = epoch_end.value - timeframes[value.value]
+    const selected_timeframe = timeframes[value.value];
+    
+    // Check the timeframe requested
+    if (selected_timeframe != null) {
+        if (selected_timeframe === 0) {
+            // Live mode: 15 minutes ago up to now
+            isLive.value = true;
+            epoch_begin.value = epoch_end.value - SECONDS_FIFTEEN_MINUTES;
+        } else {
+            // Historical mode: selected timeframe up to now
+            epoch_begin.value = epoch_end.value - selected_timeframe;
+            isLive.value = false;
+        }
     }
-    if (!skip_reload) {
-        timeseries_chart.value.refreshChart();
+    
+    // Refresh table if not first load
+    if (!isFirstLoad) {
+        table_as_stats.value.refresh_table(false);
     }
-    localStorage.setItem('ntopng.timeseries.chartResolution.' + timeseries_id, value.value)
-}
+    
+    // Save preference
+    localStorage.setItem('ntopng.timeseries.chartResolution.' + timeseries_id, value.value);
+};
 
 /* *************************************************** */
 
+/**
+ * Adds ASN type filter and refreshes data
+ * @param {Object} value - Selected filter option
+ */
 const add_filter = async (value) => {
-    loading.value = true;
     current_selected_option.value = value;
-    ntopng_url_manager.set_key_to_url(current_selected_option.value.key, current_selected_option.value.value)
-    timeseries_key.value = !timeseries_key.value
+    ntopng_url_manager.set_key_to_url(current_selected_option.value.key, current_selected_option.value.value);
+    timeseries_key.value = !timeseries_key.value; // Force chart re-render
     table_as_stats.value.refresh_table(false);
-}
+};
 
 /* *************************************************** */
+// Data Fetching
+/* *************************************************** */
 
-/* Callback to request REST data from components */
+/**
+ * Requests REST data from components for timeseries chart
+ * @param {string} url - Base URL for the request
+ * @param {Object} query_params - Query parameters
+ * @param {Object} post_params - POST parameters
+ * @returns {Promise<Object>} Timeseries data
+ */
 const get_component_data = async (url, query_params, post_params) => {
-    loading.value = true;
-    query_params.csrf = props.context.csrf
-    query_params.show_as = current_selected_option.value.value;
-    const url_params = ntopng_url_manager.obj_to_url_params(query_params);
+    const url_params = ntopng_url_manager.obj_to_url_params(get_extra_params_obj());
     const top_url = `${http_prefix}/lua/rest/v2/get/asn/get_top_asn.lua?${url_params}`;
-    const top_data = await ntopng_utility.http_request(top_url)
+    const top_data = await ntopng_utility.http_request(top_url);
+    
+    // Build time series requests for each ASN
     const ts_requests = [];
     top_data?.forEach((el) => {
         const tmp_query = { ...ts_query };
         tmp_query.ts_query = tmp_query.ts_query.replace('$IFID$', props.context.ifid);
         tmp_query.ts_query = tmp_query.ts_query.replace('$ASN$', el.asn);
         tmp_query.tskey = `${el.asn}`;
-        tmp_query.ts_unify = true
+        tmp_query.ts_unify = true;
         ts_requests.push(tmp_query);
-    })
+    });
+    
     post_params.ts_requests = ts_requests;
     const data_url = `${http_prefix}/lua/pro/rest/v2/get/timeseries/ts_multi.lua?${url_params}`;
-    const data = await ntopng_utility.http_post_request(data_url, post_params)
-    loading.value = false;
+    const data = await ntopng_utility.http_post_request(data_url, post_params);
     return data;
 };
 
+/**
+ * Builds additional parameters for API requests
+ * @returns {Object} Extra parameters including time range
+ */
 const get_extra_params_obj = () => {
     let extra_params = ntopng_url_manager.get_url_object();
-    return extra_params;
+    return {
+        ...extra_params,
+        ...{
+            epoch_begin: epoch_begin.value,
+            epoch_end: epoch_end.value,
+            is_live: isLive.value
+        }
+    };
 };
 
 /* ************************************** */
+// Formatting Utilities
+/* ************************************** */
 
+/**
+ * Formats ASN icon based on AS type
+ * @param {*} value - Cell value
+ * @param {Object} row - Row data
+ * @returns {string} HTML icon string
+ */
 const formatIconAS = (value, row) => {
     if (!value) {
-        return ''
+        return '';
     }
-    let importantASNIcon = ''
+    let importantASNIcon = '';
     if (row.is_customer_asn) {
         importantASNIcon = customerIcon;
     } else if (row.is_sub_customer_asn) {
@@ -233,18 +353,45 @@ const formatIconAS = (value, row) => {
     } else if (row.is_remote_asn) {
         importantASNIcon = remoteIcon;
     }
-    return importantASNIcon
-}
+    return importantASNIcon;
+};
+
+/*******************************************************/
+// Column Configuration
+/*******************************************************/
+
+/**
+ * Dynamically modifies columns based on license and available data
+ * @param {Array} columns - Original column definitions
+ * @returns {Array} Modified column definitions
+ */
+const handleLoadedColumns = (columns) => {
+    let modified_columns = columns;
+    if (props.context.ASNModeEnabled === true) {
+        // Remove columns not needed in ASN mode
+        modified_columns = modified_columns.filter((element) => {
+            return ((element.id !== "num_hosts")
+                && (element.id !== "alerted_flows")
+                && (element.id !== "score"));
+        });
+    }
+    return modified_columns;
+};
 
 /* ************************************** */
 
+/**
+ * Maps table column definitions to rendering functions
+ * @param {Array} columns - Column definitions
+ * @returns {Array} Enhanced column definitions with render functions
+ */
 const map_table_def_columns = (columns) => {
     let map_columns = {
+        /**
+         * Renders AS name with links and icons
+         */
         "asname": (value, row) => {
-            // value is ASNumber
-            // row is the json element
             const asName = row["asname"];
-
             let return_value = "";
             let icon = formatIconAS(value, row);
 
@@ -258,37 +405,57 @@ const map_table_def_columns = (columns) => {
             return_value += icon;
             return return_value;
         },
-        "asn": (value, row) => {
-            let return_value = row["asn"]
-            return return_value;
-        },
-        "hosts": (value, row) => {
-            return FormatterUtils.getFormatter("number")(value);
-        },
-        "seen_since": (value, row) => {
-            // `seen_since` might require formatting, e.g., date formatting.
-            return FormatterUtils.formatDateTime(value);
-        },
-        "score": (value, row) => {
-            // Assuming `score` is a number that might require some formatting.
-            return FormatterUtils.getFormatter("number")(value);
-        },
+        
+        /**
+         * Renders AS number
+         */
+        "asn": (value, row) => row["asn"],
+        
+        /**
+         * Formats host count
+         */
+        "hosts": (value, row) => FormatterUtils.getFormatter("number")(value),
+        
+        /**
+         * Formats seen since timestamp
+         */
+        "seen_since": (value, row) => FormatterUtils.formatDateTime(value),
+        
+        /**
+         * Formats score value
+         */
+        "score": (value, row) => FormatterUtils.getFormatter("number")(value),
+        
+        /**
+         * Creates traffic breakdown visualization
+         */
         "breakdown": (value, row) => {
-            return NtopUtils.createBreakdown(value["bytes_sent"], value["bytes_rcvd"], "Sent", "Rcvd")
+            const total_bytes = row["traffic"];
+            const bytes_sent_pctg = total_bytes ? (value.bytes_sent / total_bytes) * 100 : 0;
+            const bytes_rcvd_pctg = total_bytes ? (value.bytes_rcvd / total_bytes) * 100 : 0;
+            return NtopUtils.createBreakdown(bytes_sent_pctg, bytes_rcvd_pctg, "Sent", "Rcvd");
         },
-        "throughput": (value, row) => {
-            return FormatterUtils.getFormatter("bps")(value);
-        },
-        "traffic": (value, row) => {
-            return FormatterUtils.getFormatter("bytes")(value);
-        },
-        "alerted_flows": (value, row) => {
-            return FormatterUtils.getFormatter("number")(value);
-        },
+        
+        /**
+         * Formats throughput in bps
+         */
+        "throughput": (value, row) => FormatterUtils.getFormatter("bps")(value),
+        
+        /**
+         * Formats traffic in bytes
+         */
+        "traffic": (value, row) => FormatterUtils.getFormatter("bytes")(value),
+        
+        /**
+         * Formats alerted flows count
+         */
+        "alerted_flows": (value, row) => FormatterUtils.getFormatter("number")(value),
     };
 
     columns.forEach((c) => {
         c.render_func = map_columns[c.data_field];
+        
+        // Configure action buttons
         if (c.id == "actions") {
             const visible_dict = {
                 host: true,
@@ -296,16 +463,19 @@ const map_table_def_columns = (columns) => {
                 exporters_stats: showSankey,
                 timeseries: props.context.showTimeseries,
             };
+            
             c.button_def_array.forEach((b) => {
                 b.f_map_class = (current_class, row) => {
-                    // if is not defined is enabled
+                    // Disable buttons based on conditions
                     if (!visible_dict[b.id]) {
                         current_class.push("disabled");
-                    } else if (row.asn === 0 && (b.id === "exporters_stats")) {
+                    } else if (((row.asn === 0) || ((isLive.value === false) && row.is_in_memory === false)) && (b.id === "exporters_stats")) {
+                        current_class.push("disabled");
+                    } else if (((isLive.value === false) && (row.is_in_memory === false)) && (b.id === "host")) {
                         current_class.push("disabled");
                     }
                     return current_class;
-                }
+                };
             });
         }
     });
@@ -314,7 +484,13 @@ const map_table_def_columns = (columns) => {
 };
 
 /* ************************************** */
+// Button Click Handlers
+/* ************************************** */
 
+/**
+ * Navigates to exporters statistics page
+ * @param {Object} event - Click event containing row data
+ */
 function click_button_exporters_stats(event) {
     const row = event.row;
     window.location.href = `${http_prefix}/lua/as_overview.lua?asn=${row["asn"]}`;
@@ -322,6 +498,10 @@ function click_button_exporters_stats(event) {
 
 /* ************************************** */
 
+/**
+ * Navigates to hosts statistics page
+ * @param {Object} event - Click event containing row data
+ */
 function click_button_host(event) {
     const row = event.row;
     window.location.href = `${http_prefix}/lua/hosts_stats.lua?asn=${row["asn"]}`;
@@ -329,13 +509,25 @@ function click_button_host(event) {
 
 /* ************************************** */
 
+/**
+ * Navigates to flows statistics page (live or historical based on mode)
+ * @param {Object} event - Click event containing row data
+ */
 function click_button_flows(event) {
     const row = event.row;
-    window.location.href = `${http_prefix}/lua/flows_stats.lua?asn=${row["asn"]}`;
+    if (isLive.value == true) {
+        window.location.href = `${http_prefix}/lua/flows_stats.lua?asn=${row["asn"]}`;
+    } else {
+        window.location.href = `${http_prefix}/lua/pro/db_search.lua?ifid=${props.context.ifid}&epoch_begin=${epoch_begin.value}&epoch_end=${epoch_end.value}&asn=${row.asn};eq`;
+    }
 }
 
 /* ************************************** */
 
+/**
+ * Navigates to timeseries historical view
+ * @param {Object} event - Click event containing row data
+ */
 function click_button_timeseries(event) {
     const row = event.row;
     window.location.href = `${http_prefix}/lua/as_overview.lua?asn=${row["asn"]}&page=historical`;
@@ -343,6 +535,10 @@ function click_button_timeseries(event) {
 
 /* ************************************** */
 
+/**
+ * Dispatches table custom events to appropriate handlers
+ * @param {Object} event - Custom event object
+ */
 function on_table_custom_event(event) {
     let events_managed = {
         "click_button_host": click_button_host,
@@ -350,6 +546,7 @@ function on_table_custom_event(event) {
         "click_button_exporters_stats": click_button_exporters_stats,
         "click_button_timeseries": click_button_timeseries,
     };
+    
     if (events_managed[event.event_id] == null) {
         return;
     }
@@ -358,6 +555,13 @@ function on_table_custom_event(event) {
 
 /* ************************************** */
 
+/**
+ * Custom sorting function for table columns
+ * @param {Object} col - Column definition
+ * @param {Object} r0 - First row to compare
+ * @param {Object} r1 - Second row to compare
+ * @returns {number} Comparison result
+ */
 function columns_sorting(col, r0, r1) {
     if (col != null) {
         if (col.id == "name") {
@@ -385,28 +589,38 @@ function columns_sorting(col, r0, r1) {
 </script>
 
 <style scoped>
+/**
+ * Transition animations for component add/remove effects
+ * Uses Vue's transition system with enter/leave animations
+ */
+
+/* Apply transition to moving elements */
 .add-effect-move,
-/* apply transition to moving elements */
 .add-effect-enter-active,
 .add-effect-leave-active {
     transition: all 0.35s ease;
 }
 
-/* Transform: positive pixels, the effects let enters the component
- * from the right, negative pixels from the left
+/**
+ * Enter animation: fade in from left
  */
 .add-effect-enter-from {
     opacity: 0;
     transform: translateX(-60px);
 }
 
+/**
+ * Leave animation: fade out
+ */
 .add-effect-leave-to {
     opacity: 0;
     transform: translateX(0px);
 }
 
-/* ensure leaving items are taken out of layout flow so that moving
-   animations can be calculated correctly. */
+/**
+ * Ensure leaving items are taken out of layout flow
+ * so that moving animations can be calculated correctly
+ */
 .add-effect-leave-active {
     position: absolute;
 }

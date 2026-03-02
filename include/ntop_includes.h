@@ -271,6 +271,7 @@ using namespace std;
 #include "CategoryCounter.h"
 #include "nDPIStats.h"
 #include "InterarrivalStats.h"
+#include "ASNStats.h"
 #include "FlowStats.h"
 #ifdef NTOPNG_PRO
 #include "CustomAppMaps.h"

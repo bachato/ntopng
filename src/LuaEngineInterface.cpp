@@ -2808,12 +2808,17 @@ static int ntop_get_interface_vlans_info(lua_State *vm) {
 static int ntop_get_interface_as_info(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
   u_int32_t asn;
+  DetailsLevel details_level = details_higher;
 
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   asn = (u_int32_t)lua_tonumber(vm, 1);
 
-  if ((!curr_iface) || (!curr_iface->getASInfo(vm, asn)))
+  if (lua_type(vm, 2) == LUA_TBOOLEAN) {
+    details_level = lua_toboolean(vm, 2) ? details_normal : details_higher;
+  }
+
+  if ((!curr_iface) || (!curr_iface->getASInfo(vm, asn, details_level)))
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -4578,6 +4583,32 @@ static int ntop_set_interface_periodic_activity_progress(lua_State *vm) {
 
 /* ****************************************** */
 
+/* This function reads live ASN information from flows
+ * by iterating all the currently active flows
+ */
+static int ntop_get_live_asn_stats(lua_State *vm) {
+  NetworkInterface *curr_iface = getCurrentInterface(vm);
+  ASNStats asn_stats;
+  Paginator *p = NULL;
+
+  /* Non mandatory paginator parameter */
+  if ((p = new (std::nothrow) Paginator()) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  if (lua_type(vm, 1) == LUA_TTABLE) p->readOptions(vm, 1);
+
+  if (curr_iface) {
+    curr_iface->getLiveASNStats(&asn_stats, get_allowed_nets(vm), p, vm);
+  } else
+    lua_pushnil(vm);
+
+  if (p) delete p;
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_get_active_flows_stats(lua_State *vm) {
   NetworkInterface *curr_iface = getCurrentInterface(vm);
   nDPIStats ndpi_stats;
@@ -6024,6 +6055,7 @@ static luaL_Reg _ntop_interface_reg[] = {
 #endif
 
   { "getActiveFlowsStats", ntop_get_active_flows_stats },
+  { "getLiveASNStats", ntop_get_live_asn_stats },
   { "getnDPIProtoName", ntop_get_ndpi_protocol_name },
   { "getnDPIFullProtoName", ntop_get_ndpi_full_protocol_name },
   { "getnDPIProtoId", ntop_get_ndpi_protocol_id },

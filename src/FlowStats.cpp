@@ -26,6 +26,7 @@
 FlowStats::FlowStats() {
   if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  asn_stats = new (nothrow) ASNStats();
   resetStats();
 }
 
@@ -34,6 +35,7 @@ FlowStats::FlowStats() {
 FlowStats::~FlowStats() {
   if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (asn_stats) delete asn_stats;
 }
 
 /* *************************************** */
@@ -101,41 +103,7 @@ void FlowStats::incStats(Bitmap128 alert_bitmap, u_int8_t l4_protocol,
       host_pools[cli_pool]++;
     }
 
-    /* Now handle the ASN Transit list */
-    u_int32_t srcPeerAS = flow->getSrcPeerAS(), dstPeerAS = flow->getDstPeerAS();
-    if ((srcPeerAS || dstPeerAS) && (srcPeerAS != dstPeerAS)) {
-        /* Transit */
-        u_int32_t srcAS, dstAS;
-        char *asname;
-	
-        flow->getSrcAS(&srcAS, &asname);
-        flow->getDstAS(&dstAS, &asname);
-        if (srcAS != srcPeerAS) transit_asn_list.insert(srcPeerAS);
-        if (dstAS != dstPeerAS) transit_asn_list.insert(dstPeerAS);
-    }
-
-    /* Track source and destination AS numbers */
-    u_int32_t srcAS = 0, dstAS = 0;
-    char *src_as_name, *dst_as_name;
-    
-    flow->getSrcAS(&srcAS, &src_as_name);
-    flow->getDstAS(&dstAS, &dst_as_name);
-
-    if (srcAS > 0) {
-      std::map<u_int32_t, u_int32_t>::iterator it = src_asn.find(srcAS);
-      if (it == src_asn.end())
-        src_asn[srcAS] = 1;
-      else
-        it->second++;
-    }
-
-    if (dstAS > 0) {
-      std::map<u_int32_t, u_int32_t>::iterator it = dst_asn.find(dstAS);
-      if (it == dst_asn.end())
-        dst_asn[dstAS] = 1;
-      else
-        it->second++;
-    }
+    if (asn_stats) asn_stats->incStats(flow);
   }
 }
 
@@ -278,38 +246,7 @@ void FlowStats::lua(lua_State *vm) {
   lua_insert(vm, -2);
   lua_settable(vm, -3);
 
-  lua_newtable(vm);
-
-  std::set<u_int32_t>::iterator it3;
-  for (it3 = transit_asn_list.begin(); it3 != transit_asn_list.end(); it3++) {
-    lua_push_uint32_table_entry(vm, std::to_string(*it3).c_str(), 1);
-  }
-
-  lua_pushstring(vm, "transit_asn");
-  lua_insert(vm, -2);
-  lua_settable(vm, -3);
-
-  lua_newtable(vm);
-
-  std::map<u_int32_t, u_int32_t>::iterator it_src_as;
-  for (it_src_as = src_asn.begin(); it_src_as != src_asn.end(); it_src_as++) {
-    lua_push_uint32_table_entry(vm, std::to_string(it_src_as->first).c_str(), it_src_as->second);
-  }
-
-  lua_pushstring(vm, "src_asn");
-  lua_insert(vm, -2);
-  lua_settable(vm, -3);
-
-  lua_newtable(vm);
-
-  std::map<u_int32_t, u_int32_t>::iterator it_dst_as;
-  for (it_dst_as = dst_asn.begin(); it_dst_as != dst_asn.end(); it_dst_as++) {
-    lua_push_uint32_table_entry(vm, std::to_string(it_dst_as->first).c_str(), it_dst_as->second);
-  }
-
-  lua_pushstring(vm, "dst_asn");
-  lua_insert(vm, -2);
-  lua_settable(vm, -3);
+  asn_stats->lua(vm, false /* Do not add table */);
 }
 
 /* *************************************** */
@@ -350,8 +287,7 @@ void FlowStats::resetStats() {
   memset(host_pools, 0, sizeof(host_pools));
   talking_hosts.clear();
   wlan_ssid.clear();
-  src_asn.clear();
-  dst_asn.clear();
+  asn_stats->resetStats();
 }
 
 /* *************************************** */

@@ -17,83 +17,95 @@ require "lua_utils"
 -- NOTE: in case of invalid login, no error is returned but redirected to login
 --
 
--- Get from redis the throughput type bps or pps
-local throughput_type = getThroughputType()
-local now = os.time()
-
-interface.select(ifname)
+local ifid = _GET["ifid"] or interface.getId()
+local epoch_begin = _GET["epoch_begin"] or 0
+local epoch_end = _GET["epoch_end"] or 0
+local is_live = toboolean(_GET["is_live"] or true)
 local selected_asn = _GET["show_as"]
-local check_as = nil
 
-local asn = tonumber(_GET["asn"])
-local as_info;
-
-if (asn ~= nil) then
-    as_info = interface.getASInfo(asn)
-
-    if (as_info) then as_info = {as_info} end
-else
-    as_info = interface.getASesInfo({detailsLevel = "high"})
-    as_info = as_info["ASes"]
-end
-
-if not isEmptyString(selected_asn) then
-    local customer_as, sub_customer_as, remote_as =
-        as_utils.getAllConfigurations()
-    if selected_asn == "my_as" then
-        check_as = customer_as
-    elseif selected_asn == "my_customer_as" then
-        check_as = sub_customer_as
-    elseif selected_asn == "remote_as" then
-        check_as = remote_as
-    elseif selected_asn == "other_as" then
-        check_as = as_utils.getOtherASNs(as_info)
-    end
-end
-
+local ases_info = {}
 local res = {}
 
-if as_info ~= nil then
-    for key, value in pairs(as_info) do
-        local record = {}
-        local add_record = true
+interface.select(ifid)
 
-        local bytes_sent = value["bytes.sent"]
-        local bytes_rcvd = value["bytes.rcvd"]
+if not is_live and not hasClickHouseSupport() then
+    rest_utils.answer(rest_utils.consts.err.clickhouse_missing)
+    return 
+end
 
-        record["asn"] = value["asn"]
-        record["avg_host_score"] = math.floor(value["score"] /
-                                                  value["num_hosts"])
-        record["bytes_sent"] = bytes_sent
-        record["bytes_rcvd"] = bytes_rcvd
-        record["alerted_flows"] = value["alerted_flows"]["total"]
-        record["traffic"] = bytes_sent + bytes_rcvd
-        record["seen_since"] = value["seen.first"]
-        record["score"] = value["score"]
+local options = {
+    ifid = ifid,
+    epoch_begin = epoch_begin,
+    epoch_end = epoch_end,
+    selected_asn = selected_asn
+}
+
+-- Now there are two possibilities:
+-- - the traffic live is requested
+-- - the historical traffic
+if (is_live) and (is_live == true) then
+    ases_info = as_utils.retrieveASLiveTraffic(options)
+else
+    ases_info = as_utils.retrieveASHistoricalTraffic(options)
+end
+
+-- In both cases however, live and historical, we miss the Currently Live info, so let's retrieve those
+-- and sum the bytes with the live ones for Historical, use the live ones for live traffic
+
+local live_flows_stats = interface.getActiveFlowsStats(nil, nil, false, nil, nil, nil, nil) or {}
+
+for key, value in pairs(ases_info or {}) do
+    local record = {}
+    local add_record = true
+
+    local asn = tonumber(value["asn"])
+    local bytes_sent = value["bytes.sent"]
+    local bytes_rcvd = value["bytes.rcvd"]
+
+    record["asn"] = asn
+    if value["num_hosts"] then
         record["num_hosts"] = value["num_hosts"]
-        record["throughput"] = value["throughput_bps"]
+        record["avg_host_score"] = math.floor(value["score"] / value["num_hosts"])
+    end
+    record["bytes_sent"] = bytes_sent
+    record["bytes_rcvd"] = bytes_rcvd
+    if value["alerted_flows"] then
+        record["alerted_flows"] = value["alerted_flows"]["total"]
+    end
+    if bytes_sent and bytes_rcvd then
+        record["traffic"] = bytes_sent + bytes_rcvd
+    end
+    record["seen_since"] = tonumber(value["seen.first"])
+    record["score"] = value["score"]
+    record["throughput"] = value["throughput_bps"]
+    if value["asname"] then
+        if (asn == 0) then
+            value["asname"] = i18n('reserved_as')
+        end
         record["asname"] = value["asname"]
+    else
+        record["asname"] = ntop.getASNameFromASN(tonumber(record["asn"]))
+    end
 
-        if value["asn"] == 0 then record["asname"] = "Private hosts" end
+    if asn == 0 then
+        record["asname"] = "Private hosts"
+    end
 
-        record["breakdown"] = {bytes_sent = bytes_sent, bytes_rcvd = bytes_rcvd}
+    if not is_live then
+        local as_info = interface.getASInfo(asn)
+        record["is_in_memory"] = not(as_info == nil)
+    end
 
-        if check_as then
-            if not check_as[tostring(value["asn"])] then
-                add_record = false
-            end
-        end
+    record["breakdown"] = {
+        bytes_sent = bytes_sent,
+        bytes_rcvd = bytes_rcvd
+    }
 
-        if add_record then
-            table.insert(res, record)
-        end
+    if add_record then
+        table.insert(res, record)
     end
 end
 
--- sort by asn number ascending
-table.sort(res, function(a, b)
-    return a.asn < b.asn
-end)
 
 local customer_asn, sub_customer_asn, remote_asn = as_utils.getAllConfigurations()
 for pos, value in pairs(res or {}) do
