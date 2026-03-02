@@ -7,7 +7,7 @@
     <div>
         <TimeseriesChart ref="chart" :id="id" :chart_type="chart_type" :base_url_request="base_url"
             :get_custom_chart_options="get_chart_options" :register_on_status_change="false"
-            :disable_fixed_height="true">
+            :disable_fixed_height="true" @chart-updated="chartUpdatedCallback" @update-requested="updateRequestedCallback">
         </TimeseriesChart>
     </div>
 </template>
@@ -19,40 +19,67 @@ import { default as TimeseriesChart } from "./timeseries-chart.vue";
 import timeseriesUtils from "../utilities/timeseries-utils.js";
 
 /* *************************************************** */
+/* Constants and reactive variables */
+/* *************************************************** */
 
-const height_per_row = 62 /* px */
-const chart_type = ref(ntopChartApex.typeChart.TS_LINE);
-const chart = ref(null);
-const timeseries_groups = ref([]);
-const group_option_mode = timeseriesUtils.getGroupOptionMode('1_chart_x_yaxis');
-const height = ref(null);
-const ts_request = ref([]);
+const height_per_row = 62 /* px */  // Base height per row of the component
+const chart_type = ref(ntopChartApex.typeChart.TS_LINE);  // Chart type (line chart)
+const chart = ref(null);  // Reference to the child TimeseriesChart component
+const timeseries_groups = ref([]);  // Timeseries groups to display
+const group_option_mode = timeseriesUtils.getGroupOptionMode('1_chart_x_yaxis');  // Grouping mode for chart options
+const height = ref(null);  // Calculated height of the component
+const ts_request = ref([]);  // Timeseries requests to be processed
 
+const emit = defineEmits(['chart-updated', 'update-requested']);  // Events emitted to parent component
+
+/* *************************************************** */
+/* Component props */
 /* *************************************************** */
 
 const props = defineProps({
-    id: String,          /* Component ID */
-    i18n_title: String,  /* Title (i18n) */
+    id: String,          /* Unique component ID */
+    i18n_title: String,  /* Title (i18n) for internationalization */
     ifid: String,        /* Interface ID */
-    epoch_begin: Number, /* Time interval begin */
-    epoch_end: Number,   /* Time interval end */
-    max_width: Number,   /* Component Width (4, 8, 12) */
-    max_height: Number,  /* Component Hehght (4, 8, 12)*/
+    epoch_begin: Number, /* Time interval begin (Unix timestamp) */
+    epoch_end: Number,   /* Time interval end (Unix timestamp) */
+    max_width: Number,   /* Component Width (4, 8, 12) - grid system */
+    max_height: Number,  /* Component Height (4, 8, 12) - grid system */
     params: Object,      /* Component-specific parameters from the JSON template definition */
-    get_component_data: Function, /* Callback to request data (REST) */
-    csrf: String,
-    filters: Object,
+    get_component_data: Function, /* Callback to request data from REST API */
+    csrf: String,        /* CSRF token for security */
+    filters: Object,     /* Additional filters for data query */
 });
 
 /* *************************************************** */
+/* Computed properties */
+/* *************************************************** */
 
-/* Return the base url of the REST API */
+/* Returns the base URL of the REST API */
 const base_url = computed(() => {
     return `${http_prefix}${props.params.url}`;
 });
 
 /* *************************************************** */
+/* Callback methods */
+/* *************************************************** */
 
+/* Callback triggered when chart is updated */
+const chartUpdatedCallback = (options) => {
+    emit("chart-updated", options)
+}
+
+/* *************************************************** */
+
+/* Callback triggered when update is requested */
+const updateRequestedCallback = (options) => {
+    emit("update-requested", options)
+}
+
+/* *************************************************** */
+/* Parameter substitution functions */
+/* *************************************************** */
+
+/* Substitutes $IFID$ placeholder with the actual interface ID in all parameters */
 function substitute_ifid(params_to_format, current_ifid) {
     let new_formatted_params = {};
     for (const param in (params_to_format)) {
@@ -60,7 +87,7 @@ function substitute_ifid(params_to_format, current_ifid) {
             /* Contains $IFID$, substitute with the interface id */
             new_formatted_params[param] = params_to_format[param].replace('$IFID$', current_ifid);
         } else {
-            /* does NOT Contains $IFID$, add the plain param */
+            /* Does NOT contain $IFID$, add the plain parameter */
             new_formatted_params[param] = params_to_format[param];
         }
     }
@@ -70,14 +97,15 @@ function substitute_ifid(params_to_format, current_ifid) {
 
 /* *************************************************** */
 
+/* Substitutes $EXPORTER$ placeholder with the actual exporter IP in all parameters */
 function substitute_exporter(params_to_format, current_exporter) {
     let new_formatted_params = {};
     for (const param in (params_to_format)) {
         if (params_to_format[param].contains('$EXPORTER$')) {
-            /* Contains $EXPORTER$, substitute with the interface id */
+            /* Contains $EXPORTER$, substitute with the exporter IP */
             new_formatted_params[param] = params_to_format[param].replace('$EXPORTER$', current_exporter);
         } else {
-            /* does NOT Contains $EXPORTER$, add the plain param */
+            /* Does NOT contain $EXPORTER$, add the plain parameter */
             new_formatted_params[param] = params_to_format[param];
         }
     }
@@ -87,14 +115,15 @@ function substitute_exporter(params_to_format, current_exporter) {
 
 /* *************************************************** */
 
+/* Substitutes $NETWORK$ placeholder with the actual network ID in all parameters */
 function substitute_network(params_to_format, current_network) {
     let new_formatted_params = {};
     for (const param in (params_to_format)) {
         if (params_to_format[param].contains('$NETWORK$')) {
-            /* Contains $NETWORK$, substitute with the interface id */
+            /* Contains $NETWORK$, substitute with the network ID */
             new_formatted_params[param] = params_to_format[param].replace('$NETWORK$', current_network);
         } else {
-            /* does NOT Contains $NETWORK$, add the plain param */
+            /* Does NOT contain $NETWORK$, add the plain parameter */
             new_formatted_params[param] = params_to_format[param];
         }
     }
@@ -103,32 +132,30 @@ function substitute_network(params_to_format, current_network) {
 }
 
 /* *************************************************** */
+/* ANY parameter resolution functions */
+/* *************************************************** */
 
-/* This function is used to substitute to the $IFID$ found in the
- * configuration the correct interface id
- */
+/* Resolves $IFID$ ANY parameters by fetching all interfaces and creating requests for each */
 async function format_ifids(params_to_format) {
     if (ts_request.value.length > 0) {
-        /* Already populated, return */
+        /* Already populated, return early to avoid duplicate processing */
         return;
     }
     const ifid_url = "lua/rest/v2/get/ntopng/interfaces.lua"
     const ifid_list = await ntopng_utility.http_request(`${http_prefix}/${ifid_url}`) || [];
     ifid_list.forEach((iface) => {
         let new_formatted_params = substitute_ifid(params_to_format, iface.ifid);
-        new_formatted_params.source_def = [iface.ifid]
+        new_formatted_params.source_def = [iface.ifid]  // Store source definition for later use
         ts_request.value.push(new_formatted_params);
     });
 }
 
 /* *************************************************** */
 
-/* This function is used to substitute to the $EXPORTER$ found in the
- * configuration the correct flow exporter
- */
+/* Resolves $EXPORTER$ ANY parameters by fetching all flow exporters and creating requests for each */
 async function format_exporters(params_to_format) {
     if (ts_request.value.length > 0) {
-        /* Already populated, return */
+        /* Already populated, return early to avoid duplicate processing */
         return;
     }
     const exporters_url = "lua/pro/rest/v2/get/flowdevices/list.lua"
@@ -138,7 +165,7 @@ async function format_exporters(params_to_format) {
             if (exporter) {
                 let new_formatted_params = substitute_exporter(params_to_format, exporter.probe_ip);
                 new_formatted_params = substitute_ifid(new_formatted_params, exporter.ifid);
-                new_formatted_params.source_def = [exporter.ifid, exporter.probe_ip]
+                new_formatted_params.source_def = [exporter.ifid, exporter.probe_ip]  // Store source definition
                 ts_request.value.push(new_formatted_params);
             }
         });
@@ -147,12 +174,10 @@ async function format_exporters(params_to_format) {
 
 /* *************************************************** */
 
-/* This function is used to substitute to the $NETWORK$ found in the
- * configuration in the correct networks
- */
+/* Resolves $NETWORK$ ANY parameters by fetching all networks and creating requests for each */
 async function format_networks(params_to_format) {
     if (ts_request.value.length > 0) {
-        /* Already populated, return */
+        /* Already populated, return early to avoid duplicate processing */
         return;
     }
     const networks_url = "lua/rest/v2/get/network/networks.lua"
@@ -162,7 +187,7 @@ async function format_networks(params_to_format) {
             if (network) {
                 let new_formatted_params = substitute_network(params_to_format, network.id);
                 new_formatted_params = substitute_ifid(new_formatted_params, props.ifid);
-                new_formatted_params.source_def = [props.ifid, network.id];
+                new_formatted_params.source_def = [props.ifid, network.id];  // Store source definition
                 ts_request.value.push(new_formatted_params);
             }
         });
@@ -171,17 +196,15 @@ async function format_networks(params_to_format) {
 
 /* *************************************************** */
 
-/* This function is used to transform the $ANY$ params in the 
- * correct value (e.g. $ANY_IFID$ -> list of all ifid)
- */
+/* Main function to resolve all ANY parameters in the configuration */
 async function resolve_any_params() {
     /* Clear the Array */
     if (ts_request.value.length > 0) {
-        /* Already populated, return */
+        /* Already populated, return early to avoid duplicate processing */
         return;
     }
     ts_request.value = [];
-    /* Here possible ANY, can be found in the post_params */
+    /* Handle possible ANY parameters found in the post_params */
     const params = props.params.post_params?.ts_requests;
     for (const any_param in (params || {})) {
         switch (any_param) {
@@ -195,6 +218,7 @@ async function resolve_any_params() {
                 await format_networks(params[any_param]);
                 break;
             default:
+                // Handle regular parameters (no ANY substitution needed)
                 let new_formatted_params = substitute_ifid(params[any_param], props.ifid);
                 new_formatted_params.source_def = [props.ifid];
                 ts_request.value.push(new_formatted_params);
@@ -204,10 +228,10 @@ async function resolve_any_params() {
 }
 
 /* *************************************************** */
+/* Timeseries group retrieval functions */
+/* *************************************************** */
 
-/* The source_type can be found on the json and the source_array is automatically generated
- * by using the source_type
- */
+/* Retrieves timeseries groups from a metric schema and source definition */
 async function get_timeseries_groups_from_metric(metric_schema, source_def) {
     const status = {
         epoch_begin: props.epoch_begin,
@@ -222,15 +246,16 @@ async function get_timeseries_groups_from_metric(metric_schema, source_def) {
 
 /* *************************************************** */
 
+/* Retrieves basic information for all timeseries requests */
 async function retrieve_basic_info() {
-    /* Return the timeseries group, info found in the json */
+    /* Return the timeseries groups, info found in the JSON */
     if (timeseries_groups.value.length == 0) {
-        /* Order the request just the first time */
+        /* Order requests only the first time */
         order_ts_request();
         for (const value of ts_request.value) {
             const metric_schema = value?.ts_schema;
             const source_def = value.source_def;
-            delete value.source_def /* Remove the property otherwise it's going to be added to the REST */
+            delete value.source_def /* Remove the property to prevent it from being added to the REST request */
             const group = await get_timeseries_groups_from_metric(metric_schema, source_def);
             timeseries_groups.value.push(group);
         }
@@ -239,14 +264,17 @@ async function retrieve_basic_info() {
 }
 
 /* *************************************************** */
+/* Utility functions */
+/* *************************************************** */
 
+/* Sorts timeseries requests by their key for consistent ordering */
 function order_ts_request() {
     ts_request.value.sort((a, b) => a.tskey.localeCompare(b.tskey));
 }
 
 /* *************************************************** */
 
-/* Remove the property otherwise it's going to be added to the REST */
+/* Removes temporary properties that shouldn't be sent to the REST API */
 function remove_extra_params() {
     for (const value of ts_request.value) {
         if (value.source_def) {
@@ -256,8 +284,10 @@ function remove_extra_params() {
 }
 
 /* *************************************************** */
+/* Chart options and data fetching */
+/* *************************************************** */
 
-/* This function run the REST API with the data */
+/* Main function that fetches data from REST API and formats it for the chart */
 async function get_chart_options() {
     await resolve_any_params();
     await retrieve_basic_info();
@@ -273,49 +303,55 @@ async function get_chart_options() {
         }
     }
 
-    /* Have to be used this get_component_data, in order to create report too */
+    /* Use get_component_data callback to enable report generation as well */
     let result = await props.get_component_data(url,
         /* Note: passing query params (not required) to be used by check_diff_params() */
         { ifid: props.ifid, epoch_begin: props.epoch_begin, epoch_end: props.epoch_end },
         post_params, props.epoch_begin);
 
-    /* Format the result in the format needed by Dygraph */
+    /* Format the result for Dygraph chart compatibility */
     result = timeseriesUtils.tsArrayToOptionsArray(result, timeseries_groups.value, group_option_mode, '');
     if (result[0]) {
         result[0].height = height.value;
-        result[0].connectSeparatedPoints = true;
+        result[0].connectSeparatedPoints = true;  // Connect points even with gaps in data
     }
     return result?.[0];
 }
 
 /* *************************************************** */
+/* Watchers */
+/* *************************************************** */
 
-/* Watch - detect changes on epoch_begin / epoch_end and refresh the component */
+/* Watch for changes on epoch_begin/epoch_end/filters and refresh the chart accordingly */
 watch(() => [props.epoch_begin, props.epoch_end, props.filters], (cur_value, old_value) => {
     refreshChart();
 }, { flush: 'pre', deep: true });
 
 /* *************************************************** */
+/* Lifecycle hooks */
+/* *************************************************** */
 
-/* Run the init here */
+/* Initialize component before mounting */
 onBeforeMount(async () => {
     await init();
 });
 
 /* *************************************************** */
 
-onMounted(async () => { });
+onMounted(async () => { });  // Mounted hook (currently empty)
 
 /* *************************************************** */
+/* Initialization and refresh functions */
+/* *************************************************** */
 
-/* Defining the needed info by the get_chart_options function */
+/* Initializes component by calculating height based on max_height prop */
 async function init() {
     height.value = (props.max_height || 4) * height_per_row;
 }
 
 /* *************************************************** */
 
-/* Refresh function */
+/* Refreshes chart data and updates the display */
 async function refreshChart() {
     if (chart.value) {
         const result = await get_chart_options();
@@ -323,6 +359,7 @@ async function refreshChart() {
     }
 }
 
+/* Expose refreshChart method to parent components */
 defineExpose({ refreshChart });
 
 </script>

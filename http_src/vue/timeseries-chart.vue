@@ -53,7 +53,7 @@ import { ntopng_utility, ntopng_status_manager, ntopng_url_manager } from "../se
 import { Dygraph } from '../utilities/graph/dygraph';
 
 // Component event definitions for parent communication
-const emit = defineEmits(["apply", "hidden", "showed", "chart_reloaded", "zoom"]);
+const emit = defineEmits(["chart_reloaded", "zoom", "chart-updated", "update-requested"]);
 
 // Component prop definitions with TypeScript-like annotations
 const props = defineProps({
@@ -134,6 +134,7 @@ const register_status = function (status) {
  * Sets up status change listeners if configured and loads initial data.
  */
 const init = function () {
+    emit('update-requested', { firstLoad: true });
     const status = ntopng_status_manager.get_status();
     const url_request = get_url_request(status);
     if (props.register_on_status_change) {
@@ -310,6 +311,18 @@ const hideLegend = async function () {
 /* *************************************************** */
 
 /**
+ * Hides the legend element when mouse leaves chart area.
+ * 
+ * @sideeffect Sets legend display to 'none'
+ */
+const chartUpdated = async function (dygraph, is_initial) {
+    const option = { dygraph: dygraph, firstLoad: is_initial };
+    emit('chart-updated', option);
+}
+
+/* *************************************************** */
+
+/**
  * Creates and renders a Dygraph chart with the provided options.
  * Supports smooth transitions between chart states using dual containers.
  * 
@@ -324,6 +337,7 @@ const drawChart = async function (options, drawOnHidden) {
     options.labelsDiv = legend.value
     options.highlightCallback = followLegend
     options.unhighlightCallback = hideLegend
+    options.drawCallback = chartUpdated
     if (options.blockStacked) {
         block_stacked.value = true
     }
@@ -339,14 +353,14 @@ const drawChart = async function (options, drawOnHidden) {
             visibility.push(true);
         }
     }
-    
+
     // Handle container switching for smooth transitions
     if (drawOnHidden) {
         drawOnSecondDiv.value = !drawOnSecondDiv.value
     }
     const targetDiv = drawOnSecondDiv.value ? second_chart.value : first_chart.value
     const newChart = new Dygraph(targetDiv, data, options);
-    
+
     // Swap containers and clean up old chart if transitioning
     if (drawOnHidden) {
         const toHideDiv = !drawOnSecondDiv.value ? second_chart.value : first_chart.value
@@ -411,13 +425,14 @@ const getImage = function (image) {
  * @param {Object} options - New chart options with updated data/series
  */
 const updateChartSeries = async function (options) {
+    emit('update-requested', { firstLoad: false });
     if (options == null || !chart.value) { return; }
     /* There is a possibility: that the timeseries number changes, for example, 
      * before there was the DNS, now there is not. For that reason we have to 
      * check if the timeseries options are the same or not
      */
     let recreateChart = false;
-    
+
     // Check for new series
     for (const serie_name in options.series) {
         if (!timeseries_list.value.find((element) => { return (element.name === serie_name) })) {
@@ -426,7 +441,7 @@ const updateChartSeries = async function (options) {
             break
         }
     }
-    
+
     // Check for removed series
     timeseries_list.value.forEach((serie) => {
         if (!options.series[serie.name]) {
@@ -434,7 +449,7 @@ const updateChartSeries = async function (options) {
             return;
         }
     });
-    
+
     // Recreate chart if series structure changed, otherwise update
     if (recreateChart) {
         drawChart(options, true)
