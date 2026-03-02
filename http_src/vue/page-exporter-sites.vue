@@ -1,26 +1,27 @@
 <!-- (C) 2026 - ntop.org -->
 <template>
-    <!-- Geographic map visualization of sites -->
-     <div class="mt-3">
-        <Geomap :geomapDataArray="geomapDataArray" :tooltipFormatter="formatTooltipData" :glowDots="true"
-            :style="['height: 50vh']"/>
+    <div class="row">
+        <!-- Exporter sites table -->
+        <div class="col-6">
+            <TableWithConfig ref="exporter_sites_list" :table_id="table_id" :csrf="csrf" :showLoading="true"
+                @custom_event="on_table_custom_event" :f_map_columns="map_table_def_columns"
+                :get_extra_params_obj="get_extra_params_obj" :f_sort_rows="columns_sorting">
+                <!-- Custom button slot for adding new sites -->
+                <template v-slot:custom_buttons>
+                    <button class="btn btn-link" type="button" @click="addExporterSite">
+                        <i class="fas fa-plus" data-bs-toggle="tooltip" data-bs-placement="top"
+                            :title="_i18n('exporter_sites_page.add_exporter_site')"></i>
+                    </button>
+                </template>
+            </TableWithConfig>
+        </div>
+        <!-- Geographic map visualization of sites -->
+        <div class="col-6">
+            <Geomap :geomapDataArray="geomapDataArray" :tooltipFormatter="formatTooltipData" :glowDots="true"
+                :style="['height: 50vh']" />
+        </div>
     </div>
-    
-    <!-- Exporter sites table -->
-    <div class="m-2 mb-3">
-        <TableWithConfig ref="exporter_sites_list" :table_id="table_id" :csrf="csrf" :showLoading="true"
-            @custom_event="on_table_custom_event" :f_map_columns="map_table_def_columns"
-            :get_extra_params_obj="get_extra_params_obj" :f_sort_rows="columns_sorting">
-            <!-- Custom button slot for adding new sites -->
-            <template v-slot:custom_buttons>
-                <button class="btn btn-link" type="button" @click="addExporterSite">
-                    <i class="fas fa-plus" data-bs-toggle="tooltip" data-bs-placement="top"
-                        :title="_i18n('exporter_sites_page.add_exporter_site')"></i>
-                </button>
-            </template>
-        </TableWithConfig>
-    </div>
-    
+
     <!-- Modal components for site management -->
     <ModalEditExporterSite ref="exporterSiteModal" :errorMessage="modalErrorMessage" @edit="handleEditExporterSite"
         @add="handleAddExporterSite">
@@ -95,7 +96,7 @@ const map_table_def_columns = (columns) => {
     // Apply rendering functions to columns and configure action buttons
     columns.forEach((c) => {
         c.render_func = map_columns[c.data_field];
-        
+
         // Special handling for actions column (edit/delete buttons)
         if (c.id === "actions") {
             c.button_def_array.forEach((b) => {
@@ -141,7 +142,7 @@ function on_table_custom_event(event) {
         "click_button_edit_exporter_site": click_button_edit_exporter_site,
         "click_button_delete_exporter_site": click_button_delete_exporter_site
     };
-    
+
     if (events_managed[event.event_id] == null) {
         return;  // Unknown event - ignore
     }
@@ -153,7 +154,7 @@ const click_button_edit_exporter_site = (event) => {
     const row = event.row
     if (!row) return;
     if (row.id == 0) return;  // Default site cannot be edited
-    
+
     editingExporterSiteId.value = row.id;
 
     // Prepare site data for the edit modal
@@ -234,17 +235,17 @@ const handleEditExporterSite = (data) => {
         headers,
         body: JSON.stringify(addParams)
     })
-    .then(data => {
-        // Handle server-side validation errors
-        if (!data || !data.success) {
-            modalErrorMessage.value = rsp.msg || _i18n("error");
-            return;
-        }
-        // Success - refresh data and close modal
-        refresh_sites();
-        exporterSiteModal.value.close();
-    })
-    .catch(err => console.error('Error during exporter site edit:', err))
+        .then(data => {
+            // Handle server-side validation errors
+            if (!data || !data.success) {
+                modalErrorMessage.value = rsp.msg || _i18n("error");
+                return;
+            }
+            // Success - refresh data and close modal
+            refresh_sites();
+            exporterSiteModal.value.close();
+        })
+        .catch(err => console.error('Error during exporter site edit:', err))
 };
 
 /* ************************************** */
@@ -332,7 +333,7 @@ async function loadSitesMap() {
         };
 
         const headers = { 'Content-Type': 'application/json' };
-        
+
         // Fetch sites from server
         const res = await ntopng_utility.http_request(API.get, {
             method: 'post',
