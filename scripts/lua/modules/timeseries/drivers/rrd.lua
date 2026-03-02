@@ -1020,7 +1020,7 @@ function driver:timeseries_top(options, top_tags)
          end
 
          if available_tags[top_item][1].asn then
-            local info = interface.getASInfo(tonumber(top_item))
+            local info = interface.getASInfo(tonumber(top_item), true --[[ Minimal info ]])
             if info and not isEmptyString(info.asname) then
                ext_label = info.asname
             else
