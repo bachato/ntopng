@@ -26,6 +26,10 @@
                         @select_option="select_report_template">
                     </SelectSearch>
                 </div>
+                <CustomSwitch v-model:value="any_interface" class="me-2" :change_label_side="true"
+                    :label="any_interface_label" icon="fa-layer-group"
+                    :title="any_interface_label" @change_value="change_any_interface">
+                </CustomSwitch>
             </template>
 
             <!-- Report Toolbox (Store, Save, ...) -->
@@ -254,6 +258,7 @@ import { default as TimeseriesComponent } from "./dashboard-timeseries.vue";
 import { default as TopTimeseriesComponent } from "./dashboard-top-timeseries.vue";
 import { default as SankeyComponent } from "./dashboard-sankey.vue";
 import { default as SelectSearch } from "./select-search.vue";
+import { default as CustomSwitch } from "./custom-switch.vue";
 import { default as dataUtils } from "../utilities/data-utils";
 
 const _i18n = (t) => i18n(t);
@@ -278,6 +283,8 @@ const components_dict = {
 
 const loading_filters = ref(false);
 const second_load = ref(false);
+const any_interface = ref(false);
+const any_interface_label = ref(_i18n("db_search.any_interface"));
 const page_id = "page-dashboard";
 const allow_edit = props.context.allow_edit || false;
 const report_box = ref(null);
@@ -383,6 +390,10 @@ async function set_template(report_template) {
     let epoch_interval = null;
 
     printable = ntopng_url_manager.get_url_entry("printable") == "true";
+
+    if (ntopng_url_manager.get_url_entry("any_interface") == "true") {
+        any_interface.value = true;
+    }
 
     if (props.context.page == "report" || props.context.page == "vs-report") {
         if (props.context.page == "report") {
@@ -579,6 +590,9 @@ async function load_components(epoch_interval, template_name) {
                 isLoading: true,
                 ...c
             };
+            if (any_interface.value) {
+                c_ext.filters.any_interface = "true";
+            }
             update_component_epoch_interval(c_ext, epoch_interval);
             return c_ext;
         });
@@ -1014,6 +1028,15 @@ function set_component_attr_func(component) {
 
 /* ********************************************* */
 /* ************** Template Editor ************** */
+
+function change_any_interface() {
+    if (any_interface.value == false) {
+        ntopng_url_manager.delete_params(["any_interface"]);
+    } else {
+        ntopng_url_manager.set_key_to_url("any_interface", "true");
+    }
+    ntopng_url_manager.reload_url();
+}
 
 function show_new_template_modal() {
     modal_new_template.value.show();
