@@ -13,6 +13,8 @@ require "check_redis_prefs"
 
 --- Maximum number of top ASNs to return in getTop functions
 local MAXIMUM_NUMBER_OF_TOP = 10
+local HISTORICAL_SRC_ASN = "SRC_ASN"
+local HISTORICAL_DST_ASN = "DST_ASN"
 
 --- ASN utilities module
 local as_utils = {}
@@ -28,6 +30,51 @@ local function parseASNList(string)
         asn[val] = 1
     end
     return asn
+end
+
+---
+-- Formats SQL conditions for ASN filtering in historical queries
+-- Translates ASN type selections (my_as, my_customer_as, remote_as, other_as) into SQL WHERE clauses
+-- 
+-- @param options Table containing filtering options with selected_asn field
+-- @return string SQL condition string (e.g., "asn=123 OR asn=456") or empty string if no conditions
+local function formatHistoricalASNFilters(options, historical_field)
+    local check_as = nil                    -- Table of ASNs to filter by
+    local invert = false                     -- Filter direction flag:
+                                             -- false = INCLUSIVE (asn IN (...))
+                                             -- true  = EXCLUSIVE (asn NOT IN (...))
+    
+    -- Determine filter type based on user selection
+    if options.selected_asn == "my_as" then
+        -- Customer ASNs only
+        check_as = as_utils.getCustomerASNs()
+    elseif options.selected_asn == "my_customer_as" then
+        -- Sub-customer ASNs only
+        check_as = as_utils.getSubCustomerASNs()
+    elseif options.selected_asn == "remote_as" then
+        -- Remote ASNs only
+        check_as = as_utils.getRemoteASNs()
+    elseif options.selected_asn == "other_as" then
+        -- All configured ASNs (customer + sub-customer + remote)
+        check_as = as_utils.getAllASNs()
+        invert = true  -- "other_as" means NOT in configured ASNs
+                       -- e.g., exclude all known ASNs to show "other" traffic
+    end
+
+    -- Build SQL conditions for each ASN in the filter list
+    local conditions = {}
+    for asn, _ in pairs(check_as or {}) do
+        conditions[#conditions + 1] = string.format("%s=%s", historical_field, tostring(asn))
+    end
+
+    -- Return concatenated conditions or empty string if no filters
+    -- Note: The caller is responsible for combining this with other WHERE clauses
+    local filter = (table.concat(conditions, " OR ") or "")
+    if not isEmptyString(filter) and (invert == true) then
+        filter = string.format("NOT (%s)", filter)
+    end
+
+    return filter
 end
 
 ---
@@ -251,6 +298,10 @@ function as_utils.retrieveASHistoricalTraffic(options)
         return {}
     end
 
+    -- Built two different where for efficiency reasons, filtering inside the UNION
+    -- is a lot faster the filtering outside even if the code readability is a bit less
+    local src_asn_filters = formatHistoricalASNFilters(options, HISTORICAL_SRC_ASN)
+    local dst_asn_filters = formatHistoricalASNFilters(options, HISTORICAL_DST_ASN)
     -- Build WHERE clause for time range and interface
     local where = string.format("(FIRST_SEEN >= %u AND FIRST_SEEN <= %u AND LAST_SEEN <= %u) AND INTERFACE_ID = %u",
         tonumber(options.epoch_begin), tonumber(options.epoch_end), tonumber(options.epoch_end), tonumber(options.ifid))
@@ -259,9 +310,9 @@ function as_utils.retrieveASHistoricalTraffic(options)
     -- Combines both source and destination ASNs
     local query = string.format(
         "SELECT asn, min(FIRST_SEEN) as \"seen.first\", max(LAST_SEEN) as \"seen.last\", sum(SCORE) as score, sum(total_bytes) AS traffic, sum(bytes_sent) as \"bytes.sent\", sum(bytes_rcvd) as \"bytes.rcvd\", sum(total_bytes) / sum(dateDiff('second', FIRST_SEEN, LAST_SEEN) + 1) AS throughput_bps " ..
-            "FROM (SELECT SRC_ASN AS asn, FLOW_ID, TOTAL_BYTES as total_bytes, SRC2DST_BYTES as bytes_sent, DST2SRC_BYTES as bytes_rcvd, FIRST_SEEN, LAST_SEEN, INTERFACE_ID, SCORE FROM flows WHERE %s UNION ALL " ..
-            "SELECT DST_ASN AS asn, FLOW_ID, TOTAL_BYTES as total_bytes, DST2SRC_BYTES as bytes_sent, SRC2DST_BYTES as bytes_rcvd, FIRST_SEEN, LAST_SEEN, INTERFACE_ID, SCORE FROM flows WHERE %s AND DST_ASN != SRC_ASN " ..
-            ") GROUP BY asn", where, where)
+            "FROM (SELECT SRC_ASN AS asn, FLOW_ID, TOTAL_BYTES as total_bytes, SRC2DST_BYTES as bytes_sent, DST2SRC_BYTES as bytes_rcvd, FIRST_SEEN, LAST_SEEN, INTERFACE_ID, SCORE FROM flows WHERE %s %s UNION ALL " ..
+            "SELECT DST_ASN AS asn, FLOW_ID, TOTAL_BYTES as total_bytes, DST2SRC_BYTES as bytes_sent, SRC2DST_BYTES as bytes_rcvd, FIRST_SEEN, LAST_SEEN, INTERFACE_ID, SCORE FROM flows WHERE %s %s AND DST_ASN != SRC_ASN " ..
+            ") GROUP BY asn", where, ternary(isEmptyString(src_asn_filters), "", " AND " .. src_asn_filters), where, ternary(isEmptyString(dst_asn_filters), "", " AND " .. dst_asn_filters))
     
     local historical_asn_stats = interface.execSQLQuery(query) or {}
     local asn_stats = {}
