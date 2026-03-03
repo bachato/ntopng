@@ -2,15 +2,16 @@
     (C) 2022 - ntop.org    
 */
 import NtopUtils from "../ntop-utils.js";
+import { sankeyJustify, sankeyLinkHorizontal } from 'd3-sankey'
 
-let d3 = d3v7;
+const d3 = d3v7;
 
 const defaultSankeySettings = {
   align: "justify", // convenience shorthand for nodeAlign
   nodeId: d => d.id, // given d in nodes, returns a unique identifier (string)
   nodeTitle: d => `${d.id}`, // given d in (computed) nodes, hover text
   nodeGroup: d => d.id.split(/\W/)[0],
-  nodeAlign: d3.sankeyJustify, // Sankey node alignment strategy: left, right, justify, center
+  nodeAlign: sankeyJustify, // Sankey node alignment strategy: left, right, justify, center
   nodeWidth: 15, // width of node rects
   nodePadding: 10, // vertical separation between adjacent nodes
   nodeLabel: d => d.id,
@@ -20,7 +21,7 @@ const defaultSankeySettings = {
   linkTarget: ({target}) => target, // given d in links, returns a node identifier string
   linkSourceNode: ({source_node}) => source_node, // given d in links, returns a node identifier string
   linkTargetNode: ({target_node}) => target_node, // given d in links, returns a node identifier string
-  linkPath: d3.sankeyLinkHorizontal(), // given d in (computed) links, returns the SVG path
+  linkPath: sankeyLinkHorizontal(), // given d in (computed) links, returns the SVG path
   linkValue: ({value}) => value, // given d in links, returns the quantitative value
   linkLink: ({link}) => link, // given d in links, returns the quantitative value
   linkTitle: d => `${d.source_node} → ${d.target_node} : ${d.link}\n${d.value}`, // given d in (computed) links

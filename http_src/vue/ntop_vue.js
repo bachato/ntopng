@@ -19,8 +19,6 @@ import { default as PageDeviceExclusions } from "./page-device-exclusions.vue";
 import { default as PageHostTLS } from "./page-host-tls.vue";
 import { default as PageHostSSH } from "./page-host-ssh.vue";
 import { default as PageHomeMap } from "./page-home-map.vue";
-import { default as PageSankey } from "./page-sankey.vue";
-//import { default as PageSankeyTest } from "./sankey-test.vue";
 import { default as PageHostDetailsApplications } from "./page-host-details-applications.vue";
 import { default as PageHostDetailsTraffic } from "./page-host-details-traffic.vue";
 import { default as PageHostDetailsPackets } from "./page-host-details-packets.vue";
@@ -178,7 +176,6 @@ let ntopVue = {
     PageHostTLS: PageHostTLS,
     PageHostSSH: PageHostSSH,
     PageHomeMap: PageHomeMap,
-    PageSankey: PageSankey,
     PageHostRules: PageHostRules,
     PageAlertAnalysis: PageAlertAnalysis,
     PageHostMap: PageHostMap,

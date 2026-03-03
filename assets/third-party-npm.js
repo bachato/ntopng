@@ -50,18 +50,10 @@ import * as vis from 'vis-network/dist/vis-network.esm'
 window.vis = vis
 
 import 'select2'
-/* 
-  Must be included here, otherwise it's not going to work, in fact some 
-  external libraries have been changed and added this ntop util functions 
-*/
-
-/* regeneratorRuntime error, check https://github.com/babel/babel/issues/9849 */
-import regeneratorRuntime from "regenerator-runtime"
 import ToastUtils from '../http_src/utilities/toast-utils'
 import '../http_src/utilities/string-utils'
 
 /* Generic ntopng Utils */
-window.regeneratorRuntime = regeneratorRuntime
 window.ToastUtils = ToastUtils
 
 import '../http_src/utilities/datatable/datatable-plugins/api-extension'

@@ -28,6 +28,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeMount, onBeforeUnmount, watch, computed } from "vue";
+import { sankey, sankeyLinkHorizontal } from "d3-sankey";
 
 const d3 = d3v7;
 const emit = defineEmits(['node_click', 'update_width', 'update_height', 'autorefresh_toggle'])
@@ -57,7 +58,7 @@ const sankey_div = ref(null);
 
 let svg = null;
 let zoomGroup = null;
-let sankey = null;
+let sankeyRef = null;
 let sankeyData = null;
 let isZoomed = ref(false);
 const currentScale = ref(1); // keep track of zzom
@@ -332,7 +333,7 @@ function createNodeDrag(links, svg) {
             
             // redraw all links
             svg.select("g.links").selectAll("path.sankey-link")
-                .attr("d", d3.sankeyLinkHorizontal());
+                .attr("d", sankeyLinkHorizontal());
             
             // update gradients for affected links only
             svg.select("g.links").selectAll("linearGradient")
@@ -362,17 +363,17 @@ async function draw_sankey() {
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    sankey = d3.sankey()
+    sankeyRef = sankey()
         .nodeWidth(15)
         .nodePadding(10)
         .extent([[0, 0], [sankey_size.value.width - margin.right - margin.left, sankey_size.value.height - margin.top - margin.bottom]]);
 
     // Sort nodes descending by value property
-    sankey.nodeSort((a, b) => d3.descending(a.value, b.value));
+    sankeyRef.nodeSort((a, b) => d3.descending(a.value, b.value));
 
     let links, nodes;
     if (Object.keys(data).length !== 0) {
-        sankeyData = sankey(data);
+        sankeyData = sankeyRef(data);
         ({ links, nodes } = sankeyData);
     }
 
@@ -579,7 +580,7 @@ async function draw_sankey() {
     links_d3
         .append("path")
         .attr("class", "sankey-link")
-        .attr("d", d3.sankeyLinkHorizontal())
+        .attr("d", sankeyLinkHorizontal())
         .attr("stroke-width", (d) => Math.max(1, d.width))
         .attr("stroke", (d) => `url(#gradient-${d.index})`)
         .attr("stroke-opacity", 0.4)

@@ -4,11 +4,11 @@
 dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 
+require "http_lint"
 local format_utils = require "format_utils"
 local as_utils = require "as_utils"
 local rest_utils = require "rest_utils"
 local json = require("dkjson")
-require "lua_utils"
 
 --
 -- Get AS Name from IP
