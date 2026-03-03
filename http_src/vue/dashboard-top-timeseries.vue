@@ -269,9 +269,7 @@ function remove_extra_params() {
 /* *************************************************** */
 
 /* Main function that fetches data from REST API and formats it for the chart */
-async function get_chart_options() {
-    emit('beforeUpdate');  // Notify parent that update is starting
-    
+async function get_chart_options() {    
     // Initialize Tops - this ensures only one request when opening the chart
     await init();
     
@@ -298,7 +296,6 @@ async function get_chart_options() {
         result[0].height = height.value;
     }
     
-    emit('afterUpdate');  // Notify parent that update is complete
     return result?.[0];
 }
 
