@@ -4,6 +4,7 @@ require("prefs_utils")
 local is_admin = isAdministrator()
 local template = require("template_utils")
 local locales_utils = require "locales_utils"
+local host_pools = require "host_pools"
 
 print [[
 
@@ -135,6 +136,29 @@ print [[
   </div>
   </div>
 
+]]
+
+-- Host pools list for the multi-select
+local _hp = host_pools:create()
+local _all_pools = _hp:get_all_pools()
+if #_all_pools > 0 then
+print[[
+  <div class='form-group mb-3'>
+    <label class='form-label' for="edit_allowed_host_pools_select">]] print(i18n("manage_users.allowed_host_pools")) print[[</label>
+    <select id="edit_allowed_host_pools_select" multiple class="form-select">
+]]
+  for _, pool in ipairs(_all_pools) do
+    print('<option value="'..pool["pool_id"]..'">'..pool["name"]..'</option>\n')
+  end
+print[[
+    </select>
+    <input type="hidden" id="edit_allowed_host_pools" name="allowed_host_pools" value="">
+    <small>]] print(i18n("manage_users.allowed_host_pools_descr")) print[[</small>
+  </div>
+]]
+end
+
+print[[
   <div class='form-group mb-3'>
     <label class='form-label' for="networks_input">]] print(i18n("manage_users.allowed_networks")) print[[</label>
     <div class='input-group mb-6'>
@@ -143,7 +167,9 @@ print [[
     <small>]] print(i18n("manage_users.allowed_networks_descr")) print[[ 192.168.1.0/24,172.16.0.0/16</small>
   </div>
 
+]]
 
+print[[
     <div class="form-group mb-3 mb-6">
       <div class="form-check pl-0">]]
 
@@ -177,6 +203,25 @@ print [[
     }
     $("#host_role_select").change(function() { toggleUserSettings(); })
     </script>
+]]
+
+if #_all_pools > 0 then
+print[[
+    <script>
+    $(document).ready(function() {
+      $("#edit_allowed_host_pools_select").select2({
+        width: '100%',
+        theme: 'bootstrap-5',
+        dropdownParent: $("#edit_allowed_host_pools_select").parent(),
+        placeholder: ']] print(i18n("manage_users.allowed_host_pools")) print[[',
+        allowClear: true,
+      });
+    });
+    </script>
+]]
+end
+
+print[[
 
 ]]
 
@@ -350,38 +395,44 @@ print [[
   var frmprefchange = $('#form_pref_change');
 
   frmprefchange.submit(function () {
-  var ok = true;
-  if($("#networks_input").val().length == 0) {
-     password_alert.error("Network list not specified");
-     ok = false;
-  } else {
-     var arrayOfStrings = $("#networks_input").val().split(",");
+    /* Set selected host pools into the hidden field */
+    if ($("#edit_allowed_host_pools_select").length) {
+      var selectedPools = ($("#edit_allowed_host_pools_select").val() || []).join(',');
+      $("#edit_allowed_host_pools").val(selectedPools);
+    }
 
-     for (var i=0; i < arrayOfStrings.length; i++) {
+    var ok = true;
+    if($("#networks_input").val().length == 0) {
+      password_alert.error("Network list not specified");
+      ok = false;
+    } else {
+      var arrayOfStrings = $("#networks_input").val().split(",");
+
+      for (var i=0; i < arrayOfStrings.length; i++) {
 	if(!NtopUtils.is_network_mask(arrayOfStrings[i])) {
 	   password_alert.error("Invalid network list specified ("+arrayOfStrings[i]+")");
 	   ok = false;
 	}
-     }
-  }
-  if(ok) {
-    $.ajax({
-      type: frmprefchange.attr('method'),
-      url: frmprefchange.attr('action'),
-      data: frmprefchange.serialize(),
-      success: function (response) {
-        if(response.result == 0) {
-
-          const destURL = new URL(window.location);
-          destURL.searchParams.delete('user');
-
-          password_alert.success(response.message);
-          window.location.href= destURL.toString();
-       } else
-          password_alert.error(response.message);
       }
-    });
-   }
+    }
+    if(ok) {
+      $.ajax({
+        type: frmprefchange.attr('method'),
+        url: frmprefchange.attr('action'),
+        data: frmprefchange.serialize(),
+        success: function (response) {
+          if(response.result == 0) {
+
+            const destURL = new URL(window.location);
+            destURL.searchParams.delete('user');
+
+            password_alert.success(response.message);
+            window.location.href= destURL.toString();
+         } else
+           password_alert.error(response.message);
+        }
+      });
+    }
 
     return false;
    });
@@ -418,10 +469,19 @@ function reset_pwd_dialog(user) {
       $('#allow_pcap_download').prop('checked', data.allow_pcap_download === true ? true : false);
       $('#allow_historical_flows').prop('checked', data.allow_historical_flows === true ? true : false);
       $('#allow_alerts').prop('checked', data.allow_alerts === true ? true : false);
-      
+
       if(data.host_pool_id) {
         $('#old_host_pool_id').val(data.host_pool_id);
         $('#host_pool_id option[value = '+data.host_pool_id+']').attr('selected','selected');
+      }
+
+      /* Restore allowed host pools selection */
+      if ($("#edit_allowed_host_pools_select").length) {
+        const poolIds = (data.allowed_host_pools && data.allowed_host_pools !== '')
+          ? data.allowed_host_pools.split(',').map(function(p) { return p.trim(); })
+          : [];
+        $("#edit_allowed_host_pools_select").val(poolIds).trigger("change");
+        $("#edit_allowed_host_pools").val(data.allowed_host_pools || '');
       }
 
      if (isAdministrator || loggedUser === data.username) {

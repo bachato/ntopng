@@ -543,6 +543,8 @@ class Ntop {
   bool changeAllowedNets(char *username, char *allowed_nets) const;
   bool changeAllowedIfname(char *username, char *allowed_ifname) const;
   bool changeUserHostPool(const char *username, const char *host_pool_id) const;
+  bool changeAllowedHostPools(const char *username, const char *allowed_host_pools) const;
+  void getAllowedHostPools(lua_State *vm);
   bool changeUserLanguage(const char *username, const char *language) const;
   bool changeUserPcapDownloadPermission(const char *username,
                                         bool allow_pcap_download,
@@ -561,7 +563,8 @@ class Ntop {
   bool addUser(char *username, char *full_name, char *password, char *host_role,
                char *allowed_networks, char *allowed_ifname, char *host_pool_id,
                char *language, bool allow_pcap_download,
-               bool allow_historical_flows, bool allow_alerts);
+               bool allow_historical_flows, bool allow_alerts,
+               char *allowed_host_pools = NULL);
   bool addUserAPIToken(const char *username, const char *api_token);
   bool isCaptivePortalUser(const char *username);
   bool deleteUser(char *username);

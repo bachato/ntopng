@@ -1012,7 +1012,7 @@ public:
   static u_int32_t key(Host *cli, u_int16_t cli_port, Host *srv,
                        u_int16_t srv_port, u_int16_t vlan_id,
                        u_int16_t _observation_point_id, u_int16_t protocol);
-  void lua(lua_State *vm, AddressTree *ptree, DetailsLevel details_level,
+  void lua(lua_State *vm, AddressTree *allowed_nets, DetailsLevel details_level,
            bool asListElement);
   void lua_get_min_info(lua_State *vm);
   void lua_duration_info(lua_State *vm);

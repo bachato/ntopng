@@ -85,6 +85,22 @@ end
 
 -- #######################
 
+-- @brief Returns a table of allowed host pool IDs (integers), or nil if all pools are allowed
+function auth.allowed_host_pools()
+   if isAdministrator() then
+      return nil
+   end
+
+   local pools = ntop.getAllowedHostPools()
+   if not pools or table.len(pools) == 0 then
+      return nil
+   end
+
+   return pools
+end
+
+-- #######################
+
 if(trace_script_duration ~= nil) then
    io.write(debug.getinfo(1,'S').source .." executed in ".. (os.clock()-clock_start)*1000 .. " ms\n")
 end

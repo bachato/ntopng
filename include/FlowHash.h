@@ -45,7 +45,7 @@ class FlowHash : public GenericHash {
   Flow *findByKeyAndHashId(u_int32_t key, u_int32_t hash_id);
 
 #ifdef HAVE_NEDGE
-  u_int32_t dropHostTraffic(IpAddress *host_ip, AddressTree *allowed_hosts);
+  u_int32_t dropHostTraffic(IpAddress *host_ip, AddressTree *allowed_nets);
 #endif  
 };
 

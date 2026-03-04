@@ -2663,6 +2663,7 @@ local known_parameters = {
    ["host_quota"] = validateEmptyOr(validateNumber), -- max traffi quota for host
    ["allowed_interface"] = validateEmptyOr(validateInterface), -- the interface an user is allowed to configure
    ["allowed_networks"] = validateNetworksList, -- a list of networks the user is allowed to monitor
+   ["allowed_host_pools"] = validateEmptyOr(validateListOfTypeInline(validateNumber)),
    ["switch_interface"] = validateInterface, -- a new active ntopng interface
    ["switch_instance"] = validateInterface, -- a new active ntopng infrastructure instance
    ["qos_class_id"] = validateNumber,

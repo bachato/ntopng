@@ -29,6 +29,7 @@ NtopngLuaContext::NtopngLuaContext() {
   zmq_context = zmq_subscriber = NULL;
   conn = NULL;
   allowedNets = NULL;
+  allowed_pools = NULL;
   iface = NULL;
   addr_tree = NULL;
   snmpBatch = NULL;

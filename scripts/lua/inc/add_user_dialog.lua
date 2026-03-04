@@ -5,6 +5,7 @@
 local locales_utils = require "locales_utils"
 local template_utils = require "template_utils"
 local recording_utils = require "recording_utils"
+local host_pools = require "host_pools"
 require "lua_utils_generic"
 require "lua_utils_get"
 require "ntop_utils"
@@ -22,6 +23,8 @@ local messages = {
   any_interface = i18n("manage_users.any_interface"),
   allowed_networks = i18n("manage_users.allowed_networks"),
   allowed_networks_descr = i18n("manage_users.allowed_networks_descr") .. " 192.168.1.0/24,172.16.0.0/16",
+  allowed_host_pools = i18n("manage_users.allowed_host_pools"),
+  allowed_host_pools_descr = i18n("manage_users.allowed_host_pools_descr"),
   language = i18n("language"),
   add_new_user = i18n("manage_users.add_new_user"),
   allow_historical_flows = i18n("manage_users.allow_historical_flows"),
@@ -58,6 +61,16 @@ local clickhouse_enabled = interfaceHasClickHouseSupport()
 local location_href = ntop.getHttpPrefix().."/lua/admin/users.lua"
 local is_pcap_download_available = true or recording_utils.isAvailable()
 
+-- Allowed pools
+local all_host_pools = {}
+local hp = host_pools:create()
+for _, pool in ipairs(hp:get_all_pools()) do
+  all_host_pools[#all_host_pools + 1] = {
+    pool_id = pool["pool_id"],
+    name = pool["name"],
+  }
+end
+
 template_utils.render("pages/components/add-user-dialog.template", {
   i18n = i18n,
   add_user_endpoint = add_user,
@@ -70,7 +83,8 @@ template_utils.render("pages/components/add-user-dialog.template", {
   template_utils = template_utils,
   location_href = location_href,
   clickhouse_enabled = clickhouse_enabled,
-  is_pcap_download_available = is_pcap_download_available
+  is_pcap_download_available = is_pcap_download_available,
+  host_pools_list = all_host_pools,
 })
 
 

@@ -2877,6 +2877,10 @@ static int ntop_change_allowed_ifname(lua_State *vm) {
 
 /* ****************************************** */
 
+/*
+ * Set the host pool for a captive portal user on authentication
+ * (this is a 1-1 user-pool binding used for policy enforcement)
+ */
 static int ntop_change_user_host_pool(lua_State *vm) {
   char *username, *host_pool_id;
 
@@ -2897,6 +2901,41 @@ static int ntop_change_user_host_pool(lua_State *vm) {
 
   lua_pushboolean(vm, ntop->changeUserHostPool(username, host_pool_id));
   return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
+/* Set which pools an unprivileged user is allowed to view */
+static int ntop_change_user_allowed_host_pools(lua_State *vm) {
+  char *username, *allowed_host_pools;
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (!allowLocalUserManagement(vm))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((username = (char *)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((allowed_host_pools = (char *)lua_tostring(vm, 2)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  lua_pushboolean(vm,
+                  ntop->changeAllowedHostPools(username, allowed_host_pools));
+  return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
+static int ntop_get_allowed_host_pools(lua_State *vm) {
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  ntop->getAllowedHostPools(vm);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
 /* ****************************************** */
@@ -3292,7 +3331,7 @@ static int ntop_send_mail(lua_State *vm) {
 static int ntop_add_user(lua_State *vm) {
   char *username, *full_name, *password, *host_role, *allowed_networks,
       *allowed_interface;
-  char *host_pool_id = NULL, *language = NULL;
+  char *host_pool_id = NULL, *language = NULL, *allowed_host_pools = NULL;
   bool allow_pcap_download = false;
   bool allow_historical_flows = false;
   bool allow_alerts = false;
@@ -3348,10 +3387,14 @@ static int ntop_add_user(lua_State *vm) {
 
   if (lua_type(vm, 11) == LUA_TBOOLEAN) allow_alerts = lua_toboolean(vm, 11);
 
+  if (lua_type(vm, 12) == LUA_TSTRING)
+    allowed_host_pools = (char *)lua_tostring(vm, 12);
+
   lua_pushboolean(vm, ntop->addUser(username, full_name, password, host_role,
                                     allowed_networks, allowed_interface,
                                     host_pool_id, language, allow_pcap_download,
-                                    allow_historical_flows, allow_alerts));
+                                    allow_historical_flows, allow_alerts,
+                                    allowed_host_pools));
 
   return CONST_LUA_OK;
 }
@@ -8517,6 +8560,8 @@ static luaL_Reg _ntop_reg[] = {
     { "changeAllowedNets", ntop_change_allowed_nets },
     { "changeAllowedIfname", ntop_change_allowed_ifname },
     { "changeUserHostPool", ntop_change_user_host_pool },
+    { "changeAllowedHostPools", ntop_change_user_allowed_host_pools },
+    { "getAllowedHostPools", ntop_get_allowed_host_pools },
     { "changeUserFullName", ntop_change_user_full_name },
     { "changeUserLanguage", ntop_change_user_language },
     { "changePcapDownloadPermission", ntop_change_user_pcap_download_permission },

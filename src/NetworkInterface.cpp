@@ -4999,27 +4999,27 @@ void NetworkInterface::updateFlowProfiles() {
 
 /* **************************************************** */
 
-bool NetworkInterface::isHostActive(AddressTree *allowed_hosts,
+bool NetworkInterface::isHostActive(AddressTree *allowed_nets,
                                     char *host_ip, u_int16_t vlan_id) {
   Host *h;
 
-  h = findHostByIP(allowed_hosts, host_ip, vlan_id, 0 /* any observation point */);
+  h = findHostByIP(allowed_nets, host_ip, vlan_id, 0 /* any observation point */);
 
   return !!h;
 }
 
 /* **************************************************** */
 
-bool NetworkInterface::getHostInfo(lua_State *vm, AddressTree *allowed_hosts,
+bool NetworkInterface::getHostInfo(lua_State *vm, AddressTree *allowed_nets,
                                    char *host_ip, u_int16_t vlan_id) {
   Host *h;
   bool ret;
 
-  h = findHostByIP(allowed_hosts, host_ip, vlan_id,
+  h = findHostByIP(allowed_nets, host_ip, vlan_id,
                    getLuaVMUservalue(vm, observationPointId));
 
   if (h) {
-    h->lua(vm, allowed_hosts, true, true, false, true, false);
+    h->lua(vm, allowed_nets, true, true, false, true, false);
     ret = true;
   } else
     ret = false;
@@ -5029,13 +5029,13 @@ bool NetworkInterface::getHostInfo(lua_State *vm, AddressTree *allowed_hosts,
 
 /* **************************************************** */
 
-bool NetworkInterface::getHostMinInfo(lua_State *vm, AddressTree *allowed_hosts,
+bool NetworkInterface::getHostMinInfo(lua_State *vm, AddressTree *allowed_nets,
                                       char *host_ip, u_int16_t vlan_id,
                                       bool only_ndpi_stats) {
   Host *h;
   bool ret;
 
-  h = findHostByIP(allowed_hosts, host_ip, vlan_id,
+  h = findHostByIP(allowed_nets, host_ip, vlan_id,
                    getLuaVMUservalue(vm, observationPointId));
 
   if (h) {
@@ -5067,7 +5067,7 @@ void NetworkInterface::checkReloadHostsBroadcastDomain() {
 
 /* **************************************************** */
 
-Host *NetworkInterface::findHostByIP(AddressTree *allowed_hosts, char *host_ip,
+Host *NetworkInterface::findHostByIP(AddressTree *allowed_nets, char *host_ip,
                                      u_int16_t vlan_id,
                                      u_int16_t observationPointId) {
   Host *h = NULL;
@@ -5079,7 +5079,7 @@ Host *NetworkInterface::findHostByIP(AddressTree *allowed_hosts, char *host_ip,
 
   if (h == NULL) return (NULL);
 
-  if (allowed_hosts && !h->match(allowed_hosts)) return (NULL);
+  if (allowed_nets && !h->match(allowed_nets)) return (NULL);
 
   return h;
 }
@@ -5104,7 +5104,8 @@ struct flowHostRetrieveList {
 
 struct flowHostRetriever {
   /* Search criteria */
-  AddressTree *allowed_hosts;
+  AddressTree *allowed_nets;
+  Bitmap4096 *allowed_pools; /* NULL = unrestricted; non-NULL = user pool restriction */
   Host *host, *talking_with_host, *server, *client;
   u_int16_t observationPointId;
   u_int8_t *mac, bridge_iface_idx;
@@ -5266,6 +5267,8 @@ static bool flows_search(Flow *f, char *search) {
 
   return false;
 }
+
+/* **************************************************** */
 
 /* **************************************************** */
 
@@ -5720,21 +5723,25 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
       return (false);
 
     if (cli_ip && !f->get_cli_host())
-      cli_pool_found = f->getInterface()->getHostPools()->findIpPool(
-								     cli_ip, f->get_vlan_id(), &cli_pool, &cli_target_node);
+      cli_pool_found = f->getInterface()->getHostPools()->findIpPool(cli_ip, f->get_vlan_id(), &cli_pool, &cli_target_node);
 
     if (srv_ip && !f->get_srv_host())
-      srv_pool_found = f->getInterface()->getHostPools()->findIpPool(
-								     srv_ip, f->get_vlan_id(), &srv_pool, &srv_target_node);
+      srv_pool_found = f->getInterface()->getHostPools()->findIpPool(srv_ip, f->get_vlan_id(), &srv_pool, &srv_target_node);
 
     /* Pool filter */
     if (retriever->pag && retriever->pag->poolFilter(&pool_filter) &&
-        !((f->get_cli_host() &&
-           f->get_cli_host()->get_host_pool() == pool_filter) ||
-          (f->get_srv_host() &&
-           f->get_srv_host()->get_host_pool() == pool_filter)) &&
+        !((f->get_cli_host() && f->get_cli_host()->get_host_pool() == pool_filter) ||
+          (f->get_srv_host() && f->get_srv_host()->get_host_pool() == pool_filter)) &&
         !((cli_pool_found && cli_pool == pool_filter) ||
           (srv_pool_found && srv_pool == pool_filter)))
+      return (false);
+
+    /* User allowed host pools */
+    if (retriever->allowed_pools &&
+        !((f->get_cli_host() && retriever->allowed_pools->isSetBit(f->get_cli_host()->get_host_pool())) ||
+          (f->get_srv_host() && retriever->allowed_pools->isSetBit(f->get_srv_host()->get_host_pool())) ||
+          (cli_pool_found && retriever->allowed_pools->isSetBit(cli_pool)) ||
+          (srv_pool_found && retriever->allowed_pools->isSetBit(srv_pool))))
       return (false);
 
     /* Mac filter - NOTE: must stay below the vlan_id filter */
@@ -5745,7 +5752,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
            f->get_srv_host()->getMac()->equal(mac_filter))))
       return (false);
 
-    if (f->match(retriever->allowed_hosts)) return (true); /* match */
+    if (f->match(retriever->allowed_nets)) return (true); /* match */
   }
 
   return (false);
@@ -5938,7 +5945,7 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
   if (r->actNumEntries >= r->maxNumEntries)
     return(true); /* Limit reached */
 
-  if (!h || h->idle() || !h->match(r->allowed_hosts)
+  if (!h || h->idle() || !h->match(r->allowed_nets)
 #if 0
       /*
 	(***) The check below is commented out as it has no sense for hosts as written in
@@ -5983,6 +5990,8 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data,
       (r->mac && ((!h->getMac()) || (!h->getMac()->equal(r->mac)))) ||
       ((r->poolFilter != (u_int16_t)-1) &&
        (r->poolFilter != h->get_host_pool())) ||
+      (r->allowed_pools &&
+       !r->allowed_pools->isSetBit(h->get_host_pool())) ||
       (r->country && strlen(r->country) &&
        strcmp(h->get_country(buf, sizeof(buf)), r->country)) ||
       (r->osFilter != ndpi_os_MAX_OS && (h->getOS() != r->osFilter)) ||
@@ -6595,7 +6604,7 @@ int protocolSorter(const void *_a, const void *_b) {
 
 int NetworkInterface::sortFlows(u_int32_t *begin_slot, bool walk_all,
                                 struct flowHostRetriever *retriever,
-                                AddressTree *allowed_hosts, Host *host,
+                                AddressTree *allowed_nets, Host *host,
                                 Host *client, Host *server, char *flow_info,
                                 Paginator *p, const char *sortColumn, char *search) {
   int (*sorter)(const void *_a, const void *_b);
@@ -6612,7 +6621,7 @@ int NetworkInterface::sortFlows(u_int32_t *begin_slot, bool walk_all,
   retriever->iface_index = -1;
   retriever->actNumEntries = 0;
   retriever->maxNumEntries = getFlowsHashSize();
-  retriever->allowed_hosts = allowed_hosts;
+  retriever->allowed_nets = allowed_nets;
   retriever->currentSize = FLOWHOSTRETRIEVER_BLOCK_SIZE;
   retriever->map_search = search;
 
@@ -6767,7 +6776,7 @@ static bool flow_sum_stats(GenericHashEntry *flow, void *user_data,
 
 /* **************************************************** */
 
-void NetworkInterface::getLiveASNStats(ASNStats *asn_stats, AddressTree *allowed_hosts, 
+void NetworkInterface::getLiveASNStats(ASNStats *asn_stats, AddressTree *allowed_nets, 
                         Paginator *p, lua_State *vm) {
   struct flowHostRetriever retriever;
   std::unordered_map<u_int32_t, std::string> asn_names;
@@ -6778,7 +6787,7 @@ void NetworkInterface::getLiveASNStats(ASNStats *asn_stats, AddressTree *allowed
   retriever.pag = p;
   retriever.actNumEntries = 0;
   retriever.maxNumEntries = getFlowsHashSize();
-  retriever.allowed_hosts = allowed_hosts;
+  retriever.allowed_nets = allowed_nets;
   retriever.asn_stats = asn_stats;
   retriever.asn_names = &asn_names; /* Trick to enable C++ to initialize asn_names */
   
@@ -6807,7 +6816,7 @@ void NetworkInterface::getLiveASNStats(ASNStats *asn_stats, AddressTree *allowed
 
 /* **************************************************** */
 
-void NetworkInterface::getActiveFlowsStats(nDPIStats *ndpi_stats, FlowStats *stats, AddressTree *allowed_hosts,
+void NetworkInterface::getActiveFlowsStats(nDPIStats *ndpi_stats, FlowStats *stats, AddressTree *allowed_nets,
 					   Host *h, Host *talking_with_host, Host *client, Host *server,
 					   char *flow_info, Paginator *p, lua_State *vm, bool only_traffic_stats) {
   struct flowHostRetriever retriever;
@@ -6832,7 +6841,7 @@ void NetworkInterface::getActiveFlowsStats(nDPIStats *ndpi_stats, FlowStats *sta
 #endif
   retriever.actNumEntries = 0;
   retriever.maxNumEntries = getFlowsHashSize();
-  retriever.allowed_hosts = allowed_hosts;
+  retriever.allowed_nets = allowed_nets;
   retriever.ndpi_stats = ndpi_stats;
   retriever.stats = stats;
   retriever.totBytesSent = 0, retriever.totBytesRcvd = 0, retriever.totThpt = 0;
@@ -6877,7 +6886,7 @@ void NetworkInterface::getActiveFlowsStats(nDPIStats *ndpi_stats, FlowStats *sta
 /* **************************************************** */
 
 int NetworkInterface::getFlows(lua_State *vm, u_int32_t *begin_slot,
-                               bool walk_all, AddressTree *allowed_hosts,
+                               bool walk_all, AddressTree *allowed_nets,
                                Host *host, Host *talking_with_host,
                                Host *client, Host *server, char *flow_info,
                                Paginator *p, char *search) {
@@ -6904,9 +6913,10 @@ int NetworkInterface::getFlows(lua_State *vm, u_int32_t *begin_slot,
       ? details_high : details_normal;
 
   retriever.observationPointId = getLuaVMUservalue(vm, observationPointId);
+  retriever.allowed_pools = getLuaVMUservalue(vm, allowed_pools);
   retriever.talking_with_host = talking_with_host;
 
-  if (sortFlows(begin_slot, walk_all, &retriever, allowed_hosts, host, client,
+  if (sortFlows(begin_slot, walk_all, &retriever, allowed_nets, host, client,
                 server, flow_info, p, sortColumn, search) < 0)
     return (-1);
 
@@ -6923,7 +6933,7 @@ int NetworkInterface::getFlows(lua_State *vm, u_int32_t *begin_slot,
 
       lua_newtable(vm);
 
-      f->lua(vm, allowed_hosts, highDetails, true);
+      f->lua(vm, allowed_nets, highDetails, true);
 
       lua_pushinteger(vm, num + 1);
       lua_insert(vm, -2);
@@ -6937,7 +6947,7 @@ int NetworkInterface::getFlows(lua_State *vm, u_int32_t *begin_slot,
 
       lua_newtable(vm);
 
-      f->lua(vm, allowed_hosts, highDetails, true);
+      f->lua(vm, allowed_nets, highDetails, true);
 
       lua_pushinteger(vm, num + 1);
       lua_insert(vm, -2);
@@ -6963,7 +6973,7 @@ int NetworkInterface::getFlows(lua_State *vm, u_int32_t *begin_slot,
 
 /* **************************************************** */
 
-int NetworkInterface::getFlowsGroup(lua_State *vm, AddressTree *allowed_hosts,
+int NetworkInterface::getFlowsGroup(lua_State *vm, AddressTree *allowed_nets,
                                     Paginator *p, const char *groupColumn) {
   struct flowHostRetriever retriever;
   FlowGrouper *gper;
@@ -6978,7 +6988,7 @@ int NetworkInterface::getFlowsGroup(lua_State *vm, AddressTree *allowed_hosts,
 
   retriever.observationPointId = getLuaVMUservalue(vm, observationPointId);
 
-  if (sortFlows(&begin_slot, walk_all, &retriever, allowed_hosts, NULL, NULL,
+  if (sortFlows(&begin_slot, walk_all, &retriever, allowed_nets, NULL, NULL,
                 NULL, NULL, p, groupColumn, NULL) < 0) {
     return (-1);
   }
@@ -7036,7 +7046,7 @@ static bool flow_drop_walker(GenericHashEntry *h, void *user_data,
 
 /* **************************************************** */
 
-int NetworkInterface::dropFlowsTraffic(AddressTree *allowed_hosts,
+int NetworkInterface::dropFlowsTraffic(AddressTree *allowed_nets,
                                        Paginator *p) {
   struct flowHostRetriever retriever;
   u_int32_t begin_slot = 0;
@@ -7047,7 +7057,7 @@ int NetworkInterface::dropFlowsTraffic(AddressTree *allowed_hosts,
 
   memset(&retriever, 0, sizeof(retriever));
 
-  retriever.allowed_hosts = allowed_hosts;
+  retriever.allowed_nets = allowed_nets;
   retriever.pag = p;
 #ifdef NTOPNG_PRO
   retriever.qoe = &qoe;
@@ -7061,7 +7071,7 @@ int NetworkInterface::dropFlowsTraffic(AddressTree *allowed_hosts,
 /* **************************************************** */
 
 int NetworkInterface::sortHosts(u_int32_t *begin_slot, bool walk_all, struct flowHostRetriever *retriever,
-				u_int8_t bridge_iface_idx, AddressTree *allowed_hosts, bool host_details,
+				u_int8_t bridge_iface_idx, AddressTree *allowed_nets, bool host_details,
 				LocationPolicy location, char *countryFilter, char *mac_filter,
 				u_int16_t vlan_id, ndpi_os osFilter, u_int32_t asnFilter,
 				int32_t networkFilter, u_int16_t pool_filter, bool filtered_hosts,
@@ -7082,7 +7092,7 @@ int NetworkInterface::sortHosts(u_int32_t *begin_slot, bool walk_all, struct flo
     retriever->mac = NULL;
   }
 
-  retriever->allowed_hosts = allowed_hosts, retriever->location = location,
+  retriever->allowed_nets = allowed_nets, retriever->location = location,
     retriever->locationFilter = mac_location_filter,
     retriever->country = countryFilter, retriever->vlan_id = vlan_id,
     retriever->osFilter = osFilter, retriever->asnFilter = asnFilter,
@@ -7451,7 +7461,7 @@ int NetworkInterface::sortVLANs(struct flowHostRetriever *retriever,
 /* **************************************************** */
 
 int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, bool walk_all,
-					 u_int8_t bridge_iface_idx, AddressTree *allowed_hosts, bool host_details,
+					 u_int8_t bridge_iface_idx, AddressTree *allowed_nets, bool host_details,
 					 LocationPolicy location, char *countryFilter, char *mac_filter,
 					 u_int16_t vlan_id, ndpi_os osFilter, u_int32_t asnFilter,
 					 int32_t networkFilter, u_int16_t pool_filter, bool filtered_hosts,
@@ -7475,12 +7485,13 @@ int NetworkInterface::getActiveHostsList(lua_State *vm, u_int32_t *begin_slot, b
 
   memset(&retriever, 0, sizeof(struct flowHostRetriever));
   retriever.observationPointId = getLuaVMUservalue(vm, observationPointId);
+  retriever.allowed_pools = getLuaVMUservalue(vm, allowed_pools);
 #ifdef NTOPNG_PRO
   retriever.qoe = &qoe;
 #endif
 
   if (sortHosts(begin_slot, walk_all, &retriever, bridge_iface_idx,
-                allowed_hosts, host_details, location, countryFilter,
+                allowed_nets, host_details, location, countryFilter,
                 mac_filter, vlan_id, osFilter, asnFilter, networkFilter,
                 pool_filter, filtered_hosts, blacklisted_hosts, anomalousOnly,
                 dhcpOnly, cidr_filter, ipver_filter, proto_filter,
@@ -7708,12 +7719,12 @@ void NetworkInterface::getFlowsStats(lua_State *vm) {
 /* **************************************************** */
 
 void NetworkInterface::getNetworkStats(lua_State *vm, u_int32_t network_id,
-                                       AddressTree *allowed_hosts,
+                                       AddressTree *allowed_nets,
                                        bool diff, bool fullStats) const {
   NetworkStats *network_stats;
 
   if ((network_stats = getNetworkStats(network_id)) &&
-      network_stats->trafficSeen() && network_stats->match(allowed_hosts)) {
+      network_stats->trafficSeen() && network_stats->match(allowed_nets)) {
     lua_newtable(vm);
 
     network_stats->lua(vm, diff, fullStats);
@@ -7728,14 +7739,14 @@ void NetworkInterface::getNetworkStats(lua_State *vm, u_int32_t network_id,
 /* **************************************************** */
 
 void NetworkInterface::getNetworksStats(lua_State *vm,
-                                        AddressTree *allowed_hosts,
+                                        AddressTree *allowed_nets,
                                         bool diff, bool fullStats) const {
   u_int32_t num_local_networks = ntop->getNumLocalNetworks();
 
   lua_newtable(vm);
 
   for (u_int32_t network_id = 0; network_id < num_local_networks; network_id++)
-    getNetworkStats(vm, network_id, allowed_hosts, diff, fullStats);
+    getNetworkStats(vm, network_id, allowed_nets, diff, fullStats);
 }
 
 /* **************************************************** */
@@ -8694,14 +8705,14 @@ Country *NetworkInterface::getCountry(const char *country_name,
 /* **************************************************** */
 
 Flow *NetworkInterface::findFlowByKeyAndHashId(u_int32_t key, u_int hash_id,
-                                               AddressTree *allowed_hosts) {
+                                               AddressTree *allowed_nets) {
   Flow *f = NULL;
 
   if (!flows_hash) return (NULL);
 
   f = flows_hash->findByKeyAndHashId(key, hash_id);
 
-  if (f && (!f->match(allowed_hosts))) f = NULL;
+  if (f && (!f->match(allowed_nets))) f = NULL;
 
   return (f);
 }
@@ -8711,14 +8722,14 @@ Flow *NetworkInterface::findFlowByKeyAndHashId(u_int32_t key, u_int hash_id,
 #ifdef HAVE_NEDGE
 
 /* Returns the number of dropped flows */
-u_int32_t NetworkInterface::dropHostTraffic(char *host_ip, AddressTree *allowed_hosts) {
+u_int32_t NetworkInterface::dropHostTraffic(char *host_ip, AddressTree *allowed_nets) {
   IpAddress ip;
 
   if (!flows_hash) return 0;
 
   ip.set(host_ip);
 
-  return(flows_hash->dropHostTraffic(&ip, allowed_hosts));
+  return(flows_hash->dropHostTraffic(&ip, allowed_nets));
 }
 
 #endif
@@ -8731,7 +8742,7 @@ Flow *NetworkInterface::findFlowByTuple(u_int16_t vlan_id,
                                         Mac *dst_mac, IpAddress *src_ip,
                                         IpAddress *dst_ip, u_int16_t src_port,
                                         u_int16_t dst_port, u_int8_t l4_proto,
-                                        AddressTree *allowed_hosts) const {
+                                        AddressTree *allowed_nets) const {
   bool src2dst;
   Flow *f, *unswapped_flow;
 
@@ -8742,7 +8753,7 @@ Flow *NetworkInterface::findFlowByTuple(u_int16_t vlan_id,
                                private_flow_id, l4_proto, NULL, &src2dst,
                                false /* Not an inline call */, &unswapped_flow);
 
-  if (f && (!f->match(allowed_hosts))) f = NULL;
+  if (f && (!f->match(allowed_nets))) f = NULL;
 
   return (f);
 }
@@ -8753,7 +8764,7 @@ struct search_host_info {
   lua_State *vm;
   char *host_name_or_ip;
   u_int num_matches;
-  AddressTree *allowed_hosts;
+  AddressTree *allowed_nets;
 };
 
 /* **************************************************** */
@@ -8763,7 +8774,7 @@ static bool hosts_search_walker(GenericHashEntry *h, void *user_data,
   Host *host = (Host *)h;
   struct search_host_info *info = (struct search_host_info *)user_data;
 
-  if (host->addIfMatching(info->vm, info->allowed_hosts,
+  if (host->addIfMatching(info->vm, info->allowed_nets,
                           info->host_name_or_ip)) {
     info->num_matches++;
     *matched = true;
@@ -8865,13 +8876,13 @@ Host *NetworkInterface::findHostByMac(u_int8_t *mac) {
 /* **************************************************** */
 
 bool NetworkInterface::findHostsByName(lua_State *vm,
-                                       AddressTree *allowed_hosts, char *key) {
+                                       AddressTree *allowed_nets, char *key) {
   struct search_host_info info;
   u_int32_t begin_slot = 0;
   bool walk_all = true;
 
   info.vm = vm, info.host_name_or_ip = key, info.num_matches = 0,
-    info.allowed_hosts = allowed_hosts;
+    info.allowed_nets = allowed_nets;
 
   lua_newtable(vm);
   walker(&begin_slot, walk_all, walker_hosts, hosts_search_walker, (void *)&info);
@@ -11938,10 +11949,10 @@ void NetworkInterface::decNumHosts(Host *host, bool rxOnlyHost) {
 
 /* **************************************************** */
 
-bool NetworkInterface::resetHostTopSites(AddressTree *allowed_hosts,
+bool NetworkInterface::resetHostTopSites(AddressTree *allowed_nets,
                                          char *host_ip, u_int16_t vlan_id,
                                          u_int16_t observationPointId) {
-  Host *h = findHostByIP(allowed_hosts, host_ip, vlan_id, observationPointId);
+  Host *h = findHostByIP(allowed_nets, host_ip, vlan_id, observationPointId);
 
   if (h)
     return (h->resetHostTopSites());

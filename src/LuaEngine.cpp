@@ -1197,6 +1197,7 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
   char key[64], ifname[MAX_INTERFACE_NAME_LEN];
   bool is_interface_allowed;
   AddressTree ptree;
+  Bitmap4096 pools_bitmap; /* all bits zero by default */
   int rc, post_data_len = 0;
   const char *content_type;
   u_int8_t valid_csrf = 1;
@@ -1534,15 +1535,19 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
       capabilities = strtol(val, NULL, 10);
     }
 
-    /*
-      Read user allowed networks - stored on redis
-    */
+    /* Read user allowed networks from redis */
     snprintf(key, sizeof(key), CONST_STR_USER_NETS, user);
     if (ntop->getRedis()->get(key, allowed_nets, sizeof(allowed_nets)) == -1) {
-      /*
-        Set the default (allow all), if no allowed networks are found
-      */
+      /* Set the default (allow all), if no allowed networks are found */
       snprintf(allowed_nets, sizeof(allowed_nets), CONST_DEFAULT_ALL_NETS);
+    }
+
+    /* Read user allowed host pools from redis */
+    char pools_val[MAX_USER_NETS_VAL_LEN];
+    snprintf(key, sizeof(key), CONST_STR_USER_ALLOWED_HOST_POOLS, user);
+    if (ntop->getRedis()->get(key, pools_val, sizeof(pools_val)) >= 0 &&
+        pools_val[0] != '\0') {
+      pools_bitmap.setBits(pools_val); /* setBits parses comma-separated IDs */
     }
 
     ntop->getUserCapabilities(user, &allow_pcap_download,
@@ -1581,8 +1586,6 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
     ptree.addAddresses(allowed_nets);
 
     getLuaVMUservalue(L, allowedNets) = &ptree;
-    // ntop->getTrace()->traceEvent(TRACE_WARNING, "SET [p: %p][val: %s][user:
-    // %s]", &ptree, val, user);
 
     snprintf(key, sizeof(key), CONST_STR_USER_LANGUAGE, user);
 
@@ -1598,6 +1601,9 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
   getLuaVMUservalue(L, localuser) = localuser;
   getLuaVMUservalue(L, csrf) = (char *)session_csrf;
   getLuaVMUservalue(L, capabilities) = capabilities;
+  /* Store pointer to pools_bitmap only when restrictions are configured
+   * NULL means unrestricted (admin users or no allowed pools set) */
+  getLuaVMUservalue(L, allowed_pools) = (pools_bitmap.getNext(0) >= 0) ? &pools_bitmap : (Bitmap4096 *) NULL;
 
   iface = ntop->getNetworkInterface(ifname); /* Can't be null */
   /* 'select' ther interface that has already been set into the _SESSION */

@@ -3132,7 +3132,7 @@ void Flow::luaScore(lua_State *vm) {
 
 /* *************************************** */
 
-void Flow::lua(lua_State *vm, AddressTree *ptree,
+void Flow::lua(lua_State *vm, AddressTree *allowed_nets,
 	       DetailsLevel details_level, bool skipNewTable) {
   const IpAddress *src_ip = get_cli_ip_addr(), *dst_ip = get_srv_ip_addr();
   bool src_match = true, dst_match = true;
@@ -3143,9 +3143,9 @@ void Flow::lua(lua_State *vm, AddressTree *ptree,
   char *asname;
   u_int32_t asn = 0;
 
-  if(ptree) {
-    if(src_ip) src_match = src_ip->match(ptree);
-    if(dst_ip) dst_match = dst_ip->match(ptree);
+  if(allowed_nets) {
+    if(src_ip) src_match = src_ip->match(allowed_nets);
+    if(dst_ip) dst_match = dst_ip->match(allowed_nets);
     if(!src_match && !dst_match) return;
   }
 

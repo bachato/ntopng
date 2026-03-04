@@ -408,8 +408,19 @@ function pools_rest_utils.get_pools(pools)
    -- Create the instance
    local s = pools:create()
 
+   -- Check if the current user has restrictions on allowed pools
+   local allowed_pools_set = ntop.getAllowedHostPools()
+   if not allowed_pools_set or table.len(allowed_pools_set) == 0 then
+      allowed_pools_set = nil
+   end
+
    if pool_id then
-      -- Return only one pool
+      -- Check if pool is allowed
+      if allowed_pools_set and not allowed_pools_set[pool_id] then
+	 rest_utils.answer(rest_utils.consts.err.not_granted)
+	 return
+      end
+
       local cur_pool = s:get_pool(pool_id)
 
       if cur_pool then
@@ -419,8 +430,18 @@ function pools_rest_utils.get_pools(pools)
 	 return
       end
    else
-      -- Return all pool ids
-      res = s:get_all_pools()
+      -- Return all (allowed) pool ids
+      local all_pools = s:get_all_pools()
+
+      if allowed_pools_set then
+	 for _, pool in ipairs(all_pools) do
+	    if allowed_pools_set[pool["pool_id"]] then
+	       res[#res + 1] = pool
+	    end
+	 end
+      else
+	 res = all_pools
+      end
    end
 
    local rc = rest_utils.consts.success.ok

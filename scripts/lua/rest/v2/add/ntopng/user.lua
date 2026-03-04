@@ -35,6 +35,7 @@ local networks = _POST["allowed_networks"]
 local allowed_interface = _POST["allowed_interface"]
 local language = _POST["add_user_language"]
 local host_pool_id = _POST["host_pool_id"]
+local allowed_host_pools = _POST["allowed_host_pools"] or ""
 local allow_historical_flows = _POST["allow_historical_flows"]
 local allow_alerts = _POST["allow_alerts"]
 local allow_pcap_download = _POST["allow_pcap_download"]
@@ -80,9 +81,10 @@ if(all_users[username] ~= nil) then
    return
 end
 
-if not ntop.addUser(username, full_name, password, host_role, networks, 
-		    getInterfaceName(allowed_interface), host_pool_id, language, 
-                    allow_pcap_download, allow_historical_flows, allow_alerts) then
+if not ntop.addUser(username, full_name, password, host_role, networks,
+		    getInterfaceName(allowed_interface), host_pool_id, language,
+                    allow_pcap_download, allow_historical_flows, allow_alerts,
+                    allowed_host_pools) then
    rest_utils.answer(rest_utils.consts.err.add_user_failed, res)
    return
 end

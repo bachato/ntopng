@@ -5,6 +5,7 @@
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 require "lua_utils"
+local json = require "dkjson"
 
 sendHTTPHeader('application/json')
 
@@ -16,6 +17,7 @@ local allow_pcap_download = _POST["allow_pcap_download"]
 local allow_historical_flows = _POST["allow_historical_flows"]
 local allow_alerts = _POST["allow_alerts"]
 local language  = _POST["user_language"]
+local allowed_host_pools = _POST["allowed_host_pools"]
 
 -- for captive portal users
 local old_host_pool_id = _POST["old_host_pool_id"]
@@ -29,73 +31,93 @@ if(false) then
    end
 end
 
+local rc
+
 if(username == nil) then
-    print ("{ \"result\" : -1, \"message\" : \"Error in username\" }")
-    return
+   rc = { result = -1, message = "Error in username" }
+   print(json.encode(rc))
+   return
 end
 
 username = string.lower(username)
 
 if(host_role ~= nil) then
-  if(not ntop.changeUserRole(username, host_role)) then
-    print ("{ \"result\" : -1, \"message\" : \"Error in changing host type\" }")
-    return
-  end
+   if(not ntop.changeUserRole(username, host_role)) then
+      rc = { result = -1, message = "Error in changing host type" }
+      print(json.encode(rc))
+      return
+   end
 end
 
 if(networks ~= nil) then
-  if(not ntop.changeAllowedNets(username, networks)) then
-    print ("{ \"result\" : -1, \"message\" : \"Error in changing allowed networks\" }")
-    return
-  end
+   if(not ntop.changeAllowedNets(username, networks)) then
+      rc = { result = -1, message = "Error in changing allowed networks" }
+      print(json.encode(rc))
+      return
+   end
 end
 
 if(allowed_interface ~= nil) then
    if(not ntop.changeAllowedIfname(username, getInterfaceName(allowed_interface))) then
-     print ("{ \"result\" : -1, \"message\" : \"Error in changing the allowed interface\" }")
-     return
+      rc = { result = -1, message = "Error in changing the allowed interface" }
+      print(json.encode(rc))
+      return
    end
 end
 
 local allow_pcap_download_enabled = false
 if allow_pcap_download and allow_pcap_download == "1" then
-  allow_pcap_download_enabled = true;
+   allow_pcap_download_enabled = true
 end
 if(not ntop.changePcapDownloadPermission(username, allow_pcap_download_enabled)) then
-   print ("{ \"result\" : -1, \"message\" : \"Error in changing user permission\" }")
+   rc = { result = -1, message = "Error in changing user permission" }
+   print(json.encode(rc))
    return
 end
 
 local allow_historical_flows_enabled = false
 if allow_historical_flows and allow_historical_flows == "1" then
-  allow_historical_flows_enabled = true;
+   allow_historical_flows_enabled = true
 end
 if(not ntop.changeHistoricalFlowPermission(username, allow_historical_flows_enabled)) then
-   print ("{ \"result\" : -1, \"message\" : \"Error in changing user historical flow permission\" }")
+   rc = { result = -1, message = "Error in changing user historical flow permission" }
+   print(json.encode(rc))
    return
 end
 
 local allow_alerts_enabled = false
 if allow_alerts and allow_alerts == "1" then
-  allow_alerts_enabled = true;
+   allow_alerts_enabled = true
 end
 if(not ntop.changeAlertsPermission(username, allow_alerts_enabled)) then
-   print ("{ \"result\" : -1, \"message\" : \"Error in changing user alerts permission\" }")
+   rc = { result = -1, message = "Error in changing user alerts permission" }
+   print(json.encode(rc))
    return
 end
 
 if(language ~= nil) then
    if(not ntop.changeUserLanguage(username, language)) then
-      print ("{ \"result\" : -1, \"message\" : \"Error in changing the user language\" }")
+      rc = { result = -1, message = "Error in changing the user language" }
+      print(json.encode(rc))
       return
    end
 end
 
 if(new_host_pool_id ~= nil and old_host_pool_id ~= nil and new_host_pool_id ~= old_host_pool_id) then
    if(not ntop.changeUserHostPool(username, new_host_pool_id)) then
-      print ("{ \"result\" : -1, \"message\" : \"Error in changing the host pool id\" }")
+      rc = { result = -1, message = "Error in changing the host pool id" }
+      print(json.encode(rc))
       return
    end
 end
 
-print ("{ \"result\" : 0, \"message\" : \"Parameters Updated\" }")
+if(allowed_host_pools ~= nil) then
+   if(not ntop.changeAllowedHostPools(username, allowed_host_pools)) then
+      rc = { result = -1, message = "Error in changing the allowed host pools" }
+      print(json.encode(rc))
+      return
+   end
+end
+
+rc = { result = 0, message = "Parameters Updated" }
+print(json.encode(rc))

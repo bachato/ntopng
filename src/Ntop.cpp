@@ -1316,6 +1316,14 @@ void Ntop::getUsers(lua_State *vm) {
     if (ntop->getRedis()->get(key, val, CONST_MAX_LEN_REDIS_VALUE) >= 0)
       lua_push_uint64_table_entry(vm, "host_pool_id", atoi(val));
 
+    snprintf(key, CONST_MAX_LEN_REDIS_VALUE, CONST_STR_USER_ALLOWED_HOST_POOLS,
+             username);
+    if (ntop->getRedis()->get(key, val, CONST_MAX_LEN_REDIS_VALUE) >= 0 &&
+        val[0] != '\0')
+      lua_push_str_table_entry(vm, "allowed_host_pools", val);
+    else
+      lua_push_str_table_entry(vm, "allowed_host_pools", (char *)"");
+
     lua_pushstring(vm, username);
     lua_insert(vm, -2);
     lua_settable(vm, -3);
@@ -2167,6 +2175,10 @@ bool Ntop::changeAllowedIfname(char *username, char *allowed_ifname) const {
 
 /* ******************************************* */
 
+/*
+ * Set the host pool for a captive portal user on authentication
+ * (this is a 1-1 user-pool binding used for policy enforcement)
+ */
 bool Ntop::changeUserHostPool(const char *username,
                               const char *host_pool_id) const {
   if (username == NULL || username[0] == '\0') return false;
@@ -2185,6 +2197,42 @@ bool Ntop::changeUserHostPool(const char *username,
   }
 
   return (true);
+}
+
+/* ******************************************* */
+
+/* Set which pools an unprivileged user is allowed to view */
+bool Ntop::changeAllowedHostPools(const char *username,
+                                      const char *allowed_host_pools) const {
+  if (username == NULL || username[0] == '\0') return false;
+
+  char key[CONST_MAX_LEN_REDIS_KEY];
+  snprintf(key, sizeof(key), CONST_STR_USER_ALLOWED_HOST_POOLS, username);
+
+  if (allowed_host_pools != NULL && allowed_host_pools[0] != '\0')
+    return (ntop->getRedis()->set(key, (char *)allowed_host_pools, 0) >= 0);
+  else
+    ntop->getRedis()->del(key);
+
+  return (true);
+}
+
+/* ******************************************* */
+
+void Ntop::getAllowedHostPools(lua_State *vm) {
+  Bitmap4096 *pools = getLuaVMUservalue(vm, allowed_pools);
+
+  lua_newtable(vm);
+
+  if (!pools) return;
+
+  int bit = pools->getNext(0);
+  while (bit >= 0) {
+    lua_pushinteger(vm, bit);
+    lua_pushboolean(vm, true);
+    lua_rawset(vm, -3);
+    bit = pools->getNext(bit + 1);
+  }
 }
 
 /* ******************************************* */
@@ -2379,7 +2427,7 @@ bool Ntop::addUser(char *username, char *full_name, char *password,
                    char *host_role, char *allowed_networks,
                    char *allowed_ifname, char *host_pool_id, char *language,
                    bool allow_pcap_download, bool allow_historical_flows,
-                   bool allow_alerts) {
+                   bool allow_alerts, char *allowed_host_pools) {
   char key[CONST_MAX_LEN_REDIS_KEY];
   char password_hash[33];
   char new_user_id_buf[8];
@@ -2446,6 +2494,11 @@ bool Ntop::addUser(char *username, char *full_name, char *password,
   if (host_pool_id && host_pool_id[0] != '\0') {
     snprintf(key, sizeof(key), CONST_STR_USER_HOST_POOL_ID, username);
     ntop->getRedis()->set(key, host_pool_id, 0);
+  }
+
+  if (allowed_host_pools && allowed_host_pools[0] != '\0') {
+    snprintf(key, sizeof(key), CONST_STR_USER_ALLOWED_HOST_POOLS, username);
+    ntop->getRedis()->set(key, allowed_host_pools, 0);
   }
 
   users_m.unlock(__FILE__, __LINE__);

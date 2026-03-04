@@ -351,7 +351,7 @@ protected:
                 u_int8_t *view_srv_mac);
   int sortHosts(u_int32_t *begin_slot, bool walk_all,
                 struct flowHostRetriever *retriever, u_int8_t bridge_iface_idx,
-                AddressTree *allowed_hosts, bool host_details,
+                AddressTree *allowed_nets, bool host_details,
                 LocationPolicy location, char *countryFilter, char *mac_filter,
                 u_int16_t vlan_id, ndpi_os osFilter, u_int32_t asnFilter,
                 int32_t networkFilter, u_int16_t pool_filter,
@@ -370,7 +370,7 @@ protected:
                u_int16_t pool_filter, u_int8_t devtype_filter,
                u_int8_t location_filter, time_t min_first_seen);
   int sortFlows(u_int32_t *begin_slot, bool walk_all,
-                struct flowHostRetriever *retriever, AddressTree *allowed_hosts,
+                struct flowHostRetriever *retriever, AddressTree *allowed_nets,
                 Host *host, Host *client, Host *server, char *flow_info,
                 Paginator *p, const char *sortColumn, char *search = NULL);
 
@@ -587,7 +587,7 @@ public:
   inline void setSeenExternalAlerts() { has_external_alerts = true; }
   virtual bool is_purge_idle_interface() { return (purge_idle_flows_hosts); };
   int dumpFlow(Flow *f);
-  bool getHostMinInfo(lua_State *vm, AddressTree *allowed_hosts, char *host_ip,
+  bool getHostMinInfo(lua_State *vm, AddressTree *allowed_nets, char *host_ip,
                       u_int16_t vlan_id, bool only_ndpi_stats);
 
   /* Enqueue alert to a queue for processing and later delivery to recipients */
@@ -701,15 +701,15 @@ public:
                      IpAddress *_src_ip, Host **src, Mac *dst_mac,
                      IpAddress *_dst_ip, Host **dst);
   virtual Flow *findFlowByKeyAndHashId(u_int32_t key, u_int hash_id,
-                                       AddressTree *allowed_hosts);
+                                       AddressTree *allowed_nets);
   virtual Flow *findFlowByTuple(u_int16_t vlan_id,
                                 u_int16_t observation_domain_id,
                                 u_int32_t private_flow_id, Mac *src_mac,
                                 Mac *dst_mac, IpAddress *src_ip,
                                 IpAddress *dst_ip, u_int16_t src_port,
                                 u_int16_t dst_port, u_int8_t l4_proto,
-                                AddressTree *allowed_hosts) const;
-  bool findHostsByName(lua_State *vm, AddressTree *allowed_hosts, char *key);
+                                AddressTree *allowed_nets) const;
+  bool findHostsByName(lua_State *vm, AddressTree *allowed_nets, char *key);
   bool findHostsByMac(lua_State *vm, u_int8_t *mac);
   Host *findHostByMac(u_int8_t *mac);
 
@@ -729,10 +729,10 @@ public:
                      Host **srcHost, Host **dstHost, Flow **flow,
 		     bool *new_flow, u_int8_t *sender_mac);
   void processInterfaceStats(sFlowInterfaceStats *stats);
-  void getLiveASNStats(ASNStats *asn_stats, AddressTree *allowed_hosts, 
+  void getLiveASNStats(ASNStats *asn_stats, AddressTree *allowed_nets, 
                         Paginator *p, lua_State *vm);
   void getActiveFlowsStats(nDPIStats *stats, FlowStats *status_stats,
-                           AddressTree *allowed_hosts, Host *h,
+                           AddressTree *allowed_nets, Host *h,
                            Host *talking_with_host, Host *client, Host *server,
                            char *flow_info, Paginator *p, lua_State *vm,
                            bool only_traffic_stats);
@@ -811,7 +811,7 @@ public:
 
   int getActiveHostsList(
 			 lua_State *vm, u_int32_t *begin_slot, bool walk_all,
-			 u_int8_t bridge_iface_idx, AddressTree *allowed_hosts, bool host_details,
+			 u_int8_t bridge_iface_idx, AddressTree *allowed_nets, bool host_details,
 			 LocationPolicy location, char *countryFilter, char *mac_filter,
 			 u_int16_t vlan_id, ndpi_os osFilter, u_int32_t asnFilter,
 			 int32_t networkFilter, u_int16_t pool_filter, bool filtered_hosts,
@@ -843,17 +843,17 @@ public:
   int getMacsIpAddresses(lua_State *vm, int idx);
   void getFlowsStats(lua_State *vm);
   void getNetworkStats(lua_State *vm, u_int32_t network_id,
-                       AddressTree *allowed_hosts, bool diff = false, bool fullStats = false) const;
-  void getNetworksStats(lua_State *vm, AddressTree *allowed_hosts,
+                       AddressTree *allowed_nets, bool diff = false, bool fullStats = false) const;
+  void getNetworksStats(lua_State *vm, AddressTree *allowed_nets,
                         bool diff = false, bool fullStats = false) const;
   int getFlows(lua_State *vm, u_int32_t *begin_slot, bool walk_all,
-               AddressTree *allowed_hosts, Host *host, Host *talking_with_host,
+               AddressTree *allowed_nets, Host *host, Host *talking_with_host,
                Host *client, Host *server, char *flow_info, Paginator *p, char *search = NULL);
   int getFlowsTraffic(lua_State *vm, u_int32_t *begin_slot, bool walk_all,
-                      AddressTree *allowed_hosts, Host *host, Paginator *p);
-  int getFlowsGroup(lua_State *vm, AddressTree *allowed_hosts, Paginator *p,
+                      AddressTree *allowed_nets, Host *host, Paginator *p);
+  int getFlowsGroup(lua_State *vm, AddressTree *allowed_nets, Paginator *p,
                     const char *groupColumn);
-  int dropFlowsTraffic(AddressTree *allowed_hosts, Paginator *p);
+  int dropFlowsTraffic(AddressTree *allowed_nets, Paginator *p);
 
   virtual void purgeIdle(time_t when, bool force_idle = false,
                          bool full_scan = false);
@@ -910,8 +910,8 @@ public:
                         u_int16_t observationPointId, bool is_inline_call);
   virtual Host *getHostByIP(IpAddress *ip, u_int16_t vlan_id,
                             u_int16_t observationPointId, bool is_inline_call);
-  bool isHostActive(AddressTree *allowed_hosts, char *host_ip, u_int16_t vlan_id);
-  bool getHostInfo(lua_State *vm, AddressTree *allowed_hosts, char *host_ip,
+  bool isHostActive(AddressTree *allowed_nets, char *host_ip, u_int16_t vlan_id);
+  bool getHostInfo(lua_State *vm, AddressTree *allowed_nets, char *host_ip,
                    u_int16_t vlan_id);
   void findPidFlows(lua_State *vm, u_int32_t pid);
   void findProcNameFlows(lua_State *vm, char *proc_name);
@@ -1182,7 +1182,7 @@ public:
   inline void decPoolNumL2Devices(u_int16_t id, bool is_inline_call) {
     if (host_pools) host_pools->decNumL2Devices(id, is_inline_call);
   };
-  Host *findHostByIP(AddressTree *allowed_hosts, char *host_ip,
+  Host *findHostByIP(AddressTree *allowed_nets, char *host_ip,
                      u_int16_t vlan_id, u_int16_t observationPointId);
   TimeseriesExporter *getInfluxDBTSExporter();
   TimeseriesExporter *getRRDTSExporter();
@@ -1348,7 +1348,7 @@ public:
   u_int16_t getnDPIProtoByName(const char *name);
   inline u_int32_t getNewFlowSerial() { return (flow_serial++); }
   inline u_int64_t getNewAlertSerial() { return alert_serial.fetch_add(1, std::memory_order_relaxed); }
-  bool resetHostTopSites(AddressTree *allowed_hosts, char *host_ip,
+  bool resetHostTopSites(AddressTree *allowed_nets, char *host_ip,
                          u_int16_t vlan_id, u_int16_t observationPointId);
   void localHostsServerPorts(lua_State *vm);
 
@@ -1433,7 +1433,7 @@ public:
   inline u_int8_t getNumProfiles() { return (flow_profiles) ? flow_profiles->getNumProfiles() : 0; }
 #endif
 #else
-  u_int32_t dropHostTraffic(char *host_ip, AddressTree *allowed_hosts);
+  u_int32_t dropHostTraffic(char *host_ip, AddressTree *allowed_nets);
 #endif
 #endif
   void getActiveMacs(lua_State *vm);

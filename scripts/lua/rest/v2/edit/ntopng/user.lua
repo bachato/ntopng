@@ -28,6 +28,7 @@ local username = _POST["username"]
 local full_name = _POST["full_name"]
 local host_role = _POST["user_role"]
 local host_pool_id = _POST["host_pool_id"]
+local allowed_host_pools = _POST["allowed_host_pools"]
 local networks = _POST["allowed_networks"]
 local allowed_interface = _POST["allowed_interface"]
 local language = _POST["user_language"]
@@ -45,12 +46,13 @@ end
 if host_role == nil and
     networks == nil and
     allowed_interface == nil and
-    allow_pcap_download == nil and 
-    allow_alerts == nil and 
+    allow_pcap_download == nil and
+    allow_alerts == nil and
     language == nil and
     full_name == nil and
     (password == nil or confirm_password == nil) and
     host_pool_id == nil and
+    allowed_host_pools == nil and
     allow_historical_flows == nil then
     rest_utils.answer(rest_utils.consts.err.invalid_args, res)
    return
@@ -88,6 +90,13 @@ end
 
 if(host_pool_id ~= nil) then
    if(not ntop.changeUserHostPool(username, host_pool_id)) then
+      rest_utils.answer(rest_utils.consts.err.edit_user_failed, res)
+      return
+   end
+end
+
+if(allowed_host_pools ~= nil) then
+   if(not ntop.changeAllowedHostPools(username, allowed_host_pools)) then
       rest_utils.answer(rest_utils.consts.err.edit_user_failed, res)
       return
    end

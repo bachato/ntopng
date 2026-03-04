@@ -35,6 +35,7 @@ public:
   void *zmq_context, *zmq_subscriber;
   struct mg_connection *conn;
   AddressTree *allowedNets;
+  Bitmap4096 *allowed_pools;
   NetworkInterface *iface;
   AddressTree *addr_tree;
   SNMP *snmpBatch, *snmpAsyncEngine[MAX_NUM_ASYNC_SNMP_ENGINES];

@@ -6,70 +6,61 @@ dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 require "lua_utils"
 local locales_utils = require "locales_utils"
+local json = require "dkjson"
 
 sendHTTPHeader('application/json')
 
 if(isAdministratorOrPrintErr()) then
-   print("{\n")
-
    local users_list = ntop.getUsers()
    for key, value in pairs(users_list) do
       if(key == _GET["username"]) then
+         local rc = {}
 
-	 if value["group"] == "captive_portal" then
-	    print(' "host_pool_id": "'..value["host_pool_id"]..'",\n')
-	 else
-	    print(' "allowed_nets": "'..value["allowed_nets"]..'",\n')
-	    print(' "allowed_ifname": "'..value["allowed_ifname"]..'",\n')
+         if value["group"] == "captive_portal" then
+            rc["host_pool_id"] = value["host_pool_id"]
+         else
+            rc["allowed_nets"] = value["allowed_nets"]
+            rc["allowed_ifname"] = value["allowed_ifname"]
 
-	    if(value["allowed_ifname"] ~= "") then
-	       local iface_id = interface.name2id(value["allowed_ifname"])
-	       print(' "allowed_if_id": "'..iface_id..'",\n')
-	    end
-	 end
+            if value["allowed_ifname"] ~= "" then
+               rc["allowed_if_id"] = tostring(interface.name2id(value["allowed_ifname"]))
+            end
 
-	 -- handle the user language
-	 if isEmptyString(value["language"]) then
-	    value["language"] = locales_utils.default_locale
-	 else
-	    local available_locale = false
-
-	    for _, l in ipairs(locales_utils.getAvailableLocales()) do
-	       if l["code"] == value["language"] then
-		  available_locale = true
-		  break
-	       end
-	    end
-
-	    if not available_locale then
-	       value["language"] = locales_utils.default_locale
-	    end
-	 end
-
-         print(' "language": "'..value["language"]..'",\n')
-
-         if value["allow_pcap_download"] then
-            print(' "allow_pcap_download": true,\n')
-         end
-	
-         if value["allow_historical_flows"] then
-            print(' "allow_historical_flows": true,\n')
-         end
-	
-         if value["allow_alerts"] then
-            print(' "allow_alerts": true,\n')
+            rc["allowed_host_pools"] = value["allowed_host_pools"] or ""
          end
 
-         local api_token = ntop.getUserAPIToken(key) or ""
+         -- handle the user language
+         if isEmptyString(value["language"]) then
+            value["language"] = locales_utils.default_locale
+         else
+            local available_locale = false
 
-	 print(' "username": "'..key..'",\n')
-	 print(' "api_token": "' ..api_token.. '",\n')
-	 print(' "password": "'..value["password"]..'",\n')
-	 print(' "full_name": "'..value["full_name"]..'",\n')
-	 print(' "group": "'..value["group"]..'"\n')
+            for _, l in ipairs(locales_utils.getAvailableLocales()) do
+               if l["code"] == value["language"] then
+                  available_locale = true
+                  break
+               end
+            end
 
+            if not available_locale then
+               value["language"] = locales_utils.default_locale
+            end
+         end
+
+         rc["language"] = value["language"]
+         rc["allow_pcap_download"] = value["allow_pcap_download"] and true or false
+         rc["allow_historical_flows"] = value["allow_historical_flows"] and true or false
+         rc["allow_alerts"] = value["allow_alerts"] and true or false
+         rc["api_token"] = ntop.getUserAPIToken(key) or ""
+         rc["username"] = key
+         rc["password"] = value["password"]
+         rc["full_name"] = value["full_name"]
+         rc["group"] = value["group"]
+
+         print(json.encode(rc))
+         return
       end
    end
 
-   print("}")
+   print(json.encode({}))
 end
