@@ -100,6 +100,9 @@ fi
 LOGROTATE_CONF=/etc/logrotate.d/ntopng
 /bin/chmod 644 $LOGROTATE_CONF
 
+LOGROTATE_RADIUS_CONF=/etc/logrotate.d/ntopng-radius
+/bin/chmod 644 $LOGROTATE_RADIUS_CONF
+
 CRON_CONF=/etc/cron.d/ntopng
 /bin/chmod 644 $CRON_CONF
 
