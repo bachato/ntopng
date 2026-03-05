@@ -136,13 +136,7 @@ function ts_utils.listActiveDrivers()
     local driver = ts_utils.getDriverName()
     local active_drivers = {}
 
-    if driver == "rrd" then
-        local dirs = ntop.getDirs()
-        local rrd_driver = require("rrd"):new({
-            base_path = (dirs.workingdir .. "/rrd_new")
-        })
-        active_drivers[#active_drivers + 1] = rrd_driver
-    elseif driver == "influxdb" then
+    if driver == "influxdb" then
         local auth_enabled = (ntop.getPref("ntopng.prefs.influx_auth_enabled") == "1")
 
         local influxdb_driver = require("influxdb"):new({
@@ -157,7 +151,20 @@ function ts_utils.listActiveDrivers()
         local ch_driver = require("clickhousets"):new({
             db = prefs.clickhouse_dbname or "ntopng",
         })
-        active_drivers[#active_drivers + 1] = ch_driver
+        if ch_driver then
+           active_drivers[#active_drivers + 1] = ch_driver
+        else
+            traceError(TRACE_WARNING, TRACE_CONSOLE,
+                "[TS] ClickHouse not available, falling back to RRD")
+        end
+    end
+
+    if driver == "rrd" or #active_drivers == 0 then
+        local dirs = ntop.getDirs()
+        local rrd_driver = require("rrd"):new({
+            base_path = (dirs.workingdir .. "/rrd_new")
+        })
+        active_drivers[#active_drivers + 1] = rrd_driver
     end
 
     -- cache for future calls
@@ -171,11 +178,7 @@ end
 -- Get the driver to use to query data
 function ts_utils.getQueryDriver()
     local drivers = ts_utils.listActiveDrivers()
-
-    -- NOTE: prefer the InfluxDB driver if available, RRD as fallback
-    local driver = drivers[2] or drivers[1]
-
-    return driver
+    return drivers[1]
 end
 
 -- ##############################################

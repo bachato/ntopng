@@ -44,6 +44,10 @@ local CH_BATCH_SIZE     = 2000    -- maximum rows per INSERT statement
 --! @brief Driver constructor.
 --! @param options table with at least { db = "dbname" }.
 function driver:new(options)
+   if not ntop.isClickHouseEnabled() then
+      return nil
+   end
+
    local obj = {
       db = options.db or "ntopng",
    }
