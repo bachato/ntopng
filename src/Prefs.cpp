@@ -928,8 +928,8 @@ int32_t Prefs::getDefaultPrefsValue(const char *pref_key,
 static TsDriver str2TsDriver(const char *driver) {
   if(!strcmp(driver, "influxdb"))
     return (ts_driver_influxdb);
-  else if(!strcmp(driver, "prometheus"))
-    return (ts_driver_prometheus);
+  else if(!strcmp(driver, "clickhouse"))
+    return (ts_driver_clickhouse);
   else
     return (ts_driver_rrd);
 }

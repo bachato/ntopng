@@ -1072,7 +1072,7 @@ typedef struct bcast_domain_info {
 typedef enum ts_driver {
   ts_driver_rrd = 0,
   ts_driver_influxdb,
-  ts_driver_prometheus
+  ts_driver_clickhouse
 } TsDriver;
 
 /* Wrapper for pcap_if_t and pfring_if_t */

@@ -152,6 +152,12 @@ function ts_utils.listActiveDrivers()
             password = ternary(auth_enabled, ntop.getPref("ntopng.prefs.influx_password"), nil)
         })
         active_drivers[#active_drivers + 1] = influxdb_driver
+    elseif driver == "clickhouse" then
+        local prefs = ntop.getPrefs()
+        local ch_driver = require("clickhousets"):new({
+            db = prefs.clickhouse_dbname or "ntopng",
+        })
+        active_drivers[#active_drivers + 1] = ch_driver
     end
 
     -- cache for future calls

@@ -174,6 +174,24 @@ if auth.has_capability(auth.capabilities.preferences) then
                 message_severity = "alert-success"
             end
         end
+    elseif (_POST["timeseries_driver"] == "clickhouse") then
+        if not ntop.isClickHouseEnabled() then
+            message_info = i18n("prefs.clickhouse_ts_not_enabled")
+            message_severity = "alert-danger"
+            _POST["timeseries_driver"] = nil
+        elseif ntop.getPref("ntopng.prefs.timeseries_driver") ~= "clickhouse" then
+            local clickhousets = require "clickhousets"
+            local prefs = ntop.getPrefs()
+            local ok, msg = clickhousets.init(prefs.clickhouse_dbname or "ntopng", false --[[verbose]])
+            if not ok then
+                message_info = msg
+                message_severity = "alert-danger"
+                _POST["timeseries_driver"] = nil
+            elseif msg then
+                message_info = msg
+                message_severity = "alert-success"
+            end
+        end
     elseif (_POST["n2disk_license"] ~= nil) then
         recording_utils.setLicense(_POST["n2disk_license"])
     end
@@ -1615,12 +1633,28 @@ if auth.has_capability(auth.capabilities.preferences) then
                 '</th></tr></thead>')
         end
 
-        local elementToSwitch = { "ts_post_data_url", "influx_dbname", "influx_retention", "row_toggle_influx_auth",
-            "influx_username", "influx_password", "row_ts_high_resolution" }
-        local showElementArray = { false, true, false }
+        local elementToSwitch = {
+            "ts_post_data_url",
+            "influx_dbname",
+            "influx_retention",
+            "row_toggle_influx_auth",
+            "influx_username",
+            "influx_password",
+            "row_ts_high_resolution"
+        }
+        local showElementArray = {
+            { false, true, false }, -- ts_post_data_url
+            { false, true, false }, -- influx_dbname
+            { false, true, false }, -- influx_retention
+            { false, true, false }, -- row_toggle_influx_auth
+            { false, true, false }, -- influx_username
+            { false, true, false }, -- influx_password
+            { false, true, true  }, -- row_ts_high_resolution (influx + clickhouse)
+        }
 
         local active_driver = "rrd"
         local influx_active = false
+        local clickhouse_ts_active = false
 
         if not force_rrd then
             -- Similar to "to_switch" but for nested items (e.g. "local hosts cache" only
@@ -1643,12 +1677,14 @@ if auth.has_capability(auth.capabilities.preferences) then
             } }
 
             multipleTableButtonPrefs(subpage_active.entries["multiple_timeseries_database"].title,
-                subpage_active.entries["multiple_timeseries_database"].description, { "RRD", "InfluxDB 1.x/2.x" },
-                { "rrd", "influxdb" }, "rrd", "primary", "timeseries_driver", "ntopng.prefs.timeseries_driver", nil,
-                elementToSwitch, showElementArray, nested_to_switch, true --[[show]])
+                subpage_active.entries["multiple_timeseries_database"].description,
+                { "RRD", "InfluxDB 1.x/2.x", "ClickHouse" },
+                { "rrd", "influxdb", "clickhouse" }, "rrd", "primary", "timeseries_driver",
+                "ntopng.prefs.timeseries_driver", nil, elementToSwitch, showElementArray, nested_to_switch, true --[[show]])
 
             active_driver = ntop.getPref("ntopng.prefs.timeseries_driver")
             influx_active = (active_driver == "influxdb")
+            clickhouse_ts_active = (active_driver == "clickhouse")
         end
 
         prefsInputFieldPrefs(subpage_active.entries["influxdb_url"].title,
@@ -1711,7 +1747,7 @@ if auth.has_capability(auth.capabilities.preferences) then
                 "https://docs.influxdata.com/influxdb/v1.8/query_language/manage-database/#delete-a-database-with-drop-database"
             }) .. [[</li>
       </ul>]], resolutions_labels, resolutions_values, "300", "primary", "ts_high_resolution",
-            "ntopng.prefs.ts_resolution", nil, nil, nil, nil, influx_active)
+            "ntopng.prefs.ts_resolution", nil, nil, nil, nil, influx_active or clickhouse_ts_active)
 
         prefsInputFieldPrefs(subpage_active.entries["influxdb_query_timeout"].title,
             subpage_active.entries["influxdb_query_timeout"].description, "ntopng.prefs.", "influx_query_timeout", "10",

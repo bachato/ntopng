@@ -572,7 +572,7 @@ function hasHighResolutionTs()
 
    -- High resolution timeseries means dumping the host timeseries
    -- every 60 seconds instead of 300 seconds.
-   return ((active_driver == "influxdb") and
+   return (((active_driver == "influxdb") or (active_driver == "clickhouse")) and
       (ntop.getPref("ntopng.prefs.ts_resolution") ~= "300"))
 end
 
