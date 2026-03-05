@@ -57,6 +57,9 @@ class DB {
     return (-1);
   }
 
+  /* Execute queries that do not return data (e.g. insert) */
+  virtual int execSQLWrite(const char *sql) { return (-1); }
+
   virtual void archiveData(time_t epoch_begin, time_t epoch_end) {}
 
   inline NetworkInterface *getNetworkInterface() { return iface; };

@@ -1019,6 +1019,10 @@ public:
     DB *actual_db = db ? db : clickhouse_flows_db;
     if (actual_db) actual_db->archiveData(epoch_begin, epoch_end);
   }
+  inline int execSQLWrite(const char *sql) {
+    DB *actual_db = db ? db : clickhouse_flows_db;
+    return (actual_db ? actual_db->execSQLWrite(sql) : -1);
+  }
 
   NetworkStats *getNetworkStats(u_int32_t networkId) const;
   void allocateStructures(bool disable_dump = false);

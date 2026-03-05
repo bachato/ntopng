@@ -5836,6 +5836,30 @@ static int ntop_aggregate_site_flows(lua_State *vm) {
 
 /* ****************************************** */
 
+/*
+ * Execute a ClickHouse statement with no result expected (e.g. INSERT)
+ */
+static int ntop_clickhouse_exec_sql_write(lua_State *vm) {
+  NetworkInterface *curr_iface = getCurrentInterface(vm);
+  const char *sql;
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (!curr_iface)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  sql = lua_tostring(vm, 1);
+
+  lua_pushboolean(vm, curr_iface->execSQLWrite(sql) == 0);
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_exec_in_memory_sql_query(lua_State *vm) {
   char *sql;
   InMemorySQLiteDB *db = getLuaVMUserdata(vm, db);
@@ -6326,6 +6350,7 @@ static luaL_Reg _ntop_interface_reg[] = {
   /* ClickHouse */
   { "clickhouseExecCSVQuery", ntop_clickhouse_exec_csv_query },
   { "clickhouseArchiveData", ntop_clickhouse_archive_data },
+  { "execSQLWrite", ntop_clickhouse_exec_sql_write },
 
   /* DNS Cache */
   { "swapHostnameIPCache", ntop_swap_hostname_ip_cache },
