@@ -82,7 +82,6 @@
     "madge": "^5.0.1",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.34",
-    "nvd3": "^1.8.6",
     "peity": "^3.3.0",
     "select2": "^4.1.0-rc.0",
     "select2-bootstrap-5-theme": "^1.3.0",
