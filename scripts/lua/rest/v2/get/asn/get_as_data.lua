@@ -25,7 +25,13 @@ local selected_asn = _GET["show_as"]
 
 local ases_info = {}
 local res = {}
+local perform_profiling = ntop.getCache(as_utils.getProfilingKey())
 
+if not isEmptyString(perform_profiling) then
+    perform_profiling = true
+else
+    perform_profiling = false
+end
 interface.select(ifid)
 
 local options = {
@@ -35,6 +41,10 @@ local options = {
     selected_asn = selected_asn
 }
 
+if (perform_profiling) then
+    traceError(TRACE_NORMAL, TRACE_CONSOLE, string.format("[ASN REST API][Time: %s] Request ASN Data\n", os.time()))
+end
+
 -- Now there are two possibilities:
 -- - the traffic live is requested
 -- - the historical traffic
@@ -43,9 +53,17 @@ if (is_live) and (is_live == true) then
 else
     if not is_live and not hasClickHouseSupport() then
         rest_utils.answer(rest_utils.consts.err.clickhouse_missing)
-        return 
+        return
     end
     ases_info = as_utils.retrieveASHistoricalTraffic(options)
+end
+
+if (perform_profiling) then
+    traceError(TRACE_NORMAL, TRACE_CONSOLE, string.format("[ASN REST API][Time: %s] ASN Data Request Ended\n", os.time()))
+end
+
+if (perform_profiling) then
+    traceError(TRACE_NORMAL, TRACE_CONSOLE, string.format("[ASN REST API][Time: %s] Start Formatting Data\n", os.time()))
 end
 
 -- In both cases however, live and historical, we miss the Currently Live info, so let's retrieve those
@@ -90,7 +108,7 @@ for key, value in pairs(ases_info or {}) do
 
     if not is_live then
         local as_info = interface.getASInfo(asn)
-        record["is_in_memory"] = not(as_info == nil)
+        record["is_in_memory"] = not (as_info == nil)
     end
 
     record["breakdown"] = {
@@ -103,6 +121,9 @@ for key, value in pairs(ases_info or {}) do
     end
 end
 
+if (perform_profiling) then
+    traceError(TRACE_NORMAL, TRACE_CONSOLE, string.format("[ASN REST API][Time: %s] Start ASN Configuration parsing\n", os.time()))
+end
 
 local customer_asn, sub_customer_asn, remote_asn = as_utils.getAllConfigurations()
 for pos, value in pairs(res or {}) do
@@ -116,6 +137,14 @@ for pos, value in pairs(res or {}) do
             value.is_remote_asn = true
         end
     end
+end
+
+if (perform_profiling) then
+    traceError(TRACE_NORMAL, TRACE_CONSOLE, string.format("[ASN REST API][Time: %s] End ASN Configuration parsing\n", os.time()))
+end
+
+if (perform_profiling) then
+    traceError(TRACE_NORMAL, TRACE_CONSOLE, string.format("[ASN REST API][Time: %s] End Formatting Data\n", os.time()))
 end
 
 rest_utils.answer(rest_utils.consts.success.ok, res)

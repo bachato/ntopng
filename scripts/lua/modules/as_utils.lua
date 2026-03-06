@@ -4,7 +4,6 @@
 -- ASN (Autonomous System Number) Utilities Module
 -- Provides functions for managing and retrieving ASN configurations and traffic statistics
 -- Supports categorization of ASNs into customer, sub-customer, and remote types
-
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 
@@ -15,6 +14,8 @@ require "check_redis_prefs"
 local MAXIMUM_NUMBER_OF_TOP = 10
 local HISTORICAL_SRC_ASN = "SRC_ASN"
 local HISTORICAL_DST_ASN = "DST_ASN"
+
+local ASN_PROFILING_KEY = "ntopng.profiling.asn"
 
 --- ASN utilities module
 local as_utils = {}
@@ -39,11 +40,11 @@ end
 -- @param options Table containing filtering options with selected_asn field
 -- @return string SQL condition string (e.g., "asn=123 OR asn=456") or empty string if no conditions
 local function formatHistoricalASNFilters(options, historical_field)
-    local check_as = nil                    -- Table of ASNs to filter by
-    local invert = false                     -- Filter direction flag:
-                                             -- false = INCLUSIVE (asn IN (...))
-                                             -- true  = EXCLUSIVE (asn NOT IN (...))
-    
+    local check_as = nil -- Table of ASNs to filter by
+    local invert = false -- Filter direction flag:
+    -- false = INCLUSIVE (asn IN (...))
+    -- true  = EXCLUSIVE (asn NOT IN (...))
+
     -- Determine filter type based on user selection
     if options.selected_asn == "my_as" then
         -- Customer ASNs only
@@ -57,8 +58,8 @@ local function formatHistoricalASNFilters(options, historical_field)
     elseif options.selected_asn == "other_as" then
         -- All configured ASNs (customer + sub-customer + remote)
         check_as = as_utils.getAllASNs()
-        invert = true  -- "other_as" means NOT in configured ASNs
-                       -- e.g., exclude all known ASNs to show "other" traffic
+        invert = true -- "other_as" means NOT in configured ASNs
+        -- e.g., exclude all known ASNs to show "other" traffic
     end
 
     -- Build SQL conditions for each ASN in the filter list
@@ -75,6 +76,10 @@ local function formatHistoricalASNFilters(options, historical_field)
     end
 
     return filter
+end
+
+function as_utils.getProfilingKey()
+    return ASN_PROFILING_KEY
 end
 
 ---
@@ -177,7 +182,7 @@ end
 function as_utils.getASNConfiguration(asn)
     local res = nil
     local customer_asn, sub_customer_asn, remote_asn = as_utils.getAllConfigurations()
-    
+
     if customer_asn[asn] ~= nil then
         res = "customer_asn"
     elseif sub_customer_asn[asn] ~= nil then
@@ -185,7 +190,7 @@ function as_utils.getASNConfiguration(asn)
     elseif remote_asn[asn] ~= nil then
         res = "remote_asn"
     end
-    
+
     return res
 end
 
@@ -196,7 +201,7 @@ function as_utils.getCustomerAndSubCustomerASNs()
     local res = {}
     local sub_customer_asns = as_utils.getSubCustomerASNs()
     local my_asns = as_utils.getCustomerASNs()
-    
+
     -- Merge both tables
     for k, v in pairs(sub_customer_asns) do
         res[k] = v
@@ -204,7 +209,7 @@ function as_utils.getCustomerAndSubCustomerASNs()
     for k, v in pairs(my_asns) do
         res[k] = v
     end
-    
+
     return res
 end
 
@@ -213,8 +218,36 @@ end
 -- @param options Table containing filtering options (selected_asn)
 -- @return table ASN statistics keyed by ASN number
 function as_utils.retrieveASLiveTraffic(options)
+    local perform_profiling = ntop.getCache(ASN_PROFILING_KEY)
+
+    if not isEmptyString(perform_profiling) then
+        perform_profiling = true
+    else
+        perform_profiling = false
+    end
+
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] Start data retrieval (Live)\n", os.time()))
+    end
+
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] Start request to DB (Live)\n", os.time()))
+    end
     -- Get live ASN statistics from interface
     local live_asn_info = interface.getLiveASNStats() or {}
+
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] End request to DB (Live)\n", os.time()))
+    end
+
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] Start data formatting (Live)\n", os.time()))
+    end
+
     local live_src_asn = live_asn_info["src_asn"]
     local live_dst_asn = live_asn_info["dst_asn"]
     local asn_stats = {}
@@ -273,7 +306,7 @@ function as_utils.retrieveASLiveTraffic(options)
             check_as = as_utils.getRemoteASNs()
         elseif options.selected_asn == "other_as" then
             check_as = as_utils.getAllASNs()
-            invert = true  -- "other_as" means NOT in configured ASNs
+            invert = true -- "other_as" means NOT in configured ASNs
         end
 
         -- Filter ASNs based on selection
@@ -284,7 +317,17 @@ function as_utils.retrieveASLiveTraffic(options)
             end
         end
     end
-    
+
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] End data formatting (Live)\n", os.time()))
+    end
+
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] End data retrieval (Live)\n", os.time()))
+    end
+
     return asn_stats
 end
 
@@ -297,6 +340,23 @@ function as_utils.retrieveASHistoricalTraffic(options)
     if not hasClickHouseSupport() then
         return {}
     end
+    local perform_profiling = ntop.getCache(ASN_PROFILING_KEY)
+
+    if not isEmptyString(perform_profiling) then
+        perform_profiling = true
+    else
+        perform_profiling = false
+    end
+
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] Start data retrieval (Historical)\n", os.time()))
+    end
+
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] Start request to DB (Historical)\n", os.time()))
+    end
 
     -- Built two different where for efficiency reasons, filtering inside the UNION
     -- is a lot faster the filtering outside even if the code readability is a bit less
@@ -305,18 +365,29 @@ function as_utils.retrieveASHistoricalTraffic(options)
     -- Build WHERE clause for time range and interface
     local where = string.format("(FIRST_SEEN >= %u AND FIRST_SEEN <= %u AND LAST_SEEN <= %u) AND INTERFACE_ID = %u",
         tonumber(options.epoch_begin), tonumber(options.epoch_end), tonumber(options.epoch_end), tonumber(options.ifid))
-    
+
     -- Complex SQL query to aggregate ASN statistics from flows table
     -- Combines both source and destination ASNs
     local query = string.format(
         "SELECT asn, min(FIRST_SEEN) as \"seen.first\", max(LAST_SEEN) as \"seen.last\", sum(SCORE) as score, sum(total_bytes) AS traffic, sum(bytes_sent) as \"bytes.sent\", sum(bytes_rcvd) as \"bytes.rcvd\", sum(total_bytes) / sum(dateDiff('second', FIRST_SEEN, LAST_SEEN) + 1) AS throughput_bps " ..
             "FROM (SELECT SRC_ASN AS asn, FLOW_ID, TOTAL_BYTES as total_bytes, SRC2DST_BYTES as bytes_sent, DST2SRC_BYTES as bytes_rcvd, FIRST_SEEN, LAST_SEEN, INTERFACE_ID, SCORE FROM flows WHERE %s %s UNION ALL " ..
             "SELECT DST_ASN AS asn, FLOW_ID, TOTAL_BYTES as total_bytes, DST2SRC_BYTES as bytes_sent, SRC2DST_BYTES as bytes_rcvd, FIRST_SEEN, LAST_SEEN, INTERFACE_ID, SCORE FROM flows WHERE %s %s AND DST_ASN != SRC_ASN " ..
-            ") GROUP BY asn", where, ternary(isEmptyString(src_asn_filters), "", " AND " .. src_asn_filters), where, ternary(isEmptyString(dst_asn_filters), "", " AND " .. dst_asn_filters))
-    
+            ") GROUP BY asn", where, ternary(isEmptyString(src_asn_filters), "", " AND " .. src_asn_filters), where,
+        ternary(isEmptyString(dst_asn_filters), "", " AND " .. dst_asn_filters))
+
     local historical_asn_stats = interface.execSQLQuery(query) or {}
     local asn_stats = {}
-    
+
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] End request to DB (Historical)\n", os.time()))
+    end
+
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] Start data formatting (Historical)\n", os.time()))
+    end
+
     -- Process historical data
     for _, as_info in pairs(historical_asn_stats) do
         local asn = as_info["asn"]
@@ -326,11 +397,17 @@ function as_utils.retrieveASHistoricalTraffic(options)
         asn_stats[tostring(asn)] = as_info
     end
 
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] End data formatting (Historical)\n", os.time()))
+    end
+
     -- For recent time periods, merge live data with historical data
     -- This ensures complete statistics for the requested time range
-    local live_info = as_utils.retrieveASLiveTraffic(options) or {}
 
     -- Merge live and historical data
+    --[[ For now do not unify live and historical data
+    local live_info = as_utils.retrieveASLiveTraffic(options) or {}
     for asn, as_info in pairs(live_info) do
         if not asn_stats[asn] then
             -- New ASN: add live data
@@ -352,7 +429,7 @@ function as_utils.retrieveASHistoricalTraffic(options)
                 asn_stats[asn]["seen.first"] = as_info["seen.first"]
             end
         end
-    end
+    end]]
 
     return asn_stats
 end
@@ -362,10 +439,23 @@ end
 -- @param options Table containing filtering options (selected_asn)
 -- @return table Array of top ASN statistics, sorted by traffic
 function as_utils.getTopASLive(options)
-    local live_info = as_utils.retrieveASLiveTraffic(options) or {}
     local counter = 0
     local asn_tops = {}
-    
+    local perform_profiling = ntop.getCache(ASN_PROFILING_KEY)
+
+    if not isEmptyString(perform_profiling) then
+        perform_profiling = true
+    else
+        perform_profiling = false
+    end
+
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] Start Top ASN (Live)\n", os.time()))
+    end
+
+    local live_info = as_utils.retrieveASLiveTraffic(options) or {}
+
     -- Sort by traffic (descending) and take top N
     for _, as_info in pairsByField(live_info, 'traffic', rev) do
         counter = counter + 1
@@ -373,6 +463,11 @@ function as_utils.getTopASLive(options)
         if (counter >= MAXIMUM_NUMBER_OF_TOP) then
             break
         end
+    end
+
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] End Top ASN (Live)\n", os.time()))
     end
 
     return asn_tops
@@ -383,17 +478,34 @@ end
 -- @param options Table containing filtering options (epoch_begin, epoch_end, ifid, selected_asn)
 -- @return table Array of top ASN statistics, sorted by traffic
 function as_utils.getTopASHistorical(options)
-    local live_info = as_utils.retrieveASHistoricalTraffic(options) or {}
     local counter = 0
     local asn_tops = {}
-    
+    local perform_profiling = ntop.getCache(ASN_PROFILING_KEY)
+
+    if not isEmptyString(perform_profiling) then
+        perform_profiling = true
+    else
+        perform_profiling = false
+    end
+
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] Start Top ASN (Historical)\n", os.time()))
+    end
+    local historical_info = as_utils.retrieveASHistoricalTraffic(options) or {}
+
     -- Sort by traffic (descending) and take top N
-    for _, as_info in pairsByField(live_info, 'traffic', rev) do
+    for _, as_info in pairsByField(historical_info, 'traffic', rev) do
         counter = counter + 1
         asn_tops[#asn_tops + 1] = as_info
         if (counter >= MAXIMUM_NUMBER_OF_TOP) then
             break
         end
+    end
+
+    if (perform_profiling) then
+        traceError(TRACE_NORMAL, TRACE_CONSOLE,
+            string.format("[ASN Profiling][Time: %s] End Top ASN (Historical)\n", os.time()))
     end
 
     return asn_tops

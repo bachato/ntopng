@@ -12,7 +12,7 @@
             </div>
 
             <!-- Time Resolution Dropdown (only shown when chart is visible and timeseries is enabled) -->
-            <div v-if="(showChart) && props.context.showTimeseries" class="dropdown me-3 d-flex">
+            <div class="dropdown me-3 d-flex">
                 <span class="no-wrap d-flex align-items-center filters-label me-2">
                     <b>{{ _i18n("time") }}: </b>
                 </span>
@@ -22,7 +22,7 @@
         </div>
 
         <!-- Timeseries Chart Section -->
-        <div v-if="(showChart) && props.context.showTimeseries" class="position-relative" style="height: 330px;">
+        <div v-if="(showChart)" class="position-relative" style="height: 330px;">
             <!-- Loading Overlay -->
             <Loading :isLoading="loadingChart" />
 
@@ -97,7 +97,8 @@ const table_as_stats = ref(null);
 const epoch_begin = ref(currentTime - SECONDS_ONE_DAY); // Default: one day ago
 const epoch_end = ref(currentTime);
 const showSankey = props.context.showSankey;
-const showChart = ref(props.context.isEnterprise);
+const showTimeResolution = ref(props.context.ASNModeEnabled && props.context.isClickhouseEnabled)
+const showChart = ref(props.context.isEnterprise && props.context.showTimeseries);
 const isLive = ref(true);
 const current_selected_option = ref([]);
 
@@ -183,7 +184,7 @@ onBeforeMount(() => {
 
     // If ClickHouse is enabled, then it is possible to not only see th "live" data
     // but also see historical data, so simply add data
-    if (props.context.isClickhouseEnabled) {
+    if (showTimeResolution.value) {
         const extra_resolutions = [
             { value: "30_min", label: i18n('show_alerts.presets.30_min'), currently_active: false },
             { value: "hour", label: i18n('show_alerts.presets.hour'), currently_active: false },
