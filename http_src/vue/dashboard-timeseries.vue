@@ -25,10 +25,11 @@ import timeseriesUtils from "../utilities/timeseries-utils.js";
 const height_per_row = 62 /* px */  // Base height per row of the component
 const chart_type = ref(ntopChartApex.typeChart.TS_LINE);  // Chart type (line chart)
 const chart = ref(null);  // Reference to the child TimeseriesChart component
-const timeseries_groups = ref([]);  // Timeseries groups to display
+const timeseries_groups = ref(null);  // Timeseries groups to display
 const group_option_mode = timeseriesUtils.getGroupOptionMode('1_chart_x_yaxis');  // Grouping mode for chart options
 const height = ref(null);  // Calculated height of the component
 const ts_request = ref([]);  // Timeseries requests to be processed
+const source_def = {};
 
 const emit = defineEmits(['chart-updated', 'update-requested']);  // Events emitted to parent component
 
@@ -73,6 +74,12 @@ const chartUpdatedCallback = (options) => {
 /* Callback triggered when update is requested */
 const updateRequestedCallback = (options) => {
     emit("update-requested", options)
+}
+
+/* *************************************************** */
+
+const formatUniqueKey = (requestInfo) => {
+    return `${requestInfo?.ts_schema}-${requestInfo?.ts_query}`
 }
 
 /* *************************************************** */
@@ -144,8 +151,9 @@ async function format_ifids(params_to_format) {
     const ifid_url = "lua/rest/v2/get/ntopng/interfaces.lua"
     const ifid_list = await ntopng_utility.http_request(`${http_prefix}/${ifid_url}`) || [];
     ifid_list.forEach((iface) => {
-        let new_formatted_params = substitute_ifid(params_to_format, iface.ifid);
-        new_formatted_params.source_def = [iface.ifid]  // Store source definition for later use
+        const new_formatted_params = substitute_ifid(params_to_format, iface.ifid);
+        const source_def_key = formatUniqueKey(new_formatted_params)
+        source_def[source_def_key] = [iface.ifid]
         ts_request.value.push(new_formatted_params);
     });
 }
@@ -165,7 +173,8 @@ async function format_exporters(params_to_format) {
             if (exporter) {
                 let new_formatted_params = substitute_exporter(params_to_format, exporter.probe_ip);
                 new_formatted_params = substitute_ifid(new_formatted_params, exporter.ifid);
-                new_formatted_params.source_def = [exporter.ifid, exporter.probe_ip]  // Store source definition
+                const source_def_key = formatUniqueKey(new_formatted_params)
+                source_def[source_def_key] = [exporter.ifid, exporter.probe_ip]
                 ts_request.value.push(new_formatted_params);
             }
         });
@@ -187,7 +196,8 @@ async function format_networks(params_to_format) {
             if (network) {
                 let new_formatted_params = substitute_network(params_to_format, network.id);
                 new_formatted_params = substitute_ifid(new_formatted_params, props.ifid);
-                new_formatted_params.source_def = [props.ifid, network.id];  // Store source definition
+                const source_def_key = formatUniqueKey(new_formatted_params)
+                source_def[source_def_key] = [props.ifid, network.id]
                 ts_request.value.push(new_formatted_params);
             }
         });
@@ -220,7 +230,8 @@ async function resolve_any_params() {
             default:
                 // Handle regular parameters (no ANY substitution needed)
                 let new_formatted_params = substitute_ifid(params[any_param], props.ifid);
-                new_formatted_params.source_def = [props.ifid];
+                const source_def_key = formatUniqueKey(new_formatted_params)
+                source_def[source_def_key] = [props.ifid]
                 ts_request.value.push(new_formatted_params);
                 break;
         }
@@ -249,17 +260,18 @@ async function get_timeseries_groups_from_metric(metric_schema, source_def) {
 /* Retrieves basic information for all timeseries requests */
 async function retrieve_basic_info() {
     /* Return the timeseries groups, info found in the JSON */
-    if (timeseries_groups.value.length == 0) {
+    if (!timeseries_groups.value) {
+        timeseries_groups.value = [];
         /* Order requests only the first time */
         order_ts_request();
         for (const value of ts_request.value) {
             const metric_schema = value?.ts_schema;
-            const source_def = value.source_def;
-            delete value.source_def /* Remove the property to prevent it from being added to the REST request */
-            const group = await get_timeseries_groups_from_metric(metric_schema, source_def);
-            timeseries_groups.value.push(group);
+            const source_def_key = formatUniqueKey(value)
+            if (source_def[source_def_key]) {
+                const group = await get_timeseries_groups_from_metric(metric_schema, source_def[source_def_key]);
+                timeseries_groups.value.push(group);
+            }
         }
-        remove_extra_params();
     }
 }
 
@@ -270,17 +282,6 @@ async function retrieve_basic_info() {
 /* Sorts timeseries requests by their key for consistent ordering */
 function order_ts_request() {
     ts_request.value.sort((a, b) => a.tskey.localeCompare(b.tskey));
-}
-
-/* *************************************************** */
-
-/* Removes temporary properties that shouldn't be sent to the REST API */
-function remove_extra_params() {
-    for (const value of ts_request.value) {
-        if (value.source_def) {
-            delete value.source_def
-        }
-    }
 }
 
 /* *************************************************** */
