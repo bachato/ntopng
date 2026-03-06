@@ -174,36 +174,79 @@ function driver:query(schema, tstart, tend, tags, options)
    local is_counter = (schema.options.metrics_type == ts_common.metrics.counter)
    local tw         = tags_where(tags)
    local af         = agg_func(schema)
+   local sql
 
-   -- Build per-metric SELECT expressions.
-   local sel = {}
-   for _, metric in ipairs(schema._metrics) do
-      local esc = ch_escape(metric)
-      if is_counter then
-         -- Rate: (max_counter - min_counter) within bucket / bucket_width
-         sel[#sel + 1] = string.format(
-            "greatest(0, max(metrics['%s']) - min(metrics['%s'])) / %d AS `%s`",
-            esc, esc, time_step, esc)
-      elseif af == "argMax" then
-         sel[#sel + 1] = string.format(
+   if is_counter then
+      -- For counter (cumulative) schemas, compute per-bucket rates as the
+      -- difference between consecutive bucket last-values (cross-bucket delta).
+      -- A plain max-min within a single bucket returns 0 whenever only one
+      -- raw point lands in that bucket (e.g. time_step == raw_step).
+      --
+      -- Three-level structure:
+      --   innermost  - argMax per bucket, fetching one extra bucket before tstart
+      --   middle     - lag() window function over ALL rows (including the extra one)
+      --                so the first real bucket has a valid predecessor
+      --   outermost  - filter t >= tstart, apply greatest(0,...) / time_step
+      --
+      -- Window functions are evaluated after WHERE, so the lag must be computed
+      -- in the middle subquery before the outer WHERE removes the extra bucket.
+      local inner_sel = {}
+      local mid_sel   = { "t" }
+      local outer_sel = { "t" }
+      for _, metric in ipairs(schema._metrics) do
+         local esc = ch_escape(metric)
+         inner_sel[#inner_sel + 1] = string.format(
             "argMax(metrics['%s'], tstamp) AS `%s`", esc, esc)
-      else
-         sel[#sel + 1] = string.format(
-            "%s(metrics['%s']) AS `%s`", af, esc, esc)
+         mid_sel[#mid_sel + 1] = string.format(
+            "`%s` - lag(`%s`, 1, 0) OVER (ORDER BY t) AS `%s`", esc, esc, esc)
+         outer_sel[#outer_sel + 1] = string.format(
+            "greatest(0, `%s`) / %d AS `%s`", esc, time_step, esc)
       end
-   end
 
-   local sql = string.format(
-      "SELECT intDiv(toUnixTimestamp(tstamp), %d) * %d AS t, %s "
-      .. "FROM `%s`.`%s` "
-      .. "WHERE schema_name = '%s'%s "
-      .. "AND tstamp BETWEEN toDateTime(%d) AND toDateTime(%d) "
-      .. "GROUP BY t ORDER BY t ASC",
-      time_step, time_step,
-      table.concat(sel, ", "),
-      ch_escape(self.db), CH_TABLE_NAME,
-      ch_escape(schema.name), tw,
-      tstart, tend)
+      sql = string.format(
+         "SELECT %s FROM ("
+         ..   "SELECT %s FROM ("
+         ..     "SELECT intDiv(toUnixTimestamp(tstamp), %d) * %d AS t, %s "
+         ..     "FROM `%s`.`%s` "
+         ..     "WHERE schema_name = '%s'%s "
+         ..     "AND tstamp BETWEEN toDateTime(%d) AND toDateTime(%d) "
+         ..     "GROUP BY t ORDER BY t ASC"
+         ..   ")"
+         .. ") WHERE t >= %d ORDER BY t ASC",
+         table.concat(outer_sel, ", "),
+         table.concat(mid_sel, ", "),
+         time_step, time_step,
+         table.concat(inner_sel, ", "),
+         ch_escape(self.db), CH_TABLE_NAME,
+         ch_escape(schema.name), tw,
+         tstart - time_step, tend,
+         tstart)
+   else
+      -- Gauge / derivative: aggregate within each bucket directly.
+      local sel = {}
+      for _, metric in ipairs(schema._metrics) do
+         local esc = ch_escape(metric)
+         if af == "argMax" then
+            sel[#sel + 1] = string.format(
+               "argMax(metrics['%s'], tstamp) AS `%s`", esc, esc)
+         else
+            sel[#sel + 1] = string.format(
+               "%s(metrics['%s']) AS `%s`", af, esc, esc)
+         end
+      end
+
+      sql = string.format(
+         "SELECT intDiv(toUnixTimestamp(tstamp), %d) * %d AS t, %s "
+         .. "FROM `%s`.`%s` "
+         .. "WHERE schema_name = '%s'%s "
+         .. "AND tstamp BETWEEN toDateTime(%d) AND toDateTime(%d) "
+         .. "GROUP BY t ORDER BY t ASC",
+         time_step, time_step,
+         table.concat(sel, ", "),
+         ch_escape(self.db), CH_TABLE_NAME,
+         ch_escape(schema.name), tw,
+         tstart, tend)
+   end
 
    local data = ch_query(sql)
 
@@ -215,8 +258,9 @@ function driver:query(schema, tstart, tend, tags, options)
       max_vals[i] = ts_common.getMaxPointValue(schema, metric, tags)
    end
 
-   -- The first aggregated bucket starts at tstart + time_step (mirrors InfluxDB behaviour).
-   local expected_t = tstart + time_step
+   -- expected_t tracks the next bucket we expect from CH.
+   -- Start at tstart so a single missing bucket is detected and filled with NaN.
+   local expected_t = tstart
    local idx        = 1
 
    if data and #data > 0 then
@@ -293,7 +337,7 @@ function driver:query(schema, tstart, tend, tags, options)
 
    return {
       metadata = {
-         epoch_begin = tstart + time_step,
+         epoch_begin = tstart,
          epoch_end   = tend,
          epoch_step  = time_step,
          num_point   = count,
@@ -311,6 +355,7 @@ end
 
 --! @brief Calculate per-metric totals over a time range.
 function driver:queryTotal(schema, tstart, tend, tags, options)
+
    local is_counter    = (schema.options.metrics_type == ts_common.metrics.counter)
    local is_derivative = (schema.options.metrics_type == ts_common.metrics.derivative)
    local tw            = tags_where(tags)
@@ -358,6 +403,7 @@ end
 
 --! @brief List existing series matching the supplied tag filter.
 function driver:listSeries(schema, tags_filter, wildcard_tags, start_time, end_time)
+
    local tw = tags_where(tags_filter)
 
    local time_cond = string.format("tstamp >= toDateTime(%d)", start_time)
@@ -415,6 +461,7 @@ end
 
 --! @brief Top-k query: find the top items by total metric value.
 function driver:topk(schema, tags, tstart, tend, options, top_tags)
+
    if #top_tags ~= 1 then
       traceError(TRACE_ERROR, TRACE_CONSOLE,
          "ClickHouse driver expects exactly one top tag, " .. #top_tags .. " found")
@@ -709,6 +756,7 @@ end
 --! @param dbname        ClickHouse database name.
 --! @param verbose       print diagnostic messages when true.
 function driver.init(dbname, verbose)
+
    local obj = driver:new({ db = dbname })
 
    if verbose then
