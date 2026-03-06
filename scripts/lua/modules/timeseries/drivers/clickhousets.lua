@@ -6,8 +6,8 @@
 -- Data is stored in a single MergeTree table (`ntopng_timeseries`) using
 -- Map columns for tags and metrics, following ClickHouse best practices:
 --   * LowCardinality(String) for the schema name (bounded cardinality)
---   * Map(String, String)   for tag key/value pairs
---   * Map(String, Float64)  for metric key/value pairs
+--   * Map(LowCardinality(String), String)  for tag key/value pairs
+--   * Map(LowCardinality(String), Float64) for metric key/value pairs
 --   * MergeTree engine partitioned by month for efficient time pruning
 --   * TTL clause for automatic data-retention enforcement
 --   * Batch inserts (buffered through Redis) to avoid small-part overhead
@@ -669,26 +669,25 @@ function driver:setup(ts_utils)
 
    -- Create the timeseries table if it does not already exist.
    -- Best-practice design choices:
-   --   * LowCardinality(String) for schema_name   – bounded number of distinct values
-   --   * Map(String, String)    for tags           – flexible key/value tag store
-   --   * Map(String, Float64)   for metrics        – flexible metric store
-   --   * MergeTree partitioned by month           – enables efficient partition pruning
-   --   * ORDER BY (schema_name, tstamp)           – optimises time-range scans per schema
-   --   * TTL on tstamp                            – automatic retention management
-   --   * index_granularity = 8192                 – ClickHouse default, good for OLAP
+   --   * LowCardinality(String) for schema_name        – bounded number of distinct values
+   --   * Map(LowCardinality(String), String) for tags  – LowCardinality keys avoid redundant
+   --                                                      storage of repeated tag/metric names
+   --   * Map(LowCardinality(String), Float64) metrics  – same benefit for metric keys
+   --   * MergeTree partitioned by month               – enables efficient partition pruning
+   --   * ORDER BY (schema_name, tstamp)               – optimises time-range scans per schema
+   --   * TTL on tstamp                                – automatic retention management
    local create_sql = string.format([[
 CREATE TABLE IF NOT EXISTS `%s`.`%s`
 (
     `schema_name`  LowCardinality(String),
-    `tstamp`       DateTime,
-    `tags`         Map(String, String),
-    `metrics`      Map(String, Float64)
+    `tstamp`       DateTime CODEC(Delta, ZSTD),
+    `tags`         Map(LowCardinality(String), String),
+    `metrics`      Map(LowCardinality(String), Float64)
 )
 ENGINE = MergeTree()
 PARTITION BY toYYYYMM(tstamp)
 ORDER BY (schema_name, tstamp)
-TTL tstamp + toIntervalDay(%d)
-SETTINGS index_granularity = 8192]],
+TTL tstamp + toIntervalDay(%d)]],
       ch_escape(self.db), CH_TABLE_NAME, retention_days)
 
    local ok = ch_write(create_sql)
