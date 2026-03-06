@@ -33,6 +33,7 @@ local alert_consts = require("alert_consts")
 local mitre_utils = require("mitre_utils")
 local auth = require "auth"
 local exporter_site_utils = nil
+local snmp_cached_dev
 
 local page = _GET["page"]
 
@@ -42,6 +43,7 @@ local show_graph = _GET["showGraph"] or false
 if ntop.isPro() then
    package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
    exporter_site_utils = require "exporter_site_utils"
+   snmp_cached_dev = require "snmp_cached_dev"
 end
 
 if ntop.isPro() then
@@ -65,6 +67,31 @@ function formatIPPort(ip, port)
 
    return ip, port
 end
+
+-- ########
+
+local cached_devices = {}
+
+function getSNMPInterfaceIP(device_ip, port_idx)
+   if(cached_devices[device_ip] == nil) then
+      cached_devices[device_ip] = snmp_cached_dev:get_interfaces(device_ip)
+   end
+
+   port_idx = tostring(port_idx)
+   if(cached_devices[device_ip] ~= nil) then
+      local port = cached_devices[device_ip].interfaces[port_idx..""]
+
+      if((port ~= nil) and (port.ip_addr ~= nil) and (table.len(port.ip_addr) > 0)) then
+	 local ip_addr = port.ip_addr
+
+	 return(ip_addr[1])
+      end
+   end
+
+   return(nil) -- fallback
+end
+
+-- ########
 
 function formatASN(v, peer_as, ip, is_client_as)
    local asn
@@ -505,7 +532,7 @@ local function displayProc(proc, label)
 
    print(label)
 
-   print("<tr><th class='colspan-4'>" .. i18n("flow_details.user_name") .. "</th><td colspan=2>
+   print("<tr><th class='colspan-4'>" .. i18n("flow_details.user_name") .. "</th><td colspan=2>"..
 	 proc.user_name .. "</td></tr>\n")
 
    print("<tr><th class='colspan-4'>" .. i18n("flow_details.process_pid_name") .. "</th><td colspan=2>" ..
@@ -2044,10 +2071,6 @@ if isEmptyString(page) or page == "overview" then
 	       next_hop, next_hop_ip, next_hop_name, next_hop_site = formatNextHop(next_hop)
 	       nodes_names[next_hop_ip] = { firstDottedElement(next_hop_name), next_hop_site }
 	    end
-
-	    if(flow_trajectory[exporter_ip] == nil) then
-	       flow_trajectory[exporter_ip] = {}
-	    end
          end
 
 	 if(flow.exporters ~= nil) then
@@ -2060,36 +2083,49 @@ if isEmptyString(page) or page == "overview" then
 	       local ret, exp_ip, exp_name, site = formatExporter(v.exporter_ip)
 	       local ret1, next_hop_ip, next_hop_name, next_hope_site = formatNextHop(v.next_hop)
 	       local source_label = ""
-	       
+
 	       -- tprint(v)
 
-	       if(v.source > 0) then
-		  source_label = " <span class=\"badge bg-secondary\">"
-		  
-		  if(v.source == 1) then
-		     source_label = source_label .. "NetFlow / IPFIX"
-		  elseif(v.source == 2) then
-		     source_label = source_label .."sFlow"
+	       if(false) then
+		  if(v.source > 0) then
+		     source_label = " <span class=\"badge bg-secondary\">"
+
+		     if(v.source == 1) then
+			source_label = source_label .. "NetFlow / IPFIX"
+		     elseif(v.source == 2) then
+			source_label = source_label .."sFlow"
+		     end
+
+		     source_label = source_label .. "</span>"
 		  end
-		  
-		  source_label = source_label .. "</span>"
 	       end
 
 	       --tprint(source_label)
-	       
+
 	       print("<tr><td>".. ret .. ' <i class="fas fa-long-arrow-alt-right"></i> ' .. ret1)
 	       if(v.return_path == true) then print(" <span class='badge bg-secondary'>".. i18n("dedup_flow_swapped").."</span>") end
 	       print(source_label.. "</td><td>")
 	       printFlowSNMPInfo(v.exporter_ip, v.input_idx, v.output_idx, true)
 	       print("</td></tr>")
 
-	       if(flow_trajectory[exp_ip] == nil) then
-		  flow_trajectory[exp_ip] = {}
-	       end
+	       local from_ip = getSNMPInterfaceIP(v.exporter_ip, v.input_idx)
+	       local to_ip   = getSNMPInterfaceIP(v.exporter_ip, v.output_idx)
 
-	       if(next_hop_ip ~= "0.0.0.0") then
-		  table.insert(flow_trajectory[exp_ip], { next_hop = next_hop_ip, return_path = v.return_path })
-		  nodes_names[next_hop_ip] = { firstDottedElement(next_hop_name), next_hope_site }
+	       if((from_ip ~= nil) and (to_ip ~= nil)) then
+		  if(flow_trajectory[from_ip] == nil) then flow_trajectory[from_ip] = {} end
+		  if(flow_trajectory[to_ip] == nil)   then flow_trajectory[to_ip] = {}   end
+
+		  if(next_hop_ip ~= "0.0.0.0") then
+		     local ret1, exp_ip, exp_name, exp_site = formatNextHop(v.exporter_ip)
+
+		     table.insert(flow_trajectory[from_ip], { next_hop = to_ip, return_path = v.return_path })
+		     table.insert(flow_trajectory[to_ip], { next_hop = next_hop_ip, return_path = v.return_path })
+
+		     nodes_names[from_ip] = { from_ip, exp_site }
+		     nodes_names[to_ip] = { to_ip, exp_site }
+
+		     nodes_names[next_hop_ip] = { firstDottedElement(next_hop_name), next_hope_site }
+		  end
 	       end
 
 	       nodes_names[exp_ip] = { firstDottedElement(exp_name), site }
@@ -2098,23 +2134,26 @@ if isEmptyString(page) or page == "overview" then
 	    print("</td></tr>")
 	 end
 
+	 tprint(flow_trajectory)
+
 	 if(table.len(flow_trajectory) > 0) then
 	   local nodes, edges = buildExportersGraph(flow_trajectory, nodes_names, flow["cli.ip"], flow["srv.ip"])
-      -- If there are at least 3 nodes -> show the graph
-      if table.len(nodes) >= 3 then
-         print('<tr>')
-         if(table.len(flow.exporters) == 0) then print("<td></td>") end
-         print('<th colspan=2 style="height: 400px; width: 66%; max-width: 66%; overflow: hidden;">')
-         
-         local json_context = json.encode({ nodes = nodes, edges = edges })
-         print('<div style="width:100%; max-width:100%; overflow:hidden;">')
-         template.render("pages/vue_page.template", {
-                  vue_page_name = "PageExportersGraph",
-                  page_context  = json_context
-         })
-         print('</div>')
-         print('</th></tr>\n')
-      end
+
+	   -- If there are at least 3 nodes -> show the graph
+	   if table.len(nodes) >= 3 then
+	      print('<tr>')
+	      if(table.len(flow.exporters) == 0) then print("<td></td>") end
+	      print('<th colspan=2 style="height: 400px; width: 66%; max-width: 66%; overflow: hidden;">')
+
+	      local json_context = json.encode({ nodes = nodes, edges = edges })
+	      print('<div style="width:100%; max-width:100%; overflow:hidden;">')
+	      template.render("pages/vue_page.template", {
+				 vue_page_name = "PageExportersGraph",
+				 page_context  = json_context
+	      })
+	      print('</div>')
+	      print('</th></tr>\n')
+	   end
 	 end
 
          local function format_custom_field(key, value, snmpdevice)

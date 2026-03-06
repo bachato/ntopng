@@ -23,14 +23,14 @@ local format_utils = require "format_utils"
 local dns_utils = require "dns_utils"
 local http_utils = require "http_utils"
 local rest_utils = require "rest_utils"
-local snmp_utils
+--local snmp_utils
 local cache_utils = require "cache_utils"
 local exporter_site_utils
 
 if ntop.isPro() then
    package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
    require "flow_exporter_utils"
-   snmp_utils = require "snmp_utils"
+   -- snmp_utils = require "snmp_utils"
    exporter_site_utils = require "exporter_site_utils"
 end
 -- For backward compatibility override these functions
@@ -996,20 +996,18 @@ function format_portidx_name(device_ip, portidx, short_version)
 
    if (cached_val ~= nil) then
       local num_value = tonumber(cached_val)
+      
       if(num_value and (num_value == tonumber(portidx))) then
          -- With integer it seems there is some problem when caching the value
          -- returning values like 6.00000 instead of 6
          return(portidx)
       end
+      
       if(short_version) then
-	      cached_val = shortenString(cached_val, 26)
+	 cached_val = shortenString(cached_val, 26)
       end
-
-      -- if(cached_val ~= portidx) then
-      --  return (cached_val.." ("..portidx..")")
-      -- else
+      
       return (cached_val)
-      -- end
    else
       return(portidx)
    end

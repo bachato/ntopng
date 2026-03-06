@@ -1828,6 +1828,13 @@ end
 
 -- #######################
 
+function addTrajectory(snmpdevice, input_idx, output_idx)
+   local inputidx_name = format_portidx_name(snmpdevice, tostring(input_idx), false)
+   local outputidx_name = format_portidx_name(snmpdevice, tostring(output_idx), false)
+end
+
+-- #######################
+
 function printFlowSNMPInfo(snmpdevice, input_idx, output_idx, as_row)
     local inputidx_name = format_portidx_name(snmpdevice, tostring(input_idx), true)
     local outputidx_name = format_portidx_name(snmpdevice, tostring(output_idx), true)
