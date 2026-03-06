@@ -45,6 +45,50 @@ Every night, ntopng automatically creates a backup of the whole application conf
 
   The Configurations Backup Page
 
+Pool Import via CSV
+^^^^^^^^^^^^^^^^^^^
+
+In addition to the standard JSON format, pools can also be imported using a CSV file. Each line of the
+CSV file defines a single pool member assignment using the following format:
+
+.. code::
+
+  <ip_or_mac><separator><pool_name>
+
+The supported separators are: space, comma (``,``), and semicolon (``;``). The following are all equivalent
+and valid:
+
+.. code::
+
+  192.168.1.2/32@10 myPool
+  192.168.1.2/32@10,myPool
+  192.168.1.2/32@10;myPool
+
+**IP addresses** must be specified in CIDR notation with an optional VLAN tag:
+
+.. code::
+
+  x.y.z.k/p@v
+
+where ``p`` is the prefix length (e.g. ``32`` for a single host) and ``v`` is the VLAN
+ID. The VLAN tag is optional: if omitted, VLAN ``0`` is assumed. The following two entries are therefore
+equivalent:
+
+.. code::
+
+  192.168.1.1/32;myPool
+  192.168.1.1/32@0;myPool
+
+**MAC addresses** must be specified in the standard colon-separated hex format:
+
+.. code::
+
+  AA:BB:CC:DD:EE:FF;myPool
+
+Empty lines and lines starting with ``#`` are ignored and can be used as comments. Multiple members can be
+assigned to the same pool by repeating the pool name across different lines. Members belonging to different
+pools can be mixed freely in the same file.
+
 Import/Export via API
 ^^^^^^^^^^^^^^^^^^^^^
 
