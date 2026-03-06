@@ -28,11 +28,6 @@ local res = {}
 
 interface.select(ifid)
 
-if not is_live and not hasClickHouseSupport() then
-    rest_utils.answer(rest_utils.consts.err.clickhouse_missing)
-    return 
-end
-
 local options = {
     ifid = ifid,
     epoch_begin = epoch_begin,
@@ -46,13 +41,15 @@ local options = {
 if (is_live) and (is_live == true) then
     ases_info = as_utils.retrieveASLiveTraffic(options)
 else
+    if not is_live and not hasClickHouseSupport() then
+        rest_utils.answer(rest_utils.consts.err.clickhouse_missing)
+        return 
+    end
     ases_info = as_utils.retrieveASHistoricalTraffic(options)
 end
 
 -- In both cases however, live and historical, we miss the Currently Live info, so let's retrieve those
 -- and sum the bytes with the live ones for Historical, use the live ones for live traffic
-
-local live_flows_stats = interface.getActiveFlowsStats(nil, nil, false, nil, nil, nil, nil) or {}
 
 for key, value in pairs(ases_info or {}) do
     local record = {}

@@ -87,7 +87,8 @@ local context = {
     csrf = ntop.getRandomCSRFValue(),
     isEnterprise = ntop.isEnterprise(),
     showTimeseries = areASTimeseriesEnabled(ifid),
-    ASNModeEnabled = is_asn_mode_enabled
+    ASNModeEnabled = is_asn_mode_enabled,
+    isClickhouseEnabled = hasClickHouseSupport()
 }
 
 local json_context = json.encode(context)

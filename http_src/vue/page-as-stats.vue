@@ -7,27 +7,17 @@
                 <span class="no-wrap d-flex align-items-center filters-label me-2">
                     <b>{{ _i18n("asn_configuration.filter") }}: </b>
                 </span>
-                <SelectSearch 
-                    v-model:selected_option="current_selected_option" 
-                    theme="bootstrap-5"
-                    :options="asn_type_option" 
-                    @select_option="add_filter" 
-                    :dropdown_size="'small'"
-                />
+                <SelectSearch v-model:selected_option="current_selected_option" theme="bootstrap-5"
+                    :options="asn_type_option" @select_option="add_filter" :dropdown_size="'small'" />
             </div>
-            
+
             <!-- Time Resolution Dropdown (only shown when chart is visible and timeseries is enabled) -->
             <div v-if="(showChart) && props.context.showTimeseries" class="dropdown me-3 d-flex">
                 <span class="no-wrap d-flex align-items-center filters-label me-2">
                     <b>{{ _i18n("time") }}: </b>
                 </span>
-                <SelectSearch 
-                    v-model:selected_option="selected_resolution" 
-                    theme="bootstrap-5"
-                    :options="resolution_options" 
-                    @select_option="select_resolution" 
-                    :dropdown_size="'small'"
-                />
+                <SelectSearch v-model:selected_option="selected_resolution" theme="bootstrap-5"
+                    :options="resolutionOptions" @select_option="select_resolution" :dropdown_size="'small'" />
             </div>
         </div>
 
@@ -35,46 +25,28 @@
         <div v-if="(showChart) && props.context.showTimeseries" class="position-relative" style="height: 330px;">
             <!-- Loading Overlay -->
             <Loading :isLoading="loadingChart" />
-            
+
             <!-- Chart Title -->
             <div class="widget-name">
                 <h6 class="m-0">{{ chart_title }}</h6>
             </div>
-            
+
             <!-- Chart Component with Transition Effect -->
             <Transition name="add-effect" mode="out-in">
-                <DashboardTimeseries 
-                    ref="timeseries_chart" 
-                    :key="timeseries_key" 
-                    :id="timeseries_id"
-                    :epoch_begin="epoch_begin" 
-                    :epoch_end="epoch_end" 
-                    :i18n_title="chart_title"
-                    :ifid="props.context.ifid.toString()" 
-                    :max_width="12" 
-                    :max_height="4" 
-                    :params="params"
-                    :get_component_data="get_component_data" 
-                    :csrf="props.context.csrf" 
-                    @update-requested="updateChart"
-                    @chart-updated="updateChartDone"
-                />
+                <DashboardTimeseries ref="timeseries_chart" :key="timeseries_key" :id="timeseries_id"
+                    :epoch_begin="epoch_begin" :epoch_end="epoch_end" :i18n_title="chart_title"
+                    :ifid="props.context.ifid.toString()" :max_width="12" :max_height="4" :params="params"
+                    :get_component_data="get_component_data" :csrf="props.context.csrf" @update-requested="updateChart"
+                    @chart-updated="updateChartDone" />
             </Transition>
         </div>
 
         <!-- ASN Statistics Table Section -->
         <div class="position-relative">
-            <TableWithConfig 
-                ref="table_as_stats" 
-                :table_id="table_id" 
-                :csrf="props.context.csrf" 
-                :showLoading="true"
-                :f_map_columns="map_table_def_columns" 
-                :f_sort_rows="columns_sorting"
-                :handleLoadedColumns="handleLoadedColumns" 
-                :get_extra_params_obj="get_extra_params_obj"
-                @custom_event="on_table_custom_event"
-            />
+            <TableWithConfig ref="table_as_stats" :table_id="table_id" :csrf="props.context.csrf" :showLoading="true"
+                :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting"
+                :handleLoadedColumns="handleLoadedColumns" :get_extra_params_obj="get_extra_params_obj"
+                @custom_event="on_table_custom_event" />
         </div>
     </div>
 </template>
@@ -107,7 +79,7 @@ const props = defineProps({
 });
 
 // Time Constants
-const current_time = Math.floor(Date.now() / 1000);
+const currentTime = Math.floor(Date.now() / 1000);
 const SECONDS_ONE_DAY = 3600 * 24;
 const SECONDS_FIFTEEN_MINUTES = 15 * 60;
 
@@ -118,12 +90,12 @@ const table_id = 'as_stats';
 
 // Chart Configuration
 const chart_title = _i18n('top_active_asn');
-const timeseries_id = ref('top_asn');
+const timeseries_id = ref('topASNPageASStats');
 const loadingChart = ref(true);
 const timeseries_chart = ref(null);
 const table_as_stats = ref(null);
-const epoch_begin = ref(current_time - SECONDS_ONE_DAY); // Default: one day ago
-const epoch_end = ref(current_time);
+const epoch_begin = ref(currentTime - SECONDS_ONE_DAY); // Default: one day ago
+const epoch_end = ref(currentTime);
 const showSankey = props.context.showSankey;
 const showChart = ref(props.context.isEnterprise);
 const isLive = ref(true);
@@ -147,15 +119,11 @@ const asn_type_option = ref([
 ]);
 
 // Time Resolution Options
-const resolution_options = ref([
+let resolutionOptions = ref([
     { value: "live", label: i18n('show_alerts.presets.live'), icon: "fa-solid fa-circle fa-2xs text-danger", currently_active: false },
-    { value: "30_min", label: i18n('show_alerts.presets.30_min'), currently_active: false },
-    { value: "hour", label: i18n('show_alerts.presets.hour'), currently_active: false },
-    { value: "12_hours", label: i18n('show_alerts.presets.12_hours'), currently_active: false },
-    { value: "day", label: i18n('show_alerts.presets.day'), currently_active: true },
-    { value: "week", label: i18n('show_alerts.presets.week'), currently_active: false },
 ]);
-const selected_resolution = ref(resolution_options[0]);
+const DEFAULT_RESOLUTION = "live"
+const selected_resolution = ref(resolutionOptions.value.find((el) => el.value === DEFAULT_RESOLUTION));
 
 // Chart Query Parameters
 const params = {
@@ -212,24 +180,24 @@ onBeforeMount(() => {
         current_selected_option.value = asn_type_option.value[0];
     }
     ntopng_url_manager.set_key_to_url(current_selected_option.value.key, current_selected_option.value.value);
-    
-    // Load time resolution from URL or localStorage
-    let requested_resolution = ntopng_url_manager.get_url_entry("chart_resolution");
-    if (!requested_resolution) {
-        const resolution = localStorage.getItem('ntopng.timeseries.chartResolution.' + timeseries_id);
-        if (resolution) {
-            requested_resolution = resolution;
-        } else {
-            requested_resolution = "live"; // Default is live
-        }
+
+    // If ClickHouse is enabled, then it is possible to not only see th "live" data
+    // but also see historical data, so simply add data
+    if (props.context.isClickhouseEnabled) {
+        const extra_resolutions = [
+            { value: "30_min", label: i18n('show_alerts.presets.30_min'), currently_active: false },
+            { value: "hour", label: i18n('show_alerts.presets.hour'), currently_active: false },
+            { value: "12_hours", label: i18n('show_alerts.presets.12_hours'), currently_active: false },
+            { value: "day", label: i18n('show_alerts.presets.day'), currently_active: true },
+            { value: "week", label: i18n('show_alerts.presets.week'), currently_active: false },
+        ]
+        resolutionOptions.value.push(...extra_resolutions)
+        // Also in this case, search for the storage default url
+        const storedResolution = localStorage.getItem('ntopng.timeseries.chartResolution.' + timeseries_id);
+        const requestedResolution = ntopng_url_manager.get_url_entry("chart_resolution") ?
+            storedResolution : DEFAULT_RESOLUTION;
+        selected_resolution.value = resolutionOptions.value.find((el) => el.value === requestedResolution)
     }
-    
-    // Set selected resolution
-    resolution_options.value.forEach(el => {
-        if (el.value === requested_resolution) {
-            selected_resolution.value = el;
-        }
-    });
     select_resolution(selected_resolution.value, true);
 });
 
@@ -246,7 +214,7 @@ const select_resolution = (value, isFirstLoad) => {
     // Retrieve the timeframe value
     const timeframes = ntopng_utility.get_timeframes_dict();
     const selected_timeframe = timeframes[value.value];
-    
+
     // Check the timeframe requested
     if (selected_timeframe != null) {
         if (selected_timeframe === 0) {
@@ -259,12 +227,12 @@ const select_resolution = (value, isFirstLoad) => {
             isLive.value = false;
         }
     }
-    
+
     // Refresh table if not first load
     if (!isFirstLoad) {
         table_as_stats.value.refresh_table(false);
     }
-    
+
     // Save preference
     localStorage.setItem('ntopng.timeseries.chartResolution.' + timeseries_id, value.value);
 };
@@ -297,7 +265,7 @@ const get_component_data = async (url, query_params, post_params) => {
     const url_params = ntopng_url_manager.obj_to_url_params(get_extra_params_obj());
     const top_url = `${http_prefix}/lua/rest/v2/get/asn/get_top_asn.lua?${url_params}`;
     const top_data = await ntopng_utility.http_request(top_url);
-    
+
     // Build time series requests for each ASN
     const ts_requests = [];
     top_data?.forEach((el) => {
@@ -308,7 +276,7 @@ const get_component_data = async (url, query_params, post_params) => {
         tmp_query.ts_unify = true;
         ts_requests.push(tmp_query);
     });
-    
+
     post_params.ts_requests = ts_requests;
     const data_url = `${http_prefix}/lua/pro/rest/v2/get/timeseries/ts_multi.lua?${url_params}`;
     const data = await ntopng_utility.http_post_request(data_url, post_params);
@@ -405,27 +373,27 @@ const map_table_def_columns = (columns) => {
             return_value += icon;
             return return_value;
         },
-        
+
         /**
          * Renders AS number
          */
         "asn": (value, row) => row["asn"],
-        
+
         /**
          * Formats host count
          */
         "hosts": (value, row) => FormatterUtils.getFormatter("number")(value),
-        
+
         /**
          * Formats seen since timestamp
          */
         "seen_since": (value, row) => FormatterUtils.formatDateTime(value),
-        
+
         /**
          * Formats score value
          */
         "score": (value, row) => FormatterUtils.getFormatter("number")(value),
-        
+
         /**
          * Creates traffic breakdown visualization
          */
@@ -435,17 +403,17 @@ const map_table_def_columns = (columns) => {
             const bytes_rcvd_pctg = total_bytes ? (value.bytes_rcvd / total_bytes) * 100 : 0;
             return NtopUtils.createBreakdown(bytes_sent_pctg, bytes_rcvd_pctg, "Sent", "Rcvd");
         },
-        
+
         /**
          * Formats throughput in bps
          */
         "throughput": (value, row) => FormatterUtils.getFormatter("bps")(value),
-        
+
         /**
          * Formats traffic in bytes
          */
         "traffic": (value, row) => FormatterUtils.getFormatter("bytes")(value),
-        
+
         /**
          * Formats alerted flows count
          */
@@ -454,7 +422,7 @@ const map_table_def_columns = (columns) => {
 
     columns.forEach((c) => {
         c.render_func = map_columns[c.data_field];
-        
+
         // Configure action buttons
         if (c.id == "actions") {
             const visible_dict = {
@@ -463,7 +431,7 @@ const map_table_def_columns = (columns) => {
                 exporters_stats: showSankey,
                 timeseries: props.context.showTimeseries,
             };
-            
+
             c.button_def_array.forEach((b) => {
                 b.f_map_class = (current_class, row) => {
                     // Disable buttons based on conditions
@@ -546,7 +514,7 @@ function on_table_custom_event(event) {
         "click_button_exporters_stats": click_button_exporters_stats,
         "click_button_timeseries": click_button_timeseries,
     };
-    
+
     if (events_managed[event.event_id] == null) {
         return;
     }
