@@ -525,6 +525,16 @@ local function displayContainer(cont, label)
    end
 end
 
+local function valueFound(t, v)
+   for _, value in pairs(t or {}) do
+      if(v.next_hop == v) then
+	 return(true)
+      end
+   end
+   
+   return(false)
+end
+
 local function displayProc(proc, label)
    if (proc.pid == 0) then
       return
@@ -2117,10 +2127,15 @@ if isEmptyString(page) or page == "overview" then
 
 		  if(next_hop_ip ~= "0.0.0.0") then
 		     local ret1, exp_ip, exp_name, exp_site = formatNextHop(v.exporter_ip)
+		     
+		     if(not valueFound(flow_trajectory[from_ip], to_ip)) then
+			table.insert(flow_trajectory[from_ip], { next_hop = to_ip, return_path = v.return_path })
+		     end
 
-		     table.insert(flow_trajectory[from_ip], { next_hop = to_ip, return_path = v.return_path })
-		     table.insert(flow_trajectory[to_ip], { next_hop = next_hop_ip, return_path = v.return_path })
-
+		     if(not valueFound(flow_trajectory[to_ip], next_hop_ip)) then
+			table.insert(flow_trajectory[to_ip], { next_hop = next_hop_ip, return_path = v.return_path })
+		     end
+		     
 		     nodes_names[from_ip] = { from_ip, exp_site }
 		     nodes_names[to_ip] = { to_ip, exp_site }
 
