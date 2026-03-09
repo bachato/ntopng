@@ -175,7 +175,10 @@ Flow::Flow(NetworkInterface *_iface,
   else
     memset(srv_mac, 0, sizeof(srv_mac));
 
-  updateMac();
+  if(_cli_mac  && _srv_mac)    
+    updateMac();
+  else
+    c_mac = s_mac = NULL;
 
   /*
     Standard Interface
