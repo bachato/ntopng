@@ -3051,3 +3051,34 @@ function formatProfinetInfo(proto_info)
 
     return info
 end
+
+-- ########
+
+local snmp_cached_dev
+local cached_devices = {}
+
+if ntop.isPro() then
+   package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
+   exporter_site_utils = require "exporter_site_utils"
+   snmp_cached_dev = require "snmp_cached_dev"
+end
+
+function get_snmp_interface_ip(device_ip, port_idx)
+   if(cached_devices[device_ip] == nil) then
+      cached_devices[device_ip] = snmp_cached_dev:get_interfaces(device_ip)
+   end
+
+   port_idx = tostring(port_idx)
+   if(cached_devices[device_ip] ~= nil) then
+      local port = cached_devices[device_ip].interfaces[port_idx..""]
+
+      if((port ~= nil) and (port.ip_addr ~= nil) and (table.len(port.ip_addr) > 0)) then
+	 local ip_addr = port.ip_addr
+
+	 return(ip_addr[1])
+      end
+   end
+
+   return(nil) -- fallback
+end
+

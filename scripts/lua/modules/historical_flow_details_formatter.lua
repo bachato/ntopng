@@ -442,6 +442,7 @@ function historical_flow_details_formatter.format_historical_issues(flow_details
    else
       alert = flow
    end
+   
    if score > 0 then
       details = alert_utils.formatFlowAlertMessage(interface.getId(), alert, nil, false, true, true)
    end
@@ -599,15 +600,13 @@ local function format_historical_probe(flow_details, flow, info)
    }
 
    if (flow["INPUT_SNMP"]) and (tonumber(flow["INPUT_SNMP"]) ~= 0) then
-      info_field["input_interface"] = historical_flow_utils.get_historical_url(
-         format_utils.formatSNMPInterface(flow["PROBE_IP"], flow["INPUT_SNMP"]), "input_snmp", info["input_snmp"]["value"], true,
-         info["input_snmp"]["title"])
+      local label = format_utils.formatSNMPInterface(flow["PROBE_IP"], flow["INPUT_SNMP"])
+      info_field["input_interface"] = historical_flow_utils.get_historical_url(label, "input_snmp", info["input_snmp"]["value"], true, info["input_snmp"]["title"])
    end
 
    if (flow["OUTPUT_SNMP"]) and (tonumber(flow["OUTPUT_SNMP"]) ~= 0) then
-      info_field["output_interface"] = historical_flow_utils.get_historical_url(
-         format_utils.formatSNMPInterface(flow["PROBE_IP"], flow["OUTPUT_SNMP"]), "output_snmp", info["output_snmp"]["value"], true,
-         info["output_snmp"]["title"])
+      local label = format_utils.formatSNMPInterface(flow["PROBE_IP"], flow["OUTPUT_SNMP"])
+      info_field["output_interface"] = historical_flow_utils.get_historical_url(label, "output_snmp", info["output_snmp"]["value"], true, info["output_snmp"]["title"])
    end
 
    if table.len(info_field) > 1 then
@@ -752,6 +751,26 @@ end
 
 -- ###############################################
 
+local function format_snmp_url(exporter_ip, if_idx, label)
+   local url = "<A HREF=\""..ntop.getHttpPrefix() ..
+      "/lua/pro/enterprise/snmp_interface_details.lua?host="
+      .. exporter_ip ..
+      "&snmp_port_idx=" ..if_idx
+      .. "\">" .. label .. "</A>"
+
+   return(url)
+end
+
+local function valueFound(t, v)
+   for _, value in pairs(t or {}) do
+      if(v.next_hop == v) then
+	 return(true)
+      end
+   end
+   
+   return(false)
+end
+
 -- If protocol JSON contains additional exporters information,
 -- append their formatted representation to the flow details output.
 -- This block extends the standard flow details with deduplicated/exporter-hop path data.
@@ -798,13 +817,11 @@ local function format_historical_flow_additional_exporter(exporters, cli_ip, srv
          local next_hop_label, next_hop_ip, next_hop_name, next_hop_site = formatNextHop(exp.next_hop)
 
          -- Resolve input_idx and output_idx display info
-         local input_idx = historical_flow_utils.get_historical_url(
-            format_utils.formatSNMPInterface(exporter_ip, exp.input_idx), "input_snmp", exporter_ip .."_"..exp.input_idx, true,
-            exp.input_idx)
+	 local label = format_utils.formatSNMPInterface(exporter_ip, exp.input_idx)
+         local input_idx = format_snmp_url(exporter_ip, exp.input_idx, label)
 
-         local output_idx = historical_flow_utils.get_historical_url(
-            format_utils.formatSNMPInterface(exporter_ip, exp.output_idx), "output_snmp", exporter_ip .."_"..exp.output_idx, true,
-            exp.output_idx)
+	 label = format_utils.formatSNMPInterface(exporter_ip, exp.output_idx)
+         local output_idx = format_snmp_url(exporter_ip, exp.output_idx, label)
          
          -- Add row to details table
          flow_details[#flow_details + 1] = {
@@ -816,27 +833,59 @@ local function format_historical_flow_additional_exporter(exporters, cli_ip, srv
          }
          -- Build graph edge: exporter -> next_hop 
          if exporter_ip then
-            -- Initialize adjacency list for exporter if not present
-            if not flow_trajectory[exporter_ip] then
-               flow_trajectory[exporter_ip] = {}
-            end
+	    local from_ip = get_snmp_interface_ip(exporter_ip, exp.input_idx)
+	    local to_ip   = get_snmp_interface_ip(exporter_ip, exp.output_idx)
 
-            -- Insert directed edge
-            table.insert(flow_trajectory[exporter_ip], {
-               next_hop = next_hop_ip,
-               return_path = exp.return_path
-            })
-            -- Register exporter node label
-            nodes_names[exporter_ip] = { firstDottedElement(exporter_name), site }
-         end
-         -- Register next hop node label
-         if next_hop_ip then
-            nodes_names[next_hop_ip] = { firstDottedElement(next_hop_name), next_hop_site }
-         end
+	    if((from_ip ~= nil) and (to_ip ~= nil)) then
+	       if(flow_trajectory[from_ip] == nil)     then flow_trajectory[from_ip] = {}     end
+	       if(flow_trajectory[to_ip] == nil)       then flow_trajectory[to_ip] = {}       end
+	       
+	       if(next_hop_ip ~= "0.0.0.0") then
+		  local ret1, exp_ip, exp_name, exp_site = formatNextHop(exporter_ip)
+		  
+		  if(not valueFound(flow_trajectory[from_ip], to_ip)) then
+		     table.insert(flow_trajectory[from_ip], { next_hop = to_ip, return_path = exp.return_path })
+		  end
+		  
+		  if(not valueFound(flow_trajectory[to_ip], next_hop_ip)) then
+		     table.insert(flow_trajectory[to_ip], { next_hop = next_hop_ip, return_path = exp.return_path })
+		  end
+		  
+		  nodes_names[from_ip] = { from_ip, exp_site }
+		  nodes_names[to_ip]   = { to_ip, exp_site }
+
+		  if exp.next_hop then
+		     local next_hop, next_hop_ip, next_hop_name, next_hop_site = formatNextHop(exp.next_hop)
+
+		     nodes_names[next_hop_ip] = { firstDottedElement(next_hop_name), next_hope_site }
+
+		     if(exp.next_hop_ip ~= nil) then
+			if(flow_trajectory[exp.next_hop_ip] == nil) then flow_trajectory[next_hop_ip] = {} end
+			
+			if(exp.return_path) then
+			   if(not valueFound(flow_trajectory[exp.next_hop_ip], srv_ip)) and (exp.next_hop_ip ~= srv_ip) then
+			      table.insert(flow_trajectory[exp.next_hop_ip], { next_hop = srv_ip, return_path = exp.return_path })
+			   end
+			else
+			   if(not valueFound(flow_trajectory[exp.next_hop_ip], cli_ip)) and (exp.next_hop_ip ~= cli_ip) then
+			      table.insert(flow_trajectory[exp.next_hop_ip], { next_hop = cli_ip, return_path = exp.return_path })
+			   end
+			end
+		     end
+		  end
+	       end
+	    end
+
+	    local ret, exp_ip, exp_name, site = formatExporter(exporter_ip)
+	    nodes_names[exporter_ip] = { firstDottedElement(exp_name), site }	    
+	 end
       end
    end
+   
    if table.len(flow_trajectory) > 0 then
       -- Build graph only if at least one exporter node exists
+      -- tprint(nodes_names)
+      -- tprint(flow_trajectory)
       local nodes, edges = buildExportersGraph(flow_trajectory, nodes_names, cli_ip, srv_ip)
       -- If there are at least 3 nodes -> show the graph
       if table.len(nodes) >= 3 then

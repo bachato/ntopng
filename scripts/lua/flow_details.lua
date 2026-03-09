@@ -33,18 +33,12 @@ local alert_consts = require("alert_consts")
 local mitre_utils = require("mitre_utils")
 local auth = require "auth"
 local exporter_site_utils = nil
-local snmp_cached_dev
 
 local page = _GET["page"]
 
 -- remove after graph testing
 local show_graph = _GET["showGraph"] or false
 
-if ntop.isPro() then
-   package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
-   exporter_site_utils = require "exporter_site_utils"
-   snmp_cached_dev = require "snmp_cached_dev"
-end
 
 if ntop.isPro() then
    shaper_utils = require("shaper_utils")
@@ -66,29 +60,6 @@ function formatIPPort(ip, port)
    port = formatFlowPort(nil, nil, port, false)
 
    return ip, port
-end
-
--- ########
-
-local cached_devices = {}
-
-function getSNMPInterfaceIP(device_ip, port_idx)
-   if(cached_devices[device_ip] == nil) then
-      cached_devices[device_ip] = snmp_cached_dev:get_interfaces(device_ip)
-   end
-
-   port_idx = tostring(port_idx)
-   if(cached_devices[device_ip] ~= nil) then
-      local port = cached_devices[device_ip].interfaces[port_idx..""]
-
-      if((port ~= nil) and (port.ip_addr ~= nil) and (table.len(port.ip_addr) > 0)) then
-	 local ip_addr = port.ip_addr
-
-	 return(ip_addr[1])
-      end
-   end
-
-   return(nil) -- fallback
 end
 
 -- ########
@@ -2118,8 +2089,8 @@ if isEmptyString(page) or page == "overview" then
 	       printFlowSNMPInfo(v.exporter_ip, v.input_idx, v.output_idx, true)
 	       print("</td></tr>")
 
-	       local from_ip = getSNMPInterfaceIP(v.exporter_ip, v.input_idx)
-	       local to_ip   = getSNMPInterfaceIP(v.exporter_ip, v.output_idx)
+	       local from_ip = get_snmp_interface_ip(v.exporter_ip, v.input_idx)
+	       local to_ip   = get_snmp_interface_ip(v.exporter_ip, v.output_idx)
 
 	       if((from_ip ~= nil) and (to_ip ~= nil)) then
 		  if(flow_trajectory[from_ip] == nil) then flow_trajectory[from_ip] = {} end
