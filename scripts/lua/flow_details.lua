@@ -910,7 +910,7 @@ if isEmptyString(page) or page == "overview" then
 
 	 if(flow.tls_blocks) then
 	    print("<p>")
-	    print_copy_button('tls_blocks', "ja4:" .. flow["protos.tls.ja4.client_hash"].."-"..flow.tls_blocks)
+	    print_copy_button('tls_blocks', "ndpifp:" .. flow.ndpi_fingerprint .."-"..flow.tls_blocks.."@myproto")
 	    print(flow.tls_blocks)
 	 end
 
