@@ -1138,6 +1138,9 @@ end
 -- This is a function called by the periodic script influx.lua
 
 function driver:export()
+    -- Run on system interface only
+    if not isSystemInterface() then return end
+
     local base_dir = dirs.workingdir .. "/tmp/influxdb"
     local files = ntop.readdir(base_dir)
     local num_files = 0

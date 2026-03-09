@@ -1501,41 +1501,38 @@ function driver:export()
 
    local ts_utils = require "ts_utils" -- required to get the schema from the schema name
 
-   local available_interfaces = interface.getIfNames() or {}
-   -- Add the system interface to the available interfaces
-   available_interfaces[getSystemInterfaceId()] = getSystemInterfaceName()
    local rrd_queue_max_dequeues_per_interface = 8192
 
-   for cur_ifid, iface in pairs(available_interfaces) do
-      for cur_dequeue = 1, rrd_queue_max_dequeues_per_interface do
-         local ts_point = interface.rrd_dequeue(tonumber(cur_ifid))
+   local cur_ifid = tonumber(interface.getId())
 
-         if not ts_point then
-            break
-         end
+   for cur_dequeue = 1, rrd_queue_max_dequeues_per_interface do
+      local ts_point = interface.rrd_dequeue(tonumber(cur_ifid))
 
-         local parsed_ts_point = line_protocol_to_tags_and_metrics(ts_point)
+      if not ts_point then
+         break
+      end
 
-         -- No need to do coherence checks on the schema. This queue is 'private' and should
-         -- only be written with valid data already checked.
-         local schema = ts_utils.getSchema(parsed_ts_point["schema_name"])
-         local timestamp = parsed_ts_point["timestamp"]
-         local tags = parsed_ts_point["tags"]
-         local metrics = parsed_ts_point["metrics"]
-         local base, rrd = schema_get_path(schema, tags)
+      local parsed_ts_point = line_protocol_to_tags_and_metrics(ts_point)
 
-         if rrd then
-            local rrdfile = os_utils.fixPath(base .. "/" .. rrd .. ".rrd")
+      -- No need to do coherence checks on the schema. This queue is 'private' and should
+      -- only be written with valid data already checked.
+      local schema = ts_utils.getSchema(parsed_ts_point["schema_name"])
+      local timestamp = parsed_ts_point["timestamp"]
+      local tags = parsed_ts_point["tags"]
+      local metrics = parsed_ts_point["metrics"]
+      local base, rrd = schema_get_path(schema, tags)
 
-            if not ntop.notEmptyFile(rrdfile) then
-               ntop.mkdir(base)
-               if not create_rrd(schema, rrdfile, timestamp) then
-                  return false
-               end
+      if rrd then
+         local rrdfile = os_utils.fixPath(base .. "/" .. rrd .. ".rrd")
+
+         if not ntop.notEmptyFile(rrdfile) then
+            ntop.mkdir(base)
+            if not create_rrd(schema, rrdfile, timestamp) then
+               return false
             end
-
-            update_rrd(schema, rrdfile, timestamp, metrics)
          end
+
+         update_rrd(schema, rrdfile, timestamp, metrics)
       end
    end
 end

@@ -94,7 +94,7 @@ NetworkInterface::NetworkInterface(const char *name,
   init(name);
 
   customIftype = custom_interface_type;
-  influxdb_ts_exporter = rrd_ts_exporter = NULL;
+  influxdb_ts_exporter = rrd_ts_exporter = ch_ts_exporter = NULL;
   flow_checks_executor = prev_flow_checks_executor = NULL;
   host_checks_executor = prev_host_checks_executor = NULL;
   memset(ifMac, 0, sizeof(ifMac));
@@ -1115,6 +1115,7 @@ NetworkInterface::~NetworkInterface() {
 #endif
   if (influxdb_ts_exporter) delete influxdb_ts_exporter;
   if (rrd_ts_exporter) delete rrd_ts_exporter;
+  if (ch_ts_exporter) delete ch_ts_exporter;
   if (dhcp_ranges) delete[] dhcp_ranges;
   if (dhcp_ranges_shadow) delete[] dhcp_ranges_shadow;
   if (mdns)
@@ -10133,6 +10134,15 @@ TimeseriesExporter* NetworkInterface::getRRDTSExporter() {
     rrd_ts_exporter = new (nothrow) RRDTimeseriesExporter(this);
 
   return (rrd_ts_exporter);
+}
+
+/* *************************************** */
+
+TimeseriesExporter* NetworkInterface::getCHTSExporter() {
+  if (!ch_ts_exporter)
+    ch_ts_exporter = new (nothrow) CHTimeseriesExporter(this);
+
+  return (ch_ts_exporter);
 }
 
 /* *************************************** */

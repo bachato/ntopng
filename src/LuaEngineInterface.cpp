@@ -5870,6 +5870,62 @@ static int ntop_clickhouse_exec_sql_write(lua_State *vm) {
 
 /* ****************************************** */
 
+/* Enqueue a timeseries row into the interface ClickHouse TS queue.
+ * Serialises the point to line protocol via CHTimeseriesExporter::enqueueData.
+ * Lua signature: interface.chTsEnqueue(schema, timestamp, tags, metrics) -> boolean */
+static int ntop_interface_ch_ts_enqueue(lua_State *vm) {
+  bool rv = false;
+  NetworkInterface *curr_iface;
+  TimeseriesExporter *ts_exporter;
+
+  if ((curr_iface = getCurrentInterface(vm)) &&
+      (ts_exporter = curr_iface->getCHTSExporter()))
+    rv = ts_exporter->enqueueData(vm);
+
+  lua_pushboolean(vm, rv);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
+/* Dequeue one line-protocol-encoded timeseries row from the ClickHouse TS queue.
+ * Returns the string on success, nil if the queue is empty.
+ * Lua signature: interface.chTsDequeue() -> string|nil */
+static int ntop_interface_ch_ts_dequeue(lua_State *vm) {
+  NetworkInterface *curr_iface = getCurrentInterface(vm);
+
+  if (!curr_iface)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  TimeseriesExporter *ts_exporter = curr_iface->getCHTSExporter();
+  char *item = ts_exporter ? ts_exporter->dequeueData() : NULL;
+
+  if (item) {
+    lua_pushstring(vm, item);
+    free(item);
+  } else {
+    lua_pushnil(vm);
+  }
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
+/* Return the current length of the ClickHouse TS queue.
+ * Lua signature: interface.chTsQueueLen() -> integer */
+static int ntop_interface_ch_ts_queue_len(lua_State *vm) {
+  NetworkInterface *curr_iface = getCurrentInterface(vm);
+
+  if (!curr_iface)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  TimeseriesExporter *ts_exporter = curr_iface->getCHTSExporter();
+  lua_pushinteger(vm, ts_exporter ? (lua_Integer)ts_exporter->queueLength() : 0);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 static int ntop_exec_in_memory_sql_query(lua_State *vm) {
   char *sql;
   InMemorySQLiteDB *db = getLuaVMUserdata(vm, db);
@@ -6361,6 +6417,9 @@ static luaL_Reg _ntop_interface_reg[] = {
   { "clickhouseExecCSVQuery", ntop_clickhouse_exec_csv_query },
   { "clickhouseArchiveData", ntop_clickhouse_archive_data },
   { "execSQLWrite", ntop_clickhouse_exec_sql_write },
+  { "chTsEnqueue",  ntop_interface_ch_ts_enqueue },
+  { "chTsDequeue",  ntop_interface_ch_ts_dequeue },
+  { "chTsQueueLen", ntop_interface_ch_ts_queue_len },
 
   /* DNS Cache */
   { "swapHostnameIPCache", ntop_swap_hostname_ip_cache },

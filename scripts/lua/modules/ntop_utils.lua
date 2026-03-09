@@ -997,6 +997,7 @@ end
 -- ##############################################
 
 function isSystemInterface(ifid)
+   if ifid == nil then ifid = interface.getId() end
    return (getSystemInterfaceId() == tostring(ifid))
 end
 

@@ -369,6 +369,7 @@ using namespace std;
 #include "AlertFifoQueue.h"
 #include "FifoSerializerQueue.h"
 #include "RRDTimeseriesExporter.h"
+#include "CHTimeseriesExporter.h"
 #include "RecipientQueue.h"
 #include "Recipients.h"
 #if defined(NTOPNG_PRO)

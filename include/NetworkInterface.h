@@ -277,7 +277,7 @@ protected:
   SyslogStats syslogStats;
   FlowHash *flows_hash; /**< Hash used to store flows information. */
   u_int32_t last_remote_pps, last_remote_bps, last_remote_update;
-  TimeseriesExporter *influxdb_ts_exporter, *rrd_ts_exporter;
+  TimeseriesExporter *influxdb_ts_exporter, *rrd_ts_exporter, *ch_ts_exporter;
 
   TcpFlowStats tcpFlowStats;
   TcpPacketStats tcpPacketStats;
@@ -1190,6 +1190,7 @@ public:
                      u_int16_t vlan_id, u_int16_t observationPointId);
   TimeseriesExporter *getInfluxDBTSExporter();
   TimeseriesExporter *getRRDTSExporter();
+  TimeseriesExporter *getCHTSExporter();
 
   inline uint32_t getMaxSpeed() const { return (ifSpeed); }
   inline bool isLoopback() const { return (is_loopback); }

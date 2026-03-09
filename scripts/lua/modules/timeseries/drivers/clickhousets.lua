@@ -3,17 +3,16 @@
 --
 -- ClickHouse timeseries driver.
 --
--- Data is stored in a single MergeTree table (`ntopng_timeseries`) using
--- Map columns for tags and metrics, following ClickHouse best practices:
+-- Data is stored in a single table 'timeseries' using Map columns for
+-- tags and metrics, following ClickHouse best practices:
 --   * LowCardinality(String) for the schema name (bounded cardinality)
 --   * Map(LowCardinality(String), String)  for tag key/value pairs
 --   * Map(LowCardinality(String), Float64) for metric key/value pairs
 --   * MergeTree engine partitioned by month for efficient time pruning
 --   * TTL clause for automatic data-retention enforcement
---   * Batch inserts (buffered through Redis) to avoid small-part overhead
---
--- Reads use interface.execSQLQuery()  (SELECT via native protocol).
--- Writes use interface.execSQLWrite() (INSERT/DDL via native protocol Execute()).
+--   * Batch inserts (buffered through CHTimeseriesExporter, implementing
+--     an in-memory FIFO queue) to avoid small-part overhead; points 
+--     are serialised as line-protocol strings (same as RRD and InfluxDB)
 --
 
 local dirs = ntop.getDirs()
@@ -23,21 +22,52 @@ local driver = {}
 
 require "ntop_utils"
 local ts_common = require("ts_common")
-local json = require("dkjson")
 
 -- ##############################################
 
--- Redis keys
+-- Redis keys (stats only — the write buffer is an in-memory C++ queue)
 local CH_TS_KEY_PREFIX         = "ntopng.cache.clickhouse_ts."
-local CH_BUFFER_KEY            = CH_TS_KEY_PREFIX .. "buffer"
 local CH_LAST_ERROR_KEY        = CH_TS_KEY_PREFIX .. "last_error"
 local CH_EXPORTED_POINTS_KEY   = CH_TS_KEY_PREFIX .. "exported_points"
 local CH_FAILED_EXPORTS_KEY    = CH_TS_KEY_PREFIX .. "failed_exports"
 
 -- Table and batching settings
 local CH_TABLE_NAME     = "timeseries"
-local CH_MAX_BUFFER     = 50000   -- drop writes when buffer exceeds this many rows
 local CH_BATCH_SIZE     = 2000    -- maximum rows per INSERT statement
+
+-- ##############################################
+
+-- Parse string produced by CHTimeseriesExporter into its
+-- component fields.  The format is:
+--   schema_name[,tag=val ...] metric=val[,metric=val ...] timestamp\n
+local function line_protocol_parse(line)
+   local measurement_and_tags, field_set, timestamp =
+      line:match("(.+)%s(.+)%s(.+)\n")
+   if not measurement_and_tags then return nil end
+
+   local tags    = {}
+   local metrics = {}
+   local items   = measurement_and_tags:split(",")
+   local schema_name
+
+   if not items then
+      schema_name = measurement_and_tags
+   else
+      schema_name = items[1]
+      for i = 2, #items do
+         local k, v = items[i]:match("([^=]+)=(.*)")
+         if k then tags[k] = v end
+      end
+   end
+
+   for _, kv in ipairs(field_set:split(",") or {}) do
+      local k, v = kv:match("([^=]+)=(.*)")
+      if k then metrics[k] = v end
+   end
+
+   return { schema_name = schema_name, tags = tags,
+            metrics = metrics, timestamp = tonumber(timestamp) }
+end
 
 -- ##############################################
 
@@ -135,22 +165,10 @@ end
 -- ##############################################
 
 --! @brief Append a new data point.
---! Buffered in Redis; flushed to ClickHouse by driver:export().
+--! Serialised to line protocol by CHTimeseriesExporter and buffered in the
+--! in-memory C++ queue; flushed to ClickHouse by driver:export().
 function driver:append(schema, timestamp, tags, metrics)
-   local buf_len = tonumber(ntop.llenCache(CH_BUFFER_KEY)) or 0
-   if buf_len >= CH_MAX_BUFFER then
-      return false
-   end
-
-   local row = {
-      s = schema.name,
-      t = timestamp,
-      g = tags,
-      m = metrics,
-   }
-
-   ntop.rpushCache(CH_BUFFER_KEY, json.encode(row))
-   return true
+   return interface.chTsEnqueue(schema.name, timestamp, tags, metrics)
 end
 
 -- ##############################################
@@ -612,24 +630,23 @@ end
 --! @brief Flush the in-memory buffer to ClickHouse.
 --! Called periodically by the export script.
 function driver:export()
-   local buf_len = tonumber(ntop.llenCache(CH_BUFFER_KEY)) or 0
-   if buf_len == 0 then return end
+   if interface.chTsQueueLen() == 0 then return end
 
    -- Drain up to CH_BATCH_SIZE rows per invocation.
-   local rows   = {}
-   local to_pop = math.min(buf_len, CH_BATCH_SIZE)
+   local rows = {}
 
-   for _ = 1, to_pop do
-      local item = ntop.lpopCache(CH_BUFFER_KEY)
+   for _ = 1, CH_BATCH_SIZE do
+      local item = interface.chTsDequeue()
       if item == nil then break end
 
-      local row = json.decode(item)
-      if row and row.s and row.t and row.g and row.m then
+      local row = line_protocol_parse(item)
+      if row and row.schema_name and row.timestamp and row.tags and row.metrics then
          rows[#rows + 1] = string.format(
             "('%s', toDateTime(%d), %s, %s)",
-            ch_escape(row.s), row.t,
-            tags_to_ch_map(row.g),
-            metrics_to_ch_map(row.m))
+            ch_escape(row.schema_name),
+            row.timestamp,
+            tags_to_ch_map(row.tags),
+            metrics_to_ch_map(row.metrics))
       end
    end
 
