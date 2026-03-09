@@ -2149,7 +2149,7 @@ if isEmptyString(page) or page == "overview" then
 	    print("</td></tr>")
 	 end
 
-	 tprint(flow_trajectory)
+	 -- tprint(flow_trajectory)
 
 	 if(table.len(flow_trajectory) > 0) then
 	   local nodes, edges = buildExportersGraph(flow_trajectory, nodes_names, flow["cli.ip"], flow["srv.ip"])
