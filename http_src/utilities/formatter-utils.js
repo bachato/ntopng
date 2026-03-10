@@ -232,7 +232,7 @@ function formatAccounting(amount, decimalCount = 0, decimal = ".", thousands = "
     }
 }
 
-function getFormatter(type, absoluteValue, scaleFactorIndex) {
+function getFormatter(type, absoluteValue, scaleFactorIndex, label) {
     let typeOptions = types[type];
     if (typeOptions == null) { return null; }
 
@@ -300,7 +300,7 @@ function getFormatter(type, absoluteValue, scaleFactorIndex) {
         // if (mString.length < maxLenUm) {
         //     mString = mString.padStart(maxLenUm - mString.length, "_");
         // }
-        let text = `${valString} ${mString}`;
+        let text = `${valString} ${mString}${label ? (" " + label) : ''}`;
         return text;
     }
     return formatter;

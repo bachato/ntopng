@@ -2,12 +2,12 @@
   (C) 2013-26 - ntop.org
 -->
 <template>
-    <PieChartSingle ref="chart" :chart="chart_config" />
+    <PieChart ref="chart" :chart="chart_config" />
   </template>
   
   <script setup>
   import { ref, computed, watch } from "vue";
-  import PieChartSingle from "./charts/pie-chart.vue";
+  import PieChart from "./charts/pie-chart.vue";
   
   const chart = ref(null);
   
@@ -44,6 +44,8 @@
   const chart_config = computed(() => ({
     name:       props.id,
     update_url: `${http_prefix}${props.params.url}`,
+    unit:       props?.params?.unit,
+    label:      props?.params?.label,
     url_params: get_url_params(),
     custom_fetch,
   }));

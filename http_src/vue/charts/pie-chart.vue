@@ -12,8 +12,21 @@
     <div v-if="no_data && !loading" class="no-data">{{ _i18n('flows_page.no_data') }}</div>
 
     <div class="pie-body">
-      <!-- Pie Chart -->
-      <div ref="wrapper" class="pie-wrapper" v-show="!loading && !no_data"></div>
+      <div class="d-flex">
+        <!-- Pie Chart -->
+        <div ref="wrapper" class="pie-wrapper" v-show="!loading && !no_data"></div>
+
+        <!-- Legend -->
+        <div v-if="!loading && items.length" class="pie-legend">
+          <div v-for="(it, i) in items" :key="i" class="legend-item" :class="{ clickable: !!it.url }"
+            @click="it.url && (window.location.href = it.url)">
+            <span class="legend-dot" :style="{ background: it.color }"></span>
+            <span class="legend-name form-control-sm" :title="it.name">{{ it.name }}</span>
+            <span class="legend-percentage form-control-sm">{{ it.percentage }}%</span>
+          </div>
+        </div>
+
+      </div>
 
       <!-- Tooltip on hover -->
       <div v-if="!loading && tooltip.visible" class="pie-tooltip"
@@ -21,17 +34,7 @@
         <span class="tt-dot" :style="{ background: tooltip.color }"></span>
         <span class="tt-name">{{ tooltip.name }}</span>
         <span class="tt-val">{{ tooltip.value.toLocaleString() }}</span>
-        <span class="tt-pct">({{ tooltip.pct }}%)</span>
-      </div>
-
-      <!-- Legend -->
-      <div v-if="!loading && items.length" class="pie-legend">
-        <div v-for="(it, i) in items" :key="i" class="legend-item" :class="{ clickable: !!it.url }"
-          @click="it.url && (window.location.href = it.url)">
-          <span class="legend-dot" :style="{ background: it.color }"></span>
-          <span class="legend-text">{{ it.name }}</span>
-          <span class="legend-text">{{ it.pct }}%</span>
-        </div>
+        <span class="tt-percentage">({{ tooltip.percentage }}%)</span>
       </div>
     </div>
 
@@ -48,14 +51,14 @@ const d3 = d3v7;
 const _i18n = (t) => (typeof i18n === "function" ? i18n(t) : t);
 
 const props = defineProps({ chart: { type: Object, required: true } });
-const { name, update_url, url_params, refresh, unit, custom_fetch } = props.chart;
+const { name, update_url, url_params, refresh, unit, label, custom_fetch } = props.chart;
+const formatted_label = label ? i18n(label) : null;
 const legend_position = props.chart.legend_position || "bottom"; // "bottom" or "left" or "right"
-
 const container = ref(null);
-const wrapper   = ref(null);
-const loading   = ref(false);
-const no_data   = ref(false);
-const items     = ref([]);
+const wrapper = ref(null);
+const loading = ref(false);
+const no_data = ref(false);
+const items = ref([]);
 
 const tooltip = reactive({
   visible: false,
@@ -63,7 +66,7 @@ const tooltip = reactive({
   y: 0,
   name: "",
   value: 0,
-  pct: "0",
+  percentage: "0",
   color: ""
 });
 
@@ -82,8 +85,8 @@ const TWEEN = 300;
 function getDims() {
   const el = wrapper.value;
   if (!el) return { W: 200, H: 200, R: 80 };
-  
-  const W = el.clientWidth  || 200;
+
+  const W = el.clientWidth || 200;
   const H = el.clientHeight || 200;
   const R = Math.min(W, H) * 0.42;
   return { W, H, R };
@@ -105,18 +108,18 @@ onBeforeUnmount(() => {
 
 function drawSVG() {
   wrapper.value?.replaceChildren();
-
+  
   const { W, H, R } = getDims();
-  const r  = R * 0.52;
+  const r = R * 0.52;
   const cr = (R - r) * 0.18;
 
-  pie      = d3.pie().value(d => Math.max(Math.round(d.value), 1)).sort(null).padAngle(0.03);
-  arc      = d3.arc().innerRadius(r).outerRadius(R).cornerRadius(cr);
+  pie = d3.pie().value(d => Math.max(Math.round(d.value), 1)).sort(null).padAngle(0.02);
+  arc = d3.arc().innerRadius(r).outerRadius(R).cornerRadius(cr);
   arcHover = d3.arc().innerRadius(r).outerRadius(R + 7).cornerRadius(cr);
 
   svg = d3.select(wrapper.value)
     .append("svg")
-    .attr("width",  "100%")
+    .attr("width", "100%")
     .attr("height", "100%")
     .attr("viewBox", `0 0 ${W} ${H}`)
     .attr("preserveAspectRatio", "xMidYMid meet");
@@ -146,7 +149,7 @@ async function load() {
 
     if (!Array.isArray(data) || !data.length) { no_data.value = true; return; }
     no_data.value = false;
-    render(data.filter(d => d.value > 0));
+    render(data);
 
   } catch (e) {
     console.error(`pieChart-${name}:`, e);
@@ -158,22 +161,30 @@ async function load() {
 
 // assign colors from palette, first element has the same color on all pages
 function render(data) {
-  const PALETTE  = colorUtils.assignRoundRobinColors(data.map(d => d.label));
+  const PALETTE = colorUtils.assignRoundRobinColors(data.map(d => d.label));
   const getColor = (d, i) => d.color || PALETTE[i % PALETTE.length];
-  const total    = data.reduce((s, d) => s + d.value, 0);
+  const total = data.reduce((s, d) => s + d.value, 0);
+  /* Filtered data, excludes values too small to be shown in the chart
+   * values with a number lesser then 0.0%
+   */
+  const filtered_data = data.map((d, i) => ({
+    label: d.label,
+    value: d.value,
+    percentage: total > 0 ? (d.value / total * 100).toFixed(1) : "0"
+  })).filter((el) => el.percentage > 0.0);
 
-  items.value = data.map((d, i) => ({
-    name:  d.label,
-    value: unit ? formatterUtils.getFormatter(unit)(d.value) : d.value,
+  items.value = filtered_data.map((d, i) => ({
+    name: d.label,
+    value: unit ? formatterUtils.getFormatter(unit, null, null, formatted_label)(d.value) : d.value,
     color: getColor(d, i),
-    url:   d.url || null,
-    pct:   total > 0 ? (d.value / total * 100).toFixed(1) : "0",
-  }));
+    url: d.url || null,
+    percentage: total > 0 ? (d.value / total * 100).toFixed(1) : "0",
+  }))
 
-  const newpie = pie(data);
+  const newpie = pie(filtered_data);
 
   const tween = (d) => {
-    const old    = oldData.find(o => o.data.label === d.data.label);
+    const old = oldData.find(o => o.data.label === d.data.label);
     const interp = d3.interpolate(old ?? { startAngle: 0, endAngle: 0 }, d);
     return t => { try { return arc(interp(t)); } catch (e) { return ""; } };
   };
@@ -187,15 +198,15 @@ function render(data) {
       d3.select(this).transition().duration(100).attr("d", arcHover);
       const rect = container.value.getBoundingClientRect();
       const idx = items.value.findIndex(it => it.name === d.data.label);
-      
+
       Object.assign(tooltip, {
         visible: true,
-        color:   getColor(d.data, idx),
-        x:       ev.clientX - rect.left + 14,
-        y:       ev.clientY - rect.top  - 12,
-        name:    d.data.label,
-        value:   unit ? formatterUtils.getFormatter(unit)(d.data.value) : d.data.value,
-        pct:     total > 0 ? (d.data.value / total * 100).toFixed(1) : "0",
+        color: getColor(d.data, idx),
+        x: ev.clientX - rect.left + 14,
+        y: ev.clientY - rect.top - 12,
+        name: d.data.label,
+        value: unit ? formatterUtils.getFormatter(unit, null, null, formatted_label)(d.data.value) : d.data.value,
+        percentage: total > 0 ? (d.data.value / total * 100).toFixed(1) : "0",
       });
 
     })
@@ -203,7 +214,7 @@ function render(data) {
       const rect = container.value.getBoundingClientRect();
 
       tooltip.x = ev.clientX - rect.left + 14;
-      tooltip.y = ev.clientY - rect.top  - 12;
+      tooltip.y = ev.clientY - rect.top - 12;
     })
     .on("mouseout", function () {
       d3.select(this).transition().duration(100).attr("d", arc);
@@ -269,8 +280,13 @@ defineExpose({ update: load });
   gap: 12px;
 }
 
-.legend-right .pie-body { flex-direction: row; }
-.legend-left  .pie-body { flex-direction: row-reverse; }
+.legend-right .pie-body {
+  flex-direction: row;
+}
+
+.legend-left .pie-body {
+  flex-direction: row-reverse;
+}
 
 .pie-wrapper {
   flex: 1 1 auto;
@@ -284,7 +300,7 @@ defineExpose({ update: load });
   overflow: hidden;
 }
 
-.legend-left  .pie-wrapper,
+.legend-left .pie-wrapper,
 .legend-right .pie-wrapper {
   flex: 1 1 auto;
   max-width: 60%;
@@ -295,8 +311,13 @@ defineExpose({ update: load });
   margin: auto;
 }
 
-:deep(.pie-hole)  { fill: var(--loading-bg, #fff); }
-:deep(path.slice) { cursor: pointer; }
+:deep(.pie-hole) {
+  fill: var(--loading-bg, #fff);
+}
+
+:deep(path.slice) {
+  cursor: pointer;
+}
 
 .pie-tooltip {
   position: absolute;
@@ -313,38 +334,89 @@ defineExpose({ update: load });
   z-index: 100;
   backdrop-filter: blur(4px);
 }
-.tt-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.tt-name { font-weight: 500; }
-.tt-val  { font-weight: 700; }
-.tt-pct  { color: rgba(255, 255, 255, 0.5); }
+
+.tt-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tt-name {
+  font-weight: 500;
+}
+
+.tt-val {
+  font-weight: 700;
+}
+
+.tt-percentage {
+  color: rgba(255, 255, 255, 0.5);
+}
 
 .pie-legend {
   flex-shrink: 0;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-content: flex-start;
-  gap: 4px 12px;
-}
-
-/* Vertical legend for left right positioning */
-.legend-left  .pie-legend,
-.legend-right .pie-legend {
   flex-direction: column;
   flex-wrap: nowrap;
   justify-content: center;
   align-items: flex-start;
+  gap: 4px 0;
+  overflow: hidden;
+  min-width: 0;
+  max-height: 100%;
+}
+
+.legend-left .pie-legend,
+.legend-right .pie-legend {
   overflow-y: auto;
+  scrollbar-width: thin;
+  /* Firefox */
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.legend-left .pie-legend::-webkit-scrollbar,
+.legend-right .pie-legend::-webkit-scrollbar {
+  width: 3px;
+}
+
+.legend-left .pie-legend::-webkit-scrollbar-thumb,
+.legend-right .pie-legend::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
   gap: 5px;
-  white-space: nowrap;
+  min-width: 0;
+  width: 100%;
   user-select: none;
 }
-.legend-item.clickable { cursor: pointer; }
-.legend-dot  { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
-.legend-text { font-size: 0.75rem; }
+
+.legend-item.clickable {
+  cursor: pointer;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.legend-name {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.legend-percentage {
+  flex-shrink: 0;
+  color: color-mix(in srgb, currentColor 60%, transparent);
+  margin-left: 2px;
+}
 </style>
