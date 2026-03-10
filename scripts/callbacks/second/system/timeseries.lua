@@ -26,6 +26,8 @@ end
 local ts_utils = require("ts_utils_core")
 require("ts_second")
 
+local curr_ifid = interface.getId()
+
 -- Run this script for a minute before quitting (this reduces load on Lua VM infrastructure)
 local num_runs = 60
 local max_time = os.time() + 60 -- See SECOND_SCRIPT_DIR in PeriodicActivities.cpp
@@ -41,8 +43,10 @@ for i = 1, num_runs do
         zmq_flow_coll_drops = 0,
         zmq_flow_coll_udp_drops = 0
     }
+
     if (ntop.isShuttingDown()) then break end
 
+    -- Note: foreachInterface calls interface.select() for each interface
     callback_utils.foreachInterface(ifnames, interface_rrd_creation_enabled,
                                     function(ifname, ifstats)
         if (enable_second_debug) then
@@ -50,6 +54,7 @@ for i = 1, num_runs do
         end
 
         if ifstats.isView then view_id = ifstats.id end
+
         -- Traffic stats
         -- We check for ifstats.stats.bytes to start writing only when there's data. This
         -- prevents artificial and wrong peaks especially during the startup of ntopng.
@@ -173,6 +178,9 @@ for i = 1, num_runs do
 
     -- Save ZMQ stats correctly for view interfaces
     if (check_view and ntop.isPro()) then
+        -- Select the view interface to ensure enqueued data goes into the right
+        -- interface's queue for RRD/ClickHouse timeseries
+        interface.select(view_id)
         ts_utils.append("iface:zmq_recv_flows", {
             ifid = view_id,
             flows = viewed_zmq_stats.zmq_recv_flows or 0
@@ -199,6 +207,8 @@ for i = 1, num_runs do
 
     if (num_runs > 1) then ntop.msleep(1000) end
 end
+
+interface.select(curr_ifid)
 
 -- Uncomment this to simulate slow downs
 -- os.execute('perl -e "select(undef,undef,undef,0.8);"')
