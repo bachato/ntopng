@@ -14,7 +14,7 @@ npm run build || exit 1
 echo "-- Pushing code -- "
 cd httpdocs/dist
 git checkout $branch_name
-
+git pull --rebase
 git add *
 git commit -m 'updated dist' || exit 1
 echo "Committed"
