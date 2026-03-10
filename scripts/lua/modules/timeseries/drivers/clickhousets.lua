@@ -272,7 +272,7 @@ function driver:query(schema, tstart, tend, tags, options)
    local series    = {}
    local max_vals  = {}
    for i, metric in ipairs(schema._metrics) do
-      series[i]   = { id = metric, label = metric, data = {} }
+      series[i]   = { id = metric, data = {} }
       max_vals[i] = ts_common.getMaxPointValue(schema, metric, tags)
    end
 
