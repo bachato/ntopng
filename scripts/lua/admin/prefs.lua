@@ -1762,6 +1762,16 @@ if auth.has_capability(auth.capabilities.preferences) then
                 max = 365 * 10
             })
 
+        if clickhouse_ts_active then
+            print('<tr><td width="50%"><strong>' .. i18n('prefs.clickhouse_ts_grafana_dashboard')..'</strong>')
+            print('<p><small>' .. i18n('prefs.clickhouse_ts_grafana_dashboard_description')..'</td>')
+            print('<td align="right"><a href="' .. ntop.getHttpPrefix() ..
+                '/misc/grafana/ntopng-clickhouse-dashboard.json"' ..
+                ' download="ntopng-clickhouse-dashboard.json" class="btn btn-secondary">')
+            print('<i class="fas fa-download"></i>&nbsp;' .. i18n('prefs.clickhouse_ts_grafana_dashboard_btn'))
+            print('</a></td></tr>')
+        end
+
         print('<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n('prefs.interfaces_timeseries') ..
             '</th></tr></thead>')
 
