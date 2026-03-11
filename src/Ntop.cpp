@@ -4680,3 +4680,29 @@ void Ntop::dumpLuaCache(lua_State *vm) {
   
   luaCacheLock.unlock(__FILE__, __LINE__);
 }
+
+/* ******************************************* */
+
+void Ntop::snmpSetInterfaceRole(u_int32_t exporter_ip_v4,
+				u_int32_t interface_id,
+				SNMPInterfaceRole interface_role) {
+  ifRoles.emplace(std::make_tuple(exporter_ip_v4, interface_id), interface_role);
+
+  // ntop->getTrace()->traceEvent(TRACE_NORMAL, "SET %u/%u = %u", exporter_ip_v4, interface_id, interface_role);
+}
+
+/* ******************************************* */
+
+/* NOTE: add a mutex or another trick if dynamic interface reload is implemented */
+SNMPInterfaceRole Ntop::snmpGetInterfaceRole(u_int32_t exporter_ip_v4,
+					     u_int32_t interface_id) {
+  std::tuple<u_int32_t, u_int32_t> searchKey = { exporter_ip_v4, interface_id };
+  std::map<std::tuple<u_int32_t, u_int32_t>, SNMPInterfaceRole>::iterator it = ifRoles.find(searchKey);
+  
+  if(it != ifRoles.end()) {
+    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "GET %u/%u = %u", exporter_ip_v4, interface_id, it->second);
+    return(it->second);
+  } else
+    return(role_other);
+}
+

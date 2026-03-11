@@ -250,6 +250,18 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 			    zflow->inIndex, zflow->outIndex,
 			    zflow->getFlowSource(),
 			    src2dst_direction);
+
+#if defined(NTOPNG_PRO)      
+      /* Set interface role */
+      u_int32_t exporter_device_ip = ntohl(zflow->exporter_device_ip);
+      SNMPInterfaceRole r = ntop->snmpGetInterfaceRole(zflow->exporter_device_ip, zflow->inIndex);
+
+      if(r == role_other) /* Try with outIndex */
+	r = ntop->snmpGetInterfaceRole(zflow->exporter_device_ip, zflow->outIndex);
+      
+      if(r != role_other)
+	flow->setSNMPExporterInterfaceRole(r);
+#endif
     } else {
       /* Existing flow */
       if(ntop->getPrefs()->isFlowDedupEnabled()
@@ -661,6 +673,7 @@ bool ParserInterface::processFlow(ParsedFlow *zflow) {
 
     if (flow->isDNS())  flow->updateDNS(zflow);
     if (flow->isHTTP()) flow->updateHTTP(zflow);
+    
     if (flow->isTLS())  {
       flow->updateTLS(zflow);
 

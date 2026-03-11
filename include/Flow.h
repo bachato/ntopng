@@ -100,6 +100,7 @@ private:
   Host *cli_host, *srv_host; /* They are ALWAYS NULL on ViewInterfaces. For shared hosts see below viewFlowStats */
   IpAddress *cli_ip_addr, *srv_ip_addr;
   u_int8_t src2dst_tcp_flags, dst2src_tcp_flags;
+  SNMPInterfaceRole flowExporterInterfaceRole;
   FlowTCP *tcp;
 #ifdef NTOPNG_PRO
   FlowUDP *udp;
@@ -1630,6 +1631,7 @@ public:
 		       u_int32_t in_index, u_int32_t out_index,
 		       FlowSource source,
 		       bool src2dst_direction);
+  inline void setSNMPExporterInterfaceRole(SNMPInterfaceRole r) { flowExporterInterfaceRole = r; }
 };
 
 #endif /* _FLOW_H_ */

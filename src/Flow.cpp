@@ -350,6 +350,8 @@ Flow::Flow(NetworkInterface *_iface,
     }
   }
 
+  flowExporterInterfaceRole = role_other;
+  
   computeKey();
   deferredInitialization();
 }

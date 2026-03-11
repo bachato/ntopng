@@ -462,7 +462,7 @@ void ContinuousPing::runPingCampaign() {
 /* ***************************************** */
 
 void ContinuousPing::getAllInterfaces(lua_State *vm) {
-  char num_str[10];
+  char num_str[32];
   int num = 0;
 
 #ifdef TRACE_PING

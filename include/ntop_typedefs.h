@@ -1303,7 +1303,8 @@ typedef enum {
   role_internal_interface,
   role_ix,
   role_customer_interface,
-  role_internet_connectivity
+  role_internet_connectivity,
+  role_max_value /* Leave as last member */
 } SNMPInterfaceRole;
 
 

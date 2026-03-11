@@ -4945,6 +4945,37 @@ static int ntop_snmp_read_responses(lua_State *vm) {
 
 /* ****************************************** */
 
+#if defined(NTOPNG_PRO)
+static int ntop_snmp_set_interface_role(lua_State *vm) {
+  u_int32_t exporter_ip_v4;
+  u_int32_t interface_id;
+  SNMPInterfaceRole interface_role;
+  
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if((ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+     || (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TNUMBER) != CONST_LUA_OK)
+     || (ntop_lua_check(vm, __FUNCTION__, 3, LUA_TNUMBER) != CONST_LUA_OK))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  exporter_ip_v4 = ntohl((u_int32_t)inet_addr((char *)lua_tostring(vm, 1)));
+  interface_id   = (u_int32_t)lua_tonumber(vm, 2);
+  interface_role = (SNMPInterfaceRole)lua_tonumber(vm, 3);
+
+  if(interface_role < role_max_value) {
+    /* Set data */
+
+    ntop->snmpSetInterfaceRole(exporter_ip_v4, interface_id, interface_role);
+    
+    lua_pushnil(vm);
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  } else
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+}
+#endif
+
+/* ****************************************** */
+
 static int ntop_snmp_toggle_trap_collection(lua_State *vm) {
 #ifdef HAVE_SNMP_TRAP
   bool enable = false;
@@ -8647,6 +8678,11 @@ static luaL_Reg _ntop_reg[] = {
     { "snmpGetBatch", ntop_snmp_batch_get }, /* v1/v2c/v3 */
     { "snmpReadResponses", ntop_snmp_read_responses },
 
+#if defined(NTOPNG_PRO)
+    /* SNMP Interfaces */
+    { "snmpSetInterfaceRole", ntop_snmp_set_interface_role },
+#endif
+    
     /* Runtime */
     { "hasGeoIP", ntop_has_geoip },
     { "isWindows", ntop_is_windows },
