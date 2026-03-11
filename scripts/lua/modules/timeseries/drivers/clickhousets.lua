@@ -594,21 +594,43 @@ function driver:timeseries_top(options, top_tags)
          local n = (serie_data.metadata and serie_data.metadata.num_point) or 0
          local agg = {}
          for i = 1, n do
-            local s = 0
+            local s         = 0
+            local has_valid = false
             for _, serie in ipairs(serie_data.series) do
                local v = serie.data[i]
-               if v and v == v then s = s + v end   -- skip NaN
+               if v and v == v then s = s + v; has_valid = true end   -- skip NaN
             end
-            agg[i] = s
+            agg[i] = has_valid and s or options.fill_value
          end
          count = math.max(count, n)
+
+         local top_val   = item.tags[top_tag] or ""
+         local ext_label = nil
+
+         -- Device/interface schemas: resolve SNMP interface label.
+         if ntop.isPro() and options.tags and options.tags.device then
+            local snmp_utils      = require "snmp_utils"
+            local snmp_cached_dev = require "snmp_cached_dev"
+            local cached_device   = snmp_cached_dev:create(options.tags.device)
+            local ifindex         = item.tags["if_index"] or item.tags["port"]
+            if cached_device and ifindex then
+               ext_label = snmp_utils.get_snmp_interface_label(cached_device["interfaces"][ifindex])
+            end
+            if isEmptyString(ext_label) then ext_label = ifindex end
+         end
+
+         -- Protocol schemas: the ext_label is the protocol name itself.
+         if item.tags["protocol"] then
+            ext_label = top_val
+         end
+
          top_series[#top_series + 1] = {
             data       = agg,
             id         = schema._metrics[1] or "value",
             statistics = serie_data.statistics,
             tags       = item.tags,
-            name       = item.tags[top_tag] or "",
-            ext_label  = nil,
+            name       = top_val,
+            ext_label  = ext_label,
          }
       end
    end
