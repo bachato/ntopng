@@ -60,7 +60,7 @@ local function line_protocol_parse(line)
       end
    end
 
-   for _, kv in ipairs(field_set:split(",") or {}) do
+   for _, kv in ipairs(field_set:split(",") or {field_set}) do
       local k, v = kv:match("([^=]+)=(.*)")
       if k then metrics[k] = v end
    end
