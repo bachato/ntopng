@@ -41,6 +41,7 @@ local CH_BATCH_SIZE     = 2000    -- maximum rows per INSERT statement
 -- component fields.  The format is:
 --   schema_name[,tag=val ...] metric=val[,metric=val ...] timestamp\n
 local function line_protocol_parse(line)
+
    local measurement_and_tags, field_set, timestamp =
       line:match("(.+)%s(.+)%s(.+)\n")
    if not measurement_and_tags then return nil end
@@ -65,8 +66,10 @@ local function line_protocol_parse(line)
       if k then metrics[k] = v end
    end
 
-   return { schema_name = schema_name, tags = tags,
+   local data = { schema_name = schema_name, tags = tags,
             metrics = metrics, timestamp = tonumber(timestamp) }
+
+   return data
 end
 
 -- ##############################################
