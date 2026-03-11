@@ -297,7 +297,8 @@ void NetworkInterface::init(const char *interface_name) {
   push_host_filters = false;
 
   top_sites = NULL;
-
+  memset(&roleStats, 0, sizeof(roleStats));
+  
   reload_hosts_bcast_domain = false;
   hosts_bcast_domain_last_update = 0;
 
@@ -8141,6 +8142,18 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
 
     lua_push_uint64_table_entry(vm, "periodic_stats_update_frequency_secs",
 				periodicStatsUpdateFrequency());
+
+    if(roleStats.peering_bytes || roleStats.transit_bytes) {
+      lua_newtable(vm);
+
+      lua_push_uint64_table_entry(vm, "peering", roleStats.peering_bytes);
+      lua_push_uint64_table_entry(vm, "transit", roleStats.transit_bytes);
+      lua_push_uint64_table_entry(vm, "other",   roleStats.other_bytes);
+      
+      lua_pushstring(vm, "iface_role_traffic");
+      lua_insert(vm, -2);
+      lua_settable(vm, -3);
+    }
   }
 
   lua_newtable(vm); /* stats */
@@ -8396,7 +8409,7 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
 void NetworkInterface::luaSubInterface(lua_State *vm) {
   char buf[64];
 
-  switch (dynamic_interface_mode) {
+  switch(dynamic_interface_mode) {
   case flowhashing_probe_ip:
     lua_push_str_table_entry(
 			     vm, "dynamic_interface_probe_ip",
@@ -14008,4 +14021,22 @@ void NetworkInterface::nDPIDumpHostBasedProtocols(struct mg_connection *mg_conn)
 /* Dumps categoryId of nDPI protocols defined with hostnames */
 void NetworkInterface::nDPIDumpHostBasedCategories(struct mg_connection *mg_conn) {
   ndpi_dump_host_based_category_id(ndpi_struct, hash_walker, (void*)mg_conn);
+}
+
+/* **************************************************** */
+
+void NetworkInterface::incRoleBytes(u_int64_t bytes, SNMPInterfaceRole role) {
+  switch(role) {
+  case role_transit:
+    roleStats.transit_bytes += bytes;
+    break;
+    
+  case role_peering:
+    roleStats.peering_bytes += bytes;
+    break;
+    
+  default:
+    roleStats.other_bytes += bytes;
+    break;
+  }
 }

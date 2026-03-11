@@ -5938,6 +5938,7 @@ local lang = {
     ["snmp"] = "SNMP",
     ["state"] = "State",
     ["syslog_statistics"] = "Syslog Collection Statistics",
+    ["traffic_role_distribution"] = "Traffic Roles",
     ["traffic_breakdown"] = "Traffic Breakdown",
     ["traffic_distribution"] = "Traffic Distribution",
     ["traffic_statistics"] = "Traffic Statistics",

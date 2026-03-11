@@ -2058,7 +2058,8 @@ if isEmptyString(page) or page == "overview" then
 	    local len = table.len(flow.exporters)+1
 
 	    print("<tr><th rowspan=\""..(len+1).."\">" .. i18n("exporters_info") .. "</th>")
-	    print("<th>" .. i18n("flow_exporter") .. " / " .. i18n("next_hop") .. "</th><th>" .. i18n("flows_page.inIfIdx") .. " / ".. i18n("flows_page.outIfIdx") .. "</th></tr>\n")
+	    print("<th>" .. i18n("flow_exporter") .. " / " .. i18n("next_hop") .. "</th><th>" ..
+		  i18n("flows_page.inIfIdx") .. " / ".. i18n("flows_page.outIfIdx") .. "</th></tr>\n")
 
 	    for k,v in pairs(flow.exporters) do
 	       local ret, exp_ip, exp_name, site = formatExporter(v.exporter_ip)
@@ -2209,7 +2210,8 @@ if isEmptyString(page) or page == "overview" then
                   end
                   print("</tr>\n")
                else
-                  print("<tr><th class='colspan-4'>" .. getFlowKey(key) .. "</th><td colspan=2>" .. format_custom_field(key, value, snmpdevice) .. "</td></tr>\n")
+                  print("<tr><th class='colspan-4'>" .. getFlowKey(key) .. "</th><td colspan=2>"
+			.. format_custom_field(key, value, snmpdevice) .. "</td></tr>\n")
                end
 
                num = num + 1

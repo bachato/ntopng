@@ -3491,6 +3491,8 @@ void Flow::lua(lua_State *vm, AddressTree *allowed_nets,
       lua_insert(vm, -2);
       lua_settable(vm, -3);
     }
+
+    lua_push_uint32_table_entry(vm, "iface_role", (int)flowExporterInterfaceRole);
   }
 
   lua_get_status(vm);
@@ -5849,7 +5851,8 @@ std::string Flow::getFlowInfo(bool isLuaRequest) {
       swap_found |= it->return_path;
 
     snprintf(buf, sizeof(buf), "%u %sExp.",
-	     (unsigned int)(exporterStats.size()), swap_found ? "Bidir. " : "");
+	     (unsigned int)(exporterStats.size()),
+	     swap_found ? "Bidir. " : "");
     info_field = std::string(buf);
   } else if(!isMaskedFlow()) {
     if(iec104) return (iec104->getFlowInfo());
@@ -5904,6 +5907,20 @@ std::string Flow::getFlowInfo(bool isLuaRequest) {
 
       info_field = std::string(str);
     }
+  }
+
+  switch(flowExporterInterfaceRole) {
+  case role_transit:
+    info_field += " Transit";
+    break;
+    
+  case role_peering:
+    info_field += " Peering";
+    break;
+
+  default:
+    /* Nothing to do */
+    break;
   }
 
   return info_field;

@@ -4698,7 +4698,7 @@ SNMPInterfaceRole Ntop::snmpGetInterfaceRole(u_int32_t exporter_ip_v4,
 					     u_int32_t interface_id) {
   std::tuple<u_int32_t, u_int32_t> searchKey = { exporter_ip_v4, interface_id };
   std::map<std::tuple<u_int32_t, u_int32_t>, SNMPInterfaceRole>::iterator it = ifRoles.find(searchKey);
-  
+
   if(it != ifRoles.end()) {
     // ntop->getTrace()->traceEvent(TRACE_NORMAL, "GET %u/%u = %u", exporter_ip_v4, interface_id, it->second);
     return(it->second);

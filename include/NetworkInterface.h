@@ -117,6 +117,9 @@ protected:
 #endif
 
   UsedPorts usedPorts;
+  struct {
+    u_int64_t peering_bytes, transit_bytes, other_bytes;
+  } roleStats; /* AS mode only */
 
   struct ndpi_detection_module_struct *ndpi_struct, *ndpi_struct_shadow;
   bool ndpiReloadInProgress;
@@ -188,7 +191,7 @@ protected:
   u_int16_t next_compq_remove_idx;
   ParsedFlow **companionQueue;
   bool ip_reassignment_alerts_enabled;
-  
+
   /* Live Capture */
   Mutex active_captures_lock;
   u_int8_t num_live_captures;
@@ -262,8 +265,8 @@ protected:
   /* Those will hold counters at checkpoints */
   u_int64_t checkpointPktCount, checkpointBytesCount, checkpointPktDropCount,
     checkpointDroppedAlertsCount;
-  u_int64_t 
-    checkpointTrafficSent, 
+  u_int64_t
+    checkpointTrafficSent,
     checkpointTrafficRcvd,
     checkpointPacketsSent,
     checkpointPacketsRcvd;
@@ -427,7 +430,7 @@ protected:
                                          u_int32_t size, u_int *num);
   bool dumpFlowOut(Flow *f, time_t when);
   bool initFlowDB();
-  
+
 public:
   /**
    * @brief A Constructor
@@ -644,7 +647,7 @@ public:
                             bool localreceiver) {
     localStats.incStats(num_pkts, pkt_len, localsender, localreceiver);
   };
-  
+
   inline void incnDPIFlows(u_int16_t l7_protocol) {
     ndpiStats->incFlowsStats(l7_protocol);
   }
@@ -729,7 +732,7 @@ public:
                      Host **srcHost, Host **dstHost, Flow **flow,
 		     bool *new_flow, u_int8_t *sender_mac);
   void processInterfaceStats(sFlowInterfaceStats *stats);
-  void getLiveASNStats(ASNStats *asn_stats, AddressTree *allowed_nets, 
+  void getLiveASNStats(ASNStats *asn_stats, AddressTree *allowed_nets,
                         Paginator *p, lua_State *vm);
   void getActiveFlowsStats(nDPIStats *stats, FlowStats *status_stats,
                            AddressTree *allowed_nets, Host *h,
@@ -818,7 +821,7 @@ public:
 			 bool blacklisted_hosts, u_int8_t ipver_filter, int proto_filter,
 			 TrafficType traffic_type_filter, u_int32_t device_ip, bool tsLua,
 			 bool anomalousOnly, bool dhcpOnly, const AddressTree *const cidr_filter, bool alertedHost,
-			 char *sortColumn, u_int32_t maxHits, u_int32_t toSkip, bool a2zSortOrder, bool useArrayFormat, 
+			 char *sortColumn, u_int32_t maxHits, u_int32_t toSkip, bool a2zSortOrder, bool useArrayFormat,
              bool getCheckpointOnly = false, u_int8_t mac_location_filter = -1, char *map_search = NULL);
   int getActiveASList(lua_State *vm, const Paginator *p, bool diff = false, ASType as_type = all);
   int getActiveObsPointsList(lua_State *vm, const Paginator *p);
@@ -938,18 +941,18 @@ public:
     return (flow_devices_stats);
   }
 #endif
-  
+
   inline HostPools *getHostPools() { return (host_pools); }
   inline void reloadHostPools() {
     if (host_pools) host_pools->reloadPools();
   }
   inline u_int16_t getNumberHostPools() {
-    if (host_pools) 
+    if (host_pools)
       return host_pools->getCurrentHostPoolsNumber();
     return 0;
   }
   inline u_int32_t getNumberHostPoolsMembers() {
-    if (host_pools) 
+    if (host_pools)
       return host_pools->getCurrentMaxHostPoolsMembers();
     return 0;
   }
@@ -1009,7 +1012,7 @@ public:
     return (actual_db ? actual_db->execSQLQuery(vm, sql, limit_rows, wait_for_db_created)
 	    : -1);
   };
-  inline int execSQLQuery2CSV(const char *sql, const char *delimiter, const char *null_value, 
+  inline int execSQLQuery2CSV(const char *sql, const char *delimiter, const char *null_value,
                               bool dump_in_json_format, bool remove_headers, struct mg_connection *conn) {
     DB *actual_db = db ? db : clickhouse_flows_db;
     return (actual_db ? actual_db->execSQLQuery2CSV(sql, delimiter, null_value, dump_in_json_format, remove_headers, conn)
@@ -1029,7 +1032,7 @@ public:
   void getsDPIStats(lua_State *vm);
   inline bool isDbCreated() {
     DB *actual_db = db ? db : clickhouse_flows_db;
-    return (actual_db ? actual_db->isDbCreated() : true); 
+    return (actual_db ? actual_db->isDbCreated() : true);
   };
 #ifdef NTOPNG_PRO
   void updateFlowProfiles();
@@ -1067,7 +1070,7 @@ public:
       lua_insert(vm, -2);
       lua_settable(vm, -3);
     }
-  };  
+  };
   virtual void getFlowDeviceInfoByIP(lua_State *vm, u_int32_t deviceIP, bool showAllStats = true) {
     if (flow_devices_stats) {
       lua_newtable(vm);
@@ -1121,7 +1124,7 @@ public:
 #else
   inline bool isViewed() const { return(false); }
 #endif
-  
+
   bool isMacActive(char *mac);
   bool getMacInfo(lua_State *vm, char *mac);
   bool resetMacStats(lua_State *vm, char *mac, bool delete_data);
@@ -1226,7 +1229,7 @@ public:
   inline bool hasConfiguredDhcpRanges() {
     return (dhcp_ranges && !dhcp_ranges->last_ip.isEmpty());
   };
-  inline bool isFlowDumpDisabled() { return (flow_dump_disabled_by_user || 
+  inline bool isFlowDumpDisabled() { return (flow_dump_disabled_by_user ||
     flow_dump_disabled_by_backend); }
   bool isInDhcpRange(IpAddress *ip);
   void getPodsStats(lua_State *vm);
@@ -1445,7 +1448,7 @@ public:
 
   void incnDPIStats(time_t when, u_int16_t ndpi_proto,
 		    ndpi_protocol_category_t ndpi_category,
-		    u_int32_t bytes_sent, u_int32_t bytes_rcvd, 
+		    u_int32_t bytes_sent, u_int32_t bytes_rcvd,
         u_int32_t pkts_sent, u_int32_t pkts_rcvd);
 #ifdef NTOPNG_PRO
   void incQoEStats(QoEType qoe_type) { qoe_stats.incQoEStats(qoe_type); };
@@ -1464,7 +1467,8 @@ public:
   inline bool hasMACs() { return(macs_hash); }
 
   void nDPIDumpHostBasedProtocols(struct mg_connection *mg_conn);
-  void nDPIDumpHostBasedCategories(struct mg_connection *mg_conn);      
+  void nDPIDumpHostBasedCategories(struct mg_connection *mg_conn);
+  void incRoleBytes(u_int64_t bytes, SNMPInterfaceRole role);
 };
 
 #endif /* _NETWORK_INTERFACE_H_ */

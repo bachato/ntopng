@@ -772,6 +772,17 @@ local charts = {
     }
 }
 
+if (ifstats.iface_role_traffic ~= nil) then
+    charts[#charts + 1] = {
+        name       = "ifaceTrafficRoleDistribution",
+        title      = i18n("if_stats_overview.traffic_role_distribution"),
+        update_url = http_prefix .. "/lua/rest/v2/get/interface/iface_role_distribution.lua",
+        url_params = { ifid = ifstats.id, iflocalstat_mode = "distribution" },
+        refresh    = refresh,
+        unit       = "bytes",
+    }
+end
+
 if (ifstats.type ~= "zmq") then
     charts[#charts + 1] = {
         name       = "ifaceTrafficDistribution",
@@ -818,7 +829,7 @@ print [[</td></tr>]]
         print("<th nowrap> <i class='fas fa-tint' aria-hidden='true'></i> " ..
             i18n("if_stats_overview.discarded_flows") ..
             "</th><td width=20%><span id=if_zmq_dropped_flows>" .. formatValue(ifstats.zmqRecvStats.dropped_flows) ..
-            " [ " .. pctg_dropped_flows .. " % ] " .. "</span></td>")
+            " [ " .. string.format("%.2f", pctg_dropped_flows) .. " % ] " .. "</span></td>")
         print("<td colspan=2></td>")
         print("</tr>")
 
@@ -832,7 +843,7 @@ print [[</td></tr>]]
             i18n("if_stats_overview.zmq_message_drops") .. ternary(zmq_charts_available, " <A HREF='" .. url ..
                 "&page=historical&ts_schema=iface:zmq_msg_drops'><i class='fas fa-chart-area fa-sm'></i></A>", "") ..
             "</th><td width=20%><span id=if_zmq_msg_drops>" .. formatValue(ifstats.zmqRecvStats.zmq_msg_drops) ..
-            " [ " .. pctg_dropped_zmq_msg .. " % ] " .. "</span></td>")
+            " [ " .. string.format("%.2f", pctg_dropped_zmq_msg) .. " % ] " .. "</span></td>")
         print("<td nowrap colspan=2> <b>" .. i18n("if_stats_overview.zmq_avg_msg_flows") ..
             "</b>: <span id=if_zmq_avg_msg_flows></span></td>")
         print("</tr>")

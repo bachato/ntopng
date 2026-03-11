@@ -14,10 +14,13 @@ local format_utils = require("format_utils")
 local flow_consts = require "flow_consts"
 local alert_consts = require "alert_consts"
 local json = require("dkjson")
+local snmp_utils
 
 if ntop.isPro() then
     package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
+
     shaper_utils = require("shaper_utils")
+    snmp_utils   = require("snmp_utils")
 end
 
 -- The same base id of the ntop_flow.h file
@@ -1840,11 +1843,19 @@ function printFlowSNMPInfo(snmpdevice, input_idx, output_idx, as_row)
     local outputidx_name = format_portidx_name(snmpdevice, tostring(output_idx), true)
     local url_input = "#"
     local url_output = "#"
+    local input_role = nil
+    local output_role = nil
 
+    if(snmp_utils ~= nil) then       
+       input_role = snmp_utils.get_snmp_interface_role(snmpdevice, tostring(input_idx))
+       output_role = snmp_utils.get_snmp_interface_role(snmpdevice, tostring(output_idx))
+    end
+    
     if ntop.isEnterprise() then
        url_input = ntop.getHttpPrefix() ..
 	  '/lua/pro/enterprise/snmp_interface_details.lua?host='.. snmpdevice ..
 	  '&snmp_port_idx='.. input_idx
+
        url_output = ntop.getHttpPrefix() ..
 	  '/lua/pro/enterprise/snmp_interface_details.lua?host='.. snmpdevice ..
 	  '&snmp_port_idx='.. output_idx
@@ -1852,15 +1863,25 @@ function printFlowSNMPInfo(snmpdevice, input_idx, output_idx, as_row)
 
     if(as_row == true) then
        if(inputidx_name ~= "0") then
+	  local v = ""
+
+	  if(input_role ~= nil) then v = input_role.value end
+	  if(v ~= "") then v = " (".. v .. ")" end
+	     
 	  print("<span class=\"badge bg-info\">" .. "<a href=" .. url_input .. ">"
-		.. (inputidx_name or "") .. "</span></a>")
+		.. (inputidx_name or "") .. v .. "</span></a>")
        end
        
        if(outputidx_name ~= "0") then
+	  local v = ""
+
+	  if(output_role ~= nil) then v = output_role.value end
+	  if(v ~= "") then v = " (".. v .. ")" end
+	  
 	  print(' <i class="fas fa-long-arrow-alt-right"></i> ')
 	  
 	  print("<span class=\"badge bg-info\">" .. "<a href=" .. url_output .. ">" ..
-		(outputidx_name or "") .. "</span></a>")
+		(outputidx_name or "") .. v .. "</span></a>")
        end
        
     else

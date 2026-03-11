@@ -1629,9 +1629,10 @@ public:
   inline void setIGMPType(u_int8_t t) { protos.igmp.igmp_type = t; }
   void addExporterInfo(u_int32_t exporter_ipv4, IpAddress *next_hop,
 		       u_int32_t in_index, u_int32_t out_index,
-		       FlowSource source,
-		       bool src2dst_direction);
-  inline void setSNMPExporterInterfaceRole(SNMPInterfaceRole r) { flowExporterInterfaceRole = r; }
+		       FlowSource source, bool src2dst_direction);
+
+  inline SNMPInterfaceRole getSNMPExporterInterfaceRole()       { return(flowExporterInterfaceRole); }
+  inline void setSNMPExporterInterfaceRole(SNMPInterfaceRole r) { flowExporterInterfaceRole = r;     }
 };
 
 #endif /* _FLOW_H_ */
