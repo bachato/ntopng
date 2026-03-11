@@ -1642,7 +1642,7 @@
           "type": "grafana-clickhouse-datasource",
           "uid": "${DS_CLICKHOUSE}"
         },
-        "definition": "SELECT DISTINCT tags['ifid'] FROM ${db}.timeseries WHERE schema_name = 'iface:traffic_rxtx' ORDER BY 1",
+        "definition": "SELECT DISTINCT tags['ifid'] FROM ${db}.timeseries WHERE tags['ifid'] != '-1' ORDER BY 1",
         "hide": 0,
         "includeAll": true,
         "allValue": ".*",
@@ -1650,7 +1650,7 @@
         "name": "ifid",
         "label": "Interface ID",
         "options": [],
-        "query": "SELECT DISTINCT tags['ifid'] FROM ${db}.timeseries WHERE schema_name = 'iface:traffic_rxtx' ORDER BY 1",
+        "query": "SELECT DISTINCT tags['ifid'] FROM ${db}.timeseries WHERE tags['ifid'] != '-1' ORDER BY 1",
         "refresh": 2,
         "regex": "",
         "sort": 1,
