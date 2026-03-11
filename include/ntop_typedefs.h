@@ -1295,4 +1295,16 @@ typedef enum {
   remote_asn,
 } ASType;
 
+/* snmp_utils.get_snmp_interface_role_options() */
+typedef enum {
+  role_other = 0,
+  role_transit,
+  role_peering,
+  role_internal_interface,
+  role_ix,
+  role_customer_interface,
+  role_internet_connectivity
+} SNMPInterfaceRole;
+
+
 #endif /* _NTOP_TYPEDEFS_H_ */

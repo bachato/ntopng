@@ -294,7 +294,8 @@
 #define NTOPNG_CACHE_PREFIX            "ntopng.cache"
 #define NTOPNG_USER_PREFIX             "ntopng.user"
 #define NTOPNG_API_TOKEN_PREFIX        "ntopng.api_tokens"
-#define MAC_CUSTOM_DEVICE_TYPE         NTOPNG_PREFS_PREFIX ".device_types.%s"
+#define MAC_CUSTOM_DEVICE_TYPE         NTOPNG_PREFS_PREFIX ".device_types.%s
+#define CONST_SNMP_IFACE_ROLES         NTOPNG_PREFS_PREFIX ".snmp_devices.interface_role"
 #define NTOP_HOSTS_SERIAL              "ntopng.host_serial"
 #define MAX_NUM_INTERFACE_IDS 256
 #define DUMMY_BRIDGE_INTERFACE_ID 1 /* Anything but zero */
