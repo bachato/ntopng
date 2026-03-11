@@ -294,7 +294,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 16,
         "x": 0,
         "y": 10
       },
@@ -356,8 +356,8 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 12,
+        "w": 8,
+        "x": 16,
         "y": 10
       },
       "id": 4,
@@ -550,8 +550,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
-        "w": 4,
+        "h": 3,
+        "w": 12,
         "x": 12,
         "y": 19
       },
@@ -622,10 +622,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 16,
-        "y": 19
+        "h": 3,
+        "w": 12,
+        "x": 12,
+        "y": 22
       },
       "id": 7,
       "options": {
@@ -690,10 +690,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 20,
-        "y": 19
+        "h": 3,
+        "w": 12,
+        "x": 12,
+        "y": 25
       },
       "id": 8,
       "options": {
@@ -723,82 +723,6 @@
       ],
       "title": "Alerted Flows",
       "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "grafana-clickhouse-datasource",
-        "uid": "${DS_CLICKHOUSE}"
-      },
-      "description": "Security score per host (client + server sides) assigned by ntopng behavioral analysis. Higher score = more suspicious activity.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-GrYlRd"
-          },
-          "custom": {
-            "fillOpacity": 80,
-            "gradientMode": "none"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 10
-              },
-              {
-                "color": "orange",
-                "value": 50
-              },
-              {
-                "color": "red",
-                "value": 100
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 12,
-        "x": 12,
-        "y": 23
-      },
-      "id": 9,
-      "options": {
-        "displayMode": "gradient",
-        "minVizHeight": 10,
-        "minVizWidth": 0,
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-clickhouse-datasource",
-            "uid": "${DS_CLICKHOUSE}"
-          },
-          "rawSql": "SELECT\n    concat('CLI Score iface-', tags['ifid']) AS name,\n    avg(metrics['cli_score']) AS value\nFROM ${db}.timeseries\nWHERE schema_name = 'iface:score'\n  AND $__timeFilter(tstamp)\n  AND $__conditionalAll(tags['ifid'] IN (${ifid:singlequote}), $ifid)\nGROUP BY tags['ifid']\nUNION ALL\nSELECT\n    concat('SRV Score iface-', tags['ifid']) AS name,\n    avg(metrics['srv_score']) AS value\nFROM ${db}.timeseries\nWHERE schema_name = 'iface:score'\n  AND $__timeFilter(tstamp)\n  AND $__conditionalAll(tags['ifid'] IN (${ifid:singlequote}), $ifid)\nGROUP BY tags['ifid']\nORDER BY name",
-          "format": 1,
-          "refId": "A"
-        }
-      ],
-      "title": "Security Score by Interface (avg)",
-      "type": "bargauge"
     },
     {
       "collapsed": false,
@@ -872,7 +796,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 24,
         "x": 0,
         "y": 29
       },
@@ -905,79 +829,6 @@
         }
       ],
       "title": "Alerts & Alerted Flows Timeline",
-      "transformations": [
-        {
-          "id": "partitionByValues",
-          "options": {
-            "fields": [
-              "metric"
-            ]
-          }
-        }
-      ],
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-clickhouse-datasource",
-        "uid": "${DS_CLICKHOUSE}"
-      },
-      "description": "Host anomaly detection counters: number of local and remote hosts that exhibited anomalous behaviour patterns during the time window.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "bars",
-            "fillOpacity": 60,
-            "lineWidth": 1,
-            "pointSize": 5,
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            }
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 29
-      },
-      "id": 11,
-      "options": {
-        "legend": {
-          "calcs": [
-            "sum",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-clickhouse-datasource",
-            "uid": "${DS_CLICKHOUSE}"
-          },
-          "rawSql": "SELECT * FROM (\nSELECT\n    toDateTime(intDiv(toUnixTimestamp(tstamp), $__interval_s) * $__interval_s) AS time,\n    concat('Local Anomalies iface-', tags['ifid']) AS metric,\n    greatest(0, max(metrics['num_loc_hosts_anom']) - min(metrics['num_loc_hosts_anom'])) AS value\nFROM ${db}.timeseries\nWHERE schema_name = 'iface:hosts_anomalies'\n  AND $__timeFilter(tstamp)\n  AND $__conditionalAll(tags['ifid'] IN (${ifid:singlequote}), $ifid)\nGROUP BY time, tags['ifid']\nUNION ALL\nSELECT\n    toDateTime(intDiv(toUnixTimestamp(tstamp), $__interval_s) * $__interval_s) AS time,\n    concat('Remote Anomalies iface-', tags['ifid']) AS metric,\n    greatest(0, max(metrics['num_rem_hosts_anom']) - min(metrics['num_rem_hosts_anom'])) AS value\nFROM ${db}.timeseries\nWHERE schema_name = 'iface:hosts_anomalies'\n  AND $__timeFilter(tstamp)\n  AND $__conditionalAll(tags['ifid'] IN (${ifid:singlequote}), $ifid)\nGROUP BY time, tags['ifid']\n) ORDER BY time, metric",
-          "format": 0,
-          "refId": "A"
-        }
-      ],
-      "title": "Host Anomalies",
       "transformations": [
         {
           "id": "partitionByValues",
@@ -1116,28 +967,107 @@
         "type": "grafana-clickhouse-datasource",
         "uid": "${DS_CLICKHOUSE}"
       },
-      "description": "Number of new flows created per second. A sudden spike can indicate a scan, DDoS, or traffic burst.",
+      "description": "Distribution of flows across QoE categories (Excellent/Good/Fair/Degraded/Poor/Unknown) aggregated over the selected time range. Only available with ntopng Enterprise L.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "lineWidth": 2,
-            "pointSize": 4,
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            }
-          },
-          "unit": "short",
-          "displayName": "New flows/s"
+          "mappings": [],
+          "unit": "short"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Excellent"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Good"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Fair"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Degraded"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Poor"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Unknown"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "gray",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -1145,20 +1075,25 @@
         "x": 12,
         "y": 38
       },
-      "id": 13,
+      "id": 107,
       "options": {
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
         "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
           "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value",
+            "percent"
+          ]
         },
+        "pieType": "pie",
         "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
@@ -1167,23 +1102,14 @@
             "type": "grafana-clickhouse-datasource",
             "uid": "${DS_CLICKHOUSE}"
           },
-          "rawSql": "SELECT\n    toDateTime(intDiv(toUnixTimestamp(tstamp), $__interval_s) * $__interval_s) AS time,\n    concat('New flows/s iface-', tags['ifid']) AS metric,\n    greatest(0, max(metrics['new_flows']) - min(metrics['new_flows'])) / $__interval_s AS value\nFROM ${db}.timeseries\nWHERE schema_name = 'iface:new_flows'\n  AND $__timeFilter(tstamp)\n  AND $__conditionalAll(tags['ifid'] IN (${ifid:singlequote}), $ifid)\nGROUP BY time, tags['ifid']\nORDER BY time, metric",
+          "rawSql": "SELECT\n    toDateTime($__fromTime) AS time,\n    metric,\n    total\nFROM (\n    SELECT 'Excellent' AS metric, sum(metrics['excellent']) AS total\n    FROM ${db}.timeseries\n    WHERE schema_name = 'iface:qoe_stats'\n  AND $__timeFilter(tstamp)\n  AND $__conditionalAll(tags['ifid'] IN (${ifid:singlequote}), $ifid)\n    UNION ALL\n    SELECT 'Good' AS metric, sum(metrics['good']) AS total\n    FROM ${db}.timeseries\n    WHERE schema_name = 'iface:qoe_stats'\n  AND $__timeFilter(tstamp)\n  AND $__conditionalAll(tags['ifid'] IN (${ifid:singlequote}), $ifid)\n    UNION ALL\n    SELECT 'Fair' AS metric, sum(metrics['fair']) AS total\n    FROM ${db}.timeseries\n    WHERE schema_name = 'iface:qoe_stats'\n  AND $__timeFilter(tstamp)\n  AND $__conditionalAll(tags['ifid'] IN (${ifid:singlequote}), $ifid)\n    UNION ALL\n    SELECT 'Degraded' AS metric, sum(metrics['degraded']) AS total\n    FROM ${db}.timeseries\n    WHERE schema_name = 'iface:qoe_stats'\n  AND $__timeFilter(tstamp)\n  AND $__conditionalAll(tags['ifid'] IN (${ifid:singlequote}), $ifid)\n    UNION ALL\n    SELECT 'Poor' AS metric, sum(metrics['poor']) AS total\n    FROM ${db}.timeseries\n    WHERE schema_name = 'iface:qoe_stats'\n  AND $__timeFilter(tstamp)\n  AND $__conditionalAll(tags['ifid'] IN (${ifid:singlequote}), $ifid)\n    UNION ALL\n    SELECT 'Unknown' AS metric, sum(metrics['unknown']) AS total\n    FROM ${db}.timeseries\n    WHERE schema_name = 'iface:qoe_stats'\n  AND $__timeFilter(tstamp)\n  AND $__conditionalAll(tags['ifid'] IN (${ifid:singlequote}), $ifid)\n)\nORDER BY total DESC",
           "format": 0,
           "refId": "A"
         }
       ],
-      "title": "New Flows per Second",
-      "transformations": [
-        {
-          "id": "partitionByValues",
-          "options": {
-            "fields": [
-              "metric"
-            ]
-          }
-        }
-      ],
-      "type": "timeseries"
+      "title": "QoE Distribution",
+      "type": "piechart",
+      "transformations": []
     },
     {
       "collapsed": false,
@@ -1194,7 +1120,7 @@
         "y": 46
       },
       "id": 105,
-      "title": "L4 Protocol & Traffic Locality",
+      "title": "L4 Protocols",
       "type": "row"
     },
     {
@@ -1202,7 +1128,7 @@
         "type": "grafana-clickhouse-datasource",
         "uid": "${DS_CLICKHOUSE}"
       },
-      "description": "Total bytes per L4 protocol (TCP, UDP, ICMP, …) over the selected time range.",
+      "description": "Total bytes per L4 protocol (TCP, UDP, ICMP, \u2026) over the selected time range.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1215,7 +1141,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
+        "w": 24,
         "x": 0,
         "y": 47
       },
@@ -1254,110 +1180,6 @@
       "title": "Traffic by L4 Protocol",
       "type": "piechart",
       "transformations": []
-    },
-    {
-      "datasource": {
-        "type": "grafana-clickhouse-datasource",
-        "uid": "${DS_CLICKHOUSE}"
-      },
-      "description": "Traffic split between local-to-remote and remote-to-local directions. High remote-to-local may indicate inbound scans or data exfiltration targets; high local-to-remote may indicate exfiltration or C2 callbacks.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 20,
-            "lineWidth": 2,
-            "pointSize": 4,
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "normal"
-            }
-          },
-          "unit": "bps"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "Local→Remote.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "blue",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "Remote→Local.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "purple",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 16,
-        "x": 8,
-        "y": 47
-      },
-      "id": 15,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-clickhouse-datasource",
-            "uid": "${DS_CLICKHOUSE}"
-          },
-          "rawSql": "SELECT * FROM (\nSELECT\n    toDateTime(intDiv(toUnixTimestamp(tstamp), $__interval_s) * $__interval_s) AS time,\n    concat('Local→Remote iface-', tags['ifid']) AS metric,\n    greatest(0, max(metrics['bytes']) - min(metrics['bytes'])) * 8 / $__interval_s AS bps\nFROM ${db}.timeseries\nWHERE schema_name = 'iface:local2remote'\n  AND $__timeFilter(tstamp)\n  AND $__conditionalAll(tags['ifid'] IN (${ifid:singlequote}), $ifid)\nGROUP BY time, tags['ifid']\nUNION ALL\nSELECT\n    toDateTime(intDiv(toUnixTimestamp(tstamp), $__interval_s) * $__interval_s) AS time,\n    concat('Remote→Local iface-', tags['ifid']) AS metric,\n    greatest(0, max(metrics['bytes']) - min(metrics['bytes'])) * 8 / $__interval_s AS bps\nFROM ${db}.timeseries\nWHERE schema_name = 'iface:remote2local'\n  AND $__timeFilter(tstamp)\n  AND $__conditionalAll(tags['ifid'] IN (${ifid:singlequote}), $ifid)\nGROUP BY time, tags['ifid']\n) ORDER BY time, metric",
-          "format": 0,
-          "refId": "A"
-        }
-      ],
-      "title": "Traffic Locality: Local↔Remote (bps)",
-      "transformations": [
-        {
-          "id": "partitionByValues",
-          "options": {
-            "fields": [
-              "metric"
-            ]
-          }
-        }
-      ],
-      "type": "timeseries"
     },
     {
       "collapsed": false,
