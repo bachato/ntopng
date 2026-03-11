@@ -950,4 +950,20 @@ end
 
 -- ###############################################
 
+--- @param toast table The toast is the logic model defined in defined_toasts
+--- @param container table Is the table where to put the new toast ui
+function predicates.no_local_hosts(toast, container)
+    if IS_SYSTEM_INTERFACE or IS_PCAP_DUMP then
+        return
+    end
+
+    if interface.getNumLocalHosts() == 0 and interface.getNumHosts() > 5 and ntop.getUptime() > 60 then
+        local title = i18n("no_local_hosts_title")
+        local description = i18n("configured_localhost")
+        table.insert(container, toast_ui:new(toast.id, title, description, ToastLevel.DANGER, nil, toast.dismissable))
+    end
+end
+
+-- ###############################################
+
 return predicates
