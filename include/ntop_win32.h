@@ -86,6 +86,7 @@ extern int pthread_create(pthread_t *threadId, void *notUsed,
                           void *(*__start_routine)(void *), void *userParm);
 extern void pthread_detach(pthread_t *threadId);
 extern int pthread_join(pthread_t thread, void **value_ptr);
+extern pthread_t pthread_self(void);
 extern int pthread_mutex_lock(pthread_mutex_t *);
 extern int pthread_mutex_unlock(pthread_mutex_t *);
 extern int pthread_mutex_init(pthread_mutex_t *mutex, void *unused);
