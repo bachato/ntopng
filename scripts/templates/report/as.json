@@ -40,6 +40,45 @@
 	],
 	"components": [
 		{
+			"component": "pie",
+			"id": "top_l7_categories",
+			"i18n_name": "top_l7_cat",
+			"width": 4,
+			"height": 4,
+			"params": {
+				"url": "/lua/pro/rest/v2/get/db/charts/top_l7_categories.lua",
+				"url_params": {
+					"length": 10
+				}
+			}
+		},
+		{
+			"component": "pie",
+			"id": "top_l7_proto",
+			"i18n_name": "top_l7_proto",
+			"width": 4,
+			"height": 4,
+			"params": {
+				"url": "/lua/pro/rest/v2/get/db/charts/top_l7_proto.lua",
+				"url_params": {
+					"length": 10
+				}
+			}
+		},
+		{
+			"component": "pie",
+			"id": "top_l4_proto",
+			"i18n_name": "top_l4_proto",
+			"width": 4,
+			"height": 4,
+			"params": {
+				"url": "/lua/pro/rest/v2/get/db/charts/top_l4_proto.lua",
+				"url_params": {
+					"length": 10
+				}
+			}
+		},
+		{
 			"component": "top-timeseries",
 			"id": "top_active_asn",
 			"i18n_name": "graphs.top_customer_asn",

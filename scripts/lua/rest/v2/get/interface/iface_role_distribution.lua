@@ -40,8 +40,6 @@ if (ifstats.iface_role_traffic ~= nil) then
    if(ifstats.iface_role_traffic.other > 0) then
       res[#res + 1] = { label = i18n("prefs.snmp_interface_role_list.other"), value = ifstats.iface_role_traffic.other }
    end
-else
-   res[#res + 1] = { label = "No traffic yet", value = 0 }
 end
 
 rest_utils.answer(rc, res)

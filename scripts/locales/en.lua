@@ -2239,6 +2239,7 @@ local lang = {
     ["actual_traffic"] = "Current Traffic",
     ["add_component"] = "Add Widget",
     ["advanced_settings"] = "Advanced Settings",
+    ["classification"] = "Traffic Classification",
     ["community_dashboard"] = "Community Dashboard",
     ["component_height"] = "Height",
     ["component_json_error"] = "There is an error in the JSON syntax",

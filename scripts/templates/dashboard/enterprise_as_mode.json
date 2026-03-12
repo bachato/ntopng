@@ -75,6 +75,57 @@
 				"counter_formatter" : "number"
 			}
 		},
+		{
+			"component" : "pie",
+			"id" : "top_l7_proto",
+			"i18n_name" : "top_l7_proto",
+			"width" : 4,
+			"height" : 4,
+			"requires" : {
+				"modules" : [ "l7_timeseries" ]
+			},
+			"params" : {
+				"url" : "/lua/rest/v2/get/interface/l7/stats.lua",
+				"url_params" : {
+					"breed" : "true",
+					"ndpistats_mode" : "count"
+				},
+				"unit": "number",
+				"label": "flows"
+			}
+		},
+		{
+			"component" : "pie",
+			"id" : "traffic_classification",
+			"i18n_name" : "dashboard.classification",
+			"width" : 4,
+			"height" : 4,
+			"requires" : {
+				"modules" : [ "l7_timeseries" ]
+			},
+			"params" : {
+				"url" : "/lua/rest/v2/get/interface/l7/stats.lua",
+				"url_params" : {
+					"breed" : "true",
+					"ndpistats_mode" : "sinceStartup"
+				},
+				"unit": "bytes"
+			}
+		},
+
+		{
+			"component": "pie",
+			"id": "traffic_role_distribution",
+			"i18n_name": "if_stats_overview.traffic_role_distribution",
+			"width": 4,
+			"height": 4,
+			"params": {
+				"url": "/lua/rest/v2/get/interface/iface_role_distribution.lua",
+				"url_params": {},
+				"source_type": "interface"
+			}
+		},
+
         {
 			"component" : "top-timeseries",
 			"id" : "top_active_asn",

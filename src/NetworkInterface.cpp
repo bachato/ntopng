@@ -8143,7 +8143,7 @@ void NetworkInterface::lua(lua_State *vm, bool fullStats) {
     lua_push_uint64_table_entry(vm, "periodic_stats_update_frequency_secs",
 				periodicStatsUpdateFrequency());
 
-    if(roleStats.peering_bytes || roleStats.transit_bytes) {
+    if(roleStats.peering_bytes || roleStats.transit_bytes || roleStats.other_bytes) {
       lua_newtable(vm);
 
       lua_push_uint64_table_entry(vm, "peering", roleStats.peering_bytes);

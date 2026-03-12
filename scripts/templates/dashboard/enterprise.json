@@ -196,7 +196,7 @@
 		{
 			"component" : "pie",
 			"id" : "traffic_classification",
-			"i18n_name" : "classification",
+			"i18n_name" : "dashboard.classification",
 			"width" : 4,
 			"height" : 4,
 			"requires" : {
