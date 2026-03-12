@@ -4683,6 +4683,7 @@ void Ntop::dumpLuaCache(lua_State *vm) {
 
 /* ******************************************* */
 
+#ifdef NTOPNG_PRO
 void Ntop::snmpSetInterfaceRole(u_int32_t exporter_ip_v4,
 				u_int32_t interface_id,
 				SNMPInterfaceRole interface_role) {
@@ -4705,4 +4706,4 @@ SNMPInterfaceRole Ntop::snmpGetInterfaceRole(u_int32_t exporter_ip_v4,
   } else
     return(role_other);
 }
-
+#endif
