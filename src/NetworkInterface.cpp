@@ -5292,6 +5292,7 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
   LocationPolicy server_policy;
   TcpFlowStateFilter tcp_flow_state_filter;
   TransitAS transit_as;
+  SNMPInterfaceRole interface_role;
   bool unicast, unidirectional, alerted_flows, periodic_flows,
     cli_pool_found = false, srv_pool_found = false;
   u_int32_t asn_filter = (u_int32_t) -1;
@@ -5481,6 +5482,12 @@ static bool flow_matches(Flow *f, struct flowHostRetriever *retriever) {
     if (retriever->pag &&
         retriever->pag->transitASFilter(&transit_as) &&
         !(f->getTransitASType() == transit_as))
+      return (false);
+
+    if (retriever->pag &&
+        retriever->pag->interfaceRoleFilter(&interface_role) &&
+        interface_role != role_max_value && /* Exclude the default filter (All flows, basically) */
+        !(f->getSNMPExporterInterfaceRole() == interface_role))
       return (false);
 
     if (retriever->pag && retriever->pag->ipVersion(&ip_version) &&

@@ -1270,7 +1270,8 @@ local flow_columns = {
    ['USER_LABEL'] =           { tag = "user_label" },
    ['USER_LABEL_TSTAMP'] =    { tag = "user_label_tstamp" },
    ['SRC_PEER_ASN'] =         { tag = "src_peer_asn" },
-   ['DST_PEER_ASN'] =         { tag = "dst_peer_asn" }
+   ['DST_PEER_ASN'] =         { tag = "dst_peer_asn" },
+   ['INTERFACE_ROLE'] =         { tag = "iface_role", db_type = "Number", db_raw_type = "Uint8" }
 }
 local aggregated_flow_columns = {
    ['FLOW_ID'] =              { tag = "rowid", db_type = "Number", db_raw_type = "Uint64" },

@@ -58,6 +58,7 @@ Paginator::Paginator() {
   server_mode = location_all;
   tcp_flow_state_filter = tcp_flow_state_filter_all;
   transit_as = all_flow;
+  interface_role = role_max_value;
   unicast_traffic = -1;
   unidirectional_traffic = -1;
   alerted_flows = -1;
@@ -263,6 +264,8 @@ void Paginator::readOptions(lua_State* L, int index) {
           alert_type_filter = lua_tointeger(L, -1);
         else if (!strcmp(key, "statusSeverityFilter"))
           alert_type_severity_filter = (AlertLevelGroup)lua_tointeger(L, -1);
+        else if (!strcmp(key, "interfaceRole"))
+          interface_role = (SNMPInterfaceRole) lua_tointeger(L, -1);
         // else
         // ntop->getTrace()->traceEvent(TRACE_ERROR, "Invalid int type (%d) for
         // option %s", lua_tointeger(L, -1), key);

@@ -79,7 +79,7 @@
  * @component AsStats
  */
 
-import { ref, onBeforeMount, computed } from "vue";
+import { ref, onBeforeMount, onMounted, computed } from "vue";
 import { default as sortingFunctions } from "../utilities/sorting-utils.js";
 import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as DashboardTimeseries } from "./dashboard-timeseries.vue";
@@ -195,6 +195,7 @@ const updateChartDone = () => {
 /* *************************************************** */
 // Lifecycle Hooks
 /* *************************************************** */
+onMounted(() => {})
 
 /**
  * Component initialization before mounting
@@ -225,17 +226,6 @@ onBeforeMount(async () => {
     }
     ntopng_url_manager.set_key_to_url(current_interface_role.value.key, current_interface_role.value.value);
 
-    // Load Interface filter from URL
-    await load_table_filters_array();
-    const selected_interface = ntopng_url_manager.get_url_entry("interface_filter");
-    if (selected_interface) {
-        const iface_option = interface_filter_options.value.find((el) => String(el.value) === String(selected_interface));
-        if (iface_option) {
-            current_interface_filter.value = iface_option;
-            ntopng_url_manager.set_key_to_url(current_interface_filter.value.key, current_interface_filter.value.value);
-        }
-    }
-
     // If ClickHouse is enabled, then it is possible to not only see th "live" data
     // but also see historical data, so simply add data
     if (showTimeResolution.value) {
@@ -254,6 +244,17 @@ onBeforeMount(async () => {
         selected_resolution.value = resolutionOptions.value.find((el) => el.value === requestedResolution)
     }
     select_resolution(selected_resolution.value, true);
+
+    // Load Interface filter from URL
+    await load_table_filters_array();
+    const selected_interface = ntopng_url_manager.get_url_entry("interface_filter");
+    if (selected_interface) {
+        const iface_option = interface_filter_options.value.find((el) => String(el.value) === String(selected_interface));
+        if (iface_option) {
+            current_interface_filter.value = iface_option;
+            ntopng_url_manager.set_key_to_url(current_interface_filter.value.key, current_interface_filter.value.value);
+        }
+    }
 });
 
 /* *************************************************** */
@@ -315,6 +316,7 @@ const add_interface_role_filter = async (value) => {
     // If interface_filter is present, remove it
     ntopng_url_manager.delete_key_from_url(current_interface_filter.value.key);
     await load_table_filters_array();
+    timeseries_key.value = !timeseries_key.value; // Force chart re-render
     table_as_stats.value.refresh_table(false);
 };
 
@@ -325,6 +327,7 @@ const add_interface_role_filter = async (value) => {
 const add_interface_filter = (value) => {
     current_interface_filter.value = value;
     ntopng_url_manager.set_key_to_url(current_interface_filter.value.key, current_interface_filter.value.value);
+    timeseries_key.value = !timeseries_key.value; // Force chart re-render
     table_as_stats.value.refresh_table(false);
 };
 

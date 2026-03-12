@@ -78,6 +78,31 @@ local function formatHistoricalASNFilters(options, historical_field)
     return filter
 end
 
+function as_utils.formatFilters(options, add_to_existing_options)
+    local filters = {}
+    -- Interface Role available only from enterprise M
+    if ntop.isEnterpriseM() then
+        local interface_role_filter = options.interface_role
+        if interface_role_filter and not tonumber(interface_role_filter) then
+            package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
+            local snmp_utils = require "snmp_utils"
+            -- Filter in string format (value), convert to id
+            interface_role_filter = snmp_utils.get_snmp_interface_role_id_by_value(interface_role_filter)
+            -- -1 as interface role is all roles, so no filter needs to be applied
+            if interface_role_filter.id >= 0 then
+                if add_to_existing_options then
+                    options.interface_role = nil
+                    options.interfaceRole = interface_role_filter.id
+                    return options
+                else
+                    filters.interfaceRole = interface_role_filter.id
+                end
+            end
+        end
+    end
+    return filters
+end
+
 function as_utils.getProfilingKey()
     return ASN_PROFILING_KEY
 end
@@ -235,8 +260,11 @@ function as_utils.retrieveASLiveTraffic(options)
         traceError(TRACE_NORMAL, TRACE_CONSOLE,
             string.format("[ASN Profiling][Time: %s] Start request to DB (Live)\n", os.time()))
     end
+    -- Before getting the data, format the paginator, to filter flows
+    local filter_options = as_utils.formatFilters(options)
+
     -- Get live ASN statistics from interface
-    local live_asn_info = interface.getLiveASNStats() or {}
+    local live_asn_info = interface.getLiveASNStats(filter_options) or {}
 
     if (perform_profiling) then
         traceError(TRACE_NORMAL, TRACE_CONSOLE,
@@ -358,13 +386,19 @@ function as_utils.retrieveASHistoricalTraffic(options)
             string.format("[ASN Profiling][Time: %s] Start request to DB (Historical)\n", os.time()))
     end
 
+    -- Before getting the data, format the paginator, to filter flows
+    local filter_options = as_utils.formatFilters(options)
+    local interface_role_filter = ""
+    if (filter_options.interfaceRole) then
+        interface_role_filter = string.format(" AND INTERFACE_ROLE = %u", filter_options.interfaceRole)
+    end
     -- Built two different where for efficiency reasons, filtering inside the UNION
     -- is a lot faster the filtering outside even if the code readability is a bit less
     local src_asn_filters = formatHistoricalASNFilters(options, HISTORICAL_SRC_ASN)
     local dst_asn_filters = formatHistoricalASNFilters(options, HISTORICAL_DST_ASN)
     -- Build WHERE clause for time range and interface
-    local where = string.format("(FIRST_SEEN >= %u AND FIRST_SEEN <= %u AND LAST_SEEN <= %u) AND INTERFACE_ID = %u",
-        tonumber(options.epoch_begin), tonumber(options.epoch_end), tonumber(options.epoch_end), tonumber(options.ifid))
+    local where = string.format("(FIRST_SEEN >= %u AND FIRST_SEEN <= %u AND LAST_SEEN <= %u) AND INTERFACE_ID = %u %s",
+        tonumber(options.epoch_begin), tonumber(options.epoch_end), tonumber(options.epoch_end), tonumber(options.ifid), interface_role_filter)
 
     -- Complex SQL query to aggregate ASN statistics from flows table
     -- Combines both source and destination ASNs

@@ -2462,6 +2462,7 @@ local known_parameters = {
 
    ["show_as"] = validateImportantASN,
    ["interface_role"] = validateInterfaceRole,
+   ["iface_role"] = validateEmptyOr(validateListOfTypeInline(validateFilters(validateNumber))),
    ["interface_filter"] = validateSingleWord,
 
    -- Input fields

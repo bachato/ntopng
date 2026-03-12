@@ -22,6 +22,8 @@ local epoch_begin = _GET["epoch_begin"] or 0
 local epoch_end = _GET["epoch_end"] or 0
 local is_live = toboolean(_GET["is_live"] or true)
 local selected_asn = _GET["show_as"]
+local interface_role = _GET["interface_role"]
+local ip_interface = _GET["ip_interface"]
 
 local ases_info = {}
 local res = {}
@@ -38,7 +40,9 @@ local options = {
     ifid = ifid,
     epoch_begin = epoch_begin,
     epoch_end = epoch_end,
-    selected_asn = selected_asn
+    selected_asn = selected_asn,
+    interface_role = interface_role,
+    ip_interface = ip_interface
 }
 
 if (perform_profiling) then

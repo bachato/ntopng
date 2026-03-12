@@ -56,6 +56,7 @@ class Paginator {
   LocationPolicy server_mode;
   TcpFlowStateFilter tcp_flow_state_filter;
   TransitAS transit_as;
+  SNMPInterfaceRole interface_role;
 #ifdef NTOPNG_PRO
   u_int8_t qoe_filter;
 #endif
@@ -318,6 +319,14 @@ class Paginator {
   inline bool transitASFilter(TransitAS *f) const {
     if (transit_as) {
       (*f) = transit_as;
+      return true;
+    }
+    return false;
+  }
+
+  inline bool interfaceRoleFilter(SNMPInterfaceRole *f) const {
+    if (interface_role) {
+      (*f) = interface_role;
       return true;
     }
     return false;

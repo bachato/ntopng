@@ -12,6 +12,7 @@ local rest_utils = require "rest_utils"
 local alert_consts = require "alert_consts"
 local format_utils = require "format_utils"
 local l4_protocol_list = require "l4_protocol_list"
+local as_utils = require "as_utils"
 local icmp_utils = require("icmp_utils")
 
 if ntop.isPro() then
@@ -51,6 +52,7 @@ end
 
 local throughput_type = getThroughputType()
 local flows_filter = getFlowsFilter()
+flows_filter = as_utils.formatFilters(flows_filter, true)
 
 -- column names defined in include/ntop_typedefs.h:682 enum sortField
 local mapping_column_lua_c = {

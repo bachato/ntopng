@@ -348,6 +348,13 @@ tag_utils.defined_tags = {
         operators = { 'eq', 'neq' },
         hourly_available = true,
     },
+    iface_role = {
+        type = tag_utils.input_types.select,
+        value_type = 'iface_role',
+        i18n_label = i18n('as_stats.interface_role'),
+        operators = { 'eq', 'neq' },
+        hourly_available = false,
+    },
     src2dst_tcp_flags = {
         value_type = 'flags',
         i18n_label = i18n('db_search.src2dst_tcp_flags'),
@@ -1655,6 +1662,18 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
             filter.options[#filter.options + 1] = {
                 value = severity.severity_id,
                 label = i18n(severity.i18n_title)
+            }
+        end
+    elseif tag.value_type == "iface_role" then
+        local snmp_utils = require "snmp_utils"
+        filter.value_type = 'array'
+        filter.options = {}
+        local snmp_roles = snmp_utils.get_snmp_interface_role_options()
+        for _, role in pairs(snmp_roles) do
+            
+            filter.options[#filter.options + 1] = {
+                value = role.id,
+                label = role.label
             }
         end
     elseif tag.value_type == "snmp_interface" then

@@ -188,6 +188,7 @@ function getFlowsFilter()
     local client = _GET["client"]
     local server = _GET["server"]
     local flow_info = _GET["flow_info"]
+    local interface_role = _GET["interface_role"]
     local iface_index = tonumber(_GET["interface_filter"] or -1)
 
     if sortColumn == nil or sortColumn == "column_" or sortColumn == "" then
@@ -430,6 +431,10 @@ function getFlowsFilter()
 
     if not isEmptyString(flow_info) then
         pageinfo["flow_info"] = flow_info
+    end
+
+    if not isEmptyString(interface_role) then
+        pageinfo["interface_role"] = interface_role
     end
 
     return pageinfo
