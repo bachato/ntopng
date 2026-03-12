@@ -6,18 +6,28 @@
 # npm install
 #
 
-branch_name=`git branch | head | cut -d ' ' -f 2`
+CURR_DIR=$(pwd)
 
-echo "-- Compiling Dist -- "
-npm run build || exit 1
+branch_name=`git branch | head | cut -d ' ' -f 2` | tail -n 1
 
 echo "-- Pushing code -- "
 cd httpdocs/dist
 git checkout $branch_name
 git pull --rebase
-git add *
-git commit -m 'updated dist' || exit 1
-echo "Committed"
+cd $CURR_DIR
 
+echo "-- Compiling Dist -- "
+npm run build || exit 1
+
+cd httpdocs/dist
+git add *
+git commit -m 'Update dist' || exit 1
+echo "Dist committed"
 git push || exit 1
-echo "Pushed"
+echo "Dist Pushed"
+cd $CURR_DIR
+
+git add httpdocs/dist
+git commit -m 'Update dist' || exit 1
+echo "Dist ref committed"
+
