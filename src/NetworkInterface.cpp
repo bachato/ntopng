@@ -3069,6 +3069,9 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
 	  if (gre.proto == 0x6558 /* Transparent Ethernet Bridging */) {
 	    eth_offset = offset;
 	    goto datalink_check;
+	  } else if (gre.proto == 0x88BE /* ERSPAN */) {
+	    eth_offset = offset;
+	    goto datalink_check;
 	  } else if (gre.proto == ETHERTYPE_IP) {
 	    ip_offset = offset, encapsulation_overhead = offset;
 	    goto decode_packet_eth;
