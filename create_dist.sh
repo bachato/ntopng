@@ -24,10 +24,11 @@ git add *
 git commit -m 'Update dist' || exit 1
 echo "Dist committed"
 git push || exit 1
-echo "Dist Pushed"
+echo "Dist pushed"
 cd $CURR_DIR
 
 git add httpdocs/dist
 git commit -m 'Update dist' || exit 1
 echo "Dist ref committed"
-
+git push || exit 1
+echo "Dist ref pushed"
