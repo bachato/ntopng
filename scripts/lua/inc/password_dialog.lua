@@ -323,7 +323,7 @@ print([[
       <div class="input-group mb-3" style="max-width:220px">
         <input type="text" id="mfa-confirm-code" class="form-control text-center"
                maxlength="6" pattern="[0-9]{6}" placeholder="000000"
-               inputmode="numeric" autocomplete="one-time-code">
+               inputmode="numeric" autocomplete="one-time-code"> &nbsp;
         <button id="btn-mfa-enable" class="btn btn-success">
           ]] .. (i18n("mfa.enable_button") or "Enable MFA") .. [[
         </button>
@@ -337,7 +337,7 @@ print([[
       <div class="input-group mb-3" style="max-width:220px">
         <input type="text" id="mfa-disable-code" class="form-control text-center"
                maxlength="6" pattern="[0-9]{6}" placeholder="000000"
-               inputmode="numeric" autocomplete="one-time-code">
+               inputmode="numeric" autocomplete="one-time-code"> &nbsp;
         <button id="btn-mfa-disable-confirm" class="btn btn-danger">
           ]] .. (i18n("mfa.disable_confirm_button") or "Confirm Disable") .. [[
         </button>
