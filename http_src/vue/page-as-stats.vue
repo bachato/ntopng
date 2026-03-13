@@ -1,7 +1,7 @@
 <template>
     <div>
         <!-- Filter and Time Resolution Controls -->
-        <div class="button-group mb-2 d-flex align-items-center">
+        <div class="d-flex flex-wrap align-items-center mb-2 gap-1">
             <!-- ASN Type Filter Dropdown -->
             <div class="dropdown me-3 d-flex">
                 <span class="no-wrap d-flex align-items-center filters-label me-2">
@@ -26,7 +26,8 @@
                     <b>{{ _i18n("as_stats.interface_role") }}: </b>
                 </span>
                 <SelectSearch v-model:selected_option="current_interface_role" theme="bootstrap-5"
-                    :options="interface_role_options" @select_option="add_interface_role_filter" :dropdown_size="'small'" />
+                    :options="interface_role_options" @select_option="add_interface_role_filter"
+                    :dropdown_size="'small'" />
             </div>
 
             <!-- Interface Filter Dropdown (visible only when role is peering or transit) -->
@@ -36,12 +37,13 @@
                     <b>{{ _i18n("as_stats.interfaces") }}: </b>
                 </span>
                 <SelectSearch v-model:selected_option="current_interface_filter" theme="bootstrap-5"
-                    :options="interface_filter_options" @select_option="add_interface_filter" :dropdown_size="'small'" />
+                    :options="interface_filter_options" @select_option="add_interface_filter"
+                    :dropdown_size="'small'" />
             </div>
         </div>
 
         <!-- Timeseries Chart Section -->
-        <div v-if="(showChart)" class="position-relative" style="height: 330px;">
+        <div v-if="(showChart)" class="position-relative chart-container">
             <!-- Loading Overlay -->
             <Loading :isLoading="loadingChart" />
 
@@ -124,9 +126,11 @@ const current_interface_role = ref([]);
 const current_interface_filter = ref([]);
 
 // ASN Type Icons with Tooltips
-const customerIcon = '<i class="fa-solid fa-house-flag" data-bs-toggle="tooltip" data-bs-placement="top" title="' + _i18n("asn_configuration.customer_asn_title") + '"></i>';
-const subCustomerIcon = '<i class="fa-solid fa-house-laptop" data-bs-toggle="tooltip" data-bs-placement="top" title="' + _i18n("asn_configuration.sub_customer_asn_title") + '"></i>';
-const remoteIcon = '<i class="fa-solid fa-house-fire" data-bs-toggle="tooltip" data-bs-placement="top" title="' + _i18n("asn_configuration.remote_asn_title") + '"></i>';
+const ASN_ICONS = {
+    customer: { icon: 'fa-house-flag', i18nKey: 'asn_configuration.customer_asn_title' },
+    subCustomer: { icon: 'fa-house-laptop', i18nKey: 'asn_configuration.sub_customer_asn_title' },
+    remote: { icon: 'fa-house-fire', i18nKey: 'asn_configuration.remote_asn_title' },
+};
 
 // Component Keys for Re-rendering
 const timeseries_key = ref(false);
@@ -142,13 +146,15 @@ const asn_type_option = ref([
 
 // Interface Role Filter Options
 const interface_role_options = ref([
-    { key: "interface_role", value: "all",     label: i18n("as_stats.all_roles") },
-    { key: "interface_role", value: "peering",   label: i18n("prefs.snmp_interface_role_list.peering") },
-    { key: "interface_role", value: "transit",  label: i18n("prefs.snmp_interface_role_list.transit") },
+    { key: "interface_role", value: "all", label: i18n("as_stats.all_roles") },
+    { key: "interface_role", value: "peering", label: i18n("prefs.snmp_interface_role_list.peering") },
+    { key: "interface_role", value: "transit", label: i18n("prefs.snmp_interface_role_list.transit") },
 ]);
 
 // Interface Filter Options
-const interface_filter_options = ref([]);
+const interface_filter_options = ref([
+    { key: "interface_filter", value: `all`, label: i18n("db_search.all.input_snmp") }
+]);
 
 // Time Resolution Options
 let resolutionOptions = ref([
@@ -192,17 +198,10 @@ const updateChartDone = () => {
     loadingChart.value = false;
 };
 
-/* *************************************************** */
-// Lifecycle Hooks
-/* *************************************************** */
-onMounted(() => {})
-
 /**
- * Component initialization before mounting
- * Loads saved filter preferences from URL or localStorage
+ * Loads ASN filter from URL parameters or sets default
  */
-onBeforeMount(async () => {
-    // Load ASN filter from URL
+const loadASNFilter = () => {
     const selected_as = ntopng_url_manager.get_url_entry("show_as");
     if (selected_as) {
         const option = asn_type_option.value.find((el) => el.value === selected_as);
@@ -213,8 +212,12 @@ onBeforeMount(async () => {
         current_selected_option.value = asn_type_option.value[0];
     }
     ntopng_url_manager.set_key_to_url(current_selected_option.value.key, current_selected_option.value.value);
-    
-    // Load Interface Role filter from URL
+}
+
+/**
+ * Loads interface role filter from URL parameters or sets default
+ */
+const loadInterfaceRoleFilter = () => {
     const selected_role = ntopng_url_manager.get_url_entry("interface_role");
     if (selected_role) {
         const role_option = interface_role_options.value.find((el) => el.value === selected_role);
@@ -225,7 +228,29 @@ onBeforeMount(async () => {
         current_interface_role.value = interface_role_options.value[0];
     }
     ntopng_url_manager.set_key_to_url(current_interface_role.value.key, current_interface_role.value.value);
+}
 
+/**
+ * Loads interface filter from URL parameters and populates interface list
+ */
+const loadInterfaceFilter = () => {
+    load_interfaces_filter().then(() => {
+        const selected_interface = ntopng_url_manager.get_url_entry("interface_filter");
+        if (selected_interface) {
+            const iface_option = interface_filter_options.value.find((el) => String(el.value) === String(selected_interface));
+            if (!iface_option) {
+                // Interface not found, falling back to the default one
+                current_interface_filter.value = interface_filter_options.value[0];
+                ntopng_url_manager.set_key_to_url(current_interface_filter.value.key, current_interface_filter.value.value);
+            }
+        }
+    })
+}
+
+/**
+ * Loads time resolution options and sets selected value from URL or localStorage
+ */
+const loadTimeResolution = () => {
     // If ClickHouse is enabled, then it is possible to not only see th "live" data
     // but also see historical data, so simply add data
     if (showTimeResolution.value) {
@@ -244,17 +269,26 @@ onBeforeMount(async () => {
         selected_resolution.value = resolutionOptions.value.find((el) => el.value === requestedResolution)
     }
     select_resolution(selected_resolution.value, true);
+}
 
+/* *************************************************** */
+// Lifecycle Hooks
+/* *************************************************** */
+onMounted(() => { })
+
+/**
+ * Component initialization before mounting
+ * Loads saved filter preferences from URL or localStorage
+ */
+onBeforeMount(() => {
+    // Load ASN filter from URL
+    loadASNFilter();
+    // Load Interface Role filter from URL
+    loadInterfaceRoleFilter();
     // Load Interface filter from URL
-    await load_table_filters_array();
-    const selected_interface = ntopng_url_manager.get_url_entry("interface_filter");
-    if (selected_interface) {
-        const iface_option = interface_filter_options.value.find((el) => String(el.value) === String(selected_interface));
-        if (iface_option) {
-            current_interface_filter.value = iface_option;
-            ntopng_url_manager.set_key_to_url(current_interface_filter.value.key, current_interface_filter.value.value);
-        }
-    }
+    loadInterfaceFilter();
+    // Load time resolution from URL
+    loadTimeResolution();
 });
 
 /* *************************************************** */
@@ -315,9 +349,10 @@ const add_interface_role_filter = async (value) => {
     ntopng_url_manager.set_key_to_url(current_interface_role.value.key, current_interface_role.value.value);
     // If interface_filter is present, remove it
     ntopng_url_manager.delete_key_from_url(current_interface_filter.value.key);
-    await load_table_filters_array();
-    timeseries_key.value = !timeseries_key.value; // Force chart re-render
-    table_as_stats.value.refresh_table(false);
+    load_interfaces_filter().then(() => {
+        timeseries_key.value = !timeseries_key.value; // Force chart re-render
+        table_as_stats.value.refresh_table(false);
+    })
 };
 
 /**
@@ -340,45 +375,55 @@ const add_interface_filter = (value) => {
  * and populates the interface filter dropdown accordingly.
  * If the role is neither "peering" nor "transit", clears the dropdown and returns early.
  */
-async function load_table_filters_array() {
-    const role = current_interface_role.value?.value;
-
-    // If the selected role is not peering or transit, the interface filter is not applicable
-    if (role !== "peering" && role !== "transit") {
-        interface_filter_options.value = [];
-        current_interface_filter.value = [];
+// Note the abort controller is used to stop a request in case the user
+// swap between interfaces roles fast enough to not let the previous
+// request end before sending the second one, this can create race conditions
+let _interfaceAbortController = null;
+// Also use requestId guard pattern to prevent race conditions
+let requestId = 0;
+async function load_interfaces_filter() {
+    if (current_interface_role.value.value === interface_role_options.value[0].value) {
+        // Load this filter only when a specific role is selected, not the "All" filter
         return;
     }
-    
-    // Build the "select all" default option based on the current role
-    const default_option = {
-        key: "interface_filter",
-        value: `all_${role}`,
-        label: i18n(role === "peering" ? "as_stats.all_peering" : "as_stats.all_transit"),
-    };
-
-    // Fetch interfaces filtered by the current role from the REST endpoint
-    const url = `${http_prefix}/lua/pro/rest/v2/get/snmp/metric/role_interfaces.lua?snmp_interface_role=${role}`;
-    const res = await ntopng_utility.http_request(url);
-
-    // If the REST returns no results, only expose the default "all" option
-    if (!res || res.length === 0) {
-        interface_filter_options.value = [ default_option ];
+    const id = ++requestId;
+    // abort previous request
+    if (_interfaceAbortController) {
+        _interfaceAbortController.abort();
     }
-    else{
-        // Prepend the default "all" option to the list of interfaces returned by the REST
-        interface_filter_options.value = [
-            default_option,
-            ...res.map((iface) => ({
-                key: "interface_filter",
-                value: iface.device_ip + "_" + iface.interface_id,
-                label: iface.interface_name,
-            }))
-        ];
-    }
-    // Auto-select the first option (the "all" default) and sync it to the URL
+    // create new controller
+    _interfaceAbortController = new AbortController();
+    const controller = _interfaceAbortController;
+    // Clear the array, except the All Interfaces (alwais available)
+    interface_filter_options.value.splice(1)
+    // Set the filter to the default one (first element)
     current_interface_filter.value = interface_filter_options.value[0];
-    ntopng_url_manager.set_key_to_url("interface_filter", current_interface_filter.value.value);
+    // Fetch interfaces filtered by the current role from the REST endpoint
+    const url = `${http_prefix}/lua/pro/rest/v2/get/snmp/metric/role_interfaces.lua?snmp_interface_role=${current_interface_role.value.value}`;
+    return ntopng_utility.http_request(url, { signal: controller.signal }, true)
+        .then((response) => {
+            // if the request is aborted ignore result
+            if (controller.signal.aborted) return;
+            // if the request is an old one, ignore it
+            if (id !== requestId) return;
+
+            // When the request is done, update the filter options
+            interface_filter_options.value = [
+                ...interface_filter_options.value,
+                ...response.map((iface) => ({
+                    key: "interface_filter",
+                    value: iface.device_ip + "_" + iface.interface_id,
+                    label: iface.interface_name,
+                }))
+            ]
+        })
+        .catch((e) => {
+            if (e.name === "AbortError") {
+                console.log("Previous interface request aborted");
+                return;
+            }
+            console.error(e);
+        });
 }
 
 /**
@@ -437,18 +482,13 @@ const get_extra_params_obj = () => {
  * @returns {string} HTML icon string
  */
 const formatIconAS = (value, row) => {
-    if (!value) {
-        return '';
-    }
-    let importantASNIcon = '';
-    if (row.is_customer_asn) {
-        importantASNIcon = customerIcon;
-    } else if (row.is_sub_customer_asn) {
-        importantASNIcon = subCustomerIcon;
-    } else if (row.is_remote_asn) {
-        importantASNIcon = remoteIcon;
-    }
-    return importantASNIcon;
+    const type = row.is_customer_asn ? 'customer'
+        : row.is_sub_customer_asn ? 'subCustomer'
+            : row.is_remote_asn ? 'remote'
+                : null;
+    if (!type) return '';
+    const { icon, i18nKey } = ASN_ICONS[type];
+    return `<i class="fa-solid ${icon}" data-bs-toggle="tooltip" data-bs-placement="top" title="${_i18n(i18nKey)}"></i>`;
 };
 
 /*******************************************************/
@@ -650,6 +690,18 @@ function on_table_custom_event(event) {
 
 /* ************************************** */
 
+const SORT_FIELDS = {
+    name: (r) => r.asname,
+    as_number: (r) => r.asn,
+    num_hosts: (r) => r.num_hosts,
+    seen_since: (r) => r.seen_since,
+    avg_host_score: (r) => r.avg_host_score,
+    score: (r) => r.score,
+    throughput: (r) => r.throughput,
+    traffic: (r) => r.traffic,
+    alerted_flows: (r) => r.alerted_flows,
+};
+
 /**
  * Custom sorting function for table columns
  * @param {Object} col - Column definition
@@ -658,28 +710,11 @@ function on_table_custom_event(event) {
  * @returns {number} Comparison result
  */
 function columns_sorting(col, r0, r1) {
-    if (col != null) {
-        if (col.id == "name") {
-            return sortingFunctions.sortByName(r0.asname, r1.asname, col.sort);
-        } if (col.id == "as_number") {
-            return sortingFunctions.sortByNumber(r0.asn, r1.asn, col.sort);
-        } else if (col.id == "num_hosts") {
-            return sortingFunctions.sortByNumber(r0.num_hosts, r1.num_hosts, col.sort);
-        } else if (col.id == "seen_since") {
-            return sortingFunctions.sortByNumber(r0.seen_since, r1.seen_since, col.sort);
-        } else if (col.id == "avg_host_score") {
-            return sortingFunctions.sortByNumber(r0.avg_host_score, r1.avg_host_score, col.sort);
-        } else if (col.id == "score") {
-            return sortingFunctions.sortByNumber(r0.score, r1.score, col.sort);
-        } else if (col.id == "throughput") {
-            return sortingFunctions.sortByNumber(r0.throughput, r1.throughput, col.sort);
-        } else if (col.id == "traffic") {
-            return sortingFunctions.sortByNumber(r0.traffic, r1.traffic, col.sort);
-        }
-        else if (col.id == "alerted_flows") {
-            return sortingFunctions.sortByNumber(r0.alerted_flows, r1.alerted_flows, col.sort);
-        }
-    }
+    if (!col) return 0;
+    const getter = SORT_FIELDS[col.id];
+    if (!getter) return 0;
+    const sortFn = col.id === 'name' ? sortingFunctions.sortByName : sortingFunctions.sortByNumber;
+    return sortFn(getter(r0), getter(r1), col.sort);
 }
 </script>
 
@@ -718,5 +753,15 @@ function columns_sorting(col, r0, r1) {
  */
 .add-effect-leave-active {
     position: absolute;
+}
+
+.chart-container {
+    height: 330px;
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        height: 220px;
+    }
 }
 </style>

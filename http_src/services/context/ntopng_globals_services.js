@@ -238,9 +238,9 @@ export const ntopng_utility = function () {
                 if (not_unwrap === true) { return json_res; }
                 return json_res.rsp;
             } catch (err) {
+                if (throw_exception == true) { throw err; }
                 console.error(err);
                 console.error("URL: " + url);
-                if (throw_exception == true) { throw err; }
                 return null;
             }
         },

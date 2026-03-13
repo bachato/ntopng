@@ -3,7 +3,7 @@
     <slot name="custom_header2"></slot>
     <div ref="tableContainerRef" :id="id">
         <Loading :isLoading="isLoading"></Loading>
-        <div class="button-group mb-2 d-flex align-items-center"> <!-- TableHeader -->
+        <div class="d-flex flex-wrap align-items-center mb-2 gap-1"> <!-- TableHeader -->
             <div class="form-group d-flex align-items-end" style="flex-wrap: wrap;">
                 <!-- Slot for custom header-->
                 <slot name="custom_header"></slot>
