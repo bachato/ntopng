@@ -88,7 +88,7 @@ function getSerieName(name, id, tsGroup, useFullName) {
 
 /* Given all the info about a timeserie, return the correct name to be displayed */
 function getName(ts_info, metadata) {
-    let name = (metadata?.use_serie_name == true) ? ts_info.name : metadata.label;
+    let name = (metadata?.use_serie_name == true) ? ts_info?.name : metadata?.label;
 
     if (ts_info.ext_label) {
         name = ts_info.ext_label
@@ -291,7 +291,7 @@ function formatStandardSerie(timeserie_info, timeserie_options, config, tsCompar
         const past_name = getSerieName(timeserie_name + " " + tsCompare + " " + i18n('details.ago'), ts_id, timeserie_info, config.use_full_name);
         const past_value = (past_serie) ? past_serie[`${tsCompare}_ago`]?.series[j]?.data : null;
         /* An option used to not display a timeserie */
-        if (metadata.hidden) {
+        if (metadata?.hidden) {
             return;
         }
 
@@ -301,7 +301,7 @@ function formatStandardSerie(timeserie_info, timeserie_options, config, tsCompar
             config.formatters.push(formatter);
 
         /* Add the serie */
-        addNewSerie(serie_name, chart_type, { color: metadata.color, palette: 0 }, config)
+        addNewSerie(serie_name, chart_type, { color: metadata?.color, palette: 0 }, config)
 
         /* Adding the extra timeseries, 30m ago, avg and 95th */
         if (extra_timeseries?.avg == true) {
