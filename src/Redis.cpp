@@ -208,8 +208,11 @@ int Redis::expire(char *key, u_int expire_secs) {
 /* **************************************** */
 
 bool Redis::isCacheable(const char *key) {
-  if ((strstr(key, "ntopng.cache.")) || (strstr(key, "ntopng.prefs.")) ||
-      (strstr(key, "ntopng.user.") && (!strstr(key, ".password"))))
+  if (strstr(key, "ntopng.cache.")
+      || strstr(key, "ntopng.prefs.")
+      || strstr(key, "sessions.")
+      || strstr(key, "ntopng.cachedsnmp")
+      || (strstr(key, "ntopng.user.") && (!strstr(key, ".password"))))
     return (true);
 
   return (false);
@@ -338,7 +341,7 @@ char* Redis::getWithAlloc(char *key, bool cache_it) {
   bool cacheable = cache_it || isCacheable(key);
   redisReply *reply;
   std::map<std::string, StringCache>::iterator it;
-  
+
   l->lock(__FILE__, __LINE__);
 
   if(cacheable) {
@@ -365,7 +368,7 @@ char* Redis::getWithAlloc(char *key, bool cache_it) {
 #endif
     }
   }
-  
+
   stats.num_get++;
   reply = (redisReply *)redisCommand(redis, "GET %s", key);
   if (!reply) reconnectRedis(true);
@@ -373,28 +376,36 @@ char* Redis::getWithAlloc(char *key, bool cache_it) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "%s",
                                  reply->str ? reply->str : "???");
 
-  if (reply && reply->str) {
+  if (reply && reply->str)
     rsp = strdup(reply->str ? reply->str : "");
-  }
-  
-  if (cacheable && (rsp != NULL)) {
-    u_int expire_sec = 0;
 
-    if (reply) freeReplyObject(reply);
-    stats.num_ttl++;
-    reply = (redisReply *)redisCommand(redis, "TTL %s", key);
-    if (!reply) reconnectRedis(true);
-    if (reply && (reply->type != REDIS_REPLY_INTEGER))
-      ntop->getTrace()->traceEvent(TRACE_ERROR, "%s",
-                                   reply->str ? reply->str : "???");
+  if (cacheable) {
+    if(rsp != NULL) {
+      u_int expire_sec = 0;
 
-    if (reply && (((int32_t)reply->integer)) >= 0) expire_sec = reply->integer;
+#if 0
+      if (reply) freeReplyObject(reply);
 
-#ifdef CACHE_DEBUG
-    printf("**** ADD TO CACHE %s=%s [expire_sec=%u]\n", key, rsp, expire_sec);
+      stats.num_ttl++;
+      reply = (redisReply *)redisCommand(redis, "TTL %s", key);
+      if (!reply) reconnectRedis(true);
+      if (reply && (reply->type != REDIS_REPLY_INTEGER))
+	ntop->getTrace()->traceEvent(TRACE_ERROR, "%s",
+				     reply->str ? reply->str : "???");
+
+      if (reply && (((int32_t)reply->integer)) >= 0)
+	expire_sec = reply->integer;
+#else
+      expire_sec = 60; /* sec (long cache) */
 #endif
 
-    addToCache(key, rsp, expire_sec);
+#ifdef CACHE_DEBUG
+      printf("**** ADD TO CACHE %s=%s [expire_sec=%u]\n", key, rsp, expire_sec);
+#endif
+
+      addToCache(key, rsp, expire_sec);
+    } else
+      addToCache(key, "", 10 /* sec (short cache) */);
   }
 
   if (reply) freeReplyObject(reply);
@@ -410,7 +421,7 @@ int Redis::get(char *key, char *rsp, u_int rsp_len, bool cache_it) {
   bool cacheable = isCacheable(key);
   redisReply *reply;
   std::map<std::string, StringCache>::iterator it;
-  
+
   l->lock(__FILE__, __LINE__);
 
   if(cacheable) {
@@ -438,7 +449,7 @@ int Redis::get(char *key, char *rsp, u_int rsp_len, bool cache_it) {
 #endif
     }
   }
-  
+
   stats.num_get++;
   reply = (redisReply *)redisCommand(redis, "GET %s", key);
   if (!reply) reconnectRedis(true);
@@ -578,7 +589,7 @@ int Redis::hashSet(const char *key, const char *field, const char *value) {
       rc = (int)reply->integer;
     }
   }
-  
+
   if (reply) freeReplyObject(reply);
   l->unlock(__FILE__, __LINE__);
 
@@ -636,7 +647,7 @@ int Redis::_set(bool use_nx, const char *key, const char *value,
                                value, use_nx ? "NX " : "", expire_secs);
 #endif
   stats.num_set++;
- 
+
 #ifdef WIN32
   reply = (redisReply *)redisCommand(redis, "%s %s %s", cmd, key, value);
 #else
