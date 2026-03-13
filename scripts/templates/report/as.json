@@ -69,15 +69,13 @@
 		},
 		{
 			"component": "pie",
-			"id": "top_l4_proto",
-			"i18n_name": "top_l4_proto",
+			"id": "traffic_role_distribution",
+			"i18n_name": "if_stats_overview.traffic_role_distribution",
 			"width": 4,
 			"height": 4,
 			"params": {
-				"url": "/lua/pro/rest/v2/get/db/charts/top_l4_proto.lua",
-				"url_params": {
-					"length": 10
-				},
+				"url": "/lua/pro/rest/v2/get/db/charts/top_interface_roles.lua",
+				"url_params": {},
 				"unit": "bytes"
 			}
 		},
