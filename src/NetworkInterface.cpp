@@ -181,7 +181,11 @@ NetworkInterface::NetworkInterface(const char *name,
 
     checkIdle();
     ifSpeed = Utils::getMaxIfSpeed(name);
-    ifMTU = Utils::getIfMTU(name), mtuWarningShown = false;
+    mtuWarningShown = false;
+    if (ntop->getPrefs() && ntop->getPrefs()->get_custom_if_mtu() > 0)
+      ifMTU = ntop->getPrefs()->get_custom_if_mtu();
+    else
+      ifMTU = Utils::getIfMTU(name);
     reloadDhcpRanges();
   } else /* id < 0 */ {
     ifSpeed = 0;

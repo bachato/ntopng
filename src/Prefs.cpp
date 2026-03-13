@@ -47,6 +47,7 @@ Prefs::Prefs(Ntop *_ntop) {
   insecure_tls = false, clickhouse_client = clickhouse_cluster_name = NULL;
   local_networks = strdup(CONST_DEFAULT_HOME_NET "," CONST_DEFAULT_LOCAL_NETS);
   num_simulated_ips = 0, enable_behaviour_analysis = false;
+  custom_if_mtu = 0;
   local_networks_set = false, shutdown_when_done = false;
   enable_users_login = true, disable_localhost_login = false;
   enable_dns_resolution = sniff_dns_responses = sniff_name_responses =
@@ -791,6 +792,8 @@ void usage() {
 	 "(debug only)\n"
 	 "[--simulate-ips] <num>              | Simulate IPs by choosing clients "
 	 "and servers among <num> random addresses\n"
+	 "[--mtu] <mtu>                       | Force expected MTU for capture interfaces\n"
+	 "                                    | Overrides the auto-detected MTU\n"
 	 "[--limit-resources]                 | Non-essential features are disabled\n"
 	 "                                    | in order to save memory and threads\n"
 	 "[--help|-h]                         | Help\n"
@@ -1316,6 +1319,7 @@ static const struct option long_options[] = {
   {"offline",                 no_argument,       NULL, 226},
   {"readonly-flows-dump",     no_argument,       NULL, 227},
   {"strict-startup",          no_argument,       NULL, 228},
+  {"mtu",                     required_argument, NULL, 229},
 #ifdef NTOPNG_PRO
   {"dump-queue-len",          no_argument,       NULL, 248},
   {"dump-queue-block-size",   no_argument,       NULL, 249},
@@ -2378,6 +2382,10 @@ int Prefs::setOption(int optkey, char *optarg) {
 
   case 228:
     strict_startup = true;
+    break;
+
+  case 229:
+    custom_if_mtu = (u_int16_t)atoi(optarg);
     break;
 
 #ifdef NTOPNG_PRO

@@ -146,6 +146,7 @@ class Prefs {
       ignore_vlans, ignore_macs;
   bool insecure_tls; /**< Unsecure TLS connections a-la curl */
   u_int32_t num_simulated_ips;
+  u_int16_t custom_if_mtu;
   char *data_dir, *install_dir, *docs_dir, *scripts_dir, *callbacks_dir,
       *pcap_dir, *clickhouse_archive_dir
 #ifdef NTOPNG_PRO
@@ -322,6 +323,7 @@ class Prefs {
   inline u_int32_t get_num_simulated_ips() const {
     return (num_simulated_ips);
   };
+  inline u_int16_t get_custom_if_mtu() const { return (custom_if_mtu); };
   inline u_int8_t get_num_user_specified_interfaces() {
     return (num_interfaces);
   };
