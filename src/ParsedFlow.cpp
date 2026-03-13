@@ -28,7 +28,7 @@ ParsedFlow::ParsedFlow() : ParsedFlowCore(), ParsedeBPF() {
 
   additional_fields_json = NULL;
   additional_fields_tlv = NULL;
-  l7_info = NULL;
+  l7_info = NULL, memset(&l7_proto, 0, sizeof(l7_proto));
   is_swapped = false;
   http_url = http_site = http_user_agent = NULL;
   http_method = NDPI_HTTP_METHOD_UNKNOWN;
