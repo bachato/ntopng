@@ -175,7 +175,7 @@ Flow::Flow(NetworkInterface *_iface,
   else
     memset(srv_mac, 0, sizeof(srv_mac));
 
-  if(_cli_mac  && _srv_mac)    
+  if(_cli_mac  && _srv_mac)
     updateMac();
   else
     c_mac = s_mac = NULL;
@@ -351,7 +351,7 @@ Flow::Flow(NetworkInterface *_iface,
   }
 
   flowExporterInterfaceRole = role_other;
-  
+
   computeKey();
   deferredInitialization();
 }
@@ -1656,14 +1656,15 @@ void Flow::updateProtocol(ndpi_protocol proto_id) {
    * This prevents overwriting already determined category (e.g. by IP or Host)
    */
   if (ndpiDetectedProtocol.category == NDPI_PROTOCOL_CATEGORY_UNSPECIFIED) {
-#if 0
-    u_int16_t *a = (u_int16_t*)&ndpiDetectedProtocol.category;
-    u_int16_t *b = (u_int16_t*)&proto_id.category;
+    /*
+      In Ntop::nDPILoadIPCategory
+       u_int16_t id = (((u_int16_t)list_id) << 8) + (u_int8_t)cat_id;
+    */
+    u_int16_t c = (u_int16_t)proto_id.category;
+    // u_int16_t list_id = c >> 8;
+    ndpi_protocol_category_t cat_id  = (ndpi_protocol_category_t)(c & 0xFF);
 
-    *a = *b; /* trick to avoid runtime errors with custom categories */
-#else
-    ndpiDetectedProtocol.category = proto_id.category;
-#endif
+    ndpiDetectedProtocol.category = cat_id;
   }
 
   /* trick to avoid runtime errors with custom categories */
@@ -5916,7 +5917,7 @@ std::string Flow::getFlowInfo(bool isLuaRequest) {
   case role_transit:
     info_field += " Transit";
     break;
-    
+
   case role_peering:
     info_field += " Peering";
     break;
@@ -7732,12 +7733,12 @@ void Flow::getFingerprintInfo(ndpi_serializer *serializer) {
 
 void Flow::serializeExporters(ndpi_serializer *serializer) {
   int i = 0;
-  
+
   if(serializer == NULL) return;
   if(exporterStats.size() == 0) return;
 
   ndpi_serialize_start_of_block(serializer, "exporters");
-      
+
   // Iterate over all stored duplicated flow records
   for(std::vector<ExporterFlowInfo>::iterator it = exporterStats.begin();
       it != exporterStats.end(); ++it) {
@@ -7773,7 +7774,7 @@ void Flow::serializeExporters(ndpi_serializer *serializer) {
 
     ndpi_serialize_string_uint32(serializer, "source",
 				 it->source); /* FlowSource */
-    
+
     ndpi_serialize_end_of_block(serializer);
   }
 
