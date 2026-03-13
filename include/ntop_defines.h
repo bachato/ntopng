@@ -133,6 +133,10 @@
 #define CAPTIVE_PORTAL_INFO_URL "/lua/info_portal.lua"
 #define PLEASE_WAIT_URL "/lua/please_wait.lua"
 #define AUTHORIZE_URL "/authorize.html"
+#define MFA_AUTHORIZE_URL "/mfa_authorize.html"
+#define MFA_VERIFY_URL "/lua/mfa_verify.lua"
+#define MFA_PENDING_PREFIX "mfa.pending"
+#define MFA_PENDING_TTL 300 /* 5 minutes */
 #define AUTHORIZE_CAPTIVE_LUA_URL "/lua/authorize_captive.lua"
 #define HOTSPOT_DETECT_URL "/hotspot-detect.html"        /* iOS    */
 #define KINDLE_WIFISTUB_URL "/kindle-wifi/wifistub.html" /* Kindle */
@@ -334,6 +338,8 @@
 #define CONST_STR_USER_EXPIRE NTOPNG_USER_PREFIX ".%s.expire"
 #define CONST_STR_USER_CAPABILITIES NTOPNG_USER_PREFIX ".%s.capabilities"
 #define CONST_STR_USER_API_TOKEN NTOPNG_USER_PREFIX ".%s.api_token"
+#define CONST_STR_USER_TOTP_SECRET  NTOPNG_USER_PREFIX ".%s.totp_secret"
+#define CONST_STR_USER_TOTP_ENABLED NTOPNG_USER_PREFIX ".%s.totp_enabled"
 #define CONST_STR_UNKNOWN_TCP_FINGERPRINTS NTOPNG_CACHE_PREFIX ".unknown_tcp_fingerprints"
 #define CONST_ALLOWED_NETS "allowed_nets"
 #define CONST_ALLOWED_IFNAME "allowed_ifname"

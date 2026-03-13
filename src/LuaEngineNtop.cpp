@@ -3502,6 +3502,145 @@ static int ntop_delete_user(lua_State *vm) {
 
 /* ****************************************** */
 
+/* MFA/TOTP Lua bindings */
+
+static int ntop_generate_totp_secret(lua_State *vm) {
+  char secret[64];
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (!ntop->generateTOTPSecret(secret, sizeof(secret)))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  lua_pushstring(vm, secret);
+  return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
+static int ntop_set_user_totp_secret(lua_State *vm) {
+  char *username, *secret;
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (!allowLocalUserManagement(vm))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((username = (char *)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((secret = (char *)lua_tostring(vm, 2)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  lua_pushboolean(vm, ntop->setUserTOTPSecret(username, secret));
+  return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
+static int ntop_get_user_totp_secret(lua_State *vm) {
+  char *username, secret[64];
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  /* Only admins or the user themselves can retrieve the TOTP secret */
+  if (!ntop->isUserAdministrator(vm))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((username = (char *)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  if (ntop->getUserTOTPSecret(username, secret, sizeof(secret)))
+    lua_pushstring(vm, secret);
+  else
+    lua_pushnil(vm);
+
+  return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
+static int ntop_is_totp_enabled(lua_State *vm) {
+  char *username;
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((username = (char *)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  lua_pushboolean(vm, ntop->isTOTPEnabled(username));
+  return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
+static int ntop_set_user_totp_enabled(lua_State *vm) {
+  char *username;
+  bool enabled;
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (!allowLocalUserManagement(vm))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((username = (char *)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TBOOLEAN) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  enabled = lua_toboolean(vm, 2);
+
+  lua_pushboolean(vm, ntop->setUserTOTPEnabled(username, enabled));
+  return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
+static int ntop_validate_totp(lua_State *vm) {
+  char *username, *code;
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((username = (char *)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((code = (char *)lua_tostring(vm, 2)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  lua_pushboolean(vm, ntop->validateTOTPCode(username, code));
+  return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
+static int ntop_get_totp_provisioning_uri(lua_State *vm) {
+  char *username, uri[256];
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((username = (char *)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  ntop->getTOTPProvisioningUri(username, uri, sizeof(uri));
+  if (uri[0] != '\0')
+    lua_pushstring(vm, uri);
+  else
+    lua_pushnil(vm);
+
+  return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
 /* Similar to ntop_get_resolved_address but actually perfoms the address
  * resolution now */
 static int ntop_resolve_address(lua_State *vm) {
@@ -8606,6 +8745,15 @@ static luaL_Reg _ntop_reg[] = {
     { "getUserAPIToken", ntop_get_user_api_token },
     { "isLoginDisabled", ntop_is_login_disabled },
     { "isLoginBlacklisted", ntop_is_login_blacklisted },
+
+    /* MFA/TOTP */
+    { "generateTOTPSecret",      ntop_generate_totp_secret },
+    { "setUserTOTPSecret",       ntop_set_user_totp_secret },
+    { "getUserTOTPSecret",       ntop_get_user_totp_secret },
+    { "isTOTPEnabled",           ntop_is_totp_enabled },
+    { "setUserTOTPEnabled",      ntop_set_user_totp_enabled },
+    { "validateTOTP",            ntop_validate_totp },
+    { "getTOTPProvisioningUri",  ntop_get_totp_provisioning_uri },
     { "getNetworkNameById", ntop_network_name_by_id },
     { "getNetworkIdByName", ntop_network_id_by_name },
     { "getNetworks", ntop_get_networks },

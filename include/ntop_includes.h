@@ -212,6 +212,10 @@ extern const ndpi_protocol getConstNdpiUnknownProtocol();
 using namespace std;
 
 #include "mongoose.h"
+#ifdef NO_SSL_DL
+#include <openssl/hmac.h>
+#include <openssl/rand.h>
+#endif
 #include "ntop_defines.h"
 #include "Mutex.h"
 #include "RwLock.h"

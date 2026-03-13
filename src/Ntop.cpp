@@ -2519,6 +2519,209 @@ bool Ntop::addUserAPIToken(const char *username, const char *api_token) {
 
 /* ******************************************* */
 
+/* TOTP/MFA implementation based on RFC 6238 (TOTP) and RFC 4226 (HOTP).
+ * Uses OpenSSL HMAC-SHA1 which is already a dependency of ntopng.
+ * Secrets are Base32-encoded (RFC 4648) as required by the otpauth:// URI scheme.
+ */
+
+static const char *base32_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+
+/* Encode binary data to Base32 string. Returns the number of bytes written. */
+static int base32_encode(const uint8_t *src, int src_len, char *dst, int dst_len) {
+  int i, written = 0;
+  int bits = 0, val = 0;
+
+  for (i = 0; i < src_len && written < dst_len - 1; i++) {
+    val = (val << 8) | src[i];
+    bits += 8;
+    while (bits >= 5 && written < dst_len - 1) {
+      dst[written++] = base32_alphabet[(val >> (bits - 5)) & 0x1F];
+      bits -= 5;
+    }
+  }
+  if (bits > 0 && written < dst_len - 1)
+    dst[written++] = base32_alphabet[(val << (5 - bits)) & 0x1F];
+  dst[written] = '\0';
+  return written;
+}
+
+/* Decode Base32 string to binary. Returns number of bytes decoded, or -1 on error. */
+static int base32_decode(const char *src, uint8_t *dst, int dst_len) {
+  int val = 0, bits = 0, written = 0;
+  for (int i = 0; src[i] != '\0'; i++) {
+    char c = toupper((unsigned char)src[i]);
+    const char *p = strchr(base32_alphabet, c);
+    if (!p) {
+      if (c == '=') break; /* padding */
+      return -1; /* invalid character */
+    }
+    val = (val << 5) | (int)(p - base32_alphabet);
+    bits += 5;
+    if (bits >= 8) {
+      if (written >= dst_len) return -1;
+      dst[written++] = (uint8_t)((val >> (bits - 8)) & 0xFF);
+      bits -= 8;
+    }
+  }
+  return written;
+}
+
+/* Compute TOTP code for the given secret (Base32) and time counter.
+ * Returns a 6-digit code or -1 on error.
+ */
+static int compute_totp(const char *secret_b32, uint64_t counter) {
+  uint8_t secret[64];
+  int secret_len = base32_decode(secret_b32, secret, sizeof(secret));
+  if (secret_len <= 0) return -1;
+
+  /* Build 8-byte big-endian counter */
+  uint8_t msg[8];
+  for (int i = 7; i >= 0; i--) {
+    msg[i] = counter & 0xFF;
+    counter >>= 8;
+  }
+
+  /* HMAC-SHA1 */
+  unsigned char hmac[20];
+  unsigned int hmac_len = sizeof(hmac);
+  if (!HMAC(EVP_sha1(), secret, secret_len, msg, sizeof(msg), hmac, &hmac_len))
+    return -1;
+
+  /* Dynamic truncation (RFC 4226 §5.3) */
+  int offset = hmac[19] & 0x0F;
+  uint32_t code = ((hmac[offset]     & 0x7F) << 24) |
+                  ((hmac[offset + 1] & 0xFF) << 16) |
+                  ((hmac[offset + 2] & 0xFF) << 8)  |
+                  ((hmac[offset + 3] & 0xFF));
+
+  return (int)(code % 1000000);
+}
+
+/* ******************************************* */
+
+bool Ntop::generateTOTPSecret(char *secret, size_t secret_len) const {
+  /* Generate 20 random bytes and Base32-encode them */
+  uint8_t raw[20];
+  if (RAND_bytes(raw, sizeof(raw)) != 1) return false;
+  base32_encode(raw, sizeof(raw), secret, (int)secret_len);
+  return true;
+}
+
+/* ******************************************* */
+
+bool Ntop::setUserTOTPSecret(const char *username, const char *secret) const {
+  char key[CONST_MAX_LEN_REDIS_KEY];
+  snprintf(key, sizeof(key), CONST_STR_USER_TOTP_SECRET, username);
+  return (ntop->getRedis()->set(key, (char *)secret, 0) >= 0);
+}
+
+/* ******************************************* */
+
+bool Ntop::getUserTOTPSecret(const char *username, char *secret,
+                             size_t secret_len) const {
+  char key[CONST_MAX_LEN_REDIS_KEY];
+  snprintf(key, sizeof(key), CONST_STR_USER_TOTP_SECRET, username);
+  return (ntop->getRedis()->get(key, secret, (u_int)secret_len) >= 0);
+}
+
+/* ******************************************* */
+
+bool Ntop::isTOTPEnabled(const char *username) const {
+  char key[CONST_MAX_LEN_REDIS_KEY], val[4];
+  snprintf(key, sizeof(key), CONST_STR_USER_TOTP_ENABLED, username);
+  if (ntop->getRedis()->get(key, val, sizeof(val)) < 0) return false;
+  return (val[0] == '1');
+}
+
+/* ******************************************* */
+
+bool Ntop::setUserTOTPEnabled(const char *username, bool enabled) const {
+  char key[CONST_MAX_LEN_REDIS_KEY];
+  snprintf(key, sizeof(key), CONST_STR_USER_TOTP_ENABLED, username);
+  return (ntop->getRedis()->set(key, enabled ? (char *)"1" : (char *)"0", 0) >= 0);
+}
+
+/* ******************************************* */
+
+bool Ntop::validateTOTPCode(const char *username, const char *code) const {
+  char secret[64];
+  if (!getUserTOTPSecret(username, secret, sizeof(secret))) return false;
+  if (strlen(code) != 6) return false;
+  for (int i = 0; code[i]; i++)
+    if (!isdigit((unsigned char)code[i])) return false;
+
+  int input_code = atoi(code);
+  uint64_t counter = (uint64_t)(time(NULL) / 30);
+
+  /* Allow ±1 window (90 seconds total) to handle clock skew */
+  for (int delta = -1; delta <= 1; delta++) {
+    if (compute_totp(secret, counter + (uint64_t)delta) == input_code)
+      return true;
+  }
+  return false;
+}
+
+/* ******************************************* */
+
+void Ntop::getTOTPProvisioningUri(const char *username, char *uri,
+                                  size_t uri_len) const {
+  char secret[64];
+  if (!getUserTOTPSecret(username, secret, sizeof(secret))) {
+    uri[0] = '\0';
+    return;
+  }
+  const char *issuer = "ntopng";
+  snprintf(uri, uri_len, "otpauth://totp/%s:%s?secret=%s&issuer=%s&digits=6&period=30",
+           issuer, username, secret, issuer);
+}
+
+/* ******************************************* */
+
+bool Ntop::createMFAPendingToken(const char *username, const char *referer,
+                                 char *token, size_t token_len) const {
+  char val[512], key[128];
+  char random[64], tmp_token[33];
+  srand((int)time(0) ^ (int)getpid());
+  snprintf(random, sizeof(random), "%d%s", rand(), username);
+  /* mg_md5 produces a 33-char (32 hex + NUL) string */
+  mg_md5(tmp_token, random, NULL);
+  strncpy(token, tmp_token, token_len - 1);
+  token[token_len - 1] = '\0';
+
+  snprintf(key, sizeof(key), "%s.%s", MFA_PENDING_PREFIX, token);
+  snprintf(val, sizeof(val), "%s|%s", username, referer ? referer : "/");
+  return (ntop->getRedis()->set(key, val, MFA_PENDING_TTL) >= 0);
+}
+
+/* ******************************************* */
+
+bool Ntop::getMFAPendingToken(const char *token, char *username,
+                              size_t username_len, char *referer,
+                              size_t referer_len) const {
+  char key[128], val[512];
+  snprintf(key, sizeof(key), "%s.%s", MFA_PENDING_PREFIX, token);
+  if (ntop->getRedis()->get(key, val, sizeof(val)) < 0) return false;
+
+  char *sep = strchr(val, '|');
+  if (!sep) return false;
+  *sep = '\0';
+  strncpy(username, val, username_len - 1);
+  username[username_len - 1] = '\0';
+  strncpy(referer, sep + 1, referer_len - 1);
+  referer[referer_len - 1] = '\0';
+  return true;
+}
+
+/* ******************************************* */
+
+void Ntop::deleteMFAPendingToken(const char *token) const {
+  char key[128];
+  snprintf(key, sizeof(key), "%s.%s", MFA_PENDING_PREFIX, token);
+  ntop->getRedis()->del(key);
+}
+
+/* ******************************************* */
+
 bool Ntop::isCaptivePortalUser(const char *username) {
   char key[64], val[64];
 

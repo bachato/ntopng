@@ -562,6 +562,21 @@ class Ntop {
                            bool *allow_historical_flows,
                            bool *allow_alerts) const;
   bool existsUser(const char *username) const;
+
+  /* TOTP/MFA */
+  bool generateTOTPSecret(char *secret, size_t secret_len) const;
+  bool setUserTOTPSecret(const char *username, const char *secret) const;
+  bool getUserTOTPSecret(const char *username, char *secret, size_t secret_len) const;
+  bool isTOTPEnabled(const char *username) const;
+  bool setUserTOTPEnabled(const char *username, bool enabled) const;
+  bool validateTOTPCode(const char *username, const char *code) const;
+  void getTOTPProvisioningUri(const char *username, char *uri, size_t uri_len) const;
+  bool createMFAPendingToken(const char *username, const char *referer,
+                             char *token, size_t token_len) const;
+  bool getMFAPendingToken(const char *token, char *username, size_t username_len,
+                          char *referer, size_t referer_len) const;
+  void deleteMFAPendingToken(const char *token) const;
+
   bool addUser(char *username, char *full_name, char *password, char *host_role,
                char *allowed_networks, char *allowed_ifname, char *host_pool_id,
                char *language, bool allow_pcap_download,

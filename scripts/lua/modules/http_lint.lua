@@ -2579,6 +2579,9 @@ local known_parameters = {
    ["exporters_ts_resolution"] = validateNumber,
    ["snmp_devices_exporters_rrd"] = validateNumber,
 
+   -- MFA
+   ["totp"] = validateNumber,
+   
    -- Other
    ["send_test_email"] = validateEmpty,
    ["send_test_slack"] = validateEmpty,

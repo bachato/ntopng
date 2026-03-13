@@ -29,7 +29,8 @@ print [[
    print[[
     <li class="nav-item ]] print(ternary(is_admin, "", "active")) print[["><a class="nav-link ]] print(ternary(is_admin, "", "active")) print[[" href="#change-password-dialog" role="tab" data-bs-toggle="tab"> ]] print(i18n("login.password")) print[[ </a></li>
     <li class="nav-item"><a class="nav-link" href="#user-token-tab" role="tab" data-bs-toggle="tab"> ]] print(i18n("login.auth_token")) print[[ </a></li>
-  
+    <li class="nav-item"><a class="nav-link" href="#user-mfa-tab" role="tab" data-bs-toggle="tab"> <i class="fas fa-shield-alt"></i> ]] print(i18n("mfa.tab_title") or "MFA") print[[ </a></li>
+
   </ul>
   </div>
   <div class="card-body tab-content">
@@ -284,6 +285,67 @@ print([[
   </div>
 ]])
 
+-- MFA Tab
+print([[
+  <div class='tab-pane' id='user-mfa-tab'>
+    <div id="mfa_alert_placeholder"></div>
+    <div class="mb-3">
+      <p class="text-muted">]] .. (i18n("mfa.description") or "Protect your account with a Time-based One-Time Password (TOTP) authenticator app such as Google Authenticator, Authy, or similar.") .. [[</p>
+    </div>
+
+    <!-- MFA status display -->
+    <div id="mfa-status-section">
+      <div class="d-flex align-items-center mb-3">
+        <span id="mfa-status-badge" class="badge me-2"></span>
+        <span id="mfa-status-text"></span>
+      </div>
+      <button id="btn-mfa-setup" class="btn btn-primary me-2" style="display:none">
+        <i class="fas fa-qrcode"></i> ]] .. (i18n("mfa.setup_button") or "Set Up MFA") .. [[
+      </button>
+      <button id="btn-mfa-disable" class="btn btn-danger" style="display:none">
+        <i class="fas fa-times"></i> ]] .. (i18n("mfa.disable_button") or "Disable MFA") .. [[
+      </button>
+    </div>
+
+    <!-- MFA setup wizard (hidden until user clicks Set Up MFA) -->
+    <div id="mfa-setup-section" style="display:none" class="mt-3">
+      <hr>
+      <h6>]] .. (i18n("mfa.setup_step1") or "Step 1: Scan this QR code with your authenticator app") .. [[</h6>
+      <div class="text-center mb-3">
+        <div id="mfa-qrcode" class="d-inline-block p-2 border bg-white"></div>
+      </div>
+      <p class="text-muted small">
+        ]] .. (i18n("mfa.manual_entry") or "Or enter this secret manually:") .. [[
+        <code id="mfa-secret-display" class="ms-1"></code>
+      </p>
+      <hr>
+      <h6>]] .. (i18n("mfa.setup_step2") or "Step 2: Enter the 6-digit code to confirm") .. [[</h6>
+      <div class="input-group mb-3" style="max-width:220px">
+        <input type="text" id="mfa-confirm-code" class="form-control text-center"
+               maxlength="6" pattern="[0-9]{6}" placeholder="000000"
+               inputmode="numeric" autocomplete="one-time-code">
+        <button id="btn-mfa-enable" class="btn btn-success">
+          ]] .. (i18n("mfa.enable_button") or "Enable MFA") .. [[
+        </button>
+      </div>
+    </div>
+
+    <!-- Disable MFA confirm (hidden) -->
+    <div id="mfa-disable-confirm-section" style="display:none" class="mt-3">
+      <hr>
+      <p class="text-warning">]] .. (i18n("mfa.disable_warning") or "Enter your current TOTP code to confirm disabling MFA.") .. [[</p>
+      <div class="input-group mb-3" style="max-width:220px">
+        <input type="text" id="mfa-disable-code" class="form-control text-center"
+               maxlength="6" pattern="[0-9]{6}" placeholder="000000"
+               inputmode="numeric" autocomplete="one-time-code">
+        <button id="btn-mfa-disable-confirm" class="btn btn-danger">
+          ]] .. (i18n("mfa.disable_confirm_button") or "Confirm Disable") .. [[
+        </button>
+      </div>
+    </div>
+  </div>
+]])
+
 print [[
   <script type='text/javascript'>
 
@@ -507,10 +569,108 @@ function reset_pwd_dialog(user) {
       $('#pref_part_separator').show();
       $('#password_alert_placeholder').html('');
       $('#add_user_alert_placeholder').html('');
+
+      /* Update MFA tab status */
+      updateMfaStatus(data.username, data.totp_enabled === true);
     });
 
       return(true);
 }
+
+/* ---- MFA management helpers ---- */
+
+var mfa_alert = {};
+mfa_alert.error   = function(msg) { $('#mfa_alert_placeholder').html('<div class="alert alert-danger alert-dismissable">' + msg + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'); };
+mfa_alert.success = function(msg) { $('#mfa_alert_placeholder').html('<div class="alert alert-success alert-dismissable">' + msg + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'); };
+mfa_alert.clear   = function()    { $('#mfa_alert_placeholder').html(''); };
+
+var _mfa_current_user = '';
+
+function updateMfaStatus(username, enabled) {
+  _mfa_current_user = username;
+  $('#mfa-setup-section').hide();
+  $('#mfa-disable-confirm-section').hide();
+  mfa_alert.clear();
+  if (enabled) {
+    $('#mfa-status-badge').removeClass('bg-secondary').addClass('bg-success').text(']] print(i18n("mfa.status_enabled") or "Enabled") print[[');
+    $('#mfa-status-text').text(']] print(i18n("mfa.status_enabled_desc") or "Two-factor authentication is active for this account.") print[[');
+    $('#btn-mfa-setup').hide();
+    $('#btn-mfa-disable').show();
+  } else {
+    $('#mfa-status-badge').removeClass('bg-success').addClass('bg-secondary').text(']] print(i18n("mfa.status_disabled") or "Disabled") print[[');
+    $('#mfa-status-text').text(']] print(i18n("mfa.status_disabled_desc") or "Two-factor authentication is not enabled.") print[[');
+    $('#btn-mfa-setup').show();
+    $('#btn-mfa-disable').hide();
+  }
+}
+
+$(document).ready(function() {
+
+  $('#btn-mfa-setup').click(async function() {
+    mfa_alert.clear();
+    const resp = await fetch(`${http_prefix}/lua/admin/change_user_mfa.lua`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `action=generate_secret&username=${encodeURIComponent(_mfa_current_user)}&csrf=]] print(ntop.getRandomCSRFValue()) print[[`
+    });
+    const data = await resp.json();
+    if (data.result !== 0) { mfa_alert.error(data.message); return; }
+
+    $('#mfa-secret-display').text(data.secret);
+
+    /* Render QR code using the qrcode npm package */
+    const qrDiv = document.getElementById('mfa-qrcode');
+    qrDiv.innerHTML = '';
+    if (typeof QRCode !== 'undefined' && typeof QRCode.toCanvas === 'function') {
+      const canvas = document.createElement('canvas');
+      qrDiv.appendChild(canvas);
+      QRCode.toCanvas(canvas, data.provisioning_uri, { width: 200, errorCorrectionLevel: 'M' });
+    } else {
+      /* Fallback: show the URI as text */
+      qrDiv.innerHTML = '<small class="text-break" style="max-width:300px;display:block;">' + data.provisioning_uri + '</small>';
+    }
+
+    $('#mfa-setup-section').show();
+    $('#mfa-confirm-code').val('').focus();
+  });
+
+  $('#btn-mfa-enable').click(async function() {
+    const code = $('#mfa-confirm-code').val().trim();
+    if (!/^[0-9]{6}$/.test(code)) { mfa_alert.error(']] print(i18n("mfa.enter_6_digits") or "Please enter a 6-digit code.") print[['); return; }
+
+    const resp = await fetch(`${http_prefix}/lua/admin/change_user_mfa.lua`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `action=enable&username=${encodeURIComponent(_mfa_current_user)}&totp=${encodeURIComponent(code)}&csrf=]] print(ntop.getRandomCSRFValue()) print[[`
+    });
+    const data = await resp.json();
+    if (data.result !== 0) { mfa_alert.error(data.message); return; }
+    mfa_alert.success(']] print(i18n("mfa.enabled_success") or "MFA has been enabled successfully.") print[[');
+    updateMfaStatus(_mfa_current_user, true);
+  });
+
+  $('#btn-mfa-disable').click(function() {
+    $('#mfa-disable-confirm-section').show();
+    $('#mfa-disable-code').val('').focus();
+  });
+
+  $('#btn-mfa-disable-confirm').click(async function() {
+    const code = $('#mfa-disable-code').val().trim();
+    const body_parts = [`action=disable&username=${encodeURIComponent(_mfa_current_user)}&csrf=]] print(ntop.getRandomCSRFValue()) print[[`];
+    if (code !== '') body_parts.push(`totp=${encodeURIComponent(code)}`);
+
+    const resp = await fetch(`${http_prefix}/lua/admin/change_user_mfa.lua`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: body_parts.join('&')
+    });
+    const data = await resp.json();
+    if (data.result !== 0) { mfa_alert.error(data.message); return; }
+    mfa_alert.success(']] print(i18n("mfa.disabled_success") or "MFA has been disabled.") print[[');
+    updateMfaStatus(_mfa_current_user, false);
+  });
+
+});
 
 /*
 $('#password_reset_submit').click(function() {

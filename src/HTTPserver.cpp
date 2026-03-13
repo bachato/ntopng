@@ -378,6 +378,8 @@ static int isWhitelistedURI(const char *uri) {
   /* URL whitelist */
   if ((!strcmp(uri, LOGIN_URL))
       || (!strcmp(uri, AUTHORIZE_URL))
+      || (!strcmp(uri, MFA_AUTHORIZE_URL))
+      || (!strcmp(uri, MFA_VERIFY_URL))
       || (!strcmp(uri, LOCALE_URL))
 #ifdef HAVE_NEDGE
       || (!strcmp(uri, HOTSPOT_DETECT_URL)) ||
@@ -953,6 +955,19 @@ static void redirect_to_password_change(struct mg_connection *conn,
 
 /* ****************************************** */
 
+// Redirect to the MFA verification page after successful password auth.
+static void redirect_to_mfa(struct mg_connection *conn, const char *token) {
+  char url[256];
+  snprintf(url, sizeof(url), "%s%s?token=%s",
+           ntop->getPrefs()->get_http_prefix(), MFA_VERIFY_URL, token);
+  mg_printf(conn,
+            "HTTP/1.1 302 Found\r\n"
+            "Location: %s\r\n\r\n",
+            url);
+}
+
+/* ****************************************** */
+
 // A handler for the /authorize endpoint.
 // Login page form sends user name and password to this endpoint.
 static void authorize(struct mg_connection *conn,
@@ -1000,14 +1015,17 @@ static void authorize(struct mg_connection *conn,
   } else {
     /* Referer url must begin with '/' */
     if ((referer[0] != '/') || (strcmp(referer, AUTHORIZE_URL) == 0)) {
-#if 0
-      char *r = strchr(referer, '/');
-
-      if (r)
-        memmove(referer, r, strlen(r) + 1 /* with null terminator */);
-      else
-#endif
         strcpy(referer, "/");
+    }
+
+    /* If TOTP/MFA is enabled for this user, require a second factor */
+    if (ntop->isTOTPEnabled(user)) {
+      char token[33];
+      if (ntop->createMFAPendingToken(user, referer, token, sizeof(token))) {
+        redirect_to_mfa(conn, token);
+        return;
+      }
+      /* If token creation fails, fall through to normal login */
     }
 
     /* Send session cookie and set user for the new session */
@@ -1015,6 +1033,68 @@ static void authorize(struct mg_connection *conn,
     strncpy(username, user, NTOP_USERNAME_MAXLEN);
     username[NTOP_USERNAME_MAXLEN - 1] = '\0';
   }
+}
+
+/* ****************************************** */
+
+// A handler for the /mfa_authorize endpoint.
+// MFA verification page POSTs the TOTP code to this endpoint.
+static void mfa_authorize(struct mg_connection *conn,
+                           const struct mg_request_info *request_info,
+                           char *username, char *group, bool *localuser) {
+  char token[64] = {'\0'}, code[16] = {'\0'};
+  char user[32], referer[256];
+  bool got_token = false;
+
+  if (!strcmp(request_info->request_method, "POST")) {
+    char post_data[512];
+    int post_data_len = mg_read(conn, post_data, sizeof(post_data));
+    mg_get_var(post_data, post_data_len, "token", token, sizeof(token));
+    mg_get_var(post_data, post_data_len, "totp_code", code, sizeof(code));
+  } else {
+    get_qsvar(request_info, "token", token, sizeof(token));
+    get_qsvar(request_info, "totp_code", code, sizeof(code));
+  }
+
+  /* Look up the pending token to get the username and referer */
+  if (token[0] != '\0' &&
+      ntop->getMFAPendingToken(token, user, sizeof(user),
+                               referer, sizeof(referer))) {
+    got_token = true;
+  }
+
+  if (!got_token || !ntop->validateTOTPCode(user, code)) {
+    /* Invalid or expired token / wrong code */
+    char url[256];
+    if (got_token) {
+      snprintf(url, sizeof(url), "%s%s?token=%s&reason=wrong-code",
+               ntop->getPrefs()->get_http_prefix(), MFA_VERIFY_URL, token);
+    } else {
+      snprintf(url, sizeof(url), "%s/lua/login.lua?reason=session-expired",
+               ntop->getPrefs()->get_http_prefix());
+    }
+    mg_printf(conn, "HTTP/1.1 302 Found\r\nLocation: %s\r\n\r\n", url);
+    return;
+  }
+
+  /* Token is valid and TOTP code is correct: consume the token */
+  ntop->deleteMFAPendingToken(token);
+
+  /* Retrieve group for this user to create the session */
+  char grp[NTOP_GROUP_MAXLEN] = {0};
+  bool lu = true;
+  strncpy(grp, NTOP_UNKNOWN_GROUP, NTOP_GROUP_MAXLEN - 1);
+  ntop->getUserGroupLocal(user, grp);
+
+  strncpy(group, grp, NTOP_GROUP_MAXLEN - 1);
+  group[NTOP_GROUP_MAXLEN - 1] = '\0';
+  *localuser = lu;
+
+  if (referer[0] != '/') strcpy(referer, "/");
+
+  set_session_cookie(conn, user, group, *localuser, referer);
+  strncpy(username, user, NTOP_USERNAME_MAXLEN);
+  username[NTOP_USERNAME_MAXLEN - 1] = '\0';
 }
 
 /* ****************************************** */
@@ -1392,6 +1472,9 @@ static int handle_lua_request(struct mg_connection *conn) {
       return (1);
     } else if (strcmp(request_info->uri, AUTHORIZE_URL) == 0) {
       authorize(conn, request_info, username, group, &localuser);
+      return (1);
+    } else if (strcmp(request_info->uri, MFA_AUTHORIZE_URL) == 0) {
+      mfa_authorize(conn, request_info, username, group, &localuser);
       return (1);
     }
   }

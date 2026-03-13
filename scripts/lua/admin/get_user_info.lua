@@ -56,6 +56,7 @@ if(isAdministratorOrPrintErr()) then
          rc["password"] = value["password"]
          rc["full_name"] = value["full_name"]
          rc["group"] = value["group"]
+         rc["totp_enabled"] = ntop.isTOTPEnabled(key) and true or false
 
          print(json.encode(rc))
          return

@@ -1,6 +1,9 @@
 /* First import jquery */
 import $ from 'jquery'
 
+import QRCode from 'qrcode'
+window.QRCode = QRCode
+
 window.jQuery = $
 window.$ = $
 
