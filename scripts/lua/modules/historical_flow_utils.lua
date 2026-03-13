@@ -963,12 +963,27 @@ local function simple_format_dst_asn(value, record)
    local ip = record["IPV4_DST_ADDR"] or record["IPV6_DST_ADDR"]
 
    if not isEmptyString(ip) then
-      if tonumber(value) == 0 then 
+      if tonumber(value) == 0 then
          record["label"] = "No ASN"
       else
          record["label"] = ntop.getASName(ip)
       end
    end
+end
+
+-- #####################################
+
+local function simple_format_interface_role(value)
+   local role_labels = {
+      [0] = i18n("prefs.snmp_interface_role_list.other"),
+      [1] = i18n("prefs.snmp_interface_role_list.transit"),
+      [2] = i18n("prefs.snmp_interface_role_list.peering"),
+      [3] = i18n("prefs.snmp_interface_role_list.internal_interface"),
+      [4] = i18n("prefs.snmp_interface_role_list.ix"),
+      [5] = i18n("prefs.snmp_interface_role_list.customer_interface"),
+      [6] = i18n("prefs.snmp_interface_role_list.internet_connectivity"),
+   }
+   return role_labels[tonumber(value)] or tostring(value)
 end
 
 -- #####################################
@@ -1271,7 +1286,7 @@ local flow_columns = {
    ['USER_LABEL_TSTAMP'] =    { tag = "user_label_tstamp" },
    ['SRC_PEER_ASN'] =         { tag = "src_peer_asn" },
    ['DST_PEER_ASN'] =         { tag = "dst_peer_asn" },
-   ['INTERFACE_ROLE'] =         { tag = "iface_role", db_type = "Number", db_raw_type = "Uint8" }
+   ['INTERFACE_ROLE'] =         { tag = "iface_role", simple_dt_func = simple_format_interface_role, db_type = "Number", db_raw_type = "Uint8" }
 }
 local aggregated_flow_columns = {
    ['FLOW_ID'] =              { tag = "rowid", db_type = "Number", db_raw_type = "Uint64" },
