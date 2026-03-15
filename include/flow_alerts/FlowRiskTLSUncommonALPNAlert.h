@@ -26,7 +26,7 @@
 
 class FlowRiskTLSUncommonALPNAlert : public FlowRiskAlert {
  private:
-  ndpi_serializer *getAlertJSON(ndpi_serializer *serializer);
+  ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
 
  public:
   static ndpi_risk_enum getClassRisk() { return NDPI_TLS_UNCOMMON_ALPN; }
@@ -37,8 +37,10 @@ class FlowRiskTLSUncommonALPNAlert : public FlowRiskAlert {
     return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
   }
 
-  FlowRiskTLSUncommonALPNAlert(FlowCheck *c, Flow *f) : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
-  ~FlowRiskTLSUncommonALPNAlert(){};
+  FlowRiskTLSUncommonALPNAlert(FlowCheck* c, Flow* f) : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskTLSUncommonALPNAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
   ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }

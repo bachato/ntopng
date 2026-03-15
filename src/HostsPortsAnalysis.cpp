@@ -21,13 +21,11 @@
 
 #include "ntop_includes.h"
 
-
 /* **************************************************** */
 
-void HostsPortsAnalysis::add_host_details(HostDetails * host_details_to_insert) {
-    if(!host_details_to_insert)
-        return;
+void HostsPortsAnalysis::add_host_details(HostDetails* host_details_to_insert) {
+  if (!host_details_to_insert) return;
 
-    hosts_details->insert({host_details_to_insert->get_host_key(), host_details_to_insert});
-        
+  hosts_details->insert(
+      {host_details_to_insert->get_host_key(), host_details_to_insert});
 }

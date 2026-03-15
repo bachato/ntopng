@@ -38,7 +38,7 @@ class DangerousHostAlert : public HostAlert {
   DangerousHostAlert(HostCheck* c, Host* f, risk_percentage cli_pctg,
                      u_int32_t _score, u_int8_t _consecutive_high_score,
                      u_int32_t threshold);
-  ~DangerousHostAlert(){};
+  ~DangerousHostAlert() {};
 
   bool autoAck() const { return false; };
   HostAlertType getAlertType() const { return getClassType(); }

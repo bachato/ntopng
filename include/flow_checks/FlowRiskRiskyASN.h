@@ -31,10 +31,10 @@ class FlowRiskRiskyASN : public FlowRisk {
   }
 
  public:
-  FlowRiskRiskyASN(){};
-  ~FlowRiskRiskyASN(){};
+  FlowRiskRiskyASN() {};
+  ~FlowRiskRiskyASN() {};
 
-  FlowAlert *buildAlert(Flow *f) { return new FlowRiskRiskyASNAlert(this, f); }
+  FlowAlert* buildAlert(Flow* f) { return new FlowRiskRiskyASNAlert(this, f); }
 
   std::string getName() const {
     return (

@@ -23,7 +23,6 @@
 
 ndpi_serializer* S7CommUnexpectedFunctionCodeAlert::getAlertJSON(
     ndpi_serializer* serializer) {
-
   if (serializer) {
     ndpi_serialize_string_uint32(serializer, "function_code", function_code);
   }

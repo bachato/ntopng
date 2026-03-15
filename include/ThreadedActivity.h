@@ -35,62 +35,63 @@ class ThreadedActivity {
   Mutex m;
   bool randomDelaySchedule;
   u_int32_t next_schedule;
-  PeriodicScript *periodic_script;
-  std::map<std::string, ThreadedActivityStats *> threaded_activity_stats;
+  PeriodicScript* periodic_script;
+  std::map<std::string, ThreadedActivityStats*> threaded_activity_stats;
 
   void updateNextSchedule(u_int32_t now);
   void setDeadlineApproachingSecs();
-  void schedulePeriodicActivity(ThreadPool *pool, time_t scheduled_time,
-                                time_t deadline, PeriodicActivities *pa,
-				bool hourly_daily_activity);
-  ThreadedActivityState getThreadedActivityState(NetworkInterface *iface,
-                                                 char *script_name);
-  void updateThreadedActivityStatsBegin(NetworkInterface *iface,
-                                        char *script_name,
-                                        struct timeval *begin);
-  void updateThreadedActivityStatsEnd(NetworkInterface *iface,
-                                      char *script_name,
+  void schedulePeriodicActivity(ThreadPool* pool, time_t scheduled_time,
+                                time_t deadline, PeriodicActivities* pa,
+                                bool hourly_daily_activity);
+  ThreadedActivityState getThreadedActivityState(NetworkInterface* iface,
+                                                 char* script_name);
+  void updateThreadedActivityStatsBegin(NetworkInterface* iface,
+                                        char* script_name,
+                                        struct timeval* begin);
+  void updateThreadedActivityStatsEnd(NetworkInterface* iface,
+                                      char* script_name,
                                       u_long latest_duration);
-  LuaEngine *loadVM(char *script_path, NetworkInterface *iface, time_t when);
-  void set_state(NetworkInterface *iface, char *script_name,
+  LuaEngine* loadVM(char* script_path, NetworkInterface* iface, time_t when);
+  void set_state(NetworkInterface* iface, char* script_name,
                  ThreadedActivityState ta_state);
-  static const char *get_state_label(ThreadedActivityState ta_state);
-  bool isValidScript(char *dir, char *path);
+  static const char* get_state_label(ThreadedActivityState ta_state);
+  bool isValidScript(char* dir, char* path);
 
  public:
-  ThreadedActivity(const char *_path, bool delayed_activity = false,
+  ThreadedActivity(const char* _path, bool delayed_activity = false,
                    u_int32_t _periodicity_seconds = 0,
                    u_int32_t _max_duration_seconds = 0,
                    bool _align_to_localtime = false,
                    bool _exclude_viewed_interfaces = false,
                    bool _exclude_pcap_dump_interfaces = false,
-                   ThreadPool *_pool = NULL);
+                   ThreadPool* _pool = NULL);
   ~ThreadedActivity();
 
-  const char *activityPath();
+  const char* activityPath();
   void runSystemScript(time_t now);
-  void runScript(time_t now, char *script_path, NetworkInterface *iface,
+  void runScript(time_t now, char* script_path, NetworkInterface* iface,
                  time_t deadline);
   bool isTerminating();
 
-  void set_state_sleeping(NetworkInterface *iface, char *script_name);
-  void set_state_queued(NetworkInterface *iface, char *script_name);
-  void set_state_running(NetworkInterface *iface, char *script_name);
+  void set_state_sleeping(NetworkInterface* iface, char* script_name);
+  void set_state_queued(NetworkInterface* iface, char* script_name);
+  void set_state_running(NetworkInterface* iface, char* script_name);
   bool isDeadlineApproaching(time_t deadline);
   u_int32_t getPeriodicity();
   u_int32_t getMaxDuration();
   bool excludePcap();
   bool excludeViewedIfaces();
-  ThreadPool *getPool();
+  ThreadPool* getPool();
   bool alignToLocalTime();
-  ThreadedActivityState get_state(NetworkInterface *iface, char *script_name);
-  ThreadedActivityStats *getThreadedActivityStats(NetworkInterface *iface,
-                                                  char *script_name,
+  ThreadedActivityState get_state(NetworkInterface* iface, char* script_name);
+  ThreadedActivityStats* getThreadedActivityStats(NetworkInterface* iface,
+                                                  char* script_name,
                                                   bool allocate_if_missing);
 
-  void lua(NetworkInterface *iface, lua_State *vm);
-  bool schedule(PeriodicActivities *pa, u_int32_t now, bool hourly_daily_activity);
-  inline void force() { force_run = true; /* Force activity schedule */}
+  void lua(NetworkInterface* iface, lua_State* vm);
+  bool schedule(PeriodicActivities* pa, u_int32_t now,
+                bool hourly_daily_activity);
+  inline void force() { force_run = true; /* Force activity schedule */ }
 };
 
 #endif /* _THREADED_ACTIVITY_H_ */

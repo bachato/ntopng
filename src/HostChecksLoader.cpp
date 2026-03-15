@@ -25,34 +25,38 @@
 /* **************************************************** */
 
 HostChecksLoader::HostChecksLoader() : ChecksLoader() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 }
 
 /* **************************************************** */
 
 HostChecksLoader::~HostChecksLoader() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
-  
-  for (std::map<std::string, HostCheck *>::const_iterator it = cb_all.begin();
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+
+  for (std::map<std::string, HostCheck*>::const_iterator it = cb_all.begin();
        it != cb_all.end(); ++it)
     delete it->second;
 }
 
 /* **************************************************** */
 
-void HostChecksLoader::registerCheck(HostCheck *cb) {
+void HostChecksLoader::registerCheck(HostCheck* cb) {
   if (cb_all.find(cb->getName()) != cb_all.end()) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "Ignoring duplicate host check %s", cb->getName().c_str());
+    ntop->getTrace()->traceEvent(
+        TRACE_ERROR, "Ignoring duplicate host check %s", cb->getName().c_str());
     delete cb;
   } else {
     /*
       The registered name has a companion lua scaript that can be found at:
-      
+
       - /usr/share/ntopng/scripts/lua/modules/alert_definitions/host/<name>.lua
-      - /usr/share/ntopng/scripts/lua/modules/check_definitions/host/<name>.lua 
+      - /usr/share/ntopng/scripts/lua/modules/check_definitions/host/<name>.lua
     */
-    ntop->getTrace()->traceEvent(TRACE_INFO, "Registering %s", cb->getName().c_str());
-    
+    ntop->getTrace()->traceEvent(TRACE_INFO, "Registering %s",
+                                 cb->getName().c_str());
+
     cb_all[cb->getName()] = cb;
   }
 }
@@ -61,29 +65,29 @@ void HostChecksLoader::registerCheck(HostCheck *cb) {
 
 void HostChecksLoader::registerChecks() {
   /* TODO: implement dynamic loading */
-  HostCheck *fcb;
+  HostCheck* fcb;
 
-  if ((fcb = new CountriesContacts()))   registerCheck(fcb);
+  if ((fcb = new CountriesContacts())) registerCheck(fcb);
   if ((fcb = new CustomHostLuaScript())) registerCheck(fcb);
-  if ((fcb = new FlowFlood()))           registerCheck(fcb);
-  if ((fcb = new DNSServerContacts()))   registerCheck(fcb);
-  if ((fcb = new SMTPServerContacts()))  registerCheck(fcb);
-  if ((fcb = new NTPServerContacts()))   registerCheck(fcb);
-  if ((fcb = new RemoteConnection()))    registerCheck(fcb);
-  if ((fcb = new UnexpectedGateway()))   registerCheck(fcb);
-  if ((fcb = new DangerousHost()))       registerCheck(fcb);
+  if ((fcb = new FlowFlood())) registerCheck(fcb);
+  if ((fcb = new DNSServerContacts())) registerCheck(fcb);
+  if ((fcb = new SMTPServerContacts())) registerCheck(fcb);
+  if ((fcb = new NTPServerContacts())) registerCheck(fcb);
+  if ((fcb = new RemoteConnection())) registerCheck(fcb);
+  if ((fcb = new UnexpectedGateway())) registerCheck(fcb);
+  if ((fcb = new DangerousHost())) registerCheck(fcb);
   if ((fcb = new DomainNamesContacts())) registerCheck(fcb);
-  if ((fcb = new ICMPFlood()))           registerCheck(fcb);
-  
+  if ((fcb = new ICMPFlood())) registerCheck(fcb);
+
 #ifdef NTOPNG_PRO
-  if ((fcb = new ScoreAnomaly()))        registerCheck(fcb);
-  if ((fcb = new DNSFlood()))            registerCheck(fcb);
-  if ((fcb = new SNMPFlood()))           registerCheck(fcb);
-  if ((fcb = new FlowAnomaly()))         registerCheck(fcb);
-  if ((fcb = new HostScanner()))         registerCheck(fcb);
+  if ((fcb = new ScoreAnomaly())) registerCheck(fcb);
+  if ((fcb = new DNSFlood())) registerCheck(fcb);
+  if ((fcb = new SNMPFlood())) registerCheck(fcb);
+  if ((fcb = new FlowAnomaly())) registerCheck(fcb);
+  if ((fcb = new HostScanner())) registerCheck(fcb);
   if ((fcb = new ServerPortsContacts())) registerCheck(fcb);
-  if ((fcb = new NATDetected()))         registerCheck(fcb);
-  if ((fcb = new ScanRealtime()))        registerCheck(fcb);
+  if ((fcb = new NATDetected())) registerCheck(fcb);
+  if ((fcb = new ScanRealtime())) registerCheck(fcb);
 #endif
 
   // printChecks();
@@ -96,19 +100,18 @@ void HostChecksLoader::loadConfiguration() {
   struct json_object_iterator it;
   struct json_object_iterator itEnd;
   enum json_tokener_error jerr = json_tokener_success;
-  char *value = NULL;
+  char* value = NULL;
   u_int actual_len = ntop->getRedis()->len(
       CHECKS_CONFIG);  // TODO: check if this is the right place
 
-  if ((value = (char *)malloc(actual_len + 1)) == NULL) {
+  if ((value = (char*)malloc(actual_len + 1)) == NULL) {
     ntop->getTrace()->traceEvent(TRACE_ERROR,
                                  "Unable to allocate memory to deserialize %s",
                                  CHECKS_CONFIG);
     goto out;
   }
 
-  if (ntop->getRedis()->get((char *)CHECKS_CONFIG, value, actual_len + 1) !=
-      0) {
+  if (ntop->getRedis()->get((char*)CHECKS_CONFIG, value, actual_len + 1) != 0) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to find configuration %s",
                                  CHECKS_CONFIG);
     goto out;
@@ -141,17 +144,17 @@ void HostChecksLoader::loadConfiguration() {
   itEnd = json_object_iter_end(json_config_host);
 
   while (!json_object_iter_equal(&it, &itEnd)) {
-    const char *check_key = json_object_iter_peek_name(&it);
-    json_object *check_config = json_object_iter_peek_value(&it);
+    const char* check_key = json_object_iter_peek_name(&it);
+    json_object* check_config = json_object_iter_peek_value(&it);
     json_object *json_script_conf, *json_hook_all;
- 
+
     /* Skip this external_host_script check, it's an exception! */
-    if(strcmp(check_key, "external_host_script") == 0) {
+    if (strcmp(check_key, "external_host_script") == 0) {
       /* Move to the next element */
       json_object_iter_next(&it);
       continue;
     }
-    
+
     /* Periodicities that are currently available for user scripts */
     static std::map<std::string, u_int32_t> hooks = {{"min", 60},
                                                      {"5mins", 300}};
@@ -162,11 +165,11 @@ void HostChecksLoader::loadConfiguration() {
               check_config,
               it->first.c_str() /* This is either "min" or "5mins" */,
               &json_hook_all)) {
-        json_object *json_enabled;
+        json_object* json_enabled;
         bool enabled;
 
         if (cb_all.find(check_key) != cb_all.end()) {
-          HostCheck *cb = cb_all[check_key];
+          HostCheck* cb = cb_all[check_key];
 
           if (!cb->isCheckCompatibleWithEdition()) {
             ntop->getTrace()->traceEvent(
@@ -234,19 +237,19 @@ out:
 void HostChecksLoader::printChecks() {
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Available Checks:");
 
-  for (std::map<std::string, HostCheck *>::const_iterator it = cb_all.begin();
+  for (std::map<std::string, HostCheck*>::const_iterator it = cb_all.begin();
        it != cb_all.end(); ++it)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "\t%s", it->first.c_str());
 }
 
 /* **************************************************** */
 
-std::list<HostCheck *> *HostChecksLoader::getChecks(NetworkInterface *iface) {
-  std::list<HostCheck *> *l = new std::list<HostCheck *>;
+std::list<HostCheck*>* HostChecksLoader::getChecks(NetworkInterface* iface) {
+  std::list<HostCheck*>* l = new std::list<HostCheck*>;
 
-  for (std::map<std::string, HostCheck *>::const_iterator it = cb_all.begin();
+  for (std::map<std::string, HostCheck*>::const_iterator it = cb_all.begin();
        it != cb_all.end(); ++it) {
-    HostCheck *cb = it->second;
+    HostCheck* cb = it->second;
 
     if (cb->isEnabled()) cb->addCheck(l, iface);
   }
@@ -256,9 +259,9 @@ std::list<HostCheck *> *HostChecksLoader::getChecks(NetworkInterface *iface) {
 
 /* **************************************************** */
 
-bool HostChecksLoader::luaCheckInfo(lua_State *vm,
+bool HostChecksLoader::luaCheckInfo(lua_State* vm,
                                     std::string check_name) const {
-  std::map<std::string, HostCheck *>::const_iterator it =
+  std::map<std::string, HostCheck*>::const_iterator it =
       cb_all.find(check_name);
 
   if (it == cb_all.end()) return false;

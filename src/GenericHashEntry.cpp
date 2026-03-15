@@ -23,9 +23,10 @@
 
 /* ***************************************** */
 
-GenericHashEntry::GenericHashEntry(NetworkInterface *_iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+GenericHashEntry::GenericHashEntry(NetworkInterface* _iface) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   hash_next = NULL, iface = _iface, first_seen = last_seen = 0;
   num_uses = 0;
   hash_table = NULL;
@@ -41,7 +42,8 @@ GenericHashEntry::GenericHashEntry(NetworkInterface *_iface) {
 /* ***************************************** */
 
 GenericHashEntry::~GenericHashEntry() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
 }
 
 /* ***************************************** */
@@ -52,7 +54,7 @@ void GenericHashEntry::updateSeen(time_t _last_seen) {
     not have backwards timestamps in case data is
     received from multiple sources
   */
-  if(_last_seen > last_seen) last_seen = _last_seen;
+  if (_last_seen > last_seen) last_seen = _last_seen;
 
   if ((first_seen == 0) || (first_seen > last_seen)) first_seen = last_seen;
 }
@@ -66,10 +68,17 @@ void GenericHashEntry::updateSeen() { updateSeen(iface->getTimeLastPktRcvd()); }
 void GenericHashEntry::set_state(HashEntryState s) {
   if ((s < hash_entry_state          /* Can't go back */
        || (s != hash_entry_state + 1 /* Only ahead, one state at time */
-           /* Exception: flows which can go from allocated to protocoldetected without stepping on not yet detected */
-           && !(hash_entry_state == hash_entry_state_allocated && s == hash_entry_state_flow_protocoldetected)
-           /* Exception: collected flows which can go from allocated to active without stepping on not yet detected or protocoldetected when the preference is enabled */
-           && !(!iface->isPacketInterface() && ntop->getPrefs()->skipDPIforCollectedFlows() && hash_entry_state == hash_entry_state_allocated && s == hash_entry_state_active))) &&
+           /* Exception: flows which can go from allocated to protocoldetected
+              without stepping on not yet detected */
+           && !(hash_entry_state == hash_entry_state_allocated &&
+                s == hash_entry_state_flow_protocoldetected)
+           /* Exception: collected flows which can go from allocated to active
+              without stepping on not yet detected or protocoldetected when the
+              preference is enabled */
+           && !(!iface->isPacketInterface() &&
+                ntop->getPrefs()->skipDPIforCollectedFlows() &&
+                hash_entry_state == hash_entry_state_allocated &&
+                s == hash_entry_state_active))) &&
       (!iface || iface->isRunning()))
     ntop->getTrace()->traceEvent(
         TRACE_ERROR, "Internal error: invalid state transition %d -> %d",
@@ -80,17 +89,21 @@ void GenericHashEntry::set_state(HashEntryState s) {
 
 /* ***************************************** */
 
-void GenericHashEntry::periodic_stats_update(const struct timeval *tv, bool force_update) {
-  GenericTrafficElement *elem;
+void GenericHashEntry::periodic_stats_update(const struct timeval* tv,
+                                             bool force_update) {
+  GenericTrafficElement* elem;
 
-  if ((elem = dynamic_cast<GenericTrafficElement *>(this)))
+  if ((elem = dynamic_cast<GenericTrafficElement*>(this)))
     elem->updateStats(tv);
 }
 
 /* ***************************************** */
 
 bool GenericHashEntry::is_active_entry_now_idle(u_int max_idleness) const {
-  bool ret = (((u_int)(iface->getTimeLastPktRcvd()) > (last_seen + max_idleness)) ? true : false);
+  bool ret =
+      (((u_int)(iface->getTimeLastPktRcvd()) > (last_seen + max_idleness))
+           ? true
+           : false);
 
 #if 0
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s() [lastPkt: %u][last_seen: %u][max_idleness: %u][idle: %s]",
@@ -103,7 +116,7 @@ bool GenericHashEntry::is_active_entry_now_idle(u_int max_idleness) const {
 
 /* ***************************************** */
 
-void GenericHashEntry::getJSONObject(json_object *my_object,
+void GenericHashEntry::getJSONObject(json_object* my_object,
                                      DetailsLevel details_level) {
   json_object_object_add(my_object, "seen.first",
                          json_object_new_int64(first_seen));

@@ -17,27 +17,29 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
-*/
+ */
 
 #ifndef _QOE_DEGRADED_ALERT_H_
-#define _QOE_DEGRADED_ALERT_H_ 
- 
+#define _QOE_DEGRADED_ALERT_H_
+
 #include "ntop_includes.h"
- 
+
 class QoEDegradedAlert : public FlowAlert {
-  private:
-    ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
-  public:
-    static FlowAlertType getClassType() {
-      return {NDPI_NO_RISK, flow_alert_qoe_degraded, alert_category_network};
-    }
-    static u_int8_t getDefaultScore() { return SCORE_LEVEL_WARNING; };
- 
-    QoEDegradedAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-    ~QoEDegradedAlert(){};
-   
-    FlowAlertType getAlertType() const { return getClassType(); }
+ private:
+  ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
+
+ public:
+  static FlowAlertType getClassType() {
+    return {NDPI_NO_RISK, flow_alert_qoe_degraded, alert_category_network};
+  }
+  static u_int8_t getDefaultScore() { return SCORE_LEVEL_WARNING; };
+
+  QoEDegradedAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~QoEDegradedAlert() {};
+
+  FlowAlertType getAlertType() const { return getClassType(); }
 };
- 
+
 #endif /* _QOE_DEGRADED_ALERT_H_ */
- 

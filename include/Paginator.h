@@ -32,7 +32,7 @@ class Paginator {
   char *sort_column, *country_filter, *host_filter, *client_filter,
       *server_filter, *wlan_ssid_filter;
   char *container_filter, *pod_filter;
-  char *traffic_profile_filter;
+  char* traffic_profile_filter;
   char *username_filter, *pidname_filter;
   int l7proto_filter_master_proto, l7proto_filter_app_proto;
   int l7category_filter;
@@ -63,17 +63,17 @@ class Paginator {
  public:
   Paginator();
   virtual ~Paginator();
-  virtual void readOptions(lua_State *L, int index);
+  virtual void readOptions(lua_State* L, int index);
 
   inline u_int16_t maxHits() const {
     return (min_val(max_hits, CONST_MAX_NUM_HITS));
   }
   inline u_int16_t toSkip() const { return (to_skip); }
   inline bool a2zSortOrder() const { return (a2z_sort_order); }
-  inline char *sortColumn() const { return (sort_column); }
+  inline char* sortColumn() const { return (sort_column); }
   inline bool detailedResults() const { return (detailed_results); }
 
-  inline bool getDetailsLevel(DetailsLevel *f) const {
+  inline bool getDetailsLevel(DetailsLevel* f) const {
     if (details_level_set) {
       (*f) = details_level;
       return true;
@@ -81,7 +81,7 @@ class Paginator {
     return false;
   }
 
-  inline bool countryFilter(char **f) const {
+  inline bool countryFilter(char** f) const {
     if (country_filter) {
       (*f) = country_filter;
       return true;
@@ -89,7 +89,7 @@ class Paginator {
     return false;
   }
 
-  inline bool wlanSSIDFilter(char **f) const {
+  inline bool wlanSSIDFilter(char** f) const {
     if (wlan_ssid_filter) {
       (*f) = wlan_ssid_filter;
       return true;
@@ -97,7 +97,7 @@ class Paginator {
     return false;
   }
 
-  inline bool hostFilter(char **f) const {
+  inline bool hostFilter(char** f) const {
     if (host_filter) {
       (*f) = host_filter;
       return true;
@@ -105,7 +105,7 @@ class Paginator {
     return false;
   }
 
-  inline bool clientFilter(char **f) const {
+  inline bool clientFilter(char** f) const {
     if (client_filter) {
       (*f) = client_filter;
       return true;
@@ -113,7 +113,7 @@ class Paginator {
     return false;
   }
 
-  inline bool serverFilter(char **f) const {
+  inline bool serverFilter(char** f) const {
     if (server_filter) {
       (*f) = server_filter;
       return true;
@@ -121,7 +121,7 @@ class Paginator {
     return false;
   }
 
-  inline bool containerFilter(char **f) const {
+  inline bool containerFilter(char** f) const {
     if (container_filter) {
       (*f) = container_filter;
       return true;
@@ -129,7 +129,7 @@ class Paginator {
     return false;
   }
 
-  inline bool podFilter(char **f) const {
+  inline bool podFilter(char** f) const {
     if (pod_filter) {
       (*f) = pod_filter;
       return true;
@@ -137,7 +137,7 @@ class Paginator {
     return false;
   }
 
-  inline bool usernameFilter(char **f) const {
+  inline bool usernameFilter(char** f) const {
     if (username_filter) {
       (*f) = username_filter;
       return true;
@@ -145,7 +145,7 @@ class Paginator {
     return false;
   }
 
-  inline bool pidnameFilter(char **f) const {
+  inline bool pidnameFilter(char** f) const {
     if (pidname_filter) {
       (*f) = pidname_filter;
       return true;
@@ -153,18 +153,21 @@ class Paginator {
     return false;
   }
 
-  inline bool l7protoFilter(int *f_master_proto, int *f_app_proto) const {
+  inline bool l7protoFilter(int* f_master_proto, int* f_app_proto) const {
     if ((l7proto_filter_master_proto >= 0) || (l7proto_filter_app_proto >= 0)) {
       /* In this way, only if the filter is selected, the filter is applied */
-      *f_master_proto = (l7proto_filter_master_proto >= 0) ? l7proto_filter_master_proto : NDPI_PROTOCOL_UNKNOWN;
-      *f_app_proto = (l7proto_filter_app_proto >= 0) ? l7proto_filter_app_proto : NDPI_PROTOCOL_UNKNOWN;
+      *f_master_proto = (l7proto_filter_master_proto >= 0)
+                            ? l7proto_filter_master_proto
+                            : NDPI_PROTOCOL_UNKNOWN;
+      *f_app_proto = (l7proto_filter_app_proto >= 0) ? l7proto_filter_app_proto
+                                                     : NDPI_PROTOCOL_UNKNOWN;
       return true;
     }
 
     return false;
   }
 
-  inline bool l7categoryFilter(int *f) const {
+  inline bool l7categoryFilter(int* f) const {
     if (l7category_filter >= 0) {
       (*f) = l7category_filter;
       return true;
@@ -172,7 +175,7 @@ class Paginator {
     return false;
   }
 
-  inline bool ifaceIndexFilter(int *f) const {
+  inline bool ifaceIndexFilter(int* f) const {
     if (iface_index_filter >= 0) {
       (*f) = iface_index_filter;
       return true;
@@ -180,7 +183,7 @@ class Paginator {
     return false;
   }
 
-  inline bool trafficProfileFilter(char **f) const {
+  inline bool trafficProfileFilter(char** f) const {
     if (traffic_profile_filter) {
       (*f) = traffic_profile_filter;
       return true;
@@ -188,7 +191,7 @@ class Paginator {
     return false;
   }
 
-  inline bool portFilter(u_int16_t *f) const {
+  inline bool portFilter(u_int16_t* f) const {
     if (port_filter) {
       (*f) = port_filter;
       return true;
@@ -196,7 +199,7 @@ class Paginator {
     return false;
   }
 
-  inline bool localNetworkFilter(int32_t *f) const {
+  inline bool localNetworkFilter(int32_t* f) const {
     if (local_network_filter <= CONST_MAX_NUM_NETWORKS) {
       (*f) = local_network_filter;
       return true;
@@ -204,7 +207,7 @@ class Paginator {
     return false;
   }
 
-  inline bool vlanIdFilter(u_int16_t *f) const {
+  inline bool vlanIdFilter(u_int16_t* f) const {
     if (vlan_id_filter != (u_int16_t)-1) {
       (*f) = vlan_id_filter;
       return true;
@@ -212,7 +215,7 @@ class Paginator {
     return false;
   }
 
-  inline bool ipVersion(u_int8_t *f) const {
+  inline bool ipVersion(u_int8_t* f) const {
     if (ip_version) {
       (*f) = ip_version;
       return true;
@@ -220,7 +223,7 @@ class Paginator {
     return false;
   }
 
-  inline bool L4Protocol(u_int8_t *f) const {
+  inline bool L4Protocol(u_int8_t* f) const {
     if (l4_protocol) {
       (*f) = l4_protocol;
       return true;
@@ -228,7 +231,7 @@ class Paginator {
     return false;
   }
 
-  inline bool deviceIpFilter(u_int32_t *f) const {
+  inline bool deviceIpFilter(u_int32_t* f) const {
     if (deviceIP) {
       (*f) = deviceIP;
       return true;
@@ -236,7 +239,7 @@ class Paginator {
     return false;
   }
 
-  inline bool ifaceIndexFilter(u_int32_t *f) const {
+  inline bool ifaceIndexFilter(u_int32_t* f) const {
     if (ifaceIndex != (u_int32_t)-1) {
       (*f) = ifaceIndex;
       return true;
@@ -244,7 +247,7 @@ class Paginator {
     return false;
   }
 
-  inline bool inIndexFilter(u_int32_t *f) const {
+  inline bool inIndexFilter(u_int32_t* f) const {
     if (inIndex != (u_int32_t)-1) {
       (*f) = inIndex;
       return true;
@@ -252,7 +255,7 @@ class Paginator {
     return false;
   }
 
-  inline bool outIndexFilter(u_int32_t *f) const {
+  inline bool outIndexFilter(u_int32_t* f) const {
     if (outIndex != (u_int32_t)-1) {
       (*f) = outIndex;
       return true;
@@ -260,7 +263,7 @@ class Paginator {
     return false;
   }
 
-  inline bool poolFilter(u_int16_t *f) const {
+  inline bool poolFilter(u_int16_t* f) const {
     if (pool_filter != ((u_int16_t)-1)) {
       (*f) = pool_filter;
       return true;
@@ -268,7 +271,7 @@ class Paginator {
     return false;
   }
 
-  inline bool flowStatusFilter(u_int16_t *f) const {
+  inline bool flowStatusFilter(u_int16_t* f) const {
     if (alert_type_filter != ((u_int16_t)-1)) {
       (*f) = alert_type_filter;
       return true;
@@ -276,7 +279,7 @@ class Paginator {
     return false;
   }
 
-  inline bool flowStatusFilter(AlertLevelGroup *f) const {
+  inline bool flowStatusFilter(AlertLevelGroup* f) const {
     if (alert_type_severity_filter != alert_level_group_none) {
       (*f) = alert_type_severity_filter;
       return true;
@@ -284,7 +287,7 @@ class Paginator {
     return false;
   }
 
-  inline bool macFilter(u_int8_t **f) const {
+  inline bool macFilter(u_int8_t** f) const {
     if (mac_filter) {
       (*f) = mac_filter;
       return true;
@@ -292,7 +295,7 @@ class Paginator {
     return false;
   }
 
-  inline bool clientMode(LocationPolicy *f) const {
+  inline bool clientMode(LocationPolicy* f) const {
     if (client_mode) {
       (*f) = client_mode;
       return true;
@@ -300,7 +303,7 @@ class Paginator {
     return false;
   }
 
-  inline bool serverMode(LocationPolicy *f) const {
+  inline bool serverMode(LocationPolicy* f) const {
     if (server_mode) {
       (*f) = server_mode;
       return true;
@@ -308,7 +311,7 @@ class Paginator {
     return false;
   }
 
-  inline bool tcpFlowStateFilter(TcpFlowStateFilter *f) const {
+  inline bool tcpFlowStateFilter(TcpFlowStateFilter* f) const {
     if (tcp_flow_state_filter) {
       (*f) = tcp_flow_state_filter;
       return true;
@@ -316,7 +319,7 @@ class Paginator {
     return false;
   }
 
-  inline bool transitASFilter(TransitAS *f) const {
+  inline bool transitASFilter(TransitAS* f) const {
     if (transit_as) {
       (*f) = transit_as;
       return true;
@@ -324,7 +327,7 @@ class Paginator {
     return false;
   }
 
-  inline bool interfaceRoleFilter(SNMPInterfaceRole *f) const {
+  inline bool interfaceRoleFilter(SNMPInterfaceRole* f) const {
     if (interface_role) {
       (*f) = interface_role;
       return true;
@@ -332,7 +335,7 @@ class Paginator {
     return false;
   }
 
-  inline bool asnFilter(u_int32_t *f) const {
+  inline bool asnFilter(u_int32_t* f) const {
     if (asn_filter != (u_int32_t)-1) {
       (*f) = asn_filter;
       return true;
@@ -340,7 +343,7 @@ class Paginator {
     return false;
   }
 
-  inline bool asnSrcFilter(u_int32_t *f) const {
+  inline bool asnSrcFilter(u_int32_t* f) const {
     if (asn_src_filter != (u_int32_t)-1) {
       (*f) = asn_src_filter;
       return true;
@@ -348,7 +351,7 @@ class Paginator {
     return false;
   }
 
-  inline bool asnDstFilter(u_int32_t *f) const {
+  inline bool asnDstFilter(u_int32_t* f) const {
     if (asn_dst_filter != (u_int32_t)-1) {
       (*f) = asn_dst_filter;
       return true;
@@ -356,7 +359,7 @@ class Paginator {
     return false;
   }
 
-  inline bool icmpValue(u_int8_t *code, u_int8_t *typ) const {
+  inline bool icmpValue(u_int8_t* code, u_int8_t* typ) const {
     if ((icmp_type != u_int8_t(-1)) && (icmp_code != u_int8_t(-1))) {
       (*typ) = icmp_type;
       (*code) = icmp_code;
@@ -365,7 +368,7 @@ class Paginator {
     return false;
   }
 
-  inline bool dscpFilter(u_int8_t *f) const {
+  inline bool dscpFilter(u_int8_t* f) const {
     if (dscp_filter != (u_int8_t)-1) {
       (*f) = dscp_filter;
       return true;
@@ -373,7 +376,7 @@ class Paginator {
     return false;
   }
 #ifdef NTOPNG_PRO
-  inline bool QoEFilter(u_int8_t *f) const {
+  inline bool QoEFilter(u_int8_t* f) const {
     if (qoe_filter != (u_int8_t)-1) {
       (*f) = qoe_filter;
       return true;
@@ -382,7 +385,7 @@ class Paginator {
   }
 #endif
 
-  inline bool unidirectionalTraffic(bool *f) const {
+  inline bool unidirectionalTraffic(bool* f) const {
     if (unidirectional_traffic != -1) {
       (*f) = (unidirectional_traffic == 1) ? true : false;
       return true;
@@ -390,7 +393,7 @@ class Paginator {
     return false;
   }
 
-  inline bool unicastTraffic(bool *f) const {
+  inline bool unicastTraffic(bool* f) const {
     if (unicast_traffic != -1) {
       (*f) = (unicast_traffic == 1) ? true : false;
       return true;
@@ -398,7 +401,7 @@ class Paginator {
     return false;
   }
 
-  inline bool alertedFlows(bool *f) const {
+  inline bool alertedFlows(bool* f) const {
     if (alerted_flows != -1) {
       (*f) = (alerted_flows == 1) ? true : false;
       return true;
@@ -406,7 +409,7 @@ class Paginator {
     return false;
   }
 
-  inline bool periodicFlows(bool *f) const {
+  inline bool periodicFlows(bool* f) const {
     if (periodic_flows != -1) {
       (*f) = (periodic_flows == 1) ? true : false;
       return true;
@@ -414,7 +417,7 @@ class Paginator {
     return false;
   }
 
-  inline bool filteredFlows(bool *f) const {
+  inline bool filteredFlows(bool* f) const {
     if (filtered_flows != -1) {
       (*f) = (filtered_flows == 1) ? true : false;
       return true;

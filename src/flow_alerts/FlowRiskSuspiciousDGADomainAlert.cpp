@@ -23,10 +23,10 @@
 
 /* ***************************************************** */
 
-ndpi_serializer *FlowRiskSuspiciousDGADomainAlert::getAlertJSON(
-    ndpi_serializer *serializer) {
-  Flow *f = getFlow();
-  char *info = f->getDGADomain();
+ndpi_serializer* FlowRiskSuspiciousDGADomainAlert::getAlertJSON(
+    ndpi_serializer* serializer) {
+  Flow* f = getFlow();
+  char* info = f->getDGADomain();
 
   if (serializer && info) {
     ndpi_serialize_string_string(serializer, "dga_domain", info);

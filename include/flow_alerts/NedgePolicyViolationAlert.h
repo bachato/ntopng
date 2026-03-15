@@ -27,12 +27,15 @@
 class NedgePolicyViolationAlert : public FlowAlert {
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_nedge_policy_violation, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_nedge_policy_violation,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_SEVERE; };
 
-  NedgePolicyViolationAlert(FlowCheck *c, Flow *f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-  ~NedgePolicyViolationAlert(){};
+  NedgePolicyViolationAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~NedgePolicyViolationAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
 };

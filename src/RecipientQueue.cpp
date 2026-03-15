@@ -28,8 +28,9 @@
 /* *************************************** */
 
 RecipientQueue::RecipientQueue(u_int16_t _recipient_id) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   recipient_id = _recipient_id;
   queue = NULL;
   drops = 0, enqueued = 0;
@@ -58,8 +59,8 @@ RecipientQueue::~RecipientQueue() {
 
 /* *************************************** */
 
-AlertFifoItem *RecipientQueue::dequeue() {
-  AlertFifoItem *notification;
+AlertFifoItem* RecipientQueue::dequeue() {
+  AlertFifoItem* notification;
 
   if (!queue) return NULL;
 
@@ -76,16 +77,16 @@ AlertFifoItem *RecipientQueue::dequeue() {
 
 bool RecipientQueue::doDebug(const AlertFifoItem* const notification) {
 #ifdef DEBUG_RECIPIENT_QUEUE
-  if (recipient_id 
+  if (recipient_id
 #ifdef DEBUG_DB_QUEUE
-                   == 0
+          == 0
 #else
-                   != 0
+      != 0
 #endif
 #ifdef DEBUG_DB_QUEUE_HOST_ALERTS
       && notification->alert_entity == alert_entity_host
 #endif
-     )
+  )
     return true;
 #endif
   return false;
@@ -101,28 +102,32 @@ bool RecipientQueue::enqueue(const AlertFifoItem* const notification) {
 
 #ifdef DEBUG_RECIPIENT_QUEUE
   if (doDebug(notification)) {
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Enqueueing alert to recipient %d "
-      "[severity %d][category %d][entity %d][alert-id %d]",
-      recipient_id,
-      notification->alert_severity, notification->alert_category, notification->alert_entity,  notification->alert_id);
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", notification->alert.c_str());
+    ntop->getTrace()->traceEvent(
+        TRACE_NORMAL,
+        "Enqueueing alert to recipient %d "
+        "[severity %d][category %d][entity %d][alert-id %d]",
+        recipient_id, notification->alert_severity,
+        notification->alert_category, notification->alert_entity,
+        notification->alert_id);
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s",
+                                 notification->alert.c_str());
   }
 #endif
 
   /* Checking if the alerts have not to be enqueued */
-  if(skip_alerts && notification->score > 0)
+  if (skip_alerts && notification->score > 0)
     return true; /* Skipping alerts */
-  else if(!skip_alerts) {
+  else if (!skip_alerts) {
     /* In case alerts have not to be skipped, check the filters */
 
 #ifdef DEBUG_RECIPIENT_QUEUE
     if (doDebug(notification))
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "Checking alert (entity %d) for recipient %d",
-        notification->alert_entity, recipient_id);
+      ntop->getTrace()->traceEvent(
+          TRACE_NORMAL, "Checking alert (entity %d) for recipient %d",
+          notification->alert_entity, recipient_id);
 #endif
-   
-    if (!notification)
-      return true; /* Nothing to enqueue */
+
+    if (!notification) return true; /* Nothing to enqueue */
 
     if (match_alert_id) { /* Check by Alert Type */
       if (alert_entity_flow == notification->alert_entity) {
@@ -131,8 +136,9 @@ bool RecipientQueue::enqueue(const AlertFifoItem* const notification) {
       } else if (alert_entity_host == notification->alert_entity) {
         if (!enabled_host_alert_types.isSetBit(notification->alert_id))
           return true; /* Nothing to enqueue */
-      } else { /* Other */
-        if (!enabled_other_alert_types.isSetBit(notification->alert_id - OTHER_BASE_KEY)) 
+      } else {         /* Other */
+        if (!enabled_other_alert_types.isSetBit(notification->alert_id -
+                                                OTHER_BASE_KEY))
           return true; /* Nothing to enqueue */
       }
     } else { /* Check by Severity, Category, Entity */
@@ -142,35 +148,47 @@ bool RecipientQueue::enqueue(const AlertFifoItem* const notification) {
           || !(enabled_entities.isSetBit(notification->alert_entity)) /* Entity not enabled for this recipient */) {
 #ifdef DEBUG_RECIPIENT_QUEUE
         if (doDebug(notification))
-          ntop->getTrace()->traceEvent(TRACE_NORMAL, "Alert filtered out due to filtering policy for recipient %d "
-            "[severity %s (%d vs %d)][category %s (%d)][entity %s (%d)]",
-            recipient_id,
-            notification->alert_severity < minimum_severity ? "Nok" : "Ok", notification->alert_severity, minimum_severity,
-            !(enabled_categories.isSetBit(notification->alert_category)) ? "Nok" : "Ok", notification->alert_category,
-            !(enabled_entities.isSetBit(notification->alert_entity)) ? "Nok" : "Ok", notification->alert_entity);
+          ntop->getTrace()->traceEvent(
+              TRACE_NORMAL,
+              "Alert filtered out due to filtering policy for recipient %d "
+              "[severity %s (%d vs %d)][category %s (%d)][entity %s (%d)]",
+              recipient_id,
+              notification->alert_severity < minimum_severity ? "Nok" : "Ok",
+              notification->alert_severity, minimum_severity,
+              !(enabled_categories.isSetBit(notification->alert_category))
+                  ? "Nok"
+                  : "Ok",
+              notification->alert_category,
+              !(enabled_entities.isSetBit(notification->alert_entity)) ? "Nok"
+                                                                       : "Ok",
+              notification->alert_entity);
 #endif
         return true; /* Nothing to enqueue */
       }
     }
 
-    if((recipient_id == 0) /* Default recipient (DB) */
-       && (notification->alert_entity == alert_entity_flow)
-       && ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
+    if ((recipient_id == 0) /* Default recipient (DB) */
+        && (notification->alert_entity == alert_entity_flow) &&
+        ntop->getPrefs()->do_dump_flows_on_clickhouse()) {
       /*
-	Do not store flow alerts on ClickHouse as they are retrieved using a view on historical flows
-	(i.e. flow alerts are not stored but read from flows) But still increment the number of uses 
+        Do not store flow alerts on ClickHouse as they are retrieved using a
+        view on historical flows (i.e. flow alerts are not stored but read from
+        flows) But still increment the number of uses
       */
       enqueued++;
       delivered++;
 #ifdef DEBUG_RECIPIENT_QUEUE
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "Flow alert (no enqueue - clickhouse uses: %u)", enqueued);
+      ntop->getTrace()->traceEvent(
+          TRACE_NORMAL, "Flow alert (no enqueue - clickhouse uses: %u)",
+          enqueued);
 #endif
       return true;
     }
 
     if (recipient_id == 0) {
-      /* Default recipient (SQLite / ClickHouse DB) - do not filter alerts by host
-      */
+      /* Default recipient (SQLite / ClickHouse DB) - do not filter alerts by
+       * host
+       */
     } else {
       /* Other recipients (notifications) */
       if (notification->alert_entity == alert_entity_flow) {
@@ -181,7 +199,8 @@ bool RecipientQueue::enqueue(const AlertFifoItem* const notification) {
         if (!enabled_host_pools.isSetBit(notification->host.host_pool)) {
 #ifdef DEBUG_RECIPIENT_QUEUE
           if (doDebug(notification))
-            ntop->getTrace()->traceEvent(TRACE_NORMAL, "Alert filtered out due to host pool filtering");
+            ntop->getTrace()->traceEvent(
+                TRACE_NORMAL, "Alert filtered out due to host pool filtering");
 #endif
           return true;
         }
@@ -197,7 +216,7 @@ bool RecipientQueue::enqueue(const AlertFifoItem* const notification) {
   }
 
   /* Enqueue the notification (allocate memory for the alert string) */
-  AlertFifoItem *new_item = new AlertFifoItem(notification);
+  AlertFifoItem* new_item = new AlertFifoItem(notification);
 
   res = false;
 
@@ -213,7 +232,8 @@ bool RecipientQueue::enqueue(const AlertFifoItem* const notification) {
     } else {
       enqueued++;
 #ifdef DEBUG_RECIPIENT_QUEUE
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "Alert enqueued successfully (enqueued: %u)", enqueued);
+      ntop->getTrace()->traceEvent(
+          TRACE_NORMAL, "Alert enqueued successfully (enqueued: %u)", enqueued);
 #endif
     }
   } else {

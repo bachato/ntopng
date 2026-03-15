@@ -9,46 +9,41 @@
 
 #include "ntop_includes.h"
 
-
 #ifdef HAVE_ZMQ
 #ifndef HAVE_NEDGE
 
 /* *********************************************************** */
 
-void ZMQUtils::setKeepalive(void *zmq_socket) {
+void ZMQUtils::setKeepalive(void* zmq_socket) {
   int val = DEFAULT_ZMQ_TCP_KEEPALIVE;
 
-  if (zmq_setsockopt(zmq_socket, ZMQ_TCP_KEEPALIVE, &val,
-                     sizeof(val)) != 0)
-    ntop->getTrace()->traceEvent(TRACE_ERROR,
-                                 "Unable to set tcp keepalive");
+  if (zmq_setsockopt(zmq_socket, ZMQ_TCP_KEEPALIVE, &val, sizeof(val)) != 0)
+    ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to set tcp keepalive");
   else
     ntop->getTrace()->traceEvent(TRACE_INFO, "TCP keepalive set");
 
   val = DEFAULT_ZMQ_TCP_KEEPALIVE_IDLE;
-  if (zmq_setsockopt(zmq_socket, ZMQ_TCP_KEEPALIVE_IDLE, &val,
-                     sizeof(val)) != 0)
+  if (zmq_setsockopt(zmq_socket, ZMQ_TCP_KEEPALIVE_IDLE, &val, sizeof(val)) !=
+      0)
     ntop->getTrace()->traceEvent(
         TRACE_ERROR, "Unable to set tcp keepalive idle to %u seconds", val);
   else
-    ntop->getTrace()->traceEvent(
-        TRACE_INFO, "TCP keepalive idle set to %u seconds", val);
+    ntop->getTrace()->traceEvent(TRACE_INFO,
+                                 "TCP keepalive idle set to %u seconds", val);
 
   val = DEFAULT_ZMQ_TCP_KEEPALIVE_CNT;
-  if (zmq_setsockopt(zmq_socket, ZMQ_TCP_KEEPALIVE_CNT, &val,
-                     sizeof(val)) != 0)
+  if (zmq_setsockopt(zmq_socket, ZMQ_TCP_KEEPALIVE_CNT, &val, sizeof(val)) != 0)
     ntop->getTrace()->traceEvent(
         TRACE_ERROR, "Unable to set tcp keepalive count to %u", val);
   else
-    ntop->getTrace()->traceEvent(TRACE_INFO,
-                                 "TCP keepalive count set to %u", val);
+    ntop->getTrace()->traceEvent(TRACE_INFO, "TCP keepalive count set to %u",
+                                 val);
 
   val = DEFAULT_ZMQ_TCP_KEEPALIVE_INTVL;
-  if (zmq_setsockopt(zmq_socket, ZMQ_TCP_KEEPALIVE_INTVL, &val,
-                     sizeof(val)) != 0)
+  if (zmq_setsockopt(zmq_socket, ZMQ_TCP_KEEPALIVE_INTVL, &val, sizeof(val)) !=
+      0)
     ntop->getTrace()->traceEvent(
-        TRACE_ERROR, "Unable to set tcp keepalive interval to %u seconds",
-        val);
+        TRACE_ERROR, "Unable to set tcp keepalive interval to %u seconds", val);
   else
     ntop->getTrace()->traceEvent(
         TRACE_INFO, "TCP keepalive interval set to %u seconds", val);
@@ -58,9 +53,11 @@ void ZMQUtils::setKeepalive(void *zmq_socket) {
 
 #if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 1, 0)
 
-bool ZMQUtils::readEncryptionKeysFromFile(char *public_key_path, char *secret_key_path,
-    char *public_key,     char *secret_key,
-    int   public_key_len, int   secret_key_len) {
+bool ZMQUtils::readEncryptionKeysFromFile(char* public_key_path,
+                                          char* secret_key_path,
+                                          char* public_key, char* secret_key,
+                                          int public_key_len,
+                                          int secret_key_len) {
   char *tmp_public_key = NULL, *tmp_secret_key = NULL;
   bool rc = false;
 
@@ -94,7 +91,9 @@ void ZMQUtils::generateEncryptionKeys() {
   snprintf(secret_key_path, sizeof(secret_key_path), "%s/zmq-key.priv",
            ntop->get_working_dir());
 
-  if (readEncryptionKeysFromFile(public_key_path, secret_key_path, public_key, secret_key, sizeof(public_key), sizeof(secret_key))) {
+  if (readEncryptionKeysFromFile(public_key_path, secret_key_path, public_key,
+                                 secret_key, sizeof(public_key),
+                                 sizeof(secret_key))) {
     /* Keys already on file */
     rc = 0;
   }
@@ -103,27 +102,27 @@ void ZMQUtils::generateEncryptionKeys() {
     /* Keys not found, generate keys */
     rc = zmq_curve_keypair(public_key, secret_key);
     if (rc == 0) {
-      Utils::file_write(public_key_path, public_key,
-                        strlen(public_key));
-      Utils::file_write(secret_key_path, secret_key,
-                        strlen(secret_key));
+      Utils::file_write(public_key_path, public_key, strlen(public_key));
+      Utils::file_write(secret_key_path, secret_key, strlen(secret_key));
     }
   }
 
-  if (rc != 0) 
+  if (rc != 0)
     ntop->getTrace()->traceEvent(TRACE_ERROR,
                                  "Unable to generate ZMQ encryption keys");
 }
 
 /* **************************************************** */
 
-char *ZMQUtils::findEncryptionKeys(char *public_key, char *secret_key, int public_key_len, int secret_key_len) {
+char* ZMQUtils::findEncryptionKeys(char* public_key, char* secret_key,
+                                   int public_key_len, int secret_key_len) {
   char public_key_path[PATH_MAX], secret_key_path[PATH_MAX];
   bool rc = false;
 
   /* Private key from option */
   if (ntop->getPrefs()->get_zmq_encryption_priv_key()) {
-    strncpy(secret_key, ntop->getPrefs()->get_zmq_encryption_priv_key(), secret_key_len - 1);
+    strncpy(secret_key, ntop->getPrefs()->get_zmq_encryption_priv_key(),
+            secret_key_len - 1);
     secret_key[secret_key_len - 1] = '\0';
     rc = true;
   }
@@ -134,7 +133,9 @@ char *ZMQUtils::findEncryptionKeys(char *public_key, char *secret_key, int publi
              ntop->get_working_dir());
     snprintf(secret_key_path, sizeof(secret_key_path), "%s/zmq-key.priv",
              ntop->get_working_dir());
-    rc = readEncryptionKeysFromFile(public_key_path, secret_key_path, public_key, secret_key, public_key_len, secret_key_len);
+    rc =
+        readEncryptionKeysFromFile(public_key_path, secret_key_path, public_key,
+                                   secret_key, public_key_len, secret_key_len);
   }
 
   if (!rc) {
@@ -148,39 +149,36 @@ char *ZMQUtils::findEncryptionKeys(char *public_key, char *secret_key, int publi
 
 /* *********************************************************** */
 
-int ZMQUtils::setServerEncryptionKeys(void *zmq_socket, const char *secret_key) {
+int ZMQUtils::setServerEncryptionKeys(void* zmq_socket,
+                                      const char* secret_key) {
   int val = 1;
 
   if (strlen(secret_key) != 40) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR,
-                                 "Bad ZMQ secret key len (%lu != 40)",
-                                 strlen(secret_key));
+    ntop->getTrace()->traceEvent(
+        TRACE_ERROR, "Bad ZMQ secret key len (%lu != 40)", strlen(secret_key));
     return -1;
   }
 
-  if (zmq_setsockopt(zmq_socket,
-                     ZMQ_CURVE_SERVER, &val, sizeof(val)) != 0) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR,
-                                 "Unable to set ZMQ_CURVE_SERVER");
+  if (zmq_setsockopt(zmq_socket, ZMQ_CURVE_SERVER, &val, sizeof(val)) != 0) {
+    ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to set ZMQ_CURVE_SERVER");
     return -1;
   }
 
-  if (zmq_setsockopt(zmq_socket,
-                     ZMQ_CURVE_SECRETKEY, secret_key, 41) != 0) {
+  if (zmq_setsockopt(zmq_socket, ZMQ_CURVE_SECRETKEY, secret_key, 41) != 0) {
     ntop->getTrace()->traceEvent(TRACE_ERROR,
                                  "Unable to set ZMQ_CURVE_SECRETKEY");
     return -1;
   }
 
-  ntop->getTrace()->traceEvent(TRACE_INFO,
-                               "ZMQ CURVE encryption enabled");
+  ntop->getTrace()->traceEvent(TRACE_INFO, "ZMQ CURVE encryption enabled");
 
   return 0;
 }
 
 /* *********************************************************** */
 
-int ZMQUtils::setClientEncryptionKeys(void *zmq_socket, const char *server_public_key) {
+int ZMQUtils::setClientEncryptionKeys(void* zmq_socket,
+                                      const char* server_public_key) {
   char client_public_key[41];
   char client_secret_key[41];
   int rc;

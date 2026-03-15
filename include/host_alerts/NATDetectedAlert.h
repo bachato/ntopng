@@ -17,28 +17,27 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
-*/
+ */
 
 #ifndef _NAT_DETECTED_ALERT_H_
 #define _NAT_DETECTED_ALERT_H_
- 
+
 #include "ntop_includes.h"
- 
+
 class NATDetectedAlert : public HostAlert {
-  private:
-  public:
-    static HostAlertType getClassType() {
-      return {host_alert_nat_detected, alert_category_security};
-    }
-    
-    u_int8_t getAlertScore() const { return SCORE_LEVEL_WARNING; };
+ private:
+ public:
+  static HostAlertType getClassType() {
+    return {host_alert_nat_detected, alert_category_security};
+  }
 
-    NATDetectedAlert(HostCheck* c, Host* h,risk_percentage cli_pctg)
+  u_int8_t getAlertScore() const { return SCORE_LEVEL_WARNING; };
+
+  NATDetectedAlert(HostCheck* c, Host* h, risk_percentage cli_pctg)
       : HostAlert(c, h, cli_pctg) {};
-    ~NATDetectedAlert(){};
+  ~NATDetectedAlert() {};
 
-    HostAlertType getAlertType() const { return getClassType(); }
+  HostAlertType getAlertType() const { return getClassType(); }
 };
- 
-  #endif /* _NAT_DETECTED_ALERT_H_ */
- 
+
+#endif /* _NAT_DETECTED_ALERT_H_ */

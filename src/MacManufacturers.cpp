@@ -30,9 +30,10 @@
 
 /* *************************************** */
 
-MacManufacturers::MacManufacturers(const char *home) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+MacManufacturers::MacManufacturers(const char* home) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   snprintf(manufacturers_file, sizeof(manufacturers_file), "%s/other/%s",
            home ? home : "", "EtherOUI.txt");
   ntop->fixPath(manufacturers_file);
@@ -44,7 +45,7 @@ MacManufacturers::MacManufacturers(const char *home) {
 
 void MacManufacturers::init() {
   struct stat buf;
-  FILE *fd;
+  FILE* fd;
   char line[256], *cr;
   int _mac[3];
   u_int32_t mac_key;
@@ -60,8 +61,8 @@ void MacManufacturers::init() {
 
   if (fd) {
     while (fgets(line, sizeof(line), fd)) {
-      char *tmp;
-      char *mac = strtok_r(line, "\t", &tmp);
+      char* tmp;
+      char* mac = strtok_r(line, "\t", &tmp);
       char *shortmanuf, *manuf;
 
       if (!mac)
@@ -76,7 +77,6 @@ void MacManufacturers::init() {
         if (!manuf) manuf = shortmanuf;
       }
 
-     
 #ifdef MANUF_DEBUG
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s [short: %s][full: %s]",
                                    mac, shortmanuf, manuf);
@@ -97,26 +97,26 @@ void MacManufacturers::init() {
 
         mac[0] = (u_int8_t)_mac[0], mac[1] = (u_int8_t)_mac[1],
         mac[2] = (u_int8_t)_mac[2];
-        mac_key = mac2key((u_int8_t *)mac);
+        mac_key = mac2key((u_int8_t*)mac);
 
         if (mac_manufacturers.find(mac_key) == mac_manufacturers.end()) {
           mac_manufacturers_t s;
-	  u_int len = strlen(shortmanuf);;
-	  
-          s.manufacturer_name = (char *)calloc(strlen(manuf) + 1, sizeof(char));
+          u_int len = strlen(shortmanuf);
+          ;
+
+          s.manufacturer_name = (char*)calloc(strlen(manuf) + 1, sizeof(char));
           strcpy(s.manufacturer_name, manuf);
           Utils::purifyHTTPparam(s.manufacturer_name, false, false, false);
 
-	  /* Zap chars that can create problem later on */
-	  for(u_int i=0; i<len; i++) {
-	    if(shortmanuf[i] == '\'')
-	      shortmanuf[i] = '_';
-	  }
-	  
-          s.short_name = (char *)calloc(len + 1, sizeof(char));
+          /* Zap chars that can create problem later on */
+          for (u_int i = 0; i < len; i++) {
+            if (shortmanuf[i] == '\'') shortmanuf[i] = '_';
+          }
+
+          s.short_name = (char*)calloc(len + 1, sizeof(char));
           strcpy(s.short_name, shortmanuf);
 
-	  /* Standard checks... */
+          /* Standard checks... */
           Utils::purifyHTTPparam(s.short_name, false, false, false);
 
           /* TODO: reduce memory usage for recurrent manufacturers */
@@ -142,8 +142,9 @@ void MacManufacturers::init() {
 MacManufacturers::~MacManufacturers() {
   std::map<u_int32_t, mac_manufacturers_t>::const_iterator it;
 
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+
   for (it = mac_manufacturers.begin(); it != mac_manufacturers.end(); ++it) {
     free(it->second.manufacturer_name);
     free(it->second.short_name);
@@ -153,7 +154,7 @@ MacManufacturers::~MacManufacturers() {
 
 /* *************************************** */
 
-const char *MacManufacturers::getManufacturer(u_int8_t mac[]) {
+const char* MacManufacturers::getManufacturer(u_int8_t mac[]) {
   std::map<u_int32_t, mac_manufacturers_t>::const_iterator it;
   u_int32_t mac_key = mac2key(mac);
 
@@ -165,7 +166,7 @@ const char *MacManufacturers::getManufacturer(u_int8_t mac[]) {
 
 /* *************************************** */
 
-void MacManufacturers::getMacManufacturer(u_int8_t mac[], lua_State *vm) {
+void MacManufacturers::getMacManufacturer(u_int8_t mac[], lua_State* vm) {
   std::map<u_int32_t, mac_manufacturers_t>::const_iterator it;
   u_int32_t mac_key = mac2key(mac);
 

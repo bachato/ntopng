@@ -23,7 +23,7 @@
 
 /* ******************************************************* */
 
-CHTimeseriesExporter::CHTimeseriesExporter(NetworkInterface *_if)
+CHTimeseriesExporter::CHTimeseriesExporter(NetworkInterface* _if)
     : TimeseriesExporter(_if) {
   if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
@@ -36,11 +36,10 @@ CHTimeseriesExporter::~CHTimeseriesExporter() { delete ts_queue; }
 
 /* ******************************************************* */
 
-bool CHTimeseriesExporter::enqueueData(lua_State *vm, bool do_lock) {
+bool CHTimeseriesExporter::enqueueData(lua_State* vm, bool do_lock) {
   char data[LINE_PROTOCOL_MAX_LINE];
 
-  if (line_protocol_write_line(vm, data, sizeof(data),
-                               escape_spaces) < 0)
+  if (line_protocol_write_line(vm, data, sizeof(data), escape_spaces) < 0)
     return false;
 
   return ts_queue->enqueue(data);
@@ -48,7 +47,7 @@ bool CHTimeseriesExporter::enqueueData(lua_State *vm, bool do_lock) {
 
 /* ******************************************************* */
 
-char *CHTimeseriesExporter::dequeueData() {
+char* CHTimeseriesExporter::dequeueData() {
   if (ts_queue->empty()) return NULL;
   return ts_queue->dequeue();
 }

@@ -35,25 +35,25 @@ class ContinuousPingStats {
  private:
   time_t last_refresh;
   struct cp_stats stats;
-  Ping *pinger;
+  Ping* pinger;
 
  public:
-  ContinuousPingStats(Ping *p) {
+  ContinuousPingStats(Ping* p) {
     pinger = p;
     reset();
     heartbeat();
   }
 
-  inline Ping *getPinger() { return (pinger); }
-  inline void getStats(struct cp_stats *out) {
+  inline Ping* getPinger() { return (pinger); }
+  inline void getStats(struct cp_stats* out) {
     memcpy(out, &stats, sizeof(struct cp_stats));
   }
   inline void heartbeat() { last_refresh = time(NULL); }
   inline void incSent() { stats.num_ping_sent++; }
   inline time_t getLastHeartbeat() { return (last_refresh); }
   void update(float rtt);
-  float getSuccessRate(float *min_rtt, float *max_rtt, float *jitter,
-                       float *mean);
+  float getSuccessRate(float* min_rtt, float* max_rtt, float* jitter,
+                       float* mean);
   inline void reset() { memset(&stats, 0, sizeof(stats)); }
 };
 

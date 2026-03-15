@@ -26,22 +26,22 @@
 
 class DNSServerContacts : public ServerContacts {
  private:
-  u_int32_t getContactedServers(Host *h) const {
+  u_int32_t getContactedServers(Host* h) const {
     return h->getDNSContactCardinality();
   };
   HostAlertType getAlertType() const {
     return DNSServerContactsAlert::getClassType();
   };
-  HostAlert *allocAlert(HostCheck *c, Host *f, risk_percentage cli_pctg,
+  HostAlert* allocAlert(HostCheck* c, Host* f, risk_percentage cli_pctg,
                         u_int64_t _contacts, u_int64_t _contacts_threshold) {
     return new DNSServerContactsAlert(c, f, cli_pctg, _contacts,
                                       _contacts_threshold);
   };
-  bool isServer(Host *h) { return h->providesService(HOST_SERVICE_DNS); };
+  bool isServer(Host* h) { return h->providesService(HOST_SERVICE_DNS); };
 
  public:
   DNSServerContacts();
-  ~DNSServerContacts(){};
+  ~DNSServerContacts() {};
 
   HostCheckID getID() const { return host_check_dns_server_contacts; }
   std::string getName() const { return (std::string("dns_contacts")); }

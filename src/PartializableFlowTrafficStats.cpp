@@ -24,8 +24,9 @@
 /* *************************************** */
 
 PartializableFlowTrafficStats::PartializableFlowTrafficStats() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   ndpiDetectedProtocol = getConstNdpiUnknownProtocol();
   cli2srv_packets = srv2cli_packets = 0;
   cli2srv_bytes = srv2cli_bytes = 0;
@@ -45,7 +46,7 @@ PartializableFlowTrafficStats::PartializableFlowTrafficStats() {
 /* *************************************** */
 
 PartializableFlowTrafficStats::PartializableFlowTrafficStats(
-							     const PartializableFlowTrafficStats &fts) {
+    const PartializableFlowTrafficStats& fts) {
   memcpy(&ndpiDetectedProtocol, &fts.ndpiDetectedProtocol,
          sizeof(ndpiDetectedProtocol));
   cli2srv_packets = fts.cli2srv_packets;
@@ -68,9 +69,16 @@ PartializableFlowTrafficStats::PartializableFlowTrafficStats(
 /* *************************************** */
 
 /* Safety difference */
-#define NON_NEGATIVE_DIFF(a, b) { if(b > a) a = 0; else a -= b; }
+#define NON_NEGATIVE_DIFF(a, b) \
+  {                             \
+    if (b > a)                  \
+      a = 0;                    \
+    else                        \
+      a -= b;                   \
+  }
 
-PartializableFlowTrafficStats PartializableFlowTrafficStats::operator-(const PartializableFlowTrafficStats &fts) {
+PartializableFlowTrafficStats PartializableFlowTrafficStats::operator-(
+    const PartializableFlowTrafficStats& fts) {
   PartializableFlowTrafficStats cur(*this);
 #ifndef HAVE_NEDGE
   /*
@@ -80,16 +88,18 @@ PartializableFlowTrafficStats PartializableFlowTrafficStats::operator-(const Par
   static bool warn_once = true;
 
   /* Check flow counters (Debug) */
-  if (((fts.cli2srv_bytes > cur.cli2srv_bytes) || (fts.srv2cli_bytes > cur.srv2cli_bytes))
-      && warn_once) {
-    ntop->getTrace()->traceEvent(TRACE_WARNING,
-				 "Flow stats went backwards [c2s %ju -> %ju][s2c %ju -> %ju]",
-				 fts.cli2srv_bytes, cur.cli2srv_bytes, fts.srv2cli_bytes,
-				 cur.srv2cli_bytes);
+  if (((fts.cli2srv_bytes > cur.cli2srv_bytes) ||
+       (fts.srv2cli_bytes > cur.srv2cli_bytes)) &&
+      warn_once) {
+    ntop->getTrace()->traceEvent(
+        TRACE_WARNING,
+        "Flow stats went backwards [c2s %ju -> %ju][s2c %ju -> %ju]",
+        fts.cli2srv_bytes, cur.cli2srv_bytes, fts.srv2cli_bytes,
+        cur.srv2cli_bytes);
     warn_once = false;
   }
 #endif
-  
+
   NON_NEGATIVE_DIFF(cur.cli2srv_bytes, fts.cli2srv_bytes);
   NON_NEGATIVE_DIFF(cur.srv2cli_bytes, fts.srv2cli_bytes);
 
@@ -98,20 +108,26 @@ PartializableFlowTrafficStats PartializableFlowTrafficStats::operator-(const Par
   NON_NEGATIVE_DIFF(cur.srv2cli_packets, fts.srv2cli_packets);
   NON_NEGATIVE_DIFF(cur.srv2cli_goodput_bytes, fts.srv2cli_goodput_bytes);
 
-  NON_NEGATIVE_DIFF(cur.cli2srv_tcp_stats.pktRetr, fts.cli2srv_tcp_stats.pktRetr);
+  NON_NEGATIVE_DIFF(cur.cli2srv_tcp_stats.pktRetr,
+                    fts.cli2srv_tcp_stats.pktRetr);
   NON_NEGATIVE_DIFF(cur.cli2srv_tcp_stats.pktOOO, fts.cli2srv_tcp_stats.pktOOO);
-  NON_NEGATIVE_DIFF(cur.cli2srv_tcp_stats.pktLost, fts.cli2srv_tcp_stats.pktLost);
-  NON_NEGATIVE_DIFF(cur.cli2srv_tcp_stats.pktKeepAlive, fts.cli2srv_tcp_stats.pktKeepAlive);
-  NON_NEGATIVE_DIFF(cur.srv2cli_tcp_stats.pktRetr, fts.srv2cli_tcp_stats.pktRetr);
+  NON_NEGATIVE_DIFF(cur.cli2srv_tcp_stats.pktLost,
+                    fts.cli2srv_tcp_stats.pktLost);
+  NON_NEGATIVE_DIFF(cur.cli2srv_tcp_stats.pktKeepAlive,
+                    fts.cli2srv_tcp_stats.pktKeepAlive);
+  NON_NEGATIVE_DIFF(cur.srv2cli_tcp_stats.pktRetr,
+                    fts.srv2cli_tcp_stats.pktRetr);
   NON_NEGATIVE_DIFF(cur.srv2cli_tcp_stats.pktOOO, fts.srv2cli_tcp_stats.pktOOO);
-  NON_NEGATIVE_DIFF(cur.srv2cli_tcp_stats.pktLost, fts.srv2cli_tcp_stats.pktLost);
-  NON_NEGATIVE_DIFF(cur.srv2cli_tcp_stats.pktKeepAlive, fts.srv2cli_tcp_stats.pktKeepAlive);
+  NON_NEGATIVE_DIFF(cur.srv2cli_tcp_stats.pktLost,
+                    fts.srv2cli_tcp_stats.pktLost);
+  NON_NEGATIVE_DIFF(cur.srv2cli_tcp_stats.pktKeepAlive,
+                    fts.srv2cli_tcp_stats.pktKeepAlive);
 
-  for (int i = 0; i < MAX_NUM_SCORE_CATEGORIES; i++){
+  for (int i = 0; i < MAX_NUM_SCORE_CATEGORIES; i++) {
     NON_NEGATIVE_DIFF(cur.cli_host_score[i], fts.cli_host_score[i]);
     NON_NEGATIVE_DIFF(cur.srv_host_score[i], fts.srv_host_score[i]);
   }
-  
+
   /*
     Even though is_flow_alerted is a boolean, we can still use operator -= to
     keep it consistent with other fields. Compilers know how to handle the
@@ -120,33 +136,35 @@ PartializableFlowTrafficStats PartializableFlowTrafficStats::operator-(const Par
   NON_NEGATIVE_DIFF(cur.is_flow_alerted, fts.is_flow_alerted);
 
   switch (ndpi_get_lower_proto(ndpiDetectedProtocol.proto)) {
-  case NDPI_PROTOCOL_HTTP:
-    NON_NEGATIVE_DIFF(cur.protos.http.num_get, fts.protos.http.num_get);
-    NON_NEGATIVE_DIFF(cur.protos.http.num_post, fts.protos.http.num_post);
-    NON_NEGATIVE_DIFF(cur.protos.http.num_put, fts.protos.http.num_put);
-    NON_NEGATIVE_DIFF(cur.protos.http.num_other, fts.protos.http.num_other);
-    NON_NEGATIVE_DIFF(cur.protos.http.num_1xx, fts.protos.http.num_1xx);
-    NON_NEGATIVE_DIFF(cur.protos.http.num_2xx, fts.protos.http.num_2xx);
-    NON_NEGATIVE_DIFF(cur.protos.http.num_3xx, fts.protos.http.num_3xx);
-    NON_NEGATIVE_DIFF(cur.protos.http.num_4xx, fts.protos.http.num_4xx);
-    NON_NEGATIVE_DIFF(cur.protos.http.num_5xx, fts.protos.http.num_5xx);
-    break;
-  case NDPI_PROTOCOL_DNS:
-    NON_NEGATIVE_DIFF(cur.protos.dns.num_a, fts.protos.dns.num_a);
-    NON_NEGATIVE_DIFF(cur.protos.dns.num_ns, fts.protos.dns.num_ns);
-    NON_NEGATIVE_DIFF(cur.protos.dns.num_cname, fts.protos.dns.num_cname);
-    NON_NEGATIVE_DIFF(cur.protos.dns.num_soa, fts.protos.dns.num_soa);
-    NON_NEGATIVE_DIFF(cur.protos.dns.num_ptr, fts.protos.dns.num_ptr);
-    NON_NEGATIVE_DIFF(cur.protos.dns.num_mx, fts.protos.dns.num_mx);
-    NON_NEGATIVE_DIFF(cur.protos.dns.num_txt, fts.protos.dns.num_txt);
-    NON_NEGATIVE_DIFF(cur.protos.dns.num_aaaa, fts.protos.dns.num_aaaa);
-    NON_NEGATIVE_DIFF(cur.protos.dns.num_any, fts.protos.dns.num_any);
-    NON_NEGATIVE_DIFF(cur.protos.dns.num_other, fts.protos.dns.num_other);
-    NON_NEGATIVE_DIFF(cur.protos.dns.num_replies_ok, fts.protos.dns.num_replies_ok);
-    NON_NEGATIVE_DIFF(cur.protos.dns.num_replies_error, fts.protos.dns.num_replies_error);
-    break;
-  default:
-    break;
+    case NDPI_PROTOCOL_HTTP:
+      NON_NEGATIVE_DIFF(cur.protos.http.num_get, fts.protos.http.num_get);
+      NON_NEGATIVE_DIFF(cur.protos.http.num_post, fts.protos.http.num_post);
+      NON_NEGATIVE_DIFF(cur.protos.http.num_put, fts.protos.http.num_put);
+      NON_NEGATIVE_DIFF(cur.protos.http.num_other, fts.protos.http.num_other);
+      NON_NEGATIVE_DIFF(cur.protos.http.num_1xx, fts.protos.http.num_1xx);
+      NON_NEGATIVE_DIFF(cur.protos.http.num_2xx, fts.protos.http.num_2xx);
+      NON_NEGATIVE_DIFF(cur.protos.http.num_3xx, fts.protos.http.num_3xx);
+      NON_NEGATIVE_DIFF(cur.protos.http.num_4xx, fts.protos.http.num_4xx);
+      NON_NEGATIVE_DIFF(cur.protos.http.num_5xx, fts.protos.http.num_5xx);
+      break;
+    case NDPI_PROTOCOL_DNS:
+      NON_NEGATIVE_DIFF(cur.protos.dns.num_a, fts.protos.dns.num_a);
+      NON_NEGATIVE_DIFF(cur.protos.dns.num_ns, fts.protos.dns.num_ns);
+      NON_NEGATIVE_DIFF(cur.protos.dns.num_cname, fts.protos.dns.num_cname);
+      NON_NEGATIVE_DIFF(cur.protos.dns.num_soa, fts.protos.dns.num_soa);
+      NON_NEGATIVE_DIFF(cur.protos.dns.num_ptr, fts.protos.dns.num_ptr);
+      NON_NEGATIVE_DIFF(cur.protos.dns.num_mx, fts.protos.dns.num_mx);
+      NON_NEGATIVE_DIFF(cur.protos.dns.num_txt, fts.protos.dns.num_txt);
+      NON_NEGATIVE_DIFF(cur.protos.dns.num_aaaa, fts.protos.dns.num_aaaa);
+      NON_NEGATIVE_DIFF(cur.protos.dns.num_any, fts.protos.dns.num_any);
+      NON_NEGATIVE_DIFF(cur.protos.dns.num_other, fts.protos.dns.num_other);
+      NON_NEGATIVE_DIFF(cur.protos.dns.num_replies_ok,
+                        fts.protos.dns.num_replies_ok);
+      NON_NEGATIVE_DIFF(cur.protos.dns.num_replies_error,
+                        fts.protos.dns.num_replies_error);
+      break;
+    default:
+      break;
   }
 
   return cur;
@@ -159,7 +177,7 @@ PartializableFlowTrafficStats::~PartializableFlowTrafficStats() {}
 /* *************************************** */
 
 void PartializableFlowTrafficStats::setDetectedProtocol(
-							const ndpi_protocol *ndpi_detected_protocol) {
+    const ndpi_protocol* ndpi_detected_protocol) {
   memcpy(&ndpiDetectedProtocol, ndpi_detected_protocol,
          sizeof(ndpiDetectedProtocol));
 }
@@ -169,7 +187,7 @@ void PartializableFlowTrafficStats::setDetectedProtocol(
 void PartializableFlowTrafficStats::incTcpStats(bool cli2srv_direction,
                                                 u_int retr, u_int ooo,
                                                 u_int lost, u_int keepalive) {
-  FlowTCPPacketStats *cur_stats;
+  FlowTCPPacketStats* cur_stats;
 
   if (cli2srv_direction)
     cur_stats = &cli2srv_tcp_stats;
@@ -187,7 +205,7 @@ void PartializableFlowTrafficStats::incTcpStats(bool cli2srv_direction,
 void PartializableFlowTrafficStats::incScore(u_int16_t score,
                                              ScoreCategory score_category,
                                              bool as_client) {
-  u_int16_t *dst = as_client ? cli_host_score : srv_host_score;
+  u_int16_t* dst = as_client ? cli_host_score : srv_host_score;
 
   dst[score_category] += min_val(score, SCORE_MAX_VALUE);
 }
@@ -199,75 +217,77 @@ void PartializableFlowTrafficStats::setFlowAlerted() { is_flow_alerted = true; }
 /* *************************************** */
 
 void PartializableFlowTrafficStats::incStats(bool cli2srv_direction,
-                                             u_int32_t num_pkts, u_int64_t pkts_bytes,
+                                             u_int32_t num_pkts,
+                                             u_int64_t pkts_bytes,
                                              u_int64_t payloads_bytes) {
   if (cli2srv_direction)
     cli2srv_packets += num_pkts, cli2srv_bytes += pkts_bytes,
-      cli2srv_goodput_bytes += payloads_bytes;
+        cli2srv_goodput_bytes += payloads_bytes;
   else
     srv2cli_packets += num_pkts, srv2cli_bytes += pkts_bytes,
-      srv2cli_goodput_bytes += payloads_bytes;
+        srv2cli_goodput_bytes += payloads_bytes;
 }
 
 /* *************************************** */
 
 void PartializableFlowTrafficStats::setStats(bool cli2srv_direction,
-                                             u_int32_t num_pkts, u_int64_t pkts_bytes,
+                                             u_int32_t num_pkts,
+                                             u_int64_t pkts_bytes,
                                              u_int64_t payloads_bytes) {
   if (cli2srv_direction)
     cli2srv_packets = num_pkts, cli2srv_bytes = pkts_bytes,
-      cli2srv_goodput_bytes = payloads_bytes;
+    cli2srv_goodput_bytes = payloads_bytes;
   else
     srv2cli_packets = num_pkts, srv2cli_bytes = pkts_bytes,
-      srv2cli_goodput_bytes = payloads_bytes;
+    srv2cli_goodput_bytes = payloads_bytes;
 }
 
 /* *************************************** */
 
 void PartializableFlowTrafficStats::incDNSQuery(u_int16_t query_type) {
   switch (query_type) {
-  case 0:
-    /* Zero means we have not been able to decode the DNS message */
-    break;
-  case 1:
-    /* A */
-    protos.dns.num_a++;
-    break;
-  case 2:
-    /* NS */
-    protos.dns.num_ns++;
-    break;
-  case 5:
-    /* CNAME */
-    protos.dns.num_cname++;
-    break;
-  case 6:
-    /* SOA */
-    protos.dns.num_soa++;
-    break;
-  case 12:
-    /* PTR */
-    protos.dns.num_ptr++;
-    break;
-  case 15:
-    /* MX */
-    protos.dns.num_mx++;
-    break;
-  case 16:
-    /* TXT */
-    protos.dns.num_txt++;
-    break;
-  case 28:
-    /* AAAA */
-    protos.dns.num_aaaa++;
-    break;
-  case 255:
-    /* ANY */
-    protos.dns.num_any++;
-    break;
-  default:
-    protos.dns.num_other++;
-    break;
+    case 0:
+      /* Zero means we have not been able to decode the DNS message */
+      break;
+    case 1:
+      /* A */
+      protos.dns.num_a++;
+      break;
+    case 2:
+      /* NS */
+      protos.dns.num_ns++;
+      break;
+    case 5:
+      /* CNAME */
+      protos.dns.num_cname++;
+      break;
+    case 6:
+      /* SOA */
+      protos.dns.num_soa++;
+      break;
+    case 12:
+      /* PTR */
+      protos.dns.num_ptr++;
+      break;
+    case 15:
+      /* MX */
+      protos.dns.num_mx++;
+      break;
+    case 16:
+      /* TXT */
+      protos.dns.num_txt++;
+      break;
+    case 28:
+      /* AAAA */
+      protos.dns.num_aaaa++;
+      break;
+    case 255:
+      /* ANY */
+      protos.dns.num_any++;
+      break;
+    default:
+      protos.dns.num_other++;
+      break;
   }
 }
 
@@ -275,18 +295,19 @@ void PartializableFlowTrafficStats::incDNSQuery(u_int16_t query_type) {
 
 void PartializableFlowTrafficStats::incDNSResp(u_int16_t resp_code) {
   switch (resp_code) {
-  case 0:
-    protos.dns.num_replies_ok++;
-    break;
-  default:
-    protos.dns.num_replies_error++;
+    case 0:
+      protos.dns.num_replies_ok++;
+      break;
+    default:
+      protos.dns.num_replies_error++;
   }
 }
 
 /* *************************************** */
 
-void PartializableFlowTrafficStats::get_partial(PartializableFlowTrafficStats *dst,
-						PartializableFlowTrafficStats *fts) const {
+void PartializableFlowTrafficStats::get_partial(
+    PartializableFlowTrafficStats* dst,
+    PartializableFlowTrafficStats* fts) const {
   /* Set tmp to the current value */
   PartializableFlowTrafficStats tmp(*this);
 
@@ -304,32 +325,43 @@ void PartializableFlowTrafficStats::get_partial(PartializableFlowTrafficStats *d
 
 u_int16_t PartializableFlowTrafficStats::get_num_http_requests() const {
   return protos.http.num_get + protos.http.num_post + protos.http.num_head +
-    protos.http.num_put + protos.http.num_other;
+         protos.http.num_put + protos.http.num_other;
 }
 
 /* *************************************** */
 
 u_int16_t PartializableFlowTrafficStats::get_num_dns_queries() const {
   return protos.dns.num_a + protos.dns.num_ns + protos.dns.num_cname +
-    protos.dns.num_soa + protos.dns.num_ptr + protos.dns.num_mx +
-    protos.dns.num_txt + protos.dns.num_aaaa + protos.dns.num_any +
-    protos.dns.num_other;
+         protos.dns.num_soa + protos.dns.num_ptr + protos.dns.num_mx +
+         protos.dns.num_txt + protos.dns.num_aaaa + protos.dns.num_any +
+         protos.dns.num_other;
 }
 
 /* *************************************** */
 
-#define swapme(pivot, a, b)          { pivot = a; a = b; b = pivot; }
-#define swapme_buf(pivot, a, b, len) { memcpy(pivot, a, len); memcpy(a, b, len); memcpy(b, pivot, len); }
+#define swapme(pivot, a, b) \
+  {                         \
+    pivot = a;              \
+    a = b;                  \
+    b = pivot;              \
+  }
+#define swapme_buf(pivot, a, b, len) \
+  {                                  \
+    memcpy(pivot, a, len);           \
+    memcpy(a, b, len);               \
+    memcpy(b, pivot, len);           \
+  }
 
 void PartializableFlowTrafficStats::swap() {
   u_int32_t p32;
   u_int64_t p64;
   FlowTCPPacketStats p;
   u_int16_t p16[MAX_NUM_SCORE_CATEGORIES];
-	     
+
   swapme(p32, cli2srv_packets, srv2cli_packets);
   swapme(p64, cli2srv_bytes, srv2cli_bytes);
-  swapme(p64,  cli2srv_goodput_bytes, srv2cli_goodput_bytes);
-  swapme_buf(&p, &cli2srv_tcp_stats, &srv2cli_tcp_stats, sizeof(FlowTCPPacketStats));
+  swapme(p64, cli2srv_goodput_bytes, srv2cli_goodput_bytes);
+  swapme_buf(&p, &cli2srv_tcp_stats, &srv2cli_tcp_stats,
+             sizeof(FlowTCPPacketStats));
   swapme_buf(p16, cli_host_score, srv_host_score, sizeof(p16));
 }

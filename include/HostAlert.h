@@ -28,33 +28,36 @@ class HostCheck;
 
 class HostAlert {
  private:
-  Host *host;
-  bool released; /* to be released */
-  bool last_released_for_host; /* there no other engaged alert at the time this has been released */
-  bool expiring; /* engaged, under re-evaluation */
+  Host* host;
+  bool released;               /* to be released */
+  bool last_released_for_host; /* there no other engaged alert at the time this
+                                  has been released */
+  bool expiring;               /* engaged, under re-evaluation */
   HostCheckID check_id;
   std::string check_name;
   u_int64_t rowid; /* row id used by engaged alert in the in-memory table */
   time_t engage_time;
   time_t release_time;
-  time_t timeout_time; /* used by alerts with no C++ Check to automatically disengage */
-  risk_percentage cli_pctg; /* The fraction of total risk that goes to the client */
+  time_t timeout_time; /* used by alerts with no C++ Check to automatically
+                          disengage */
+  risk_percentage
+      cli_pctg; /* The fraction of total risk that goes to the client */
   bool is_attacker, is_victim; /* Whether the host of this alert is considered
                                   to be an attacker o a victim */
   /*
      Adds to the passed `serializer` (generated with `getAlertSerializer`)
      information specific to this alert
    */
-  virtual ndpi_serializer *getAlertJSON(ndpi_serializer *serializer) {
+  virtual ndpi_serializer* getAlertJSON(ndpi_serializer* serializer) {
     return serializer;
   }
-  void init(HostCheckID _check_id, std::string _check_name, Host *h,
+  void init(HostCheckID _check_id, std::string _check_name, Host* h,
             risk_percentage _cli_pctg);
 
  public:
-  HostAlert(HostCheckID check_id, std::string check_name, Host *h,
+  HostAlert(HostCheckID check_id, std::string check_name, Host* h,
             risk_percentage _cli_pctg);
-  HostAlert(HostCheck *c, Host *h, risk_percentage _cli_pctg);
+  HostAlert(HostCheck* c, Host* h, risk_percentage _cli_pctg);
   virtual ~HostAlert();
 
   inline u_int8_t getCliScore() const {
@@ -86,11 +89,14 @@ class HostAlert {
   /* Alert automatically released when the condition is no longer satisfied. */
   virtual bool hasAutoRelease() { return true; }
 
-  inline Host *getHost() const { return (host); }
+  inline Host* getHost() const { return (host); }
   inline HostCheckID getCheckType() const { return (check_id); }
   inline std::string getCheckName() const { return (check_name); }
 
-  inline void setEngaged(u_int64_t _rowid) { expiring = released = false; rowid = _rowid; }
+  inline void setEngaged(u_int64_t _rowid) {
+    expiring = released = false;
+    rowid = _rowid;
+  }
 
   inline void setExpiring() { expiring = true; }
   inline bool isExpired() { return expiring; }
@@ -104,9 +110,7 @@ class HostAlert {
   }
   inline bool isReleased() { return released; }
 
-  inline void setLastReleased() {
-    last_released_for_host = true;
-  }
+  inline void setLastReleased() { last_released_for_host = true; }
   inline bool isLastReleased() { return last_released_for_host; }
 
   inline time_t getEngageTime() { return engage_time; }
@@ -122,7 +126,7 @@ class HostAlert {
   /* Generates the JSON alert serializer with base information and per-check
    * information gathered with `getAlertJSON`. NOTE: memory must be freed by the
    * caller. */
-  ndpi_serializer *getSerializedAlert();
+  ndpi_serializer* getSerializedAlert();
 };
 
 #endif /* _HOST_ALERT_H_ */

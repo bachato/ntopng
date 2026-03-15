@@ -39,7 +39,7 @@ class Cardinality {
     if (ndpi_hll_init(&hll, bits)) throw "init error";
   }
 
-  bool addElement(const char *value, size_t value_len) {
+  bool addElement(const char* value, size_t value_len) {
     return (ndpi_hll_add(&hll, value, value_len) ? true : false);
   }
 

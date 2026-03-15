@@ -22,7 +22,7 @@
 
 /* ******************************************************** */
 
-void FrequentStringItems::add(char *key, u_int32_t value) {
+void FrequentStringItems::add(char* key, u_int32_t value) {
   std::map<std::string, u_int32_t>::iterator it;
 
   m.lock(__FILE__, __LINE__);
@@ -41,8 +41,8 @@ void FrequentStringItems::add(char *key, u_int32_t value) {
 
 /* ******************************************************** */
 
-static bool sortByVal(const pair<u_int32_t, std::string> &a,
-                      const pair<u_int32_t, std::string> &b) {
+static bool sortByVal(const pair<u_int32_t, std::string>& a,
+                      const pair<u_int32_t, std::string>& b) {
   return (a.first < b.first);
 }
 
@@ -68,8 +68,8 @@ void FrequentStringItems::prune() {
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "Erasing %s (%u)",
         vec[i].second.c_str(), vec[i].first);
 #endif
-      std::string k = vec[i].second;
-      q.erase(k);
+    std::string k = vec[i].second;
+    q.erase(k);
   }
 }
 
@@ -79,9 +79,9 @@ void FrequentStringItems::prune() {
   Entries are sorted first and only the top X (by value)
   are serialized to JSON
 */
-char *FrequentStringItems::json(u_int32_t max_num_items) {
-  json_object *j;
-  char *rsp;
+char* FrequentStringItems::json(u_int32_t max_num_items) {
+  json_object* j;
+  char* rsp;
   vector<pair<std::string, u_int32_t>> vec;
 
   if ((j = json_object_new_object()) == NULL) return (NULL);
@@ -95,8 +95,8 @@ char *FrequentStringItems::json(u_int32_t max_num_items) {
   m.unlock(__FILE__, __LINE__);
 
   std::sort(vec.begin(), vec.end(),
-            [](const pair<std::string, u_int32_t> &a,
-               const pair<std::string, u_int32_t> &b) {
+            [](const pair<std::string, u_int32_t>& a,
+               const pair<std::string, u_int32_t>& b) {
               /* Sort by value (top to bottom) */
               return (a.second > b.second);
             });
@@ -123,7 +123,7 @@ char *FrequentStringItems::json(u_int32_t max_num_items) {
 #ifdef TESTME
 
 void testme() {
-  FrequentStringItems *f = new (std::nothrow) FrequentStringItems(8);
+  FrequentStringItems* f = new (std::nothrow) FrequentStringItems(8);
 
   for (int i = 0; i < 256; i++) {
     char buf[32];

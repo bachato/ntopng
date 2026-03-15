@@ -31,10 +31,10 @@ class FlowRiskSSHObsoleteServer : public FlowRisk {
   }
 
  public:
-  FlowRiskSSHObsoleteServer() : FlowRisk(){};
-  ~FlowRiskSSHObsoleteServer(){};
+  FlowRiskSSHObsoleteServer() : FlowRisk() {};
+  ~FlowRiskSSHObsoleteServer() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskSSHObsoleteServerAlert(this, f);
   }
 

@@ -32,7 +32,7 @@ ASNConfiguration::~ASNConfiguration() {}
 
 /* ***************************************************** */
 
-void ASNConfiguration::reloadASNConfiguration(char *key) {
+void ASNConfiguration::reloadASNConfiguration(char* key) {
   std::set<u_int32_t> new_tree;
   loadConfiguration(&new_tree, key);
 
@@ -58,13 +58,13 @@ bool ASNConfiguration::findASN(u_int32_t asn) {
 
 /* ***************************************************** */
 
-void ASNConfiguration::loadConfiguration(std::set<u_int32_t> *tree, char *key) {
-  char *rsp = NULL;
-  Redis *redis = ntop->getRedis();
+void ASNConfiguration::loadConfiguration(std::set<u_int32_t>* tree, char* key) {
+  char* rsp = NULL;
+  Redis* redis = ntop->getRedis();
   u_int actual_len = redis->len(key);
 
   if (actual_len++ /* ++ for the \0 */ > 0 &&
-      (rsp = (char *)malloc(actual_len)) != NULL) {
+      (rsp = (char*)malloc(actual_len)) != NULL) {
     redis->get(key, rsp, actual_len);
     /* Get a list of ASNs separated by commas */
     std::string asnStr(rsp);
@@ -95,8 +95,8 @@ void ASNConfiguration::loadConfiguration(std::set<u_int32_t> *tree, char *key) {
 
 /* ***************************************************** */
 
-void ASNConfiguration::debugPrint(char *list_name) {
-  for (const u_int32_t &asn_id : tree) {
+void ASNConfiguration::debugPrint(char* list_name) {
+  for (const u_int32_t& asn_id : tree) {
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s] ASN Element: %d",
                                  list_name, asn_id);
   }

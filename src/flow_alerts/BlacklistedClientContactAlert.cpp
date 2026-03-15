@@ -23,15 +23,16 @@
 
 ndpi_serializer* BlacklistedClientContactAlert::getAlertJSON(
     ndpi_serializer* serializer) {
-  Flow *f = getFlow();
+  Flow* f = getFlow();
 
   if (serializer) {
     ndpi_serialize_string_boolean(serializer, "cli_blacklisted",
                                   f->isBlacklistedClient());
     ndpi_serialize_string_boolean(serializer, "srv_blacklisted",
                                   f->isBlacklistedServer());
-    ndpi_serialize_string_boolean(serializer, "cat_blacklisted",
-				  f->get_protocol_category() == NDPI_PROTOCOL_CATEGORY_MALWARE);
+    ndpi_serialize_string_boolean(
+        serializer, "cat_blacklisted",
+        f->get_protocol_category() == NDPI_PROTOCOL_CATEGORY_MALWARE);
     ndpi_serialize_string_uint32(serializer, "uid", f->get_hash_entry_id());
 
     if (f->get_custom_category_file())

@@ -29,12 +29,13 @@
 
 /* ********************************************* */
 
-PacketDumperTuntap::PacketDumperTuntap(NetworkInterface *i) {
-  char *name = i->get_name();  
+PacketDumperTuntap::PacketDumperTuntap(NetworkInterface* i) {
+  char* name = i->get_name();
   int ret = openTap(NULL, DUMP_MTU);
 
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   if (ret < 0) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Opening tap (%s) failed", name);
     init_ok = false;
@@ -57,8 +58,8 @@ PacketDumperTuntap::~PacketDumperTuntap() { closeTap(); }
 #define LINUX_SYSTEMCMD_SIZE 128
 
 int PacketDumperTuntap::openTap(
-    char *dev, /* user-definable interface name, eg. edge0 */ int mtu) {
-  char *tuntap_device = strdup("/dev/net/tun");
+    char* dev, /* user-definable interface name, eg. edge0 */ int mtu) {
+  char* tuntap_device = strdup("/dev/net/tun");
   char buf[LINUX_SYSTEMCMD_SIZE];
   struct ifreq ifr;
   int rc;
@@ -80,7 +81,7 @@ int PacketDumperTuntap::openTap(
     snprintf(dev_name, sizeof(dev_name), "%s", dev);
   }
 
-  rc = ioctl(fd, TUNSETIFF, (void *)&ifr);
+  rc = ioctl(fd, TUNSETIFF, (void*)&ifr);
   if (rc < 0) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "ioctl(%s) [%d/%s]\n",
                                  tuntap_device, errno, strerror(errno));
@@ -105,7 +106,7 @@ int PacketDumperTuntap::openTap(
 #ifdef __FreeBSD__
 #define FREEBSD_TAPDEVICE_SIZE 32
 int PacketDumperTuntap::openTap(
-    char *dev, /* user-definable interface name, eg. edge0 */ int mtu) {
+    char* dev, /* user-definable interface name, eg. edge0 */ int mtu) {
   int i;
   char tap_device[FREEBSD_TAPDEVICE_SIZE];
 
@@ -138,7 +139,7 @@ int PacketDumperTuntap::openTap(
 #ifdef __OpenBSD__
 #define OPENBSD_TAPDEVICE_SIZE 32
 int PacketDumperTuntap::openTap(
-    char *dev, /* user-definable interface name, eg. edge0 */ int mtu) {
+    char* dev, /* user-definable interface name, eg. edge0 */ int mtu) {
   int i;
   char tap_device[OPENBSD_TAPDEVICE_SIZE];
 
@@ -169,7 +170,7 @@ int PacketDumperTuntap::openTap(
 
 #ifdef WIN32
 int PacketDumperTuntap::openTap(
-    char *dev, /* user-definable interface name, eg. edge0 */ int mtu) {
+    char* dev, /* user-definable interface name, eg. edge0 */ int mtu) {
   ntop->getTrace()->traceEvent(TRACE_NORMAL,
                                "TAP interface not yet supported on windows");
   return (-1);
@@ -208,7 +209,7 @@ void PacketDumperTuntap::up() {
 #define OSX_TAPDEVICE_SIZE 32
 
 int PacketDumperTuntap::openTap(
-    char *dev, /* user-definable interface name, eg. edge0 */ int mtu) {
+    char* dev, /* user-definable interface name, eg. edge0 */ int mtu) {
   int i;
   char tap_device[OSX_TAPDEVICE_SIZE];
 
@@ -238,7 +239,7 @@ int PacketDumperTuntap::openTap(
 /* ********************************************* */
 
 #ifdef NOTUSED
-int PacketDumperTuntap::readTap(unsigned char *buf, int len) {
+int PacketDumperTuntap::readTap(unsigned char* buf, int len) {
   if (init_ok) return (read(fd, buf, len));
   return 0;
 }
@@ -246,7 +247,7 @@ int PacketDumperTuntap::readTap(unsigned char *buf, int len) {
 
 /* ********************************************* */
 
-int PacketDumperTuntap::writeTap(unsigned char *buf, int len,
+int PacketDumperTuntap::writeTap(unsigned char* buf, int len,
                                  dump_reason reason,
                                  unsigned int sampling_rate) {
   int rc = 0;
@@ -287,7 +288,7 @@ void PacketDumperTuntap::closeTap() {
 
 /* ********************************************* */
 
-void PacketDumperTuntap::lua(lua_State *vm) {
+void PacketDumperTuntap::lua(lua_State* vm) {
   lua_newtable(vm);
   lua_push_uint64_table_entry(vm, "num_dumped_pkts", get_num_dumped_packets());
 

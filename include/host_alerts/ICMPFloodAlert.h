@@ -31,10 +31,10 @@ class ICMPFloodAlert : public FlowHitsAlert {
     return {host_alert_icmp_flood, alert_category_security};
   }
 
-  ICMPFloodAlert(HostCheck *c, Host *h, risk_percentage cli_pctg,
+  ICMPFloodAlert(HostCheck* c, Host* h, risk_percentage cli_pctg,
                  u_int16_t hits, u_int64_t threshold, bool is_attacker)
-      : FlowHitsAlert(c, h, cli_pctg, hits, threshold, is_attacker){};
-  ~ICMPFloodAlert(){};
+      : FlowHitsAlert(c, h, cli_pctg, hits, threshold, is_attacker) {};
+  ~ICMPFloodAlert() {};
 
   HostAlertType getAlertType() const { return getClassType(); }
 };

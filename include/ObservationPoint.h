@@ -36,7 +36,7 @@ class ObservationPoint : public GenericHashEntry,
   u_int16_t obs_point;
   NetworkStats dirstats;
   u_int64_t num_flows;
-  ndpi_bitmap *exporter_list;
+  ndpi_bitmap* exporter_list;
   std::atomic<bool> delete_requested;
   bool remove_entry;
 
@@ -51,7 +51,7 @@ class ObservationPoint : public GenericHashEntry,
   }
 
  public:
-  ObservationPoint(NetworkInterface *_iface, u_int16_t obs_point);
+  ObservationPoint(NetworkInterface* _iface, u_int16_t obs_point);
   ~ObservationPoint();
 
   void set_hash_entry_state_idle();
@@ -66,7 +66,7 @@ class ObservationPoint : public GenericHashEntry,
   }
 
   bool equal(u_int16_t _obs_point) { return (obs_point == _obs_point); }
-  inline bool equal(ObservationPoint *_obs_point) {
+  inline bool equal(ObservationPoint* _obs_point) {
     return (obs_point == _obs_point->key());
   }
 
@@ -84,18 +84,18 @@ class ObservationPoint : public GenericHashEntry,
     }
   }
 
-  virtual void updateStats(const struct timeval *tv);
+  virtual void updateStats(const struct timeval* tv);
 
-  void lua(lua_State *vm, DetailsLevel details_level, bool asListElement);
+  void lua(lua_State* vm, DetailsLevel details_level, bool asListElement);
 
-  inline void serialize(json_object *obj, DetailsLevel details_level) {
+  inline void serialize(json_object* obj, DetailsLevel details_level) {
     if (!remove_entry) {
       GenericHashEntry::getJSONObject(obj, details_level);
       GenericTrafficElement::getJSONObject(obj, iface);
       json_object_object_add(obj, "flows", json_object_new_int64(num_flows));
     }
   }
-  inline char *getSerializationKey(char *buf, u_int bufsize) {
+  inline char* getSerializationKey(char* buf, u_int bufsize) {
     snprintf(buf, bufsize, OBS_POINT_SERIALIZED_KEY, iface->get_id(),
              obs_point);
     return (buf);

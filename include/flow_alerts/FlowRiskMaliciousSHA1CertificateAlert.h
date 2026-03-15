@@ -36,9 +36,11 @@ class FlowRiskMaliciousSHA1CertificateAlert : public FlowRiskAlert {
     return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
   }
 
-  FlowRiskMaliciousSHA1CertificateAlert(FlowCheck *c, Flow *f)
-    : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
-  ~FlowRiskMaliciousSHA1CertificateAlert(){};
+  FlowRiskMaliciousSHA1CertificateAlert(FlowCheck* c, Flow* f)
+      : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskMaliciousSHA1CertificateAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
   ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }

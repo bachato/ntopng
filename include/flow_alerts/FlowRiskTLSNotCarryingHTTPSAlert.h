@@ -34,9 +34,11 @@ class FlowRiskTLSNotCarryingHTTPSAlert : public FlowRiskAlert {
     return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
   }
 
-  FlowRiskTLSNotCarryingHTTPSAlert(FlowCheck *c, Flow *f)
-    : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
-  ~FlowRiskTLSNotCarryingHTTPSAlert(){};
+  FlowRiskTLSNotCarryingHTTPSAlert(FlowCheck* c, Flow* f)
+      : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskTLSNotCarryingHTTPSAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
   ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }

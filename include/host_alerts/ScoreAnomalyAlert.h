@@ -53,7 +53,7 @@ class ScoreAnomalyAlert : public HostAlert {
     lower_bound = _lower_bound;
     upper_bound = _upper_bound;
   }
-  ~ScoreAnomalyAlert(){};
+  ~ScoreAnomalyAlert() {};
 
   static HostAlertType getClassType() {
     return {host_alert_score_anomaly, alert_category_security};

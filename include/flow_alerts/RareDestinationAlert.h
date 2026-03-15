@@ -26,7 +26,7 @@
 
 class RareDestinationAlert : public FlowAlert {
  private:
-  ndpi_serializer *getAlertJSON(ndpi_serializer *serializer);
+  ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
 
  public:
   static FlowAlertType getClassType() {
@@ -34,8 +34,10 @@ class RareDestinationAlert : public FlowAlert {
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_NOTICE; };
 
-  RareDestinationAlert(FlowCheck *c, Flow *f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-  ~RareDestinationAlert(){};
+  RareDestinationAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~RareDestinationAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
 };

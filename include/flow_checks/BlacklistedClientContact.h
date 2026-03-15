@@ -32,14 +32,16 @@ class BlacklistedClientContact : public FlowCheck {
                   false /* Don't exclude for nEdge */,
                   false /* NOT only for nEdge */,
                   true /* has_protocol_detected */,
-                  false /* has_periodic_update */, false /* has_flow_end */){};
-  ~BlacklistedClientContact(){};
+                  false /* has_periodic_update */, false /* has_flow_end */) {};
+  ~BlacklistedClientContact() {};
 
-  bool loadConfiguration(json_object *config);
-  void protocolDetected(Flow *f);
-  FlowAlert *buildAlert(Flow *f);
+  bool loadConfiguration(json_object* config);
+  void protocolDetected(Flow* f);
+  FlowAlert* buildAlert(Flow* f);
 
-  std::string getName() const { return (std::string("blacklisted_client_contact")); }
+  std::string getName() const {
+    return (std::string("blacklisted_client_contact"));
+  }
 };
 
 #endif /* _BLACKLIST_CLIENT_CONTACT_H_ */

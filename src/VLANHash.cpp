@@ -23,15 +23,16 @@
 
 /* ************************************ */
 
-VLANHash::VLANHash(NetworkInterface *_iface, u_int _num_hashes,
+VLANHash::VLANHash(NetworkInterface* _iface, u_int _num_hashes,
                    u_int _max_hash_size)
     : GenericHash(_iface, _num_hashes, _max_hash_size, "VLANHash") {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 }
 
 /* ************************************ */
 
-VLAN *VLANHash::get(u_int16_t _vlan_id, bool is_inline_call) {
+VLAN* VLANHash::get(u_int16_t _vlan_id, bool is_inline_call) {
   u_int32_t hash = _vlan_id;
 
   hash %= num_hashes;
@@ -39,17 +40,17 @@ VLAN *VLANHash::get(u_int16_t _vlan_id, bool is_inline_call) {
   if (table[hash] == NULL) {
     return (NULL);
   } else {
-    VLAN *head;
+    VLAN* head;
 
     if (!is_inline_call) locks[hash]->rdlock(__FILE__, __LINE__);
 
-    head = (VLAN *)table[hash];
+    head = (VLAN*)table[hash];
 
     while (head != NULL) {
       if ((!head->idle()) && head->equal(_vlan_id))
         break;
       else
-        head = (VLAN *)head->next();
+        head = (VLAN*)head->next();
     }
 
     if (!is_inline_call) locks[hash]->unlock(__FILE__, __LINE__);

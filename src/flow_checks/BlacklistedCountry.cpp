@@ -24,7 +24,7 @@
 
 /* ***************************************************** */
 
-bool BlacklistedCountry::hasBlacklistedCountry(Host *h) const {
+bool BlacklistedCountry::hasBlacklistedCountry(Host* h) const {
   char buf[3], *country;
 
   if (!h) return false;
@@ -36,7 +36,7 @@ bool BlacklistedCountry::hasBlacklistedCountry(Host *h) const {
 
 /* ***************************************************** */
 
-void BlacklistedCountry::protocolDetected(Flow *f) {
+void BlacklistedCountry::protocolDetected(Flow* f) {
   u_int8_t c_score, s_score;
   risk_percentage cli_score_pctg = CLIENT_FAIR_RISK_PERCENTAGE;
   bool is_server_bl = false, is_client_bl = false;
@@ -56,9 +56,10 @@ void BlacklistedCountry::protocolDetected(Flow *f) {
   if (is_server_bl || is_client_bl) {
     FlowAlertType alert_type = BlacklistedCountryAlert::getClassType();
 
-    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
+    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg,
+                       &c_score, &s_score);
 
-    FlowAlert *alert = buildAlert(f);
+    FlowAlert* alert = buildAlert(f);
     alert->setCliSrvScores(c_score, s_score);
     f->triggerAlert(alert);
   }
@@ -66,10 +67,10 @@ void BlacklistedCountry::protocolDetected(Flow *f) {
 
 /* ***************************************************** */
 
-FlowAlert *BlacklistedCountry::buildAlert(Flow *f) {
+FlowAlert* BlacklistedCountry::buildAlert(Flow* f) {
   bool is_server_bl = hasBlacklistedCountry(f->get_srv_host());
   bool is_client_bl = hasBlacklistedCountry(f->get_cli_host());
-  BlacklistedCountryAlert *alert =
+  BlacklistedCountryAlert* alert =
       new (std::nothrow) BlacklistedCountryAlert(this, f, is_server_bl);
 
   if (alert) {
@@ -92,7 +93,7 @@ FlowAlert *BlacklistedCountry::buildAlert(Flow *f) {
 
 /* ***************************************************** */
 
-bool BlacklistedCountry::loadConfiguration(json_object *config) {
+bool BlacklistedCountry::loadConfiguration(json_object* config) {
   FlowCheck::loadConfiguration(config); /* Parse parameters in common */
   json_object *countries_json, *country_json;
 

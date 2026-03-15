@@ -23,49 +23,47 @@
 
 /* ************************************ */
 
-HostHash::HostHash(NetworkInterface *_iface, u_int _num_hashes,
+HostHash::HostHash(NetworkInterface* _iface, u_int _num_hashes,
                    u_int _max_hash_size)
     : GenericHash(_iface, _num_hashes, _max_hash_size, "HostHash") {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   num_http_hosts = 0;
 }
 
 /* ************************************ */
 
-Host* HostHash::get(u_int16_t vlanId, IpAddress *key, Mac *mac,
+Host* HostHash::get(u_int16_t vlanId, IpAddress* key, Mac* mac,
                     bool is_inline_call, u_int16_t observation_point_id) {
   u_int32_t hash = key->key();
 
   /* Check if MAC address needs to be used in host key */
-  if (ntop->getPrefs()->useMacAddressInFlowKey() == false)
-    mac = NULL;
+  if (ntop->getPrefs()->useMacAddressInFlowKey() == false) mac = NULL;
 
 #ifdef USE_MAC_IN_KEY_WITH_DHCP
-  if((hash == 0 /* 0.0.0.0 */) && (mac != NULL))
-    hash += mac->key();
+  if ((hash == 0 /* 0.0.0.0 */) && (mac != NULL)) hash += mac->key();
 #endif
 
   hash %= num_hashes;
-  
+
   if (table[hash] == NULL) {
     return (NULL);
   } else {
-    Host *head;
+    Host* head;
 
     if (!is_inline_call) locks[hash]->rdlock(__FILE__, __LINE__);
 
-    head = (Host *)table[hash];
+    head = (Host*)table[hash];
 
     while (head != NULL) {
-      if ((!head->idle()) && (head->get_vlan_id() == vlanId)
-          && (head->get_observation_point_id() == observation_point_id)
-          && (head->get_ip() != NULL) && (head->get_ip()->compare(key) == 0)
-          && ((mac == NULL) || (mac == head->getMac()))
-	  )
+      if ((!head->idle()) && (head->get_vlan_id() == vlanId) &&
+          (head->get_observation_point_id() == observation_point_id) &&
+          (head->get_ip() != NULL) && (head->get_ip()->compare(key) == 0) &&
+          ((mac == NULL) || (mac == head->getMac())))
         break;
       else
-        head = (Host *)head->next();
+        head = (Host*)head->next();
     }
 
     if (!is_inline_call) locks[hash]->unlock(__FILE__, __LINE__);

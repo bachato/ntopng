@@ -25,8 +25,9 @@
 
 Check::Check(NtopngEdition _edition, bool _packet_interface_only,
              bool _nedge_exclude, bool _nedge_only) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   check_edition = _edition;
   packet_interface_only = _packet_interface_only;
   nedge_exclude = _nedge_exclude;
@@ -36,8 +37,9 @@ Check::Check(NtopngEdition _edition, bool _packet_interface_only,
 
 /* **************************************************** */
 
-Check::~Check(){
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+Check::~Check() {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
 };
 
 /* **************************************************** */
@@ -50,12 +52,14 @@ bool Check::isCheckCompatibleWithEdition() const {
       break;
 
     case ntopng_edition_pro:
-      if (!ntop->getPrefs()->is_pro_edition() /* includes Pro, Enterprise M/L */)
+      if (!ntop->getPrefs()
+               ->is_pro_edition() /* includes Pro, Enterprise M/L */)
         return (false);
       break;
 
     case ntopng_edition_enterprise_m:
-      if (!ntop->getPrefs()->is_enterprise_m_edition() /* includes Enterprise M/L */)
+      if (!ntop->getPrefs()
+               ->is_enterprise_m_edition() /* includes Enterprise M/L */)
         return (false);
       break;
 
@@ -70,7 +74,7 @@ bool Check::isCheckCompatibleWithEdition() const {
 
 /* **************************************************** */
 
-bool Check::isCheckCompatibleWithInterface(NetworkInterface *iface) {
+bool Check::isCheckCompatibleWithInterface(NetworkInterface* iface) {
   /* Version check, done at runtime as versions can change */
   if (!isCheckCompatibleWithEdition()) return (false);
 

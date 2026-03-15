@@ -24,8 +24,9 @@
 /* *************************************** */
 
 FlowGrouper::FlowGrouper(sortField sf) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   sorter = sf;
   app_protocol = 0;
   table_index = 1;
@@ -36,12 +37,13 @@ FlowGrouper::FlowGrouper(sortField sf) {
 /* *************************************** */
 
 FlowGrouper::~FlowGrouper() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
 }
 
 /* *************************************** */
 
-bool FlowGrouper::inGroup(Flow *flow) {
+bool FlowGrouper::inGroup(Flow* flow) {
   switch (sorter) {
     case column_ndpi:
       return (flow->get_detected_protocol().proto.app_protocol == app_protocol);
@@ -52,7 +54,7 @@ bool FlowGrouper::inGroup(Flow *flow) {
 
 /* *************************************** */
 
-int FlowGrouper::newGroup(Flow *flow) {
+int FlowGrouper::newGroup(Flow* flow) {
   if (flow == NULL) return -1;
 
   memset(&stats, 0, sizeof(stats));
@@ -70,7 +72,7 @@ int FlowGrouper::newGroup(Flow *flow) {
 
 /* *************************************** */
 
-int FlowGrouper::incStats(Flow *flow) {
+int FlowGrouper::incStats(Flow* flow) {
   if (flow == NULL || !inGroup(flow)) return -1;
 
   stats.bytes += flow->get_bytes();
@@ -92,7 +94,7 @@ int FlowGrouper::incStats(Flow *flow) {
 
 /* *************************************** */
 
-void FlowGrouper::lua(lua_State *vm) {
+void FlowGrouper::lua(lua_State* vm) {
   lua_newtable(vm);
 
   lua_push_uint64_table_entry(vm, "proto", app_protocol);

@@ -27,15 +27,18 @@
 class ServerConfiguration {
  private:
   VLANAddressTree *tree, *tree_shadow;
-  
-  void loadConfiguration(VLANAddressTree *tree, char *key);
+
+  void loadConfiguration(VLANAddressTree* tree, char* key);
+
  public:
   ServerConfiguration();
   ~ServerConfiguration();
 
-  inline bool isEmptyConfiguration() { return((tree == NULL) || tree->isEmpty()); }
-  bool findAddress(IpAddress *ip, u_int16_t vlan_id);
-  void reloadServerConfiguration(char *key);
+  inline bool isEmptyConfiguration() {
+    return ((tree == NULL) || tree->isEmpty());
+  }
+  bool findAddress(IpAddress* ip, u_int16_t vlan_id);
+  void reloadServerConfiguration(char* key);
 };
 
 #endif /* _SERVER_CONFIGURATION_H */

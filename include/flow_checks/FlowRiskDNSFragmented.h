@@ -31,10 +31,10 @@ class FlowRiskDNSFragmented : public FlowRisk {
   }
 
  public:
-  FlowRiskDNSFragmented() : FlowRisk(){};
-  ~FlowRiskDNSFragmented(){};
+  FlowRiskDNSFragmented() : FlowRisk() {};
+  ~FlowRiskDNSFragmented() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskDNSFragmentedAlert(this, f);
   }
 

@@ -23,9 +23,10 @@
 
 /* ****************************************** */
 
-SyslogLuaEngine::SyslogLuaEngine(NetworkInterface *iface) : LuaEngine() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+SyslogLuaEngine::SyslogLuaEngine(NetworkInterface* iface) : LuaEngine() {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   initialized = false;
 
   snprintf(script_path, sizeof(script_path), "%s/%s",
@@ -83,12 +84,13 @@ bool SyslogLuaEngine::pcall(int num_args, int num_results) {
 
 /* **************************************************** */
 
-void SyslogLuaEngine::handleEvent(const char *producer, const char *message,
-                                  const char *host, int priority) {
-  lua_State *L = getState();
+void SyslogLuaEngine::handleEvent(const char* producer, const char* message,
+                                  const char* host, int priority) {
+  lua_State* L = getState();
 
-  //ntop->getTrace()->traceEvent(TRACE_WARNING, "Producer = %s Host = %s Message = %s",
-  //  producer ? producer : "", host ? host : "", message ? message : "");
+  // ntop->getTrace()->traceEvent(TRACE_WARNING, "Producer = %s Host = %s
+  // Message = %s",
+  //   producer ? producer : "", host ? host : "", message ? message : "");
 
   lua_getglobal(L, SYSLOG_SCRIPT_CALLBACK_EVENT);
   lua_pushstring(L, producer ? producer : "");

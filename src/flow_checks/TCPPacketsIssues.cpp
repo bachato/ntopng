@@ -24,14 +24,14 @@
 
 /* ***************************************************** */
 
-void TCPPacketsIssues::checkTCPPacketsIssues(Flow *f) {
+void TCPPacketsIssues::checkTCPPacketsIssues(Flow* f) {
   if (f->get_packets() == 0)
     return;
   else {
     FlowAlertType alert_type = TCPPacketsIssuesAlert::getClassType();
     u_int8_t c_score, s_score;
     risk_percentage cli_score_pctg = CLIENT_FAIR_RISK_PERCENTAGE;
-    FlowTrafficStats *stats = f->getTrafficStats();
+    FlowTrafficStats* stats = f->getTrafficStats();
     u_int64_t retransmission = stats ? (stats->get_cli2srv_tcp_retr() +
                                         stats->get_srv2cli_tcp_retr())
                                      : 0,
@@ -65,9 +65,10 @@ void TCPPacketsIssues::checkTCPPacketsIssues(Flow *f) {
                                  lost_pctg, lost_threshold);
 #endif /* DEBUG_PACKETS_ISSUES */
 
-    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
+    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg,
+                       &c_score, &s_score);
 
-    FlowAlert *alert = buildAlert(f);
+    FlowAlert* alert = buildAlert(f);
     alert->setCliSrvScores(c_score, s_score);
     f->triggerAlert(alert);
   }
@@ -75,22 +76,22 @@ void TCPPacketsIssues::checkTCPPacketsIssues(Flow *f) {
 
 /* ***************************************************** */
 
-void TCPPacketsIssues::periodicUpdate(Flow *f) { checkTCPPacketsIssues(f); }
+void TCPPacketsIssues::periodicUpdate(Flow* f) { checkTCPPacketsIssues(f); }
 
 /* ***************************************************** */
 
-void TCPPacketsIssues::flowEnd(Flow *f) { checkTCPPacketsIssues(f); }
+void TCPPacketsIssues::flowEnd(Flow* f) { checkTCPPacketsIssues(f); }
 
 /* ***************************************************** */
 
-FlowAlert *TCPPacketsIssues::buildAlert(Flow *f) {
+FlowAlert* TCPPacketsIssues::buildAlert(Flow* f) {
   return new TCPPacketsIssuesAlert(this, f, retransmission_threshold,
                                    out_of_order_threshold, lost_threshold);
 }
 
 /* ***************************************************** */
 
-bool TCPPacketsIssues::loadConfiguration(json_object *config) {
+bool TCPPacketsIssues::loadConfiguration(json_object* config) {
   bool enabled = false;
   json_object *json_table, *json_bytes;
 

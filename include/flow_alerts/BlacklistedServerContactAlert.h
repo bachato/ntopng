@@ -30,12 +30,15 @@ class BlacklistedServerContactAlert : public FlowAlert {
 
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_blacklisted_server_contact, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_blacklisted_server_contact,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_CRITICAL; };
 
-  BlacklistedServerContactAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {setAlertScore(getDefaultScore());};
-  ~BlacklistedServerContactAlert(){};
+  BlacklistedServerContactAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~BlacklistedServerContactAlert() {};
 
   bool autoAck() const { return false; };
 

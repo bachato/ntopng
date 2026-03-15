@@ -24,15 +24,16 @@
 /* *************************************** */
 
 TcpPacketStats::TcpPacketStats() {
-  //if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s",
+  // __FILE__);
   pktRetr = pktOOO = pktLost = pktKeepAlive = 0;
 }
 
 /* *************************************** */
 
-char *TcpPacketStats::serialize() {
-  json_object *my_object = getJSONObject();
-  char *rsp = strdup(json_object_to_json_string(my_object));
+char* TcpPacketStats::serialize() {
+  json_object* my_object = getJSONObject();
+  char* rsp = strdup(json_object_to_json_string(my_object));
 
   /* Free memory */
   json_object_put(my_object);
@@ -42,8 +43,8 @@ char *TcpPacketStats::serialize() {
 
 /* ******************************************* */
 
-json_object *TcpPacketStats::getJSONObject() {
-  json_object *my_object;
+json_object* TcpPacketStats::getJSONObject() {
+  json_object* my_object;
 
   my_object = json_object_new_object();
 
@@ -64,7 +65,7 @@ json_object *TcpPacketStats::getJSONObject() {
 
 /* ******************************************* */
 
-void TcpPacketStats::lua(lua_State *vm, const char *label) {
+void TcpPacketStats::lua(lua_State* vm, const char* label) {
   lua_newtable(vm);
 
   lua_push_uint64_table_entry(vm, "retransmissions", pktRetr);

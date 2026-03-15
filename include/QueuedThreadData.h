@@ -26,22 +26,21 @@
 
 class QueuedThreadData {
  public:
-  ThreadedActivity *j;
-  char *script_path;
-  NetworkInterface *iface;
+  ThreadedActivity* j;
+  char* script_path;
+  NetworkInterface* iface;
   bool adaptive_pool_size;
   time_t deadline;
-  PeriodicActivities *pa;
+  PeriodicActivities* pa;
   bool hourly_daily_activity;
-  
-  QueuedThreadData(ThreadedActivity *_j, char *_path, NetworkInterface *_iface,
-                   time_t _deadline, PeriodicActivities *_pa,
-		   bool _hourly_daily_activity);
+
+  QueuedThreadData(ThreadedActivity* _j, char* _path, NetworkInterface* _iface,
+                   time_t _deadline, PeriodicActivities* _pa,
+                   bool _hourly_daily_activity);
 
   ~QueuedThreadData();
 
   void run();
 };
-
 
 #endif /* _QUEUED_THREAD_DATA_ */

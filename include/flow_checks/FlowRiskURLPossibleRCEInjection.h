@@ -31,11 +31,11 @@ class FlowRiskURLPossibleRCEInjection : public FlowRisk {
   }
 
  public:
-  FlowRiskURLPossibleRCEInjection() : FlowRisk(){};
-  ~FlowRiskURLPossibleRCEInjection(){};
+  FlowRiskURLPossibleRCEInjection() : FlowRisk() {};
+  ~FlowRiskURLPossibleRCEInjection() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    FlowRiskURLPossibleRCEInjectionAlert *alert =
+  FlowAlert* buildAlert(Flow* f) {
+    FlowRiskURLPossibleRCEInjectionAlert* alert =
         new FlowRiskURLPossibleRCEInjectionAlert(this, f);
 
     alert->setCliAttacker(), alert->setSrvVictim();

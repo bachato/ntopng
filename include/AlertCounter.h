@@ -43,7 +43,7 @@ class AlertCounter {
 
  public:
   AlertCounter();
-  void inc(time_t when, AlertableEntity *alertable);
+  void inc(time_t when, AlertableEntity* alertable);
   u_int16_t hits() const;
   void reset_hits();
 };
@@ -51,6 +51,5 @@ class AlertCounter {
 typedef struct {
   AlertCounter *attacker_counter, *victim_counter;
 } AttackVictimCounter;
-
 
 #endif /* _ALERT_COUNTER_H_ */

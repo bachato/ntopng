@@ -31,10 +31,10 @@ class FlowRiskTLSNotCarryingHTTPS : public FlowRiskTLS {
   }
 
  public:
-  FlowRiskTLSNotCarryingHTTPS() : FlowRiskTLS(){};
-  ~FlowRiskTLSNotCarryingHTTPS(){};
+  FlowRiskTLSNotCarryingHTTPS() : FlowRiskTLS() {};
+  ~FlowRiskTLSNotCarryingHTTPS() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskTLSNotCarryingHTTPSAlert(this, f);
   }
 

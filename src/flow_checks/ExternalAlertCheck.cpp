@@ -22,16 +22,18 @@
 #include "ntop_includes.h"
 #include "flow_checks_includes.h"
 
-/* Note: this is overridden by ExternalAlertCheckPro::checkExternalAlert on Pro */
-void ExternalAlertCheck::checkExternalAlert(Flow *f) {
+/* Note: this is overridden by ExternalAlertCheckPro::checkExternalAlert on Pro
+ */
+void ExternalAlertCheck::checkExternalAlert(Flow* f) {
   if (f->hasExternalAlert()) {
     FlowAlertType alert_type = ExternalAlertCheckAlert::getClassType();
     risk_percentage cli_score_pctg = CLIENT_FAIR_RISK_PERCENTAGE;
     u_int8_t c_score, s_score;
 
-    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
+    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg,
+                       &c_score, &s_score);
 
-    FlowAlert *alert = buildAlert(f);
+    FlowAlert* alert = buildAlert(f);
     alert->setCliSrvScores(c_score, s_score);
     f->triggerAlert(alert);
   }
@@ -39,15 +41,15 @@ void ExternalAlertCheck::checkExternalAlert(Flow *f) {
 
 /* ***************************************************** */
 
-void ExternalAlertCheck::protocolDetected(Flow *f) { checkExternalAlert(f); }
+void ExternalAlertCheck::protocolDetected(Flow* f) { checkExternalAlert(f); }
 
 /* ***************************************************** */
 
-void ExternalAlertCheck::flowEnd(Flow *f) { checkExternalAlert(f); }
+void ExternalAlertCheck::flowEnd(Flow* f) { checkExternalAlert(f); }
 
 /* ***************************************************** */
 
-FlowAlert *ExternalAlertCheck::buildAlert(Flow *f) {
+FlowAlert* ExternalAlertCheck::buildAlert(Flow* f) {
   return new ExternalAlertCheckAlert(this, f);
 }
 

@@ -28,33 +28,33 @@ class GenericTrafficElement {
  protected:
   TrafficStats sent, rcvd;
   ThroughputStats bytes_thpt, pkts_thpt;
-  nDPIStats *ndpiStats;
+  nDPIStats* ndpiStats;
 #ifdef NTOPNG_PRO
-  CustomAppStats *custom_app_stats;
+  CustomAppStats* custom_app_stats;
 #endif
-  DSCPStats *dscpStats;
+  DSCPStats* dscpStats;
   u_int32_t total_num_dropped_flows;
   TcpPacketStats tcp_packet_stats_sent, tcp_packet_stats_rcvd;
 
   float bytes_thpt_diff;
 
-  inline void incRetx(TcpPacketStats *const tps, u_int32_t num) {
+  inline void incRetx(TcpPacketStats* const tps, u_int32_t num) {
     tps->incRetr(num);
   };
-  inline void incOOO(TcpPacketStats *const tps, u_int32_t num) {
+  inline void incOOO(TcpPacketStats* const tps, u_int32_t num) {
     tps->incOOO(num);
   };
-  inline void incLost(TcpPacketStats *const tps, u_int32_t num) {
+  inline void incLost(TcpPacketStats* const tps, u_int32_t num) {
     tps->incLost(num);
     ;
   };
-  inline void incKeepAlive(TcpPacketStats *const tps, u_int32_t num) {
+  inline void incKeepAlive(TcpPacketStats* const tps, u_int32_t num) {
     tps->incKeepAlive(num);
   };
 
  public:
   GenericTrafficElement();
-  GenericTrafficElement(const GenericTrafficElement &gte);
+  GenericTrafficElement(const GenericTrafficElement& gte);
 
   virtual ~GenericTrafficElement() {
     if (ndpiStats) delete ndpiStats;
@@ -65,10 +65,10 @@ class GenericTrafficElement {
   };
   inline void incNumDroppedFlows() { total_num_dropped_flows++; };
 
-  inline TcpPacketStats *getTcpPacketSentStats() {
+  inline TcpPacketStats* getTcpPacketSentStats() {
     return (&tcp_packet_stats_sent);
   }
-  inline TcpPacketStats *getTcpPacketRcvdStats() {
+  inline TcpPacketStats* getTcpPacketRcvdStats() {
     return (&tcp_packet_stats_rcvd);
   }
   inline void incSentTcp(u_int32_t ooo_pkts, u_int32_t retr_pkts,
@@ -113,12 +113,12 @@ class GenericTrafficElement {
     incKeepAlive(&tcp_packet_stats_rcvd, num);
   };
 
-  virtual void updateStats(const struct timeval *tv);
-  void lua(lua_State *vm, bool host_details);
-  void getJSONObject(json_object *my_object, NetworkInterface *iface);
+  virtual void updateStats(const struct timeval* tv);
+  void lua(lua_State* vm, bool host_details);
+  void getJSONObject(json_object* my_object, NetworkInterface* iface);
 
-  inline nDPIStats *getnDPIStats() { return (ndpiStats); };
-  inline DSCPStats *getDSCPStats() { return (dscpStats); };
+  inline nDPIStats* getnDPIStats() { return (ndpiStats); };
+  inline DSCPStats* getDSCPStats() { return (dscpStats); };
   inline u_int32_t getNumDroppedFlows() const {
     return total_num_dropped_flows;
   };
@@ -133,7 +133,7 @@ class GenericTrafficElement {
   inline float getBytesThpt() const { return (bytes_thpt.getThpt()); };
   inline float getPacketsThpt() const { return (pkts_thpt.getThpt()); };
   void resetStats();
-  void serialize(ndpi_serializer *s);
+  void serialize(ndpi_serializer* s);
 };
 
 #endif /* _GENRIC_TRAFFIC_ELEMENT_H_ */

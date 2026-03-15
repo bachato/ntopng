@@ -24,8 +24,9 @@
 /* *************************************** */
 
 GenericTrafficElement::GenericTrafficElement() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   /* NOTE NOTE NOTE: keep in sync with copy constructor below */
   ndpiStats = NULL;
 
@@ -54,7 +55,7 @@ void GenericTrafficElement::resetStats() {
 
 /* *************************************** */
 
-GenericTrafficElement::GenericTrafficElement(const GenericTrafficElement &gte) {
+GenericTrafficElement::GenericTrafficElement(const GenericTrafficElement& gte) {
   ndpiStats =
       (gte.ndpiStats) ? new (std::nothrow) nDPIStats(*gte.ndpiStats) : NULL;
 
@@ -82,14 +83,14 @@ GenericTrafficElement::GenericTrafficElement(const GenericTrafficElement &gte) {
 
 /* *************************************** */
 
-void GenericTrafficElement::updateStats(const struct timeval *tv) {
+void GenericTrafficElement::updateStats(const struct timeval* tv) {
   bytes_thpt.updateStats(tv, sent.getNumBytes() + rcvd.getNumBytes());
   pkts_thpt.updateStats(tv, sent.getNumPkts() + rcvd.getNumPkts());
 }
 
 /* *************************************** */
 
-void GenericTrafficElement::lua(lua_State *vm, bool host_details) {
+void GenericTrafficElement::lua(lua_State* vm, bool host_details) {
   lua_push_float_table_entry(vm, "throughput_bps", bytes_thpt.getThpt());
   lua_push_uint64_table_entry(vm, "throughput_trend_bps",
                               bytes_thpt.getTrend());
@@ -115,8 +116,8 @@ void GenericTrafficElement::lua(lua_State *vm, bool host_details) {
 
 /* *************************************** */
 
-void GenericTrafficElement::getJSONObject(json_object *my_object,
-                                          NetworkInterface *iface) {
+void GenericTrafficElement::getJSONObject(json_object* my_object,
+                                          NetworkInterface* iface) {
   if (total_num_dropped_flows)
     json_object_object_add(my_object, "flows.dropped",
                            json_object_new_int(total_num_dropped_flows));
@@ -131,14 +132,14 @@ void GenericTrafficElement::getJSONObject(json_object *my_object,
 
 /* *************************************** */
 
-void GenericTrafficElement::serialize(ndpi_serializer *s) {
+void GenericTrafficElement::serialize(ndpi_serializer* s) {
   if (total_num_dropped_flows)
     ndpi_serialize_string_uint32(s, "flows.dropped", total_num_dropped_flows);
 
   ndpi_serialize_start_of_block(s, "sent");
   sent.serialize(s);
   ndpi_serialize_end_of_block(s);
-    
+
   ndpi_serialize_start_of_block(s, "rcvd");
   rcvd.serialize(s);
   ndpi_serialize_end_of_block(s);

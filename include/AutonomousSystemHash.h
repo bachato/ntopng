@@ -29,10 +29,10 @@ class AutonomousSystemHash : public GenericHash {
   Mutex m;
 
  public:
-  AutonomousSystemHash(NetworkInterface *iface, u_int _num_hashes,
+  AutonomousSystemHash(NetworkInterface* iface, u_int _num_hashes,
                        u_int _max_hash_size);
 
-  AutonomousSystem *get(IpAddress *ipa, bool is_inline_call);
+  AutonomousSystem* get(IpAddress* ipa, bool is_inline_call);
   void updateASNExportersPrefs();
 
 #ifdef AS_DEBUG

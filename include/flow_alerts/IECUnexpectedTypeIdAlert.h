@@ -35,7 +35,8 @@ class IECUnexpectedTypeIdAlert : public FlowAlert {
 
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_iec_unexpected_type_id, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_iec_unexpected_type_id,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_NOTICE; };
 
@@ -54,7 +55,7 @@ class IECUnexpectedTypeIdAlert : public FlowAlert {
     negative = _negative;
     setAlertScore(getDefaultScore());
   };
-  ~IECUnexpectedTypeIdAlert(){};
+  ~IECUnexpectedTypeIdAlert() {};
 
   bool autoAck() const { return false; };
 

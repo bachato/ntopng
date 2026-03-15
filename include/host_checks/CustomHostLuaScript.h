@@ -26,12 +26,12 @@
 
 class CustomHostLuaScript : public HostCheck {
  private:
-  LuaEngine *initVM();
+  LuaEngine* initVM();
   bool disabled;
 
-  HostAlert *allocAlert(HostCheck *c, Host *h, risk_percentage cli_pctg,
+  HostAlert* allocAlert(HostCheck* c, Host* h, risk_percentage cli_pctg,
                         u_int32_t _score, std::string _msg) {
-    CustomHostLuaScriptAlert *alert =
+    CustomHostLuaScriptAlert* alert =
         new CustomHostLuaScriptAlert(c, h, cli_pctg, _score, _msg);
 
     if (cli_pctg != CLIENT_NO_RISK_PERCENTAGE) alert->setAttacker();
@@ -43,8 +43,8 @@ class CustomHostLuaScript : public HostCheck {
   CustomHostLuaScript();
   ~CustomHostLuaScript();
 
-  void periodicUpdate(Host *h, HostAlert *engaged_alert);
-  bool loadConfiguration(json_object *config);
+  void periodicUpdate(Host* h, HostAlert* engaged_alert);
+  bool loadConfiguration(json_object* config);
 
   HostCheckID getID() const { return host_check_custom_lua_script; }
   std::string getName() const {

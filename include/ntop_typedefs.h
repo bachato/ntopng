@@ -42,7 +42,7 @@ enum {
 #endif
 
 typedef struct {
-  const char *string;
+  const char* string;
   int64_t int_num;
   double double_num;
   bool boolean;
@@ -66,20 +66,20 @@ typedef enum {
 class AlertCheckLuaEngine;
 class ThreadedActivityStats;
 typedef struct {
-  lua_State *vm;
-  NetworkInterface *iface;
-  AlertCheckLuaEngine *acle;
-  struct timeval *tv;
+  lua_State* vm;
+  NetworkInterface* iface;
+  AlertCheckLuaEngine* acle;
+  struct timeval* tv;
   time_t deadline;
   bool no_time_left;
   bool skip_checks;
-  ThreadedActivityStats *thstats;
+  ThreadedActivityStats* thstats;
   u_int32_t cur_entries;
   u_int32_t tot_entries;
 } periodic_ht_state_update_user_data_t;
 
 typedef struct {
-  struct timeval *tv;
+  struct timeval* tv;
 } periodic_stats_update_user_data_t;
 
 /* Keep in sync with alert_consts.alerts_granularities and Utils */
@@ -187,7 +187,7 @@ typedef enum {
 
 /* Status are handled in Lua (alert_consts.lua) */
 typedef u_int32_t AlertType;
-#define alert_none ((u_int8_t)-1)
+#define alert_none ((u_int8_t) - 1)
 
 typedef enum {
   alert_level_none = 0,
@@ -239,13 +239,13 @@ typedef enum {
   alert_entity_snmp_device = 3,
   alert_entity_flow = 4,
   alert_entity_mac = 5,
-  //alert_entity_host_pool = 6,
+  // alert_entity_host_pool = 6,
   alert_entity_user = 7,
   alert_entity_am_host = 8,
   alert_entity_system = 9,
   alert_entity_as = 10,
-  //alert_entity_l7 = 12,
-  //alert_entity_mitre_table_info = 13,
+  // alert_entity_l7 = 12,
+  // alert_entity_mitre_table_info = 13,
 
   /* Add new entities above ^ and do not exceed alert_entity_other */
   alert_entity_other = 15,
@@ -282,8 +282,8 @@ struct zmq_msg_hdr_v4 { /* formerly zmq_msg_hdr_v3 (but still version 4) */
 };
 
 typedef struct {
-  char *endpoint;
-  void *socket;
+  char* endpoint;
+  void* socket;
 } zmq_subscriber;
 
 typedef struct {
@@ -332,7 +332,7 @@ typedef enum {
 typedef struct {
   u_int32_t pid, father_pid;
   char *process_name, *father_process_name;
-  char *cmd_line;
+  char* cmd_line;
   char *pkg_name, *father_pkg_name;
   char *uid_name, *father_uid_name;
   u_int32_t uid /* User Id */, gid;               /* Group Id */
@@ -347,12 +347,12 @@ typedef enum {
 } ContainerInfoDataType;
 
 typedef struct {
-  char *id;
-  char *name;
+  char* id;
+  char* name;
   union {
     struct {
-      char *pod;
-      char *ns;
+      char* pod;
+      char* ns;
     } k8s;
     struct {
       /* Reseved for future use */
@@ -392,17 +392,17 @@ typedef struct zmq_template {
 
 typedef struct zmq_field_map {
   u_int32_t pen, field;
-  const char *map;
+  const char* map;
 } ZMQ_FieldMap;
 
 typedef struct zmq_field_value_map {
   u_int32_t pen, field, value;
-  const char *map;
+  const char* map;
 } ZMQ_FieldValueMap;
 
 struct vm_ptree {
-  lua_State *vm;
-  AddressTree *ptree;
+  lua_State* vm;
+  AddressTree* ptree;
 };
 
 struct active_flow_stats {
@@ -415,7 +415,7 @@ struct grev1_header {
 };
 
 struct string_list {
-  char *str;
+  char* str;
   struct string_list *prev, *next;
 };
 
@@ -560,7 +560,7 @@ typedef struct {
 
 typedef struct {
   FlowAlertType alert_type;
-  const char *alert_lua_name;
+  const char* alert_lua_name;
 } FlowAlertTypeExtended;
 
 /*
@@ -595,11 +595,12 @@ typedef enum {
   host_alert_custom_lua_script = 24,
   host_alert_notused_6 = 25,
   host_alert_traffic_volume = 26,
-  host_alert_external_script = 27, /* Triggered from Lua (see rest/v2/trigger/host/alert.lua) */
+  host_alert_external_script =
+      27, /* Triggered from Lua (see rest/v2/trigger/host/alert.lua) */
   host_alert_host_scanner = 28,
   host_alert_server_ports_contacts = 29,
   host_alert_suspicious_domain_scan = 30, /* Triggered from Lua */
-  host_alert_scan = 31, /* Triggered from Lua */
+  host_alert_scan = 31,                   /* Triggered from Lua */
 
   MAX_DEFINED_HOST_ALERT_TYPE, /* Leave it as last member */
   MAX_HOST_ALERT_TYPE = 32     /* Constrained by HostAlertBitmap */
@@ -609,7 +610,7 @@ typedef enum {
 /* keep the below in sync with other_alert_keys.lua */
 #define MAX_OTHER_ALERT_TYPE 127
 #define OTHER_BASE_KEY 4096
-#define MAX_DEFINED_OTHER_ALERT_TYPE (MAX_OTHER_ALERT_TYPE+1)
+#define MAX_DEFINED_OTHER_ALERT_TYPE (MAX_OTHER_ALERT_TYPE + 1)
 
 typedef struct {
   HostAlertTypeEnum id;
@@ -617,7 +618,7 @@ typedef struct {
 } HostAlertType;
 
 class HostAlert;
-typedef std::pair<HostAlert *, bool> HostAlertReleasedPair;
+typedef std::pair<HostAlert*, bool> HostAlertReleasedPair;
 typedef UintBitmap<u_int32_t> HostAlertBitmap;
 
 typedef enum {
@@ -759,7 +760,7 @@ typedef enum {
 typedef struct {
   u_int32_t samplesGenerated; /* The sequence number of this counter sample */
   u_int32_t deviceIP, ifIndex, ifType, ifSpeed;
-  char *ifName;
+  char* ifName;
   bool ifFullDuplex, ifAdminStatus, ifOperStatus, ifPromiscuousMode;
   u_int64_t ifInOctets, ifInPackets, ifInErrors, ifOutOctets, ifOutPackets,
       ifOutErrors;
@@ -768,8 +769,8 @@ typedef struct {
 } sFlowInterfaceStats;
 
 typedef struct {
-  const char *class_name;
-  const luaL_Reg *class_methods;
+  const char* class_name;
+  const luaL_Reg* class_methods;
 } ntop_class_reg;
 
 typedef enum {
@@ -814,8 +815,8 @@ typedef enum {
 } DeviceProtoStatus;
 
 struct keyval {
-  const char *key;
-  char *val;
+  const char* key;
+  char* val;
 };
 
 class StringCache {
@@ -991,9 +992,9 @@ typedef enum {
 
 typedef struct {
   bool admin;
-  char *allowedIfname;
-  char *allowedNets;
-  char *language;
+  char* allowedIfname;
+  char* allowedNets;
+  char* language;
 } HTTPAuthenticator;
 
 /*
@@ -1016,11 +1017,12 @@ typedef enum {
 } UserCapabilities;
 
 typedef struct {
-  double namelookup, connect, appconnect, pretransfer, redirect, start, total, bytes_download, bytes_upload;
+  double namelookup, connect, appconnect, pretransfer, redirect, start, total,
+      bytes_download, bytes_upload;
 } HTTPTranferStats;
 
 typedef struct {
-  lua_State *vm;
+  lua_State* vm;
   time_t last_conn_check;
   struct {
     u_int32_t download, upload;
@@ -1062,7 +1064,7 @@ typedef struct ts_icmp_stats {
 
 class AlertableEntity;
 typedef void(alertable_callback)(AlertEntity alert_entity_type,
-                                 AlertableEntity *alertable, void *user_data);
+                                 AlertableEntity* alertable, void* user_data);
 
 typedef struct bcast_domain_info {
   bool is_interface_network;
@@ -1078,13 +1080,13 @@ typedef enum ts_driver {
 /* Wrapper for pcap_if_t and pfring_if_t */
 typedef struct _ntop_if_t {
   /* pcap fields */
-  char *name;
-  char *description;
+  char* name;
+  char* description;
   /* PF_RING related fields */
-  char *module;
+  char* module;
   int license;
   int ifindex;
-  _ntop_if_t *next;
+  _ntop_if_t* next;
 } ntop_if_t;
 
 typedef enum {
@@ -1123,9 +1125,9 @@ typedef enum { asc = 0, desc } sortingOrder;
 
 typedef struct _MapsFilters {
   bool periodicity_or_service;
-  NetworkInterface *iface;
-  u_int8_t *mac;
-  IpAddress *ip;
+  NetworkInterface* iface;
+  u_int8_t* mac;
+  IpAddress* ip;
   bool unicast;
   u_int16_t vlan_id;
   u_int16_t host_pool_id;
@@ -1145,9 +1147,9 @@ typedef struct _MapsFilters {
 } MapsFilters;
 
 typedef struct _MapsFilteringMenu {
-  std::set<u_int16_t> *proto_map;
-  std::set<u_int16_t> *vlan_map;
-  std::set<u_int16_t> *pool_map;
+  std::set<u_int16_t>* proto_map;
+  std::set<u_int16_t>* vlan_map;
+  std::set<u_int16_t>* pool_map;
 } MapsFilteringMenu;
 
 typedef struct {
@@ -1175,11 +1177,11 @@ typedef struct {
 typedef struct {
   /* All int32 because following the rfc, they use 32 bits */
   /* See: https://datatracker.ietf.org/doc/html/rfc2866 */
-  char *mac;
-  char *last_ip;
-  char *username;
-  char *session_id;
-  char *nas_port_name;
+  char* mac;
+  char* last_ip;
+  char* username;
+  char* session_id;
+  char* nas_port_name;
   u_int32_t nas_port_id;
   u_int32_t bytes_sent;
   u_int32_t bytes_rcvd;
@@ -1206,8 +1208,8 @@ typedef enum {
 
 typedef enum {
   MINOR_NO_STATE = 0, /* Initial Flow State (just for constructor) */
-  S0,           /* Only SYN in src2dst_tcp_flags; no flags in dst2src_tcp_flags */
-  S1,           /* ... */
+  S0, /* Only SYN in src2dst_tcp_flags; no flags in dst2src_tcp_flags */
+  S1, /* ... */
   SF,
   REJ,
   S2,
@@ -1262,7 +1264,6 @@ typedef enum {
   DROP_REASON_FLOW_SIZE_EXCEEDED
 } DropReason;
 
-
 typedef enum {
   qoe_unknown = 0,
   qoe_poor,
@@ -1272,8 +1273,7 @@ typedef enum {
   qoe_excellent
 } QoEType;
 
-typedef enum
-{
+typedef enum {
   scan_alert_scan_detention = 0,
   scan_alert_rx_only,
   scan_alert_syn,
@@ -1306,6 +1306,5 @@ typedef enum {
   role_internet_connectivity,
   role_max_value /* Leave as last member */
 } SNMPInterfaceRole;
-
 
 #endif /* _NTOP_TYPEDEFS_H_ */

@@ -33,10 +33,10 @@ class SQLiteDB : public SQLiteStoreManager {
   int openStore();
 
  public:
-  SQLiteDB(NetworkInterface *iface);
+  SQLiteDB(NetworkInterface* iface);
   ~SQLiteDB();
 
-  const char *getEngineName();
+  const char* getEngineName();
 };
 
 #endif /* _SQLITE_DB_H_ */

@@ -23,7 +23,6 @@
 
 ndpi_serializer* S7CommTooManyErrorsAlert::getAlertJSON(
     ndpi_serializer* serializer) {
-
   if (serializer) {
     ndpi_serialize_string_uint32(serializer, "num_errors", num_errors);
   }

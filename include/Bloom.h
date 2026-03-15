@@ -34,11 +34,11 @@
 
 class Bloom {
  private:
-  Bitmask *bitmask;         /**< The bitmask */
+  Bitmask* bitmask;         /**< The bitmask */
   u_int32_t num_bloom_bits; /**< The bitmask size */
   u_int32_t mask;           /**< The mask to be used for the hash */
 
-  u_int32_t ntophash(char *str);
+  u_int32_t ntophash(char* str);
 
  public:
   Bloom(u_int32_t _num_bloom_bits);
@@ -48,7 +48,7 @@ class Bloom {
    * Adds a new value to the bloom setting the relative bit in the bitmask.
    * @param str The value to set.
    */
-  inline void setBit(char *str) { bitmask->set_bit(ntophash(str)); }
+  inline void setBit(char* str) { bitmask->set_bit(ntophash(str)); }
   inline void setBit(u_int32_t value) { bitmask->set_bit(value & mask); }
 
   /**
@@ -57,7 +57,7 @@ class Bloom {
    * if the user is aware of the limitation it can be used safely
    * @param str The value to set.
    */
-  inline void unsetBit(char *str) { bitmask->clear_bit(ntophash(str)); }
+  inline void unsetBit(char* str) { bitmask->clear_bit(ntophash(str)); }
   inline void unsetBit(u_int32_t value) { bitmask->clear_bit(value & mask); }
 
   /**
@@ -65,7 +65,7 @@ class Bloom {
    * @param str The value to check.
    * @return True is the hash for the provided value is set, false otherwise.
    */
-  inline bool isSetBit(char *str) {
+  inline bool isSetBit(char* str) {
     return (bitmask->is_set_bit(ntophash(str)));
   }
 };

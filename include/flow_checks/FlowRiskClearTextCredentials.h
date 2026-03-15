@@ -31,10 +31,10 @@ class FlowRiskClearTextCredentials : public FlowRisk {
   }
 
  public:
-  FlowRiskClearTextCredentials() : FlowRisk(){};
-  ~FlowRiskClearTextCredentials(){};
+  FlowRiskClearTextCredentials() : FlowRisk() {};
+  ~FlowRiskClearTextCredentials() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskClearTextCredentialsAlert(this, f);
   }
 

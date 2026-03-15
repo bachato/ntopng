@@ -24,14 +24,16 @@
 /* *************************************** */
 
 ICMPinfo::ICMPinfo() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   unreach = NULL;
   reset();
 }
 /* *************************************** */
 
-ICMPinfo::ICMPinfo(const ICMPinfo &_icmp_info) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+ICMPinfo::ICMPinfo(const ICMPinfo& _icmp_info) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   unreach = NULL;
   reset();
 
@@ -39,7 +41,7 @@ ICMPinfo::ICMPinfo(const ICMPinfo &_icmp_info) {
   icmp_identifier = _icmp_info.icmp_identifier;
 
   if (_icmp_info.unreach &&
-      (unreach = (unreachable_t *)calloc(1, sizeof(*unreach)))) {
+      (unreach = (unreachable_t*)calloc(1, sizeof(*unreach)))) {
     unreach->src_ip.set(&_icmp_info.unreach->src_ip),
         unreach->dst_ip.set(&_icmp_info.unreach->dst_ip);
     unreach->src_port = _icmp_info.unreach->src_port,
@@ -59,7 +61,8 @@ void ICMPinfo::reset() {
 /* *************************************** */
 
 ICMPinfo::~ICMPinfo() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
   if (unreach) free(unreach);
 }
 
@@ -96,7 +99,7 @@ u_int32_t ICMPinfo::key() const {
 /* *************************************** */
 
 void ICMPinfo::dissectICMP(u_int16_t const payload_len,
-                           const u_int8_t *const payload_data) {
+                           const u_int8_t* const payload_data) {
   reset();
 
   if (payload_len > 2) {
@@ -104,19 +107,24 @@ void ICMPinfo::dissectICMP(u_int16_t const payload_len,
 
     if (icmp_type == ICMP_DEST_UNREACH && icmp_code == ICMP_PORT_UNREACH &&
         payload_len >= (sizeof(struct ndpi_iphdr) + 8)) {
-      struct ndpi_iphdr *icmp_port_unreach_ip = (struct ndpi_iphdr *)&payload_data[8];
-      u_short icmp_port_unreach_iph_len = (u_short)(icmp_port_unreach_ip->ihl * 4);
+      struct ndpi_iphdr* icmp_port_unreach_ip =
+          (struct ndpi_iphdr*)&payload_data[8];
+      u_short icmp_port_unreach_iph_len =
+          (u_short)(icmp_port_unreach_ip->ihl * 4);
 
-      if ((payload_len >= (8 + icmp_port_unreach_iph_len + sizeof(struct ndpi_udphdr)))
-	  && (icmp_port_unreach_ip->protocol == IPPROTO_UDP)
-	  && (unreach || (unreach = (unreachable_t *)calloc(1, sizeof(*unreach))))) {
-        struct ndpi_udphdr *icmp_port_unreach_udp = (struct ndpi_udphdr *)&payload_data[8 + icmp_port_unreach_iph_len];
-	
+      if ((payload_len >=
+           (8 + icmp_port_unreach_iph_len + sizeof(struct ndpi_udphdr))) &&
+          (icmp_port_unreach_ip->protocol == IPPROTO_UDP) &&
+          (unreach ||
+           (unreach = (unreachable_t*)calloc(1, sizeof(*unreach))))) {
+        struct ndpi_udphdr* icmp_port_unreach_udp =
+            (struct ndpi_udphdr*)&payload_data[8 + icmp_port_unreach_iph_len];
+
         unreach->src_ip.set(icmp_port_unreach_ip->saddr),
-	  unreach->dst_ip.set(icmp_port_unreach_ip->daddr),
-	  unreach->src_port = icmp_port_unreach_udp->source,
-	  unreach->dst_port = icmp_port_unreach_udp->dest,
-	  unreach->protocol = icmp_port_unreach_ip->protocol;
+            unreach->dst_ip.set(icmp_port_unreach_ip->daddr),
+            unreach->src_port = icmp_port_unreach_udp->source,
+            unreach->dst_port = icmp_port_unreach_udp->dest,
+            unreach->protocol = icmp_port_unreach_ip->protocol;
       }
     } else if ((icmp_type == ICMP_ECHO || icmp_type == ICMP_ECHOREPLY ||
                 icmp_type == ICMP_TIMESTAMP ||
@@ -136,7 +144,7 @@ void ICMPinfo::dissectICMP(u_int16_t const payload_len,
          may be zero.
       */
 
-      icmp_identifier = ntohs(*(u_int16_t *)&payload_data[4]);
+      icmp_identifier = ntohs(*(u_int16_t*)&payload_data[4]);
       // ntop->getTrace()->traceEvent(TRACE_NORMAL, "identifier: 0x%X [0x%x%x]",
       // icmp_identifier, payload_data[4], payload_data[5]);
     }
@@ -162,10 +170,10 @@ void ICMPinfo::print() const {
 
 /* *************************************** */
 
-bool ICMPinfo::equal(const ICMPinfo *const _icmp_info) const {
+bool ICMPinfo::equal(const ICMPinfo* const _icmp_info) const {
   if (!_icmp_info) return false;
 
-  unreachable_t *ur = _icmp_info->getUnreach();
+  unreachable_t* ur = _icmp_info->getUnreach();
 
   if (unreach && ur) {
     bool equal = unreach->src_ip.equal(&ur->src_ip) &&
@@ -185,7 +193,7 @@ bool ICMPinfo::equal(const ICMPinfo *const _icmp_info) const {
 
 /* *************************************** */
 
-void ICMPinfo::lua(lua_State *vm, AddressTree *ptree, NetworkInterface *iface,
+void ICMPinfo::lua(lua_State* vm, AddressTree* ptree, NetworkInterface* iface,
                    u_int16_t vlan_id) const {
   char buf[64];
 

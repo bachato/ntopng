@@ -31,7 +31,8 @@ class PartializableFlowTrafficStats {
   u_int64_t cli2srv_bytes, srv2cli_bytes;
   u_int64_t cli2srv_goodput_bytes, srv2cli_goodput_bytes;
   FlowTCPPacketStats cli2srv_tcp_stats, srv2cli_tcp_stats;
-  u_int16_t cli_host_score[MAX_NUM_SCORE_CATEGORIES], srv_host_score[MAX_NUM_SCORE_CATEGORIES];
+  u_int16_t cli_host_score[MAX_NUM_SCORE_CATEGORIES],
+      srv_host_score[MAX_NUM_SCORE_CATEGORIES];
   bool is_flow_alerted; /* NOTE: only used by view interfaces. Potentially
                            removed in the future after views rework */
   union {
@@ -41,12 +42,12 @@ class PartializableFlowTrafficStats {
 
  public:
   PartializableFlowTrafficStats();
-  PartializableFlowTrafficStats(const PartializableFlowTrafficStats &fts);
+  PartializableFlowTrafficStats(const PartializableFlowTrafficStats& fts);
   PartializableFlowTrafficStats operator-(
-      const PartializableFlowTrafficStats &fts);
+      const PartializableFlowTrafficStats& fts);
   virtual ~PartializableFlowTrafficStats();
 
-  void setDetectedProtocol(const ndpi_protocol *ndpi_detected_protocol);
+  void setDetectedProtocol(const ndpi_protocol* ndpi_detected_protocol);
 
   void incTcpStats(bool cli2srv_direction, u_int retr, u_int ooo, u_int lost,
                    u_int keepalive);
@@ -54,31 +55,31 @@ class PartializableFlowTrafficStats {
   void incScore(u_int16_t score, ScoreCategory score_category, bool as_client);
   void setFlowAlerted();
 
-  inline void incHTTPReqPOST()  { protos.http.num_post++;  };
-  inline void incHTTPReqPUT()   { protos.http.num_put++;   };
-  inline void incHTTPReqGET()   { protos.http.num_get++;   };
-  inline void incHTTPReqHEAD()  { protos.http.num_head++;  };
+  inline void incHTTPReqPOST() { protos.http.num_post++; };
+  inline void incHTTPReqPUT() { protos.http.num_put++; };
+  inline void incHTTPReqGET() { protos.http.num_get++; };
+  inline void incHTTPReqHEAD() { protos.http.num_head++; };
   inline void incHTTPReqOhter() { protos.http.num_other++; };
-  inline void incHTTPResp1xx()  { protos.http.num_1xx++;   };
-  inline void incHTTPResp2xx()  { protos.http.num_2xx++;   };
-  inline void incHTTPResp3xx()  { protos.http.num_3xx++;   };
-  inline void incHTTPResp4xx()  { protos.http.num_4xx++;   };
-  inline void incHTTPResp5xx()  { protos.http.num_5xx++;   };
+  inline void incHTTPResp1xx() { protos.http.num_1xx++; };
+  inline void incHTTPResp2xx() { protos.http.num_2xx++; };
+  inline void incHTTPResp3xx() { protos.http.num_3xx++; };
+  inline void incHTTPResp4xx() { protos.http.num_4xx++; };
+  inline void incHTTPResp5xx() { protos.http.num_5xx++; };
 
   void incDNSQuery(u_int16_t query_type);
   void incDNSResp(u_int16_t resp_code);
 
-  virtual void incStats(bool cli2srv_direction, u_int32_t num_pkts, u_int64_t pkts_bytes,
-                        u_int64_t payloads_bytes);
-  virtual void setStats(bool cli2srv_direction, u_int32_t num_pkts, u_int64_t pkts_bytes,
-                        u_int64_t payloads_bytes);
+  virtual void incStats(bool cli2srv_direction, u_int32_t num_pkts,
+                        u_int64_t pkts_bytes, u_int64_t payloads_bytes);
+  virtual void setStats(bool cli2srv_direction, u_int32_t num_pkts,
+                        u_int64_t pkts_bytes, u_int64_t payloads_bytes);
 
-  void get_partial(PartializableFlowTrafficStats *dst,
-                   PartializableFlowTrafficStats *fts) const;
-  inline const FlowHTTPStats *get_flow_http_stats() const {
+  void get_partial(PartializableFlowTrafficStats* dst,
+                   PartializableFlowTrafficStats* fts) const;
+  inline const FlowHTTPStats* get_flow_http_stats() const {
     return &protos.http;
   };
-  inline const FlowDNSStats *get_flow_dns_stats() const { return &protos.dns; };
+  inline const FlowDNSStats* get_flow_dns_stats() const { return &protos.dns; };
 
   inline u_int32_t get_cli2srv_packets() const { return cli2srv_packets; };
   inline u_int32_t get_srv2cli_packets() const { return srv2cli_packets; };

@@ -32,12 +32,12 @@ class BlacklistedFlow : public FlowCheck {
                   false /* Don't exclude for nEdge */,
                   false /* NOT only for nEdge */,
                   true /* has_protocol_detected */,
-                  false /* has_periodic_update */, false /* has_flow_end */){};
-  ~BlacklistedFlow(){};
+                  false /* has_periodic_update */, false /* has_flow_end */) {};
+  ~BlacklistedFlow() {};
 
-  bool loadConfiguration(json_object *config);
-  void protocolDetected(Flow *f);
-  FlowAlert *buildAlert(Flow *f);
+  bool loadConfiguration(json_object* config);
+  void protocolDetected(Flow* f);
+  FlowAlert* buildAlert(Flow* f);
 
   std::string getName() const { return (std::string("blacklisted")); }
 };

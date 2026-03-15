@@ -28,25 +28,27 @@ class Host;
 
 class BroadcastDomains {
  private:
-  NetworkInterface *iface;
-  AddressTree *inline_broadcast_domains; /* Accessed inline */
-  AddressTree *broadcast_domains, *broadcast_domains_shadow; /* Accessed concurrently non-inline */
+  NetworkInterface* iface;
+  AddressTree* inline_broadcast_domains; /* Accessed inline */
+  AddressTree *broadcast_domains,
+      *broadcast_domains_shadow; /* Accessed concurrently non-inline */
   time_t next_update, last_update;
   u_int16_t next_domain_id;
-  std::map<u_int16_t, struct bcast_domain_info> domains_info; /* Insertion: inline, read: non-inline */
+  std::map<u_int16_t, struct bcast_domain_info>
+      domains_info; /* Insertion: inline, read: non-inline */
 
  public:
-  BroadcastDomains(NetworkInterface *_iface);
+  BroadcastDomains(NetworkInterface* _iface);
   ~BroadcastDomains();
 
   inline time_t getLastUpdate() { return last_update; };
-  bool addAddress(IpAddress *ipa, int network_bits);
+  bool addAddress(IpAddress* ipa, int network_bits);
   void reloadBroadcastDomains(bool force_immediate_reload = false);
-  bool isLocalBroadcastDomain(IpAddress *ipa, int network_bits,
+  bool isLocalBroadcastDomain(IpAddress* ipa, int network_bits,
                               bool isInlineCall);
-  bool isLocalBroadcastDomainHost(Host *h, bool isInlineCall);
+  bool isLocalBroadcastDomainHost(Host* h, bool isInlineCall);
   bool isGhostLocalBroadcastDomain(bool is_interface_network);
-  void lua(lua_State *vm);
+  void lua(lua_State* vm);
   void reset();
 };
 

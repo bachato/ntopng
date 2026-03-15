@@ -34,8 +34,10 @@ class FlowRiskRiskyASNAlert : public FlowRiskAlert {
     return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
   }
 
-  FlowRiskRiskyASNAlert(FlowCheck *c, Flow *f) : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
-  ~FlowRiskRiskyASNAlert(){};
+  FlowRiskRiskyASNAlert(FlowCheck* c, Flow* f) : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskRiskyASNAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
   ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }

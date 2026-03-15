@@ -44,11 +44,11 @@ class NetworkStats : public InterfaceMemberAlertableEntity,
 
 #if defined(NTOPNG_PRO)
   QoEStats qoe_stats;
-  InOutTraffic *network_matrix;
+  InOutTraffic* network_matrix;
   time_t nextMinPeriodicUpdate;
 #endif
 
-  static inline void incTcp(TcpPacketStats *tps, u_int32_t ooo_pkts,
+  static inline void incTcp(TcpPacketStats* tps, u_int32_t ooo_pkts,
                             u_int32_t retr_pkts, u_int32_t lost_pkts,
                             u_int32_t keep_alive_pkts) {
     if (ooo_pkts) tps->incOOO(ooo_pkts);
@@ -58,11 +58,11 @@ class NetworkStats : public InterfaceMemberAlertableEntity,
   }
 
 #ifdef NTOPNG_PRO
-  void updateBehaviorStats(const struct timeval *tv);
+  void updateBehaviorStats(const struct timeval* tv);
 #endif
 
  public:
-  NetworkStats(NetworkInterface *iface, u_int32_t _network_id);
+  NetworkStats(NetworkInterface* iface, u_int32_t _network_id);
   virtual ~NetworkStats();
 
   inline bool trafficSeen() {
@@ -131,12 +131,12 @@ class NetworkStats : public InterfaceMemberAlertableEntity,
   };
 
   void setNetworkId(u_int8_t id);
-  bool match(AddressTree *tree);
-  void lua(lua_State *vm, bool diff = false, bool fullStats = true);
-  bool serialize(json_object *my_object);
+  bool match(AddressTree* tree);
+  void lua(lua_State* vm, bool diff = false, bool fullStats = true);
+  bool serialize(json_object* my_object);
   void housekeepAlerts(ScriptPeriodicity p);
 
-  virtual void updateStats(const struct timeval *tv);
+  virtual void updateStats(const struct timeval* tv);
 
   void updateSynAlertsCounter(time_t when, bool syn_sent);
   void updateSynAckAlertsCounter(time_t when, bool synack_sent);

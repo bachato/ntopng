@@ -24,7 +24,7 @@
 
 /* ***************************************************** */
 
-void FlowFlood::periodicUpdate(Host *h, HostAlert *engaged_alert) {
+void FlowFlood::periodicUpdate(Host* h, HostAlert* engaged_alert) {
   u_int16_t flows = 0;
 
   if ((flows = h->flow_flood_attacker_hits()) > threshold)

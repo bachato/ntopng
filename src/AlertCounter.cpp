@@ -26,7 +26,8 @@
 /* *************************************** */
 
 AlertCounter::AlertCounter() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   max_hits_since_reset = 0;
   hits_reset_req = false;
   reset_window();
@@ -41,7 +42,7 @@ void AlertCounter::reset_window(time_t when) {
 
 /* *************************************** */
 
-void AlertCounter::inc(time_t when, AlertableEntity *alertable) {
+void AlertCounter::inc(time_t when, AlertableEntity* alertable) {
   if (hits_reset_req) {
     max_hits_since_reset = 0;
     hits_reset_req = false;
@@ -56,7 +57,7 @@ void AlertCounter::inc(time_t when, AlertableEntity *alertable) {
     current_hits++;
   }
 
-  #if 0
+#if 0
     ntop->getTrace()->traceEvent(TRACE_NORMAL,
           "stats [host: %s][when: %u][time_last_hit: %u][max_hits_since_reset: %u][current_hits: %u]",
           alertable->getEntityValue().c_str(),
@@ -65,7 +66,7 @@ void AlertCounter::inc(time_t when, AlertableEntity *alertable) {
           max_hits_since_reset,
           current_hits
           );
-  #endif
+#endif
 }
 
 /* *************************************** */
@@ -73,10 +74,9 @@ void AlertCounter::inc(time_t when, AlertableEntity *alertable) {
 u_int16_t AlertCounter::hits() const {
   if (hits_reset_req) /* Requested, but not yet reset */
     return 0;
-  
-  return (max_hits_since_reset > current_hits) ? 
-    max_hits_since_reset : 
-    current_hits;
+
+  return (max_hits_since_reset > current_hits) ? max_hits_since_reset
+                                               : current_hits;
 }
 
 /* *************************************** */

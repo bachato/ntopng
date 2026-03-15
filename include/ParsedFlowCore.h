@@ -58,7 +58,7 @@ class ParsedFlowCore {
   } tcp;
 
   ParsedFlowCore();
-  ParsedFlowCore(const ParsedFlowCore &pfc);
+  ParsedFlowCore(const ParsedFlowCore& pfc);
   virtual ~ParsedFlowCore();
   void swap();
 };

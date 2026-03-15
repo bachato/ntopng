@@ -44,7 +44,7 @@ class Bitmask {
  private:
   u_int32_t tot_elems; /**< The bitmask size in bits */
   u_int32_t num_elems; /**< The bitmask size in bytes */
-  u_int32_t *bits;     /**< The bitmask */
+  u_int32_t* bits;     /**< The bitmask */
 
   void bitmask_set(u_int32_t n);
   void bitmask_clr(u_int32_t n);

@@ -26,20 +26,20 @@
 
 class VLANBidirectionalTraffic : public FlowCheck {
  private:
-  Bitmask *vlans;
+  Bitmask* vlans;
 
-  void checkBidirectionalTraffic(Flow *f);
+  void checkBidirectionalTraffic(Flow* f);
   bool checkVLAN(u_int16_t vlan_id);
-  bool isServerNotLocal(Flow *f);
+  bool isServerNotLocal(Flow* f);
 
  public:
   VLANBidirectionalTraffic();
   ~VLANBidirectionalTraffic();
 
-  void protocolDetected(Flow *f);
-  FlowAlert *buildAlert(Flow *f);
+  void protocolDetected(Flow* f);
+  FlowAlert* buildAlert(Flow* f);
 
-  bool loadConfiguration(json_object *config);
+  bool loadConfiguration(json_object* config);
 
   std::string getName() const {
     return (std::string("vlan_bidirectional_traffic"));

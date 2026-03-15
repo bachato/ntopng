@@ -26,16 +26,16 @@
 
 class UnexpectedServer : public FlowCheck {
  private:
-  ndpi_ptree_t *whitelist_ptree;
-  void *whitelist_automa;
+  ndpi_ptree_t* whitelist_ptree;
+  void* whitelist_automa;
 
   virtual FlowAlertType getAlertType() const = 0;
 
  protected:
-  virtual bool isAllowedHost(Flow *f) { return (false); }
+  virtual bool isAllowedHost(Flow* f) { return (false); }
 
-  virtual bool isAllowedProto(Flow *f) { return (false); }
-  virtual const IpAddress *getServerIP(Flow *f) {
+  virtual bool isAllowedProto(Flow* f) { return (false); }
+  virtual const IpAddress* getServerIP(Flow* f) {
     return (f->get_srv_ip_addr());
   }
 
@@ -55,8 +55,8 @@ class UnexpectedServer : public FlowCheck {
     if (whitelist_automa) ndpi_free_automa(whitelist_automa);
   };
 
-  void protocolDetected(Flow *f);
-  bool loadConfiguration(json_object *config) { return (true); }
+  void protocolDetected(Flow* f);
+  bool loadConfiguration(json_object* config) { return (true); }
 };
 
 #endif /* _UNEXPECTED_HOST_H_ */

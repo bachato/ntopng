@@ -30,29 +30,28 @@
 #endif
 
 struct keyval string_to_replace[MAX_NUM_HTTP_REPLACEMENTS] = {
-  { NULL, NULL }
-}; /* TODO remove */
+    {NULL, NULL}}; /* TODO remove */
 
-extern luaL_Reg *ntop_interface_reg;
-extern luaL_Reg *ntop_reg;
-extern luaL_Reg *ntop_network_reg;
-extern luaL_Reg *ntop_flow_reg;
-extern luaL_Reg *ntop_host_reg;
+extern luaL_Reg* ntop_interface_reg;
+extern luaL_Reg* ntop_reg;
+extern luaL_Reg* ntop_network_reg;
+extern luaL_Reg* ntop_flow_reg;
+extern luaL_Reg* ntop_host_reg;
 
 #ifdef HAVE_NTOP_CLOUD
-extern luaL_Reg *ntop_cloud_reg;
+extern luaL_Reg* ntop_cloud_reg;
 #endif
 
 /* #define TRACE_VM_ENGINES */
 
 /* ******************************* */
 
-NtopngLuaContext *getUserdata(struct lua_State *vm) {
+NtopngLuaContext* getUserdata(struct lua_State* vm) {
   if (vm) {
-    NtopngLuaContext *userdata;
+    NtopngLuaContext* userdata;
 
     lua_getglobal(vm, "userdata");
-    userdata = (NtopngLuaContext *)lua_touserdata(vm, lua_gettop(vm));
+    userdata = (NtopngLuaContext*)lua_touserdata(vm, lua_gettop(vm));
     lua_pop(vm, 1);  // undo the push done by lua_getglobal
 
     return (userdata);
@@ -63,7 +62,7 @@ NtopngLuaContext *getUserdata(struct lua_State *vm) {
 /* ******************************* */
 
 #ifdef DUMP_STACK
-static void stackDump(lua_State *L) {
+static void stackDump(lua_State* L) {
   int i;
   int top = lua_gettop(L);
 
@@ -110,12 +109,12 @@ static u_int32_t upper_power_of_two(u_int32_t n) {
 }
 
 /* Custom memory allocator */
-static void *l_alloc(void *ud, void *ptr, size_t old_size, size_t new_size) {
-  LuaEngine *le = (LuaEngine*)ud;
+static void* l_alloc(void* ud, void* ptr, size_t old_size, size_t new_size) {
+  LuaEngine* le = (LuaEngine*)ud;
 
   le->incMemUsed(new_size - old_size);
 
-  if(new_size == 0) {
+  if (new_size == 0) {
 #if 0
     ntop->getTrace()->traceEvent(TRACE_NORMAL,
 				 "[Lua free] old size: %d ptr %p / tot: %d",
@@ -123,9 +122,9 @@ static void *l_alloc(void *ud, void *ptr, size_t old_size, size_t new_size) {
 #endif
 
     free(ptr);
-    return(NULL);
+    return (NULL);
   } else {
-    if(new_size < 32)
+    if (new_size < 32)
       new_size = 32;
     else
       new_size = upper_power_of_two(new_size);
@@ -136,7 +135,7 @@ static void *l_alloc(void *ud, void *ptr, size_t old_size, size_t new_size) {
 				 new_size, ptr, le->getMemUsed());
 #endif
 
-    return(realloc(ptr, new_size));
+    return (realloc(ptr, new_size));
   }
 }
 
@@ -145,10 +144,11 @@ static void *l_alloc(void *ud, void *ptr, size_t old_size, size_t new_size) {
 LuaEngine::LuaEngine() {
   std::bad_alloc bax;
 
-  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s",
+  // __FILE__);
 
   ntop->incNumLuaVMs();
-  start_epoch= (u_int32_t)time(NULL);
+  start_epoch = (u_int32_t)time(NULL);
 
   loaded_script_path = NULL;
   is_system_vm = false;
@@ -157,14 +157,16 @@ LuaEngine::LuaEngine() {
   L = lua_newstate(l_alloc, this);
 
   if (!L) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to create a new Lua state.");
+    ntop->getTrace()->traceEvent(TRACE_ERROR,
+                                 "Unable to create a new Lua state.");
     throw bax;
   }
 
   lua_context = new NtopngLuaContext;
 
   if (!lua_context) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to create a context for the new Lua state.");
+    ntop->getTrace()->traceEvent(
+        TRACE_ERROR, "Unable to create a context for the new Lua state.");
     lua_close(L);
     throw bax;
   }
@@ -176,7 +178,8 @@ LuaEngine::LuaEngine() {
 /* ******************************* */
 
 LuaEngine::~LuaEngine() {
-  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete]
+  // %s", __FILE__);
 
   if (L) {
     lua_settop(L, 0);
@@ -185,17 +188,16 @@ LuaEngine::~LuaEngine() {
     stackDump(L);
 #endif
 
-    if(lua_context)
-      delete lua_context;
+    if (lua_context) delete lua_context;
 
     ntop->decNumLuaVMs();
 
 #ifdef TRACE_VM_ENGINES
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Terminated VM [# LuaVMs: %u][Duration: %u sec][Memory: %u][%s]",
-				 ntop->getNumActiveLuaVMs(),
-				 (u_int32_t)time(NULL)-start_epoch+1,
-				 getMemUsed(),
-				 loaded_script_path ? loaded_script_path : "");
+    ntop->getTrace()->traceEvent(
+        TRACE_NORMAL,
+        "Terminated VM [# LuaVMs: %u][Duration: %u sec][Memory: %u][%s]",
+        ntop->getNumActiveLuaVMs(), (u_int32_t)time(NULL) - start_epoch + 1,
+        getMemUsed(), loaded_script_path ? loaded_script_path : "");
 #endif
 
     lua_close(L); /* Free memory */
@@ -206,8 +208,8 @@ LuaEngine::~LuaEngine() {
 
 /* ****************************************** */
 
-void LuaEngine::luaRegister(lua_State *L, const char *class_name,
-                            luaL_Reg *class_methods) {
+void LuaEngine::luaRegister(lua_State* L, const char* class_name,
+                            luaL_Reg* class_methods) {
   const luaL_Reg _meta[] = {{NULL, NULL}};
   int lib_id, meta_id;
 
@@ -234,7 +236,7 @@ void LuaEngine::luaRegister(lua_State *L, const char *class_name,
 
 /* ******************************* */
 
-int ntop_lua_return_value(lua_State *vm, const char *function_name, int val) {
+int ntop_lua_return_value(lua_State* vm, const char* function_name, int val) {
   bool show_warning;
 
   switch (val) {
@@ -257,7 +259,8 @@ int ntop_lua_return_value(lua_State *vm, const char *function_name, int val) {
                                    "https://github.com/ntop/ntopng/issues");
     }
 
-    lua_pushnil(vm); /* Add dummy push to make sure the stack has a return value */
+    lua_pushnil(
+        vm); /* Add dummy push to make sure the stack has a return value */
   }
 
   return (val);
@@ -265,21 +268,21 @@ int ntop_lua_return_value(lua_State *vm, const char *function_name, int val) {
 
 /* ****************************************** */
 
-static int ntop_lua_http_print(lua_State *vm) {
-  struct mg_connection *conn;
-  char *printtype;
+static int ntop_lua_http_print(lua_State* vm) {
+  struct mg_connection* conn;
+  char* printtype;
   int t;
 
   conn = getLuaVMUserdata(vm, conn);
 
   /* ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__); */
 
-  NtopngLuaContext *ctx = getLuaVMContext(vm);
+  NtopngLuaContext* ctx = getLuaVMContext(vm);
   const bool buffering = ctx && ctx->buffer_http_response;
 
   /* Route output either into the response buffer (REST API gzip path)
    * or directly to the socket (normal path). */
-  auto write_out = [&](const char *data, size_t len) {
+  auto write_out = [&](const char* data, size_t len) {
     if (buffering)
       ctx->http_response_buffer.append(data, len);
     else
@@ -288,13 +291,13 @@ static int ntop_lua_http_print(lua_State *vm) {
 
   /* Handle binary blob */
   if ((lua_type(vm, 2) == LUA_TSTRING) &&
-      (printtype = (char *)lua_tostring(vm, 2)) != NULL)
+      (printtype = (char*)lua_tostring(vm, 2)) != NULL)
     if (!strncmp(printtype, "blob", 4)) {
-      char *str = NULL;
+      char* str = NULL;
 
       if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
         return (CONST_LUA_ERROR);
-      if ((str = (char *)lua_tostring(vm, 1)) != NULL) {
+      if ((str = (char*)lua_tostring(vm, 1)) != NULL) {
         int len = strlen(str);
 
         if (len <= 1)
@@ -314,14 +317,14 @@ static int ntop_lua_http_print(lua_State *vm) {
 
     case LUA_TBOOLEAN: {
       int v = lua_toboolean(vm, 1);
-      const char *bstr = v ? "true" : "false";
+      const char* bstr = v ? "true" : "false";
 
       write_out(bstr, strlen(bstr));
     } break;
 
     case LUA_TSTRING: {
       size_t len;
-      const char *str = lua_tolstring(vm, 1, &len);
+      const char* str = lua_tolstring(vm, 1, &len);
 
       if (str && len > 0) write_out(str, len);
     } break;
@@ -337,15 +340,17 @@ static int ntop_lua_http_print(lua_State *vm) {
       lua_pushnil(vm);
 
       while (lua_next(vm, -2) != 0) {
-        const char *key = lua_tostring(vm, -2);
+        const char* key = lua_tostring(vm, -2);
         char buf[1024];
         int len;
 
         if (lua_isstring(vm, -1)) {
-          len = snprintf(buf, sizeof(buf), "%s = %s", key, lua_tostring(vm, -1));
+          len =
+              snprintf(buf, sizeof(buf), "%s = %s", key, lua_tostring(vm, -1));
           if (len > 0) write_out(buf, (size_t)len);
         } else if (lua_isnumber(vm, -1)) {
-          len = snprintf(buf, sizeof(buf), "%s = %d", key, (int)lua_tonumber(vm, -1));
+          len = snprintf(buf, sizeof(buf), "%s = %d", key,
+                         (int)lua_tonumber(vm, -1));
           if (len > 0) write_out(buf, (size_t)len);
         } else if (lua_istable(vm, -1)) {
           write_out(key, strlen(key));
@@ -368,14 +373,14 @@ static int ntop_lua_http_print(lua_State *vm) {
 
 /* ****************************************** */
 
-int ntop_lua_cli_print(lua_State *vm) {
+int ntop_lua_cli_print(lua_State* vm) {
   int t;
 
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
   switch (t = lua_type(vm, 1)) {
     case LUA_TSTRING: {
-      char *str = (char *)lua_tostring(vm, 1);
+      char* str = (char*)lua_tostring(vm, 1);
 
       if (str && (strlen(str) > 0))
         ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", str);
@@ -387,7 +392,8 @@ int ntop_lua_cli_print(lua_State *vm) {
       break;
 
     default:
-      ntop->getTrace()->traceEvent(TRACE_WARNING, "%s(): Lua type %d is not handled", __FUNCTION__, t);
+      ntop->getTrace()->traceEvent(
+          TRACE_WARNING, "%s(): Lua type %d is not handled", __FUNCTION__, t);
       return (CONST_LUA_ERROR);
   }
 
@@ -397,18 +403,17 @@ int ntop_lua_cli_print(lua_State *vm) {
 
 /* ****************************************** */
 
-int ntop_lua_cloud_print(lua_State *vm) {
+int ntop_lua_cloud_print(lua_State* vm) {
   int t;
-  LuaEngine *engine = getLuaVMUserdata(vm, engine);
+  LuaEngine* engine = getLuaVMUserdata(vm, engine);
 
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
   switch (t = lua_type(vm, 1)) {
     case LUA_TSTRING: {
-      char *str = (char *)lua_tostring(vm, 1);
+      char* str = (char*)lua_tostring(vm, 1);
 
-      if (str && (strlen(str) > 0))
-        engine->pushResultString(str);
+      if (str && (strlen(str) > 0)) engine->pushResultString(str);
     } break;
 
     case LUA_TNUMBER:
@@ -416,7 +421,8 @@ int ntop_lua_cloud_print(lua_State *vm) {
       break;
 
     default:
-      ntop->getTrace()->traceEvent(TRACE_WARNING, "%s(): Lua type %d is not handled", __FUNCTION__, t);
+      ntop->getTrace()->traceEvent(
+          TRACE_WARNING, "%s(): Lua type %d is not handled", __FUNCTION__, t);
       return (CONST_LUA_ERROR);
   }
 
@@ -428,9 +434,9 @@ int ntop_lua_cloud_print(lua_State *vm) {
 
 #if defined(NTOPNG_PRO) || defined(HAVE_NEDGE)
 
-static int __ntop_lua_handlefile(lua_State *L, char *script_path, bool ex) {
+static int __ntop_lua_handlefile(lua_State* L, char* script_path, bool ex) {
   int rc;
-  LuaHandler *lh = new LuaHandler(L, script_path);
+  LuaHandler* lh = new LuaHandler(L, script_path);
 
 #ifdef DEBUG_LUA_LOADING
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Loading %s", script_path);
@@ -444,20 +450,22 @@ static int __ntop_lua_handlefile(lua_State *L, char *script_path, bool ex) {
 /* ****************************************** */
 
 /* This function is called by Lua scripts when the call require(...) */
-static int ntop_lua_require(lua_State *L) {
-  char *script_name;
-  LuaEngine *engine = getUserdata(L)->engine;
+static int ntop_lua_require(lua_State* L) {
+  char* script_name;
+  LuaEngine* engine = getUserdata(L)->engine;
 
-  if (lua_type(L, 1) != LUA_TSTRING
-      || (script_name = (char *)lua_tostring(L, 1)) == NULL)
+  if (lua_type(L, 1) != LUA_TSTRING ||
+      (script_name = (char*)lua_tostring(L, 1)) == NULL)
     return 0;
 
-  if(engine->require(std::string(script_name))) {
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Circular dependency found %s\n", script_name);
+  if (engine->require(std::string(script_name))) {
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Circular dependency found %s\n",
+                                 script_name);
     // return(0); /* Already loaded */
   }
 
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s(%s)", __FUNCTION__, script_name);
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s(%s)", __FUNCTION__,
+                               script_name);
 
   lua_getglobal(L, "package");
   lua_getfield(L, -1, "path");
@@ -498,12 +506,14 @@ static int ntop_lua_require(lua_State *L) {
   }
 
   if (script_path == "" ||
-      __ntop_lua_handlefile(L, (char *)script_path.c_str(), false)) {
+      __ntop_lua_handlefile(L, (char*)script_path.c_str(), false)) {
     if (lua_type(L, -1) == LUA_TSTRING) {
-      const char *err = lua_tostring(L, -1);
-      ntop->getTrace()->traceEvent(TRACE_WARNING, "Script failure "
+      const char* err = lua_tostring(L, -1);
+      ntop->getTrace()->traceEvent(TRACE_WARNING,
+                                   "Script failure "
                                    "[script: %s][path: %s][cur-path: %s]",
-                                   script_name, script_path.c_str(), err ? err : "");
+                                   script_name, script_path.c_str(),
+                                   err ? err : "");
     }
 
     return 0;
@@ -514,20 +524,20 @@ static int ntop_lua_require(lua_State *L) {
 
 /* ****************************************** */
 
-static int ntop_lua_xfile(lua_State *L, bool ex) {
-  char *script_path;
+static int ntop_lua_xfile(lua_State* L, bool ex) {
+  char* script_path;
   int ret;
 
   if (lua_type(L, 1) != LUA_TSTRING ||
-      (script_path = (char *)lua_tostring(L, 1)) == NULL)
+      (script_path = (char*)lua_tostring(L, 1)) == NULL)
     return 0;
 
   ret = __ntop_lua_handlefile(L, script_path, ex);
 
   if (ret && (!lua_isnil(L, -1))) {
-    const char *msg = lua_tostring(L, -1);
+    const char* msg = lua_tostring(L, -1);
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Script failure %s", msg);
-    if(ntop->getRedis()) {
+    if (ntop->getRedis()) {
       /* Push the alert into this queue, used by the alert */
       ntop->getRedis()->lpush(ALERT_TRACE_ERRORS, msg, 50 /* No Trim */);
     }
@@ -538,45 +548,45 @@ static int ntop_lua_xfile(lua_State *L, bool ex) {
 
 /* ****************************************** */
 
-static int ntop_lua_dofile(lua_State *L) { return ntop_lua_xfile(L, true); }
+static int ntop_lua_dofile(lua_State* L) { return ntop_lua_xfile(L, true); }
 
 /* ****************************************** */
 
-static int ntop_lua_loadfile(lua_State *L) { return ntop_lua_xfile(L, false); }
+static int ntop_lua_loadfile(lua_State* L) { return ntop_lua_xfile(L, false); }
 
 #endif
 
 /* ****************************************** */
 
-void LuaEngine::lua_register_classes(lua_State *L, LuaEngineMode mode) {
+void LuaEngine::lua_register_classes(lua_State* L, LuaEngineMode mode) {
   if (!L) return;
 
   getLuaVMContext(L)->engine = this;
 
   /* ntop add-ons */
   luaRegister(L, "interface", ntop_interface_reg);
-  luaRegister(L, "ntop",      ntop_reg);
-  luaRegister(L, "network",   ntop_network_reg);
-  luaRegister(L, "flow",      ntop_flow_reg);
-  luaRegister(L, "host",      ntop_host_reg);
+  luaRegister(L, "ntop", ntop_reg);
+  luaRegister(L, "network", ntop_network_reg);
+  luaRegister(L, "flow", ntop_flow_reg);
+  luaRegister(L, "host", ntop_host_reg);
 #ifdef HAVE_NTOP_CLOUD
-  luaRegister(L, "cloud",     ntop_cloud_reg);
+  luaRegister(L, "cloud", ntop_cloud_reg);
 #endif
 
-  switch(mode) {
-  case lua_engine_mode_http:
-    /* Overload the standard Lua print() with ntop_lua_http_print that dumps
-     * data on HTTP server */
-    lua_register(L, "print", ntop_lua_http_print);
-    break;
+  switch (mode) {
+    case lua_engine_mode_http:
+      /* Overload the standard Lua print() with ntop_lua_http_print that dumps
+       * data on HTTP server */
+      lua_register(L, "print", ntop_lua_http_print);
+      break;
 
-  case lua_engine_mode_callback:
-    lua_register(L, "print", ntop_lua_cli_print);
-    break;
+    case lua_engine_mode_callback:
+      lua_register(L, "print", ntop_lua_cli_print);
+      break;
 
-  case lua_engine_mode_cloud:
-    lua_register(L, "print", ntop_lua_cloud_print);
-    break;
+    case lua_engine_mode_cloud:
+      lua_register(L, "print", ntop_lua_cloud_print);
+      break;
   }
 
 #if defined(NTOPNG_PRO) || defined(HAVE_NEDGE)
@@ -637,9 +647,8 @@ static int post_iterator(void *cls,
 /* ****************************************** */
 
 /* Loads a script into the engine from within ntopng (no HTTP GUI). */
-int LuaEngine::load_script(char *script_path,
-			   LuaEngineMode mode,
-			   NetworkInterface *iface) {
+int LuaEngine::load_script(char* script_path, LuaEngineMode mode,
+                           NetworkInterface* iface) {
   int rc = 0;
   bool initialized;
 
@@ -652,8 +661,8 @@ int LuaEngine::load_script(char *script_path,
 
   try {
     if (!initialized) {
-      luaL_openlibs(L);               /* Load base libraries */
-      lua_register_classes(L, mode);  /* Load custom classes */
+      luaL_openlibs(L);              /* Load base libraries */
+      lua_register_classes(L, mode); /* Load custom classes */
     } else
       lua_settop(L, lua_gettop(L)); /* Reset the stack */
 
@@ -673,7 +682,7 @@ int LuaEngine::load_script(char *script_path,
       rc = luaL_loadfile(L, script_path);
 
     if (rc != 0) {
-      const char *err = lua_tostring(L, -1);
+      const char* err = lua_tostring(L, -1);
 
       ntop->getTrace()->traceEvent(TRACE_WARNING, "Script failure [%s][%s]",
                                    script_path, err ? err : "");
@@ -710,12 +719,17 @@ int LuaEngine::run_loaded_script() {
     getLuaVMUservalue(L, capabilities) = (u_int64_t)-1; /* All set */
 
   /* Perform the actual call */
-  if (lua_pcall(L, 0, LUA_MULTRET /* Allow the script to be called multiple times (used with cusotm host/flow scrips) */, 0) != 0) {
+  if (lua_pcall(L, 0,
+                LUA_MULTRET /* Allow the script to be called multiple times
+                               (used with cusotm host/flow scrips) */
+                ,
+                0) != 0) {
     if (lua_type(L, -1) == LUA_TSTRING) {
-      const char *err = lua_tostring(L, -1);
+      const char* err = lua_tostring(L, -1);
 
-      if(err) {
-        ntop->getTrace()->traceEvent(TRACE_WARNING, "%s [%s]", err, loaded_script_path);
+      if (err) {
+        ntop->getTrace()->traceEvent(TRACE_WARNING, "%s [%s]", err,
+                                     loaded_script_path);
         ntop->getRedis()->lpush(ALERT_TRACE_ERRORS, err, 50 /* No Trim */);
       }
     }
@@ -767,8 +781,8 @@ static char* http_encode(char *str) {
 
 #ifdef NOT_USED
 
-void LuaEngine::purifyHTTPParameter(char *param) {
-  char *ampersand;
+void LuaEngine::purifyHTTPParameter(char* param) {
+  char* ampersand;
   bool utf8_found = false;
 
   if ((ampersand = strchr(param, '%')) != NULL) {
@@ -837,11 +851,11 @@ void LuaEngine::purifyHTTPParameter(char *param) {
 
 /* ****************************************** */
 
-bool LuaEngine::switchInterface(struct lua_State *vm, const char *ifid,
-                                const char *observation_point_id,
-                                const char *user, const char *group,
-                                const char *session) {
-  NetworkInterface *iface = NULL;
+bool LuaEngine::switchInterface(struct lua_State* vm, const char* ifid,
+                                const char* observation_point_id,
+                                const char* user, const char* group,
+                                const char* session) {
+  NetworkInterface* iface = NULL;
   char iface_key[64], ifname_key[64], obs_id_key[64];
   char iface_id[16];
 
@@ -895,10 +909,10 @@ bool LuaEngine::switchInterface(struct lua_State *vm, const char *ifid,
 
 /* ****************************************** */
 
-void LuaEngine::setInterface(const char *user, char *const ifname,
+void LuaEngine::setInterface(const char* user, char* const ifname,
                              u_int16_t ifname_len,
-                             bool *const is_allowed) const {
-  NetworkInterface *iface = NULL;
+                             bool* const is_allowed) const {
+  NetworkInterface* iface = NULL;
   char key[CONST_MAX_LEN_REDIS_KEY];
   u_int16_t observationPointId = 0;
 
@@ -970,13 +984,13 @@ void LuaEngine::setInterface(const char *user, char *const ifname,
 
 /* ****************************************** */
 
-bool LuaEngine::setParamsTable(lua_State *vm,
-                               const struct mg_request_info *request_info,
-                               const char *table_name,
-                               const char *query) const {
-  char *where;
-  char *tok;
-  char *query_string = query ? strdup(query) : NULL;
+bool LuaEngine::setParamsTable(lua_State* vm,
+                               const struct mg_request_info* request_info,
+                               const char* table_name,
+                               const char* query) const {
+  char* where;
+  char* tok;
+  char* query_string = query ? strdup(query) : NULL;
   bool ret = false;
 
   lua_newtable(vm);
@@ -990,14 +1004,14 @@ bool LuaEngine::setParamsTable(lua_State *vm,
     tok = strtok_r(query_string, "&", &where);
 
     while (tok != NULL) {
-      char *_equal;
+      char* _equal;
 
       if (strncmp(tok, "csrf", strlen("csrf")) !=
               0 /* Do not put csrf into the params table */
           &&
           strncmp(tok, "switch_interface", strlen("switch_interface")) != 0 &&
           (_equal = strchr(tok, '='))) {
-        char *decoded_buf;
+        char* decoded_buf;
         int len;
 
         _equal[0] = '\0';
@@ -1006,7 +1020,7 @@ bool LuaEngine::setParamsTable(lua_State *vm,
 
         // ntop->getTrace()->traceEvent(TRACE_WARNING, "%s = %s", tok, _equal);
 
-        if ((decoded_buf = (char *)malloc(len + 1)) != NULL) {
+        if ((decoded_buf = (char*)malloc(len + 1)) != NULL) {
           bool rsp = false;
 
           Utils::urlDecode(_equal, decoded_buf, len + 1);
@@ -1026,9 +1040,10 @@ bool LuaEngine::setParamsTable(lua_State *vm,
               !Utils::dir_exists(decoded_buf) &&
               strcmp(tok, "pid_name") /* This is the only exception */
           )
-            ntop->getTrace()->traceEvent(TRACE_WARNING,
-					 "Discarded '%s'='%s' as argument is a valid file path", tok,
-					 decoded_buf);
+            ntop->getTrace()->traceEvent(
+                TRACE_WARNING,
+                "Discarded '%s'='%s' as argument is a valid file path", tok,
+                decoded_buf);
           else
             lua_push_str_table_entry(vm, tok, decoded_buf);
 
@@ -1046,15 +1061,15 @@ bool LuaEngine::setParamsTable(lua_State *vm,
   if (table_name)
     lua_setglobal(L, table_name);
   else
-    lua_setglobal(L, (char *)"_GET"); /* Default */
+    lua_setglobal(L, (char*)"_GET"); /* Default */
 
   return (ret);
 }
 
 /* ****************************************** */
 
-void build_redirect(const char *url, const char *query_string,
-		    char *buf, size_t bufsize) {
+void build_redirect(const char* url, const char* query_string, char* buf,
+                    size_t bufsize) {
   /*
     Inside ntopng
     - we cannot redirect outside of the application
@@ -1063,9 +1078,9 @@ void build_redirect(const char *url, const char *query_string,
     hence we implement a lighweighted URL checker that
   */
 
-  if((strncmp(url, "http", 4) == 0)
-     || strchr(url, '%')) {
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "Invalid redirect URL: %s", url);
+  if ((strncmp(url, "http", 4) == 0) || strchr(url, '%')) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Invalid redirect URL: %s",
+                                 url);
     url = "/"; /* Let's redirect to the root page */
   }
 
@@ -1093,17 +1108,17 @@ void build_redirect(const char *url, const char *query_string,
  * body when the client advertises Accept-Encoding: gzip, injects the matching
  * Content-Encoding / Vary / Content-Length headers, and writes everything to
  * the socket in one go via mg_write (binary-safe). */
-static void flushBufferedHTTPResponse(struct mg_connection *conn,
-                                      const struct mg_request_info *request_info,
-                                      NtopngLuaContext *ctx) {
-  const std::string &response = ctx->http_response_buffer;
+static void flushBufferedHTTPResponse(
+    struct mg_connection* conn, const struct mg_request_info* request_info,
+    NtopngLuaContext* ctx) {
+  const std::string& response = ctx->http_response_buffer;
 
   if (response.empty()) {
     ctx->buffer_http_response = false;
     return;
   }
 
-  static const char *CRLF2 = "\r\n\r\n";
+  static const char* CRLF2 = "\r\n\r\n";
   size_t boundary = response.find(CRLF2);
 
   if (boundary == std::string::npos) {
@@ -1114,21 +1129,20 @@ static void flushBufferedHTTPResponse(struct mg_connection *conn,
     return;
   }
 
-  const char *accept_enc = mg_get_header(conn, "Accept-Encoding");
+  const char* accept_enc = mg_get_header(conn, "Accept-Encoding");
   bool try_gzip = accept_enc && (strstr(accept_enc, "gzip") != NULL);
 
   /* Isolate the header block (no trailing \r\n\r\n) and the body. */
   std::string headers(response, 0, boundary);
-  const char *body_data = response.data() + boundary + 4;
-  size_t       body_size = response.size() - (boundary + 4);
+  const char* body_data = response.data() + boundary + 4;
+  size_t body_size = response.size() - (boundary + 4);
 
   /* Don't re-compress if the script already set Content-Encoding. */
   if (try_gzip && headers.find("Content-Encoding") != std::string::npos)
     try_gzip = false;
 
   /* Compression only pays off above ~1 KB. */
-  if (try_gzip && body_size < 1024)
-    try_gzip = false;
+  if (try_gzip && body_size < 1024) try_gzip = false;
 
 #ifdef HAVE_ZLIB
   if (try_gzip) {
@@ -1137,24 +1151,23 @@ static void flushBufferedHTTPResponse(struct mg_connection *conn,
     if (deflateInit2(&zs, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15 | 16, 8,
                      Z_DEFAULT_STRATEGY) == Z_OK) {
       uLong max_comp = deflateBound(&zs, (uLong)body_size);
-      char *comp_buf = (char *)malloc(max_comp);
+      char* comp_buf = (char*)malloc(max_comp);
 
       if (comp_buf) {
-        zs.next_in   = (Bytef *)body_data;
-        zs.avail_in  = (uInt)body_size;
-        zs.next_out  = (Bytef *)comp_buf;
+        zs.next_in = (Bytef*)body_data;
+        zs.avail_in = (uInt)body_size;
+        zs.next_out = (Bytef*)comp_buf;
         zs.avail_out = (uInt)max_comp;
 
         if (deflate(&zs, Z_FINISH) == Z_STREAM_END) {
           size_t comp_len = zs.total_out;
           deflateEnd(&zs);
 
-          std::string final_headers =
-              headers +
-              "\r\nContent-Encoding: gzip"
-              "\r\nVary: Accept-Encoding"
-              "\r\nContent-Length: " + std::to_string(comp_len) +
-              "\r\n\r\n";
+          std::string final_headers = headers +
+                                      "\r\nContent-Encoding: gzip"
+                                      "\r\nVary: Accept-Encoding"
+                                      "\r\nContent-Length: " +
+                                      std::to_string(comp_len) + "\r\n\r\n";
 
           mg_write(conn, final_headers.data(), final_headers.size());
           mg_write(conn, comp_buf, comp_len);
@@ -1175,9 +1188,7 @@ static void flushBufferedHTTPResponse(struct mg_connection *conn,
 
   /* Fallback: send uncompressed, but still add Content-Length. */
   std::string final_headers =
-      headers +
-      "\r\nContent-Length: " + std::to_string(body_size) +
-      "\r\n\r\n";
+      headers + "\r\nContent-Length: " + std::to_string(body_size) + "\r\n\r\n";
 
   mg_write(conn, final_headers.data(), final_headers.size());
   if (body_size > 0) mg_write(conn, body_data, body_size);
@@ -1188,26 +1199,26 @@ static void flushBufferedHTTPResponse(struct mg_connection *conn,
 
 /* ****************************************** */
 
-int LuaEngine::handle_script_request(struct mg_connection *conn,
-                                     const struct mg_request_info *request_info,
-                                     char *script_path, bool *attack_attempt,
-                                     const char *user, const char *group,
-                                     const char *session_csrf, bool localuser) {
-  NetworkInterface *iface = NULL;
+int LuaEngine::handle_script_request(struct mg_connection* conn,
+                                     const struct mg_request_info* request_info,
+                                     char* script_path, bool* attack_attempt,
+                                     const char* user, const char* group,
+                                     const char* session_csrf, bool localuser) {
+  NetworkInterface* iface = NULL;
   char key[64], ifname[MAX_INTERFACE_NAME_LEN];
   bool is_interface_allowed;
   AddressTree ptree;
   Bitmap4096 pools_bitmap; /* all bits zero by default */
   int rc, post_data_len = 0;
-  const char *content_type;
+  const char* content_type;
   u_int8_t valid_csrf = 1;
-  char *post_data = NULL;
+  char* post_data = NULL;
   char csrf[64] = {'\0'};
   char switch_interface[2] = {'\0'};
   char addr_buf[64];
   char session_buf[64];
   char ifid_buf[32], obs_id_buf[16], session_key[32];
-  const char *origin_header;
+  const char* origin_header;
   bool send_redirect = false;
   IpAddress client_addr;
   int num_uploaded_files = 0;
@@ -1229,7 +1240,8 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
   if ((strcmp(request_info->request_method, "POST") == 0) &&
       (content_type != NULL)) {
     u_int32_t content_len = mg_get_content_len(conn) + 1;
-    bool is_file_upload = (strncmp(content_type, "multipart/form-data", 19) == 0) ? true : false;
+    bool is_file_upload =
+        (strncmp(content_type, "multipart/form-data", 19) == 0) ? true : false;
 
     if ((!is_file_upload) && (content_len > HTTP_MAX_POST_DATA_LEN)) {
       ntop->getTrace()->traceEvent(TRACE_WARNING,
@@ -1280,18 +1292,18 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
               lua_push_str_table_entry(L, "uploaded_file", uploaded_file);
 
               if (request_info->query_string) {
-                char *d = strdup(request_info->query_string);
+                char* d = strdup(request_info->query_string);
 
                 if (d != NULL) {
-                  char *where;
-                  char *tok = strtok_r(d, "&", &where);
+                  char* where;
+                  char* tok = strtok_r(d, "&", &where);
 
                   while (tok != NULL) {
-                    char *tok_where;
-                    char *k = strtok_r(tok, "=", &tok_where);
+                    char* tok_where;
+                    char* k = strtok_r(tok, "=", &tok_where);
 
                     if (k != NULL) {
-                      char *v = strtok_r(NULL, "=", &tok_where);
+                      char* v = strtok_r(NULL, "=", &tok_where);
 
                       if (v != NULL) lua_push_str_table_entry(L, k, v);
                     }
@@ -1306,7 +1318,8 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
             }
           }
         }
-      } else if ((post_data = (char *)malloc(content_len * sizeof(char))) == NULL ||
+      } else if ((post_data = (char*)malloc(content_len * sizeof(char))) ==
+                     NULL ||
                  (post_data_len = mg_read(conn, post_data, content_len)) == 0) {
         valid_csrf = 0;
       } else {
@@ -1384,7 +1397,7 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
           /* application/json */
           lua_newtable(L);
 
-	  /* This payload is NOT parsed, checked or verified against attacks */
+          /* This payload is NOT parsed, checked or verified against attacks */
           lua_push_str_table_entry(L, "payload", post_data);
           lua_setglobal(L, "_POST");
         }
@@ -1418,7 +1431,8 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
       if (post_data) free(post_data);
     }
   } else
-    *attack_attempt = setParamsTable(L, request_info, "_POST", NULL /* Empty */);
+    *attack_attempt =
+        setParamsTable(L, request_info, "_POST", NULL /* Empty */);
 
   if (send_redirect) {
     char buf[2048], uri[512];
@@ -1442,56 +1456,62 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
   /* _SERVER */
   lua_newtable(L);
   lua_push_str_table_entry(L, "REQUEST_METHOD",
-                           (char *)request_info->request_method);
-  lua_push_str_table_entry(L, "URI",
-			   (char *)request_info->uri ? (char *)request_info->uri : (char *)"");
+                           (char*)request_info->request_method);
+  lua_push_str_table_entry(
+      L, "URI",
+      (char*)request_info->uri ? (char*)request_info->uri : (char*)"");
   lua_push_str_table_entry(L, "REFERER",
-                           (char *)mg_get_header(conn, "Referer")
-			   ? (char *)mg_get_header(conn, "Referer")
-			   : (char *)"");
-  
-  const char *host = mg_get_header(conn, "Host");
+                           (char*)mg_get_header(conn, "Referer")
+                               ? (char*)mg_get_header(conn, "Referer")
+                               : (char*)"");
+
+  const char* host = mg_get_header(conn, "Host");
 
   if (host) {
-    lua_pushfstring(L, "%s://%s", (request_info->is_ssl) ? "https" : "http", host);
+    lua_pushfstring(L, "%s://%s", (request_info->is_ssl) ? "https" : "http",
+                    host);
     lua_pushstring(L, "HTTP_HOST");
     lua_insert(L, -2);
     lua_settable(L, -3);
   }
 
   if (request_info->remote_user)
-    lua_push_str_table_entry(L, "REMOTE_USER", (char *)request_info->remote_user);
+    lua_push_str_table_entry(L, "REMOTE_USER",
+                             (char*)request_info->remote_user);
   if (request_info->query_string)
-    lua_push_str_table_entry(L, "QUERY_STRING", (char *)request_info->query_string);
+    lua_push_str_table_entry(L, "QUERY_STRING",
+                             (char*)request_info->query_string);
 
   /* Additional headers can be added eventually */
   origin_header = mg_get_header(conn, "Origin");
   if (origin_header) lua_push_str_table_entry(L, "Origin", origin_header);
 
   for (int i = 0; ((request_info->http_headers[i].name != NULL) &&
-                   request_info->http_headers[i].name[0] != '\0'); i++)
+                   request_info->http_headers[i].name[0] != '\0');
+       i++)
     lua_push_str_table_entry(L, request_info->http_headers[i].name,
-                             (char *)request_info->http_headers[i].value);
+                             (char*)request_info->http_headers[i].value);
 
   client_addr.set(mg_get_client_address(conn));
-  lua_push_str_table_entry(L, "REMOTE_ADDR", (char *)client_addr.print(addr_buf, sizeof(addr_buf)));
+  lua_push_str_table_entry(
+      L, "REMOTE_ADDR", (char*)client_addr.print(addr_buf, sizeof(addr_buf)));
 
-  lua_setglobal(L, (char *)"_SERVER");
+  lua_setglobal(L, (char*)"_SERVER");
 
   /* NOTE: ntopng cannot rely on user provided cookies for security data (e.g.
    * user or group), use the session data instead! */
-  char *_cookies;
+  char* _cookies;
 
   /* Cookies */
   lua_newtable(L);
-  if ((_cookies = (char *)mg_get_header(conn, "Cookie")) != NULL) {
-    char *cookies = strdup(_cookies);
+  if ((_cookies = (char*)mg_get_header(conn, "Cookie")) != NULL) {
+    char* cookies = strdup(_cookies);
     char *tok, *where;
 
     // ntop->getTrace()->traceEvent(TRACE_WARNING, "=> '%s'", cookies);
     tok = strtok_r(cookies, "=", &where);
     while (tok != NULL) {
-      char *val;
+      char* val;
 
       while (tok[0] == ' ') tok++;
 
@@ -1565,11 +1585,11 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
   lua_newtable(L);
 
   lua_push_str_table_entry(L, "session", session_buf);
-  lua_push_str_table_entry(L, "user", (char *)user);
-  lua_push_str_table_entry(L, "group", (char *)group);
+  lua_push_str_table_entry(L, "user", (char*)user);
+  lua_push_str_table_entry(L, "group", (char*)group);
   lua_push_bool_table_entry(L, "localuser", localuser);
   lua_push_uint64_table_entry(L, "capabilities", capabilities);
-  lua_push_str_table_entry(L, "allowed_nets", (char *)allowed_nets);
+  lua_push_str_table_entry(L, "allowed_nets", (char*)allowed_nets);
 
   // now it's time to set the interface.
   setInterface(user, ifname, sizeof(ifname), &is_interface_allowed);
@@ -1580,7 +1600,7 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
 
   if (user[0] != '\0') {
     char val[16];
-    getLuaVMUservalue(L, user) = (char *)user;
+    getLuaVMUservalue(L, user) = (char*)user;
 
     /* Populate a patricia tree with the user allowed networks */
     ptree.addAddresses(allowed_nets);
@@ -1589,7 +1609,8 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
 
     snprintf(key, sizeof(key), CONST_STR_USER_LANGUAGE, user);
 
-    if ((ntop->getRedis()->get(key, val, sizeof(val)) != -1) && (val[0] != '\0')) {
+    if ((ntop->getRedis()->get(key, val, sizeof(val)) != -1) &&
+        (val[0] != '\0')) {
       lua_pushstring(L, val);
     } else
       lua_pushstring(L, NTOP_DEFAULT_USER_LANG);
@@ -1597,13 +1618,14 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
     lua_setglobal(L, CONST_USER_LANGUAGE);
   }
 
-  getLuaVMUservalue(L, group) = (char *)(group ? (group) : "");
+  getLuaVMUservalue(L, group) = (char*)(group ? (group) : "");
   getLuaVMUservalue(L, localuser) = localuser;
-  getLuaVMUservalue(L, csrf) = (char *)session_csrf;
+  getLuaVMUservalue(L, csrf) = (char*)session_csrf;
   getLuaVMUservalue(L, capabilities) = capabilities;
   /* Store pointer to pools_bitmap only when restrictions are configured
    * NULL means unrestricted (admin users or no allowed pools set) */
-  getLuaVMUservalue(L, allowed_pools) = (pools_bitmap.getNext(0) >= 0) ? &pools_bitmap : (Bitmap4096 *) NULL;
+  getLuaVMUservalue(L, allowed_pools) =
+      (pools_bitmap.getNext(0) >= 0) ? &pools_bitmap : (Bitmap4096*)NULL;
 
   iface = ntop->getNetworkInterface(ifname); /* Can't be null */
   /* 'select' ther interface that has already been set into the _SESSION */
@@ -1614,7 +1636,7 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
 
   /* Enable response buffering for REST API endpoints so that
    * flushBufferedHTTPResponse() can apply gzip compression afterwards. */
-  NtopngLuaContext *ctx = getLuaVMContext(L);
+  NtopngLuaContext* ctx = getLuaVMContext(L);
 
   if (ctx && strncmp(request_info->uri, "/lua/", 5) == 0) {
     ctx->buffer_http_response = true;
@@ -1643,13 +1665,13 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
   }
 
   if (rc != 0) {
-    const char *err = lua_tostring(L, -1);
+    const char* err = lua_tostring(L, -1);
 
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Script failure [%s][%s]",
                                  script_path, err ? err : "Unknown error");
 
     return (redirect_to_error_page(conn, request_info, "internal_error",
-                                   script_path, (char *)err));
+                                   script_path, (char*)err));
   }
 
   return (CONST_LUA_OK);
@@ -1657,8 +1679,8 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
 
 /* ****************************************** */
 
-void LuaEngine::setHost(Host *h) {
-  NtopngLuaContext *c = getLuaVMContext(L);
+void LuaEngine::setHost(Host* h) {
+  NtopngLuaContext* c = getLuaVMContext(L);
 
   if (c) {
     c->host = h;
@@ -1669,8 +1691,8 @@ void LuaEngine::setHost(Host *h) {
 
 /* ****************************************** */
 
-void LuaEngine::setNetwork(NetworkStats *ns) {
-  NtopngLuaContext *c = getLuaVMContext(L);
+void LuaEngine::setNetwork(NetworkStats* ns) {
+  NtopngLuaContext* c = getLuaVMContext(L);
 
   if (c) {
     c->network = ns;
@@ -1679,8 +1701,8 @@ void LuaEngine::setNetwork(NetworkStats *ns) {
 
 /* ****************************************** */
 
-void LuaEngine::setFlow(Flow *f) {
-  NtopngLuaContext *c = getLuaVMContext(L);
+void LuaEngine::setFlow(Flow* f) {
+  NtopngLuaContext* c = getLuaVMContext(L);
 
   if (c) {
     c->flow = f;
@@ -1690,11 +1712,11 @@ void LuaEngine::setFlow(Flow *f) {
 
 /* ****************************************** */
 
-void LuaEngine::setThreadedActivityData(const ThreadedActivity *ta,
-                                        ThreadedActivityStats *tas,
+void LuaEngine::setThreadedActivityData(const ThreadedActivity* ta,
+                                        ThreadedActivityStats* tas,
                                         time_t deadline) {
-  NtopngLuaContext *cur_ctx;
-  lua_State *cur_state = getState();
+  NtopngLuaContext* cur_ctx;
+  lua_State* cur_state = getState();
 
   if ((cur_ctx = getLuaVMContext(cur_state))) {
     cur_ctx->deadline = deadline;
@@ -1705,9 +1727,7 @@ void LuaEngine::setThreadedActivityData(const ThreadedActivity *ta,
 
 /* ****************************************** */
 
-void LuaEngine::pushResultString(char *str) {
-  cloud_string.append(str);
-}
+void LuaEngine::pushResultString(char* str) { cloud_string.append(str); }
 
 /* ****************************************** */
 
@@ -1720,9 +1740,7 @@ void LuaEngine::pushResultNumber(float f) {
 
 /* ****************************************** */
 
-Host* LuaEngine::getHost() {
-  return (getLuaVMContext(L)->host);
-}
+Host* LuaEngine::getHost() { return (getLuaVMContext(L)->host); }
 
 /* ****************************************** */
 
@@ -1735,9 +1753,8 @@ NetworkInterface* LuaEngine::getNetworkInterface() {
 bool LuaEngine::require(std::string name) {
   std::set<std::string>::iterator it = require_list.find(name);
 
-  if(it != require_list.end())
-    return(true);
+  if (it != require_list.end()) return (true);
 
   require_list.insert(name);
-  return(false);
+  return (false);
 }

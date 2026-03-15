@@ -33,8 +33,9 @@
 /* *************************************** */
 
 IEC104Stats::IEC104Stats() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   memset(&pkt_lost, 0, sizeof(pkt_lost));
   last_type_i = 0;
   memset(&last_i_apdu, 0, sizeof(last_i_apdu));
@@ -49,18 +50,19 @@ IEC104Stats::IEC104Stats() {
 /* *************************************** */
 
 IEC104Stats::~IEC104Stats() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   ndpi_free_data_analysis(i_s_apdu, 1);
 }
 
 /* *************************************** */
 
-void IEC104Stats::processPacket(Flow *f, bool tx_direction,
-                                const u_char *payload, u_int16_t payload_len,
-				const struct pcap_pkthdr *h) {
+void IEC104Stats::processPacket(Flow* f, bool tx_direction,
+                                const u_char* payload, u_int16_t payload_len,
+                                const struct pcap_pkthdr* h) {
   if ((payload_len >= 6) && (payload[0] == 0x68 /* IEC magic byte */)) {
     u_int offset = 1 /* Skip magic byte */;
-    u_int64_t *allowedTypeIDs = ntop->getPrefs()->getIEC104AllowedTypeIDs();
+    u_int64_t* allowedTypeIDs = ntop->getPrefs()->getIEC104AllowedTypeIDs();
     std::unordered_map<u_int16_t, u_int32_t>::iterator it;
 
     lock.wrlock(__FILE__, __LINE__);
@@ -70,11 +72,13 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
     else
       stats.reverse_msgs++;
 
-    while ((offset+1) /* Skip START byte */ < payload_len) {
+    while ((offset + 1) /* Skip START byte */ < payload_len) {
       /* https://infosys.beckhoff.com/english.php?content=../content/1033/tcplclibiec870_5_104/html/tcplclibiec870_5_104_objref_overview.htm&id
        */
       u_int8_t len = payload[offset];
-      u_int8_t pdu_type = ((payload[offset + 1] & 0x01) == 0) ? 0 : (payload[offset + 1] & 0x03);
+      u_int8_t pdu_type = ((payload[offset + 1] & 0x01) == 0)
+                              ? 0
+                              : (payload[offset + 1] & 0x03);
 
 #ifdef DEBUG_IEC60870
       ntop->getTrace()->traceEvent(TRACE_WARNING, "[%s] %02X %02X %02X %02X",
@@ -93,9 +97,9 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
 
       switch (pdu_type) {
         case 0x03: /* U */
-	{
+        {
           u_int8_t u_type = (payload[offset + 1] & 0xFC) >> 2;
-          const char *u_type_str;
+          const char* u_type_str;
 
 #ifdef IEC60870_TRACE
           ntop->getTrace()->traceEvent(TRACE_NORMAL, "A-PDU U-%u",
@@ -136,38 +140,39 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
 
           snprintf(infobuf, sizeof(infobuf) - 1, "%s U (%s)",
                    tx_direction ? "->" : "<-", u_type_str);
-        }
-	break;
+        } break;
 
         case 0x01: /* S */
-	  if((offset+4) < payload_len) {
-	    if (len >= 4) {
-	      u_int16_t rx = ((((u_int16_t)payload[offset + 4]) << 8) + payload[offset + 3]) >> 1;
+          if ((offset + 4) < payload_len) {
+            if (len >= 4) {
+              u_int16_t rx = ((((u_int16_t)payload[offset + 4]) << 8) +
+                              payload[offset + 3]) >>
+                             1;
 
-	      if (last_i_apdu.tv_sec != 0) {
-		float ms = Utils::msTimevalDiff(&h->ts, &last_i_apdu);
+              if (last_i_apdu.tv_sec != 0) {
+                float ms = Utils::msTimevalDiff(&h->ts, &last_i_apdu);
 
 #ifdef IEC60870_TRACE
-		ntop->getTrace()->traceEvent(
-                  TRACE_NORMAL,
-                  "A-PDU S [last I-TX: %u][S RX ack: %u][tdiff: %.2f msec]",
-                  tx_seq_num, rx, ms);
+                ntop->getTrace()->traceEvent(
+                    TRACE_NORMAL,
+                    "A-PDU S [last I-TX: %u][S RX ack: %u][tdiff: %.2f msec]",
+                    tx_seq_num, rx, ms);
 #endif
-		/*
-		  In theory if all is in good shape
-		  (rx + 1) == tx_seq_num
-		*/
+                /*
+                  In theory if all is in good shape
+                  (rx + 1) == tx_seq_num
+                */
 
-		ndpi_data_add_value(i_s_apdu, ms);
-	      }
+                ndpi_data_add_value(i_s_apdu, ms);
+              }
 
-	      /* No rx and tx to be updated */
-	      snprintf(infobuf, sizeof(infobuf) - 1, "%s S, RX %u",
-		       tx_direction ? "->" : "<-", rx);
-	    }
+              /* No rx and tx to be updated */
+              snprintf(infobuf, sizeof(infobuf) - 1, "%s S, RX %u",
+                       tx_direction ? "->" : "<-", rx);
+            }
 
-	    stats.type_s++;
-	  }
+            stats.type_s++;
+          }
           break;
       }
 
@@ -181,12 +186,18 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
       memcpy(&last_i_apdu, &h->ts, sizeof(struct timeval));
       stats.type_i++;
 
-      if(((offset + 6) < payload_len) && (len >= 6 /* Ignore 4 bytes APDUs */)) {
+      if (((offset + 6) < payload_len) &&
+          (len >= 6 /* Ignore 4 bytes APDUs */)) {
         u_int16_t rx_value, tx_value;
-        bool initial_run = ((rx_seq_num == 0) && (tx_seq_num == 0)) ? true : false;
+        bool initial_run =
+            ((rx_seq_num == 0) && (tx_seq_num == 0)) ? true : false;
 
-        tx_value = ((((u_int16_t)payload[offset + 2]) << 8) + payload[offset + 1]) >> 1;
-        rx_value = ((((u_int16_t)payload[offset + 4]) << 8) + payload[offset + 3]) >> 1;
+        tx_value =
+            ((((u_int16_t)payload[offset + 2]) << 8) + payload[offset + 1]) >>
+            1;
+        rx_value =
+            ((((u_int16_t)payload[offset + 4]) << 8) + payload[offset + 3]) >>
+            1;
 
         if (!tx_direction) {
           /* Counters are swapped */
@@ -231,7 +242,7 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
 
         /* Skip magic(1), len(1), type/TX(2), RX(2) = 6 */
         len -= 6 /* Skip magic and len */,
-	  offset += 5 /* magic already skept */;
+            offset += 5 /* magic already skept */;
 
         if (payload_len >= (offset + len)) {
           u_int8_t type_id = payload[offset];
@@ -244,8 +255,8 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
 
           offset += len + 2 /* magic and len */;
 
-          if((len >= 6) && ((offset + 6) <= payload_len))
-            asdu = /* ntohs */ (*((u_int16_t *)&payload[4 + offset]));
+          if ((len >= 6) && ((offset + 6) <= payload_len))
+            asdu = /* ntohs */ (*((u_int16_t*)&payload[4 + offset]));
           else
             asdu = 0;
 
@@ -272,8 +283,9 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
             it = type_i_transitions.find(transition);
 
             if (it == type_i_transitions.end()) {
-              if (f->get_duration() > ntop->getPrefs()->getIEC60870LearingPeriod()) {
-                FlowAlert *alert = NULL;
+              if (f->get_duration() >
+                  ntop->getPrefs()->getIEC60870LearingPeriod()) {
+                FlowAlert* alert = NULL;
                 u_int16_t c_score = 50, s_score = 10;
 
 #ifdef IEC60870_TRACE
@@ -286,9 +298,8 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
 
                 if ((!ntop->getRedis()->get(key, rsp, sizeof(rsp))) &&
                     ((rsp[0] != '\0') && (!strcmp(rsp, "1"))))
-                  alert = new IECInvalidTransitionAlert(NULL, f,
-							(struct timeval*)&h->ts,
-                                                        last_type_i, type_id);
+                  alert = new IECInvalidTransitionAlert(
+                      NULL, f, (struct timeval*)&h->ts, last_type_i, type_id);
 
                 if (alert) {
                   alert->setCliSrvScores(c_score, s_score);
@@ -318,7 +329,7 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
                 ((transitions.m_to_c > 20) || (transitions.c_to_m > 20) ||
                  (transitions.c_to_c > 5))) {
               /* https://github.com/ntop/ntopng/issues/6598 */
-              FlowAlert *alert = NULL;
+              FlowAlert* alert = NULL;
               u_int16_t c_score = CLIENT_ALERT_SCORE,
                         s_score = SERVER_ALERT_SCORE;
 
@@ -327,9 +338,9 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
 
               if ((!ntop->getRedis()->get(key, rsp, sizeof(rsp))) &&
                   ((rsp[0] != '\0') && (!strcmp(rsp, "1"))))
-                alert = new IECInvalidCommandTransitionAlert(NULL, f,
-							     (struct timeval*)&h->ts, transitions.m_to_c,
-							     transitions.c_to_m, transitions.c_to_c);
+                alert = new IECInvalidCommandTransitionAlert(
+                    NULL, f, (struct timeval*)&h->ts, transitions.m_to_c,
+                    transitions.c_to_m, transitions.c_to_c);
 
               if (alert) {
                 alert->setCliSrvScores(c_score, s_score);
@@ -364,7 +375,7 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
           }
 
           if (unexpected_typeid_alerted) {
-            FlowAlert *alert = NULL;
+            FlowAlert* alert = NULL;
             u_int16_t c_score = CLIENT_ALERT_SCORE,
                       s_score = SERVER_ALERT_SCORE;
 
@@ -388,8 +399,9 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
         // ntop->getTrace()->traceEvent(TRACE_WARNING, "*** short APDUs");
         break;
       }
-      
-      if((offset < payload_len) && (payload[offset] == 0x68 /* IEC magic byte */))
+
+      if ((offset < payload_len) &&
+          (payload[offset] == 0x68 /* IEC magic byte */))
         offset += 1; /* We skip the initial magic byte */
       else {
 #ifdef DEBUG_IEC60870
@@ -407,7 +419,7 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
 
 /* *************************************** */
 
-void IEC104Stats::lua(lua_State *vm) {
+void IEC104Stats::lua(lua_State* vm) {
   lua_newtable(vm);
 
   lock.rdlock(__FILE__, __LINE__);
@@ -416,7 +428,8 @@ void IEC104Stats::lua(lua_State *vm) {
 
   lua_newtable(vm);
 
-  for (std::unordered_map<u_int16_t, u_int32_t>::iterator it = typeid_uses.begin();
+  for (std::unordered_map<u_int16_t, u_int32_t>::iterator it =
+           typeid_uses.begin();
        it != typeid_uses.end(); ++it) {
     char buf[8];
 

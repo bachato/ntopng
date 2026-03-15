@@ -27,12 +27,15 @@
 class InvalidDNSQueryAlert : public FlowAlert {
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_dns_invalid_query, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_dns_invalid_query,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_NOTICE; };
 
-  InvalidDNSQueryAlert(FlowCheck *c, Flow *f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-  ~InvalidDNSQueryAlert(){};
+  InvalidDNSQueryAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~InvalidDNSQueryAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
 };

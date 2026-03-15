@@ -81,9 +81,9 @@ class Generichash;
  */
 class GenericHashEntry {
  private:
-  GenericHashEntry *hash_next; /**< Pointer of next hash entry.*/
+  GenericHashEntry* hash_next; /**< Pointer of next hash entry.*/
   HashEntryState hash_entry_state;
-  GenericHash *hash_table;
+  GenericHash* hash_table;
 
   /**
    * @brief Set one of the states of the hash entry in its lifecycle.
@@ -96,7 +96,7 @@ class GenericHashEntry {
   std::atomic<int32_t> num_uses;
   time_t first_seen;       /**< Time of first seen. */
   time_t last_seen;        /**< Time of last seen. */
-  NetworkInterface *iface; /**< Pointer of network interface. */
+  NetworkInterface* iface; /**< Pointer of network interface. */
 
  public:
   /**
@@ -106,7 +106,7 @@ class GenericHashEntry {
    * @param _iface Network interface pointer for the new hash.
    * @return A new Instance of GenericHashEntry.
    */
-  GenericHashEntry(NetworkInterface *_iface);
+  GenericHashEntry(NetworkInterface* _iface);
 
   /**
    * @brief A destructor.
@@ -138,22 +138,22 @@ class GenericHashEntry {
    *
    * @return Return the next hash entry.
    */
-  inline GenericHashEntry *next() { return (hash_next); };
+  inline GenericHashEntry* next() { return (hash_next); };
 
   /**
    * @brief Set a pointer to the hash table this entry
    * hash been added to
    */
-  void set_hash_table(GenericHash *gh) { hash_table = gh; };
+  void set_hash_table(GenericHash* gh) { hash_table = gh; };
 
-  inline GenericHash *get_hash_table() { return (hash_table); };
+  inline GenericHash* get_hash_table() { return (hash_table); };
 
   /**
    * @brief Set and id to uniquely identify this
    * hash entry into the hash table (class GenericHash)
    * it belongs to.
    */
-  virtual void set_hash_entry_id(u_int32_t hash_entry_id){};
+  virtual void set_hash_entry_id(u_int32_t hash_entry_id) {};
 
   /**
    * @brief Set the next hash entry.
@@ -161,7 +161,7 @@ class GenericHashEntry {
    *
    * @param n Hash entry to set as next hash entry.
    */
-  inline void set_next(GenericHashEntry *n) { hash_next = n; };
+  inline void set_next(GenericHashEntry* n) { hash_next = n; };
 
   /**
    * @brief Set the hash entry state to idle. Must be called inline
@@ -229,22 +229,28 @@ class GenericHashEntry {
    * @param quick Only perform minimal operations
    *
    */
-  virtual void periodic_stats_update(const struct timeval *tv, bool force_update);
+  virtual void periodic_stats_update(const struct timeval* tv,
+                                     bool force_update);
   inline HashEntryState get_state() const { return (hash_entry_state); }
   void updateSeen();
   void updateSeen(time_t _last_seen);
-  bool equal(GenericHashEntry *b) { return ((this == b) ? true : false); };
-  inline NetworkInterface *getInterface() { return (iface); };
-  inline bool idle() const          { return (get_state() > hash_entry_state_active); }
-  virtual void housekeep(time_t t)  { return; };
-  inline u_int get_duration() const { return ((u_int)((1 + last_seen) - first_seen)); };
-  virtual u_int32_t key()           { return (0); };
-  virtual char *get_string_key(char *buf, u_int buf_len) const { buf[0] = '\0'; return (buf); };
-  void incUses()                    { num_uses++; }
-  void decUses()                    { num_uses--; }
-  int32_t getUses() const           { return (num_uses); }
+  bool equal(GenericHashEntry* b) { return ((this == b) ? true : false); };
+  inline NetworkInterface* getInterface() { return (iface); };
+  inline bool idle() const { return (get_state() > hash_entry_state_active); }
+  virtual void housekeep(time_t t) { return; };
+  inline u_int get_duration() const {
+    return ((u_int)((1 + last_seen) - first_seen));
+  };
+  virtual u_int32_t key() { return (0); };
+  virtual char* get_string_key(char* buf, u_int buf_len) const {
+    buf[0] = '\0';
+    return (buf);
+  };
+  void incUses() { num_uses++; }
+  void decUses() { num_uses--; }
+  int32_t getUses() const { return (num_uses); }
 
-  virtual void getJSONObject(json_object *obj, DetailsLevel details_level);
+  virtual void getJSONObject(json_object* obj, DetailsLevel details_level);
 };
 
 #endif /* _GENERIC_HASH_ENTRY_H_ */

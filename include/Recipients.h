@@ -43,7 +43,7 @@ class Recipients {
    *
    * @return AlertFifoItem on success, NULL on empty queue
    */
-   AlertFifoItem *dequeue(u_int16_t recipient_id);
+  AlertFifoItem* dequeue(u_int16_t recipient_id);
 
   /**
    * @brief Enqueues a notification to a `recipient_id` queue, depending on the
@@ -85,8 +85,7 @@ class Recipients {
                           Bitmap128 enabled_flow_alert_types,
                           Bitmap128 enabled_host_alert_types,
                           Bitmap128 enabled_other_alert_types,
-                          bool match_alert_id,
-                          bool skip_alerts);
+                          bool match_alert_id, bool skip_alerts);
 
   /**
    * @brief Marks a recipient as deleted
@@ -117,7 +116,8 @@ class Recipients {
    * @brief Inc recipient stats (used by Lua recipients)
    * @param recipient_id An integer recipient identifier
    */
-  void incStats(u_int16_t recipient_id, u_int64_t delivered, u_int64_t filtered_out, u_int64_t delivery_failures);
+  void incStats(u_int16_t recipient_id, u_int64_t delivered,
+                u_int64_t filtered_out, u_int64_t delivery_failures);
 
   /**
    * @brief Checks whether there are notifications queued in any of the

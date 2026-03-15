@@ -24,7 +24,7 @@
 
 /* ***************************************************** */
 
-void RareDestination::protocolDetected(Flow *f) {
+void RareDestination::protocolDetected(Flow* f) {
   bool is_rare_destination = false;
 
   /* TODO: check if this is a real rare destination */
@@ -41,9 +41,10 @@ void RareDestination::protocolDetected(Flow *f) {
     u_int8_t c_score, s_score;
     risk_percentage cli_score_pctg = CLIENT_FAIR_RISK_PERCENTAGE;
 
-    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
+    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg,
+                       &c_score, &s_score);
 
-    FlowAlert *alert = buildAlert(f);
+    FlowAlert* alert = buildAlert(f);
     alert->setCliSrvScores(c_score, s_score);
     f->triggerAlert(alert);
   }
@@ -51,7 +52,7 @@ void RareDestination::protocolDetected(Flow *f) {
 
 /* ***************************************************** */
 
-FlowAlert *RareDestination::buildAlert(Flow *f) {
+FlowAlert* RareDestination::buildAlert(Flow* f) {
   return new RareDestinationAlert(this, f);
 }
 

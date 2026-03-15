@@ -25,15 +25,16 @@
 
 /* ************************************************ */
 
-void ListeningPorts::parsePortInfo(json_object *z, std::map<u_int16_t, ListeningPortInfo> *info) {
-  json_object *p;
+void ListeningPorts::parsePortInfo(
+    json_object* z, std::map<u_int16_t, ListeningPortInfo>* info) {
+  json_object* p;
   ListeningPortInfo pinfo;
   u_int16_t port = 0;
   enum json_type o_type = json_object_get_type(z);
 
   if (o_type == json_type_array) {
     for (u_int i = 0; i < (u_int)json_object_array_length(z); i++) {
-      json_object *e = json_object_array_get_idx(z, i);
+      json_object* e = json_object_array_get_idx(z, i);
 
       if (json_object_object_get_ex(e, "port", &p))
         port = (u_int32_t)json_object_get_int(p);
@@ -53,11 +54,11 @@ void ListeningPorts::parsePortInfo(json_object *z, std::map<u_int16_t, Listening
 
 /* ************************************************ */
 
-void ListeningPorts::parsePorts(json_object *z) {
+void ListeningPorts::parsePorts(json_object* z) {
   enum json_type o_type = json_object_get_type(z);
 
   if (o_type == json_type_object) {
-    json_object *p;
+    json_object* p;
 
     if (json_object_object_get_ex(z, "tcp4", &p)) parsePortInfo(p, &tcp4);
 
@@ -72,15 +73,15 @@ void ListeningPorts::parsePorts(json_object *z) {
 /* ************************************************ */
 
 void ListeningPorts::luaProtocolInfo(
-    lua_State *vm, std::map<u_int16_t, ListeningPortInfo> &info,
-    const char *label) {
+    lua_State* vm, std::map<u_int16_t, ListeningPortInfo>& info,
+    const char* label) {
   std::map<u_int16_t, ListeningPortInfo>::const_iterator it;
 
   lua_newtable(vm);
 
   for (it = info.begin(); it != info.end(); it++) {
     u_int16_t port = it->first;
-    const ListeningPortInfo *pinfo = &it->second;
+    const ListeningPortInfo* pinfo = &it->second;
 
     // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Port %u", port);
 
@@ -103,7 +104,7 @@ void ListeningPorts::luaProtocolInfo(
 
 /* ************************************************ */
 
-void ListeningPorts::lua(lua_State *vm) {
+void ListeningPorts::lua(lua_State* vm) {
   luaProtocolInfo(vm, tcp4, "tcp4");
   luaProtocolInfo(vm, tcp6, "tcp6");
   luaProtocolInfo(vm, udp4, "udp4");

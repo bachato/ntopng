@@ -30,10 +30,10 @@ class DomainNamesContacts : public ServerContacts {
   HostAlertType getAlertType() const {
     return DomainNamesContactsAlert::getClassType();
   };
-  u_int32_t getContactedServers(Host *h) const {
+  u_int32_t getContactedServers(Host* h) const {
     return h->getDomainNamesCardinality();
   }
-  DomainNamesContactsAlert *allocAlert(HostCheck *c, Host *h,
+  DomainNamesContactsAlert* allocAlert(HostCheck* c, Host* h,
                                        risk_percentage cli_pctg,
                                        u_int64_t _num_domain_names,
                                        u_int64_t _domain_names_threshold) {
@@ -43,10 +43,10 @@ class DomainNamesContacts : public ServerContacts {
 
  public:
   DomainNamesContacts();
-  ~DomainNamesContacts(){};
+  ~DomainNamesContacts() {};
 
-  void periodicUpdate(Host *h, HostAlert *engaged_alert);
-  bool loadConfiguration(json_object *config);
+  void periodicUpdate(Host* h, HostAlert* engaged_alert);
+  bool loadConfiguration(json_object* config);
 
   HostCheckID getID() const { return host_check_domain_names_contacts; }
   std::string getName() const { return (std::string("domain_names_contacts")); }

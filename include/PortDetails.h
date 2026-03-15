@@ -25,22 +25,23 @@
 #include "ntop_includes.h"
 
 class PortDetails {
-  private: 
-    /* <srv_host_key, vlan_id > -> 1 */
-    std::unordered_map<u_int64_t, u_int8_t> hosts;
-  
-  public:
-    PortDetails(){};
-    ~PortDetails(){};
+ private:
+  /* <srv_host_key, vlan_id > -> 1 */
+  std::unordered_map<u_int64_t, u_int8_t> hosts;
 
-    /* Getters */
-    inline u_int16_t get_size() { return(hosts.size());};
-    
-    /* Setters */
-    /* host_key = <srv_host_key, vlan_id> */
-    void add_host(u_int64_t host_key) { 
-      hosts[host_key] = (hosts.find(host_key) == hosts.end()) ? 1 : hosts[host_key]; 
-    };
+ public:
+  PortDetails() {};
+  ~PortDetails() {};
+
+  /* Getters */
+  inline u_int16_t get_size() { return (hosts.size()); };
+
+  /* Setters */
+  /* host_key = <srv_host_key, vlan_id> */
+  void add_host(u_int64_t host_key) {
+    hosts[host_key] =
+        (hosts.find(host_key) == hosts.end()) ? 1 : hosts[host_key];
+  };
 };
 
 #endif /* _PORT_DETAILS_H_ */

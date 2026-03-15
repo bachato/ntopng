@@ -25,25 +25,27 @@
 #include "ntop_includes.h"
 
 class HostsPorts {
-  private:
-    /* <srv_port, app_proto, master_proto> -> (<srv_host, vlan_id> -> 1)*/
-    std::unordered_map<u_int64_t, PortDetails*> srv_ports;
-    u_int8_t protocol = 0;
-    u_int16_t vlan_id = (u_int16_t)-1;
-  
-  public:
-    HostsPorts(){};
-    ~HostsPorts(){};
+ private:
+  /* <srv_port, app_proto, master_proto> -> (<srv_host, vlan_id> -> 1)*/
+  std::unordered_map<u_int64_t, PortDetails*> srv_ports;
+  u_int8_t protocol = 0;
+  u_int16_t vlan_id = (u_int16_t)-1;
 
-    /* Getters */
-    inline std::unordered_map<u_int64_t, PortDetails*> get_srv_ports() { return(srv_ports); };
-    inline u_int8_t get_protocol() { return(protocol); };
-    inline u_int16_t get_vlan_id() { return(vlan_id); };
-    
-    /* Setters */
-    void set_protocol(u_int8_t _protocol) { protocol = _protocol; };
-    void set_vlan_id(u_int16_t _vlan_id) { vlan_id = _vlan_id; };
-    void add_srv_port(u_int64_t key, u_int64_t host_key); 
+ public:
+  HostsPorts() {};
+  ~HostsPorts() {};
+
+  /* Getters */
+  inline std::unordered_map<u_int64_t, PortDetails*> get_srv_ports() {
+    return (srv_ports);
+  };
+  inline u_int8_t get_protocol() { return (protocol); };
+  inline u_int16_t get_vlan_id() { return (vlan_id); };
+
+  /* Setters */
+  void set_protocol(u_int8_t _protocol) { protocol = _protocol; };
+  void set_vlan_id(u_int16_t _vlan_id) { vlan_id = _vlan_id; };
+  void add_srv_port(u_int64_t key, u_int64_t host_key);
 };
 
 #endif /* _HOSTS_PORTS_H_ */

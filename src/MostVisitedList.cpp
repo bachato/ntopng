@@ -24,7 +24,8 @@
 /* *************************************** */
 
 MostVisitedList::MostVisitedList(u_int32_t _max_num_items) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   top_data = new (std::nothrow) FrequentStringItems(_max_num_items);
   old_data = shadow_old_data = NULL;
   max_num_items = _max_num_items;
@@ -34,7 +35,8 @@ MostVisitedList::MostVisitedList(u_int32_t _max_num_items) {
 /* *************************************** */
 
 MostVisitedList::~MostVisitedList() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
   if (top_data) delete (top_data);
   if (old_data) free(old_data);
   if (shadow_old_data) free(shadow_old_data);
@@ -42,7 +44,7 @@ MostVisitedList::~MostVisitedList() {
 
 /* *************************************** */
 
-void MostVisitedList::getCurrentTime(struct tm *t_now) {
+void MostVisitedList::getCurrentTime(struct tm* t_now) {
   time_t now = time(NULL);
 
   memset(t_now, 0, sizeof(*t_now));
@@ -51,8 +53,8 @@ void MostVisitedList::getCurrentTime(struct tm *t_now) {
 
 /* *************************************** */
 
-void MostVisitedList::saveOldData(u_int32_t iface_id, char *additional_key_info,
-                                  char *hashkey) {
+void MostVisitedList::saveOldData(u_int32_t iface_id, char* additional_key_info,
+                                  char* hashkey) {
   char redis_key[64];
   int minute = 0;
   struct tm t_now;
@@ -76,7 +78,7 @@ void MostVisitedList::saveOldData(u_int32_t iface_id, char *additional_key_info,
   minute = t_now.tm_min - (t_now.tm_min % 5);
 
   snprintf(redis_key, sizeof(redis_key), "%s%s_%d_%d_%d_%d",
-           (char *)NTOPNG_CACHE_PREFIX, additional_key_info, iface_id,
+           (char*)NTOPNG_CACHE_PREFIX, additional_key_info, iface_id,
            t_now.tm_mday, t_now.tm_hour, minute);
 
   /* String like `ntopng.cache.1_17_11_45` */
@@ -110,12 +112,12 @@ void MostVisitedList::saveOldData(u_int32_t iface_id, char *additional_key_info,
 
 /* *************************************** */
 
-void MostVisitedList::lua(lua_State *vm, char *name, char *old_name) {
-  FrequentStringItems *cur_top_data = top_data;
-  char *cur_old_data = old_data;
+void MostVisitedList::lua(lua_State* vm, char* name, char* old_name) {
+  FrequentStringItems* cur_top_data = top_data;
+  char* cur_old_data = old_data;
 
   if (cur_top_data) {
-    char *cur_top_data_json = cur_top_data->json();
+    char* cur_top_data_json = cur_top_data->json();
 
     if (cur_top_data_json) {
       lua_push_str_table_entry(vm, name, cur_top_data_json);
@@ -129,10 +131,10 @@ void MostVisitedList::lua(lua_State *vm, char *name, char *old_name) {
 /* *************************************** */
 
 void MostVisitedList::serializeDeserialize(u_int32_t iface_id,
-                                           bool do_serialize, char *extra_info,
-                                           char *info_subject,
-                                           char *hour_hashkey,
-                                           char *day_hashkey) {
+                                           bool do_serialize, char* extra_info,
+                                           char* info_subject,
+                                           char* hour_hashkey,
+                                           char* day_hashkey) {
   struct tm t_now;
   char redis_hour_key[64], redis_daily_key[64], redis_key_current_data[64];
 
@@ -148,7 +150,7 @@ void MostVisitedList::serializeDeserialize(u_int32_t iface_id,
            iface_id, t_now.tm_mday);
 
   snprintf(redis_key_current_data, sizeof(redis_key_current_data), "%s%s%d_%d",
-           (char *)NTOPNG_CACHE_PREFIX, info_subject, iface_id, t_now.tm_mday);
+           (char*)NTOPNG_CACHE_PREFIX, info_subject, iface_id, t_now.tm_mday);
 
   /* Serialize the data */
   if (do_serialize) {
@@ -156,7 +158,7 @@ void MostVisitedList::serializeDeserialize(u_int32_t iface_id,
     ntop->getRedis()->lpush(day_hashkey, redis_daily_key, 0);
     if (top_data->getSize()) {
       /* Serialize the double of the max value */
-      char *top_data_json = top_data->json(2 * max_num_items);
+      char* top_data_json = top_data->json(2 * max_num_items);
 
       if (top_data_json) {
         ntop->getRedis()->set(redis_key_current_data, top_data_json, 3600);
@@ -175,10 +177,10 @@ void MostVisitedList::serializeDeserialize(u_int32_t iface_id,
 
 /* *************************************** */
 
-void MostVisitedList::deserializeTopData(char *redis_key_current) {
-  char *json;
+void MostVisitedList::deserializeTopData(char* redis_key_current) {
+  char* json;
   u_int json_len;
-  json_object *j;
+  json_object* j;
   enum json_tokener_error jerr;
 
   json_len = ntop->getRedis()->len(redis_key_current);
@@ -187,7 +189,7 @@ void MostVisitedList::deserializeTopData(char *redis_key_current) {
   else
     json_len += 8; /* Little overhead */
 
-  if ((json = (char *)malloc(json_len)) == NULL) {
+  if ((json = (char*)malloc(json_len)) == NULL) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
     return;
   }
@@ -206,11 +208,11 @@ void MostVisitedList::deserializeTopData(char *redis_key_current) {
 #endif
 
     if (json_object_get_type(j) == json_type_object) {
-      struct lh_entry *entry = json_object_get_object(j)->head;
+      struct lh_entry* entry = json_object_get_object(j)->head;
 
       for (; entry != NULL; entry = entry->next) {
-        char *key = (char *)entry->k;
-        struct json_object *val = (struct json_object *)entry->v;
+        char* key = (char*)entry->k;
+        struct json_object* val = (struct json_object*)entry->v;
         enum json_type type = json_object_get_type(val);
 
         if (type == json_type_int) {
@@ -237,8 +239,8 @@ void MostVisitedList::deserializeTopData(char *redis_key_current) {
 
 /* *************************************** */
 
-void MostVisitedList::resetTopSitesData(u_int32_t iface_id, char *extra_info,
-                                        char *hashkey) {
+void MostVisitedList::resetTopSitesData(u_int32_t iface_id, char* extra_info,
+                                        char* hashkey) {
   char redis_reset_key[256];
 
   int minute = 0;

@@ -34,9 +34,11 @@ class FlowRiskTLSCertificateMismatchAlert : public FlowRiskAlert {
     return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
   }
 
-  FlowRiskTLSCertificateMismatchAlert(FlowCheck *c, Flow *f)
-    : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
-  ~FlowRiskTLSCertificateMismatchAlert(){};
+  FlowRiskTLSCertificateMismatchAlert(FlowCheck* c, Flow* f)
+      : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskTLSCertificateMismatchAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
   ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }

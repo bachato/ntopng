@@ -26,19 +26,21 @@
 HostCheck::HostCheck(NtopngEdition _edition, bool _packet_interface_only,
                      bool _nedge_exclude, bool _nedge_only)
     : Check(_edition, _packet_interface_only, _nedge_exclude, _nedge_only) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   periodicity_secs = 0;
 };
 
 /* **************************************************** */
 
 HostCheck::~HostCheck() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
 };
 
 /* **************************************************** */
 
-bool HostCheck::loadConfiguration(json_object *config) {
+bool HostCheck::loadConfiguration(json_object* config) {
   bool rc = true;
 
   // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s() %s", __FUNCTION__,

@@ -28,7 +28,7 @@ class LongLivedFlowAlert : public FlowAlert {
  private:
   u_int64_t longlived_th;
 
-  ndpi_serializer *getAlertJSON(ndpi_serializer *serializer);
+  ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
 
  public:
   static FlowAlertType getClassType() {
@@ -38,12 +38,12 @@ class LongLivedFlowAlert : public FlowAlert {
 
   inline u_int64_t get_longlived_th() { return longlived_th; };
 
-  LongLivedFlowAlert(FlowCheck *c, Flow *f, u_int64_t _longlived_th)
+  LongLivedFlowAlert(FlowCheck* c, Flow* f, u_int64_t _longlived_th)
       : FlowAlert(c, f) {
     longlived_th = _longlived_th;
     setAlertScore(getDefaultScore());
   };
-  ~LongLivedFlowAlert(){};
+  ~LongLivedFlowAlert() {};
 
   bool autoAck() const { return false; };
 

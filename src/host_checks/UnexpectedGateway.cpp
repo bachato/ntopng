@@ -21,33 +21,33 @@
 
 #include "ntop_includes.h"
 #include "host_checks_includes.h"
-//#define DEBUG_GATEWAY 1
+// #define DEBUG_GATEWAY 1
 
 /* ***************************************************** */
 
 UnexpectedGateway::UnexpectedGateway()
-  : HostCheck(ntopng_edition_community, false /* All interfaces */,
-	      false /* Don't exclude for nEdge */,
-	      false /* NOT only for nEdge */) {};
+    : HostCheck(ntopng_edition_community, false /* All interfaces */,
+                false /* Don't exclude for nEdge */,
+                false /* NOT only for nEdge */) {};
 
 /* ***************************************************** */
 
-void UnexpectedGateway::periodicUpdate(Host *h, HostAlert *engaged_alert) {
-  HostAlert *alert = engaged_alert;
-  IpAddress *p = h->get_ip();
+void UnexpectedGateway::periodicUpdate(Host* h, HostAlert* engaged_alert) {
+  HostAlert* alert = engaged_alert;
+  IpAddress* p = h->get_ip();
 
   if (h->isLocalHost() && p && !p->isBroadcastAddress()) {
 #ifdef DEBUG_GATEWAY
     char buf[64];
-    ntop->getTrace()->traceEvent(TRACE_NORMAL,
-				 "Checking Unexpected Gateway [IP %s] [Is Gateway: %s] [Is Configured "
-				 "Gateway: %s]",
-				 p->print(buf, sizeof(buf)), p->isGateway() ? "Yes" : "No",
-				 ntop->getPrefs()->isGateway(p, h->get_vlan_id()) ? "Yes" : "No");
+    ntop->getTrace()->traceEvent(
+        TRACE_NORMAL,
+        "Checking Unexpected Gateway [IP %s] [Is Gateway: %s] [Is Configured "
+        "Gateway: %s]",
+        p->print(buf, sizeof(buf)), p->isGateway() ? "Yes" : "No",
+        ntop->getPrefs()->isGateway(p, h->get_vlan_id()) ? "Yes" : "No");
 #endif
     if (p->isGateway() && !ntop->getPrefs()->isGateway(p, h->get_vlan_id())) {
-      if (!alert)
-        alert = allocAlert(this, h, CLIENT_FULL_RISK_PERCENTAGE);
+      if (!alert) alert = allocAlert(this, h, CLIENT_FULL_RISK_PERCENTAGE);
       if (alert) h->triggerAlert(alert);
     }
   }
@@ -55,7 +55,7 @@ void UnexpectedGateway::periodicUpdate(Host *h, HostAlert *engaged_alert) {
 
 /* ***************************************************** */
 
-bool UnexpectedGateway::loadConfiguration(json_object *config) {
+bool UnexpectedGateway::loadConfiguration(json_object* config) {
   HostCheck::loadConfiguration(config); /* Parse parameters in common */
   return (true);
 }

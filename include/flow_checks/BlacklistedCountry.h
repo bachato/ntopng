@@ -28,7 +28,7 @@ class BlacklistedCountry : public FlowCheck {
  private:
   std::set<std::string> blacklisted_countries;
 
-  bool hasBlacklistedCountry(Host *h) const;
+  bool hasBlacklistedCountry(Host* h) const;
 
  public:
   BlacklistedCountry()
@@ -36,13 +36,13 @@ class BlacklistedCountry : public FlowCheck {
                   false /* Don't exclude for nEdge */,
                   false /* NOT only for nEdge */,
                   true /* has_protocol_detected */,
-                  false /* has_periodic_update */, false /* has_flow_end */){};
-  ~BlacklistedCountry(){};
+                  false /* has_periodic_update */, false /* has_flow_end */) {};
+  ~BlacklistedCountry() {};
 
-  bool loadConfiguration(json_object *config);
+  bool loadConfiguration(json_object* config);
 
-  void protocolDetected(Flow *f);
-  FlowAlert *buildAlert(Flow *f);
+  void protocolDetected(Flow* f);
+  FlowAlert* buildAlert(Flow* f);
 
   std::string getName() const { return (std::string("country_check")); }
 };

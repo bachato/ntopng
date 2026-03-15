@@ -31,15 +31,15 @@ class UnexpectedSMTPServer : public UnexpectedServer {
   }
 
  protected:
-  bool isAllowedHost(Flow *f);
-  bool isAllowedProto(Flow *f) { return (f->isSMTPorSMTPS()); }
+  bool isAllowedHost(Flow* f);
+  bool isAllowedProto(Flow* f) { return (f->isSMTPorSMTPS()); }
 
  public:
-  UnexpectedSMTPServer() : UnexpectedServer(){};
-  ~UnexpectedSMTPServer(){};
+  UnexpectedSMTPServer() : UnexpectedServer() {};
+  ~UnexpectedSMTPServer() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    UnexpectedSMTPServerAlert *alert = new UnexpectedSMTPServerAlert(this, f);
+  FlowAlert* buildAlert(Flow* f) {
+    UnexpectedSMTPServerAlert* alert = new UnexpectedSMTPServerAlert(this, f);
     alert->setCliAttacker();
     return alert;
   }

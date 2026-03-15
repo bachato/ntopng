@@ -31,10 +31,10 @@ class FlowRiskMaliciousSHA1Certificate : public FlowRisk {
   }
 
  public:
-  FlowRiskMaliciousSHA1Certificate(){};
-  ~FlowRiskMaliciousSHA1Certificate(){};
+  FlowRiskMaliciousSHA1Certificate() {};
+  ~FlowRiskMaliciousSHA1Certificate() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskMaliciousSHA1CertificateAlert(this, f);
   }
 

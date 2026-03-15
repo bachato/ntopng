@@ -26,7 +26,7 @@
 
 class FlowRiskBinaryApplicationTransferAlert : public FlowRiskAlert {
  private:
-  ndpi_serializer *getAlertJSON(ndpi_serializer *serializer);
+  ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
 
  public:
   static ndpi_risk_enum getClassRisk() {
@@ -39,9 +39,11 @@ class FlowRiskBinaryApplicationTransferAlert : public FlowRiskAlert {
     return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
   }
 
-  FlowRiskBinaryApplicationTransferAlert(FlowCheck *c, Flow *f)
-    : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore()); };
-  ~FlowRiskBinaryApplicationTransferAlert(){};
+  FlowRiskBinaryApplicationTransferAlert(FlowCheck* c, Flow* f)
+      : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskBinaryApplicationTransferAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
   ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }

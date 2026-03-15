@@ -36,221 +36,219 @@ typedef unsigned long long ticks;
 
 class Utils {
  private:
-  static bool validInterfaceName(const char *name);
-  static bool validInterfaceDescription(const char *description);
-  static bool validInterface(const pcap_if_t *pcap_if);
+  static bool validInterfaceName(const char* name);
+  static bool validInterfaceDescription(const char* description);
+  static bool validInterface(const pcap_if_t* pcap_if);
 
  public:
-  static inline bool isEmptyString(const char *s) { return (!s || !s[0]); }
-  static char *toLowerResolvedNames(const char *const name);
-  static char *jsonLabel(int label, const char *label_str, char *buf,
+  static inline bool isEmptyString(const char* s) { return (!s || !s[0]); }
+  static char* toLowerResolvedNames(const char* const name);
+  static char* jsonLabel(int label, const char* label_str, char* buf,
                          u_int buf_len);
-  static char *formatTraffic(float numBits, bool bits, char *buf,
+  static char* formatTraffic(float numBits, bool bits, char* buf,
                              u_int buf_len);
-  static char *formatPackets(float numPkts, char *buf, u_int buf_len);
-  static const char *edition2name(NtopngEdition ntopng_edition);
-  static char *l4proto2name(u_int8_t proto);
-  static u_int8_t l4name2proto(const char *name);
-  static u_int8_t queryname2type(const char *name);
-  static bool isIPAddress(const char *ip);
-  static void splitAddressAndVlan(char *addr, u_int16_t *vlan_id);
+  static char* formatPackets(float numPkts, char* buf, u_int buf_len);
+  static const char* edition2name(NtopngEdition ntopng_edition);
+  static char* l4proto2name(u_int8_t proto);
+  static u_int8_t l4name2proto(const char* name);
+  static u_int8_t queryname2type(const char* name);
+  static bool isIPAddress(const char* ip);
+  static void splitAddressAndVlan(char* addr, u_int16_t* vlan_id);
   static const bool isIpEmpty(ipAddress addr);
 #ifdef __linux__
-  static int setAffinityMask(char *cores_list, cpu_set_t *mask);
-  static int setThreadAffinityWithMask(pthread_t thread, cpu_set_t *mask);
+  static int setAffinityMask(char* cores_list, cpu_set_t* mask);
+  static int setThreadAffinityWithMask(pthread_t thread, cpu_set_t* mask);
 #endif
   static int setThreadAffinity(pthread_t thread, int core_id);
-  static void setThreadName(const char *name);
-  static char *trim(char *s);
-  static u_int32_t hashString(const char *s,
+  static void setThreadName(const char* name);
+  static char* trim(char* s);
+  static u_int32_t hashString(const char* s,
                               u_int32_t len = 0 /* automatically computed */);
-  static float timeval2ms(const struct timeval *tv);
+  static float timeval2ms(const struct timeval* tv);
 #ifdef PROFILING
   static u_int64_t getTimeNsec();
 #endif
-  static float msTimevalDiff(const struct timeval *end,
-                             const struct timeval *begin);
-  static u_int32_t usecTimevalDiff(const struct timeval *end,
-                                   const struct timeval *begin);
+  static float msTimevalDiff(const struct timeval* end,
+                             const struct timeval* begin);
+  static u_int32_t usecTimevalDiff(const struct timeval* end,
+                                   const struct timeval* begin);
   /* Returns the difference new_value - cur_value and then stores new_value in
    * *cur_value */
   template <typename T>
-  static inline T uintDiff(T *cur_value, T new_value) {
+  static inline T uintDiff(T* cur_value, T new_value) {
     T res = new_value > *cur_value ? new_value - *cur_value : 0;
     *cur_value = new_value;
     return res;
   };
-  static size_t file_write(const char *path, const char *content,
+  static size_t file_write(const char* path, const char* content,
                            size_t content_len);
-  static size_t file_read(const char *path, char **content);
-  static bool file_exists(const char *path);
-  static bool dir_exists(const char *path);
-  static int8_t num_files_in_dir(const char *dir);
-  static bool mkdir_tree(char *const path);
-  static int mkdir(const char *pathname, mode_t mode);
-  static void lua_getpaths_recursively(lua_State *vm, const char *path, const char *filename);
-  static int remove_recursively(const char *path);
-  static const char *trend2str(ValueTrend t);
+  static size_t file_read(const char* path, char** content);
+  static bool file_exists(const char* path);
+  static bool dir_exists(const char* path);
+  static int8_t num_files_in_dir(const char* dir);
+  static bool mkdir_tree(char* const path);
+  static int mkdir(const char* pathname, mode_t mode);
+  static void lua_getpaths_recursively(lua_State* vm, const char* path,
+                                       const char* filename);
+  static int remove_recursively(const char* path);
+  static const char* trend2str(ValueTrend t);
   static int dropPrivileges();
-  static char *base64_encode(unsigned char const *bytes_to_encode,
+  static char* base64_encode(unsigned char const* bytes_to_encode,
                              ssize_t in_len);
-  static std::string base64_decode(std::string const &encoded_string);
-  static double pearsonValueCorrelation(activity_bitmap *x, activity_bitmap *y);
-  static double JaccardSimilarity(activity_bitmap *x, activity_bitmap *y);
-  static int ifname2id(const char *name);
-  static char *stringtolower(char *str);
-  static std::string list2JsonArray(const char *s);
-  static char *sanitizeHostName(char *str);
-  static char *urlDecode(const char *src, char *dst, u_int dst_len);
-  static bool isValidUTF8(const u_char *param, size_t length);
-  static bool purifyHTTPparam(char *const param, bool strict, bool allowURL,
+  static std::string base64_decode(std::string const& encoded_string);
+  static double pearsonValueCorrelation(activity_bitmap* x, activity_bitmap* y);
+  static double JaccardSimilarity(activity_bitmap* x, activity_bitmap* y);
+  static int ifname2id(const char* name);
+  static char* stringtolower(char* str);
+  static std::string list2JsonArray(const char* s);
+  static char* sanitizeHostName(char* str);
+  static char* urlDecode(const char* src, char* dst, u_int dst_len);
+  static bool isValidUTF8(const u_char* param, size_t length);
+  static bool purifyHTTPparam(char* const param, bool strict, bool allowURL,
                               bool allowDots);
-  static char *stripHTML(const char *str);
-  static bool sendTCPData(char *host, int port, char *data, int timeout);
-  static bool sendUDPData(char *host, int port, char *data);
-  static bool postHTTPJsonData(char *bearer_token, char *username,
-                               char *password, char *url, char *json,
-			       int connect_timeout,
-			       int max_duration_timeout,
-			       HTTPTranferStats *stats);
-  static bool postHTTPJsonData(char *bearer_token, char *username,
-                               char *password, char *url, char *json,
-			       int connect_timeout,
-			       int max_duration_timeout,
-			       HTTPTranferStats *stats,
-                               char *return_data, int return_data_size,
-                               int *response_code);
-  static bool sendMail(lua_State *vm, char *from, char *to, char *cc,
-                       char *message, char *smtp_server, char *username,
-                       char *password, bool use_proxy, bool verbose);
-  static bool postHTTPTextFile(lua_State *vm, char *username, char *password,
-                               char *url, char *path,
-			       int connect_timeout,
-			       int max_duration_timeout,
-                               HTTPTranferStats *stats);
-  static bool httpGetPostPutPatch(lua_State *vm, char *url, char *username,
-				  char *password, char *user_header_token,
-				  int connect_timeout, int max_duration_timeout,			  
-				  bool return_content, bool use_cookie_authentication,
-				  HTTPTranferStats *stats, const char *form_data,
-				  char *write_fname, bool follow_redirects,
-				  int ip_version, HttpMethod method);
-  static long httpGet(const char *url, const char *username,
-                      const char *password, const char *user_header_token,
+  static char* stripHTML(const char* str);
+  static bool sendTCPData(char* host, int port, char* data, int timeout);
+  static bool sendUDPData(char* host, int port, char* data);
+  static bool postHTTPJsonData(char* bearer_token, char* username,
+                               char* password, char* url, char* json,
+                               int connect_timeout, int max_duration_timeout,
+                               HTTPTranferStats* stats);
+  static bool postHTTPJsonData(char* bearer_token, char* username,
+                               char* password, char* url, char* json,
+                               int connect_timeout, int max_duration_timeout,
+                               HTTPTranferStats* stats, char* return_data,
+                               int return_data_size, int* response_code);
+  static bool sendMail(lua_State* vm, char* from, char* to, char* cc,
+                       char* message, char* smtp_server, char* username,
+                       char* password, bool use_proxy, bool verbose);
+  static bool postHTTPTextFile(lua_State* vm, char* username, char* password,
+                               char* url, char* path, int connect_timeout,
+                               int max_duration_timeout,
+                               HTTPTranferStats* stats);
+  static bool httpGetPostPutPatch(
+      lua_State* vm, char* url, char* username, char* password,
+      char* user_header_token, int connect_timeout, int max_duration_timeout,
+      bool return_content, bool use_cookie_authentication,
+      HTTPTranferStats* stats, const char* form_data, char* write_fname,
+      bool follow_redirects, int ip_version, HttpMethod method);
+  static long httpGet(const char* url, const char* username,
+                      const char* password, const char* user_header_token,
                       int connect_timeout, int max_duration_timeout,
-		      char *const resp, const u_int resp_len);
-  static bool progressCanContinue(ProgressState *progressState);
-  static char *urlEncode(const char *url);
+                      char* const resp, const u_int resp_len);
+  static bool progressCanContinue(ProgressState* progressState);
+  static char* urlEncode(const char* url);
   static ticks getticks();
   static ticks gettickspersec();
-  static char *getURL(char *url, char *buf, u_int buf_len);
-  static bool discardOldFilesExceeding(const char *path,
+  static char* getURL(char* url, char* buf, u_int buf_len);
+  static bool discardOldFilesExceeding(const char* path,
                                        const unsigned long max_size);
-  static u_int64_t macaddr_int(const u_int8_t *mac);
-  static char *ifname2devname(const char *ifname, char *devname,
+  static u_int64_t macaddr_int(const u_int8_t* mac);
+  static char* ifname2devname(const char* ifname, char* devname,
                               int devname_size);
-  static void readMac(const char *ifname, dump_mac_t mac_addr);
-  static u_int32_t readIPv4(char *ifname);
-  static bool readIPv6(char *ifname, struct in6_addr *sin);
-  static u_int32_t getMaxIfSpeed(const char *ifname);
-  static u_int16_t getIfMTU(const char *ifname);
-  static int ethtoolGet(const char *ifname, int cmd, uint32_t *v);
-  static int ethtoolSet(const char *ifname, int cmd, uint32_t v);
-  static int disableOffloads(const char *ifname);
-  static bool isGoodNameToCategorize(char *name);
-  static char *get2ndLevelDomain(char *_domainname);
-  static char *tokenizer(char *arg, int c, char **data);
-  static in_addr_t inet_addr(const char *cp);
-  static char *intoaV4(unsigned int addr, char *buf, u_short bufLen);
-  static char *intoaV6(struct ndpi_in6_addr ipv6, u_int8_t bitmask, char *buf,
+  static void readMac(const char* ifname, dump_mac_t mac_addr);
+  static u_int32_t readIPv4(char* ifname);
+  static bool readIPv6(char* ifname, struct in6_addr* sin);
+  static u_int32_t getMaxIfSpeed(const char* ifname);
+  static u_int16_t getIfMTU(const char* ifname);
+  static int ethtoolGet(const char* ifname, int cmd, uint32_t* v);
+  static int ethtoolSet(const char* ifname, int cmd, uint32_t v);
+  static int disableOffloads(const char* ifname);
+  static bool isGoodNameToCategorize(char* name);
+  static char* get2ndLevelDomain(char* _domainname);
+  static char* tokenizer(char* arg, int c, char** data);
+  static in_addr_t inet_addr(const char* cp);
+  static char* intoaV4(unsigned int addr, char* buf, u_short bufLen);
+  static char* intoaV6(struct ndpi_in6_addr ipv6, u_int8_t bitmask, char* buf,
                        u_short bufLen);
-  static u_int64_t timeval2usec(const struct timeval *tv);
-  static void xor_encdec(u_char *data, int data_len, u_char *key);
+  static u_int64_t timeval2usec(const struct timeval* tv);
+  static void xor_encdec(u_char* data, int data_len, u_char* key);
   static bool isPrintableChar(u_char c);
-  static char *formatMacAddress(const u_int8_t *const mac, char *buf, u_int buf_len);
-  static char *formatMac(const u_int8_t *const mac, char *buf, u_int buf_len);
+  static char* formatMacAddress(const u_int8_t* const mac, char* buf,
+                                u_int buf_len);
+  static char* formatMac(const u_int8_t* const mac, char* buf, u_int buf_len);
   static u_int64_t encodeMacTo64(u_int8_t mac[6]);
   static void decode64ToMac(u_int64_t mac64, u_int8_t mac[6] /* out */);
-  static void parseMac(u_int8_t *mac, const char *symMac);
-  static u_int32_t macHash(const u_int8_t *const mac);
-  static bool isEmptyMac(const u_int8_t *const mac);
-  static bool isSpecialMac(u_int8_t *mac);
-  inline static bool isBroadMulticastMac(const u_int8_t *mac) {
+  static void parseMac(u_int8_t* mac, const char* symMac);
+  static u_int32_t macHash(const u_int8_t* const mac);
+  static bool isEmptyMac(const u_int8_t* const mac);
+  static bool isSpecialMac(u_int8_t* mac);
+  inline static bool isBroadMulticastMac(const u_int8_t* mac) {
     return (isBroadcastMac(mac) || isMulticastMac(mac));
   }
-  static bool isBroadcastMac(const u_int8_t *mac);
-  static bool isMulticastMac(const u_int8_t *mac);
+  static bool isBroadcastMac(const u_int8_t* mac);
+  static bool isMulticastMac(const u_int8_t* mac);
   static int numberOfSetBits(u_int32_t i);
-  static void initRedis(Redis **r, const char *redis_host,
-                        const char *redis_password, u_int16_t redis_port,
+  static void initRedis(Redis** r, const char* redis_host,
+                        const char* redis_password, u_int16_t redis_port,
                         u_int8_t _redis_db_id, bool giveup_on_failure);
-  static json_object *cloneJSONSimple(json_object *src);
+  static json_object* cloneJSONSimple(json_object* src);
 
   /* ScriptPeriodicity */
-  static const char *periodicityToScriptName(ScriptPeriodicity p);
+  static const char* periodicityToScriptName(ScriptPeriodicity p);
   static int periodicityToSeconds(ScriptPeriodicity p);
 
   /* eBPF-related */
-  static int tcpStateStr2State(const char *state_str);
-  static const char *tcpState2StateStr(int state);
-  static eBPFEventType eBPFEventStr2Event(const char *event_str);
-  static const char *eBPFEvent2EventStr(eBPFEventType event);
+  static int tcpStateStr2State(const char* state_str);
+  static const char* tcpState2StateStr(int state);
+  static eBPFEventType eBPFEventStr2Event(const char* event_str);
+  static const char* eBPFEvent2EventStr(eBPFEventType event);
 
-  static bool str2DetailsLevel(const char *details, DetailsLevel *out);
+  static bool str2DetailsLevel(const char* details, DetailsLevel* out);
   static u_int32_t roundTime(u_int32_t now, u_int32_t rounder,
                              int32_t offset_from_utc);
   static bool isCriticalNetworkProtocol(u_int16_t protocol_id);
-  static u_int32_t stringHash(const char *s);
-  static const char *policySource2Str(L7PolicySource_t policy_source);
-  static const char *captureDirection2Str(pcap_direction_t dir);
-  static bool readInterfaceStats(const char *ifname, ProtoStats *in_stats,
-                                 ProtoStats *out_stats);
-  static bool shouldResolveHost(const char *host_ip);
-  static bool mg_write_retry(struct mg_connection *conn, u_char *b, int len);
-  static bool parseAuthenticatorJson(HTTPAuthenticator *auth, char *content);
-  static void freeAuthenticator(HTTPAuthenticator *auth);
+  static u_int32_t stringHash(const char* s);
+  static const char* policySource2Str(L7PolicySource_t policy_source);
+  static const char* captureDirection2Str(pcap_direction_t dir);
+  static bool readInterfaceStats(const char* ifname, ProtoStats* in_stats,
+                                 ProtoStats* out_stats);
+  static bool shouldResolveHost(const char* host_ip);
+  static bool mg_write_retry(struct mg_connection* conn, u_char* b, int len);
+  static bool parseAuthenticatorJson(HTTPAuthenticator* auth, char* content);
+  static void freeAuthenticator(HTTPAuthenticator* auth);
   static DetailsLevel bool2DetailsLevel(bool max, bool higher,
                                         bool normal = false);
 
   /* Patricia Tree */
-  static ndpi_patricia_node_t *add_to_ptree(ndpi_patricia_tree_t *tree,
-                                            int family, void *addr, int bits);
-  static ndpi_patricia_node_t *ptree_match(ndpi_patricia_tree_t *tree,
-                                           int family, const void *const addr,
+  static ndpi_patricia_node_t* add_to_ptree(ndpi_patricia_tree_t* tree,
+                                            int family, void* addr, int bits);
+  static ndpi_patricia_node_t* ptree_match(ndpi_patricia_tree_t* tree,
+                                           int family, const void* const addr,
                                            int bits);
-  static ndpi_patricia_node_t *ptree_add_rule(ndpi_patricia_tree_t *ptree,
-                                              const char *line);
-  static bool ptree_prefix_print(ndpi_prefix_t *prefix, char *buffer,
+  static ndpi_patricia_node_t* ptree_add_rule(ndpi_patricia_tree_t* ptree,
+                                              const char* line);
+  static bool ptree_prefix_print(ndpi_prefix_t* prefix, char* buffer,
                                  size_t bufsize);
 
-  static inline void update_ewma(u_int32_t sample, u_int32_t *ewma,
+  static inline void update_ewma(u_int32_t sample, u_int32_t* ewma,
                                  u_int8_t alpha_percent) {
     if (alpha_percent > 100) alpha_percent = 100;
     if (!ewma) return;
     (*ewma) = (alpha_percent * sample + (100 - alpha_percent) * (*ewma)) / 100;
   }
-  static inline u_int64_t toUs(const struct timeval *t) {
+  static inline u_int64_t toUs(const struct timeval* t) {
     return (((u_int64_t)t->tv_sec) * 1000000 + ((u_int64_t)t->tv_usec));
   };
-  static void replacestr(char *line, const char *search, const char *replace);
+  static void replacestr(char* line, const char* search, const char* replace);
   static u_int32_t getHostManagementIPv4Address();
-  static bool isInterfaceUp(char *ifname);
+  static bool isInterfaceUp(char* ifname);
   static bool maskHost(bool isLocalIP);
-  static char *getInterfaceDescription(char *ifname, char *buf, int buf_len);
-  static int bindSockToDevice(int sock, int family, const char *devicename);
-  static bool execCmd(char *cmd, std::string *out);
-  static void maximizeSocketBuffer(int sock_fd, bool rx_buffer, u_int max_buf_mb);
-  static u_int32_t parsetime(char *str);
-  static time_t str2epoch(const char *str);
-  static u_int64_t mac2int(const u_int8_t *mac);
-  static u_int8_t *int2mac(u_int64_t mac, u_int8_t *buf);
-  static void listInterfaces(lua_State *vm);
-  static bool validInterface(const ntop_if_t *ntop_if);
-  static void containerInfoLua(lua_State *vm, const ContainerInfo *const cont);
-  static char *ntop_lookupdev(char *ifname_out, int ifname_size);
-  static int get_ifindex(const char *ifname);
-  static char *get_real_name(const char *ifname_alias, ntop_if_t *devlist);
-  static char *get_real_name(const char *ifname_alias);
+  static char* getInterfaceDescription(char* ifname, char* buf, int buf_len);
+  static int bindSockToDevice(int sock, int family, const char* devicename);
+  static bool execCmd(char* cmd, std::string* out);
+  static void maximizeSocketBuffer(int sock_fd, bool rx_buffer,
+                                   u_int max_buf_mb);
+  static u_int32_t parsetime(char* str);
+  static time_t str2epoch(const char* str);
+  static u_int64_t mac2int(const u_int8_t* mac);
+  static u_int8_t* int2mac(u_int64_t mac, u_int8_t* buf);
+  static void listInterfaces(lua_State* vm);
+  static bool validInterface(const ntop_if_t* ntop_if);
+  static void containerInfoLua(lua_State* vm, const ContainerInfo* const cont);
+  static char* ntop_lookupdev(char* ifname_out, int ifname_size);
+  static int get_ifindex(const char* ifname);
+  static char* get_real_name(const char* ifname_alias, ntop_if_t* devlist);
+  static char* get_real_name(const char* ifname_alias);
   /**
    * @brief Return all the available interfaces
    * @details Return all the available interfaces, unifying data from PF_RING
@@ -259,29 +257,29 @@ class Utils {
    *
    * @return returns 0 on success and -1 on failure
    */
-  static int ntop_findalldevs(ntop_if_t **alldevsp);
+  static int ntop_findalldevs(ntop_if_t** alldevsp);
   /**
    * @brief Free data returned with `Utils::ntop_findalldevs`
    * @details Frees data allocated during the call to `Utils::ntop_findalldevs`
    *
    * @return void
    */
-  static void ntop_freealldevs(ntop_if_t *alldevs);
+  static void ntop_freealldevs(ntop_if_t* alldevs);
 
   /* System Host Montoring and Diagnose Functions */
-  static bool getCPULoad(cpu_load_stats *out);
-  static void luaMeminfo(lua_State *vm);
+  static bool getCPULoad(cpu_load_stats* out);
+  static void luaMeminfo(lua_State* vm);
   static int retainWriteCapabilities();
   static int gainWriteCapabilities();
   static int dropWriteCapabilities();
-  static u_int32_t findInterfaceGatewayIPv4(const char *ifname);
+  static u_int32_t findInterfaceGatewayIPv4(const char* ifname);
 
   /* Data Format */
-  static char *formatTraffic(float numBits, bool bits, char *buf);
-  static char *formatPackets(float numPkts, char *buf);
+  static char* formatTraffic(float numBits, bool bits, char* buf);
+  static char* formatPackets(float numPkts, char* buf);
 
   /* Pcap files utiles */
-  static void init_pcap_header(struct pcap_file_header *const h, int linktype,
+  static void init_pcap_header(struct pcap_file_header* const h, int linktype,
                                int snaplen, bool nsec = false);
 
   /* Bitmap functions */
@@ -294,22 +292,23 @@ class Utils {
     return (bitmap1 | bitmap2);
   }
 
-  static ndpi_os getOSFromFingerprint(const char *fingerprint, const char *manuf,
-                                     DeviceType devtype);
-  static DeviceType getDeviceTypeFromOsDetail(const char *os_detail,
-					      ndpi_os *hint);
+  static ndpi_os getOSFromFingerprint(const char* fingerprint,
+                                      const char* manuf, DeviceType devtype);
+  static DeviceType getDeviceTypeFromOsDetail(const char* os_detail,
+                                              ndpi_os* hint);
   static ndpi_os OShint2ndpi_os(ndpi_os os);
   static u_int32_t pow2(u_int32_t v);
-  static int exec(const char *command);
+  static int exec(const char* command);
 #ifdef __linux__
-  static void deferredExec(const char *command);
+  static void deferredExec(const char* command);
 #endif
-  static void tlv2lua(lua_State *vm, ndpi_serializer *serializer);
-  static void tlv2serializer(ndpi_serializer *tvl_serializer, ndpi_serializer *serializer);
-  static u_int16_t countryCode2U16(const char *country_code);
-  static char *countryU162Code(u_int16_t country_u16, char *country_code,
+  static void tlv2lua(lua_State* vm, ndpi_serializer* serializer);
+  static void tlv2serializer(ndpi_serializer* tvl_serializer,
+                             ndpi_serializer* serializer);
+  static u_int16_t countryCode2U16(const char* country_code);
+  static char* countryU162Code(u_int16_t country_u16, char* country_code,
                                size_t country_code_size);
-  static bool isNumber(const char *s, unsigned int s_len, bool *is_float);
+  static bool isNumber(const char* s, unsigned int s_len, bool* is_float);
   static bool isPingSupported();
   static ScoreCategory mapAlertToScoreCategory(AlertCategory check_category);
   /* Map alert score to AlertLevel */
@@ -322,44 +321,50 @@ class Utils {
     (grouped) levels.
    */
   static AlertLevelGroup mapAlertLevelToGroup(AlertLevel alert_level);
-  static bool hasExtension(const char *path, const char *ext);
+  static bool hasExtension(const char* path, const char* ext);
 #ifndef WIN32
-  static int mapSyslogFacilityTextToValue(const char *facility_text);
+  static int mapSyslogFacilityTextToValue(const char* facility_text);
 #endif
-  static void buildSqliteAllowedNetworksFilters(lua_State *vm);
-  static void make_session_key(char *buf, u_int buf_len);
-  static const char *get_state_label(ThreadedActivityState ta_state);
-  static bool endsWith(const char *base, const char *str);
-  static int openSocket(int domain, int type, int protocol, const char *label);
+  static void buildSqliteAllowedNetworksFilters(lua_State* vm);
+  static void make_session_key(char* buf, u_int buf_len);
+  static const char* get_state_label(ThreadedActivityState ta_state);
+  static bool endsWith(const char* base, const char* str);
+  static int openSocket(int domain, int type, int protocol, const char* label);
   static void closeSocket(int socket);
   static int pollSocket(int sock, int timeout /* msec */);
   static int pollSockets(int socks[], u_int num, int timeout /* msec */);
-  static const char **getMessagingTopics();
-  static char *toHex(char *in, u_int in_len, char *out, u_int out_len);
-  static bool fromHex(char *in, u_int in_len, char *out, u_int out_len);
+  static const char** getMessagingTopics();
+  static char* toHex(char* in, u_int in_len, char* out, u_int out_len);
+  static bool fromHex(char* in, u_int in_len, char* out, u_int out_len);
 
-  static void swap8(u_int8_t *a, u_int8_t *b);
-  static void swap16(u_int16_t *a, u_int16_t *b);
-  static void swap32(u_int32_t *a, u_int32_t *b);
-  static void swap64(u_int64_t *a, u_int64_t *b);
-  static void swapfloat(float *a, float *b);
-  static void swapLen(void *a, void *b, u_int len);
-  static char* createRandomString(char *buf, size_t buf_len);
-  static IpAddress* parseHostString(char *host_ip, u_int16_t *vlan_id /* out */);
-  static bool nwInterfaceExists(char *if_name);
-  static bool readModbusDeviceInfo(char *ip_address, u_int8_t timeout_sec, lua_State *vm);
-  static bool readEthernetIPDeviceInfo(char *ip_address, u_int8_t timeout_sec, lua_State *vm);
+  static void swap8(u_int8_t* a, u_int8_t* b);
+  static void swap16(u_int16_t* a, u_int16_t* b);
+  static void swap32(u_int32_t* a, u_int32_t* b);
+  static void swap64(u_int64_t* a, u_int64_t* b);
+  static void swapfloat(float* a, float* b);
+  static void swapLen(void* a, void* b, u_int len);
+  static char* createRandomString(char* buf, size_t buf_len);
+  static IpAddress* parseHostString(char* host_ip,
+                                    u_int16_t* vlan_id /* out */);
+  static bool nwInterfaceExists(char* if_name);
+  static bool readModbusDeviceInfo(char* ip_address, u_int8_t timeout_sec,
+                                   lua_State* vm);
+  static bool readEthernetIPDeviceInfo(char* ip_address, u_int8_t timeout_sec,
+                                       lua_State* vm);
   static const char* OS2Str(ndpi_os os);
   static const char* learningMode2str(OSLearningMode mode);
   static const char* deviceType2str(DeviceType devtype);
-  static bool checkNetworkList(char *network_list, char *rsp,
-			       bool (*callback)(char *, char *, void *user_data), void *user_data);
+  static bool checkNetworkList(char* network_list, char* rsp,
+                               bool (*callback)(char*, char*, void* user_data),
+                               void* user_data);
 
   static DeviceType osType2deviceType(ndpi_os t);
   static bool setProcessLimit(int resource, u_int32_t upper_limit);
-  
-/* Increment the counter up to 255 without wrapping */
-  static void inc8bitNoOverflow(u_int8_t *v) { if(*v < 0xFF) (*v)++; }
+
+  /* Increment the counter up to 255 without wrapping */
+  static void inc8bitNoOverflow(u_int8_t* v) {
+    if (*v < 0xFF) (*v)++;
+  }
 };
 
 #endif /* _UTILS_H_ */

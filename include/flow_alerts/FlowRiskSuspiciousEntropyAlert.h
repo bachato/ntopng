@@ -35,8 +35,10 @@ class FlowRiskSuspiciousEntropyAlert : public FlowRiskAlert {
     return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
   }
 
-  FlowRiskSuspiciousEntropyAlert(FlowCheck *c, Flow *f) : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
-  ~FlowRiskSuspiciousEntropyAlert(){};
+  FlowRiskSuspiciousEntropyAlert(FlowCheck* c, Flow* f) : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskSuspiciousEntropyAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
   ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }

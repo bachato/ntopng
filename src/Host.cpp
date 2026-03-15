@@ -23,13 +23,13 @@
 
 /* *************************************** */
 
-Host::Host(NetworkInterface *_iface, int32_t _iface_idx, char *ipAddress,
+Host::Host(NetworkInterface* _iface, int32_t _iface_idx, char* ipAddress,
            u_int16_t _vlan_id, u_int16_t observation_point_id)
     : GenericHashEntry(_iface),
       Score(_iface),
       HostChecksStatus(),
       HostAlertableEntity(_iface, alert_entity_host) {
-  if(trace_new_delete)
+  if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 
   ip.set(ipAddress);
@@ -38,14 +38,13 @@ Host::Host(NetworkInterface *_iface, int32_t _iface_idx, char *ipAddress,
 
 /* *************************************** */
 
-Host::Host(NetworkInterface *_iface, int32_t _iface_idx, Mac *_mac,
-           u_int16_t _vlan_id, u_int16_t observation_point_id, IpAddress *_ip)
+Host::Host(NetworkInterface* _iface, int32_t _iface_idx, Mac* _mac,
+           u_int16_t _vlan_id, u_int16_t observation_point_id, IpAddress* _ip)
     : GenericHashEntry(_iface),
       Score(_iface),
       HostChecksStatus(),
       HostAlertableEntity(_iface, alert_entity_host) {
-
-  if(trace_new_delete)
+  if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 
   ip.set(_ip);
@@ -64,26 +63,26 @@ Host::Host(NetworkInterface *_iface, int32_t _iface_idx, Mac *_mac,
 /* *************************************** */
 
 Host::~Host() {
-  if(trace_new_delete)
+  if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
 
-  if((getUses() > 0)
+  if ((getUses() > 0)
       /* View hosts are not in sync with viewed flows so during shutdown it can
          be normal */
       && (!iface->isView() || !ntop->getGlobals()->isShutdownRequested()))
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Internal error: num_uses=%u",
                                  getUses());
 
-  if(mac) mac->decUses();
-  if(as) as->decUses();
-  if(country) country->decUses();
-  if(obs_point) obs_point->decUses();
-  if(vlan) vlan->decUses();
+  if (mac) mac->decUses();
+  if (as) as->decUses();
+  if (country) country->decUses();
+  if (obs_point) obs_point->decUses();
+  if (vlan) vlan->decUses();
 
 #ifdef NTOPNG_PRO
-  if(host_traffic_shapers) {
+  if (host_traffic_shapers) {
     for (int i = 0; i < NUM_TRAFFIC_SHAPERS; i++) {
-      if(host_traffic_shapers[i]) delete host_traffic_shapers[i];
+      if (host_traffic_shapers[i]) delete host_traffic_shapers[i];
     }
 
     free(host_traffic_shapers);
@@ -93,26 +92,26 @@ Host::~Host() {
 
   freeHostNames();
 
-  if(flow_flood.attacker_counter) delete flow_flood.attacker_counter;
-  if(flow_flood.victim_counter) delete flow_flood.victim_counter;
-  if(icmp_flood.attacker_counter) delete icmp_flood.attacker_counter;
-  if(icmp_flood.victim_counter) delete icmp_flood.victim_counter;
-  if(dns_flood.attacker_counter) delete dns_flood.attacker_counter;
-  if(dns_flood.victim_counter) delete dns_flood.victim_counter;
-  if(snmp_flood.attacker_counter) delete snmp_flood.attacker_counter;
-  if(snmp_flood.victim_counter) delete snmp_flood.victim_counter;
-  if(rst_scan.attacker_counter) delete rst_scan.attacker_counter;
-  if(rst_scan.victim_counter) delete rst_scan.victim_counter;
+  if (flow_flood.attacker_counter) delete flow_flood.attacker_counter;
+  if (flow_flood.victim_counter) delete flow_flood.victim_counter;
+  if (icmp_flood.attacker_counter) delete icmp_flood.attacker_counter;
+  if (icmp_flood.victim_counter) delete icmp_flood.victim_counter;
+  if (dns_flood.attacker_counter) delete dns_flood.attacker_counter;
+  if (dns_flood.victim_counter) delete dns_flood.victim_counter;
+  if (snmp_flood.attacker_counter) delete snmp_flood.attacker_counter;
+  if (snmp_flood.victim_counter) delete snmp_flood.victim_counter;
+  if (rst_scan.attacker_counter) delete rst_scan.attacker_counter;
+  if (rst_scan.victim_counter) delete rst_scan.victim_counter;
 
-  if(stats) delete stats;
-  if(stats_shadow) delete stats_shadow;
+  if (stats) delete stats;
+  if (stats_shadow) delete stats_shadow;
 
 #ifndef HAVE_NEDGE
-  if(listening_ports) delete listening_ports;
-  if(listening_ports_shadow) delete listening_ports_shadow;
+  if (listening_ports) delete listening_ports;
+  if (listening_ports_shadow) delete listening_ports_shadow;
 #endif
 
-  if(blacklist_name) free(blacklist_name);
+  if (blacklist_name) free(blacklist_name);
 
   /*
     Pool counters are updated both in and outside the datapath.
@@ -120,10 +119,10 @@ Host::~Host() {
     consistency (no thread outside the datapath will change the last pool id)
   */
   iface->decPoolNumHosts(get_host_pool(), false /* Host is deleted offline */);
-  if(customHostAlert.msg) free(customHostAlert.msg);
+  if (customHostAlert.msg) free(customHostAlert.msg);
 
-  if(!ntop->getPrefs()->limitResourcesUsage()) {
-    if(tcp_udp_contacted_ports_no_tx)
+  if (!ntop->getPrefs()->limitResourcesUsage()) {
+    if (tcp_udp_contacted_ports_no_tx)
       ndpi_bitmap_free(tcp_udp_contacted_ports_no_tx);
 
     ndpi_hll_destroy(&outgoing_hosts_tcp_udp_port_with_no_tx_hll);
@@ -137,18 +136,18 @@ Host::~Host() {
  * well */
 u_int16_t Host::incScoreValue(u_int16_t score_incr,
                               ScoreCategory score_category, bool as_client) {
-  NetworkStats *ns = getNetworkStats(get_local_network_id());
+  NetworkStats* ns = getNetworkStats(get_local_network_id());
   u_int16_t score_inc;
 
   /* Do increments only on members that don't change during the lifecycle of the
    * host */
-  if(as) as->incScoreValue(score_incr, score_category, as_client);
-  if(vlan) vlan->incScoreValue(score_incr, score_category, as_client);
-  if(country) country->incScoreValue(score_incr, score_category, as_client);
-  if(obs_point)
+  if (as) as->incScoreValue(score_incr, score_category, as_client);
+  if (vlan) vlan->incScoreValue(score_incr, score_category, as_client);
+  if (country) country->incScoreValue(score_incr, score_category, as_client);
+  if (obs_point)
     obs_point->incScoreValue(score_incr, score_category, as_client);
-  if(ns) ns->incScoreValue(score_incr, score_category, as_client);
-  if(iface) iface->incScoreValue(score_incr, as_client);
+  if (ns) ns->incScoreValue(score_incr, score_category, as_client);
+  if (iface) iface->incScoreValue(score_incr, as_client);
   score_inc = Score::incScoreValue(score_incr, score_category, as_client);
 
   return score_inc;
@@ -160,16 +159,16 @@ u_int16_t Host::incScoreValue(u_int16_t score_incr,
  * well */
 u_int16_t Host::decScoreValue(u_int16_t score_decr,
                               ScoreCategory score_category, bool as_client) {
-  NetworkStats *ns = getNetworkStats(get_local_network_id());
+  NetworkStats* ns = getNetworkStats(get_local_network_id());
 
   /* Keep decements in sync with Host::incScoreValue */
-  if(as) as->decScoreValue(score_decr, score_category, as_client);
-  if(vlan) vlan->decScoreValue(score_decr, score_category, as_client);
-  if(country) country->decScoreValue(score_decr, score_category, as_client);
-  if(obs_point)
+  if (as) as->decScoreValue(score_decr, score_category, as_client);
+  if (vlan) vlan->decScoreValue(score_decr, score_category, as_client);
+  if (country) country->decScoreValue(score_decr, score_category, as_client);
+  if (obs_point)
     obs_point->decScoreValue(score_decr, score_category, as_client);
-  if(ns) ns->decScoreValue(score_decr, score_category, as_client);
-  if(iface) iface->decScoreValue(score_decr, as_client);
+  if (ns) ns->decScoreValue(score_decr, score_category, as_client);
+  if (iface) iface->decScoreValue(score_decr, as_client);
 
   return Score::decScoreValue(score_decr, score_category, as_client);
 }
@@ -177,7 +176,7 @@ u_int16_t Host::decScoreValue(u_int16_t score_decr,
 /* *************************************** */
 
 void Host::updateSynAlertsCounter(time_t when, bool syn_sent) {
-  if(syn_sent)
+  if (syn_sent)
     syn_scan.syn_sent_last_min++;
   else
     syn_scan.syn_recvd_last_min++;
@@ -192,7 +191,7 @@ void Host::updateFinAlertsCounter(time_t when, bool fin_sent) {
 /* *************************************** */
 
 void Host::updateRstAlertsCounter(time_t when, bool rst_sent) {
-  AlertCounter *counter =
+  AlertCounter* counter =
       rst_sent ? rst_scan.attacker_counter : rst_scan.victim_counter;
 
   counter->inc(when, this);
@@ -208,7 +207,7 @@ void Host::updateFinAckAlertsCounter(time_t when, bool finack_sent) {
 /* *************************************** */
 
 void Host::updateICMPAlertsCounter(time_t when, bool icmp_sent) {
-  AlertCounter *counter =
+  AlertCounter* counter =
       icmp_sent ? icmp_flood.attacker_counter : icmp_flood.victim_counter;
 
   counter->inc(when, this);
@@ -217,7 +216,8 @@ void Host::updateICMPAlertsCounter(time_t when, bool icmp_sent) {
 /* *************************************** */
 
 void Host::updateDNSAlertsCounter(time_t when, bool dns_sent) {
-  AlertCounter *counter = dns_sent ? dns_flood.attacker_counter : dns_flood.victim_counter;
+  AlertCounter* counter =
+      dns_sent ? dns_flood.attacker_counter : dns_flood.victim_counter;
 
   counter->inc(when, this);
 }
@@ -225,7 +225,7 @@ void Host::updateDNSAlertsCounter(time_t when, bool dns_sent) {
 /* *************************************** */
 
 void Host::updateSNMPAlertsCounter(time_t when, bool snmp_sent) {
-  AlertCounter *counter =
+  AlertCounter* counter =
       snmp_sent ? snmp_flood.attacker_counter : snmp_flood.victim_counter;
 
   counter->inc(when, this);
@@ -234,7 +234,7 @@ void Host::updateSNMPAlertsCounter(time_t when, bool snmp_sent) {
 /* *************************************** */
 
 void Host::updateSynAckAlertsCounter(time_t when, bool synack_sent) {
-  if(synack_sent)
+  if (synack_sent)
     syn_scan.synack_sent_last_min++;
   else
     syn_scan.synack_recvd_last_min++;
@@ -261,9 +261,9 @@ void Host::housekeep(time_t now) {
 
 /* *************************************** */
 
-void Host::initialize(Mac *_mac, int32_t _iface_idx, u_int16_t _vlanId,
+void Host::initialize(Mac* _mac, int32_t _iface_idx, u_int16_t _vlanId,
                       u_int16_t observation_point_id) {
-  if(_vlanId == (u_int16_t)-1) _vlanId = 0;
+  if (_vlanId == (u_int16_t)-1) _vlanId = 0;
 
   vlan_id = _vlanId & 0xFFF; /* Cleanup any possible junk */
   iface_index = _iface_idx;
@@ -304,7 +304,7 @@ void Host::initialize(Mac *_mac, int32_t _iface_idx, u_int16_t _vlanId,
   /* Mac MUST be set before toggleRxOnlyHost() */
   mac = _mac;
   if (mac) mac->incUses();
-  
+
   toggleRxOnlyHost(true);
 
 #ifdef NTOPNG_PRO
@@ -314,7 +314,7 @@ void Host::initialize(Mac *_mac, int32_t _iface_idx, u_int16_t _vlanId,
 
   observationPointId = observation_point_id;
 
-  if((vlan = iface->getVLAN(vlan_id, true, true /* Inline call */)) != NULL)
+  if ((vlan = iface->getVLAN(vlan_id, true, true /* Inline call */)) != NULL)
     vlan->incUses();
 
   INTERFACE_PROFILING_SUB_SECTION_ENTER(
@@ -335,7 +335,7 @@ void Host::initialize(Mac *_mac, int32_t _iface_idx, u_int16_t _vlanId,
   fin_scan.fin_recvd_last_min = fin_scan.finack_sent_last_min = 0;
   INTERFACE_PROFILING_SUB_SECTION_EXIT(iface, 17);
 
-  if(!ntop->getPrefs()->limitResourcesUsage()) {
+  if (!ntop->getPrefs()->limitResourcesUsage()) {
     tcp_udp_contacted_ports_no_tx = ndpi_bitmap_alloc();
     ndpi_hll_init(&outgoing_hosts_tcp_udp_port_with_no_tx_hll,
                   5 /* StdError: 18.4% */);
@@ -344,14 +344,14 @@ void Host::initialize(Mac *_mac, int32_t _iface_idx, u_int16_t _vlanId,
   } else
     tcp_udp_contacted_ports_no_tx = NULL;
 
-  if(ip.getVersion() /* IP is set */) {
+  if (ip.getVersion() /* IP is set */) {
     char country_name[64];
 
     /* Note: moving this to deferredInitialization led to issues
      * like "Trying to decrement a score which is 0" warnings as
      * counters were incremented too late (after dec) */
 
-    if((as = iface->getAS(&ip, true /* Create if missing */,
+    if ((as = iface->getAS(&ip, true /* Create if missing */,
                            true /* Inline call */)) != NULL) {
       as->incUses();
       asn = as->get_asn();
@@ -360,18 +360,18 @@ void Host::initialize(Mac *_mac, int32_t _iface_idx, u_int16_t _vlanId,
 
     get_country(country_name, sizeof(country_name));
 
-    if((country = iface->getCountry(country_name, true /* Create if missing */,
+    if ((country = iface->getCountry(country_name, true /* Create if missing */,
                                      true /* Inline call */)) != NULL)
       country->incUses();
 
-    if((obs_point = iface->getObsPoint(observationPointId,
+    if ((obs_point = iface->getObsPoint(observationPointId,
                                         true /* Create if missing */,
                                         true /* Inline call */)) != NULL)
       obs_point->incUses();
   }
 
   device_type = device_unknown;
-  
+
   /* Increase the number of active hosts */
   reloadHostBlacklist();
 }
@@ -383,18 +383,19 @@ void Host::deferredInitialization() {
 
   setEntityValue(get_hostkey(buf, sizeof(buf), true));
 
-  is_in_broadcast_domain = iface->isLocalBroadcastDomainHost(this, true /* Inline call */);
+  is_in_broadcast_domain =
+      iface->isLocalBroadcastDomainHost(this, true /* Inline call */);
 
   reloadDhcpHost();
 }
 
 /* *************************************** */
 
-char *Host::get_hostkey(char *buf, u_int buf_len, bool force_vlan) {
+char* Host::get_hostkey(char* buf, u_int buf_len, bool force_vlan) {
   char ipbuf[64];
-  char *key = ip.print(ipbuf, sizeof(ipbuf));
+  char* key = ip.print(ipbuf, sizeof(ipbuf));
 
-  if((vlan_id > 0) || force_vlan) {
+  if ((vlan_id > 0) || force_vlan) {
     char obsBuf[16] = {'\0'};
 
     /*
@@ -406,7 +407,7 @@ char *Host::get_hostkey(char *buf, u_int buf_len, bool force_vlan) {
         snprintf(obsBuf, sizeof(obsBuf), " (%u)", observationPointId);
     */
 
-    if(get_vlan_id())
+    if (get_vlan_id())
       snprintf(buf, buf_len, "%s@%u%s", key, get_vlan_id(), obsBuf);
     else
       snprintf(buf, buf_len, "%s%s", key, obsBuf);
@@ -414,7 +415,7 @@ char *Host::get_hostkey(char *buf, u_int buf_len, bool force_vlan) {
     strncpy(buf, key, buf_len);
 
   buf[buf_len - 1] = '\0';
-  return(buf);
+  return (buf);
 }
 
 /* *************************************** */
@@ -422,28 +423,28 @@ char *Host::get_hostkey(char *buf, u_int buf_len, bool force_vlan) {
 void Host::updateHostPool(bool isInlineCall, bool firstUpdate) {
   bool mac_match = false;
 
-  if(!iface) return;
+  if (!iface) return;
 
-  if(!firstUpdate) iface->decPoolNumHosts(get_host_pool(), isInlineCall);
+  if (!firstUpdate) iface->decPoolNumHosts(get_host_pool(), isInlineCall);
   host_pool_id = iface->getHostPool(this, &mac_match);
   host_pool_id_is_from_mac = mac_match;
   iface->incPoolNumHosts(get_host_pool(), isInlineCall);
 
 #ifdef HAVE_NEDGE
-  if(iface && iface->is_bridge_interface()) {
-    HostPools *hp = iface->getHostPools();
+  if (iface && iface->is_bridge_interface()) {
+    HostPools* hp = iface->getHostPools();
 
-    if(hp && hp->enforceQuotasPerPoolMember(get_host_pool())) {
+    if (hp && hp->enforceQuotasPerPoolMember(get_host_pool())) {
       /* must allocate a structure to keep track of used quotas */
-      if(stats) stats->allocateQuotaEnforcementStats();
+      if (stats) stats->allocateQuotaEnforcementStats();
     } else { /* Free the structure that is no longer needed */
       /* It is ensured by the caller that this method is called no more than 1
       time per second. Therefore, it is safe to delete a previously allocated
       shadow class */
-      if(stats) stats->deleteQuotaEnforcementStats();
+      if (stats) stats->deleteQuotaEnforcementStats();
     }
 
-    if(hp && hp->enforceShapersPerPoolMember(get_host_pool())) {
+    if (hp && hp->enforceShapersPerPoolMember(get_host_pool())) {
       /* Align with global traffic shapers */
       iface->getL7Policer()->cloneShapers(&host_traffic_shapers);
 
@@ -467,11 +468,11 @@ void Host::updateHostPool(bool isInlineCall, bool firstUpdate) {
 
 /* *************************************** */
 
-void Host::set_mac(Mac *_mac) {
-  if(_mac == NULL) return;
-  if(mac == _mac) return;
+void Host::set_mac(Mac* _mac) {
+  if (_mac == NULL) return;
+  if (mac == _mac) return;
 
-  if(mac) mac->decUses();
+  if (mac) mac->decUses();
 
   mac = _mac;
   mac->incUses();
@@ -479,14 +480,14 @@ void Host::set_mac(Mac *_mac) {
 
 /* *************************************** */
 
-void Host::luaStrTableEntryLocked(lua_State *const vm, const char *entry_name,
-                                  const char *entry_value) {
+void Host::luaStrTableEntryLocked(lua_State* const vm, const char* entry_name,
+                                  const char* entry_value) {
   /* Perform access to const entry values using a lock as entry value can change
    * for example during a data reset */
-  if(entry_name) {
+  if (entry_name) {
     m.lock(__FILE__, __LINE__);
 
-    if(entry_value) lua_push_str_table_entry(vm, entry_name, entry_value);
+    if (entry_value) lua_push_str_table_entry(vm, entry_name, entry_value);
 
     m.unlock(__FILE__, __LINE__);
   }
@@ -494,38 +495,38 @@ void Host::luaStrTableEntryLocked(lua_State *const vm, const char *entry_name,
 
 /* *************************************** */
 
-void Host::lua_get_names(lua_State *const vm, char *const buf,
+void Host::lua_get_names(lua_State* const vm, char* const buf,
                          ssize_t buf_size) {
-  Mac *cur_mac = getMac();
+  Mac* cur_mac = getMac();
 
   lua_newtable(vm);
 
-  if(ntop->getPrefs()->is_name_decoding_enabled()) {
+  if (ntop->getPrefs()->is_name_decoding_enabled()) {
     getMDNSName(buf, buf_size);
-    if(buf[0]) lua_push_str_table_entry(vm, "mdns", buf);
+    if (buf[0]) lua_push_str_table_entry(vm, "mdns", buf);
 
     getMDNSTXTName(buf, buf_size);
-    if(buf[0]) lua_push_str_table_entry(vm, "mdns_txt", buf);
+    if (buf[0]) lua_push_str_table_entry(vm, "mdns_txt", buf);
 
     getResolvedName(buf, buf_size);
-    if(buf[0]) lua_push_str_table_entry(vm, "resolved", buf);
+    if (buf[0]) lua_push_str_table_entry(vm, "resolved", buf);
 
     getNetbiosName(buf, buf_size);
-    if(buf[0]) lua_push_str_table_entry(vm, "netbios", buf);
+    if (buf[0]) lua_push_str_table_entry(vm, "netbios", buf);
 
     getTLSName(buf, buf_size);
-    if(buf[0]) lua_push_str_table_entry(vm, "tls", buf);
+    if (buf[0]) lua_push_str_table_entry(vm, "tls", buf);
 
     getHTTPName(buf, buf_size);
-    if(buf[0]) lua_push_str_table_entry(vm, "http", buf);
+    if (buf[0]) lua_push_str_table_entry(vm, "http", buf);
 
-    if(isBroadcastDomainHost() && cur_mac) {
+    if (isBroadcastDomainHost() && cur_mac) {
       cur_mac->getDHCPName(buf, buf_size);
-      if(buf[0]) lua_push_str_table_entry(vm, "dhcp", buf);
+      if (buf[0]) lua_push_str_table_entry(vm, "dhcp", buf);
     }
 
     getDHCPName(buf, buf_size);
-    if(buf[0]) lua_push_str_table_entry(vm, "dhcp", buf);
+    if (buf[0]) lua_push_str_table_entry(vm, "dhcp", buf);
   }
 
   lua_pushstring(vm, "names");
@@ -535,7 +536,7 @@ void Host::lua_get_names(lua_State *const vm, char *const buf,
 
 /* ***************************************************** */
 
-void Host::lua_get_ip(lua_State *vm) const {
+void Host::lua_get_ip(lua_State* vm) const {
   char ip_buf[64];
 
   lua_push_str_table_entry(vm, "ip", ip.print(ip_buf, sizeof(ip_buf)));
@@ -547,70 +548,71 @@ void Host::lua_get_ip(lua_State *vm) const {
 
 /* ***************************************************** */
 
-void Host::lua_get_localhost_info(lua_State *vm) const {
+void Host::lua_get_localhost_info(lua_State* vm) const {
   lua_pushboolean(vm, isLocalHost());
 }
 
 /* ***************************************************** */
 
-void Host::lua_get_mac(lua_State *vm) const {
+void Host::lua_get_mac(lua_State* vm) const {
   char buf[64];
   /* Cache macs as they can be swapped/updated */
-  Mac *cur_mac = getMac();
+  Mac* cur_mac = getMac();
 
-  const u_int8_t *mac = cur_mac ? cur_mac->get_mac() : view_interface_mac;
+  const u_int8_t* mac = cur_mac ? cur_mac->get_mac() : view_interface_mac;
 
-  lua_push_str_table_entry(vm, "mac", Utils::formatMac(mac ? mac : NULL, buf, sizeof(buf)));
+  lua_push_str_table_entry(
+      vm, "mac", Utils::formatMac(mac ? mac : NULL, buf, sizeof(buf)));
   lua_push_bool_table_entry(vm, "mac_meaningful", is_mac_meaningful);
   lua_push_uint64_table_entry(vm, "devtype", getDeviceType());
 }
 
 /* ***************************************************** */
 
-void Host::lua_get_bytes(lua_State *vm) const {
+void Host::lua_get_bytes(lua_State* vm) const {
   lua_push_uint64_table_entry(vm, "bytes.sent", getNumBytesSent());
   lua_push_uint64_table_entry(vm, "bytes.rcvd", getNumBytesRcvd());
 }
 
 /* ***************************************************** */
 
-void Host::lua_get_app_bytes(lua_State *vm, u_int app_id) const {
+void Host::lua_get_app_bytes(lua_State* vm, u_int app_id) const {
   lua_pushinteger(vm, get_ndpi_stats()->getProtoBytes(app_id));
 }
 
 /* ***************************************************** */
 
-void Host::lua_get_cat_bytes(lua_State *vm,
+void Host::lua_get_cat_bytes(lua_State* vm,
                              ndpi_protocol_category_t category_id) const {
   lua_pushinteger(vm, get_ndpi_stats()->getCategoryBytes(category_id));
 }
 
 /* ***************************************************** */
 
-void Host::lua_get_packets(lua_State *vm) const {
+void Host::lua_get_packets(lua_State* vm) const {
   lua_push_uint64_table_entry(vm, "packets.sent", getNumPktsSent());
   lua_push_uint64_table_entry(vm, "packets.rcvd", getNumPktsRcvd());
 }
 
 /* ***************************************************** */
 
-void Host::lua_get_as(lua_State *vm) const {
-  const char *asn_n = get_asname();
+void Host::lua_get_as(lua_State* vm) const {
+  const char* asn_n = get_asname();
 
   lua_push_uint64_table_entry(vm, "asn", get_asn());
-  lua_push_str_table_entry(vm, "asname", asn_n ? asn_n : (char *)"");
+  lua_push_str_table_entry(vm, "asname", asn_n ? asn_n : (char*)"");
 }
 
 /* ***************************************************** */
 
-void Host::lua_get_host_pool(lua_State *vm) const {
+void Host::lua_get_host_pool(lua_State* vm) const {
   lua_push_uint64_table_entry(vm, "host_pool_id", host_pool_id);
   lua_push_str_table_entry(vm, "host_pool_match",
                            host_pool_id_is_from_mac ? "mac" : "ip");
 }
 /* ***************************************************** */
 
-void Host::lua_get_os(lua_State *vm) {
+void Host::lua_get_os(lua_State* vm) {
   char buf[64];
 
   lua_push_int32_table_entry(vm, "os", getOS());
@@ -619,8 +621,8 @@ void Host::lua_get_os(lua_State *vm) {
 
 /* ***************************************************** */
 
-void Host::lua_get_ndpi_info(lua_State *vm) {
-  if(stats)
+void Host::lua_get_ndpi_info(lua_State* vm) {
+  if (stats)
     stats->luaNdpiStats(vm);
   else
     lua_pushnil(vm);
@@ -628,7 +630,7 @@ void Host::lua_get_ndpi_info(lua_State *vm) {
 
 /* ***************************************************** */
 
-void Host::lua_get_min_info(lua_State *vm) {
+void Host::lua_get_min_info(lua_State* vm) {
   char buf[64];
 
   lua_push_str_table_entry(vm, "name", get_visual_name(buf, sizeof(buf)));
@@ -660,53 +662,65 @@ void Host::lua_get_min_info(lua_State *vm) {
 
 /* ***************************************************** */
 
-void Host::lua_get_geoloc(lua_State *vm) {
+void Host::lua_get_geoloc(lua_State* vm) {
   char *continent = NULL, *country_name = NULL, *city = NULL;
   float latitude = 0, longitude = 0;
 
   ntop->getGeolocation()->getInfo(&ip, &continent, &country_name, &city,
                                   &latitude, &longitude);
-  lua_push_str_table_entry(vm, "continent", continent ? continent : (char *)"");
+  lua_push_str_table_entry(vm, "continent", continent ? continent : (char*)"");
   lua_push_str_table_entry(vm, "country",
-                           country_name ? country_name : (char *)"");
+                           country_name ? country_name : (char*)"");
   lua_push_float_table_entry(vm, "latitude", latitude);
   lua_push_float_table_entry(vm, "longitude", longitude);
-  lua_push_str_table_entry(vm, "city", city ? city : (char *)"");
+  lua_push_str_table_entry(vm, "city", city ? city : (char*)"");
   ntop->getGeolocation()->freeInfo(&continent, &country_name, &city);
 }
 
 /* ***************************************************** */
 
-void Host::lua_get_flow_flood(lua_State *vm) const {
+void Host::lua_get_flow_flood(lua_State* vm) const {
   u_int16_t hits;
 
-  if((hits = flow_flood.victim_counter->hits()))
+  if ((hits = flow_flood.victim_counter->hits()))
     lua_push_uint64_table_entry(vm, "hits.flow_flood_victim", hits);
 
-  if((hits = flow_flood.attacker_counter->hits()))
+  if ((hits = flow_flood.attacker_counter->hits()))
     lua_push_uint64_table_entry(vm, "hits.flow_flood_attacker", hits);
 }
 
 /* ***************************************************** */
 
-void Host::lua_get_services(lua_State *vm) const {
-  if(host_services_bitmap == 0) return;
+void Host::lua_get_services(lua_State* vm) const {
+  if (host_services_bitmap == 0) return;
 
   lua_newtable(vm);
 
-  if(providesService(HOST_SERVICE_DHCP))   lua_push_bool_table_entry(vm, "dhcp", true);
-  if(providesService(HOST_SERVICE_DNS))    lua_push_bool_table_entry(vm, "dns", true);
-  if(providesService(HOST_SERVICE_NTP))    lua_push_bool_table_entry(vm, "ntp", true);
-  if(providesService(HOST_SERVICE_SMTP))   lua_push_bool_table_entry(vm, "smtp", true);
-  if(providesService(HOST_SERVICE_IMAP))   lua_push_bool_table_entry(vm, "imap", true);
-  if(providesService(HOST_SERVICE_POP))    lua_push_bool_table_entry(vm, "pop", true);
-  if(providesService(HOST_SERVICE_HTTP))   lua_push_bool_table_entry(vm, "http", true);
-  if(providesService(HOST_SERVICE_SSH))    lua_push_bool_table_entry(vm, "ssh", true);
-  if(providesService(HOST_SERVICE_RDP))    lua_push_bool_table_entry(vm, "rdp", true);
-  if(providesService(HOST_SERVICE_MODBUS)) lua_push_bool_table_entry(vm, "modbus", true);
-  if(providesService(HOST_SERVICE_S7COMM)) lua_push_bool_table_entry(vm, "s7comm", true);
-  if(providesService(HOST_SERVICE_PROFINET)) lua_push_bool_table_entry(vm, "profinet", true);
-  
+  if (providesService(HOST_SERVICE_DHCP))
+    lua_push_bool_table_entry(vm, "dhcp", true);
+  if (providesService(HOST_SERVICE_DNS))
+    lua_push_bool_table_entry(vm, "dns", true);
+  if (providesService(HOST_SERVICE_NTP))
+    lua_push_bool_table_entry(vm, "ntp", true);
+  if (providesService(HOST_SERVICE_SMTP))
+    lua_push_bool_table_entry(vm, "smtp", true);
+  if (providesService(HOST_SERVICE_IMAP))
+    lua_push_bool_table_entry(vm, "imap", true);
+  if (providesService(HOST_SERVICE_POP))
+    lua_push_bool_table_entry(vm, "pop", true);
+  if (providesService(HOST_SERVICE_HTTP))
+    lua_push_bool_table_entry(vm, "http", true);
+  if (providesService(HOST_SERVICE_SSH))
+    lua_push_bool_table_entry(vm, "ssh", true);
+  if (providesService(HOST_SERVICE_RDP))
+    lua_push_bool_table_entry(vm, "rdp", true);
+  if (providesService(HOST_SERVICE_MODBUS))
+    lua_push_bool_table_entry(vm, "modbus", true);
+  if (providesService(HOST_SERVICE_S7COMM))
+    lua_push_bool_table_entry(vm, "s7comm", true);
+  if (providesService(HOST_SERVICE_PROFINET))
+    lua_push_bool_table_entry(vm, "profinet", true);
+
   lua_pushstring(vm, "services");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
@@ -714,61 +728,61 @@ void Host::lua_get_services(lua_State *vm) const {
 
 /* ***************************************************** */
 
-void Host::lua_get_syn_scan(lua_State *vm) const {
+void Host::lua_get_syn_scan(lua_State* vm) const {
   u_int32_t hits;
 
   hits = 0;
-  if(syn_scan.syn_sent_last_min > syn_scan.synack_recvd_last_min)
+  if (syn_scan.syn_sent_last_min > syn_scan.synack_recvd_last_min)
     hits = syn_scan.syn_sent_last_min - syn_scan.synack_recvd_last_min;
-  if(hits) lua_push_uint64_table_entry(vm, "hits.syn_scan_attacker", hits);
+  if (hits) lua_push_uint64_table_entry(vm, "hits.syn_scan_attacker", hits);
 
   hits = 0;
-  if(syn_scan.syn_recvd_last_min > syn_scan.synack_sent_last_min)
+  if (syn_scan.syn_recvd_last_min > syn_scan.synack_sent_last_min)
     hits = syn_scan.syn_recvd_last_min - syn_scan.synack_sent_last_min;
-  if(hits) lua_push_uint64_table_entry(vm, "hits.syn_scan_victim", hits);
+  if (hits) lua_push_uint64_table_entry(vm, "hits.syn_scan_victim", hits);
 }
 
 /* ***************************************************** */
 
-void Host::lua_get_fin_scan(lua_State *vm) const {
+void Host::lua_get_fin_scan(lua_State* vm) const {
   u_int32_t hits;
 
   hits = 0;
-  if(fin_scan.fin_sent_last_min > fin_scan.finack_recvd_last_min)
+  if (fin_scan.fin_sent_last_min > fin_scan.finack_recvd_last_min)
     hits = fin_scan.fin_sent_last_min - fin_scan.finack_recvd_last_min;
-  if(hits) lua_push_uint64_table_entry(vm, "hits.fin_scan_attacker", hits);
+  if (hits) lua_push_uint64_table_entry(vm, "hits.fin_scan_attacker", hits);
 
   hits = 0;
-  if(fin_scan.fin_recvd_last_min > fin_scan.finack_sent_last_min)
+  if (fin_scan.fin_recvd_last_min > fin_scan.finack_sent_last_min)
     hits = fin_scan.fin_recvd_last_min - fin_scan.finack_sent_last_min;
-  if(hits) lua_push_uint64_table_entry(vm, "hits.fin_scan_victim", hits);
+  if (hits) lua_push_uint64_table_entry(vm, "hits.fin_scan_victim", hits);
 }
 
 /* ***************************************************** */
 
-void Host::lua_get_time(lua_State *vm) const {
+void Host::lua_get_time(lua_State* vm) const {
   lua_push_uint64_table_entry(vm, "seen.first", get_first_seen());
   lua_push_uint64_table_entry(vm, "seen.last", get_last_seen());
   lua_push_uint64_table_entry(vm, "duration", get_duration());
 
-  if(stats)
+  if (stats)
     lua_push_uint64_table_entry(vm, "total_activity_time",
                                 stats->getTotalActivityTime());
 }
 
 /* ***************************************************** */
 
-void Host::lua_get_num_alerts(lua_State *vm) const {
+void Host::lua_get_num_alerts(lua_State* vm) const {
   lua_push_uint64_table_entry(vm, "num_alerts", getNumEngagedAlerts());
   lua_push_uint64_table_entry(vm, "active_alerted_flows", getNumAlertedFlows());
 
-  if(stats)
+  if (stats)
     lua_push_uint64_table_entry(vm, "total_alerts", stats->getTotalAlerts());
 }
 
 /* ***************************************************** */
 
-void Host::lua_get_num_total_flows(lua_State *vm) const {
+void Host::lua_get_num_total_flows(lua_State* vm) const {
   lua_push_uint64_table_entry(vm, "total_flows.as_client",
                               getTotalNumFlowsAsClient());
   lua_push_uint64_table_entry(vm, "total_flows.as_server",
@@ -777,7 +791,7 @@ void Host::lua_get_num_total_flows(lua_State *vm) const {
 
 /* ***************************************************** */
 
-void Host::lua_get_num_flows(lua_State *vm) const {
+void Host::lua_get_num_flows(lua_State* vm) const {
   lua_push_uint64_table_entry(vm, "active_flows.as_client",
                               getNumOutgoingFlows());
   lua_push_uint64_table_entry(vm, "active_flows.as_server",
@@ -795,12 +809,12 @@ void Host::lua_get_num_flows(lua_State *vm) const {
   lua_push_uint64_table_entry(vm, "host_unreachable_flows.as_client",
                               getTotalNumHostUnreachableOutgoingFlows());
 
-  if(stats) stats->luaHostBehaviour(vm);
+  if (stats) stats->luaHostBehaviour(vm);
 }
 
 /* ***************************************************** */
 
-void Host::lua_get_num_contacts(lua_State *vm) {
+void Host::lua_get_num_contacts(lua_State* vm) {
   lua_push_uint64_table_entry(vm, "contacts.as_client",
                               getNumActiveContactsAsClient());
   lua_push_uint64_table_entry(vm, "contacts.as_server",
@@ -809,13 +823,13 @@ void Host::lua_get_num_contacts(lua_State *vm) {
 
 /* ***************************************************** */
 
-void Host::lua_get_num_http_hosts(lua_State *vm) {
+void Host::lua_get_num_http_hosts(lua_State* vm) {
   lua_push_uint64_table_entry(vm, "active_http_hosts", getActiveHTTPHosts());
 }
 
 /* ***************************************************** */
 
-void Host::lua_unidirectional_tcp_udp_flows(lua_State *vm,
+void Host::lua_unidirectional_tcp_udp_flows(lua_State* vm,
                                             bool as_subtable) const {
   lua_newtable(vm);
 
@@ -824,7 +838,7 @@ void Host::lua_unidirectional_tcp_udp_flows(lua_State *vm,
   lua_push_uint32_table_entry(vm, "num_egress",
                               unidirectionalTCPUDPFlows.numEgressFlows);
 
-  if(as_subtable) {
+  if (as_subtable) {
     lua_pushstring(vm, "num_unidirectional_tcp_flows");
     lua_insert(vm, -2);
     lua_settable(vm, -3);
@@ -833,7 +847,7 @@ void Host::lua_unidirectional_tcp_udp_flows(lua_State *vm,
 
 /* ***************************************************** */
 
-void Host::lua_blacklisted_flows(lua_State *vm) const {
+void Host::lua_blacklisted_flows(lua_State* vm) const {
   /* Flow exchanged with blacklists hosts */
   lua_newtable(vm);
 
@@ -854,8 +868,8 @@ void Host::lua_blacklisted_flows(lua_State *vm) const {
 /* ***************************************************** */
 
 #ifndef HAVE_NEDGE
-void Host::lua_get_listening_ports(lua_State *vm) {
-  if(listening_ports == NULL) return;
+void Host::lua_get_listening_ports(lua_State* vm) {
+  if (listening_ports == NULL) return;
 
   lua_newtable(vm);
 
@@ -869,26 +883,26 @@ void Host::lua_get_listening_ports(lua_State *vm) {
 
 /* ***************************************************** */
 
-void Host::lua(lua_State *vm, AddressTree *ptree, bool host_details,
-               bool verbose, bool veryBasicInfo,
-	       bool returnHost, bool asListElement) {
+void Host::lua(lua_State* vm, AddressTree* ptree, bool host_details,
+               bool verbose, bool veryBasicInfo, bool returnHost,
+               bool asListElement) {
   char buf[64], buf_id[64], *host_id = buf_id;
   char ip_buf[64], *ipaddr = NULL;
   bool mask_host = Utils::maskHost(isLocalHost());
-  
-  if((ptree && (!match(ptree))) || mask_host) return;
 
-  if(verbose) veryBasicInfo = false;
-  
+  if ((ptree && (!match(ptree))) || mask_host) return;
+
+  if (verbose) veryBasicInfo = false;
+
   /* Some checks first... */
-  if(!is_dhcp_host) {
-    Mac *cur_mac = getMac();
-    
-    if(cur_mac && cur_mac->getDHCPfingerprint()) {
+  if (!is_dhcp_host) {
+    Mac* cur_mac = getMac();
+
+    if (cur_mac && cur_mac->getDHCPfingerprint()) {
       is_dhcp_host = 1;
     }
   }
-  
+
   lua_newtable(vm);
 
   lua_push_str_table_entry(vm, "ip",
@@ -897,14 +911,15 @@ void Host::lua(lua_State *vm, AddressTree *ptree, bool host_details,
   lua_push_int32_table_entry(vm, "iface_index", iface_index);
   lua_push_str_table_entry(vm, "name", get_visual_name(buf, sizeof(buf)));
 
-  if(!veryBasicInfo) {
+  if (!veryBasicInfo) {
     lua_push_uint32_table_entry(vm, "observation_point_id",
-				get_observation_point_id());
+                                get_observation_point_id());
     lua_push_bool_table_entry(vm, "serialize_by_mac", serializeByMac());
     lua_push_uint64_table_entry(vm, "ipkey", ip.key());
-    lua_push_str_table_entry(vm, "iphex", ip.get_ip_hex(buf_id, sizeof(buf_id)));
+    lua_push_str_table_entry(vm, "iphex",
+                             ip.get_ip_hex(buf_id, sizeof(buf_id)));
     lua_push_str_table_entry(vm, "tskey", get_tskey(buf_id, sizeof(buf_id)));
-    lua_push_bool_table_entry(vm, "mac_meaningful", isMACmeaningful()); 
+    lua_push_bool_table_entry(vm, "mac_meaningful", isMACmeaningful());
 
     lua_get_min_info(vm);
     lua_get_mac(vm);
@@ -919,33 +934,40 @@ void Host::lua(lua_State *vm, AddressTree *ptree, bool host_details,
     qoe_stats.lua_qoe_stats(vm);
 #endif
 
-    if(stats)
-      stats->lua(vm, mask_host, Utils::bool2DetailsLevel(verbose, host_details)),
-        stats->luaHostBehaviour(vm);
+    if (stats)
+      stats->lua(vm, mask_host,
+                 Utils::bool2DetailsLevel(verbose, host_details)),
+          stats->luaHostBehaviour(vm);
 
     lua_get_num_flows(vm);
     lua_get_num_contacts(vm);
     lua_get_num_http_hosts(vm);
 
-    lua_push_float_table_entry(vm, "bytes_ratio", ndpi_data_ratio(getNumBytesSent(), getNumBytesRcvd()));
-    lua_push_float_table_entry(vm, "pkts_ratio", ndpi_data_ratio(getNumPktsSent(), getNumPktsRcvd()));
+    lua_push_float_table_entry(
+        vm, "bytes_ratio",
+        ndpi_data_ratio(getNumBytesSent(), getNumBytesRcvd()));
+    lua_push_float_table_entry(
+        vm, "pkts_ratio", ndpi_data_ratio(getNumPktsSent(), getNumPktsRcvd()));
 
-    lua_push_int32_table_entry(vm, "num_contacted_peers_with_tcp_udp_flows_no_response",
-			       getNumContactedPeersAsClientTCPUDPNoTX());
-    lua_push_int32_table_entry(vm, "num_incoming_peers_that_sent_tcp_udp_flows_no_response",
-			       getNumContactsFromPeersAsServerTCPUDPNoTX());
+    lua_push_int32_table_entry(
+        vm, "num_contacted_peers_with_tcp_udp_flows_no_response",
+        getNumContactedPeersAsClientTCPUDPNoTX());
+    lua_push_int32_table_entry(
+        vm, "num_incoming_peers_that_sent_tcp_udp_flows_no_response",
+        getNumContactsFromPeersAsServerTCPUDPNoTX());
 
-    if(device_ip)
+    if (device_ip)
       lua_push_str_table_entry(vm, "device_ip",
-			       Utils::intoaV4(device_ip, buf, sizeof(buf)));
+                               Utils::intoaV4(device_ip, buf, sizeof(buf)));
 
-    if(blacklist_name != NULL)
+    if (blacklist_name != NULL)
       lua_push_str_table_entry(vm, "blacklist_name", blacklist_name);
 
     lua_push_bool_table_entry(vm, "is_rx_only", isRxOnlyHost());
 
-    if(more_then_one_device)
-      lua_push_bool_table_entry(vm, "more_then_one_device", more_then_one_device);
+    if (more_then_one_device)
+      lua_push_bool_table_entry(vm, "more_then_one_device",
+                                more_then_one_device);
 
     luaDNS(vm, verbose);
     luaTCP(vm);
@@ -953,39 +975,40 @@ void Host::lua(lua_State *vm, AddressTree *ptree, bool host_details,
 
     lua_unidirectional_tcp_udp_flows(vm, true);
 
-    if(host_details) {
+    if (host_details) {
       lua_get_score_breakdown(vm);
       lua_blacklisted_flows(vm);
 
       /*
-	This has been disabled as in case of an attack, most hosts do not have a
-	name and we will waste a lot of time doing activities that are not
-	necessary
+        This has been disabled as in case of an attack, most hosts do not have a
+        name and we will waste a lot of time doing activities that are not
+        necessary
       */
       get_name(buf, sizeof(buf), false);
-      if(strlen(buf) == 0 || strcmp(buf, ipaddr) == 0) {
-	if(isBroadcastHost() || isMulticastHost() ||
-	   (isIPv6() && ((strncmp(ipaddr, "ff0", 3) == 0) ||
-			 (strncmp(ipaddr, "fe80", 4) == 0))))
-	  ; /* Nothing to do */
-	else {
-	  /* We resolve immediately the IP address by queueing on the top of
-	   * address queue */
-	  ntop->getRedis()->pushHostToResolve(ipaddr, false,
-					      true /* Fake to resolve it ASAP */);
-	}
+      if (strlen(buf) == 0 || strcmp(buf, ipaddr) == 0) {
+        if (isBroadcastHost() || isMulticastHost() ||
+            (isIPv6() && ((strncmp(ipaddr, "ff0", 3) == 0) ||
+                          (strncmp(ipaddr, "fe80", 4) == 0))))
+          ; /* Nothing to do */
+        else {
+          /* We resolve immediately the IP address by queueing on the top of
+           * address queue */
+          ntop->getRedis()->pushHostToResolve(
+              ipaddr, false, true /* Fake to resolve it ASAP */);
+        }
       }
 
       luaStrTableEntryLocked(
-			     vm, "ssdp",
-			     ssdpLocation); /* locked to protect against data-reset changes */
+          vm, "ssdp",
+          ssdpLocation); /* locked to protect against data-reset changes */
 
       /* ifid is useful for example for view interfaces to detemine
-	 the actual, original interface the host is associated to. */
+         the actual, original interface the host is associated to. */
       lua_push_uint64_table_entry(vm, "ifid", iface->get_id());
-      if(!mask_host)
-	luaStrTableEntryLocked(vm, "info",
-			       names.mdns_info); /* locked to protect against data-reset changes */
+      if (!mask_host)
+        luaStrTableEntryLocked(
+            vm, "info",
+            names.mdns_info); /* locked to protect against data-reset changes */
 
       lua_get_names(vm, buf, sizeof(buf));
 
@@ -1003,10 +1026,10 @@ void Host::lua(lua_State *vm, AddressTree *ptree, bool host_details,
 
     lua_get_fingerprints(vm);
 
-    if(!returnHost) host_id = get_hostkey(buf_id, sizeof(buf_id));
+    if (!returnHost) host_id = get_hostkey(buf_id, sizeof(buf_id));
   }
-  
-  if(asListElement) {
+
+  if (asListElement) {
     lua_pushstring(vm, host_id);
     lua_insert(vm, -2);
     lua_settable(vm, -3);
@@ -1015,12 +1038,11 @@ void Host::lua(lua_State *vm, AddressTree *ptree, bool host_details,
 
 /* ***************************************** */
 
-char *Host::print(char *buf, u_int buf_len,
+char* Host::print(char* buf, u_int buf_len,
                   bool force_resolution_if_not_found) {
   /* try get name */
-  char *name = get_name(buf, buf_len, force_resolution_if_not_found);
-  if(name[0] != '\0')
-    return name;
+  char* name = get_name(buf, buf_len, force_resolution_if_not_found);
+  if (name[0] != '\0') return name;
 
   /* no name: print ip */
   return get_ip()->print(buf, buf_len);
@@ -1028,7 +1050,7 @@ char *Host::print(char *buf, u_int buf_len,
 
 /* ***************************************** */
 
-char *Host::get_name(char *buf, u_int buf_len,
+char* Host::get_name(char* buf, u_int buf_len,
                      bool force_resolution_if_not_found) {
   char *addr = NULL, name_buf[128];
   int rc = -1;
@@ -1037,13 +1059,13 @@ char *Host::get_name(char *buf, u_int buf_len,
 
   name_buf[0] = '\0';
 
-  if(!ntop->getPrefs()->is_name_decoding_enabled()) goto out;
+  if (!ntop->getPrefs()->is_name_decoding_enabled()) goto out;
 
-  if(isLocalHost() &&
+  if (isLocalHost() &&
       (!ntop->getPrefs()->is_localhost_name_decoding_enabled()))
     goto out;
 
-  if(nextResolveAttempt &&
+  if (nextResolveAttempt &&
       ((num_resolve_attempts > 1) || (nextResolveAttempt > now) ||
        (nextResolveAttempt == (time_t)-1))) {
     skip_resolution = true;
@@ -1055,42 +1077,42 @@ char *Host::get_name(char *buf, u_int buf_len,
   num_resolve_attempts++;
 
   getServerName(name_buf, sizeof(name_buf));
-  if(name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
+  if (name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
 
   getDHCPName(name_buf, sizeof(name_buf));
-  if(name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
+  if (name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
 
   getResolvedName(name_buf, sizeof(name_buf));
-  if(name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
+  if (name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
 
   /* Most relevant names goes first */
-  if(isBroadcastDomainHost()) {
-    Mac *cur_mac = getMac(); /* Cache it as it can change */
+  if (isBroadcastDomainHost()) {
+    Mac* cur_mac = getMac(); /* Cache it as it can change */
 
-    if(cur_mac) {
+    if (cur_mac) {
       cur_mac->getDHCPName(name_buf, sizeof(name_buf));
-      if(strlen(name_buf)) goto out;
+      if (strlen(name_buf)) goto out;
     }
   }
 
   getMDNSTXTName(name_buf, sizeof(name_buf));
-  if(name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
+  if (name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
 
   getMDNSName(name_buf, sizeof(name_buf));
-  if(name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
+  if (name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
 
   getMDNSInfo(name_buf, sizeof(name_buf));
-  if(name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
+  if (name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
 
-  if(ntop->getPrefs()->do_tls_quic_hostnaming()) {
+  if (ntop->getPrefs()->do_tls_quic_hostnaming()) {
     getTLSName(name_buf, sizeof(name_buf));
-    if(name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
+    if (name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
   }
 
   getHTTPName(name_buf, sizeof(name_buf));
-  if(name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
+  if (name_buf[0] && !Utils::isIPAddress(name_buf)) goto out;
 
-  if(!skip_resolution) {
+  if (!skip_resolution) {
     addr = ip.print(buf, buf_len);
     rc = ntop->getRedis()->getAddress(addr, name_buf, sizeof(name_buf),
                                       force_resolution_if_not_found);
@@ -1104,9 +1126,9 @@ char *Host::get_name(char *buf, u_int buf_len,
       goto out;
   */
 
-  if(rc == 0 && strcmp(addr, name_buf))
+  if (rc == 0 && strcmp(addr, name_buf))
     setResolvedName(name_buf);
-  else if(!skip_resolution)
+  else if (!skip_resolution)
     addr = ip.print(name_buf, sizeof(name_buf));
 
 out:
@@ -1118,25 +1140,25 @@ out:
 
 /* Retrieve the host label. This should only be used to store persistent
  * information from C. In lua use hostinfo2label instead. */
-char *Host::get_host_label(char *const buf, ssize_t buf_len) {
+char* Host::get_host_label(char* const buf, ssize_t buf_len) {
   char redis_key[CONST_MAX_LEN_REDIS_KEY];
   char ip_buf[64];
 
   /* Try to get a label first */
   snprintf(redis_key, sizeof(redis_key), HOST_LABEL_NAMES_KEY,
            ip.print(ip_buf, sizeof(ip_buf)));
-  if(ntop->getRedis()->get(redis_key, buf, buf_len) != 0) {
+  if (ntop->getRedis()->get(redis_key, buf, buf_len) != 0) {
     /* Not found, use the internal names instead */
     get_name(buf, buf_len, false /* don't resolve */);
   }
 
-  return(buf);
+  return (buf);
 }
 
 /* ***************************************** */
 
-char *Host::getResolvedName(char *const buf, ssize_t buf_len) {
-  if(buf && buf_len) {
+char* Host::getResolvedName(char* const buf, ssize_t buf_len) {
+  if (buf && buf_len) {
     m.lock(__FILE__, __LINE__);
     snprintf(buf, buf_len, "%s", names.resolved ? names.resolved : "");
     m.unlock(__FILE__, __LINE__);
@@ -1147,8 +1169,8 @@ char *Host::getResolvedName(char *const buf, ssize_t buf_len) {
 
 /* ***************************************** */
 
-char *Host::getMDNSName(char *const buf, ssize_t buf_len) {
-  if(buf && buf_len) {
+char* Host::getMDNSName(char* const buf, ssize_t buf_len) {
+  if (buf && buf_len) {
     m.lock(__FILE__, __LINE__);
     snprintf(buf, buf_len, "%s", names.mdns ? names.mdns : "");
     m.unlock(__FILE__, __LINE__);
@@ -1159,8 +1181,8 @@ char *Host::getMDNSName(char *const buf, ssize_t buf_len) {
 
 /* ***************************************** */
 
-char *Host::getServerName(char *const buf, ssize_t buf_len) {
-  if(buf && buf_len) {
+char* Host::getServerName(char* const buf, ssize_t buf_len) {
+  if (buf && buf_len) {
     m.lock(__FILE__, __LINE__);
     snprintf(buf, buf_len, "%s", names.server_name ? names.server_name : "");
     m.unlock(__FILE__, __LINE__);
@@ -1171,8 +1193,8 @@ char *Host::getServerName(char *const buf, ssize_t buf_len) {
 
 /* ***************************************** */
 
-char *Host::getMDNSTXTName(char *const buf, ssize_t buf_len) {
-  if(buf && buf_len) {
+char* Host::getMDNSTXTName(char* const buf, ssize_t buf_len) {
+  if (buf && buf_len) {
     m.lock(__FILE__, __LINE__);
     snprintf(buf, buf_len, "%s", names.mdns_txt ? names.mdns_txt : "");
     m.unlock(__FILE__, __LINE__);
@@ -1183,33 +1205,33 @@ char *Host::getMDNSTXTName(char *const buf, ssize_t buf_len) {
 
 /* ***************************************** */
 
-char *Host::getMDNSInfo(char *const buf, ssize_t buf_len) {
-  if(buf && buf_len) {
+char* Host::getMDNSInfo(char* const buf, ssize_t buf_len) {
+  if (buf && buf_len) {
     m.lock(__FILE__, __LINE__);
     snprintf(buf, buf_len, "%s", names.mdns_info ? names.mdns_info : "");
     m.unlock(__FILE__, __LINE__);
   }
 
-  return(buf);
+  return (buf);
 }
 
 /* ***************************************** */
 
-char *Host::getNetbiosName(char *const buf, ssize_t buf_len) {
-  if(buf && buf_len) {
+char* Host::getNetbiosName(char* const buf, ssize_t buf_len) {
+  if (buf && buf_len) {
     m.lock(__FILE__, __LINE__);
     snprintf(buf, buf_len, "%s",
              names.netbios ? Utils::stringtolower(names.netbios) : "");
     m.unlock(__FILE__, __LINE__);
   }
 
-  return(buf);
+  return (buf);
 }
 
 /* ***************************************** */
 
-char *Host::getTLSName(char *const buf, ssize_t buf_len) {
-  if(buf && buf_len) {
+char* Host::getTLSName(char* const buf, ssize_t buf_len) {
+  if (buf && buf_len) {
     m.lock(__FILE__, __LINE__);
     snprintf(buf, buf_len, "%s", names.tls ? names.tls : "");
     m.unlock(__FILE__, __LINE__);
@@ -1220,20 +1242,20 @@ char *Host::getTLSName(char *const buf, ssize_t buf_len) {
 
 /* ***************************************** */
 
-char *Host::getDHCPName(char *const buf, ssize_t buf_len) {
-  if(buf && buf_len) {
+char* Host::getDHCPName(char* const buf, ssize_t buf_len) {
+  if (buf && buf_len) {
     m.lock(__FILE__, __LINE__);
     snprintf(buf, buf_len, "%s", names.dhcp ? names.dhcp : "");
     m.unlock(__FILE__, __LINE__);
   }
 
-  return ((char *)buf);
+  return ((char*)buf);
 }
 
 /* ***************************************** */
 
-char *Host::getHTTPName(char *const buf, ssize_t buf_len) {
-  if(buf && buf_len) {
+char* Host::getHTTPName(char* const buf, ssize_t buf_len) {
+  if (buf && buf_len) {
     m.lock(__FILE__, __LINE__);
     snprintf(buf, buf_len, "%s", names.http ? names.http : "");
     m.unlock(__FILE__, __LINE__);
@@ -1244,10 +1266,10 @@ char *Host::getHTTPName(char *const buf, ssize_t buf_len) {
 
 /* ***************************************** */
 
-const char *Host::getOSDetail(char *const buf, ssize_t buf_len) {
-  if(buf && buf_len) buf[0] = '\0';
+const char* Host::getOSDetail(char* const buf, ssize_t buf_len) {
+  if (buf && buf_len) buf[0] = '\0';
 
-  return(buf);
+  return (buf);
 }
 
 /* ***************************************** */
@@ -1274,7 +1296,7 @@ bool Host::is_hash_entry_state_idle_transition_ready() {
     - Avoid keeping inactive hosts in memory for an indefinite time
   */
 
-  if(getNumEngagedAlerts() > 0)
+  if (getNumEngagedAlerts() > 0)
     max_idle = ntop->getPrefs()->get_alerted_host_max_idle();
   else
     max_idle = ntop->getPrefs()->get_host_max_idle(isLocalHost());
@@ -1283,12 +1305,13 @@ bool Host::is_hash_entry_state_idle_transition_ready() {
 
 #if DEBUG_HOST_IDLE_TRANSITION
   char buf[64];
-  ntop->getTrace()->traceEvent(TRACE_WARNING,
-			       "Idle check [%s][local: %u][get_host_max_idle: %u][last seen: %u][ready: "
-			       "%u]",
-			       ip.print(buf, sizeof(buf)), isLocalHost(),
-			       ntop->getPrefs()->get_host_max_idle(isLocalHost()), last_seen,
-			       res ? 1 : 0);
+  ntop->getTrace()->traceEvent(
+      TRACE_WARNING,
+      "Idle check [%s][local: %u][get_host_max_idle: %u][last seen: %u][ready: "
+      "%u]",
+      ip.print(buf, sizeof(buf)), isLocalHost(),
+      ntop->getPrefs()->get_host_max_idle(isLocalHost()), last_seen,
+      res ? 1 : 0);
 #endif
 
   return res;
@@ -1296,8 +1319,8 @@ bool Host::is_hash_entry_state_idle_transition_ready() {
 
 /* *************************************** */
 
-void Host::periodic_stats_update(const struct timeval *tv, bool force_update) {
-  if(!deferred_init) {
+void Host::periodic_stats_update(const struct timeval* tv, bool force_update) {
+  if (!deferred_init) {
     deferred_init = 1;
     deferredInitialization();
   }
@@ -1307,13 +1330,13 @@ void Host::periodic_stats_update(const struct timeval *tv, bool force_update) {
   checkDataReset();
   checkStatsReset();
   checkBroadcastDomain();
-  
-  if(stats) stats->updateStats(tv);
+
+  if (stats) stats->updateStats(tv);
 
   GenericHashEntry::periodic_stats_update(tv, force_update);
 
 #ifdef DEBUG_SCAN_DETECTION
-  if(num_incomplete_flows > 0) {
+  if (num_incomplete_flows > 0) {
     char buf[64];
 
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s: %u",
@@ -1333,8 +1356,8 @@ void Host::incStats(u_int32_t when, u_int8_t l4_proto, u_int ndpi_proto,
                     u_int64_t sent_bytes, u_int64_t sent_goodput_bytes,
                     u_int64_t rcvd_packets, u_int64_t rcvd_bytes,
                     u_int64_t rcvd_goodput_bytes, bool peer_is_unicast) {
-  if(sent_bytes || rcvd_bytes) {
-    if(stats)
+  if (sent_bytes || rcvd_bytes) {
+    if (stats)
       stats->incStats(when, l4_proto, ndpi_proto, ndpi_category, custom_app,
                       sent_packets, sent_bytes, sent_goodput_bytes,
                       rcvd_packets, rcvd_bytes, rcvd_goodput_bytes,
@@ -1346,14 +1369,14 @@ void Host::incStats(u_int32_t when, u_int8_t l4_proto, u_int ndpi_proto,
 
 /* *************************************** */
 
-void Host::serialize(json_object *my_object, DetailsLevel details_level) {
+void Host::serialize(json_object* my_object, DetailsLevel details_level) {
   char buf[96];
-  Mac *m = mac;
+  Mac* m = mac;
 
-  if(stats) stats->getJSONObject(my_object, details_level);
+  if (stats) stats->getJSONObject(my_object, details_level);
 
   json_object_object_add(my_object, "ip", ip.getJSONObject());
-  if(vlan_id != 0)
+  if (vlan_id != 0)
     json_object_object_add(my_object, "vlan_id", json_object_new_int(vlan_id));
   json_object_object_add(my_object, "mac_address",
                          json_object_new_string(Utils::formatMac(
@@ -1361,20 +1384,20 @@ void Host::serialize(json_object *my_object, DetailsLevel details_level) {
   json_object_object_add(my_object, "ifid",
                          json_object_new_int(iface->get_id()));
 
-  if(details_level >= details_high) {
+  if (details_level >= details_high) {
     GenericHashEntry::getJSONObject(my_object, details_level);
     json_object_object_add(my_object, "last_stats_reset",
                            json_object_new_int64(last_stats_reset));
     json_object_object_add(my_object, "asn", json_object_new_int(asn));
 
     get_name(buf, sizeof(buf), false);
-    if(strlen(buf))
+    if (strlen(buf))
       json_object_object_add(my_object, "symbolic_name",
                              json_object_new_string(buf));
-    if(asname)
+    if (asname)
       json_object_object_add(
           my_object, "asname",
-          json_object_new_string(asname ? asname : (char *)""));
+          json_object_new_string(asname ? asname : (char*)""));
 
     json_object_object_add(my_object, "localHost",
                            json_object_new_boolean(isLocalHost()));
@@ -1397,51 +1420,48 @@ void Host::serialize(json_object *my_object, DetailsLevel details_level) {
 
 /* *************************************** */
 
-char *Host::get_visual_name(char *buf, u_int buf_len) {
+char* Host::get_visual_name(char* buf, u_int buf_len) {
   bool mask_host = Utils::maskHost(isLocalHost());
   char buf2[64];
-  char *sym_name;
+  char* sym_name;
 
   buf[0] = '\0';
 
-  if(mask_host)
-    return(buf);
+  if (mask_host) return (buf);
 
   sym_name = get_name(buf2, sizeof(buf2), false);
 
-  if((sym_name == NULL) || (sym_name[0] == '\0'))
-    return(buf);
+  if ((sym_name == NULL) || (sym_name[0] == '\0')) return (buf);
 
   strncpy(buf, sym_name, buf_len);
   buf[buf_len - 1] = '\0';
 
-  return(buf);
+  return (buf);
 }
 
 /* *************************************** */
 
-bool Host::addIfMatching(lua_State *vm, AddressTree *ptree, char *key) {
+bool Host::addIfMatching(lua_State* vm, AddressTree* ptree, char* key) {
   char keybuf[64] = {0}, *keybuf_ptr;
   char ipbuf[64] = {0}, *ipbuf_ptr;
-  Mac *m = mac; /* Need to cache them as they can be swapped/updated */
+  Mac* m = mac; /* Need to cache them as they can be swapped/updated */
 
-  if(!match(ptree)) return (false);
+  if (!match(ptree)) return (false);
   keybuf_ptr = get_hostkey(keybuf, sizeof(keybuf));
 
-  if(strcasestr((ipbuf_ptr = Utils::formatMac(m ? m->get_mac() : NULL, ipbuf,
-					      sizeof(ipbuf))),
-		key)                          /* Match by MAC */
-     || strcasestr((ipbuf_ptr = keybuf_ptr), key) /* Match by hostkey */
-     || strcasestr((ipbuf_ptr = get_visual_name(ipbuf, sizeof(ipbuf))), key)
+  if (strcasestr((ipbuf_ptr = Utils::formatMac(m ? m->get_mac() : NULL, ipbuf,
+                                               sizeof(ipbuf))),
+                 key)                              /* Match by MAC */
+      || strcasestr((ipbuf_ptr = keybuf_ptr), key) /* Match by hostkey */
+      || strcasestr((ipbuf_ptr = get_visual_name(ipbuf, sizeof(ipbuf))), key)
 
-     || strcasestr(getMDNSName(ipbuf, sizeof(ipbuf)), key)
-     || strcasestr(getMDNSTXTName(ipbuf, sizeof(ipbuf)), key)
-     || strcasestr(getResolvedName(ipbuf, sizeof(ipbuf)), key)
-     || strcasestr(getNetbiosName(ipbuf, sizeof(ipbuf)), key)
-     || strcasestr(getTLSName(ipbuf, sizeof(ipbuf)), key)
-     || strcasestr(getHTTPName(ipbuf, sizeof(ipbuf)), key)
-     || strcasestr(getDHCPName(ipbuf, sizeof(ipbuf)), key)
-     ) { /* Match by name */
+      || strcasestr(getMDNSName(ipbuf, sizeof(ipbuf)), key) ||
+      strcasestr(getMDNSTXTName(ipbuf, sizeof(ipbuf)), key) ||
+      strcasestr(getResolvedName(ipbuf, sizeof(ipbuf)), key) ||
+      strcasestr(getNetbiosName(ipbuf, sizeof(ipbuf)), key) ||
+      strcasestr(getTLSName(ipbuf, sizeof(ipbuf)), key) ||
+      strcasestr(getHTTPName(ipbuf, sizeof(ipbuf)), key) ||
+      strcasestr(getDHCPName(ipbuf, sizeof(ipbuf)), key)) { /* Match by name */
 
     lua_push_str_table_entry(vm, keybuf_ptr, ipbuf_ptr);
     return (true);
@@ -1452,8 +1472,8 @@ bool Host::addIfMatching(lua_State *vm, AddressTree *ptree, char *key) {
 
 /* *************************************** */
 
-bool Host::addIfMatching(lua_State *vm, u_int8_t *_mac) {
-  if(mac && mac->equal(_mac)) {
+bool Host::addIfMatching(lua_State* vm, u_int8_t* _mac) {
+  if (mac && mac->equal(_mac)) {
     char keybuf[64], ipbuf[32];
 
     lua_push_str_table_entry(vm, get_string_key(ipbuf, sizeof(ipbuf)),
@@ -1468,13 +1488,13 @@ bool Host::addIfMatching(lua_State *vm, u_int8_t *_mac) {
 
 void Host::incNumFlows(time_t t, bool as_client, bool isTCP) {
   /* Called every time a new flow appear */
-  NetworkStats *ns = getNetworkStats(get_local_network_id());
-  AlertCounter *counter;
+  NetworkStats* ns = getNetworkStats(get_local_network_id());
+  AlertCounter* counter;
 
   /* Increase network flows */
-  if(ns) ns->incNumFlows(last_seen, as_client);
+  if (ns) ns->incNumFlows(last_seen, as_client);
 
-  if(as_client) {
+  if (as_client) {
     counter = flow_flood.attacker_counter;
     num_active_flows_as_client++;
   } else {
@@ -1483,14 +1503,14 @@ void Host::incNumFlows(time_t t, bool as_client, bool isTCP) {
   }
 
   counter->inc(t, this);
-  if(stats) stats->incNumFlows(as_client);
+  if (stats) stats->incNumFlows(as_client);
 }
 
 /* *************************************** */
 
 void Host::decNumFlows(time_t t, bool as_client, bool isTCP,
                        u_int16_t isTwhOver) {
-  if(as_client)
+  if (as_client)
     num_active_flows_as_client--;
   else
     num_active_flows_as_server--;
@@ -1499,19 +1519,19 @@ void Host::decNumFlows(time_t t, bool as_client, bool isTCP,
 /* *************************************** */
 
 #ifdef HAVE_NEDGE
-TrafficShaper *Host::get_shaper(ndpi_protocol ndpiProtocol) {
-  HostPools *hp;
+TrafficShaper* Host::get_shaper(ndpi_protocol ndpiProtocol) {
+  HostPools* hp;
   TrafficShaper *ts = NULL, **shapers = NULL;
   u_int8_t shaper_id = DEFAULT_SHAPER_ID;
-  L7Policer *policer;
+  L7Policer* policer;
   L7PolicySource_t policy_source;
 
-  if(!(policer = iface->getL7Policer())) return NULL;
-  if(!(hp = iface->getHostPools()))
+  if (!(policer = iface->getL7Policer())) return NULL;
+  if (!(hp = iface->getHostPools()))
     return policer->getShaper(PASS_ALL_SHAPER_ID);
 
   // Avoid setting drop verdicts for wan hosts policy
-  if(getMac() && (getMac()->locate() != located_on_lan_interface)) {
+  if (getMac() && (getMac()->locate() != located_on_lan_interface)) {
     return policer->getShaper(DEFAULT_SHAPER_ID);
   }
 
@@ -1524,15 +1544,14 @@ TrafficShaper *Host::get_shaper(ndpi_protocol ndpiProtocol) {
 
     ntop->getTrace()->traceEvent(
         TRACE_NORMAL, "[shaper] [%s@%u][ndpiProtocol=%d/%s] => [shaper_id=%d]",
-        ip.print(buf, sizeof(buf)), vlan_id,
-        ndpiProtocol.proto.app_protocol,
+        ip.print(buf, sizeof(buf)), vlan_id, ndpiProtocol.proto.app_protocol,
         ndpi_protocol2name(iface->get_ndpi_struct(), ndpiProtocol.proto, buf1,
                            sizeof(buf1)),
         shaper_id);
   }
 #endif
 
-  if(hp->enforceShapersPerPoolMember(get_host_pool()) &&
+  if (hp->enforceShapersPerPoolMember(get_host_pool()) &&
       (shapers = host_traffic_shapers) && shaper_id >= 0 &&
       shaper_id < NUM_TRAFFIC_SHAPERS) {
     ts = shapers[shaper_id];
@@ -1556,7 +1575,7 @@ TrafficShaper *Host::get_shaper(ndpi_protocol ndpiProtocol) {
   }
 
   /* Update blocking status */
-  if(ts && ts->shaping_enabled() && ts->get_max_rate_kbit_sec() == 0)
+  if (ts && ts->shaping_enabled() && ts->get_max_rate_kbit_sec() == 0)
     has_blocking_shaper = true;
   else
     has_blocking_shaper = false;
@@ -1569,13 +1588,13 @@ TrafficShaper *Host::get_shaper(ndpi_protocol ndpiProtocol) {
 
 #ifdef HAVE_NEDGE
 bool Host::checkQuota(ndpi_protocol ndpiProtocol,
-                      L7PolicySource_t *quota_source, const struct tm *now) {
+                      L7PolicySource_t* quota_source, const struct tm* now) {
   bool is_above;
-  L7Policer *policer;
+  L7Policer* policer;
 
-  if((policer = iface->getL7Policer()) == NULL) return false;
+  if ((policer = iface->getL7Policer()) == NULL) return false;
 
-  if(stats)
+  if (stats)
     is_above =
         policer->checkQuota(get_host_pool(), stats->getQuotaEnforcementStats(),
                             ndpiProtocol, quota_source, now);
@@ -1590,7 +1609,7 @@ bool Host::checkQuota(ndpi_protocol ndpiProtocol,
       ndpi_protocol2name(iface->get_ndpi_struct(), ndpiProtocol.proto, protobuf,
                          sizeof(protobuf)),
       ip.print(buf, sizeof(buf)), vlan_id,
-      is_above ? (char *)"EXCEEDED" : (char *)"ok",
+      is_above ? (char*)"EXCEEDED" : (char*)"ok",
       stats->getQuotaEnforcementStats() ? "[QUOTAS enforced per pool member]"
                                         : "");
 #endif
@@ -1601,11 +1620,11 @@ bool Host::checkQuota(ndpi_protocol ndpiProtocol,
 
 /* *************************************** */
 
-void Host::luaUsedQuotas(lua_State *vm) {
-  if(stats) {
-    HostPoolStats *quota_stats = stats->getQuotaEnforcementStats();
+void Host::luaUsedQuotas(lua_State* vm) {
+  if (stats) {
+    HostPoolStats* quota_stats = stats->getQuotaEnforcementStats();
 
-    if(quota_stats)
+    if (quota_stats)
       quota_stats->lua(vm, iface);
     else
       lua_newtable(vm);
@@ -1617,12 +1636,12 @@ void Host::luaUsedQuotas(lua_State *vm) {
 
 /* Splits a string in the format hostip@u_int16_t: *buf=hostip,
  * *vlan_id=u_int16_t */
-void Host::splitHostVLAN(const char *at_sign_str, char *buf, int bufsize,
-                         u_int16_t *vlan_id) {
+void Host::splitHostVLAN(const char* at_sign_str, char* buf, int bufsize,
+                         u_int16_t* vlan_id) {
   int size;
-  const char *vlan_ptr = strchr(at_sign_str, '@');
+  const char* vlan_ptr = strchr(at_sign_str, '@');
 
-  if(vlan_ptr == NULL) {
+  if (vlan_ptr == NULL) {
     vlan_ptr = at_sign_str + strlen(at_sign_str);
     *vlan_id = 0;
   } else {
@@ -1642,9 +1661,9 @@ void Host::reloadHostBlacklist() {
 
 /* *************************************** */
 
-void Host::offlineSetMDNSInfo(char *const str) {
-  char *cur_info;
-  const char *tokens[] = {"._http._tcp.local",
+void Host::offlineSetMDNSInfo(char* const str) {
+  char* cur_info;
+  const char* tokens[] = {"._http._tcp.local",
                           "._sftp-ssh._tcp.local",
                           "._smb._tcp.local",
                           "._device-info._tcp.local",
@@ -1652,18 +1671,17 @@ void Host::offlineSetMDNSInfo(char *const str) {
                           "._afpovertcp._tcp.local",
                           NULL};
 
-  if(names.mdns_info || !str || (str[0] == '_'))
-    return; /* Already set */
+  if (names.mdns_info || !str || (str[0] == '_')) return; /* Already set */
 
-  if(strstr(str, ".ip6.arpa")) return; /* Ignored for the time being */
+  if (strstr(str, ".ip6.arpa")) return; /* Ignored for the time being */
 
   for (int i = 0; tokens[i] != NULL; i++) {
-    if(strstr(str, tokens[i])) {
+    if (strstr(str, tokens[i])) {
       str[strlen(str) - strlen(tokens[i])] = '\0';
 
-      if((cur_info = strdup(str))) {
+      if ((cur_info = strdup(str))) {
         for (i = 0; cur_info[i] != '\0'; i++) {
-          if(!isascii(cur_info[i])) cur_info[i] = ' ';
+          if (!isascii(cur_info[i])) cur_info[i] = ' ';
         }
 
         /* Time to set the actual info */
@@ -1677,46 +1695,44 @@ void Host::offlineSetMDNSInfo(char *const str) {
 
 /* *************************************** */
 
-void Host::offlineSetSSDPLocation(const char *url) {
-  if(!ssdpLocation && url && (ssdpLocation = strdup(url)))
+void Host::offlineSetSSDPLocation(const char* url) {
+  if (!ssdpLocation && url && (ssdpLocation = strdup(url)))
     ;
 }
 
 /* *************************************** */
 
-void Host::offlineSetMDNSName(const char *mdns_n) {
-  if(!isValidHostName(mdns_n)) return;
-  if(!names.mdns && mdns_n)
-    names.mdns = Utils::toLowerResolvedNames(mdns_n);
+void Host::offlineSetMDNSName(const char* mdns_n) {
+  if (!isValidHostName(mdns_n)) return;
+  if (!names.mdns && mdns_n) names.mdns = Utils::toLowerResolvedNames(mdns_n);
 }
 
 /* *************************************** */
 
-void Host::offlineSetDHCPName(const char *dhcp_n) {
-  if(!isValidHostName(dhcp_n)) return;
-  if(!names.dhcp && dhcp_n)
-    names.dhcp = strdup(dhcp_n);
+void Host::offlineSetDHCPName(const char* dhcp_n) {
+  if (!isValidHostName(dhcp_n)) return;
+  if (!names.dhcp && dhcp_n) names.dhcp = strdup(dhcp_n);
 }
 
 /* *************************************** */
 
-void Host::offlineSetMDNSTXTName(const char *mdns_n_txt) {
-  if(!names.mdns_txt && mdns_n_txt)
+void Host::offlineSetMDNSTXTName(const char* mdns_n_txt) {
+  if (!names.mdns_txt && mdns_n_txt)
     names.mdns_txt = Utils::toLowerResolvedNames(mdns_n_txt);
 }
 
 /* *************************************** */
 
-void Host::offlineSetNetbiosName(const char *netbios_n) {
-  if(!isValidHostName(netbios_n)) return;
-  if(!names.netbios && netbios_n)
+void Host::offlineSetNetbiosName(const char* netbios_n) {
+  if (!isValidHostName(netbios_n)) return;
+  if (!names.netbios && netbios_n)
     names.netbios = Utils::toLowerResolvedNames(netbios_n);
 }
 
 /* *************************************** */
 
-void Host::offlineSetTLSName(const char *tls_n) {
-  if((!isValidHostName(tls_n)) || isLocalHost()) {
+void Host::offlineSetTLSName(const char* tls_n) {
+  if ((!isValidHostName(tls_n)) || isLocalHost()) {
     /*
       As in TLS we cannot check if the connection reported
       some mismatches we do not set TLS names for local hosts
@@ -1726,77 +1742,70 @@ void Host::offlineSetTLSName(const char *tls_n) {
     return;
   }
 
-  if(!names.tls && tls_n)
-    names.tls = Utils::toLowerResolvedNames(tls_n);
+  if (!names.tls && tls_n) names.tls = Utils::toLowerResolvedNames(tls_n);
 }
 
 /* *************************************** */
 
-void Host::offlineSetHTTPName(const char *http_n) {
-  if(!isValidHostName(http_n))
-    return;
-  
-  if(!names.http && http_n)
-    names.http = Utils::toLowerResolvedNames(http_n);
+void Host::offlineSetHTTPName(const char* http_n) {
+  if (!isValidHostName(http_n)) return;
+
+  if (!names.http && http_n) names.http = Utils::toLowerResolvedNames(http_n);
 }
 
 /* *************************************** */
 
-bool Host::isValidHostName(const char *name) {
+bool Host::isValidHostName(const char* name) {
   /* Make sure we do not use invalid names as strings */
   u_int ip4_0 = 0, ip4_1 = 0, ip4_2 = 0, ip4_3 = 0;
 
-  if((name == NULL)
-     || (name[0] == '_')
-     || Utils::endsWith(name, ".ip6.arpa")
-     || Utils::endsWith(name, "._udp.local")
-     || (sscanf(name, "%u.%u.%u.%u", &ip4_0, &ip4_1, &ip4_2, &ip4_3) == 4) /* IPv4 address */
-     /* Invalid chars */
-     || (strchr(name, ':') != NULL)
-     || (strchr(name, '*') != NULL)
-     || (strchr(name, ' ') != NULL)
-     || (strchr(name, '@') != NULL)
-     || (strchr(name, ',') != NULL)
-     || (strchr(name, '(') != NULL)
-     || (strchr(name, ')') != NULL)
-     )
+  if ((name == NULL) || (name[0] == '_') ||
+      Utils::endsWith(name, ".ip6.arpa") ||
+      Utils::endsWith(name, "._udp.local") ||
+      (sscanf(name, "%u.%u.%u.%u", &ip4_0, &ip4_1, &ip4_2, &ip4_3) ==
+       4) /* IPv4 address */
+      /* Invalid chars */
+      || (strchr(name, ':') != NULL) || (strchr(name, '*') != NULL) ||
+      (strchr(name, ' ') != NULL) || (strchr(name, '@') != NULL) ||
+      (strchr(name, ',') != NULL) || (strchr(name, '(') != NULL) ||
+      (strchr(name, ')') != NULL))
     return (false);
-  
+
   return (true);
 }
 
 /* *************************************** */
 
-void Host::setServerName(const char *server_n) {
-  if(!isValidHostName(server_n)) return;
-  if(!names.server_name && server_n)
+void Host::setServerName(const char* server_n) {
+  if (!isValidHostName(server_n)) return;
+  if (!names.server_name && server_n)
     names.server_name = Utils::toLowerResolvedNames(server_n);
 }
 
 /* *************************************** */
 
-void Host::setResolvedName(const char *resolved_name) {
+void Host::setResolvedName(const char* resolved_name) {
   /* Multiple threads can set this so we must lock */
-  if(resolved_name && resolved_name[0] != '\0') {
+  if (resolved_name && resolved_name[0] != '\0') {
     m.lock(__FILE__, __LINE__);
-    
-    if(!names.resolved /* Don't set hostnames already set */)
+
+    if (!names.resolved /* Don't set hostnames already set */)
       names.resolved = Utils::toLowerResolvedNames(resolved_name);
-    
+
     m.unlock(__FILE__, __LINE__);
   }
 }
 
 /* *************************************** */
 
-char *Host::get_country(char *buf, u_int buf_len) {
+char* Host::get_country(char* buf, u_int buf_len) {
   char *continent = NULL, *country_name = NULL, *city = NULL;
   float latitude = 0, longitude = 0;
 
   ntop->getGeolocation()->getInfo(&ip, &continent, &country_name, &city,
                                   &latitude, &longitude);
 
-  if(country_name)
+  if (country_name)
     snprintf(buf, buf_len, "%s", country_name);
   else
     buf[0] = '\0';
@@ -1808,14 +1817,14 @@ char *Host::get_country(char *buf, u_int buf_len) {
 
 /* *************************************** */
 
-char *Host::get_city(char *buf, u_int buf_len) {
+char* Host::get_city(char* buf, u_int buf_len) {
   char *continent = NULL, *country_name = NULL, *city = NULL;
   float latitude = 0, longitude = 0;
 
   ntop->getGeolocation()->getInfo(&ip, &continent, &country_name, &city,
                                   &latitude, &longitude);
 
-  if(city) {
+  if (city) {
     snprintf(buf, buf_len, "%s", city);
   } else
     buf[0] = '\0';
@@ -1827,7 +1836,7 @@ char *Host::get_city(char *buf, u_int buf_len) {
 
 /* *************************************** */
 
-void Host::get_geocoordinates(float *latitude, float *longitude) {
+void Host::get_geocoordinates(float* latitude, float* longitude) {
   char *continent = NULL, *country_name = NULL, *city = NULL;
 
   *latitude = 0, *longitude = 0;
@@ -1838,34 +1847,34 @@ void Host::get_geocoordinates(float *latitude, float *longitude) {
 
 /* *************************************** */
 
-void Host::serialize_geocoordinates(ndpi_serializer *s, const char *prefix) {
+void Host::serialize_geocoordinates(ndpi_serializer* s, const char* prefix) {
   char *continent = NULL, *country = NULL, *city = NULL, buf[64];
   float latitude = 0, longitude = 0;
 
   ntop->getGeolocation()->getInfo(&ip, &continent, &country, &city, &latitude,
                                   &longitude);
 
-  if(city) {
+  if (city) {
     snprintf(buf, sizeof(buf), "%scity_name", prefix);
     ndpi_serialize_string_string(s, buf, city);
   }
 
-  if(country) {
+  if (country) {
     snprintf(buf, sizeof(buf), "%scountry_name", prefix);
     ndpi_serialize_string_string(s, buf, country);
   }
 
-  if(continent) {
+  if (continent) {
     snprintf(buf, sizeof(buf), "%scontinent_name", prefix);
     ndpi_serialize_string_string(s, buf, continent);
   }
 
-  if(longitude) {
+  if (longitude) {
     snprintf(buf, sizeof(buf), "%slocation_lon", prefix);
     ndpi_serialize_string_float(s, buf, longitude, "%f");
   }
 
-  if(latitude) {
+  if (latitude) {
     snprintf(buf, sizeof(buf), "%slocation_lat", prefix);
     ndpi_serialize_string_float(s, buf, latitude, "%f");
   }
@@ -1894,7 +1903,7 @@ bool Host::isBidirectionalTraffic() const {
 
 DeviceProtoStatus Host::getDeviceAllowedProtocolStatus(ndpi_protocol proto,
                                                        bool as_client) {
-  if(getMac() &&
+  if (getMac() &&
       !getMac()->isSpecialMac()
 #ifdef HAVE_NEDGE
       /* On nEdge the concept of device protocol policies is only applied to
@@ -1925,13 +1934,13 @@ void Host::blacklistedStatsResetRequested() {
 /* *************************************** */
 
 void Host::checkStatsReset() {
-  if(stats_shadow) {
+  if (stats_shadow) {
     delete stats_shadow;
     stats_shadow = NULL;
   }
 
-  if(statsResetRequested()) {
-    HostStats *new_stats = allocateStats();
+  if (statsResetRequested()) {
+    HostStats* new_stats = allocateStats();
 
     stats_shadow = stats;
     stats = new_stats;
@@ -1955,68 +1964,68 @@ void Host::checkStatsReset() {
   to set on the original host, the services that
   have been observed on the shadow IP address
 */
-void Host::updateView(IpAddress *ipa) {
+void Host::updateView(IpAddress* ipa) {
   for (int i = 1; i <= NUM_HOST_SERVICES; i++)
-    if (ipa->providesService(i) && !providesService(i))
-      setService(i);
+    if (ipa->providesService(i) && !providesService(i)) setService(i);
 }
 
 /* *************************************** */
 
 void Host::checkBroadcastDomain() {
-  if(iface->reloadHostsBroadcastDomain())
-    is_in_broadcast_domain = iface->isLocalBroadcastDomainHost(this, false /* Non-inline call */);
+  if (iface->reloadHostsBroadcastDomain())
+    is_in_broadcast_domain =
+        iface->isLocalBroadcastDomainHost(this, false /* Non-inline call */);
 }
 
 /* *************************************** */
 
 void Host::freeHostNames() {
-  if(ssdpLocation) {
+  if (ssdpLocation) {
     free(ssdpLocation);
     ssdpLocation = NULL;
   }
-  
-  if(names.http) {
+
+  if (names.http) {
     free(names.http);
     names.http = NULL;
   }
-  
-  if(names.mdns) {
+
+  if (names.mdns) {
     free(names.mdns);
     names.mdns = NULL;
   }
-  
-  if(names.mdns_info) {
+
+  if (names.mdns_info) {
     free(names.mdns_info);
     names.mdns_info = NULL;
   }
-  
-  if(names.mdns_txt) {
+
+  if (names.mdns_txt) {
     free(names.mdns_txt);
     names.mdns_txt = NULL;
   }
-  
-  if(names.netbios) {
+
+  if (names.netbios) {
     free(names.netbios);
     names.netbios = NULL;
   }
-  
-  if(names.resolved) {
+
+  if (names.resolved) {
     free(names.resolved);
     names.resolved = NULL;
   }
-  
-  if(names.server_name) {
+
+  if (names.server_name) {
     free(names.server_name);
     names.server_name = NULL;
   }
-  
-  if(names.tls) {
+
+  if (names.tls) {
     free(names.tls);
     names.tls = NULL;
   }
-  
-  if(names.dhcp) {
+
+  if (names.dhcp) {
     free(names.dhcp);
     names.dhcp = NULL;
   }
@@ -2033,7 +2042,7 @@ void Host::resetHostNames() {
 /* *************************************** */
 
 void Host::checkNameReset() {
-  if(name_reset_requested) {
+  if (name_reset_requested) {
     resetHostNames();
     name_reset_requested = 0;
   }
@@ -2049,7 +2058,7 @@ void Host::deleteHostData() {
 /* *************************************** */
 
 void Host::checkDataReset() {
-  if(data_delete_requested) {
+  if (data_delete_requested) {
     deleteHostData();
     data_delete_requested = 0;
   }
@@ -2057,12 +2066,12 @@ void Host::checkDataReset() {
 
 /* *************************************** */
 
-char *Host::get_mac_based_tskey(Mac *mac, char *buf, size_t bufsize,
+char* Host::get_mac_based_tskey(Mac* mac, char* buf, size_t bufsize,
                                 bool skip_prefix) {
-  char *k = mac ? Utils::formatMac(mac->get_mac(), buf, bufsize)
+  char* k = mac ? Utils::formatMac(mac->get_mac(), buf, bufsize)
                 : Utils::formatMac(NULL, buf, bufsize);
 
-  if(!skip_prefix) {
+  if (!skip_prefix) {
     /* NOTE: it is important to differentiate between v4 and v6 for macs */
     strncat(buf, get_ip()->isIPv4() ? "_v4" : "_v6", bufsize);
   }
@@ -2073,13 +2082,12 @@ char *Host::get_mac_based_tskey(Mac *mac, char *buf, size_t bufsize,
 /* *************************************** */
 
 bool Host::setOS(ndpi_os _os, OSLearningMode mode) {
-  Mac *cur_mac;
+  Mac* cur_mac;
   char msg[64];
-  
-  if(_os == ndpi_os_unknown)
-    return(false);
-  
-  if((os_type != ndpi_os_unknown) && (os_type != _os)) {    
+
+  if (_os == ndpi_os_unknown) return (false);
+
+  if ((os_type != ndpi_os_unknown) && (os_type != _os)) {
 #if 0
     char buf[64];
     
@@ -2088,47 +2096,46 @@ bool Host::setOS(ndpi_os _os, OSLearningMode mode) {
 				 print(buf, sizeof(buf)));
 #endif
 
-    if(mode == os_learning_http_user_agent) {
+    if (mode == os_learning_http_user_agent) {
       /*
-	In case of inconsistency, we ignore the User-Agent information
-	as this information can be inconsistent/fake/wrong
+        In case of inconsistency, we ignore the User-Agent information
+        as this information can be inconsistent/fake/wrong
       */
-      
-      return(false); /* Don't overwrite the existing value */
+
+      return (false); /* Don't overwrite the existing value */
     }
   }
-  
+
   os_type = _os;
 
   cur_mac = getMac(); /* Cache macs as they can be swapped/updated */
 
-  snprintf(msg, sizeof(msg), "%s (%s)",
-	   Utils::OS2Str(_os), Utils::learningMode2str(mode));
-  
+  snprintf(msg, sizeof(msg), "%s (%s)", Utils::OS2Str(_os),
+           Utils::learningMode2str(mode));
+
   ntop->trackAssetChange("Host", "setOS", NULL, NULL, this, NULL, msg);
 
   /* In case the device type is not set, we can infer it from the OS */
-  if((cur_mac != NULL) && (cur_mac->getDeviceType() == device_unknown)) {
+  if ((cur_mac != NULL) && (cur_mac->getDeviceType() == device_unknown)) {
     DeviceType dt = Utils::osType2deviceType(os_type);
 
-    if(dt != device_unknown) {
-      if(getDeviceType() == device_unknown)
-	setDeviceType(dt);      
-	  
+    if (dt != device_unknown) {
+      if (getDeviceType() == device_unknown) setDeviceType(dt);
+
       cur_mac->setDeviceType(dt);
     }
   }
 
-  return(true); /* OS set */
+  return (true); /* OS set */
 }
 
 /* *************************************** */
 
-char *Host::get_tskey(char *buf, size_t bufsize) {
-  char *k;
-  Mac *cur_mac = getMac(); /* Cache macs as they can be swapped/updated */
+char* Host::get_tskey(char* buf, size_t bufsize) {
+  char* k;
+  Mac* cur_mac = getMac(); /* Cache macs as they can be swapped/updated */
 
-  if(serializeByMac())
+  if (serializeByMac())
     k = get_mac_based_tskey(cur_mac, buf, bufsize);
   else
     k = get_hostkey(buf, bufsize);
@@ -2140,9 +2147,9 @@ char *Host::get_tskey(char *buf, size_t bufsize) {
 
 void Host::refreshDisabledAlerts() {
 #ifdef NTOPNG_PRO
-  AlertExclusions *ntop_alert_exclusions = ntop->getAlertExclusions();
+  AlertExclusions* ntop_alert_exclusions = ntop->getAlertExclusions();
 
-  if(ntop_alert_exclusions &&
+  if (ntop_alert_exclusions &&
       ntop_alert_exclusions->checkChange(&disabled_alerts_tstamp)) {
     /* Set alert exclusion into the host */
     ntop_alert_exclusions->setDisabledHostAlertsBitmaps(this);
@@ -2179,14 +2186,16 @@ bool Host::isFlowAlertDisabled(FlowAlertType alert_type) {
 /* Serialize host info to json (used by HostAlert::getSerializedAlert)
  * NOTE: keep in sync with alerts_api.lua (getHostAttributes)
  */
-void Host::serializeAttributes(ndpi_serializer *serializer) {
+void Host::serializeAttributes(ndpi_serializer* serializer) {
   char buf[64];
 
-  ndpi_serialize_string_string(serializer, "name", get_visual_name(buf, sizeof(buf)));
+  ndpi_serialize_string_string(serializer, "name",
+                               get_visual_name(buf, sizeof(buf)));
   ndpi_serialize_string_boolean(serializer, "localhost", isLocalHost());
   ndpi_serialize_string_boolean(serializer, "systemhost", isSystemHost());
   ndpi_serialize_string_boolean(serializer, "privatehost", isPrivateHost());
-  ndpi_serialize_string_boolean(serializer, "broadcast_domain_host", isBroadcastDomainHost());
+  ndpi_serialize_string_boolean(serializer, "broadcast_domain_host",
+                                isBroadcastDomainHost());
   ndpi_serialize_string_boolean(serializer, "dhcpHost", isDHCPHost());
   ndpi_serialize_string_boolean(serializer, "is_blacklisted", isBlacklisted());
   ndpi_serialize_string_boolean(serializer, "is_broadcast", isBroadcastHost());
@@ -2194,28 +2203,31 @@ void Host::serializeAttributes(ndpi_serializer *serializer) {
 
 #ifdef HAVE_NEDGE
   ndpi_serialize_string_boolean(serializer, "childSafe", isChildSafe());
-  ndpi_serialize_string_boolean(serializer, "drop_all_host_traffic", dropAllTraffic());
+  ndpi_serialize_string_boolean(serializer, "drop_all_host_traffic",
+                                dropAllTraffic());
 #endif
 }
 
 /* *************************************** */
 
-/* Create a JSON in the alerts format 
+/* Create a JSON in the alerts format
  * NOTE: keep in sync with HostAlertableEntity::luaAlert and alerts_api.lua
  */
-void Host::alert2JSON(HostAlert *alert, bool released, ndpi_serializer *s) {
+void Host::alert2JSON(HostAlert* alert, bool released, ndpi_serializer* s) {
   char ip_buf[128], buf[128];
-  ndpi_serializer *alert_json_serializer = NULL;
-  char *alert_json = NULL;
+  ndpi_serializer* alert_json_serializer = NULL;
+  char* alert_json = NULL;
   u_int32_t alert_json_len;
 
-  /* rowid is used by engaged (in-memory) alerts only to delete them when disengaged */
+  /* rowid is used by engaged (in-memory) alerts only to delete them when
+   * disengaged */
   ndpi_serialize_string_int64(s, "rowid", alert->getRowID());
 
   ndpi_serialize_string_int32(s, "ifid", getInterface()->get_id());
   ndpi_serialize_string_string(s, "action", released ? "release" : "engage");
   ndpi_serialize_string_int32(s, "alert_id", alert->getAlertType().id);
-  ndpi_serialize_string_int32(s, "alert_category", alert->getAlertType().category);
+  ndpi_serialize_string_int32(s, "alert_category",
+                              alert->getAlertType().category);
   ndpi_serialize_string_boolean(s, "require_attention", !alert->autoAck());
   ndpi_serialize_string_string(s, "subtype", "" /* No subtype for hosts */);
   ndpi_serialize_string_int32(s, "score", alert->getAlertScore());
@@ -2236,15 +2248,17 @@ void Host::alert2JSON(HostAlert *alert, bool released, ndpi_serializer *s) {
   ndpi_serialize_string_boolean(s, "is_server", alert->isServer());
 
   ndpi_serialize_string_uint32(s, "network", (u_int32_t)get_local_network_id());
-  ndpi_serialize_string_int32(s, "observation_point_id", get_observation_point_id());
+  ndpi_serialize_string_int32(s, "observation_point_id",
+                              get_observation_point_id());
   serialize_geocoordinates(s, "");
 
-  HostCheck *cb = getInterface()->getCheck(alert->getCheckType());
+  HostCheck* cb = getInterface()->getCheck(alert->getCheckType());
   ndpi_serialize_string_int32(s, "granularity", cb ? cb->getPeriod() : 0);
 
   alert_json_serializer = alert->getSerializedAlert();
   if (alert_json_serializer)
-    alert_json = ndpi_serializer_get_buffer(alert_json_serializer, &alert_json_len);
+    alert_json =
+        ndpi_serializer_get_buffer(alert_json_serializer, &alert_json_len);
 
   ndpi_serialize_string_string(s, "json", alert_json ? alert_json : "");
 
@@ -2257,13 +2271,13 @@ void Host::alert2JSON(HostAlert *alert, bool released, ndpi_serializer *s) {
 /* *************************************** */
 
 /* Enqueue alert to recipients */
-bool Host::enqueueAlertToRecipients(HostAlert *alert, bool released) {
+bool Host::enqueueAlertToRecipients(HostAlert* alert, bool released) {
   bool rv = false;
   u_int32_t buflen;
-  AlertFifoItem *notification;
+  AlertFifoItem* notification;
   ndpi_serializer host_json;
-  const char *host_str;
-  const char *instance_name;
+  const char* host_str;
+  const char* instance_name;
 
   ndpi_init_serializer(&host_json, ndpi_serialization_format_json);
 
@@ -2274,8 +2288,8 @@ bool Host::enqueueAlertToRecipients(HostAlert *alert, bool released) {
 
   notification = new AlertFifoItem();
 
-  if(notification) {
-    notification->alert = (char *)host_str;
+  if (notification) {
+    notification->alert = (char*)host_str;
     notification->score = alert->getAlertScore();
     notification->alert_severity =
         Utils::mapScoreToSeverity(notification->score);
@@ -2286,10 +2300,10 @@ bool Host::enqueueAlertToRecipients(HostAlert *alert, bool released) {
 
     rv = ntop->recipients_enqueue(notification);
 
-    if(!rv) delete notification;
+    if (!rv) delete notification;
 
     /* Push filters to the Smart Recording service */
-    if(iface->isSmartRecordingEnabled() &&
+    if (iface->isSmartRecordingEnabled() &&
         (instance_name = iface->getSmartRecordingInstance())) {
       char key[256], ip_buf[64];
       int expiration = 30 * 60; /* 30 min */
@@ -2297,7 +2311,7 @@ bool Host::enqueueAlertToRecipients(HostAlert *alert, bool released) {
       /* Note: see alerts_api.lua: pushSmartRecordingFilter() for alerts
        * triggered from Lua */
 
-      if(alert->isReleased() && alert->isLastReleased()) {
+      if (alert->isReleased() && alert->isLastReleased()) {
         /* Relased: 30 min expiration to make sure n2disk data is processed */
         expiration = 30 * 60;
       } else {
@@ -2314,21 +2328,21 @@ bool Host::enqueueAlertToRecipients(HostAlert *alert, bool released) {
     }
 
     /* Push filters to the "Runtime Manager" in pfring for filtering */
-    if(iface->pushHostFilters()) {
+    if (iface->pushHostFilters()) {
       char value[64], ip_buf[64], key[64];
-      char *ip_str = get_ip()->print(ip_buf, sizeof(ip_buf));
+      char* ip_str = get_ip()->print(ip_buf, sizeof(ip_buf));
 
       snprintf(key, sizeof(key), "pfring.%d.filter.host.queue",
                iface->get_id());
 
-      if(!alert->isReleased()) {
+      if (!alert->isReleased()) {
         /* Engaged: add host (if not already present) */
         snprintf(value, sizeof(value), "+%s", ip_str);
         ntop->getRedis()->rpush(key, value, 1024 /* trim size */);
 
       } else {
         /* Released (or Stored) */
-        if(alert->isLastReleased()) {
+        if (alert->isLastReleased()) {
           /* No other alerts released: remove host (if any) */
           snprintf(value, sizeof(value), "-%s", ip_str);
           ntop->getRedis()->rpush(key, value, 1024 /* trim size */);
@@ -2337,11 +2351,11 @@ bool Host::enqueueAlertToRecipients(HostAlert *alert, bool released) {
     }
   }
 
-  if(!rv) getInterface()->incNumDroppedAlerts(alert_entity_host);
+  if (!rv) getInterface()->incNumDroppedAlerts(alert_entity_host);
 
   ndpi_term_serializer(&host_json);
 
-  if(released) delete alert;
+  if (released) delete alert;
 
   return rv;
 }
@@ -2352,8 +2366,8 @@ bool Host::enqueueAlertToRecipients(HostAlert *alert, bool released) {
 void Host::releaseAllEngagedAlerts() {
   for (u_int i = 0; i < NUM_DEFINED_HOST_CHECKS; i++) {
     HostCheckID t = (HostCheckID)i;
-    HostAlert *alert = getCheckEngagedAlert(t);
-    if(alert) {
+    HostAlert* alert = getCheckEngagedAlert(t);
+    if (alert) {
       releaseAlert(alert);
     }
   }
@@ -2364,22 +2378,22 @@ void Host::releaseAllEngagedAlerts() {
 /*
  * This is called by the Check to trigger an alert
  */
-bool Host::triggerAlert(HostAlert *alert) {
+bool Host::triggerAlert(HostAlert* alert) {
   ScoreCategory score_category;
   HostAlertType alert_type;
   u_int64_t alert_rowid = alert->getRowID();
 
-  if(alert == NULL) return false;
+  if (alert == NULL) return false;
 
   alert_type = alert->getAlertType();
 
-  if(ntop->getPrefs()->dontEmitHostAlerts() /* all host alerts disabled */ ||
+  if (ntop->getPrefs()->dontEmitHostAlerts() /* all host alerts disabled */ ||
       isHostAlertDisabled(
           alert_type) /* alerts disabled for this host and type */) {
 #ifdef DEBUG_SCORE
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "Discarding disabled alert");
 #endif
-    if(getCheckEngagedAlert(alert->getCheckType()) ==
+    if (getCheckEngagedAlert(alert->getCheckType()) ==
         alert)              /* Alert is engaged */
       alert->setExpiring(); /* Mark this alert as expiring to have it released
                                soon */
@@ -2390,16 +2404,17 @@ bool Host::triggerAlert(HostAlert *alert) {
   }
 
   /* Get a new rowid, unless already engaged and assigned a rowid */
-  if(!alert_rowid) alert_rowid = iface->getNewAlertSerial();
+  if (!alert_rowid) alert_rowid = iface->getNewAlertSerial();
 
   /* Leave this AFTER the isHostAlertDisabled check */
   alert->setEngaged(alert_rowid);
 
-  if(hasCheckEngagedAlert(alert->getCheckType())) {
-    if(getCheckEngagedAlert(alert->getCheckType()) == alert) {
+  if (hasCheckEngagedAlert(alert->getCheckType())) {
+    if (getCheckEngagedAlert(alert->getCheckType()) == alert) {
       /* This is a refresh (see alert->isExpired()) */
-      //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Refreshing alert already engaged"
-      //  " with ID = %llu", alert->getRowID());
+      // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Refreshing alert already
+      // engaged"
+      //   " with ID = %llu", alert->getRowID());
       return true;
     } else {
       ntop->getTrace()->traceEvent(
@@ -2410,7 +2425,8 @@ bool Host::triggerAlert(HostAlert *alert) {
     }
   }
 
-  //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Triggering alert engaged with ID = %llu", alert->getRowID());
+  // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Triggering alert engaged with
+  // ID = %llu", alert->getRowID());
 
 #ifdef DEBUG_SCORE
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Set host score %u/%u",
@@ -2437,10 +2453,11 @@ bool Host::triggerAlert(HostAlert *alert) {
  * This is called by the Check (or by the HostChecksExecutor
  * for expired alerts with auto release) to release an alert
  */
-void Host::releaseAlert(HostAlert *alert) {
+void Host::releaseAlert(HostAlert* alert) {
   ScoreCategory score_category;
 
-  //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Releasing alert engaged with ID = %llu", alert->getRowID());
+  // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Releasing alert engaged with ID
+  // = %llu", alert->getRowID());
 
   /* Set as released */
   alert->release();
@@ -2449,7 +2466,7 @@ void Host::releaseAlert(HostAlert *alert) {
   removeEngagedAlert(alert);
 
   /* Mark this alert as last engaged if there are no more engaged alerts */
-  if(!getNumEngagedAlerts()) alert->setLastReleased();
+  if (!getNumEngagedAlerts()) alert->setLastReleased();
 
   /* Dec score */
   score_category =
@@ -2466,14 +2483,14 @@ void Host::releaseAlert(HostAlert *alert) {
 /*
  * This is called by the Check to store an alert (trigger as already released)
  */
-bool Host::storeAlert(HostAlert *alert) {
+bool Host::storeAlert(HostAlert* alert) {
   HostAlertType alert_type;
 
-  if(alert == NULL) return false;
+  if (alert == NULL) return false;
 
   alert_type = alert->getAlertType();
 
-  if(ntop->getPrefs()->dontEmitHostAlerts() /* all host alerts disabled */ ||
+  if (ntop->getPrefs()->dontEmitHostAlerts() /* all host alerts disabled */ ||
       isHostAlertDisabled(
           alert_type) /* alerts disabled for this host and type */) {
 #ifdef DEBUG_SCORE
@@ -2489,7 +2506,7 @@ bool Host::storeAlert(HostAlert *alert) {
   /* Set as released */
   alert->release();
 
-  if(!getNumEngagedAlerts()) alert->setLastReleased();
+  if (!getNumEngagedAlerts()) alert->setLastReleased();
 
   /* Enqueue the released alert to be notified */
   iface->enqueueHostAlert(alert);
@@ -2500,10 +2517,10 @@ bool Host::storeAlert(HostAlert *alert) {
 /* *************************************** */
 
 u_int16_t Host::get_country_code() {
-  if(country) {
-    char *country_name = country->get_country_name();
+  if (country) {
+    char* country_name = country->get_country_name();
 
-    if(country_name) return (Utils::countryCode2U16(country_name));
+    if (country_name) return (Utils::countryCode2U16(country_name));
   } /* No else here */
 
   return (0); /* Not found */
@@ -2512,17 +2529,17 @@ u_int16_t Host::get_country_code() {
 /* *************************************** */
 
 /* Visit the host and add it to the vector */
-void Host::visit(std::vector<ActiveHostWalkerInfo> *v, HostWalkMode mode) {
+void Host::visit(std::vector<ActiveHostWalkerInfo>* v, HostWalkMode mode) {
   char buf[64], key[96], *label = get_visual_name(buf, sizeof(buf));
   u_int64_t tot;
 
-  if(get_vlan_id() == 0)
+  if (get_vlan_id() == 0)
     snprintf(key, sizeof(key), "%s", printMask(buf, sizeof(buf)));
   else
     snprintf(key, sizeof(key), "%s@%u", printMask(buf, sizeof(buf)),
              get_vlan_id());
 
-  if(label[0] == '\0') label = key;
+  if (label[0] == '\0') label = key;
 
   switch (mode) {
     case ALL_FLOWS:
@@ -2542,19 +2559,19 @@ void Host::visit(std::vector<ActiveHostWalkerInfo> *v, HostWalkMode mode) {
       tot =
           getTotalNumAlertedIncomingFlows() + getTotalNumAlertedOutgoingFlows();
 
-      if(tot > 0)
+      if (tot > 0)
         v->push_back(
             ActiveHostWalkerInfo(key, label, getTotalNumAlertedIncomingFlows(),
                                  getTotalNumAlertedOutgoingFlows(), tot));
       break;
 
     case DNS_QUERIES: {
-      DnsStats *dns = getDNSstats();
+      DnsStats* dns = getDNSstats();
 
-      if(dns) {
+      if (dns) {
         tot = dns->getRcvdNumRepliesOk() + dns->getSentNumQueries();
 
-        if(tot > 0)
+        if (tot > 0)
           v->push_back(ActiveHostWalkerInfo(key, label,
                                             dns->getRcvdNumRepliesOk(),
                                             dns->getSentNumQueries(), tot));
@@ -2562,52 +2579,55 @@ void Host::visit(std::vector<ActiveHostWalkerInfo> *v, HostWalkMode mode) {
     } break;
 
     case SYN_DISTRIBUTION: {
-      HostStats *stats = getStats();
+      HostStats* stats = getStats();
 
-      if(stats) {
+      if (stats) {
         tot = getNumOutgoingFlows() + getNumIncomingFlows();
 
-        if(tot > 0)
-          v->push_back(ActiveHostWalkerInfo(key, label, stats->getSentStats()->getNumSYN(),
-					    stats->getRecvStats()->getNumSYN(), tot));
+        if (tot > 0)
+          v->push_back(ActiveHostWalkerInfo(
+              key, label, stats->getSentStats()->getNumSYN(),
+              stats->getRecvStats()->getNumSYN(), tot));
       }
     } break;
 
     case SYN_VS_RST: {
-      HostStats *stats = getStats();
+      HostStats* stats = getStats();
 
-      if(stats) {
+      if (stats) {
         tot = getNumOutgoingFlows() + getNumIncomingFlows();
 
-        if(tot > 0)
-          v->push_back(ActiveHostWalkerInfo(key, label, stats->getSentStats()->getNumSYN(),
-					    stats->getRecvStats()->getNumRST(), tot));
+        if (tot > 0)
+          v->push_back(ActiveHostWalkerInfo(
+              key, label, stats->getSentStats()->getNumSYN(),
+              stats->getRecvStats()->getNumRST(), tot));
       }
     } break;
 
     case SYN_VS_SYNACK: {
-      HostStats *stats = getStats();
+      HostStats* stats = getStats();
 
-      if(stats) {
+      if (stats) {
         tot = getNumOutgoingFlows() + getNumIncomingFlows();
 
-        if(tot > 0)
-          v->push_back(ActiveHostWalkerInfo(key, label, stats->getSentStats()->getNumSYN(),
-					    stats->getRecvStats()->getNumSYNACK(), tot));
+        if (tot > 0)
+          v->push_back(ActiveHostWalkerInfo(
+              key, label, stats->getSentStats()->getNumSYN(),
+              stats->getRecvStats()->getNumSYNACK(), tot));
       }
     } break;
 
     case TCP_PKTS_SENT_VS_RCVD: {
-      HostStats *stats = getStats();
+      HostStats* stats = getStats();
 
-      if(stats) {
-        L4Stats *l4 = stats->getL4Stats();
+      if (stats) {
+        L4Stats* l4 = stats->getL4Stats();
 
-        if(l4) {
+        if (l4) {
           tot =
               l4->getTCPSent()->getNumBytes() + l4->getTCPRcvd()->getNumBytes();
 
-          if(tot > 0)
+          if (tot > 0)
             v->push_back(
                 ActiveHostWalkerInfo(key, label, l4->getTCPSent()->getNumPkts(),
                                      l4->getTCPRcvd()->getNumPkts(), tot));
@@ -2616,24 +2636,25 @@ void Host::visit(std::vector<ActiveHostWalkerInfo> *v, HostWalkMode mode) {
     } break;
 
     case TCP_BYTES_SENT_VS_RCVD: {
-      HostStats *stats = getStats();
+      HostStats* stats = getStats();
 
-      if(stats) {
-        L4Stats *l4 = stats->getL4Stats();
+      if (stats) {
+        L4Stats* l4 = stats->getL4Stats();
 
-        if(l4) {
+        if (l4) {
           tot =
               l4->getTCPSent()->getNumBytes() + l4->getTCPRcvd()->getNumBytes();
 
-          if(tot > 0)
-            v->push_back(ActiveHostWalkerInfo(key, label, l4->getTCPSent()->getNumBytes(),
-					      l4->getTCPRcvd()->getNumBytes(), tot));
+          if (tot > 0)
+            v->push_back(ActiveHostWalkerInfo(
+                key, label, l4->getTCPSent()->getNumBytes(),
+                l4->getTCPRcvd()->getNumBytes(), tot));
         }
       }
     } break;
 
     case ACTIVE_ALERT_FLOWS:
-      if(getNumAlertedFlows() > 0)
+      if (getNumAlertedFlows() > 0)
         v->push_back(ActiveHostWalkerInfo(key, label, getNumIncomingFlows(),
                                           getNumOutgoingFlows(),
                                           getNumAlertedFlows()));
@@ -2647,14 +2668,15 @@ void Host::visit(std::vector<ActiveHostWalkerInfo> *v, HostWalkMode mode) {
 
       tot = getNumBytesSent() + getNumBytesRcvd();
 
-      if(tot > 0)
-        v->push_back(ActiveHostWalkerInfo(key, label, bytes_ratio, pkts_ratio, tot));
+      if (tot > 0)
+        v->push_back(
+            ActiveHostWalkerInfo(key, label, bytes_ratio, pkts_ratio, tot));
     } break;
 
     case SCORE:
       tot = getScoreAsClient() + getScoreAsServer();
 
-      if(tot > 0)
+      if (tot > 0)
         v->push_back(ActiveHostWalkerInfo(key, label, getScoreAsClient(),
                                           getScoreAsServer(), tot));
       break;
@@ -2662,7 +2684,7 @@ void Host::visit(std::vector<ActiveHostWalkerInfo> *v, HostWalkMode mode) {
     case BLACKLISTED_FLOWS_HOSTS:
       tot = num_blacklisted_flows.as_client + num_blacklisted_flows.as_server;
 
-      if(tot > 0)
+      if (tot > 0)
         v->push_back(
             ActiveHostWalkerInfo(key, label, num_blacklisted_flows.as_client,
                                  num_blacklisted_flows.as_server, tot));
@@ -2672,9 +2694,10 @@ void Host::visit(std::vector<ActiveHostWalkerInfo> *v, HostWalkMode mode) {
       tot = unidirectionalTCPUDPFlows.numIngressFlows +
             unidirectionalTCPUDPFlows.numEgressFlows;
 
-      if(tot > 0)
-        v->push_back(ActiveHostWalkerInfo(key, label, unidirectionalTCPUDPFlows.numEgressFlows,
-					  unidirectionalTCPUDPFlows.numIngressFlows, tot));
+      if (tot > 0)
+        v->push_back(ActiveHostWalkerInfo(
+            key, label, unidirectionalTCPUDPFlows.numEgressFlows,
+            unidirectionalTCPUDPFlows.numIngressFlows, tot));
       break;
   }
 }
@@ -2682,14 +2705,13 @@ void Host::visit(std::vector<ActiveHostWalkerInfo> *v, HostWalkMode mode) {
 /* *************************************** */
 
 void Host::setService(int service_enum) {
-  if(!providesService(service_enum))
-    host_services_bitmap |= 1 << service_enum;
+  if (!providesService(service_enum)) host_services_bitmap |= 1 << service_enum;
 }
 
 /* *************************************** */
 
-void Host::setBlacklistName(char *name) {
-  if((name == NULL) || (blacklist_name != NULL) /* Already set */
+void Host::setBlacklistName(char* name) {
+  if ((name == NULL) || (blacklist_name != NULL) /* Already set */
   )
     return;
 
@@ -2697,7 +2719,7 @@ void Host::setBlacklistName(char *name) {
 
   ntop->incBlacklisHits(std::string(name));
 
-  if(ntop->getPrefs()->collectBlackListStats()) {
+  if (ntop->getPrefs()->collectBlackListStats()) {
     char key[128], theDate[32], ip_buf[64];
     time_t theTime = time(NULL);
 #ifndef WIN32
@@ -2716,15 +2738,15 @@ void Host::setBlacklistName(char *name) {
 
 /* The alert will be triggered by src/host_checks/CustomHostLuaScript.cpp */
 
-void Host::triggerCustomHostAlert(u_int8_t score, char *msg) {
+void Host::triggerCustomHostAlert(u_int8_t score, char* msg) {
   customHostAlert.alertTriggered = true, customHostAlert.score = score;
 
-  if(customHostAlert.msg) {
+  if (customHostAlert.msg) {
     free(customHostAlert.msg);
     customHostAlert.msg = NULL;
   }
 
-  if(msg) customHostAlert.msg = strdup(msg);
+  if (msg) customHostAlert.msg = strdup(msg);
 }
 
 /* *************************************** */
@@ -2733,9 +2755,9 @@ void Host::triggerCustomHostAlert(u_int8_t score, char *msg) {
   Used to estimate the cardinality of <server, server_port> contacted
   by this host over TCP or UDP and with no data received or connection refused
 */
-void Host::setUnidirectionalTCPUDPNoTXEgressFlow(IpAddress *ip,
+void Host::setUnidirectionalTCPUDPNoTXEgressFlow(IpAddress* ip,
                                                  u_int16_t port) {
-  if(!ntop->getPrefs()->limitResourcesUsage())
+  if (!ntop->getPrefs()->limitResourcesUsage())
     ndpi_hll_add_number(&outgoing_hosts_tcp_udp_port_with_no_tx_hll,
                         ip->key() + (port << 8));  // Simple hash
 }
@@ -2747,9 +2769,9 @@ void Host::setUnidirectionalTCPUDPNoTXEgressFlow(IpAddress *ip,
   this host over TCP or UDP and with no data replied (i.e. this host has not
   replied them back)
 */
-void Host::setUnidirectionalTCPUDPNoTXIngressFlow(IpAddress *ip,
+void Host::setUnidirectionalTCPUDPNoTXIngressFlow(IpAddress* ip,
                                                   u_int16_t port) {
-  if(!ntop->getPrefs()->limitResourcesUsage())
+  if (!ntop->getPrefs()->limitResourcesUsage())
     ndpi_hll_add_number(&incoming_hosts_tcp_udp_port_with_no_tx_hll,
                         ip->key() + (port << 8));  // Simple hash
 }
@@ -2757,11 +2779,11 @@ void Host::setUnidirectionalTCPUDPNoTXIngressFlow(IpAddress *ip,
 /* *************************************** */
 
 void Host::resetHostContacts() {
-  if(!ntop->getPrefs()->limitResourcesUsage()) {
+  if (!ntop->getPrefs()->limitResourcesUsage()) {
     ndpi_hll_reset(&outgoing_hosts_tcp_udp_port_with_no_tx_hll);
     ndpi_hll_reset(&incoming_hosts_tcp_udp_port_with_no_tx_hll);
 
-    if(tcp_udp_contacted_ports_no_tx)
+    if (tcp_udp_contacted_ports_no_tx)
       ndpi_bitmap_free(tcp_udp_contacted_ports_no_tx);
 
     tcp_udp_contacted_ports_no_tx = ndpi_bitmap_alloc();
@@ -2772,33 +2794,37 @@ void Host::resetHostContacts() {
 
 u_int32_t Host::getNumContactedPeersAsClientTCPUDPNoTX() {
   return (!ntop->getPrefs()->limitResourcesUsage()
-              ? (u_int32_t)ndpi_hll_count(&outgoing_hosts_tcp_udp_port_with_no_tx_hll) : 0);
+              ? (u_int32_t)ndpi_hll_count(
+                    &outgoing_hosts_tcp_udp_port_with_no_tx_hll)
+              : 0);
 };
 
 /* *************************************** */
 
 u_int32_t Host::getNumContactsFromPeersAsServerTCPUDPNoTX() {
   return (!ntop->getPrefs()->limitResourcesUsage()
-              ? (u_int32_t)ndpi_hll_count(&incoming_hosts_tcp_udp_port_with_no_tx_hll) : 0);
+              ? (u_int32_t)ndpi_hll_count(
+                    &incoming_hosts_tcp_udp_port_with_no_tx_hll)
+              : 0);
 };
 
 /* *************************************** */
 
 void Host::toggleRxOnlyHost(bool rx_only) {
-  if(is_rx_only == rx_only) return; /* Nothing to do */
+  if (is_rx_only == rx_only) return; /* Nothing to do */
 
 #ifdef DEBUG
   {
     char buf[64];
 
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "%s [is-rx-only: %s][isUnicast(): %s][isLocal: %s]",
-				 print(buf, sizeof(buf)),
-				 rx_only ? "true" : "false", isUnicastHost() ? "true" : "false",
-				 isLocalHost() ? "true" : "false");
+    ntop->getTrace()->traceEvent(
+        TRACE_WARNING, "%s [is-rx-only: %s][isUnicast(): %s][isLocal: %s]",
+        print(buf, sizeof(buf)), rx_only ? "true" : "false",
+        isUnicastHost() ? "true" : "false", isLocalHost() ? "true" : "false");
   }
 #endif
 
-  if(rx_only == false) { /* Rx-only -> Not-Rx-only */
+  if (rx_only == false) { /* Rx-only -> Not-Rx-only */
     iface->decNumHosts(this, true /* rx-only */);
     iface->incNumHosts(this, false /* not-rx-only */);
   } else {
@@ -2809,10 +2835,10 @@ void Host::toggleRxOnlyHost(bool rx_only) {
   {
     char buf[64];
 
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "%s [is-rx-only: %s] [%u rx-only hosts]",
-				 print(buf, sizeof(buf)),
-				 rx_only ? "true" : "false",
-				 iface->getNumRxOnlyHosts());
+    ntop->getTrace()->traceEvent(
+        TRACE_WARNING, "%s [is-rx-only: %s] [%u rx-only hosts]",
+        print(buf, sizeof(buf)), rx_only ? "true" : "false",
+        iface->getNumRxOnlyHosts());
   }
 #endif
 
@@ -2821,15 +2847,16 @@ void Host::toggleRxOnlyHost(bool rx_only) {
 
 /* *************************************** */
 
-void Host::setnDPIOS(ndpi_os _os) {  
-  if(os_type != ndpi_os_unknown) {
+void Host::setnDPIOS(ndpi_os _os) {
+  if (os_type != ndpi_os_unknown) {
     /* Already set */
 
-    if(os_type == _os)
+    if (os_type == _os)
       return; /* Nothing changed */
     else {
-      /* ntop->getTrace()->traceEvent(TRACE_WARNING, "OS change detected [%u -> %u]", os_type, _os); */
-      
+      /* ntop->getTrace()->traceEvent(TRACE_WARNING, "OS change detected [%u ->
+       * %u]", os_type, _os); */
+
       alt_os_type = os_type;
       os_type = _os;
 
@@ -2841,27 +2868,27 @@ void Host::setnDPIOS(ndpi_os _os) {
 /* *************************************** */
 
 void Host::setDeviceType(DeviceType devtype) {
-  if(device_type == devtype)
+  if (device_type == devtype)
     return;
   else
     device_type = devtype;
 }
 
 /* *************************************** */
- 
-void Host::checkpoint(lua_State *vm) {
-    /* Just push the info needed by scripts/lua/modules/top_talkers_utils.lua */
-    if (stats) {
-        char buf_id[64], *host_id;
-        lua_newtable(vm);
-        lua_push_str_table_entry(vm, "tskey", get_tskey(buf_id, sizeof(buf_id)));
-        lua_push_bool_table_entry(vm, "localhost", isLocalHost());
-        lua_get_ip(vm);
-        lua_get_as(vm);
-        stats->checkpoint(vm);
-        host_id = get_hostkey(buf_id, sizeof(buf_id));
-        lua_pushstring(vm, host_id);
-        lua_insert(vm, -2);
-        lua_settable(vm, -3);
-    }
+
+void Host::checkpoint(lua_State* vm) {
+  /* Just push the info needed by scripts/lua/modules/top_talkers_utils.lua */
+  if (stats) {
+    char buf_id[64], *host_id;
+    lua_newtable(vm);
+    lua_push_str_table_entry(vm, "tskey", get_tskey(buf_id, sizeof(buf_id)));
+    lua_push_bool_table_entry(vm, "localhost", isLocalHost());
+    lua_get_ip(vm);
+    lua_get_as(vm);
+    stats->checkpoint(vm);
+    host_id = get_hostkey(buf_id, sizeof(buf_id));
+    lua_pushstring(vm, host_id);
+    lua_insert(vm, -2);
+    lua_settable(vm, -3);
+  }
 };

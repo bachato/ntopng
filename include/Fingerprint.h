@@ -40,8 +40,8 @@ class Fingerprint {
  public:
   Fingerprint() { ; }
 
-  void update(const char *fp, const char *app_name, bool is_malicious);
-  void lua(const char *key, lua_State *vm);
+  void update(const char* fp, const char* app_name, bool is_malicious);
+  void lua(const char* key, lua_State* vm);
 };
 
 typedef struct {

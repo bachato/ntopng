@@ -23,10 +23,11 @@
 
 /* ************************************ */
 
-GenericHash::GenericHash(NetworkInterface *_iface, u_int _num_hashes,
-                         u_int _max_hash_size, const char *_name) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+GenericHash::GenericHash(NetworkInterface* _iface, u_int _num_hashes,
+                         u_int _max_hash_size, const char* _name) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   num_hashes = _num_hashes;
   current_size = 0;
   /* Allow the total number of entries (that is, active and those idle but still
@@ -45,13 +46,13 @@ GenericHash::GenericHash(NetworkInterface *_iface, u_int _num_hashes,
   iface = _iface;
   idle_entries = idle_entries_shadow = NULL;
 
-  table = new (std::nothrow) GenericHashEntry *[num_hashes];
+  table = new (std::nothrow) GenericHashEntry*[num_hashes];
   for (u_int i = 0; i < num_hashes; i++) table[i] = NULL;
 
-  locks = new (std::nothrow) RwLock *[num_hashes];
+  locks = new (std::nothrow) RwLock*[num_hashes];
   for (u_int i = 0; i < num_hashes; i++) locks[i] = new (std::nothrow) RwLock();
 
-  idle_entries_in_use = new (std::nothrow) vector<GenericHashEntry *>;
+  idle_entries_in_use = new (std::nothrow) vector<GenericHashEntry*>;
 
   last_purged_hash = _num_hashes - 1;
 
@@ -79,14 +80,13 @@ GenericHash::~GenericHash() {
 /* ************************************ */
 
 void GenericHash::cleanup() {
-  vector<GenericHashEntry *> **ghvs[] = {&idle_entries, &idle_entries_shadow,
-                                         &idle_entries_in_use};
+  vector<GenericHashEntry*>** ghvs[] = {&idle_entries, &idle_entries_shadow,
+                                        &idle_entries_in_use};
 
   for (u_int i = 0; i < sizeof(ghvs) / sizeof(ghvs[0]); i++) {
     if (*ghvs[i]) {
       if (!(*ghvs[i])->empty()) {
-        for (vector<GenericHashEntry *>::const_iterator it =
-                 (*ghvs[i])->begin();
+        for (vector<GenericHashEntry*>::const_iterator it = (*ghvs[i])->begin();
              it != (*ghvs[i])->end(); ++it) {
           delete *it;
         }
@@ -99,10 +99,10 @@ void GenericHash::cleanup() {
 
   for (u_int i = 0; i < num_hashes; i++) {
     if (table[i] != NULL) {
-      GenericHashEntry *head = table[i];
+      GenericHashEntry* head = table[i];
 
       while (head) {
-        GenericHashEntry *next = head->next();
+        GenericHashEntry* next = head->next();
 
         delete (head);
         head = next;
@@ -117,7 +117,7 @@ void GenericHash::cleanup() {
 
 /* ************************************ */
 
-bool GenericHash::add(GenericHashEntry *h, bool do_lock) {
+bool GenericHash::add(GenericHashEntry* h, bool do_lock) {
   if (hasEmptyRoom()) {
     u_int32_t hash = (h->key() % num_hashes);
     u_int32_t this_entry_id;
@@ -154,7 +154,7 @@ bool GenericHash::add(GenericHashEntry *h, bool do_lock) {
 /* ************************************ */
 
 u_int64_t GenericHash::purgeQueuedIdleEntries() {
-  vector<GenericHashEntry *> *cur_idle = NULL;
+  vector<GenericHashEntry*>* cur_idle = NULL;
   u_int64_t num_purged = entry_state_transition_counters.num_purged;
 
   if (idle_entries) {
@@ -164,7 +164,7 @@ u_int64_t GenericHash::purgeQueuedIdleEntries() {
 
   if (cur_idle) {
     if (!cur_idle->empty()) {
-      for (vector<GenericHashEntry *>::const_iterator it = cur_idle->begin();
+      for (vector<GenericHashEntry*>::const_iterator it = cur_idle->begin();
            it != cur_idle->end(); ++it) {
         /* In case of flow dump the uses number might be increased (0 -> 1) */
         if ((*it)->getUses() == 0) {
@@ -205,12 +205,13 @@ u_int64_t GenericHash::purgeQueuedIdleEntries() {
   /*
     Try and delete all the entries which were found to be in-use when idle
    */
-  for (vector<GenericHashEntry *>::iterator it = idle_entries_in_use->begin();
+  for (vector<GenericHashEntry*>::iterator it = idle_entries_in_use->begin();
        it != idle_entries_in_use->end();) {
     if ((*it)->getUses() == 0) {
-      GenericHashEntry *e = *it;
-      it = idle_entries_in_use->erase(it); /* Remove the entry from the vector */
-      delete e; /* Free the entry memory */
+      GenericHashEntry* e = *it;
+      it =
+          idle_entries_in_use->erase(it); /* Remove the entry from the vector */
+      delete e;                           /* Free the entry memory */
       entry_state_transition_counters.num_purged++;
     } else
       ++it;
@@ -230,15 +231,16 @@ u_int64_t GenericHash::purgeQueuedIdleEntries() {
 
 /* ************************************ */
 
-bool GenericHash::walk(u_int32_t *begin_slot, bool walk_all,
-                       bool (*walker)(GenericHashEntry *h, void *user_data, bool *entryMatched),
-                       void *user_data) {
+bool GenericHash::walk(u_int32_t* begin_slot, bool walk_all,
+                       bool (*walker)(GenericHashEntry* h, void* user_data,
+                                      bool* entryMatched),
+                       void* user_data) {
   bool found = false;
   u_int16_t tot_matched = 0;
 
   for (u_int hash_id = *begin_slot; hash_id < num_hashes; hash_id++) {
     if (table[hash_id] != NULL) {
-      GenericHashEntry *head;
+      GenericHashEntry* head;
 
 #ifdef WALK_DEBUG
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "[walk] Locking %d [%p]",
@@ -249,7 +251,7 @@ bool GenericHash::walk(u_int32_t *begin_slot, bool walk_all,
       head = table[hash_id];
 
       while (head) {
-        GenericHashEntry *next = head->next();
+        GenericHashEntry* next = head->next();
 
         /* FIXX get_state() does not always match idle() as the latter can be
          * overridden (e.g. Flow), leading to walking entries that are actually
@@ -277,7 +279,8 @@ bool GenericHash::walk(u_int32_t *begin_slot, bool walk_all,
       if ((tot_matched >= MIN_NUM_HASH_WALK_ELEMS) /* At least a few entries
                                                       have been returned */
           && (!walk_all)) {
-        u_int32_t next_slot = (hash_id == (num_hashes - 1)) ? 0 /* start over */ : (hash_id + 1);
+        u_int32_t next_slot =
+            (hash_id == (num_hashes - 1)) ? 0 /* start over */ : (hash_id + 1);
 
         *begin_slot = next_slot;
 #ifdef WALK_DEBUG
@@ -312,27 +315,27 @@ bool GenericHash::walk(u_int32_t *begin_slot, bool walk_all,
   Active -> Idle -> Ready to be Purged -> Purged
 */
 
-u_int GenericHash::purgeIdle(const struct timeval *tv, bool force_idle,
+u_int GenericHash::purgeIdle(const struct timeval* tv, bool force_idle,
                              bool full_scan) {
   u_int i, num_detached = 0, buckets_checked = 0;
   time_t now = time(NULL);
   /* Visit all entries when force_idle is true */
   u_int visit_fraction = (!force_idle && !full_scan) ? purge_step : num_hashes;
   size_t idle_entries_shadow_old_size;
-  vector<GenericHashEntry *>::const_iterator it;
+  vector<GenericHashEntry*>::const_iterator it;
 
-  if(ntop->getPrefs()->disablePurge()) {
+  if (ntop->getPrefs()->disablePurge()) {
     /* ntop->getTrace()->traceEvent(TRACE_WARNING, "Purge disabled"); */
-    return(0);
+    return (0);
   }
-  
+
   if (!idle_entries) {
     idle_entries = idle_entries_shadow;
 
     try {
-      idle_entries_shadow = new vector<GenericHashEntry *>;
+      idle_entries_shadow = new vector<GenericHashEntry*>;
 
-    } catch (std::bad_alloc &ba) {
+    } catch (std::bad_alloc& ba) {
       ntop->getTrace()->traceEvent(TRACE_ERROR, "Memory allocation error");
       return 0;
     }
@@ -378,7 +381,7 @@ u_int GenericHash::purgeIdle(const struct timeval *tv, bool force_idle,
 
       while (head) {
         HashEntryState head_state = head->get_state();
-        GenericHashEntry *next = head->next();
+        GenericHashEntry* next = head->next();
 
         head->periodic_stats_update(tv, false);
 
@@ -406,8 +409,8 @@ u_int GenericHash::purgeIdle(const struct timeval *tv, bool force_idle,
             if (head->get_state() == hash_entry_state_flow_protocoldetected) {
               /* Transition to active if the protocol is detected */
 
-	      head->set_hash_entry_state_active();
-	    }
+              head->set_hash_entry_state_active();
+            }
 
             if (force_idle) goto detach_idle_hash_entry;
             break;
@@ -502,7 +505,7 @@ bool GenericHash::hasEmptyRoom() {
 
 /* ************************************ */
 
-void GenericHash::lua(lua_State *vm) {
+void GenericHash::lua(lua_State* vm) {
   int64_t num_idle;
 
   lua_newtable(vm);

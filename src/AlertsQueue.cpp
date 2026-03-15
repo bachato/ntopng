@@ -23,8 +23,9 @@
 
 /* **************************************************** */
 
-AlertsQueue::AlertsQueue(NetworkInterface *_iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+AlertsQueue::AlertsQueue(NetworkInterface* _iface) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   iface = _iface;
 }
 
@@ -35,8 +36,9 @@ AlertsQueue::AlertsQueue(NetworkInterface *_iface) {
  * ndpi_term_serializer(tlv);
  * free(tlv);
  */
-void AlertsQueue::pushAlertJson(ndpi_serializer *alert, const char *atype,
-                                const char *a_subtype, AlertCategory alert_category) {
+void AlertsQueue::pushAlertJson(ndpi_serializer* alert, const char* atype,
+                                const char* a_subtype,
+                                AlertCategory alert_category) {
   /* These are mandatory fields, present in all the pushed alerts */
   ndpi_serialize_string_uint32(alert, "ifid", iface->get_id());
   ndpi_serialize_string_string(alert, "alert_id", atype);
@@ -55,15 +57,15 @@ void AlertsQueue::pushAlertJson(ndpi_serializer *alert, const char *atype,
 
 /* **************************************************** */
 
-void AlertsQueue::pushOutsideDhcpRangeAlert(u_int8_t *cli_mac, Mac *sender_mac,
+void AlertsQueue::pushOutsideDhcpRangeAlert(u_int8_t* cli_mac, Mac* sender_mac,
                                             u_int32_t ip, u_int32_t router_ip,
                                             u_int16_t vlan_id) {
-  ndpi_serializer *tlv;
+  ndpi_serializer* tlv;
   char name[64];
 
   if (ntop->getPrefs()->are_alerts_disabled()) return;
 
-  tlv = (ndpi_serializer *)calloc(1, sizeof(ndpi_serializer));
+  tlv = (ndpi_serializer*)calloc(1, sizeof(ndpi_serializer));
 
   if (tlv) {
     char cli_mac_s[32], sender_mac_s[32];
@@ -92,22 +94,23 @@ void AlertsQueue::pushOutsideDhcpRangeAlert(u_int8_t *cli_mac, Mac *sender_mac,
     sender_mac->getDHCPName(name, sizeof(name));
     ndpi_serialize_string_string(tlv, "device_name", name);
 
-    pushAlertJson(tlv, "misconfigured_dhcp_range", NULL, alert_category_network);
+    pushAlertJson(tlv, "misconfigured_dhcp_range", NULL,
+                  alert_category_network);
   }
 }
 
 /* **************************************************** */
 
 void AlertsQueue::pushMacIpAssociationChangedAlert(u_int32_t ip,
-                                                   u_int8_t *old_mac,
-                                                   u_int8_t *new_mac,
-                                                   Mac *new_host_mac) {
-  ndpi_serializer *tlv;
+                                                   u_int8_t* old_mac,
+                                                   u_int8_t* new_mac,
+                                                   Mac* new_host_mac) {
+  ndpi_serializer* tlv;
   char name[64];
 
   if (ntop->getPrefs()->are_alerts_disabled()) return;
 
-  tlv = (ndpi_serializer *)calloc(1, sizeof(ndpi_serializer));
+  tlv = (ndpi_serializer*)calloc(1, sizeof(ndpi_serializer));
 
   if (tlv) {
     char oldmac_s[32], newmac_s[32], ipbuf[32], *ip_s;
@@ -131,21 +134,22 @@ void AlertsQueue::pushMacIpAssociationChangedAlert(u_int32_t ip,
     new_host_mac->getDHCPName(name, sizeof(name));
     ndpi_serialize_string_string(tlv, "device_name", name);
 
-    pushAlertJson(tlv, "mac_ip_association_change", NULL, alert_category_network);
+    pushAlertJson(tlv, "mac_ip_association_change", NULL,
+                  alert_category_network);
   }
 }
 
 /* **************************************************** */
 
-void AlertsQueue::pushBroadcastDomainTooLargeAlert(const u_int8_t *src_mac,
-                                                   const u_int8_t *dst_mac,
+void AlertsQueue::pushBroadcastDomainTooLargeAlert(const u_int8_t* src_mac,
+                                                   const u_int8_t* dst_mac,
                                                    u_int32_t spa, u_int32_t tpa,
                                                    u_int16_t vlan_id) {
-  ndpi_serializer *tlv;
+  ndpi_serializer* tlv;
 
   if (ntop->getPrefs()->are_alerts_disabled()) return;
 
-  tlv = (ndpi_serializer *)calloc(1, sizeof(ndpi_serializer));
+  tlv = (ndpi_serializer*)calloc(1, sizeof(ndpi_serializer));
 
   if (tlv) {
     char src_mac_s[32], dst_mac_s[32], spa_buf[32], tpa_buf[32];
@@ -164,28 +168,30 @@ void AlertsQueue::pushBroadcastDomainTooLargeAlert(const u_int8_t *src_mac,
     ndpi_serialize_string_string(tlv, "spa", spa_s);
     ndpi_serialize_string_string(tlv, "tpa", tpa_s);
 
-    pushAlertJson(tlv, "broadcast_domain_too_large", NULL, alert_category_network);
+    pushAlertJson(tlv, "broadcast_domain_too_large", NULL,
+                  alert_category_network);
   }
 }
 
 /* **************************************************** */
 
-void AlertsQueue::pushLoginTrace(const char *user, const char *method, bool authorized) {
-  ndpi_serializer *tlv;
+void AlertsQueue::pushLoginTrace(const char* user, const char* method,
+                                 bool authorized) {
+  ndpi_serializer* tlv;
 
   if (ntop->getPrefs()->are_alerts_disabled()) return;
 
-  tlv = (ndpi_serializer *)calloc(1, sizeof(ndpi_serializer));
+  tlv = (ndpi_serializer*)calloc(1, sizeof(ndpi_serializer));
 
   if (tlv) {
     ndpi_init_serializer_ll(tlv, ndpi_serialization_format_tlv, 64);
 
     ndpi_serialize_string_string(tlv, "scope", "login");
     ndpi_serialize_string_string(tlv, "user", user);
-    if (method)
-      ndpi_serialize_string_string(tlv, "method", method);
+    if (method) ndpi_serialize_string_string(tlv, "method", method);
 
-    pushAlertJson(tlv, authorized ? "user_activity" : "login_failed", NULL, alert_category_system);
+    pushAlertJson(tlv, authorized ? "user_activity" : "login_failed", NULL,
+                  alert_category_system);
   }
 }
 
@@ -193,11 +199,11 @@ void AlertsQueue::pushLoginTrace(const char *user, const char *method, bool auth
 
 void AlertsQueue::pushNfqFlushedAlert(int queue_len, int queue_len_pct,
                                       int queue_dropped) {
-  ndpi_serializer *tlv;
+  ndpi_serializer* tlv;
 
   if (ntop->getPrefs()->are_alerts_disabled()) return;
 
-  tlv = (ndpi_serializer *)calloc(1, sizeof(ndpi_serializer));
+  tlv = (ndpi_serializer*)calloc(1, sizeof(ndpi_serializer));
 
   if (tlv) {
     ndpi_init_serializer_ll(tlv, ndpi_serialization_format_tlv, 64);
@@ -212,18 +218,17 @@ void AlertsQueue::pushNfqFlushedAlert(int queue_len, int queue_len_pct,
 
 /* **************************************************** */
 
-void AlertsQueue::pushCloudDisconnectionAlert(const char *descr) {
-  ndpi_serializer *tlv;
+void AlertsQueue::pushCloudDisconnectionAlert(const char* descr) {
+  ndpi_serializer* tlv;
 
   if (ntop->getPrefs()->are_alerts_disabled()) return;
 
-  tlv = (ndpi_serializer *)calloc(1, sizeof(ndpi_serializer));
+  tlv = (ndpi_serializer*)calloc(1, sizeof(ndpi_serializer));
 
   if (tlv) {
     ndpi_init_serializer_ll(tlv, ndpi_serialization_format_tlv, 64);
 
-    if (descr)
-      ndpi_serialize_string_string(tlv, "description", descr);
+    if (descr) ndpi_serialize_string_string(tlv, "description", descr);
 
     pushAlertJson(tlv, "cloud_disconnected", NULL, alert_category_system);
   }
@@ -231,18 +236,17 @@ void AlertsQueue::pushCloudDisconnectionAlert(const char *descr) {
 
 /* **************************************************** */
 
-void AlertsQueue::pushCloudReconnectionAlert(const char *descr) {
-  ndpi_serializer *tlv;
+void AlertsQueue::pushCloudReconnectionAlert(const char* descr) {
+  ndpi_serializer* tlv;
 
   if (ntop->getPrefs()->are_alerts_disabled()) return;
 
-  tlv = (ndpi_serializer *)calloc(1, sizeof(ndpi_serializer));
+  tlv = (ndpi_serializer*)calloc(1, sizeof(ndpi_serializer));
 
   if (tlv) {
     ndpi_init_serializer_ll(tlv, ndpi_serialization_format_tlv, 64);
 
-    if (descr)
-      ndpi_serialize_string_string(tlv, "description", descr);
+    if (descr) ndpi_serialize_string_string(tlv, "description", descr);
 
     pushAlertJson(tlv, "cloud_reconnected", NULL, alert_category_system);
   }
@@ -250,20 +254,19 @@ void AlertsQueue::pushCloudReconnectionAlert(const char *descr) {
 
 /* **************************************************** */
 
-void AlertsQueue::pushSNMPTrapAlert(const char *device_ip, const char *descr) {
-  ndpi_serializer *tlv;
+void AlertsQueue::pushSNMPTrapAlert(const char* device_ip, const char* descr) {
+  ndpi_serializer* tlv;
 
   if (ntop->getPrefs()->are_alerts_disabled()) return;
 
-  tlv = (ndpi_serializer *)calloc(1, sizeof(ndpi_serializer));
+  tlv = (ndpi_serializer*)calloc(1, sizeof(ndpi_serializer));
 
   if (tlv) {
     ndpi_init_serializer_ll(tlv, ndpi_serialization_format_tlv, 64);
 
     ndpi_serialize_string_string(tlv, "device", device_ip);
 
-    if (descr)
-      ndpi_serialize_string_string(tlv, "description", descr);
+    if (descr) ndpi_serialize_string_string(tlv, "description", descr);
 
     pushAlertJson(tlv, "snmp_trap", NULL, alert_category_network);
   }

@@ -24,11 +24,12 @@
 /* ************************************ */
 
 InterfaceStatsHash::InterfaceStatsHash(u_int _max_hash_size) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   max_hash_size = _max_hash_size;
-  buckets = (sFlowInterfaceStats **)calloc(sizeof(sFlowInterfaceStats *),
-                                           max_hash_size);
+  buckets = (sFlowInterfaceStats**)calloc(sizeof(sFlowInterfaceStats*),
+                                          max_hash_size);
 
   if (buckets == NULL) throw "Not enough memory";
 }
@@ -64,10 +65,10 @@ InterfaceStatsHash::~InterfaceStatsHash() {
 }
 /* ************************************ */
 
-bool InterfaceStatsHash::set(const sFlowInterfaceStats *const stats) {
-  sFlowInterfaceStats *head;
+bool InterfaceStatsHash::set(const sFlowInterfaceStats* const stats) {
+  sFlowInterfaceStats* head;
   u_int32_t ifIndex = stats->ifIndex, deviceIP = stats->deviceIP;
-  const char *ifName = stats->ifName;
+  const char* ifName = stats->ifName;
   u_int32_t hash = (deviceIP + ifIndex + Utils::hashString(ifName)) %
                    max_hash_size,
             num_runs = 0;
@@ -77,7 +78,7 @@ bool InterfaceStatsHash::set(const sFlowInterfaceStats *const stats) {
 
   if (!buckets[hash]) goto new_bucket;
 
-  head = (sFlowInterfaceStats *)buckets[hash];
+  head = (sFlowInterfaceStats*)buckets[hash];
 
   while (head != NULL) {
     if (head->deviceIP == deviceIP && head->ifIndex == ifIndex &&
@@ -135,7 +136,7 @@ bool InterfaceStatsHash::set(const sFlowInterfaceStats *const stats) {
     head->samplesGenerated = stats->samplesGenerated;
   } else {
   new_bucket:
-    buckets[hash] = (sFlowInterfaceStats *)malloc(sizeof(sFlowInterfaceStats));
+    buckets[hash] = (sFlowInterfaceStats*)malloc(sizeof(sFlowInterfaceStats));
 
     if (!buckets[hash]) {
       ret = false;
@@ -177,7 +178,7 @@ unlock:
 
 /* ************************************ */
 
-void InterfaceStatsHash::luaDeviceList(lua_State *vm) {
+void InterfaceStatsHash::luaDeviceList(lua_State* vm) {
   std::set<u_int32_t>
       flowDevices; /* Set size automatically limited by max_hash_size */
   std::set<u_int32_t>::const_iterator it;
@@ -187,7 +188,7 @@ void InterfaceStatsHash::luaDeviceList(lua_State *vm) {
   m.lock(__FILE__, __LINE__);
 
   for (u_int i = 0; i < max_hash_size; i++) {
-    sFlowInterfaceStats *head = (sFlowInterfaceStats *)buckets[i];
+    sFlowInterfaceStats* head = (sFlowInterfaceStats*)buckets[i];
 
     if (head) {
       bool found = false;
@@ -210,13 +211,13 @@ void InterfaceStatsHash::luaDeviceList(lua_State *vm) {
 
 /* ************************************ */
 
-void InterfaceStatsHash::luaDeviceInfo(lua_State *vm, u_int32_t deviceIP) {
+void InterfaceStatsHash::luaDeviceInfo(lua_State* vm, u_int32_t deviceIP) {
   lua_newtable(vm);
 
   m.lock(__FILE__, __LINE__);
 
   for (u_int i = 0; i < max_hash_size; i++) {
-    sFlowInterfaceStats *head = (sFlowInterfaceStats *)buckets[i];
+    sFlowInterfaceStats* head = (sFlowInterfaceStats*)buckets[i];
 
     if (head && (head->deviceIP == deviceIP)) {
       lua_newtable(vm);

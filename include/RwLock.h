@@ -33,17 +33,17 @@ class RwLock {
 #else
   pthread_rwlock_t the_rwlock;
 #endif
-  void lock(const char *filename, int line, bool readonly);
-  bool trylock(const char *filename, int line, bool readonly);
+  void lock(const char* filename, int line, bool readonly);
+  bool trylock(const char* filename, int line, bool readonly);
 
  public:
   RwLock();
   ~RwLock();
 
-  void rdlock(const char *filename, int line);
-  void wrlock(const char *filename, int line);
-  bool trywrlock(const char *filename, int line);
-  void unlock(const char *filename, int line);
+  void rdlock(const char* filename, int line);
+  void wrlock(const char* filename, int line);
+  bool trywrlock(const char* filename, int line);
+  void unlock(const char* filename, int line);
 };
 
 #endif /* _RWLOCK_H_ */

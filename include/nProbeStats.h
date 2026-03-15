@@ -56,7 +56,7 @@ typedef struct {
 } CumulativenProbeStats;
 
 class nProbeStats {
-public:
+ public:
   char remote_ifname[32];
   char remote_ifaddress[64];
   char remote_probe_address[64];
@@ -89,10 +89,11 @@ public:
   u_int32_t sflow_pkt_sample_drops;
   u_int32_t flow_collection_drops;
   u_int32_t flow_collection_udp_socket_drops;
-  FlowCollection flow_collection; 
-    
+  FlowCollection flow_collection;
+
   std::map<u_int32_t, ExporterStats> exportersStats;
-public:
+
+ public:
   nProbeStats();
   ~nProbeStats() {};
 };

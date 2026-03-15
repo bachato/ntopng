@@ -34,9 +34,11 @@ class FlowRiskDNSSuspiciousTrafficAlert : public FlowRiskAlert {
     return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
   }
 
-  FlowRiskDNSSuspiciousTrafficAlert(FlowCheck *c, Flow *f)
-    : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
-  ~FlowRiskDNSSuspiciousTrafficAlert(){};
+  FlowRiskDNSSuspiciousTrafficAlert(FlowCheck* c, Flow* f)
+      : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskDNSSuspiciousTrafficAlert() {};
 
   bool autoAck() const { return false; };
 

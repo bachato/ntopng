@@ -24,14 +24,16 @@
 /* *********************************************** */
 
 CategoryCounter::CategoryCounter() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   duration = 0, last_epoch_update = 0;
 }
 
 /* *********************************************** */
 
-CategoryCounter::CategoryCounter(const CategoryCounter &c) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+CategoryCounter::CategoryCounter(const CategoryCounter& c) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   bytes.set(c.bytes);
   duration = c.duration;
   last_epoch_update = c.last_epoch_update;
@@ -39,18 +41,21 @@ CategoryCounter::CategoryCounter(const CategoryCounter &c) {
 
 /* *********************************************** */
 
-void CategoryCounter::lua(NetworkInterface *iface, lua_State *vm,
+void CategoryCounter::lua(NetworkInterface* iface, lua_State* vm,
                           u_int16_t category_id, bool tsLua) {
-  const char *name = iface->get_ndpi_category_name((ndpi_protocol_category_t)category_id);
+  const char* name =
+      iface->get_ndpi_category_name((ndpi_protocol_category_t)category_id);
 
   if (!tsLua) {
     u_int64_t bytes_total = bytes.getTotal();
 
     if (bytes_total > INT64_MAX) {
-      ntop->getTrace()->traceEvent(TRACE_ERROR, "bytes (total=%llu/sent=%llu/rcvd=%llu) for category %s (%d) exceeds "
-                                   "max (%llu) allowed for ts",
-                                   bytes_total, bytes.getSent(), bytes.getRcvd(),
-                                   name, (int) category_id, INT64_MAX);
+      ntop->getTrace()->traceEvent(
+          TRACE_ERROR,
+          "bytes (total=%llu/sent=%llu/rcvd=%llu) for category %s (%d) exceeds "
+          "max (%llu) allowed for ts",
+          bytes_total, bytes.getSent(), bytes.getRcvd(), name, (int)category_id,
+          INT64_MAX);
       bytes_total = INT64_MAX;
     }
 
@@ -93,11 +98,11 @@ void CategoryCounter::incStats(u_int32_t when, u_int64_t sent_bytes,
 
 /* *********************************************** */
 
-void CategoryCounter::addProtoJson(json_object *my_object,
-                                   NetworkInterface *iface,
+void CategoryCounter::addProtoJson(json_object* my_object,
+                                   NetworkInterface* iface,
                                    ndpi_protocol_category_t category_id) {
-  json_object *inner;
-  const char *name = iface->get_ndpi_category_name(category_id);
+  json_object* inner;
+  const char* name = iface->get_ndpi_category_name(category_id);
 
   inner = json_object_new_object();
 
@@ -119,10 +124,10 @@ void CategoryCounter::resetStats() {
 }
 
 /* *********************************************** */
-bool CategoryCounter::deserialize(json_object *o) {
+bool CategoryCounter::deserialize(json_object* o) {
   if (!o || !json_object_is_type(o, json_type_object)) return false;
 
-  json_object *obj;
+  json_object* obj;
 
   resetStats();
 

@@ -9,7 +9,6 @@
 
 #include "ntop_includes.h"
 
-
 #ifdef HAVE_ZMQ
 #ifndef HAVE_NEDGE
 
@@ -19,17 +18,17 @@
  * Constructor: initializes ZMQ sockets.
  * @param endpoint The ZMQ endpoint.
  */
-ZMQPublisher::ZMQPublisher(char *endpoint) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+ZMQPublisher::ZMQPublisher(char* endpoint) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   server_secret_key[0] = '\0';
   server_public_key[0] = '\0';
 
   ntop->getTrace()->traceEvent(TRACE_INFO, "Initializing ZMQPublisher with %s",
                                endpoint);
 
-  if (endpoint == NULL)
-    throw("NULL endpoint");
+  if (endpoint == NULL) throw("NULL endpoint");
 
   context = zmq_ctx_new();
 
@@ -44,26 +43,27 @@ ZMQPublisher::ZMQPublisher(char *endpoint) {
 
   if (pub_socket == NULL) {
     ntop->getTrace()->traceEvent(
-        TRACE_ERROR, "Unable to initialize ZMQ %s (pub_socket)",
-        endpoint);
+        TRACE_ERROR, "Unable to initialize ZMQ %s (pub_socket)", endpoint);
     throw "Unable to initialize ZMQ (pub_socket)";
   }
 
   if (ntop->getPrefs()->is_zmq_encryption_enabled()) {
 #if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 1, 0)
-    const char *secret_key;
+    const char* secret_key;
     if (ntop->getPrefs()->get_zmq_encryption_priv_key() == NULL)
       ZMQUtils::generateEncryptionKeys();
 
-    secret_key = ZMQUtils::findEncryptionKeys(server_public_key, server_secret_key,
-      sizeof(server_public_key), sizeof(server_secret_key));
+    secret_key = ZMQUtils::findEncryptionKeys(
+        server_public_key, server_secret_key, sizeof(server_public_key),
+        sizeof(server_secret_key));
 
     if (secret_key != NULL) {
       if (ZMQUtils::setServerEncryptionKeys(pub_socket, secret_key) < 0)
         throw "Unable to set ZMQ encryption";
     }
 #else
-    ntop->getTrace()->traceEvent(TRACE_ERROR,
+    ntop->getTrace()->traceEvent(
+        TRACE_ERROR,
         "Unable to enable ZMQ CURVE encryption, ZMQ >= 4.1 is required");
 #endif
   }
@@ -76,11 +76,10 @@ ZMQPublisher::ZMQPublisher(char *endpoint) {
     throw("Unable to connect to the specified ZMQ endpoint");
   }
 
-  if (strncmp(endpoint, (char *)"tcp://", 6) == 0) {
+  if (strncmp(endpoint, (char*)"tcp://", 6) == 0) {
     /* TCP socket optimizations */
     ZMQUtils::setKeepalive(pub_socket);
   }
-
 };
 
 /* *********************************************************** */
@@ -99,11 +98,11 @@ ZMQPublisher::~ZMQPublisher() {
  * Sends a message on ZMQ, encoding and compressing it.
  * @param str The message.
  */
-bool ZMQPublisher::sendMessage(const char *topic, char *str) {
+bool ZMQPublisher::sendMessage(const char* topic, char* str) {
   struct zmq_msg_hdr_v1 msg_hdr;
   int len = strlen(str), rc;
 #ifdef HAVE_ZLIB
-  char *compressed;
+  char* compressed;
 #endif
 
   ntop->getTrace()->traceEvent(TRACE_INFO, "Sending msg on topic '%s' [%s]",
@@ -112,11 +111,11 @@ bool ZMQPublisher::sendMessage(const char *topic, char *str) {
   snprintf(msg_hdr.url, sizeof(msg_hdr.url), "%s", topic);
 
 #ifdef HAVE_ZLIB
-  if ((compressed = (char *)malloc(len + 16)) != NULL) {
+  if ((compressed = (char*)malloc(len + 16)) != NULL) {
     uLongf complen = len + 14;
     int err;
 
-    if ((err = compress((Byte *)&compressed[1], &complen, (Byte *)str, len)) !=
+    if ((err = compress((Byte*)&compressed[1], &complen, (Byte*)str, len)) !=
         Z_OK) {
       ntop->getTrace()->traceEvent(TRACE_ERROR, "compress error [%d][%s]", err,
                                    str);

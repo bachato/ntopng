@@ -31,7 +31,7 @@
 
 template <typename T>
 class SPSCQueue {
-private:
+ private:
   std::string name;
   u_int32_t num_failed_enqueues; /* Counts the number of times the enqueue has
                                     failed (queue full) */
@@ -48,7 +48,7 @@ private:
    * Constructor
    * @param size The queue size (rounded up to the next power of 2)
    */
-  SPSCQueue(u_int32_t size, const char *_name) {
+  SPSCQueue(u_int32_t size, const char* _name) {
     queue_size = Utils::pow2(size);
     queue.resize(queue_size);
     tail = shadow_tail = queue_size - 1;
@@ -91,7 +91,7 @@ private:
     T item = queue[next_tail];
     shadow_tail = next_tail;
 
-    if((shadow_tail & QUEUE_WATERMARK_MASK) == 0) tail = shadow_tail;
+    if ((shadow_tail & QUEUE_WATERMARK_MASK) == 0) tail = shadow_tail;
 
     return item;
   }
@@ -137,7 +137,7 @@ private:
   /**
    * Writes queue stats in a table of the vm passed as parameter
    */
-  inline void lua(lua_State *vm) const {
+  inline void lua(lua_State* vm) const {
     if (vm) {
       lua_newtable(vm);
       lua_push_uint32_table_entry(vm, "num_failed_enqueues",

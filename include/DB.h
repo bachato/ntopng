@@ -24,46 +24,51 @@
 
 #include "ntop_includes.h"
 
-typedef int db_result_row_callback(std::vector<std::string> *row, std::vector<std::string> *columns, void *user_data);
+typedef int db_result_row_callback(std::vector<std::string>* row,
+                                   std::vector<std::string>* columns,
+                                   void* user_data);
 
 class DB {
  private:
-
  protected:
-  NetworkInterface *iface;
+  NetworkInterface* iface;
   bool running;
 
  public:
-  DB(NetworkInterface *_iface);
-  virtual ~DB(){};
+  DB(NetworkInterface* _iface);
+  virtual ~DB() {};
 
-  virtual const char *getEngineName() { return "Unknown"; };
+  virtual const char* getEngineName() { return "Unknown"; };
   virtual bool startDumpLoop() { return false; }
 
-  virtual int execSQLQuery(const char *sql,
-                           bool doReconnect = true, bool ignoreErrors = false,
-                           db_result_row_callback *cb = NULL, void *cb_user_data = NULL) {
+  virtual int execSQLQuery(const char* sql, bool doReconnect = true,
+                           bool ignoreErrors = false,
+                           db_result_row_callback* cb = NULL,
+                           void* cb_user_data = NULL) {
     return (-1);
   }
 
-  virtual int execSQLQuery(lua_State *vm, const char *sql,
-                           bool limitRows, bool wait_for_db_created) {
+  virtual int execSQLQuery(lua_State* vm, const char* sql, bool limitRows,
+                           bool wait_for_db_created) {
     return (-1);
   }
 
-  virtual int execSQLQuery2CSV(const char *sql, const char *delimiter,
-                               const char *null_value, bool dump_in_json_format,
-                               bool remove_headers, struct mg_connection *mg_conn) {
+  virtual int execSQLQuery2CSV(const char* sql, const char* delimiter,
+                               const char* null_value, bool dump_in_json_format,
+                               bool remove_headers,
+                               struct mg_connection* mg_conn) {
     return (-1);
   }
 
   /* Execute queries that do not return data (e.g. insert) */
-  virtual int execSQLWrite(const char *sql) { return (-1); }
+  virtual int execSQLWrite(const char* sql) { return (-1); }
 
   virtual void archiveData(time_t epoch_begin, time_t epoch_end) {}
 
-  inline NetworkInterface *getNetworkInterface() { return iface; };
-  inline void startDBLoop() { if (startDumpLoop()) running = true; };
+  inline NetworkInterface* getNetworkInterface() { return iface; };
+  inline void startDBLoop() {
+    if (startDumpLoop()) running = true;
+  };
   inline int isRunning() { return (running); };
   virtual bool isDbCreated() { return (true); };
   virtual void shutdown();

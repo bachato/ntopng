@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
-*/
+ */
 
 #include "host_alerts_includes.h"
 
@@ -26,11 +26,11 @@ ndpi_serializer* ScanRealtimeAlert::getAlertJSON(ndpi_serializer* serializer) {
   if (serializer == NULL) return NULL;
   ndpi_serialize_start_of_list(serializer, "alerts");
 
-  for(ScanAlertType alert : alerts)
+  for (ScanAlertType alert : alerts)
     ndpi_serialize_string_uint64(serializer, "alerts_addr", alert);
-  
+
   ndpi_serialize_end_of_list(serializer);
 #endif
-  
+
   return serializer;
 }

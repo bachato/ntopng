@@ -23,41 +23,41 @@
 
 /* ************************************ */
 
-FlowHash::FlowHash(NetworkInterface *_iface, u_int _num_hashes,
+FlowHash::FlowHash(NetworkInterface* _iface, u_int _num_hashes,
                    u_int _max_hash_size)
     : GenericHash(_iface, _num_hashes, _max_hash_size, "FlowHash") {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 };
 
 /* ************************************ */
 
 static u_int16_t max_num_loops = 0;
 
-Flow* FlowHash::find(Mac *src_mac, Mac *dst_mac, IpAddress *src_ip,
-                     IpAddress *dst_ip, u_int16_t src_port, u_int16_t dst_port,
+Flow* FlowHash::find(Mac* src_mac, Mac* dst_mac, IpAddress* src_ip,
+                     IpAddress* dst_ip, u_int16_t src_port, u_int16_t dst_port,
                      u_int16_t vlanId, u_int16_t observation_point_id,
                      u_int32_t private_flow_id, u_int8_t protocol,
-                     const ICMPinfo *const icmp_info, bool *src2dst_direction,
-                     bool is_inline_call, Flow **unswapped_flow) {
+                     const ICMPinfo* const icmp_info, bool* src2dst_direction,
+                     bool is_inline_call, Flow** unswapped_flow) {
   u_int32_t hash;
-  Flow *head;
+  Flow* head;
   u_int16_t num_loops = 0;
 
-  hash = src_ip->key() + dst_ip->key() +
-    (icmp_info ? icmp_info->key() : 0) +
-    private_flow_id +
-    src_port + dst_port + vlanId +  protocol;
+  hash = src_ip->key() + dst_ip->key() + (icmp_info ? icmp_info->key() : 0) +
+         private_flow_id + src_port + dst_port + vlanId + protocol;
 
 #ifdef USE_MAC_IN_KEY_WITH_DHCP
-  if((src_ip->key() == 0) && (dst_ip->key() == 0xFFFFFFFF)) {
-    /* Add the MAC address of the source host (dst_mac is not necessary as it's FF:FF:FF:FF:FF:FF) */
-    if(src_mac != NULL) hash += src_mac->key();
+  if ((src_ip->key() == 0) && (dst_ip->key() == 0xFFFFFFFF)) {
+    /* Add the MAC address of the source host (dst_mac is not necessary as it's
+     * FF:FF:FF:FF:FF:FF) */
+    if (src_mac != NULL) hash += src_mac->key();
   }
 #endif
 
   hash %= num_hashes;
 
-  head = (Flow *)table[hash];
+  head = (Flow*)table[hash];
 
   *unswapped_flow = NULL;
 
@@ -81,8 +81,8 @@ Flow* FlowHash::find(Mac *src_mac, Mac *dst_mac, IpAddress *src_ip,
                     vlanId, observation_point_id, private_flow_id, protocol,
                     icmp_info, src2dst_direction)) {
       if (num_loops > max_num_loops) {
-        ntop->getTrace()->traceEvent(TRACE_DEBUG, "DEBUG: [Num loops: %u][hashId: %u]",
-				     num_loops, hash);
+        ntop->getTrace()->traceEvent(
+            TRACE_DEBUG, "DEBUG: [Num loops: %u][hashId: %u]", num_loops, hash);
         max_num_loops = num_loops;
       }
 
@@ -98,11 +98,12 @@ Flow* FlowHash::find(Mac *src_mac, Mac *dst_mac, IpAddress *src_ip,
 
       break;
     } else
-      head = (Flow *)head->next(), num_loops++;
+      head = (Flow*)head->next(), num_loops++;
   }
 
   if (num_loops > max_num_loops) {
-    ntop->getTrace()->traceEvent(TRACE_DEBUG, "DEBUG: [Num loops: %u][hashId: %u]", num_loops, hash);
+    ntop->getTrace()->traceEvent(
+        TRACE_DEBUG, "DEBUG: [Num loops: %u][hashId: %u]", num_loops, hash);
     max_num_loops = num_loops;
   }
 
@@ -113,9 +114,9 @@ Flow* FlowHash::find(Mac *src_mac, Mac *dst_mac, IpAddress *src_ip,
 
 /* ************************************ */
 
-Flow *FlowHash::findByKeyAndHashId(u_int32_t key, u_int32_t hash_id) {
+Flow* FlowHash::findByKeyAndHashId(u_int32_t key, u_int32_t hash_id) {
   u_int32_t hash = key % num_hashes;
-  Flow *head = (Flow *)table[hash];
+  Flow* head = (Flow*)table[hash];
 
   if (head == NULL) return (NULL);
 
@@ -125,47 +126,48 @@ Flow *FlowHash::findByKeyAndHashId(u_int32_t key, u_int32_t hash_id) {
     if ((!head->idle()) && (head->get_hash_entry_id() == hash_id))
       break;
     else
-      head = (Flow *)head->next();
+      head = (Flow*)head->next();
   }
 
   locks[hash]->unlock(__FILE__, __LINE__);
 
-  return ((Flow *)head);
+  return ((Flow*)head);
 }
 
 /* **************************************************** */
 
 #ifdef HAVE_NEDGE
 
-u_int32_t FlowHash::dropHostTraffic(IpAddress *host_ip, AddressTree *allowed_nets) {
+u_int32_t FlowHash::dropHostTraffic(IpAddress* host_ip,
+                                    AddressTree* allowed_nets) {
   u_int32_t num_matched_flows = 0;
-  
-  for(u_int32_t i=0; i<num_hashes; i++) {
-    u_int32_t hash = i % num_hashes;
-    Flow *head = (Flow *)table[hash];
-    
-    if (head != NULL) {    
-      locks[hash]->rdlock(__FILE__, __LINE__);
-      
-      while (head) {
-	if (!head->idle()) {	
-	  if((head->get_cli_ip_addr()->equal(host_ip)) || (head->get_srv_ip_addr()->equal(host_ip))) {
-	    if(head->match(allowed_nets)) {
-	      head->setDropVerdict(DROP_REASON_USER_ACTION);
-	      num_matched_flows++;
-	    }
-	  }
-	}
 
-	head = (Flow *)head->next();
-      }  /* while */
+  for (u_int32_t i = 0; i < num_hashes; i++) {
+    u_int32_t hash = i % num_hashes;
+    Flow* head = (Flow*)table[hash];
+
+    if (head != NULL) {
+      locks[hash]->rdlock(__FILE__, __LINE__);
+
+      while (head) {
+        if (!head->idle()) {
+          if ((head->get_cli_ip_addr()->equal(host_ip)) ||
+              (head->get_srv_ip_addr()->equal(host_ip))) {
+            if (head->match(allowed_nets)) {
+              head->setDropVerdict(DROP_REASON_USER_ACTION);
+              num_matched_flows++;
+            }
+          }
+        }
+
+        head = (Flow*)head->next();
+      } /* while */
 
       locks[hash]->unlock(__FILE__, __LINE__);
-    } /* if */    
+    } /* if */
   } /* while */
-  
-  return(num_matched_flows);
+
+  return (num_matched_flows);
 }
 
 #endif
-

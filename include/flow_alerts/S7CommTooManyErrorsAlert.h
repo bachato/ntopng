@@ -32,15 +32,17 @@ class S7CommTooManyErrorsAlert : public FlowAlert {
 
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_s7comm_too_many_errors, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_s7comm_too_many_errors,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_ERROR; };
 
-  S7CommTooManyErrorsAlert(FlowCheck* c, Flow* f, u_int32_t _num_errors) : FlowAlert(c, f) {
+  S7CommTooManyErrorsAlert(FlowCheck* c, Flow* f, u_int32_t _num_errors)
+      : FlowAlert(c, f) {
     num_errors = _num_errors;
     setAlertScore(getDefaultScore());
   };
-  ~S7CommTooManyErrorsAlert(){};
+  ~S7CommTooManyErrorsAlert() {};
 
   bool autoAck() const { return false; };
 

@@ -20,7 +20,7 @@
  */
 
 #ifndef _FLOW_RESET_ALERT_H_
-#define _FLOW_RESET_ALERT_H_ 
+#define _FLOW_RESET_ALERT_H_
 
 #include "ntop_includes.h"
 
@@ -31,9 +31,11 @@ class TCPFlowResetAlert : public FlowAlert {
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_NOTICE; };
 
-  TCPFlowResetAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-  ~TCPFlowResetAlert(){};
-  
+  TCPFlowResetAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~TCPFlowResetAlert() {};
+
   FlowAlertType getAlertType() const { return getClassType(); }
 };
 

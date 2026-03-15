@@ -24,7 +24,8 @@
 /* ******************************* */
 
 Trace::Trace() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   traceLevel = TRACE_LEVEL_NORMAL;
   logFile = NULL;
   logFd = NULL;
@@ -36,10 +37,9 @@ Trace::Trace() {
 /* ******************************* */
 
 Trace::~Trace() {
-  if (logFd)   fclose(logFd);
+  if (logFd) fclose(logFd);
   if (logFile) free(logFile);
-  if (traceRedis && (!dontFreeRedis))
-    delete traceRedis;
+  if (traceRedis && (!dontFreeRedis)) delete traceRedis;
 };
 
 /* ******************************* */
@@ -88,7 +88,7 @@ void Trace::open_log() {
 
 /* ******************************* */
 
-void Trace::set_log_file(const char *log_file) {
+void Trace::set_log_file(const char* log_file) {
   if (log_file && log_file[0] != '\0') {
     rotate_logs(true);
     if (logFile) free(logFile);
@@ -107,7 +107,7 @@ void Trace::set_trace_level(u_int8_t id) {
 
 /* ******************************* */
 
-void Trace::initRedis(const char *redis_host, const char *redis_password,
+void Trace::initRedis(const char* redis_host, const char* redis_password,
                       u_int16_t redis_port, u_int8_t _redis_db_id) {
   Utils::initRedis(&traceRedis, redis_host, redis_password, redis_port,
                    _redis_db_id, false);
@@ -116,8 +116,8 @@ void Trace::initRedis(const char *redis_host, const char *redis_password,
 
 /* ******************************* */
 
-void Trace::traceEvent(int eventTraceLevel, const char *_file, const int line,
-                       const char *format, ...) {
+void Trace::traceEvent(int eventTraceLevel, const char* _file, const int line,
+                       const char* format, ...) {
   va_list va_ap;
 #ifndef WIN32
   struct tm result;
@@ -125,11 +125,11 @@ void Trace::traceEvent(int eventTraceLevel, const char *_file, const int line,
 
   if ((eventTraceLevel <= traceLevel) && (traceLevel > 0)) {
     char buf[8100], out_buf[9000];
-    char theDate[32], *file = (char *)_file;
-    const char *extra_msg = "";
+    char theDate[32], *file = (char*)_file;
+    const char* extra_msg = "";
     time_t theTime = time(NULL);
     char filebuf[MAX_PATH];
-    const char *backslash = strrchr(_file,
+    const char* backslash = strrchr(_file,
 #ifdef WIN32
                                     '\\'
 #else
@@ -139,7 +139,7 @@ void Trace::traceEvent(int eventTraceLevel, const char *_file, const int line,
 
     if (backslash != NULL) {
       snprintf(filebuf, sizeof(filebuf), "%s", &backslash[1]);
-      file = (char *)filebuf;
+      file = (char*)filebuf;
     }
 
     va_start(va_ap, format);
@@ -151,12 +151,13 @@ void Trace::traceEvent(int eventTraceLevel, const char *_file, const int line,
      */
 
     memset(buf, 0, sizeof(buf));
-    strftime(theDate, sizeof(theDate), "%d/%b/%Y %H:%M:%S", localtime_r(&theTime, &result));
+    strftime(theDate, sizeof(theDate), "%d/%b/%Y %H:%M:%S",
+             localtime_r(&theTime, &result));
 
     vsnprintf(buf, sizeof(buf) - 1, format, va_ap);
 
     va_end(va_ap);
-    
+
     if (eventTraceLevel == 0 /* TRACE_ERROR */)
       extra_msg = "ERROR: ";
     else if (eventTraceLevel == 1 /* TRACE_WARNING */)
@@ -171,26 +172,25 @@ void Trace::traceEvent(int eventTraceLevel, const char *_file, const int line,
     printf("%s\n", out_buf);
     fflush(stdout);
 
-    if (traceRedis
-	&& traceRedis->isOperational()
-	&& ntop->getRedis()->isOperational()) {
+    if (traceRedis && traceRedis->isOperational() &&
+        ntop->getRedis()->isOperational()) {
       if (traceRedis->llen(NTOPNG_TRACE) >= MAX_NUM_NTOPNG_TRACES) {
         memset(buf, 0, sizeof(buf));
 
-        traceRedis->rpop(NTOPNG_TRACE,buf, sizeof(buf));
+        traceRedis->rpop(NTOPNG_TRACE, buf, sizeof(buf));
       }
       traceRedis->lpush(NTOPNG_TRACE, out_buf, MAX_NUM_NTOPNG_TRACES,
     			false /* Do not re-trace errors, re-tracing would yield a deadlock */);
     }
   }
-
 }
 
 /* ******************************* */
 
-void Trace::logEvent(int eventTraceLevel, char *log_line) {
+void Trace::logEvent(int eventTraceLevel, char* log_line) {
   if (logFd) {
-    rotate_mutex.lock(__FILE__, __LINE__); /* Need to lock as a rotation may be in progress */
+    rotate_mutex.lock(
+        __FILE__, __LINE__); /* Need to lock as a rotation may be in progress */
     numLogLines++;
     fprintf(logFd, "%s\n", log_line);
     fflush(logFd);
@@ -210,9 +210,10 @@ void Trace::logEvent(int eventTraceLevel, char *log_line) {
 
 /* ******************************* */
 
-void Trace::setRedis(Redis *r) {
+void Trace::setRedis(Redis* r) {
   traceRedis = r;
-  dontFreeRedis = true; /* No need to free traceRedis as this is a shared pointer */
+  dontFreeRedis =
+      true; /* No need to free traceRedis as this is a shared pointer */
 }
 
 /* ******************************* */
@@ -238,7 +239,7 @@ void Trace::AddToMessageLog(LPTSTR lpszMsg) {
 #endif
 
   if (!isWinNT()) {
-    char *msg = (char *)lpszMsg;
+    char* msg = (char*)lpszMsg;
     printf("%s", msg);
     if (msg[strlen(msg) - 1] != '\n') printf("\n");
     return;

@@ -26,7 +26,7 @@
 
 class FlowRiskTLSOldProtocolVersionAlert : public FlowRiskAlert {
  private:
-  ndpi_serializer *getAlertJSON(ndpi_serializer *serializer);
+  ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
 
  public:
   static ndpi_risk_enum getClassRisk() { return NDPI_TLS_OBSOLETE_VERSION; }
@@ -37,9 +37,11 @@ class FlowRiskTLSOldProtocolVersionAlert : public FlowRiskAlert {
     return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
   }
 
-  FlowRiskTLSOldProtocolVersionAlert(FlowCheck *c, Flow *f)
-    : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
-  ~FlowRiskTLSOldProtocolVersionAlert(){};
+  FlowRiskTLSOldProtocolVersionAlert(FlowCheck* c, Flow* f)
+      : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskTLSOldProtocolVersionAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
   ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }

@@ -21,31 +21,31 @@
 
 #include "ntop_includes.h"
 
-
 #ifdef HAVE_ZMQ
 #ifndef HAVE_NEDGE
 
 /* **************************************************** */
 
-ExportInterface::ExportInterface(const char *_endpoint, const char *_topic) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+ExportInterface::ExportInterface(const char* _endpoint, const char* _topic) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   topic = strdup(_topic), endpoint = strdup(_endpoint);
 
   if ((context = zmq_ctx_new()) == NULL) {
-    const char *msg = "Unable to initialize ZMQ context";
+    const char* msg = "Unable to initialize ZMQ context";
     ntop->getTrace()->traceEvent(TRACE_ERROR, msg);
     throw(msg);
   }
 
   if ((publisher = zmq_socket(context, ZMQ_PUB)) == NULL) {
-    const char *msg = "Unable to create ZMQ socket";
+    const char* msg = "Unable to create ZMQ socket";
     ntop->getTrace()->traceEvent(TRACE_ERROR, msg);
     throw(msg);
   }
 
 #if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 1, 0)
   if (ntop->getPrefs()->get_export_zmq_encryption_key()) {
-    const char *server_public_key =
+    const char* server_public_key =
         ntop->getPrefs()->get_export_zmq_encryption_key();
     char client_public_key[41];
     char client_secret_key[41];
@@ -54,7 +54,7 @@ ExportInterface::ExportInterface(const char *_endpoint, const char *_topic) {
     rc = zmq_curve_keypair(client_public_key, client_secret_key);
 
     if (rc != 0) {
-      const char *msg = "Error generating ZMQ client key pair";
+      const char* msg = "Error generating ZMQ client key pair";
       ntop->getTrace()->traceEvent(TRACE_ERROR, msg);
       throw(msg);
     }
@@ -112,7 +112,8 @@ ExportInterface::ExportInterface(const char *_endpoint, const char *_topic) {
 /* **************************************************** */
 
 ExportInterface::~ExportInterface() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
   if (topic) free(topic);
   if (endpoint) free(endpoint);
 
@@ -122,7 +123,7 @@ ExportInterface::~ExportInterface() {
 
 /* **************************************************** */
 
-void ExportInterface::export_data(char *json) {
+void ExportInterface::export_data(char* json) {
   if (publisher) {
     struct zmq_msg_hdr_v1 msg_hdr;
 

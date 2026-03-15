@@ -30,9 +30,10 @@ class Mac : public GenericHashEntry {
   u_int8_t mac[6];
   u_int16_t host_pool_id;
   u_int32_t bridge_seen_iface_id; /* != 0 for bridge interfaces only */
-  bool special_mac, lockDeviceTypeChanges, broadcast_mac, asset_map_updated, empty_mac;
+  bool special_mac, lockDeviceTypeChanges, broadcast_mac, asset_map_updated,
+      empty_mac;
   bool stats_reset_requested, data_delete_requested;
-  const char *manuf;
+  const char* manuf;
   MacStats *stats, *stats_shadow;
   time_t last_stats_reset;
   ndpi_os device_os; /* This is the OS hint has observed via MAC address */
@@ -41,12 +42,12 @@ class Mac : public GenericHashEntry {
   std::vector<std::string> events;
 #endif
   struct {
-    char *dhcp; /* Extracted from DHCP dissection */
+    char* dhcp; /* Extracted from DHCP dissection */
   } names;
 
-  char *dhcpv4_fingerprint;
-  char *model;
-  char *ssid;
+  char* dhcpv4_fingerprint;
+  char* model;
+  char* ssid;
 
   bool source_mac;
   DeviceType device_type;
@@ -64,9 +65,9 @@ class Mac : public GenericHashEntry {
   void checkStatsReset();
   void dumpToRedis();
   void guessDeviceType();
-  
+
  public:
-  Mac(NetworkInterface *_iface, u_int8_t _mac[6]);
+  Mac(NetworkInterface* _iface, u_int8_t _mac[6]);
   ~Mac();
 
   inline u_int16_t getNumHosts() { return getUses(); }
@@ -95,7 +96,7 @@ class Mac : public GenericHashEntry {
 #endif
 
   inline u_int32_t key() { return (Utils::macHash(mac)); }
-  inline const u_int8_t *const get_mac() const { return (mac); }
+  inline const u_int8_t* const get_mac() const { return (mac); }
 
   u_int64_t get_mac64();
 
@@ -103,10 +104,10 @@ class Mac : public GenericHashEntry {
   bool isNull() const;
 
   bool equal(const u_int8_t _mac[6]);
-  bool equal(const Mac *m) {
+  bool equal(const Mac* m) {
     return ((memcmp(mac, m->mac, 6) == 0) ? true : false);
   };
-  inline void set(u_int8_t *macval) { memcpy(mac, macval, 6); };
+  inline void set(u_int8_t* macval) { memcpy(mac, macval, 6); };
 
 #ifdef NTOPNG_PRO
   inline time_t getNotifiedTime() { return captive_portal_notified; };
@@ -116,10 +117,10 @@ class Mac : public GenericHashEntry {
     bridge_seen_iface_id = idx;
     setSourceMac();
   }
-  inline u_int32_t getSeenIface()      { return (bridge_seen_iface_id); }
+  inline u_int32_t getSeenIface() { return (bridge_seen_iface_id); }
   void setDeviceOS(ndpi_os _os);
-  inline ndpi_os getDeviceOS()         { return(device_os);             }
-  
+  inline ndpi_os getDeviceOS() { return (device_os); }
+
   inline void forceDeviceType(DeviceType devtype) {
     /* Called when a user, from the GUI, wants to change the device type and
      * specify a custom type */
@@ -129,25 +130,25 @@ class Mac : public GenericHashEntry {
     if (!lockDeviceTypeChanges) lockDeviceTypeChanges = true;
   }
   inline DeviceType getDeviceType() { return (device_type); }
-  char *getDHCPName(char *const buf, ssize_t buf_size);
-  inline char* getDHCPNamePtr() { return(names.dhcp); }
-  char *getDHCPNameNotLowerCase(char *const buf, ssize_t buf_size);
+  char* getDHCPName(char* const buf, ssize_t buf_size);
+  inline char* getDHCPNamePtr() { return (names.dhcp); }
+  char* getDHCPNameNotLowerCase(char* const buf, ssize_t buf_size);
   void set_hash_entry_state_idle();
-  void lua(lua_State *vm, bool show_details, bool asListElement);
-  virtual char *get_string_key(char *buf, u_int buf_len) const {
+  void lua(lua_State* vm, bool show_details, bool asListElement);
+  virtual char* get_string_key(char* buf, u_int buf_len) const {
     return (Utils::formatMac(mac, buf, buf_len));
   };
-  inline int16_t findAddress(AddressTree *ptree) {
+  inline int16_t findAddress(AddressTree* ptree) {
     return ptree ? ptree->findMac(mac) : -1;
   };
-  inline char *print(char *str, u_int str_len) {
+  inline char* print(char* str, u_int str_len) {
     return (Utils::formatMac(mac, str, str_len));
   };
   void updateHostPool(bool isInlineCall, bool firstUpdate = false);
-  void inlineSetModel(const char *m);
-  void setDHCPFingerprint(const char *f);
-  void inlineSetSSID(const char *s);
-  void inlineSetDHCPName(const char *dhcp_name);
+  void inlineSetModel(const char* m);
+  void setDHCPFingerprint(const char* f);
+  void inlineSetSSID(const char* s);
+  void inlineSetDHCPName(const char* dhcp_name);
   inline u_int16_t get_host_pool() { return (host_pool_id); }
 
   inline void requestStatsReset() { stats_reset_requested = true; };
@@ -159,7 +160,7 @@ class Mac : public GenericHashEntry {
 
   inline void incSentStats(time_t t, u_int64_t num_pkts, u_int64_t num_bytes) {
     if (first_seen == 0) first_seen = t;
-    if(stats && (num_pkts != 0)) stats->incSentStats(t, num_pkts, num_bytes);
+    if (stats && (num_pkts != 0)) stats->incSentStats(t, num_pkts, num_bytes);
     last_seen = t;
   }
 
@@ -169,51 +170,70 @@ class Mac : public GenericHashEntry {
                            u_int64_t sent_packets, u_int64_t sent_bytes,
                            u_int64_t sent_goodput_bytes, u_int64_t rcvd_packets,
                            u_int64_t rcvd_bytes, u_int64_t rcvd_goodput_bytes) {
-    if(stats != NULL)
+    if (stats != NULL)
       stats->incnDPIStats(when, ndpi_category, sent_packets, sent_bytes,
-			  sent_goodput_bytes, rcvd_packets, rcvd_bytes,
-			  rcvd_goodput_bytes);
-  }
-  
-  inline void incRcvdStats(time_t t, u_int64_t num_pkts, u_int64_t num_bytes) {
-    if(stats && (num_pkts != 0)) stats->incRcvdStats(t, num_pkts, num_bytes);
+                          sent_goodput_bytes, rcvd_packets, rcvd_bytes,
+                          rcvd_goodput_bytes);
   }
 
-  char *getSerializationKey(char *buf, u_int bufsize, bool short_format = false);
+  inline void incRcvdStats(time_t t, u_int64_t num_pkts, u_int64_t num_bytes) {
+    if (stats && (num_pkts != 0)) stats->incRcvdStats(t, num_pkts, num_bytes);
+  }
+
+  char* getSerializationKey(char* buf, u_int bufsize,
+                            bool short_format = false);
 
   inline u_int64_t getNumSentArp() { return (stats->getNumSentArp()); }
   inline u_int64_t getNumRcvdArp() { return (stats->getNumRcvdArp()); }
-  inline void incNumDroppedFlows() { if(stats != NULL) stats->incNumDroppedFlows();     }
-  inline void incSentArpRequests() { if(stats != NULL) stats->incSentArpRequests();     }
-  inline void incSentArpReplies()  { if(stats != NULL) stats->incSentArpReplies();      }
-  inline void incRcvdArpRequests() { if(stats != NULL) stats->incRcvdArpRequests();     }
-  inline void incRcvdArpReplies()  { if(stats != NULL) stats->incRcvdArpReplies();      }
-  void periodic_stats_update(const struct timeval *tv, bool force_update);
-  inline u_int64_t getNumBytes() { return (stats->getNumBytes());     }
-  inline float getBytesThpt() { return (stats->getBytesThpt());       }
-  inline bool isMulticast() { return Utils::isMulticastMac(mac);      }
-  inline u_int64_t getNumPktsSent() { return stats ? stats->getNumPktsSent() : 0;   }
-  inline u_int64_t getNumPktsRcvd() { return stats ? stats->getNumPktsRcvd() : 0;   }
-  inline u_int64_t getNumBytesSent() { return stats ? stats->getNumBytesSent() : 0; }
-  inline u_int64_t getNumBytesRcvd() { return stats ? stats->getNumBytesRcvd() : 0; }
+  inline void incNumDroppedFlows() {
+    if (stats != NULL) stats->incNumDroppedFlows();
+  }
+  inline void incSentArpRequests() {
+    if (stats != NULL) stats->incSentArpRequests();
+  }
+  inline void incSentArpReplies() {
+    if (stats != NULL) stats->incSentArpReplies();
+  }
+  inline void incRcvdArpRequests() {
+    if (stats != NULL) stats->incRcvdArpRequests();
+  }
+  inline void incRcvdArpReplies() {
+    if (stats != NULL) stats->incRcvdArpReplies();
+  }
+  void periodic_stats_update(const struct timeval* tv, bool force_update);
+  inline u_int64_t getNumBytes() { return (stats->getNumBytes()); }
+  inline float getBytesThpt() { return (stats->getBytesThpt()); }
+  inline bool isMulticast() { return Utils::isMulticastMac(mac); }
+  inline u_int64_t getNumPktsSent() {
+    return stats ? stats->getNumPktsSent() : 0;
+  }
+  inline u_int64_t getNumPktsRcvd() {
+    return stats ? stats->getNumPktsRcvd() : 0;
+  }
+  inline u_int64_t getNumBytesSent() {
+    return stats ? stats->getNumBytesSent() : 0;
+  }
+  inline u_int64_t getNumBytesRcvd() {
+    return stats ? stats->getNumBytesRcvd() : 0;
+  }
 
   inline bool isBroadcast() { return (broadcast_mac); }
 
   inline void incNumDHCPRequests() { stats->incNumDHCPRequests(); }
-  inline void incNumDHCPReplies()  { stats->incNumDHCPReplies();  }
-  inline bool isAssetUpdated()     { return(asset_map_updated);   }
+  inline void incNumDHCPReplies() { stats->incNumDHCPReplies(); }
+  inline bool isAssetUpdated() { return (asset_map_updated); }
 
 #ifdef NTOPNG_PRO
-  void dumpAssetMac(ndpi_serializer *serializer);
-  void dumpAssetInfo(ndpi_serializer *serializer);  
+  void dumpAssetMac(ndpi_serializer* serializer);
+  void dumpAssetInfo(ndpi_serializer* serializer);
   void dumpMacInfo(bool add_last_seen);
   void analyzeDevice();
 #endif
 
-  inline char* getDHCPfingerprint() { return(dhcpv4_fingerprint); }
+  inline char* getDHCPfingerprint() { return (dhcpv4_fingerprint); }
 
 #ifdef HAVE_NEDGE
-  void logMacEvent(char *msg);
+  void logMacEvent(char* msg);
 #endif
 };
 

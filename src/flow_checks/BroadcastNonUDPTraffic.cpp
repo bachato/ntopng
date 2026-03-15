@@ -24,9 +24,9 @@
 
 /* ***************************************************** */
 
-void BroadcastNonUDPTraffic::flowBegin(Flow *f) {
-  const IpAddress *ip_addr = f->get_srv_ip_addr();
-  Mac *mac_addr = f->get_srv_host() ? f->get_srv_host()->getMac() : NULL;
+void BroadcastNonUDPTraffic::flowBegin(Flow* f) {
+  const IpAddress* ip_addr = f->get_srv_ip_addr();
+  Mac* mac_addr = f->get_srv_host() ? f->get_srv_host()->getMac() : NULL;
 
   if (ip_addr || mac_addr) {
     bool launch_alert = false;
@@ -50,9 +50,10 @@ void BroadcastNonUDPTraffic::flowBegin(Flow *f) {
 
       risk_percentage cli_score_pctg = CLIENT_HIGH_RISK_PERCENTAGE;
 
-      computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
+      computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg,
+                         &c_score, &s_score);
 
-      FlowAlert *alert = buildAlert(f);
+      FlowAlert* alert = buildAlert(f);
       alert->setCliSrvScores(c_score, s_score);
       f->triggerAlert(alert);
     }
@@ -61,8 +62,8 @@ void BroadcastNonUDPTraffic::flowBegin(Flow *f) {
 
 /* ***************************************************** */
 
-FlowAlert *BroadcastNonUDPTraffic::buildAlert(Flow *f) {
-  BroadcastNonUDPTrafficAlert *alert =
+FlowAlert* BroadcastNonUDPTraffic::buildAlert(Flow* f) {
+  BroadcastNonUDPTrafficAlert* alert =
       new (std::nothrow) BroadcastNonUDPTrafficAlert(this, f);
 
   if (alert) {

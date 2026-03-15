@@ -28,13 +28,16 @@ class UnexpectedNTPServerAlert : public UnexpectedServerAlert {
  private:
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_unexpected_ntp_server, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_unexpected_ntp_server,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_ERROR; };
 
-  UnexpectedNTPServerAlert(FlowCheck *c, Flow *f)
-      : UnexpectedServerAlert(c, f){setAlertScore(getDefaultScore());};
-  ~UnexpectedNTPServerAlert(){};
+  UnexpectedNTPServerAlert(FlowCheck* c, Flow* f)
+      : UnexpectedServerAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~UnexpectedNTPServerAlert() {};
 
   bool autoAck() const { return false; };
 

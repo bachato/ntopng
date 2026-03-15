@@ -24,7 +24,8 @@
 /* *************************************** */
 
 PacketStats::PacketStats() {
-  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s",
+  // __FILE__);
   resetStats();
 }
 
@@ -101,9 +102,9 @@ void PacketStats::incFlagStats(u_int8_t flags, bool cumulative_flags) {
 
 /* *************************************** */
 
-char *PacketStats::serialize() {
-  json_object *my_object = getJSONObject();
-  char *rsp = strdup(json_object_to_json_string(my_object));
+char* PacketStats::serialize() {
+  json_object* my_object = getJSONObject();
+  char* rsp = strdup(json_object_to_json_string(my_object));
 
   /* Free memory */
   json_object_put(my_object);
@@ -113,8 +114,8 @@ char *PacketStats::serialize() {
 
 /* ******************************************* */
 
-json_object *PacketStats::getJSONObject() {
-  json_object *my_object;
+json_object* PacketStats::getJSONObject() {
+  json_object* my_object;
 
   my_object = json_object_new_object();
 
@@ -161,7 +162,7 @@ json_object *PacketStats::getJSONObject() {
 
 /* ******************************************* */
 
-void PacketStats::lua(lua_State *vm, const char *label) {
+void PacketStats::lua(lua_State* vm, const char* label) {
   lua_newtable(vm);
 
   lua_newtable(vm);

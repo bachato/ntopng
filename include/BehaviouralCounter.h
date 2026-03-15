@@ -35,7 +35,7 @@ class BehaviouralCounter {
     is_anomaly = false,
     tot_num_anomalies = last_lower = last_upper = last_value = 0;
   }
-  virtual ~BehaviouralCounter(){};
+  virtual ~BehaviouralCounter() {};
 
   /*
     In Parameters:

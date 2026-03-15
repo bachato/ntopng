@@ -41,9 +41,9 @@ class ProtoStats {
   inline u_int64_t getBytes() const { return (numBytes); };
   inline void setPkts(u_int64_t v) { numPkts = v; };
   inline void setBytes(u_int64_t v) { numBytes = v; };
-  void lua(lua_State *vm, const char *prefix);
-  void print(const char *prefix);
-  inline void sum(ProtoStats *p) const {
+  void lua(lua_State* vm, const char* prefix);
+  void print(const char* prefix);
+  inline void sum(ProtoStats* p) const {
     p->numPkts += numPkts, p->numBytes += numBytes;
   };
 };

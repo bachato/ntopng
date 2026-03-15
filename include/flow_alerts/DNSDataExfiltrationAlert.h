@@ -27,12 +27,15 @@
 class DNSDataExfiltrationAlert : public FlowAlert {
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_dns_data_exfiltration, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_dns_data_exfiltration,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_WARNING; };
 
-  DNSDataExfiltrationAlert(FlowCheck *c, Flow *f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-  ~DNSDataExfiltrationAlert(){};
+  DNSDataExfiltrationAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~DNSDataExfiltrationAlert() {};
 
   bool autoAck() const { return false; };
 

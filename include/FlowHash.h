@@ -26,14 +26,14 @@
 
 class FlowHash : public GenericHash {
  public:
-  FlowHash(NetworkInterface *iface, u_int _num_hashes, u_int _max_hash_size);
+  FlowHash(NetworkInterface* iface, u_int _num_hashes, u_int _max_hash_size);
 
-  Flow* find(Mac *srcMac, Mac *dstMac, IpAddress *src_ip, IpAddress *dst_ip,
+  Flow* find(Mac* srcMac, Mac* dstMac, IpAddress* src_ip, IpAddress* dst_ip,
              u_int16_t src_port, u_int16_t dst_port, u_int16_t vlanId,
              u_int16_t observation_domain_id, u_int32_t private_flow_id,
-             u_int8_t protocol, const ICMPinfo *const icmp_info,
-             bool *src2dst_direction, bool is_inline_call,
-             Flow **unswapped_flow);
+             u_int8_t protocol, const ICMPinfo* const icmp_info,
+             bool* src2dst_direction, bool is_inline_call,
+             Flow** unswapped_flow);
   /**
    * @brief Find an entry by key value and hash entry id.
    *
@@ -42,11 +42,11 @@ class FlowHash : public GenericHash {
    * @return Pointer of entry that matches with the key parameter, NULL if there
    * isn't entry with the key parameter or if the hash is empty.
    */
-  Flow *findByKeyAndHashId(u_int32_t key, u_int32_t hash_id);
+  Flow* findByKeyAndHashId(u_int32_t key, u_int32_t hash_id);
 
 #ifdef HAVE_NEDGE
-  u_int32_t dropHostTraffic(IpAddress *host_ip, AddressTree *allowed_nets);
-#endif  
+  u_int32_t dropHostTraffic(IpAddress* host_ip, AddressTree* allowed_nets);
+#endif
 };
 
 #endif /* _FLOW_HASH_H_ */

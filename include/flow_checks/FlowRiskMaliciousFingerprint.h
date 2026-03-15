@@ -31,10 +31,10 @@ class FlowRiskMaliciousFingerprint : public FlowRisk {
   }
 
  public:
-  FlowRiskMaliciousFingerprint(){};
-  ~FlowRiskMaliciousFingerprint(){};
+  FlowRiskMaliciousFingerprint() {};
+  ~FlowRiskMaliciousFingerprint() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskMaliciousFingerprintAlert(this, f);
   }
 

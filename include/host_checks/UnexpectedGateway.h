@@ -27,15 +27,15 @@
 class UnexpectedGateway : public HostCheck {
  public:
   UnexpectedGateway();
-  ~UnexpectedGateway(){};
+  ~UnexpectedGateway() {};
 
-  UnexpectedGatewayAlert *allocAlert(HostCheck *c, Host *h,
-                                    risk_percentage cli_pctg) {
+  UnexpectedGatewayAlert* allocAlert(HostCheck* c, Host* h,
+                                     risk_percentage cli_pctg) {
     return new UnexpectedGatewayAlert(c, h, cli_pctg);
   };
 
-  bool loadConfiguration(json_object *config);
-  void periodicUpdate(Host *h, HostAlert *engaged_alert);
+  bool loadConfiguration(json_object* config);
+  void periodicUpdate(Host* h, HostAlert* engaged_alert);
 
   HostCheckID getID() const { return host_check_unexpected_gateway; }
   std::string getName() const { return (std::string("unexpected_gateway")); }

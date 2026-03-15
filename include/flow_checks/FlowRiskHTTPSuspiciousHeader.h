@@ -31,11 +31,11 @@ class FlowRiskHTTPSuspiciousHeader : public FlowRisk {
   }
 
  public:
-  FlowRiskHTTPSuspiciousHeader() : FlowRisk(){};
-  ~FlowRiskHTTPSuspiciousHeader(){};
+  FlowRiskHTTPSuspiciousHeader() : FlowRisk() {};
+  ~FlowRiskHTTPSuspiciousHeader() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    FlowRiskHTTPSuspiciousHeaderAlert *alert =
+  FlowAlert* buildAlert(Flow* f) {
+    FlowRiskHTTPSuspiciousHeaderAlert* alert =
         new FlowRiskHTTPSuspiciousHeaderAlert(this, f);
 
     alert->setCliAttacker(), alert->setSrvVictim();

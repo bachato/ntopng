@@ -41,35 +41,36 @@ class Prefs {
  private:
   u_int8_t num_deferred_interfaces_to_register;
   pcap_direction_t captureDirection;
-  char **deferred_interfaces_to_register, *cli, *ciphers_list, *custom_geoip_dir;
+  char **deferred_interfaces_to_register, *cli, *ciphers_list,
+      *custom_geoip_dir;
   char *http_binding_address1, *http_binding_address2;
   char *https_binding_address1, *https_binding_address2;
-  char *http_index_page;
-  char *influx_internal_db_name;
+  char* http_index_page;
+  char* influx_internal_db_name;
   bool influx_internal_available;
   bool enable_client_x509_auth, reproduce_at_original_speed, disable_purge,
-    strict_startup;
-  char* zmq_publish_events_url, *http_log_path;
+      strict_startup;
+  char *zmq_publish_events_url, *http_log_path;
   const char *clickhouse_client, *clickhouse_cluster_name;
   Ntop* ntop;
   bool enable_dns_resolution, sniff_dns_responses, sniff_name_responses,
-    sniff_local_name_responses, pcap_file_purge_hosts_flows,
-    categorization_enabled, resolve_all_host_ip, change_user, daemonize,
-    enable_auto_logout, enable_auto_logout_at_runtime, use_promiscuous_mode,
-    enable_ixia_timestamps, full_stats_enabled,
-    enable_interface_name_only, enable_users_login, disable_localhost_login,
-    service_license_check, enable_sql_log, enable_access_log, enable_assets_log, log_to_file,
-    enable_mac_ndpi_stats, enable_activities_debug, enable_behaviour_analysis,
-    enable_asn_behaviour_analysis, enable_network_behaviour_analysis,
-    enable_iface_l7_behaviour_analysis, emit_flow_alerts, emit_host_alerts,
-    dump_flows_on_clickhouse, readonly_flows_dump, use_mac_in_flow_key, do_reforge_timestamps,
-    add_vlan_tags_to_cloud_exporters, collect_blacklist_stats,
-    fail_on_invalid_license, limited_resources_mode, fingerprint_stats,
-    tls_quic_hostnaming;
+      sniff_local_name_responses, pcap_file_purge_hosts_flows,
+      categorization_enabled, resolve_all_host_ip, change_user, daemonize,
+      enable_auto_logout, enable_auto_logout_at_runtime, use_promiscuous_mode,
+      enable_ixia_timestamps, full_stats_enabled, enable_interface_name_only,
+      enable_users_login, disable_localhost_login, service_license_check,
+      enable_sql_log, enable_access_log, enable_assets_log, log_to_file,
+      enable_mac_ndpi_stats, enable_activities_debug, enable_behaviour_analysis,
+      enable_asn_behaviour_analysis, enable_network_behaviour_analysis,
+      enable_iface_l7_behaviour_analysis, emit_flow_alerts, emit_host_alerts,
+      dump_flows_on_clickhouse, readonly_flows_dump, use_mac_in_flow_key,
+      do_reforge_timestamps, add_vlan_tags_to_cloud_exporters,
+      collect_blacklist_stats, fail_on_invalid_license, limited_resources_mode,
+      fingerprint_stats, tls_quic_hostnaming;
   u_int32_t behaviour_analysis_learning_period;
   u_int32_t iec60870_learning_period, modbus_learning_period,
-    s7comm_learning_period, devices_learning_period,
-    mac_address_cache_duration;
+      s7comm_learning_period, devices_learning_period,
+      mac_address_cache_duration;
   u_int32_t host_port_learning_period;
   bool enable_flow_swap_heuristic;
   bool skip_dpi_for_collected_flows;
@@ -79,7 +80,8 @@ class Prefs {
   ndpi_bitmap* s7comm_allowed_function_codes;
   u_int s7comm_too_many_errors;
   u_int profinet_too_many_errors;
-  bool data_archive_before_ttl_delete, asset_inventory_enabled, snmp_trap_enabled;
+  bool data_archive_before_ttl_delete, asset_inventory_enabled,
+      snmp_trap_enabled;
 #endif
   ServiceAcceptance behaviour_analysis_learning_status_during_learning,
       behaviour_analysis_learning_status_post_learning;
@@ -96,7 +98,7 @@ class Prefs {
   u_int32_t other_rrd_raw_days, other_rrd_1min_days, other_rrd_1h_days,
       other_rrd_1d_days;
   u_int32_t housekeeping_frequency;
-  bool disable_alerts, enable_top_talkers, enable_sites_collection, 
+  bool disable_alerts, enable_top_talkers, enable_sites_collection,
       enable_active_local_hosts_cache, enable_dns_cache, split_ts_direction;
   bool enable_flow_device_port_rrd_creation,
       enable_observation_points_rrd_creation,
@@ -129,14 +131,15 @@ class Prefs {
   u_int8_t num_interfaces;
   u_int16_t auto_assigned_pool_id;
   u_int8_t vs_max_num_scans;
-  bool vs_slow_scan; 
-  bool dump_flows_on_es, dump_flows_on_syslog,
-      dump_json_flows_on_disk, dump_ext_json;
+  bool vs_slow_scan;
+  bool dump_flows_on_es, dump_flows_on_syslog, dump_json_flows_on_disk,
+      dump_ext_json;
   bool asn_mode_enabled;
 #ifdef NTOPNG_PRO
   bool dump_flows_direct;
   u_int32_t dump_queue_len, dump_queue_block_size;
-  u_int32_t max_aggregated_flows_upperbound, max_aggregated_flows_traffic_upperbound;
+  u_int32_t max_aggregated_flows_upperbound,
+      max_aggregated_flows_traffic_upperbound;
 #endif
   bool enable_runtime_flows_dump; /**< runtime preference to enable/disable
                                      flows dump from the UI */
@@ -179,12 +182,12 @@ class Prefs {
   int dns_mode;
   bool json_labels_string_format;
   char *es_type, *es_index, *es_url, *es_user, *es_pwd, *es_host;
-  char *clickhouse_host;
-  char *clickhouse_dbname;
-  char *clickhouse_user;
-  char *clickhouse_pw;
+  char* clickhouse_host;
+  char* clickhouse_dbname;
+  char* clickhouse_user;
+  char* clickhouse_pw;
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
-  char *clickhouse_cluster_user; /* In case of ch cloud, 2 users are needed, 
+  char* clickhouse_cluster_user; /* In case of ch cloud, 2 users are needed,
                     one for mysql and one for ch */
   bool ntopng_assets_inventory_enabled;
 #endif
@@ -200,12 +203,13 @@ class Prefs {
   bool appliance;
 #endif
 
-  ServerConfiguration *gateway, *dns_servers, *ntp_servers, *smtp_servers, *dhcp_servers;
+  ServerConfiguration *gateway, *dns_servers, *ntp_servers, *smtp_servers,
+      *dhcp_servers;
   ASNConfiguration *customer_asn, *sub_customer_asn, *remote_asn;
 
 #ifdef NTOPNG_PRO
-  AddressTree *networks_policy_configuration;
-  AddressTree *networks_policy_configuration_shadow;
+  AddressTree* networks_policy_configuration;
+  AddressTree* networks_policy_configuration_shadow;
 #endif
 
 #ifdef HAVE_PF_RING
@@ -220,7 +224,7 @@ class Prefs {
   bool message_broker_enabled;
 #ifdef NTOPNG_PRO
   bool print_maintenance, print_license;
-  char *lic_mgr_config_file;
+  char* lic_mgr_config_file;
 #endif
   bool print_version, print_version_json;
   bool snmp_polling;
@@ -260,7 +264,9 @@ class Prefs {
   bool is_enterprise_xxl_edition();
   bool is_enterprise_xxxl_edition();
 
-  bool is_edr_mode() { return false; /* TODO (used to be private Cloud mode) */ };
+  bool is_edr_mode() {
+    return false; /* TODO (used to be private Cloud mode) */
+  };
 
   bool is_nedge_pro_edition();
   bool is_nedge_enterprise_edition();
@@ -329,7 +335,8 @@ class Prefs {
   };
   inline bool do_dump_flows_on_es() { return (dump_flows_on_es); };
   inline bool do_dump_flows_on_clickhouse() {
-    return ((is_enterprise_m_edition() || is_nedge_enterprise_edition()) && dump_flows_on_clickhouse);
+    return ((is_enterprise_m_edition() || is_nedge_enterprise_edition()) &&
+            dump_flows_on_clickhouse);
   };
   inline bool do_dump_alerts_on_clickhouse() {
     return (do_dump_flows_on_clickhouse());
@@ -345,18 +352,19 @@ class Prefs {
     return (dump_json_flows_on_disk);
   };
   inline bool do_dump_flows() {
-    return (do_dump_flows_on_es()
-         || do_dump_flows_on_clickhouse()
-         || do_dump_flows_on_syslog()
+    return (do_dump_flows_on_es() || do_dump_flows_on_clickhouse() ||
+            do_dump_flows_on_syslog()
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
-         || do_dump_flows_on_kafka()
+            || do_dump_flows_on_kafka()
 #endif
     );
   };
 
 #ifdef NTOPNG_PRO
   inline u_int32_t get_dump_queue_len() { return dump_queue_len; };
-  inline u_int32_t get_dump_queue_block_size() { return dump_queue_block_size; };
+  inline u_int32_t get_dump_queue_block_size() {
+    return dump_queue_block_size;
+  };
   inline void toggle_dump_flows_direct(bool enable) {
     dump_flows_direct = enable;
   };
@@ -365,9 +373,10 @@ class Prefs {
   inline bool is_runtime_flows_dump_enabled() const {
     return (enable_runtime_flows_dump);
   };
-  inline bool is_readonly_flows_dump() { return(readonly_flows_dump); };
+  inline bool is_readonly_flows_dump() { return (readonly_flows_dump); };
   inline bool is_flows_dump_enabled() {
-    return (do_dump_flows() && is_runtime_flows_dump_enabled() && !readonly_flows_dump);
+    return (do_dump_flows() && is_runtime_flows_dump_enabled() &&
+            !readonly_flows_dump);
   };
   int32_t getDefaultPrefsValue(const char* pref_key, int32_t default_value);
   void getDefaultStringPrefsValue(const char* pref_key, char** buffer,
@@ -382,13 +391,21 @@ class Prefs {
   inline char* get_docs_dir() { return (docs_dir); };  // HTTP docs
   inline const char* get_scripts_dir() { return (scripts_dir); };
   inline const char* get_callbacks_dir() { return (callbacks_dir); };
-  inline char* get_influx_internal_db_name() { return (influx_internal_db_name); };
-  void set_influx_internal_db_name(char *internal_name);
-  inline bool get_influx_internal_available() { return (influx_internal_available); };
-  inline void set_influx_internal_available(bool available) { influx_internal_available = available; };
+  inline char* get_influx_internal_db_name() {
+    return (influx_internal_db_name);
+  };
+  void set_influx_internal_db_name(char* internal_name);
+  inline bool get_influx_internal_available() {
+    return (influx_internal_available);
+  };
+  inline void set_influx_internal_available(bool available) {
+    influx_internal_available = available;
+  };
   void set_callback_dir(char* path) { callbacks_dir = path; };
   inline const char* get_pcap_dir() { return (pcap_dir); };
-  inline const char* get_clickhouse_archive_dir() { return (clickhouse_archive_dir); };
+  inline const char* get_clickhouse_archive_dir() {
+    return (clickhouse_archive_dir);
+  };
 #ifdef NTOPNG_PRO
   inline const char* get_pro_callbacks_dir() { return (pro_callbacks_dir); };
 #endif
@@ -401,15 +418,9 @@ class Prefs {
   inline const char* get_test_post_script_path() {
     return (test_post_script_path);
   };
-  inline const char* get_message_broker_url() {
-    return(message_broker_url);
-  };
-  inline const char* get_message_broker() {
-    return(message_broker);
-  };
-  inline bool is_message_broker_enabled() {
-    return(message_broker_enabled);
-  };
+  inline const char* get_message_broker_url() { return (message_broker_url); };
+  inline const char* get_message_broker() { return (message_broker); };
+  inline bool is_message_broker_enabled() { return (message_broker_enabled); };
   inline char* get_export_endpoint() { return (export_endpoint); };
   inline char* get_export_zmq_encryption_key() {
     return (export_zmq_encryption_key);
@@ -432,9 +443,13 @@ class Prefs {
   bool do_active_monitoring();
   inline bool get_active_monitoring_pref() { return (active_monitoring); };
   inline bool do_tls_quic_hostnaming() { return (tls_quic_hostnaming); };
-  inline bool email_starttls_enabled()          { return (starttls); };
-  inline bool dump_pcap_to_clickhouse_enabled() { return (dump_pcap_to_clickhouse); };
-  inline bool query_performance_log_enabled() { return (query_performance_log); };
+  inline bool email_starttls_enabled() { return (starttls); };
+  inline bool dump_pcap_to_clickhouse_enabled() {
+    return (dump_pcap_to_clickhouse);
+  };
+  inline bool query_performance_log_enabled() {
+    return (query_performance_log);
+  };
   inline char* get_cpu_affinity() { return (cpu_affinity); };
   inline char* get_other_cpu_affinity() { return (other_cpu_affinity); };
 #ifdef __linux__
@@ -529,12 +544,16 @@ class Prefs {
 
   inline char* get_clickhouse_host() { return (clickhouse_host); };
   inline int get_clickhouse_tcp_port() { return (clickhouse_tcp_port); };
-  inline bool is_clickhouse_tcp_port_secure() { return (clickhouse_tcp_port_secure); };
+  inline bool is_clickhouse_tcp_port_secure() {
+    return (clickhouse_tcp_port_secure);
+  };
   inline char* get_clickhouse_dbname() { return (clickhouse_dbname); };
   inline char* get_clickhouse_user() { return (clickhouse_user); };
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
   /* If this is not NULL, it means that the user is using CH Cloud */
-  inline char* get_clickhouse_cluster_user() { return (clickhouse_cluster_user); };
+  inline char* get_clickhouse_cluster_user() {
+    return (clickhouse_cluster_user);
+  };
 #endif
   inline char* get_clickhouse_pw() { return (clickhouse_pw); };
 
@@ -600,15 +619,15 @@ class Prefs {
   inline u_int32_t get_pkt_ifaces_flow_max_idle() {
     return (pkt_ifaces_flow_max_idle);
   };
-  inline char *getHttpIndexPage() {
-    return http_index_page;
-  };
+  inline char* getHttpIndexPage() { return http_index_page; };
 
-  inline bool isASNModeEnabled()                   { return asn_mode_enabled;          };
-  inline bool are_top_talkers_enabled()            { return (enable_top_talkers);      };
-  inline bool are_sites_collection_enabled()       { return (enable_sites_collection); };
-  inline bool is_dns_cache_enabled()               { return (enable_dns_cache);        };
-  inline bool flow_table_duration_or_last_seen()   { return (flow_table_time);         };
+  inline bool isASNModeEnabled() { return asn_mode_enabled; };
+  inline bool are_top_talkers_enabled() { return (enable_top_talkers); };
+  inline bool are_sites_collection_enabled() {
+    return (enable_sites_collection);
+  };
+  inline bool is_dns_cache_enabled() { return (enable_dns_cache); };
+  inline bool flow_table_duration_or_last_seen() { return (flow_table_time); };
   inline bool is_active_local_host_cache_enabled() {
     return (enable_active_local_hosts_cache);
   };
@@ -622,7 +641,7 @@ class Prefs {
   inline bool is_observation_points_rrd_creation_enabled() {
     return (enable_observation_points_rrd_creation);
   };
-  inline char* get_http_log_path() { return(http_log_path); };
+  inline char* get_http_log_path() { return (http_log_path); };
   inline bool is_intranet_traffic_rrd_creation_enabled() {
     return (enable_intranet_traffic_rrd_creation);
   };
@@ -709,7 +728,7 @@ class Prefs {
   inline bool purgeHostsFlowsOnPcapFiles() {
     return (pcap_file_purge_hosts_flows /* || dump_flows_on_clickhouse */);
   };
-  inline bool disablePurge()    { return (disable_purge);   };
+  inline bool disablePurge() { return (disable_purge); };
   inline bool isStrictStartup() { return (strict_startup); };
   inline void enableBehaviourAnalysis() { enable_behaviour_analysis = true; };
   inline bool isBehavourAnalysisEnabled() {
@@ -739,27 +758,61 @@ class Prefs {
   inline ServiceAcceptance behaviourAnalysisStatusPostLearning() {
     return behaviour_analysis_learning_status_post_learning;
   };
-  inline u_int64_t* getIEC104AllowedTypeIDs() { return (iec104_allowed_typeids);   };
-  inline u_int32_t getIEC60870LearingPeriod() { return (iec60870_learning_period); };
-  inline u_int32_t getModbusLearningPeriod()   { return (modbus_learning_period); };
-  inline u_int32_t getS7CommLearningPeriod()   { return (s7comm_learning_period); };
+  inline u_int64_t* getIEC104AllowedTypeIDs() {
+    return (iec104_allowed_typeids);
+  };
+  inline u_int32_t getIEC60870LearingPeriod() {
+    return (iec60870_learning_period);
+  };
+  inline u_int32_t getModbusLearningPeriod() {
+    return (modbus_learning_period);
+  };
+  inline u_int32_t getS7CommLearningPeriod() {
+    return (s7comm_learning_period);
+  };
 #ifdef NTOPNG_PRO
-  inline bool isAssetInventoryEnabled() { return(asset_inventory_enabled && !isASNModeEnabled()); };
+  inline bool isAssetInventoryEnabled() {
+    return (asset_inventory_enabled && !isASNModeEnabled());
+  };
   inline bool isSNMPTrapEnabled() { return snmp_trap_enabled; };
-  inline ndpi_bitmap* getModbusAllowedFunctionCodes() { return (modbus_allowed_function_codes);  };
-  inline void         setModbusTooManyExceptionsThreshold(u_int v) { modbus_too_many_exceptions = v;     }
-  inline u_int        getModbusTooManyExceptionsThreshold()        { return(modbus_too_many_exceptions); }
-  inline ndpi_bitmap* getS7CommAllowedFunctionCodes() { return (s7comm_allowed_function_codes);  };
-  inline void         setS7CommTooManyErrorsThreshold(u_int v) { s7comm_too_many_errors = v;     }
-  inline u_int        getS7CommTooManyErrorsThreshold()        { return(s7comm_too_many_errors); }
-  inline void         setProfinetTooManyErrorsThreshold(u_int v) { profinet_too_many_errors = v;     }
-  inline u_int        getProfinetTooManyErrorsThreshold()        { return(profinet_too_many_errors); }
+  inline ndpi_bitmap* getModbusAllowedFunctionCodes() {
+    return (modbus_allowed_function_codes);
+  };
+  inline void setModbusTooManyExceptionsThreshold(u_int v) {
+    modbus_too_many_exceptions = v;
+  }
+  inline u_int getModbusTooManyExceptionsThreshold() {
+    return (modbus_too_many_exceptions);
+  }
+  inline ndpi_bitmap* getS7CommAllowedFunctionCodes() {
+    return (s7comm_allowed_function_codes);
+  };
+  inline void setS7CommTooManyErrorsThreshold(u_int v) {
+    s7comm_too_many_errors = v;
+  }
+  inline u_int getS7CommTooManyErrorsThreshold() {
+    return (s7comm_too_many_errors);
+  }
+  inline void setProfinetTooManyErrorsThreshold(u_int v) {
+    profinet_too_many_errors = v;
+  }
+  inline u_int getProfinetTooManyErrorsThreshold() {
+    return (profinet_too_many_errors);
+  }
 #endif
   inline u_int32_t devicesLearingPeriod() { return (devices_learning_period); };
-  inline u_int32_t macAddressCacheDuration() { return (mac_address_cache_duration); };
-  inline u_int32_t hostPortLearningPeriod() { return (host_port_learning_period); };
-  inline bool isFlowSwapHeuristicEnabled() { return (enable_flow_swap_heuristic); };
-  inline bool skipDPIforCollectedFlows() { return (skip_dpi_for_collected_flows); };
+  inline u_int32_t macAddressCacheDuration() {
+    return (mac_address_cache_duration);
+  };
+  inline u_int32_t hostPortLearningPeriod() {
+    return (host_port_learning_period);
+  };
+  inline bool isFlowSwapHeuristicEnabled() {
+    return (enable_flow_swap_heuristic);
+  };
+  inline bool skipDPIforCollectedFlows() {
+    return (skip_dpi_for_collected_flows);
+  };
   inline bool are_alerts_disabled() { return (disable_alerts); };
   inline bool dontEmitFlowAlerts() {
     return (disable_alerts || !emit_flow_alerts);
@@ -767,17 +820,15 @@ class Prefs {
   inline bool dontEmitHostAlerts() {
     return (disable_alerts || !emit_host_alerts);
   };
-  inline void dontUseClickHouse() {
-    dump_flows_on_clickhouse = false;
-  };
+  inline void dontUseClickHouse() { dump_flows_on_clickhouse = false; };
   inline char* getZMQPublishEventsURL() { return (zmq_publish_events_url); };
   inline const char* getClickHouseClientPath() { return (clickhouse_client); };
   inline const char* getClickHouseClusterName() {
     return (clickhouse_cluster_name);
   };
 #ifdef NTOPNG_PRO
-  void setModbusAllowedFunctionCodes(const char *function_codes);
-  void setS7CommAllowedFunctionCodes(const char *function_codes);
+  void setModbusAllowedFunctionCodes(const char* function_codes);
+  void setS7CommAllowedFunctionCodes(const char* function_codes);
 #endif
   void setIEC104AllowedTypeIDs(const char* type_ids);
   void validate();
@@ -790,47 +841,56 @@ class Prefs {
   void reloadASNConfiguration();
 #ifdef NTOPNG_PRO
   bool reloadNetworksPolicyConfiguration();
-  bool loadPolicyConfiguration(AddressTree *tree, char *key, NetworkConfigurationId id);
+  bool loadPolicyConfiguration(AddressTree* tree, char* key,
+                               NetworkConfigurationId id);
   AddressTree* getNetworksPolicyConfiguration();
 #endif
-  bool isGateway(IpAddress *ip, u_int16_t vlan_id);
-  bool isDNSServer(IpAddress *ip, u_int16_t vlan_id);
-  bool isNTPServer(IpAddress *ip, u_int16_t vlan_id);
-  bool isSMTPServer(IpAddress *ip, u_int16_t vlan_id);
-  bool isDHCPServer(IpAddress *ip, u_int16_t vlan_id);
-  
+  bool isGateway(IpAddress* ip, u_int16_t vlan_id);
+  bool isDNSServer(IpAddress* ip, u_int16_t vlan_id);
+  bool isNTPServer(IpAddress* ip, u_int16_t vlan_id);
+  bool isSMTPServer(IpAddress* ip, u_int16_t vlan_id);
+  bool isDHCPServer(IpAddress* ip, u_int16_t vlan_id);
+
   bool isCustomerASN(u_int32_t asn);
   bool isSubCustomerASN(u_int32_t asn);
   bool isRemoteASN(u_int32_t asn);
-  
-  ServerConfiguration* getConfiguredGateways()    { return(gateway);      }
-  ServerConfiguration* getConfiguredDNSServers()  { return(dns_servers);  }
-  ServerConfiguration* getConfiguredNTPServers()  { return(ntp_servers);  }
-  ServerConfiguration* getConfiguredSMTPServers() { return(smtp_servers); }
-  ServerConfiguration* getConfiguredDHCPServers() { return(dhcp_servers); }
 
-  ASNConfiguration* getCustomerASN() { return(customer_asn); }
-  ASNConfiguration* getSubCustomerASN() { return(sub_customer_asn); }
-  ASNConfiguration* getRemoteASN() { return(remote_asn); }
+  ServerConfiguration* getConfiguredGateways() { return (gateway); }
+  ServerConfiguration* getConfiguredDNSServers() { return (dns_servers); }
+  ServerConfiguration* getConfiguredNTPServers() { return (ntp_servers); }
+  ServerConfiguration* getConfiguredSMTPServers() { return (smtp_servers); }
+  ServerConfiguration* getConfiguredDHCPServers() { return (dhcp_servers); }
 
-  inline bool useMacAddressInFlowKey()     { return (use_mac_in_flow_key);  }
-  inline bool areFingerprintStatsEnabled() { return (fingerprint_stats);    }
-  inline bool doReforgeTimestamps()        { return(do_reforge_timestamps); }
-  inline void enableVLANCloudToExporters() { add_vlan_tags_to_cloud_exporters = true;  }
-  inline bool addVLANCloudToExporters()    { return(add_vlan_tags_to_cloud_exporters); }
-  inline bool collectBlackListStats()      { return(collect_blacklist_stats);          }
-  inline bool limitResourcesUsage()        { return(limited_resources_mode);           }
-  inline bool failOnInvalidLicense()       { return(fail_on_invalid_license);          }
-  inline char* getCiphersList()            { return(ciphers_list);                     }
+  ASNConfiguration* getCustomerASN() { return (customer_asn); }
+  ASNConfiguration* getSubCustomerASN() { return (sub_customer_asn); }
+  ASNConfiguration* getRemoteASN() { return (remote_asn); }
+
+  inline bool useMacAddressInFlowKey() { return (use_mac_in_flow_key); }
+  inline bool areFingerprintStatsEnabled() { return (fingerprint_stats); }
+  inline bool doReforgeTimestamps() { return (do_reforge_timestamps); }
+  inline void enableVLANCloudToExporters() {
+    add_vlan_tags_to_cloud_exporters = true;
+  }
+  inline bool addVLANCloudToExporters() {
+    return (add_vlan_tags_to_cloud_exporters);
+  }
+  inline bool collectBlackListStats() { return (collect_blacklist_stats); }
+  inline bool limitResourcesUsage() { return (limited_resources_mode); }
+  inline bool failOnInvalidLicense() { return (fail_on_invalid_license); }
+  inline char* getCiphersList() { return (ciphers_list); }
 #ifdef NTOPNG_PRO
-  inline char* getLicMgrConfigFile()       { return(lic_mgr_config_file);              }
-  inline AddressTree* getNwPolicyConfig()  { return(networks_policy_configuration);    }
+  inline char* getLicMgrConfigFile() { return (lic_mgr_config_file); }
+  inline AddressTree* getNwPolicyConfig() {
+    return (networks_policy_configuration);
+  }
 #endif
-  inline char* getCustomGeoIPDir()         { return(custom_geoip_dir);                 }
-  void setCustomGeoIPDir(char *d);
+  inline char* getCustomGeoIPDir() { return (custom_geoip_dir); }
+  void setCustomGeoIPDir(char* d);
 
-  inline bool fullStatsEnabled()           { return(full_stats_enabled);               }
-  inline bool isFlowDedupEnabled()         { return(is_enterprise_xl_edition() ? true : false); }
+  inline bool fullStatsEnabled() { return (full_stats_enabled); }
+  inline bool isFlowDedupEnabled() {
+    return (is_enterprise_xl_edition() ? true : false);
+  }
 };
 
 #endif /* _PREFS_H_ */

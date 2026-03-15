@@ -24,8 +24,9 @@
 /* ******************************* */
 
 Mutex::Mutex() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   pthread_mutex_init(&the_mutex, NULL);
   locked = false;
 #ifdef MUTEX_DEBUG
@@ -37,7 +38,7 @@ Mutex::Mutex() {
 
 /* ******************************* */
 
-bool Mutex::lock(const char *filename, const int line, bool trace_errors) {
+bool Mutex::lock(const char* filename, const int line, bool trace_errors) {
   int rc;
 
   errno = 0;
@@ -73,8 +74,8 @@ bool Mutex::lock(const char *filename, const int line, bool trace_errors) {
  * NOTE: Unlike the real McCoy, won't return EOWNERDEAD, EDEADLK
  *       or EOWNERDEAD
  */
-static int pthread_mutex_timedlock(pthread_mutex_t *mutex,
-                                   struct timespec *abs_timeout) {
+static int pthread_mutex_timedlock(pthread_mutex_t* mutex,
+                                   struct timespec* abs_timeout) {
   int rv;
   struct timespec remaining, slept, ts;
 
@@ -108,8 +109,8 @@ static int pthread_mutex_timedlock(pthread_mutex_t *mutex,
 
 /* ******************************* */
 
-bool Mutex::lockTimeout(const char *filename, const int line,
-                        struct timespec *wait, bool trace_errors) {
+bool Mutex::lockTimeout(const char* filename, const int line,
+                        struct timespec* wait, bool trace_errors) {
   int rc;
 
   errno = 0;
@@ -135,7 +136,7 @@ bool Mutex::lockTimeout(const char *filename, const int line,
 
 /* ******************************* */
 
-void Mutex::unlock(const char *filename, const int line, bool trace_errors) {
+void Mutex::unlock(const char* filename, const int line, bool trace_errors) {
   int rc;
 
   errno = 0;

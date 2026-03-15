@@ -27,9 +27,9 @@
 
 /* **************************************************************** */
 
-static int ntop_host_get_ip(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_host_get_ip(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h) {
     char buf[64];
@@ -43,13 +43,13 @@ static int ntop_host_get_ip(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_host_get_mac(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_host_get_mac(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h) {
-    Mac *cur_mac = h->getMac();
-    const u_int8_t *mac = cur_mac ? cur_mac->get_mac() : NULL;
+    Mac* cur_mac = h->getMac();
+    const u_int8_t* mac = cur_mac ? cur_mac->get_mac() : NULL;
     char buf[64];
 
     lua_pushstring(vm, Utils::formatMac(mac ? mac : NULL, buf, sizeof(buf)));
@@ -61,9 +61,9 @@ static int ntop_host_get_mac(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_host_get_name(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_host_get_name(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h) {
     char buf[64];
@@ -77,9 +77,9 @@ static int ntop_host_get_name(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_host_get_vlan_id(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_host_get_vlan_id(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h)
     lua_pushinteger(vm, h->get_vlan_id());
@@ -91,9 +91,9 @@ static int ntop_host_get_vlan_id(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_host_get_score(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_host_get_score(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h)
     lua_pushinteger(vm, h->getScore());
@@ -105,9 +105,9 @@ static int ntop_host_get_score(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_host_is_local(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_host_is_local(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   lua_pushboolean(vm, h ? h->isLocalHost() : false);
 
@@ -116,10 +116,10 @@ static int ntop_host_is_local(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_host_is_unicast(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
-  IpAddress *ip = h ? h->get_ip() : NULL;
+static int ntop_host_is_unicast(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
+  IpAddress* ip = h ? h->get_ip() : NULL;
 
   lua_pushboolean(vm, ip ? (!ip->isBroadMulticastAddress()) : true);
 
@@ -128,10 +128,10 @@ static int ntop_host_is_unicast(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_host_is_multicast(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
-  IpAddress *ip = h ? h->get_ip() : NULL;
+static int ntop_host_is_multicast(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
+  IpAddress* ip = h ? h->get_ip() : NULL;
 
   lua_pushboolean(vm, ip ? ip->isMulticastAddress() : false);
 
@@ -140,10 +140,10 @@ static int ntop_host_is_multicast(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_host_is_broadcast(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
-  IpAddress *ip = h ? h->get_ip() : NULL;
+static int ntop_host_is_broadcast(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
+  IpAddress* ip = h ? h->get_ip() : NULL;
 
   lua_pushboolean(vm, ip ? ip->isBroadcastAddress() : false);
 
@@ -152,9 +152,9 @@ static int ntop_host_is_broadcast(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_host_is_blacklisted(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_host_is_blacklisted(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   lua_pushboolean(vm, h ? h->isBlacklisted() : false);
 
@@ -163,9 +163,9 @@ static int ntop_host_is_blacklisted(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_host_is_rx_only(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_host_is_rx_only(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   lua_pushboolean(vm, h ? h->isRxOnlyHost() : false);
 
@@ -174,9 +174,9 @@ static int ntop_host_is_rx_only(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_host_get_bytes_sent(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_host_get_bytes_sent(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h)
     lua_pushinteger(vm, h->getNumBytesSent());
@@ -188,9 +188,9 @@ static int ntop_host_get_bytes_sent(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_host_get_bytes_rcvd(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_host_get_bytes_rcvd(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h)
     lua_pushinteger(vm, h->getNumBytesRcvd());
@@ -202,9 +202,9 @@ static int ntop_host_get_bytes_rcvd(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_host_get_bytes_total(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_host_get_bytes_total(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h)
     lua_pushinteger(vm, h->getNumBytesSent() + h->getNumBytesRcvd());
@@ -216,12 +216,12 @@ static int ntop_host_get_bytes_total(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_host_get_l7_stats(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_host_get_l7_stats(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h) {
-    nDPIStats *stats = h->get_ndpi_stats();
+    nDPIStats* stats = h->get_ndpi_stats();
 
     if (stats) {
       lua_newtable(vm);
@@ -236,9 +236,9 @@ static int ntop_host_get_l7_stats(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_skip_visited_host(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_skip_visited_host(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h) {
     bool skip_host = false;
@@ -263,13 +263,13 @@ static int ntop_skip_visited_host(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_trigger_host_alert(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_trigger_host_alert(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h) {
     u_int32_t value;
-    char *msg;
+    char* msg;
 
     if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
       return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
@@ -277,7 +277,7 @@ static int ntop_trigger_host_alert(lua_State *vm) {
 
     if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
       return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-    msg = (char *)lua_tostring(vm, 2);
+    msg = (char*)lua_tostring(vm, 2);
 
     h->triggerCustomHostAlert(value, msg);
   } else
@@ -288,9 +288,9 @@ static int ntop_trigger_host_alert(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_get_num_contacted_peers_as_client_tcp_udp_notx(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_get_num_contacted_peers_as_client_tcp_udp_notx(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h)
     lua_pushinteger(vm, h->getNumContactedPeersAsClientTCPUDPNoTX());
@@ -302,9 +302,9 @@ static int ntop_get_num_contacted_peers_as_client_tcp_udp_notx(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_get_unidirectional_tcp_udp_flows_stats(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_get_unidirectional_tcp_udp_flows_stats(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h)
     h->lua_unidirectional_tcp_udp_flows(vm, false);
@@ -317,9 +317,9 @@ static int ntop_get_unidirectional_tcp_udp_flows_stats(lua_State *vm) {
 /* **************************************************************** */
 
 static int ntop_get_num_contacts_from_peers_as_server_tcp_udp_notx(
-    lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+    lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h)
     lua_pushinteger(vm, h->getNumContactsFromPeersAsServerTCPUDPNoTX());
@@ -331,9 +331,9 @@ static int ntop_get_num_contacts_from_peers_as_server_tcp_udp_notx(
 
 /* **************************************************************** */
 
-static int ntop_get_num_contacted_tcp_udp_server_ports_notx(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_get_num_contacted_tcp_udp_server_ports_notx(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h)
     lua_pushinteger(vm, h->getNumContactedTCPUDPServerPortsNoTX());
@@ -345,9 +345,9 @@ static int ntop_get_num_contacted_tcp_udp_server_ports_notx(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_reset_host_contacts(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_reset_host_contacts(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   if (h) h->resetHostContacts();
 
@@ -358,9 +358,9 @@ static int ntop_reset_host_contacts(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_is_first_check_run(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Host *h = c ? c->host : NULL;
+static int ntop_is_first_check_run(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Host* h = c ? c->host : NULL;
 
   lua_pushboolean(vm, h ? h->isCustomHostScriptFirstRun() : false);
 
@@ -403,4 +403,4 @@ static luaL_Reg _ntop_host_reg[] = {
     {"resetHostContacts", ntop_reset_host_contacts},
     {NULL, NULL}};
 
-luaL_Reg *ntop_host_reg = _ntop_host_reg;
+luaL_Reg* ntop_host_reg = _ntop_host_reg;

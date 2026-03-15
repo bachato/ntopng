@@ -24,7 +24,7 @@
 
 /* ***************************************************** */
 
-void UnexpectedServer::protocolDetected(Flow *f) {
+void UnexpectedServer::protocolDetected(Flow* f) {
   if (!isAllowedProto(f)) return;
 
   if (!isAllowedHost(f)) {
@@ -32,9 +32,10 @@ void UnexpectedServer::protocolDetected(Flow *f) {
     u_int8_t c_score, s_score;
     risk_percentage cli_score_pctg = CLIENT_HIGH_RISK_PERCENTAGE;
 
-    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
+    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg,
+                       &c_score, &s_score);
 
-    FlowAlert *alert = buildAlert(f);
+    FlowAlert* alert = buildAlert(f);
     alert->setCliSrvScores(c_score, s_score);
     f->triggerAlert(alert);
   }

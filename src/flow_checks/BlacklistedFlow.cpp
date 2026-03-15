@@ -24,17 +24,17 @@
 
 /* ***************************************************** */
 
-void BlacklistedFlow::protocolDetected(Flow *f) {
+void BlacklistedFlow::protocolDetected(Flow* f) {
   if ((f->get_protocol_category() == NDPI_PROTOCOL_CATEGORY_MALWARE) &&
-      !(f->isBlacklistedServer()) &&
-      !(f->isBlacklistedClient())) {
+      !(f->isBlacklistedServer()) && !(f->isBlacklistedClient())) {
     FlowAlertType alert_type = BlacklistedFlowAlert::getClassType();
     u_int8_t c_score, s_score;
     risk_percentage cli_score_pctg = CLIENT_HIGH_RISK_PERCENTAGE;
 
-    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
+    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg,
+                       &c_score, &s_score);
 
-    FlowAlert *alert = buildAlert(f);
+    FlowAlert* alert = buildAlert(f);
     alert->setCliSrvScores(c_score, s_score);
     f->triggerAlert(alert);
   }
@@ -42,9 +42,10 @@ void BlacklistedFlow::protocolDetected(Flow *f) {
 
 /* ***************************************************** */
 
-FlowAlert *BlacklistedFlow::buildAlert(Flow *f) {
-  BlacklistedFlowAlert *alert = new (std::nothrow) BlacklistedFlowAlert(this, f);
-  
+FlowAlert* BlacklistedFlow::buildAlert(Flow* f) {
+  BlacklistedFlowAlert* alert =
+      new (std::nothrow) BlacklistedFlowAlert(this, f);
+
   return alert;
 }
 
@@ -63,7 +64,7 @@ FlowAlert *BlacklistedFlow::buildAlert(Flow *f) {
   }
 */
 
-bool BlacklistedFlow::loadConfiguration(json_object *config) {
+bool BlacklistedFlow::loadConfiguration(json_object* config) {
   FlowCheck::loadConfiguration(config); /* Parse parameters in common */
 
   /* Parse additional parameters */

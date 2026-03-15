@@ -87,7 +87,7 @@ class FifoQueue {
   inline float fillPct() {
     u_int64_t pending = num_enqueued - num_dequeued;
     if (pending == 0) return 0;
-    return (float) pending / max_size * 100;
+    return (float)pending / max_size * 100;
   };
   inline void lua(lua_State* vm, const char* table_name) {
     lua_newtable(vm);

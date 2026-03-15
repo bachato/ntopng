@@ -28,8 +28,8 @@ class Geolocation {
  private:
 #ifdef HAVE_MAXMINDDB
   MMDB_s geo_ip_asn_mmdb, geo_ip_city_mmdb;
-  bool loadGeoDB(const char *base_path, const char *db_name,
-                 MMDB_s *const mmdb) const;
+  bool loadGeoDB(const char* base_path, const char* db_name,
+                 MMDB_s* const mmdb) const;
   bool mmdbs_ok;
 #endif
 
@@ -48,11 +48,11 @@ class Geolocation {
     return (false);
 #endif
   };
-  bool getAS(IpAddress *addr, u_int32_t *asn, char **asname);
-  bool getInfo(IpAddress *addr, char **continent_code, char **country_code,
-               char **city, float *latitude, float *longitude);
-  static void freeInfo(char **continent_code, char **country_code, char **city);
-  bool getASName(u_int32_t asn, char *asname, u_int asname_len);  
+  bool getAS(IpAddress* addr, u_int32_t* asn, char** asname);
+  bool getInfo(IpAddress* addr, char** continent_code, char** country_code,
+               char** city, float* latitude, float* longitude);
+  static void freeInfo(char** continent_code, char** country_code, char** city);
+  bool getASName(u_int32_t asn, char* asname, u_int asname_len);
 };
 
 #endif /* _GEOLOCATION_H_ */

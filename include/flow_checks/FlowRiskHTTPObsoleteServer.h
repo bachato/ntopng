@@ -31,10 +31,10 @@ class FlowRiskHTTPObsoleteServer : public FlowRisk {
   }
 
  public:
-  FlowRiskHTTPObsoleteServer(){};
-  ~FlowRiskHTTPObsoleteServer(){};
+  FlowRiskHTTPObsoleteServer() {};
+  ~FlowRiskHTTPObsoleteServer() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskHTTPObsoleteServerAlert(this, f);
   }
 

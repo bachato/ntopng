@@ -27,22 +27,23 @@
 class SQLiteStoreManager : public DB {
  protected:
   Mutex m;
-  sqlite3 *db;
+  sqlite3* db;
 
-  int init(const char *db_file_full_path);
-  int exec_statement(sqlite3_stmt *stmt);
-   
+  int init(const char* db_file_full_path);
+  int exec_statement(sqlite3_stmt* stmt);
+
  public:
-  SQLiteStoreManager(NetworkInterface *iface);
+  SQLiteStoreManager(NetworkInterface* iface);
   virtual ~SQLiteStoreManager();
 
   int optimizeStore();
-  
-  int execFile(const char *path);
-  int exec_query(const char *db_query, int (*callback)(void *, int, char **, char **), void *payload);
-  
-  int execSQLQuery(lua_State *vm, const char *sql,
-                   bool limitRows, bool wait_for_db_created);
+
+  int execFile(const char* path);
+  int exec_query(const char* db_query,
+                 int (*callback)(void*, int, char**, char**), void* payload);
+
+  int execSQLQuery(lua_State* vm, const char* sql, bool limitRows,
+                   bool wait_for_db_created);
 };
 
 #endif /* _SQLITE_STORE_MANAGER_H_ */

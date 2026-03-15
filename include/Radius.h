@@ -31,27 +31,29 @@ class Radius {
   bool use_chap;
   int result;
   char *radiusAuthServer, *radiusAcctServer;
-  char *radiusSecret, *authServer, *radiusAdminGroup, *radiusUnprivCapabilitiesGroup;
+  char *radiusSecret, *authServer, *radiusAdminGroup,
+      *radiusUnprivCapabilitiesGroup;
   char dict_path[MAX_RADIUS_LEN];
 
-  bool buildConfiguration(rc_handle **rh);
-  bool addBasicConfigurationAcct(rc_handle *rh, VALUE_PAIR **send,
-                                 u_int32_t status_type, RadiusTraffic *info);
-  bool addUpdateConfigurationAcct(rc_handle *rh, VALUE_PAIR **send, RadiusTraffic *info);
+  bool buildConfiguration(rc_handle** rh);
+  bool addBasicConfigurationAcct(rc_handle* rh, VALUE_PAIR** send,
+                                 u_int32_t status_type, RadiusTraffic* info);
+  bool addUpdateConfigurationAcct(rc_handle* rh, VALUE_PAIR** send,
+                                  RadiusTraffic* info);
 
  public:
   Radius(bool _use_chap = true);
   ~Radius();
 
-  void logRadius(const char *event_type, const char *format, ...);
+  void logRadius(const char* event_type, const char* format, ...);
 
   bool updateLoginInfo();
 
-  bool authenticate(const char *user, const char *password,
-                    bool *has_unprivileged_capabilities, bool *is_admin);
-  bool startSession(RadiusTraffic *info);
-  bool stopSession(RadiusTraffic *info);
-  bool updateSession(RadiusTraffic *info);
+  bool authenticate(const char* user, const char* password,
+                    bool* has_unprivileged_capabilities, bool* is_admin);
+  bool startSession(RadiusTraffic* info);
+  bool stopSession(RadiusTraffic* info);
+  bool updateSession(RadiusTraffic* info);
 };
 
 #endif

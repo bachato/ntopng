@@ -25,7 +25,7 @@
 
 /* *************************************** */
 
-AutonomousSystem::AutonomousSystem(NetworkInterface *_iface, IpAddress *ipa)
+AutonomousSystem::AutonomousSystem(NetworkInterface* _iface, IpAddress* ipa)
     : GenericHashEntry(_iface), GenericTrafficElement(), Score(_iface) {
   if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
@@ -48,18 +48,18 @@ AutonomousSystem::AutonomousSystem(NetworkInterface *_iface, IpAddress *ipa)
   if (ntop->getPrefs()->isCustomerASN(get_asn()) ||
       ntop->getPrefs()->isSubCustomerASN(get_asn()) ||
       ntop->getPrefs()->isRemoteASN(get_asn())) {
-        saveExporterStatsPrefs(true);
+    saveExporterStatsPrefs(true);
 #ifdef AS_DEBUG
-        ntop->getTrace()->traceEvent(
-            TRACE_NORMAL, "Autonomous System [asn: %u] [exporter stats: true]",
-            get_asn());
+    ntop->getTrace()->traceEvent(
+        TRACE_NORMAL, "Autonomous System [asn: %u] [exporter stats: true]",
+        get_asn());
 #endif
-    } else {
-        saveExporterStatsPrefs(false);
+  } else {
+    saveExporterStatsPrefs(false);
 #ifdef AS_DEBUG
-        ntop->getTrace()->traceEvent(
-            TRACE_NORMAL, "Autonomous System [asn: %u] [exporter stats: false]",
-            get_asn());
+    ntop->getTrace()->traceEvent(
+        TRACE_NORMAL, "Autonomous System [asn: %u] [exporter stats: false]",
+        get_asn());
 #endif
   }
 }
@@ -109,13 +109,13 @@ void AutonomousSystem::updateRoundTripTime(u_int32_t rtt_msecs) {
 
 /* *************************************** */
 
-void AutonomousSystem::lua(lua_State *vm, DetailsLevel details_level,
+void AutonomousSystem::lua(lua_State* vm, DetailsLevel details_level,
                            bool asListElement, bool diff) {
   lua_newtable(vm);
-  ((GenericTrafficElement *)this)->lua(vm, true);
+  ((GenericTrafficElement*)this)->lua(vm, true);
 
   lua_push_uint64_table_entry(vm, "asn", asn);
-  lua_push_str_table_entry(vm, "asname", asname ? asname : (char *)"");
+  lua_push_str_table_entry(vm, "asname", asname ? asname : (char*)"");
 
   lua_push_uint64_table_entry(vm, "bytes.sent", sent.getNumBytes());
   lua_push_uint64_table_entry(vm, "bytes.rcvd", rcvd.getNumBytes());
@@ -124,7 +124,6 @@ void AutonomousSystem::lua(lua_State *vm, DetailsLevel details_level,
   lua_push_uint64_table_entry(vm, "seen.last", last_seen);
 
   if (details_level >= details_high) {
-
     lua_push_uint64_table_entry(vm, "duration", get_duration());
 
     lua_push_uint64_table_entry(vm, "num_hosts", getNumHosts());
@@ -144,13 +143,14 @@ void AutonomousSystem::lua(lua_State *vm, DetailsLevel details_level,
         lua_newtable(vm);
         char buf[32], buf2[64];
         IpAddress exporter;
-	TrafficCounter &stats = it->second;
+        TrafficCounter& stats = it->second;
 
         exporter.set(htonl(it->first.first));
 
         lua_push_uint64_table_entry(vm, "bytes_sent", stats.getSent());
         lua_push_uint64_table_entry(vm, "bytes_rcvd", stats.getRcvd());
-        snprintf(buf2, sizeof(buf2), "%s_%d", exporter.print(buf, sizeof(buf)), it->first.second);
+        snprintf(buf2, sizeof(buf2), "%s_%d", exporter.print(buf, sizeof(buf)),
+                 it->first.second);
         lua_pushstring(vm, buf2);
         lua_insert(vm, -2);
         lua_settable(vm, -3);
@@ -167,8 +167,9 @@ void AutonomousSystem::lua(lua_State *vm, DetailsLevel details_level,
                               getTotalAlertedNumFlowsAsClient());
   lua_push_uint64_table_entry(vm, "as_server",
                               getTotalAlertedNumFlowsAsServer());
-  lua_push_uint64_table_entry(vm, "total",
-			      getTotalAlertedNumFlowsAsClient() + getTotalAlertedNumFlowsAsServer());
+  lua_push_uint64_table_entry(
+      vm, "total",
+      getTotalAlertedNumFlowsAsClient() + getTotalAlertedNumFlowsAsServer());
   lua_pushstring(vm, "alerted_flows");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
@@ -189,7 +190,7 @@ bool AutonomousSystem::equal(u_int32_t _asn) { return (asn == _asn); }
 
 /* *************************************** */
 
-void AutonomousSystem::updateStats(const struct timeval *tv) {
+void AutonomousSystem::updateStats(const struct timeval* tv) {
   GenericTrafficElement::updateStats(tv);
 
 #ifdef NTOPNG_PRO
@@ -201,15 +202,17 @@ void AutonomousSystem::updateStats(const struct timeval *tv) {
 
 #ifdef NTOPNG_PRO
 
-void AutonomousSystem::updateBehaviorStats(const struct timeval *tv) {}
+void AutonomousSystem::updateBehaviorStats(const struct timeval* tv) {}
 
 #endif
 
 /* ***************************************** */
 
-void AutonomousSystem::findExportersStats(u_int64_t bytes_sent, u_int64_t bytes_rcvd,
-					  std::pair<u_int32_t, u_int16_t> *key) {
-  std::map<std::pair<u_int32_t, u_int16_t>, TrafficCounter>::iterator it = exporters_map.find(*key);
+void AutonomousSystem::findExportersStats(
+    u_int64_t bytes_sent, u_int64_t bytes_rcvd,
+    std::pair<u_int32_t, u_int16_t>* key) {
+  std::map<std::pair<u_int32_t, u_int16_t>, TrafficCounter>::iterator it =
+      exporters_map.find(*key);
 
   if (it != exporters_map.end()) {
     it->second.incStats(bytes_sent, bytes_rcvd);  // Update if exists already

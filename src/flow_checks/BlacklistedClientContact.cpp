@@ -24,15 +24,16 @@
 
 /* ***************************************************** */
 
-void BlacklistedClientContact::protocolDetected(Flow *f) {
+void BlacklistedClientContact::protocolDetected(Flow* f) {
   if (f->isBlacklistedClient() && f->isRemoteToLocal()) {
     u_int8_t c_score, s_score;
     risk_percentage cli_score_pctg = CLIENT_FAIR_RISK_PERCENTAGE;
-    
-    FlowAlert *alert = buildAlert(f);
+
+    FlowAlert* alert = buildAlert(f);
 
     if (alert) {
-      computeCliSrvScore(alert->getAlertScore(), cli_score_pctg, &c_score, &s_score);
+      computeCliSrvScore(alert->getAlertScore(), cli_score_pctg, &c_score,
+                         &s_score);
       alert->setCliSrvScores(c_score, s_score);
       f->triggerAlert(alert);
     }
@@ -41,10 +42,11 @@ void BlacklistedClientContact::protocolDetected(Flow *f) {
 
 /* ***************************************************** */
 
-FlowAlert* BlacklistedClientContact::buildAlert(Flow *f) {
+FlowAlert* BlacklistedClientContact::buildAlert(Flow* f) {
   bool is_server_bl = f->isBlacklistedServer();
   bool is_client_bl = f->isBlacklistedClient();
-  BlacklistedClientContactAlert *alert = new (std::nothrow) BlacklistedClientContactAlert(this, f);
+  BlacklistedClientContactAlert* alert =
+      new (std::nothrow) BlacklistedClientContactAlert(this, f);
 
   if (alert) {
     /*
@@ -60,14 +62,15 @@ FlowAlert* BlacklistedClientContact::buildAlert(Flow *f) {
     else if (is_client_bl && is_server_bl)
       alert->setCliAttacker(), alert->setSrvAttacker();
 
-    if(f->get_packets_srv2cli() == 0) {
+    if (f->get_packets_srv2cli() == 0) {
       /*
-	Nothing serious: the server did not reply (server port or traffic filtered)
+        Nothing serious: the server did not reply (server port or traffic
+        filtered)
        */
       alert->setAlertScore(SCORE_LEVEL_NOTICE);
     } else {
       /*
-	Bad: the server port is open and it has replied
+        Bad: the server port is open and it has replied
       */
       alert->setAlertScore(SCORE_LEVEL_WARNING);
     }
@@ -91,7 +94,7 @@ FlowAlert* BlacklistedClientContact::buildAlert(Flow *f) {
   }
 */
 
-bool BlacklistedClientContact::loadConfiguration(json_object *config) {
+bool BlacklistedClientContact::loadConfiguration(json_object* config) {
   FlowCheck::loadConfiguration(config); /* Parse parameters in common */
 
   /* Parse additional parameters */

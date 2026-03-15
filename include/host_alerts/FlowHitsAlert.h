@@ -34,7 +34,7 @@ class FlowHitsAlert : public HostAlert {
  public:
   FlowHitsAlert(HostCheck* c, Host* h, risk_percentage cli_pctg, u_int16_t hits,
                 u_int64_t threshold, bool is_attacker);
-  ~FlowHitsAlert(){};
+  ~FlowHitsAlert() {};
 
   void toggleAttacker(bool _is_attacker) { is_attacker = _is_attacker; }
   void setHits(u_int64_t _hits) { hits = _hits; }

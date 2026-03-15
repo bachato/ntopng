@@ -28,16 +28,16 @@ class InterfaceStatsHash {
  private:
   Mutex m;
   u_int max_hash_size;
-  sFlowInterfaceStats **buckets;
+  sFlowInterfaceStats** buckets;
 
  public:
   InterfaceStatsHash(u_int _max_hash_size);
   ~InterfaceStatsHash();
 
-  bool set(const sFlowInterfaceStats *const stats);
+  bool set(const sFlowInterfaceStats* const stats);
 
-  void luaDeviceList(lua_State *vm);
-  void luaDeviceInfo(lua_State *vm, u_int32_t deviceID);
+  void luaDeviceList(lua_State* vm);
+  void luaDeviceInfo(lua_State* vm, u_int32_t deviceID);
 };
 
 #endif /* _INTERFACE_STATS_HASH_H_ */

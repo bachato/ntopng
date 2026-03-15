@@ -24,8 +24,9 @@
 /* *************************************** */
 
 Recipients::Recipients() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   memset(&recipient_queues, 0, sizeof(recipient_queues));
   default_recipient_minimum_severity = alert_level_none;
 }
@@ -40,8 +41,8 @@ Recipients::~Recipients() {
 
 /* *************************************** */
 
-AlertFifoItem *Recipients::dequeue(u_int16_t recipient_id) {
-  AlertFifoItem *notification = NULL; 
+AlertFifoItem* Recipients::dequeue(u_int16_t recipient_id) {
+  AlertFifoItem* notification = NULL;
 
   if (recipient_id >= MAX_NUM_RECIPIENTS) return NULL;
 
@@ -74,7 +75,6 @@ bool Recipients::enqueue(u_int16_t recipient_id,
    */
   if (recipient_queues[recipient_id]) {
     res = recipient_queues[recipient_id]->enqueue(notification);
-    
   }
 
   m.unlock(__FILE__, __LINE__);
@@ -125,16 +125,12 @@ bool Recipients::enqueue(const AlertFifoItem* const notification) {
 
 /* *************************************** */
 
-void Recipients::register_recipient(u_int16_t recipient_id,
-                                    AlertLevel minimum_severity,
-                                    Bitmap128 enabled_categories,
-                                    Bitmap4096 enabled_host_pools,
-                                    Bitmap128 enabled_entities,
-                                    Bitmap128 enabled_flow_alert_types,
-                                    Bitmap128 enabled_host_alert_types,
-                                    Bitmap128 enabled_other_alert_types,
-                                    bool match_alert_id,
-                                    bool skip_alerts) {
+void Recipients::register_recipient(
+    u_int16_t recipient_id, AlertLevel minimum_severity,
+    Bitmap128 enabled_categories, Bitmap4096 enabled_host_pools,
+    Bitmap128 enabled_entities, Bitmap128 enabled_flow_alert_types,
+    Bitmap128 enabled_host_alert_types, Bitmap128 enabled_other_alert_types,
+    bool match_alert_id, bool skip_alerts) {
   if (recipient_id >= MAX_NUM_RECIPIENTS) return;
 
   m.lock(__FILE__, __LINE__);
@@ -147,9 +143,12 @@ void Recipients::register_recipient(u_int16_t recipient_id,
     recipient_queues[recipient_id]->setEnabledCategories(enabled_categories);
     recipient_queues[recipient_id]->setEnabledEntities(enabled_entities);
     recipient_queues[recipient_id]->setEnabledHostPools(enabled_host_pools);
-    recipient_queues[recipient_id]->setEnabledFlowAlertTypes(enabled_flow_alert_types);
-    recipient_queues[recipient_id]->setEnabledHostAlertTypes(enabled_host_alert_types);
-    recipient_queues[recipient_id]->setEnabledOtherAlertTypes(enabled_other_alert_types);
+    recipient_queues[recipient_id]->setEnabledFlowAlertTypes(
+        enabled_flow_alert_types);
+    recipient_queues[recipient_id]->setEnabledHostAlertTypes(
+        enabled_host_alert_types);
+    recipient_queues[recipient_id]->setEnabledOtherAlertTypes(
+        enabled_other_alert_types);
     recipient_queues[recipient_id]->toggleAlertIDMatch(match_alert_id);
     recipient_queues[recipient_id]->setSkipAlerts(skip_alerts);
   }
@@ -209,15 +208,15 @@ time_t Recipients::last_use(u_int16_t recipient_id) {
 
 /* *************************************** */
 
-void Recipients::incStats(u_int16_t recipient_id,
-    u_int64_t delivered, u_int64_t filtered_out, u_int64_t delivery_failures) {
-
+void Recipients::incStats(u_int16_t recipient_id, u_int64_t delivered,
+                          u_int64_t filtered_out, u_int64_t delivery_failures) {
   if (recipient_id >= MAX_NUM_RECIPIENTS) return;
 
   m.lock(__FILE__, __LINE__);
 
   if (recipient_queues[recipient_id])
-    recipient_queues[recipient_id]->incStats(delivered, filtered_out, delivery_failures);
+    recipient_queues[recipient_id]->incStats(delivered, filtered_out,
+                                             delivery_failures);
 
   m.unlock(__FILE__, __LINE__);
 }

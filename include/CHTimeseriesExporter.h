@@ -26,14 +26,14 @@
 
 class CHTimeseriesExporter : public TimeseriesExporter {
  private:
-  StringFifoQueue *ts_queue;
+  StringFifoQueue* ts_queue;
 
  public:
-  CHTimeseriesExporter(NetworkInterface *_if);
+  CHTimeseriesExporter(NetworkInterface* _if);
   ~CHTimeseriesExporter();
 
-  bool enqueueData(lua_State *vm, bool do_lock = true);
-  char *dequeueData();
+  bool enqueueData(lua_State* vm, bool do_lock = true);
+  char* dequeueData();
   u_int64_t queueLength() const;
   void flush();
 };

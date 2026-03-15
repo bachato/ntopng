@@ -24,7 +24,8 @@
 /* ******************************* */
 
 NtopngLuaContext::NtopngLuaContext() {
-  allowed_ifname = user = group = csrf = sqlite_hosts_filter = sqlite_flows_filter = NULL;
+  allowed_ifname = user = group = csrf = sqlite_hosts_filter =
+      sqlite_flows_filter = NULL;
   sqlite_filters_loaded = false;
   zmq_context = zmq_subscriber = NULL;
   conn = NULL;
@@ -55,8 +56,7 @@ NtopngLuaContext::~NtopngLuaContext() {
   if (snmpBatch) delete snmpBatch;
 
   for (u_int16_t slot_id = 0; slot_id < MAX_NUM_ASYNC_SNMP_ENGINES; slot_id++) {
-    if (snmpAsyncEngine[slot_id] != NULL)
-      delete snmpAsyncEngine[slot_id];
+    if (snmpAsyncEngine[slot_id] != NULL) delete snmpAsyncEngine[slot_id];
   }
 
   if (pkt_capture.end_capture > 0) {
@@ -67,7 +67,7 @@ NtopngLuaContext::~NtopngLuaContext() {
   if ((iface != NULL) && live_capture.pcaphdr_sent)
     iface->deregisterLiveCapture(this);
 
-  if (addr_tree != NULL)   delete addr_tree;
+  if (addr_tree != NULL) delete addr_tree;
   if (sqlite_hosts_filter) free(sqlite_hosts_filter);
   if (sqlite_flows_filter) free(sqlite_flows_filter);
 
@@ -75,5 +75,5 @@ NtopngLuaContext::~NtopngLuaContext() {
   if (bin) delete bin;
 #endif
 
-  if(db) delete db;
+  if (db) delete db;
 }

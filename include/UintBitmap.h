@@ -40,10 +40,10 @@ class UintBitmap {
     return (((bitmap >> id) & 1) ? true : false);
   };
   inline void bitmapOr(const UintBitmap b) { bitmap |= b.bitmap; };
-  inline void set(const UintBitmap *b) { bitmap = b->bitmap; };
-  inline bool equal(const UintBitmap *b) const { return bitmap == b->bitmap; };
+  inline void set(const UintBitmap* b) { bitmap = b->bitmap; };
+  inline bool equal(const UintBitmap* b) const { return bitmap == b->bitmap; };
 
-  void lua(lua_State *vm, const char *label) const {
+  void lua(lua_State* vm, const char* label) const {
     lua_newtable(vm);
 
     for (u_int i = 0; i < numBits(); i++) {

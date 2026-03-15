@@ -35,9 +35,11 @@ class FlowRiskTLSCertificateExpiredAlert : public FlowRiskAlert {
     return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
   }
 
-  FlowRiskTLSCertificateExpiredAlert(FlowCheck *c, Flow *f)
-    : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
-  ~FlowRiskTLSCertificateExpiredAlert(){};
+  FlowRiskTLSCertificateExpiredAlert(FlowCheck* c, Flow* f)
+      : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskTLSCertificateExpiredAlert() {};
 
   bool autoAck() const { return false; };
 

@@ -22,15 +22,16 @@
 #include "ntop_includes.h"
 #include "flow_checks_includes.h"
 
-void RemoteToRemote::protocolDetected(Flow *f) {
+void RemoteToRemote::protocolDetected(Flow* f) {
   if (f->isRemoteToRemote() && f->isUnicast()) {
     FlowAlertType alert_type = RemoteToRemoteAlert::getClassType();
     u_int8_t c_score, s_score;
     risk_percentage cli_score_pctg = CLIENT_FAIR_RISK_PERCENTAGE;
 
-    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
+    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg,
+                       &c_score, &s_score);
 
-    FlowAlert *alert = buildAlert(f);
+    FlowAlert* alert = buildAlert(f);
     alert->setCliSrvScores(c_score, s_score);
     f->triggerAlert(alert);
   }
@@ -38,7 +39,7 @@ void RemoteToRemote::protocolDetected(Flow *f) {
 
 /* ***************************************************** */
 
-FlowAlert *RemoteToRemote::buildAlert(Flow *f) {
+FlowAlert* RemoteToRemote::buildAlert(Flow* f) {
   return new RemoteToRemoteAlert(this, f);
 }
 

@@ -26,21 +26,21 @@
 
 class TCPZeroWindow : public FlowCheck {
  private:
-  void checkTCPWindow(Flow *f);
+  void checkTCPWindow(Flow* f);
 
  public:
   TCPZeroWindow()
       : FlowCheck(ntopng_edition_community, true /* Packet Interfaces only */,
                   true /* Exclude for nEdge */, false /* NOT only for nEdge */,
                   false /* has_protocol_detected */,
-                  true /* has_periodic_update */, true /* has_flow_end */){};
-  ~TCPZeroWindow(){};
+                  true /* has_periodic_update */, true /* has_flow_end */) {};
+  ~TCPZeroWindow() {};
 
-  bool loadConfiguration(json_object *config) { return (true); }
+  bool loadConfiguration(json_object* config) { return (true); }
 
-  void periodicUpdate(Flow *f);
-  void flowEnd(Flow *f);
-  FlowAlert *buildAlert(Flow *f);
+  void periodicUpdate(Flow* f);
+  void flowEnd(Flow* f);
+  FlowAlert* buildAlert(Flow* f);
 
   std::string getName() const { return (std::string("zero_tcp_window")); }
 };

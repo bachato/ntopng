@@ -32,7 +32,7 @@ class CategoryCounter {
 
  public:
   CategoryCounter();
-  CategoryCounter(const CategoryCounter &c);
+  CategoryCounter(const CategoryCounter& c);
 
   void incStats(u_int32_t when, u_int64_t sent_bytes, u_int64_t rcvd_bytes);
   inline void sum(CategoryCounter c) {
@@ -40,14 +40,14 @@ class CategoryCounter {
     duration += c.duration;
   };
 
-  void lua(NetworkInterface *iface, lua_State *vm, u_int16_t category_id,
+  void lua(NetworkInterface* iface, lua_State* vm, u_int16_t category_id,
            bool tsLua);
-  void addProtoJson(json_object *my_object, NetworkInterface *iface,
+  void addProtoJson(json_object* my_object, NetworkInterface* iface,
                     ndpi_protocol_category_t category_id);
   inline u_int64_t getTotalBytes() { return (bytes.getTotal()); }
   inline u_int32_t getDuration() { return (duration); }
   void resetStats();
-  bool deserialize(json_object *o);
+  bool deserialize(json_object* o);
 };
 
 #endif /* _CATEGORY_COUNTER_H_ */

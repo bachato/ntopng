@@ -38,8 +38,10 @@ class FlowRiskSuspiciousDGADomainAlert : public FlowRiskAlert {
   }
 
   FlowRiskSuspiciousDGADomainAlert(FlowCheck* c, Flow* f)
-    : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
-  ~FlowRiskSuspiciousDGADomainAlert(){};
+      : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskSuspiciousDGADomainAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
   ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }

@@ -24,7 +24,7 @@
 /* ***************************************************** */
 
 UnexpectedGatewayAlert::UnexpectedGatewayAlert(HostCheck* c, Host* f,
-                                             risk_percentage cli_pctg)
+                                               risk_percentage cli_pctg)
     : HostAlert(c, f, cli_pctg) {};
 
 /* ***************************************************** */

@@ -32,48 +32,56 @@
 
 Geolocation::Geolocation() {
   bool mmdbs_asn_ok = false, mmdbs_city_ok = false;
-  char *custom_dir = ntop->getPrefs()->getCustomGeoIPDir();
-  
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  char* custom_dir = ntop->getPrefs()->getCustomGeoIPDir();
 
-  if(custom_dir == NULL) custom_dir = (char*)".";
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
+  if (custom_dir == NULL) custom_dir = (char*)".";
+
 #ifdef HAVE_MAXMINDDB
   char docs_path[MAX_PATH];
-  const char *lookup_paths[] = {
-    custom_dir,
+  const char* lookup_paths[] = {
+      custom_dir,
 #ifndef WIN32
-    "/var/lib/GeoIP",    // `geoipupdate` default install dir on Ubuntu 16,18 and Debian 10,9
-    "/usr/share/GeoIP",  // `geoipupdate` default install dir on Ubuntu 14 and Centos 7,8
+      "/var/lib/GeoIP",    // `geoipupdate` default install dir on Ubuntu 16,18
+                           // and Debian 10,9
+      "/usr/share/GeoIP",  // `geoipupdate` default install dir on Ubuntu 14 and
+                           // Centos 7,8
 #if defined(__FreeBSD__)
-    "/usr/local/share/ntopng/httpdocs/geoip/",  // ntopng-data default install dir
+      "/usr/local/share/ntopng/httpdocs/geoip/",  // ntopng-data default install
+                                                  // dir
 #else
-    "/usr/share/ntopng/httpdocs/geoip/",  // ntopng-data default install dir
+      "/usr/share/ntopng/httpdocs/geoip/",  // ntopng-data default install dir
 #endif
 #endif
-    docs_path
-  };
+      docs_path};
 
   mmdbs_ok = false;
 
-  snprintf(docs_path, sizeof(docs_path), "%s/geoip", ntop->getPrefs()->get_docs_dir());
+  snprintf(docs_path, sizeof(docs_path), "%s/geoip",
+           ntop->getPrefs()->get_docs_dir());
   ntop->fixPath(docs_path);
 
-  for (u_int i = 0; i < sizeof(lookup_paths) / sizeof(lookup_paths[0]) && !mmdbs_ok; i++) {
-    DIR *dirp;
-    struct dirent *dp;
+  for (u_int i = 0;
+       i < sizeof(lookup_paths) / sizeof(lookup_paths[0]) && !mmdbs_ok; i++) {
+    DIR* dirp;
+    struct dirent* dp;
 
     /* Let's try with MaxMind files DBs:
      * https://dev.maxmind.com/geoip/geoipupdate/ */
     if (!mmdbs_asn_ok)
-      mmdbs_asn_ok = loadGeoDB(lookup_paths[i], "GeoLite2-ASN.mmdb", &geo_ip_asn_mmdb);
+      mmdbs_asn_ok =
+          loadGeoDB(lookup_paths[i], "GeoLite2-ASN.mmdb", &geo_ip_asn_mmdb);
 
     if (!mmdbs_city_ok)
-      mmdbs_city_ok = loadGeoDB(lookup_paths[i], "GeoLite2-City.mmdb", &geo_ip_city_mmdb);
+      mmdbs_city_ok =
+          loadGeoDB(lookup_paths[i], "GeoLite2-City.mmdb", &geo_ip_city_mmdb);
 
     if (mmdbs_asn_ok && mmdbs_city_ok) {
-      ntop->getTrace()->traceEvent(TRACE_NORMAL,
-				   "Using geolocation provided by MaxMind (https://maxmind.com)");
+      ntop->getTrace()->traceEvent(
+          TRACE_NORMAL,
+          "Using geolocation provided by MaxMind (https://maxmind.com)");
       mmdbs_ok = true;
       break;
     }
@@ -94,18 +102,20 @@ Geolocation::Geolocation() {
 
       if (strncmp(dp->d_name, "dbip-", 5) == 0) {
         if ((!mmdbs_asn_ok) && (strncmp(dp->d_name, "dbip-asn", 8) == 0)) {
-          mmdbs_asn_ok = loadGeoDB(lookup_paths[i], dp->d_name, &geo_ip_asn_mmdb);
+          mmdbs_asn_ok =
+              loadGeoDB(lookup_paths[i], dp->d_name, &geo_ip_asn_mmdb);
         }
 
         if ((!mmdbs_city_ok) && (strncmp(dp->d_name, "dbip-city", 9) == 0)) {
           mmdbs_city_ok =
-	    loadGeoDB(lookup_paths[i], dp->d_name, &geo_ip_city_mmdb);
+              loadGeoDB(lookup_paths[i], dp->d_name, &geo_ip_city_mmdb);
         }
       }
 
       if (mmdbs_asn_ok && mmdbs_city_ok) {
-        ntop->getTrace()->traceEvent(TRACE_NORMAL,
-				     "Using geolocation provided by DB-IP (https://db-ip.com)");
+        ntop->getTrace()->traceEvent(
+            TRACE_NORMAL,
+            "Using geolocation provided by DB-IP (https://db-ip.com)");
         break;
       }
     }
@@ -123,25 +133,25 @@ Geolocation::Geolocation() {
 #ifdef HAVE_MAXMINDDB
   if (!mmdbs_ok)
 #endif
-    {
-      if (mmdbs_asn_ok) MMDB_close(&geo_ip_asn_mmdb);
-      if (mmdbs_city_ok) MMDB_close(&geo_ip_city_mmdb);
-      ntop->getTrace()->traceEvent(TRACE_NORMAL,
-				   "Running without geolocation support.");
-      ntop->getTrace()->traceEvent(
-				   TRACE_NORMAL, "To enable geolocation follow the instructions at");
-      ntop->getTrace()->traceEvent(
-				   TRACE_NORMAL,
-				   "https://github.com/ntop/ntopng/blob/dev/doc/README.geolocation.md");
-    }
+  {
+    if (mmdbs_asn_ok) MMDB_close(&geo_ip_asn_mmdb);
+    if (mmdbs_city_ok) MMDB_close(&geo_ip_city_mmdb);
+    ntop->getTrace()->traceEvent(TRACE_NORMAL,
+                                 "Running without geolocation support.");
+    ntop->getTrace()->traceEvent(
+        TRACE_NORMAL, "To enable geolocation follow the instructions at");
+    ntop->getTrace()->traceEvent(
+        TRACE_NORMAL,
+        "https://github.com/ntop/ntopng/blob/dev/doc/README.geolocation.md");
+  }
 #endif
 }
 
 /* *************************************** */
 
 #ifdef HAVE_MAXMINDDB
-bool Geolocation::loadGeoDB(const char *base_path, const char *db_name,
-                            MMDB_s *const mmdb) const {
+bool Geolocation::loadGeoDB(const char* base_path, const char* db_name,
+                            MMDB_s* const mmdb) const {
   char path[MAX_PATH];
   struct stat buf;
   bool found;
@@ -192,19 +202,19 @@ Geolocation::~Geolocation() {
   IMPORTANT:
   if *asname != NULL, then the caller MUST free *asname
  */
-bool Geolocation::getAS(IpAddress *addr, u_int32_t *asn, char **asname) {
+bool Geolocation::getAS(IpAddress* addr, u_int32_t* asn, char** asname) {
   if (asn) *asn = 0;
   if (asname) *asname = NULL;
-  bool ret = false; 
+  bool ret = false;
 
 #ifdef HAVE_MAXMINDDB
-  sockaddr *sa = NULL;
+  sockaddr* sa = NULL;
   ssize_t sa_len;
   int mmdb_error, status;
   MMDB_lookup_result_s result;
   MMDB_entry_data_s entry_data;
 
-  if (!mmdbs_ok) return(false);
+  if (!mmdbs_ok) return (false);
 
   if (addr && addr->get_sockaddr(&sa, &sa_len)) {
     result = MMDB_lookup_sockaddr(&geo_ip_asn_mmdb, sa, &mmdb_error);
@@ -226,9 +236,9 @@ bool Geolocation::getAS(IpAddress *addr, u_int32_t *asn, char **asname) {
                                                NULL)) == MMDB_SUCCESS) {
           if (entry_data.has_data &&
               entry_data.type == MMDB_DATA_TYPE_UTF8_STRING) {
-            char *org;
+            char* org;
 
-            if ((org = (char *)calloc(1, entry_data.data_size + 1))) {
+            if ((org = (char*)calloc(1, entry_data.data_size + 1))) {
               memcpy(org, entry_data.utf8_string, entry_data.data_size);
               *asname = org;
             }
@@ -249,25 +259,25 @@ bool Geolocation::getAS(IpAddress *addr, u_int32_t *asn, char **asname) {
 
 /* *************************************** */
 
-bool Geolocation::getInfo(IpAddress *addr, char **continent_code,
-                          char **country_code, char **city, float *latitude,
-                          float *longitude) {
-  if ((!addr) || (addr->getVersion() == 0)) return(false);
+bool Geolocation::getInfo(IpAddress* addr, char** continent_code,
+                          char** country_code, char** city, float* latitude,
+                          float* longitude) {
+  if ((!addr) || (addr->getVersion() == 0)) return (false);
 
-  if (continent_code) *continent_code = strdup((char *)UNKNOWN_CONTINENT);
-  if (country_code) *country_code = strdup((char *)UNKNOWN_COUNTRY);
-  if (city) *city = strdup((char *)UNKNOWN_CITY);
+  if (continent_code) *continent_code = strdup((char*)UNKNOWN_CONTINENT);
+  if (country_code) *country_code = strdup((char*)UNKNOWN_COUNTRY);
+  if (city) *city = strdup((char*)UNKNOWN_CITY);
   if (latitude) *latitude = 0;
   if (longitude) *longitude = 0;
 
   bool ret = false;
 
 #ifdef HAVE_MAXMINDDB
-  sockaddr *sa = NULL;
+  sockaddr* sa = NULL;
   ssize_t sa_len;
-  char *cdata;
+  char* cdata;
 
-  if (!mmdbs_ok) return(false);
+  if (!mmdbs_ok) return (false);
 
   if (addr && addr->get_sockaddr(&sa, &sa_len)) {
     int mmdb_error, status;
@@ -284,7 +294,7 @@ bool Geolocation::getInfo(IpAddress *addr, char **continent_code,
                                      "code", NULL)) == MMDB_SUCCESS) {
           if (entry_data.has_data &&
               entry_data.type == MMDB_DATA_TYPE_UTF8_STRING) {
-            if ((cdata = (char *)calloc(1, entry_data.data_size + 1))) {
+            if ((cdata = (char*)calloc(1, entry_data.data_size + 1))) {
               memcpy(cdata, entry_data.utf8_string, entry_data.data_size);
               free(*continent_code);
               *continent_code = cdata;
@@ -298,7 +308,7 @@ bool Geolocation::getInfo(IpAddress *addr, char **continent_code,
                                      "iso_code", NULL)) == MMDB_SUCCESS) {
           if (entry_data.has_data &&
               entry_data.type == MMDB_DATA_TYPE_UTF8_STRING) {
-            if ((cdata = (char *)calloc(1, entry_data.data_size + 1))) {
+            if ((cdata = (char*)calloc(1, entry_data.data_size + 1))) {
               memcpy(cdata, entry_data.utf8_string, entry_data.data_size);
               free(*country_code);
               *country_code = cdata;
@@ -313,7 +323,7 @@ bool Geolocation::getInfo(IpAddress *addr, char **continent_code,
                                      "names", "en", NULL)) == MMDB_SUCCESS) {
           if (entry_data.has_data &&
               entry_data.type == MMDB_DATA_TYPE_UTF8_STRING) {
-            if ((cdata = (char *)calloc(1, entry_data.data_size + 1))) {
+            if ((cdata = (char*)calloc(1, entry_data.data_size + 1))) {
               memcpy(cdata, entry_data.utf8_string, entry_data.data_size);
               free(*city);
               *city = cdata;
@@ -344,10 +354,10 @@ bool Geolocation::getInfo(IpAddress *addr, char **continent_code,
     char buf[64];
 
     ntop->getTrace()->traceEvent(
-				 TRACE_ERROR,
-				 "Invalid address lookup [addr addr: 0x%X][addr: %s][version: %u]",
-				 addr ? addr : 0, addr ? addr->print(buf, sizeof(buf)) : "",
-				 addr ? addr->getVersion() : 0);
+        TRACE_ERROR,
+        "Invalid address lookup [addr addr: 0x%X][addr: %s][version: %u]",
+        addr ? addr : 0, addr ? addr->print(buf, sizeof(buf)) : "",
+        addr ? addr->getVersion() : 0);
   }
   if (sa) free(sa);
 #endif
@@ -357,8 +367,8 @@ bool Geolocation::getInfo(IpAddress *addr, char **continent_code,
 
 /* *************************************** */
 
-void Geolocation::freeInfo(char **continent_code, char **country_code,
-                           char **city) {
+void Geolocation::freeInfo(char** continent_code, char** country_code,
+                           char** city) {
   if (continent_code) {
     free(*continent_code);
     *continent_code = NULL;
@@ -377,20 +387,20 @@ void Geolocation::freeInfo(char **continent_code, char **country_code,
 
 #if defined(HAVE_MAXMINDDB) && defined(TEST_GEOLOCATION)
 void Geolocation::testme() {
-  sockaddr *sa = NULL;
+  sockaddr* sa = NULL;
   ssize_t sa_len;
   IpAddress test;
   int mmdb_error, status;
   MMDB_lookup_result_s result;
-  MMDB_entry_data_list_s *entry_data_list = NULL;
+  MMDB_entry_data_list_s* entry_data_list = NULL;
   MMDB_entry_data_s entry_data;
 
-  static char *ips[] = {(char *)"192.168.1.1", (char *)"69.89.31.226",
-                        (char *)"8.8.8.8", (char *)"69.63.181.15",
-                        (char *)"2a03:2880:f10c:83:face:b00c:0:25de"};
+  static char* ips[] = {(char*)"192.168.1.1", (char*)"69.89.31.226",
+                        (char*)"8.8.8.8", (char*)"69.63.181.15",
+                        (char*)"2a03:2880:f10c:83:face:b00c:0:25de"};
 
-  for (u_int32_t i = 0; i < sizeof(ips) / sizeof(char *); i++) {
-    char *ip = ips[i];
+  for (u_int32_t i = 0; i < sizeof(ips) / sizeof(char*); i++) {
+    char* ip = ips[i];
 
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "Geolocating [%s]", ip);
     test.set(ip);
@@ -409,7 +419,7 @@ void Geolocation::testme() {
         entry_data_list = NULL;
 
         if ((status = MMDB_get_entry_data_list(
-					       &result.entry, &entry_data_list)) != MMDB_SUCCESS)
+                 &result.entry, &entry_data_list)) != MMDB_SUCCESS)
           ntop->getTrace()->traceEvent(TRACE_ERROR,
                                        "Unable to lookup address [%s]",
                                        MMDB_strerror(status));
@@ -426,17 +436,17 @@ void Geolocation::testme() {
 
         } else
           ntop->getTrace()->traceEvent(
-				       TRACE_ERROR, "Unable to lookup autonomous system number [%s]",
-				       MMDB_strerror(status));
+              TRACE_ERROR, "Unable to lookup autonomous system number [%s]",
+              MMDB_strerror(status));
 
         if ((status = MMDB_get_value(&result.entry, &entry_data,
                                      "autonomous_system_organization", NULL)) ==
             MMDB_SUCCESS) {
           if (entry_data.has_data &&
               entry_data.type == MMDB_DATA_TYPE_UTF8_STRING) {
-            char *org;
+            char* org;
 
-            if ((org = (char *)calloc(1, entry_data.data_size + 1))) {
+            if ((org = (char*)calloc(1, entry_data.data_size + 1))) {
               memcpy(org, entry_data.utf8_string, entry_data.data_size);
               ntop->getTrace()->traceEvent(TRACE_NORMAL, "Organization: %s",
                                            org);
@@ -446,9 +456,9 @@ void Geolocation::testme() {
 
         } else
           ntop->getTrace()->traceEvent(
-				       TRACE_ERROR,
-				       "Unable to lookup autonomous system organization [%s]",
-				       MMDB_strerror(status));
+              TRACE_ERROR,
+              "Unable to lookup autonomous system organization [%s]",
+              MMDB_strerror(status));
       }
 
       /* TEST City database */
@@ -481,60 +491,61 @@ void Geolocation::testme() {
 
 /* *************************************** */
 
-bool Geolocation::getASName(u_int32_t asn, char *asname, u_int asname_len) {
+bool Geolocation::getASName(u_int32_t asn, char* asname, u_int asname_len) {
   char buf[256], val[16], json[2048];
   long rc;
 
   snprintf(val, sizeof(val), "%u", asn);
-  
-  if(ntop->getRedis()->hashGet(AS_NANE_CACHE, val, asname, asname_len) == 0) {
-    return(true); /* Found on cache */
+
+  if (ntop->getRedis()->hashGet(AS_NANE_CACHE, val, asname, asname_len) == 0) {
+    return (true); /* Found on cache */
   }
-  
-  snprintf(buf, sizeof(buf), "https://stat.ripe.net/data/as-overview/data.json?resource=AS%u", asn);
+
+  snprintf(buf, sizeof(buf),
+           "https://stat.ripe.net/data/as-overview/data.json?resource=AS%u",
+           asn);
   json[0] = '\0';
   rc = Utils::httpGet(buf, NULL, NULL, NULL, 5 /* connect timeout */,
-		      10 /* download timeout */, json, sizeof(json));
-  
+                      10 /* download timeout */, json, sizeof(json));
+
   ntop->getTrace()->traceEvent(TRACE_INFO, "[rc: %u][%s]", rc, json);
-  
-  if(rc == 200) {
+
+  if (rc == 200) {
     json_object *o, *obj;
     enum json_tokener_error jerr = json_tokener_success;
 
-    if((o = json_tokener_parse_verbose(json, &jerr)) == NULL)
-      return(false);
+    if ((o = json_tokener_parse_verbose(json, &jerr)) == NULL) return (false);
 
-    if(json_object_object_get_ex(o, "data", &obj)) {
-      json_object *obj1;
-      
-      if(json_object_object_get_ex(obj, "holder", &obj1)) {
-	const char *res, *r = json_object_get_string(obj1);
+    if (json_object_object_get_ex(o, "data", &obj)) {
+      json_object* obj1;
+
+      if (json_object_object_get_ex(obj, "holder", &obj1)) {
+        const char *res, *r = json_object_get_string(obj1);
 
 #if 1
-	res = r;
+        res = r;
 #else
-	res = strchr(r, ' ');
+        res = strchr(r, ' ');
 
-	if(res == NULL)
-	  res = r;
-	else
-	  res = &res[1]; /* Skip space */
+        if (res == NULL)
+          res = r;
+        else
+          res = &res[1]; /* Skip space */
 #endif
-	
-	snprintf(asname, asname_len, "%s", res);
-	
-	ntop->getRedis()->hashSet(AS_NANE_CACHE, val, asname);
-	json_object_put(o);
-	return(true);
+
+        snprintf(asname, asname_len, "%s", res);
+
+        ntop->getRedis()->hashSet(AS_NANE_CACHE, val, asname);
+        json_object_put(o);
+        return (true);
       }
 
       json_object_put(o);
-    }   
+    }
   }
 
   /* Not found */
   ntop->getRedis()->hashSet(AS_NANE_CACHE, val, "");
-  
-  return(false);
+
+  return (false);
 }

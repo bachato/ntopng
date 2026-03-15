@@ -37,7 +37,7 @@ class FlowStats {
   u_int32_t host_pools[UNLIMITED_NUM_HOST_POOLS];
   std::map<std::string, u_int16_t> talking_hosts;
   std::map<std::string, u_int16_t> wlan_ssid;
-  ASNStats *asn_stats;
+  ASNStats* asn_stats;
 
  public:
   FlowStats();
@@ -45,12 +45,12 @@ class FlowStats {
 
   void incStats(Bitmap128 alert_bitmap, u_int8_t l4_protocol,
                 AlertLevel alert_level, u_int8_t dscp_cli2srv,
-                u_int8_t dscp_srv2cli, Flow *flow);
+                u_int8_t dscp_srv2cli, Flow* flow);
 
-  void updateTalkingHosts(Flow *f);
-  void updateWLANSSID(Flow *f);
+  void updateTalkingHosts(Flow* f);
+  void updateWLANSSID(Flow* f);
 
-  void lua(lua_State *vm);
+  void lua(lua_State* vm);
 
   void resetStats();
   void resetTalkingHosts() { talking_hosts.clear(); };

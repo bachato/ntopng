@@ -24,7 +24,8 @@
 /* *************************************** */
 
 EthStats::EthStats() {
-  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s",
+  // __FILE__);
   cleanup();
 }
 
@@ -64,7 +65,7 @@ void EthStats::incProtoStats(u_int16_t proto, u_int32_t num_pkts,
 
 /* *************************************** */
 
-void EthStats::lua(lua_State *vm) {
+void EthStats::lua(lua_State* vm) {
   lua_newtable(vm);
 
   eth_IPv4.lua(vm, "IPv4_");
@@ -111,7 +112,7 @@ void EthStats::lua(lua_State *vm) {
 }
 /* *************************************** */
 
-void EthStats::updateStats(const struct timeval *tv) {
+void EthStats::updateStats(const struct timeval* tv) {
   ingress_bytes_thpt.updateStats(tv, getNumIngressBytes()),
       ingress_pkts_thpt.updateStats(tv, getNumIngressPackets());
   egress_bytes_thpt.updateStats(tv, getNumEgressBytes()),

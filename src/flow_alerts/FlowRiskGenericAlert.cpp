@@ -23,7 +23,6 @@
 
 ndpi_serializer* FlowRiskGenericAlert::getAlertJSON(
     ndpi_serializer* serializer) {
-
   if (serializer) {
     ndpi_serialize_string_int32(serializer, "risk_id", risk);
   }

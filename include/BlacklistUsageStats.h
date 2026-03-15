@@ -64,16 +64,16 @@ class BlacklistUsageStats {
         num_false_negatives += fn, num_true_negatives += tn;
   }
 
-  inline void get(u_int32_t *tp, u_int32_t *fp, u_int32_t *fn, u_int32_t *tn) {
+  inline void get(u_int32_t* tp, u_int32_t* fp, u_int32_t* fn, u_int32_t* tn) {
     *tp = num_true_positives, *fp = num_false_positives,
     *fn = num_false_negatives, *tn = num_true_negatives;
   }
 #endif
 
-  inline void incHits()              { num_hits++, num_total_hits++; }
-  inline u_int32_t getNumHits()      { return (num_hits);            }
-  inline u_int32_t getNumTotalHits() { return (num_total_hits);      }
-  inline void      resetNumHits()    { num_hits = 0;                 }
+  inline void incHits() { num_hits++, num_total_hits++; }
+  inline u_int32_t getNumHits() { return (num_hits); }
+  inline u_int32_t getNumTotalHits() { return (num_total_hits); }
+  inline void resetNumHits() { num_hits = 0; }
 };
 
 #endif /* _BLACKLIST_USAGE_STATS_H_ */

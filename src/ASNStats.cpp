@@ -63,11 +63,8 @@ void ASNStats::incStats(Flow* flow) {
     /* Now handle the source ASN */
     it = src_asn.find(srcAS);
     if (it == src_asn.end()) {
-      src_asn[srcAS] = {
-        flow->get_bytes_cli2srv(),
-        flow->get_bytes_srv2cli(),
-        flow->get_bytes()
-      };
+      src_asn[srcAS] = {flow->get_bytes_cli2srv(), flow->get_bytes_srv2cli(),
+                        flow->get_bytes()};
     } else {
       it->second.bytes_sent += flow->get_bytes_cli2srv();
       it->second.bytes_rcvd += flow->get_bytes_srv2cli();
@@ -77,11 +74,8 @@ void ASNStats::incStats(Flow* flow) {
     /* Now handle the destination ASN */
     it = dst_asn.find(dstAS);
     if (it == dst_asn.end()) {
-      dst_asn[dstAS] = {
-        flow->get_bytes_srv2cli(),
-        flow->get_bytes_cli2srv(),
-        flow->get_bytes()
-      };
+      dst_asn[dstAS] = {flow->get_bytes_srv2cli(), flow->get_bytes_cli2srv(),
+                        flow->get_bytes()};
     } else {
       it->second.bytes_sent += flow->get_bytes_srv2cli();
       it->second.bytes_rcvd += flow->get_bytes_cli2srv();

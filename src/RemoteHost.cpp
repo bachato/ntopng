@@ -23,26 +23,27 @@
 
 /* *************************************** */
 
-RemoteHost::RemoteHost(NetworkInterface *_iface, int32_t _iface_idx, Mac *_mac,
+RemoteHost::RemoteHost(NetworkInterface* _iface, int32_t _iface_idx, Mac* _mac,
                        u_int16_t _u_int16_t, u_int16_t _observation_point_id,
-                       IpAddress *_ip)
-  : Host(_iface, _iface_idx, _mac, _u_int16_t, _observation_point_id, _ip) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+                       IpAddress* _ip)
+    : Host(_iface, _iface_idx, _mac, _u_int16_t, _observation_point_id, _ip) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
 #ifdef REMOTEHOST_DEBUG
   char buf[48];
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Instantiating REMOTE host %s",
-    _ip ? _ip->print(buf, sizeof(buf)) : "");
+                               _ip ? _ip->print(buf, sizeof(buf)) : "");
 #endif
   initialize();
 }
 
 /* *************************************** */
 
-RemoteHost::RemoteHost(NetworkInterface *_iface, int32_t _iface_idx,
-		       char *ipAddress, u_int16_t _u_int16_t,
-		       u_int16_t _observation_point_id)
-  : Host(_iface, _iface_idx, ipAddress, _u_int16_t, _observation_point_id) {
+RemoteHost::RemoteHost(NetworkInterface* _iface, int32_t _iface_idx,
+                       char* ipAddress, u_int16_t _u_int16_t,
+                       u_int16_t _observation_point_id)
+    : Host(_iface, _iface_idx, ipAddress, _u_int16_t, _observation_point_id) {
   initialize();
 }
 
@@ -61,17 +62,18 @@ void RemoteHost::set_hash_entry_state_idle() {
 
 /* *************************************** */
 
-/* NOTE: Host::initialize will be called by the constructor after the Host initializator */
+/* NOTE: Host::initialize will be called by the constructor after the Host
+ * initializator */
 void RemoteHost::initialize() {
   char buf[64], host[96];
-  char *strIP = ip.print(buf, sizeof(buf));
+  char* strIP = ip.print(buf, sizeof(buf));
 
   snprintf(host, sizeof(host), "%s@%u", strIP, vlan_id);
   stats = allocateStats();
   updateHostPool(true /* inline with packet processing */,
                  true /* first inc */);
 
-#if 0  /* Redis won't cache remote hosts */
+#if 0 /* Redis won't cache remote hosts */
   char rsp[256];
   if (ntop->getPrefs()->is_dns_resolution_enabled_for_all_hosts()) {
     /* Just ask ntopng to resolve the name. Actual name will be grabbed once
@@ -80,6 +82,7 @@ void RemoteHost::initialize() {
     ntop->getRedis()->getAddress(host, rsp, sizeof(rsp), true);
   }
 #endif
-  
-  iface->incNumHosts(this, true /* Initialization: bytes are 0, considered RX only */);
+
+  iface->incNumHosts(
+      this, true /* Initialization: bytes are 0, considered RX only */);
 }

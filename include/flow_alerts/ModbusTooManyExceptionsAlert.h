@@ -32,18 +32,20 @@ class ModbusTooManyExceptionsAlert : public FlowAlert {
 
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_modbus_too_many_exceptions, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_modbus_too_many_exceptions,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_ERROR; };
 
-  ModbusTooManyExceptionsAlert(FlowCheck* c, Flow* f, u_int32_t _num_exceptions) : FlowAlert(c, f) {
+  ModbusTooManyExceptionsAlert(FlowCheck* c, Flow* f, u_int32_t _num_exceptions)
+      : FlowAlert(c, f) {
     num_exceptions = _num_exceptions;
     setAlertScore(getDefaultScore());
   };
-  ~ModbusTooManyExceptionsAlert(){};
+  ~ModbusTooManyExceptionsAlert() {};
 
   bool autoAck() const { return false; };
-  
+
   FlowAlertType getAlertType() const { return getClassType(); }
 };
 

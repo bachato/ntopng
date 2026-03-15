@@ -23,7 +23,7 @@
 
 ndpi_serializer* FlowRiskTLSCertificateSelfSignedAlert::getAlertJSON(
     ndpi_serializer* serializer) {
-  Flow *f = getFlow();
+  Flow* f = getFlow();
   char* s;
 
   if (serializer) {

@@ -26,7 +26,7 @@
 
 class FlowRiskTLSFatalAlert : public FlowRiskAlert {
  private:
-  ndpi_serializer *getAlertJSON(ndpi_serializer *serializer);
+  ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
 
  public:
   static ndpi_risk_enum getClassRisk() { return NDPI_TLS_FATAL_ALERT; }
@@ -37,8 +37,10 @@ class FlowRiskTLSFatalAlert : public FlowRiskAlert {
     return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
   }
 
-  FlowRiskTLSFatalAlert(FlowCheck *c, Flow *f) : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
-  ~FlowRiskTLSFatalAlert(){};
+  FlowRiskTLSFatalAlert(FlowCheck* c, Flow* f) : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskTLSFatalAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
   ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }

@@ -27,12 +27,15 @@
 class DataExfiltrationAlert : public FlowAlert {
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_data_exfiltration, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_data_exfiltration,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_ERROR; };
 
-  DataExfiltrationAlert(FlowCheck *c, Flow *f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-  ~DataExfiltrationAlert(){};
+  DataExfiltrationAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~DataExfiltrationAlert() {};
 
   bool autoAck() const { return false; };
 

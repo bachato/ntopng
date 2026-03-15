@@ -26,32 +26,34 @@ class NetworkInterface;
 
 /* This class provides a way to send asynchronous alerts from C to Lua.
  * Alerts are processed by Lua in alert_utils.processStoreAlertFromQueue.
- * 
- * Full example at: https://github.com/ntop/ntopng/commit/8d326f271867cad00ae889cd53519f23f42b190c
+ *
+ * Full example at:
+ * https://github.com/ntop/ntopng/commit/8d326f271867cad00ae889cd53519f23f42b190c
  */
 class AlertsQueue {
  private:
-  NetworkInterface *iface;
+  NetworkInterface* iface;
 
-  void pushAlertJson(ndpi_serializer *alert, const char *atype,
-                     const char *a_subtype = NULL, AlertCategory alert_category = alert_category_network);
+  void pushAlertJson(ndpi_serializer* alert, const char* atype,
+                     const char* a_subtype = NULL,
+                     AlertCategory alert_category = alert_category_network);
 
  public:
-  AlertsQueue(NetworkInterface *iface);
+  AlertsQueue(NetworkInterface* iface);
 
-  void pushOutsideDhcpRangeAlert(u_int8_t *cli_mac, Mac *sender_mac,
+  void pushOutsideDhcpRangeAlert(u_int8_t* cli_mac, Mac* sender_mac,
                                  u_int32_t ip, u_int32_t router_ip,
                                  u_int16_t vlan_id);
-  void pushMacIpAssociationChangedAlert(u_int32_t ip, u_int8_t *old_mac,
-                                        u_int8_t *new_mac, Mac *new_host_mac);
-  void pushBroadcastDomainTooLargeAlert(const u_int8_t *src_mac,
-                                        const u_int8_t *dst_mac, u_int32_t spa,
+  void pushMacIpAssociationChangedAlert(u_int32_t ip, u_int8_t* old_mac,
+                                        u_int8_t* new_mac, Mac* new_host_mac);
+  void pushBroadcastDomainTooLargeAlert(const u_int8_t* src_mac,
+                                        const u_int8_t* dst_mac, u_int32_t spa,
                                         u_int32_t tpa, u_int16_t vlan_id);
-  void pushLoginTrace(const char *user, const char *method, bool authorized);
+  void pushLoginTrace(const char* user, const char* method, bool authorized);
   void pushNfqFlushedAlert(int queue_len, int queue_len_pct, int queue_dropped);
-  void pushCloudDisconnectionAlert(const char *descr);
-  void pushCloudReconnectionAlert(const char *descr);
-  void pushSNMPTrapAlert(const char *device_ip, const char *descr);
+  void pushCloudDisconnectionAlert(const char* descr);
+  void pushCloudReconnectionAlert(const char* descr);
+  void pushSNMPTrapAlert(const char* device_ip, const char* descr);
 };
 
 #endif

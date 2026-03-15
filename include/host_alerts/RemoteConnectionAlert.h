@@ -37,7 +37,7 @@ class RemoteConnectionAlert : public HostAlert {
 
   RemoteConnectionAlert(HostCheck* c, Host* f, risk_percentage cli_pctg,
                         u_int8_t _num_remote_access);
-  ~RemoteConnectionAlert(){};
+  ~RemoteConnectionAlert() {};
 
   HostAlertType getAlertType() const { return getClassType(); }
   u_int8_t getAlertScore() const { return SCORE_LEVEL_NOTICE; };

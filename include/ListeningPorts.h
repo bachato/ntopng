@@ -28,14 +28,14 @@ class ListeningPortInfo {
 
  public:
   ListeningPortInfo() {}
-  ListeningPortInfo(const ListeningPortInfo &lpi) {
+  ListeningPortInfo(const ListeningPortInfo& lpi) {
     this->process = lpi.process;
     this->package = lpi.package;
   }
-  inline void setProcess(const char *p) { this->process = p; }
-  inline void setPackage(const char *p) { this->package = p; }
-  inline const char *getProcess() const { return process.c_str(); }
-  inline const char *getPackage() const { return package.c_str(); }
+  inline void setProcess(const char* p) { this->process = p; }
+  inline void setPackage(const char* p) { this->package = p; }
+  inline const char* getProcess() const { return process.c_str(); }
+  inline const char* getPackage() const { return package.c_str(); }
 };
 
 class ListeningPorts {
@@ -43,26 +43,26 @@ class ListeningPorts {
   std::map<u_int16_t /* port */, ListeningPortInfo /* info */> tcp4, tcp6, udp4,
       udp6;
 
-  void parsePortInfo(json_object *z,
-                     std::map<u_int16_t, ListeningPortInfo> *info);
+  void parsePortInfo(json_object* z,
+                     std::map<u_int16_t, ListeningPortInfo>* info);
 
  public:
   ListeningPorts() {}
 
   /* Copy constructor */
-  ListeningPorts(const ListeningPorts &lp) {
+  ListeningPorts(const ListeningPorts& lp) {
     this->tcp4 = lp.tcp4;
     this->tcp6 = lp.tcp6;
     this->udp4 = lp.udp4;
     this->udp6 = lp.udp6;
   }
 
-  void parsePorts(json_object *z);
+  void parsePorts(json_object* z);
 
-  void luaProtocolInfo(lua_State *vm,
-                       std::map<u_int16_t, ListeningPortInfo> &info,
-                       const char *label);
-  void lua(lua_State *vm);
+  void luaProtocolInfo(lua_State* vm,
+                       std::map<u_int16_t, ListeningPortInfo>& info,
+                       const char* label);
+  void lua(lua_State* vm);
 };
 
 #endif /* _NTOP_LISTENING_PORTS_H_ */

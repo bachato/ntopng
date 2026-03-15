@@ -31,10 +31,10 @@ class FlowRiskDNSLargePacket : public FlowRisk {
   }
 
  public:
-  FlowRiskDNSLargePacket() : FlowRisk(){};
-  ~FlowRiskDNSLargePacket(){};
+  FlowRiskDNSLargePacket() : FlowRisk() {};
+  ~FlowRiskDNSLargePacket() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskDNSLargePacketAlert(this, f);
   }
 

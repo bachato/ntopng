@@ -23,7 +23,7 @@
 
 /* **************************************************** */
 
-void HostAlert::init(HostCheckID _check_id, std::string _check_name, Host *h,
+void HostAlert::init(HostCheckID _check_id, std::string _check_name, Host* h,
                      risk_percentage _cli_pctg) {
   host = h;
   expiring = released = false;
@@ -40,31 +40,34 @@ void HostAlert::init(HostCheckID _check_id, std::string _check_name, Host *h,
 
 /* **************************************************** */
 
-HostAlert::HostAlert(HostCheckID _check_id, std::string _check_name, Host *h,
+HostAlert::HostAlert(HostCheckID _check_id, std::string _check_name, Host* h,
                      risk_percentage _cli_pctg) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   init(_check_id, _check_name, h, _cli_pctg);
 }
 
 /* **************************************************** */
 
-HostAlert::HostAlert(HostCheck *c, Host *h, risk_percentage _cli_pctg) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+HostAlert::HostAlert(HostCheck* c, Host* h, risk_percentage _cli_pctg) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   init(c->getID(), c->getName(), h, _cli_pctg);
 }
 
 /* **************************************************** */
 
 HostAlert::~HostAlert() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
 }
 
 /* ***************************************************** */
 
 /* NOTE: keep in sync with alerts_api.lua (addAlertGenerationInfo) */
-ndpi_serializer *HostAlert::getSerializedAlert() {
-  ndpi_serializer *serializer =
-      (ndpi_serializer *)malloc(sizeof(ndpi_serializer));
+ndpi_serializer* HostAlert::getSerializedAlert() {
+  ndpi_serializer* serializer =
+      (ndpi_serializer*)malloc(sizeof(ndpi_serializer));
 
   if (serializer == NULL) return NULL;
 
@@ -77,7 +80,8 @@ ndpi_serializer *HostAlert::getSerializedAlert() {
 
   /* Add information relative to this check */
   ndpi_serialize_start_of_block(serializer, "alert_generation");
-  ndpi_serialize_string_string(serializer, "script_key", getCheckName().c_str());
+  ndpi_serialize_string_string(serializer, "script_key",
+                               getCheckName().c_str());
   ndpi_serialize_string_string(serializer, "subdir", "host");
 
   /* Add information relative to the host */

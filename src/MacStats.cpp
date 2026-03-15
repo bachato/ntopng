@@ -24,11 +24,12 @@
 /* *************************************** */
 
 MacStats::MacStats(NetworkInterface* _iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   iface = _iface;
   arp_stats.sent.requests = 0, arp_stats.sent.replies = 0,
-      arp_stats.rcvd.requests = 0, arp_stats.rcvd.replies = 0;
+  arp_stats.rcvd.requests = 0, arp_stats.rcvd.replies = 0;
 
   memset(&dhcp_stats, 0, sizeof(dhcp_stats));
 
@@ -45,10 +46,8 @@ void MacStats::lua(lua_State* vm, bool show_details) {
                                 arp_stats.sent.requests);
     lua_push_uint64_table_entry(vm, "arp_requests.rcvd",
                                 arp_stats.rcvd.requests);
-    lua_push_uint64_table_entry(vm, "arp_replies.sent",
-                                arp_stats.sent.replies);
-    lua_push_uint64_table_entry(vm, "arp_replies.rcvd",
-                                arp_stats.rcvd.replies);
+    lua_push_uint64_table_entry(vm, "arp_replies.sent", arp_stats.sent.replies);
+    lua_push_uint64_table_entry(vm, "arp_replies.rcvd", arp_stats.rcvd.replies);
 
     lua_push_uint32_table_entry(vm, "dhcp.sent", dhcp_stats.num_req_sent);
     lua_push_uint32_table_entry(vm, "dhcp.rcvd", dhcp_stats.num_rep_rcvd);

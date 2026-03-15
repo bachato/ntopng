@@ -23,16 +23,15 @@
 
 /* **************************************************** */
 
-const char *SQLiteDB::getEngineName() {
-  return "SQLite";
-}
+const char* SQLiteDB::getEngineName() { return "SQLite"; }
 
 /* **************************************************** */
 
-SQLiteDB::SQLiteDB(NetworkInterface *_iface) : SQLiteStoreManager(_iface) {
+SQLiteDB::SQLiteDB(NetworkInterface* _iface) : SQLiteStoreManager(_iface) {
   char filePath[MAX_PATH + 256];
 
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 
   /* Note: SQLite no longer used only for alerts (e.g. assets), however
    * we keep the path containing 'alerts' for backward compatibility*/
@@ -45,7 +44,8 @@ SQLiteDB::SQLiteDB(NetworkInterface *_iface) : SQLiteStoreManager(_iface) {
 
   /* Prepare the database path */
   snprintf(filePath, sizeof(filePath), "%s/%d/alerts/%s",
-           ntop->get_working_dir(), _iface->get_id(), ALERTS_STORE_DB_FILE_NAME);
+           ntop->get_working_dir(), _iface->get_id(),
+           ALERTS_STORE_DB_FILE_NAME);
   ntop->fixPath(filePath);
 
   /* Initialize the database */
@@ -82,4 +82,3 @@ int SQLiteDB::openStore() {
 
   return rc;
 }
-

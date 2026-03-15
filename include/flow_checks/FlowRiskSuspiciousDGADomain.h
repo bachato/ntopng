@@ -31,11 +31,11 @@ class FlowRiskSuspiciousDGADomain : public FlowRisk {
   }
 
  public:
-  FlowRiskSuspiciousDGADomain() : FlowRisk(){};
-  ~FlowRiskSuspiciousDGADomain(){};
+  FlowRiskSuspiciousDGADomain() : FlowRisk() {};
+  ~FlowRiskSuspiciousDGADomain() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    FlowRiskSuspiciousDGADomainAlert *alert =
+  FlowAlert* buildAlert(Flow* f) {
+    FlowRiskSuspiciousDGADomainAlert* alert =
         new FlowRiskSuspiciousDGADomainAlert(this, f);
     alert->setCliAttacker();
     return alert;

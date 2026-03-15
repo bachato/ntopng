@@ -26,19 +26,19 @@
 
 class LowGoodputFlow : public FlowCheck {
  private:
-  void checkLowGoodput(Flow *f);
+  void checkLowGoodput(Flow* f);
 
  public:
   LowGoodputFlow()
       : FlowCheck(ntopng_edition_community, true /* Packet Interfaces only */,
                   true /* Exclude for nEdge */, false /* Only for nEdge */,
                   false /* has_protocol_detected */,
-                  true /* has_periodic_update */, true /* has_flow_end */){};
-  virtual ~LowGoodputFlow(){};
+                  true /* has_periodic_update */, true /* has_flow_end */) {};
+  virtual ~LowGoodputFlow() {};
 
-  void periodicUpdate(Flow *f);
-  void flowEnd(Flow *f);
-  FlowAlert *buildAlert(Flow *f);
+  void periodicUpdate(Flow* f);
+  void flowEnd(Flow* f);
+  FlowAlert* buildAlert(Flow* f);
 
   std::string getName() const { return (std::string("low_goodput")); }
 };

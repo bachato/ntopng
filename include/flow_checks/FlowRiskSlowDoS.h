@@ -31,20 +31,15 @@ class FlowRiskSlowDoS : public FlowRisk {
   }
 
  public:
-  FlowRiskSlowDoS() : FlowRisk(){};
-  ~FlowRiskSlowDoS(){};
+  FlowRiskSlowDoS() : FlowRisk() {};
+  ~FlowRiskSlowDoS() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    return new FlowRiskSlowDoSAlert(this, f);
-  }
+  FlowAlert* buildAlert(Flow* f) { return new FlowRiskSlowDoSAlert(this, f); }
 
   std::string getName() const {
-    return (FlowRiskAlerts::getCheckName(
-        FlowRiskSlowDoSAlert::getClassRisk()));
+    return (FlowRiskAlerts::getCheckName(FlowRiskSlowDoSAlert::getClassRisk()));
   }
-  ndpi_risk_enum handledRisk() {
-    return FlowRiskSlowDoSAlert::getClassRisk();
-  }
+  ndpi_risk_enum handledRisk() { return FlowRiskSlowDoSAlert::getClassRisk(); }
 };
 
 #endif

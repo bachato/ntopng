@@ -24,7 +24,8 @@
 /* *************************************** */
 
 ScoreStats::ScoreStats() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   memset(&cli_score, 0, sizeof(cli_score)),
       memset(&srv_score, 0, sizeof(srv_score));
 }
@@ -34,8 +35,7 @@ ScoreStats::ScoreStats() {
 u_int64_t ScoreStats::sum(ScoreCounter scores[]) {
   u_int64_t res = 0;
 
-  for (int i = 0; i < MAX_NUM_SCORE_CATEGORIES; i++)
-    res += scores[i].get();
+  for (int i = 0; i < MAX_NUM_SCORE_CATEGORIES; i++) res += scores[i].get();
 
   return res;
 };
@@ -86,7 +86,7 @@ u_int16_t ScoreStats::decValue(u_int16_t score, ScoreCategory score_category,
 
 /* *************************************** */
 
-void ScoreStats::lua_breakdown(lua_State *vm, bool as_client) {
+void ScoreStats::lua_breakdown(lua_State* vm, bool as_client) {
   u_int32_t total = as_client ? getClient() : getServer();
 
   if (total == 0) total = 1; /* Prevents zero-division errors */
@@ -114,7 +114,7 @@ void ScoreStats::lua_breakdown(lua_State *vm, bool as_client) {
 /*
   Outputs Lua tables for client and server per-category score breakdown.
 */
-void ScoreStats::lua_breakdown(lua_State *vm) {
+void ScoreStats::lua_breakdown(lua_State* vm) {
   lua_newtable(vm);
 
   lua_breakdown(vm, true /* as client */);
@@ -131,7 +131,7 @@ void ScoreStats::lua_breakdown(lua_State *vm) {
   Serialize for client and server per-category score breakdown.
   Used by ScoreAnomalyAlert.h
 */
-void ScoreStats::serialize_breakdown(ndpi_serializer *serializer) {
+void ScoreStats::serialize_breakdown(ndpi_serializer* serializer) {
   u_int32_t total = getClient();
 
   if (total == 0) total = 1; /* Prevents zero-division errors */

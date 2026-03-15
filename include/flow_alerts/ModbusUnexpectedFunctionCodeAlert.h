@@ -32,17 +32,20 @@ class ModbusUnexpectedFunctionCodeAlert : public FlowAlert {
 
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_modbus_unexpected_function_code, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_modbus_unexpected_function_code,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_ERROR; };
 
   inline u_int8_t get_function_code() { return function_code; };
 
-  ModbusUnexpectedFunctionCodeAlert(FlowCheck* c, Flow* f, u_int8_t _function_code) : FlowAlert(c, f) {
+  ModbusUnexpectedFunctionCodeAlert(FlowCheck* c, Flow* f,
+                                    u_int8_t _function_code)
+      : FlowAlert(c, f) {
     function_code = _function_code;
     setAlertScore(getDefaultScore());
   };
-  ~ModbusUnexpectedFunctionCodeAlert(){};
+  ~ModbusUnexpectedFunctionCodeAlert() {};
 
   bool autoAck() const { return false; };
 

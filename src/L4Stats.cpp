@@ -23,7 +23,7 @@
 
 /* **************************************************** */
 
-void L4Stats::luaStats(lua_State *vm) {
+void L4Stats::luaStats(lua_State* vm) {
   lua_push_uint64_table_entry(vm, "tcp.packets.sent", tcp_sent.getNumPkts());
   lua_push_uint64_table_entry(vm, "tcp.packets.rcvd", tcp_rcvd.getNumPkts());
   lua_push_uint64_table_entry(vm, "tcp.bytes.sent", tcp_sent.getNumBytes());

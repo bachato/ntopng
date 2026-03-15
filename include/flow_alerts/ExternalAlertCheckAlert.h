@@ -26,7 +26,7 @@
 
 class ExternalAlertCheckAlert : public FlowAlert {
  private:
-  ndpi_serializer *getAlertJSON(ndpi_serializer *serializer);
+  ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
 
  public:
   static FlowAlertType getClassType() {
@@ -34,8 +34,10 @@ class ExternalAlertCheckAlert : public FlowAlert {
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_ERROR; };
 
-  ExternalAlertCheckAlert(FlowCheck *c, Flow *f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-  ~ExternalAlertCheckAlert(){};
+  ExternalAlertCheckAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~ExternalAlertCheckAlert() {};
 
   bool autoAck() const { return false; };
 

@@ -24,11 +24,11 @@
 
 /* ***************************************************** */
 
-bool UnexpectedDHCPServer::isAllowedHost(Flow *f) {
+bool UnexpectedDHCPServer::isAllowedHost(Flow* f) {
   if (ntop->getPrefs()->getConfiguredDHCPServers()->isEmptyConfiguration())
     return (true);
   else {
-    IpAddress *ip = f->get_cli_ip_addr();
+    IpAddress* ip = f->get_cli_ip_addr();
 
     if (ip == NULL || ip->isBroadcastAddress()) return (true);
 

@@ -28,15 +28,15 @@ class FlowRiskGenericAlert : public FlowRiskAlert {
  private:
   ndpi_risk_enum risk;
 
-  ndpi_serializer *getAlertJSON(ndpi_serializer *serializer);
+  ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
 
  public:
-  FlowRiskGenericAlert(FlowCheck *c, Flow *f, ndpi_risk_enum _risk)
+  FlowRiskGenericAlert(FlowCheck* c, Flow* f, ndpi_risk_enum _risk)
       : FlowRiskAlert(c, f) {
     risk = _risk;
     setAlertScore(FlowRiskAlerts::getFlowRiskScore(risk));
   };
-  ~FlowRiskGenericAlert(){};
+  ~FlowRiskGenericAlert() {};
 
   FlowAlertType getAlertType() const {
     return FlowRiskAlerts::getFlowRiskAlertType(risk);

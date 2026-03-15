@@ -25,8 +25,9 @@
 
 /* *************************************** */
 
-HostPools::HostPools(NetworkInterface *_iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+HostPools::HostPools(NetworkInterface* _iface) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 
   tree = tree_shadow = NULL;
   stats = stats_shadow = NULL;
@@ -37,34 +38,53 @@ HostPools::HostPools(NetworkInterface *_iface) {
   max_flow_size = NULL;
   routing_policy_id = NULL;
 
-  if ((children_safe = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL) throw 1;
-  if ((forge_global_dns = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL) throw 1;
-  if ((routing_policy_id = (u_int8_t *)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int8_t))) == NULL) throw 1;
-  if ((block_blacklisted_flows = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL) throw 1;
-  if ((max_flow_size = (u_int32_t *)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int32_t))) == NULL) throw 1;
-  if ((dynamic_blacklist_enabled = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL) throw 1;
+  if ((children_safe = (bool*)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL)
+    throw 1;
+  if ((forge_global_dns = (bool*)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) ==
+      NULL)
+    throw 1;
+  if ((routing_policy_id =
+           (u_int8_t*)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int8_t))) == NULL)
+    throw 1;
+  if ((block_blacklisted_flows =
+           (bool*)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL)
+    throw 1;
+  if ((max_flow_size =
+           (u_int32_t*)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int32_t))) == NULL)
+    throw 1;
+  if ((dynamic_blacklist_enabled =
+           (bool*)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL)
+    throw 1;
 
   for (int i = 0; i < MAX_NUM_HOST_POOLS; i++)
     routing_policy_id[i] = DEFAULT_ROUTING_TABLE_ID;
 
-  if ((pool_shaper = (u_int16_t *)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int16_t))) == NULL ||
-      (schedule_bitmap = (u_int32_t *)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int32_t))) == NULL ||
-      (enforce_quotas_per_pool_member = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL ||
-      (enforce_shapers_per_pool_member = (bool *)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL)
+  if ((pool_shaper =
+           (u_int16_t*)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int16_t))) == NULL ||
+      (schedule_bitmap =
+           (u_int32_t*)calloc(MAX_NUM_HOST_POOLS, sizeof(u_int32_t))) == NULL ||
+      (enforce_quotas_per_pool_member =
+           (bool*)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL ||
+      (enforce_shapers_per_pool_member =
+           (bool*)calloc(MAX_NUM_HOST_POOLS, sizeof(bool))) == NULL)
     throw 1;
 #endif
 
 #ifdef HAVE_NEDGE
-  dynamicBlacklist = (AddressTree **)calloc(sizeof(AddressTree*), MAX_NUM_HOST_POOLS);
+  dynamicBlacklist =
+      (AddressTree**)calloc(sizeof(AddressTree*), MAX_NUM_HOST_POOLS);
 
-  for(u_int i=0; i<MAX_NUM_HOST_POOLS; i++)
-    dynamicBlacklist[i] = NULL;
+  for (u_int i = 0; i < MAX_NUM_HOST_POOLS; i++) dynamicBlacklist[i] = NULL;
 #endif
 
-  if ((num_active_hosts_inline = (int32_t *)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL ||
-      (num_active_hosts_offline = (int32_t *)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL ||
-      (num_active_l2_devices_inline = (int32_t *)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL ||
-      (num_active_l2_devices_offline = (int32_t *)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL)
+  if ((num_active_hosts_inline =
+           (int32_t*)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL ||
+      (num_active_hosts_offline =
+           (int32_t*)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL ||
+      (num_active_l2_devices_inline =
+           (int32_t*)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL ||
+      (num_active_l2_devices_offline =
+           (int32_t*)calloc(sizeof(int32_t), MAX_NUM_HOST_POOLS)) == NULL)
     throw 1;
 
   if (_iface) iface = _iface;
@@ -72,31 +92,33 @@ HostPools::HostPools(NetworkInterface *_iface) {
   reloadPools();
   max_num_pools = MAX_NUM_HOST_POOLS;
 
-  ntop->getTrace()->traceEvent(TRACE_INFO, "Host Pools Available: %u", max_num_pools);
+  ntop->getTrace()->traceEvent(TRACE_INFO, "Host Pools Available: %u",
+                               max_num_pools);
 }
 
 /* *************************************** */
 
-void HostPools::deleteStats(HostPoolStats ***hps) {
+void HostPools::deleteStats(HostPoolStats*** hps) {
   if (hps) {
     if (*hps) {
       for (int i = 0; i < MAX_NUM_HOST_POOLS; i++)
         if ((*hps)[i]) delete (*hps)[i];
-      delete[] * hps;
+      delete[] *hps;
       *hps = NULL;
     }
   }
 }
 /* *************************************** */
 
-void HostPools::storeStats(HostPoolStats **stats) {
+void HostPools::storeStats(HostPoolStats** stats) {
   char stats_key[CONST_MAX_LEN_REDIS_KEY];
-  Redis *redis = ntop->getRedis();
+  Redis* redis = ntop->getRedis();
 
   for (int i = 0; i < MAX_NUM_HOST_POOLS; i++) {
     if (stats[i] == NULL) continue;
     u_int16_t pool_id = i;
-    snprintf(stats_key, sizeof(stats_key), HOST_POOL_SERIALIZED_KEY, iface->get_id());
+    snprintf(stats_key, sizeof(stats_key), HOST_POOL_SERIALIZED_KEY,
+             iface->get_id());
     std::string json = stats[i]->serialize(iface);
     if (!json.empty()) {
       redis->hashSet(stats_key, std::to_string(pool_id).c_str(), json.c_str());
@@ -115,11 +137,12 @@ HostPools::~HostPools() {
   if (tree_shadow) delete tree_shadow;
   if (tree) delete tree;
 
-  if (stats){
+  if (stats) {
 #ifdef HAVE_NEDGE
     storeStats(stats);
 #endif
-    deleteStats(&stats); }
+    deleteStats(&stats);
+  }
   if (stats_shadow) deleteStats(&stats_shadow);
 
 #ifdef HAVE_NEDGE
@@ -136,16 +159,15 @@ HostPools::~HostPools() {
 #endif
 
 #ifdef HAVE_NEDGE
-  for(u_int i=0; i<MAX_NUM_HOST_POOLS; i++) {
-    if(dynamicBlacklist[i] != NULL)
-      delete(dynamicBlacklist[i]);
+  for (u_int i = 0; i < MAX_NUM_HOST_POOLS; i++) {
+    if (dynamicBlacklist[i] != NULL) delete (dynamicBlacklist[i]);
   }
 #endif
 }
 
 /* *************************************** */
 
-void HostPools::swap(VLANAddressTree *new_trees, HostPoolStats **new_stats) {
+void HostPools::swap(VLANAddressTree* new_trees, HostPoolStats** new_stats) {
   /* Swap statistics */
   if (new_stats) {
     if (stats) {
@@ -169,7 +191,7 @@ void HostPools::swap(VLANAddressTree *new_trees, HostPoolStats **new_stats) {
 
 /* *************************************** */
 
-void HostPools::luaStats(lua_State *vm) {
+void HostPools::luaStats(lua_State* vm) {
   if (vm) {
     lua_newtable(vm);
 
@@ -179,8 +201,8 @@ void HostPools::luaStats(lua_State *vm) {
 
 /* *************************************** */
 
-void HostPools::luaStats(lua_State *vm, u_int16_t pool_id) {
-  HostPoolStats *hps;
+void HostPools::luaStats(lua_State* vm, u_int16_t pool_id) {
+  HostPoolStats* hps;
 
   if (vm) {
     if (stats && pool_id < MAX_NUM_HOST_POOLS) {
@@ -197,13 +219,14 @@ void HostPools::luaStats(lua_State *vm, u_int16_t pool_id) {
 
 /* *************************************** */
 
-void HostPools::updateStats(const struct timeval *tv) {
-  HostPoolStats *hps;
+void HostPools::updateStats(const struct timeval* tv) {
+  HostPoolStats* hps;
 
   if (stats && tv) {
     for (int i = 0; i < MAX_NUM_HOST_POOLS; i++)
       if ((hps = stats[i]))
-        hps->updateStats(tv); /* Use hps, stats[i] can become NULL after a swap */
+        hps->updateStats(
+            tv); /* Use hps, stats[i] can become NULL after a swap */
   }
 };
 
@@ -214,7 +237,7 @@ void HostPools::incPoolStats(u_int32_t when, u_int16_t host_pool_id,
                              ndpi_protocol_category_t category_id,
                              u_int64_t sent_packets, u_int64_t sent_bytes,
                              u_int64_t rcvd_packets, u_int64_t rcvd_bytes) {
-  HostPoolStats *hps = getPoolStats(host_pool_id);
+  HostPoolStats* hps = getPoolStats(host_pool_id);
 
   if (!hps) return;
 
@@ -230,7 +253,7 @@ void HostPools::incPoolStats(u_int32_t when, u_int16_t host_pool_id,
 #ifdef NTOPNG_PRO
 
 void HostPools::incPoolNumDroppedFlows(u_int16_t pool_id) {
-  HostPoolStats *hps = getPoolStats(pool_id);
+  HostPoolStats* hps = getPoolStats(pool_id);
 
   if (!hps) return;
 
@@ -240,7 +263,7 @@ void HostPools::incPoolNumDroppedFlows(u_int16_t pool_id) {
 /* *************************************** */
 
 void HostPools::resetPoolsStats(u_int16_t pool_filter) {
-  HostPoolStats *hps;
+  HostPoolStats* hps;
 
   if (stats) {
     if (pool_filter != (u_int16_t)-1) {
@@ -260,7 +283,7 @@ void HostPools::resetPoolsStats(u_int16_t pool_filter) {
 /* *************************************** */
 
 void HostPools::checkPoolsStatsReset() {
-  HostPoolStats *hps;
+  HostPoolStats* hps;
 
   if (stats) {
     for (int i = 0; i < MAX_NUM_HOST_POOLS; i++) {
@@ -277,7 +300,7 @@ void HostPools::checkPoolsStatsReset() {
 
 /* *************************************** */
 
-void HostPools::lua(lua_State *vm) {
+void HostPools::lua(lua_State* vm) {
   u_int32_t hosts = 0, l2_devices = 0;
   u_int32_t cur_hosts = 0, cur_l2 = 0;
   u_int32_t active_pools = 0;
@@ -320,10 +343,11 @@ void HostPools::lua(lua_State *vm) {
 
 /* *************************************** */
 
-void HostPools::reloadPool(u_int16_t _pool_id, VLANAddressTree *new_tree, HostPoolStats **new_stats) {
+void HostPools::reloadPool(u_int16_t _pool_id, VLANAddressTree* new_tree,
+                           HostPoolStats** new_stats) {
   char kname[CONST_MAX_LEN_REDIS_KEY];
   char **pool_members, *at, *member;
-  Redis *redis = ntop->getRedis();
+  Redis* redis = ntop->getRedis();
   int num_members, actual_num_members;
   u_int16_t vlan_id;
   char pool_id[64];
@@ -336,51 +360,82 @@ void HostPools::reloadPool(u_int16_t _pool_id, VLANAddressTree *new_tree, HostPo
   if (new_stats[_pool_id]) {
     char name_rsp[POOL_MAX_NAME_LEN];
 
-    redis->hashGet(kname, (char *)"name", name_rsp, sizeof(name_rsp));
+    redis->hashGet(kname, (char*)"name", name_rsp, sizeof(name_rsp));
     new_stats[_pool_id]->updateName(name_rsp);
   }
 
 #ifdef HAVE_NEDGE
   char rsp[16] = {0};
 
-  children_safe[_pool_id] = ((redis->hashGet(kname, (char *)CONST_CHILDREN_SAFE, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
-  forge_global_dns[_pool_id] = ((redis->hashGet(kname, (char *)CONST_FORGE_GLOBAL_DNS, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
-  routing_policy_id[_pool_id] = (redis->hashGet(kname, (char *)CONST_ROUTING_POLICY_ID, rsp, sizeof(rsp)) != -1) ? atoi(rsp) : DEFAULT_ROUTING_TABLE_ID;
-  block_blacklisted_flows[_pool_id] = ((redis->hashGet(kname, (char *)CONST_BLOCK_BLACKLISTED_FLOWS, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
-  max_flow_size[_pool_id] = (redis->hashGet(kname, (char *)CONST_MAX_FLOW_SIZE, rsp, sizeof(rsp)) != -1) ? atoi(rsp) : 0;
-  pool_shaper[_pool_id] = (redis->hashGet(kname, (char *)CONST_POOL_SHAPER_ID, rsp, sizeof(rsp)) != -1) ? atoi(rsp) : DEFAULT_SHAPER_ID;
-  schedule_bitmap[_pool_id] = (redis->hashGet(kname, (char *)CONST_SCHEDULE_BITMAP, rsp, sizeof(rsp)) != -1) ? strtol(rsp, NULL, 16) : DEFAULT_TIME_SCHEDULE;
-  enforce_quotas_per_pool_member[_pool_id] = ((redis->hashGet(kname, (char *)CONST_ENFORCE_QUOTAS_PER_POOL_MEMBER, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
-  enforce_shapers_per_pool_member[_pool_id] = ((redis->hashGet(kname, (char *)CONST_ENFORCE_SHAPERS_PER_POOL_MEMBER, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
-  dynamic_blacklist_enabled[_pool_id] = ((redis->hashGet(kname, (char *)CONST_DYNAMIC_BLACKLIST, rsp, sizeof(rsp)) != -1) && (!strcmp(rsp, "true")));
+  children_safe[_pool_id] = ((redis->hashGet(kname, (char*)CONST_CHILDREN_SAFE,
+                                             rsp, sizeof(rsp)) != -1) &&
+                             (!strcmp(rsp, "true")));
+  forge_global_dns[_pool_id] =
+      ((redis->hashGet(kname, (char*)CONST_FORGE_GLOBAL_DNS, rsp,
+                       sizeof(rsp)) != -1) &&
+       (!strcmp(rsp, "true")));
+  routing_policy_id[_pool_id] =
+      (redis->hashGet(kname, (char*)CONST_ROUTING_POLICY_ID, rsp,
+                      sizeof(rsp)) != -1)
+          ? atoi(rsp)
+          : DEFAULT_ROUTING_TABLE_ID;
+  block_blacklisted_flows[_pool_id] =
+      ((redis->hashGet(kname, (char*)CONST_BLOCK_BLACKLISTED_FLOWS, rsp,
+                       sizeof(rsp)) != -1) &&
+       (!strcmp(rsp, "true")));
+  max_flow_size[_pool_id] = (redis->hashGet(kname, (char*)CONST_MAX_FLOW_SIZE,
+                                            rsp, sizeof(rsp)) != -1)
+                                ? atoi(rsp)
+                                : 0;
+  pool_shaper[_pool_id] = (redis->hashGet(kname, (char*)CONST_POOL_SHAPER_ID,
+                                          rsp, sizeof(rsp)) != -1)
+                              ? atoi(rsp)
+                              : DEFAULT_SHAPER_ID;
+  schedule_bitmap[_pool_id] =
+      (redis->hashGet(kname, (char*)CONST_SCHEDULE_BITMAP, rsp, sizeof(rsp)) !=
+       -1)
+          ? strtol(rsp, NULL, 16)
+          : DEFAULT_TIME_SCHEDULE;
+  enforce_quotas_per_pool_member[_pool_id] =
+      ((redis->hashGet(kname, (char*)CONST_ENFORCE_QUOTAS_PER_POOL_MEMBER, rsp,
+                       sizeof(rsp)) != -1) &&
+       (!strcmp(rsp, "true")));
+  enforce_shapers_per_pool_member[_pool_id] =
+      ((redis->hashGet(kname, (char*)CONST_ENFORCE_SHAPERS_PER_POOL_MEMBER, rsp,
+                       sizeof(rsp)) != -1) &&
+       (!strcmp(rsp, "true")));
+  dynamic_blacklist_enabled[_pool_id] =
+      ((redis->hashGet(kname, (char*)CONST_DYNAMIC_BLACKLIST, rsp,
+                       sizeof(rsp)) != -1) &&
+       (!strcmp(rsp, "true")));
 
-  if(dynamic_blacklist_enabled[_pool_id]) {
-    ntop->getTrace()->traceEvent(TRACE_INFO, "Allocating synamic blacklist for poolId %d", _pool_id);
+  if (dynamic_blacklist_enabled[_pool_id]) {
+    ntop->getTrace()->traceEvent(
+        TRACE_INFO, "Allocating synamic blacklist for poolId %d", _pool_id);
 
     dynamicBlacklist[_pool_id] = new AddressTree();
   }
-  
+
 #ifdef HOST_POOLS_DEBUG
-  redis->hashGet(kname, (char *)"name", rsp, sizeof(rsp));
-  ntop->getTrace()->traceEvent(TRACE_NORMAL,
-			       "Loading pool [%s][pool_id: %u][name: %s]"
-			       "[children_safe: %i]"
-			       "[forge_global_dns: %i]"
-			       "[pool_shaper: %i]"
-			       "[schedule_bitmap: %i]"
-			       "[block_blacklisted_flows: %i]"
-			       "[dynamic_blacklist: %i]"
-			       "[max_flow_size: %u]"
-			       "[enforce_quotas_per_pool_member: %i]"
-			       "[enforce_shapers_per_pool_member: %i]",
-			       iface->get_name(), _pool_id, rsp, children_safe[_pool_id],
-			       forge_global_dns[_pool_id], pool_shaper[_pool_id],
-			       schedule_bitmap[_pool_id],
-			       block_blacklisted_flows[_pool_id],
-			       dynamic_blacklist[_pool_id],
-			       max_flow_size[_pool_id],
-			       enforce_quotas_per_pool_member[_pool_id],
-			       enforce_shapers_per_pool_member[_pool_id]);
+  redis->hashGet(kname, (char*)"name", rsp, sizeof(rsp));
+  ntop->getTrace()->traceEvent(
+      TRACE_NORMAL,
+      "Loading pool [%s][pool_id: %u][name: %s]"
+      "[children_safe: %i]"
+      "[forge_global_dns: %i]"
+      "[pool_shaper: %i]"
+      "[schedule_bitmap: %i]"
+      "[block_blacklisted_flows: %i]"
+      "[dynamic_blacklist: %i]"
+      "[max_flow_size: %u]"
+      "[enforce_quotas_per_pool_member: %i]"
+      "[enforce_shapers_per_pool_member: %i]",
+      iface->get_name(), _pool_id, rsp, children_safe[_pool_id],
+      forge_global_dns[_pool_id], pool_shaper[_pool_id],
+      schedule_bitmap[_pool_id], block_blacklisted_flows[_pool_id],
+      dynamic_blacklist[_pool_id], max_flow_size[_pool_id],
+      enforce_quotas_per_pool_member[_pool_id],
+      enforce_shapers_per_pool_member[_pool_id]);
 #endif
 
 #endif /* NTOPNG_PRO */
@@ -391,17 +446,20 @@ void HostPools::reloadPool(u_int16_t _pool_id, VLANAddressTree *new_tree, HostPo
   if ((num_members = redis->smembers(kname, &pool_members)) > 0) {
     // NOTE: the auto-assigned host_pool must not be limited as it receives
     // devices assigments automatically
-    actual_num_members = min_val((u_int32_t)num_members,
-				 ((_pool_id == ntop->getPrefs()->get_auto_assigned_pool_id())
-				  ? MAX_NUM_INTERFACE_HOSTS : MAX_NUM_POOL_MEMBERS));
+    actual_num_members =
+        min_val((u_int32_t)num_members,
+                ((_pool_id == ntop->getPrefs()->get_auto_assigned_pool_id())
+                     ? MAX_NUM_INTERFACE_HOSTS
+                     : MAX_NUM_POOL_MEMBERS));
 
     if (actual_num_members < num_members) {
-      ntop->getTrace()->traceEvent(TRACE_WARNING,
-				   "Too many members [pool id: %2d][pool members: %d]. "
-				   "Maximum number of pool members for this license is %u, so %u pool "
-				   "members will be ignored.",
-				   _pool_id, num_members, actual_num_members,
-				   num_members - actual_num_members, actual_num_members);
+      ntop->getTrace()->traceEvent(
+          TRACE_WARNING,
+          "Too many members [pool id: %2d][pool members: %d]. "
+          "Maximum number of pool members for this license is %u, so %u pool "
+          "members will be ignored.",
+          _pool_id, num_members, actual_num_members,
+          num_members - actual_num_members, actual_num_members);
     }
 
     for (int k = 0; k < actual_num_members; k++) {
@@ -410,22 +468,23 @@ void HostPools::reloadPool(u_int16_t _pool_id, VLANAddressTree *new_tree, HostPo
       if (!member) continue;
 
       if ((at = strchr(member, '@'))) {
-	vlan_id = atoi(at + 1);
-	*at = '\0';
+        vlan_id = atoi(at + 1);
+        *at = '\0';
       } else
-	vlan_id = 0;
+        vlan_id = 0;
 
       bool rc;
 
       if (!(rc = new_tree->addAddress(vlan_id, member, _pool_id))
 #ifdef HOST_POOLS_DEBUG
-	  || true
+          || true
 #endif
-	  )
+      )
 
-	ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s tree node for %s [vlan %i] [host pool: %s]",
-				     rc ? "Successfully added" : "Unable to add", member, vlan_id,
-				     pool_id);
+        ntop->getTrace()->traceEvent(
+            TRACE_NORMAL, "%s tree node for %s [vlan %i] [host pool: %s]",
+            rc ? "Successfully added" : "Unable to add", member, vlan_id,
+            pool_id);
 
       free(member);
     }
@@ -438,22 +497,22 @@ void HostPools::reloadPool(u_int16_t _pool_id, VLANAddressTree *new_tree, HostPo
 
 void HostPools::reloadPools() {
   char kname[CONST_MAX_LEN_REDIS_KEY];
-  char **pools;
+  char** pools;
   int num_pools;
   u_int16_t _pool_id;
-  VLANAddressTree *new_tree;
-  HostPoolStats **new_stats;
-  Redis *redis = ntop->getRedis();
+  VLANAddressTree* new_tree;
+  HostPoolStats** new_stats;
+  Redis* redis = ntop->getRedis();
 
   if (!iface || (iface->get_id() == -1)) return;
 
   new_tree = new (std::nothrow) VLANAddressTree;
-  if(new_tree == NULL) {
+  if (new_tree == NULL) {
     return;
   }
 
-  new_stats = new (std::nothrow) HostPoolStats *[MAX_NUM_HOST_POOLS];
-  if(new_stats == NULL) {
+  new_stats = new (std::nothrow) HostPoolStats*[MAX_NUM_HOST_POOLS];
+  if (new_stats == NULL) {
     delete new_tree;
     return;
   }
@@ -474,9 +533,8 @@ void HostPools::reloadPools() {
   /* Keys are pool ids */
   if ((num_pools = redis->smembers(kname, &pools)) == -1) {
     delete new_tree;
-    if (new_stats[0])
-      delete new_stats[0];
-    delete [] new_stats;
+    if (new_stats[0]) delete new_stats[0];
+    delete[] new_stats;
     return; /* Something went wrong with redis? */
   }
 #ifdef HAVE_NEDGE
@@ -486,15 +544,15 @@ void HostPools::reloadPools() {
   for (int i = 0; i < num_pools; i++) {
     if (!pools[i]) continue;
 
-    _pool_id = (u_int16_t) atoi(pools[i]);
+    _pool_id = (u_int16_t)atoi(pools[i]);
 
     if (_pool_id >= MAX_NUM_HOST_POOLS) {
       ntop->getTrace()->traceEvent(
-				   TRACE_WARNING,
-				   "Ignoring pool [pool id: %2d]. "
-				   "Maximum number of host pools for this license is %u, inclusive of "
-				   "the Not Assigned pool.",
-				   _pool_id, MAX_NUM_HOST_POOLS);
+          TRACE_WARNING,
+          "Ignoring pool [pool id: %2d]. "
+          "Maximum number of host pools for this license is %u, inclusive of "
+          "the Not Assigned pool.",
+          _pool_id, MAX_NUM_HOST_POOLS);
 
       free(pools[i]);
       continue;
@@ -502,13 +560,16 @@ void HostPools::reloadPools() {
 
     if (_pool_id != 0) {            /* Pool id 0 stats already updated */
       if (stats && stats[_pool_id]) /* Duplicate existing statistics */
-	new_stats[_pool_id] = new (std::nothrow) HostPoolStats(*stats[_pool_id]);
+        new_stats[_pool_id] =
+            new (std::nothrow) HostPoolStats(*stats[_pool_id]);
       else { /* Brand new statistics */
-	new_stats[_pool_id] = new (std::nothrow) HostPoolStats(iface);
+        new_stats[_pool_id] = new (std::nothrow) HostPoolStats(iface);
 #ifdef HAVE_NEDGE
-        snprintf(stats_key, sizeof(stats_key), HOST_POOL_SERIALIZED_KEY, iface->get_id());
-        if (redis->hashGet(stats_key, std::to_string(_pool_id).c_str(), json_stats, sizeof(json_stats)) == 0) {
-          new_stats[_pool_id]->deserialize(json_stats,iface);
+        snprintf(stats_key, sizeof(stats_key), HOST_POOL_SERIALIZED_KEY,
+                 iface->get_id());
+        if (redis->hashGet(stats_key, std::to_string(_pool_id).c_str(),
+                           json_stats, sizeof(json_stats)) == 0) {
+          new_stats[_pool_id]->deserialize(json_stats, iface);
         }
 #endif
       }
@@ -528,8 +589,8 @@ void HostPools::reloadPools() {
 
 /* *************************************** */
 
-bool HostPools::findMacPool(const u_int8_t *const mac, u_int16_t *found_pool) {
-  VLANAddressTree *cur_tree; /* must use this as tree can be swapped */
+bool HostPools::findMacPool(const u_int8_t* const mac, u_int16_t* found_pool) {
+  VLANAddressTree* cur_tree; /* must use this as tree can be swapped */
   int16_t ret;
 
   if (!tree || !(cur_tree = tree)) return (false);
@@ -546,7 +607,7 @@ bool HostPools::findMacPool(const u_int8_t *const mac, u_int16_t *found_pool) {
 
 /* *************************************** */
 
-bool HostPools::findMacPool(Mac *mac, u_int16_t *found_pool) {
+bool HostPools::findMacPool(Mac* mac, u_int16_t* found_pool) {
   if (mac->isSpecialMac()) return (false);
 
   return findMacPool(mac->get_mac(), found_pool);
@@ -554,10 +615,10 @@ bool HostPools::findMacPool(Mac *mac, u_int16_t *found_pool) {
 
 /* *************************************** */
 
-bool HostPools::findIpPool(IpAddress *ip, u_int16_t vlan_id,
-                           u_int16_t *found_pool,
-                           ndpi_patricia_node_t **found_node) {
-  VLANAddressTree *cur_tree; /* must use this as tree can be swapped */
+bool HostPools::findIpPool(IpAddress* ip, u_int16_t vlan_id,
+                           u_int16_t* found_pool,
+                           ndpi_patricia_node_t** found_node) {
+  VLANAddressTree* cur_tree; /* must use this as tree can be swapped */
 #ifdef HOST_POOLS_DEBUG
   char buf[128];
 #endif
@@ -567,14 +628,14 @@ bool HostPools::findIpPool(IpAddress *ip, u_int16_t vlan_id,
   if (vlan_id > 4095)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "%%%% CRASHING %%%%");
 
-  *found_node = (ndpi_patricia_node_t *)ip->findAddress(
-							cur_tree->getAddressTree(vlan_id));
+  *found_node =
+      (ndpi_patricia_node_t*)ip->findAddress(cur_tree->getAddressTree(vlan_id));
 
   if (*found_node) {
 #ifdef HOST_POOLS_DEBUG
     ntop->getTrace()->traceEvent(
-				 TRACE_NORMAL, "Found pool for %s [pool id: %i]",
-				 ip->print(buf, sizeof(buf)), ndpi_patricia_get_node_u64(*found_node));
+        TRACE_NORMAL, "Found pool for %s [pool id: %i]",
+        ip->print(buf, sizeof(buf)), ndpi_patricia_get_node_u64(*found_node));
 #endif
     *found_pool = ndpi_patricia_get_node_u64(*found_node);
     return (true);
@@ -586,10 +647,10 @@ bool HostPools::findIpPool(IpAddress *ip, u_int16_t vlan_id,
 /* *************************************** */
 
 u_int16_t HostPools::getCurrentHostPoolsNumber() {
-  HostPoolStats *hps;
+  HostPoolStats* hps;
   u_int16_t pools_number = 0;
   for (int i = 0; i < MAX_NUM_HOST_POOLS; i++) {
-    if((hps = stats[i])) {
+    if ((hps = stats[i])) {
       pools_number = pools_number + 1;
     }
   }
@@ -599,11 +660,11 @@ u_int16_t HostPools::getCurrentHostPoolsNumber() {
 /* *************************************** */
 
 u_int32_t HostPools::getCurrentMaxHostPoolsMembers() {
-  HostPoolStats *hps;
+  HostPoolStats* hps;
   u_int32_t max_members_number = 0;
   /* Starting from 1, because 0 is the default host pool */
   for (int i = 1; i < MAX_NUM_HOST_POOLS; i++) {
-    if((hps = stats[i])) {
+    if ((hps = stats[i])) {
       max_members_number += getNumPoolHosts(i);
     }
   }
@@ -612,9 +673,9 @@ u_int32_t HostPools::getCurrentMaxHostPoolsMembers() {
 
 /* *************************************** */
 
-u_int16_t HostPools::getPool(Host *h, bool *mac_match) {
+u_int16_t HostPools::getPool(Host* h, bool* mac_match) {
   u_int16_t pool_id;
-  ndpi_patricia_node_t *node;
+  ndpi_patricia_node_t* node;
   bool found = false;
 
   if (mac_match != NULL) *mac_match = false;
@@ -637,7 +698,7 @@ u_int16_t HostPools::getPool(Host *h, bool *mac_match) {
 
 /* *************************************** */
 
-u_int16_t HostPools::getPool(Mac *m) {
+u_int16_t HostPools::getPool(Mac* m) {
   u_int16_t pool_id;
   bool found = false;
 
@@ -652,8 +713,8 @@ u_int16_t HostPools::getPool(Mac *m) {
 
 /* Returns a pool id, given a pool name. When no pool id is found, the default
  * pool id is returned */
-u_int16_t HostPools::getPoolByName(const char *pool_name) {
-  HostPoolStats *hps;
+u_int16_t HostPools::getPoolByName(const char* pool_name) {
+  HostPoolStats* hps;
 
   for (int i = 0; i < MAX_NUM_HOST_POOLS; i++) {
     if ((hps = getPoolStats(i)) && hps->getName().compare(pool_name) == 0)

@@ -13,7 +13,9 @@ class ServerPortsBitmap {
   ServerPortsBitmap();
   ~ServerPortsBitmap();
 
-  inline void addPort(bool isTCP, u_int16_t port) { ndpi_bitmap_set((isTCP ? tcp_bitmap : udp_bitmap), port); };
+  inline void addPort(bool isTCP, u_int16_t port) {
+    ndpi_bitmap_set((isTCP ? tcp_bitmap : udp_bitmap), port);
+  };
   const char* serializer();
   bool deserializer(const char* json_str);
 };

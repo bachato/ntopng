@@ -27,10 +27,11 @@
 
 /* **************************************************** */
 
-SyslogParserInterface::SyslogParserInterface(const char *endpoint,
-                                             const char *custom_interface_type)
+SyslogParserInterface::SyslogParserInterface(const char* endpoint,
+                                             const char* custom_interface_type)
     : ParserInterface(endpoint, custom_interface_type) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   le = NULL;
   producers_reload_requested = true;
 }
@@ -53,11 +54,11 @@ SyslogParserInterface::~SyslogParserInterface() {
 
 /* **************************************************** */
 
-u_int8_t SyslogParserInterface::parseLog(char *log_line, char *client_ip) {
-  const char *producer_name = NULL;
+u_int8_t SyslogParserInterface::parseLog(char* log_line, char* client_ip) {
+  const char* producer_name = NULL;
   char *prio = NULL, *parsed_client_ip = NULL, *device = NULL,
        *application = NULL, *content = NULL;
-  char *tmp;
+  char* tmp;
   u_int32_t num_total_events = 0, num_malformed = 0;
 
   if (producers_reload_requested) {
@@ -202,14 +203,14 @@ exit:
 
 /* **************************************************** */
 
-void SyslogParserInterface::lua(lua_State *vm, bool fullStats) {
+void SyslogParserInterface::lua(lua_State* vm, bool fullStats) {
   NetworkInterface::lua(vm, fullStats);
 }
 
 /* **************************************************** */
 
-void SyslogParserInterface::addProducerMapping(const char *host,
-                                               const char *producer) {
+void SyslogParserInterface::addProducerMapping(const char* host,
+                                               const char* producer) {
   string host_ip(host);
   string producer_name(producer);
   producers_map_t::iterator it;
@@ -253,7 +254,7 @@ void SyslogParserInterface::doProducersMappingUpdate() {
 
 /* **************************************************** */
 
-const char *SyslogParserInterface::getProducerName(const char *host) {
+const char* SyslogParserInterface::getProducerName(const char* host) {
   string host_ip(host);
   producers_map_t::const_iterator it;
 

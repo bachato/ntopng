@@ -26,16 +26,19 @@
 
 class PeriodicityChangedAlert : public FlowAlert {
  private:
-  ndpi_serializer *getAlertJSON(ndpi_serializer *serializer);
+  ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
 
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_periodicity_changed, alert_category_network};
+    return {NDPI_NO_RISK, flow_alert_periodicity_changed,
+            alert_category_network};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_NOTICE; };
 
-  PeriodicityChangedAlert(FlowCheck *c, Flow *f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-  ~PeriodicityChangedAlert(){};
+  PeriodicityChangedAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~PeriodicityChangedAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
 };

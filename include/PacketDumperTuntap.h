@@ -26,7 +26,7 @@
 
 class PacketDumperTuntap {
  private:
-  NetworkInterface *iface;
+  NetworkInterface* iface;
   int fd;
   u_int8_t mac_addr[6];
   u_int16_t mtu;
@@ -34,26 +34,26 @@ class PacketDumperTuntap {
   bool init_ok;
   u_int32_t num_dumped_packets;
 
-  int getIPAddress(struct ifreq *ifr, char *if_name);
-  int getNetmask(struct ifreq *ifr, char *if_name);
-  int getHwAddress(struct ifreq *ifr, char *if_name);
+  int getIPAddress(struct ifreq* ifr, char* if_name);
+  int getNetmask(struct ifreq* ifr, char* if_name);
+  int getHwAddress(struct ifreq* ifr, char* if_name);
   void up();
 
  public:
-  PacketDumperTuntap(NetworkInterface *i);
+  PacketDumperTuntap(NetworkInterface* i);
   ~PacketDumperTuntap();
 
-  int openTap(char *dev, /* user-definable interface name, eg. edge0 */
+  int openTap(char* dev, /* user-definable interface name, eg. edge0 */
               int mtu);
-  int readTap(unsigned char *buf, int len);
-  int writeTap(unsigned char *buf, int len, dump_reason reason,
+  int readTap(unsigned char* buf, int len);
+  int writeTap(unsigned char* buf, int len, dump_reason reason,
                unsigned int sampling_rate);
-  inline char *getName(void) { return ((char *)dev_name); }
+  inline char* getName(void) { return ((char*)dev_name); }
   void closeTap();
 
   u_int32_t get_num_dumped_packets(void) { return num_dumped_packets; }
 
-  void lua(lua_State *vm);
+  void lua(lua_State* vm);
 };
 
 #endif /* _PACKET_DUMPER_TUNTAP_H_ */

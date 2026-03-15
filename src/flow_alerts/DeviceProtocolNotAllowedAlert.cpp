@@ -23,9 +23,9 @@
 
 /* ***************************************************** */
 
-ndpi_serializer *DeviceProtocolNotAllowedAlert::getAlertJSON(
-    ndpi_serializer *serializer) {
-  Flow *f = getFlow();
+ndpi_serializer* DeviceProtocolNotAllowedAlert::getAlertJSON(
+    ndpi_serializer* serializer) {
+  Flow* f = getFlow();
   Host *cli = f->get_cli_host(), *srv = f->get_srv_host();
   DeviceType cli_dev_type = device_unknown, srv_dev_type = device_unknown;
 
@@ -37,11 +37,13 @@ ndpi_serializer *DeviceProtocolNotAllowedAlert::getAlertJSON(
     ndpi_serialize_string_int32(serializer, "srv.devtype", srv_dev_type);
 
     if (!f->isCliDeviceAllowedProtocol()) {
-      ndpi_serialize_string_string(serializer, "devproto_forbidden_peer", "cli");
+      ndpi_serialize_string_string(serializer, "devproto_forbidden_peer",
+                                   "cli");
       ndpi_serialize_string_int32(serializer, "devproto_forbidden_id",
                                   f->getCliDeviceDisallowedProtocol());
     } else {
-      ndpi_serialize_string_string(serializer, "devproto_forbidden_peer", "srv");
+      ndpi_serialize_string_string(serializer, "devproto_forbidden_peer",
+                                   "srv");
       ndpi_serialize_string_int32(serializer, "devproto_forbidden_id",
                                   f->getSrvDeviceDisallowedProtocol());
     }

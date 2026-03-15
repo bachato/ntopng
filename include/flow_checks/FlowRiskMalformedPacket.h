@@ -31,10 +31,10 @@ class FlowRiskMalformedPacket : public FlowRisk {
   }
 
  public:
-  FlowRiskMalformedPacket() : FlowRisk(){};
-  ~FlowRiskMalformedPacket(){};
+  FlowRiskMalformedPacket() : FlowRisk() {};
+  ~FlowRiskMalformedPacket() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskMalformedPacketAlert(this, f);
   }
 

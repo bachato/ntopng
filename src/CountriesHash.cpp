@@ -23,15 +23,16 @@
 
 /* ************************************ */
 
-CountriesHash::CountriesHash(NetworkInterface *_iface, u_int _num_hashes,
+CountriesHash::CountriesHash(NetworkInterface* _iface, u_int _num_hashes,
                              u_int _max_hash_size)
     : GenericHash(_iface, _num_hashes, _max_hash_size, "CountriesHash") {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 }
 
 /* ************************************ */
 
-Country *CountriesHash::get(const char *country_name, bool is_inline_call) {
+Country* CountriesHash::get(const char* country_name, bool is_inline_call) {
   u_int32_t hash = Utils::stringHash(country_name);
 
   hash %= num_hashes;
@@ -39,17 +40,17 @@ Country *CountriesHash::get(const char *country_name, bool is_inline_call) {
   if (table[hash] == NULL) {
     return (NULL);
   } else {
-    Country *head;
+    Country* head;
 
     if (!is_inline_call) locks[hash]->rdlock(__FILE__, __LINE__);
 
-    head = (Country *)table[hash];
+    head = (Country*)table[hash];
 
     while (head != NULL) {
       if ((!head->idle()) && head->equal(country_name))
         break;
       else
-        head = (Country *)head->next();
+        head = (Country*)head->next();
     }
 
     if (!is_inline_call) locks[hash]->unlock(__FILE__, __LINE__);
@@ -62,8 +63,8 @@ Country *CountriesHash::get(const char *country_name, bool is_inline_call) {
 
 #ifdef COUNTRY_DEBUG
 
-static bool print_country(GenericHashEntry *_country, void *user_data) {
-  Country *country = (Country *)_country;
+static bool print_country(GenericHashEntry* _country, void* user_data) {
+  Country* country = (Country*)_country;
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL,
                                "Country [name: %s] [num_uses: %u]",

@@ -26,25 +26,25 @@
 
 class FlowAlert {
  private:
-  Flow *flow;
+  Flow* flow;
   std::string check_name;
   bool cli_attacker, srv_attacker;
   bool cli_victim, srv_victim;
   u_int8_t cli_score, srv_score;
   u_int8_t alert_score;
-  char *json_alert;
+  char* json_alert;
   bool refresh_json_alert;
-  
+
   /*
      Adds to the passed `serializer` (generated with `getAlertSerializer`)
      information specific to this alert
    */
-  virtual ndpi_serializer *getAlertJSON(ndpi_serializer *serializer) {
+  virtual ndpi_serializer* getAlertJSON(ndpi_serializer* serializer) {
     return serializer;
   }
 
  public:
-  FlowAlert(FlowCheck *c, Flow *f);
+  FlowAlert(FlowCheck* c, Flow* f);
   virtual ~FlowAlert();
 
   inline void setCliAttacker() { cli_attacker = true; }
@@ -59,9 +59,10 @@ class FlowAlert {
   inline bool isSrvVictim() { return srv_victim; }
 
   inline void setCliSrvScores(u_int8_t c, u_int8_t s) {
-    cli_score = min_val(c, SCORE_MAX_VALUE); 
+    cli_score = min_val(c, SCORE_MAX_VALUE);
     srv_score = min_val(s, SCORE_MAX_VALUE);
-    if (cli_score + srv_score > SCORE_MAX_VALUE) srv_score = SCORE_MAX_VALUE - cli_score;
+    if (cli_score + srv_score > SCORE_MAX_VALUE)
+      srv_score = SCORE_MAX_VALUE - cli_score;
   };
   inline u_int8_t getCliScore() { return cli_score; };
   inline u_int8_t getSrvScore() { return srv_score; };
@@ -70,13 +71,13 @@ class FlowAlert {
   inline u_int8_t getAlertScore() const { return alert_score; };
   inline void setAlertScore(u_int8_t value) {
     if (value > SCORE_MAX_VALUE) value = SCORE_MAX_VALUE;
-    alert_score = value; 
+    alert_score = value;
   };
-  
+
   /* false = alert that requires attention, true = not important (auto ack) */
   virtual bool autoAck() const { return true; };
 
-  inline Flow *getFlow() const { return (flow); }
+  inline Flow* getFlow() const { return (flow); }
   inline std::string getCheckName() const { return (check_name); }
 
   /*
@@ -85,7 +86,7 @@ class FlowAlert {
      be freed by the caller as it is a reference to an internal string released
      with the alert.
   */
-  const char *getSerializedAlert();
+  const char* getSerializedAlert();
   inline void refreshAlert() { refresh_json_alert = true; };
 };
 

@@ -24,8 +24,9 @@
 /* ********************************************* */
 
 TimelineExtract::TimelineExtract() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   extraction.id = 0;
   status_code = 0;
   running = false;
@@ -39,16 +40,17 @@ TimelineExtract::~TimelineExtract() { stop(); }
 /* ********************************************* */
 
 #ifdef HAVE_PF_RING
-pfring *TimelineExtract::openTimeline(const char *timeline_path, time_t from,
-                                      time_t to, const char *bpf_filter) {
+pfring* TimelineExtract::openTimeline(const char* timeline_path, time_t from,
+                                      time_t to, const char* bpf_filter) {
   char from_buff[24], to_buff[24];
-  pfring *handle = NULL;
-  char *filter;
-  struct tm *time_info;
+  pfring* handle = NULL;
+  char* filter;
+  struct tm* time_info;
   int rc, len;
   char timeline_ifname[MAX_PATH];
 
-  snprintf(timeline_ifname, sizeof(timeline_ifname), "timeline:%s", timeline_path);
+  snprintf(timeline_ifname, sizeof(timeline_ifname), "timeline:%s",
+           timeline_path);
 
   handle = pfring_open(timeline_ifname, 16384, 0);
 
@@ -60,7 +62,7 @@ pfring *TimelineExtract::openTimeline(const char *timeline_path, time_t from,
   }
 
   len = 64 + (bpf_filter ? strlen(bpf_filter) : 0);
-  filter = (char *)malloc(len);
+  filter = (char*)malloc(len);
 
   if (filter == NULL) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to allocate memory");
@@ -115,9 +117,9 @@ error:
 
 /* ********************************************* */
 
-pfring *TimelineExtract::openTimelineFromInterface(NetworkInterface *iface,
+pfring* TimelineExtract::openTimelineFromInterface(NetworkInterface* iface,
                                                    time_t from, time_t to,
-                                                   const char *bpf_filter) {
+                                                   const char* bpf_filter) {
   char timeline_path[MAX_PATH];
 
   snprintf(timeline_path, sizeof(timeline_path), "%s/%d/timeline",
@@ -130,18 +132,18 @@ pfring *TimelineExtract::openTimelineFromInterface(NetworkInterface *iface,
 
 /* ********************************************* */
 
-bool TimelineExtract::extractToDisk(u_int32_t id, NetworkInterface *iface,
+bool TimelineExtract::extractToDisk(u_int32_t id, NetworkInterface* iface,
                                     time_t from, time_t to,
-                                    const char *bpf_filter, u_int64_t max_bytes,
-                                    const char *timeline_path) {
+                                    const char* bpf_filter, u_int64_t max_bytes,
+                                    const char* timeline_path) {
   bool completed = false;
 #ifdef HAVE_PF_RING
   char out_path[MAX_PATH];
-  PacketDumper *dumper;
-  pfring *handle;
-  u_char *packet = NULL;
+  PacketDumper* dumper;
+  pfring* handle;
+  u_char* packet = NULL;
   struct pfring_pkthdr header;
-  struct pcap_pkthdr *h;
+  struct pcap_pkthdr* h;
 
   memset(&header, 0, sizeof(header));
 
@@ -174,7 +176,7 @@ bool TimelineExtract::extractToDisk(u_int32_t id, NetworkInterface *iface,
 
   while (!shutdown && !ntop->getGlobals()->isShutdown() &&
          pfring_recv(handle, &packet, 0, &header, 0) > 0) {
-    h = (struct pcap_pkthdr *)&header;
+    h = (struct pcap_pkthdr*)&header;
     dumper->dumpPacket(h, packet);
     stats.packets++;
     stats.bytes += sizeof(struct pcap_disk_pkthdr) + h->caplen;
@@ -202,14 +204,14 @@ error:
 
 /* ********************************************* */
 
-bool TimelineExtract::extractLive(struct mg_connection *conn,
-                                  NetworkInterface *iface, time_t from,
-                                  time_t to, const char *bpf_filter,
-                                  const char *timeline_path) {
+bool TimelineExtract::extractLive(struct mg_connection* conn,
+                                  NetworkInterface* iface, time_t from,
+                                  time_t to, const char* bpf_filter,
+                                  const char* timeline_path) {
   bool completed = false;
 #ifdef HAVE_PF_RING
-  pfring *handle = NULL;
-  u_char *packet = NULL;
+  pfring* handle = NULL;
+  u_char* packet = NULL;
   struct pfring_pkthdr h;
   struct pcap_file_header pcaphdr;
   struct pcap_disk_pkthdr pkthdr;
@@ -220,23 +222,24 @@ bool TimelineExtract::extractLive(struct mg_connection *conn,
   stats.packets = stats.bytes = 0;
 
   if (!timeline_path || timeline_path[0] == '\0') {
-    ntop->getTrace()->traceEvent(TRACE_INFO,
-      "Running live extraction on iface %s interval %ld-%ld filter '%s'",
-      iface->get_name(), from, to, bpf_filter ? bpf_filter : "");
+    ntop->getTrace()->traceEvent(
+        TRACE_INFO,
+        "Running live extraction on iface %s interval %ld-%ld filter '%s'",
+        iface->get_name(), from, to, bpf_filter ? bpf_filter : "");
     handle = openTimelineFromInterface(iface, from, to, bpf_filter);
   } else {
-    ntop->getTrace()->traceEvent(TRACE_INFO,
-      "Running live extraction on timeline %s interval %ld-%ld filter '%s'",
-      timeline_path, from, to, bpf_filter ? bpf_filter : "");
+    ntop->getTrace()->traceEvent(
+        TRACE_INFO,
+        "Running live extraction on timeline %s interval %ld-%ld filter '%s'",
+        timeline_path, from, to, bpf_filter ? bpf_filter : "");
     handle = openTimeline(timeline_path, from, to, bpf_filter);
   }
 
   if (handle != NULL) {
-
     /* Write pcap header */
     Utils::init_pcap_header(&pcaphdr, pfring_get_link_type(handle),
                             pfring_get_caplen(handle));
-    if (!Utils::mg_write_retry(conn, (u_char *)&pcaphdr, sizeof(pcaphdr)))
+    if (!Utils::mg_write_retry(conn, (u_char*)&pcaphdr, sizeof(pcaphdr)))
       http_client_disconnected = true;
 
     /* Write packets */
@@ -246,8 +249,8 @@ bool TimelineExtract::extractLive(struct mg_connection *conn,
       pkthdr.ts.tv_usec = h.ts.tv_usec, pkthdr.caplen = h.caplen;
       pkthdr.len = h.len;
 
-      if (!Utils::mg_write_retry(conn, (u_char *)&pkthdr, sizeof(pkthdr)) ||
-          !Utils::mg_write_retry(conn, (u_char *)packet, h.caplen))
+      if (!Utils::mg_write_retry(conn, (u_char*)&pkthdr, sizeof(pkthdr)) ||
+          !Utils::mg_write_retry(conn, (u_char*)packet, h.caplen))
         http_client_disconnected = true;
 
       stats.packets++;
@@ -256,7 +259,8 @@ bool TimelineExtract::extractLive(struct mg_connection *conn,
 
     pfring_close(handle);
 
-    ntop->getTrace()->traceEvent(TRACE_INFO, "Live extraction completed %s",
+    ntop->getTrace()->traceEvent(
+        TRACE_INFO, "Live extraction completed %s",
         http_client_disconnected ? "(disconnected)" : "");
 
     completed = true;
@@ -271,8 +275,8 @@ bool TimelineExtract::extractLive(struct mg_connection *conn,
 
 /* ********************************************* */
 
-static void *extractionThread(void *ptr) {
-  TimelineExtract *extr = (TimelineExtract *)ptr;
+static void* extractionThread(void* ptr) {
+  TimelineExtract* extr = (TimelineExtract*)ptr;
   char name[16];
 
   snprintf(name, sizeof(name), "extract");
@@ -288,11 +292,11 @@ static void *extractionThread(void *ptr) {
 
 /* ********************************************* */
 
-void TimelineExtract::runExtractionJob(u_int32_t id, NetworkInterface *iface,
+void TimelineExtract::runExtractionJob(u_int32_t id, NetworkInterface* iface,
                                        time_t from, time_t to,
-                                       const char *bpf_filter,
+                                       const char* bpf_filter,
                                        u_int64_t max_bytes,
-                                       const char *timeline_path) {
+                                       const char* timeline_path) {
   running = true;
 
   extraction.id = id;
@@ -303,7 +307,7 @@ void TimelineExtract::runExtractionJob(u_int32_t id, NetworkInterface *iface,
   extraction.max_bytes = max_bytes;
   extraction.timeline_path = timeline_path;
 
-  pthread_create(&extraction_thread, NULL, extractionThread, (void *)this);
+  pthread_create(&extraction_thread, NULL, extractionThread, (void*)this);
 }
 
 /* ********************************************* */
@@ -315,7 +319,7 @@ void TimelineExtract::stopExtractionJob(u_int32_t id) {
 /* ********************************************* */
 
 void TimelineExtract::stop() {
-  void *res;
+  void* res;
 
   shutdown = true;
 
@@ -332,7 +336,7 @@ void TimelineExtract::cleanupJob() {
 
 /* ********************************************* */
 
-void TimelineExtract::getStatus(lua_State *vm) {
+void TimelineExtract::getStatus(lua_State* vm) {
   lua_newtable(vm);
 
   if (extraction.id) {

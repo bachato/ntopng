@@ -28,9 +28,8 @@
 
 class InMemorySQLiteDB : public SQLiteStoreManager {
  private:
-
  public:
-  InMemorySQLiteDB(NetworkInterface *iface);
+  InMemorySQLiteDB(NetworkInterface* iface);
   ~InMemorySQLiteDB();
 };
 

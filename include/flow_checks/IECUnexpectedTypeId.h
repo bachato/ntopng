@@ -31,11 +31,11 @@ class IECUnexpectedTypeId : public FlowCheck {
                   false /* Don't exclude for nEdge */,
                   false /* NOT only for nEdge */,
                   false /* has_protocol_detected */,
-                  false /* has_periodic_update */, false /* has_flow_end */){};
-  ~IECUnexpectedTypeId(){};
+                  false /* has_periodic_update */, false /* has_flow_end */) {};
+  ~IECUnexpectedTypeId() {};
 
   void scriptDisable();
-  bool loadConfiguration(json_object *config);
+  bool loadConfiguration(json_object* config);
 
   std::string getName() const {
     return (std::string("iec_unexpected_type_id"));

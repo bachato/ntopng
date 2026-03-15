@@ -25,8 +25,8 @@
 #include "ntop_includes.h"
 
 class FlowRiskSlowDoSAlert : public FlowRiskAlert {
-private:
-public:
+ private:
+ public:
   static ndpi_risk_enum getClassRisk() { return NDPI_SLOW_DOS; }
   static FlowAlertType getClassType() {
     return FlowRiskAlerts::getFlowRiskAlertType(getClassRisk());
@@ -35,8 +35,10 @@ public:
     return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
   }
 
-  FlowRiskSlowDoSAlert(FlowCheck *c, Flow *f) : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
-  ~FlowRiskSlowDoSAlert(){};
+  FlowRiskSlowDoSAlert(FlowCheck* c, Flow* f) : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskSlowDoSAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
   ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }

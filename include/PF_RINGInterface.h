@@ -30,17 +30,17 @@
 
 class PF_RINGInterface : public NetworkInterface {
  private:
-  pfring *pfring_handle[PF_RING_MAX_SOCKETS];
+  pfring* pfring_handle[PF_RING_MAX_SOCKETS];
   int num_pfring_handles;
   u_int32_t dropped_packets;
   bool merged_interfaces;
   pfring_stat last_pfring_stat;
   void updatePacketsStats();
   u_int32_t getNumDroppedPackets();
-  pfring *pfringSocketInit(const char *name);
+  pfring* pfringSocketInit(const char* name);
 
  public:
-  PF_RINGInterface(const char *name);
+  PF_RINGInterface(const char* name);
   ~PF_RINGInterface();
 
   void singlePacketPollLoop();
@@ -48,13 +48,13 @@ class PF_RINGInterface : public NetworkInterface {
   virtual bool areTrafficDirectionsSupported() { return (true); };
   bool isDiscoverableInterface() { return (!isTrafficMirrored()); };
   virtual InterfaceType getIfType() const { return (interface_type_PF_RING); };
-  virtual const char *get_type() const {
+  virtual const char* get_type() const {
     return (CONST_INTERFACE_TYPE_PF_RING);
   };
   inline int get_num_pfring_handles() { return (num_pfring_handles); };
   void startPacketPolling();
   void shutdown();
-  bool set_packet_filter(char *filter);
+  bool set_packet_filter(char* filter);
 };
 
 #endif /* _PF_RING_NETWORK_INTERFACE_H_ */

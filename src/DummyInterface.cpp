@@ -26,7 +26,8 @@
 /* **************************************************** */
 
 DummyInterface::DummyInterface() : ZMQParserInterface("dummy") {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Initialized dummy interface");
 }
 

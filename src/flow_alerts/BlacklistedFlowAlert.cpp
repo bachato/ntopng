@@ -23,11 +23,12 @@
 
 ndpi_serializer* BlacklistedFlowAlert::getAlertJSON(
     ndpi_serializer* serializer) {
-  Flow *f = getFlow();
+  Flow* f = getFlow();
 
   if (serializer) {
-    ndpi_serialize_string_boolean(serializer, "cat_blacklisted",
-				  f->get_protocol_category() == NDPI_PROTOCOL_CATEGORY_MALWARE);
+    ndpi_serialize_string_boolean(
+        serializer, "cat_blacklisted",
+        f->get_protocol_category() == NDPI_PROTOCOL_CATEGORY_MALWARE);
     ndpi_serialize_string_uint32(serializer, "uid", f->get_hash_entry_id());
   }
 

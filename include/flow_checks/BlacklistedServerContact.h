@@ -27,21 +27,23 @@
 class BlacklistedServerContact : public FlowCheck {
  private:
   u_int8_t score;
-  
+
  public:
   BlacklistedServerContact()
       : FlowCheck(ntopng_edition_community, false /* All interfaces */,
                   false /* Don't exclude for nEdge */,
                   false /* NOT only for nEdge */,
                   true /* has_protocol_detected */,
-                  false /* has_periodic_update */, false /* has_flow_end */){};
-  ~BlacklistedServerContact(){};
+                  false /* has_periodic_update */, false /* has_flow_end */) {};
+  ~BlacklistedServerContact() {};
 
-  bool loadConfiguration(json_object *config);
-  void protocolDetected(Flow *f);
-  FlowAlert *buildAlert(Flow *f);
+  bool loadConfiguration(json_object* config);
+  void protocolDetected(Flow* f);
+  FlowAlert* buildAlert(Flow* f);
 
-  std::string getName() const { return (std::string("blacklisted_server_contact")); }
+  std::string getName() const {
+    return (std::string("blacklisted_server_contact"));
+  }
 };
 
 #endif /* _BLACKLIST_SERVER_CONTACT_H_ */

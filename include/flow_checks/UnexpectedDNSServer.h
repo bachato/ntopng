@@ -31,16 +31,16 @@ class UnexpectedDNSServer : public UnexpectedServer {
   }
 
  protected:
-  bool isAllowedHost(Flow *f);
-  bool isAllowedProto(Flow *f) { return (f->isDNS()); }
-  const IpAddress *getServerIP(Flow *f) { return (f->get_dns_srv_ip_addr()); }
+  bool isAllowedHost(Flow* f);
+  bool isAllowedProto(Flow* f) { return (f->isDNS()); }
+  const IpAddress* getServerIP(Flow* f) { return (f->get_dns_srv_ip_addr()); }
 
  public:
-  UnexpectedDNSServer() : UnexpectedServer(){};
-  ~UnexpectedDNSServer(){};
+  UnexpectedDNSServer() : UnexpectedServer() {};
+  ~UnexpectedDNSServer() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    UnexpectedDNSServerAlert *alert = new UnexpectedDNSServerAlert(this, f);
+  FlowAlert* buildAlert(Flow* f) {
+    UnexpectedDNSServerAlert* alert = new UnexpectedDNSServerAlert(this, f);
     alert->setCliAttacker();
     return alert;
   }

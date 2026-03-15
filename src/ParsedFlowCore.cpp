@@ -24,8 +24,9 @@
 /* *************************************** */
 
 ParsedFlowCore::ParsedFlowCore() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   src_ip.reset(), dst_ip.reset();
   memset(&src_mac, 0, sizeof(src_mac));
   memset(&dst_mac, 0, sizeof(dst_mac));
@@ -54,11 +55,12 @@ ParsedFlowCore::ParsedFlowCore() {
 
 /* *************************************** */
 
-ParsedFlowCore::ParsedFlowCore(const ParsedFlowCore &pfc) {
+ParsedFlowCore::ParsedFlowCore(const ParsedFlowCore& pfc) {
   src_ip.set(&pfc.src_ip), dst_ip.set(&pfc.dst_ip);
   memcpy(&src_mac, &pfc.src_mac, sizeof(src_mac));
   memcpy(&dst_mac, &pfc.dst_mac, sizeof(dst_mac));
-  memcpy(&exporter_device_ipv6, &pfc.exporter_device_ipv6, sizeof(exporter_device_ipv6));
+  memcpy(&exporter_device_ipv6, &pfc.exporter_device_ipv6,
+         sizeof(exporter_device_ipv6));
   version = pfc.version;
   exporter_device_ip = pfc.exporter_device_ip;
   nprobe_ip = pfc.nprobe_ip;
@@ -100,7 +102,7 @@ void ParsedFlowCore::swap() {
   struct timeval tmp_nw_latency;
   u_int32_t tmp_src_as, tmp_prev_adjacent_as;
   u_int16_t tmp_window;
-  
+
   memcpy(&tmp_mac, &src_mac, sizeof(tmp_mac));
   tmp_ip.set(&src_ip);
   tmp_port = src_port, tmp_index = inIndex;
@@ -112,7 +114,7 @@ void ParsedFlowCore::swap() {
   memcpy(&tmp_nw_latency, &tcp.clientNwLatency, sizeof(tcp.clientNwLatency));
   tmp_window = tcp.in_window;
   tmp_src_as = src_as, tmp_prev_adjacent_as = prev_adjacent_as;
- 
+
   memcpy(&src_mac, &dst_mac, sizeof(src_mac));
   src_ip.set(&dst_ip);
   src_port = dst_port, inIndex = outIndex;
@@ -138,4 +140,3 @@ void ParsedFlowCore::swap() {
   tcp.out_window = tmp_window;
   dst_as = tmp_src_as, next_adjacent_as = tmp_prev_adjacent_as;
 }
-

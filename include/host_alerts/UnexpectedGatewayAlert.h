@@ -27,8 +27,9 @@
 class UnexpectedGatewayAlert : public HostAlert {
  private:
   ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
+
  protected:
-  const IpAddress *getServerIP(Flow *f) { return (f->get_dns_srv_ip_addr()); }
+  const IpAddress* getServerIP(Flow* f) { return (f->get_dns_srv_ip_addr()); }
 
  public:
   static HostAlertType getClassType() {
@@ -36,7 +37,7 @@ class UnexpectedGatewayAlert : public HostAlert {
   }
 
   UnexpectedGatewayAlert(HostCheck* c, Host* f, risk_percentage cli_pctg);
-  ~UnexpectedGatewayAlert(){};
+  ~UnexpectedGatewayAlert() {};
 
   HostAlertType getAlertType() const { return getClassType(); }
   u_int8_t getAlertScore() const { return SCORE_LEVEL_ERROR; };

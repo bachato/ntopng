@@ -29,21 +29,21 @@ class IpAddress;
 class AddressTree {
  protected:
   u_int32_t numAddresses, numAddressesIPv4, numAddressesIPv6;
-  ndpi_patricia_tree_t *getPatricia(char *what);
+  ndpi_patricia_tree_t* getPatricia(char* what);
   ndpi_patricia_tree_t *ptree_v4, *ptree_v6;
   std::map<u_int64_t, int64_t> macs;
   ndpi_void_fn_t free_func;
   RwLock updateLock;
 
-  void removePrefix(bool isV4, ndpi_prefix_t *prefix);
-  static void walk(ndpi_patricia_tree_t *ptree, ndpi_void_fn3_t func,
-                   void *const user_data);
-  static bool removePrefix(ndpi_patricia_tree_t *ptree, ndpi_prefix_t *prefix);
+  void removePrefix(bool isV4, ndpi_prefix_t* prefix);
+  static void walk(ndpi_patricia_tree_t* ptree, ndpi_void_fn3_t func,
+                   void* const user_data);
+  static bool removePrefix(ndpi_patricia_tree_t* ptree, ndpi_prefix_t* prefix);
   void cleanup(ndpi_void_fn_t free_func);
 
  public:
   AddressTree(bool handleIPv6 = true, ndpi_void_fn_t data_free_func = NULL);
-  AddressTree(const AddressTree &at, ndpi_void_fn_t data_free_func = NULL);
+  AddressTree(const AddressTree& at, ndpi_void_fn_t data_free_func = NULL);
   virtual ~AddressTree();
 
   void init(bool handleIPv6);
@@ -53,42 +53,42 @@ class AddressTree {
   inline u_int32_t getNumAddressesIPv4() const { return (numAddressesIPv4); }
   inline u_int32_t getNumAddressesIPv6() const { return (numAddressesIPv6); }
 
-  inline bool isEmpty() { return(getNumAddresses() == 0); }
+  inline bool isEmpty() { return (getNumAddresses() == 0); }
 
-  inline ndpi_patricia_tree_t *getTree(bool isV4) const {
+  inline ndpi_patricia_tree_t* getTree(bool isV4) const {
     return (isV4 ? ptree_v4 : ptree_v6);
   }
 
-  bool addAddress(const char *_what, const int64_t user_data = -1);
-  bool addAddressAndData(const char *_what, void *user_data,
-			 bool fail_if_already_present = false);
-  ndpi_patricia_node_t *addAddress(const IpAddress *const ipa);
-  ndpi_patricia_node_t *addAddress(const IpAddress *const ipa, int network_bits,
+  bool addAddress(const char* _what, const int64_t user_data = -1);
+  bool addAddressAndData(const char* _what, void* user_data,
+                         bool fail_if_already_present = false);
+  ndpi_patricia_node_t* addAddress(const IpAddress* const ipa);
+  ndpi_patricia_node_t* addAddress(const IpAddress* const ipa, int network_bits,
                                    bool compact_after_add);
-  bool addAddresses(const char *net, const int64_t user_data = -1);
+  bool addAddresses(const char* net, const int64_t user_data = -1);
 
-  void getAddresses(lua_State *vm);
+  void getAddresses(lua_State* vm);
 
-  int64_t findAddress(int family, void *addr,
-                      u_int8_t *network_mask_bits = NULL);
+  int64_t findAddress(int family, void* addr,
+                      u_int8_t* network_mask_bits = NULL);
   int64_t findMac(const u_int8_t addr[]);
-  int64_t find(const char *addr, u_int8_t *network_mask_bits = NULL);
+  int64_t find(const char* addr, u_int8_t* network_mask_bits = NULL);
 
   /* Return true on match, false otherwise */
-  bool match(char *addr);
+  bool match(char* addr);
   /* Return user data on success, NULL otherwise */
-  void *matchAndGetData(const char *addr);
+  void* matchAndGetData(const char* addr);
   /* Return node on success, NULL otherwise */
-  ndpi_patricia_node_t *matchAndGetNode(const char *addr);
+  ndpi_patricia_node_t* matchAndGetNode(const char* addr);
 
-  ndpi_patricia_node_t *match(IpAddress *ipa, int network_bits);
-  void *matchAndGetData(IpAddress *ipa);
+  ndpi_patricia_node_t* match(IpAddress* ipa, int network_bits);
+  void* matchAndGetData(IpAddress* ipa);
 
   void dump();
-  void walk(ndpi_void_fn3_t func, void *const user_data);
+  void walk(ndpi_void_fn3_t func, void* const user_data);
 
-  char* serialize(char *buf, u_int buf_len);
-  bool  deserialize(char *json);
+  char* serialize(char* buf, u_int buf_len);
+  bool deserialize(char* json);
 };
 
 #endif /* _ADDRESS_TREE_H_ */

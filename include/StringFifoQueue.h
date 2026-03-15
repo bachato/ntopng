@@ -24,26 +24,26 @@
 
 #include "ntop_includes.h"
 
-class StringFifoQueue : public FifoQueue<char *> {
+class StringFifoQueue : public FifoQueue<char*> {
  public:
-  StringFifoQueue(u_int32_t queue_size) : FifoQueue<char *>(queue_size) {}
+  StringFifoQueue(u_int32_t queue_size) : FifoQueue<char*>(queue_size) {}
 
   ~StringFifoQueue() {
     while (!q.empty()) {
-      char *s = q.front();
+      char* s = q.front();
 
       q.pop();
       free(s);
     }
   }
 
-  bool enqueue(char *item) {
+  bool enqueue(char* item) {
     bool rv;
 
     m.lock(__FILE__, __LINE__);
 
     if (canEnqueue()) {
-      char *d = strdup(item);
+      char* d = strdup(item);
 
       if (d) {
         q.push(d);

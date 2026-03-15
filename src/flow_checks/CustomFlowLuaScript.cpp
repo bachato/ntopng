@@ -36,7 +36,7 @@ CustomFlowLuaScript::CustomFlowLuaScript()
 
 /* ***************************************************** */
 
-LuaEngine *CustomFlowLuaScript::initVM(const char *script_path) {
+LuaEngine* CustomFlowLuaScript::initVM(const char* script_path) {
   char where[512];
   struct stat s;
 
@@ -49,16 +49,16 @@ LuaEngine *CustomFlowLuaScript::initVM(const char *script_path) {
         where);
     return (NULL);
   } else {
-    LuaEngine *lua;
+    LuaEngine* lua;
 
     try {
       lua = new LuaEngine();
-      lua->load_script((char *)where,
-		       lua_engine_mode_callback,
-		       NULL /* NetworkInterface filled later via lua->setFlow(f); */);
+      lua->load_script(
+          (char*)where, lua_engine_mode_callback,
+          NULL /* NetworkInterface filled later via lua->setFlow(f); */);
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "Loaded custom user script %s",
                                    where);
-    } catch (std::bad_alloc &ba) {
+    } catch (std::bad_alloc& ba) {
       lua = NULL;
       ntop->getTrace()->traceEvent(TRACE_ERROR,
                                    "Unable to start Lua interpreter.");
@@ -71,10 +71,10 @@ LuaEngine *CustomFlowLuaScript::initVM(const char *script_path) {
 
 CustomFlowLuaScript::~CustomFlowLuaScript() {
   for (int i = 0; i < MAX_NUM_INTERFACE_IDS; i++) {
-    NetworkInterface *iface;
+    NetworkInterface* iface;
 
     if ((iface = ntop->getInterface(i)) != NULL) {
-      LuaEngine *vm;
+      LuaEngine* vm;
 
       vm = iface->getCustomFlowLuaScriptProtoDetected();
 
@@ -106,11 +106,11 @@ CustomFlowLuaScript::~CustomFlowLuaScript() {
 
 /* ***************************************************** */
 
-void CustomFlowLuaScript::protocolDetected(Flow *f) {
+void CustomFlowLuaScript::protocolDetected(Flow* f) {
   if ((f == NULL) || disabled_proto_detected)
     return;
   else {
-    LuaEngine *lua = f->getInterface()->getCustomFlowLuaScriptProtoDetected();
+    LuaEngine* lua = f->getInterface()->getCustomFlowLuaScriptProtoDetected();
 
     if (lua == NULL) {
       lua = initVM(CUSTOM_FLOW_NDPI_SCRIPT);
@@ -127,11 +127,11 @@ void CustomFlowLuaScript::protocolDetected(Flow *f) {
 
 /* ***************************************************** */
 
-void CustomFlowLuaScript::periodicUpdate(Flow *f) {
+void CustomFlowLuaScript::periodicUpdate(Flow* f) {
   if ((f == NULL) || disabled_periodic_update)
     return;
   else {
-    LuaEngine *lua = f->getInterface()->getCustomFlowLuaScriptPeriodic();
+    LuaEngine* lua = f->getInterface()->getCustomFlowLuaScriptPeriodic();
 
     if (lua == NULL) {
       lua = initVM(CUSTOM_FLOW_PERIODIC_SCRIPT);
@@ -148,11 +148,11 @@ void CustomFlowLuaScript::periodicUpdate(Flow *f) {
 
 /* ***************************************************** */
 
-void CustomFlowLuaScript::flowEnd(Flow *f) {
+void CustomFlowLuaScript::flowEnd(Flow* f) {
   if ((f == NULL) || disabled_flow_end)
     return;
   else {
-    LuaEngine *lua = f->getInterface()->getCustomFlowLuaScriptEnd();
+    LuaEngine* lua = f->getInterface()->getCustomFlowLuaScriptEnd();
 
     if (lua == NULL) {
       lua = initVM(CUSTOM_FLOW_END_SCRIPT);
@@ -169,7 +169,7 @@ void CustomFlowLuaScript::flowEnd(Flow *f) {
 
 /* ***************************************************** */
 
-void CustomFlowLuaScript::checkFlow(Flow *f, LuaEngine *lua) {
+void CustomFlowLuaScript::checkFlow(Flow* f, LuaEngine* lua) {
   if (false) {
     char buf[128];
 
@@ -184,10 +184,11 @@ void CustomFlowLuaScript::checkFlow(Flow *f, LuaEngine *lua) {
     u_int8_t c_score, s_score;
     risk_percentage cli_score_pctg = CLIENT_FAIR_RISK_PERCENTAGE;
 
-    FlowAlert *alert = buildAlert(f);
+    FlowAlert* alert = buildAlert(f);
 
     if (alert) {
-      computeCliSrvScore(alert->getAlertScore(), cli_score_pctg, &c_score, &s_score);
+      computeCliSrvScore(alert->getAlertScore(), cli_score_pctg, &c_score,
+                         &s_score);
       alert->setCliSrvScores(c_score, s_score);
       f->triggerAlert(alert);
     }
@@ -196,8 +197,8 @@ void CustomFlowLuaScript::checkFlow(Flow *f, LuaEngine *lua) {
 
 /* ***************************************************** */
 
-FlowAlert *CustomFlowLuaScript::buildAlert(Flow *f) {
-  CustomFlowLuaScriptAlert *alert =
+FlowAlert* CustomFlowLuaScript::buildAlert(Flow* f) {
+  CustomFlowLuaScriptAlert* alert =
       new (std::nothrow) CustomFlowLuaScriptAlert(this, f);
 
   if (alert) {
@@ -223,7 +224,7 @@ FlowAlert *CustomFlowLuaScript::buildAlert(Flow *f) {
   }
 */
 
-bool CustomFlowLuaScript::loadConfiguration(json_object *config) {
+bool CustomFlowLuaScript::loadConfiguration(json_object* config) {
   FlowCheck::loadConfiguration(config); /* Parse parameters in common */
 
   /* Parse additional parameters */

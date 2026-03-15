@@ -33,28 +33,28 @@ class ParsedeBPF {
   ContainerInfo src_container_info, dst_container_info;
   TcpInfo src_tcp_info, dst_tcp_info;
   eBPFEventType event_type;
-  char *ifname;
+  char* ifname;
   bool process_info_set, container_info_set, tcp_info_set;
 
   ParsedeBPF();
-  ParsedeBPF(const ParsedeBPF &pe, bool swap_directions);
+  ParsedeBPF(const ParsedeBPF& pe, bool swap_directions);
   virtual ~ParsedeBPF();
 
   inline void swap() { server_info = !server_info; };
 
-  bool update(const ParsedeBPF *const pe);
+  bool update(const ParsedeBPF* const pe);
   bool isServerInfo() const;
   void print();
 
-  void getJSONObject(json_object *my_object) const;
-  void getProcessInfoJSONObject(const ProcessInfo *proc,
-                                json_object *proc_object) const;
-  void getContainerInfoJSONObject(const ContainerInfo *cont,
-                                  json_object *proc_object) const;
-  void getTCPInfoJSONObject(const TcpInfo *tcp, json_object *proc_object) const;
+  void getJSONObject(json_object* my_object) const;
+  void getProcessInfoJSONObject(const ProcessInfo* proc,
+                                json_object* proc_object) const;
+  void getContainerInfoJSONObject(const ContainerInfo* cont,
+                                  json_object* proc_object) const;
+  void getTCPInfoJSONObject(const TcpInfo* tcp, json_object* proc_object) const;
 
-  void lua(lua_State *vm) const;
-  void processInfoLua(lua_State *vm, const ProcessInfo *proc) const;
+  void lua(lua_State* vm) const;
+  void processInfoLua(lua_State* vm, const ProcessInfo* proc) const;
 };
 
 #endif /* _PARSED_EBPF_H_ */

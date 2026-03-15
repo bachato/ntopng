@@ -24,8 +24,9 @@
 /* **************************************************** */
 
 Paginator::Paginator() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   /* char* */
   sort_column = strdup("column_thpt");
   country_filter = NULL;
@@ -178,12 +179,12 @@ void Paginator::readOptions(lua_State* L, int index) {
           else
             tcp_flow_state_filter = tcp_flow_state_filter_all;
         } else if (!strcmp(key, "transitAS")) {
-          const char* value = lua_tostring(L, -1);            
+          const char* value = lua_tostring(L, -1);
           if (!strcmp(value, "direct"))
             transit_as = direct_flow;
           else if (!strcmp(value, "transit"))
             transit_as = transit_flow;
-          else 
+          else
             transit_as = all_flow;
         } else if (!strcmp(key, "detailsLevel")) {
           const char* value = lua_tostring(L, -1);
@@ -253,11 +254,11 @@ void Paginator::readOptions(lua_State* L, int index) {
         else if (!strcmp(key, "icmp_code"))
           icmp_code = lua_tointeger(L, -1);
         else if (!strcmp(key, "dscpFilter"))
-            dscp_filter = lua_tointeger(L, -1);
-    #ifdef NTOPNG_PRO
+          dscp_filter = lua_tointeger(L, -1);
+#ifdef NTOPNG_PRO
         else if (!strcmp(key, "qoeFilter"))
-            qoe_filter = lua_tointeger(L, -1);
-    #endif
+          qoe_filter = lua_tointeger(L, -1);
+#endif
         else if (!strcmp(key, "ifaceIndex"))
           iface_index_filter = lua_tointeger(L, -1);
         else if (!strcmp(key, "statusFilter"))
@@ -265,7 +266,7 @@ void Paginator::readOptions(lua_State* L, int index) {
         else if (!strcmp(key, "statusSeverityFilter"))
           alert_type_severity_filter = (AlertLevelGroup)lua_tointeger(L, -1);
         else if (!strcmp(key, "interfaceRole"))
-          interface_role = (SNMPInterfaceRole) lua_tointeger(L, -1);
+          interface_role = (SNMPInterfaceRole)lua_tointeger(L, -1);
         // else
         // ntop->getTrace()->traceEvent(TRACE_ERROR, "Invalid int type (%d) for
         // option %s", lua_tointeger(L, -1), key);

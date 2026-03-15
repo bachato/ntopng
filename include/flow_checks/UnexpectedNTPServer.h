@@ -31,15 +31,15 @@ class UnexpectedNTPServer : public UnexpectedServer {
   }
 
  protected:
-  bool isAllowedHost(Flow *f);
-  bool isAllowedProto(Flow *f) { return (f->isNTP()); }
+  bool isAllowedHost(Flow* f);
+  bool isAllowedProto(Flow* f) { return (f->isNTP()); }
 
  public:
-  UnexpectedNTPServer() : UnexpectedServer(){};
-  ~UnexpectedNTPServer(){};
+  UnexpectedNTPServer() : UnexpectedServer() {};
+  ~UnexpectedNTPServer() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    UnexpectedNTPServerAlert *alert = new UnexpectedNTPServerAlert(this, f);
+  FlowAlert* buildAlert(Flow* f) {
+    UnexpectedNTPServerAlert* alert = new UnexpectedNTPServerAlert(this, f);
     alert->setCliAttacker();
     return alert;
   }

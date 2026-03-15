@@ -42,7 +42,7 @@
 extern "C" {
 #endif
 #include <getopt.h> /* getopt from: http://www.pwilson.net/sample.html. */
-const char *win_inet_ntop(int af, const void *src, char *dst, socklen_t size);
+const char* win_inet_ntop(int af, const void* src, char* dst, socklen_t size);
 #ifdef __cplusplus
 }
 #endif
@@ -82,28 +82,28 @@ typedef int mode_t;
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern int pthread_create(pthread_t *threadId, void *notUsed,
-                          void *(*__start_routine)(void *), void *userParm);
-extern void pthread_detach(pthread_t *threadId);
-extern int pthread_join(pthread_t thread, void **value_ptr);
+extern int pthread_create(pthread_t* threadId, void* notUsed,
+                          void* (*__start_routine)(void*), void* userParm);
+extern void pthread_detach(pthread_t* threadId);
+extern int pthread_join(pthread_t thread, void** value_ptr);
 extern pthread_t pthread_self(void);
-extern int pthread_mutex_lock(pthread_mutex_t *);
-extern int pthread_mutex_unlock(pthread_mutex_t *);
-extern int pthread_mutex_init(pthread_mutex_t *mutex, void *unused);
-extern void pthread_mutex_destroy(pthread_mutex_t *mutex);
-extern int pthread_mutex_timedlock(pthread_mutex_t *mutex,
-                                   const struct timespec *w);
-extern int pthread_cond_init(pthread_cond_t *cv, const void *unused);
-extern int pthread_cond_wait(pthread_cond_t *cv, pthread_mutex_t *mutex);
-extern int pthread_cond_timedwait(pthread_cond_t *cv, pthread_mutex_t *mutex,
-                                  const struct timespec *abstime);
-extern int pthread_cond_signal(pthread_cond_t *cv);
-extern int pthread_cond_broadcast(pthread_cond_t *cv);
-extern int pthread_cond_destroy(pthread_cond_t *cv);
+extern int pthread_mutex_lock(pthread_mutex_t*);
+extern int pthread_mutex_unlock(pthread_mutex_t*);
+extern int pthread_mutex_init(pthread_mutex_t* mutex, void* unused);
+extern void pthread_mutex_destroy(pthread_mutex_t* mutex);
+extern int pthread_mutex_timedlock(pthread_mutex_t* mutex,
+                                   const struct timespec* w);
+extern int pthread_cond_init(pthread_cond_t* cv, const void* unused);
+extern int pthread_cond_wait(pthread_cond_t* cv, pthread_mutex_t* mutex);
+extern int pthread_cond_timedwait(pthread_cond_t* cv, pthread_mutex_t* mutex,
+                                  const struct timespec* abstime);
+extern int pthread_cond_signal(pthread_cond_t* cv);
+extern int pthread_cond_broadcast(pthread_cond_t* cv);
+extern int pthread_cond_destroy(pthread_cond_t* cv);
 
-extern int gettimeofday(struct timeval *tp, struct timezone *tzp);
-extern char *strtok_r(char *s, const char *delim, char **save_ptr);
-extern int win_inet_pton(int af, const char *src, void *dst);
+extern int gettimeofday(struct timeval* tp, struct timezone* tzp);
+extern char* strtok_r(char* s, const char* delim, char** save_ptr);
+extern int win_inet_pton(int af, const char* src, void* dst);
 extern void win_usleep(__int64 usec);
 #ifdef __cplusplus
 }
@@ -144,12 +144,12 @@ typedef struct DIR {
   char dir_path[MAX_PATH];
 } DIR;
 
-extern int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result);
-extern struct dirent *readdir(DIR *dir);
-extern int closedir(DIR *dir);
-extern DIR *opendir(const char *name);
+extern int readdir_r(DIR* dirp, struct dirent* entry, struct dirent** result);
+extern struct dirent* readdir(DIR* dir);
+extern int closedir(DIR* dir);
+extern DIR* opendir(const char* name);
 
-extern void get_serial(unsigned long *driveSerial);
+extern void get_serial(unsigned long* driveSerial);
 
 /* getopt.h */
 #define __GNU_LIBRARY__ 1
@@ -225,11 +225,11 @@ struct ip6_ext {
 };
 
 #ifndef S_ISDIR
-#define S_ISDIR(mode) (((mode)&S_IFMT) == S_IFDIR)
+#define S_ISDIR(mode) (((mode) & S_IFMT) == S_IFDIR)
 #endif
 
 #ifndef S_ISREG
-#define S_ISREG(mode) (((mode)&S_IFMT) == S_IFREG)
+#define S_ISREG(mode) (((mode) & S_IFMT) == S_IFREG)
 #endif
 
 #ifndef ssize_t
@@ -243,12 +243,12 @@ extern "C" {
 #endif
 extern unsigned int sleep(unsigned int seconds);
 extern void usleep(__int64 usec);
-extern int inet_aton(const char *cp, struct in_addr *addr);
-extern char *strndup(const char *string, size_t s);
-const char *strcasestr(const char *haystack, const char *needle);
-char *strptime(const char *buf, const char *format, struct tm *tm);
+extern int inet_aton(const char* cp, struct in_addr* addr);
+extern char* strndup(const char* string, size_t s);
+const char* strcasestr(const char* haystack, const char* needle);
+char* strptime(const char* buf, const char* format, struct tm* tm);
 // extern int inet_pton(int af, const char *src, void *dst);
-char *getWindowsTimezone();
+char* getWindowsTimezone();
 #ifdef __cplusplus
 };
 #endif

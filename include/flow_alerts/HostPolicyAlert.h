@@ -27,7 +27,7 @@
 class HostPolicyAlert : public FlowAlert {
  private:
   HostPolicyAlertReason reason;
-  ndpi_serializer *getAlertJSON(ndpi_serializer *serializer);
+  ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
 
  public:
   static FlowAlertType getClassType() {
@@ -35,11 +35,13 @@ class HostPolicyAlert : public FlowAlert {
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_CRITICAL; };
 
-  HostPolicyAlert(FlowCheck *c, Flow *f) : FlowAlert(c, f){ setAlertScore(getDefaultScore()); };
-  ~HostPolicyAlert(){};
+  HostPolicyAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~HostPolicyAlert() {};
 
   void setReason(HostPolicyAlertReason r) { reason = r; }
-  FlowAlertType getAlertType() const      { return getClassType(); }
+  FlowAlertType getAlertType() const { return getClassType(); }
 };
 
 #endif /* _HOST_POLICY_ALERT_H_ */

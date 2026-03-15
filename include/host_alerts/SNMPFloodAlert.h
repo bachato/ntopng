@@ -31,10 +31,10 @@ class SNMPFloodAlert : public FlowHitsAlert {
     return {host_alert_snmp_flood, alert_category_security};
   }
 
-  SNMPFloodAlert(HostCheck *c, Host *h, risk_percentage cli_pctg,
+  SNMPFloodAlert(HostCheck* c, Host* h, risk_percentage cli_pctg,
                  u_int16_t hits, u_int64_t threshold, bool is_attacker)
-      : FlowHitsAlert(c, h, cli_pctg, hits, threshold, is_attacker){};
-  ~SNMPFloodAlert(){};
+      : FlowHitsAlert(c, h, cli_pctg, hits, threshold, is_attacker) {};
+  ~SNMPFloodAlert() {};
 
   HostAlertType getAlertType() const { return getClassType(); }
 };

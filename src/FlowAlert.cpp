@@ -23,8 +23,9 @@
 
 /* **************************************************** */
 
-FlowAlert::FlowAlert(FlowCheck *c, Flow *f) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+FlowAlert::FlowAlert(FlowCheck* c, Flow* f) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   flow = f;
   cli_attacker = srv_attacker = false;
   cli_victim = srv_victim = false;
@@ -38,16 +39,17 @@ FlowAlert::FlowAlert(FlowCheck *c, Flow *f) {
 /* **************************************************** */
 
 FlowAlert::~FlowAlert() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
   if (json_alert) free(json_alert);
 }
 
 /* ***************************************************** */
 
-const char *FlowAlert::getSerializedAlert() {
+const char* FlowAlert::getSerializedAlert() {
   ndpi_serializer serializer;
-  char *json;
-  u_int32_t json_len; 
+  char* json;
+  u_int32_t json_len;
 
   if (refresh_json_alert) {
     if (json_alert) {
@@ -56,14 +58,14 @@ const char *FlowAlert::getSerializedAlert() {
     }
   }
 
-  if (json_alert)
-    return json_alert;
- 
+  if (json_alert) return json_alert;
+
   if (ndpi_init_serializer(&serializer, ndpi_serialization_format_json) == -1)
     return NULL;
 
   ndpi_serialize_start_of_block(&serializer, "alert_generation");
-  ndpi_serialize_string_string(&serializer, "script_key", getCheckName().c_str());
+  ndpi_serialize_string_string(&serializer, "script_key",
+                               getCheckName().c_str());
   ndpi_serialize_string_string(&serializer, "subdir", "flow");
   ndpi_serialize_end_of_block(&serializer);
 
@@ -73,8 +75,7 @@ const char *FlowAlert::getSerializedAlert() {
 
   json = ndpi_serializer_get_buffer(&serializer, &json_len);
 
-  if (json)
-    json_alert = strdup(json);
+  if (json) json_alert = strdup(json);
 
   ndpi_term_serializer(&serializer);
 

@@ -28,8 +28,8 @@ class FlowRisk : public FlowCheck {
  private:
   virtual FlowAlertType getAlertType() const = 0;
 
-  bool ignoreRisk(Flow *f, ndpi_risk_enum r);
-  void checkRisk(Flow *f);
+  bool ignoreRisk(Flow* f, ndpi_risk_enum r);
+  void checkRisk(Flow* f);
 
  public:
   FlowRisk(bool check_on_flow_end = false)
@@ -37,17 +37,19 @@ class FlowRisk : public FlowCheck {
                   false /* Don't exclude for nEdge */,
                   false /* NOT only for nEdge */,
                   !check_on_flow_end /* has_protocol_detected */,
-                  false /* has_periodic_update */, check_on_flow_end /* has_flow_end */){};
+                  false /* has_periodic_update */,
+                  check_on_flow_end /* has_flow_end */) {};
   FlowRisk(NtopngEdition _edition, bool check_on_flow_end = false)
       : FlowCheck(_edition, false /* All interfaces */,
                   false /* Don't exclude for nEdge */,
                   false /* NOT only for nEdge */,
                   !check_on_flow_end /* has_protocol_detected */,
-                  false /* has_periodic_update */, check_on_flow_end /* has_flow_end */){};
-  ~FlowRisk(){};
+                  false /* has_periodic_update */,
+                  check_on_flow_end /* has_flow_end */) {};
+  ~FlowRisk() {};
   virtual ndpi_risk_enum handledRisk() { return NDPI_NO_RISK; };
-  void protocolDetected(Flow *f);
-  void flowEnd(Flow *f);
+  void protocolDetected(Flow* f);
+  void flowEnd(Flow* f);
 };
 
 #endif /* _FLOW_RISK_H_ */

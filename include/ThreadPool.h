@@ -29,31 +29,31 @@ class ThreadPool {
   u_int16_t num_threads;
   bool terminating;
   pthread_cond_t condvar;
-  Mutex *m;
+  Mutex* m;
 #ifdef __linux__
   cpu_set_t affinity_mask;
 #endif
 
   std::vector<pthread_t> threadsState;
-  std::queue<QueuedThreadData *> threads;
+  std::queue<QueuedThreadData*> threads;
 
-  QueuedThreadData *dequeueJob(bool waitIfEmpty);
+  QueuedThreadData* dequeueJob(bool waitIfEmpty);
 
   /* Creates and starts a new pool thread */
   bool spawn();
   bool isQueueable(ThreadedActivityState cur_state);
 
  public:
-  ThreadPool(char *comma_separated_affinity_mask = NULL);
+  ThreadPool(char* comma_separated_affinity_mask = NULL);
   virtual ~ThreadPool();
 
   void shutdown();
   inline bool isTerminating() { return terminating; };
 
   void run();
-  bool queueJob(ThreadedActivity *ta, char *path, NetworkInterface *iface,
-                time_t scheduled_time, time_t deadline, PeriodicActivities *pa,
-		bool hourly_daily_activity);
+  bool queueJob(ThreadedActivity* ta, char* path, NetworkInterface* iface,
+                time_t scheduled_time, time_t deadline, PeriodicActivities* pa,
+                bool hourly_daily_activity);
 };
 
 #endif /* _THREAD_POOL_H_ */

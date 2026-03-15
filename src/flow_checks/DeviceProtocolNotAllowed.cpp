@@ -22,7 +22,7 @@
 #include "ntop_includes.h"
 #include "flow_checks_includes.h"
 
-void DeviceProtocolNotAllowed::protocolDetected(Flow *f) {
+void DeviceProtocolNotAllowed::protocolDetected(Flow* f) {
   if (!f->isDeviceAllowedProtocol()) {
     FlowAlertType alert_type = DeviceProtocolNotAllowedAlert::getClassType();
     u_int8_t c_score, s_score;
@@ -33,9 +33,10 @@ void DeviceProtocolNotAllowed::protocolDetected(Flow *f) {
     else
       cli_score_pctg = CLIENT_LOW_RISK_PERCENTAGE;
 
-    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
+    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg,
+                       &c_score, &s_score);
 
-    FlowAlert *alert = buildAlert(f);
+    FlowAlert* alert = buildAlert(f);
     alert->setCliSrvScores(c_score, s_score);
     f->triggerAlert(alert);
   }
@@ -43,8 +44,8 @@ void DeviceProtocolNotAllowed::protocolDetected(Flow *f) {
 
 /* ***************************************************** */
 
-FlowAlert *DeviceProtocolNotAllowed::buildAlert(Flow *f) {
-  DeviceProtocolNotAllowedAlert *alert =
+FlowAlert* DeviceProtocolNotAllowed::buildAlert(Flow* f) {
+  DeviceProtocolNotAllowedAlert* alert =
       new (std::nothrow) DeviceProtocolNotAllowedAlert(this, f);
 
   if (alert) {

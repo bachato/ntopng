@@ -24,18 +24,16 @@
 /* *************************************** */
 
 ServerPortsBitmap::ServerPortsBitmap() {
-  if((tcp_bitmap = ndpi_bitmap_alloc()) == NULL)
-    throw("Out of memory");
+  if ((tcp_bitmap = ndpi_bitmap_alloc()) == NULL) throw("Out of memory");
 
-  if((udp_bitmap = ndpi_bitmap_alloc()) == NULL)
-    throw("Out of memory");
+  if ((udp_bitmap = ndpi_bitmap_alloc()) == NULL) throw("Out of memory");
 }
 
 /* *************************************** */
 
 ServerPortsBitmap::~ServerPortsBitmap() {
-  if(tcp_bitmap) ndpi_bitmap_free(tcp_bitmap);
-  if(udp_bitmap) ndpi_bitmap_free(udp_bitmap);
+  if (tcp_bitmap) ndpi_bitmap_free(tcp_bitmap);
+  if (udp_bitmap) ndpi_bitmap_free(udp_bitmap);
 }
 
 /* *************************************** */
@@ -44,27 +42,30 @@ const char* ServerPortsBitmap::bitmap_serialize(ndpi_bitmap* port_bitmap) {
   char *buf, *ret;
   size_t len = ndpi_bitmap_serialize(port_bitmap, &buf);
 
-  if(buf != NULL) {
+  if (buf != NULL) {
     ret = ndpi_base64_encode((const u_char*)buf, len);
     ndpi_free(buf);
-    return(ret);
+    return (ret);
   } else
-    return(NULL);
+    return (NULL);
 }
 
 /* *************************************** */
 
-void ServerPortsBitmap::bitmap_deserialize(const char* tcp_str, const char* udp_str) {
+void ServerPortsBitmap::bitmap_deserialize(const char* tcp_str,
+                                           const char* udp_str) {
   size_t tcp_bitmap_len, udp_bitmap_len;
   u_char *tcp_bitmap_str, *udp_bitmap_str;
 
-  if((tcp_bitmap_str = ndpi_base64_decode((const u_char*)tcp_str, strlen(tcp_str), &tcp_bitmap_len)) != NULL) {
+  if ((tcp_bitmap_str = ndpi_base64_decode(
+           (const u_char*)tcp_str, strlen(tcp_str), &tcp_bitmap_len)) != NULL) {
     ndpi_bitmap_free(tcp_bitmap); /* Free the old bitmap */
     tcp_bitmap = ndpi_bitmap_deserialize((char*)tcp_bitmap_str, tcp_bitmap_len);
     free(tcp_bitmap_str);
   }
 
-  if((udp_bitmap_str = ndpi_base64_decode((const u_char*)udp_str, strlen(udp_str), &udp_bitmap_len)) != NULL) {
+  if ((udp_bitmap_str = ndpi_base64_decode(
+           (const u_char*)udp_str, strlen(udp_str), &udp_bitmap_len)) != NULL) {
     ndpi_bitmap_free(udp_bitmap); /* Free the old bitmap */
     udp_bitmap = ndpi_bitmap_deserialize((char*)udp_bitmap_str, udp_bitmap_len);
     free(udp_bitmap_str);
@@ -77,20 +78,20 @@ const char* ServerPortsBitmap::serializer() {
   const char *bitmap_str_tcp, *bitmap_str_udp;
   ndpi_serializer serializer;
   u_int32_t buflen;
-  const char *ser;
+  const char* ser;
 
   if (ndpi_init_serializer(&serializer, ndpi_serialization_format_json) == -1) {
     return NULL;
   }
 
   bitmap_str_tcp = bitmap_serialize(tcp_bitmap);
-  if(bitmap_str_tcp != NULL) {
+  if (bitmap_str_tcp != NULL) {
     ndpi_serialize_string_string(&serializer, "tcp", bitmap_str_tcp);
     ndpi_free((void*)bitmap_str_tcp);
   }
 
   bitmap_str_udp = bitmap_serialize(udp_bitmap);
-  if(bitmap_str_udp != NULL) {
+  if (bitmap_str_udp != NULL) {
     ndpi_serialize_string_string(&serializer, "udp", bitmap_str_udp);
     ndpi_free((void*)bitmap_str_udp);
   }
@@ -99,7 +100,7 @@ const char* ServerPortsBitmap::serializer() {
 
   ndpi_term_serializer(&serializer);
 
-  return(ser);
+  return (ser);
 }
 
 /* *************************************** */
@@ -114,8 +115,8 @@ bool ServerPortsBitmap::deserializer(const char* json_str) {
   const char* bitmap_str_tcp;
   const char* bitmap_str_udp;
 
-  if(json_object_object_get_ex(json_obj, "tcp", &tcp_str) &&
-          json_object_object_get_ex(json_obj, "udp", &udp_str)) {
+  if (json_object_object_get_ex(json_obj, "tcp", &tcp_str) &&
+      json_object_object_get_ex(json_obj, "udp", &udp_str)) {
     bitmap_str_tcp = json_object_get_string(tcp_str);
     bitmap_str_udp = json_object_get_string(udp_str);
   } else

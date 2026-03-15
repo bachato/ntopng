@@ -31,10 +31,10 @@ class FlowRiskRiskyDomain : public FlowRisk {
   }
 
  public:
-  FlowRiskRiskyDomain(){};
-  ~FlowRiskRiskyDomain(){};
+  FlowRiskRiskyDomain() {};
+  ~FlowRiskRiskyDomain() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskRiskyDomainAlert(this, f);
   }
 

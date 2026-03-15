@@ -34,8 +34,10 @@ class RemoteAccessAlert : public FlowAlert {
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_NOTICE; };
 
-  RemoteAccessAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-  ~RemoteAccessAlert(){};
+  RemoteAccessAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~RemoteAccessAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
 };

@@ -30,27 +30,27 @@ class MostVisitedList {
   u_int8_t current_cycle;
   u_int32_t max_num_items;
 
-  FrequentStringItems *top_data;
+  FrequentStringItems* top_data;
   char *old_data, *shadow_old_data;
 
-  void getCurrentTime(struct tm *t_now);
-  void deserializeTopData(char *redis_key_current);
+  void getCurrentTime(struct tm* t_now);
+  void deserializeTopData(char* redis_key_current);
 
  public:
   MostVisitedList(u_int32_t _max_num_items);
   ~MostVisitedList();
 
-  void resetTopSitesData(u_int32_t iface_id, char *extra_info, char *hashkey);
-  void saveOldData(u_int32_t iface_id, char *additional_key_info,
-                   char *hashkey);
+  void resetTopSitesData(u_int32_t iface_id, char* extra_info, char* hashkey);
+  void saveOldData(u_int32_t iface_id, char* additional_key_info,
+                   char* hashkey);
   void serializeDeserialize(u_int32_t iface_id, bool do_serialize,
-                            char *extra_info, char *info_subject,
-                            char *hour_hashkey, char *day_hashkey);
-  void lua(lua_State *vm, char *name, char *old_name);
+                            char* extra_info, char* info_subject,
+                            char* hour_hashkey, char* day_hashkey);
+  void lua(lua_State* vm, char* name, char* old_name);
   void clear() {
     if (top_data) top_data->clear();
   }
-  inline void incrVisitedData(char *data, u_int32_t num) {
+  inline void incrVisitedData(char* data, u_int32_t num) {
     if (top_data) top_data->add(data, num);
   };
 };

@@ -31,11 +31,11 @@ class FlowRiskNumericIPHost : public FlowRisk {
   };
 
  public:
-  FlowRiskNumericIPHost() : FlowRisk(){};
-  ~FlowRiskNumericIPHost(){};
+  FlowRiskNumericIPHost() : FlowRisk() {};
+  ~FlowRiskNumericIPHost() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    FlowRiskNumericIPHostAlert *alert = new FlowRiskNumericIPHostAlert(this, f);
+  FlowAlert* buildAlert(Flow* f) {
+    FlowRiskNumericIPHostAlert* alert = new FlowRiskNumericIPHostAlert(this, f);
 
     alert->setCliAttacker(), alert->setSrvVictim();
 

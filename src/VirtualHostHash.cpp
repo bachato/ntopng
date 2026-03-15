@@ -23,31 +23,32 @@
 
 /* *********************************************************** */
 
-VirtualHostHash::VirtualHostHash(NetworkInterface *_iface, u_int _num_hashes,
+VirtualHostHash::VirtualHostHash(NetworkInterface* _iface, u_int _num_hashes,
                                  u_int _max_hash_size)
     : GenericHash(_iface, _num_hashes, _max_hash_size, "VirtualHostHash") {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 }
 
 /* *********************************************************** */
 
-VirtualHost *VirtualHostHash::get(char *vhost_name) {
+VirtualHost* VirtualHostHash::get(char* vhost_name) {
   u_int32_t hash = Utils::hashString(vhost_name) % num_hashes;
 
   if (table[hash] == NULL) {
     return (NULL);
   } else {
-    VirtualHost *head;
+    VirtualHost* head;
 
     locks[hash]->wrlock(__FILE__, __LINE__);
-    head = (VirtualHost *)table[hash];
+    head = (VirtualHost*)table[hash];
 
     while (head != NULL) {
       if ((!head->idle()) && head->get_name() &&
           (strcmp(vhost_name, head->get_name()) == 0))
         break;
       else
-        head = (VirtualHost *)head->next();
+        head = (VirtualHost*)head->next();
     }
     locks[hash]->unlock(__FILE__, __LINE__);
 

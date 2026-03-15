@@ -22,7 +22,7 @@
 #include "ntop_includes.h"
 
 typedef struct _activity_descr {
-  const char *path;
+  const char* path;
   u_int32_t periodicity;
   u_int32_t max_duration_secs;
   bool align_to_localtime;
@@ -45,8 +45,9 @@ static activity_descr ad[] = {
 /* ******************************************* */
 
 PeriodicActivities::PeriodicActivities() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   num_sec_min_activities = num_hour_day_activities = 0;
 
   th_pool = new ThreadPool();
@@ -57,34 +58,38 @@ PeriodicActivities::PeriodicActivities() {
 /* ******************************************* */
 
 PeriodicActivities::~PeriodicActivities() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+
   delete th_pool;
 
-  /* Now it's safe to delete the activities as no other thread is executing their code. */
+  /* Now it's safe to delete the activities as no other thread is executing
+   * their code. */
   for (u_int16_t i = 0; i < num_sec_min_activities; i++)
-    delete sec_min_activities[i]; /* This line calls ThreadedActivity::~ThreadedActivity() */
+    delete sec_min_activities[i]; /* This line calls
+                                     ThreadedActivity::~ThreadedActivity() */
 
   for (u_int16_t i = 0; i < num_hour_day_activities; i++)
-    delete hour_day_activities[i]; /* This line calls ThreadedActivity::~ThreadedActivity() */
+    delete hour_day_activities[i]; /* This line calls
+                                      ThreadedActivity::~ThreadedActivity() */
 }
 
 /* ******************************************* */
 
-void PeriodicActivities::lua(NetworkInterface *iface, lua_State *vm) {
+void PeriodicActivities::lua(NetworkInterface* iface, lua_State* vm) {
   for (u_int16_t i = 0; i < num_sec_min_activities; i++)
-    sec_min_activities[i]->lua(iface, vm);  
-  
+    sec_min_activities[i]->lua(iface, vm);
+
   for (u_int16_t i = 0; i < num_hour_day_activities; i++)
-    hour_day_activities[i]->lua(iface, vm);      
+    hour_day_activities[i]->lua(iface, vm);
 }
 
 /* **************************************************** */
 
-static void *startActivity(void *ptr) {
+static void* startActivity(void* ptr) {
   ntop->registerThread("periodic", pthread_self());
 
-  ((PeriodicActivities *)ptr)->run();
+  ((PeriodicActivities*)ptr)->run();
 
   return (NULL);
 }
@@ -93,32 +98,33 @@ static void *startActivity(void *ptr) {
 
 /* This is the main infinite loop */
 void PeriodicActivities::run() {
-  while (!(ntop->getGlobals()->isShutdownRequested()
-	   || ntop->getGlobals()->isShutdown())) {
+  while (!(ntop->getGlobals()->isShutdownRequested() ||
+           ntop->getGlobals()->isShutdown())) {
     u_int32_t now = (u_int32_t)time(NULL);
 
     for (u_int16_t i = 0; i < num_sec_min_activities; i++)
       sec_min_activities[i]->schedule(this, now, false);
 
-    //if(num_running_hour_day_activities == 0) {
+    // if(num_running_hour_day_activities == 0) {
     /* At most only one concurrent activity */
     for (u_int16_t i = 0; i < num_hour_day_activities; i++)
-	    hour_day_activities[i]->schedule(this, now, true);
+      hour_day_activities[i]->schedule(this, now, true);
     //}
-    
+
     sleep(1);
   }
 
   thread_running = false;
 
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Terminated periodic activites...");
+  ntop->getTrace()->traceEvent(TRACE_NORMAL,
+                               "Terminated periodic activites...");
 }
 
 /* ******************************************* */
 
 void PeriodicActivities::startPeriodicActivitiesLoop() {
   struct stat buf;
-  ThreadedActivity *startup_activity;
+  ThreadedActivity* startup_activity;
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL,
                                "Started periodic activities loop...");
@@ -130,13 +136,15 @@ void PeriodicActivities::startPeriodicActivitiesLoop() {
     ntop->getTrace()->traceEvent(TRACE_ERROR,
                                  "The current user cannot access %s.",
                                  ntop->get_callbacks_dir());
-    ntop->getTrace()->traceEvent(TRACE_ERROR,
-				 "Please fix the directory right or add --dont-change-user to");
+    ntop->getTrace()->traceEvent(
+        TRACE_ERROR,
+        "Please fix the directory right or add --dont-change-user to");
     ntop->getTrace()->traceEvent(TRACE_ERROR, "the ntopng command line.");
     exit(0);
   }
 
-  if ((startup_activity = new (std::nothrow) ThreadedActivity(STARTUP_SCRIPT_PATH))) {
+  if ((startup_activity =
+           new (std::nothrow) ThreadedActivity(STARTUP_SCRIPT_PATH))) {
     /*
       Don't call run() as by the time the script will be run
       the delete below will free the memory
@@ -147,7 +155,7 @@ void PeriodicActivities::startPeriodicActivitiesLoop() {
   }
 
   for (u_int i = 0; ad[i].path != NULL; i++) {
-    ThreadedActivity *ta;
+    ThreadedActivity* ta;
 
     if (ad[i].periodicity == 0) {
       ntop->getTrace()->traceEvent(TRACE_WARNING, "Skipping %s: 0 periodicity",
@@ -155,46 +163,50 @@ void PeriodicActivities::startPeriodicActivitiesLoop() {
       continue;
     }
 
-    ta = new (std::nothrow) ThreadedActivity(ad[i].path, false, /* Exact */
-					     ad[i].periodicity, ad[i].max_duration_secs, ad[i].align_to_localtime,
-					     ad[i].exclude_viewed_interfaces, ad[i].exclude_pcap_dump_interfaces,
-					     th_pool);
+    ta = new (std::nothrow) ThreadedActivity(
+        ad[i].path, false, /* Exact */
+        ad[i].periodicity, ad[i].max_duration_secs, ad[i].align_to_localtime,
+        ad[i].exclude_viewed_interfaces, ad[i].exclude_pcap_dump_interfaces,
+        th_pool);
 
     if (ta) {
-      if((strncmp(ad[i].path, "hour", 4) == 0)
-	 || (strncmp(ad[i].path, "daily", 5) == 0))	
-	hour_day_activities[num_hour_day_activities++] = ta;
+      if ((strncmp(ad[i].path, "hour", 4) == 0) ||
+          (strncmp(ad[i].path, "daily", 5) == 0))
+        hour_day_activities[num_hour_day_activities++] = ta;
       else
-	sec_min_activities[num_sec_min_activities++] = ta;
+        sec_min_activities[num_sec_min_activities++] = ta;
     }
 
     if (ad[i].periodicity >= 60 /* no delay for sub-minute scripts */) {
       char script_dir[64];
 
-      snprintf(script_dir, sizeof(script_dir), "%s%s", ad[i].path, DELAYED_TRAILER);
+      snprintf(script_dir, sizeof(script_dir), "%s%s", ad[i].path,
+               DELAYED_TRAILER);
 
-      ta = new (std::nothrow) ThreadedActivity(script_dir, true, /* Delayed */
-					       ad[i].periodicity, ad[i].max_duration_secs, ad[i].align_to_localtime,
-					       ad[i].exclude_viewed_interfaces, ad[i].exclude_pcap_dump_interfaces,
-					       th_pool);
+      ta = new (std::nothrow) ThreadedActivity(
+          script_dir, true, /* Delayed */
+          ad[i].periodicity, ad[i].max_duration_secs, ad[i].align_to_localtime,
+          ad[i].exclude_viewed_interfaces, ad[i].exclude_pcap_dump_interfaces,
+          th_pool);
       if (ta) {
-      if((strncmp(ad[i].path, "hour", 4) == 0)
-	 || (strncmp(ad[i].path, "daily", 5) == 0))	
-	hour_day_activities[num_hour_day_activities++] = ta;
-      else
-	sec_min_activities[num_sec_min_activities++] = ta;
+        if ((strncmp(ad[i].path, "hour", 4) == 0) ||
+            (strncmp(ad[i].path, "daily", 5) == 0))
+          hour_day_activities[num_hour_day_activities++] = ta;
+        else
+          sec_min_activities[num_sec_min_activities++] = ta;
       }
     }
   }
 
-  ntop->getTrace()->traceEvent(TRACE_INFO, "Found [%u sec/min][%u hour/day] activity dirs",
+  ntop->getTrace()->traceEvent(TRACE_INFO,
+                               "Found [%u sec/min][%u hour/day] activity dirs",
                                num_sec_min_activities, num_hour_day_activities);
 
-  if (pthread_create(&pthreadLoop, NULL, startActivity, (void *)this) == 0) {
+  if (pthread_create(&pthreadLoop, NULL, startActivity, (void*)this) == 0) {
     thread_running = true;
 #ifdef __linux__
-    Utils::setThreadAffinityWithMask(pthreadLoop, ntop->getPrefs()->get_other_cpu_affinity_mask());
+    Utils::setThreadAffinityWithMask(
+        pthreadLoop, ntop->getPrefs()->get_other_cpu_affinity_mask());
 #endif
   }
 }
-

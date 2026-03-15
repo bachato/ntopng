@@ -52,7 +52,7 @@ class AlertFifoItem {
     flow.cli_host_pool = flow.srv_host_pool = 0;
   }
 
-  AlertFifoItem(const AlertFifoItem *i) {
+  AlertFifoItem(const AlertFifoItem* i) {
     alert_entity = i->alert_entity;
     alert_severity = i->alert_severity;
     alert_category = i->alert_category;

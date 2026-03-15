@@ -27,16 +27,17 @@
 class ASNConfiguration {
  private:
   std::set<u_int32_t> tree, tree_shadow;
-  
-  void loadConfiguration(std::set<u_int32_t> *tree, char *key);
+
+  void loadConfiguration(std::set<u_int32_t>* tree, char* key);
+
  public:
   ASNConfiguration();
   ~ASNConfiguration();
 
-  inline bool isEmptyConfiguration() { return(tree.empty()); }
+  inline bool isEmptyConfiguration() { return (tree.empty()); }
   bool findASN(u_int32_t);
-  void reloadASNConfiguration(char *key);
-  void debugPrint(char *list_name);
+  void reloadASNConfiguration(char* key);
+  void debugPrint(char* list_name);
 };
 
 #endif /* _ASN_CONFIGURATION_H */

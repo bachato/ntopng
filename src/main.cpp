@@ -22,7 +22,7 @@
 #include "ntop_includes.h"
 
 extern "C" {
-extern char *rrd_strversion(void);
+extern char* rrd_strversion(void);
 };
 
 AfterShutdownAction afterShutdownAction = after_shutdown_nop;
@@ -76,28 +76,28 @@ void initWinsock32() {
 /* ******************************** */
 
 extern "C" {
-  int ntop_main(int argc, char *argv[])
+int ntop_main(int argc, char* argv[])
 #else
-    int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 #endif
 {
-  Prefs *prefs = NULL;
-  char *ifName;
+  Prefs* prefs = NULL;
+  char* ifName;
   int rc;
-  char *affinity;
+  char* affinity;
   int indexAffinity = 0;
-  char *core_id_s = NULL;
+  char* core_id_s = NULL;
   int core_id;
   char path[2 * MAX_PATH];
 #ifdef NTOPNG_PRO
   bool has_view_all = false;
 #endif
-  FILE *fd;
-  ThreadedActivity *boot_activity;
+  FILE* fd;
+  ThreadedActivity* boot_activity;
 
   tzset(); /* Init time and timezone */
   memset((void*)&ndpiUnknownProtocol, 0, sizeof(ndpiUnknownProtocol));
-  
+
 #ifdef WIN32
   initWinsock32();
 #else
@@ -189,7 +189,7 @@ extern "C" {
   affinity = prefs->get_cpu_affinity();
 
   for (int i = 0; i < MAX_NUM_INTERFACE_IDS; i++) {
-    NetworkInterface *iface = NULL;
+    NetworkInterface* iface = NULL;
 
     if ((ifName = ntop->get_if_name(i)) == NULL ||
         !strncmp(ifName, "view:", 5) /* Defer view interfaces init */)
@@ -202,14 +202,13 @@ extern "C" {
         iface = new (std::nothrow) DummyInterface();
       } else if (strstr(ifName, "zmq://") || strstr(ifName, "tcp://") ||
                  strstr(ifName, "ipc://")) {
-        char *at = strchr(ifName, '@');
-        char *endpoint;
+        char* at = strchr(ifName, '@');
+        char* endpoint;
 
         if (at != NULL)
           endpoint = &at[1];
         else
           endpoint = ifName;
-
 
 #ifdef HAVE_ZMQ
         iface = new (std::nothrow) ZMQCollectorInterface(endpoint);
@@ -238,20 +237,22 @@ extern "C" {
           ntop->getTrace()->traceEvent(TRACE_WARNING,
                                        "Inline/bridge capabilities have now "
                                        "been moved in ntopng Edge (nEdge)");
-          ntop->getTrace()->traceEvent(TRACE_WARNING, "For more information and free migration see:");
-          ntop->getTrace()->traceEvent(TRACE_WARNING,
-				       "https://www.ntop.org/support/faq/"
-				       "migration-of-ntopng-inline-pro-enterprises-licenses-to-ntopng-"
-				       "edge-nedge/");
+          ntop->getTrace()->traceEvent(
+              TRACE_WARNING, "For more information and free migration see:");
+          ntop->getTrace()->traceEvent(
+              TRACE_WARNING,
+              "https://www.ntop.org/support/faq/"
+              "migration-of-ntopng-inline-pro-enterprises-licenses-to-ntopng-"
+              "edge-nedge/");
           ntop->getTrace()->traceEvent(TRACE_WARNING, "\n");
         }
 #endif
 
 #if !defined(HAVE_NEDGE)
-	if (iface == NULL && strncmp(ifName, "sflow:", 6) == 0)
+        if (iface == NULL && strncmp(ifName, "sflow:", 6) == 0)
           iface = new (std::nothrow) sFlowPktInterface(ifName);
 #endif
-	
+
 #if defined(HAVE_NEDGE)
         if (iface == NULL && strncmp(ifName, "nf:", 3) == 0)
           iface = new (std::nothrow) NetfilterInterface(ifName);
@@ -278,8 +279,9 @@ extern "C" {
       if (iface) delete iface;
       iface = NULL;
     } catch (...) {
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "Unable to open interface %s. Falling back to pcap.",
-				   ifName);
+      ntop->getTrace()->traceEvent(
+          TRACE_NORMAL, "Unable to open interface %s. Falling back to pcap.",
+          ifName);
       if (iface) delete iface;
       iface = NULL;
     }
@@ -290,8 +292,9 @@ extern "C" {
         errno = 0;
         iface = new PcapInterface(ifName, i, false);
       } catch (int err) {
-        ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to open interface %s with pcap [%d]: %s",
-				     ifName, err, strerror(err));
+        ntop->getTrace()->traceEvent(
+            TRACE_ERROR, "Unable to open interface %s with pcap [%d]: %s",
+            ifName, err, strerror(err));
         if (iface) delete iface;
         iface = NULL;
       }
@@ -300,7 +303,7 @@ extern "C" {
 
     if (iface) {
       if (affinity != NULL) {
-        char *tmp;
+        char* tmp;
 
         if (indexAffinity == 0)
           core_id_s = strtok_r(affinity, ",", &tmp);
@@ -326,8 +329,8 @@ extern "C" {
   /* Instantiated deferred view interfaces */
 #ifdef NTOPNG_PRO
   for (int i = 0; i < MAX_NUM_INTERFACE_IDS; i++) {
-    NetworkInterface *iface = NULL;
-    
+    NetworkInterface* iface = NULL;
+
     if ((ifName = ntop->get_if_name(i)) == NULL || strncmp(ifName, "view:", 5))
       continue;
 
@@ -342,13 +345,13 @@ extern "C" {
   }
 
   if (has_view_all) {
-    NetworkInterface *iface = NULL;
+    NetworkInterface* iface = NULL;
 
     if ((iface = new (std::nothrow) ViewInterface("view:all")))
       ntop->registerInterface(iface);
   }
 #endif
-  
+
   if (ntop->getFirstInterface() == NULL) {
 #ifdef WIN32
     ntop->getTrace()->traceEvent(TRACE_ERROR,
@@ -364,7 +367,7 @@ extern "C" {
 
 #ifndef WIN32
   if (prefs->get_pid_path() != NULL) {
-    FILE *fd;
+    FILE* fd;
 
     fd = fopen(prefs->get_pid_path(), "w");
     if (fd != NULL) {
@@ -398,19 +401,19 @@ extern "C" {
   ntop->loadMacManufacturers(prefs->get_docs_dir());
   ntop->loadTrackers();
 #ifdef HAVE_SNMP_TRAP
-  if (prefs->isSNMPTrapEnabled())
-    ntop->toggleSNMPTrapCollector(true);
+  if (prefs->isSNMPTrapEnabled()) ntop->toggleSNMPTrapCollector(true);
 #endif
 
 #ifndef __linux__
   /*
-     On non-Linux platforms (no capabilites) we need to register the HTTP server before
-     dropping the privileges. This is required in order to possibly
-     bind the HTTP server to privileged ports (< 1024)
+     On non-Linux platforms (no capabilites) we need to register the HTTP server
+     before dropping the privileges. This is required in order to possibly bind
+     the HTTP server to privileged ports (< 1024)
   */
-  ntop->registerHTTPserver(new (std::nothrow) HTTPserver(prefs->get_docs_dir(), prefs->get_scripts_dir()));
+  ntop->registerHTTPserver(new (std::nothrow) HTTPserver(
+      prefs->get_docs_dir(), prefs->get_scripts_dir()));
 #endif
-  
+
   /* Drop the privileges before initializing the network interfaces. This
    * is necessary as the initialization may create files/directories, which
    * should not be created as root. */
@@ -418,14 +421,16 @@ extern "C" {
 
 #ifdef __linux__
   /*
-    On Linux the HTTP server is started after dropping privileges as we can use capabilities
+    On Linux the HTTP server is started after dropping privileges as we can use
+    capabilities
  */
-  ntop->registerHTTPserver(new (std::nothrow) HTTPserver(prefs->get_docs_dir(), prefs->get_scripts_dir()));
+  ntop->registerHTTPserver(new (std::nothrow) HTTPserver(
+      prefs->get_docs_dir(), prefs->get_scripts_dir()));
 #endif
 
   /* initInterface writes DB data on disk, keep it after changing user */
   for (int i = 0; i < MAX_NUM_INTERFACE_IDS; i++) {
-    NetworkInterface *iface;
+    NetworkInterface* iface;
 
     if ((iface = ntop->getInterface(i)) != NULL) ntop->initInterface(iface);
   }
@@ -480,14 +485,18 @@ extern "C" {
 #endif
 
 #if defined(WIN32) && defined(DEMO_WIN32)
-  ntop->getTrace()->traceEvent(TRACE_NORMAL,
-			       "-----------------------------------------------------------");
-  ntop->getTrace()->traceEvent(TRACE_WARNING, "This is a demo version of ntopng limited to %d packets",
-			       MAX_NUM_PACKETS);
-  ntop->getTrace()->traceEvent(TRACE_WARNING,
-			       "Please go to http://shop.ntop.org for getting the full version");
-  ntop->getTrace()->traceEvent(TRACE_NORMAL,
-			       "-----------------------------------------------------------");
+  ntop->getTrace()->traceEvent(
+      TRACE_NORMAL,
+      "-----------------------------------------------------------");
+  ntop->getTrace()->traceEvent(
+      TRACE_WARNING, "This is a demo version of ntopng limited to %d packets",
+      MAX_NUM_PACKETS);
+  ntop->getTrace()->traceEvent(
+      TRACE_WARNING,
+      "Please go to http://shop.ntop.org for getting the full version");
+  ntop->getTrace()->traceEvent(
+      TRACE_NORMAL,
+      "-----------------------------------------------------------");
 #endif
 
   /* This method returns after a shutdown has been requested.
@@ -545,38 +554,39 @@ extern "C" {
 
 #ifdef CUSTOM_ALLOCATOR
 
-static std::map <void*, std::size_t> _allocator;
+static std::map<void*, std::size_t> _allocator;
 static u_int64_t _tot_memory = 0;
 
-void *operator new[](std::size_t s) {
-  void *m = (void*)malloc(s);
+void* operator new[](std::size_t s) {
+  void* m = (void*)malloc(s);
 
   _allocator[m] = s, _tot_memory += s;
 
-  printf("[NEW] [size: %u][tot: %lu]\n", (unsigned int)s, (unsigned long)_tot_memory);
+  printf("[NEW] [size: %u][tot: %lu]\n", (unsigned int)s,
+         (unsigned long)_tot_memory);
   return m;
- }
+}
 
-void operator delete[](void *p) throw() {
-  std::map <void*, std::size_t>::iterator i = _allocator.find(p);
+void operator delete[](void* p) throw() {
+  std::map<void*, std::size_t>::iterator i = _allocator.find(p);
 
-  if(i == _allocator.end()) {
+  if (i == _allocator.end()) {
     /* Not found */
   } else {
     _tot_memory -= i->second;
-    
-    printf("[DELETE] [size: %u][tot: %lu]\n",
-	   (unsigned int)i->second, (unsigned long)_tot_memory);
+
+    printf("[DELETE] [size: %u][tot: %lu]\n", (unsigned int)i->second,
+           (unsigned long)_tot_memory);
 
     _allocator.erase(i);
     free(p);
   }
- }
+}
 
 #endif
 
 /* ******************************************* */
 
 const ndpi_protocol getConstNdpiUnknownProtocol() {
-  return((const ndpi_protocol)ndpiUnknownProtocol);
+  return ((const ndpi_protocol)ndpiUnknownProtocol);
 }

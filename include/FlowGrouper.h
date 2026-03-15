@@ -50,11 +50,11 @@ class FlowGrouper {
 
   inline u_int32_t getNumEntries() { return stats.num_flows; }
 
-  bool inGroup(Flow *flow);
-  int incStats(Flow *flow);
-  int newGroup(Flow *flow);
+  bool inGroup(Flow* flow);
+  int incStats(Flow* flow);
+  int newGroup(Flow* flow);
 
-  void lua(lua_State *vm);
+  void lua(lua_State* vm);
 };
 
 #endif /* _FLOW_GROUPER_H_ */

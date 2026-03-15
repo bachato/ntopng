@@ -36,10 +36,10 @@ CustomHostLuaScript::CustomHostLuaScript()
 
 CustomHostLuaScript::~CustomHostLuaScript() {
   for (int i = 0; i < MAX_NUM_INTERFACE_IDS; i++) {
-    NetworkInterface *iface;
+    NetworkInterface* iface;
 
     if ((iface = ntop->getInterface(i)) != NULL) {
-      LuaEngine *vm = iface->getCustomHostLuaScript();
+      LuaEngine* vm = iface->getCustomHostLuaScript();
 
       if (vm != NULL) {
         iface->setCustomHostLuaScript(NULL /* remove VM */);
@@ -51,8 +51,9 @@ CustomHostLuaScript::~CustomHostLuaScript() {
 
 /* ***************************************************** */
 
-LuaEngine *CustomHostLuaScript::initVM() {
-  const char *script_path = "scripts/callbacks/checks/hosts/custom_host_lua_script.lua";
+LuaEngine* CustomHostLuaScript::initVM() {
+  const char* script_path =
+      "scripts/callbacks/checks/hosts/custom_host_lua_script.lua";
   char where[512];
   struct stat s;
 
@@ -69,16 +70,15 @@ LuaEngine *CustomHostLuaScript::initVM() {
 
     return (NULL);
   } else {
-    LuaEngine *lua;
+    LuaEngine* lua;
 
     try {
       lua = new LuaEngine();
-      lua->load_script((char *)where,
-		       lua_engine_mode_callback,
+      lua->load_script((char*)where, lua_engine_mode_callback,
                        NULL /* NetworkInterface filled later below */);
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "Loaded custom user script %s",
                                    where);
-    } catch (std::bad_alloc &ba) {
+    } catch (std::bad_alloc& ba) {
       ntop->getTrace()->traceEvent(TRACE_ERROR,
                                    "Unable to start Lua interpreter.");
       lua = NULL;
@@ -90,8 +90,8 @@ LuaEngine *CustomHostLuaScript::initVM() {
 
 /* ***************************************************** */
 
-void CustomHostLuaScript::periodicUpdate(Host *h, HostAlert *engaged_alert) {
-  LuaEngine *lua;
+void CustomHostLuaScript::periodicUpdate(Host* h, HostAlert* engaged_alert) {
+  LuaEngine* lua;
 
   if (!h)
     return;
@@ -125,7 +125,7 @@ void CustomHostLuaScript::periodicUpdate(Host *h, HostAlert *engaged_alert) {
                                            least once */
 
     if (h->isCustomHostAlertTriggered()) {
-      HostAlert *alert = engaged_alert;
+      HostAlert* alert = engaged_alert;
 
       if (!alert) {
         /* Alert not already triggered */
@@ -142,7 +142,7 @@ void CustomHostLuaScript::periodicUpdate(Host *h, HostAlert *engaged_alert) {
 
 /* ***************************************************** */
 
-bool CustomHostLuaScript::loadConfiguration(json_object *config) {
+bool CustomHostLuaScript::loadConfiguration(json_object* config) {
   HostCheck::loadConfiguration(config); /* Parse parameters in common */
 
   return (true);

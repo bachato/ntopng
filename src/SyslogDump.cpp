@@ -29,9 +29,10 @@
 
 /* **************************************** */
 
-SyslogDump::SyslogDump(NetworkInterface *_iface) : FlowDB(_iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+SyslogDump::SyslogDump(NetworkInterface* _iface) : FlowDB(_iface) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   openlog(NULL /* If ident is NULL, the program name is used */,
           LOG_PID        /* Include PID with each message */
               | LOG_CONS /* Write directly to system console if there is an
@@ -46,7 +47,7 @@ SyslogDump::~SyslogDump() { closelog(); }
 
 /* **************************************** */
 
-bool SyslogDump::dumpFlow(time_t when, Flow *f, char *msg) {
+bool SyslogDump::dumpFlow(time_t when, Flow* f, char* msg) {
   syslog(LOG_INFO, "%s", msg);
 
   /*

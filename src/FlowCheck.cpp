@@ -28,7 +28,8 @@ FlowCheck::FlowCheck(NtopngEdition _edition, bool _packet_interface_only,
                      bool _has_protocol_detected, bool _has_periodic_update,
                      bool _has_flow_end, bool _has_flow_begin)
     : Check(_edition, _packet_interface_only, _nedge_exclude, _nedge_only) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   has_protocol_detected = _has_protocol_detected;
   has_periodic_update = _has_periodic_update;
   has_flow_end = _has_flow_end;
@@ -41,12 +42,13 @@ FlowCheck::FlowCheck(NtopngEdition _edition, bool _packet_interface_only,
 /* **************************************************** */
 
 FlowCheck::~FlowCheck() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
 };
 
 /* **************************************************** */
 
-void FlowCheck::addCheck(std::list<FlowCheck *> *l, NetworkInterface *iface,
+void FlowCheck::addCheck(std::list<FlowCheck*>* l, NetworkInterface* iface,
                          FlowChecks check) {
   if (!isCheckCompatibleWithInterface(iface)) return;
 
@@ -77,7 +79,7 @@ void FlowCheck::addCheck(std::list<FlowCheck *> *l, NetworkInterface *iface,
 
 /* **************************************************** */
 
-bool FlowCheck::loadConfiguration(json_object *config) {
+bool FlowCheck::loadConfiguration(json_object* config) {
   bool rc = true;
 
   // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s() %s", __FUNCTION__,
@@ -104,14 +106,14 @@ bool FlowCheck::loadConfiguration(json_object *config) {
 
 void FlowCheck::computeCliSrvScore(u_int8_t alert_score,
                                    risk_percentage cli_pctg,
-                                   u_int8_t *cli_score, u_int8_t *srv_score) {
+                                   u_int8_t* cli_score, u_int8_t* srv_score) {
   *cli_score = (alert_score * cli_pctg) / 100;
   *srv_score = alert_score - (*cli_score);
 }
 
 /* **************************************************** */
 
-void FlowCheck::lua(lua_State *vm) {
+void FlowCheck::lua(lua_State* vm) {
 #ifdef CHECKS_PROFILING
   /* Stats */
   lua_newtable(vm);

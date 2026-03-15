@@ -24,13 +24,14 @@
 /* *************************************** */
 
 ProtoStats::ProtoStats() {
-  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s",
+  // __FILE__);
   reset();
 }
 
 /* *************************************** */
 
-void ProtoStats::print(const char *prefix) {
+void ProtoStats::print(const char* prefix) {
   char bytes_buf[32], packets_buf[32];
 
   ntop->getTrace()->traceEvent(
@@ -42,7 +43,7 @@ void ProtoStats::print(const char *prefix) {
 
 /* *************************************** */
 
-void ProtoStats::lua(lua_State *vm, const char *prefix) {
+void ProtoStats::lua(lua_State* vm, const char* prefix) {
   char key_buf[32];
 
   snprintf(key_buf, sizeof(key_buf), "%sbytes", prefix);

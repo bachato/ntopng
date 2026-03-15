@@ -39,7 +39,8 @@ Bloom::Bloom(u_int32_t _num_bloom_bits) {
  * Destructor.
  */
 Bloom::~Bloom() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
   delete bitmask;
 }
 
@@ -50,7 +51,7 @@ Bloom::~Bloom() {
  * @param str The string to hash.
  * @return The hash.
  */
-u_int32_t Bloom::ntophash(char *str) {
+u_int32_t Bloom::ntophash(char* str) {
   u_int32_t hash = 0;
 
   for (u_int32_t i = 0; str[i] != 0; i++) hash += tolower(str[i]) * (i + 1);

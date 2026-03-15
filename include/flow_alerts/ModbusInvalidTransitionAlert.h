@@ -30,11 +30,12 @@ class ModbusInvalidTransitionAlert : public FlowAlert {
   u_int16_t type_i;
   u_int8_t type_id;
 
-  ndpi_serializer *getAlertJSON(ndpi_serializer *serializer);
+  ndpi_serializer* getAlertJSON(ndpi_serializer* serializer);
 
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_modbus_invalid_transition, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_modbus_invalid_transition,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_NOTICE; };
 
@@ -42,14 +43,15 @@ class ModbusInvalidTransitionAlert : public FlowAlert {
   inline u_int16_t get_type_i() { return type_i; };
   inline u_int8_t get_type_id() { return type_id; };
 
-  ModbusInvalidTransitionAlert(FlowCheck *c, Flow *f, struct timeval *_time,
-			       u_int16_t _type_i, u_int8_t _type_id) : FlowAlert(c, f) {
+  ModbusInvalidTransitionAlert(FlowCheck* c, Flow* f, struct timeval* _time,
+                               u_int16_t _type_i, u_int8_t _type_id)
+      : FlowAlert(c, f) {
     type_i = _type_i;
     type_id = _type_id;
     packet_epoch = _time->tv_sec;
     setAlertScore(getDefaultScore());
   };
-  ~ModbusInvalidTransitionAlert(){};
+  ~ModbusInvalidTransitionAlert() {};
 
   bool autoAck() const { return false; };
 

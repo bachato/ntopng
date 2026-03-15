@@ -25,23 +25,25 @@
 
 class ZMQPublisher {
  private:
-  void *context; /**< ZMQ context */
-  void *pub_socket; /**< ZMQ publisher socket */
+  void* context;    /**< ZMQ context */
+  void* pub_socket; /**< ZMQ publisher socket */
   char server_public_key[41];
   char server_secret_key[41];
 
 #if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 1, 0)
-  int setServerEncryptionKeys(const char *secret_key);
-  int setClientEncryptionKeys(const char *server_public_key);
+  int setServerEncryptionKeys(const char* secret_key);
+  int setClientEncryptionKeys(const char* server_public_key);
 #endif
-  bool sendMessage(const char *topic, char *str);
+  bool sendMessage(const char* topic, char* str);
 
  public:
-  ZMQPublisher(char *endpoint);
+  ZMQPublisher(char* endpoint);
   ~ZMQPublisher();
 
-  inline bool sendIPSMessage(char *msg)     { return (sendMessage("ips", msg)); }
-  inline bool sendControlMessage(char *msg) { return (sendMessage("message", msg)); }
+  inline bool sendIPSMessage(char* msg) { return (sendMessage("ips", msg)); }
+  inline bool sendControlMessage(char* msg) {
+    return (sendMessage("message", msg));
+  }
 };
 
 #endif /* HAVE_ZMQ */

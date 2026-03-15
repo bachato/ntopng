@@ -23,9 +23,9 @@
 
 ndpi_serializer* S7CommInvalidTransitionAlert::getAlertJSON(
     ndpi_serializer* serializer) {
-  Flow *f = getFlow();
+  Flow* f = getFlow();
 
-  if(serializer) {
+  if (serializer) {
     ndpi_serialize_string_uint32(serializer, "timestamp", packet_epoch);
     ndpi_serialize_string_uint32(serializer, "flow_key", f->key());
     ndpi_serialize_string_uint32(serializer, "flow_hash_entry_id",

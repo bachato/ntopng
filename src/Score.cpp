@@ -23,9 +23,10 @@
 
 /* ***************************************************** */
 
-Score::Score(NetworkInterface *_iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+Score::Score(NetworkInterface* _iface) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   view_interface_score = _iface->isView();
   score = NULL;
 }
@@ -67,7 +68,7 @@ u_int16_t Score::decScoreValue(u_int16_t score_decr,
 
 /* ***************************************************** */
 
-void Score::lua_get_score(lua_State *vm) {
+void Score::lua_get_score(lua_State* vm) {
   lua_push_uint64_table_entry(vm, "score", score ? score->get() : 0);
   lua_push_uint64_table_entry(vm, "score.as_client",
                               score ? score->getClient() : 0);
@@ -77,6 +78,6 @@ void Score::lua_get_score(lua_State *vm) {
 
 /* ***************************************************** */
 
-void Score::lua_get_score_breakdown(lua_State *vm) {
+void Score::lua_get_score_breakdown(lua_State* vm) {
   if (score) score->lua_breakdown(vm);
 }

@@ -23,15 +23,16 @@
 
 /* **************************************************** */
 
-SQLiteStoreManager::SQLiteStoreManager(NetworkInterface *_iface) : DB(_iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+SQLiteStoreManager::SQLiteStoreManager(NetworkInterface* _iface) : DB(_iface) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   db = NULL;
 };
 
 /* **************************************************** */
 
-int SQLiteStoreManager::init(const char *db_file_full_path) {
+int SQLiteStoreManager::init(const char* db_file_full_path) {
   if (sqlite3_open(db_file_full_path, &db)) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to open %s: %s",
                                  db_file_full_path, sqlite3_errmsg(db));
@@ -64,10 +65,10 @@ SQLiteStoreManager::~SQLiteStoreManager() {
  *
  * @return Zero in case of success, nonzero in case of failure.
  */
-int SQLiteStoreManager::exec_query(const char *db_query,
-                                   int (*callback)(void *, int, char **, char **),
-                                   void *payload) {
-  char *zErrMsg = 0;
+int SQLiteStoreManager::exec_query(const char* db_query,
+                                   int (*callback)(void*, int, char**, char**),
+                                   void* payload) {
+  char* zErrMsg = 0;
 
   if (!db) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Database not initialized.");
@@ -92,7 +93,7 @@ int SQLiteStoreManager::exec_query(const char *db_query,
 
   See https://www.sqlite.org/rescode.html
 */
-int SQLiteStoreManager::exec_statement(sqlite3_stmt *stmt) {
+int SQLiteStoreManager::exec_statement(sqlite3_stmt* stmt) {
   int rc;
   int max_retries = 5;
   bool retry = true;
@@ -135,7 +136,7 @@ int SQLiteStoreManager::optimizeStore() {
   char query[STORE_MANAGER_MAX_QUERY];
   int step;
   bool rc = false;
-  sqlite3_stmt *stmt = NULL;
+  sqlite3_stmt* stmt = NULL;
 
   m.lock(__FILE__, __LINE__);
 
@@ -153,9 +154,9 @@ int SQLiteStoreManager::optimizeStore() {
 
   sqlite3_reset(stmt);
 
-  #ifndef WIN32
+#ifndef WIN32
   sync();
-  #endif
+#endif
 
 out:
   if (stmt) sqlite3_finalize(stmt);
@@ -166,12 +167,13 @@ out:
 
 /* **************************************************** */
 
-int SQLiteStoreManager::execFile(const char *path) {
+int SQLiteStoreManager::execFile(const char* path) {
   char schema_path[MAX_PATH], *schema;
   int rc;
 
   /* Read the database schema file */
-  snprintf(schema_path, sizeof(schema_path), "%s/misc/%s", ntop->get_docs_dir(), path);
+  snprintf(schema_path, sizeof(schema_path), "%s/misc/%s", ntop->get_docs_dir(),
+           path);
   ntop->fixPath(schema_path);
 
   ntop->getTrace()->traceEvent(TRACE_INFO, "Processing %s", schema_path);
@@ -181,7 +183,7 @@ int SQLiteStoreManager::execFile(const char *path) {
                               std::istreambuf_iterator<char>());
 
   /* Make sure the database is accessible */
-  rc = exec_query((char *)"SELECT 1", NULL, NULL);
+  rc = exec_query((char*)"SELECT 1", NULL, NULL);
 
   if (rc)
     ntop->getTrace()->traceEvent(TRACE_ERROR,
@@ -190,22 +192,23 @@ int SQLiteStoreManager::execFile(const char *path) {
 
   schema = strdup(schema_contents.c_str());
 
-  if(schema) {
+  if (schema) {
     char *tmp, *query = strtok_r(schema, "@", &tmp);
-  
-    while(query) {
+
+    while (query) {
       ntop->getTrace()->traceEvent(TRACE_INFO, "%s", query);
-    
+
       /* Initialize the database with its schema that has just been read */
       rc = exec_query(query, NULL, NULL);
-    
+
       if (rc) {
-	const char *msg = sqlite3_errmsg(db);
-      
-	if (strstr(msg, "duplicate column name"))
-	  rc = 0; /* Silence ALTER TABLE errors */
-	else
-	  ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to create database schema [%s]", msg);
+        const char* msg = sqlite3_errmsg(db);
+
+        if (strstr(msg, "duplicate column name"))
+          rc = 0; /* Silence ALTER TABLE errors */
+        else
+          ntop->getTrace()->traceEvent(
+              TRACE_ERROR, "Unable to create database schema [%s]", msg);
       }
 
       query = strtok_r(NULL, "@", &tmp);
@@ -213,7 +216,7 @@ int SQLiteStoreManager::execFile(const char *path) {
 
     free(schema);
   }
-  
+
   if (schema_file.is_open()) schema_file.close();
 
   return (rc);
@@ -222,14 +225,14 @@ int SQLiteStoreManager::execFile(const char *path) {
 /* **************************************************** */
 
 struct SQLiteDataRetriever {
-  lua_State *vm;
+  lua_State* vm;
   u_int32_t current_offset;
 };
 
-static int process_sqlite_row(void *data, int argc, char **argv,
-                              char **azColName) {
-  SQLiteDataRetriever *ar = (SQLiteDataRetriever *) data;
-  lua_State *vm = ar->vm;
+static int process_sqlite_row(void* data, int argc, char** argv,
+                              char** azColName) {
+  SQLiteDataRetriever* ar = (SQLiteDataRetriever*)data;
+  lua_State* vm = ar->vm;
 
   lua_newtable(vm);
 
@@ -245,18 +248,18 @@ static int process_sqlite_row(void *data, int argc, char **argv,
 
 /* **************************************************** */
 
-int SQLiteStoreManager::execSQLQuery(lua_State *vm, const char *sql,
-				     bool limitRows, bool wait_for_db_created) {
+int SQLiteStoreManager::execSQLQuery(lua_State* vm, const char* sql,
+                                     bool limitRows, bool wait_for_db_created) {
   int rc = SQLITE_ERROR;
   SQLiteDataRetriever ar;
-  char *zErrMsg = NULL;
+  char* zErrMsg = NULL;
 
   m.lock(__FILE__, __LINE__);
 
   lua_newtable(vm);
 
   ar.vm = vm, ar.current_offset = 0;
-  rc = sqlite3_exec(db, sql, process_sqlite_row, (void *)&ar, &zErrMsg);
+  rc = sqlite3_exec(db, sql, process_sqlite_row, (void*)&ar, &zErrMsg);
 
   if (rc != SQLITE_OK) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "SQL Error: %s\n%s", zErrMsg,

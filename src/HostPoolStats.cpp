@@ -23,9 +23,11 @@
 
 /* ***************************************** */
 
-HostPoolStats::HostPoolStats(NetworkInterface *iface) : GenericTrafficElement() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+HostPoolStats::HostPoolStats(NetworkInterface* iface)
+    : GenericTrafficElement() {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   ndpiStats = new (std::nothrow) nDPIStats();
   totalStats = new (std::nothrow) nDPIStats();
   mustReset = false;
@@ -46,13 +48,13 @@ void HostPoolStats::updateSeen(time_t _last_seen) {
 
 /* ***************************************** */
 
-void HostPoolStats::updateName(const char *_pool_name) {
+void HostPoolStats::updateName(const char* _pool_name) {
   pool_name.assign(_pool_name ? _pool_name : "");
 }
 
 /* ***************************************** */
 
-void HostPoolStats::lua(lua_State *vm, NetworkInterface *iface) {
+void HostPoolStats::lua(lua_State* vm, NetworkInterface* iface) {
   u_int64_t bytes = 0;
   u_int32_t duration = 0;
 
@@ -71,7 +73,7 @@ void HostPoolStats::lua(lua_State *vm, NetworkInterface *iface) {
     lua_push_uint64_table_entry(vm, "bytes", bytes);
     lua_push_uint64_table_entry(vm, "duration", duration);
 
-    lua_pushstring(vm, (char *)"cross_application");
+    lua_pushstring(vm, (char*)"cross_application");
     lua_insert(vm, -2);
     lua_settable(vm, -3);
   }
@@ -79,8 +81,8 @@ void HostPoolStats::lua(lua_State *vm, NetworkInterface *iface) {
 
 /* ***************************************** */
 
-json_object *HostPoolStats::getJSONObject(NetworkInterface *iface) {
-  json_object *my_object;
+json_object* HostPoolStats::getJSONObject(NetworkInterface* iface) {
+  json_object* my_object;
 
   if ((my_object = json_object_new_object()) == NULL) return (NULL);
 
@@ -96,12 +98,12 @@ json_object *HostPoolStats::getJSONObject(NetworkInterface *iface) {
 
 /* ***************************************** */
 
-char *HostPoolStats::serialize(NetworkInterface *iface) {
-  json_object *my_object = getJSONObject(iface);
+char* HostPoolStats::serialize(NetworkInterface* iface) {
+  json_object* my_object = getJSONObject(iface);
 
   if (!my_object) return NULL;
 
-  char *rsp = strdup(json_object_to_json_string(my_object));
+  char* rsp = strdup(json_object_to_json_string(my_object));
 
   /* Free memory */
   json_object_put(my_object);
@@ -111,18 +113,16 @@ char *HostPoolStats::serialize(NetworkInterface *iface) {
 
 /* ***************************************** */
 
-bool HostPoolStats::deserialize(char *json, NetworkInterface *iface)
-{
+bool HostPoolStats::deserialize(char* json, NetworkInterface* iface) {
   json_object *o, *obj;
   enum json_tokener_error jerr = json_tokener_success;
 
-  if (!json) return(false);
+  if (!json) return (false);
 
-  if((o = json_tokener_parse_verbose(json, &jerr)) == NULL)
-    return(false);
+  if ((o = json_tokener_parse_verbose(json, &jerr)) == NULL) return (false);
 
   cleanup();
-  
+
   if (json_object_object_get_ex(o, "sent", &obj)) {
     sent.deserialize(obj);
     ;
@@ -143,7 +143,7 @@ bool HostPoolStats::deserialize(char *json, NetworkInterface *iface)
   }
 
   json_object_put(o);
-  return(true);
+  return (true);
 }
 
 /* ***************************************** */
@@ -159,7 +159,7 @@ void HostPoolStats::cleanup() {
     totalStats = NULL;
   }
 
-  sent.resetStats();  
+  sent.resetStats();
   rcvd.resetStats();
 
   pool_name.clear();

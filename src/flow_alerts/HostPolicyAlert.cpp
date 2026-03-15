@@ -22,7 +22,7 @@
 #include "flow_alerts_includes.h"
 
 ndpi_serializer* HostPolicyAlert::getAlertJSON(ndpi_serializer* serializer) {
-  if(serializer) {
+  if (serializer) {
     ndpi_serialize_string_uint32(serializer, "reason", (int)reason);
   }
 

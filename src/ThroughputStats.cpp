@@ -24,7 +24,8 @@
 /* *************************************** */
 
 ThroughputStats::ThroughputStats() {
-  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s",
+  // __FILE__);
   resetStats();
 }
 
@@ -40,7 +41,7 @@ void ThroughputStats::resetStats() {
 
 /* *************************************** */
 
-ThroughputStats::ThroughputStats(const ThroughputStats &thpts) {
+ThroughputStats::ThroughputStats(const ThroughputStats& thpts) {
   last_val = thpts.last_val;
   thpt = thpts.thpt;
   last_thpt = thpts.last_thpt;
@@ -50,7 +51,7 @@ ThroughputStats::ThroughputStats(const ThroughputStats &thpts) {
 
 /* *************************************** */
 
-void ThroughputStats::updateStats(const struct timeval *tv, u_int64_t new_val) {
+void ThroughputStats::updateStats(const struct timeval* tv, u_int64_t new_val) {
   if (last_update_time.tv_sec >
           0 /* Waits at least two calls before computing the throughput */
       && new_val >= last_val /* Protects against resets / wraps */) {
@@ -74,7 +75,7 @@ void ThroughputStats::updateStats(const struct timeval *tv, u_int64_t new_val) {
 
 /* *************************************** */
 
-void ThroughputStats::set(ThroughputStats *v) {
+void ThroughputStats::set(ThroughputStats* v) {
   last_val = v->last_val;
   thpt = v->thpt, last_thpt = v->last_thpt;
   thpt_trend = v->thpt_trend;

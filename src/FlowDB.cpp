@@ -23,9 +23,10 @@
 
 /* ******************************************* */
 
-FlowDB::FlowDB(NetworkInterface *_iface) : DB(_iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+FlowDB::FlowDB(NetworkInterface* _iface) : DB(_iface) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   lastUpdateTime.tv_sec = 0, lastUpdateTime.tv_usec = 0;
   droppedFlows = queueDroppedFlows = exportedFlows = lastExportedFlows = 0;
   checkpointDroppedFlows = checkpointQueueDroppedFlows =
@@ -35,19 +36,22 @@ FlowDB::FlowDB(NetworkInterface *_iface) : DB(_iface) {
 
 /* ******************************************* */
 
-void FlowDB::getStats(u_int64_t *flow_export_count,
-		  u_int64_t *flow_export_drops,
-		  u_int64_t *flow_export_rate,
-		  bool since_last_checkpoint) {
-
-  *flow_export_count = exportedFlows - (since_last_checkpoint ? checkpointExportedFlows : 0);
-  *flow_export_drops = getNumDroppedFlows() - (since_last_checkpoint  ? (checkpointDroppedFlows + checkpointQueueDroppedFlows) : 0);
-  *flow_export_rate  = exportRate >= 0 ? exportRate : 0;
+void FlowDB::getStats(u_int64_t* flow_export_count,
+                      u_int64_t* flow_export_drops, u_int64_t* flow_export_rate,
+                      bool since_last_checkpoint) {
+  *flow_export_count =
+      exportedFlows - (since_last_checkpoint ? checkpointExportedFlows : 0);
+  *flow_export_drops =
+      getNumDroppedFlows() -
+      (since_last_checkpoint
+           ? (checkpointDroppedFlows + checkpointQueueDroppedFlows)
+           : 0);
+  *flow_export_rate = exportRate >= 0 ? exportRate : 0;
 }
 
 /* ******************************************* */
 
-void FlowDB::lua(lua_State *vm, bool since_last_checkpoint) {
+void FlowDB::lua(lua_State* vm, bool since_last_checkpoint) {
   u_int64_t drops, rate, count;
 
   getStats(&drops, &rate, &count, since_last_checkpoint);
@@ -69,7 +73,7 @@ void FlowDB::checkPointCounters(bool drops_only) {
 
 /* ******************************************* */
 
-void FlowDB::updateStats(const struct timeval *tv) {
+void FlowDB::updateStats(const struct timeval* tv) {
   if (tv == NULL) return;
 
   if (lastUpdateTime.tv_sec > 0) {

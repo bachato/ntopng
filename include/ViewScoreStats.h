@@ -25,11 +25,12 @@
 class ViewScoreStats : public ScoreStats {
  private:
   Mutex m;
-  ScoreCounter cli_dec[MAX_NUM_SCORE_CATEGORIES], srv_dec[MAX_NUM_SCORE_CATEGORIES];
+  ScoreCounter cli_dec[MAX_NUM_SCORE_CATEGORIES],
+      srv_dec[MAX_NUM_SCORE_CATEGORIES];
 
  public:
   ViewScoreStats();
-  ~ViewScoreStats(){};
+  ~ViewScoreStats() {};
 
   /* Total Getters */
   u_int64_t getClient() { return (sum(cli_score) - sum(cli_dec)); };
@@ -37,10 +38,10 @@ class ViewScoreStats : public ScoreStats {
 
   /* Getters by category */
   u_int32_t getClient(ScoreCategory sc) {
-    return (cli_score[sc].get() - cli_dec[sc].get() );
+    return (cli_score[sc].get() - cli_dec[sc].get());
   };
   u_int32_t getServer(ScoreCategory sc) {
-    return (srv_score[sc].get()  - srv_dec[sc].get() );
+    return (srv_score[sc].get() - srv_dec[sc].get());
   };
 
   u_int16_t decValue(u_int16_t score, ScoreCategory score_category,

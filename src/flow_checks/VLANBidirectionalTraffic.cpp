@@ -40,7 +40,7 @@ VLANBidirectionalTraffic::~VLANBidirectionalTraffic() {
 
 /* ***************************************************** */
 
-void VLANBidirectionalTraffic::checkBidirectionalTraffic(Flow *f) {
+void VLANBidirectionalTraffic::checkBidirectionalTraffic(Flow* f) {
   if (!f) return;
 
   if (isServerNotLocal(f)) {
@@ -53,13 +53,15 @@ void VLANBidirectionalTraffic::checkBidirectionalTraffic(Flow *f) {
 
       if (f->get_bytes_cli2srv() > 0 && f->get_bytes_srv2cli() > 0) {
         /* the flow is bidirectional */
-        FlowAlertType alert_type = VLANBidirectionalTrafficAlert::getClassType();
+        FlowAlertType alert_type =
+            VLANBidirectionalTrafficAlert::getClassType();
         u_int8_t c_score, s_score;
         risk_percentage cli_score_pctg = CLIENT_HIGH_RISK_PERCENTAGE;
 
-        computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
+        computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id),
+                           cli_score_pctg, &c_score, &s_score);
 
-        FlowAlert *alert = buildAlert(f);
+        FlowAlert* alert = buildAlert(f);
         alert->setCliSrvScores(c_score, s_score);
         f->triggerAlert(alert);
       }
@@ -69,19 +71,19 @@ void VLANBidirectionalTraffic::checkBidirectionalTraffic(Flow *f) {
 
 /* ***************************************************** */
 
-void VLANBidirectionalTraffic::protocolDetected(Flow *f) {
+void VLANBidirectionalTraffic::protocolDetected(Flow* f) {
   checkBidirectionalTraffic(f);
 }
 
 /* ***************************************************** */
 
-FlowAlert *VLANBidirectionalTraffic::buildAlert(Flow *f) {
+FlowAlert* VLANBidirectionalTraffic::buildAlert(Flow* f) {
   return (new VLANBidirectionalTrafficAlert(this, f));
 }
 
 /* ***************************************************** */
 
-bool VLANBidirectionalTraffic::loadConfiguration(json_object *config) {
+bool VLANBidirectionalTraffic::loadConfiguration(json_object* config) {
   FlowCheck::loadConfiguration(config); /* Parse parameters in common */
   json_object *whitelist_json, *whitelisted_domain_json;
 
@@ -89,7 +91,8 @@ bool VLANBidirectionalTraffic::loadConfiguration(json_object *config) {
     vlans->clear_all_bits();
 
     if (json_object_object_get_ex(config, "items", &whitelist_json)) {
-      for (u_int i = 0; i < (u_int)json_object_array_length(whitelist_json); i++) {
+      for (u_int i = 0; i < (u_int)json_object_array_length(whitelist_json);
+           i++) {
         u_int16_t vlan_id = (u_int16_t)-1;
 
         whitelisted_domain_json = json_object_array_get_idx(whitelist_json, i);
@@ -115,11 +118,13 @@ bool VLANBidirectionalTraffic::checkVLAN(u_int16_t vlan_id) {
 
 /* ***************************************************** */
 
-bool VLANBidirectionalTraffic::isServerNotLocal(Flow *f) {
-  const IpAddress *srv_ip = f->get_srv_ip_addr();
+bool VLANBidirectionalTraffic::isServerNotLocal(Flow* f) {
+  const IpAddress* srv_ip = f->get_srv_ip_addr();
 
   if (srv_ip == NULL)
     return (false);
   else
-    return ((srv_ip->isLocalHost() || srv_ip->isBroadMulticastAddress()) ? false : true);
+    return ((srv_ip->isLocalHost() || srv_ip->isBroadMulticastAddress())
+                ? false
+                : true);
 }

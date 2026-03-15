@@ -24,7 +24,8 @@
 /* *************************************** */
 
 ParsedFlow::ParsedFlow() : ParsedFlowCore(), ParsedeBPF() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 
   additional_fields_json = NULL;
   additional_fields_tlv = NULL;
@@ -46,15 +47,15 @@ ParsedFlow::ParsedFlow() : ParsedFlowCore(), ParsedeBPF() {
   smtp_rcp_to = NULL;
   smtp_mail_from = NULL;
   flow_verdict = 0; /* Unknown */
-  src_port_pre_nat = dst_port_pre_nat =
-    src_port_post_nat = dst_port_post_nat = 0;
+  src_port_pre_nat = dst_port_pre_nat = src_port_post_nat = dst_port_post_nat =
+      0;
   tcp_fingerprint = bittorrent_hash = NULL;
   l7_error_code = 0;
   confidence = NDPI_CONFIDENCE_UNKNOWN;
   os_hint = ndpi_os_unknown;
   flow_source = packet_to_flow;
-  src_ip_addr_pre_nat = dst_ip_addr_pre_nat =
-    src_ip_addr_post_nat = dst_ip_addr_post_nat = 0;
+  src_ip_addr_pre_nat = dst_ip_addr_pre_nat = src_ip_addr_post_nat =
+      dst_ip_addr_post_nat = 0;
   memset(&custom_app, 0, sizeof(custom_app));
   wlan_ssid = NULL;
   memset(&wtp_mac_address, 0, sizeof(wtp_mac_address));
@@ -66,7 +67,8 @@ ParsedFlow::ParsedFlow() : ParsedFlowCore(), ParsedeBPF() {
 
 /* *************************************** */
 
-ParsedFlow::ParsedFlow(const ParsedFlow &pf) : ParsedFlowCore(pf), ParsedeBPF(pf) {
+ParsedFlow::ParsedFlow(const ParsedFlow& pf)
+    : ParsedFlowCore(pf), ParsedeBPF(pf) {
   /* Currently we avoid TLV additional fields in the copy constructor */
   additional_fields_tlv = NULL;
 
@@ -102,7 +104,7 @@ ParsedFlow::ParsedFlow(const ParsedFlow &pf) : ParsedFlowCore(pf), ParsedeBPF(pf
   else
     dns_query = NULL;
 
-  if(pf.end_reason)
+  if (pf.end_reason)
     end_reason = strdup(pf.end_reason);
   else
     end_reason = NULL;
@@ -167,12 +169,12 @@ ParsedFlow::ParsedFlow(const ParsedFlow &pf) : ParsedFlowCore(pf), ParsedeBPF(pf
   else
     sip_call_id = NULL;
 
-  if(pf.wlan_ssid)
+  if (pf.wlan_ssid)
     wlan_ssid = strdup(pf.wlan_ssid);
   else
     wlan_ssid = NULL;
 
-  if(pf.l7_json)
+  if (pf.l7_json)
     l7_json = strdup(pf.l7_json);
   else
     l7_json = NULL;
@@ -187,13 +189,14 @@ ParsedFlow::ParsedFlow(const ParsedFlow &pf) : ParsedFlowCore(pf), ParsedeBPF(pf
   dns_ret_code = pf.dns_ret_code;
   dns_query_id = pf.dns_query_id;
   os_hint = pf.os_hint;
-  
-  /* Only IPv4 supported, in case the ipv4 is 0 it's already handled inside IpAddress class */
+
+  /* Only IPv4 supported, in case the ipv4 is 0 it's already handled inside
+   * IpAddress class */
   src_ip_addr_pre_nat = pf.src_ip_addr_pre_nat;
   dst_ip_addr_pre_nat = pf.dst_ip_addr_pre_nat;
   src_ip_addr_post_nat = pf.src_ip_addr_post_nat;
   dst_ip_addr_post_nat = pf.dst_ip_addr_post_nat;
-  
+
   /* 0 by default */
   src_port_pre_nat = pf.src_port_pre_nat;
   dst_port_pre_nat = pf.dst_port_pre_nat;
@@ -213,136 +216,136 @@ ParsedFlow::ParsedFlow(const ParsedFlow &pf) : ParsedFlowCore(pf), ParsedeBPF(pf
 
 /* *************************************** */
 
-void ParsedFlow::fromLua(lua_State *L, int index) {
+void ParsedFlow::fromLua(lua_State* L, int index) {
   lua_pushnil(L);
 
   while (lua_next(L, index) != 0) {
-    const char *key = lua_tostring(L, -2);
+    const char* key = lua_tostring(L, -2);
     int t = lua_type(L, -1);
 
     switch (t) {
-    case LUA_TSTRING:
-      if (!strcmp(key, "src_ip")) {
-	src_ip.set(lua_tostring(L, -1));
-      } else if (!strcmp(key, "dst_ip")) {
-	dst_ip.set(lua_tostring(L, -1));
-      } else if (!strcmp(key, "http_method")) {
-	http_method = ndpi_http_str2method(lua_tostring(L, -1),
-					   strlen(lua_tostring(L, -1)));
-      } else if (!strcmp(key, "http_site")) {
-	if (http_site) free(http_site);
-	http_site = strdup(lua_tostring(L, -1));
-      } else if (!strcmp(key, "http_user_agent")) {
-	if (http_user_agent) free(http_user_agent);
-	http_user_agent = strdup(lua_tostring(L, -1));
-      } else if (!strcmp(key, "l7_info")) {
-	if (l7_info) free(l7_info);
-	l7_info = strdup(lua_tostring(L, -1));
-      } else if (!strcmp(key, "http_url")) {
-	if (http_url) free(http_url);
-	http_url = strdup(lua_tostring(L, -1));
-      } else if (!strcmp(key, "tls_server_name")) {
-	if (tls_server_name) free(tls_server_name);
-	tls_server_name = strdup(lua_tostring(L, -1));
-      } else if (!strcmp(key, "dns_query")) {
-	if (dns_query) free(dns_query);
-	dns_query = strdup(lua_tostring(L, -1));
-      } else if (!strcmp(key, "ja4c_hash")) {
-	if (ja4c_hash) free(ja4c_hash);
-	ja4c_hash = strdup(lua_tostring(L, -1));
-      } else if (!strcmp(key, "tcp_fingerprint")) {
-	if (tcp_fingerprint) free(tcp_fingerprint);
-	tcp_fingerprint = strdup(lua_tostring(L, -1));
-      } else if (!strcmp(key, "bittorrent_hash")) {
-	if (bittorrent_hash) free(bittorrent_hash);
-	bittorrent_hash = strdup(lua_tostring(L, -1));
-      } else if (!strcmp(key, "external_alert")) {
-	if (external_alert) free(external_alert);
-	external_alert = strdup(lua_tostring(L, -1));
-      } else if (!strcmp(key, "flow_risk_info")) {
-	if (flow_risk_info) free(flow_risk_info);
-	flow_risk_info = strdup(lua_tostring(L, -1));
-      } else if (!strcmp(key, "ot_info")) {
-	if (ot_info) free(ot_info);
-	ot_info = strdup(lua_tostring(L, -1));
-      } else if (!strcmp(key, "first_switched_iso8601")) {
-	first_switched = Utils::str2epoch(lua_tostring(L, -1));
-      } else if (!strcmp(key, "last_switched_iso8601")) {
-	last_switched = Utils::str2epoch(lua_tostring(L, -1));
-      } else if (!strcmp(key, "l4_proto")) {
-	l4_proto = Utils::l4name2proto(lua_tostring(L, -1));
-      } else if (!strcmp(key, "l7_json")) {
-	if (l7_json) free(l7_json);
-	l7_json = strdup(lua_tostring(L, -1));
-      } else {
-	addAdditionalField(key, json_object_new_string(lua_tostring(L, -1)));
-	ntop->getTrace()->traceEvent(TRACE_DEBUG,
-				     "Key '%s' (string) not supported", key);
-      }
-      break;
+      case LUA_TSTRING:
+        if (!strcmp(key, "src_ip")) {
+          src_ip.set(lua_tostring(L, -1));
+        } else if (!strcmp(key, "dst_ip")) {
+          dst_ip.set(lua_tostring(L, -1));
+        } else if (!strcmp(key, "http_method")) {
+          http_method = ndpi_http_str2method(lua_tostring(L, -1),
+                                             strlen(lua_tostring(L, -1)));
+        } else if (!strcmp(key, "http_site")) {
+          if (http_site) free(http_site);
+          http_site = strdup(lua_tostring(L, -1));
+        } else if (!strcmp(key, "http_user_agent")) {
+          if (http_user_agent) free(http_user_agent);
+          http_user_agent = strdup(lua_tostring(L, -1));
+        } else if (!strcmp(key, "l7_info")) {
+          if (l7_info) free(l7_info);
+          l7_info = strdup(lua_tostring(L, -1));
+        } else if (!strcmp(key, "http_url")) {
+          if (http_url) free(http_url);
+          http_url = strdup(lua_tostring(L, -1));
+        } else if (!strcmp(key, "tls_server_name")) {
+          if (tls_server_name) free(tls_server_name);
+          tls_server_name = strdup(lua_tostring(L, -1));
+        } else if (!strcmp(key, "dns_query")) {
+          if (dns_query) free(dns_query);
+          dns_query = strdup(lua_tostring(L, -1));
+        } else if (!strcmp(key, "ja4c_hash")) {
+          if (ja4c_hash) free(ja4c_hash);
+          ja4c_hash = strdup(lua_tostring(L, -1));
+        } else if (!strcmp(key, "tcp_fingerprint")) {
+          if (tcp_fingerprint) free(tcp_fingerprint);
+          tcp_fingerprint = strdup(lua_tostring(L, -1));
+        } else if (!strcmp(key, "bittorrent_hash")) {
+          if (bittorrent_hash) free(bittorrent_hash);
+          bittorrent_hash = strdup(lua_tostring(L, -1));
+        } else if (!strcmp(key, "external_alert")) {
+          if (external_alert) free(external_alert);
+          external_alert = strdup(lua_tostring(L, -1));
+        } else if (!strcmp(key, "flow_risk_info")) {
+          if (flow_risk_info) free(flow_risk_info);
+          flow_risk_info = strdup(lua_tostring(L, -1));
+        } else if (!strcmp(key, "ot_info")) {
+          if (ot_info) free(ot_info);
+          ot_info = strdup(lua_tostring(L, -1));
+        } else if (!strcmp(key, "first_switched_iso8601")) {
+          first_switched = Utils::str2epoch(lua_tostring(L, -1));
+        } else if (!strcmp(key, "last_switched_iso8601")) {
+          last_switched = Utils::str2epoch(lua_tostring(L, -1));
+        } else if (!strcmp(key, "l4_proto")) {
+          l4_proto = Utils::l4name2proto(lua_tostring(L, -1));
+        } else if (!strcmp(key, "l7_json")) {
+          if (l7_json) free(l7_json);
+          l7_json = strdup(lua_tostring(L, -1));
+        } else {
+          addAdditionalField(key, json_object_new_string(lua_tostring(L, -1)));
+          ntop->getTrace()->traceEvent(TRACE_DEBUG,
+                                       "Key '%s' (string) not supported", key);
+        }
+        break;
 
-    case LUA_TNUMBER:
-      if (!strcmp(key, "vlan_id"))
-	vlan_id = lua_tonumber(L, -1);
-      else if (!strcmp(key, "version"))
-	version = htons(lua_tointeger(L, -1));
-      else if (!strcmp(key, "src_port"))
-	src_port = htons(lua_tointeger(L, -1));
-      else if (!strcmp(key, "dst_port"))
-	dst_port = htons(lua_tointeger(L, -1));
-      else if (!strcmp(key, "l4_proto"))
-	l4_proto = lua_tonumber(L, -1);
-      else if (!strcmp(key, "tcp_flags"))
-	tcp.tcp_flags = htons(lua_tointeger(L, -1));
-      else if (!strcmp(key, "direction"))
-	direction = htons(lua_tointeger(L, -1));
-      else if (!strcmp(key, "first_switched"))
-	first_switched = lua_tonumber(L, -1);
-      else if (!strcmp(key, "last_switched"))
-	last_switched = lua_tonumber(L, -1);
-      else if (!strcmp(key, "in_pkts"))
-	in_pkts = lua_tonumber(L, -1);
-      else if (!strcmp(key, "in_bytes"))
-	in_bytes = lua_tonumber(L, -1);
-      else if (!strcmp(key, "out_pkts"))
-	out_pkts = lua_tonumber(L, -1);
-      else if (!strcmp(key, "out_bytes"))
-	out_bytes = lua_tonumber(L, -1);
-      else if (!strcmp(key, "master_protocol"))
-	l7_proto.proto.master_protocol = lua_tonumber(L, -1);
-      else if (!strcmp(key, "app_protocol"))
-	l7_proto.proto.app_protocol = lua_tonumber(L, -1);
-      else if (!strcmp(key, "confidence"))
-	confidence = (ndpi_confidence_t) lua_tonumber(L, -1);
-      else if (!strcmp(key, "dns_query_type"))
-	dns_query_type = lua_tonumber(L, -1);
-      else if (!strcmp(key, "dns_ret_code"))
-	dns_ret_code = lua_tonumber(L, -1);
-      else if (!strcmp(key, "dns_query_id"))
-	dns_query_id = lua_tonumber(L, -1);
-      else if (!strcmp(key, "http_ret_code"))
-	http_ret_code = lua_tonumber(L, -1);
-      else if (!strcmp(key, "tcp_stats_src_to_dst"))
-	tcp_stats_src_to_dst = lua_tonumber(L, -1);
-      else if (!strcmp(key, "tcp_stats_dst_to_src"))
-	tcp_stats_dst_to_src = lua_tonumber(L, -1);
-      else {
-	addAdditionalField(key, json_object_new_int64(lua_tonumber(L, -1)));
-	ntop->getTrace()->traceEvent(TRACE_DEBUG,
-				     "Key '%s' (number) not supported", key);
-      }
-      break;
+      case LUA_TNUMBER:
+        if (!strcmp(key, "vlan_id"))
+          vlan_id = lua_tonumber(L, -1);
+        else if (!strcmp(key, "version"))
+          version = htons(lua_tointeger(L, -1));
+        else if (!strcmp(key, "src_port"))
+          src_port = htons(lua_tointeger(L, -1));
+        else if (!strcmp(key, "dst_port"))
+          dst_port = htons(lua_tointeger(L, -1));
+        else if (!strcmp(key, "l4_proto"))
+          l4_proto = lua_tonumber(L, -1);
+        else if (!strcmp(key, "tcp_flags"))
+          tcp.tcp_flags = htons(lua_tointeger(L, -1));
+        else if (!strcmp(key, "direction"))
+          direction = htons(lua_tointeger(L, -1));
+        else if (!strcmp(key, "first_switched"))
+          first_switched = lua_tonumber(L, -1);
+        else if (!strcmp(key, "last_switched"))
+          last_switched = lua_tonumber(L, -1);
+        else if (!strcmp(key, "in_pkts"))
+          in_pkts = lua_tonumber(L, -1);
+        else if (!strcmp(key, "in_bytes"))
+          in_bytes = lua_tonumber(L, -1);
+        else if (!strcmp(key, "out_pkts"))
+          out_pkts = lua_tonumber(L, -1);
+        else if (!strcmp(key, "out_bytes"))
+          out_bytes = lua_tonumber(L, -1);
+        else if (!strcmp(key, "master_protocol"))
+          l7_proto.proto.master_protocol = lua_tonumber(L, -1);
+        else if (!strcmp(key, "app_protocol"))
+          l7_proto.proto.app_protocol = lua_tonumber(L, -1);
+        else if (!strcmp(key, "confidence"))
+          confidence = (ndpi_confidence_t)lua_tonumber(L, -1);
+        else if (!strcmp(key, "dns_query_type"))
+          dns_query_type = lua_tonumber(L, -1);
+        else if (!strcmp(key, "dns_ret_code"))
+          dns_ret_code = lua_tonumber(L, -1);
+        else if (!strcmp(key, "dns_query_id"))
+          dns_query_id = lua_tonumber(L, -1);
+        else if (!strcmp(key, "http_ret_code"))
+          http_ret_code = lua_tonumber(L, -1);
+        else if (!strcmp(key, "tcp_stats_src_to_dst"))
+          tcp_stats_src_to_dst = lua_tonumber(L, -1);
+        else if (!strcmp(key, "tcp_stats_dst_to_src"))
+          tcp_stats_dst_to_src = lua_tonumber(L, -1);
+        else {
+          addAdditionalField(key, json_object_new_int64(lua_tonumber(L, -1)));
+          ntop->getTrace()->traceEvent(TRACE_DEBUG,
+                                       "Key '%s' (number) not supported", key);
+        }
+        break;
 
-    case LUA_TBOOLEAN:
-      addAdditionalField(key, json_object_new_boolean(lua_toboolean(L, -1)));
-      ntop->getTrace()->traceEvent(TRACE_DEBUG,
-				   "Key '%s' (boolean) not supported", key);
-      break;
+      case LUA_TBOOLEAN:
+        addAdditionalField(key, json_object_new_boolean(lua_toboolean(L, -1)));
+        ntop->getTrace()->traceEvent(TRACE_DEBUG,
+                                     "Key '%s' (boolean) not supported", key);
+        break;
 
-    default:
-      ntop->getTrace()->traceEvent(TRACE_ERROR,
-				   "Internal error: type %d not handled", t);
-      break;
+      default:
+        ntop->getTrace()->traceEvent(TRACE_ERROR,
+                                     "Internal error: type %d not handled", t);
+        break;
     }
 
     lua_pop(L, 1);
@@ -351,9 +354,7 @@ void ParsedFlow::fromLua(lua_State *L, int index) {
 
 /* *************************************** */
 
-ParsedFlow::~ParsedFlow() {
-  freeMemory();
-}
+ParsedFlow::~ParsedFlow() { freeMemory(); }
 
 /* *************************************** */
 
@@ -366,39 +367,99 @@ void ParsedFlow::freeMemory() {
     additional_fields_tlv = NULL;
   }
 
-  if (l7_info)              { free(l7_info); l7_info = NULL; }
-  if (http_url)             { free(http_url); http_url = NULL; }
-  if (http_site)            { free(http_site); http_site = NULL; }
-  if (http_user_agent)      { free(http_user_agent); http_user_agent = NULL; }
-  if (dns_query)            { free(dns_query); dns_query = NULL; }
-  if (end_reason)           { free(end_reason); end_reason = NULL; }
-  if (tls_server_name)      { free(tls_server_name); tls_server_name = NULL; }
-  if (bittorrent_hash)      { free(bittorrent_hash); bittorrent_hash = NULL; }
-  if (tcp_fingerprint)      { free(tcp_fingerprint); tcp_fingerprint = NULL; }
-  if (ja4c_hash)            { free(ja4c_hash); ja4c_hash = NULL; }
-  if (external_alert)       { free(external_alert); external_alert = NULL; }
-  if (flow_risk_info)       { free(flow_risk_info); flow_risk_info = NULL; }
-  if (ot_info)              { free(ot_info); ot_info = NULL; }
-  if (ndpi_flow_risk_name)  { free(ndpi_flow_risk_name); ndpi_flow_risk_name = NULL; }
-  if (smtp_rcp_to)          { free(smtp_rcp_to); smtp_rcp_to = NULL; }
-  if (smtp_mail_from)       { free(smtp_mail_from); smtp_mail_from = NULL; }
-  if (dhcp_client_name)     { free(dhcp_client_name); dhcp_client_name = NULL; }
-  if (sip_call_id)          { free(sip_call_id); sip_call_id = NULL; }
-  if (wlan_ssid)            { free(wlan_ssid); wlan_ssid = NULL; }
-  if (l7_json)              { free(l7_json); l7_json = NULL; }
+  if (l7_info) {
+    free(l7_info);
+    l7_info = NULL;
+  }
+  if (http_url) {
+    free(http_url);
+    http_url = NULL;
+  }
+  if (http_site) {
+    free(http_site);
+    http_site = NULL;
+  }
+  if (http_user_agent) {
+    free(http_user_agent);
+    http_user_agent = NULL;
+  }
+  if (dns_query) {
+    free(dns_query);
+    dns_query = NULL;
+  }
+  if (end_reason) {
+    free(end_reason);
+    end_reason = NULL;
+  }
+  if (tls_server_name) {
+    free(tls_server_name);
+    tls_server_name = NULL;
+  }
+  if (bittorrent_hash) {
+    free(bittorrent_hash);
+    bittorrent_hash = NULL;
+  }
+  if (tcp_fingerprint) {
+    free(tcp_fingerprint);
+    tcp_fingerprint = NULL;
+  }
+  if (ja4c_hash) {
+    free(ja4c_hash);
+    ja4c_hash = NULL;
+  }
+  if (external_alert) {
+    free(external_alert);
+    external_alert = NULL;
+  }
+  if (flow_risk_info) {
+    free(flow_risk_info);
+    flow_risk_info = NULL;
+  }
+  if (ot_info) {
+    free(ot_info);
+    ot_info = NULL;
+  }
+  if (ndpi_flow_risk_name) {
+    free(ndpi_flow_risk_name);
+    ndpi_flow_risk_name = NULL;
+  }
+  if (smtp_rcp_to) {
+    free(smtp_rcp_to);
+    smtp_rcp_to = NULL;
+  }
+  if (smtp_mail_from) {
+    free(smtp_mail_from);
+    smtp_mail_from = NULL;
+  }
+  if (dhcp_client_name) {
+    free(dhcp_client_name);
+    dhcp_client_name = NULL;
+  }
+  if (sip_call_id) {
+    free(sip_call_id);
+    sip_call_id = NULL;
+  }
+  if (wlan_ssid) {
+    free(wlan_ssid);
+    wlan_ssid = NULL;
+  }
+  if (l7_json) {
+    free(l7_json);
+    l7_json = NULL;
+  }
 }
 
 /* *************************************** */
 
 void ParsedFlow::swap() {
   u_int8_t tmp_qoe_c2s, tmp_qoe_s2c;
-  
+
   ParsedFlowCore::swap();
   ParsedeBPF::swap();
 
   tmp_qoe_c2s = qoe.src_to_dst, tmp_qoe_s2c = qoe.dst_to_src;
   qoe.src_to_dst = tmp_qoe_s2c, qoe.dst_to_src = tmp_qoe_c2s;
-  
+
   is_swapped = true;
 }
 
@@ -409,7 +470,8 @@ u_int32_t ParsedFlow::get_private_flow_id() {
 
   if (getSIPCallId()) {
     size_t len = strlen(getSIPCallId());
-    private_flow_id = ndpi_quick_hash((const unsigned char *) getSIPCallId(), len);
+    private_flow_id =
+        ndpi_quick_hash((const unsigned char*)getSIPCallId(), len);
   } else if (getDNSQueryId()) {
     private_flow_id = getDNSQueryId();
   }
@@ -419,7 +481,7 @@ u_int32_t ParsedFlow::get_private_flow_id() {
 
 /* *************************************** */
 
-void ParsedFlow::addAdditionalField(const char *key, json_object *field) {
+void ParsedFlow::addAdditionalField(const char* key, json_object* field) {
   if (!additional_fields_json)
     additional_fields_json = json_object_new_object();
   if (additional_fields_json)
@@ -427,19 +489,22 @@ void ParsedFlow::addAdditionalField(const char *key, json_object *field) {
 }
 
 /* *************************************** */
-  
-void ParsedFlow::addAdditionalField(ndpi_deserializer *deserializer) {
+
+void ParsedFlow::addAdditionalField(ndpi_deserializer* deserializer) {
   if (!additional_fields_tlv) {
-    additional_fields_tlv = (ndpi_serializer *)calloc(1, sizeof(ndpi_serializer));
+    additional_fields_tlv =
+        (ndpi_serializer*)calloc(1, sizeof(ndpi_serializer));
     if (additional_fields_tlv) {
-      if (ndpi_init_serializer_ll(additional_fields_tlv, ndpi_serialization_format_tlv, 64) != 0) {
-        ntop->getTrace()->traceEvent(TRACE_WARNING, "Failure allocating TLV serializer");
+      if (ndpi_init_serializer_ll(additional_fields_tlv,
+                                  ndpi_serialization_format_tlv, 64) != 0) {
+        ntop->getTrace()->traceEvent(TRACE_WARNING,
+                                     "Failure allocating TLV serializer");
         free(additional_fields_tlv);
         additional_fields_tlv = NULL;
       }
     }
   }
-    
+
   if (additional_fields_tlv)
     ndpi_deserialize_clone_item(deserializer, additional_fields_tlv);
 }
@@ -452,11 +517,11 @@ void ParsedFlow::print() {
   src_ip.print(buf1, sizeof(buf1));
   dst_ip.print(buf2, sizeof(buf2));
 
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "[src-ip: %s][src-port: %u][dst-ip: %s][dst-port: %u][first: %u][last: %u]",
-			       src_ip.print(buf1, sizeof(buf1)),
-			       ntohs(src_port), 
-			       dst_ip.print(buf2, sizeof(buf2)),
-			       ntohs(dst_port),
-			       first_switched,
-			       last_switched);
+  ntop->getTrace()->traceEvent(TRACE_NORMAL,
+                               "[src-ip: %s][src-port: %u][dst-ip: "
+                               "%s][dst-port: %u][first: %u][last: %u]",
+                               src_ip.print(buf1, sizeof(buf1)),
+                               ntohs(src_port),
+                               dst_ip.print(buf2, sizeof(buf2)),
+                               ntohs(dst_port), first_switched, last_switched);
 }

@@ -68,13 +68,14 @@ u_int8_t DSCPStats::ds2Precedence(u_int8_t ds_id) {
 /* *************************************** */
 
 DSCPStats::DSCPStats() {
-  //   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  //   if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new]
+  //   %s", __FILE__);
   memset(counters, 0, sizeof(counters));
 }
 
 /* *************************************** */
 
-DSCPStats::DSCPStats(const DSCPStats &stats) {
+DSCPStats::DSCPStats(const DSCPStats& stats) {
   memcpy(counters, stats.counters, sizeof(counters));
 }
 
@@ -84,7 +85,7 @@ DSCPStats::~DSCPStats() {}
 
 /* *************************************** */
 
-void DSCPStats::sum(DSCPStats *stats) const {
+void DSCPStats::sum(DSCPStats* stats) const {
   for (int i = 0; i < DS_PRECEDENCE_GROUPS; i++) {
     stats->counters[i].packets.sent += counters[i].packets.sent;
     stats->counters[i].packets.rcvd += counters[i].packets.rcvd;
@@ -95,7 +96,7 @@ void DSCPStats::sum(DSCPStats *stats) const {
 
 /* *************************************** */
 
-void DSCPStats::print(NetworkInterface *iface) {
+void DSCPStats::print(NetworkInterface* iface) {
   for (int i = 0; i < 8; i++) {
     if (counters[i].bytes.sent || counters[i].bytes.rcvd)
       printf("[%d] [pkts: %llu/%llu][bytes: %llu/%llu]\n", i,
@@ -108,7 +109,7 @@ void DSCPStats::print(NetworkInterface *iface) {
 
 /* *************************************** */
 
-void DSCPStats::lua(NetworkInterface *iface, lua_State *vm, bool tsLua) {
+void DSCPStats::lua(NetworkInterface* iface, lua_State* vm, bool tsLua) {
   char name[16], buf[64];
 
   lua_newtable(vm);
@@ -158,7 +159,7 @@ void DSCPStats::incStats(u_int16_t ds_id, u_int64_t sent_packets,
 
 /* *************************************** */
 
-char *DSCPStats::precedence2Name(u_int8_t p, char *buf, size_t buf_size) {
+char* DSCPStats::precedence2Name(u_int8_t p, char* buf, size_t buf_size) {
   if (p < 8)
     snprintf(buf, buf_size, "cs%u", p);
   else if (p == DS_PR_LE)

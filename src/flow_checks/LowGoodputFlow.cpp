@@ -24,7 +24,7 @@
 
 /* ***************************************************** */
 
-void LowGoodputFlow::checkLowGoodput(Flow *f) {
+void LowGoodputFlow::checkLowGoodput(Flow* f) {
   FlowAlertType alert_type = LowGoodputFlowAlert::getClassType();
   u_int8_t c_score, s_score;
   risk_percentage cli_score_pctg = CLIENT_FAIR_RISK_PERCENTAGE;
@@ -55,24 +55,25 @@ void LowGoodputFlow::checkLowGoodput(Flow *f) {
       break; /* Continue with the check */
   };
 
-  computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
+  computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg,
+                     &c_score, &s_score);
 
-  FlowAlert *alert = buildAlert(f);
+  FlowAlert* alert = buildAlert(f);
   alert->setCliSrvScores(c_score, s_score);
   f->triggerAlert(alert);
 }
 
 /* ***************************************************** */
 
-void LowGoodputFlow::periodicUpdate(Flow *f) { checkLowGoodput(f); }
+void LowGoodputFlow::periodicUpdate(Flow* f) { checkLowGoodput(f); }
 
 /* ***************************************************** */
 
-void LowGoodputFlow::flowEnd(Flow *f) { checkLowGoodput(f); }
+void LowGoodputFlow::flowEnd(Flow* f) { checkLowGoodput(f); }
 
 /* ***************************************************** */
 
-FlowAlert *LowGoodputFlow::buildAlert(Flow *f) {
+FlowAlert* LowGoodputFlow::buildAlert(Flow* f) {
   return new LowGoodputFlowAlert(this, f);
 }
 

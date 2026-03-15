@@ -24,7 +24,8 @@
 /* *************************************** */
 
 ContainerStats::ContainerStats() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   num_flows_as_client = num_flows_as_server = 0;
   tot_rtt_as_client = tot_rtt_variance_as_client = 0;
   tot_rtt_as_server = tot_rtt_variance_as_server = 0;

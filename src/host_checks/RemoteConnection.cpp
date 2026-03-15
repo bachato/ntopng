@@ -27,12 +27,12 @@
 RemoteConnection::RemoteConnection()
     : HostCheck(ntopng_edition_community, false /* All interfaces */,
                 false /* Don't exclude for nEdge */,
-                false /* NOT only for nEdge */){};
+                false /* NOT only for nEdge */) {};
 
 /* ***************************************************** */
 
-void RemoteConnection::periodicUpdate(Host *h, HostAlert *engaged_alert) {
-  HostAlert *alert = engaged_alert;
+void RemoteConnection::periodicUpdate(Host* h, HostAlert* engaged_alert) {
+  HostAlert* alert = engaged_alert;
   u_int8_t num_remote_access = 0;
 
   num_remote_access = h->getRemoteAccess();
@@ -47,7 +47,7 @@ void RemoteConnection::periodicUpdate(Host *h, HostAlert *engaged_alert) {
 
 /* ***************************************************** */
 
-bool RemoteConnection::loadConfiguration(json_object *config) {
+bool RemoteConnection::loadConfiguration(json_object* config) {
   HostCheck::loadConfiguration(config); /* Parse parameters in common */
 
   return (true);

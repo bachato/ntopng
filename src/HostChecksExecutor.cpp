@@ -23,9 +23,10 @@
 
 /* **************************************************** */
 
-HostChecksExecutor::HostChecksExecutor(HostChecksLoader *fcl,
-                                       NetworkInterface *_iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+HostChecksExecutor::HostChecksExecutor(HostChecksLoader* fcl,
+                                       NetworkInterface* _iface) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   iface = _iface;
   memset(host_cb_arr, 0, sizeof(host_cb_arr));
   loadHostChecks(fcl);
@@ -34,32 +35,33 @@ HostChecksExecutor::HostChecksExecutor(HostChecksLoader *fcl,
 /* **************************************************** */
 
 HostChecksExecutor::~HostChecksExecutor() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+
   if (periodic_host_cb) delete periodic_host_cb;
 };
 
 /* **************************************************** */
 
-void HostChecksExecutor::loadHostChecks(HostChecksLoader *fcl) {
+void HostChecksExecutor::loadHostChecks(HostChecksLoader* fcl) {
   /* Load list of 'periodicUpdate' checks */
   periodic_host_cb = fcl->getChecks(iface);
 
   /* Initialize checks array for quick lookup */
-  for (std::list<HostCheck *>::iterator it = periodic_host_cb->begin();
+  for (std::list<HostCheck*>::iterator it = periodic_host_cb->begin();
        it != periodic_host_cb->end(); ++it) {
-    HostCheck *cb = (*it);
+    HostCheck* cb = (*it);
     host_cb_arr[cb->getID()] = cb;
   }
 }
 
 /* **************************************************** */
 
-void HostChecksExecutor::releaseAllDisabledAlerts(Host *h, time_t now) {
+void HostChecksExecutor::releaseAllDisabledAlerts(Host* h, time_t now) {
   for (u_int i = 0; i < NUM_DEFINED_HOST_CHECKS; i++) {
-    HostCheckID t = (HostCheckID) i;
-    HostCheck *cb = getCheck(t);
-    HostAlert *alert = h->getCheckEngagedAlert(t);
+    HostCheckID t = (HostCheckID)i;
+    HostCheck* cb = getCheck(t);
+    HostAlert* alert = h->getCheckEngagedAlert(t);
 
     if (alert) {
       if (/* Check max engage time (24h) required to optimize DB queries */
@@ -77,7 +79,7 @@ void HostChecksExecutor::releaseAllDisabledAlerts(Host *h, time_t now) {
 
 /* **************************************************** */
 
-void HostChecksExecutor::execChecks(Host *h) {
+void HostChecksExecutor::execChecks(Host* h) {
   bool run_min_cbs, run_5min_cbs; /* Checks to be executed during this run */
   time_t now = time(NULL);
 
@@ -88,15 +90,15 @@ void HostChecksExecutor::execChecks(Host *h) {
   run_5min_cbs = h->isTimeToRun5MinChecks(now);
 
   /* Exec all enabled checks */
-  for (std::list<HostCheck *>::iterator it = periodic_host_cb->begin();
+  for (std::list<HostCheck*>::iterator it = periodic_host_cb->begin();
        it != periodic_host_cb->end(); ++it) {
-    HostCheck *cb = (*it);
+    HostCheck* cb = (*it);
     HostCheckID ct = cb->getID();
 
     /* Check if it's time to run the check on this host */
     if ((run_min_cbs && cb->isMinCheck()) ||
         (run_5min_cbs && cb->is5MinCheck())) {
-      HostAlert *alert;
+      HostAlert* alert;
 
       /* Initializing (auto-release) alert to expiring, to check if
        * it needs to be released when not engaged again */

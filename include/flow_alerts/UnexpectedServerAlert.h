@@ -34,8 +34,8 @@ class UnexpectedServerAlert : public FlowAlert {
   }
 
  public:
-  UnexpectedServerAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f){};
-  ~UnexpectedServerAlert(){};
+  UnexpectedServerAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {};
+  ~UnexpectedServerAlert() {};
 };
 
 #endif /* _UNEXPECTED_HOST_ALERT_H_ */

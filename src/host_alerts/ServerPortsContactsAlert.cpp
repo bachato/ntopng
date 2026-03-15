@@ -2,9 +2,10 @@
 
 /* ***************************************************** */
 
-ServerPortsContactsAlert::ServerPortsContactsAlert(
-    HostCheck* c, Host* f, risk_percentage cli_pctg, 
-    u_int16_t _server_port, u_int16_t _app_proto)
+ServerPortsContactsAlert::ServerPortsContactsAlert(HostCheck* c, Host* f,
+                                                   risk_percentage cli_pctg,
+                                                   u_int16_t _server_port,
+                                                   u_int16_t _app_proto)
     : HostAlert(c, f, cli_pctg) {
   server_port = _server_port;
   app_proto = _app_proto;
@@ -17,8 +18,7 @@ ndpi_serializer* ServerPortsContactsAlert::getAlertJSON(
   if (serializer == NULL) return NULL;
 
   ndpi_serialize_string_uint64(serializer, "port", server_port);
-  ndpi_serialize_string_uint64(serializer, "app_protocol",
-                               app_proto);
+  ndpi_serialize_string_uint64(serializer, "app_protocol", app_proto);
 
   return serializer;
 }

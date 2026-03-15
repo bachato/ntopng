@@ -26,7 +26,7 @@
 
 class ExternalAlertCheck : public FlowCheck {
  private:
-  virtual void checkExternalAlert(Flow *f);
+  virtual void checkExternalAlert(Flow* f);
 
  public:
   ExternalAlertCheck()
@@ -34,13 +34,12 @@ class ExternalAlertCheck : public FlowCheck {
                   false /* Don't exclude for nEdge */,
                   false /* NOT only for nEdge */,
                   true /* has_protocol_detected */,
-                  false /* has_periodic_update */,
-                  true /* has_flow_end */){};
-  ~ExternalAlertCheck(){};
+                  false /* has_periodic_update */, true /* has_flow_end */) {};
+  ~ExternalAlertCheck() {};
 
-  void protocolDetected(Flow *f);
-  void flowEnd(Flow *f);
-  FlowAlert *buildAlert(Flow *f);
+  void protocolDetected(Flow* f);
+  void flowEnd(Flow* f);
+  FlowAlert* buildAlert(Flow* f);
 
   std::string getName() const { return (std::string("external_alert_check")); }
 };

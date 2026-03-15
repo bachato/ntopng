@@ -34,8 +34,10 @@ class FlowRiskHTTPSuspiciousURLAlert : public FlowRiskAlert {
     return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
   }
 
-  FlowRiskHTTPSuspiciousURLAlert(FlowCheck *c, Flow *f) : FlowRiskAlert(c, f){  setAlertScore(getDefaultScore());};
-  ~FlowRiskHTTPSuspiciousURLAlert(){};
+  FlowRiskHTTPSuspiciousURLAlert(FlowCheck* c, Flow* f) : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskHTTPSuspiciousURLAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
   ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }

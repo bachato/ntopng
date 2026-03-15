@@ -30,7 +30,7 @@ class RecipientQueue {
   bool skip_alerts;
   bool match_alert_id;
 
-  AlertFifoQueue *queue;
+  AlertFifoQueue* queue;
 
   /* Counters for the number of enqueues */
   u_int64_t enqueued;
@@ -44,7 +44,8 @@ class RecipientQueue {
   /* Counters for the number of alerts delivered */
   u_int64_t delivered;
 
-  /* Counters for the number of alerts not delivered due to an endpoint failure */
+  /* Counters for the number of alerts not delivered due to an endpoint failure
+   */
   u_int64_t delivery_failures;
 
   /* Timestamp of the last dequeue, regardless of queue priority */
@@ -69,8 +70,9 @@ class RecipientQueue {
   Bitmap128 enabled_host_alert_types; /* MUST be large enough to contain
                                  HostAlertID */
 
-  Bitmap128 enabled_other_alert_types; /* MUST be large enough to contain
-                                 Other alert IDs defined in other_alert_keys.lua */
+  Bitmap128
+      enabled_other_alert_types; /* MUST be large enough to contain
+                           Other alert IDs defined in other_alert_keys.lua */
 
   /* MUST be large enough to contain MAX_NUM_HOST_POOLS */
   Bitmap4096 enabled_host_pools;
@@ -86,7 +88,7 @@ class RecipientQueue {
    *
    * @return AlertFifoItem on success, NULL if queue is empty
    */
-  AlertFifoItem *dequeue();
+  AlertFifoItem* dequeue();
 
   /**
    * @brief Enqueues a notification to a `recipient_id` queue
@@ -176,9 +178,7 @@ class RecipientQueue {
    *
    * @return
    */
-  inline void setSkipAlerts(bool _skip_alerts) {
-    skip_alerts = _skip_alerts;
-  };
+  inline void setSkipAlerts(bool _skip_alerts) { skip_alerts = _skip_alerts; };
 
   /**
    * @brief Toggle match on alert_id only (ignore severity, category, etc)
@@ -215,7 +215,8 @@ class RecipientQueue {
   /**
    * @brief Inc recipient stats (used by lua recipients)
    */
-  inline void incStats(u_int64_t _delivered, u_int64_t _filtered_out, u_int64_t _delivery_failures) {
+  inline void incStats(u_int64_t _delivered, u_int64_t _filtered_out,
+                       u_int64_t _delivery_failures) {
     delivered += _delivered;
     filtered_out += _filtered_out;
     delivery_failures += _delivery_failures;

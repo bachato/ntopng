@@ -32,11 +32,11 @@ class RemoteToLocalInsecureFlow : public FlowCheck {
                   false /* Don't exclude for nEdge */,
                   false /* NOT only for nEdge */,
                   true /* has_protocol_detected */,
-                  false /* has_periodic_update */, false /* has_flow_end */){};
-  ~RemoteToLocalInsecureFlow(){};
+                  false /* has_periodic_update */, false /* has_flow_end */) {};
+  ~RemoteToLocalInsecureFlow() {};
 
-  void protocolDetected(Flow *f);
-  FlowAlert *buildAlert(Flow *f);
+  void protocolDetected(Flow* f);
+  FlowAlert* buildAlert(Flow* f);
 
   std::string getName() const {
     return (std::string("remote_to_local_insecure_flow"));

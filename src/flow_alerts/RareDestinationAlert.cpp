@@ -23,7 +23,7 @@
 
 ndpi_serializer* RareDestinationAlert::getAlertJSON(
     ndpi_serializer* serializer) {
-  Flow *f = getFlow();
+  Flow* f = getFlow();
 
   if (serializer) {
     ndpi_serialize_string_string(serializer, "destination",

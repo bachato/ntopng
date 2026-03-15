@@ -40,9 +40,9 @@ class GenericHashEntry;
  */
 class GenericHash {
  protected:
-  GenericHashEntry *
-      *table; /**< Entry table. It is used for maintain an update history */
-  char *name;
+  GenericHashEntry**
+      table; /**< Entry table. It is used for maintain an update history */
+  char* name;
   u_int32_t num_hashes;    /**< Number of hash */
   u_int32_t current_size;  /**< Current size of hash (including idle or
                               ready-to-purge elements) */
@@ -50,9 +50,9 @@ class GenericHash {
   u_int32_t
       upper_num_visited_entries; /**< Max number of entries to purge per run */
   u_int32_t hash_mask;
-  RwLock **locks;
-  NetworkInterface
-      *iface; /**< Pointer of network interface for this generic hash */
+  RwLock** locks;
+  NetworkInterface*
+      iface; /**< Pointer of network interface for this generic hash */
   u_int32_t last_purged_hash; /**< Index of last purged hash */
   u_int32_t last_entry_id;    /**< An uniue identifier assigned to each entry in
                                  the hash table */
@@ -64,15 +64,15 @@ class GenericHash {
     u_int64_t num_purged;
   } entry_state_transition_counters;
 
-  vector<GenericHashEntry *>
-      *idle_entries_in_use; /**< Vector used by the offline thread in charge to
-                               hold idle entries but still in use */
-  vector<GenericHashEntry *>
-      *idle_entries; /**< Vector used by the offline thread in charge of
-                        deleting hash table entries */
-  vector<GenericHashEntry *>
-      *idle_entries_shadow; /**< Vector prepared by the purgeIdle and
-                               periodically swapped to idle_entries */
+  vector<GenericHashEntry*>*
+      idle_entries_in_use; /**< Vector used by the offline thread in charge to
+                              hold idle entries but still in use */
+  vector<GenericHashEntry*>*
+      idle_entries; /**< Vector used by the offline thread in charge of
+                       deleting hash table entries */
+  vector<GenericHashEntry*>*
+      idle_entries_shadow; /**< Vector prepared by the purgeIdle and
+                              periodically swapped to idle_entries */
 
  public:
   /**
@@ -85,8 +85,8 @@ class GenericHash {
    * @param _name Hash name (debug)
    * @return A new Instance of GenericHash.
    */
-  GenericHash(NetworkInterface *_iface, u_int _num_hashes, u_int _max_hash_size,
-              const char *_name);
+  GenericHash(NetworkInterface* _iface, u_int _num_hashes, u_int _max_hash_size,
+              const char* _name);
 
   /**
    * @brief A Destructor
@@ -122,7 +122,7 @@ class GenericHash {
    *         False otherwise.
    *
    */
-  bool add(GenericHashEntry *h, bool do_lock);
+  bool add(GenericHashEntry* h, bool do_lock);
 
   /**
    * @brief Generic hash table walker
@@ -136,10 +136,10 @@ class GenericHash {
    * @param walker A pointer to the comparison function.
    * @param user_data Value to be compared with the values of hash.
    */
-  bool walk(u_int32_t *begin_slot, bool walk_all,
-            bool (*walker)(GenericHashEntry *h, void *user_data,
-                           bool *entryMatched),
-            void *user_data);
+  bool walk(u_int32_t* begin_slot, bool walk_all,
+            bool (*walker)(GenericHashEntry* h, void* user_data,
+                           bool* entryMatched),
+            void* user_data);
 
   /**
    * @brief Purge idle entries that have been previous idled by purgeIdle() via
@@ -158,7 +158,7 @@ class GenericHash {
    *
    * @return Numbers of purged entry, 0 otherwise.
    */
-  u_int purgeIdle(const struct timeval *tv, bool force_idle, bool full_scan);
+  u_int purgeIdle(const struct timeval* tv, bool force_idle, bool full_scan);
 
   /**
    * @brief Purge all hash entries.
@@ -172,7 +172,7 @@ class GenericHash {
    *
    * @return Pointer of network interface instance.
    */
-  inline NetworkInterface *getInterface() { return (iface); };
+  inline NetworkInterface* getInterface() { return (iface); };
 
   /**
    * @brief Return the name associated with the hash.
@@ -180,7 +180,7 @@ class GenericHash {
    *
    * @return Pointer to the name
    */
-  inline const char *getName() const { return name; };
+  inline const char* getName() const { return name; };
 
   /**
    * @brief Check whether the hash has empty space
@@ -197,7 +197,7 @@ class GenericHash {
    *
    * @return Current size of hash.
    */
-  void lua(lua_State *vm);
+  void lua(lua_State* vm);
 };
 
 #endif /* _GENERIC_HASH_H_ */

@@ -40,8 +40,8 @@ void ContinuousPingStats::update(float rtt) {
 
 /* ***************************************** */
 
-float ContinuousPingStats::getSuccessRate(float *min_rtt, float *max_rtt,
-                                          float *jitter, float *mean) {
+float ContinuousPingStats::getSuccessRate(float* min_rtt, float* max_rtt,
+                                          float* jitter, float* mean) {
   float pctg = min(
       (stats.num_ping_sent == 0)
           ? 0

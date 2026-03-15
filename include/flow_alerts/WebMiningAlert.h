@@ -28,12 +28,15 @@ class WebMiningAlert : public FlowAlert {
  private:
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_web_mining_detected, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_web_mining_detected,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_WARNING; };
 
-  WebMiningAlert(FlowCheck *c, Flow *f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-  ~WebMiningAlert(){};
+  WebMiningAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~WebMiningAlert() {};
 
   bool autoAck() const { return false; };
 

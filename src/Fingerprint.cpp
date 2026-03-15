@@ -23,7 +23,7 @@
 
 /* *************************************** */
 
-void Fingerprint::update(const char *_fprint, const char *app_name,
+void Fingerprint::update(const char* _fprint, const char* app_name,
                          bool is_malicious) {
   std::string fprint(_fprint);
 
@@ -40,8 +40,8 @@ void Fingerprint::update(const char *_fprint, const char *app_name,
     fp[fprint] = s;
   } else {
     it->second.num_uses++,
-      it->second.app_name = std::string(app_name ? app_name : "",
-					it->second.is_malicious = is_malicious);
+        it->second.app_name = std::string(
+            app_name ? app_name : "", it->second.is_malicious = is_malicious);
   }
 
   m.unlock(__FILE__, __LINE__);
@@ -49,7 +49,7 @@ void Fingerprint::update(const char *_fprint, const char *app_name,
 
 /* *************************************** */
 
-void Fingerprint::lua(const char *key, lua_State *vm) {
+void Fingerprint::lua(const char* key, lua_State* vm) {
   lua_newtable(vm);
 
   m.lock(__FILE__, __LINE__);

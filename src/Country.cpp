@@ -23,12 +23,13 @@
 
 /* *************************************** */
 
-Country::Country(NetworkInterface *_iface, const char *country)
+Country::Country(NetworkInterface* _iface, const char* country)
     : GenericHashEntry(_iface),
       GenericTrafficElement(),
       Score(_iface),
       dirstats(_iface, 0) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   country_name = strdup(country);
 
 #ifdef COUNTRY_DEBUG
@@ -44,9 +45,11 @@ void Country::set_hash_entry_state_idle() { ; /* Nothing to do */ }
 /* *************************************** */
 
 Country::~Country() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 #ifdef COUNTRY_DEBUG
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Deleted Country %s", country_name);
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Deleted Country %s",
+                               country_name);
 #endif
 
   free(country_name);
@@ -54,7 +57,7 @@ Country::~Country() {
 
 /* *************************************** */
 
-void Country::lua(lua_State *vm, DetailsLevel details_level,
+void Country::lua(lua_State* vm, DetailsLevel details_level,
                   bool asListElement) {
   lua_newtable(vm);
 
@@ -83,14 +86,14 @@ void Country::lua(lua_State *vm, DetailsLevel details_level,
 
 /* *************************************** */
 
-bool Country::equal(const char *country) {
+bool Country::equal(const char* country) {
   return (strcmp(country_name, country) == 0);
 }
 
 /* *************************************** */
 
-void Country::serialize(json_object *o, DetailsLevel details_level) {
-  json_object *obj;
+void Country::serialize(json_object* o, DetailsLevel details_level) {
+  json_object* obj;
   GenericHashEntry::getJSONObject(o, details_level);
 
   if ((obj = sent.getJSONObject()) != NULL)

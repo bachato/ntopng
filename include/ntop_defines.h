@@ -115,14 +115,16 @@
 
 #define ZMQ_COMPATIBILITY_MSG_VERSION 1
 
-#define ZMQ_MSG_VERSION               4 /* struct zmq_msg_hdr_v4 */
-#define ZMQ_MSG_VERSION_TLV           3
-#define ZMQ_MSG_VERSION_OLD           2
+#define ZMQ_MSG_VERSION 4 /* struct zmq_msg_hdr_v4 */
+#define ZMQ_MSG_VERSION_TLV 3
+#define ZMQ_MSG_VERSION_OLD 2
 
 /* Keep in sync with nProbe */
-#define ZMQ_FLAG_IS_TLV        (1 << 1)
+#define ZMQ_FLAG_IS_TLV (1 << 1)
 #define ZMQ_FLAG_IS_COMPRESSED (1 << 2)
-#define ZMQ_FLAG_EVENT_SOCKET  (1 << 3) /* indicates this is an event sent on a separate socket (msg_id follows a separate sequence) */
+#define ZMQ_FLAG_EVENT_SOCKET                                              \
+  (1 << 3) /* indicates this is an event sent on a separate socket (msg_id \
+              follows a separate sequence) */
 
 #define LOGIN_URL "/lua/login.lua"
 #define INDEX_URL "/lua/index.lua"
@@ -147,7 +149,7 @@
 #define REST_API_PREFIX "/lua/rest/"
 #define REST_API_PRO_PREFIX "/lua/pro/rest/"
 #define INTERFACE_DATA_URL "/lua/rest/get/interface/data.lua"
-#define MAX_PASSWORD_LEN 128 + 1      /* \0 */
+#define MAX_PASSWORD_LEN 128 + 1     /* \0 */
 #define HTTP_SESSION_DURATION 43200  // 12h
 #define HTTP_SESSION_MIDNIGHT_EXPIRATION false
 #define EXTENDED_HTTP_SESSION_DURATION 604800  // 7d
@@ -157,9 +159,9 @@
 
 #define PCAP_MAGIC 0xa1b2c3d4
 #define PCAP_NSEC_MAGIC 0xa1b23c4d
-#define NO_UID ((u_int32_t)-1)
-#define NO_PID ((u_int32_t)-1)
-#define NO_NDPI_PROTOCOL ((u_int)-1)
+#define NO_UID ((u_int32_t) - 1)
+#define NO_PID ((u_int32_t) - 1)
+#define NO_NDPI_PROTOCOL ((u_int) - 1)
 #define NDPI_MIN_NUM_PACKETS 12
 #define GTP_U_V1_PORT 2152
 #define EOIP_PORT 16667 /* Ethernet over IP */
@@ -172,8 +174,9 @@
 
 #define LIMITED_NUM_INTERFACES 8
 #define LIMITED_NUM_ACTIVE_HOSTS 256
-#define LIMITED_NUM_ACTIVE_FLOWS (128*1024)
-#define LIMITED_NUM_HOST_POOLS 5 /* 3 pools plus the NO_HOST_POOL_ID plus the Jailed hosts pool */
+#define LIMITED_NUM_ACTIVE_FLOWS (128 * 1024)
+#define LIMITED_NUM_HOST_POOLS \
+  5 /* 3 pools plus the NO_HOST_POOL_ID plus the Jailed hosts pool */
 #define LIMITED_NUM_PROFILES 16
 #define LIMITED_NUM_POOL_MEMBERS 8
 #define LIMITED_MAX_ZMQ_SUBSCRIBERS 32
@@ -185,12 +188,12 @@
 
 #ifndef NTOPNG_PRO
 #define MAX_NUM_DEFINED_INTERFACES LIMITED_NUM_INTERFACES
-#define MAX_NUM_ACTIVE_HOSTS       LIMITED_NUM_ACTIVE_HOSTS
-#define MAX_NUM_ACTIVE_FLOWS       LIMITED_NUM_ACTIVE_FLOWS
-#define MAX_NUM_HOST_POOLS         LIMITED_NUM_HOST_POOLS
-#define MAX_NUM_PROFILES           LIMITED_NUM_PROFILES
-#define MAX_NUM_POOL_MEMBERS       LIMITED_NUM_POOL_MEMBERS
-#define MAX_ZMQ_SUBSCRIBERS        LIMITED_MAX_ZMQ_SUBSCRIBERS
+#define MAX_NUM_ACTIVE_HOSTS LIMITED_NUM_ACTIVE_HOSTS
+#define MAX_NUM_ACTIVE_FLOWS LIMITED_NUM_ACTIVE_FLOWS
+#define MAX_NUM_HOST_POOLS LIMITED_NUM_HOST_POOLS
+#define MAX_NUM_PROFILES LIMITED_NUM_PROFILES
+#define MAX_NUM_POOL_MEMBERS LIMITED_NUM_POOL_MEMBERS
+#define MAX_ZMQ_SUBSCRIBERS LIMITED_MAX_ZMQ_SUBSCRIBERS
 #else
 /* Max number of ZMQ endpoints that can be configured to connect to the probes
  * Note: when running as server/collector the max number of clients/subscribers
@@ -203,7 +206,7 @@
 #define MAX_INTERFACE_NAME_LEN 512
 #define MAX_USER_NETS_VAL_LEN 255
 #define NUM_HOSTS_RESOLVED_BITS 2 << 19 /* ~1 million */
-#define HOST_FAMILY_ID ((u_int16_t)-1)
+#define HOST_FAMILY_ID ((u_int16_t) - 1)
 #define FLOW_PURGE_FREQUENCY 1  /* sec */
 #define HOST_PURGE_FREQUENCY 3  /* sec */
 #define OTHER_PURGE_FREQUENCY 5 /* sec - Other = ASs, MAC, Countries, VLANs */
@@ -212,14 +215,14 @@
         with incomplete TWH */
 #define MAX_FLOW_IDLE 60        /* sec */
 #define MAX_LOCAL_HOST_IDLE 300 /* sec */
-#define MAX_MAC_IDLE 300 /* sec */
+#define MAX_MAC_IDLE 300        /* sec */
 #define MAX_REMOTE_HOST_IDLE 60 /* sec */
 #define MAX_HASH_ENTRY_IDLE                                               \
   60 /* sec - Generic idle time for hash entries different from hosts and \
         flows (i.e., ASes and Countries) */
 #define MAX_PROBE_IDLE_TIME 1800 /* 30 min (Used in ZMQParserInterface.cpp) */
 #define MAX_RRD_QUEUE_LEN 200000 /* timeseries in the queue */
-#define CH_TS_QUEUE_SIZE  50000  /* ClickHouse timeseries in-memory queue */
+#define CH_TS_QUEUE_SIZE 50000   /* ClickHouse timeseries in-memory queue */
 #define MIN_NUM_IDLE_ENTRIES_IF 5000
 #define INTF_RRD_RAW_DAYS 1
 #define INTF_RRD_1MIN_DAYS 30
@@ -250,7 +253,8 @@
 #define DHCP_CACHE "ntopng.dhcp.%d.cache.%s"
 #define DHCP_STORM_QUEUE_NAME "ntopng.dhcp.storm.%d"
 #define ASSET_SERVICE_KEY "ntopng.asset.%d.%s" /* ifId.host */
-#define ASSET_HASH_CACHE_KEY "ntopng.asset.hash.cache.%d" /* take in sync with lua code */
+#define ASSET_HASH_CACHE_KEY \
+  "ntopng.asset.hash.cache.%d" /* take in sync with lua code */
 #define DHCP_STORM_PPS_THSHOLD 2048
 #define NTOPNG_TRACE "ntopng.trace"
 #define ALERT_TRACE_ERRORS "ntopng.trace_error.alert_queue"
@@ -271,36 +275,40 @@
 #define LAST_RESET_TIME "ntopng.prefs.last_reset_time"
 #define NTOPNG_VLAN_ALIASES "ntopng.vlan_aliases"
 #define TRAFFIC_FILTERING_CACHE_DURATION 43200 /* 12 h */
-#define DNS_CACHE_DURATION            3600     /*  1 h */
-#define LOCAL_HOSTS_CACHE_DURATION    3600     /*  1 h */
-#define LOCALHOST_SERVER_PORT_BITMAP  "ntopng.cache.localhost_srv_port_bitmap.%s" 
-#define HOST_LABEL_NAMES_KEY          "ntopng.cache.host_labels.%s"
-#define IFACE_DHCP_RANGE_KEY          "ntopng.prefs.ifid_%u.dhcp_ranges"
-#define IFACE_BROADCAST_DOMAINS_KEY   "ntopng.prefs.ifid_%u.broadcast_domains"
-#define HOST_SERIALIZED_KEY           "ntopng.serialized_hosts.ifid_%u_%s@%d"
-#define HOST_SERIALIZED_SHORT_KEY     "%u_%s@%d"
-#define MAC_SERIALIZED_KEY            "ntopng.serialized_macs.ifid_%u_%s" /* /lua/enterprise/get_inactive_macs_data.lua */
-#define MAC_SERIALIZED_SHORT_KEY      "%u_%s" /* /lua/enterprise/get_inactive_macs_data.lua */
-#define IP_MAC_ASSOCIATION            "ntopng.ip_to_mac.ifid_%u_%s@%d"
-#define HOST_PREF_MUD_RECORDING       "ntopng.prefs.iface_%d.mud.recording.%s"
+#define DNS_CACHE_DURATION 3600                /*  1 h */
+#define LOCAL_HOSTS_CACHE_DURATION 3600        /*  1 h */
+#define LOCALHOST_SERVER_PORT_BITMAP "ntopng.cache.localhost_srv_port_bitmap.%s"
+#define HOST_LABEL_NAMES_KEY "ntopng.cache.host_labels.%s"
+#define IFACE_DHCP_RANGE_KEY "ntopng.prefs.ifid_%u.dhcp_ranges"
+#define IFACE_BROADCAST_DOMAINS_KEY "ntopng.prefs.ifid_%u.broadcast_domains"
+#define HOST_SERIALIZED_KEY "ntopng.serialized_hosts.ifid_%u_%s@%d"
+#define HOST_SERIALIZED_SHORT_KEY "%u_%s@%d"
+#define MAC_SERIALIZED_KEY                                                          \
+  "ntopng.serialized_macs.ifid_%u_%s" /* /lua/enterprise/get_inactive_macs_data.lua \
+                                       */
+#define MAC_SERIALIZED_SHORT_KEY \
+  "%u_%s" /* /lua/enterprise/get_inactive_macs_data.lua */
+#define IP_MAC_ASSOCIATION "ntopng.ip_to_mac.ifid_%u_%s@%d"
+#define HOST_PREF_MUD_RECORDING "ntopng.prefs.iface_%d.mud.recording.%s"
 #define MUD_RECORDING_GENERAL_PURPOSE "general_purpose"
 #define MUD_RECORDING_SPECIAL_PURPOSE "special_purpose"
-#define MUD_RECORDING_DISABLED         "disabled"
-#define MUD_RECORDING_DEFAULT          "default"
-#define HOST_BY_MAC_SERIALIZED_KEY     "ntopng.serialized_hostsbymac.ifid_%u_%s"
-#define HOST_POOL_SERIALIZED_KEY       "ntopng.serialized_host_pools.ifid_%u"
-#define VLAN_SERIALIZED_KEY            "ntopng.serialized_vlan.ifid_%u_vlan_%u"
-#define AS_SERIALIZED_KEY              "ntopng.serialized_as.ifid_%u_as_%u"
-#define COUNTRY_SERIALIZED_KEY         "ntopng.serialized_as.ifid_%u_country_%s"
-#define OBS_POINT_SERIALIZED_KEY       "ntopng.serialized_as.ifid_%u_obs_point_%u"
-#define SYSLOG_PRODUCERS_MAP_KEY       "ntopng.syslog.ifid_%u.producers_map"
-#define NTOPNG_PREFS_PREFIX            "ntopng.prefs"
-#define NTOPNG_CACHE_PREFIX            "ntopng.cache"
-#define NTOPNG_USER_PREFIX             "ntopng.user"
-#define NTOPNG_API_TOKEN_PREFIX        "ntopng.api_tokens"
-#define MAC_CUSTOM_DEVICE_TYPE         NTOPNG_PREFS_PREFIX ".device_types.%s"
-#define CONST_SNMP_IFACE_ROLES         NTOPNG_PREFS_PREFIX ".snmp_devices.interface_role"
-#define NTOP_HOSTS_SERIAL              "ntopng.host_serial"
+#define MUD_RECORDING_DISABLED "disabled"
+#define MUD_RECORDING_DEFAULT "default"
+#define HOST_BY_MAC_SERIALIZED_KEY "ntopng.serialized_hostsbymac.ifid_%u_%s"
+#define HOST_POOL_SERIALIZED_KEY "ntopng.serialized_host_pools.ifid_%u"
+#define VLAN_SERIALIZED_KEY "ntopng.serialized_vlan.ifid_%u_vlan_%u"
+#define AS_SERIALIZED_KEY "ntopng.serialized_as.ifid_%u_as_%u"
+#define COUNTRY_SERIALIZED_KEY "ntopng.serialized_as.ifid_%u_country_%s"
+#define OBS_POINT_SERIALIZED_KEY "ntopng.serialized_as.ifid_%u_obs_point_%u"
+#define SYSLOG_PRODUCERS_MAP_KEY "ntopng.syslog.ifid_%u.producers_map"
+#define NTOPNG_PREFS_PREFIX "ntopng.prefs"
+#define NTOPNG_CACHE_PREFIX "ntopng.cache"
+#define NTOPNG_USER_PREFIX "ntopng.user"
+#define NTOPNG_API_TOKEN_PREFIX "ntopng.api_tokens"
+#define MAC_CUSTOM_DEVICE_TYPE NTOPNG_PREFS_PREFIX ".device_types.%s"
+#define CONST_SNMP_IFACE_ROLES \
+  NTOPNG_PREFS_PREFIX ".snmp_devices.interface_role"
+#define NTOP_HOSTS_SERIAL "ntopng.host_serial"
 #define MAX_NUM_INTERFACE_IDS 256
 #define DUMMY_BRIDGE_INTERFACE_ID 1 /* Anything but zero */
 #define MAX_FAILED_LOGIN_ATTEMPTS 5
@@ -329,7 +337,8 @@
 #define CONST_STR_USER_NETS NTOPNG_USER_PREFIX ".%s.allowed_nets"
 #define CONST_STR_USER_ALLOWED_IFNAME NTOPNG_USER_PREFIX ".%s.allowed_ifname"
 #define CONST_STR_USER_HOST_POOL_ID NTOPNG_USER_PREFIX ".%s.host_pool_id"
-#define CONST_STR_USER_ALLOWED_HOST_POOLS NTOPNG_USER_PREFIX ".%s.allowed_host_pools"
+#define CONST_STR_USER_ALLOWED_HOST_POOLS \
+  NTOPNG_USER_PREFIX ".%s.allowed_host_pools"
 #define CONST_STR_USER_LANGUAGE NTOPNG_USER_PREFIX ".%s.language"
 #define CONST_STR_USER_ALLOW_PCAP NTOPNG_USER_PREFIX ".%s.allow_pcap"
 #define CONST_STR_USER_ALLOW_HISTORICAL_FLOW \
@@ -338,9 +347,10 @@
 #define CONST_STR_USER_EXPIRE NTOPNG_USER_PREFIX ".%s.expire"
 #define CONST_STR_USER_CAPABILITIES NTOPNG_USER_PREFIX ".%s.capabilities"
 #define CONST_STR_USER_API_TOKEN NTOPNG_USER_PREFIX ".%s.api_token"
-#define CONST_STR_USER_TOTP_SECRET  NTOPNG_USER_PREFIX ".%s.totp_secret"
+#define CONST_STR_USER_TOTP_SECRET NTOPNG_USER_PREFIX ".%s.totp_secret"
 #define CONST_STR_USER_TOTP_ENABLED NTOPNG_USER_PREFIX ".%s.totp_enabled"
-#define CONST_STR_UNKNOWN_TCP_FINGERPRINTS NTOPNG_CACHE_PREFIX ".unknown_tcp_fingerprints"
+#define CONST_STR_UNKNOWN_TCP_FINGERPRINTS \
+  NTOPNG_CACHE_PREFIX ".unknown_tcp_fingerprints"
 #define CONST_ALLOWED_NETS "allowed_nets"
 #define CONST_ALLOWED_IFNAME "allowed_ifname"
 #define CONST_USER_LANGUAGE "language"
@@ -363,16 +373,18 @@
 #define CONST_INTERFACE_TYPE_DB "db"
 #define CONST_INTERFACE_TYPE_UNKNOWN "unknown"
 
-#define CONST_ASSETS_PERIODIC_UPDATE  60      /* 1 min  */
-#define CONST_DEMO_MODE_DURATION     600      /* 10 min */
-#define CONST_MAX_DUMP_DURATION      300      /* 5 min  */
+#define CONST_ASSETS_PERIODIC_UPDATE 60       /* 1 min  */
+#define CONST_DEMO_MODE_DURATION 600          /* 10 min */
+#define CONST_MAX_DUMP_DURATION 300           /* 5 min  */
 #define CONST_MAX_NUM_PACKETS_PER_LIVE 100000 /* live captures via HTTP */
 #define CONST_MAX_DUMP 500000000
 
 #define CONST_MAX_NUM_LIVE_EXTRACTIONS 2
 
-#define CONST_MAX_EXTR_PCAP_BYTES NTOPNG_PREFS_PREFIX ".max_extracted_pcap_bytes"
-#define CONST_MAX_EXTR_PCAP_FILES NTOPNG_PREFS_PREFIX ".max_extracted_pcap_files"
+#define CONST_MAX_EXTR_PCAP_BYTES \
+  NTOPNG_PREFS_PREFIX ".max_extracted_pcap_bytes"
+#define CONST_MAX_EXTR_PCAP_FILES \
+  NTOPNG_PREFS_PREFIX ".max_extracted_pcap_files"
 #define CONST_DEFAULT_MAX_EXTR_PCAP_BYTES (100 * 1024 * 1024)
 #define CONST_DEFAULT_MAX_EXTR_PCAP_FILES (0)
 
@@ -398,15 +410,15 @@
 #define MAX_NUM_LOCAL_NETWORKS 1024
 #define CONST_MAX_NUM_CHECKPOINTS 4
 
-#define HOST_SERVICE_DHCP   0x01
-#define HOST_SERVICE_DNS    0x02
-#define HOST_SERVICE_NTP    0x03
-#define HOST_SERVICE_SMTP   0x04
-#define HOST_SERVICE_IMAP   0x05
-#define HOST_SERVICE_POP    0x06
-#define HOST_SERVICE_HTTP   0x07
-#define HOST_SERVICE_SSH    0x08
-#define HOST_SERVICE_RDP    0x09
+#define HOST_SERVICE_DHCP 0x01
+#define HOST_SERVICE_DNS 0x02
+#define HOST_SERVICE_NTP 0x03
+#define HOST_SERVICE_SMTP 0x04
+#define HOST_SERVICE_IMAP 0x05
+#define HOST_SERVICE_POP 0x06
+#define HOST_SERVICE_HTTP 0x07
+#define HOST_SERVICE_SSH 0x08
+#define HOST_SERVICE_RDP 0x09
 #define HOST_SERVICE_MODBUS 0x0A
 #define HOST_SERVICE_S7COMM 0x0B
 #define HOST_SERVICE_PROFINET 0x0C
@@ -631,7 +643,7 @@
                                        */
 #define CONST_MAX_NEW_FLOWS_SECOND 25 /* keep in sync with alert_utils.lua */
 #define CONST_ALERT_GRACE_PERIOD 60   /* No more than 1 alert/min */
-#define CONST_MAX_ALERT_ENGAGE_TIME (60*60*24) /* 24h (sec) */
+#define CONST_MAX_ALERT_ENGAGE_TIME (60 * 60 * 24) /* 24h (sec) */
 
 #define CONST_CONTACTED_BY "contacted_by"
 #define CONST_CONTACTS "contacted_peers" /* Peers contacted by this host */
@@ -650,11 +662,11 @@
 /* Maximum line lenght for the line protocol to write timeseries */
 #define LINE_PROTOCOL_MAX_LINE 512
 
-#define CONST_DEVICES_LEARNING_TIME 7200 /* 2 hours */
+#define CONST_DEVICES_LEARNING_TIME 7200   /* 2 hours */
 #define CONST_HOST_PORT_LEARNING_TIME 7200 /* 2 hours */
-#define CONST_IEC104_LEARNING_TIME 21600 /* 6 hours */
-#define CONST_MODBUS_LEARNING_TIME 21600 /* 6 hours */
-#define CONST_S7COMM_LEARNING_TIME 21600 /* 6 hours */
+#define CONST_IEC104_LEARNING_TIME 21600   /* 6 hours */
+#define CONST_MODBUS_LEARNING_TIME 21600   /* 6 hours */
+#define CONST_S7COMM_LEARNING_TIME 21600   /* 6 hours */
 #define CONST_INFLUXDB_KEY_EXPORTED_POINTS \
   "ntopng.cache.influxdb.num_exported_points"
 #define CONST_INFLUXDB_FLUSH_TIME 10         /* sec */
@@ -679,14 +691,12 @@
 #define CONST_DEFAULT_FLOWS_ONLY_INTERFACE false
 #define CONST_ALERT_DISABLED_PREFS \
   NTOPNG_PREFS_PREFIX ".disable_alerts_generation"
-#define CONST_PREFS_ENABLE_SNMP_POLLING \
-  NTOPNG_PREFS_PREFIX ".snmp_polling"
+#define CONST_PREFS_ENABLE_SNMP_POLLING NTOPNG_PREFS_PREFIX ".snmp_polling"
 #define CONST_PREFS_ENABLE_ACTIVE_MONITORING \
   NTOPNG_PREFS_PREFIX ".active_monitoring"
 #define CONST_PREFS_ENABLE_NETWORK_DISCOVERY \
   NTOPNG_PREFS_PREFIX ".network_discovery"
-#define CONST_PREFS_ENABLE_STARTTLS \
-  NTOPNG_PREFS_PREFIX ".starttls"
+#define CONST_PREFS_ENABLE_STARTTLS NTOPNG_PREFS_PREFIX ".starttls"
 #define CONST_PREFS_ENABLE_DUMP_PCAP_TO_CLICKHOUSE \
   NTOPNG_PREFS_PREFIX ".dump_pcap_to_clickhouse"
 #define CONST_PREFS_ENABLE_ARCHIVE_BEFORE_TTL_DELETE \
@@ -706,8 +716,7 @@
 #define CONST_FLOW_TABLE_TIME NTOPNG_PREFS_PREFIX ".flow_table_time"
 #define CONST_FLOW_TABLE_PROBE_ORDER \
   NTOPNG_PREFS_PREFIX ".flow_table_probe_order"
-#define CONST_INTERFACE_CUSTOM_NAME \
-  NTOPNG_PREFS_PREFIX ".ifid_%d.name"
+#define CONST_INTERFACE_CUSTOM_NAME NTOPNG_PREFS_PREFIX ".ifid_%d.name"
 #define CONST_MIRRORED_TRAFFIC_PREFS \
   NTOPNG_PREFS_PREFIX ".ifid_%d.is_traffic_mirrored"
 #define CONST_SMART_RECORDING_PREFS \
@@ -781,10 +790,12 @@
   NTOPNG_PREFS_PREFIX ".is_client_x509_auth_enabled"
 #define CONST_PREFS_EMIT_FLOW_ALERTS NTOPNG_PREFS_PREFIX ".emit_flow_alerts"
 #define CONST_PREFS_EMIT_HOST_ALERTS NTOPNG_PREFS_PREFIX ".emit_host_alerts"
-#define CONST_PREFS_TLS_QUIC_HOSTNAMING NTOPNG_PREFS_PREFIX ".tls_quic_hostnaming"
+#define CONST_PREFS_TLS_QUIC_HOSTNAMING \
+  NTOPNG_PREFS_PREFIX ".tls_quic_hostnaming"
 
-#define CONST_PREFS_COLLECT_BLACKLISTSTATS NTOPNG_PREFS_PREFIX ".collect_blacklist_stats"
-#define CONST_BLACKLIST_DAILY_STATS        NTOPNG_CACHE_PREFIX ".bl_hosts.%s"
+#define CONST_PREFS_COLLECT_BLACKLISTSTATS \
+  NTOPNG_PREFS_PREFIX ".collect_blacklist_stats"
+#define CONST_BLACKLIST_DAILY_STATS NTOPNG_CACHE_PREFIX ".bl_hosts.%s"
 
 #define CONST_PREFS_BROADCAST_DOMAIN_TOO_LARGE \
   NTOPNG_PREFS_PREFIX ".is_broadcast_domain_too_large_enabled"
@@ -803,14 +814,12 @@
   NTOPNG_PREFS_PREFIX ".behaviour_analysis_learning_status_during_learning"
 #define CONST_PREFS_BEHAVIOUR_ANALYSIS_STATUS_POST_LEARNING \
   NTOPNG_PREFS_PREFIX ".behaviour_analysis_learning_status_post_learning"
-  
-#define CONST_PREFS_HTTP_INDEX_PAGE \
-  NTOPNG_PREFS_PREFIX ".http_index_page"
-#define DEFAULT_HTTP_INDEX_PAGE \
-  ""
+
+#define CONST_PREFS_HTTP_INDEX_PAGE NTOPNG_PREFS_PREFIX ".http_index_page"
+#define DEFAULT_HTTP_INDEX_PAGE ""
 
 #define CONST_PREFS_ASN_MODE_ENABLED NTOPNG_PREFS_PREFIX ".toggle_asn_mode"
-#define DEFAULT_ASN_MODE_ENABLED     false
+#define DEFAULT_ASN_MODE_ENABLED false
 
 #define CONST_PREFS_IEC60870_ANALYSIS_LEARNING_PERIOD \
   NTOPNG_PREFS_PREFIX ".iec60870_learning_period"
@@ -823,41 +832,32 @@
 #define CONST_PREFS_DEVICES_ANALYSIS_LEARNING_PERIOD \
   NTOPNG_PREFS_PREFIX ".devices_learning_period"
 
-
 #define CONST_DEFAULT_BEHAVIOUR_ANALYSIS_LEARNING_PERIOD \
   7200  // 2 hours by default
 
-#define CONST_PREFS_NETBOX_ENABLED \
-  NTOPNG_PREFS_PREFIX ".toggle_netbox"
-#define CONST_DEFAULT_NETBOX_ENABLED \
-  0  // disabled by default
+#define CONST_PREFS_NETBOX_ENABLED NTOPNG_PREFS_PREFIX ".toggle_netbox"
+#define CONST_DEFAULT_NETBOX_ENABLED 0  // disabled by default
 
 #define CONST_PREFS_NTOPNG_ASSETS_INVENTORY_ENABLED \
   NTOPNG_PREFS_PREFIX ".toggle_ntopng_assets_inventory"
-#define CONST_DEFAULT_NTOPNG_ASSETS_INVENTORY_ENABLED \
-  0  // disabled by default
-  
-#define CONST_PREFS_NETBOX_ENABLED \
-  NTOPNG_PREFS_PREFIX ".toggle_netbox"
-#define CONST_DEFAULT_NETBOX_ENABLED \
-  0  // disabled by default
-  
+#define CONST_DEFAULT_NTOPNG_ASSETS_INVENTORY_ENABLED 0  // disabled by default
+
+#define CONST_PREFS_NETBOX_ENABLED NTOPNG_PREFS_PREFIX ".toggle_netbox"
+#define CONST_DEFAULT_NETBOX_ENABLED 0  // disabled by default
+
 // *** NOTE: changed from toggle_asset_inventory to enable_asset_inventory
 // due to old incosistencies in the key
 #define CONST_PREFS_ASSET_INVENTORY_ENABLED \
-  NTOPNG_PREFS_PREFIX ".enable_asset_inventory" // same name as lua prefs.lua
-#define CONST_DEFAULT_ASSET_INVENTORY_ENABLED \
-  1  // enabled by default
+  NTOPNG_PREFS_PREFIX ".enable_asset_inventory"  // same name as lua prefs.lua
+#define CONST_DEFAULT_ASSET_INVENTORY_ENABLED 1  // enabled by default
 
 #define CONST_PREFS_SNMP_TRAP_ENABLED \
-  NTOPNG_PREFS_PREFIX ".toggle_snmp_trap" // same name as lua prefs.lua
-#define CONST_DEFAULT_SNMP_TRAP_ENABLED \
-  0  // disabled by default
+  NTOPNG_PREFS_PREFIX ".toggle_snmp_trap"  // same name as lua prefs.lua
+#define CONST_DEFAULT_SNMP_TRAP_ENABLED 0  // disabled by default
 
-#define CONST_PREFS_USE_MAC_IN_FLOW_KEY		\
+#define CONST_PREFS_USE_MAC_IN_FLOW_KEY \
   NTOPNG_PREFS_PREFIX ".use_mac_in_flow_key"
-#define CONST_PREFS_FINGERPRINT_STATS \
-  NTOPNG_PREFS_PREFIX ".fingerprint_stats"
+#define CONST_PREFS_FINGERPRINT_STATS NTOPNG_PREFS_PREFIX ".fingerprint_stats"
 
 #define CONST_PREFS_NETWORK_DISCOVERY_DEBUG \
   NTOPNG_PREFS_PREFIX ".network_discovery_debug"
@@ -878,7 +878,8 @@
 #define CONST_VS_SLOW_SCAN NTOPNG_PREFS_PREFIX ".vs.vs_slow_scan"
 #define CONST_RUNTIME_MAX_UI_STRLEN NTOPNG_PREFS_PREFIX ".max_ui_strlen"
 #define CONST_RUNTIME_PREFS_TS_DRIVER NTOPNG_PREFS_PREFIX ".timeseries_driver"
-#define CONST_RUNTIME_PREFS_SPLIT_TS_DIRECTION NTOPNG_PREFS_PREFIX ".split_ts_direction"
+#define CONST_RUNTIME_PREFS_SPLIT_TS_DIRECTION \
+  NTOPNG_PREFS_PREFIX ".split_ts_direction"
 #define CONST_RUNTIME_IS_AUTOLOGOUT_ENABLED \
   NTOPNG_PREFS_PREFIX ".is_autologon_enabled"
 #define CONST_RUNTIME_IS_INTERFACE_NAME_ONLY \
@@ -994,7 +995,7 @@
 #define CONST_LOOPBACK_ADDRESS "127.0.0.1"
 #define CONST_EPP_MAX_CMD_NUM 34
 #define CONST_DEFAULT_MAX_PACKET_SIZE 1522
-#define CONST_MAX_PACKET_SIZE         65535 /* https://wiki.wireshark.org/MTU */
+#define CONST_MAX_PACKET_SIZE 65535 /* https://wiki.wireshark.org/MTU */
 
 /* ARP matrix generation preferences */
 #define CONST_DEFAULT_ARP_MATRIX_GENERATION \
@@ -1094,8 +1095,8 @@
 #define HAVE_EMBEDDED_SUPPORT 1
 #endif
 
-#define NUM_MINUTES_PER_DAY             1440  // == 60 * 24
-#define NUM_MIN_TCP_PKTS_PER_DIRECTION  4
+#define NUM_MINUTES_PER_DAY 1440  // == 60 * 24
+#define NUM_MIN_TCP_PKTS_PER_DIRECTION 4
 
 #define DUMP_MAC_SIZE 6
 #define MAC_SIZE DUMP_MAC_SIZE
@@ -1123,7 +1124,8 @@
 #define CONST_PREFS_MESSAGE_BROKER_URL NTOPNG_PREFS_PREFIX ".message_broker_url"
 #define DEFAULT_MESSAGE_BROKER_URL "0.0.0.0:4222"
 
-#define CONST_PREFS_MESSAGE_BROKER_ENABLED NTOPNG_PREFS_PREFIX ".toggle_message_broker"
+#define CONST_PREFS_MESSAGE_BROKER_ENABLED \
+  NTOPNG_PREFS_PREFIX ".toggle_message_broker"
 #define DEFAULT_MESSAGE_BROKER_ENABLED false
 
 #define BROKER_RPC_CALL_DEFAULT_TIMEOUT_MS (u_int64_t)10000
@@ -1133,8 +1135,7 @@
 #define CONST_NATS_M_BROKER_ID "nats"
 #define CONST_MQTT_M_BROKER_ID "mqtt"
 
-#define CONST_PREFS_MESSAGE_BROKER \
-  NTOPNG_PREFS_PREFIX ".message_broker"
+#define CONST_PREFS_MESSAGE_BROKER NTOPNG_PREFS_PREFIX ".message_broker"
 #define DEFAULT_MESSAGE_BROKER CONST_NATS_M_BROKER_ID
 
 /* ********************* */
@@ -1142,7 +1143,8 @@
 #define DEFAULT_SAFE_SEARCH_DNS "208.67.222.123" /* OpenDNS Family Shield */
 
 /* ********************* */
-#define DEFAULT_SPLIT_TS_DIRECTION "total" /* Split Interface Timeseries l7 traffic */
+#define DEFAULT_SPLIT_TS_DIRECTION \
+  "total" /* Split Interface Timeseries l7 traffic */
 
 #define ALERTS_MANAGER_MAX_AGGR_SECS \
   300 /* Aggregate equal alerts if generated within this interval */
@@ -1188,7 +1190,8 @@
 #define STATS_UPDATE_SCRIPT_PATH "stats_update.lua"
 
 #define STARTUP_SCRIPT_PATH "startup.lua"
-#define BOOT_SCRIPT_PATH    "boot.lua" /* Executed as root before networking is setup */
+#define BOOT_SCRIPT_PATH \
+  "boot.lua" /* Executed as root before networking is setup */
 #define SHUTDOWN_SCRIPT_PATH "shutdown.lua"
 
 #define HOUSEKEEPING_SCRIPT_PATH "housekeeping.lua"
@@ -1259,14 +1262,17 @@
   256 /* Keep it in sync with lua preferences file prefs.lua */
 #endif
 #define PREF_NTOP_RADIUS_AUTH NTOPNG_PREFS_PREFIX ".radius.auth_enabled"
-#define PREF_RADIUS_AUTH_SERVER NTOPNG_PREFS_PREFIX ".radius.radius_server_address"
-#define PREF_RADIUS_ACCT_SERVER NTOPNG_PREFS_PREFIX ".radius.radius_acct_server_address"
+#define PREF_RADIUS_AUTH_SERVER \
+  NTOPNG_PREFS_PREFIX ".radius.radius_server_address"
+#define PREF_RADIUS_ACCT_SERVER \
+  NTOPNG_PREFS_PREFIX ".radius.radius_acct_server_address"
 #define PREF_RADIUS_AUTH_PROTO NTOPNG_PREFS_PREFIX ".radius.radius_auth_proto"
 #define PREF_RADIUS_SECRET NTOPNG_PREFS_PREFIX ".radius.radius_secret"
 #define PREF_RADIUS_ADMIN_GROUP NTOPNG_PREFS_PREFIX ".radius.radius_admin_group"
 #define PREF_RADIUS_UNPRIV_CAP_GROUP \
   NTOPNG_PREFS_PREFIX ".radius.radius_unpriv_capabilties_group"
-#define PREF_RADIUS_EXT_AUTHE_LOCAL_AUTHO NTOPNG_PREFS_PREFIX ".radius.external_auth_for_local_users_enabled"
+#define PREF_RADIUS_EXT_AUTHE_LOCAL_AUTHO \
+  NTOPNG_PREFS_PREFIX ".radius.external_auth_for_local_users_enabled"
 #define PREF_RADIUS_DEBUG NTOPNG_PREFS_PREFIX ".radius_debug"
 #define CONST_RADIUS_LOG_FILE "radius.log"
 
@@ -1339,8 +1345,9 @@
 #define HTTP_MAX_CONTENT_TYPE_LENGTH 63
 #define HTTP_MAX_HEADER_LINES 20
 
-#define HTTP_MAX_UPLOAD_DATA_LEN  25000000 /* ~25 MB (see also upload_pcap.template) */
-#define HTTP_MAX_POST_DATA_LEN    4194304  /*   4 MB */
+#define HTTP_MAX_UPLOAD_DATA_LEN \
+  25000000 /* ~25 MB (see also upload_pcap.template) */
+#define HTTP_MAX_POST_DATA_LEN 4194304 /*   4 MB */
 #define HTTP_CONTENT_TYPE_HEADER "Content-Type: "
 #define CONST_HELLO_HOST "hello"
 
@@ -1368,7 +1375,8 @@
 #define MARKER_PASS 1
 #define MARKER_DROP 2
 
-#define NO_HOST_POOL_ID 0 /* Keep in sync with pools.lua pools.DEFAULT_POOL_ID   */
+#define NO_HOST_POOL_ID \
+  0 /* Keep in sync with pools.lua pools.DEFAULT_POOL_ID   */
 #define DEFAULT_POOL_NAME \
   "Default" /* Keep in sync with pools.lua pools.DEFAULT_POOL_NAME */
 
@@ -1400,7 +1408,7 @@
 
 #ifdef __cplusplus
 class NtopngLuaContext; /* Forward */
-extern NtopngLuaContext* getUserdata(struct lua_State *vm);
+extern NtopngLuaContext* getUserdata(struct lua_State* vm);
 #define getLuaVMContext(a) (a ? getUserdata(a) : NULL)
 #define getLuaVMUserdata(a, b) (a ? getUserdata(a)->b : NULL)
 #define getLuaVMUservalue(a, b) getUserdata(a)->b
@@ -1415,20 +1423,21 @@ extern NtopngLuaContext* getUserdata(struct lua_State *vm);
 #define MAX_CHECKPOINT_COMPRESSION_BUFFER_SIZE 1024
 
 /* Keep in sync with nProbe */
-#define MAX_ZMQ_FLOW_BUF                 131072
-#define DEFAULT_ZMQ_TCP_KEEPALIVE        1 /* Keepalive ON */
-#define DEFAULT_ZMQ_TCP_KEEPALIVE_IDLE  30 /* Keepalive after 30 seconds */
-#define DEFAULT_ZMQ_TCP_KEEPALIVE_CNT    3 /* Keepalive send 3 probes */
-#define DEFAULT_ZMQ_TCP_KEEPALIVE_INTVL  3 /* Keepalive probes sent every 3 seconds */
+#define MAX_ZMQ_FLOW_BUF 131072
+#define DEFAULT_ZMQ_TCP_KEEPALIVE 1       /* Keepalive ON */
+#define DEFAULT_ZMQ_TCP_KEEPALIVE_IDLE 30 /* Keepalive after 30 seconds */
+#define DEFAULT_ZMQ_TCP_KEEPALIVE_CNT 3   /* Keepalive send 3 probes */
+#define DEFAULT_ZMQ_TCP_KEEPALIVE_INTVL \
+  3 /* Keepalive probes sent every 3 seconds */
 
-#define NTOPNG_MAX_NUM_SNMP_DEVICES_NEDGE       8
-#define NTOPNG_MAX_NUM_SNMP_DEVICES_ENT_M      16
-#define NTOPNG_MAX_NUM_SNMP_DEVICES_ENT_L      32
-#define NTOPNG_MAX_NUM_SNMP_DEVICES_ENT_XL    128
-#define NTOPNG_MAX_NUM_SNMP_DEVICES_ENT_XXL   512
+#define NTOPNG_MAX_NUM_SNMP_DEVICES_NEDGE 8
+#define NTOPNG_MAX_NUM_SNMP_DEVICES_ENT_M 16
+#define NTOPNG_MAX_NUM_SNMP_DEVICES_ENT_L 32
+#define NTOPNG_MAX_NUM_SNMP_DEVICES_ENT_XL 128
+#define NTOPNG_MAX_NUM_SNMP_DEVICES_ENT_XXL 512
 #define NTOPNG_MAX_NUM_SNMP_DEVICES_ENT_XXXL 1024
 
-#define MAX_NUM_ASYNC_SNMP_ENGINES         NTOPNG_MAX_NUM_SNMP_DEVICES_ENT_XXL
+#define MAX_NUM_ASYNC_SNMP_ENGINES NTOPNG_MAX_NUM_SNMP_DEVICES_ENT_XXL
 
 #if defined(NTOPNG_PRO) && defined(HAVE_LIBSNMP)
 #define HAVE_SNMP_TRAP
@@ -1493,7 +1502,7 @@ extern NtopngLuaContext* getUserdata(struct lua_State *vm);
 
 #define UNKNOWN_FLOW_DIRECTION 2
 
-#define UNKNOWN_PKT_IFACE_IDX  -1
+#define UNKNOWN_PKT_IFACE_IDX -1
 
 /******************************************************************************/
 
@@ -1542,7 +1551,7 @@ extern NtopngLuaContext* getUserdata(struct lua_State *vm);
 #ifdef PROFILING
 #define PROFILING_DECLARE(n)             \
   ticks __profiling_sect_start[n];       \
-  const char *__profiling_sect_label[n]; \
+  const char* __profiling_sect_label[n]; \
   ticks __profiling_sect_tot[n];         \
   u_int64_t __profiling_sect_counter[n];
 #define PROFILING_INIT()                                                 \
@@ -1585,8 +1594,8 @@ extern NtopngLuaContext* getUserdata(struct lua_State *vm);
 #define INTERFACE_PROFILING_SUB_SECTION_EXIT(f, i)
 #endif
 
-#define MAX_NUM_CONCURRENT_JOBS    8
-#define MAX_NUM_QUEUED_JOBS        256
+#define MAX_NUM_CONCURRENT_JOBS 8
+#define MAX_NUM_QUEUED_JOBS 256
 #define CONST_MAX_NUM_QUEUED_PORTS 8
 
 #define SIMULATE_VLANS_MAX_VALUE 0xa /* 10 in hexadecimal */
@@ -1640,46 +1649,58 @@ extern NtopngLuaContext* getUserdata(struct lua_State *vm);
 #define CUSTOM_FLOW_END_SCRIPT \
   "scripts/callbacks/checks/flows/custom_flow_end_script.lua"
 
-#define OFFLINE_LOCAL_HOSTS_MACS_QUEUE_NAME "ntopng.assets_hosts_macs.queue.ifid_%d"
+#define OFFLINE_LOCAL_HOSTS_MACS_QUEUE_NAME \
+  "ntopng.assets_hosts_macs.queue.ifid_%d"
 
 #define EXPORTERS_EXCEEDED_LIMITS_KEY "ntopng.limits.exporters"
 
 #define MAX_NUM_PCAP_INTERFACES 8
 
-#define NO_VLAN (u_int16_t)-1
-#define NO_IN_IF_INDEX (u_int32_t)-1
-#define NO_OUT_IF_INDEX (u_int32_t)-1
-#define NO_ALERTS_STATUS (u_int32_t)-1
+#define NO_VLAN (u_int16_t) - 1
+#define NO_IN_IF_INDEX (u_int32_t) - 1
+#define NO_OUT_IF_INDEX (u_int32_t) - 1
+#define NO_ALERTS_STATUS (u_int32_t) - 1
 
 #define CONST_MAX_NUM_DEDUP_STATS 3
 #define CONST_DEFAULT_TLS_CIPHERS "HIGH:!aNULL:!MD5:!RC4"
-#define CONST_ZMQ_PAYLOAD_LEN     131072 /* 128k max ZMQ message size */
+#define CONST_ZMQ_PAYLOAD_LEN 131072 /* 128k max ZMQ message size */
 
-#define CONST_GATEWAY_CONFIGURATION_REDIS_KEY "ntopng.prefs.nw_config_gateway_list"
-#define CONST_DNS_SERVER_CONFIGURATION_REDIS_KEY "ntopng.prefs.nw_config_dns_list"
-#define CONST_NTP_SERVER_CONFIGURATION_REDIS_KEY "ntopng.prefs.nw_config_ntp_list"
-#define CONST_DHCP_SERVER_CONFIGURATION_REDIS_KEY "ntopng.prefs.nw_config_dhcp_list"
-#define CONST_SMTP_SERVER_CONFIGURATION_REDIS_KEY "ntopng.prefs.nw_config_smtp_list"
+#define CONST_GATEWAY_CONFIGURATION_REDIS_KEY \
+  "ntopng.prefs.nw_config_gateway_list"
+#define CONST_DNS_SERVER_CONFIGURATION_REDIS_KEY \
+  "ntopng.prefs.nw_config_dns_list"
+#define CONST_NTP_SERVER_CONFIGURATION_REDIS_KEY \
+  "ntopng.prefs.nw_config_ntp_list"
+#define CONST_DHCP_SERVER_CONFIGURATION_REDIS_KEY \
+  "ntopng.prefs.nw_config_dhcp_list"
+#define CONST_SMTP_SERVER_CONFIGURATION_REDIS_KEY \
+  "ntopng.prefs.nw_config_smtp_list"
 
-#define CONST_CUSTOMER_ASN_CONFIGURATION_REDIS_KEY "ntopng.prefs.config_customer_asn_list"
-#define CONST_SUB_CUSTOMER_ASN_CONFIGURATION_REDIS_KEY "ntopng.prefs.config_sub_customer_asn_list"
-#define CONST_REMOTE_ASN_CONFIGURATION_REDIS_KEY "ntopng.prefs.config_remote_asn_list"
+#define CONST_CUSTOMER_ASN_CONFIGURATION_REDIS_KEY \
+  "ntopng.prefs.config_customer_asn_list"
+#define CONST_SUB_CUSTOMER_ASN_CONFIGURATION_REDIS_KEY \
+  "ntopng.prefs.config_sub_customer_asn_list"
+#define CONST_REMOTE_ASN_CONFIGURATION_REDIS_KEY \
+  "ntopng.prefs.config_remote_asn_list"
 
 #ifdef NTOPNG_PRO
-#define CONST_LOCAL_DEVICES_NETWORKS_CONFIGURATION_REDIS_KEY     "ntopng.prefs.nw_policy_local_devices"
-#define CONST_CORPORATE_DEVICES_NETWORKS_CONFIGURATION_REDIS_KEY "ntopng.prefs.nw_policy_corporate_devices"
-#define CONST_WHITELISTED_NETWORKS_CONFIGURATION_REDIS_KEY       "ntopng.prefs.nw_policy_whitelisted_networks"
+#define CONST_LOCAL_DEVICES_NETWORKS_CONFIGURATION_REDIS_KEY \
+  "ntopng.prefs.nw_policy_local_devices"
+#define CONST_CORPORATE_DEVICES_NETWORKS_CONFIGURATION_REDIS_KEY \
+  "ntopng.prefs.nw_policy_corporate_devices"
+#define CONST_WHITELISTED_NETWORKS_CONFIGURATION_REDIS_KEY \
+  "ntopng.prefs.nw_policy_whitelisted_networks"
 #endif
 
-#define CONST_FLOW_DEV_EXPORTER_SITES_ID                         "ntopng.flow_dev_exporter_sites"
+#define CONST_FLOW_DEV_EXPORTER_SITES_ID "ntopng.flow_dev_exporter_sites"
 
-#define NTOP_QOE_MAX        100
-#define NTOP_QOE_UNKNOWN    255
-#define NTOP_QOE_EXCELLENT   90
-#define NTOP_QOE_GOOD        75
-#define NTOP_QOE_FAIR        65
-#define NTOP_QOE_DEGRADED    50
-#define NTOP_QOE_POOR        30
+#define NTOP_QOE_MAX 100
+#define NTOP_QOE_UNKNOWN 255
+#define NTOP_QOE_EXCELLENT 90
+#define NTOP_QOE_GOOD 75
+#define NTOP_QOE_FAIR 65
+#define NTOP_QOE_DEGRADED 50
+#define NTOP_QOE_POOR 30
 
 /******************************************************************************/
 

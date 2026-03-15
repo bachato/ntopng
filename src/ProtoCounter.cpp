@@ -25,9 +25,10 @@
 
 ProtoCounter::ProtoCounter(u_int16_t _proto_id, bool enable_throughput_stats,
                            bool enable_behavior_stats) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   proto_id = _proto_id;
-  
+
   if (enable_throughput_stats)
     bytes_thpt = new (std::nothrow) ThroughputStats();
   else
@@ -50,19 +51,18 @@ ProtoCounter::~ProtoCounter() {
 
 /* *************************************************/
 
-void ProtoCounter::sum(ProtoCounter *p) {
+void ProtoCounter::sum(ProtoCounter* p) {
   packets.incStats(p->packets.getSent(), p->packets.getRcvd());
   bytes.incStats(p->bytes.getSent(), p->bytes.getRcvd());
   duration += p->duration;
   total_flows += p->total_flows;
 
-  if(bytes_thpt && p->bytes_thpt)
-    bytes_thpt->set(p->bytes_thpt);
+  if (bytes_thpt && p->bytes_thpt) bytes_thpt->set(p->bytes_thpt);
 }
 
 /* *************************************************/
 
-void ProtoCounter::print(u_int16_t proto_id, NetworkInterface *iface) {
+void ProtoCounter::print(u_int16_t proto_id, NetworkInterface* iface) {
   if (bytes.getTotal())
     printf("[%s] [pkts: %llu/%llu][bytes: %llu/%llu][duration: %u sec]\n",
            iface->get_ndpi_proto_name(proto_id),
@@ -74,9 +74,9 @@ void ProtoCounter::print(u_int16_t proto_id, NetworkInterface *iface) {
 
 /* *************************************************/
 
-void ProtoCounter::lua(lua_State *vm, NetworkInterface *iface, bool tsLua,
+void ProtoCounter::lua(lua_State* vm, NetworkInterface* iface, bool tsLua,
                        bool diff) {
-  char *name = iface->get_ndpi_proto_name(proto_id);
+  char* name = iface->get_ndpi_proto_name(proto_id);
 
   if (name != NULL) {
     if (bytes.getTotal() ||
@@ -93,13 +93,13 @@ void ProtoCounter::lua(lua_State *vm, NetworkInterface *iface, bool tsLua,
         lua_push_uint64_table_entry(vm, "duration", duration);
         lua_push_uint64_table_entry(vm, "num_flows", total_flows);
 
-	/*
+        /*
 #ifdef NTOPNG_PRO
-	  if (behavior_bytes_traffic)
+          if (behavior_bytes_traffic)
           behavior_bytes_traffic->luaBehavior(
-	  vm, "l7_traffic_behavior");
+          vm, "l7_traffic_behavior");
 #endif
-	*/
+        */
         if (bytes_thpt) {
           lua_newtable(vm);
 
@@ -129,23 +129,23 @@ void ProtoCounter::lua(lua_State *vm, NetworkInterface *iface, bool tsLua,
 
 /* *************************************************/
 
-void ProtoCounter::set(ProtoCounter *p) {
+void ProtoCounter::set(ProtoCounter* p) {
   proto_id = p->proto_id;
-/*
-#ifdef NTOPNG_PRO
-  if (behavior_bytes_traffic != NULL) {
-    delete behavior_bytes_traffic;
-    behavior_bytes_traffic = NULL;
-  }
+  /*
+  #ifdef NTOPNG_PRO
+    if (behavior_bytes_traffic != NULL) {
+      delete behavior_bytes_traffic;
+      behavior_bytes_traffic = NULL;
+    }
 
-  if (p->behavior_bytes_traffic) {
-    behavior_bytes_traffic = new (std::nothrow) BehaviorAnalysis();
+    if (p->behavior_bytes_traffic) {
+      behavior_bytes_traffic = new (std::nothrow) BehaviorAnalysis();
 
-    if (behavior_bytes_traffic != NULL)
-      behavior_bytes_traffic->set(p->behavior_bytes_traffic);
-  }
-#endif
-*/
+      if (behavior_bytes_traffic != NULL)
+        behavior_bytes_traffic->set(p->behavior_bytes_traffic);
+    }
+  #endif
+  */
   if (bytes_thpt != NULL) {
     delete bytes_thpt;
     bytes_thpt = NULL;
@@ -163,7 +163,7 @@ void ProtoCounter::set(ProtoCounter *p) {
 
 /* *************************************************/
 
-void ProtoCounter::updateStats(const struct timeval *tv,
+void ProtoCounter::updateStats(const struct timeval* tv,
                                time_t nextMinPeriodicUpdate) {
   if (!bytes_thpt) bytes_thpt = new (std::nothrow) ThroughputStats();
 
@@ -202,10 +202,10 @@ void ProtoCounter::incStats(u_int32_t when, u_int64_t sent_packets,
 
 /* ************************************************ */
 
-void ProtoCounter::addProtoJson(json_object *my_object,
-                                NetworkInterface *iface) {
+void ProtoCounter::addProtoJson(json_object* my_object,
+                                NetworkInterface* iface) {
   json_object *inner, *inner1;
-  char *name = iface->get_ndpi_proto_name(proto_id);
+  char* name = iface->get_ndpi_proto_name(proto_id);
 
   if (!name) return;
 
@@ -256,26 +256,28 @@ void ProtoCounter::resetStats() {
 }
 
 /* ************************************************ */
-bool ProtoCounter::deserialize(json_object *o) {
+bool ProtoCounter::deserialize(json_object* o) {
   if (!o || !json_object_is_type(o, json_type_object)) return false;
 
-  json_object *obj;
+  json_object* obj;
 
   resetStats();
 
   if (json_object_object_get_ex(o, "duration", &obj))
     duration = json_object_get_int64(obj);
 
-  if (json_object_object_get_ex(o, "packets", &obj) && json_object_is_type(obj, json_type_object)) {
+  if (json_object_object_get_ex(o, "packets", &obj) &&
+      json_object_is_type(obj, json_type_object)) {
     json_object *sent, *rcvd;
     if (json_object_object_get_ex(obj, "sent", &sent))
       packets.setSent(json_object_get_int64(sent));
     if (json_object_object_get_ex(obj, "rcvd", &rcvd))
       packets.setRcvd(json_object_get_int64(rcvd));
-      ;
+    ;
   }
 
-  if (json_object_object_get_ex(o, "bytes", &obj) && json_object_is_type(obj, json_type_object)) {
+  if (json_object_object_get_ex(o, "bytes", &obj) &&
+      json_object_is_type(obj, json_type_object)) {
     json_object *sent, *rcvd;
     if (json_object_object_get_ex(obj, "sent", &sent))
       bytes.setSent(json_object_get_int64(sent));

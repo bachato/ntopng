@@ -36,43 +36,48 @@
 /* **************************************************** */
 
 u_int32_t ScoreCounter::dec(u_int16_t score) {
-  if(value >= score) {
+  if (value >= score) {
     u_int32_t old_value = value;
-    
+
     value -= score, decay_time = ntop->get_current_time() + DEFAULT_DECAY_TIME;
     alpha = ((float)(old_value - value)) / DEFAULT_DECAY_TIME, beta = old_value;
 
 #ifdef TRACE
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[ScoreCounter::dec()] [old: %u][new: %u][alpha: %.2f]",
-				 beta, value, alpha);
+    ntop->getTrace()->traceEvent(
+        TRACE_NORMAL, "[ScoreCounter::dec()] [old: %u][new: %u][alpha: %.2f]",
+        beta, value, alpha);
 #endif
   } else {
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "Internal error [%u vs %u]", value, score);
+    ntop->getTrace()->traceEvent(TRACE_ERROR, "Internal error [%u vs %u]",
+                                 value, score);
     value = 0;
   }
-  
-  return(value);
+
+  return (value);
 }
 
 /* **************************************************** */
 
 u_int32_t ScoreCounter::get() {
-  if(decay_time == 0)
-    return(value); /* No decay */
+  if (decay_time == 0)
+    return (value); /* No decay */
   else {
-    if(decay_time < ntop->get_current_time()) {
+    if (decay_time < ntop->get_current_time()) {
       decay_time = 0; /* Decay is over */
-      return(value);
+      return (value);
     } else {
-       u_int32_t t_diff = decay_time - ntop->get_current_time();
-       u_int32_t t_past = DEFAULT_DECAY_TIME-t_diff;
-       u_int32_t ret = beta - (u_int32_t)(alpha * t_past);
+      u_int32_t t_diff = decay_time - ntop->get_current_time();
+      u_int32_t t_past = DEFAULT_DECAY_TIME - t_diff;
+      u_int32_t ret = beta - (u_int32_t)(alpha * t_past);
 
 #ifdef TRACE
-       ntop->getTrace()->traceEvent(TRACE_NORMAL, "[ScoreCounter::get()] [current: %u][old: %u][time past: %u/%u]", ret, b, t_past, DEFAULT_DECAY_TIME);
+      ntop->getTrace()->traceEvent(
+          TRACE_NORMAL,
+          "[ScoreCounter::get()] [current: %u][old: %u][time past: %u/%u]", ret,
+          b, t_past, DEFAULT_DECAY_TIME);
 #endif
-       
-      return(ret);
+
+      return (ret);
     }
   }
 }

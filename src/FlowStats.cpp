@@ -42,7 +42,7 @@ FlowStats::~FlowStats() {
 
 void FlowStats::incStats(Bitmap128 alert_bitmap, u_int8_t l4_protocol,
                          AlertLevel alert_level, u_int8_t dscp_cli2srv,
-                         u_int8_t dscp_srv2cli, Flow *flow) {
+                         u_int8_t dscp_srv2cli, Flow* flow) {
   u_int i;
 
   for (i = 0; i < alert_bitmap.numBits(); i++) {
@@ -66,8 +66,8 @@ void FlowStats::incStats(Bitmap128 alert_bitmap, u_int8_t l4_protocol,
       cli_pool_found = true;
     } else {
       /* Host null, let's try using IpAddress */
-      IpAddress *ip = (IpAddress *)flow->get_cli_ip_addr();
-      ndpi_patricia_node_t *cli_target_node = NULL;
+      IpAddress* ip = (IpAddress*)flow->get_cli_ip_addr();
+      ndpi_patricia_node_t* cli_target_node = NULL;
 
       if (flow->get_cli_ip_addr())
         cli_pool_found = flow->getInterface()->getHostPools()->findIpPool(
@@ -79,8 +79,8 @@ void FlowStats::incStats(Bitmap128 alert_bitmap, u_int8_t l4_protocol,
       srv_pool_found = true;
     } else {
       /* Host null, let's try using IpAddress */
-      ndpi_patricia_node_t *srv_target_node = NULL;
-      IpAddress *ip = (IpAddress *)flow->get_srv_ip_addr();
+      ndpi_patricia_node_t* srv_target_node = NULL;
+      IpAddress* ip = (IpAddress*)flow->get_srv_ip_addr();
 
       if (flow->get_srv_ip_addr())
         srv_pool_found = flow->getInterface()->getHostPools()->findIpPool(
@@ -109,7 +109,7 @@ void FlowStats::incStats(Bitmap128 alert_bitmap, u_int8_t l4_protocol,
 
 /* *************************************** */
 
-void FlowStats::lua(lua_State *vm) {
+void FlowStats::lua(lua_State* vm) {
   lua_newtable(vm);
 
   for (int i = 0; i < BITMAP_NUM_BITS; i++) {
@@ -251,7 +251,7 @@ void FlowStats::lua(lua_State *vm) {
 
 /* *************************************** */
 
-void FlowStats::updateTalkingHosts(Flow *f) {
+void FlowStats::updateTalkingHosts(Flow* f) {
   char buf[64];
   std::pair<std::map<std::string, u_int16_t>::iterator, bool> ret;
   ret = talking_hosts.insert(std::pair<std::string, u_int16_t>(
@@ -267,8 +267,8 @@ void FlowStats::updateTalkingHosts(Flow *f) {
 
 /* *************************************** */
 
-void FlowStats::updateWLANSSID(Flow *f) {
-  char *wlan_ssid_string = f->getWLANSSID();
+void FlowStats::updateWLANSSID(Flow* f) {
+  char* wlan_ssid_string = f->getWLANSSID();
   if (wlan_ssid_string) {
     std::pair<std::map<std::string, u_int16_t>::iterator, bool> ret;
     ret = wlan_ssid.insert(

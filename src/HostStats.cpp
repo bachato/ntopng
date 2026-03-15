@@ -24,7 +24,8 @@
 /* *************************************** */
 
 HostStats::HostStats(Host* _host) : GenericTrafficElement() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   host = _host;
 
   alerted_flows_as_client = alerted_flows_as_server = 0;
@@ -115,9 +116,10 @@ void HostStats::updateStats(const struct timeval* tv) {
     if (score_cli.addObservation(host->getScoreAsClient())) {
       char buf[64];
 
-      ntop->getTrace()->traceEvent(TRACE_INFO, "[ANOMALY] %s [%s][client score] [value: %u]",
-				   host->get_ip()->print(buf, sizeof(buf)),
-				   host->getInterface()->get_name(), host->getScoreAsClient());
+      ntop->getTrace()->traceEvent(
+          TRACE_INFO, "[ANOMALY] %s [%s][client score] [value: %u]",
+          host->get_ip()->print(buf, sizeof(buf)),
+          host->getInterface()->get_name(), host->getScoreAsClient());
       num_anomalies++;
       client_score_anomaly = 1;
     } else
@@ -126,9 +128,10 @@ void HostStats::updateStats(const struct timeval* tv) {
     if (score_srv.addObservation(host->getScoreAsServer())) {
       char buf[64];
 
-      ntop->getTrace()->traceEvent(TRACE_INFO, "[ANOMALY] %s [%s][server score] [value: %u]",
-				   host->get_ip()->print(buf, sizeof(buf)),
-				   host->getInterface()->get_name(), host->getScoreAsServer());
+      ntop->getTrace()->traceEvent(
+          TRACE_INFO, "[ANOMALY] %s [%s][server score] [value: %u]",
+          host->get_ip()->print(buf, sizeof(buf)),
+          host->getInterface()->get_name(), host->getScoreAsServer());
       num_anomalies++;
       server_score_anomaly = 1;
     } else
@@ -324,7 +327,7 @@ void HostStats::luaStats(lua_State* vm, NetworkInterface* iface,
 
   if (getResetFlow() > 0)
     lua_push_uint64_table_entry(vm, "num_reset_flows", getResetFlow());
-  
+
   host->lua_get_score(vm);
 
   if (verbose) {
@@ -404,7 +407,6 @@ void HostStats::incStats(time_t when, u_int8_t l4_proto, u_int ndpi_proto,
                          u_int64_t sent_bytes, u_int64_t sent_goodput_bytes,
                          u_int64_t rcvd_packets, u_int64_t rcvd_bytes,
                          u_int64_t rcvd_goodput_bytes, bool peer_is_unicast) {
-
   sent.incStats(when, sent_packets, sent_bytes);
   rcvd.incStats(when, rcvd_packets, rcvd_bytes);
 

@@ -27,7 +27,7 @@
 class TCPPacketsIssues : public FlowCheck {
  private:
   u_int64_t retransmission_threshold, out_of_order_threshold, lost_threshold;
-  void checkTCPPacketsIssues(Flow *f);
+  void checkTCPPacketsIssues(Flow* f);
 
  public:
   TCPPacketsIssues()
@@ -39,13 +39,13 @@ class TCPPacketsIssues : public FlowCheck {
     retransmission_threshold = out_of_order_threshold = lost_threshold =
         (u_int64_t)-1 /* No threshold */;
   };
-  ~TCPPacketsIssues(){};
+  ~TCPPacketsIssues() {};
 
-  void periodicUpdate(Flow *f);
-  void flowEnd(Flow *f);
+  void periodicUpdate(Flow* f);
+  void flowEnd(Flow* f);
 
-  bool loadConfiguration(json_object *config);
-  FlowAlert *buildAlert(Flow *f);
+  bool loadConfiguration(json_object* config);
+  FlowAlert* buildAlert(Flow* f);
 
   std::string getName() const { return (std::string("tcp_packets_issues")); }
 };

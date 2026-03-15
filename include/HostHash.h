@@ -30,10 +30,10 @@ class HostHash : public GenericHash {
   Mutex m;
 
  public:
-  HostHash(NetworkInterface *iface, u_int _num_hashes, u_int _max_hash_size);
+  HostHash(NetworkInterface* iface, u_int _num_hashes, u_int _max_hash_size);
 
   /* Search for an host by IP and VLAN */
-  Host *get(u_int16_t vlanId, IpAddress *key, Mac *mac, bool is_inline_call,
+  Host* get(u_int16_t vlanId, IpAddress* key, Mac* mac, bool is_inline_call,
             u_int16_t observation_point_id);
 
   void incNumHTTPEntries();

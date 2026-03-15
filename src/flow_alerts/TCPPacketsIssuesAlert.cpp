@@ -23,7 +23,7 @@
 
 ndpi_serializer* TCPPacketsIssuesAlert::getAlertJSON(
     ndpi_serializer* serializer) {
-  Flow *f = getFlow();
+  Flow* f = getFlow();
   FlowTrafficStats* stats = f->getTrafficStats();
   u_int64_t retransmission = stats ? (stats->get_cli2srv_tcp_retr() +
                                       stats->get_srv2cli_tcp_retr())

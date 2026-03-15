@@ -23,7 +23,7 @@
 
 /* ************************************ */
 
-AutonomousSystemHash::AutonomousSystemHash(NetworkInterface *_iface,
+AutonomousSystemHash::AutonomousSystemHash(NetworkInterface* _iface,
                                            u_int _num_hashes,
                                            u_int _max_hash_size)
     : GenericHash(_iface, _num_hashes, _max_hash_size, "AutonomousSystemHash") {
@@ -33,7 +33,7 @@ AutonomousSystemHash::AutonomousSystemHash(NetworkInterface *_iface,
 
 /* ************************************ */
 
-AutonomousSystem *AutonomousSystemHash::get(IpAddress *ipa,
+AutonomousSystem* AutonomousSystemHash::get(IpAddress* ipa,
                                             bool is_inline_call) {
   u_int32_t asn, hash;
 
@@ -46,17 +46,17 @@ AutonomousSystem *AutonomousSystemHash::get(IpAddress *ipa,
   if (table[hash] == NULL) {
     return (NULL);
   } else {
-    AutonomousSystem *head;
+    AutonomousSystem* head;
 
     if (!is_inline_call) locks[hash]->rdlock(__FILE__, __LINE__);
 
-    head = (AutonomousSystem *)table[hash];
+    head = (AutonomousSystem*)table[hash];
 
     while (head != NULL) {
       if (!head->idle() && head->equal(asn))
         break;
       else
-        head = (AutonomousSystem *)head->next();
+        head = (AutonomousSystem*)head->next();
     }
 
     if (!is_inline_call) locks[hash]->unlock(__FILE__, __LINE__);
@@ -69,8 +69,8 @@ AutonomousSystem *AutonomousSystemHash::get(IpAddress *ipa,
 
 #ifdef AS_DEBUG
 
-static bool print_ases(GenericHashEntry *_as, void *user_data) {
-  AutonomousSystem *as = (AutonomousSystem *)_as;
+static bool print_ases(GenericHashEntry* _as, void* user_data) {
+  AutonomousSystem* as = (AutonomousSystem*)_as;
 
   ntop->getTrace()->traceEvent(
       TRACE_NORMAL, "Autonomous System [asn: %u] [asname: %s] [num_uses: %u]",
@@ -91,8 +91,9 @@ void AutonomousSystemHash::printHash() {
 
 #endif
 
-static bool update_ases_prefs(GenericHashEntry *_as, void *user_data, bool *entry_matched) {
-  AutonomousSystem *as = (AutonomousSystem *)_as;
+static bool update_ases_prefs(GenericHashEntry* _as, void* user_data,
+                              bool* entry_matched) {
+  AutonomousSystem* as = (AutonomousSystem*)_as;
   if (ntop->getPrefs()->isCustomerASN(as->get_asn()) ||
       ntop->getPrefs()->isSubCustomerASN(as->get_asn()) ||
       ntop->getPrefs()->isRemoteASN(as->get_asn())) {

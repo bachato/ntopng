@@ -36,30 +36,36 @@ class FlowDB : public DB {
   u_int32_t checkpointDroppedFlows, checkpointQueueDroppedFlows;
 
  public:
-  FlowDB(NetworkInterface *_iface);
-  virtual ~FlowDB(){};
+  FlowDB(NetworkInterface* _iface);
+  virtual ~FlowDB() {};
 
   /* Failures enqueueing flows for export (NetworkInterface) */
-  inline void incNumQueueDroppedFlows(u_int32_t num = 1) { queueDroppedFlows += num; };
+  inline void incNumQueueDroppedFlows(u_int32_t num = 1) {
+    queueDroppedFlows += num;
+  };
   /* Failures dumping flows to the database (ClickHouseDB) */
-  inline void incNumDroppedFlows(u_int32_t num = 1)      { droppedFlows += num;      };
+  inline void incNumDroppedFlows(u_int32_t num = 1) { droppedFlows += num; };
   /* Flows successfully dumped */
-  inline void incNumExportedFlows(u_int64_t num = 1)     { exportedFlows += num;     };
+  inline void incNumExportedFlows(u_int64_t num = 1) { exportedFlows += num; };
 
   inline u_int64_t getNumExportedFlows() const { return (exportedFlows); }
-  inline u_int32_t getNumDroppedFlows()  const { return (queueDroppedFlows + droppedFlows); };
-  void updateStats(const struct timeval *tv);
+  inline u_int32_t getNumDroppedFlows() const {
+    return (queueDroppedFlows + droppedFlows);
+  };
+  void updateStats(const struct timeval* tv);
   void checkPointCounters(bool drops_only);
 
-  virtual const char *getEngineName() { return "Unknown"; };
-  virtual bool dumpFlow(time_t when, Flow *f, char *json) { return false; };
+  virtual const char* getEngineName() { return "Unknown"; };
+  virtual bool dumpFlow(time_t when, Flow* f, char* json) { return false; };
   virtual bool startDumpLoop() { return false; }
 
   virtual void archiveData(time_t epoch_begin, time_t epoch_end) {}
 
-  virtual void lua(lua_State *vm, bool since_last_checkpoint);
-  virtual void getStats(u_int64_t *flow_export_count, u_int64_t *flow_export_drops,
-			u_int64_t *flow_export_rate, bool since_last_checkpoint);  
+  virtual void lua(lua_State* vm, bool since_last_checkpoint);
+  virtual void getStats(u_int64_t* flow_export_count,
+                        u_int64_t* flow_export_drops,
+                        u_int64_t* flow_export_rate,
+                        bool since_last_checkpoint);
 };
 
 #endif /* _FLOWDB_CLASS_H_ */

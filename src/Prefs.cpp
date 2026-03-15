@@ -36,13 +36,13 @@ extern "C" {
 
 /* ******************************************* */
 
-Prefs::Prefs(Ntop *_ntop) {
-  if(trace_new_delete && (ntop->getTrace() != NULL))
+Prefs::Prefs(Ntop* _ntop) {
+  if (trace_new_delete && (ntop->getTrace() != NULL))
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 
   num_deferred_interfaces_to_register = 0, cli = NULL;
   ntop = _ntop, pcap_file_purge_hosts_flows = false, ignore_vlans = false,
-    simulate_vlans = false, simulate_macs = false, ignore_macs = false;
+  simulate_vlans = false, simulate_macs = false, ignore_macs = false;
   housekeeping_frequency = HOUSEKEEPING_FREQUENCY;
   insecure_tls = false, clickhouse_client = clickhouse_cluster_name = NULL;
   local_networks = strdup(CONST_DEFAULT_HOME_NET "," CONST_DEFAULT_LOCAL_NETS);
@@ -51,17 +51,18 @@ Prefs::Prefs(Ntop *_ntop) {
   local_networks_set = false, shutdown_when_done = false;
   enable_users_login = true, disable_localhost_login = false;
   enable_dns_resolution = sniff_dns_responses = sniff_name_responses =
-    sniff_local_name_responses = true, limited_resources_mode = false;
+      sniff_local_name_responses = true,
+  limited_resources_mode = false;
   use_promiscuous_mode = true, do_reforge_timestamps = false;
   resolve_all_host_ip = false, service_license_check = false;
   add_vlan_tags_to_cloud_exporters = false, disable_purge = false,
-    strict_startup = false;
+  strict_startup = false;
   max_num_hosts = MAX_NUM_INTERFACE_HOSTS,
-    max_num_flows = MAX_NUM_INTERFACE_HOSTS;
+  max_num_flows = MAX_NUM_INTERFACE_HOSTS;
   attacker_max_num_flows_per_sec = victim_max_num_flows_per_sec =
-    CONST_MAX_NEW_FLOWS_SECOND;
+      CONST_MAX_NEW_FLOWS_SECOND;
   attacker_max_num_syn_per_sec = victim_max_num_syn_per_sec =
-    CONST_MAX_NUM_SYN_PER_SECOND;
+      CONST_MAX_NUM_SYN_PER_SECOND;
   ewma_alpha_percent = CONST_DEFAULT_EWMA_ALPHA_PERCENT;
   data_dir = strdup(CONST_DEFAULT_DATA_DIR);
   emit_flow_alerts = emit_host_alerts = true;
@@ -72,23 +73,21 @@ Prefs::Prefs(Ntop *_ntop) {
   influx_internal_available = true;
   enable_access_log = false, enable_assets_log = false, enable_sql_log = false;
   enable_flow_device_port_rrd_creation =
-    enable_observation_points_rrd_creation =
-    enable_intranet_traffic_rrd_creation = false;
+      enable_observation_points_rrd_creation =
+          enable_intranet_traffic_rrd_creation = false;
   http_log_path = NULL;
   reproduce_at_original_speed = false;
   enable_top_talkers = enable_sites_collection = enable_dns_cache = false;
   enable_active_local_hosts_cache = false, enable_tiny_flows_export = true,
-    enable_captive_portal = false, mac_based_captive_portal = false,
-    enable_arp_matrix_generation = false,
-    enable_informative_captive_portal = false,
-    enable_external_auth_captive_portal = false,
-    full_stats_enabled = true,
-    override_dst_with_post_nat_dst = false,
-    override_src_with_post_nat_src = false,
-    message_broker_enabled = false;
+  enable_captive_portal = false, mac_based_captive_portal = false,
+  enable_arp_matrix_generation = false,
+  enable_informative_captive_portal = false,
+  enable_external_auth_captive_portal = false, full_stats_enabled = true,
+  override_dst_with_post_nat_dst = false,
+  override_src_with_post_nat_src = false, message_broker_enabled = false;
   hostMask = no_host_mask, collect_blacklist_stats = false;
   enable_asn_behaviour_analysis = enable_network_behaviour_analysis =
-    enable_iface_l7_behaviour_analysis = false;
+      enable_iface_l7_behaviour_analysis = false;
   enable_broadcast_domain_too_large = false;
   enable_mac_ndpi_stats = false;
   auto_assigned_pool_id = NO_HOST_POOL_ID;
@@ -100,9 +99,9 @@ Prefs::Prefs(Ntop *_ntop) {
   max_extracted_pcap_bytes = CONST_DEFAULT_MAX_EXTR_PCAP_BYTES;
   max_extracted_pcap_files = CONST_DEFAULT_MAX_EXTR_PCAP_FILES;
   behaviour_analysis_learning_period =
-    CONST_DEFAULT_BEHAVIOUR_ANALYSIS_LEARNING_PERIOD;
+      CONST_DEFAULT_BEHAVIOUR_ANALYSIS_LEARNING_PERIOD;
   mac_address_cache_duration = MAX_MAC_IDLE;
-  enable_flow_swap_heuristic = true; /* Enabled by default */
+  enable_flow_swap_heuristic = true;    /* Enabled by default */
   skip_dpi_for_collected_flows = false; /* Disabled by default */
   behaviour_analysis_learning_status_during_learning = service_allowed;
   behaviour_analysis_learning_status_post_learning = service_allowed;
@@ -126,7 +125,7 @@ Prefs::Prefs(Ntop *_ntop) {
   pcap_dir = NULL;
   clickhouse_archive_dir = NULL;
   test_pre_script_path = test_post_script_path = test_runtime_script_path =
-    NULL;
+      NULL;
   message_broker_url = NULL;
   message_broker = NULL;
   config_file_path = ndpi_proto_path = NULL;
@@ -167,7 +166,7 @@ Prefs::Prefs(Ntop *_ntop) {
   pid_path = strdup(DEFAULT_PID_PATH);
   packet_filter = NULL;
   num_interfaces = 0, enable_auto_logout = true,
-    enable_auto_logout_at_runtime = true;
+  enable_auto_logout_at_runtime = true;
   enable_interface_name_only = false, dump_flows_on_clickhouse = false;
   dump_flows_on_es = dump_flows_on_syslog = false;
   dump_json_flows_on_disk = dump_ext_json = false;
@@ -177,7 +176,8 @@ Prefs::Prefs(Ntop *_ntop) {
   dump_queue_len = CLICKHOUSE_MAX_DUMP_BLOCKS;
   dump_queue_block_size = CLICKHOUSE_MAX_DUMP_ROWS_PER_BLOCK;
   dump_flows_direct = false;
-  max_aggregated_flows_upperbound = 10000, max_aggregated_flows_traffic_upperbound = 1;
+  max_aggregated_flows_upperbound = 10000,
+  max_aggregated_flows_traffic_upperbound = 1;
   data_archive_before_ttl_delete = false;
 #endif
   enable_runtime_flows_dump = true;
@@ -203,10 +203,10 @@ Prefs::Prefs(Ntop *_ntop) {
 #endif
   print_version = print_version_json = false;
 
-  if(!(ifNames = (InterfaceInfo *)calloc(UNLIMITED_NUM_INTERFACES,
-                                          sizeof(InterfaceInfo))) ||
+  if (!(ifNames = (InterfaceInfo*)calloc(UNLIMITED_NUM_INTERFACES,
+                                         sizeof(InterfaceInfo))) ||
       !(deferred_interfaces_to_register =
-	(char **)calloc(UNLIMITED_NUM_INTERFACES, sizeof(char *))))
+            (char**)calloc(UNLIMITED_NUM_INTERFACES, sizeof(char*))))
     throw "Not enough memory";
 
   json_labels_string_format = true;
@@ -218,11 +218,10 @@ Prefs::Prefs(Ntop *_ntop) {
   export_endpoint = NULL;
   enable_ixia_timestamps = false;
 
-  es_type = strdup((char *)"flows"),
-    es_index = strdup((char *)"ntopng-%Y.%m.%d"),
-    es_url = strdup((char *)"http://localhost:9200/_bulk"),
-    es_user = strdup((char *)""), es_pwd = strdup((char *)""),
-    es_host = strdup((char *)"");
+  es_type = strdup((char*)"flows"), es_index = strdup((char*)"ntopng-%Y.%m.%d"),
+  es_url = strdup((char*)"http://localhost:9200/_bulk"),
+  es_user = strdup((char*)""), es_pwd = strdup((char*)""),
+  es_host = strdup((char*)"");
 
   clickhouse_host = clickhouse_dbname = clickhouse_user = clickhouse_pw = NULL;
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
@@ -239,9 +238,9 @@ Prefs::Prefs(Ntop *_ntop) {
   ls_proto = NULL;
   has_cmdl_trace_lvl = false;
 
-  gateway      = new (std::nothrow) ServerConfiguration();
-  dns_servers  = new (std::nothrow) ServerConfiguration();
-  ntp_servers  = new (std::nothrow) ServerConfiguration();
+  gateway = new (std::nothrow) ServerConfiguration();
+  dns_servers = new (std::nothrow) ServerConfiguration();
+  ntp_servers = new (std::nothrow) ServerConfiguration();
   dhcp_servers = new (std::nothrow) ServerConfiguration();
   smtp_servers = new (std::nothrow) ServerConfiguration();
 
@@ -260,7 +259,7 @@ Prefs::Prefs(Ntop *_ntop) {
 
   /* All allowed */
   iec104_allowed_typeids[0] = (u_int64_t)-1,
-    iec104_allowed_typeids[1] = (u_int64_t)-1;
+  iec104_allowed_typeids[1] = (u_int64_t)-1;
 
 #ifdef NTOPNG_PRO
   modbus_allowed_function_codes = NULL; /* All allowed */
@@ -274,20 +273,20 @@ Prefs::Prefs(Ntop *_ntop) {
 /* ******************************************* */
 
 Prefs::~Prefs() {
-  if(ifNames) {
+  if (ifNames) {
     for (int i = 0; i < num_interfaces; i++) {
-      if(ifNames[i].name) free(ifNames[i].name);
-      if(ifNames[i].alias) free(ifNames[i].alias);
-      if(ifNames[i].description) free(ifNames[i].description);
+      if (ifNames[i].name) free(ifNames[i].name);
+      if (ifNames[i].alias) free(ifNames[i].alias);
+      if (ifNames[i].description) free(ifNames[i].description);
     }
 
     free(ifNames);
     ifNames = NULL;
   }
 
-  if(deferred_interfaces_to_register) {
+  if (deferred_interfaces_to_register) {
     for (int i = 0; i < num_deferred_interfaces_to_register; i++) {
-      if(deferred_interfaces_to_register[i])
+      if (deferred_interfaces_to_register[i])
         free(deferred_interfaces_to_register[i]);
     }
 
@@ -295,79 +294,80 @@ Prefs::~Prefs() {
     deferred_interfaces_to_register = NULL;
   }
 
-  if(influx_internal_db_name) free(influx_internal_db_name);
-  if(http_log_path)           free(http_log_path);
-  if(zmq_publish_events_url) free(zmq_publish_events_url);
-  if(data_dir) free(data_dir);
-  if(install_dir) free(install_dir);
-  if(docs_dir) free(docs_dir);
-  if(scripts_dir) free(scripts_dir);
-  if(callbacks_dir) free(callbacks_dir);
+  if (influx_internal_db_name) free(influx_internal_db_name);
+  if (http_log_path) free(http_log_path);
+  if (zmq_publish_events_url) free(zmq_publish_events_url);
+  if (data_dir) free(data_dir);
+  if (install_dir) free(install_dir);
+  if (docs_dir) free(docs_dir);
+  if (scripts_dir) free(scripts_dir);
+  if (callbacks_dir) free(callbacks_dir);
 #ifdef NTOPNG_PRO
-  if(pro_callbacks_dir) free(pro_callbacks_dir);
+  if (pro_callbacks_dir) free(pro_callbacks_dir);
 #endif
-  if(pcap_dir) free(pcap_dir);
-  if(clickhouse_archive_dir) free(clickhouse_archive_dir);
-  if(config_file_path) free(config_file_path);
-  if(user) free(user);
-  if(pid_path) free(pid_path);
-  if(packet_filter) free(packet_filter);
-  if(cpu_affinity) free(cpu_affinity);
-  if(other_cpu_affinity) free(other_cpu_affinity);
-  if(es_type) free(es_type);
-  if(es_index) free(es_index);
-  if(es_url) free(es_url);
-  if(es_user) free(es_user);
-  if(es_pwd) free(es_pwd);
-  if(es_host) free(es_host);
-  if(instance_name) free(instance_name);
-  if(http_index_page) free(http_index_page);
+  if (pcap_dir) free(pcap_dir);
+  if (clickhouse_archive_dir) free(clickhouse_archive_dir);
+  if (config_file_path) free(config_file_path);
+  if (user) free(user);
+  if (pid_path) free(pid_path);
+  if (packet_filter) free(packet_filter);
+  if (cpu_affinity) free(cpu_affinity);
+  if (other_cpu_affinity) free(other_cpu_affinity);
+  if (es_type) free(es_type);
+  if (es_index) free(es_index);
+  if (es_url) free(es_url);
+  if (es_user) free(es_user);
+  if (es_pwd) free(es_pwd);
+  if (es_host) free(es_host);
+  if (instance_name) free(instance_name);
+  if (http_index_page) free(http_index_page);
   free(http_prefix);
   free(local_networks);
   free(redis_host);
-  if(redis_password) free(redis_password);
-  if(cli) free(cli);
-  if(ciphers_list) free(ciphers_list);
-  if(clickhouse_host) free(clickhouse_host);
-  if(clickhouse_dbname) free(clickhouse_dbname);
-  if(clickhouse_user) free(clickhouse_user);
+  if (redis_password) free(redis_password);
+  if (cli) free(cli);
+  if (ciphers_list) free(ciphers_list);
+  if (clickhouse_host) free(clickhouse_host);
+  if (clickhouse_dbname) free(clickhouse_dbname);
+  if (clickhouse_user) free(clickhouse_user);
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
-  if(clickhouse_cluster_user) free(clickhouse_cluster_user);
+  if (clickhouse_cluster_user) free(clickhouse_cluster_user);
 #endif
-  if(clickhouse_pw) free(clickhouse_pw);
-  if(ls_host) free(ls_host);
-  if(ls_port) free(ls_port);
-  if(ls_proto) free(ls_proto);
-  if(http_binding_address1) free(http_binding_address1);
-  if(http_binding_address2) free(http_binding_address2);
-  if(https_binding_address1) free(https_binding_address1);
-  if(https_binding_address2) free(https_binding_address2);
-  if(ndpi_proto_path) free(ndpi_proto_path);
-  if(test_pre_script_path) free(test_pre_script_path);
-  if(test_runtime_script_path) free(test_runtime_script_path);
-  if(test_post_script_path) free(test_post_script_path);
-  if(message_broker_url) free(message_broker_url);
-  if(message_broker) free(message_broker);
+  if (clickhouse_pw) free(clickhouse_pw);
+  if (ls_host) free(ls_host);
+  if (ls_port) free(ls_port);
+  if (ls_proto) free(ls_proto);
+  if (http_binding_address1) free(http_binding_address1);
+  if (http_binding_address2) free(http_binding_address2);
+  if (https_binding_address1) free(https_binding_address1);
+  if (https_binding_address2) free(https_binding_address2);
+  if (ndpi_proto_path) free(ndpi_proto_path);
+  if (test_pre_script_path) free(test_pre_script_path);
+  if (test_runtime_script_path) free(test_runtime_script_path);
+  if (test_post_script_path) free(test_post_script_path);
+  if (message_broker_url) free(message_broker_url);
+  if (message_broker) free(message_broker);
 #ifdef NTOPNG_PRO
-  if(modbus_allowed_function_codes)
+  if (modbus_allowed_function_codes)
     ndpi_bitmap_free(modbus_allowed_function_codes);
-  if(s7comm_allowed_function_codes)
+  if (s7comm_allowed_function_codes)
     ndpi_bitmap_free(s7comm_allowed_function_codes);
 #endif
 
-  if(gateway)  delete gateway;
-  if(dns_servers)  delete dns_servers;
-  if(ntp_servers)  delete ntp_servers;
-  if(dhcp_servers) delete dhcp_servers;
-  if(smtp_servers) delete smtp_servers;
+  if (gateway) delete gateway;
+  if (dns_servers) delete dns_servers;
+  if (ntp_servers) delete ntp_servers;
+  if (dhcp_servers) delete dhcp_servers;
+  if (smtp_servers) delete smtp_servers;
 
-  if(customer_asn)     delete customer_asn;
-  if(sub_customer_asn) delete sub_customer_asn;
-  if(remote_asn)       delete remote_asn;
+  if (customer_asn) delete customer_asn;
+  if (sub_customer_asn) delete sub_customer_asn;
+  if (remote_asn) delete remote_asn;
 
 #ifdef NTOPNG_PRO
-  if(networks_policy_configuration) delete networks_policy_configuration;
-  if(networks_policy_configuration_shadow) delete networks_policy_configuration_shadow;
+  if (networks_policy_configuration) delete networks_policy_configuration;
+  if (networks_policy_configuration_shadow)
+    delete networks_policy_configuration_shadow;
 #endif
 }
 
@@ -375,7 +375,8 @@ Prefs::~Prefs() {
 
 /* C-binding needed by Win32 service call */
 void nDPIusage() {
-  struct ndpi_detection_module_struct *ndpi_struct = ndpi_init_detection_module(NULL);
+  struct ndpi_detection_module_struct* ndpi_struct =
+      ndpi_init_detection_module(NULL);
 
   printf("\nnDPI detected protocols:\n");
   ndpi_dump_protocols(ndpi_struct, stdout);
@@ -388,416 +389,444 @@ void nDPIusage() {
 /* C-binding needed by Win32 service call */
 void usage() {
   printf(
-	 "ntopng %s%s v.%s - " NTOP_COPYRIGHT
-	 "\n\n"
-	 "Usage:\n"
-	 "  ntopng <configuration file path>\n"
-	 "  or\n"
-	 "  ntopng <command line options> \n\n"
-	 "Options:\n"
+      "ntopng %s%s v.%s - " NTOP_COPYRIGHT
+      "\n\n"
+      "Usage:\n"
+      "  ntopng <configuration file path>\n"
+      "  or\n"
+      "  ntopng <command line options> \n\n"
+      "Options:\n"
 #ifndef HAVE_NEDGE
-	 "[--dns-mode|-n] <mode>              | DNS address resolution mode\n"
-	 "                                    | 0 - Decode DNS responses and "
-	 "resolve\n"
-	 "                                    |     local numeric IPs only "
-	 "(default)\n"
-	 "                                    | 1 - Decode DNS responses and "
-	 "resolve all\n"
-	 "                                    |     numeric IPs\n"
-	 "                                    | 2 - Decode DNS responses but "
-	 "don't\n"
-	 "                                    |     resolve numeric IPs\n"
-	 "                                    | 3 - Don't decode "
-	 "DNS/MDNS/HTTP/TLS responses\n"
-	 "                                    |     and don't resolve numeric IPs "
-	 "(all hosts)\n"
-	 "                                    | 4 - Don't decode "
-	 "DNS/MDNS/HTTP/TLS responses\n"
-	 "                                    |     and don't resolve numeric IPs "
-	 "(localhost only)\n"
+      "[--dns-mode|-n] <mode>              | DNS address resolution mode\n"
+      "                                    | 0 - Decode DNS responses and "
+      "resolve\n"
+      "                                    |     local numeric IPs only "
+      "(default)\n"
+      "                                    | 1 - Decode DNS responses and "
+      "resolve all\n"
+      "                                    |     numeric IPs\n"
+      "                                    | 2 - Decode DNS responses but "
+      "don't\n"
+      "                                    |     resolve numeric IPs\n"
+      "                                    | 3 - Don't decode "
+      "DNS/MDNS/HTTP/TLS responses\n"
+      "                                    |     and don't resolve numeric IPs "
+      "(all hosts)\n"
+      "                                    | 4 - Don't decode "
+      "DNS/MDNS/HTTP/TLS responses\n"
+      "                                    |     and don't resolve numeric IPs "
+      "(localhost only)\n"
 #endif
-	 "[--interface|-i] <interface|pcap>   | Input interface name "
-	 "(numeric/symbolic),\n"
-	 "                                    | view or pcap file path, "
-	 "including:\n"
-	 "                                    | zmq://<IP address>         [ZMQ "
-	 "flow collection]\n"
-	 "                                    | tcp://<IP address>         "
-	 "[Deprecated - use zmq://]\n"
+      "[--interface|-i] <interface|pcap>   | Input interface name "
+      "(numeric/symbolic),\n"
+      "                                    | view or pcap file path, "
+      "including:\n"
+      "                                    | zmq://<IP address>         [ZMQ "
+      "flow collection]\n"
+      "                                    | tcp://<IP address>         "
+      "[Deprecated - use zmq://]\n"
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
-	 "                                    | kafka://<brokers list>     [Kafka "
-	 "flow collection]\n"
-	 "                                    | kafka-ssl://<brokers list> [Kafka "
-	 "flow collection over SSL/TLS]\n"
+      "                                    | kafka://<brokers list>     [Kafka "
+      "flow collection]\n"
+      "                                    | kafka-ssl://<brokers list> [Kafka "
+      "flow collection over SSL/TLS]\n"
 #endif
 #ifndef WIN32
-	 "[--data-dir|-d] <path>              | Data directory (must be "
-	 "writable).\n"
-	 "                                    | Default: %s\n"
-	 "[--install-dir|-t] <path>           | Set the installation directory to "
-	 "<dir>.\n"
-	 "                                    | Should be set when installing "
-	 "ntopng \n"
-	 "                                    | under custom directories\n"
-	 "[--daemon|-e]                       | Daemonize ntopng\n"
+      "[--data-dir|-d] <path>              | Data directory (must be "
+      "writable).\n"
+      "                                    | Default: %s\n"
+      "[--install-dir|-t] <path>           | Set the installation directory to "
+      "<dir>.\n"
+      "                                    | Should be set when installing "
+      "ntopng \n"
+      "                                    | under custom directories\n"
+      "[--daemon|-e]                       | Daemonize ntopng\n"
 #endif
-	 "[--httpdocs-dir|-1] <path>          | HTTP documents root directory.\n"
-	 "                                    | Default: %s\n"
-	 "[--scripts-dir|-2] <path>           | Scripts directory.\n"
-	 "                                    | Default: %s\n"
-	 "[--callbacks-dir|-3] <path>         | Callbacks directory.\n"
-	 "                                    | Default: %s\n"
-	 "[--pcap-dir|-5] <path>              | Storage directory used for continuous traffic\n"
-	 "                                    | recording in PCAP format.\n"
-	 "                                    | Default: %s\n"
-	 "[--db-archive-dir|-6] <path>        | Directory used for archiving historical flows\n"
-	 "                                    | recorded on ClickHouse when data retention is over.\n"
-	 "                                    | Default: %s\n"
-	 "[--no-promisc|-u]                   | Don't set the interface in promisc mode.\n"
-	 "[--geoip-dir] <dir>                 | Load GeoIP databases from the specified directory.\n"
-	 "[--http-port|-w] <[addr:]port>      | HTTP. Set to 0 to disable http "
-	 "server.\n"
-	 "                                    | Addr can be an IPv4 "
-	 "(192.168.1.1)\n"
-	 "                                    | or IPv6 ([3ffe:2a00:100:7031::1]) "
-	 "addr.\n"
-	 "                                    | Surround IPv6 addr with square "
-	 "brackets.\n"
-	 "                                    | Prepend a ':' without addr before "
-	 "the\n"
-	 "                                    | listening port on the loopback "
-	 "address.\n"
-	 "                                    | Default port: %u\n"
-	 "                                    | Examples:\n"
-	 "                                    | -w :3000\n"
-	 "                                    | -w 192.168.1.1:3001\n"
-	 "                                    | -w [3ffe:2a00:100:7031::1]:3002\n"
-	 "[--https-port|-W] <[:]https port>   | HTTPS. See also -w above. "
-	 "Default: %u\n"
-	 "[--http-log|-L] <path>              | Log HTTP requests in the specified file\n"
-	 "[--local-networks|-m] <local list>  | Local networks and local autonomous systems list.\n"
-	 "                                    | <local list> is a comma-separated "
-	 "list or a path to a file.\n"
-	 "                                    | Local networks in CIDR format and\n"
-	 "                                    | autonomous system in asn<number> format.\n"
-	 "                                    | The file accepts multiple lines with networks\n"
-	 "                                    | and as with specified format.\n"
-	 "                                    | An optional '=<alias>' is "
-	 "supported for local networks\n"
-	 "                                    | to specify an alias.\n"
-	 "                                    | Examples:\n"
-	 "                                    | -m "
-	 "\"192.168.1.0/24,172.16.0.0/16\"\n"
-	 "                                    | -m "
-	 "\"192.168.1.0/24=LAN_1,192.168.2.0/24=LAN_2,10.0.0.0/8\"\n"
-	 "                                    | -m "
-	 "\"/path/to/local_networks_file\"\n"
-	 "[--ppp-networks|-M] <local list>    | Disable detection of broadcast IP addresses\n"
-	 "                                    | for local networks (point-to-point addresses).\n"
-	 "[--ndpi-protocols|-p] <file>|<URL>  | Specify a nDPI protocol file\n"
-	 "                                    | (e.g. protos.txt) or URL (e.g. https://localhost/protos.txt)\n"
-	 "[--redis|-r] <fmt>                  | Redis connection. <fmt> is "
-	 "specified as\n"
-	 "                                    | [h[:port[:pwd]]][@db-id] where "
-	 "db-id\n"
-	 "                                    | identifies the database Id "
-	 "(default 0).\n"
-	 "                                    | h is the host running Redis "
-	 "(default\n"
-	 "                                    | localhost), optionally followed "
-	 "by a\n"
-	 "                                    |  ':'-separated port (default "
-	 "6379).\n"
-	 "                                    | The special characters \\ and ` "
-	 "are not\n"
-	 "                                    | supported by ntopng.\n"
-	 "                                    | A password can be specified "
-	 "after\n"
-	 "                                    | the port when Redis auth is "
-	 "required.\n"
-	 "                                    | By default password auth is "
-	 "disabled.\n"
+      "[--httpdocs-dir|-1] <path>          | HTTP documents root directory.\n"
+      "                                    | Default: %s\n"
+      "[--scripts-dir|-2] <path>           | Scripts directory.\n"
+      "                                    | Default: %s\n"
+      "[--callbacks-dir|-3] <path>         | Callbacks directory.\n"
+      "                                    | Default: %s\n"
+      "[--pcap-dir|-5] <path>              | Storage directory used for "
+      "continuous traffic\n"
+      "                                    | recording in PCAP format.\n"
+      "                                    | Default: %s\n"
+      "[--db-archive-dir|-6] <path>        | Directory used for archiving "
+      "historical flows\n"
+      "                                    | recorded on ClickHouse when data "
+      "retention is over.\n"
+      "                                    | Default: %s\n"
+      "[--no-promisc|-u]                   | Don't set the interface in "
+      "promisc mode.\n"
+      "[--geoip-dir] <dir>                 | Load GeoIP databases from the "
+      "specified directory.\n"
+      "[--http-port|-w] <[addr:]port>      | HTTP. Set to 0 to disable http "
+      "server.\n"
+      "                                    | Addr can be an IPv4 "
+      "(192.168.1.1)\n"
+      "                                    | or IPv6 ([3ffe:2a00:100:7031::1]) "
+      "addr.\n"
+      "                                    | Surround IPv6 addr with square "
+      "brackets.\n"
+      "                                    | Prepend a ':' without addr before "
+      "the\n"
+      "                                    | listening port on the loopback "
+      "address.\n"
+      "                                    | Default port: %u\n"
+      "                                    | Examples:\n"
+      "                                    | -w :3000\n"
+      "                                    | -w 192.168.1.1:3001\n"
+      "                                    | -w [3ffe:2a00:100:7031::1]:3002\n"
+      "[--https-port|-W] <[:]https port>   | HTTPS. See also -w above. "
+      "Default: %u\n"
+      "[--http-log|-L] <path>              | Log HTTP requests in the "
+      "specified file\n"
+      "[--local-networks|-m] <local list>  | Local networks and local "
+      "autonomous systems list.\n"
+      "                                    | <local list> is a comma-separated "
+      "list or a path to a file.\n"
+      "                                    | Local networks in CIDR format "
+      "and\n"
+      "                                    | autonomous system in asn<number> "
+      "format.\n"
+      "                                    | The file accepts multiple lines "
+      "with networks\n"
+      "                                    | and as with specified format.\n"
+      "                                    | An optional '=<alias>' is "
+      "supported for local networks\n"
+      "                                    | to specify an alias.\n"
+      "                                    | Examples:\n"
+      "                                    | -m "
+      "\"192.168.1.0/24,172.16.0.0/16\"\n"
+      "                                    | -m "
+      "\"192.168.1.0/24=LAN_1,192.168.2.0/24=LAN_2,10.0.0.0/8\"\n"
+      "                                    | -m "
+      "\"/path/to/local_networks_file\"\n"
+      "[--ppp-networks|-M] <local list>    | Disable detection of broadcast IP "
+      "addresses\n"
+      "                                    | for local networks "
+      "(point-to-point addresses).\n"
+      "[--ndpi-protocols|-p] <file>|<URL>  | Specify a nDPI protocol file\n"
+      "                                    | (e.g. protos.txt) or URL (e.g. "
+      "https://localhost/protos.txt)\n"
+      "[--redis|-r] <fmt>                  | Redis connection. <fmt> is "
+      "specified as\n"
+      "                                    | [h[:port[:pwd]]][@db-id] where "
+      "db-id\n"
+      "                                    | identifies the database Id "
+      "(default 0).\n"
+      "                                    | h is the host running Redis "
+      "(default\n"
+      "                                    | localhost), optionally followed "
+      "by a\n"
+      "                                    |  ':'-separated port (default "
+      "6379).\n"
+      "                                    | The special characters \\ and ` "
+      "are not\n"
+      "                                    | supported by ntopng.\n"
+      "                                    | A password can be specified "
+      "after\n"
+      "                                    | the port when Redis auth is "
+      "required.\n"
+      "                                    | By default password auth is "
+      "disabled.\n"
 #ifdef __linux__
-	 "                                    | On unix <fmt> can also be the "
-	 "redis socket file path.\n"
-	 "                                    | Port is ignored for socket-based "
-	 "connections.\n"
+      "                                    | On unix <fmt> can also be the "
+      "redis socket file path.\n"
+      "                                    | Port is ignored for socket-based "
+      "connections.\n"
 #endif
-	 "                                    | Examples:\n"
-	 "                                    | -r @2\n"
-	 "                                    | -r 129.168.1.3\n"
-	 "                                    | -r 129.168.1.3:6379@3\n"
-	 "                                    | -r 129.168.1.3:6379:nt0pngPwD@0\n"
+      "                                    | Examples:\n"
+      "                                    | -r @2\n"
+      "                                    | -r 129.168.1.3\n"
+      "                                    | -r 129.168.1.3:6379@3\n"
+      "                                    | -r 129.168.1.3:6379:nt0pngPwD@0\n"
 #ifdef __linux__
-	 "                                    | -r /var/run/redis/redis.sock\n"
-	 "                                    | -r /var/run/redis/redis.sock@2\n"
-	 "[--core-affinity|-g] <ids>          | Bind the capture/processing "
-	 "threads to\n"
-	 "                                    | specific CPU cores (specified as "
-	 "a comma-\n"
-	 "                                    | separated list of core id)\n"
-	 "[--other-core-affinity|-y] <ids>    | Bind service threads to specific "
-	 "CPU cores\n"
-	 "                                    | (specified as a comma-separated "
-	 "list of core id)\n"
+      "                                    | -r /var/run/redis/redis.sock\n"
+      "                                    | -r /var/run/redis/redis.sock@2\n"
+      "[--core-affinity|-g] <ids>          | Bind the capture/processing "
+      "threads to\n"
+      "                                    | specific CPU cores (specified as "
+      "a comma-\n"
+      "                                    | separated list of core id)\n"
+      "[--other-core-affinity|-y] <ids>    | Bind service threads to specific "
+      "CPU cores\n"
+      "                                    | (specified as a comma-separated "
+      "list of core id)\n"
 #endif
-	 "[--user|-U] <sys user>              | Run ntopng with the specified "
-	 "user\n"
-	 "                                    | instead of %s\n"
-	 "[--dont-change-user|-s]             | Do not change user (debug only)\n"
-	 "[--disable-purge]                   | Disable data purge (debug only)\n"
-	 "[--ciphers-list] <list>             | Specify the list of TLS ciphers to be used\n"
-	 "                                    | when https is used. Default: \"%s\"\n"
-	 "[--shutdown-when-done]              | Terminate after reading the pcap "
-	 "(debug only)\n"
-	 "[--offline]                         | Run in offline mode (avoid "
-	 "contacting remote sites, including blacklists) \n"
-	 "[--strict-startup]                  | Exit on startup if critical subsystems "
-	 "(e.g. ClickHouse) fail to initialize\n"
-	 "[--insecure]                        | Allow connections to TLS sites "
-	 "with invalid certificates \n"
+      "[--user|-U] <sys user>              | Run ntopng with the specified "
+      "user\n"
+      "                                    | instead of %s\n"
+      "[--dont-change-user|-s]             | Do not change user (debug only)\n"
+      "[--disable-purge]                   | Disable data purge (debug only)\n"
+      "[--ciphers-list] <list>             | Specify the list of TLS ciphers "
+      "to be used\n"
+      "                                    | when https is used. Default: "
+      "\"%s\"\n"
+      "[--shutdown-when-done]              | Terminate after reading the pcap "
+      "(debug only)\n"
+      "[--offline]                         | Run in offline mode (avoid "
+      "contacting remote sites, including blacklists) \n"
+      "[--strict-startup]                  | Exit on startup if critical "
+      "subsystems "
+      "(e.g. ClickHouse) fail to initialize\n"
+      "[--insecure]                        | Allow connections to TLS sites "
+      "with invalid certificates \n"
 #if HAVE_ZMQ
-	 "[--zmq-encryption]                  | Enable ZMQ encryption\n"
-	 "[--zmq-encryption-key-priv <key>]   | ZMQ (collection) encryption "
-	 "secret key (debug only) \n"
-	 "[--zmq-publish-events <URL>]        | Endpoint for publishing events "
+      "[--zmq-encryption]                  | Enable ZMQ encryption\n"
+      "[--zmq-encryption-key-priv <key>]   | ZMQ (collection) encryption "
+      "secret key (debug only) \n"
+      "[--zmq-publish-events <URL>]        | Endpoint for publishing events "
 #endif
-	 "(e.g. IPS)\n"
-	 "[--disable-autologout|-q]           | Disable web logout for "
-	 "inactivity\n"
-	 "[--disable-login|-l] <mode>         | Disable user login "
-	 "authentication:\n"
-	 "                                    | 0 - Disable login only for "
-	 "localhost\n"
-	 "                                    | 1 - Disable login for all hosts\n"
-	 "[--max-num-flows|-X] <num>          | Max number of active flows\n"
-	 "                                    | (default: %u)\n"
-	 "[--max-num-hosts|-x] <num>          | Max number of active hosts\n"
-	 "                                    | (default: %u)\n"
-	 "[--pcap-reforge-timestamps|-z]      | Reforge timestamps when reading from file\n"
-	 "[--users-file] <path>               | Users configuration file path\n"
-	 "                                    | Default: %s\n"
-	 "[--original-speed]                  | Reproduce (-i) the pcap file at "
-	 "original speed\n",
+      "(e.g. IPS)\n"
+      "[--disable-autologout|-q]           | Disable web logout for "
+      "inactivity\n"
+      "[--disable-login|-l] <mode>         | Disable user login "
+      "authentication:\n"
+      "                                    | 0 - Disable login only for "
+      "localhost\n"
+      "                                    | 1 - Disable login for all hosts\n"
+      "[--max-num-flows|-X] <num>          | Max number of active flows\n"
+      "                                    | (default: %u)\n"
+      "[--max-num-hosts|-x] <num>          | Max number of active hosts\n"
+      "                                    | (default: %u)\n"
+      "[--pcap-reforge-timestamps|-z]      | Reforge timestamps when reading "
+      "from file\n"
+      "[--users-file] <path>               | Users configuration file path\n"
+      "                                    | Default: %s\n"
+      "[--original-speed]                  | Reproduce (-i) the pcap file at "
+      "original speed\n",
 #ifdef HAVE_NEDGE
-	 "edge "
+      "edge "
 #else
-	 ""
+      ""
 #endif
-	 ,
-	 PACKAGE_MACHINE, PACKAGE_VERSION,
+      ,
+      PACKAGE_MACHINE, PACKAGE_VERSION,
 #ifndef WIN32
-	 ntop->get_working_dir(),
+      ntop->get_working_dir(),
 #endif
-	 CONST_DEFAULT_DOCS_DIR, CONST_DEFAULT_SCRIPTS_DIR,
-	 CONST_DEFAULT_CALLBACKS_DIR, CONST_DEFAULT_DATA_DIR,
-         CONST_DEFAULT_DATA_DIR,
-	 CONST_DEFAULT_NTOP_PORT, CONST_DEFAULT_NTOP_PORT + 1,
-	 CONST_DEFAULT_NTOP_USER, CONST_DEFAULT_TLS_CIPHERS,
-	 MAX_NUM_INTERFACE_HOSTS, MAX_NUM_INTERFACE_HOSTS,
-	 CONST_DEFAULT_USERS_FILE);
+      CONST_DEFAULT_DOCS_DIR, CONST_DEFAULT_SCRIPTS_DIR,
+      CONST_DEFAULT_CALLBACKS_DIR, CONST_DEFAULT_DATA_DIR,
+      CONST_DEFAULT_DATA_DIR, CONST_DEFAULT_NTOP_PORT,
+      CONST_DEFAULT_NTOP_PORT + 1, CONST_DEFAULT_NTOP_USER,
+      CONST_DEFAULT_TLS_CIPHERS, MAX_NUM_INTERFACE_HOSTS,
+      MAX_NUM_INTERFACE_HOSTS, CONST_DEFAULT_USERS_FILE);
 
   printf(
 #ifndef WIN32
-	 "[--pid|-G] <path>                   | Pid file path\n"
+      "[--pid|-G] <path>                   | Pid file path\n"
 #endif
 
-	 "[--packet-filter|-B] <filter>       | Ingress packet filter (BPF "
-	 "filter)\n"
-	 "[--dump-flows|-F] <mode>            | Dump expired flows. Mode:\n"
-	 "                                    |\n"
+      "[--packet-filter|-B] <filter>       | Ingress packet filter (BPF "
+      "filter)\n"
+      "[--dump-flows|-F] <mode>            | Dump expired flows. Mode:\n"
+      "                                    |\n"
 #ifndef HAVE_NEDGE
-	 "                                    | es            Dump in "
-	 "ElasticSearch database\n"
-	 "                                    |   Format:\n"
-	 "                                    |   es;<mapping type>;<idx "
-	 "name>;<es URL>;<username>:<password>\n"
-	 "                                    |   Example:\n"
-	 "                                    |   "
-	 "es;ntopng;ntopng-%%Y.%%m.%%d;http://localhost:9200/_bulk;user:pwd\n"
-	 "                                    |   Notes:\n"
-	 "                                    |   The <idx name> accepts the "
-	 "strftime() format.\n"
-	 "                                    |   <mapping type> must be set to "
-	 "ntopng and it is\n"
-	 "                                    |   used until ElasticSearch "
-	 "version 6 and ignored in newer versions.\n"
-	 "                                    |\n"
+      "                                    | es            Dump in "
+      "ElasticSearch database\n"
+      "                                    |   Format:\n"
+      "                                    |   es;<mapping type>;<idx "
+      "name>;<es URL>;<username>:<password>\n"
+      "                                    |   Example:\n"
+      "                                    |   "
+      "es;ntopng;ntopng-%%Y.%%m.%%d;http://localhost:9200/_bulk;user:pwd\n"
+      "                                    |   Notes:\n"
+      "                                    |   The <idx name> accepts the "
+      "strftime() format.\n"
+      "                                    |   <mapping type> must be set to "
+      "ntopng and it is\n"
+      "                                    |   used until ElasticSearch "
+      "version 6 and ignored in newer versions.\n"
+      "                                    |\n"
 #endif
 #ifndef HAVE_NEDGE
 #if !defined(WIN32) && !defined(__APPLE__)
-	 "                                    | syslog        Dump in syslog\n"
-	 "                                    |   Format:\n"
-	 "                                    |   syslog[;<facility-text>]\n"
-	 "                                    |   Example:\n"
-	 "                                    |   syslog\n"
-	 "                                    |   syslog;local3\n"
-	 "                                    |   Notes:\n"
-	 "                                    |   <facility-text> is "
-	 "case-insensitive.\n"
-	 "                                    |\n"
+      "                                    | syslog        Dump in syslog\n"
+      "                                    |   Format:\n"
+      "                                    |   syslog[;<facility-text>]\n"
+      "                                    |   Example:\n"
+      "                                    |   syslog\n"
+      "                                    |   syslog;local3\n"
+      "                                    |   Notes:\n"
+      "                                    |   <facility-text> is "
+      "case-insensitive.\n"
+      "                                    |\n"
 #endif
 #endif
-	 );
+  );
 
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
   printf(
-	 "                                    | clickhouse    Dump in ClickHouse "
-	 "(Enterprise M and better)\n"
-	 "                                    |   Format:\n"
-	 "                                    |   clickhouse;<host[@<tcp-"
-	 "port>,<mysql-port>]|socket>;<dbname>;<user>;<pw>\n"
-	 "                                    |   Example:\n"
-	 "                                    |   "
-	 "clickhouse;127.0.0.1;ntopng;default;\n"
-	 "                                    |   You can also use just -F "
-	 "clickhouse as alias of:\n"
-	 "                                    |   -F "
-	 "\"clickhouse;127.0.0.1@%u,%u;ntopng;default;\"\n"
-	 "                                    |\n"
+      "                                    | clickhouse    Dump in ClickHouse "
+      "(Enterprise M and better)\n"
+      "                                    |   Format:\n"
+      "                                    |   clickhouse;<host[@<tcp-"
+      "port>,<mysql-port>]|socket>;<dbname>;<user>;<pw>\n"
+      "                                    |   Example:\n"
+      "                                    |   "
+      "clickhouse;127.0.0.1;ntopng;default;\n"
+      "                                    |   You can also use just -F "
+      "clickhouse as alias of:\n"
+      "                                    |   -F "
+      "\"clickhouse;127.0.0.1@%u,%u;ntopng;default;\"\n"
+      "                                    |\n"
 #ifndef HAVE_NEDGE
-	 "                                    | clickhouse-cluster    Dump in "
-	 "ClickHouse Cluster (Enterprise M/L/XL/XXL)\n"
-	 "                                    |   Format:\n"
-	 "                                    |   clickhouse-cluster;<host[@<tcp-"
-	 "port>,<mysql-port>]|socket>;<dbname>;<user>;<pw>;<cluster name>\n"
-	 "                                    |   Example:\n"
-	 "                                    |   "
-	 "clickhouse-cluster;127.0.0.1;ntopng;default;ntop_cluster\n"
-	 "                                    |   You can also use just -F "
-	 "clickhouse-cluster as alias of:\n"
-	 "                                    |   -F "
-	 "\"clickhouse-cluster;127.0.0.1@%u,%u;ntopng;default;ntop_cluster\"\n"
-	 "                                    | NOTE:\n"
-	 "                                    | - tcp-port used by the clickhouse API\n"
-	 "                                    | - mysql-port used by the mysql API\n"
-	 "                                    |\n"
+      "                                    | clickhouse-cluster    Dump in "
+      "ClickHouse Cluster (Enterprise M/L/XL/XXL)\n"
+      "                                    |   Format:\n"
+      "                                    |   clickhouse-cluster;<host[@<tcp-"
+      "port>,<mysql-port>]|socket>;<dbname>;<user>;<pw>;<cluster name>\n"
+      "                                    |   Example:\n"
+      "                                    |   "
+      "clickhouse-cluster;127.0.0.1;ntopng;default;ntop_cluster\n"
+      "                                    |   You can also use just -F "
+      "clickhouse-cluster as alias of:\n"
+      "                                    |   -F "
+      "\"clickhouse-cluster;127.0.0.1@%u,%u;ntopng;default;ntop_cluster\"\n"
+      "                                    | NOTE:\n"
+      "                                    | - tcp-port used by the clickhouse "
+      "API\n"
+      "                                    | - mysql-port used by the mysql "
+      "API\n"
+      "                                    |\n"
 #endif
-	 "                                    | clickhouse-cloud    Dump in "
-	 "ClickHouse Cloud (Enterprise M/L/XL/XXL)\n"
-	 "                                    |   Format:\n"
-	 "                                    |   clickhouse-cloud;<host[@<tcp-"
-	 "port>,<mysql-port>]|socket>;<dbname>;<clickhouse-user>,<mysql-user>;<pw>;\n"
-	 "                                    |   Example:\n"
-	 "                                    |   "
-	 "clickhouse-cloud;europe-east15.clickhouse.cloud@9440s,3306;ntopng;default,mysql-user;mych-password\n"
-	 "                                    | NOTE:\n"
-	 "                                    | - clickhouse-user used by clickhouse-client\n"
-	 "                                    | - mysql-user used by the mysql API\n"
-	 "                                    | - tcp-port used by the clickhouse API\n"
-	 "                                    | - mysql-port used by the mysql API\n"
-	 "                                    |\n"
-	 ,
-	 CONST_DEFAULT_CLICKHOUSE_TCP_PORT, CONST_DEFAULT_CLICKHOUSE_MYSQL_PORT
+      "                                    | clickhouse-cloud    Dump in "
+      "ClickHouse Cloud (Enterprise M/L/XL/XXL)\n"
+      "                                    |   Format:\n"
+      "                                    |   clickhouse-cloud;<host[@<tcp-"
+      "port>,<mysql-port>]|socket>;<dbname>;<clickhouse-user>,<mysql-user>;<pw>"
+      ";\n"
+      "                                    |   Example:\n"
+      "                                    |   "
+      "clickhouse-cloud;europe-east15.clickhouse.cloud@9440s,3306;ntopng;"
+      "default,mysql-user;mych-password\n"
+      "                                    | NOTE:\n"
+      "                                    | - clickhouse-user used by "
+      "clickhouse-client\n"
+      "                                    | - mysql-user used by the mysql "
+      "API\n"
+      "                                    | - tcp-port used by the clickhouse "
+      "API\n"
+      "                                    | - mysql-port used by the mysql "
+      "API\n"
+      "                                    |\n",
+      CONST_DEFAULT_CLICKHOUSE_TCP_PORT, CONST_DEFAULT_CLICKHOUSE_MYSQL_PORT
 #ifndef HAVE_NEDGE
-         ,
-	 CONST_DEFAULT_CLICKHOUSE_TCP_PORT, CONST_DEFAULT_CLICKHOUSE_MYSQL_PORT
+      ,
+      CONST_DEFAULT_CLICKHOUSE_TCP_PORT, CONST_DEFAULT_CLICKHOUSE_MYSQL_PORT
 #endif
-	 );
+  );
 #endif
 
 #ifndef HAVE_NEDGE
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
   printf(
-	 "                                    |\n"
-	 "                                    | kafka   Dump to Kafka (Enterprise "
-	 "M/L/XL/XXL)\n"
-	 "                                    |   Format:\n"
-	 "                                    |   "
-	 "kafka;[<brokerIP[:<port>]]+;<topic>[;<kafka option>=<value>]+\n"
-	 "                                    |   \n"
-	 "                                    |   Example:\n"
-	 "                                    |   \"kafka;127.0.0.1;flows\"\n"
-	 "                                    |   "
-	 "\"kafka;127.0.0.1:7689,192.168.1.20,192.168.1.2:9092;flows;compression."
-	 "codec=gzip,debug=all\"\n"
-	 "                                    |   \n"
-	 "                                    |   See at the bottom of this help "
-	 "the list of (comma separated) supported kafka configuration options.\n"
-	 "                                    |\n"
-         );
+      "                                    |\n"
+      "                                    | kafka   Dump to Kafka (Enterprise "
+      "M/L/XL/XXL)\n"
+      "                                    |   Format:\n"
+      "                                    |   "
+      "kafka;[<brokerIP[:<port>]]+;<topic>[;<kafka option>=<value>]+\n"
+      "                                    |   \n"
+      "                                    |   Example:\n"
+      "                                    |   \"kafka;127.0.0.1;flows\"\n"
+      "                                    |   "
+      "\"kafka;127.0.0.1:7689,192.168.1.20,192.168.1.2:9092;flows;compression."
+      "codec=gzip,debug=all\"\n"
+      "                                    |   \n"
+      "                                    |   See at the bottom of this help "
+      "the list of (comma separated) supported kafka configuration options.\n"
+      "                                    |\n");
 #endif
 #endif
 
 #ifdef NTOPNG_PRO
   printf(
-         "[--dump-queue-len] <len>            | Set the in-memory ClickHouse dump queue length (Default: %u)\n"
-         "[--dump-queue-block-size] <size>    | Set the in-memory ClickHouse data block size (Default: %u)\n"
-	 "[--direct-flows-dump]               | Dump collected flows directly before any additional processing\n"
-	 "[--readonly-flows-dump]             | Keep ClickHouse connected for reading but disable flow dump (writing)\n",
-         CLICKHOUSE_MAX_DUMP_BLOCKS,
-         CLICKHOUSE_MAX_DUMP_ROWS_PER_BLOCK
-         );
+      "[--dump-queue-len] <len>            | Set the in-memory ClickHouse dump "
+      "queue length (Default: %u)\n"
+      "[--dump-queue-block-size] <size>    | Set the in-memory ClickHouse data "
+      "block size (Default: %u)\n"
+      "[--direct-flows-dump]               | Dump collected flows directly "
+      "before any additional processing\n"
+      "[--readonly-flows-dump]             | Keep ClickHouse connected for "
+      "reading but disable flow dump (writing)\n",
+      CLICKHOUSE_MAX_DUMP_BLOCKS, CLICKHOUSE_MAX_DUMP_ROWS_PER_BLOCK);
 #endif
   printf(
-	 "[--export-flows|-I] <endpoint>      | Export flows with the specified "
-	 "endpoint\n"
-	 "                                    | See https://wp.me/p1LxdS-O5 for a "
-	 "-I use case.\n"
+      "[--export-flows|-I] <endpoint>      | Export flows with the specified "
+      "endpoint\n"
+      "                                    | See https://wp.me/p1LxdS-O5 for a "
+      "-I use case.\n"
 #if HAVE_ZMQ
-	 "[--zmq-encryption-key <key>]        | ZMQ (export) encryption public "
-	 "key (-I only) \n"
+      "[--zmq-encryption-key <key>]        | ZMQ (export) encryption public "
+      "key (-I only) \n"
 #endif
-	 "[--hw-timestamp-mode] <mode>        | Enable hw "
-	 "timestamping/stripping.\n"
-	 "                                    | Supported TS modes:\n"
-	 "                                    | ixia  - Timestamped pkts by "
-	 "ixiacom.com\n"
-	 "                                    |         hardware devices\n"
-	 "[--capture-direction] <dir>         | Specify packet capture direction\n"
-	 "                                    | 0=RX+TX (default), 1=RX only, "
-	 "2=TX only\n"
+      "[--hw-timestamp-mode] <mode>        | Enable hw "
+      "timestamping/stripping.\n"
+      "                                    | Supported TS modes:\n"
+      "                                    | ixia  - Timestamped pkts by "
+      "ixiacom.com\n"
+      "                                    |         hardware devices\n"
+      "[--capture-direction] <dir>         | Specify packet capture direction\n"
+      "                                    | 0=RX+TX (default), 1=RX only, "
+      "2=TX only\n"
 #ifdef HAVE_PF_RING
-	 "[--cluster-id] <cluster id>         | Specify the PF_RING cluster ID on "
-	 "which incoming packets will be bound.\n"
+      "[--cluster-id] <cluster id>         | Specify the PF_RING cluster ID on "
+      "which incoming packets will be bound.\n"
 #endif
-	 "[--http-prefix|-Z <prefix>]         | HTTP prefix to be prepended to "
-	 "URLs.\n"
-	 "                                    | Useful when using ntopng behind a "
-	 "proxy.\n"
-	 "[--instance-name|-N <name>]         | Assign a name to this ntopng "
-	 "instance.\n"
+      "[--http-prefix|-Z <prefix>]         | HTTP prefix to be prepended to "
+      "URLs.\n"
+      "                                    | Useful when using ntopng behind a "
+      "proxy.\n"
+      "[--instance-name|-N <name>]         | Assign a name to this ntopng "
+      "instance.\n"
 #ifdef NTOPNG_PRO
-	 "[--community]                       | Start ntopng in community "
-	 "edition.\n"
-	 "[--fail-invalid-license]            | Exit without a valid license.\n"
-	 "[--check-license]                   | Check if the license is valid.\n"
-	 "[--check-maintenance]               | Check until maintenance is included\n"
-	 "                                    | in the license.\n"
+      "[--community]                       | Start ntopng in community "
+      "edition.\n"
+      "[--fail-invalid-license]            | Exit without a valid license.\n"
+      "[--check-license]                   | Check if the license is valid.\n"
+      "[--check-maintenance]               | Check until maintenance is "
+      "included\n"
+      "                                    | in the license.\n"
 #endif
-	 "[--version|-V]                      | Print version and license\n"
-	 "                                    | information, then quit\n"
+      "[--version|-V]                      | Print version and license\n"
+      "                                    | information, then quit\n"
 #ifdef NTOPNG_PRO
-	 "[--version-json]                    | Print version and license\n"
-	 "                                    | info in JSON format, then quit\n"
+      "[--version-json]                    | Print version and license\n"
+      "                                    | info in JSON format, then quit\n"
 #endif
-	 "[--verbose|-v] <level>              | Verbose tracing [range 0 (min).. 6 (max)]\n"
-	 "                                    | 0 - Errors only\n"
-	 "                                    | 1 - Warning\n"
-	 "                                    | 2 - Normal (default value)\n"
-	 "                                    | 3 - Informative\n"
-	 "                                    | 4 - Future use\n"
-	 "                                    | 5 - Future use\n"
-	 "                                    | 6 - Debug\n"
-	 "[--print-ndpi-protocols]            | Print the nDPI protocols list\n"
+      "[--verbose|-v] <level>              | Verbose tracing [range 0 (min).. "
+      "6 (max)]\n"
+      "                                    | 0 - Errors only\n"
+      "                                    | 1 - Warning\n"
+      "                                    | 2 - Normal (default value)\n"
+      "                                    | 3 - Informative\n"
+      "                                    | 4 - Future use\n"
+      "                                    | 5 - Future use\n"
+      "                                    | 6 - Debug\n"
+      "[--print-ndpi-protocols]            | Print the nDPI protocols list\n"
 #ifndef HAVE_NEDGE
-	 "[--ignore-macs]                     | Ignore packets MAC addresses\n"
+      "[--ignore-macs]                     | Ignore packets MAC addresses\n"
 #endif
-	 "[--ignore-vlans]                    | Ignore packets VLAN tags\n"
-	 "[--pcap-file-purge-flows]           | Enable flow purge with pcap files "
-	 "(debug only)\n"
-	 "[--simulate-vlans]                  | Simulate VLAN traffic (debug "
-	 "only)\n"
-	 "[--simulate-macs]                   | Simulate MACs in the traffic "
-	 "(debug only)\n"
-	 "[--simulate-ips] <num>              | Simulate IPs by choosing clients "
-	 "and servers among <num> random addresses\n"
-	 "[--mtu] <mtu>                       | Force expected MTU for capture interfaces\n"
-	 "                                    | Overrides the auto-detected MTU\n"
-	 "[--limit-resources]                 | Non-essential features are disabled\n"
-	 "                                    | in order to save memory and threads\n"
-	 "[--help|-h]                         | Help\n"
-	 );
+      "[--ignore-vlans]                    | Ignore packets VLAN tags\n"
+      "[--pcap-file-purge-flows]           | Enable flow purge with pcap files "
+      "(debug only)\n"
+      "[--simulate-vlans]                  | Simulate VLAN traffic (debug "
+      "only)\n"
+      "[--simulate-macs]                   | Simulate MACs in the traffic "
+      "(debug only)\n"
+      "[--simulate-ips] <num>              | Simulate IPs by choosing clients "
+      "and servers among <num> random addresses\n"
+      "[--mtu] <mtu>                       | Force expected MTU for capture "
+      "interfaces\n"
+      "                                    | Overrides the auto-detected MTU\n"
+      "[--limit-resources]                 | Non-essential features are "
+      "disabled\n"
+      "                                    | in order to save memory and "
+      "threads\n"
+      "[--help|-h]                         | Help\n");
 
   printf("\n");
 
@@ -818,25 +847,25 @@ void usage() {
 /* ******************************************* */
 
 void Prefs::setTraceLevelFromRedis() {
-  char *lvlStr;
+  char* lvlStr;
 
-  if((lvlStr = (char *)malloc(CONST_MAX_LEN_REDIS_VALUE)) == NULL)
+  if ((lvlStr = (char*)malloc(CONST_MAX_LEN_REDIS_VALUE)) == NULL)
     ;
 
-  if(!hasCmdlTraceLevel() &&
-      ntop->getRedis()->get((char *)CONST_RUNTIME_PREFS_LOGGING_LEVEL, lvlStr,
+  if (!hasCmdlTraceLevel() &&
+      ntop->getRedis()->get((char*)CONST_RUNTIME_PREFS_LOGGING_LEVEL, lvlStr,
                             CONST_MAX_LEN_REDIS_VALUE) == 0) {
-    if(!strcmp(lvlStr, "trace")) {
+    if (!strcmp(lvlStr, "trace")) {
       ntop->getTrace()->set_trace_level(TRACE_LEVEL_TRACE);
-    } else if(!strcmp(lvlStr, "debug")) {
+    } else if (!strcmp(lvlStr, "debug")) {
       ntop->getTrace()->set_trace_level(TRACE_LEVEL_DEBUG);
-    } else if(!strcmp(lvlStr, "info")) {
+    } else if (!strcmp(lvlStr, "info")) {
       ntop->getTrace()->set_trace_level(TRACE_LEVEL_INFO);
-    } else if(!strcmp(lvlStr, "normal")) {
+    } else if (!strcmp(lvlStr, "normal")) {
       ntop->getTrace()->set_trace_level(TRACE_LEVEL_NORMAL);
-    } else if(!strcmp(lvlStr, "warning")) {
+    } else if (!strcmp(lvlStr, "warning")) {
       ntop->getTrace()->set_trace_level(TRACE_LEVEL_WARNING);
-    } else if(!strcmp(lvlStr, "error")) {
+    } else if (!strcmp(lvlStr, "error")) {
       ntop->getTrace()->set_trace_level(TRACE_LEVEL_ERROR);
     }
   }
@@ -846,9 +875,9 @@ void Prefs::setTraceLevelFromRedis() {
 
 /* ******************************************* */
 
-char *Prefs::get_if_name(int id) {
+char* Prefs::get_if_name(int id) {
   for (int i = 0; i < num_interfaces; i++) {
-    if(ifNames[i].id == id) return ifNames[i].name;
+    if (ifNames[i].id == id) return ifNames[i].name;
   }
 
   return NULL;
@@ -856,9 +885,9 @@ char *Prefs::get_if_name(int id) {
 
 /* ******************************************* */
 
-char *Prefs::get_if_descr(int id) {
+char* Prefs::get_if_descr(int id) {
   for (int i = 0; i < num_interfaces; i++) {
-    if(ifNames[i].id == id) return ifNames[i].description;
+    if (ifNames[i].id == id) return ifNames[i].description;
   }
 
   return NULL;
@@ -866,9 +895,9 @@ char *Prefs::get_if_descr(int id) {
 
 /* ******************************************* */
 
-char *Prefs::get_if_alias(int id) {
+char* Prefs::get_if_alias(int id) {
   for (int i = 0; i < num_interfaces; i++) {
-    if(ifNames[i].id == id) return ifNames[i].alias;
+    if (ifNames[i].id == id) return ifNames[i].alias;
   }
 
   return NULL;
@@ -876,11 +905,12 @@ char *Prefs::get_if_alias(int id) {
 
 /* ******************************************* */
 
-void Prefs::getDefaultStringPrefsValue(const char *pref_key, char **buffer,
-                                       const char *default_value) {
+void Prefs::getDefaultStringPrefsValue(const char* pref_key, char** buffer,
+                                       const char* default_value) {
   char rsp[MAX_PATH];
 
-  if((ntop->getRedis()->get((char *)pref_key, rsp, sizeof(rsp)) == 0) && (rsp[0] != '\0') && strcmp(rsp, "nil"))
+  if ((ntop->getRedis()->get((char*)pref_key, rsp, sizeof(rsp)) == 0) &&
+      (rsp[0] != '\0') && strcmp(rsp, "nil"))
     *buffer = strdup(rsp);
   else
     *buffer = strdup(default_value);
@@ -888,50 +918,50 @@ void Prefs::getDefaultStringPrefsValue(const char *pref_key, char **buffer,
 
 /* ******************************************* */
 
-bool Prefs::getDefaultBoolPrefsValue(const char *pref_key,
+bool Prefs::getDefaultBoolPrefsValue(const char* pref_key,
                                      const bool default_value) {
   char rsp[8];
 
-  if(ntop->getRedis()->get((char *)pref_key, rsp, sizeof(rsp)) == 0 &&
+  if (ntop->getRedis()->get((char*)pref_key, rsp, sizeof(rsp)) == 0 &&
       rsp[0] != '\0') {
-    return ((rsp[0] == '1' || rsp[0] =='t' /* true */ ) ? true : false);
+    return ((rsp[0] == '1' || rsp[0] == 't' /* true */) ? true : false);
   } else {
     snprintf(rsp, sizeof(rsp), "%c", default_value ? '1' : '0');
-    ntop->getRedis()->set((char *)pref_key, rsp);
+    ntop->getRedis()->set((char*)pref_key, rsp);
     return (default_value);
   }
 }
 /* ******************************************* */
 
-bool Prefs::do_active_monitoring(){
-  return get_active_monitoring_pref() 
-      #ifndef WIN32
-      && ntop->isPingInitialized()
-      #endif
+bool Prefs::do_active_monitoring() {
+  return get_active_monitoring_pref()
+#ifndef WIN32
+         && ntop->isPingInitialized()
+#endif
       ;
 };
 
 /* ******************************************* */
 
-int32_t Prefs::getDefaultPrefsValue(const char *pref_key,
+int32_t Prefs::getDefaultPrefsValue(const char* pref_key,
                                     int32_t default_value) {
   char rsp[32];
 
-  if(ntop->getRedis()->get((char *)pref_key, rsp, sizeof(rsp)) == 0)
+  if (ntop->getRedis()->get((char*)pref_key, rsp, sizeof(rsp)) == 0)
     return (atoi(rsp));
   else {
     snprintf(rsp, sizeof(rsp), "%i", default_value);
-    ntop->getRedis()->set((char *)pref_key, rsp);
+    ntop->getRedis()->set((char*)pref_key, rsp);
     return (default_value);
   }
 }
 
 /* ******************************************* */
 
-static TsDriver str2TsDriver(const char *driver) {
-  if(!strcmp(driver, "influxdb"))
+static TsDriver str2TsDriver(const char* driver) {
+  if (!strcmp(driver, "influxdb"))
     return (ts_driver_influxdb);
-  else if(!strcmp(driver, "clickhouse"))
+  else if (!strcmp(driver, "clickhouse"))
     return (ts_driver_clickhouse);
   else
     return (ts_driver_rrd);
@@ -940,196 +970,264 @@ static TsDriver str2TsDriver(const char *driver) {
 /* ******************************************* */
 
 void Prefs::reloadPrefsFromRedis() {
-  char *aux = NULL;
-  char *tmp = NULL;
+  char* aux = NULL;
+  char* tmp = NULL;
 
   // sets to the default value in redis if no key is found
 #ifdef PREFS_RELOAD_DEBUG
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "A preference has changed, reloading...");
+  ntop->getTrace()->traceEvent(TRACE_DEBUG,
+                               "A preference has changed, reloading...");
 #endif
 
   enable_auto_logout_at_runtime = getDefaultPrefsValue(
-						       CONST_RUNTIME_IS_AUTOLOGOUT_ENABLED, CONST_DEFAULT_IS_AUTOLOGOUT_ENABLED);
+      CONST_RUNTIME_IS_AUTOLOGOUT_ENABLED, CONST_DEFAULT_IS_AUTOLOGOUT_ENABLED);
 
   enable_interface_name_only =
-    getDefaultPrefsValue(CONST_RUNTIME_IS_INTERFACE_NAME_ONLY, false);
+      getDefaultPrefsValue(CONST_RUNTIME_IS_INTERFACE_NAME_ONLY, false);
 
 #ifdef NTOPNG_PRO
   max_aggregated_flows_upperbound =
-    getDefaultPrefsValue(CONST_MAX_AGGREGATED_FLOWS_UPPERBOUND, 10000);
+      getDefaultPrefsValue(CONST_MAX_AGGREGATED_FLOWS_UPPERBOUND, 10000);
   max_aggregated_flows_traffic_upperbound =
-    getDefaultPrefsValue(CONST_MAX_AGGREGATED_FLOWS_TRAFFIC_UPPERBOUND, 1);
+      getDefaultPrefsValue(CONST_MAX_AGGREGATED_FLOWS_TRAFFIC_UPPERBOUND, 1);
 #endif
   // alert preferences
-  enable_access_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ACCESS_LOG, false);
-  enable_assets_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false);
+  enable_access_log =
+      getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ACCESS_LOG, false);
+  enable_assets_log =
+      getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false);
   enable_sql_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_SQL_LOG, false);
-  use_mac_in_flow_key = getDefaultPrefsValue(CONST_PREFS_USE_MAC_IN_FLOW_KEY, false);
-  fingerprint_stats = getDefaultPrefsValue(CONST_PREFS_FINGERPRINT_STATS, false);
+  use_mac_in_flow_key =
+      getDefaultPrefsValue(CONST_PREFS_USE_MAC_IN_FLOW_KEY, false);
+  fingerprint_stats =
+      getDefaultPrefsValue(CONST_PREFS_FINGERPRINT_STATS, false);
   // vulnerability scan preferences
   vs_max_num_scans = getDefaultPrefsValue(CONST_VS_MAX_NUM_SCANS, 4);
   vs_slow_scan = getDefaultBoolPrefsValue(CONST_VS_SLOW_SCAN, false);
   // auth session preferences
-  auth_session_duration = getDefaultPrefsValue(CONST_AUTH_SESSION_DURATION_PREFS,
-					       HTTP_SESSION_DURATION),
-    auth_session_midnight_expiration = getDefaultBoolPrefsValue(CONST_AUTH_SESSION_MIDNIGHT_EXP_PREFS,
-								HTTP_SESSION_MIDNIGHT_EXPIRATION);
+  auth_session_duration = getDefaultPrefsValue(
+      CONST_AUTH_SESSION_DURATION_PREFS, HTTP_SESSION_DURATION),
+  auth_session_midnight_expiration = getDefaultBoolPrefsValue(
+      CONST_AUTH_SESSION_MIDNIGHT_EXP_PREFS, HTTP_SESSION_MIDNIGHT_EXPIRATION);
 
   /* Runtime Preferences */
-  housekeeping_frequency = getDefaultPrefsValue(CONST_RUNTIME_PREFS_HOUSEKEEPING_FREQ, HOUSEKEEPING_FREQUENCY),
-    local_host_cache_duration = getDefaultPrefsValue(CONST_LOCAL_HOST_CACHE_DURATION_PREFS, LOCAL_HOSTS_CACHE_DURATION),
-    local_host_max_idle = getDefaultPrefsValue(CONST_LOCAL_HOST_IDLE_PREFS, MAX_LOCAL_HOST_IDLE),
-    non_local_host_max_idle = getDefaultPrefsValue(CONST_REMOTE_HOST_IDLE_PREFS, MAX_REMOTE_HOST_IDLE),
-    pkt_ifaces_flow_max_idle = getDefaultPrefsValue(CONST_FLOW_MAX_IDLE_PREFS, MAX_FLOW_IDLE),
-    active_local_hosts_cache_interval = getDefaultPrefsValue(CONST_RUNTIME_ACTIVE_LOCAL_HOSTS_CACHE_INTERVAL,
-							     CONST_DEFAULT_ACTIVE_LOCAL_HOSTS_CACHE_INTERVAL),
-    mac_address_cache_duration = getDefaultPrefsValue(CONST_RUNTIME_MAC_ADDRESS_CACHE_DURATION,
-						      MAX_MAC_IDLE),
-    enable_flow_swap_heuristic = getDefaultBoolPrefsValue(CONST_RUNTIME_ENABLE_FLOW_SWAP_HEURISTIC,
-							  true),
-    skip_dpi_for_collected_flows = getDefaultBoolPrefsValue(CONST_RUNTIME_SKIP_DPI_FOR_COLLECTED_FLOWS,
-							    false),
-    enable_assets_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false);
-  
-  log_to_file = getDefaultBoolPrefsValue(CONST_RUNTIME_PREFS_LOG_TO_FILE, false);
-  intf_rrd_raw_days = getDefaultPrefsValue(CONST_INTF_RRD_RAW_DAYS, INTF_RRD_RAW_DAYS),
-    intf_rrd_1min_days = getDefaultPrefsValue(CONST_INTF_RRD_1MIN_DAYS, INTF_RRD_1MIN_DAYS),
-    intf_rrd_1h_days = getDefaultPrefsValue(CONST_INTF_RRD_1H_DAYS, INTF_RRD_1H_DAYS),
-    intf_rrd_1d_days = getDefaultPrefsValue(CONST_INTF_RRD_1D_DAYS, INTF_RRD_1D_DAYS),
-    other_rrd_raw_days = getDefaultPrefsValue(CONST_OTHER_RRD_RAW_DAYS, OTHER_RRD_RAW_DAYS),
-    other_rrd_1min_days = getDefaultPrefsValue(CONST_OTHER_RRD_1MIN_DAYS, OTHER_RRD_1MIN_DAYS),
-    other_rrd_1h_days = getDefaultPrefsValue(CONST_OTHER_RRD_1H_DAYS, OTHER_RRD_1H_DAYS),
-    other_rrd_1d_days = getDefaultPrefsValue(CONST_OTHER_RRD_1D_DAYS, OTHER_RRD_1D_DAYS),
+  housekeeping_frequency = getDefaultPrefsValue(
+      CONST_RUNTIME_PREFS_HOUSEKEEPING_FREQ, HOUSEKEEPING_FREQUENCY),
+  local_host_cache_duration = getDefaultPrefsValue(
+      CONST_LOCAL_HOST_CACHE_DURATION_PREFS, LOCAL_HOSTS_CACHE_DURATION),
+  local_host_max_idle =
+      getDefaultPrefsValue(CONST_LOCAL_HOST_IDLE_PREFS, MAX_LOCAL_HOST_IDLE),
+  non_local_host_max_idle =
+      getDefaultPrefsValue(CONST_REMOTE_HOST_IDLE_PREFS, MAX_REMOTE_HOST_IDLE),
+  pkt_ifaces_flow_max_idle =
+      getDefaultPrefsValue(CONST_FLOW_MAX_IDLE_PREFS, MAX_FLOW_IDLE),
+  active_local_hosts_cache_interval =
+      getDefaultPrefsValue(CONST_RUNTIME_ACTIVE_LOCAL_HOSTS_CACHE_INTERVAL,
+                           CONST_DEFAULT_ACTIVE_LOCAL_HOSTS_CACHE_INTERVAL),
+  mac_address_cache_duration = getDefaultPrefsValue(
+      CONST_RUNTIME_MAC_ADDRESS_CACHE_DURATION, MAX_MAC_IDLE),
+  enable_flow_swap_heuristic =
+      getDefaultBoolPrefsValue(CONST_RUNTIME_ENABLE_FLOW_SWAP_HEURISTIC, true),
+  skip_dpi_for_collected_flows = getDefaultBoolPrefsValue(
+      CONST_RUNTIME_SKIP_DPI_FOR_COLLECTED_FLOWS, false),
+  enable_assets_log =
+      getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false);
 
-    enable_top_talkers = getDefaultBoolPrefsValue(CONST_TOP_TALKERS_ENABLED, CONST_DEFAULT_TOP_TALKERS_ENABLED),
-    enable_sites_collection = getDefaultBoolPrefsValue(CONST_SITES_COLLECTION_ENABLED, CONST_DEFAULT_SITES_COLLECTION_ENABLED),
-    message_broker_enabled = getDefaultBoolPrefsValue(CONST_PREFS_MESSAGE_BROKER_ENABLED, DEFAULT_MESSAGE_BROKER_ENABLED),
-    enable_dns_cache = getDefaultBoolPrefsValue(CONST_DNS_CACHE_ENABLED, CONST_DEFAULT_DNS_CACHE_ENABLED),
-    enable_active_local_hosts_cache = getDefaultBoolPrefsValue(CONST_RUNTIME_ACTIVE_LOCAL_HOSTS_CACHE_ENABLED,
-							       CONST_DEFAULT_IS_ACTIVE_LOCAL_HOSTS_CACHE_ENABLED),
-    enable_tiny_flows_export = getDefaultBoolPrefsValue(CONST_IS_TINY_FLOW_EXPORT_ENABLED,
-							CONST_DEFAULT_IS_TINY_FLOW_EXPORT_ENABLED),
+  log_to_file =
+      getDefaultBoolPrefsValue(CONST_RUNTIME_PREFS_LOG_TO_FILE, false);
+  intf_rrd_raw_days =
+      getDefaultPrefsValue(CONST_INTF_RRD_RAW_DAYS, INTF_RRD_RAW_DAYS),
+  intf_rrd_1min_days =
+      getDefaultPrefsValue(CONST_INTF_RRD_1MIN_DAYS, INTF_RRD_1MIN_DAYS),
+  intf_rrd_1h_days =
+      getDefaultPrefsValue(CONST_INTF_RRD_1H_DAYS, INTF_RRD_1H_DAYS),
+  intf_rrd_1d_days =
+      getDefaultPrefsValue(CONST_INTF_RRD_1D_DAYS, INTF_RRD_1D_DAYS),
+  other_rrd_raw_days =
+      getDefaultPrefsValue(CONST_OTHER_RRD_RAW_DAYS, OTHER_RRD_RAW_DAYS),
+  other_rrd_1min_days =
+      getDefaultPrefsValue(CONST_OTHER_RRD_1MIN_DAYS, OTHER_RRD_1MIN_DAYS),
+  other_rrd_1h_days =
+      getDefaultPrefsValue(CONST_OTHER_RRD_1H_DAYS, OTHER_RRD_1H_DAYS),
+  other_rrd_1d_days =
+      getDefaultPrefsValue(CONST_OTHER_RRD_1D_DAYS, OTHER_RRD_1D_DAYS),
 
-    max_entity_alerts = getDefaultPrefsValue(CONST_MAX_ENTITY_ALERTS,
-					     ALERTS_MANAGER_MAX_ENTITY_ALERTS),
-    max_num_secs_before_delete_alert = getDefaultPrefsValue(CONST_MAX_NUM_SECS_ALERTS_BEFORE_DEL,
-							    ALERTS_MAX_SECS_BEFORE_PURGE),
-    alert_page_refresh_rate = getDefaultPrefsValue(CONST_ALERT_PAGE_REFRESH_RATE,
-						   ALERTS_PAGE_REFRESH_RATE),
-    enable_observation_points_rrd_creation = getDefaultBoolPrefsValue(CONST_RUNTIME_PREFS_OBSERVATION_POINTS_RRD_CREATION, false),
-    enable_intranet_traffic_rrd_creation = getDefaultBoolPrefsValue(CONST_RUNTIME_PREFS_INTRANET_TRAFFIC_RRD_CREATION, false),
-    enable_flow_device_port_rrd_creation = getDefaultBoolPrefsValue(CONST_RUNTIME_PREFS_FLOW_DEVICE_PORT_RRD_CREATION, false),
-    disable_alerts = getDefaultBoolPrefsValue(CONST_ALERT_DISABLED_PREFS, false),
-    enable_activities_debug = getDefaultBoolPrefsValue(CONST_ACTIVITIES_DEBUG_ENABLED, false),
-    snmp_polling = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_SNMP_POLLING, true);
-  active_monitoring = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ACTIVE_MONITORING, false);
-  network_discovery = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_NETWORK_DISCOVERY, false);
+  enable_top_talkers = getDefaultBoolPrefsValue(
+      CONST_TOP_TALKERS_ENABLED, CONST_DEFAULT_TOP_TALKERS_ENABLED),
+  enable_sites_collection = getDefaultBoolPrefsValue(
+      CONST_SITES_COLLECTION_ENABLED, CONST_DEFAULT_SITES_COLLECTION_ENABLED),
+  message_broker_enabled = getDefaultBoolPrefsValue(
+      CONST_PREFS_MESSAGE_BROKER_ENABLED, DEFAULT_MESSAGE_BROKER_ENABLED),
+  enable_dns_cache = getDefaultBoolPrefsValue(CONST_DNS_CACHE_ENABLED,
+                                              CONST_DEFAULT_DNS_CACHE_ENABLED),
+  enable_active_local_hosts_cache = getDefaultBoolPrefsValue(
+      CONST_RUNTIME_ACTIVE_LOCAL_HOSTS_CACHE_ENABLED,
+      CONST_DEFAULT_IS_ACTIVE_LOCAL_HOSTS_CACHE_ENABLED),
+  enable_tiny_flows_export =
+      getDefaultBoolPrefsValue(CONST_IS_TINY_FLOW_EXPORT_ENABLED,
+                               CONST_DEFAULT_IS_TINY_FLOW_EXPORT_ENABLED),
+
+  max_entity_alerts = getDefaultPrefsValue(CONST_MAX_ENTITY_ALERTS,
+                                           ALERTS_MANAGER_MAX_ENTITY_ALERTS),
+  max_num_secs_before_delete_alert = getDefaultPrefsValue(
+      CONST_MAX_NUM_SECS_ALERTS_BEFORE_DEL, ALERTS_MAX_SECS_BEFORE_PURGE),
+  alert_page_refresh_rate = getDefaultPrefsValue(CONST_ALERT_PAGE_REFRESH_RATE,
+                                                 ALERTS_PAGE_REFRESH_RATE),
+  enable_observation_points_rrd_creation = getDefaultBoolPrefsValue(
+      CONST_RUNTIME_PREFS_OBSERVATION_POINTS_RRD_CREATION, false),
+  enable_intranet_traffic_rrd_creation = getDefaultBoolPrefsValue(
+      CONST_RUNTIME_PREFS_INTRANET_TRAFFIC_RRD_CREATION, false),
+  enable_flow_device_port_rrd_creation = getDefaultBoolPrefsValue(
+      CONST_RUNTIME_PREFS_FLOW_DEVICE_PORT_RRD_CREATION, false),
+  disable_alerts = getDefaultBoolPrefsValue(CONST_ALERT_DISABLED_PREFS, false),
+  enable_activities_debug =
+      getDefaultBoolPrefsValue(CONST_ACTIVITIES_DEBUG_ENABLED, false),
+  snmp_polling =
+      getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_SNMP_POLLING, true);
+  active_monitoring =
+      getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ACTIVE_MONITORING, false);
+  network_discovery =
+      getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_NETWORK_DISCOVERY, false);
   starttls = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_STARTTLS, false);
-  dump_pcap_to_clickhouse = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_DUMP_PCAP_TO_CLICKHOUSE, false);
+  dump_pcap_to_clickhouse = getDefaultBoolPrefsValue(
+      CONST_PREFS_ENABLE_DUMP_PCAP_TO_CLICKHOUSE, false);
 #ifdef NTOPNG_PRO
-  data_archive_before_ttl_delete = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ARCHIVE_BEFORE_TTL_DELETE, false);
+  data_archive_before_ttl_delete = getDefaultBoolPrefsValue(
+      CONST_PREFS_ENABLE_ARCHIVE_BEFORE_TTL_DELETE, false);
 #endif
-  query_performance_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_QUERY_PERFORMANCE_LOG, false);
+  query_performance_log =
+      getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_QUERY_PERFORMANCE_LOG, false);
 
   enable_arp_matrix_generation =
-    getDefaultBoolPrefsValue(CONST_DEFAULT_ARP_MATRIX_GENERATION, false),
+      getDefaultBoolPrefsValue(CONST_DEFAULT_ARP_MATRIX_GENERATION, false),
 
-    override_dst_with_post_nat_dst = getDefaultBoolPrefsValue(CONST_DEFAULT_OVERRIDE_DST_WITH_POST_NAT, false),
-    override_src_with_post_nat_src = getDefaultBoolPrefsValue(CONST_DEFAULT_OVERRIDE_SRC_WITH_POST_NAT, false),
+  override_dst_with_post_nat_dst =
+      getDefaultBoolPrefsValue(CONST_DEFAULT_OVERRIDE_DST_WITH_POST_NAT, false),
+  override_src_with_post_nat_src =
+      getDefaultBoolPrefsValue(CONST_DEFAULT_OVERRIDE_SRC_WITH_POST_NAT, false),
 
-    max_num_packets_per_tiny_flow =  getDefaultPrefsValue(CONST_MAX_NUM_PACKETS_PER_TINY_FLOW,
-							  CONST_DEFAULT_MAX_NUM_PACKETS_PER_TINY_FLOW),
-    dump_frequency = getDefaultPrefsValue(CONST_DUMP_FREQUENCY, ES_BULK_MAX_DELAY),
-    max_num_bytes_per_tiny_flow = getDefaultPrefsValue(CONST_MAX_NUM_BYTES_PER_TINY_FLOW,
-						       CONST_DEFAULT_MAX_NUM_BYTES_PER_TINY_FLOW),
-    max_extracted_pcap_bytes = getDefaultPrefsValue(CONST_MAX_EXTR_PCAP_BYTES, CONST_DEFAULT_MAX_EXTR_PCAP_BYTES);
-  max_extracted_pcap_files = getDefaultPrefsValue(CONST_MAX_EXTR_PCAP_FILES, CONST_DEFAULT_MAX_EXTR_PCAP_FILES);
+  max_num_packets_per_tiny_flow =
+      getDefaultPrefsValue(CONST_MAX_NUM_PACKETS_PER_TINY_FLOW,
+                           CONST_DEFAULT_MAX_NUM_PACKETS_PER_TINY_FLOW),
+  dump_frequency =
+      getDefaultPrefsValue(CONST_DUMP_FREQUENCY, ES_BULK_MAX_DELAY),
+  max_num_bytes_per_tiny_flow =
+      getDefaultPrefsValue(CONST_MAX_NUM_BYTES_PER_TINY_FLOW,
+                           CONST_DEFAULT_MAX_NUM_BYTES_PER_TINY_FLOW),
+  max_extracted_pcap_bytes = getDefaultPrefsValue(
+      CONST_MAX_EXTR_PCAP_BYTES, CONST_DEFAULT_MAX_EXTR_PCAP_BYTES);
+  max_extracted_pcap_files = getDefaultPrefsValue(
+      CONST_MAX_EXTR_PCAP_FILES, CONST_DEFAULT_MAX_EXTR_PCAP_FILES);
 
   ewma_alpha_percent = getDefaultPrefsValue(CONST_EWMA_ALPHA_PERCENT,
-					    CONST_DEFAULT_EWMA_ALPHA_PERCENT);
+                                            CONST_DEFAULT_EWMA_ALPHA_PERCENT);
 
-  enable_captive_portal = getDefaultBoolPrefsValue(CONST_PREFS_CAPTIVE_PORTAL, false);
-  mac_based_captive_portal = getDefaultBoolPrefsValue(CONST_PREFS_MAC_CAPTIVE_PORTAL, true);
-  enable_informative_captive_portal = getDefaultBoolPrefsValue(CONST_PREFS_INFORM_CAPTIVE_PORTAL, false);
-  enable_external_auth_captive_portal = getDefaultBoolPrefsValue(CONST_PREFS_EXTERNAL_AUTH, false);
-  full_stats_enabled = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_FULL_STATS, true);
-  enable_vlan_trunk_bridge = getDefaultBoolPrefsValue(CONST_PREFS_VLAN_TRUNK_MODE_ENABLED, false);
-  default_l7policy = getDefaultPrefsValue(CONST_PREFS_DEFAULT_L7_POLICY, PASS_ALL_SHAPER_ID);
+  enable_captive_portal =
+      getDefaultBoolPrefsValue(CONST_PREFS_CAPTIVE_PORTAL, false);
+  mac_based_captive_portal =
+      getDefaultBoolPrefsValue(CONST_PREFS_MAC_CAPTIVE_PORTAL, true);
+  enable_informative_captive_portal =
+      getDefaultBoolPrefsValue(CONST_PREFS_INFORM_CAPTIVE_PORTAL, false);
+  enable_external_auth_captive_portal =
+      getDefaultBoolPrefsValue(CONST_PREFS_EXTERNAL_AUTH, false);
+  full_stats_enabled =
+      getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_FULL_STATS, true);
+  enable_vlan_trunk_bridge =
+      getDefaultBoolPrefsValue(CONST_PREFS_VLAN_TRUNK_MODE_ENABLED, false);
+  default_l7policy =
+      getDefaultPrefsValue(CONST_PREFS_DEFAULT_L7_POLICY, PASS_ALL_SHAPER_ID);
 
   max_ui_strlen = getDefaultPrefsValue(CONST_RUNTIME_MAX_UI_STRLEN,
-				       CONST_DEFAULT_MAX_UI_STRLEN);
+                                       CONST_DEFAULT_MAX_UI_STRLEN);
   hostMask = (HostMask)getDefaultPrefsValue(CONST_RUNTIME_PREFS_HOSTMASK,
-					    no_host_mask);
-  flow_table_time = (bool)getDefaultPrefsValue(CONST_FLOW_TABLE_TIME, flow_table_time);
-  flow_table_probe_order = (bool)getDefaultPrefsValue(CONST_FLOW_TABLE_PROBE_ORDER, flow_table_probe_order);
-  auto_assigned_pool_id = (u_int16_t)getDefaultPrefsValue(CONST_RUNTIME_PREFS_AUTO_ASSIGNED_POOL_ID, NO_HOST_POOL_ID);
-  enable_broadcast_domain_too_large = getDefaultBoolPrefsValue(CONST_PREFS_BROADCAST_DOMAIN_TOO_LARGE, false);
+                                            no_host_mask);
+  flow_table_time =
+      (bool)getDefaultPrefsValue(CONST_FLOW_TABLE_TIME, flow_table_time);
+  flow_table_probe_order = (bool)getDefaultPrefsValue(
+      CONST_FLOW_TABLE_PROBE_ORDER, flow_table_probe_order);
+  auto_assigned_pool_id = (u_int16_t)getDefaultPrefsValue(
+      CONST_RUNTIME_PREFS_AUTO_ASSIGNED_POOL_ID, NO_HOST_POOL_ID);
+  enable_broadcast_domain_too_large =
+      getDefaultBoolPrefsValue(CONST_PREFS_BROADCAST_DOMAIN_TOO_LARGE, false);
 
-  getDefaultStringPrefsValue(CONST_RUNTIME_PREFS_TS_DRIVER, &aux, (char *)"rrd");
-  if(aux) {
+  getDefaultStringPrefsValue(CONST_RUNTIME_PREFS_TS_DRIVER, &aux, (char*)"rrd");
+  if (aux) {
     timeseries_driver = str2TsDriver(aux);
     free(aux);
   }
 
-  getDefaultStringPrefsValue(CONST_RUNTIME_PREFS_SPLIT_TS_DIRECTION, &aux, DEFAULT_SPLIT_TS_DIRECTION);
-  if(aux) {
+  getDefaultStringPrefsValue(CONST_RUNTIME_PREFS_SPLIT_TS_DIRECTION, &aux,
+                             DEFAULT_SPLIT_TS_DIRECTION);
+  if (aux) {
     split_ts_direction = strncmp(aux, DEFAULT_SPLIT_TS_DIRECTION, 5);
     free(aux);
   }
 
-  getDefaultStringPrefsValue(CONST_RUNTIME_PREFS_ENABLE_MAC_NDPI_STATS, &aux, (char *)"none");
-  if(aux) {
-    enable_mac_ndpi_stats = strncmp(aux, (char *)"none", 4);
+  getDefaultStringPrefsValue(CONST_RUNTIME_PREFS_ENABLE_MAC_NDPI_STATS, &aux,
+                             (char*)"none");
+  if (aux) {
+    enable_mac_ndpi_stats = strncmp(aux, (char*)"none", 4);
     free(aux);
   }
 
-  getDefaultStringPrefsValue(CONST_SAFE_SEARCH_DNS, &aux, DEFAULT_SAFE_SEARCH_DNS);
-  if(aux) {
+  getDefaultStringPrefsValue(CONST_SAFE_SEARCH_DNS, &aux,
+                             DEFAULT_SAFE_SEARCH_DNS);
+  if (aux) {
     safe_search_dns_ip = Utils::inet_addr(aux);
     free(aux);
   }
 
   getDefaultStringPrefsValue(CONST_GLOBAL_DNS, &aux, DEFAULT_GLOBAL_DNS);
-  if(aux) {
+  if (aux) {
     global_primary_dns_ip = Utils::inet_addr(aux);
     free(aux);
   }
 
   getDefaultStringPrefsValue(CONST_SECONDARY_DNS, &aux, DEFAULT_GLOBAL_DNS);
-  if(aux) {
+  if (aux) {
     global_secondary_dns_ip = Utils::inet_addr(aux);
     free(aux);
   }
 
-  getDefaultStringPrefsValue(CONST_PREFS_MESSAGE_BROKER_URL, &tmp, DEFAULT_MESSAGE_BROKER_URL);
-  if(tmp) {
-    if(message_broker_url) free(message_broker_url);
+  getDefaultStringPrefsValue(CONST_PREFS_MESSAGE_BROKER_URL, &tmp,
+                             DEFAULT_MESSAGE_BROKER_URL);
+  if (tmp) {
+    if (message_broker_url) free(message_broker_url);
     message_broker_url = strdup(tmp);
     free(tmp);
   }
 
-  getDefaultStringPrefsValue(CONST_PREFS_MESSAGE_BROKER, &tmp, DEFAULT_MESSAGE_BROKER);
-  if(message_broker) free(message_broker);
+  getDefaultStringPrefsValue(CONST_PREFS_MESSAGE_BROKER, &tmp,
+                             DEFAULT_MESSAGE_BROKER);
+  if (message_broker) free(message_broker);
   message_broker = tmp;
 
-  getDefaultStringPrefsValue(CONST_PREFS_HTTP_INDEX_PAGE, &tmp, DEFAULT_HTTP_INDEX_PAGE);
-  if(http_index_page) free(http_index_page);
+  getDefaultStringPrefsValue(CONST_PREFS_HTTP_INDEX_PAGE, &tmp,
+                             DEFAULT_HTTP_INDEX_PAGE);
+  if (http_index_page) free(http_index_page);
 
-  if(tmp[0] == '\0') {
+  if (tmp[0] == '\0') {
     free(tmp);
     tmp = strdup(INDEX_URL);
   }
   http_index_page = tmp;
 
-  asn_mode_enabled = getDefaultBoolPrefsValue(CONST_PREFS_ASN_MODE_ENABLED, false);
-  global_dns_forging_enabled = getDefaultBoolPrefsValue(CONST_PREFS_GLOBAL_DNS_FORGING_ENABLED, false);
-  enable_client_x509_auth = getDefaultBoolPrefsValue(CONST_PREFS_CLIENT_X509_AUTH, false);
-  emit_flow_alerts = getDefaultBoolPrefsValue(CONST_PREFS_EMIT_FLOW_ALERTS, true);
-  emit_host_alerts = getDefaultBoolPrefsValue(CONST_PREFS_EMIT_HOST_ALERTS, true);
-  tls_quic_hostnaming = getDefaultBoolPrefsValue(CONST_PREFS_TLS_QUIC_HOSTNAMING, false);
+  asn_mode_enabled =
+      getDefaultBoolPrefsValue(CONST_PREFS_ASN_MODE_ENABLED, false);
+  global_dns_forging_enabled =
+      getDefaultBoolPrefsValue(CONST_PREFS_GLOBAL_DNS_FORGING_ENABLED, false);
+  enable_client_x509_auth =
+      getDefaultBoolPrefsValue(CONST_PREFS_CLIENT_X509_AUTH, false);
+  emit_flow_alerts =
+      getDefaultBoolPrefsValue(CONST_PREFS_EMIT_FLOW_ALERTS, true);
+  emit_host_alerts =
+      getDefaultBoolPrefsValue(CONST_PREFS_EMIT_HOST_ALERTS, true);
+  tls_quic_hostnaming =
+      getDefaultBoolPrefsValue(CONST_PREFS_TLS_QUIC_HOSTNAMING, false);
 
   /* Used for stats */
-  collect_blacklist_stats = getDefaultBoolPrefsValue(CONST_PREFS_COLLECT_BLACKLISTSTATS, false);
+  collect_blacklist_stats =
+      getDefaultBoolPrefsValue(CONST_PREFS_COLLECT_BLACKLISTSTATS, false);
 
   setTraceLevelFromRedis();
   refreshHostsAlertsPrefs();
@@ -1140,14 +1238,16 @@ void Prefs::reloadPrefsFromRedis() {
 #ifdef NTOPNG_PRO
   // reset value
   /* TODO: add a preference in the prefs page */
-  asset_inventory_enabled = getDefaultPrefsValue(CONST_PREFS_ASSET_INVENTORY_ENABLED,
-						 CONST_DEFAULT_ASSET_INVENTORY_ENABLED);
+  asset_inventory_enabled =
+      getDefaultPrefsValue(CONST_PREFS_ASSET_INVENTORY_ENABLED,
+                           CONST_DEFAULT_ASSET_INVENTORY_ENABLED);
   snmp_trap_enabled = getDefaultPrefsValue(CONST_PREFS_SNMP_TRAP_ENABLED,
-					   CONST_DEFAULT_SNMP_TRAP_ENABLED);
+                                           CONST_DEFAULT_SNMP_TRAP_ENABLED);
 #endif
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
-  ntopng_assets_inventory_enabled = getDefaultPrefsValue(CONST_PREFS_NTOPNG_ASSETS_INVENTORY_ENABLED,
-							 CONST_DEFAULT_NTOPNG_ASSETS_INVENTORY_ENABLED);
+  ntopng_assets_inventory_enabled =
+      getDefaultPrefsValue(CONST_PREFS_NTOPNG_ASSETS_INVENTORY_ENABLED,
+                           CONST_DEFAULT_NTOPNG_ASSETS_INVENTORY_ENABLED);
 #endif
 
 #if defined(NTOPNG_PRO)
@@ -1184,38 +1284,47 @@ void Prefs::reloadPrefsFromRedis() {
 
 void Prefs::refreshBehaviourAnalysis() {
   enable_behaviour_analysis = is_enterprise_l_edition();
-  enable_asn_behaviour_analysis = getDefaultBoolPrefsValue(CONST_PREFS_ASN_BEHAVIOR_ANALYSIS, false);
-  enable_network_behaviour_analysis = getDefaultBoolPrefsValue(CONST_PREFS_NETWORK_BEHAVIOR_ANALYSIS, false);
-  enable_iface_l7_behaviour_analysis = getDefaultBoolPrefsValue(CONST_PREFS_IFACE_L7_BEHAVIOR_ANALYSIS, false);
-  behaviour_analysis_learning_period = getDefaultPrefsValue(CONST_PREFS_BEHAVIOUR_ANALYSIS_LEARNING_PERIOD,
-							    CONST_DEFAULT_BEHAVIOUR_ANALYSIS_LEARNING_PERIOD);
+  enable_asn_behaviour_analysis =
+      getDefaultBoolPrefsValue(CONST_PREFS_ASN_BEHAVIOR_ANALYSIS, false);
+  enable_network_behaviour_analysis =
+      getDefaultBoolPrefsValue(CONST_PREFS_NETWORK_BEHAVIOR_ANALYSIS, false);
+  enable_iface_l7_behaviour_analysis =
+      getDefaultBoolPrefsValue(CONST_PREFS_IFACE_L7_BEHAVIOR_ANALYSIS, false);
+  behaviour_analysis_learning_period =
+      getDefaultPrefsValue(CONST_PREFS_BEHAVIOUR_ANALYSIS_LEARNING_PERIOD,
+                           CONST_DEFAULT_BEHAVIOUR_ANALYSIS_LEARNING_PERIOD);
   behaviour_analysis_learning_status_during_learning =
-    (ServiceAcceptance)getDefaultPrefsValue(CONST_PREFS_BEHAVIOUR_ANALYSIS_STATUS_DURING_LEARNING,
-					    service_allowed);
+      (ServiceAcceptance)getDefaultPrefsValue(
+          CONST_PREFS_BEHAVIOUR_ANALYSIS_STATUS_DURING_LEARNING,
+          service_allowed);
   behaviour_analysis_learning_status_post_learning =
-    (ServiceAcceptance)getDefaultPrefsValue(CONST_PREFS_BEHAVIOUR_ANALYSIS_STATUS_POST_LEARNING, service_allowed);
-  iec60870_learning_period = getDefaultPrefsValue(CONST_PREFS_IEC60870_ANALYSIS_LEARNING_PERIOD,
-						  CONST_IEC104_LEARNING_TIME);
-  modbus_learning_period = getDefaultPrefsValue(CONST_PREFS_MODBUS_ANALYSIS_LEARNING_PERIOD,
-						CONST_MODBUS_LEARNING_TIME);
-  s7comm_learning_period = getDefaultPrefsValue(CONST_PREFS_S7COMM_ANALYSIS_LEARNING_PERIOD,
-						CONST_S7COMM_LEARNING_TIME);
-  devices_learning_period = getDefaultPrefsValue(CONST_PREFS_DEVICES_ANALYSIS_LEARNING_PERIOD,
-						 CONST_DEVICES_LEARNING_TIME);
-  host_port_learning_period = getDefaultPrefsValue(CONST_PREFS_HOST_PORT_LEARNING_PERIOD,
-						 CONST_HOST_PORT_LEARNING_TIME);
+      (ServiceAcceptance)getDefaultPrefsValue(
+          CONST_PREFS_BEHAVIOUR_ANALYSIS_STATUS_POST_LEARNING, service_allowed);
+  iec60870_learning_period =
+      getDefaultPrefsValue(CONST_PREFS_IEC60870_ANALYSIS_LEARNING_PERIOD,
+                           CONST_IEC104_LEARNING_TIME);
+  modbus_learning_period = getDefaultPrefsValue(
+      CONST_PREFS_MODBUS_ANALYSIS_LEARNING_PERIOD, CONST_MODBUS_LEARNING_TIME);
+  s7comm_learning_period = getDefaultPrefsValue(
+      CONST_PREFS_S7COMM_ANALYSIS_LEARNING_PERIOD, CONST_S7COMM_LEARNING_TIME);
+  devices_learning_period =
+      getDefaultPrefsValue(CONST_PREFS_DEVICES_ANALYSIS_LEARNING_PERIOD,
+                           CONST_DEVICES_LEARNING_TIME);
+  host_port_learning_period = getDefaultPrefsValue(
+      CONST_PREFS_HOST_PORT_LEARNING_PERIOD, CONST_HOST_PORT_LEARNING_TIME);
 }
 
 /* ******************************************* */
 
 void Prefs::loadInstanceNameDefaults() {
-  // Do not re-set the interface name if it has already been set via command line
-  if(instance_name || !ntop)
+  // Do not re-set the interface name if it has already been set via command
+  // line
+  if (instance_name || !ntop)
     return;
   else {
     char tmp[256];
 
-    if(gethostname(tmp, sizeof(tmp)))
+    if (gethostname(tmp, sizeof(tmp)))
       ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to read hostname [%s]",
                                    strerror(errno));
     else
@@ -1227,111 +1336,111 @@ void Prefs::loadInstanceNameDefaults() {
 
 static const struct option long_options[] = {
 #ifndef WIN32
-  {"data-dir",                required_argument, NULL, 'd'},
+    {"data-dir", required_argument, NULL, 'd'},
 #endif
-  {"daemon",                  no_argument,       NULL, 'e'},
-  {"core-affinity",           required_argument, NULL, 'g'},
-  {"help",                    no_argument,       NULL, 'h'},
-  {"interface",               required_argument, NULL, 'i'},
-  {"traffic-filtering",       required_argument, NULL, 'k'},
-  {"disable-login",           required_argument, NULL, 'l'},
-  {"local-networks",          required_argument, NULL, 'm'},
+    {"daemon", no_argument, NULL, 'e'},
+    {"core-affinity", required_argument, NULL, 'g'},
+    {"help", no_argument, NULL, 'h'},
+    {"interface", required_argument, NULL, 'i'},
+    {"traffic-filtering", required_argument, NULL, 'k'},
+    {"disable-login", required_argument, NULL, 'l'},
+    {"local-networks", required_argument, NULL, 'm'},
 #ifndef HAVE_NEDGE
-  {"dns-mode",                required_argument, NULL, 'n'},
+    {"dns-mode", required_argument, NULL, 'n'},
 #endif
-  {"ndpi-protocols",          required_argument, NULL, 'p'},
-  {"disable-autologout",      no_argument,       NULL, 'q'},
-  {"redis",                   required_argument, NULL, 'r'},
-  {"dont-change-user",        no_argument,       NULL, 's'},
+    {"ndpi-protocols", required_argument, NULL, 'p'},
+    {"disable-autologout", no_argument, NULL, 'q'},
+    {"redis", required_argument, NULL, 'r'},
+    {"dont-change-user", no_argument, NULL, 's'},
 #ifndef WIN32
-  {"install-dir",             required_argument, NULL, 't'},
+    {"install-dir", required_argument, NULL, 't'},
 #endif
-  {"no-promisc",              no_argument,       NULL, 'u'},
-  {"verbose",                 required_argument, NULL, 'v'},
-  {"http-port",               required_argument, NULL, 'w'},
-  {"max-num-hosts",           required_argument, NULL, 'x'},
-  {"other-core-affinity",     required_argument, NULL, 'y'},
-  {"pcap-reforge-timestamps", no_argument,       NULL, 'z'},
-  {"packet-filter",           required_argument, NULL, 'B'},
-  {"dump-hosts",              required_argument, NULL, 'D'},
-  {"dump-flows",              required_argument, NULL, 'F'},
+    {"no-promisc", no_argument, NULL, 'u'},
+    {"verbose", required_argument, NULL, 'v'},
+    {"http-port", required_argument, NULL, 'w'},
+    {"max-num-hosts", required_argument, NULL, 'x'},
+    {"other-core-affinity", required_argument, NULL, 'y'},
+    {"pcap-reforge-timestamps", no_argument, NULL, 'z'},
+    {"packet-filter", required_argument, NULL, 'B'},
+    {"dump-hosts", required_argument, NULL, 'D'},
+    {"dump-flows", required_argument, NULL, 'F'},
 #ifndef WIN32
-  {"pid",                     required_argument, NULL, 'G'},
+    {"pid", required_argument, NULL, 'G'},
 #endif
-  {"export-flows",            required_argument, NULL, 'I'},
-  {"http-log",                required_argument, NULL, 'L'},
-  {"ppp-networks",            no_argument,       NULL, 'M'},
-  {"instance-name",           required_argument, NULL, 'N'},
-  {"capture-direction",       required_argument, NULL, 'Q'},
-  {"sticky-hosts",            required_argument, NULL, 'S'},
-  {"user",                    required_argument, NULL, 'U'},
-  {"version",                 no_argument,       NULL, 'V'},
-  {"https-port",              required_argument, NULL, 'W'},
-  {"max-num-flows",           required_argument, NULL, 'X'},
-  {"http-prefix",             required_argument, NULL, 'Z'},
-  {"httpdocs-dir",            required_argument, NULL, '1'},
-  {"scripts-dir",             required_argument, NULL, '2'},
-  {"callbacks-dir",           required_argument, NULL, '3'},
-  {"prefs-dir",               required_argument, NULL, '4'},
-  {"pcap-dir",                required_argument, NULL, '5'},
-  {"db-archive-dir",          required_argument, NULL, '6'},
-  {"geoip-dir",               required_argument, NULL, 196},
+    {"export-flows", required_argument, NULL, 'I'},
+    {"http-log", required_argument, NULL, 'L'},
+    {"ppp-networks", no_argument, NULL, 'M'},
+    {"instance-name", required_argument, NULL, 'N'},
+    {"capture-direction", required_argument, NULL, 'Q'},
+    {"sticky-hosts", required_argument, NULL, 'S'},
+    {"user", required_argument, NULL, 'U'},
+    {"version", no_argument, NULL, 'V'},
+    {"https-port", required_argument, NULL, 'W'},
+    {"max-num-flows", required_argument, NULL, 'X'},
+    {"http-prefix", required_argument, NULL, 'Z'},
+    {"httpdocs-dir", required_argument, NULL, '1'},
+    {"scripts-dir", required_argument, NULL, '2'},
+    {"callbacks-dir", required_argument, NULL, '3'},
+    {"prefs-dir", required_argument, NULL, '4'},
+    {"pcap-dir", required_argument, NULL, '5'},
+    {"db-archive-dir", required_argument, NULL, '6'},
+    {"geoip-dir", required_argument, NULL, 196},
 #ifdef NTOPNG_PRO
-  {"license-mgr",             required_argument, NULL, 197},
+    {"license-mgr", required_argument, NULL, 197},
 #endif
-  {"ciphers-list",            required_argument, NULL, 198},
-  {"disable-purge",           no_argument,       NULL, 199},
-  {"limit-resources",         no_argument,       NULL, 200},
-  {"test-script-post",        required_argument, NULL, 201},
+    {"ciphers-list", required_argument, NULL, 198},
+    {"disable-purge", no_argument, NULL, 199},
+    {"limit-resources", no_argument, NULL, 200},
+    {"test-script-post", required_argument, NULL, 201},
 #ifdef HAVE_PF_RING
-  {"cluster-id",              required_argument, NULL, 204},
+    {"cluster-id", required_argument, NULL, 204},
 #endif
 #ifdef NTOPNG_PRO
-  {"version-json",            no_argument,       NULL, 205},
+    {"version-json", no_argument, NULL, 205},
 #endif
-  {"test-script-pre",         required_argument, NULL, 206},
-  {"pcap-file-purge-flows",   no_argument,       NULL, 207},
-  {"original-speed",          no_argument,       NULL, 208},
-  {"online-check",            no_argument,       NULL, 209},
-  {"print-ndpi-protocols",    no_argument,       NULL, 210},
-  {"online-license-check",    no_argument,       NULL, 211}, // deprecated (removed)
-  {"hw-timestamp-mode",       required_argument, NULL, 212},
-  {"shutdown-when-done",      no_argument,       NULL, 213},
-  {"simulate-vlans",          no_argument,       NULL, 214},
+    {"test-script-pre", required_argument, NULL, 206},
+    {"pcap-file-purge-flows", no_argument, NULL, 207},
+    {"original-speed", no_argument, NULL, 208},
+    {"online-check", no_argument, NULL, 209},
+    {"print-ndpi-protocols", no_argument, NULL, 210},
+    {"online-license-check", no_argument, NULL, 211},  // deprecated (removed)
+    {"hw-timestamp-mode", required_argument, NULL, 212},
+    {"shutdown-when-done", no_argument, NULL, 213},
+    {"simulate-vlans", no_argument, NULL, 214},
 #ifndef HAVE_NEDGE
-  {"ignore-macs",             no_argument,       NULL, 216},
+    {"ignore-macs", no_argument, NULL, 216},
 #endif
-  {"ignore-vlans",            no_argument,       NULL, 217},
-  {"test-script",             required_argument, NULL, 218},
+    {"ignore-vlans", no_argument, NULL, 217},
+    {"test-script", required_argument, NULL, 218},
 #if HAVE_ZMQ
-  {"zmq-publish-events",      required_argument, NULL, 203},
-  {"zmq-encrypt-pwd",         required_argument, NULL, 215},
-  {"zmq-encryption",          no_argument,       NULL, 219},
-  {"zmq-encryption-key-priv", required_argument, NULL, 220},
-  {"zmq-encryption-key",      required_argument, NULL, 222},
+    {"zmq-publish-events", required_argument, NULL, 203},
+    {"zmq-encrypt-pwd", required_argument, NULL, 215},
+    {"zmq-encryption", no_argument, NULL, 219},
+    {"zmq-encryption-key-priv", required_argument, NULL, 220},
+    {"zmq-encryption-key", required_argument, NULL, 222},
 #endif
-  {"simulate-ips",            required_argument, NULL, 221},
+    {"simulate-ips", required_argument, NULL, 221},
 #ifndef HAVE_NEDGE
-  {"appliance",               no_argument,       NULL, 223},
+    {"appliance", no_argument, NULL, 223},
 #endif
-  {"simulate-macs",           no_argument,       NULL, 224},
-  {"insecure",                no_argument,       NULL, 225},
-  {"offline",                 no_argument,       NULL, 226},
-  {"readonly-flows-dump",     no_argument,       NULL, 227},
-  {"strict-startup",          no_argument,       NULL, 228},
-  {"mtu",                     required_argument, NULL, 229},
+    {"simulate-macs", no_argument, NULL, 224},
+    {"insecure", no_argument, NULL, 225},
+    {"offline", no_argument, NULL, 226},
+    {"readonly-flows-dump", no_argument, NULL, 227},
+    {"strict-startup", no_argument, NULL, 228},
+    {"mtu", required_argument, NULL, 229},
 #ifdef NTOPNG_PRO
-  {"dump-queue-len",          no_argument,       NULL, 248},
-  {"dump-queue-block-size",   no_argument,       NULL, 249},
-  {"direct-flows-dump",       no_argument,       NULL, 250},
-  {"fail-invalid-license",    no_argument,       NULL, 251},
-  {"check-maintenance",       no_argument,       NULL, 252},
-  {"check-license",           no_argument,       NULL, 253},
-  {"community",               no_argument,       NULL, 254},
+    {"dump-queue-len", no_argument, NULL, 248},
+    {"dump-queue-block-size", no_argument, NULL, 249},
+    {"direct-flows-dump", no_argument, NULL, 250},
+    {"fail-invalid-license", no_argument, NULL, 251},
+    {"check-maintenance", no_argument, NULL, 252},
+    {"check-license", no_argument, NULL, 253},
+    {"community", no_argument, NULL, 254},
 #endif
 
-  /* End of options */
-  {NULL,                      no_argument,       NULL, 0}};
+    /* End of options */
+    {NULL, no_argument, NULL, 0}};
 
 /* ******************************************* */
 
@@ -1343,27 +1452,27 @@ static const int hidden_optkeys[] = {'F' /* flows export */, 'r' /* redis */,
 
 /* ******************************************* */
 
-void Prefs::parseHTTPPort(char *arg) {
+void Prefs::parseHTTPPort(char* arg) {
   char tmp[32], *a, *_t;
 
   snprintf(tmp, sizeof(tmp), "%s", arg);
 
   a = strtok_r(tmp, ",", &_t);
-  if(a) http_port = atoi(a);
+  if (a) http_port = atoi(a);
 }
 
 /* ******************************************* */
 
-char *Prefs::parseLocalNetworks(char *arg) {
+char* Prefs::parseLocalNetworks(char* arg) {
   struct stat buf;
 
-  if((stat(arg, &buf) == 0) && S_ISREG(buf.st_mode)) {
+  if ((stat(arg, &buf) == 0) && S_ISREG(buf.st_mode)) {
     string res;
     string line;
     ifstream fl(arg);
     char to_trim[] = {'\t', ' ', '\n', '\r', '"', '\'', '\0'};
 
-    if(fl.is_open()) {
+    if (fl.is_open()) {
       /*
         A file with local networks.
         Multiple local networks are expressed either using commas and also on
@@ -1374,10 +1483,10 @@ char *Prefs::parseLocalNetworks(char *arg) {
         9.9.9.9/32
         10.0.0.0/8
       */
-      while(getline(fl, line)) {
-        const char *l = line.c_str();
+      while (getline(fl, line)) {
+        const char* l = line.c_str();
 
-        if((l[0] == '\0') || (l[0] == '#')) continue;
+        if ((l[0] == '\0') || (l[0] == '#')) continue;
 
         for (u_int i = 0; to_trim[i] != '\0'; i++)
           line.erase(std::remove(line.begin(), line.end(), to_trim[i]),
@@ -1387,7 +1496,7 @@ char *Prefs::parseLocalNetworks(char *arg) {
 
         /* Append the comma if local networks are specified across multiple file
          * lines */
-        if(res.size() > 0) res += ",";
+        if (res.size() > 0) res += ",";
 
         /* Append the current line with one or more local networks */
         res += line;
@@ -1406,14 +1515,14 @@ char *Prefs::parseLocalNetworks(char *arg) {
 
 /* ******************************************* */
 
-void Prefs::setCommandLineString(int optkey, const char *optarg) {
+void Prefs::setCommandLineString(int optkey, const char* optarg) {
   char *p, *opt = NULL;
   int len = 6;
   int i;
 
-  if(optarg) {
+  if (optarg) {
     for (i = 0; hidden_optkeys[i] != 0; i++) {
-      if(optkey == hidden_optkeys[i]) {
+      if (optkey == hidden_optkeys[i]) {
         optarg = "[hidden]";
         break;
       }
@@ -1422,33 +1531,33 @@ void Prefs::setCommandLineString(int optkey, const char *optarg) {
   }
 
   for (i = 0; long_options[i].name != NULL; i++) {
-    if(long_options[i].val == optkey) {
-      opt = (char *)long_options[i].name;
+    if (long_options[i].val == optkey) {
+      opt = (char*)long_options[i].name;
       len += strlen(opt) + 2;
       break;
     }
   }
 
-  if((p = (char *)malloc(len)) != NULL) {
-    if(opt) {
-      if(optarg && strlen(optarg))
+  if ((p = (char*)malloc(len)) != NULL) {
+    if (opt) {
+      if (optarg && strlen(optarg))
         snprintf(p, len - 1, "--%s \'%s\' ", opt, optarg);
       else
         snprintf(p, len - 1, "--%s ", opt);
     } else {
-      if(optarg && strlen(optarg))
+      if (optarg && strlen(optarg))
         snprintf(p, len - 1, "-%c %s ", optkey, optarg);
       else
         snprintf(p, len - 1, "-%c ", optkey);
     }
 
-    if(cli == NULL)
+    if (cli == NULL)
       cli = p;
     else {
       int l = strlen(cli);
-      char *backup = cli;
+      char* backup = cli;
 
-      if((cli = (char *)realloc(cli, l + len)) != NULL) {
+      if ((cli = (char*)realloc(cli, l + len)) != NULL) {
         strcpy(&cli[l], p);
         free(p);
       } else
@@ -1475,8 +1584,7 @@ static void printVersionInformation() {
 #ifdef NTOPNG_PRO
          ntop->getPro()->is_embedded_version() ? "/Embedded" :
 #endif
-         ""
-	 );
+                                               "");
   printf("GIT rev:\t%s\n", NTOPNG_GIT_RELEASE);
 
 #ifdef NTOPNG_PRO
@@ -1487,7 +1595,7 @@ static void printVersionInformation() {
 #else
          ""
 #endif
-	 );
+  );
 
   printf("System Id:\t%s\n", ntop->getPro()->get_system_id());
   printf("Platform:\t%s\n", PACKAGE_MACHINE);
@@ -1496,18 +1604,18 @@ static void printVersionInformation() {
 
 /* ******************************************* */
 
-int Prefs::setOption(int optkey, char *optarg) {
-  const struct option *opt;
+int Prefs::setOption(int optkey, char* optarg) {
+  const struct option* opt;
   char *double_dot, buf[128] = {'\0'};
 
   opt = long_options;
-  while(opt->name != NULL) {
-    if(optkey == opt->val) {
-      if(opt->has_arg == required_argument && (!optarg || optarg[0] == '\0')) {
+  while (opt->name != NULL) {
+    if (optkey == opt->val) {
+      if (opt->has_arg == required_argument && (!optarg || optarg[0] == '\0')) {
         ntop->getTrace()->traceEvent(
-				     TRACE_WARNING,
-				     "Missing required argument. Skipping option -%c (--%s).", opt->val,
-				     opt->name);
+            TRACE_WARNING,
+            "Missing required argument. Skipping option -%c (--%s).", opt->val,
+            opt->name);
         return (-1);
       }
 
@@ -1520,913 +1628,957 @@ int Prefs::setOption(int optkey, char *optarg) {
   setCommandLineString(optkey, optarg);
 
   switch (optkey) {
-  case 'B':
-    if((optarg[0] == '\"') && (strlen(optarg) > 2)) {
-      packet_filter = strdup(&optarg[1]);
-      packet_filter[strlen(packet_filter) - 1] = '\0';
-    } else
-      packet_filter = strdup(optarg);
-    break;
+    case 'B':
+      if ((optarg[0] == '\"') && (strlen(optarg) > 2)) {
+        packet_filter = strdup(&optarg[1]);
+        packet_filter[strlen(packet_filter) - 1] = '\0';
+      } else
+        packet_filter = strdup(optarg);
+      break;
 
-  case 'u':
-    use_promiscuous_mode = false;
-    break;
+    case 'u':
+      use_promiscuous_mode = false;
+      break;
 
 #ifndef WIN32
-  case 'd':
-    ntop->setWorkingDir(optarg);
-    break;
+    case 'd':
+      ntop->setWorkingDir(optarg);
+      break;
 
-  case 't':
-    install_dir = strndup(optarg, MAX_PATH);
-    break;
+    case 't':
+      install_dir = strndup(optarg, MAX_PATH);
+      break;
 #endif
 
-  case 'D':
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "-D deprecated.");
-    break;
+    case 'D':
+      ntop->getTrace()->traceEvent(TRACE_ERROR, "-D deprecated.");
+      break;
 
-  case 'e':
-    daemonize = true;
-    break;
+    case 'e':
+      daemonize = true;
+      break;
 
-  case 'S':
-    ntop->getTrace()->traceEvent(
-				 TRACE_ERROR,
-				 "-S deprecated, sticky hosts no longer supported. "
-				 "Configure remote and local hosts idle timeouts "
-				 "from the preferences.");
-    break;
+    case 'S':
+      ntop->getTrace()->traceEvent(
+          TRACE_ERROR,
+          "-S deprecated, sticky hosts no longer supported. "
+          "Configure remote and local hosts idle timeouts "
+          "from the preferences.");
+      break;
 
-  case 'g':
-    cpu_affinity = strdup(optarg);
-    break;
+    case 'g':
+      cpu_affinity = strdup(optarg);
+      break;
 
-  case 'm': {
-    char *cur_nets = parseLocalNetworks(optarg);
+    case 'm': {
+      char* cur_nets = parseLocalNetworks(optarg);
 
-    if(cur_nets) {
-      if(!local_networks_set) {
-	free(local_networks);
+      if (cur_nets) {
+        if (!local_networks_set) {
+          free(local_networks);
 
-	local_networks = cur_nets;
-	local_networks_set = true;
-      } else {
-	/* If local_networks is already set up, the new -m argument is going
-	 * to be concat (comma separeted) to the old one */
+          local_networks = cur_nets;
+          local_networks_set = true;
+        } else {
+          /* If local_networks is already set up, the new -m argument is going
+           * to be concat (comma separeted) to the old one */
 
-	if(strlen(cur_nets) > 0) {
-	  int new_local_networks_size = strlen(local_networks) + strlen(cur_nets) + 2;
-	  char *new_local_networks    = (char *)malloc(sizeof(char) * new_local_networks_size);
+          if (strlen(cur_nets) > 0) {
+            int new_local_networks_size =
+                strlen(local_networks) + strlen(cur_nets) + 2;
+            char* new_local_networks =
+                (char*)malloc(sizeof(char) * new_local_networks_size);
 
-	  if(new_local_networks) {
-	    snprintf(new_local_networks, new_local_networks_size, "%s,%s",
-		     local_networks, cur_nets);
-	    free(local_networks);
-	    local_networks = new_local_networks;
-	  }
-	}
+            if (new_local_networks) {
+              snprintf(new_local_networks, new_local_networks_size, "%s,%s",
+                       local_networks, cur_nets);
+              free(local_networks);
+              local_networks = new_local_networks;
+            }
+          }
 
-	free(cur_nets);
+          free(cur_nets);
+        }
       }
-    }
-  } break;
+    } break;
 
-  case 'M':
-    ntop->disableBroadcastIP();
-    break;
+    case 'M':
+      ntop->disableBroadcastIP();
+      break;
 
 #ifndef HAVE_NEDGE
-  case 'n':
-    dns_mode = atoi(optarg);
+    case 'n':
+      dns_mode = atoi(optarg);
 
-    switch (dns_mode) {
-    case 0:
+      switch (dns_mode) {
+        case 0:
+          break;
+
+        case 1:
+          resolve_all_hosts();
+          break;
+
+        case 2:
+          disable_dns_resolution();
+          break;
+
+        case 3:
+          disable_dns_resolution();
+          disable_dns_responses_decoding();
+          disable_all_name_decoding();
+          break;
+
+        case 4:
+          disable_localhost_name_decoding();
+          break;
+
+        default:
+          usage();
+      }
       break;
-
-    case 1:
-      resolve_all_hosts();
-      break;
-
-    case 2:
-      disable_dns_resolution();
-      break;
-
-    case 3:
-      disable_dns_resolution();
-      disable_dns_responses_decoding();
-      disable_all_name_decoding();
-      break;
-
-    case 4:
-      disable_localhost_name_decoding();
-      break;
-
-    default:
-      usage();
-    }
-    break;
 #endif
 
-  case 'p':
-    ndpi_proto_path = strdup(optarg);
-    ntop->setCustomnDPIProtos(ndpi_proto_path);
-    break;
-
-  case 'q':
-    enable_auto_logout = false;
-    break;
-
-  case 'Q':
-    switch (atoi(optarg)) {
-    case 1:
-      setCaptureDirection(PCAP_D_IN);
+    case 'p':
+      ndpi_proto_path = strdup(optarg);
+      ntop->setCustomnDPIProtos(ndpi_proto_path);
       break;
-    case 2:
-      setCaptureDirection(PCAP_D_OUT);
+
+    case 'q':
+      enable_auto_logout = false;
       break;
-    default:
-      setCaptureDirection(PCAP_D_INOUT);
-      break;
-    }
-    break;
 
-  case 'h':
-    help();
-    break;
-
-  case 'i':
-    if(!optarg)
-      ntop->getTrace()->traceEvent(TRACE_ERROR,
-				   "No interface specified, -i ignored");
-    else if(strlen(optarg) > MAX_INTERFACE_NAME_LEN - 1)
-      ntop->getTrace()->traceEvent(TRACE_ERROR,
-				   "Interface name too long (exceeding %d characters): ignored %s",
-				   MAX_INTERFACE_NAME_LEN - 1, optarg);
-    else if(!addDeferredInterfaceToRegister(optarg))
-      ntop->getTrace()->traceEvent(TRACE_ERROR, "Too many interfaces specified with -i: ignored %s", optarg);
-    break;
-
-  case 'w':
-    if(strchr(optarg, ':') == NULL) {
-      // only the port
-      parseHTTPPort(optarg);
-    } else if(optarg[0] == ':') {
-      // first char == ':' binds to the loopback address
-      parseHTTPPort(&optarg[1]);
-      bind_http_to_loopback();
-    } else {
-      // ':' is after the first character, so
-      // we need to parse both the ip address and the port
-      double_dot = strrchr(optarg, ':');
-      u_int len = double_dot - optarg;
-      http_binding_address1 = strndup(optarg, len);
-      parseHTTPPort(&double_dot[1]);
-    }
-    break;
-
-  case 'W':
-    if(strchr(optarg, ':') == NULL) {
-      // only the port
-      https_port = atoi(optarg);
-    } else if(optarg[0] == ':') {
-      // first char == ':' binds to the loopback address
-      https_port = atoi(&optarg[1]);
-      bind_https_to_loopback();
-    } else {
-      // ':' is after the first character, so
-      // we need to parse both the ip address and the port
-      double_dot = strrchr(optarg, ':');
-      u_int len = double_dot - optarg;
-      https_binding_address1 = strndup(optarg, len);
-      https_port = atoi(&double_dot[1]);
-    }
-    break;
-
-  case 'z':
-    do_reforge_timestamps  = true;
-    break;
-
-  case 'Z':
-    if(optarg[0] != '/') {
-      ntop->getTrace()->traceEvent(TRACE_WARNING,
-				   "-Z argument (%s) must begin with '/' (example /ntopng): skipped",
-				   optarg);
-    } else {
-      int len = strlen(optarg);
-
-      if(len > 0) {
-	if(optarg[len - 1] == '/') {
-	  ntop->getTrace()->traceEvent(TRACE_WARNING,
-				       "-Z argument (%s) cannot end with '/' "
-				       "(example /ntopng): skipped",
-				       optarg);
-	} else {
-	  free(http_prefix);
-	  http_prefix = strdup(optarg);
-	}
+    case 'Q':
+      switch (atoi(optarg)) {
+        case 1:
+          setCaptureDirection(PCAP_D_IN);
+          break;
+        case 2:
+          setCaptureDirection(PCAP_D_OUT);
+          break;
+        default:
+          setCaptureDirection(PCAP_D_INOUT);
+          break;
       }
-    }
-    break;
+      break;
 
-  case 'N':
-    instance_name = strndup(optarg, 256);
-    break;
+    case 'h':
+      help();
+      break;
 
-  case 'r': {
-    char *r;
+    case 'i':
+      if (!optarg)
+        ntop->getTrace()->traceEvent(TRACE_ERROR,
+                                     "No interface specified, -i ignored");
+      else if (strlen(optarg) > MAX_INTERFACE_NAME_LEN - 1)
+        ntop->getTrace()->traceEvent(
+            TRACE_ERROR,
+            "Interface name too long (exceeding %d characters): ignored %s",
+            MAX_INTERFACE_NAME_LEN - 1, optarg);
+      else if (!addDeferredInterfaceToRegister(optarg))
+        ntop->getTrace()->traceEvent(
+            TRACE_ERROR, "Too many interfaces specified with -i: ignored %s",
+            optarg);
+      break;
 
-    /*
-      Supported formats for --redis
-
-      host:port
-      host@redis_instance
-      host:port@redis_instance
-      host:port:password@redis_instance
-    */
-    snprintf(buf, sizeof(buf), "%s", optarg);
-    r = strrchr(buf, '@');
-    if(r) {
-      bool is_float;
-      char *idptr = &r[1];
-      if(Utils::isNumber(idptr, strlen(idptr), &is_float)) {
-	int id = atoi((const char *)idptr);
-	if(id < 0 || id > 0xff) {
-	  ntop->getTrace()->traceEvent(
-				       TRACE_WARNING,
-				       "Redis DB ID provided with --redis|-r cannot be bigger than %u",
-				       0xff);
-	} else {
-	  redis_db_id = id;
-	}
-	(*r) = '\0';
+    case 'w':
+      if (strchr(optarg, ':') == NULL) {
+        // only the port
+        parseHTTPPort(optarg);
+      } else if (optarg[0] == ':') {
+        // first char == ':' binds to the loopback address
+        parseHTTPPort(&optarg[1]);
+        bind_http_to_loopback();
+      } else {
+        // ':' is after the first character, so
+        // we need to parse both the ip address and the port
+        double_dot = strrchr(optarg, ':');
+        u_int len = double_dot - optarg;
+        http_binding_address1 = strndup(optarg, len);
+        parseHTTPPort(&double_dot[1]);
       }
-    }
-
-    if(strchr(buf, ':')) {
-      char *w, *c;
-
-      c = strtok_r(buf, ":", &w);
-
-      if(redis_host) free(redis_host);
-      redis_host = strdup(c);
-
-      c = strtok_r(NULL, ":", &w);
-      if(c) redis_port = atoi(c);
-
-      c = strtok_r(NULL, "\0", &w);
-      if(c) redis_password = strdup(c);
-    } else if(strlen(buf) > 0) {
-      /* only the host */
-      if(redis_host) free(redis_host);
-      redis_host = strdup(buf);
-    }
-
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "ntopng will use redis %s@%u",
-				 redis_host, redis_db_id);
-    if(redis_password)
-      ntop->getTrace()->traceEvent(TRACE_NORMAL,
-				   "redis connection is password-protected");
-  } break;
-
-  case 's':
-    change_user = false;
-    break;
-
-  case '1':
-    free(docs_dir);
-    docs_dir = strdup(optarg);
-    break;
-
-  case '2':
-    free(scripts_dir);
-    scripts_dir = strdup(optarg);
-    break;
-
-  case '3':
-    free(callbacks_dir);
-    callbacks_dir = strdup(optarg);
-    break;
-
-  case '5':
-    if(pcap_dir) free(pcap_dir);
-    pcap_dir = strdup(optarg);
-    break;
-
-  case '6':
-    if(clickhouse_archive_dir) free(clickhouse_archive_dir);
-    clickhouse_archive_dir = strdup(optarg);
-    break;
-
-  case 'l':
-    switch (atoi(optarg)) {
-    case 0:
-      disable_localhost_login = true;
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "Localhost HTTP user login disabled");
       break;
-    case 1:
-      enable_users_login = false;
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "All HTTP user login disabled");
+
+    case 'W':
+      if (strchr(optarg, ':') == NULL) {
+        // only the port
+        https_port = atoi(optarg);
+      } else if (optarg[0] == ':') {
+        // first char == ':' binds to the loopback address
+        https_port = atoi(&optarg[1]);
+        bind_https_to_loopback();
+      } else {
+        // ':' is after the first character, so
+        // we need to parse both the ip address and the port
+        double_dot = strrchr(optarg, ':');
+        u_int len = double_dot - optarg;
+        https_binding_address1 = strndup(optarg, len);
+        https_port = atoi(&double_dot[1]);
+      }
       break;
-    default:
-      ntop->getTrace()->traceEvent(TRACE_ERROR, "Invalid '%s' value specified for -l: ignored", optarg);
-    }
-    break;
 
-  case 'L':
-    http_log_path = strdup(optarg);
-    break;
+    case 'z':
+      do_reforge_timestamps = true;
+      break;
 
-  case 'x':
-    max_num_hosts = atoi(optarg);
-    break;
+    case 'Z':
+      if (optarg[0] != '/') {
+        ntop->getTrace()->traceEvent(
+            TRACE_WARNING,
+            "-Z argument (%s) must begin with '/' (example /ntopng): skipped",
+            optarg);
+      } else {
+        int len = strlen(optarg);
 
-  case 'X':
-    max_num_flows = atoi(optarg);
-    break;
+        if (len > 0) {
+          if (optarg[len - 1] == '/') {
+            ntop->getTrace()->traceEvent(TRACE_WARNING,
+                                         "-Z argument (%s) cannot end with '/' "
+                                         "(example /ntopng): skipped",
+                                         optarg);
+          } else {
+            free(http_prefix);
+            http_prefix = strdup(optarg);
+          }
+        }
+      }
+      break;
 
-  case 'y':
-    other_cpu_affinity = strdup(optarg);
+    case 'N':
+      instance_name = strndup(optarg, 256);
+      break;
+
+    case 'r': {
+      char* r;
+
+      /*
+        Supported formats for --redis
+
+        host:port
+        host@redis_instance
+        host:port@redis_instance
+        host:port:password@redis_instance
+      */
+      snprintf(buf, sizeof(buf), "%s", optarg);
+      r = strrchr(buf, '@');
+      if (r) {
+        bool is_float;
+        char* idptr = &r[1];
+        if (Utils::isNumber(idptr, strlen(idptr), &is_float)) {
+          int id = atoi((const char*)idptr);
+          if (id < 0 || id > 0xff) {
+            ntop->getTrace()->traceEvent(
+                TRACE_WARNING,
+                "Redis DB ID provided with --redis|-r cannot be bigger than %u",
+                0xff);
+          } else {
+            redis_db_id = id;
+          }
+          (*r) = '\0';
+        }
+      }
+
+      if (strchr(buf, ':')) {
+        char *w, *c;
+
+        c = strtok_r(buf, ":", &w);
+
+        if (redis_host) free(redis_host);
+        redis_host = strdup(c);
+
+        c = strtok_r(NULL, ":", &w);
+        if (c) redis_port = atoi(c);
+
+        c = strtok_r(NULL, "\0", &w);
+        if (c) redis_password = strdup(c);
+      } else if (strlen(buf) > 0) {
+        /* only the host */
+        if (redis_host) free(redis_host);
+        redis_host = strdup(buf);
+      }
+
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "ntopng will use redis %s@%u",
+                                   redis_host, redis_db_id);
+      if (redis_password)
+        ntop->getTrace()->traceEvent(TRACE_NORMAL,
+                                     "redis connection is password-protected");
+    } break;
+
+    case 's':
+      change_user = false;
+      break;
+
+    case '1':
+      free(docs_dir);
+      docs_dir = strdup(optarg);
+      break;
+
+    case '2':
+      free(scripts_dir);
+      scripts_dir = strdup(optarg);
+      break;
+
+    case '3':
+      free(callbacks_dir);
+      callbacks_dir = strdup(optarg);
+      break;
+
+    case '5':
+      if (pcap_dir) free(pcap_dir);
+      pcap_dir = strdup(optarg);
+      break;
+
+    case '6':
+      if (clickhouse_archive_dir) free(clickhouse_archive_dir);
+      clickhouse_archive_dir = strdup(optarg);
+      break;
+
+    case 'l':
+      switch (atoi(optarg)) {
+        case 0:
+          disable_localhost_login = true;
+          ntop->getTrace()->traceEvent(TRACE_NORMAL,
+                                       "Localhost HTTP user login disabled");
+          break;
+        case 1:
+          enable_users_login = false;
+          ntop->getTrace()->traceEvent(TRACE_NORMAL,
+                                       "All HTTP user login disabled");
+          break;
+        default:
+          ntop->getTrace()->traceEvent(
+              TRACE_ERROR, "Invalid '%s' value specified for -l: ignored",
+              optarg);
+      }
+      break;
+
+    case 'L':
+      http_log_path = strdup(optarg);
+      break;
+
+    case 'x':
+      max_num_hosts = atoi(optarg);
+      break;
+
+    case 'X':
+      max_num_flows = atoi(optarg);
+      break;
+
+    case 'y':
+      other_cpu_affinity = strdup(optarg);
 #ifdef HAVE_LIBCAP
-    Utils::setAffinityMask(optarg, &other_cpu_affinity_mask);
+      Utils::setAffinityMask(optarg, &other_cpu_affinity_mask);
 #endif
-    break;
+      break;
 
-  case 'v': {
-    if(!optarg)
-      ntop->getTrace()->traceEvent(TRACE_ERROR, "No value specified for verbosity: ignored");
-    else {
-      int8_t lvl = (int8_t)strtol(optarg, NULL, 10);
-
-      has_cmdl_trace_lvl = true;
-      errno = 0;
-
-      if(errno)
-	ntop->getTrace()->traceEvent(TRACE_ERROR, "Invalid '%s' value specified for -v: ignored", optarg);
+    case 'v': {
+      if (!optarg)
+        ntop->getTrace()->traceEvent(
+            TRACE_ERROR, "No value specified for verbosity: ignored");
       else {
-	if(lvl < 0) lvl = 0;
-	ntop->getTrace()->set_trace_level((u_int8_t)lvl);
-      }
-    }
-  } break;
+        int8_t lvl = (int8_t)strtol(optarg, NULL, 10);
 
-  case 'F':
-    if(!optarg)
-      ntop->getTrace()->traceEvent(TRACE_ERROR, "No connection specified, -F ignored");
+        has_cmdl_trace_lvl = true;
+        errno = 0;
+
+        if (errno)
+          ntop->getTrace()->traceEvent(
+              TRACE_ERROR, "Invalid '%s' value specified for -v: ignored",
+              optarg);
+        else {
+          if (lvl < 0) lvl = 0;
+          ntop->getTrace()->set_trace_level((u_int8_t)lvl);
+        }
+      }
+    } break;
+
+    case 'F':
+      if (!optarg)
+        ntop->getTrace()->traceEvent(TRACE_ERROR,
+                                     "No connection specified, -F ignored");
 
 #ifndef HAVE_NEDGE
-    else if((strncmp(optarg, "es", 2) == 0) && (strlen(optarg) > 3)) {
-      char *elastic_index_type = NULL, *elastic_index_name = NULL,
-	*tmp = NULL, *elastic_url = NULL, *elastic_user = NULL,
-	*elastic_pwd = NULL;
-      /* es;<index type>;<index name>;<es URL>;<es pwd> */
+      else if ((strncmp(optarg, "es", 2) == 0) && (strlen(optarg) > 3)) {
+        char *elastic_index_type = NULL, *elastic_index_name = NULL,
+             *tmp = NULL, *elastic_url = NULL, *elastic_user = NULL,
+             *elastic_pwd = NULL;
+        /* es;<index type>;<index name>;<es URL>;<es pwd> */
 
-      if((elastic_index_type = strtok_r(&optarg[3], ";", &tmp)) != NULL) {
-	if((elastic_index_name = strtok_r(NULL, ";", &tmp)) != NULL) {
-	  if((elastic_url = strtok_r(NULL, ";", &tmp)) != NULL) {
-	    if((elastic_user = strtok_r(NULL, ";", &tmp)) == NULL)
-	      elastic_pwd = (char *)"";
-	    else {
-	      char *double_col = strchr(elastic_user, ':');
+        if ((elastic_index_type = strtok_r(&optarg[3], ";", &tmp)) != NULL) {
+          if ((elastic_index_name = strtok_r(NULL, ";", &tmp)) != NULL) {
+            if ((elastic_url = strtok_r(NULL, ";", &tmp)) != NULL) {
+              if ((elastic_user = strtok_r(NULL, ";", &tmp)) == NULL)
+                elastic_pwd = (char*)"";
+              else {
+                char* double_col = strchr(elastic_user, ':');
 
-	      if(double_col)
-		elastic_pwd = &double_col[1], double_col[0] = '\0';
-	      else
-		elastic_pwd = (char *)"";
-	    }
-	  }
-	}
+                if (double_col)
+                  elastic_pwd = &double_col[1], double_col[0] = '\0';
+                else
+                  elastic_pwd = (char*)"";
+              }
+            }
+          }
+        }
+
+        if (elastic_index_type && elastic_index_name && elastic_url) {
+          if (es_type) free(es_type);
+          if (es_index) free(es_index);
+          if (es_url) free(es_url);
+          if (es_user) free(es_user);
+          if (es_pwd) free(es_pwd);
+          if (es_host) free(es_host);
+
+          if ((es_type = strdup(elastic_index_type)) == NULL)
+            ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
+
+          if ((es_index = strdup(elastic_index_name)) == NULL)
+            ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
+
+          if ((es_url = strdup(elastic_url)) == NULL)
+            ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
+
+          if ((es_user = strdup(elastic_user ? elastic_user : "")) == NULL)
+            ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
+
+          if ((es_pwd = strdup(elastic_pwd ? elastic_pwd : "")) == NULL)
+            ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
+
+          if ((es_host = strdup(elastic_url)) == NULL)
+            ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
+
+          if (es_type && es_index && es_url && es_user && es_pwd && es_host) {
+            if (!strncmp(es_host, "http://",
+                         7))  // url starts either with http or https
+              Utils::tokenizer(es_host + 7, '/', NULL);
+            else if (!strncmp(es_host, "https://", 8))
+              Utils::tokenizer(es_host + 8, '/', NULL);
+            else
+              Utils::tokenizer(es_host, '/', NULL);
+
+            ntop->getTrace()->traceEvent(
+                TRACE_NORMAL,
+                "Using ElasticSearch for data dump [%s][%s][%s][%s]", es_type,
+                es_index, es_url, es_host);
+            dump_flows_on_es = true;
+          } else
+            dump_flows_on_es = false;
+        } else {
+          ntop->getTrace()->traceEvent(TRACE_WARNING,
+                                       "Discarding -F: invalid format for es");
+          ntop->getTrace()->traceEvent(
+              TRACE_WARNING,
+              "Format: -F es;<index type>;<index name>;<es URL>;<user>:<pwd>");
+        }
       }
-
-      if(elastic_index_type && elastic_index_name && elastic_url) {
-	if(es_type)  free(es_type);
-	if(es_index) free(es_index);
-	if(es_url)   free(es_url);
-	if(es_user)  free(es_user);
-	if(es_pwd)   free(es_pwd);
-	if(es_host)  free(es_host);
-
-	if((es_type = strdup(elastic_index_type)) == NULL)
-	  ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
-
-	if((es_index = strdup(elastic_index_name)) == NULL)
-	  ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
-
-	if((es_url   = strdup(elastic_url)) == NULL)
-	  ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
-
-	if((es_user  = strdup(elastic_user ? elastic_user : "")) == NULL)
-	  ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
-
-	if((es_pwd   = strdup(elastic_pwd ? elastic_pwd : "")) == NULL)
-	  ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
-
-	if((es_host  = strdup(elastic_url)) == NULL)
-	  ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
-
-	if(es_type && es_index && es_url && es_user && es_pwd && es_host) {
-	  if(!strncmp(es_host, "http://", 7))  // url starts either with http or https
-	    Utils::tokenizer(es_host + 7, '/', NULL);
-	  else if(!strncmp(es_host, "https://", 8))
-	    Utils::tokenizer(es_host + 8, '/', NULL);
-	  else
-	    Utils::tokenizer(es_host, '/', NULL);
-
-	  ntop->getTrace()->traceEvent(TRACE_NORMAL,
-				       "Using ElasticSearch for data dump [%s][%s][%s][%s]", es_type,
-				       es_index, es_url, es_host);
-	  dump_flows_on_es = true;
-	} else
-	  dump_flows_on_es = false;
-      } else {
-	ntop->getTrace()->traceEvent(TRACE_WARNING, "Discarding -F: invalid format for es");
-	ntop->getTrace()->traceEvent(TRACE_WARNING, "Format: -F es;<index type>;<index name>;<es URL>;<user>:<pwd>");
-      }
-    }
 #endif /* HAVE_NEDGE */
 
 #ifndef HAVE_NEDGE
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
-    else if((strncmp(optarg, "kafka", 5) == 0) && (strlen(optarg) > 3)) {
-      char *conf = strdup(&optarg[5]);
+      else if ((strncmp(optarg, "kafka", 5) == 0) && (strlen(optarg) > 3)) {
+        char* conf = strdup(&optarg[5]);
 
-      if(conf != NULL) {
-	char *brokers_list, *tmp;
+        if (conf != NULL) {
+          char *brokers_list, *tmp;
 
-	if((brokers_list = strtok_r(conf, ";", &tmp)) != NULL) {
-	  char *topic = strtok_r(NULL, ";", &tmp);
+          if ((brokers_list = strtok_r(conf, ";", &tmp)) != NULL) {
+            char* topic = strtok_r(NULL, ";", &tmp);
 
-	  if(conf != NULL) {
-	    char *options = strtok_r(NULL, ";", &tmp);
+            if (conf != NULL) {
+              char* options = strtok_r(NULL, ";", &tmp);
 
-	    if((kafka_brokers_list = strdup(brokers_list)) != NULL) {
-	      if((kafka_topic = strdup(topic)) != NULL) {
-		kafka_options = options ? strdup(options) : NULL;
-	      }
-	    }
+              if ((kafka_brokers_list = strdup(brokers_list)) != NULL) {
+                if ((kafka_topic = strdup(topic)) != NULL) {
+                  kafka_options = options ? strdup(options) : NULL;
+                }
+              }
 
-	    if((kafka_brokers_list == NULL) || (kafka_topic == NULL)) {
-	      /* Out of memory */
-	      ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
+              if ((kafka_brokers_list == NULL) || (kafka_topic == NULL)) {
+                /* Out of memory */
+                ntop->getTrace()->traceEvent(TRACE_WARNING,
+                                             "Not enough memory");
 
-	      if(kafka_brokers_list) {
-		free(kafka_brokers_list);
-		kafka_brokers_list = NULL;
-	      }
-	      if(kafka_topic) {
-		free(kafka_topic);
-		kafka_topic = NULL;
-	      }
-	    }
-	  } else
-	    ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to parse kafka topic: skipping -F");
-	} else
-	  ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to parse brokers list: skipping -F");
+                if (kafka_brokers_list) {
+                  free(kafka_brokers_list);
+                  kafka_brokers_list = NULL;
+                }
+                if (kafka_topic) {
+                  free(kafka_topic);
+                  kafka_topic = NULL;
+                }
+              }
+            } else
+              ntop->getTrace()->traceEvent(
+                  TRACE_WARNING, "Unable to parse kafka topic: skipping -F");
+          } else
+            ntop->getTrace()->traceEvent(
+                TRACE_WARNING, "Unable to parse brokers list: skipping -F");
 
-	free(conf);
-      } else
-	ntop->getTrace()->traceEvent(TRACE_WARNING, "Discarding -F: unable to parse kafka options");
-    }
+          free(conf);
+        } else
+          ntop->getTrace()->traceEvent(
+              TRACE_WARNING, "Discarding -F: unable to parse kafka options");
+      }
 #endif
 #endif /* HAVE_NEDGE */
 
-    else if((!strncmp(optarg, "clickhouse", 10)) ||
-	    (!strncmp(optarg, "clickhouse-cluster", 18)) ||
-            (!strncmp(optarg, "clickhouse-cloud", 16))) {
+      else if ((!strncmp(optarg, "clickhouse", 10)) ||
+               (!strncmp(optarg, "clickhouse-cluster", 18)) ||
+               (!strncmp(optarg, "clickhouse-cloud", 16))) {
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
-        char *sep = strchr(optarg, ';');
+        char* sep = strchr(optarg, ';');
 
-	bool all_good = true;
-	bool use_clickhouse_cluster;
-	bool use_clickhouse_cloud;
+        bool all_good = true;
+        bool use_clickhouse_cluster;
+        bool use_clickhouse_cloud;
 
-	dump_flows_on_clickhouse = true;
-	use_clickhouse_cluster   = (strncmp(optarg, "clickhouse-cluster", 18) == 0) ? true : false;
-	use_clickhouse_cloud     = (strncmp(optarg, "clickhouse-cloud", 16) == 0) ? true : false;
+        dump_flows_on_clickhouse = true;
+        use_clickhouse_cluster =
+            (strncmp(optarg, "clickhouse-cluster", 18) == 0) ? true : false;
+        use_clickhouse_cloud =
+            (strncmp(optarg, "clickhouse-cloud", 16) == 0) ? true : false;
 
-	/* Check if CLICKHOUSE_CLIENT is present */
-	struct stat buf;
-	bool client_found = ((stat(CONST_BIN_DIR "/" CLICKHOUSE_CLIENT, &buf) == 0)
-			    && (S_ISREG(buf.st_mode))) ? true : false;
+        /* Check if CLICKHOUSE_CLIENT is present */
+        struct stat buf;
+        bool client_found =
+            ((stat(CONST_BIN_DIR "/" CLICKHOUSE_CLIENT, &buf) == 0) &&
+             (S_ISREG(buf.st_mode)))
+                ? true
+                : false;
 
-	if(!client_found) {
-	  client_found = ((stat(CONST_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT, &buf) == 0) &&
-			  (S_ISREG(buf.st_mode))) ? true : false;
-	  if(client_found) clickhouse_client = CONST_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT_CMD;
-	} else {
-	  if(!client_found) {
-	    client_found = ((stat(CONST_LOCAL_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT, &buf) == 0) &&
-			    (S_ISREG(buf.st_mode))) ? true : false;
-	    if(client_found) clickhouse_client = CONST_LOCAL_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT_CMD;
-	  } else {
-	    clickhouse_client = CONST_BIN_DIR "/" CLICKHOUSE_CLIENT;
-	  }
-	}
+        if (!client_found) {
+          client_found =
+              ((stat(CONST_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT, &buf) == 0) &&
+               (S_ISREG(buf.st_mode)))
+                  ? true
+                  : false;
+          if (client_found)
+            clickhouse_client = CONST_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT_CMD;
+        } else {
+          if (!client_found) {
+            client_found = ((stat(CONST_LOCAL_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT,
+                                  &buf) == 0) &&
+                            (S_ISREG(buf.st_mode)))
+                               ? true
+                               : false;
+            if (client_found)
+              clickhouse_client =
+                  CONST_LOCAL_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT_CMD;
+          } else {
+            clickhouse_client = CONST_BIN_DIR "/" CLICKHOUSE_CLIENT;
+          }
+        }
 
-	if(!client_found) {
-	  ntop->getTrace()->traceEvent(TRACE_WARNING,
-					 "-F clickhouse is not available "
-					 "(ClickHouse client not found)");
-	  ntop->getTrace()->traceEvent(TRACE_WARNING, "Expected %s or %s",
-					 CONST_BIN_DIR "/" CLICKHOUSE_CLIENT,
-					 CONST_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT);
-	  all_good = dump_flows_on_clickhouse = false;
-	}
+        if (!client_found) {
+          ntop->getTrace()->traceEvent(TRACE_WARNING,
+                                       "-F clickhouse is not available "
+                                       "(ClickHouse client not found)");
+          ntop->getTrace()->traceEvent(TRACE_WARNING, "Expected %s or %s",
+                                       CONST_BIN_DIR "/" CLICKHOUSE_CLIENT,
+                                       CONST_BIN_DIR "/" CLICKHOUSE_ALT_CLIENT);
+          all_good = dump_flows_on_clickhouse = false;
+        }
 
-	if(all_good) {
-	  u_int num_semicolumns = 0;
+        if (all_good) {
+          u_int num_semicolumns = 0;
 
-	  for (u_int i = 0; optarg[i] != '\0'; i++)
-	    if(optarg[i] == ';') num_semicolumns++;
+          for (u_int i = 0; optarg[i] != '\0'; i++)
+            if (optarg[i] == ';') num_semicolumns++;
 
-	  if((num_semicolumns == 0) && dump_flows_on_clickhouse) {
-	    clickhouse_host = strdup((char *)"127.0.0.1");
-	    clickhouse_dbname = strdup((char *)"ntopng");
-	    clickhouse_user = strdup((char *)"default");
-	    clickhouse_pw = strdup((char *)"");
+          if ((num_semicolumns == 0) && dump_flows_on_clickhouse) {
+            clickhouse_host = strdup((char*)"127.0.0.1");
+            clickhouse_dbname = strdup((char*)"ntopng");
+            clickhouse_user = strdup((char*)"default");
+            clickhouse_pw = strdup((char*)"");
 
-	    if(use_clickhouse_cluster)
-	      clickhouse_cluster_name = strdup((char *)DEFAULT_CLICKHOUSE_CLUSTER);
-	  } else {
-	    optarg = Utils::tokenizer(sep + 1, ';', &clickhouse_host);
-	    optarg = Utils::tokenizer(optarg, ';', &clickhouse_dbname);
-	    optarg = Utils::tokenizer(optarg, ';', &clickhouse_user);
-	    clickhouse_pw = strdup(optarg ? optarg : "");
+            if (use_clickhouse_cluster)
+              clickhouse_cluster_name =
+                  strdup((char*)DEFAULT_CLICKHOUSE_CLUSTER);
+          } else {
+            optarg = Utils::tokenizer(sep + 1, ';', &clickhouse_host);
+            optarg = Utils::tokenizer(optarg, ';', &clickhouse_dbname);
+            optarg = Utils::tokenizer(optarg, ';', &clickhouse_user);
+            clickhouse_pw = strdup(optarg ? optarg : "");
 
-	    if(use_clickhouse_cluster) {
-	      optarg = Utils::tokenizer(optarg, ';', &clickhouse_pw);
-	      if(optarg) clickhouse_cluster_name = strdup(optarg);
-	    }
-	  }
+            if (use_clickhouse_cluster) {
+              optarg = Utils::tokenizer(optarg, ';', &clickhouse_pw);
+              if (optarg) clickhouse_cluster_name = strdup(optarg);
+            }
+          }
 
-	  if(use_clickhouse_cloud) {
-	    char *comma;
-	    char *tmp = clickhouse_user;
-	    clickhouse_user = NULL;
-	    if(tmp && (comma = strchr(tmp, ','))) {
-	      //clickhouse_cluster_user = clickhouse_user;
-	      *(comma++) = '\0';
-	      clickhouse_user = strdup(comma);
-	      clickhouse_cluster_user = strdup(tmp);
-	      free(tmp);
-	    }
-	    if(!clickhouse_cluster_user || !clickhouse_user) {
-	      /* Falling back to default values */
-	      ntop->getTrace()->traceEvent(TRACE_WARNING,
-					   "Invalid ClickHouse user, falling back to local ClickHouse [ClickHouse user: %s / %s]",
-					   clickhouse_cluster_user ? clickhouse_cluster_user : "", clickhouse_user ? clickhouse_user : "");
+          if (use_clickhouse_cloud) {
+            char* comma;
+            char* tmp = clickhouse_user;
+            clickhouse_user = NULL;
+            if (tmp && (comma = strchr(tmp, ','))) {
+              // clickhouse_cluster_user = clickhouse_user;
+              *(comma++) = '\0';
+              clickhouse_user = strdup(comma);
+              clickhouse_cluster_user = strdup(tmp);
+              free(tmp);
+            }
+            if (!clickhouse_cluster_user || !clickhouse_user) {
+              /* Falling back to default values */
+              ntop->getTrace()->traceEvent(
+                  TRACE_WARNING,
+                  "Invalid ClickHouse user, falling back to local ClickHouse "
+                  "[ClickHouse user: %s / %s]",
+                  clickhouse_cluster_user ? clickhouse_cluster_user : "",
+                  clickhouse_user ? clickhouse_user : "");
 
-	      clickhouse_host = strdup((char *)"127.0.0.1");
-	      clickhouse_dbname = strdup((char *)"ntopng");
-	      clickhouse_user = strdup((char *)"default");
-	      clickhouse_pw = strdup((char *)"");
-	      clickhouse_cluster_user = NULL; /* No CH user by default */
-	    }
-	  }
+              clickhouse_host = strdup((char*)"127.0.0.1");
+              clickhouse_dbname = strdup((char*)"ntopng");
+              clickhouse_user = strdup((char*)"default");
+              clickhouse_pw = strdup((char*)"");
+              clickhouse_cluster_user = NULL; /* No CH user by default */
+            }
+          }
 
-	  if(use_clickhouse_cluster &&
-	      ((clickhouse_cluster_name == NULL) ||
-	       (clickhouse_cluster_name[0] == '\0'))) {
-	    if(clickhouse_cluster_name) {
-	      free((void *)clickhouse_cluster_name);
-	      clickhouse_cluster_name = NULL;
-	    }
+          if (use_clickhouse_cluster &&
+              ((clickhouse_cluster_name == NULL) ||
+               (clickhouse_cluster_name[0] == '\0'))) {
+            if (clickhouse_cluster_name) {
+              free((void*)clickhouse_cluster_name);
+              clickhouse_cluster_name = NULL;
+            }
 
-	    clickhouse_cluster_name =
-	      strdup((char *)DEFAULT_CLICKHOUSE_CLUSTER);
-	  }
+            clickhouse_cluster_name = strdup((char*)DEFAULT_CLICKHOUSE_CLUSTER);
+          }
 
-	  if(clickhouse_host && clickhouse_user) {
-	    if((clickhouse_dbname == NULL) || (clickhouse_dbname[0] == '\0'))
-	      clickhouse_dbname = strdup("ntopng");
+          if (clickhouse_host && clickhouse_user) {
+            if ((clickhouse_dbname == NULL) || (clickhouse_dbname[0] == '\0'))
+              clickhouse_dbname = strdup("ntopng");
 
-	    if(clickhouse_pw == NULL) clickhouse_pw = strdup("");
+            if (clickhouse_pw == NULL) clickhouse_pw = strdup("");
 
-	    /* Check for non-default SQL port on -F line */
+            /* Check for non-default SQL port on -F line */
 
-            /* mysql deprecated and not used (still parsed for backward compatibility) */
-	    char *mysql_port_str;
+            /* mysql deprecated and not used (still parsed for backward
+             * compatibility) */
+            char* mysql_port_str;
             int mysql_port = CONST_DEFAULT_CLICKHOUSE_MYSQL_PORT;
 
-	    /* Default ports */
-	    clickhouse_tcp_port = CONST_DEFAULT_CLICKHOUSE_TCP_PORT;
-	    clickhouse_tcp_port_secure = false; /* No TLS */
+            /* Default ports */
+            clickhouse_tcp_port = CONST_DEFAULT_CLICKHOUSE_TCP_PORT;
+            clickhouse_tcp_port_secure = false; /* No TLS */
 
-	    /* Configured ports, if any */
-	    if((mysql_port_str = strchr(clickhouse_host, '@'))) {
-	      char *comma, *clickhouse_tcp_port_str;
-	      long l;
-	      int len;
+            /* Configured ports, if any */
+            if ((mysql_port_str = strchr(clickhouse_host, '@'))) {
+              char *comma, *clickhouse_tcp_port_str;
+              long l;
+              int len;
 
-	      *(mysql_port_str++) = '\0';
+              *(mysql_port_str++) = '\0';
 
-	      if((comma = strchr(mysql_port_str, ','))) {
-		clickhouse_tcp_port_str = mysql_port_str;
-		*(comma++) = '\0';
-		mysql_port_str = comma;
+              if ((comma = strchr(mysql_port_str, ','))) {
+                clickhouse_tcp_port_str = mysql_port_str;
+                *(comma++) = '\0';
+                mysql_port_str = comma;
 
-		errno = 0;
-		len = strlen(clickhouse_tcp_port_str);
+                errno = 0;
+                len = strlen(clickhouse_tcp_port_str);
 
-		if(len > 1) {
-		  len--;
+                if (len > 1) {
+                  len--;
 
-		  if(clickhouse_tcp_port_str[len] == 's') {
-		    clickhouse_tcp_port_secure = true;
-		    clickhouse_tcp_port_str[len] = '\0';
-		  }
-		}
-		l = strtol(clickhouse_tcp_port_str, NULL, 10);
+                  if (clickhouse_tcp_port_str[len] == 's') {
+                    clickhouse_tcp_port_secure = true;
+                    clickhouse_tcp_port_str[len] = '\0';
+                  }
+                }
+                l = strtol(clickhouse_tcp_port_str, NULL, 10);
 
-		if(errno || !l)
-		  ntop->getTrace()->traceEvent(TRACE_WARNING,
-					       "Invalid MySQL port, using default port %d [%s]",
-					       clickhouse_tcp_port, strerror(errno));
-		else
-		  clickhouse_tcp_port = (int)l;
-	      }
+                if (errno || !l)
+                  ntop->getTrace()->traceEvent(
+                      TRACE_WARNING,
+                      "Invalid MySQL port, using default port %d [%s]",
+                      clickhouse_tcp_port, strerror(errno));
+                else
+                  clickhouse_tcp_port = (int)l;
+              }
 
-	      errno = 0;
-	      len = strlen(mysql_port_str);
+              errno = 0;
+              len = strlen(mysql_port_str);
 
-	      if(len > 1) {
-		len--;
+              if (len > 1) {
+                len--;
 
-		if(mysql_port_str[len] == 's') {
-		  //mysql_port_secure = true;
-		  mysql_port_str[len] = '\0';
-		}
-	      }
+                if (mysql_port_str[len] == 's') {
+                  // mysql_port_secure = true;
+                  mysql_port_str[len] = '\0';
+                }
+              }
 
-	      l = strtol(mysql_port_str, NULL, 10);
+              l = strtol(mysql_port_str, NULL, 10);
 
-	      if(errno || !l)
-		ntop->getTrace()->traceEvent(TRACE_WARNING,
-					     "Invalid MySQL port, using default port %d [%s]",
-					     mysql_port, strerror(errno));
-	      else
-		mysql_port = (int)l;
-	    }
+              if (errno || !l)
+                ntop->getTrace()->traceEvent(
+                    TRACE_WARNING,
+                    "Invalid MySQL port, using default port %d [%s]",
+                    mysql_port, strerror(errno));
+              else
+                mysql_port = (int)l;
+            }
 
-	    if(clickhouse_host) {
-	      if(strcmp(clickhouse_host, "localhost") == 0) {
-		/* Clickhouse does not like localhost */
-		free(clickhouse_host);
-		clickhouse_host = strdup("127.0.0.1");
-	      }
-	    }
-	  } else {
-	    ntop->getTrace()->traceEvent(TRACE_WARNING, "Invalid format for -F clickhouse;....");
+            if (clickhouse_host) {
+              if (strcmp(clickhouse_host, "localhost") == 0) {
+                /* Clickhouse does not like localhost */
+                free(clickhouse_host);
+                clickhouse_host = strdup("127.0.0.1");
+              }
+            }
+          } else {
+            ntop->getTrace()->traceEvent(
+                TRACE_WARNING, "Invalid format for -F clickhouse;....");
           }
-	} /* all_good */
+        } /* all_good */
 
 #else
-        ntop->getTrace()->traceEvent(TRACE_WARNING,
-				     "-F clickhouse not available: missing support");
+        ntop->getTrace()->traceEvent(
+            TRACE_WARNING, "-F clickhouse not available: missing support");
 #endif
-    } /* "clickhouse" */
-
+      } /* "clickhouse" */
 #ifndef HAVE_NEDGE
 #if !defined(WIN32) && !defined(__APPLE__)
-    else if(!strncmp(optarg, "syslog", strlen("syslog"))) {
-      char *flows_syslog_facility_text;
+      else if (!strncmp(optarg, "syslog", strlen("syslog"))) {
+        char* flows_syslog_facility_text;
 
-      dump_flows_on_syslog = true;
-      if(strchr(optarg, ';') != NULL) {
-	int syslog_facility_value;
+        dump_flows_on_syslog = true;
+        if (strchr(optarg, ';') != NULL) {
+          int syslog_facility_value;
 
-	optarg = Utils::tokenizer(strchr(optarg, ';') + 1, ';',
-				  &flows_syslog_facility_text);
-	syslog_facility_value =
-	  Utils::mapSyslogFacilityTextToValue(flows_syslog_facility_text);
+          optarg = Utils::tokenizer(strchr(optarg, ';') + 1, ';',
+                                    &flows_syslog_facility_text);
+          syslog_facility_value =
+              Utils::mapSyslogFacilityTextToValue(flows_syslog_facility_text);
 
-	if(syslog_facility_value != -1) {
-	  flows_syslog_facility = syslog_facility_value;
-	  ntop->getTrace()->traceEvent(
-				       TRACE_DEBUG,
-				       "Syslog facility for dumping flows is set to %s (%d)",
-				       flows_syslog_facility_text, flows_syslog_facility);
-	}
+          if (syslog_facility_value != -1) {
+            flows_syslog_facility = syslog_facility_value;
+            ntop->getTrace()->traceEvent(
+                TRACE_DEBUG,
+                "Syslog facility for dumping flows is set to %s (%d)",
+                flows_syslog_facility_text, flows_syslog_facility);
+          }
+        }
+        ntop->getTrace()->traceEvent(TRACE_NORMAL,
+                                     "Dumping flows to syslog in JSON format");
       }
-      ntop->getTrace()->traceEvent(TRACE_NORMAL,
-				   "Dumping flows to syslog in JSON format");
-    }
 #endif
 #endif /* HAVE_NEDGE */
 
-    else {
-      ntop->getTrace()->traceEvent(TRACE_ERROR, "Unsupported export format '%s'", optarg);
-    }
+      else {
+        ntop->getTrace()->traceEvent(TRACE_ERROR,
+                                     "Unsupported export format '%s'", optarg);
+      }
 
-    break;
+      break;
 
 #ifndef WIN32
-  case 'G':
-    if(pid_path) free(pid_path);
-    pid_path = strdup(optarg);
-    break;
+    case 'G':
+      if (pid_path) free(pid_path);
+      pid_path = strdup(optarg);
+      break;
 #endif
 
-  case 'I':
-    export_endpoint = strdup(optarg);
-    break;
+    case 'I':
+      export_endpoint = strdup(optarg);
+      break;
 
-  case 'U':
-    set_user(optarg);
-    break;
+    case 'U':
+      set_user(optarg);
+      break;
 
-  case 'V':
-    print_version = true;
-    break;
+    case 'V':
+      print_version = true;
+      break;
 
-  case 196:
-    setCustomGeoIPDir(optarg);
-    break;
+    case 196:
+      setCustomGeoIPDir(optarg);
+      break;
 
 #ifdef NTOPNG_PRO
-  case 197:
-    lic_mgr_config_file = strdup(optarg);
-    break;
+    case 197:
+      lic_mgr_config_file = strdup(optarg);
+      break;
 #endif
 
-  case 198:
-    ciphers_list = strdup(optarg);
-    break;
+    case 198:
+      ciphers_list = strdup(optarg);
+      break;
 
-  case 199:
-    disable_purge = true;
-    break;
+    case 199:
+      disable_purge = true;
+      break;
 
-  case 200:
-    limited_resources_mode = true;
-    break;
+    case 200:
+      limited_resources_mode = true;
+      break;
 
-  case 201:
-    if(test_post_script_path) free(test_post_script_path);
-    test_post_script_path = strdup(optarg);
-    break;
+    case 201:
+      if (test_post_script_path) free(test_post_script_path);
+      test_post_script_path = strdup(optarg);
+      break;
 
-  case 203:
-    zmq_publish_events_url = strdup(optarg);
-    break;
+    case 203:
+      zmq_publish_events_url = strdup(optarg);
+      break;
 
 #ifdef HAVE_PF_RING
-  case 204:
-    pfring_cluster_id = atoi(optarg);
-    break;
+    case 204:
+      pfring_cluster_id = atoi(optarg);
+      break;
 #endif
 
-  case 205:
-    print_version_json = true;
-    break;
+    case 205:
+      print_version_json = true;
+      break;
 
-  case 206:
-    if(test_pre_script_path) free(test_pre_script_path);
-    test_pre_script_path = strdup(optarg);
-    break;
+    case 206:
+      if (test_pre_script_path) free(test_pre_script_path);
+      test_pre_script_path = strdup(optarg);
+      break;
 
-  case 207:
-    pcap_file_purge_hosts_flows = true;
-    break;
+    case 207:
+      pcap_file_purge_hosts_flows = true;
+      break;
 
-  case 208:
-    reproduce_at_original_speed = true;
-    break;
+    case 208:
+      reproduce_at_original_speed = true;
+      break;
 
-  case 209:
-    service_license_check = true;
-    break;
+    case 209:
+      service_license_check = true;
+      break;
 
-  case 210:
-    nDPIhelp();
-    break;
+    case 210:
+      nDPIhelp();
+      break;
 
-  case 211:
-    ntop->getTrace()->traceEvent(
-				 TRACE_WARNING,
-				 "Online check no longer supported (please remove "
-				 "--online-license-check from the configuration)");
-    break;
-
-  case 212:
-    if(!strcmp(optarg, "ixia"))
-      enable_ixia_timestamps = true;
-    else
+    case 211:
       ntop->getTrace()->traceEvent(
-				   TRACE_WARNING,
-				   "Unknown --hw-timestamp-mode mode, it has been ignored\n");
-    break;
+          TRACE_WARNING,
+          "Online check no longer supported (please remove "
+          "--online-license-check from the configuration)");
+      break;
 
-  case 213:
-    shutdown_when_done = true;
-    break;
+    case 212:
+      if (!strcmp(optarg, "ixia"))
+        enable_ixia_timestamps = true;
+      else
+        ntop->getTrace()->traceEvent(
+            TRACE_WARNING,
+            "Unknown --hw-timestamp-mode mode, it has been ignored\n");
+      break;
 
-  case 214:
-    simulate_vlans = true;
-    break;
+    case 213:
+      shutdown_when_done = true;
+      break;
 
-  case 215:
-    zmq_encryption_pwd = strdup(optarg);
-    break;
+    case 214:
+      simulate_vlans = true;
+      break;
 
-#ifndef HAVE_NEDGE
-  case 216:
-    ignore_macs = true;
-    break;
-#endif
-
-  case 217:
-    ignore_vlans = true;
-    break;
-
-  case 219:
-    enable_zmq_encryption = true;
-    break;
-
-  case 220:
-    enable_zmq_encryption = true;
-    zmq_encryption_priv_key = strdup(optarg);
-    break;
-
-  case 221:
-    num_simulated_ips = atoi(optarg);
-    break;
-
-  case 222:
-    export_zmq_encryption_key = strdup(optarg);
-    break;
+    case 215:
+      zmq_encryption_pwd = strdup(optarg);
+      break;
 
 #ifndef HAVE_NEDGE
-  case 223:
-    appliance = true;
-    break;
+    case 216:
+      ignore_macs = true;
+      break;
 #endif
 
-  case 224:
-    simulate_macs = true;
-    break;
+    case 217:
+      ignore_vlans = true;
+      break;
 
-  case 225:
-    insecure_tls = true;
-    break;
+    case 219:
+      enable_zmq_encryption = true;
+      break;
 
-  case 226:
-    ntop->toggleForcedOffline(true);
-    ntop->toggleOffline(true);
-    break;
+    case 220:
+      enable_zmq_encryption = true;
+      zmq_encryption_priv_key = strdup(optarg);
+      break;
 
-  case 227:
-    readonly_flows_dump = true;
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Read-only flows dump set");
-    break;
+    case 221:
+      num_simulated_ips = atoi(optarg);
+      break;
 
-  case 228:
-    strict_startup = true;
-    break;
+    case 222:
+      export_zmq_encryption_key = strdup(optarg);
+      break;
 
-  case 229:
-    custom_if_mtu = (u_int16_t)atoi(optarg);
-    break;
+#ifndef HAVE_NEDGE
+    case 223:
+      appliance = true;
+      break;
+#endif
+
+    case 224:
+      simulate_macs = true;
+      break;
+
+    case 225:
+      insecure_tls = true;
+      break;
+
+    case 226:
+      ntop->toggleForcedOffline(true);
+      ntop->toggleOffline(true);
+      break;
+
+    case 227:
+      readonly_flows_dump = true;
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "Read-only flows dump set");
+      break;
+
+    case 228:
+      strict_startup = true;
+      break;
+
+    case 229:
+      custom_if_mtu = (u_int16_t)atoi(optarg);
+      break;
 
 #ifdef NTOPNG_PRO
-  case 248:
-    dump_queue_len = atoi(optarg);
-    break;
+    case 248:
+      dump_queue_len = atoi(optarg);
+      break;
 
-  case 249:
-    dump_queue_block_size = atoi(optarg);
-    break;
+    case 249:
+      dump_queue_block_size = atoi(optarg);
+      break;
 
-  case 250:
-    toggle_dump_flows_direct(true);
-    break;
+    case 250:
+      toggle_dump_flows_direct(true);
+      break;
 
-  case 251:
-    fail_on_invalid_license = true;
-    break;
+    case 251:
+      fail_on_invalid_license = true;
+      break;
 
-  case 252:
-    print_maintenance = true;
-    break;
+    case 252:
+      print_maintenance = true;
+      break;
 
-  case 253:
-    print_license = true;
-    break;
+    case 253:
+      print_license = true;
+      break;
 
-  case 254:
-    ntop->getPro()->do_force_community_edition();
-    break;
+    case 254:
+      ntop->getPro()->do_force_community_edition();
+      break;
 #endif
 
-  case 218:
-    if(test_runtime_script_path) free(test_runtime_script_path);
-    test_runtime_script_path = strdup(optarg);
-    break;
+    case 218:
+      if (test_runtime_script_path) free(test_runtime_script_path);
+      test_runtime_script_path = strdup(optarg);
+      break;
 
-  default:
-    ntop->getTrace()->traceEvent(
-				 TRACE_WARNING, "Unknown option -%c: Ignored.", (char)optkey);
-    return (-1);
+    default:
+      ntop->getTrace()->traceEvent(
+          TRACE_WARNING, "Unknown option -%c: Ignored.", (char)optkey);
+      return (-1);
   }
 
   return (0);
@@ -2436,28 +2588,28 @@ int Prefs::setOption(int optkey, char *optarg) {
 
 int Prefs::checkOptions() {
 #ifdef NTOPNG_PRO
-  if(print_maintenance) {
+  if (print_maintenance) {
     /* Disable tracing messages */
     ntop->getTrace()->set_trace_level(0);
     ntop->registerPrefs(this, true);
-    if(ntop->getPro()->check_maintenance_duration())
+    if (ntop->getPro()->check_maintenance_duration())
       exit(0);
     else
       exit(1);
   }
 
-  if(print_license) {
+  if (print_license) {
     /* Disable tracing messages */
     ntop->getTrace()->set_trace_level(0);
     ntop->registerPrefs(this, true);
-    if(ntop->getPro()->check_license_validity())
+    if (ntop->getPro()->check_license_validity())
       exit(0);
     else
       exit(1);
   }
 #endif
 
-  if(print_version) {
+  if (print_version) {
 #ifdef NTOPNG_PRO
     char buf[128];
 #endif
@@ -2472,15 +2624,15 @@ int Prefs::checkOptions() {
     printf("License Type:\t%s\n",
            ntop->getPro()->get_license_type(buf, sizeof(buf)));
 
-    if(ntop->getPro()->demo_ends_at())
+    if (ntop->getPro()->demo_ends_at())
       printf("Validity:\t%s\n",
              ntop->getPro()->get_demo_expiration(buf, sizeof(buf)));
     else
       printf("Maintenance:\t%s\n",
              ntop->getPro()->get_maintenance_expiration(buf, sizeof(buf)));
 
-    if(ntop->getPro()->get_encoded_license()[0] != '\0') {
-      char *enc_license = ntop->getPro()->get_encoded_license();
+    if (ntop->getPro()->get_encoded_license()[0] != '\0') {
+      char* enc_license = ntop->getPro()->get_encoded_license();
       int i, len = strlen(enc_license);
       for (i = 0; i < len; i += 69) {
         char buff[70];
@@ -2488,19 +2640,19 @@ int Prefs::checkOptions() {
 
         memcpy(buff, &enc_license[i], clen);
         buff[clen] = '\0';
-        if(i == 0)
+        if (i == 0)
           printf("License:\t%s\n", buff);
         else
           printf("        \t%s\n", buff);
       }
     }
 
-    if(ntop->getPro()->get_license()[0] != '\0')
+    if (ntop->getPro()->get_license()[0] != '\0')
       printf("License Hash:\t%s\n", ntop->getPro()->get_license());
 #endif
 
     exit(0);
-  } else if(print_version_json) {
+  } else if (print_version_json) {
 #if defined(NTOPNG_PRO) && (!defined(FORCE_VALID_LICENSE))
     time_t license_until = (time_t)-1, maintenance_until = (time_t)-1;
     char outbuf[256], edition[64];
@@ -2519,33 +2671,33 @@ int Prefs::checkOptions() {
 #ifdef NTOPNG_PRO
              ntop->getPro()->is_embedded_version() ? "/Embedded" :
 #endif
-             ""
-	     );
+                                                   "");
 
     ntop->getTrace()->set_trace_level((u_int8_t)0);
     ntop->registerPrefs(this, true);
 
-    if((license_until = ntop->getPro()->demo_ends_at()) == 0)
+    if ((license_until = ntop->getPro()->demo_ends_at()) == 0)
       license_until = (time_t)-1;
 
     maintenance_until = ntop->getPro()->maintenance_ends_at();
 
-    printf("%s\n", getLicenseJSON(
-				  (char *)PACKAGE_VERSION, (char *)PACKAGE_OS, edition,
-				  (char *)ntop->getPro()->get_system_id(), license_until,
-				  maintenance_until, outbuf, sizeof(outbuf)));
+    printf("%s\n",
+           getLicenseJSON((char*)PACKAGE_VERSION, (char*)PACKAGE_OS, edition,
+                          (char*)ntop->getPro()->get_system_id(), license_until,
+                          maintenance_until, outbuf, sizeof(outbuf)));
 
     exit(0);
 #endif
   }
 
-  if(install_dir) ntop->set_install_dir(install_dir);
+  if (install_dir) ntop->set_install_dir(install_dir);
 
   free(data_dir);
   data_dir = strdup(ntop->get_install_dir());
 
-  if(!pcap_dir) pcap_dir = strdup(ntop->get_working_dir());
-  if(!clickhouse_archive_dir) clickhouse_archive_dir = strdup(ntop->get_working_dir());
+  if (!pcap_dir) pcap_dir = strdup(ntop->get_working_dir());
+  if (!clickhouse_archive_dir)
+    clickhouse_archive_dir = strdup(ntop->get_working_dir());
 
   docs_dir = ntop->getValidPath(docs_dir);
   scripts_dir = ntop->getValidPath(scripts_dir);
@@ -2555,35 +2707,36 @@ int Prefs::checkOptions() {
 
 #ifdef NTOPNG_PRO
   pro_callbacks_dir = ntop->getValidPath(pro_callbacks_dir);
-  if(!pro_callbacks_dir) {
+  if (!pro_callbacks_dir) {
     ntop->getTrace()->traceEvent(TRACE_ERROR,
                                  "Unable to locate pro callbacks dir");
     return (-1);
   }
   ntop->removeTrailingSlash(pro_callbacks_dir);
 #endif
-  if(!data_dir) {
+  if (!data_dir) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to locate data dir");
     return (-1);
   }
-  if(!docs_dir[0]) {
+  if (!docs_dir[0]) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to locate docs dir");
     return (-1);
   }
-  if(!scripts_dir[0]) {
+  if (!scripts_dir[0]) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to locate scripts dir");
     return (-1);
   }
-  if(!callbacks_dir[0]) {
+  if (!callbacks_dir[0]) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to locate callbacks dir");
     return (-1);
   }
-  if(!pcap_dir[0]) {
+  if (!pcap_dir[0]) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to locate pcap dir");
     return (-1);
   }
-  if(!clickhouse_archive_dir[0]) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to locate ClickHouse archive dir");
+  if (!clickhouse_archive_dir[0]) {
+    ntop->getTrace()->traceEvent(TRACE_ERROR,
+                                 "Unable to locate ClickHouse archive dir");
     return (-1);
   }
 
@@ -2593,16 +2746,16 @@ int Prefs::checkOptions() {
   ntop->removeTrailingSlash(pcap_dir);
   ntop->removeTrailingSlash(clickhouse_archive_dir);
 
-  if(http_binding_address1 == NULL)
+  if (http_binding_address1 == NULL)
     http_binding_address1 = strdup(CONST_ANY_ADDRESS);
-  if(http_binding_address2 == NULL)
+  if (http_binding_address2 == NULL)
     http_binding_address2 = strdup(CONST_ANY_ADDRESS);
-  if(https_binding_address1 == NULL)
+  if (https_binding_address1 == NULL)
     https_binding_address1 = strdup(CONST_ANY_ADDRESS);
-  if(https_binding_address2 == NULL)
+  if (https_binding_address2 == NULL)
     https_binding_address2 = strdup(CONST_ANY_ADDRESS);
 
-  if(strcmp(ntop->get_working_dir(), CONST_OLD_DEFAULT_DATA_DIR) == 0 &&
+  if (strcmp(ntop->get_working_dir(), CONST_OLD_DEFAULT_DATA_DIR) == 0 &&
       !is_user_set()) {
     /* Using the old /var/tmp/ntopng with the default user:
      * keep using 'nobody' to preserve backward compaitibility */
@@ -2614,26 +2767,26 @@ int Prefs::checkOptions() {
 
 /* ******************************************* */
 
-int Prefs::loadFromCLI(int argc, char *argv[]) {
+int Prefs::loadFromCLI(int argc, char* argv[]) {
   u_char c;
 
-  while(
-	 (c = getopt_long(
+  while ((c = getopt_long(
 #ifdef WIN32
-			  (int *(__cdecl *)(void))argc, (char *const **(__cdecl *)(void))argv,
+              (int*(__cdecl*)(void))argc, (char* const**(__cdecl*)(void))argv,
 #else
-			  argc, argv,
+              argc, argv,
 #endif
-			  "k:eg:hi:w:r:sg:m:n:p:qd:t:x:y:1:2:3:4:5:6:l:L:uv:zA:B:c:CD:E:F:MN:G:I:O:Q:"
-			  "S:TU:X:W:VZ:",
-			  long_options, NULL)) != '?') {
-    if(c == 255) break;
+              "k:eg:hi:w:r:sg:m:n:p:qd:t:x:y:1:2:3:4:5:6:l:L:uv:zA:B:c:CD:E:F:"
+              "MN:G:I:O:Q:"
+              "S:TU:X:W:VZ:",
+              long_options, NULL)) != '?') {
+    if (c == 255) break;
     setOption(c, optarg);
   }
 
-  if((http_port == 0) && (https_port == 0)) {
+  if ((http_port == 0) && (https_port == 0)) {
     ntop->getTrace()->traceEvent(
-				 TRACE_ERROR, "Both HTTP and HTTPS ports are disabled: quitting");
+        TRACE_ERROR, "Both HTTP and HTTPS ports are disabled: quitting");
     exit(0);
   }
 
@@ -2642,42 +2795,42 @@ int Prefs::loadFromCLI(int argc, char *argv[]) {
 
 /* ******************************************* */
 
-int Prefs::loadFromFile(const char *path) {
+int Prefs::loadFromFile(const char* path) {
   char buffer[16384], *line, *key, *value;
   u_int line_len, opt_name_len, num_line = 0;
-  FILE *fd;
-  const struct option *opt;
+  FILE* fd;
+  const struct option* opt;
 
   config_file_path = strdup(path);
 
   fd = fopen(config_file_path, "r");
 
-  if(fd == NULL) {
+  if (fd == NULL) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Config file %s not found",
                                  config_file_path);
     return (-1);
   }
 
-  while(true) {
-    if(!(line = fgets(buffer, sizeof(buffer), fd))) break;
+  while (true) {
+    if (!(line = fgets(buffer, sizeof(buffer), fd))) break;
 
     line = Utils::trim(line);
     num_line++, value = NULL;
 
-    if((line_len = strlen(line)) < 2 || line[0] == '#') continue;
+    if ((line_len = strlen(line)) < 2 || line[0] == '#') continue;
 
-    if(!strncmp(line, "--", 2)) { /* long opt */
+    if (!strncmp(line, "--", 2)) { /* long opt */
       key = &line[2], line_len -= 2;
 
       opt = long_options;
-      while(opt->name != NULL) {
+      while (opt->name != NULL) {
         opt_name_len = strlen(opt->name);
 
-        if(strncmp(key, opt->name, opt_name_len) == 0 &&
+        if (strncmp(key, opt->name, opt_name_len) == 0 &&
             (line_len <= opt_name_len || key[opt_name_len] == '\0' ||
              key[opt_name_len] == ' ' || key[opt_name_len] == '=')) {
-          if(line_len > opt_name_len) key[opt_name_len] = '\0';
-          if(line_len > opt_name_len + 1)
+          if (line_len > opt_name_len) key[opt_name_len] = '\0';
+          if (line_len > opt_name_len + 1)
             value = Utils::trim(&key[opt_name_len + 1]);
 
           // ntop->getTrace()->traceEvent(TRACE_NORMAL, "key: %s value: %s",
@@ -2689,23 +2842,24 @@ int Prefs::loadFromFile(const char *path) {
 
         opt++;
       }
-    } else if(line[0] == '-') { /* short opt */
+    } else if (line[0] == '-') { /* short opt */
       key = &line[1], line_len--;
 
-      if(key[1] != ' ' &&
-          key[1] != '=' &&
-          key[1] != '\0') {
+      if (key[1] != ' ' && key[1] != '=' && key[1] != '\0') {
         ntop->getTrace()->traceEvent(
-				     TRACE_WARNING, "Skipping unrecognized line format %s:%u : %s",
-				     config_file_path, num_line, buffer);
+            TRACE_WARNING, "Skipping unrecognized line format %s:%u : %s",
+            config_file_path, num_line, buffer);
         continue;
       }
 
-      if(line_len > 1) key[1] = '\0';
-      if(line_len > 2) value = Utils::trim(&key[2]);
-      else value = NULL;
+      if (line_len > 1) key[1] = '\0';
+      if (line_len > 2)
+        value = Utils::trim(&key[2]);
+      else
+        value = NULL;
 
-      // ntop->getTrace()->traceEvent(TRACE_NORMAL, "key: %c value: %s", key[0], value);
+      // ntop->getTrace()->traceEvent(TRACE_NORMAL, "key: %c value: %s", key[0],
+      // value);
       setOption(key[0], value);
 
     } else {
@@ -2723,10 +2877,10 @@ int Prefs::loadFromFile(const char *path) {
 
 /* ******************************************* */
 
-void Prefs::add_network_interface(char *name, char *description) {
-  if(num_interfaces < MAX_NUM_DEFINED_INTERFACES) {
-    char *real_name = NULL;
-    char *ifname = NULL;
+void Prefs::add_network_interface(char* name, char* description) {
+  if (num_interfaces < MAX_NUM_DEFINED_INTERFACES) {
+    char* real_name = NULL;
+    char* ifname = NULL;
     int id;
 
     if (strncmp(name, "-", 1) == 0) {
@@ -2741,56 +2895,57 @@ void Prefs::add_network_interface(char *name, char *description) {
     }
 
     id = Utils::ifname2id(ifname);
-    if(id >= 0) {
+    if (id >= 0) {
       ifNames[num_interfaces].name = ifname;
       ifNames[num_interfaces].alias = real_name ? strdup(name) : NULL;
-      ifNames[num_interfaces].description = strdup(description ? description : name);
+      ifNames[num_interfaces].description =
+          strdup(description ? description : name);
       ifNames[num_interfaces].id = id;
       num_interfaces++;
     } else {
       free(ifname);
       ntop->getTrace()->traceEvent(
-				   TRACE_ERROR, "Unable to get a valid id for %s, skipping.", name);
+          TRACE_ERROR, "Unable to get a valid id for %s, skipping.", name);
     }
   } else {
     ntop->getTrace()->traceEvent(TRACE_ERROR,
                                  "Too many interfaces (%d): discarded %s",
                                  num_interfaces, name);
     ntop->getTrace()->traceEvent(
-				 TRACE_ERROR,
-				 "Hint: reset redis (redis-cli flushall) and then start ntopng again");
+        TRACE_ERROR,
+        "Hint: reset redis (redis-cli flushall) and then start ntopng again");
   }
 }
 
 /* ******************************************* */
 
 void Prefs::add_default_interfaces() {
-  NetworkInterface *dummy = new (std::nothrow) NetworkInterface("dummy");
+  NetworkInterface* dummy = new (std::nothrow) NetworkInterface("dummy");
   dummy->addAllAvailableInterfaces();
   delete dummy;
 };
 
 /* *************************************** */
 
-void Prefs::bind_http_to_address(const char *addr1, const char *addr2) {
-  if(http_binding_address1) free(http_binding_address1);
+void Prefs::bind_http_to_address(const char* addr1, const char* addr2) {
+  if (http_binding_address1) free(http_binding_address1);
   http_binding_address1 = strdup(addr1);
 
-  if(http_binding_address2) free(http_binding_address2);
+  if (http_binding_address2) free(http_binding_address2);
   http_binding_address2 = strdup(addr2);
 }
 
-void Prefs::bind_https_to_address(const char *addr1, const char *addr2) {
-  if(https_binding_address1) free(https_binding_address1);
+void Prefs::bind_https_to_address(const char* addr1, const char* addr2) {
+  if (https_binding_address1) free(https_binding_address1);
   https_binding_address1 = strdup(addr1);
 
-  if(https_binding_address2) free(https_binding_address2);
+  if (https_binding_address2) free(https_binding_address2);
   https_binding_address2 = strdup(addr2);
 }
 
 /* *************************************** */
 
-void Prefs::lua(lua_State *vm) {
+void Prefs::lua(lua_State* vm) {
   char buf[32];
 #ifdef NTOPNG_PRO
   char HTTP_stats_base_dir[MAX_PATH * 2];
@@ -2823,14 +2978,16 @@ void Prefs::lua(lua_State *vm) {
   lua_push_bool_table_entry(vm, "is_dump_flows_direct_enabled",
                             do_dump_flows_direct());
   lua_push_int32_table_entry(vm, "max_aggregated_flows_upperbound",
-			     max_aggregated_flows_upperbound);
+                             max_aggregated_flows_upperbound);
   lua_push_int32_table_entry(vm, "max_aggregated_flows_traffic_upperbound",
-			     max_aggregated_flows_traffic_upperbound);
-  lua_push_bool_table_entry(vm, "data_archive_before_ttl_delete", data_archive_before_ttl_delete);
+                             max_aggregated_flows_traffic_upperbound);
+  lua_push_bool_table_entry(vm, "data_archive_before_ttl_delete",
+                            data_archive_before_ttl_delete);
 #endif
   lua_push_bool_table_entry(vm, "is_asn_mode_enabled", asn_mode_enabled);
-  
-  if(clickhouse_dbname) lua_push_str_table_entry(vm, "clickhouse_dbname", clickhouse_dbname);
+
+  if (clickhouse_dbname)
+    lua_push_str_table_entry(vm, "clickhouse_dbname", clickhouse_dbname);
   lua_push_bool_table_entry(vm, "is_dump_flows_to_es_enabled",
                             do_dump_flows_on_es());
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
@@ -2840,32 +2997,36 @@ void Prefs::lua(lua_State *vm) {
   lua_push_bool_table_entry(vm, "is_dump_flows_to_syslog_enabled",
                             do_dump_flows_on_syslog());
   lua_push_int32_table_entry(vm, "host_to_scan_max_num_scans",
-			                      vs_max_num_scans);
+                             vs_max_num_scans);
   lua_push_bool_table_entry(vm, "vs_slow_scan", vs_slow_scan);
   lua_push_bool_table_entry(vm, "snmp_polling", snmp_polling);
   lua_push_bool_table_entry(vm, "active_monitoring", do_active_monitoring());
-  lua_push_bool_table_entry(vm, "active_monitoring_pref", get_active_monitoring_pref());
+  lua_push_bool_table_entry(vm, "active_monitoring_pref",
+                            get_active_monitoring_pref());
   lua_push_bool_table_entry(vm, "network_discovery", network_discovery);
   lua_push_bool_table_entry(vm, "starttls", starttls);
-  lua_push_bool_table_entry(vm, "dump_pcap_to_clickhouse", dump_pcap_to_clickhouse);
-  lua_push_bool_table_entry(vm, "query_performance_log_enabled", query_performance_log);
+  lua_push_bool_table_entry(vm, "dump_pcap_to_clickhouse",
+                            dump_pcap_to_clickhouse);
+  lua_push_bool_table_entry(vm, "query_performance_log_enabled",
+                            query_performance_log);
   lua_push_bool_table_entry(vm, "tls_quic_hostnaming", tls_quic_hostnaming);
 
 #ifdef HAVE_NEDGE
-  lua_push_bool_table_entry(vm, "is_mac_based_captive_portal", mac_based_captive_portal);
+  lua_push_bool_table_entry(vm, "is_mac_based_captive_portal",
+                            mac_based_captive_portal);
 #endif
 
   lua_push_uint64_table_entry(vm, "http.port", get_http_port());
 
   lua_push_str_table_entry(vm, "instance_name",
-                           instance_name ? instance_name : (char *)"");
+                           instance_name ? instance_name : (char*)"");
 
   /* Command line options */
   lua_push_bool_table_entry(vm, "has_cmdl_trace_lvl", has_cmdl_trace_lvl);
 
 #ifdef NTOPNG_PRO
   memset(HTTP_stats_base_dir, '\0', MAX_PATH);
-  strncat(HTTP_stats_base_dir, (const char *)ntop->get_working_dir(), MAX_PATH);
+  strncat(HTTP_stats_base_dir, (const char*)ntop->get_working_dir(), MAX_PATH);
   strncat(HTTP_stats_base_dir, "/httpstats/", MAX_PATH);
   lua_push_str_table_entry(vm, "http_stats_base_dir", HTTP_stats_base_dir);
 #endif
@@ -2886,7 +3047,7 @@ void Prefs::lua(lua_State *vm) {
   lua_push_uint64_table_entry(vm, "non_local_host_max_idle",
                               non_local_host_max_idle);
   lua_push_uint64_table_entry(vm, "flow_max_idle", pkt_ifaces_flow_max_idle);
-  if(enable_active_local_hosts_cache)
+  if (enable_active_local_hosts_cache)
     lua_push_uint64_table_entry(vm, "active_local_hosts_cache_interval",
                                 active_local_hosts_cache_interval);
 
@@ -2905,8 +3066,7 @@ void Prefs::lua(lua_State *vm) {
   lua_push_bool_table_entry(vm, "flow_table_time", flow_table_time);
   lua_push_bool_table_entry(vm, "flow_table_probe_order",
                             flow_table_probe_order);
-  lua_push_bool_table_entry(vm, "enable_full_stats",
-                            full_stats_enabled);
+  lua_push_bool_table_entry(vm, "enable_full_stats", full_stats_enabled);
   lua_push_bool_table_entry(vm, "is_active_local_hosts_cache_enabled",
                             enable_active_local_hosts_cache);
 
@@ -2954,26 +3114,25 @@ void Prefs::lua(lua_State *vm) {
   lua_push_uint64_table_entry(vm, "mac_address_cache_duration",
                               mac_address_cache_duration);
   lua_push_bool_table_entry(vm, "enable_flow_swap_heuristic",
-                              enable_flow_swap_heuristic);
-  lua_push_bool_table_entry(vm, "enable_assets_log",
-                              enable_assets_log);
+                            enable_flow_swap_heuristic);
+  lua_push_bool_table_entry(vm, "enable_assets_log", enable_assets_log);
   lua_push_uint64_table_entry(vm, "devices_learning_period",
                               devices_learning_period);
   lua_push_uint64_table_entry(vm, "host_port_learning_period",
                               host_port_learning_period);
   lua_push_str_table_entry(
-			   vm, "safe_search_dns",
-			   Utils::intoaV4(ntohl(safe_search_dns_ip), buf, sizeof(buf)));
+      vm, "safe_search_dns",
+      Utils::intoaV4(ntohl(safe_search_dns_ip), buf, sizeof(buf)));
   lua_push_str_table_entry(
-			   vm, "global_dns",
-			   global_primary_dns_ip
-			   ? Utils::intoaV4(ntohl(global_primary_dns_ip), buf, sizeof(buf))
-			   : (char *)"");
+      vm, "global_dns",
+      global_primary_dns_ip
+          ? Utils::intoaV4(ntohl(global_primary_dns_ip), buf, sizeof(buf))
+          : (char*)"");
   lua_push_str_table_entry(
-			   vm, "secondary_dns",
-			   global_secondary_dns_ip
-			   ? Utils::intoaV4(ntohl(global_secondary_dns_ip), buf, sizeof(buf))
-			   : (char *)"");
+      vm, "secondary_dns",
+      global_secondary_dns_ip
+          ? Utils::intoaV4(ntohl(global_secondary_dns_ip), buf, sizeof(buf))
+          : (char*)"");
 
   lua_push_bool_table_entry(vm, "is_captive_portal_enabled",
                             enable_captive_portal);
@@ -2984,29 +3143,33 @@ void Prefs::lua(lua_State *vm) {
 
   lua_push_uint64_table_entry(vm, "max_ui_strlen", max_ui_strlen);
 
-
   lua_push_str_table_entry(vm, "config_file",
-                           config_file_path ? config_file_path : (char *)"");
+                           config_file_path ? config_file_path : (char*)"");
   lua_push_str_table_entry(vm, "ndpi_proto_file",
-                           ndpi_proto_path ? ndpi_proto_path : (char *)"");
+                           ndpi_proto_path ? ndpi_proto_path : (char*)"");
 
   lua_push_str_table_entry(vm, "cpu_affinity",
-                           cpu_affinity ? cpu_affinity : (char *)"");
-  lua_push_str_table_entry(
-			   vm, "other_cpu_affinity",
-			   other_cpu_affinity ? other_cpu_affinity : (char *)"");
-  lua_push_str_table_entry(vm, "user", change_user ? user : (char *)"");
+                           cpu_affinity ? cpu_affinity : (char*)"");
+  lua_push_str_table_entry(vm, "other_cpu_affinity",
+                           other_cpu_affinity ? other_cpu_affinity : (char*)"");
+  lua_push_str_table_entry(vm, "user", change_user ? user : (char*)"");
 
   lua_push_str_table_entry(vm, "capture_direction",
                            Utils::captureDirection2Str(captureDirection));
 
-  lua_push_str_table_entry(vm, "message_broker_url", message_broker_url ? message_broker_url : "");
-  lua_push_str_table_entry(vm, "message_broker", message_broker ? message_broker : "");
-  lua_push_bool_table_entry(vm, "toggle_message_broker", message_broker_enabled);
+  lua_push_str_table_entry(vm, "message_broker_url",
+                           message_broker_url ? message_broker_url : "");
+  lua_push_str_table_entry(vm, "message_broker",
+                           message_broker ? message_broker : "");
+  lua_push_bool_table_entry(vm, "toggle_message_broker",
+                            message_broker_enabled);
 
-  lua_push_str_table_entry(vm, "zmq_publish_events_url", zmq_publish_events_url);
-  lua_push_bool_table_entry(vm, "limited_resources_mode", limited_resources_mode);
-  lua_push_str_table_entry(vm, "split_ts_direction", split_ts_direction ? "rx_tx" : "total");
+  lua_push_str_table_entry(vm, "zmq_publish_events_url",
+                           zmq_publish_events_url);
+  lua_push_bool_table_entry(vm, "limited_resources_mode",
+                            limited_resources_mode);
+  lua_push_str_table_entry(vm, "split_ts_direction",
+                           split_ts_direction ? "rx_tx" : "total");
 }
 
 /* *************************************** */
@@ -3014,34 +3177,34 @@ void Prefs::lua(lua_State *vm) {
 void Prefs::refreshHostsAlertsPrefs() {
   char rsp[32];
 
-  if(ntop->getRedis()->hashGet(
-				(char *)CONST_RUNTIME_PREFS_HOSTS_ALERTS_CONFIG,
-				(char *)CONST_HOST_FLOW_ATTACKER_ALERT_THRESHOLD_KEY, rsp,
-				sizeof(rsp)) == 0)
+  if (ntop->getRedis()->hashGet(
+          (char*)CONST_RUNTIME_PREFS_HOSTS_ALERTS_CONFIG,
+          (char*)CONST_HOST_FLOW_ATTACKER_ALERT_THRESHOLD_KEY, rsp,
+          sizeof(rsp)) == 0)
     attacker_max_num_flows_per_sec = atol(rsp);
   else
     attacker_max_num_flows_per_sec = CONST_MAX_NEW_FLOWS_SECOND;
 
-  if(ntop->getRedis()->hashGet(
-				(char *)CONST_RUNTIME_PREFS_HOSTS_ALERTS_CONFIG,
-				(char *)CONST_HOST_FLOW_VICTIM_ALERT_THRESHOLD_KEY, rsp,
-				sizeof(rsp)) == 0)
+  if (ntop->getRedis()->hashGet(
+          (char*)CONST_RUNTIME_PREFS_HOSTS_ALERTS_CONFIG,
+          (char*)CONST_HOST_FLOW_VICTIM_ALERT_THRESHOLD_KEY, rsp,
+          sizeof(rsp)) == 0)
     victim_max_num_flows_per_sec = atol(rsp);
   else
     victim_max_num_flows_per_sec = CONST_MAX_NEW_FLOWS_SECOND;
 
-  if(ntop->getRedis()->hashGet(
-				(char *)CONST_RUNTIME_PREFS_HOSTS_ALERTS_CONFIG,
-				(char *)CONST_HOST_SYN_ATTACKER_ALERT_THRESHOLD_KEY, rsp,
-				sizeof(rsp)) == 0)
+  if (ntop->getRedis()->hashGet(
+          (char*)CONST_RUNTIME_PREFS_HOSTS_ALERTS_CONFIG,
+          (char*)CONST_HOST_SYN_ATTACKER_ALERT_THRESHOLD_KEY, rsp,
+          sizeof(rsp)) == 0)
     attacker_max_num_syn_per_sec = atol(rsp);
   else
     attacker_max_num_syn_per_sec = CONST_MAX_NUM_SYN_PER_SECOND;
 
-  if(ntop->getRedis()->hashGet(
-				(char *)CONST_RUNTIME_PREFS_HOSTS_ALERTS_CONFIG,
-				(char *)CONST_HOST_SYN_VICTIM_ALERT_THRESHOLD_KEY, rsp,
-				sizeof(rsp)) == 0)
+  if (ntop->getRedis()->hashGet(
+          (char*)CONST_RUNTIME_PREFS_HOSTS_ALERTS_CONFIG,
+          (char*)CONST_HOST_SYN_VICTIM_ALERT_THRESHOLD_KEY, rsp,
+          sizeof(rsp)) == 0)
     victim_max_num_syn_per_sec = atol(rsp);
   else
     victim_max_num_syn_per_sec = CONST_MAX_NUM_SYN_PER_SECOND;
@@ -3051,14 +3214,14 @@ void Prefs::refreshHostsAlertsPrefs() {
 
 void Prefs::refreshDeviceProtocolsPolicyPref() {
   device_protocol_policies_enabled = getDefaultBoolPrefsValue(
-							      CONST_PREFS_ENABLE_DEVICE_PROTOCOL_POLICIES, false);
+      CONST_PREFS_ENABLE_DEVICE_PROTOCOL_POLICIES, false);
 }
 
 /* *************************************** */
 
 void Prefs::refreshDbDumpPrefs() {
   enable_runtime_flows_dump =
-    getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_RUNTIME_FLOWS_DUMP, true);
+      getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_RUNTIME_FLOWS_DUMP, true);
 }
 
 /* *************************************** */
@@ -3068,11 +3231,11 @@ void Prefs::resetDeferredInterfacesToRegister() {
   ntop->getTrace()->traceEvent(TRACE_ERROR, "Reset interfaces");
   for (int i = 0; i < num_deferred_interfaces_to_register; i++) {
     /* Reset network interfaces, excluding event interfaces like syslog/zmq */
-    if(deferred_interfaces_to_register[i] != NULL) {
-      if(strstr(deferred_interfaces_to_register[i], "syslog://") ||
+    if (deferred_interfaces_to_register[i] != NULL) {
+      if (strstr(deferred_interfaces_to_register[i], "syslog://") ||
           strstr(deferred_interfaces_to_register[i], "tcp://"))
         deferred_interfaces_to_register[num++] =
-	  deferred_interfaces_to_register[i];
+            deferred_interfaces_to_register[i];
       else
         free(deferred_interfaces_to_register[i]);
     }
@@ -3082,24 +3245,24 @@ void Prefs::resetDeferredInterfacesToRegister() {
 
 /* *************************************** */
 
-bool Prefs::addDeferredInterfaceToRegister(const char *ifname) {
-  if(num_deferred_interfaces_to_register < UNLIMITED_NUM_INTERFACES) {
+bool Prefs::addDeferredInterfaceToRegister(const char* ifname) {
+  if (num_deferred_interfaces_to_register < UNLIMITED_NUM_INTERFACES) {
     bool isView = strstr(ifname, "view:");
     if (isView) {
       /* View interface only available with pro version */
 #ifdef NTOPNG_PRO
       deferred_interfaces_to_register[num_deferred_interfaces_to_register] =
-      strdup(ifname);
+          strdup(ifname);
       num_deferred_interfaces_to_register++;
       return true;
 #endif
     } else if (!isView) {
       deferred_interfaces_to_register[num_deferred_interfaces_to_register] =
-      strdup(ifname);
+          strdup(ifname);
       num_deferred_interfaces_to_register++;
       return true;
     }
-    return true; // Simply ignore the -i view option
+    return true;  // Simply ignore the -i view option
   } else {
     return false;
   }
@@ -3109,7 +3272,7 @@ bool Prefs::addDeferredInterfaceToRegister(const char *ifname) {
 
 void Prefs::registerNetworkInterfaces() {
   for (int i = 0; i < num_deferred_interfaces_to_register; i++) {
-    if(deferred_interfaces_to_register[i] != NULL) {
+    if (deferred_interfaces_to_register[i] != NULL) {
       add_network_interface(deferred_interfaces_to_register[i], NULL);
       free(deferred_interfaces_to_register[i]);
       deferred_interfaces_to_register[i] = NULL;
@@ -3122,11 +3285,11 @@ void Prefs::registerNetworkInterfaces() {
 bool Prefs::is_pro_edition() {
   return
 #ifdef NTOPNG_PRO
-    ntop->getPro()->has_valid_license()
+      ntop->getPro()->has_valid_license()
 #else
-    false
+      false
 #endif
-    ;
+          ;
 }
 
 /* *************************************** */
@@ -3134,12 +3297,12 @@ bool Prefs::is_pro_edition() {
 bool Prefs::is_enterprise_m_edition() {
   return
 #ifdef NTOPNG_PRO
-    ntop->getPro()->has_valid_enterprise_m_license() ||
-    is_enterprise_l_edition() /* L or higher */
+      ntop->getPro()->has_valid_enterprise_m_license() ||
+      is_enterprise_l_edition() /* L or higher */
 #else
-    false
+      false
 #endif
-    ;
+      ;
 }
 
 /* *************************************** */
@@ -3147,12 +3310,12 @@ bool Prefs::is_enterprise_m_edition() {
 bool Prefs::is_enterprise_l_edition() {
   return
 #ifdef NTOPNG_PRO
-    ntop->getPro()->has_valid_enterprise_l_license() ||
-    is_enterprise_xl_edition() /* XL or higher */
+      ntop->getPro()->has_valid_enterprise_l_license() ||
+      is_enterprise_xl_edition() /* XL or higher */
 #else
-    false
+      false
 #endif
-    ;
+      ;
 }
 
 /* *************************************** */
@@ -3160,12 +3323,12 @@ bool Prefs::is_enterprise_l_edition() {
 bool Prefs::is_enterprise_xl_edition() {
   return
 #ifdef NTOPNG_PRO
-    ntop->getPro()->has_valid_enterprise_xl_license() ||
-    is_enterprise_xxl_edition() /* XXL or higher */
+      ntop->getPro()->has_valid_enterprise_xl_license() ||
+      is_enterprise_xxl_edition() /* XXL or higher */
 #else
-    false
+      false
 #endif
-    ;
+      ;
 }
 
 /* *************************************** */
@@ -3173,11 +3336,11 @@ bool Prefs::is_enterprise_xl_edition() {
 bool Prefs::is_enterprise_xxl_edition() {
   return
 #ifdef NTOPNG_PRO
-    ntop->getPro()->has_valid_enterprise_xxl_license()
+      ntop->getPro()->has_valid_enterprise_xxl_license()
 #else
-    false
+      false
 #endif
-    ;
+          ;
 }
 
 /* *************************************** */
@@ -3185,11 +3348,11 @@ bool Prefs::is_enterprise_xxl_edition() {
 bool Prefs::is_enterprise_xxxl_edition() {
   return
 #ifdef NTOPNG_PRO
-    ntop->getPro()->has_valid_enterprise_xxxl_license()
+      ntop->getPro()->has_valid_enterprise_xxxl_license()
 #else
-    false
+      false
 #endif
-    ;
+          ;
 }
 
 /* *************************************** */
@@ -3197,11 +3360,11 @@ bool Prefs::is_enterprise_xxxl_edition() {
 bool Prefs::is_nedge_pro_edition() {
   return
 #ifdef HAVE_NEDGE
-    ntop->getPro()->has_valid_license()
+      ntop->getPro()->has_valid_license()
 #else
-    false
+      false
 #endif
-    ;
+          ;
 }
 
 /* *************************************** */
@@ -3209,11 +3372,11 @@ bool Prefs::is_nedge_pro_edition() {
 bool Prefs::is_nedge_enterprise_edition() {
   return
 #ifdef HAVE_NEDGE
-    ntop->getPro()->has_valid_nedge_enterprise_license()
+      ntop->getPro()->has_valid_nedge_enterprise_license()
 #else
-    false
+      false
 #endif
-    ;
+          ;
 }
 
 /* *************************************** */
@@ -3221,11 +3384,11 @@ bool Prefs::is_nedge_enterprise_edition() {
 bool Prefs::is_embedded_edition() {
   return
 #if defined(NTOPNG_PRO) || defined(HAVE_NEDGE)
-    ntop->getPro()->is_embedded_version()
+      ntop->getPro()->is_embedded_version()
 #else
-    false
+      false
 #endif
-    ;
+          ;
 }
 
 /* *************************************** */
@@ -3233,7 +3396,7 @@ bool Prefs::is_embedded_edition() {
 void Prefs::set_routing_mode(bool enabled) {
 #ifdef HAVE_NEDGE
   routing_mode_enabled =
-    enabled && ntop->getPro()->has_valid_nedge_enterprise_license();
+      enabled && ntop->getPro()->has_valid_nedge_enterprise_license();
 #else
   routing_mode_enabled = false;
 #endif
@@ -3244,11 +3407,11 @@ void Prefs::set_routing_mode(bool enabled) {
 time_t Prefs::pro_edition_demo_ends_at() {
   return
 #ifdef NTOPNG_PRO
-    ntop->getPro()->demo_ends_at()
+      ntop->getPro()->demo_ends_at()
 #else
-    0
+      0
 #endif
-    ;
+          ;
 }
 
 /* *************************************** */
@@ -3256,19 +3419,20 @@ time_t Prefs::pro_edition_demo_ends_at() {
 void Prefs::validate() {
   /* Perform here post-initialization validations */
 
-  if(is_enterprise_m_edition() /* M or higher */
+  if (is_enterprise_m_edition() /* M or higher */
       || is_nedge_enterprise_edition()) {
     ; /* All good */
-  } else if(dump_flows_on_clickhouse) {
+  } else if (dump_flows_on_clickhouse) {
     ntop->getTrace()->traceEvent(
-				 TRACE_WARNING,
-				 "-F clickhouse is available only on Enterprise");
+        TRACE_WARNING, "-F clickhouse is available only on Enterprise");
     dump_flows_on_clickhouse = false;
   }
 
-  /* Use max num flows as upper limit for flows/hosts cache size to avoid configuration mistakes */
-  /* Note: check the size here, after detecting the model (and setting the corresponding limits) */
-  u_int32_t limit = MAX_NUM_ACTIVE_FLOWS*2;
+  /* Use max num flows as upper limit for flows/hosts cache size to avoid
+   * configuration mistakes */
+  /* Note: check the size here, after detecting the model (and setting the
+   * corresponding limits) */
+  u_int32_t limit = MAX_NUM_ACTIVE_FLOWS * 2;
   max_num_hosts = max_val(min_val(max_num_hosts, limit), 1024);
   max_num_flows = max_val(min_val(max_num_flows, limit), 1024);
 }
@@ -3278,14 +3442,13 @@ void Prefs::validate() {
 #ifdef HAVE_NEDGE
 
 bool Prefs::isInformativeCaptivePortalEnabled() const {
-  return (enable_informative_captive_portal &&
-          !enable_vlan_trunk_bridge);
+  return (enable_informative_captive_portal && !enable_vlan_trunk_bridge);
 }
 
 /* *************************************** */
 
-const char *Prefs::getCaptivePortalUrl() {
-  if(isInformativeCaptivePortalEnabled()) {
+const char* Prefs::getCaptivePortalUrl() {
+  if (isInformativeCaptivePortalEnabled()) {
     return CAPTIVE_PORTAL_INFO_URL;
   } else {
     return CAPTIVE_PORTAL_URL;
@@ -3302,27 +3465,27 @@ bool Prefs::isExternalAuthCaptivePortalEnabled() const {
 
 /* *************************************** */
 
-void Prefs::setIEC104AllowedTypeIDs(const char *type_ids) {
+void Prefs::setIEC104AllowedTypeIDs(const char* type_ids) {
   char *p, *buf, *tmp;
 
-  if(!type_ids) return;
+  if (!type_ids) return;
 
-  if((strcmp(type_ids, "-1") == 0))
+  if ((strcmp(type_ids, "-1") == 0))
     iec104_allowed_typeids[0] = (u_int64_t)-1,
-      iec104_allowed_typeids[1] = (u_int64_t)-1; /* All */
-  else if((buf = strdup(type_ids))) {
+    iec104_allowed_typeids[1] = (u_int64_t)-1; /* All */
+  else if ((buf = strdup(type_ids))) {
     iec104_allowed_typeids[0] = (u_int64_t)0,
-      iec104_allowed_typeids[1] = (u_int64_t)0;
+    iec104_allowed_typeids[1] = (u_int64_t)0;
 
     p = strtok_r(buf, ",", &tmp);
-    while(p != NULL) {
+    while (p != NULL) {
       int type_id = atoi(p);
 
       // ntop->getTrace()->traceEvent(TRACE_WARNING, "-> %d", type_id);
 
-      if(type_id < 64)
+      if (type_id < 64)
         iec104_allowed_typeids[0] |= ((u_int64_t)1 << type_id);
-      else if(type_id < 128)
+      else if (type_id < 128)
         iec104_allowed_typeids[1] |= ((u_int64_t)1 << (type_id - 64));
 
       p = strtok_r(NULL, ",", &tmp);
@@ -3336,34 +3499,35 @@ void Prefs::setIEC104AllowedTypeIDs(const char *type_ids) {
 
 #ifdef NTOPNG_PRO
 
-void Prefs::setModbusAllowedFunctionCodes(const char *function_codes) {
+void Prefs::setModbusAllowedFunctionCodes(const char* function_codes) {
   char *p, *buf, *tmp;
 
-  if(!function_codes) return;
+  if (!function_codes) return;
 
-  if((strcmp(function_codes, "-1") == 0)) {
-    if(modbus_allowed_function_codes != NULL) {
+  if ((strcmp(function_codes, "-1") == 0)) {
+    if (modbus_allowed_function_codes != NULL) {
       ndpi_bitmap_free(modbus_allowed_function_codes);
       modbus_allowed_function_codes = NULL;
     }
-  } else if((buf = strdup(function_codes))) {
-    if(modbus_allowed_function_codes == NULL) {
-      if((modbus_allowed_function_codes = ndpi_bitmap_alloc()) == NULL)
-	ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to allocate bitmap memory");
+  } else if ((buf = strdup(function_codes))) {
+    if (modbus_allowed_function_codes == NULL) {
+      if ((modbus_allowed_function_codes = ndpi_bitmap_alloc()) == NULL)
+        ntop->getTrace()->traceEvent(TRACE_WARNING,
+                                     "Unable to allocate bitmap memory");
     }
 
-    if(modbus_allowed_function_codes) {
+    if (modbus_allowed_function_codes) {
       ndpi_bitmap_free(modbus_allowed_function_codes);
 
-      if((modbus_allowed_function_codes = ndpi_bitmap_alloc()) != NULL) {
-	p = strtok_r(buf, ",", &tmp);
-	while(p != NULL) {
-	  int f_code = atoi(p);
+      if ((modbus_allowed_function_codes = ndpi_bitmap_alloc()) != NULL) {
+        p = strtok_r(buf, ",", &tmp);
+        while (p != NULL) {
+          int f_code = atoi(p);
 
-	  ndpi_bitmap_set(modbus_allowed_function_codes, f_code);
+          ndpi_bitmap_set(modbus_allowed_function_codes, f_code);
 
-	  p = strtok_r(NULL, ",", &tmp);
-	}
+          p = strtok_r(NULL, ",", &tmp);
+        }
       }
     }
 
@@ -3373,34 +3537,35 @@ void Prefs::setModbusAllowedFunctionCodes(const char *function_codes) {
 
 /* *************************************** */
 
-void Prefs::setS7CommAllowedFunctionCodes(const char *function_codes) {
+void Prefs::setS7CommAllowedFunctionCodes(const char* function_codes) {
   char *p, *buf, *tmp;
 
-  if(!function_codes) return;
+  if (!function_codes) return;
 
-  if((strcmp(function_codes, "-1") == 0)) {
-    if(s7comm_allowed_function_codes != NULL) {
+  if ((strcmp(function_codes, "-1") == 0)) {
+    if (s7comm_allowed_function_codes != NULL) {
       ndpi_bitmap_free(s7comm_allowed_function_codes);
       s7comm_allowed_function_codes = NULL;
     }
-  } else if((buf = strdup(function_codes))) {
-    if(s7comm_allowed_function_codes == NULL) {
-      if((s7comm_allowed_function_codes = ndpi_bitmap_alloc()) == NULL)
-	ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to allocate bitmap memory");
+  } else if ((buf = strdup(function_codes))) {
+    if (s7comm_allowed_function_codes == NULL) {
+      if ((s7comm_allowed_function_codes = ndpi_bitmap_alloc()) == NULL)
+        ntop->getTrace()->traceEvent(TRACE_WARNING,
+                                     "Unable to allocate bitmap memory");
     }
 
-    if(s7comm_allowed_function_codes) {
+    if (s7comm_allowed_function_codes) {
       ndpi_bitmap_free(s7comm_allowed_function_codes);
 
-      if((s7comm_allowed_function_codes = ndpi_bitmap_alloc()) != NULL) {
-	p = strtok_r(buf, ",", &tmp);
-	while(p != NULL) {
-	  int f_code = atoi(p);
+      if ((s7comm_allowed_function_codes = ndpi_bitmap_alloc()) != NULL) {
+        p = strtok_r(buf, ",", &tmp);
+        while (p != NULL) {
+          int f_code = atoi(p);
 
-	  ndpi_bitmap_set(s7comm_allowed_function_codes, f_code);
+          ndpi_bitmap_set(s7comm_allowed_function_codes, f_code);
 
-	  p = strtok_r(NULL, ",", &tmp);
-	}
+          p = strtok_r(NULL, ",", &tmp);
+        }
       }
     }
 
@@ -3413,24 +3578,32 @@ void Prefs::setS7CommAllowedFunctionCodes(const char *function_codes) {
 /* *************************************** */
 
 void Prefs::reloadServersConfiguration() {
-  gateway->reloadServerConfiguration((char *) CONST_GATEWAY_CONFIGURATION_REDIS_KEY);
-  dns_servers->reloadServerConfiguration((char *) CONST_DNS_SERVER_CONFIGURATION_REDIS_KEY);
-  ntp_servers->reloadServerConfiguration((char *) CONST_NTP_SERVER_CONFIGURATION_REDIS_KEY);
-  dhcp_servers->reloadServerConfiguration((char *) CONST_DHCP_SERVER_CONFIGURATION_REDIS_KEY);
-  smtp_servers->reloadServerConfiguration((char *) CONST_SMTP_SERVER_CONFIGURATION_REDIS_KEY);
+  gateway->reloadServerConfiguration(
+      (char*)CONST_GATEWAY_CONFIGURATION_REDIS_KEY);
+  dns_servers->reloadServerConfiguration(
+      (char*)CONST_DNS_SERVER_CONFIGURATION_REDIS_KEY);
+  ntp_servers->reloadServerConfiguration(
+      (char*)CONST_NTP_SERVER_CONFIGURATION_REDIS_KEY);
+  dhcp_servers->reloadServerConfiguration(
+      (char*)CONST_DHCP_SERVER_CONFIGURATION_REDIS_KEY);
+  smtp_servers->reloadServerConfiguration(
+      (char*)CONST_SMTP_SERVER_CONFIGURATION_REDIS_KEY);
 }
 
 /* *************************************** */
 
 void Prefs::reloadASNConfiguration() {
-  customer_asn->reloadASNConfiguration((char *) CONST_CUSTOMER_ASN_CONFIGURATION_REDIS_KEY);
-  sub_customer_asn->reloadASNConfiguration((char *) CONST_SUB_CUSTOMER_ASN_CONFIGURATION_REDIS_KEY);
-  remote_asn->reloadASNConfiguration((char *) CONST_REMOTE_ASN_CONFIGURATION_REDIS_KEY);
-/*
-  customer_asn->debugPrint("customer_asn");
-  sub_customer_asn->debugPrint("sub_customer_asn");
-  remote_asn->debugPrint("remote_asn");
-*/
+  customer_asn->reloadASNConfiguration(
+      (char*)CONST_CUSTOMER_ASN_CONFIGURATION_REDIS_KEY);
+  sub_customer_asn->reloadASNConfiguration(
+      (char*)CONST_SUB_CUSTOMER_ASN_CONFIGURATION_REDIS_KEY);
+  remote_asn->reloadASNConfiguration(
+      (char*)CONST_REMOTE_ASN_CONFIGURATION_REDIS_KEY);
+  /*
+    customer_asn->debugPrint("customer_asn");
+    sub_customer_asn->debugPrint("sub_customer_asn");
+    remote_asn->debugPrint("remote_asn");
+  */
 }
 
 /* *************************************** */
@@ -3438,22 +3611,31 @@ void Prefs::reloadASNConfiguration() {
 #ifdef NTOPNG_PRO
 
 bool Prefs::reloadNetworksPolicyConfiguration() {
-  AddressTree *new_tree=NULL;
+  AddressTree* new_tree = NULL;
   new_tree = new (std::nothrow) AddressTree;
 
-  if(new_tree == NULL) {
+  if (new_tree == NULL) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to Load Configuration");
     return false;
   }
 
   /* NetworkPolicyCheck */
-  bool res = loadPolicyConfiguration(new_tree, (char *) CONST_LOCAL_DEVICES_NETWORKS_CONFIGURATION_REDIS_KEY, restricted_host_network_id)
-    && loadPolicyConfiguration(new_tree, (char *) CONST_CORPORATE_DEVICES_NETWORKS_CONFIGURATION_REDIS_KEY, core_host_network_id)
-    && loadPolicyConfiguration(new_tree, (char *) CONST_WHITELISTED_NETWORKS_CONFIGURATION_REDIS_KEY, whitelisted_host_network_id);
+  bool res =
+      loadPolicyConfiguration(
+          new_tree, (char*)CONST_LOCAL_DEVICES_NETWORKS_CONFIGURATION_REDIS_KEY,
+          restricted_host_network_id) &&
+      loadPolicyConfiguration(
+          new_tree,
+          (char*)CONST_CORPORATE_DEVICES_NETWORKS_CONFIGURATION_REDIS_KEY,
+          core_host_network_id) &&
+      loadPolicyConfiguration(
+          new_tree, (char*)CONST_WHITELISTED_NETWORKS_CONFIGURATION_REDIS_KEY,
+          whitelisted_host_network_id);
 
-  if(new_tree && res) {
-    if(networks_policy_configuration) {
-      if(networks_policy_configuration_shadow) delete networks_policy_configuration_shadow;
+  if (new_tree && res) {
+    if (networks_policy_configuration) {
+      if (networks_policy_configuration_shadow)
+        delete networks_policy_configuration_shadow;
       networks_policy_configuration_shadow = networks_policy_configuration;
     }
 
@@ -3465,14 +3647,14 @@ bool Prefs::reloadNetworksPolicyConfiguration() {
 
 /* *************************************** */
 
-bool Prefs::loadPolicyConfiguration(AddressTree *tree,
-				    char *key, NetworkConfigurationId id) {
-  char *rsp = NULL;
-  Redis *redis = ntop->getRedis();
+bool Prefs::loadPolicyConfiguration(AddressTree* tree, char* key,
+                                    NetworkConfigurationId id) {
+  char* rsp = NULL;
+  Redis* redis = ntop->getRedis();
   u_int actual_len = redis->len(key);
 
-  if((actual_len++ /* ++ for the \0 */ > 0)
-      && ((rsp = (char *)malloc(actual_len)) != NULL)) {
+  if ((actual_len++ /* ++ for the \0 */ > 0) &&
+      ((rsp = (char*)malloc(actual_len)) != NULL)) {
     redis->get(key, rsp, actual_len);
 
     /* Get a list of server separated by commas */
@@ -3480,26 +3662,28 @@ bool Prefs::loadPolicyConfiguration(AddressTree *tree,
     char charToRemove = ' ';
 
     /* Remove the spaces between the IPs */
-    ipStr.erase(std::remove(ipStr.begin(), ipStr.end(), charToRemove), ipStr.end());
+    ipStr.erase(std::remove(ipStr.begin(), ipStr.end(), charToRemove),
+                ipStr.end());
 
     /* Now iterate the string */
     std::stringstream ipList(ipStr);
     std::string ip;
 
-    while(std::getline(ipList, ip, ',')) {
-      if(!tree->addAddress(ip.c_str(), id)) {
-	ntop->getTrace()->traceEvent(TRACE_WARNING,
-				     "Unable to add tree node in Policy Configuration [Network: %s]",
-				     (char *) ip.c_str());
-	return false;
+    while (std::getline(ipList, ip, ',')) {
+      if (!tree->addAddress(ip.c_str(), id)) {
+        ntop->getTrace()->traceEvent(
+            TRACE_WARNING,
+            "Unable to add tree node in Policy Configuration [Network: %s]",
+            (char*)ip.c_str());
+        return false;
       }
 
       ntop->getTrace()->traceEvent(TRACE_DEBUG,
-				   "Added [Network: %s] to Redis %s list",
-				   (char *) ip.c_str(),key);
+                                   "Added [Network: %s] to Redis %s list",
+                                   (char*)ip.c_str(), key);
     }
 
-    if(rsp) free(rsp);
+    if (rsp) free(rsp);
   }
 
   return true;
@@ -3509,64 +3693,62 @@ bool Prefs::loadPolicyConfiguration(AddressTree *tree,
 /* *************************************** */
 
 #ifdef NTOPNG_PRO
-AddressTree *Prefs::getNetworksPolicyConfiguration() {
+AddressTree* Prefs::getNetworksPolicyConfiguration() {
   return networks_policy_configuration;
 }
 #endif
 
 /* *************************************** */
 
-bool Prefs::isGateway(IpAddress *ip, u_int16_t vlan_id) {
-  return(gateway->findAddress(ip, vlan_id));
+bool Prefs::isGateway(IpAddress* ip, u_int16_t vlan_id) {
+  return (gateway->findAddress(ip, vlan_id));
 }
 
 /* *************************************** */
 
-bool Prefs::isDNSServer(IpAddress *ip, u_int16_t vlan_id) {
-  return(dns_servers->findAddress(ip, vlan_id));
+bool Prefs::isDNSServer(IpAddress* ip, u_int16_t vlan_id) {
+  return (dns_servers->findAddress(ip, vlan_id));
 }
 
 /* *************************************** */
 
-bool Prefs::isNTPServer(IpAddress *ip, u_int16_t vlan_id) {
-  return(ntp_servers->findAddress(ip, vlan_id));
+bool Prefs::isNTPServer(IpAddress* ip, u_int16_t vlan_id) {
+  return (ntp_servers->findAddress(ip, vlan_id));
 }
 
 /* *************************************** */
 
-bool Prefs::isDHCPServer(IpAddress *ip, u_int16_t vlan_id) {
-  return(dhcp_servers->findAddress(ip, vlan_id));
+bool Prefs::isDHCPServer(IpAddress* ip, u_int16_t vlan_id) {
+  return (dhcp_servers->findAddress(ip, vlan_id));
 }
 
 /* *************************************** */
 
-bool Prefs::isSMTPServer(IpAddress *ip, u_int16_t vlan_id) {
-  return(smtp_servers->findAddress(ip, vlan_id));
+bool Prefs::isSMTPServer(IpAddress* ip, u_int16_t vlan_id) {
+  return (smtp_servers->findAddress(ip, vlan_id));
 }
 
 /* *************************************** */
 
 bool Prefs::isCustomerASN(u_int32_t asn) {
-  return(customer_asn->findASN(asn));
+  return (customer_asn->findASN(asn));
 }
 
 /* *************************************** */
 
 bool Prefs::isSubCustomerASN(u_int32_t asn) {
-  return(sub_customer_asn->findASN(asn));
+  return (sub_customer_asn->findASN(asn));
 }
 
 /* *************************************** */
 
-bool Prefs::isRemoteASN(u_int32_t asn) {
-  return(remote_asn->findASN(asn));
-}
+bool Prefs::isRemoteASN(u_int32_t asn) { return (remote_asn->findASN(asn)); }
 
 /* *************************************** */
 
-void Prefs::setCustomGeoIPDir(char *d) {
-  if(d != NULL) {
-    if(custom_geoip_dir) free(custom_geoip_dir);
+void Prefs::setCustomGeoIPDir(char* d) {
+  if (d != NULL) {
+    if (custom_geoip_dir) free(custom_geoip_dir);
 
     custom_geoip_dir = strdup(d);
   }
@@ -3574,12 +3756,11 @@ void Prefs::setCustomGeoIPDir(char *d) {
 
 /* *************************************** */
 
-void Prefs::set_influx_internal_db_name(char *internal_name) {
-    if (internal_name && internal_name[0] != '\0') {
-        if (influx_internal_db_name)
-            free(influx_internal_db_name);
-        influx_internal_db_name = strdup(internal_name);
-    }
+void Prefs::set_influx_internal_db_name(char* internal_name) {
+  if (internal_name && internal_name[0] != '\0') {
+    if (influx_internal_db_name) free(influx_internal_db_name);
+    influx_internal_db_name = strdup(internal_name);
+  }
 };
 
 /* *************************************** */

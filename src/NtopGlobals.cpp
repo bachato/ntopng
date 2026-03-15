@@ -24,19 +24,22 @@
 /* **************************************** */
 
 NtopGlobals::NtopGlobals() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   start_time = time(NULL);
   file_id = 0;
   trace = new (std::nothrow) Trace();
-  is_initialized = is_shutdown = shutdown_requested = false, do_decode_tunnels = true;
+  is_initialized = is_shutdown = shutdown_requested = false,
+  do_decode_tunnels = true;
 };
 
 /* **************************************** */
 
 NtopGlobals::~NtopGlobals() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+
   if (trace) {
     delete trace;
     trace = NULL;

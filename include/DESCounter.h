@@ -38,13 +38,16 @@ class DESCounter : public BehaviouralCounter {
       throw "Error while creating DES";
   }
 
-  DESCounter(struct ndpi_des_struct *_des) {
+  DESCounter(struct ndpi_des_struct* _des) {
     memcpy(&des, _des, sizeof(struct ndpi_des_struct));
   }
 
   bool addObservation(u_int64_t value) {
     double forecast, confidence_band;
-    bool rc = (ndpi_des_add_value(&des, value, &forecast, &confidence_band) == 1) ? true : false;
+    bool rc =
+        (ndpi_des_add_value(&des, value, &forecast, &confidence_band) == 1)
+            ? true
+            : false;
     double l_forecast = forecast - confidence_band;
     double h_forecast = forecast + confidence_band;
 
@@ -65,8 +68,8 @@ class DESCounter : public BehaviouralCounter {
   }
 
   inline void resetStats() { ndpi_des_reset(&des); }
-  inline DESCounter *clone() { return (new (std::nothrow) DESCounter(&des)); }
-  inline void set(DESCounter *c) {
+  inline DESCounter* clone() { return (new (std::nothrow) DESCounter(&des)); }
+  inline void set(DESCounter* c) {
     memcpy(&des, &c->des, sizeof(struct ndpi_des_struct));
   }
 };

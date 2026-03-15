@@ -24,8 +24,9 @@
 /* *************************************** */
 
 FlowTrafficStats::FlowTrafficStats() : PartializableFlowTrafficStats() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   ndpi_init_data_analysis(&cli2srv_bytes_stats, 0),
       ndpi_init_data_analysis(&srv2cli_bytes_stats, 0);
 }
@@ -34,8 +35,9 @@ FlowTrafficStats::FlowTrafficStats() : PartializableFlowTrafficStats() {
 
 FlowTrafficStats::FlowTrafficStats(const FlowTrafficStats& fts)
     : PartializableFlowTrafficStats(fts) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   ndpi_init_data_analysis(&cli2srv_bytes_stats, 0),
       ndpi_init_data_analysis(&srv2cli_bytes_stats, 0);
 }
@@ -43,8 +45,9 @@ FlowTrafficStats::FlowTrafficStats(const FlowTrafficStats& fts)
 /* *************************************** */
 
 FlowTrafficStats::~FlowTrafficStats() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+
   ndpi_free_data_analysis(&cli2srv_bytes_stats, 0),
       ndpi_free_data_analysis(&srv2cli_bytes_stats, 0);
 }
@@ -59,9 +62,10 @@ const ndpi_analyze_struct* FlowTrafficStats::get_analize_struct(
 /* *************************************** */
 
 void FlowTrafficStats::incStats(bool cli2srv_direction, u_int32_t num_pkts,
-                                u_int64_t pkts_bytes, u_int64_t payloads_bytes) {
-  PartializableFlowTrafficStats::incStats(cli2srv_direction, num_pkts, pkts_bytes,
-                                          payloads_bytes);
+                                u_int64_t pkts_bytes,
+                                u_int64_t payloads_bytes) {
+  PartializableFlowTrafficStats::incStats(cli2srv_direction, num_pkts,
+                                          pkts_bytes, payloads_bytes);
 
   if (cli2srv_direction)
     ndpi_data_add_value(&cli2srv_bytes_stats, pkts_bytes);
@@ -72,9 +76,10 @@ void FlowTrafficStats::incStats(bool cli2srv_direction, u_int32_t num_pkts,
 /* *************************************** */
 
 void FlowTrafficStats::setStats(bool cli2srv_direction, u_int32_t num_pkts,
-                                u_int64_t pkts_bytes, u_int64_t payloads_bytes) {
-  PartializableFlowTrafficStats::setStats(cli2srv_direction, num_pkts, pkts_bytes,
-                                          payloads_bytes);
+                                u_int64_t pkts_bytes,
+                                u_int64_t payloads_bytes) {
+  PartializableFlowTrafficStats::setStats(cli2srv_direction, num_pkts,
+                                          pkts_bytes, payloads_bytes);
 
   if (cli2srv_direction) {
     ndpi_init_data_analysis(&cli2srv_bytes_stats, 0);
@@ -88,10 +93,13 @@ void FlowTrafficStats::setStats(bool cli2srv_direction, u_int32_t num_pkts,
 /* *************************************** */
 
 void FlowTrafficStats::swap() {
-  Utils::swapLen(&cli2srv_bytes_stats, &srv2cli_bytes_stats, sizeof(ndpi_analyze_struct));
+  Utils::swapLen(&cli2srv_bytes_stats, &srv2cli_bytes_stats,
+                 sizeof(ndpi_analyze_struct));
   Utils::swap32(&cli2srv_packets, &srv2cli_packets);
   Utils::swap64(&cli2srv_bytes, &srv2cli_bytes);
   Utils::swap64(&cli2srv_goodput_bytes, &srv2cli_goodput_bytes);
-  Utils::swapLen(&cli2srv_tcp_stats, &srv2cli_tcp_stats, sizeof(FlowTCPPacketStats));
-  Utils::swapLen(cli_host_score, srv_host_score, sizeof(u_int16_t)*MAX_NUM_SCORE_CATEGORIES);  
+  Utils::swapLen(&cli2srv_tcp_stats, &srv2cli_tcp_stats,
+                 sizeof(FlowTCPPacketStats));
+  Utils::swapLen(cli_host_score, srv_host_score,
+                 sizeof(u_int16_t) * MAX_NUM_SCORE_CATEGORIES);
 }

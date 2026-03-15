@@ -24,7 +24,8 @@
 /* *************************************** */
 
 ICMPstats::ICMPstats() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   num_destination_unreachable = 0;
 }
 
@@ -33,8 +34,9 @@ ICMPstats::ICMPstats() {
 ICMPstats::~ICMPstats() {
   std::map<u_int16_t, ICMPstats_t>::const_iterator it;
 
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+
   for (it = stats.begin(); it != stats.end(); ++it) {
     if (it->second.last_host_sent_peer) free(it->second.last_host_sent_peer);
     if (it->second.last_host_rcvd_peer) free(it->second.last_host_rcvd_peer);
@@ -45,7 +47,7 @@ ICMPstats::~ICMPstats() {
 /* *************************************** */
 
 void ICMPstats::incStats(u_int32_t num_pkts, u_int8_t icmp_type,
-                         u_int8_t icmp_code, bool sent, Host *peer) {
+                         u_int8_t icmp_code, bool sent, Host* peer) {
   std::map<u_int16_t, ICMPstats_t>::const_iterator it;
   ICMPstats_t s;
   u_int16_t key = get_typecode(icmp_type, icmp_code);
@@ -85,8 +87,8 @@ void ICMPstats::incStats(u_int32_t num_pkts, u_int8_t icmp_type,
 
 /* *************************************** */
 
-void ICMPstats::addToTable(const char *label, lua_State *vm,
-                           const ICMPstats_t *curr, bool verbose) {
+void ICMPstats::addToTable(const char* label, lua_State* vm,
+                           const ICMPstats_t* curr, bool verbose) {
   lua_newtable(vm);
   lua_push_uint64_table_entry(vm, "sent", curr->pkt_sent);
   if (verbose)
@@ -103,13 +105,11 @@ void ICMPstats::addToTable(const char *label, lua_State *vm,
 
 /* ******************************************* */
 
-void ICMPstats::updateStats(const struct timeval *const tv) {
-  /* REMOVE */
-}
+void ICMPstats::updateStats(const struct timeval* const tv) { /* REMOVE */ }
 
 /* *************************************** */
 
-void ICMPstats::lua(bool isV4, lua_State *vm, bool verbose) {
+void ICMPstats::lua(bool isV4, lua_State* vm, bool verbose) {
   std::map<u_int16_t, ICMPstats_t>::const_iterator it;
 
   m.lock(__FILE__, __LINE__);
@@ -134,14 +134,14 @@ void ICMPstats::lua(bool isV4, lua_State *vm, bool verbose) {
 
 /* *************************************** */
 
-void ICMPstats::sum(ICMPstats *e) {
+void ICMPstats::sum(ICMPstats* e) {
   std::map<u_int16_t, ICMPstats_t>::const_iterator orig_it;
 
   for (orig_it = e->stats.begin(); orig_it != e->stats.end(); ++orig_it) {
     std::map<u_int16_t, ICMPstats_t>::const_iterator it;
     ICMPstats_t s;
     u_int16_t key = orig_it->first;
-    const ICMPstats_t *curr = &orig_it->second;
+    const ICMPstats_t* curr = &orig_it->second;
 
     if ((it = stats.find(key)) != stats.end())
       s = it->second;
@@ -163,7 +163,7 @@ void ICMPstats::sum(ICMPstats *e) {
 /* *************************************** */
 
 /* Get minimal stats required by the timeseries */
-void ICMPstats::getTsStats(ts_icmp_stats *s) {
+void ICMPstats::getTsStats(ts_icmp_stats* s) {
   u_int16_t echo_key = get_typecode(8, 0);
   u_int16_t echo_reply_key = get_typecode(0, 0);
   std::map<u_int16_t, ICMPstats_t>::const_iterator it;

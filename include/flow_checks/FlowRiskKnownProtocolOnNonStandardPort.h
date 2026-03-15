@@ -31,11 +31,11 @@ class FlowRiskKnownProtocolOnNonStandardPort : public FlowRisk {
   }
 
  public:
-  FlowRiskKnownProtocolOnNonStandardPort() : FlowRisk(){};
-  ~FlowRiskKnownProtocolOnNonStandardPort(){};
+  FlowRiskKnownProtocolOnNonStandardPort() : FlowRisk() {};
+  ~FlowRiskKnownProtocolOnNonStandardPort() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    FlowRiskKnownProtocolOnNonStandardPortAlert *alert =
+  FlowAlert* buildAlert(Flow* f) {
+    FlowRiskKnownProtocolOnNonStandardPortAlert* alert =
         new FlowRiskKnownProtocolOnNonStandardPortAlert(this, f);
 
     /* Client is an attacker, trying to use a server on a non-std port */

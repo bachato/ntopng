@@ -26,61 +26,62 @@
 
 /* **************************************************** */
 
-sFlowPktInterface::sFlowPktInterface(const char *_name) : NetworkInterface(_name) {
+sFlowPktInterface::sFlowPktInterface(const char* _name)
+    : NetworkInterface(_name) {
   struct sockaddr_in svrAddr;
   u_int16_t port = atoi(&_name[6]);
-  
+
   svrAddr.sin_family = AF_INET;
   svrAddr.sin_addr.s_addr = htonl(INADDR_ANY);
   svrAddr.sin_port = htons(port);
 
   sock_fd = Utils::openSocket(AF_INET, SOCK_DGRAM, 0, "sFlowPktInterface");
-  if(sock_fd < 0)
-    throw "Unable to create collection socket";
-  
-  if(::bind(sock_fd, (struct sockaddr *)&svrAddr, sizeof(svrAddr)) == -1) {
+  if (sock_fd < 0) throw "Unable to create collection socket";
+
+  if (::bind(sock_fd, (struct sockaddr*)&svrAddr, sizeof(svrAddr)) == -1) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Cannot bind at port %d [%s]",
-				 port, strerror(errno));
+                                 port, strerror(errno));
     Utils::closeSocket(sock_fd);
     throw "bind error";
   } else
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Waiting for flows at port %d", port);
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Waiting for flows at port %d",
+                                 port);
 }
 
 /* **************************************************** */
 
-sFlowPktInterface::~sFlowPktInterface() {
-  Utils::closeSocket(sock_fd);
-}
+sFlowPktInterface::~sFlowPktInterface() { Utils::closeSocket(sock_fd); }
 
 /* **************************************************** */
 
 void sFlowPktInterface::sflowPacketPollLoop() {
   while (isRunning()) {
     int rc;
-    
+
     rc = Utils::pollSocket(sock_fd, 1000);
 
     // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Poll returned %d", rc);
-    
-    if(rc > 0) {
+
+    if (rc > 0) {
       char buffer[2048];
       struct sockaddr_in fromHostV4;
       size_t len = sizeof(fromHostV4);
-      
-      rc = recvfrom(sock_fd, (char*) & buffer, sizeof(buffer),
-		    0, (struct sockaddr*)&fromHostV4, (socklen_t*)&len);
 
-      // ntop->getTrace()->traceEvent(TRACE_NORMAL, "recvfrom() returned %d", rc);
-      
-      if(rc > 0) {
-	// ntop->getTrace()->traceEvent(TRACE_NORMAL, "Dissecting %u bytes sFlow", rc);
-	
-	dissectSflow(this, (u_char*)buffer, (uint)rc, &fromHostV4);
+      rc = recvfrom(sock_fd, (char*)&buffer, sizeof(buffer), 0,
+                    (struct sockaddr*)&fromHostV4, (socklen_t*)&len);
+
+      // ntop->getTrace()->traceEvent(TRACE_NORMAL, "recvfrom() returned %d",
+      // rc);
+
+      if (rc > 0) {
+        // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Dissecting %u bytes
+        // sFlow", rc);
+
+        dissectSflow(this, (u_char*)buffer, (uint)rc, &fromHostV4);
       } else
-	ntop->getTrace()->traceEvent(TRACE_ERROR,
-				     "recvfrom failed[%d]: [%s/%d]\n",
-				     rc, strerror(errno), errno);
+        ntop->getTrace()->traceEvent(TRACE_ERROR,
+                                     "recvfrom failed[%d]: [%s/%d]\n", rc,
+                                     strerror(errno), errno);
     } else {
       purgeIdle(time(NULL));
     }
@@ -89,8 +90,8 @@ void sFlowPktInterface::sflowPacketPollLoop() {
 
 /* **************************************************** */
 
-static void *packetPollLoop(void *ptr) {
-  sFlowPktInterface *iface = (sFlowPktInterface *)ptr;
+static void* packetPollLoop(void* ptr) {
+  sFlowPktInterface* iface = (sFlowPktInterface*)ptr;
 
   iface->setPollerThreadName();
 
@@ -113,16 +114,14 @@ static void *packetPollLoop(void *ptr) {
 /* **************************************************** */
 
 void sFlowPktInterface::startPacketPolling() {
-  pthread_create(&pollLoop, NULL, packetPollLoop, (void *)this);
+  pthread_create(&pollLoop, NULL, packetPollLoop, (void*)this);
   pollLoopCreated = true;
   NetworkInterface::startPacketPolling();
 }
 
 /* **************************************************** */
 
-void sFlowPktInterface::shutdown() {
-  NetworkInterface::shutdown();
-}
+void sFlowPktInterface::shutdown() { NetworkInterface::shutdown(); }
 
 /* **************************************************** */
 

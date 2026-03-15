@@ -25,10 +25,11 @@
 
 /* *************************************** */
 
-BroadcastDomains::BroadcastDomains(NetworkInterface *_iface) {
+BroadcastDomains::BroadcastDomains(NetworkInterface* _iface) {
   char buf[256], key[64];
 
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   iface = _iface;
   inline_broadcast_domains = new (std::nothrow) AddressTree(false);
   broadcast_domains = broadcast_domains_shadow = NULL;
@@ -36,10 +37,10 @@ BroadcastDomains::BroadcastDomains(NetworkInterface *_iface) {
   next_domain_id = 0;
 
   snprintf(key, sizeof(key), IFACE_BROADCAST_DOMAINS_KEY, iface->get_id());
-  if(ntop->getRedis() && (ntop->getRedis()->get(key, buf, sizeof(buf)) == 0)) {
+  if (ntop->getRedis() && (ntop->getRedis()->get(key, buf, sizeof(buf)) == 0)) {
     broadcast_domains = new (std::nothrow) AddressTree();
 
-    if(broadcast_domains != NULL) {
+    if (broadcast_domains != NULL) {
       ntop->getTrace()->traceEvent(TRACE_INFO, "Broadcast domains: %s", buf);
       broadcast_domains->deserialize(buf);
     }
@@ -49,9 +50,10 @@ BroadcastDomains::BroadcastDomains(NetworkInterface *_iface) {
 /* *************************************** */
 
 BroadcastDomains::~BroadcastDomains() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
 
-  if(broadcast_domains) {
+  if (broadcast_domains) {
     char buf[256], *j, key[64];
 
     j = broadcast_domains->serialize(buf, sizeof(buf));
@@ -72,7 +74,7 @@ BroadcastDomains::~BroadcastDomains() {
     broadcast_domains = NULL;
   }
 
-  if(broadcast_domains_shadow) {
+  if (broadcast_domains_shadow) {
     delete (broadcast_domains_shadow);
     broadcast_domains_shadow = NULL;
   }
@@ -80,19 +82,21 @@ BroadcastDomains::~BroadcastDomains() {
 
 /* *************************************** */
 
-bool BroadcastDomains::addAddress(IpAddress *ipa, int network_bits) {
-  ndpi_patricia_node_t *addr_node;
+bool BroadcastDomains::addAddress(IpAddress* ipa, int network_bits) {
+  ndpi_patricia_node_t* addr_node;
   u_int16_t domain_id;
 
   if (!inline_broadcast_domains) return (false);
 
   if (next_domain_id == ((u_int16_t)-1)) {
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "Too many broadcast domains defined on interface %s",
-				 iface->get_name());
+    ntop->getTrace()->traceEvent(
+        TRACE_WARNING, "Too many broadcast domains defined on interface %s",
+        iface->get_name());
     return (false);
   }
 
-  if ((addr_node = inline_broadcast_domains->match(ipa, network_bits)) != NULL) {
+  if ((addr_node = inline_broadcast_domains->match(ipa, network_bits)) !=
+      NULL) {
     domain_id = ndpi_patricia_get_node_u64(addr_node);
 
     /* Already exists, only increment the hits */
@@ -120,7 +124,8 @@ bool BroadcastDomains::addAddress(IpAddress *ipa, int network_bits) {
   }
 #endif
 
-  addr_node = inline_broadcast_domains->addAddress(ipa, network_bits, true /* Compact after add */);
+  addr_node = inline_broadcast_domains->addAddress(
+      ipa, network_bits, true /* Compact after add */);
 
   if (addr_node) {
     struct bcast_domain_info info;
@@ -165,10 +170,11 @@ void BroadcastDomains::reloadBroadcastDomains(bool force_immediate_reload) {
 
       broadcast_domains_shadow = broadcast_domains;
 
-      if(inline_broadcast_domains)
-	broadcast_domains = new (std::nothrow) AddressTree(*inline_broadcast_domains);
+      if (inline_broadcast_domains)
+        broadcast_domains =
+            new (std::nothrow) AddressTree(*inline_broadcast_domains);
       else
-	broadcast_domains = new (std::nothrow) AddressTree(false);
+        broadcast_domains = new (std::nothrow) AddressTree(false);
 
       last_update = now;
       next_update = 0;
@@ -183,19 +189,19 @@ void BroadcastDomains::reloadBroadcastDomains(bool force_immediate_reload) {
 
 /* *************************************** */
 
-bool BroadcastDomains::isLocalBroadcastDomain(IpAddress *ipa,
-                                              int network_bits,
+bool BroadcastDomains::isLocalBroadcastDomain(IpAddress* ipa, int network_bits,
                                               bool isInlineCall) {
-  AddressTree *cur_tree = isInlineCall ? inline_broadcast_domains : broadcast_domains;
+  AddressTree* cur_tree =
+      isInlineCall ? inline_broadcast_domains : broadcast_domains;
 
   return cur_tree && cur_tree->match(ipa, network_bits);
 }
 
 /* *************************************** */
 
-bool BroadcastDomains::isLocalBroadcastDomainHost(Host *h,
-                                                  bool isInlineCall) {
-  AddressTree *cur_tree = isInlineCall ? inline_broadcast_domains : broadcast_domains;
+bool BroadcastDomains::isLocalBroadcastDomainHost(Host* h, bool isInlineCall) {
+  AddressTree* cur_tree =
+      isInlineCall ? inline_broadcast_domains : broadcast_domains;
 
   if (cur_tree && h && h->isIPv4() /* IPv6 not handled */)
     return h->match(cur_tree);
@@ -206,22 +212,22 @@ bool BroadcastDomains::isLocalBroadcastDomainHost(Host *h,
 /* *************************************** */
 
 struct bcast_domain_walk_data {
-  BroadcastDomains *bcast_domains;
+  BroadcastDomains* bcast_domains;
   std::map<u_int16_t, bcast_domain_info> domains_info;
-  lua_State *vm;
+  lua_State* vm;
 };
 
-static void bcast_domain_lua(ndpi_patricia_node_t *node, void *data,
-                             void *user_data) {
+static void bcast_domain_lua(ndpi_patricia_node_t* node, void* data,
+                             void* user_data) {
   char address[128];
-  struct bcast_domain_walk_data *bdata =
-      (struct bcast_domain_walk_data *)user_data;
+  struct bcast_domain_walk_data* bdata =
+      (struct bcast_domain_walk_data*)user_data;
   std::map<u_int16_t, bcast_domain_info>::iterator it;
 
   if ((it = bdata->domains_info.find(ndpi_patricia_get_node_u64(node))) !=
       bdata->domains_info.end()) {
-    lua_State *vm = bdata->vm;
-    ndpi_prefix_t *prefix = ndpi_patricia_get_node_prefix(node);
+    lua_State* vm = bdata->vm;
+    ndpi_prefix_t* prefix = ndpi_patricia_get_node_prefix(node);
 
     if ((!prefix) ||
         !Utils::ptree_prefix_print(prefix, address, sizeof(address)))
@@ -241,8 +247,8 @@ static void bcast_domain_lua(ndpi_patricia_node_t *node, void *data,
 
 /* *************************************** */
 
-void BroadcastDomains::lua(lua_State *vm) {
-  AddressTree *cur_tree = broadcast_domains;
+void BroadcastDomains::lua(lua_State* vm) {
+  AddressTree* cur_tree = broadcast_domains;
   struct bcast_domain_walk_data data;
 
   /* Make a copy to avoid iterating it during inline insertion */
@@ -262,7 +268,7 @@ void BroadcastDomains::lua(lua_State *vm) {
 /* *************************************** */
 
 void BroadcastDomains::reset() {
-  if(inline_broadcast_domains) {
+  if (inline_broadcast_domains) {
     delete inline_broadcast_domains;
     inline_broadcast_domains = NULL;
   }

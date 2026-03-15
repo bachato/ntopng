@@ -49,21 +49,21 @@ class DSCPStats {
   DSCPCounter counters[DS_PRECEDENCE_GROUPS];
 
   u_int8_t ds2Precedence(u_int8_t ds_id);
-  char *precedence2Name(u_int8_t p, char *buf, size_t buf_size);
+  char* precedence2Name(u_int8_t p, char* buf, size_t buf_size);
 
  public:
   DSCPStats();
-  DSCPStats(const DSCPStats &stats);
+  DSCPStats(const DSCPStats& stats);
   ~DSCPStats();
 
-  void updateStats(const struct timeval *tv);
+  void updateStats(const struct timeval* tv);
 
   void incStats(u_int16_t ds_id, u_int64_t sent_packets, u_int64_t sent_bytes,
                 u_int64_t rcvd_packets, u_int64_t rcvd_bytes);
 
-  void print(NetworkInterface *iface);
-  void lua(NetworkInterface *iface, lua_State *vm, bool tsLua = false);
-  void sum(DSCPStats *s) const;
+  void print(NetworkInterface* iface);
+  void lua(NetworkInterface* iface, lua_State* vm, bool tsLua = false);
+  void sum(DSCPStats* s) const;
   void resetStats();
 };
 

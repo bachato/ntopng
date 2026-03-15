@@ -24,8 +24,9 @@
 /* **************************************** */
 
 RoundTripStats::RoundTripStats() {
-  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s",
+  // __FILE__);
+
   stats_it = ROUND_TRIP_LENGTH - 1; /* Last Item */
   memset(stats, 0, sizeof(stats));
 }
@@ -45,7 +46,7 @@ void RoundTripStats::addPoint(u_int32_t data) {
 
 /* **************************************** */
 
-void RoundTripStats::luaRTStats(lua_State *vm, const char *stats_name) {
+void RoundTripStats::luaRTStats(lua_State* vm, const char* stats_name) {
   u_int8_t stats_it_shadow =
       stats_it;  // Two threads could access this variable at the same time
 
@@ -64,8 +65,8 @@ void RoundTripStats::luaRTStats(lua_State *vm, const char *stats_name) {
 
 /* **************************************** */
 
-void RoundTripStats::sum(RoundTripStats *_stats) {
-  u_int32_t *_viewed_stats = _stats->getStats();
+void RoundTripStats::sum(RoundTripStats* _stats) {
+  u_int32_t* _viewed_stats = _stats->getStats();
 
   for (int i = 0; i < ROUND_TRIP_LENGTH; i++) _viewed_stats[i] += stats[i];
 }

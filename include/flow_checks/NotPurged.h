@@ -26,7 +26,7 @@
 
 class NotPurged : public FlowCheck {
  private:
-  void checkNotPurged(Flow *f);
+  void checkNotPurged(Flow* f);
 
  public:
   NotPurged()
@@ -34,12 +34,12 @@ class NotPurged : public FlowCheck {
                   false /* Don't exclude for nEdge */,
                   false /* NOT only for nEdge */,
                   false /* has_protocol_detected */,
-                  true /* has_periodic_update */, true /* has_flow_end */){};
-  ~NotPurged(){};
+                  true /* has_periodic_update */, true /* has_flow_end */) {};
+  ~NotPurged() {};
 
-  void periodicUpdate(Flow *f);
-  void flowEnd(Flow *f);
-  FlowAlert *buildAlert(Flow *f);
+  void periodicUpdate(Flow* f);
+  void flowEnd(Flow* f);
+  FlowAlert* buildAlert(Flow* f);
 
   std::string getName() const { return (std::string("not_purged")); }
 };

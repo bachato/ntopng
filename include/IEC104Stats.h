@@ -48,7 +48,7 @@ class IEC104Stats {
   std::unordered_map<u_int16_t, u_int32_t> typeid_uses;
   u_int16_t last_type_i;
   struct timeval last_i_apdu;
-  struct ndpi_analyze_struct *i_s_apdu;
+  struct ndpi_analyze_struct* i_s_apdu;
   u_int16_t tx_seq_num, rx_seq_num;
   bool invalid_command_transition_detected;
 
@@ -59,10 +59,10 @@ class IEC104Stats {
   IEC104Stats();
   ~IEC104Stats();
 
-  void processPacket(Flow *f, bool tx_direction, const u_char *payload,
-                     u_int16_t payload_len, const struct pcap_pkthdr *h);
+  void processPacket(Flow* f, bool tx_direction, const u_char* payload,
+                     u_int16_t payload_len, const struct pcap_pkthdr* h);
 
-  void lua(lua_State *vm);
+  void lua(lua_State* vm);
   std::string getFlowInfo();
 };
 

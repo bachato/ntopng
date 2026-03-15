@@ -30,10 +30,10 @@ class SyslogLuaEngine : public LuaEngine {
   bool pcall(int num_args, int num_results);
 
  public:
-  SyslogLuaEngine(NetworkInterface *iface);
+  SyslogLuaEngine(NetworkInterface* iface);
   virtual ~SyslogLuaEngine();
 
-  void handleEvent(const char *producer, const char *message, const char *host,
+  void handleEvent(const char* producer, const char* message, const char* host,
                    int priority);
 };
 

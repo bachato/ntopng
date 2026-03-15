@@ -40,8 +40,10 @@ class FlowRiskKnownProtocolOnNonStandardPortAlert : public FlowRiskAlert {
   }
 
   FlowRiskKnownProtocolOnNonStandardPortAlert(FlowCheck* c, Flow* f)
-    : FlowRiskAlert(c, f){ setAlertScore(getDefaultScore());};
-  ~FlowRiskKnownProtocolOnNonStandardPortAlert(){};
+      : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskKnownProtocolOnNonStandardPortAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
   ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }

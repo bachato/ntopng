@@ -25,11 +25,11 @@
 
 /* ***************************************************** */
 
-bool UnexpectedDNSServer::isAllowedHost(Flow *f) {
+bool UnexpectedDNSServer::isAllowedHost(Flow* f) {
   if (ntop->getPrefs()->getConfiguredDNSServers()->isEmptyConfiguration())
     return (true);
   else {
-    IpAddress *ip = (IpAddress *)getServerIP(f);
+    IpAddress* ip = (IpAddress*)getServerIP(f);
 
     if (ip != NULL) {
 #ifdef DEBUG_DNS_SERVER
@@ -39,7 +39,8 @@ bool UnexpectedDNSServer::isAllowedHost(Flow *f) {
           TRACE_NORMAL,
           "Checking Unexpected DNS Server [IP %s] [Is DNS: %s] [Is Configured "
           "DNS: %s]",
-          ip->print(buf, sizeof(buf)), ip->providesService(HOST_SERVICE_DNS) ? "Yes" : "No",
+          ip->print(buf, sizeof(buf)),
+          ip->providesService(HOST_SERVICE_DNS) ? "Yes" : "No",
           ntop->getPrefs()->isDNSServer(ip, f->get_vlan_id()) ? "Yes" : "No");
 #endif
 

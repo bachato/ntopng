@@ -29,8 +29,9 @@ ObservationPoint::ObservationPoint(NetworkInterface* _iface,
       GenericTrafficElement(),
       Score(_iface),
       dirstats(_iface, 0) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   obs_point = _obs_point;
   num_flows = 0;
   delete_requested = false;
@@ -78,7 +79,7 @@ void ObservationPoint::lua(lua_State* vm, DetailsLevel details_level,
                            bool asListElement) {
   u_int32_t exporter_ip = 0;
   u_int64_t value;
-    
+
   /* Security check done to prevent race conditions */
   if (remove_entry) {
     lua_pushnil(vm);
@@ -113,12 +114,13 @@ void ObservationPoint::lua(lua_State* vm, DetailsLevel details_level,
   lua_newtable(vm);
 
   ndpi_bitmap_iterator* iterator = ndpi_bitmap_iterator_alloc(exporter_list);
-  while (ndpi_bitmap_iterator_next(iterator, &value)) {    
+  while (ndpi_bitmap_iterator_next(iterator, &value)) {
     char buf[32];
 
     exporter_ip = (u_int32_t)value;
-    
-    lua_push_uint32_table_entry(vm, Utils::intoaV4(exporter_ip, buf, sizeof(buf)), 1);
+
+    lua_push_uint32_table_entry(
+        vm, Utils::intoaV4(exporter_ip, buf, sizeof(buf)), 1);
   }
   lua_pushstring(vm, "exporter_list");
   lua_insert(vm, -2);

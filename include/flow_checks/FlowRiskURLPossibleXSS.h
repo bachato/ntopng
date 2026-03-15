@@ -31,11 +31,11 @@ class FlowRiskURLPossibleXSS : public FlowRisk {
   }
 
  public:
-  FlowRiskURLPossibleXSS() : FlowRisk(){};
-  ~FlowRiskURLPossibleXSS(){};
+  FlowRiskURLPossibleXSS() : FlowRisk() {};
+  ~FlowRiskURLPossibleXSS() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    FlowRiskURLPossibleXSSAlert *alert =
+  FlowAlert* buildAlert(Flow* f) {
+    FlowRiskURLPossibleXSSAlert* alert =
         new FlowRiskURLPossibleXSSAlert(this, f);
 
     alert->setCliAttacker(), alert->setSrvVictim();

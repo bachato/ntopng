@@ -30,7 +30,7 @@ SNMPSession::SNMPSession() { session_ptr = NULL; }
 /* ******************************* */
 
 SNMPSession::~SNMPSession() {
-  if(session_ptr) snmp_sess_close(session_ptr);
+  if (session_ptr) snmp_sess_close(session_ptr);
 }
 
 /* ******************************* */

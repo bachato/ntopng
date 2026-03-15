@@ -23,10 +23,11 @@
 
 /* ****************************************** */
 
-OtherAlertableEntity::OtherAlertableEntity(NetworkInterface *iface,
+OtherAlertableEntity::OtherAlertableEntity(NetworkInterface* iface,
                                            AlertEntity entity)
-  : AlertableEntity(iface, entity) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+    : AlertableEntity(iface, entity) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 }
 
 /* ****************************************** */
@@ -35,7 +36,7 @@ OtherAlertableEntity::~OtherAlertableEntity() {}
 
 /* ****************************************** */
 
-void OtherAlertableEntity::luaAlert(lua_State *vm, const Alert *alert,
+void OtherAlertableEntity::luaAlert(lua_State* vm, const Alert* alert,
                                     ScriptPeriodicity p) const {
   lua_push_int64_table_entry(vm, "rowid", alert->rowid);
   lua_push_int32_table_entry(vm, "alert_id", alert->alert_id);
@@ -48,7 +49,7 @@ void OtherAlertableEntity::luaAlert(lua_State *vm, const Alert *alert,
                              Utils::mapScoreToSeverity(alert->score));
   if (!(alert->name.empty()))
     lua_push_str_table_entry(vm, "name", alert->name.c_str());
-  else // leave it for retrocompatibility
+  else  // leave it for retrocompatibility
     lua_push_str_table_entry(vm, "name", getEntityValue().c_str());
 
   lua_push_uint64_table_entry(vm, "tstamp", alert->tstamp);
@@ -65,20 +66,21 @@ void OtherAlertableEntity::luaAlert(lua_State *vm, const Alert *alert,
 /* Return true if the element was inserted, false if already present.
    NOTE: given a ScriptPeriodicity p, only one thread at time can perform
    a triggerAlert. */
-bool OtherAlertableEntity::triggerAlert(lua_State *vm, std::string key,
+bool OtherAlertableEntity::triggerAlert(lua_State* vm, std::string key,
                                         ScriptPeriodicity p, time_t now,
                                         u_int32_t score, AlertType alert_id,
-                                        const char *subtype, const char *json,
-                                        const char *ip, const char *name,
+                                        const char* subtype, const char* json,
+                                        const char* ip, const char* name,
                                         u_int16_t port) {
   bool rv = false;
   std::map<u_int32_t /* std::string */, Alert>::iterator it;
 
   if (getEntityValue().empty()) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "setEntityValue() not called or empty entity_val");
+    ntop->getTrace()->traceEvent(
+        TRACE_ERROR, "setEntityValue() not called or empty entity_val");
   } else {
     u_int32_t num_key = ndpi_hash_string(key.c_str());
-    
+
     engaged_alerts_lock.wrlock(__FILE__, __LINE__);
 
     it = engaged_alerts[(u_int)p].find(num_key);
@@ -117,14 +119,14 @@ bool OtherAlertableEntity::triggerAlert(lua_State *vm, std::string key,
 
 /* ****************************************** */
 
-bool OtherAlertableEntity::releaseAlert(lua_State *vm, std::string key,
+bool OtherAlertableEntity::releaseAlert(lua_State* vm, std::string key,
                                         ScriptPeriodicity p, time_t now) {
   std::map<u_int32_t /* std::string */, Alert>::iterator it;
   bool rv = false;
 
   if (!engaged_alerts[(u_int)p].empty()) {
     u_int32_t num_key = ndpi_hash_string(key.c_str());
-    
+
     engaged_alerts_lock.wrlock(__FILE__, __LINE__);
 
     it = engaged_alerts[(u_int)p].find(num_key);
@@ -156,7 +158,7 @@ bool OtherAlertableEntity::releaseAlert(lua_State *vm, std::string key,
 
 /* ****************************************** */
 
-void OtherAlertableEntity::countAlerts(grouped_alerts_counters *counters) {
+void OtherAlertableEntity::countAlerts(grouped_alerts_counters* counters) {
   std::map<u_int32_t /* std::string */, Alert>::const_iterator it;
 
   for (int i = 0; i < MAX_NUM_PERIODIC_SCRIPTS; i++) {
@@ -165,10 +167,12 @@ void OtherAlertableEntity::countAlerts(grouped_alerts_counters *counters) {
     if (!engaged_alerts[p].empty()) {
       engaged_alerts_lock.rdlock(__FILE__, __LINE__);
 
-      for (it = engaged_alerts[p].begin(); it != engaged_alerts[p].end(); ++it) {
-        const Alert *alert = &it->second;
+      for (it = engaged_alerts[p].begin(); it != engaged_alerts[p].end();
+           ++it) {
+        const Alert* alert = &it->second;
 
-        counters->severities[std::make_pair(getEntityType(), Utils::mapScoreToSeverity(alert->score))]++;
+        counters->severities[std::make_pair(
+            getEntityType(), Utils::mapScoreToSeverity(alert->score))]++;
         counters->types[std::make_pair(getEntityType(), alert->alert_id)]++;
       }
 
@@ -180,15 +184,15 @@ void OtherAlertableEntity::countAlerts(grouped_alerts_counters *counters) {
 /* ****************************************** */
 
 void OtherAlertableEntity::getAlertsByPeriodicity(
-    lua_State *vm, ScriptPeriodicity p, AlertType type_filter,
-    AlertLevel severity_filter, AlertRole role_filter, u_int *idx) {
+    lua_State* vm, ScriptPeriodicity p, AlertType type_filter,
+    AlertLevel severity_filter, AlertRole role_filter, u_int* idx) {
   std::map<u_int32_t /* std::string */, Alert>::const_iterator it;
 
   if (!engaged_alerts[p].empty()) {
     engaged_alerts_lock.rdlock(__FILE__, __LINE__);
 
     for (it = engaged_alerts[p].begin(); it != engaged_alerts[p].end(); ++it) {
-      const Alert *alert = &it->second;
+      const Alert* alert = &it->second;
 
       if (((type_filter == alert_none) || (type_filter == alert->alert_id)) &&
           ((severity_filter == alert_level_none) ||
@@ -208,20 +212,20 @@ void OtherAlertableEntity::getAlertsByPeriodicity(
 
 /* ****************************************** */
 
-void OtherAlertableEntity::getAlerts(lua_State *vm,
+void OtherAlertableEntity::getAlerts(lua_State* vm,
                                      ScriptPeriodicity periodicity_filter,
                                      AlertType type_filter,
                                      AlertLevel severity_filter,
-                                     AlertRole role_filter, u_int *idx) {
+                                     AlertRole role_filter, u_int* idx) {
   if (periodicity_filter != no_periodicity) {
     /* Get alerts about a specific periodicity */
     getAlertsByPeriodicity(vm, periodicity_filter, type_filter, severity_filter,
-                         role_filter, idx);
+                           role_filter, idx);
   } else {
     int p;
 
     for (p = 0; p < MAX_NUM_PERIODIC_SCRIPTS; p++)
       getAlertsByPeriodicity(vm, (ScriptPeriodicity)p, type_filter,
-                           severity_filter, role_filter, idx);
+                             severity_filter, role_filter, idx);
   }
 }

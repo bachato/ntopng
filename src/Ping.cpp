@@ -40,8 +40,8 @@ struct ping_packet {
 
 /* ****************************************** */
 
-static void *resultPollerFctn(void *ptr) {
-  ((Ping *)ptr)->pollResults();
+static void* resultPollerFctn(void* ptr) {
+  ((Ping*)ptr)->pollResults();
   return (NULL);
 }
 
@@ -56,9 +56,10 @@ void Ping::setOpts(int fd) {
 
 /* ****************************************** */
 
-Ping::Ping(char *_ifname) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+Ping::Ping(char* _ifname) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   ping_id = rand(), cnt = 0;
   running = false;
 
@@ -83,8 +84,10 @@ Ping::Ping(char *_ifname) {
 #endif
 
   if ((sd == -1) && (errno != 0)) {
-    if (errno != EPROTONOSUPPORT /* Avoid flooding logs when IPv4 is not supported */) {
-      ntop->getTrace()->traceEvent(TRACE_ERROR, "Ping IPv4 socket creation error: %s", strerror(errno));
+    if (errno !=
+        EPROTONOSUPPORT /* Avoid flooding logs when IPv4 is not supported */) {
+      ntop->getTrace()->traceEvent(
+          TRACE_ERROR, "Ping IPv4 socket creation error: %s", strerror(errno));
       throw "Unable to create ping socket";
     }
   } else {
@@ -97,10 +100,13 @@ Ping::Ping(char *_ifname) {
       sin.sin_addr.s_addr = Utils::readIPv4(_ifname);
 
       if (sin.sin_addr.s_addr != 0) {
-        if (::bind(sd, (struct sockaddr *)&sin, sizeof(struct sockaddr_in)) == -1) {
-          ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to bind socket to IPv4 Address, error: %s", strerror(errno));
-	  throw "Unable to create ping on the specified interface";
-	}
+        if (::bind(sd, (struct sockaddr*)&sin, sizeof(struct sockaddr_in)) ==
+            -1) {
+          ntop->getTrace()->traceEvent(
+              TRACE_ERROR, "Unable to bind socket to IPv4 Address, error: %s",
+              strerror(errno));
+          throw "Unable to create ping on the specified interface";
+        }
       }
     }
   }
@@ -120,8 +126,10 @@ Ping::Ping(char *_ifname) {
 
   if ((sd6 < 0) && (errno != 0)) {
     if (errno != EPROTONOSUPPORT &&
-        errno != EAFNOSUPPORT) /* Avoid flooding logs when IPv6 is not supported */{
-      ntop->getTrace()->traceEvent(TRACE_ERROR, "Ping IPv6 socket creation error: %s", strerror(errno));
+        errno !=
+            EAFNOSUPPORT) /* Avoid flooding logs when IPv6 is not supported */ {
+      ntop->getTrace()->traceEvent(
+          TRACE_ERROR, "Ping IPv6 socket creation error: %s", strerror(errno));
     }
   } else {
     setOpts(sd6);
@@ -133,24 +141,26 @@ Ping::Ping(char *_ifname) {
       sin.sin6_family = AF_INET6;
 
       if (Utils::readIPv6(_ifname, &sin.sin6_addr)) {
-        if (::bind(sd6, (struct sockaddr *)&sin, sizeof(struct sockaddr_in6)) == -1) {
-          ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to bind socket to IPv6 Address, error %s",
+        if (::bind(sd6, (struct sockaddr*)&sin, sizeof(struct sockaddr_in6)) ==
+            -1) {
+          ntop->getTrace()->traceEvent(
+              TRACE_ERROR, "Unable to bind socket to IPv6 Address, error %s",
               strerror(errno));
-	  throw "Unable to create ping on the specified IPv6 address";
-	}
+          throw "Unable to create ping on the specified IPv6 address";
+        }
       }
     }
   }
 
-  if ((sd < 0) && (sd6 < 0))
-    throw "Socket creation error";
+  if ((sd < 0) && (sd6 < 0)) throw "Socket creation error";
 }
 
 /* ****************************************** */
 
 Ping::~Ping() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+
   if (running) {
     running = false;
     pthread_join(resultPoller, NULL);
@@ -166,20 +176,20 @@ Ping::~Ping() {
 
 void Ping::start() {
   if (!running) {
-    pthread_create(&resultPoller, NULL, resultPollerFctn, (void *)this);
+    pthread_create(&resultPoller, NULL, resultPollerFctn, (void*)this);
     running = true;
   }
 }
 
 /* ****************************************** */
 
-u_int16_t Ping::checksum(void *b, int len) {
-  u_int16_t *buf = (u_int16_t *)b;
+u_int16_t Ping::checksum(void* b, int len) {
+  u_int16_t* buf = (u_int16_t*)b;
   u_int32_t sum = 0;
   u_int16_t result;
 
   for (sum = 0; len > 1; len -= 2) sum += *buf++;
-  if (len == 1) sum += *(unsigned char *)buf;
+  if (len == 1) sum += *(unsigned char*)buf;
   sum = (sum >> 16) + (sum & 0xFFFF);
   sum += (sum >> 16);
   result = ~sum;
@@ -189,13 +199,13 @@ u_int16_t Ping::checksum(void *b, int len) {
 
 /* ****************************************** */
 
-int Ping::ping(char *_addr, bool use_v6) {
-  struct hostent *hname = gethostbyname2(_addr, use_v6 ? AF_INET6 : AF_INET);
+int Ping::ping(char* _addr, bool use_v6) {
+  struct hostent* hname = gethostbyname2(_addr, use_v6 ? AF_INET6 : AF_INET);
   struct sockaddr_in addr;
   struct sockaddr_in6 addr6;
   struct ping_packet pckt;
   u_int i;
-  struct timeval *tv;
+  struct timeval* tv;
   ssize_t res;
 
   if (hname == NULL) return (-1);
@@ -232,16 +242,16 @@ int Ping::ping(char *_addr, bool use_v6) {
 
   pckt.msg[i] = 0;
   pckt.hdr.un.echo.sequence = htons(cnt++);
-  tv = (struct timeval *)pckt.msg;
+  tv = (struct timeval*)pckt.msg;
   gettimeofday(tv, NULL);
 
   pckt.hdr.checksum = checksum(&pckt, sizeof(ping_packet));
 
   if (use_v6)
-    res = sendto(sd6, &pckt, sizeof(pckt), 0, (struct sockaddr *)&addr6,
+    res = sendto(sd6, &pckt, sizeof(pckt), 0, (struct sockaddr*)&addr6,
                  sizeof(addr6));
   else
-    res = sendto(sd, &pckt, sizeof(pckt), 0, (struct sockaddr *)&addr,
+    res = sendto(sd, &pckt, sizeof(pckt), 0, (struct sockaddr*)&addr,
                  sizeof(addr));
 
   if (res == -1) {
@@ -295,9 +305,8 @@ void Ping::pollResults() {
 #endif
 
   while (running && (!ntop->getGlobals()->isShutdown())) {
-
-    num_socks = 0; 
-    if (sd >= 0)  sock_mask[num_socks++] = sd;
+    num_socks = 0;
+    if (sd >= 0) sock_mask[num_socks++] = sd;
     if (sd6 >= 0) sock_mask[num_socks++] = sd6;
 
     if (num_socks && Utils::pollSockets(sock_mask, num_socks, 1000) > 0) {
@@ -307,15 +316,17 @@ void Ping::pollResults() {
         struct sockaddr_in addr;
         socklen_t len = sizeof(addr);
 
-        bytes = recvfrom(sd, buf, sizeof(buf), 0, (struct sockaddr *)&addr, &len);
+        bytes =
+            recvfrom(sd, buf, sizeof(buf), 0, (struct sockaddr*)&addr, &len);
         handleICMPResponse(buf, bytes, &addr.sin_addr, NULL);
       }
 
-      if (sd6 >= 0 && sock_mask[num_socks-1] == sd6) {
+      if (sd6 >= 0 && sock_mask[num_socks - 1] == sd6) {
         struct sockaddr_in6 addr;
         socklen_t len = sizeof(addr);
 
-        bytes = recvfrom(sd6, buf, sizeof(buf), 0, (struct sockaddr *)&addr, &len);
+        bytes =
+            recvfrom(sd6, buf, sizeof(buf), 0, (struct sockaddr*)&addr, &len);
         handleICMPResponse(buf, bytes, NULL, &addr.sin6_addr);
       }
     }
@@ -328,10 +339,10 @@ void Ping::pollResults() {
 
 /* ****************************************************** */
 
-void Ping::handleICMPResponse(unsigned char *buf, u_int buf_len,
-                              struct in_addr *ip, struct in6_addr *ip6) {
-  struct ndpi_icmphdr *icmp = NULL;
-  struct ping_packet *pckt = NULL;
+void Ping::handleICMPResponse(unsigned char* buf, u_int buf_len,
+                              struct in_addr* ip, struct in6_addr* ip6) {
+  struct ndpi_icmphdr* icmp = NULL;
+  struct ping_packet* pckt = NULL;
   u_int16_t echo_id;
 
   if (ip) {
@@ -339,12 +350,12 @@ void Ping::handleICMPResponse(unsigned char *buf, u_int buf_len,
       return; /* Response doesn't match the expected response size */
     }
 
-    struct ndpi_iphdr *ip4 = (struct ndpi_iphdr *)buf;
-    icmp = (struct ndpi_icmphdr *)(buf + ip4->ihl * 4);
-    pckt = (struct ping_packet *)icmp;
+    struct ndpi_iphdr* ip4 = (struct ndpi_iphdr*)buf;
+    icmp = (struct ndpi_icmphdr*)(buf + ip4->ihl * 4);
+    pckt = (struct ping_packet*)icmp;
   } else {
-    icmp = (struct ndpi_icmphdr *)buf;
-    pckt = (struct ping_packet *)icmp;
+    icmp = (struct ndpi_icmphdr*)buf;
+    pckt = (struct ping_packet*)icmp;
   }
 
   echo_id = ntohs(icmp->un.echo.id);
@@ -365,7 +376,7 @@ void Ping::handleICMPResponse(unsigned char *buf, u_int buf_len,
   /* The PING ID must have ping_id */
   if (echo_id == ping_id) {
     float rtt;
-    struct timeval end, *begin = (struct timeval *)pckt->msg;
+    struct timeval end, *begin = (struct timeval*)pckt->msg;
     char *h, buf[64];
 
     gettimeofday(&end, NULL);
@@ -377,7 +388,7 @@ void Ping::handleICMPResponse(unsigned char *buf, u_int buf_len,
       h = Utils::intoaV4(ntohl(ip->s_addr), buf, sizeof(buf));
       results_v4[std::string(h)] = rtt;
     } else {
-      h = Utils::intoaV6(*((struct ndpi_in6_addr *)ip6), 128, buf, sizeof(buf));
+      h = Utils::intoaV6(*((struct ndpi_in6_addr*)ip6), 128, buf, sizeof(buf));
       results_v6[std::string(h)] = rtt;
     }
 
@@ -398,10 +409,10 @@ void Ping::handleICMPResponse(unsigned char *buf, u_int buf_len,
 
 /* ****************************************************** */
 
-void Ping::collectResponses(lua_State *vm, bool v6) {
-  std::map<std::string /* IP */, float /* RTT */> *results =
+void Ping::collectResponses(lua_State* vm, bool v6) {
+  std::map<std::string /* IP */, float /* RTT */>* results =
       v6 ? &results_v6 : &results_v4;
-  std::map<std::string /* IP */, bool> *pinged = v6 ? &pinged_v6 : &pinged_v4;
+  std::map<std::string /* IP */, bool>* pinged = v6 ? &pinged_v6 : &pinged_v4;
 
   /* The lua_newtable() below is added by  Ntop::collectResponses() */
   /* lua_newtable(vm); */
@@ -434,7 +445,7 @@ void Ping::collectResponses(lua_State *vm, bool v6) {
 
 float Ping::getRTT(std::string who, bool v6) {
   std::map<std::string /* IP */, float /* RTT */>::const_iterator it;
-  std::map<std::string /* IP */, float /* RTT */> *results =
+  std::map<std::string /* IP */, float /* RTT */>* results =
       v6 ? &results_v6 : &results_v4;
   float f;
 

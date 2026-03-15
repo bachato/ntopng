@@ -31,8 +31,8 @@ class IECInvalidTransition : public FlowCheck {
                   false /* Don't exclude for nEdge */,
                   false /* NOT only for nEdge */,
                   false /* has_protocol_detected */,
-                  false /* has_periodic_update */, false /* has_flow_end */){};
-  ~IECInvalidTransition(){};
+                  false /* has_periodic_update */, false /* has_flow_end */) {};
+  ~IECInvalidTransition() {};
 
   std::string getName() const {
     return (std::string("iec_invalid_transition"));

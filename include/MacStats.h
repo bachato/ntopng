@@ -24,7 +24,7 @@
 
 class MacStats : public GenericTrafficElement {
  protected:
-  NetworkInterface *iface;
+  NetworkInterface* iface;
   struct {
     u_int32_t num_req_sent, num_rep_rcvd;
   } dhcp_stats;
@@ -35,20 +35,18 @@ class MacStats : public GenericTrafficElement {
   } arp_stats;
 
  public:
-  MacStats(NetworkInterface *_iface);
+  MacStats(NetworkInterface* _iface);
 
-  void lua(lua_State *vm, bool show_details);
-  inline void getJSONObject(json_object *my_object) {
+  void lua(lua_State* vm, bool show_details);
+  inline void getJSONObject(json_object* my_object) {
     GenericTrafficElement::getJSONObject(my_object, iface);
   }
 
   inline u_int64_t getNumSentArp() {
-    return (u_int64_t)arp_stats.sent.requests +
-           arp_stats.sent.replies;
+    return (u_int64_t)arp_stats.sent.requests + arp_stats.sent.replies;
   }
   inline u_int64_t getNumRcvdArp() {
-    return (u_int64_t)arp_stats.rcvd.requests +
-           arp_stats.rcvd.replies;
+    return (u_int64_t)arp_stats.rcvd.requests + arp_stats.rcvd.replies;
   }
   inline void incSentArpRequests() { arp_stats.sent.requests++; }
   inline void incSentArpReplies() { arp_stats.sent.replies++; }

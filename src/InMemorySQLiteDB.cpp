@@ -23,9 +23,11 @@
 
 /* **************************************************** */
 
-InMemorySQLiteDB::InMemorySQLiteDB(NetworkInterface *iface) : SQLiteStoreManager(iface) {
+InMemorySQLiteDB::InMemorySQLiteDB(NetworkInterface* iface)
+    : SQLiteStoreManager(iface) {
   if (sqlite3_open(":memory:", &db)) {
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to created in memory databsse: %s",
+    ntop->getTrace()->traceEvent(TRACE_WARNING,
+                                 "Unable to created in memory databsse: %s",
                                  sqlite3_errmsg(db));
     db = NULL;
     throw "DB creation error";
@@ -34,6 +36,4 @@ InMemorySQLiteDB::InMemorySQLiteDB(NetworkInterface *iface) : SQLiteStoreManager
 
 /* **************************************************** */
 
-InMemorySQLiteDB::~InMemorySQLiteDB() {
-  ;
-}
+InMemorySQLiteDB::~InMemorySQLiteDB() { ; }

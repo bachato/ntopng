@@ -28,26 +28,26 @@ class LuaEngine;
 class ThreadedActivity;
 
 class NtopngLuaContext {
-public:
+ public:
   char *allowed_ifname, *user, *group, *csrf;
   char *sqlite_hosts_filter, *sqlite_flows_filter;
   bool sqlite_filters_loaded;
   void *zmq_context, *zmq_subscriber;
-  struct mg_connection *conn;
-  AddressTree *allowedNets;
-  Bitmap4096 *allowed_pools;
-  NetworkInterface *iface;
-  AddressTree *addr_tree;
+  struct mg_connection* conn;
+  AddressTree* allowedNets;
+  Bitmap4096* allowed_pools;
+  NetworkInterface* iface;
+  AddressTree* addr_tree;
   SNMP *snmpBatch, *snmpAsyncEngine[MAX_NUM_ASYNC_SNMP_ENGINES];
-  Host *host;
-  NetworkStats *network;
-  Flow *flow;
+  Host* host;
+  NetworkStats* network;
+  Flow* flow;
   bool localuser;
   u_int16_t observationPointId, getbulkMaxNumRepetitions;
-  LuaEngine *engine;
+  LuaEngine* engine;
 
   /* In-memory DB */
-  InMemorySQLiteDB *db;
+  InMemorySQLiteDB* db;
 
   /* Capabilities bitmap */
   u_int64_t capabilities;
@@ -60,15 +60,15 @@ public:
   struct {
     bool captureInProgress;
     pthread_t captureThreadLoop;
-    pcap_t *pd;
-    pcap_dumper_t *dumper;
+    pcap_t* pd;
+    pcap_dumper_t* dumper;
     u_int32_t end_capture;
   } pkt_capture;
 
   /* Live capture written to mongoose socket */
   struct {
     u_int32_t capture_until, capture_max_pkts, num_captured_packets;
-    void *matching_host;
+    void* matching_host;
     bool bpfFilterSet;
     struct bpf_program fcode;
 
@@ -79,10 +79,10 @@ public:
     /* Partial sends */
     char send_buffer[1600];
     u_int data_not_yet_sent_len; /*
-				   Amount of data that was
-				   not sent mostly due to
-				   socket buffering
-				 */
+                                   Amount of data that was
+                                   not sent mostly due to
+                                   socket buffering
+                                 */
   } live_capture;
 
   /*
@@ -95,13 +95,13 @@ public:
   time_t next_reload;
   /* Periodic scripts (ThreadedActivity.cpp) */
   time_t deadline;
-  const ThreadedActivity *threaded_activity;
-  ThreadedActivityStats *threaded_activity_stats;
+  const ThreadedActivity* threaded_activity;
+  ThreadedActivityStats* threaded_activity_stats;
 
 #if defined(NTOPNG_PRO)
-  BinAnalysis *bin;
+  BinAnalysis* bin;
 #endif
-  
+
   NtopngLuaContext();
   ~NtopngLuaContext();
 };

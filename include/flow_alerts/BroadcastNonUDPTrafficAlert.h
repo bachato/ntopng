@@ -30,12 +30,15 @@ class BroadcastNonUDPTrafficAlert : public FlowAlert {
 
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_broadcast_non_udp_traffic, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_broadcast_non_udp_traffic,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_ERROR; };
 
-  BroadcastNonUDPTrafficAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-  ~BroadcastNonUDPTrafficAlert(){};
+  BroadcastNonUDPTrafficAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~BroadcastNonUDPTrafficAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
 };

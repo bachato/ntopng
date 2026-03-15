@@ -33,7 +33,7 @@ class Country : public GenericHashEntry,
   /* Note: country name can be more then 2 chars, see
    * https://www.iso.org/iso-3166-country-codes.html
    */
-  char *country_name;
+  char* country_name;
   NetworkStats dirstats;
 
   inline void incStats(time_t t, u_int64_t num_pkts, u_int64_t num_bytes) {
@@ -41,17 +41,17 @@ class Country : public GenericHashEntry,
   }
 
  public:
-  Country(NetworkInterface *_iface, const char *country);
+  Country(NetworkInterface* _iface, const char* country);
   ~Country();
 
   void set_hash_entry_state_idle();
 
   inline u_int16_t getNumHosts() { return getUses(); }
   inline u_int32_t key() { return Utils::stringHash(country_name); }
-  inline char *get_country_name() { return country_name; }
+  inline char* get_country_name() { return country_name; }
 
-  bool equal(const char *country);
-  inline bool equal(Country *country) {
+  bool equal(const char* country);
+  inline bool equal(Country* country) {
     return equal(country->get_country_name());
   }
 
@@ -73,10 +73,10 @@ class Country : public GenericHashEntry,
     dirstats.incInner(t, num_pkts, num_bytes, broadcast);
   }
 
-  void lua(lua_State *vm, DetailsLevel details_level, bool asListElement);
+  void lua(lua_State* vm, DetailsLevel details_level, bool asListElement);
 
-  void serialize(json_object *obj, DetailsLevel details_level);
-  inline char *getSerializationKey(char *buf, u_int bufsize) {
+  void serialize(json_object* obj, DetailsLevel details_level);
+  inline char* getSerializationKey(char* buf, u_int bufsize) {
     snprintf(buf, bufsize, COUNTRY_SERIALIZED_KEY, iface->get_id(),
              country_name);
     return (buf);

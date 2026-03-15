@@ -31,24 +31,25 @@ class HostScannerAlert : public HostAlert {
   ndpi_serializer* getAlertJSON(ndpi_serializer* serializer) {
     if (serializer == NULL) return NULL;
     ndpi_serialize_string_uint64(serializer, "as_client", as_client);
-    ndpi_serialize_string_uint64(serializer, "as_client_threshold", as_client_threshold);
+    ndpi_serialize_string_uint64(serializer, "as_client_threshold",
+                                 as_client_threshold);
     return (serializer);
   }
 
  public:
-  HostScannerAlert(HostCheck* c, Host* h,risk_percentage cli_pctg,
-                    u_int32_t _as_client, u_int32_t _as_client_threshold)
+  HostScannerAlert(HostCheck* c, Host* h, risk_percentage cli_pctg,
+                   u_int32_t _as_client, u_int32_t _as_client_threshold)
       : HostAlert(c, h, cli_pctg) {
     as_client = _as_client;
     as_client_threshold = _as_client_threshold;
   }
-  ~HostScannerAlert(){};
+  ~HostScannerAlert() {};
 
   static HostAlertType getClassType() {
-    return { host_alert_host_scanner, alert_category_security};
+    return {host_alert_host_scanner, alert_category_security};
   }
   HostAlertType getAlertType() const { return getClassType(); }
-  u_int8_t getAlertScore() const     { return SCORE_LEVEL_CRITICAL; };
+  u_int8_t getAlertScore() const { return SCORE_LEVEL_CRITICAL; };
 };
 
 #endif /* _HOST_BLACK_HOLE_CONTACTS_H_ */

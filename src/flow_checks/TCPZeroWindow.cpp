@@ -22,15 +22,16 @@
 #include "ntop_includes.h"
 #include "flow_checks_includes.h"
 
-void TCPZeroWindow::checkTCPWindow(Flow *f) {
+void TCPZeroWindow::checkTCPWindow(Flow* f) {
   if (f->isTCPZeroWindow() && !f->getInterface()->isSampledTraffic()) {
     FlowAlertType alert_type = TCPZeroWindowAlert::getClassType();
     u_int8_t c_score, s_score;
     risk_percentage cli_score_pctg = CLIENT_HIGH_RISK_PERCENTAGE;
 
-    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
+    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg,
+                       &c_score, &s_score);
 
-    FlowAlert *alert = buildAlert(f);
+    FlowAlert* alert = buildAlert(f);
     alert->setCliSrvScores(c_score, s_score);
     f->triggerAlert(alert);
   }
@@ -38,15 +39,15 @@ void TCPZeroWindow::checkTCPWindow(Flow *f) {
 
 /* ***************************************************** */
 
-void TCPZeroWindow::periodicUpdate(Flow *f) { checkTCPWindow(f); }
+void TCPZeroWindow::periodicUpdate(Flow* f) { checkTCPWindow(f); }
 
 /* ***************************************************** */
 
-void TCPZeroWindow::flowEnd(Flow *f) { checkTCPWindow(f); }
+void TCPZeroWindow::flowEnd(Flow* f) { checkTCPWindow(f); }
 
 /* ***************************************************** */
 
-FlowAlert *TCPZeroWindow::buildAlert(Flow *f) {
+FlowAlert* TCPZeroWindow::buildAlert(Flow* f) {
   return new TCPZeroWindowAlert(this, f);
 }
 

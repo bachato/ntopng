@@ -25,7 +25,7 @@
 /* ***************************************************** */
 
 /* NOTE: keep in sync with ParserInterface::processFlow() */
-bool FlowRisk::ignoreRisk(Flow *f, ndpi_risk_enum r) {
+bool FlowRisk::ignoreRisk(Flow* f, ndpi_risk_enum r) {
   switch (r) {
     case NDPI_TLS_SELFSIGNED_CERTIFICATE: {
       ndpi_risk_params params[] = {
@@ -53,7 +53,7 @@ bool FlowRisk::ignoreRisk(Flow *f, ndpi_risk_enum r) {
 
 /* ***************************************************** */
 
-void FlowRisk::checkRisk(Flow *f) {
+void FlowRisk::checkRisk(Flow* f) {
   ndpi_risk_enum r = handledRisk();
 
   if (f->hasRisk(r)) {
@@ -73,7 +73,7 @@ void FlowRisk::checkRisk(Flow *f) {
 
     ndpi_risk2score(risk_bitmap, &c_score, &s_score);
 
-    FlowAlert *alert = buildAlert(f);
+    FlowAlert* alert = buildAlert(f);
     alert->setCliSrvScores(c_score, s_score);
     f->triggerAlert(alert);
   }
@@ -81,17 +81,20 @@ void FlowRisk::checkRisk(Flow *f) {
 
 /* ***************************************************** */
 
-void FlowRisk::protocolDetected(Flow *f) {
+void FlowRisk::protocolDetected(Flow* f) {
   /* Handle risks that should be checked as soon as l7 protocol is detected */
-  /* Note: controlled by check_on_flow_end parameter of FlowRisk() constructor */
+  /* Note: controlled by check_on_flow_end parameter of FlowRisk() constructor
+   */
   checkRisk(f);
 }
 
 /* ***************************************************** */
 
-void FlowRisk::flowEnd(Flow *f) { 
-  /* Handle risks that should be checked at flow end (e.g. unidirectional flow) */
-  /* Note: controlled by check_on_flow_end parameter of FlowRisk() constructor */
+void FlowRisk::flowEnd(Flow* f) {
+  /* Handle risks that should be checked at flow end (e.g. unidirectional flow)
+   */
+  /* Note: controlled by check_on_flow_end parameter of FlowRisk() constructor
+   */
   checkRisk(f);
 }
 

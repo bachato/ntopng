@@ -25,8 +25,8 @@
 
 /* **************************************************** */
 
-static void *esLoop(void *ptr) {
-  ElasticSearch *es = (ElasticSearch *)ptr;
+static void* esLoop(void* ptr) {
+  ElasticSearch* es = (ElasticSearch*)ptr;
   char name[16];
 
   snprintf(name, sizeof(name), "es-%d", es->getNetworkInterface()->get_id());
@@ -39,22 +39,23 @@ static void *esLoop(void *ptr) {
 
 /* **************************************** */
 
-ElasticSearch::ElasticSearch(NetworkInterface *_iface) : FlowDB(_iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+ElasticSearch::ElasticSearch(NetworkInterface* _iface) : FlowDB(_iface) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   snprintf(es_version, sizeof(es_version), "%c", '0');
   es_version_inited = false;
   num_queued_elems = 0;
-  
-  export_queue = new (std::nothrow) SPSCQueue<char *>(ES_MAX_QUEUE_LEN, "elk-export-queue"); 
-  if (export_queue == NULL)
-    throw "Not enough memory";
+
+  export_queue =
+      new (std::nothrow) SPSCQueue<char*>(ES_MAX_QUEUE_LEN, "elk-export-queue");
+  if (export_queue == NULL) throw "Not enough memory";
 
   reportDrops = false;
   lastReportedDropsTime = 0;
 
-  if (!(es_template_push_url = (char *)malloc(MAX_PATH)) ||
-      !(es_version_query_url = (char *)malloc(MAX_PATH)))
+  if (!(es_template_push_url = (char*)malloc(MAX_PATH)) ||
+      !(es_version_query_url = (char*)malloc(MAX_PATH)))
     throw "Not enough memory";
 
   esThreadLoop = (pthread_t)NULL;
@@ -68,7 +69,8 @@ ElasticSearch::ElasticSearch(NetworkInterface *_iface) : FlowDB(_iface) {
 /* **************************************** */
 
 ElasticSearch::~ElasticSearch() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
   shutdown();
   if (es_template_push_url) free(es_template_push_url);
   if (es_version_query_url) free(es_version_query_url);
@@ -79,7 +81,7 @@ ElasticSearch::~ElasticSearch() {
 
 void ElasticSearch::shutdown() {
   if (running) {
-    void *res;
+    void* res;
 
     DB::shutdown();
 
@@ -89,8 +91,8 @@ void ElasticSearch::shutdown() {
 
 /* **************************************** */
 
-bool ElasticSearch::dumpFlow(time_t when, Flow *f, char *msg) {
-  char *str;
+bool ElasticSearch::dumpFlow(time_t when, Flow* f, char* msg) {
+  char* str;
   bool rc = false;
 
   if (num_queued_elems >= ES_MAX_QUEUE_LEN) {
@@ -118,7 +120,6 @@ bool ElasticSearch::dumpFlow(time_t when, Flow *f, char *msg) {
   str = strdup(msg);
 
   if (str) {
-
     rc = export_queue->enqueue(str, true);
 
     if (rc)
@@ -134,7 +135,7 @@ bool ElasticSearch::dumpFlow(time_t when, Flow *f, char *msg) {
 
 bool ElasticSearch::startDumpLoop() {
   if (ntop->getPrefs()->do_dump_flows_on_es()) {
-    pthread_create(&esThreadLoop, NULL, esLoop, (void *)this);
+    pthread_create(&esThreadLoop, NULL, esLoop, (void*)this);
 
     return (true);
   }
@@ -146,8 +147,8 @@ bool ElasticSearch::startDumpLoop() {
 
 void ElasticSearch::indexESdata() {
   u_int32_t last_dump = (u_int32_t)time(NULL);
-  char *postbuf = (char *)malloc(ES_BULK_BUFFER_SIZE);
-  char *pending_flow = NULL;
+  char* postbuf = (char*)malloc(ES_BULK_BUFFER_SIZE);
+  char* pending_flow = NULL;
 
   if (!postbuf) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Cannot allocate ES bulk buffer");
@@ -158,11 +159,11 @@ void ElasticSearch::indexESdata() {
     u_int32_t now = (u_int32_t)time(NULL);
 
     if ((num_queued_elems >= ES_MIN_BUFFERED_FLOWS) ||
-        ((num_queued_elems > 0 || pending_flow)
-	 && (now >= last_dump + ntop->getPrefs()->get_dump_frequency()))) {
+        ((num_queued_elems > 0 || pending_flow) &&
+         (now >= last_dump + ntop->getPrefs()->get_dump_frequency()))) {
       u_int len, num_flows;
       char index_name[64], header[256];
-      struct tm *tm_info;
+      struct tm* tm_info;
       struct timeval tv;
       time_t t;
       HTTPTranferStats stats;
@@ -182,7 +183,7 @@ void ElasticSearch::indexESdata() {
         snprintf(header, sizeof(header),
                  "{\"index\": {\"_type\": \"%s\", \"_index\": \"%s\"}}",
                  atleast_version_6()
-                     ? (char *)"_doc" /* types no longer supported in 6 */
+                     ? (char*)"_doc" /* types no longer supported in 6 */
                      : ntop->getPrefs()->get_es_type(),
                  index_name);
       }
@@ -192,19 +193,19 @@ void ElasticSearch::indexESdata() {
       if (pending_flow) {
         len += snprintf(&postbuf[len], ES_BULK_BUFFER_SIZE - len, "%s\n%s\n",
                         header, pending_flow),
-        num_flows++;
+            num_flows++;
         free(pending_flow);
         pending_flow = NULL;
       }
 
       while (export_queue->isNotEmpty()) {
-        char *str = export_queue->dequeue();
+        char* str = export_queue->dequeue();
         num_queued_elems--;
-        
+
         if (len <= ES_BULK_BUFFER_SIZE - strlen(header) - strlen(str) - 5) {
           len += snprintf(&postbuf[len], ES_BULK_BUFFER_SIZE - len, "%s\n%s\n",
-                        header, str),
-          num_flows++;
+                          header, str),
+              num_flows++;
           free(str);
         } else {
           pending_flow = str;
@@ -214,15 +215,15 @@ void ElasticSearch::indexESdata() {
 
       postbuf[len] = '\0';
 
-      ntop->getTrace()->traceEvent(
-          TRACE_INFO, "[ES] Buffered request with %d flows (%d bytes), %u more flows enqueued",
-          num_flows, len, num_queued_elems.load());
+      ntop->getTrace()->traceEvent(TRACE_INFO,
+                                   "[ES] Buffered request with %d flows (%d "
+                                   "bytes), %u more flows enqueued",
+                                   num_flows, len, num_queued_elems.load());
 
       if (!Utils::postHTTPJsonData(NULL, ntop->getPrefs()->get_es_user(),
                                    ntop->getPrefs()->get_es_pwd(),
-                                   ntop->getPrefs()->get_es_url(), postbuf,
-				   0, 0,
-                                   &stats)) {
+                                   ntop->getPrefs()->get_es_url(), postbuf, 0,
+                                   0, &stats)) {
         /* Post failure */
         ntop->getTrace()->traceEvent(
             TRACE_ERROR, "[ES] POST request for %d flows (%d bytes) failed",
@@ -230,9 +231,14 @@ void ElasticSearch::indexESdata() {
         incNumDroppedFlows(num_flows);
         _usleep(100000);
       } else {
-	ntop->getTrace()->traceEvent(TRACE_INFO, "[ES] [namelookup: %.2f sec][connect: %.2f sec][appconnect: %.2f sec][pretransfer: %.2f sec][redirect: %.2f sec][start: %.2f sec][total: %.2f sec][flows-sent: %u]",
-				     stats.namelookup, stats.connect, stats.appconnect,
-				     stats.pretransfer, stats.redirect, stats.start, stats.total, num_flows);
+        ntop->getTrace()->traceEvent(
+            TRACE_INFO,
+            "[ES] [namelookup: %.2f sec][connect: %.2f sec][appconnect: %.2f "
+            "sec][pretransfer: %.2f sec][redirect: %.2f sec][start: %.2f "
+            "sec][total: %.2f sec][flows-sent: %u]",
+            stats.namelookup, stats.connect, stats.appconnect,
+            stats.pretransfer, stats.redirect, stats.start, stats.total,
+            num_flows);
         incNumExportedFlows(num_flows);
       }
 
@@ -248,7 +254,7 @@ void ElasticSearch::indexESdata() {
 /* **************************************** */
 
 /* Send ntopng index template to Elastic Search */
-const char *ElasticSearch::get_es_version() {
+const char* ElasticSearch::get_es_version() {
   if (!es_version_inited) { /* lazy... */
     u_int buf_len =
 #ifdef HAVE_CURL
@@ -256,7 +262,7 @@ const char *ElasticSearch::get_es_version() {
 #else
         1 << 14; /* 16kB */
 #endif
-    char *buf = (char *)malloc(buf_len);
+    char* buf = (char*)malloc(buf_len);
 
     if (buf) {
       long http_ret_code =
@@ -294,7 +300,7 @@ const char *ElasticSearch::get_es_version() {
 
         if (json_object_object_get_ex(o, "version", &obj) &&
             json_object_object_get_ex(obj, "number", &obj2)) {
-          const char *ver = json_object_get_string(obj2);
+          const char* ver = json_object_get_string(obj2);
 
           snprintf(es_version, sizeof(es_version), "%c",
                    ver && ver[0] ? ver[0] : '0');
@@ -319,8 +325,8 @@ const char *ElasticSearch::get_es_version() {
 /* **************************************** */
 
 /* Send ntopng index template to Elastic Search */
-const char *ElasticSearch::get_es_template() {
-  const char *v = get_es_version();
+const char* ElasticSearch::get_es_template() {
+  const char* v = get_es_version();
   int vers = atoi(v ? v : "0");
 
   switch (vers) {
@@ -339,7 +345,7 @@ const char *ElasticSearch::get_es_template() {
 
 /* Send ntopng index template to Elastic Search */
 void ElasticSearch::pushEStemplate() {
-  char *postbuf = NULL;
+  char* postbuf = NULL;
   char template_path[MAX_PATH];
   ifstream template_file;
   u_int8_t max_attempts = 3;

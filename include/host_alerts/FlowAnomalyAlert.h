@@ -51,7 +51,7 @@ class FlowAnomalyAlert : public HostAlert {
     lower_bound = _lower_bound;
     upper_bound = _upper_bound;
   }
-  ~FlowAnomalyAlert(){};
+  ~FlowAnomalyAlert() {};
 
   static HostAlertType getClassType() {
     return {host_alert_flows_anomaly, alert_category_network};

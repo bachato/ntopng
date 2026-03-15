@@ -27,13 +27,14 @@
 
 /* **************************************************** */
 
-ZCCollectorInterface::ZCCollectorInterface(const char *name)
+ZCCollectorInterface::ZCCollectorInterface(const char* name)
     : ZMQParserInterface(name) {
   char ifname[32];
-  char *at;
+  char* at;
 
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   cluster_id = queue_id = 0;
   snprintf(ifname, sizeof(ifname), "%s", &name[7]);
 
@@ -89,15 +90,15 @@ void ZCCollectorInterface::collect_flows() {
     rc = pfring_zc_recv_pkt(zq, &buffer, 0 /* wait_for_packet */);
 
     if (rc > 0) {
-      u_char *data = pfring_zc_pkt_buff_data(buffer, zq);
+      u_char* data = pfring_zc_pkt_buff_data(buffer, zq);
 
       if (data[0] == '{') {
-        //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Event: %s", data);
-        parseEvent((char *)data, buffer->len, 0, (void *)this);
+        // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Event: %s", data);
+        parseEvent((char*)data, buffer->len, 0, (void*)this);
         recvStats.num_events++;
       } else {
-        //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Data");
-        recvStats.num_flows += parseTLVFlows((char *)data, buffer->len, this);
+        // ntop->getTrace()->traceEvent(TRACE_NORMAL, "Data");
+        recvStats.num_flows += parseTLVFlows((char*)data, buffer->len, this);
       }
 
       recvStats.zmq_msg_rcvd++;
@@ -118,8 +119,8 @@ void ZCCollectorInterface::collect_flows() {
 
 /* **************************************************** */
 
-static void *packetPollLoop(void *ptr) {
-  ZCCollectorInterface *iface = (ZCCollectorInterface *)ptr;
+static void* packetPollLoop(void* ptr) {
+  ZCCollectorInterface* iface = (ZCCollectorInterface*)ptr;
 
   iface->setPollerThreadName();
 
@@ -133,7 +134,7 @@ static void *packetPollLoop(void *ptr) {
 /* **************************************************** */
 
 void ZCCollectorInterface::startPacketPolling() {
-  pthread_create(&pollLoop, NULL, packetPollLoop, (void *)this);
+  pthread_create(&pollLoop, NULL, packetPollLoop, (void*)this);
   pollLoopCreated = true;
   NetworkInterface::startPacketPolling();
 }
@@ -148,7 +149,7 @@ void ZCCollectorInterface::shutdown() {
 
 /* **************************************************** */
 
-bool ZCCollectorInterface::set_packet_filter(char *filter) {
+bool ZCCollectorInterface::set_packet_filter(char* filter) {
   ntop->getTrace()->traceEvent(
       TRACE_ERROR, "No filter can be set on a collector interface. Ignored %s",
       filter);

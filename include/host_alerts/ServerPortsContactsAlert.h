@@ -4,7 +4,7 @@
 #include "ntop_includes.h"
 
 class ServerPortsContactsAlert : public HostAlert {
-  private:
+ private:
   u_int16_t server_port;
   u_int16_t app_proto;
 
@@ -12,7 +12,7 @@ class ServerPortsContactsAlert : public HostAlert {
 
  public:
   ServerPortsContactsAlert(HostCheck* c, Host* f, risk_percentage cli_pctg,
-                         u_int16_t _server_port, u_int16_t _app_proto);
+                           u_int16_t _server_port, u_int16_t _app_proto);
   ~ServerPortsContactsAlert() {}
 
   static HostAlertType getClassType() {

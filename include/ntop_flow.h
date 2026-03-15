@@ -199,7 +199,7 @@
 #define L7_PROTO_NAME NTOP_BASE_ID + 119
 #define L7_INFO NTOP_BASE_ID + 539
 #define L7_CONFIDENCE NTOP_BASE_ID + 560
-#define L7_DETAILS NTOP_BASE_ID+593 /* nDPI JSON */
+#define L7_DETAILS NTOP_BASE_ID + 593 /* nDPI JSON */
 #define DOWNSTREAM_TUNNEL_ID NTOP_BASE_ID + 120
 #define FLOW_USER_NAME NTOP_BASE_ID + 121
 #define NPROBE_INSTANCE_NAME NTOP_BASE_ID + 122
@@ -242,20 +242,22 @@
 #define DOWNSTREAM_SESSION_ID NTOP_BASE_ID + 447
 #define TLS_SERVER_NAME NTOP_BASE_ID + 188
 #define BITTORRENT_HASH NTOP_BASE_ID + 189
-#define QOE_SRC_TO_DST  NTOP_BASE_ID + 594
-#define QOE_DST_TO_SRC  NTOP_BASE_ID + 595
-#define L7_OS_HINT      NTOP_BASE_ID+596
+#define QOE_SRC_TO_DST NTOP_BASE_ID + 594
+#define QOE_DST_TO_SRC NTOP_BASE_ID + 595
+#define L7_OS_HINT NTOP_BASE_ID + 596
 #define TLS_CIPHER NTOP_BASE_ID + 493
 #define SSL_UNSAFE_CIPHER NTOP_BASE_ID + 494
 #define L7_PROTO_RISK NTOP_BASE_ID + 509
-#define HASSHC_HASH   NTOP_BASE_ID + 525
-#define HASSHS_HASH   NTOP_BASE_ID + 526
-#define FLOW_VERDICT  NTOP_BASE_ID + 522
+#define HASSHC_HASH NTOP_BASE_ID + 525
+#define HASSHS_HASH NTOP_BASE_ID + 526
+#define FLOW_VERDICT NTOP_BASE_ID + 522
 #define L7_ERROR_CODE NTOP_BASE_ID + 554
-#define L7_RISK_INFO  NTOP_BASE_ID + 555
-#define JA4C_HASH     NTOP_BASE_ID + 576
-#define FLOW_SOURCE   NTOP_BASE_ID + 579 /* 0 = packets, 1 = collected NetFlow/IPFIX, 2 = collected sFlow/nfLite */
-#define OT_INFO       NTOP_BASE_ID + 603 /* OT protocols info (JSON) */
+#define L7_RISK_INFO NTOP_BASE_ID + 555
+#define JA4C_HASH NTOP_BASE_ID + 576
+#define FLOW_SOURCE                                                   \
+  NTOP_BASE_ID + 579 /* 0 = packets, 1 = collected NetFlow/IPFIX, 2 = \
+                        collected sFlow/nfLite */
+#define OT_INFO NTOP_BASE_ID + 603 /* OT protocols info (JSON) */
 
 /* eBPF / Process */
 #define SRC_PROC_PID NTOP_BASE_ID + 168
@@ -567,15 +569,15 @@
 #define STATUS NTOP_BASE_ID + 534
 #define MAJOR_CONNECTION_STATE NTOP_BASE_ID + 535
 #define MINOR_CONNECTION_STATE NTOP_BASE_ID + 536
-#define L7_SERVICE NTOP_BASE_ID+582
-#define UNIQUE_SOURCE_ID      NTOP_BASE_ID+589 /* Unique nProbe + exporter flow source identifier */
-#define NPROBE_UUID           NTOP_BASE_ID+590
-#define L7_DOMAIN_INFO        NTOP_BASE_ID+591
-#define TCP_FINGERPRINT       NTOP_BASE_ID+597
-#define NPROBE_SOURCE_ID      NTOP_BASE_ID+600 /* Unique nProbe identifier */
-#define TCP_STATS_SRC_TO_DST  NTOP_BASE_ID+601
-#define TCP_STATS_DST_TO_SRC  NTOP_BASE_ID+602
-
+#define L7_SERVICE NTOP_BASE_ID + 582
+#define UNIQUE_SOURCE_ID \
+  NTOP_BASE_ID + 589 /* Unique nProbe + exporter flow source identifier */
+#define NPROBE_UUID NTOP_BASE_ID + 590
+#define L7_DOMAIN_INFO NTOP_BASE_ID + 591
+#define TCP_FINGERPRINT NTOP_BASE_ID + 597
+#define NPROBE_SOURCE_ID NTOP_BASE_ID + 600 /* Unique nProbe identifier */
+#define TCP_STATS_SRC_TO_DST NTOP_BASE_ID + 601
+#define TCP_STATS_DST_TO_SRC NTOP_BASE_ID + 602
 
 /* sFlow Counter Fields */
 #define SFLOW_DEVICE_IP 0

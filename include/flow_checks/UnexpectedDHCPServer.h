@@ -31,18 +31,19 @@ class UnexpectedDHCPServer : public UnexpectedServer {
   }
 
  protected:
-  bool isAllowedHost(Flow *f);
-  bool isAllowedProto(Flow *f) {
-    return (f->isDHCP() && (f->get_cli_port() == 67 /* Server port (bootps) */));
+  bool isAllowedHost(Flow* f);
+  bool isAllowedProto(Flow* f) {
+    return (f->isDHCP() &&
+            (f->get_cli_port() == 67 /* Server port (bootps) */));
   }
-  const IpAddress *getServerIP(Flow *f) { return (f->get_dhcp_srv_ip_addr()); }
+  const IpAddress* getServerIP(Flow* f) { return (f->get_dhcp_srv_ip_addr()); }
 
  public:
-  UnexpectedDHCPServer() : UnexpectedServer(){};
-  ~UnexpectedDHCPServer(){};
+  UnexpectedDHCPServer() : UnexpectedServer() {};
+  ~UnexpectedDHCPServer() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    UnexpectedDHCPServerAlert *alert = new UnexpectedDHCPServerAlert(this, f);
+  FlowAlert* buildAlert(Flow* f) {
+    UnexpectedDHCPServerAlert* alert = new UnexpectedDHCPServerAlert(this, f);
     alert->setCliAttacker();
     return alert;
   }

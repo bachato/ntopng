@@ -40,8 +40,8 @@ class IECInvalidCommandTransition : public FlowCheck {
                   false /* Don't exclude for nEdge */,
                   false /* NOT only for nEdge */,
                   false /* has_protocol_detected */,
-                  false /* has_periodic_update */, false /* has_flow_end */){};
-  ~IECInvalidCommandTransition(){};
+                  false /* has_periodic_update */, false /* has_flow_end */) {};
+  ~IECInvalidCommandTransition() {};
 
   std::string getName() const {
     return (std::string("iec_invalid_command_transition"));

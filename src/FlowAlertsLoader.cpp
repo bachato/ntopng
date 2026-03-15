@@ -25,7 +25,8 @@
 /* **************************************************** */
 
 FlowAlertsLoader::FlowAlertsLoader() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   memset(&alert_to_score, 0, sizeof(alert_to_score));
 
   /* Set all alerts to no risk, then initialize risk-based alerts */
@@ -139,7 +140,7 @@ FlowAlertsLoader::FlowAlertsLoader() {
                 BlacklistedClientContactAlert::getDefaultScore());
   registerAlert(BlacklistedServerContactAlert::getClassType(),
                 BlacklistedServerContactAlert::getDefaultScore());
-  registerAlert(TCPFlowResetAlert::getClassType(), 
+  registerAlert(TCPFlowResetAlert::getClassType(),
                 TCPFlowResetAlert::getDefaultScore());
   registerAlert(HostPolicyAlert::getClassType(),
                 HostPolicyAlert::getDefaultScore());

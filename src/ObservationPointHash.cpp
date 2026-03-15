@@ -23,16 +23,17 @@
 
 /* ************************************ */
 
-ObservationPointHash::ObservationPointHash(NetworkInterface *_iface,
+ObservationPointHash::ObservationPointHash(NetworkInterface* _iface,
                                            u_int _num_hashes,
                                            u_int _max_hash_size)
     : GenericHash(_iface, _num_hashes, _max_hash_size, "ObservationPointHash") {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 }
 
 /* ************************************ */
 
-ObservationPoint *ObservationPointHash::get(u_int16_t obs_point,
+ObservationPoint* ObservationPointHash::get(u_int16_t obs_point,
                                             bool is_inline_call) {
   if (obs_point == 0 || obs_point == (u_int16_t)-1)
     return (NULL);
@@ -44,17 +45,17 @@ ObservationPoint *ObservationPointHash::get(u_int16_t obs_point,
     if (table[hash] == NULL) {
       return (NULL);
     } else {
-      ObservationPoint *head;
+      ObservationPoint* head;
 
       if (!is_inline_call) locks[hash]->rdlock(__FILE__, __LINE__);
 
-      head = (ObservationPoint *)table[hash];
+      head = (ObservationPoint*)table[hash];
 
       while (head != NULL) {
         if ((!head->idle()) && head->equal(obs_point))
           break;
         else
-          head = (ObservationPoint *)head->next();
+          head = (ObservationPoint*)head->next();
       }
 
       if (!is_inline_call) locks[hash]->unlock(__FILE__, __LINE__);

@@ -31,9 +31,9 @@ class SMTPServerContactsAlert : public ServerContactsAlert {
     return {host_alert_smtp_server_contacts, alert_category_security};
   }
 
-  SMTPServerContactsAlert(HostCheck *c, Host *f, risk_percentage cli_pctg,
+  SMTPServerContactsAlert(HostCheck* c, Host* f, risk_percentage cli_pctg,
                           u_int64_t _contacts, u_int64_t _contacts_threshold);
-  ~SMTPServerContactsAlert(){};
+  ~SMTPServerContactsAlert() {};
 
   HostAlertType getAlertType() const { return getClassType(); }
 };

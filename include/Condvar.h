@@ -40,7 +40,7 @@ class Condvar {
 
   void init();
   int wait();
-  int timedWait(struct timespec *expiration);
+  int timedWait(struct timespec* expiration);
 
   inline int signal() { return (signal_waiters(false)); };
   inline int signalAll() { return (signal_waiters(true)); };

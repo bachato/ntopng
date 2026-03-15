@@ -31,7 +31,8 @@ RwLock::RwLock() {
 #else
   pthread_rwlock_init(&the_rwlock, NULL);
 #endif
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 }
 
 /* ******************************* */
@@ -46,7 +47,7 @@ RwLock::~RwLock() {
 
 /* ******************************* */
 
-void RwLock::lock(const char *filename, int line, bool readonly) {
+void RwLock::lock(const char* filename, int line, bool readonly) {
 #ifndef HAVE_RW_LOCK
 #ifdef DEBUG_RW_LOCK
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s:%d] lock(%p)", filename, line,
@@ -79,7 +80,7 @@ void RwLock::lock(const char *filename, int line, bool readonly) {
 
 /* ******************************* */
 
-bool RwLock::trylock(const char *filename, int line, bool readonly) {
+bool RwLock::trylock(const char* filename, int line, bool readonly) {
 #ifndef HAVE_RW_LOCK
   m.lock(filename, line);
   return true; /* Pretend to be always successful - indeed, if here the lock is
@@ -108,25 +109,25 @@ bool RwLock::trylock(const char *filename, int line, bool readonly) {
 
 /* ******************************* */
 
-void RwLock::rdlock(const char *filename, int line) {
+void RwLock::rdlock(const char* filename, int line) {
   lock(filename, line, true /* readonly */);
 }
 
 /* ******************************* */
 
-void RwLock::wrlock(const char *filename, int line) {
+void RwLock::wrlock(const char* filename, int line) {
   lock(filename, line, false /* write */);
 }
 
 /* ******************************* */
 
-bool RwLock::trywrlock(const char *filename, int line) {
+bool RwLock::trywrlock(const char* filename, int line) {
   return trylock(filename, line, false /* write */);
 }
 
 /* ******************************* */
 
-void RwLock::unlock(const char *filename, int line) {
+void RwLock::unlock(const char* filename, int line) {
 #ifndef HAVE_RW_LOCK
 #ifdef DEBUG_RW_LOCK
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s:%d] unlock(%p)", filename,

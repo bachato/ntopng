@@ -39,7 +39,7 @@ class DomainNamesContactsAlert : public ServerContactsAlert {
   DomainNamesContactsAlert(HostCheck* c, Host* f, risk_percentage cli_pctg,
                            u_int32_t _num_domain_names,
                            u_int16_t _domain_names_threshold);
-  ~DomainNamesContactsAlert(){};
+  ~DomainNamesContactsAlert() {};
 
   HostAlertType getAlertType() const { return getClassType(); }
   u_int8_t getAlertScore() const { return SCORE_LEVEL_NOTICE; };

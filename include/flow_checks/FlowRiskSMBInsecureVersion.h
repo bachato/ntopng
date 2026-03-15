@@ -31,10 +31,10 @@ class FlowRiskSMBInsecureVersion : public FlowRisk {
   }
 
  public:
-  FlowRiskSMBInsecureVersion() : FlowRisk(){};
-  ~FlowRiskSMBInsecureVersion(){};
+  FlowRiskSMBInsecureVersion() : FlowRisk() {};
+  ~FlowRiskSMBInsecureVersion() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskSMBInsecureVersionAlert(this, f);
   }
 

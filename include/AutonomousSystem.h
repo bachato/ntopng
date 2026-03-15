@@ -31,7 +31,7 @@ class AutonomousSystem : public GenericHashEntry,
                          public Score {
  private:
   u_int32_t asn;
-  char *asname;
+  char* asname;
   u_int32_t round_trip_time;
   u_int32_t alerted_flows_as_client, alerted_flows_as_server;
   bool save_exporters_stats; /* Core ASN for which stats need to be saved */
@@ -58,11 +58,11 @@ class AutonomousSystem : public GenericHashEntry,
   }
 
 #ifdef NTOPNG_PRO
-  void updateBehaviorStats(const struct timeval *tv);
+  void updateBehaviorStats(const struct timeval* tv);
 #endif
 
  public:
-  AutonomousSystem(NetworkInterface *_iface, IpAddress *ipa);
+  AutonomousSystem(NetworkInterface* _iface, IpAddress* ipa);
   ~AutonomousSystem();
 
   void set_hash_entry_state_idle();
@@ -70,7 +70,7 @@ class AutonomousSystem : public GenericHashEntry,
   inline u_int16_t getNumHosts() { return getUses(); }
   inline u_int32_t key() { return (asn); }
   inline u_int32_t get_asn() { return (asn); }
-  inline char *get_asname() { return (asname ? asname : (char *)""); }
+  inline char* get_asname() { return (asname ? asname : (char*)""); }
 
   bool equal(u_int32_t asn);
 
@@ -93,12 +93,12 @@ class AutonomousSystem : public GenericHashEntry,
   };
 
   void updateRoundTripTime(u_int32_t rtt_msecs);
-  void lua(lua_State *vm, DetailsLevel details_level, bool asListElement,
+  void lua(lua_State* vm, DetailsLevel details_level, bool asListElement,
            bool diff = false);
 
-  virtual void updateStats(const struct timeval *tv);
+  virtual void updateStats(const struct timeval* tv);
 
-  inline char *getSerializationKey(char *buf, u_int bufsize) {
+  inline char* getSerializationKey(char* buf, u_int bufsize) {
     snprintf(buf, bufsize, AS_SERIALIZED_KEY, iface->get_id(), asn);
     return (buf);
   }
@@ -110,16 +110,14 @@ class AutonomousSystem : public GenericHashEntry,
   };
   inline void saveExporterStatsPrefs(bool _save_exporters_stats) {
     save_exporters_stats = _save_exporters_stats;
-    
+
     if (!save_exporters_stats)
       exporters_map.clear(); /* Empty the map in case it's present */
   }
   void findExportersStats(u_int64_t bytes_sent, u_int64_t bytes_rcvd,
-                          std::pair<u_int32_t, u_int16_t> *key);
+                          std::pair<u_int32_t, u_int16_t>* key);
 #ifdef NTOPNG_PRO
-      void incQoEStats(QoEType qoe_type) {
-    qoe_stats.incQoEStats(qoe_type);
-  };
+  void incQoEStats(QoEType qoe_type) { qoe_stats.incQoEStats(qoe_type); };
 #endif
 };
 

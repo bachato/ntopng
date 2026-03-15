@@ -30,10 +30,10 @@ class NetworkInterfaceAlertableEntity : public OtherAlertableEntity {
  private:
  protected:
  public:
-  NetworkInterfaceAlertableEntity(NetworkInterface *alert_iface,
+  NetworkInterfaceAlertableEntity(NetworkInterface* alert_iface,
                                   AlertEntity entity)
-      : OtherAlertableEntity(alert_iface, entity){};
-  virtual ~NetworkInterfaceAlertableEntity(){};
+      : OtherAlertableEntity(alert_iface, entity) {};
+  virtual ~NetworkInterfaceAlertableEntity() {};
 };
 
 #endif

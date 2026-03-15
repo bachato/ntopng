@@ -31,15 +31,15 @@ class FlowRiskBinaryApplicationTransfer : public FlowRisk {
   };
 
  public:
-  FlowRiskBinaryApplicationTransfer() : FlowRisk(){};
-  ~FlowRiskBinaryApplicationTransfer(){};
+  FlowRiskBinaryApplicationTransfer() : FlowRisk() {};
+  ~FlowRiskBinaryApplicationTransfer() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    FlowRiskBinaryApplicationTransferAlert *alert =
+  FlowAlert* buildAlert(Flow* f) {
+    FlowRiskBinaryApplicationTransferAlert* alert =
         new FlowRiskBinaryApplicationTransferAlert(this, f);
 
     /*
-      The server is considered an attacker it can be a server 
+      The server is considered an attacker it can be a server
       providing malicious files.
      */
     alert->setSrvAttacker();

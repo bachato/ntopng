@@ -30,12 +30,15 @@ class RemoteToLocalInsecureFlowAlert : public FlowAlert {
 
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_remote_to_local_insecure_proto, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_remote_to_local_insecure_proto,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_ERROR; };
 
-  RemoteToLocalInsecureFlowAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-  ~RemoteToLocalInsecureFlowAlert(){};
+  RemoteToLocalInsecureFlowAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~RemoteToLocalInsecureFlowAlert() {};
 
   bool autoAck() const { return false; };
 

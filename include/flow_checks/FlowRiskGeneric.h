@@ -33,18 +33,18 @@ class FlowRiskGeneric : public FlowRisk {
 
  public:
   FlowRiskGeneric(ndpi_risk_enum _risk) : FlowRisk() { risk = _risk; };
-  ~FlowRiskGeneric(){};
+  ~FlowRiskGeneric() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskGenericAlert(this, f, risk);
   }
 
-  std::string getName() const  {
-    const char *name = FlowRiskAlerts::getCheckName(risk);
-    
+  std::string getName() const {
+    const char* name = FlowRiskAlerts::getCheckName(risk);
+
     return (name ? std::string(name) : "");
   }
-  ndpi_risk_enum handledRisk() { return risk;  }
+  ndpi_risk_enum handledRisk() { return risk; }
 };
 
 #endif

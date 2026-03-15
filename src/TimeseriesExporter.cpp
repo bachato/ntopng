@@ -23,8 +23,9 @@
 
 /* ******************************************************* */
 
-TimeseriesExporter::TimeseriesExporter(NetworkInterface *_if) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+TimeseriesExporter::TimeseriesExporter(NetworkInterface* _if) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   iface = _if;
 }
 
@@ -34,7 +35,7 @@ TimeseriesExporter::~TimeseriesExporter() {}
 
 /* ******************************************************* */
 
-bool TimeseriesExporter::is_table_empty(lua_State *L, int index) {
+bool TimeseriesExporter::is_table_empty(lua_State* L, int index) {
   lua_pushnil(L);
 
   if (lua_next(L, index)) {
@@ -53,8 +54,8 @@ bool TimeseriesExporter::is_table_empty(lua_State *L, int index) {
    See
    https://docs.influxdata.com/influxdb/v1.7/write_protocols/line_protocol_tutorial/#special-characters
 */
-int TimeseriesExporter::escape_spaces(char *buf, int buf_len,
-                                      const char *unescaped) {
+int TimeseriesExporter::escape_spaces(char* buf, int buf_len,
+                                      const char* unescaped) {
   int cur_len = 0;
 
   while (*unescaped) {
@@ -83,8 +84,8 @@ influx_escape_char_err:
 /* ******************************************************* */
 
 int TimeseriesExporter::line_protocol_concat_table_fields(
-    lua_State *L, int index, char *buf, int buf_len,
-    int (*escape_fn)(char *outbuf, int outlen, const char *orig)) {
+    lua_State* L, int index, char* buf, int buf_len,
+    int (*escape_fn)(char* outbuf, int outlen, const char* orig)) {
   bool first = true;
   char val_buf[128];
   int cur_buf_len = 0, n;
@@ -94,7 +95,7 @@ int TimeseriesExporter::line_protocol_concat_table_fields(
   lua_pushnil(L);
 
   while (lua_next(L, index) != 0) {
-    const char *s = lua_tostring(L, -1);
+    const char* s = lua_tostring(L, -1);
 
     write_ok = false;
 
@@ -129,15 +130,15 @@ line_protocol_concat_table_fields_err:
 /* ******************************************************* */
 
 int TimeseriesExporter::line_protocol_write_line(
-    lua_State *vm, char *dst_line, int dst_line_len,
-    int (*escape_fn)(char *outbuf, int outlen, const char *orig)) {
-  char *schema;
+    lua_State* vm, char* dst_line, int dst_line_len,
+    int (*escape_fn)(char* outbuf, int outlen, const char* orig)) {
+  char* schema;
   time_t tstamp;
   int cur_line_len = 0, n;
 
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
     return -1;
-  schema = (char *)lua_tostring(vm, 1);
+  schema = (char*)lua_tostring(vm, 1);
 
   if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TNUMBER) != CONST_LUA_OK)
     return -1;

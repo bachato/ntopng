@@ -24,7 +24,6 @@
 
 #include "ntop_includes.h"
 
-
 #ifdef HAVE_ZMQ
 #ifndef HAVE_NEDGE
 
@@ -34,10 +33,10 @@ class ExportInterface {
   void *publisher, *context;
 
  public:
-  ExportInterface(const char *_endpoint, const char *_script_name = "flow");
+  ExportInterface(const char* _endpoint, const char* _script_name = "flow");
   ~ExportInterface();
 
-  void export_data(char *json);
+  void export_data(char* json);
 };
 #endif
 #endif

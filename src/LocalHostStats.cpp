@@ -23,22 +23,24 @@
 
 /* *************************************** */
 
-LocalHostStats::LocalHostStats(Host *_host) : HostStats(_host) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+LocalHostStats::LocalHostStats(Host* _host) : HostStats(_host) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   top_sites = new (std::nothrow) MostVisitedList(HOST_SITES_TOP_NUMBER);
 
   dns = new (std::nothrow) DnsStats();
   http = new (std::nothrow) HTTPstats(_host);
   icmp = new (std::nothrow) ICMPstats();
-  peers = new (std::nothrow) PeerStats(MAX_DYNAMIC_STATS_VALUES /* 10 as default */);
+  peers = new (std::nothrow)
+      PeerStats(MAX_DYNAMIC_STATS_VALUES /* 10 as default */);
 
   init();
 }
 
 /* *************************************** */
 
-LocalHostStats::LocalHostStats(LocalHostStats &s) : HostStats(s) {
+LocalHostStats::LocalHostStats(LocalHostStats& s) : HostStats(s) {
   top_sites = new (std::nothrow) MostVisitedList(HOST_SITES_TOP_NUMBER);
   peers = new (std::nothrow)
       PeerStats(MAX_DYNAMIC_STATS_VALUES /* 10 as default */);
@@ -83,7 +85,7 @@ void LocalHostStats::init() {
 
 /* *************************************** */
 
-void LocalHostStats::incrVisitedWebSite(char *hostname) {
+void LocalHostStats::incrVisitedWebSite(char* hostname) {
   u_int ip4_0 = 0, ip4_1 = 0, ip4_2 = 0, ip4_3 = 0;
   char *firstdot = NULL, *nextdot = NULL;
 
@@ -111,7 +113,7 @@ void LocalHostStats::incrVisitedWebSite(char *hostname) {
 
 /* *************************************** */
 
-void LocalHostStats::updateStats(const struct timeval *tv) {
+void LocalHostStats::updateStats(const struct timeval* tv) {
   HostStats::updateStats(tv);
 
   if (dns) dns->updateStats(tv);
@@ -137,10 +139,11 @@ void LocalHostStats::updateStats(const struct timeval *tv) {
 
         /* String like `_1.1.1.1@2` */
         snprintf(additional_key_info, sizeof(additional_key_info), "_%s",
-		 host->get_tskey(buf, sizeof(buf)));
-	
-        top_sites->saveOldData(host->getInterface()->get_id(), additional_key_info,
-			       (char *)HASHKEY_LOCAL_HOSTS_TOP_SITES_HOUR_KEYS_PUSHED);
+                 host->get_tskey(buf, sizeof(buf)));
+
+        top_sites->saveOldData(
+            host->getInterface()->get_id(), additional_key_info,
+            (char*)HASHKEY_LOCAL_HOSTS_TOP_SITES_HOUR_KEYS_PUSHED);
       }
     }
 
@@ -162,7 +165,7 @@ void LocalHostStats::updateHostContacts() {
 
 /* *************************************** */
 
-void LocalHostStats::getJSONObject(json_object *my_object,
+void LocalHostStats::getJSONObject(json_object* my_object,
                                    DetailsLevel details_level) {
   HostStats::getJSONObject(my_object, details_level);
 
@@ -182,7 +185,7 @@ void LocalHostStats::getJSONObject(json_object *my_object,
 
 /* *************************************** */
 
-void LocalHostStats::luaHostBehaviour(lua_State *vm) {
+void LocalHostStats::luaHostBehaviour(lua_State* vm) {
   HostStats::luaHostBehaviour(vm);
 
   lua_newtable(vm);
@@ -201,13 +204,13 @@ void LocalHostStats::luaHostBehaviour(lua_State *vm) {
 
 /* *************************************** */
 
-void LocalHostStats::lua(lua_State *vm, bool mask_host,
+void LocalHostStats::lua(lua_State* vm, bool mask_host,
                          DetailsLevel details_level) {
   HostStats::lua(vm, mask_host, details_level);
 
   if ((!mask_host) && top_sites &&
       ntop->getPrefs()->are_top_talkers_enabled()) {
-    top_sites->lua(vm, (char *)"sites", (char *)"sites.old");
+    top_sites->lua(vm, (char*)"sites", (char*)"sites.old");
   }
 
   luaHostBehaviour(vm);
@@ -235,7 +238,7 @@ void LocalHostStats::lua(lua_State *vm, bool mask_host,
 
 /* *************************************** */
 
-void LocalHostStats::luaPeers(lua_State *vm) {
+void LocalHostStats::luaPeers(lua_State* vm) {
   if (peers) {
     if (peers->getSlidingWinStatus()) {
       lua_newtable(vm);
@@ -266,7 +269,7 @@ void LocalHostStats::luaPeers(lua_State *vm) {
 
 /* *************************************** */
 
-void LocalHostStats::lua_get_timeseries(lua_State *vm) {
+void LocalHostStats::lua_get_timeseries(lua_State* vm) {
   luaStats(vm, host->getInterface(), true /* host details */,
            true /* verbose */, true /* tsLua */);
 
@@ -328,9 +331,9 @@ void LocalHostStats::removeRedisSitesKey() {
   /* Deserializing the info */
   top_sites->serializeDeserialize(
       host->getInterface()->get_id(), false, additional_key_info,
-      (char *)HASHKEY_TOP_SITES_SERIALIZATION_KEY,
-      (char *)HASHKEY_LOCAL_HOSTS_TOP_SITES_HOUR_KEYS_PUSHED,
-      (char *)HASHKEY_LOCAL_HOSTS_TOP_SITES_DAY_KEYS_PUSHED);
+      (char*)HASHKEY_TOP_SITES_SERIALIZATION_KEY,
+      (char*)HASHKEY_LOCAL_HOSTS_TOP_SITES_HOUR_KEYS_PUSHED,
+      (char*)HASHKEY_LOCAL_HOSTS_TOP_SITES_DAY_KEYS_PUSHED);
 }
 
 /* *************************************** */
@@ -346,7 +349,7 @@ void LocalHostStats::addRedisSitesKey() {
   /* Serializing the info */
   top_sites->serializeDeserialize(
       host->getInterface()->get_id(), true, additional_key_info,
-      (char *)HASHKEY_TOP_SITES_SERIALIZATION_KEY,
-      (char *)HASHKEY_LOCAL_HOSTS_TOP_SITES_HOUR_KEYS_PUSHED,
-      (char *)HASHKEY_LOCAL_HOSTS_TOP_SITES_DAY_KEYS_PUSHED);
+      (char*)HASHKEY_TOP_SITES_SERIALIZATION_KEY,
+      (char*)HASHKEY_LOCAL_HOSTS_TOP_SITES_HOUR_KEYS_PUSHED,
+      (char*)HASHKEY_LOCAL_HOSTS_TOP_SITES_DAY_KEYS_PUSHED);
 }

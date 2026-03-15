@@ -35,7 +35,7 @@ class DoHDoTStats {
 
   inline void incUses() { num_uses++; }
 
-  void lua(lua_State *vm) {
+  void lua(lua_State* vm) {
     char buf[64];
 
     lua_push_str_table_entry(vm, "ip", ip.print(buf, sizeof(buf)));

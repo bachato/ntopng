@@ -24,15 +24,16 @@
 
 /* ***************************************************** */
 
-void NotPurged::checkNotPurged(Flow *f) {
+void NotPurged::checkNotPurged(Flow* f) {
   if (f->isNotPurged()) {
     FlowAlertType alert_type = NotPurgedAlert::getClassType();
     u_int8_t c_score, s_score;
     risk_percentage cli_score_pctg = CLIENT_FAIR_RISK_PERCENTAGE;
 
-    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
+    computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg,
+                       &c_score, &s_score);
 
-    FlowAlert *alert = buildAlert(f);
+    FlowAlert* alert = buildAlert(f);
     alert->setCliSrvScores(c_score, s_score);
     f->triggerAlert(alert);
   }
@@ -40,15 +41,15 @@ void NotPurged::checkNotPurged(Flow *f) {
 
 /* ***************************************************** */
 
-void NotPurged::periodicUpdate(Flow *f) { checkNotPurged(f); }
+void NotPurged::periodicUpdate(Flow* f) { checkNotPurged(f); }
 
 /* ***************************************************** */
 
-void NotPurged::flowEnd(Flow *f) { checkNotPurged(f); }
+void NotPurged::flowEnd(Flow* f) { checkNotPurged(f); }
 
 /* ***************************************************** */
 
-FlowAlert *NotPurged::buildAlert(Flow *f) {
+FlowAlert* NotPurged::buildAlert(Flow* f) {
   return new NotPurgedAlert(this, f);
 }
 

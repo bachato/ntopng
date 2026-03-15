@@ -23,9 +23,10 @@
 
 /* ****************************************** */
 
-AlertableEntity::AlertableEntity(NetworkInterface *iface, AlertEntity entity) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+AlertableEntity::AlertableEntity(NetworkInterface* iface, AlertEntity entity) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   alert_iface = iface;
   entity_type = entity;
   num_engaged_alerts = 0;
@@ -34,7 +35,8 @@ AlertableEntity::AlertableEntity(NetworkInterface *iface, AlertEntity entity) {
 /* ****************************************** */
 
 AlertableEntity::~AlertableEntity() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
 #if 0
   if(getNumEngagedAlerts() > 0) {
     /* Cannot destroy an alertable entity with currently engaged alerts,
@@ -62,10 +64,10 @@ void AlertableEntity::decNumAlertsEngaged(AlertLevel alert_severity) {
 
 /* ****************************************** */
 
-int AlertableEntity::parseEntityValueIp(const char *alert_entity_value,
-                                        struct in6_addr *ip_raw) {
+int AlertableEntity::parseEntityValueIp(const char* alert_entity_value,
+                                        struct in6_addr* ip_raw) {
   char tmp_entity[128];
-  char *sep;
+  char* sep;
   int rv;
 
   memset(ip_raw, 0, sizeof(*ip_raw));
@@ -84,19 +86,19 @@ int AlertableEntity::parseEntityValueIp(const char *alert_entity_value,
   if (strchr(tmp_entity, ':'))
     rv = inet_pton(AF_INET6, tmp_entity, ip_raw);
   else
-    rv = inet_pton(AF_INET, tmp_entity, ((char *)ip_raw) + 12);
+    rv = inet_pton(AF_INET, tmp_entity, ((char*)ip_raw) + 12);
 
   return (rv);
 }
 
 /* ****************************************** */
 
-bool AlertableEntity::matchesAllowedNetworks(AddressTree *allowed_nets) {
+bool AlertableEntity::matchesAllowedNetworks(AddressTree* allowed_nets) {
   struct in6_addr ip_raw;
   IpAddress addr;
   int netbits;
   std::string entity_value = getEntityValue();
-  const char *alert_entity_value = entity_value.c_str();
+  const char* alert_entity_value = entity_value.c_str();
 
   if (!allowed_nets) return (true);
 
@@ -108,7 +110,7 @@ bool AlertableEntity::matchesAllowedNetworks(AddressTree *allowed_nets) {
     netbits = 128;
   } else {
     // IPv4
-    addr.set(*((u_int32_t *)&ip_raw.s6_addr[12]));
+    addr.set(*((u_int32_t*)&ip_raw.s6_addr[12]));
     netbits = 32;
   }
 

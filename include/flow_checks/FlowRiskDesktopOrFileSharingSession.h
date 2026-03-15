@@ -31,10 +31,10 @@ class FlowRiskDesktopOrFileSharingSession : public FlowRisk {
   }
 
  public:
-  FlowRiskDesktopOrFileSharingSession(){};
-  ~FlowRiskDesktopOrFileSharingSession(){};
+  FlowRiskDesktopOrFileSharingSession() {};
+  ~FlowRiskDesktopOrFileSharingSession() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskDesktopOrFileSharingSessionAlert(this, f);
   }
 

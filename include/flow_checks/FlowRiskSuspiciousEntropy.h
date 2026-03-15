@@ -31,10 +31,10 @@ class FlowRiskSuspiciousEntropy : public FlowRisk {
   }
 
  public:
-  FlowRiskSuspiciousEntropy() : FlowRisk(){};
-  ~FlowRiskSuspiciousEntropy(){};
+  FlowRiskSuspiciousEntropy() : FlowRisk() {};
+  ~FlowRiskSuspiciousEntropy() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskSuspiciousEntropyAlert(this, f);
   }
 

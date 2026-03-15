@@ -23,15 +23,14 @@
 
 /* **************************************************** */
 
-QueuedThreadData::QueuedThreadData(ThreadedActivity *_j,
-				   char *_path,
-				   NetworkInterface *_iface,
-				   time_t _deadline,
-				   PeriodicActivities *_pa,
-				   bool _hourly_daily_activity) {
+QueuedThreadData::QueuedThreadData(ThreadedActivity* _j, char* _path,
+                                   NetworkInterface* _iface, time_t _deadline,
+                                   PeriodicActivities* _pa,
+                                   bool _hourly_daily_activity) {
   j = _j, script_path = strdup(_path), iface = _iface;
   deadline = _deadline, pa = _pa,
-    hourly_daily_activity = _hourly_daily_activity;;
+  hourly_daily_activity = _hourly_daily_activity;
+  ;
 }
 
 /* **************************************************** */
@@ -46,19 +45,20 @@ QueuedThreadData::~QueuedThreadData() {
 
 void QueuedThreadData::run() {
   char name[64], *slash = strrchr(script_path, '/');
-  char *label = slash ? &slash[1] : script_path;
+  char* label = slash ? &slash[1] : script_path;
 
 #ifdef TASK_DEBUG
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "(**) Started task [%s][%s][%s][label=%s]",
-			       script_path, iface->get_name(),
-			       hourly_daily_activity ? "hour/daily" : "sec/min", label);
+  ntop->getTrace()->traceEvent(
+      TRACE_NORMAL, "(**) Started task [%s][%s][%s][label=%s]", script_path,
+      iface->get_name(), hourly_daily_activity ? "hour/daily" : "sec/min",
+      label);
 #endif
 
   if (iface->get_id() == -1)
     snprintf(name, sizeof(name), "q-s-%s", label);
   else
     snprintf(name, sizeof(name), "q-%d-%s", iface->get_id(), label);
-      
+
   ntop->registerThread(name, pthread_self());
 
   pa->incRunningTasks(hourly_daily_activity);
@@ -66,10 +66,10 @@ void QueuedThreadData::run() {
   j->runScript(time(NULL), script_path, iface, deadline);
   j->set_state_sleeping(iface, script_path);
   pa->decRunningTasks(hourly_daily_activity);
-  
+
 #ifdef TASK_DEBUG
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "(**) Completed task [%s][%s][%s]",
-			       script_path, iface->get_name(),
-			       hourly_daily_activity ? "hour/daily" : "sec/min");
+  ntop->getTrace()->traceEvent(
+      TRACE_NORMAL, "(**) Completed task [%s][%s][%s]", script_path,
+      iface->get_name(), hourly_daily_activity ? "hour/daily" : "sec/min");
 #endif
 }

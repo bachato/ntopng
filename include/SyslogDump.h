@@ -28,10 +28,10 @@
 
 class SyslogDump : public FlowDB {
  public:
-  SyslogDump(NetworkInterface *_iface);
+  SyslogDump(NetworkInterface* _iface);
   virtual ~SyslogDump();
 
-  virtual bool dumpFlow(time_t when, Flow *f, char *json);
+  virtual bool dumpFlow(time_t when, Flow* f, char* json);
 };
 
 #endif

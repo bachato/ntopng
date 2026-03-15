@@ -27,12 +27,15 @@
 class AccessControlListAlert : public FlowAlert {
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_access_control_list, alert_category_network};
+    return {NDPI_NO_RISK, flow_alert_access_control_list,
+            alert_category_network};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_ERROR; };
 
-  AccessControlListAlert(FlowCheck *c, Flow *f) : FlowAlert(c, f){ setAlertScore(getDefaultScore()); };
-  ~AccessControlListAlert(){};
+  AccessControlListAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~AccessControlListAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
 };

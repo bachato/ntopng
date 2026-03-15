@@ -23,51 +23,59 @@
 
 /* *************************************** */
 
-AggregatedFlowsStats::AggregatedFlowsStats(const IpAddress* c, const IpAddress* s, u_int8_t _l4_proto,
-					   u_int64_t bytes_sent, u_int64_t bytes_rcvd, u_int32_t score, Bitmap128 flow_alerts) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  num_flows = tot_sent = tot_rcvd = tot_score =
-  key = vlan_id = flow_device_ip = proto_key = 0;
+AggregatedFlowsStats::AggregatedFlowsStats(
+    const IpAddress* c, const IpAddress* s, u_int8_t _l4_proto,
+    u_int64_t bytes_sent, u_int64_t bytes_rcvd, u_int32_t score,
+    Bitmap128 flow_alerts) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  num_flows = tot_sent = tot_rcvd = tot_score = key = vlan_id = flow_device_ip =
+      proto_key = 0;
   l4_proto = _l4_proto;
   proto_name = info_key = NULL;
   server = client = host = NULL;
   alerts_status.reset();
-  
+
   incFlowStats(c, s, bytes_sent, bytes_rcvd, score, flow_alerts);
 }
 
 /* *************************************** */
 
 AggregatedFlowsStats::~AggregatedFlowsStats() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
   if (proto_name) free(proto_name);
-  if (info_key)   free(info_key);
-  if (client)     delete client;
-  if (server)     delete server;
+  if (info_key) free(info_key);
+  if (client) delete client;
+  if (server) delete server;
 }
 
 /* *************************************** */
 
 void AggregatedFlowsStats::incFlowStats(const IpAddress* _client,
-					const IpAddress* _server,
-					u_int64_t bytes_sent, u_int64_t bytes_rcvd,
-					u_int32_t score, Bitmap128 flow_alerts) {
+                                        const IpAddress* _server,
+                                        u_int64_t bytes_sent,
+                                        u_int64_t bytes_rcvd, u_int32_t score,
+                                        Bitmap128 flow_alerts) {
   char buf[128];
 
-  if(_client)
-    clients.insert(std::string(((IpAddress*)_client)->get_ip_hex(buf, sizeof(buf))));
-  
-  if(_server)
-    servers.insert(std::string(((IpAddress*)_server)->get_ip_hex(buf, sizeof(buf))));  
+  if (_client)
+    clients.insert(
+        std::string(((IpAddress*)_client)->get_ip_hex(buf, sizeof(buf))));
 
-  num_flows++, tot_sent += bytes_sent, tot_rcvd += bytes_rcvd, tot_score += score;
+  if (_server)
+    servers.insert(
+        std::string(((IpAddress*)_server)->get_ip_hex(buf, sizeof(buf))));
+
+  num_flows++, tot_sent += bytes_sent, tot_rcvd += bytes_rcvd,
+      tot_score += score;
 
   alerts_status.bitmapOr(flow_alerts);
 }
 
 /* *************************************** */
 
-void AggregatedFlowsStats::setFlowIPVLANDeviceIP(Flow *f) {
+void AggregatedFlowsStats::setFlowIPVLANDeviceIP(Flow* f) {
   setClient(f->get_cli_ip_addr(), f->get_cli_host());
   setServer(f->get_srv_ip_addr(), f->get_srv_host());
   setVlanId(f->get_vlan_id());

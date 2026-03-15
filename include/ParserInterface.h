@@ -28,32 +28,34 @@ class ParserInterface : public NetworkInterface {
  private:
   Mutex companions_lock;
   u_int8_t num_companion_interfaces;
-  NetworkInterface **companion_interfaces;
+  NetworkInterface** companion_interfaces;
 
   virtual void reloadCompanions();
 
  protected:
 #ifdef NTOPNG_PRO
   void exportersLimitReached();
-  SNMPInterfaceRole getRole(u_int32_t exporter_device_ip, u_int32_t if_id_in, u_int32_t if_id_out);
+  SNMPInterfaceRole getRole(u_int32_t exporter_device_ip, u_int32_t if_id_in,
+                            u_int32_t if_id_out);
 #endif
 
-  inline u_int32_t getExporterUniqueSourceID(u_int32_t exporter_device_ip, u_int32_t nprobe_ip) {
+  inline u_int32_t getExporterUniqueSourceID(u_int32_t exporter_device_ip,
+                                             u_int32_t nprobe_ip) {
     return exporter_device_ip + nprobe_ip;
   }
 
  public:
-  ParserInterface(const char *endpoint,
-                  const char *custom_interface_type = NULL);
+  ParserInterface(const char* endpoint,
+                  const char* custom_interface_type = NULL);
   ~ParserInterface();
 
   virtual bool is_ndpi_enabled() const { return (false); };
   virtual u_int getPacketOverhead() {
     return 0; /* Can't determine this for non-packet interfaces */
   }
-  bool processFlow(ParsedFlow *zflow);
+  bool processFlow(ParsedFlow* zflow);
 
-  void deliverFlowToCompanions(ParsedFlow *const flow);
+  void deliverFlowToCompanions(ParsedFlow* const flow);
   inline bool companionsEnabled() { return num_companion_interfaces > 0; };
 };
 

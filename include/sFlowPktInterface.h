@@ -31,19 +31,17 @@ class sFlowPktInterface : public NetworkInterface {
   int sock_fd;
 
  public:
-  sFlowPktInterface(const char *name);
+  sFlowPktInterface(const char* name);
   ~sFlowPktInterface();
 
   void sflowPacketPollLoop();
   virtual bool areTrafficDirectionsSupported() { return (false); };
-  bool isDiscoverableInterface()               { return (false); };
-  virtual InterfaceType getIfType() const      { return (interface_type_PCAP); };
-  virtual const char *get_type() const {
-    return (CONST_INTERFACE_TYPE_PCAP);
-  };
+  bool isDiscoverableInterface() { return (false); };
+  virtual InterfaceType getIfType() const { return (interface_type_PCAP); };
+  virtual const char* get_type() const { return (CONST_INTERFACE_TYPE_PCAP); };
   void startPacketPolling();
   void shutdown();
-  bool set_packet_filter(char *filter) { return(false); }
+  bool set_packet_filter(char* filter) { return (false); }
 };
 
 #endif /* _SFLOW_PKT_INTERFACE_H_ */

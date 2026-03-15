@@ -27,7 +27,7 @@
 class FlowHits : public HostCheck {
  private:
  protected:
-  void triggerFlowHitsAlert(Host *h, HostAlert *engaged_alert, bool attacker,
+  void triggerFlowHitsAlert(Host* h, HostAlert* engaged_alert, bool attacker,
                             u_int16_t hits, u_int64_t threshold,
                             risk_percentage cli_pctg);
 
@@ -35,13 +35,13 @@ class FlowHits : public HostCheck {
 
  public:
   FlowHits();
-  ~FlowHits(){};
+  ~FlowHits() {};
 
-  virtual FlowHitsAlert *allocAlert(Host *h, risk_percentage cli_pctg,
+  virtual FlowHitsAlert* allocAlert(Host* h, risk_percentage cli_pctg,
                                     u_int16_t hits, u_int64_t threshold,
                                     bool attacker) = 0;
 
-  bool loadConfiguration(json_object *config);
+  bool loadConfiguration(json_object* config);
 };
 
 #endif

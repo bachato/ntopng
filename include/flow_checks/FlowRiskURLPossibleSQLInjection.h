@@ -31,11 +31,11 @@ class FlowRiskURLPossibleSQLInjection : public FlowRisk {
   }
 
  public:
-  FlowRiskURLPossibleSQLInjection() : FlowRisk(){};
-  ~FlowRiskURLPossibleSQLInjection(){};
+  FlowRiskURLPossibleSQLInjection() : FlowRisk() {};
+  ~FlowRiskURLPossibleSQLInjection() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    FlowRiskURLPossibleSQLInjectionAlert *alert =
+  FlowAlert* buildAlert(Flow* f) {
+    FlowRiskURLPossibleSQLInjectionAlert* alert =
         new FlowRiskURLPossibleSQLInjectionAlert(this, f);
 
     alert->setCliAttacker(), alert->setSrvVictim();

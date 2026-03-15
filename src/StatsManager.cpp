@@ -21,18 +21,19 @@
 
 #include "ntop_includes.h"
 
-//#define DEBUG_STATS_MANAGER 1
+// #define DEBUG_STATS_MANAGER 1
 
 /* ******************************************* */
 
-StatsManager::StatsManager(NetworkInterface *_iface)
+StatsManager::StatsManager(NetworkInterface* _iface)
     : SQLiteStoreManager(_iface) {
   char filePath[MAX_PATH + 16], fileFullPath[MAX_PATH + 162],
       fileName[MAX_PATH + 16];
-  const char *filename = STATS_MANAGER_STORE_NAME;
+  const char* filename = STATS_MANAGER_STORE_NAME;
 
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   MINUTE_CACHE_NAME = "MINUTE_STATS";
   HOUR_CACHE_NAME = "HOUR_STATS";
   DAY_CACHE_NAME = "DAY_STATS";
@@ -67,7 +68,7 @@ StatsManager::StatsManager(NetworkInterface *_iface)
  *
  * @return Zero in case of success, nonzero in case of failure.
  */
-int StatsManager::openStore(const char *cache_name) {
+int StatsManager::openStore(const char* cache_name) {
   char table_query[STORE_MANAGER_MAX_QUERY];
   int rc;
 
@@ -105,7 +106,7 @@ int StatsManager::openStore(const char *cache_name) {
  * @param key Key to use as boundary.
  * @return Zero in case of success, nonzero in case of error.
  */
-int StatsManager::deleteStatsOlderThan(const char *cache_name,
+int StatsManager::deleteStatsOlderThan(const char* cache_name,
                                        const time_t key) {
   char query[STORE_MANAGER_MAX_QUERY];
   int rc;
@@ -200,9 +201,9 @@ int StatsManager::deleteDayStatsOlderThan(unsigned num_days) {
  *
  * @return Zero in case of success, nonzero in case of error.
  */
-static int get_samplings_db(void *data, int argc, char **argv,
-                            char **azColName) {
-  struct statsManagerRetrieval *retr = (struct statsManagerRetrieval *)data;
+static int get_samplings_db(void* data, int argc, char** argv,
+                            char** azColName) {
+  struct statsManagerRetrieval* retr = (struct statsManagerRetrieval*)data;
 
   if (argc > 1) return -1;
 
@@ -232,8 +233,8 @@ static int get_samplings_db(void *data, int argc, char **argv,
  *
  * @return Zero in case of success, nonzero in case of error.
  */
-int StatsManager::retrieveStatsInterval(struct statsManagerRetrieval *retvals,
-                                        const char *cache_name,
+int StatsManager::retrieveStatsInterval(struct statsManagerRetrieval* retvals,
+                                        const char* cache_name,
                                         const time_t key_start,
                                         const time_t key_end) {
   char query[STORE_MANAGER_MAX_QUERY];
@@ -259,7 +260,7 @@ int StatsManager::retrieveStatsInterval(struct statsManagerRetrieval *retvals,
 
   m.lock(__FILE__, __LINE__);
 
-  rc = exec_query(query, get_samplings_db, (void *)retvals);
+  rc = exec_query(query, get_samplings_db, (void*)retvals);
 
   m.unlock(__FILE__, __LINE__);
 
@@ -283,7 +284,7 @@ int StatsManager::retrieveStatsInterval(struct statsManagerRetrieval *retvals,
  */
 int StatsManager::retrieveMinuteStatsInterval(
     time_t epoch_start, time_t epoch_end,
-    struct statsManagerRetrieval *retvals) {
+    struct statsManagerRetrieval* retvals) {
   if (!retvals) return -1;
 
   return retrieveStatsInterval(retvals, MINUTE_CACHE_NAME, epoch_start,
@@ -307,7 +308,7 @@ int StatsManager::retrieveMinuteStatsInterval(
  */
 int StatsManager::retrieveHourStatsInterval(
     time_t epoch_start, time_t epoch_end,
-    struct statsManagerRetrieval *retvals) {
+    struct statsManagerRetrieval* retvals) {
   if (!retvals) return -1;
 
   return retrieveStatsInterval(retvals, HOUR_CACHE_NAME, epoch_start,
@@ -331,7 +332,7 @@ int StatsManager::retrieveHourStatsInterval(
  */
 int StatsManager::retrieveDayStatsInterval(
     time_t epoch_start, time_t epoch_end,
-    struct statsManagerRetrieval *retvals) {
+    struct statsManagerRetrieval* retvals) {
   if (!retvals) return -1;
 
   return retrieveStatsInterval(retvals, DAY_CACHE_NAME, epoch_start, epoch_end);
@@ -350,10 +351,10 @@ int StatsManager::retrieveDayStatsInterval(
  *
  * @return Zero in case of success, nonzero in case of error.
  */
-int StatsManager::insertSampling(const char *sampling, const char *cache_name,
+int StatsManager::insertSampling(const char* sampling, const char* cache_name,
                                  long int key) {
   char query[STORE_MANAGER_MAX_QUERY];
-  sqlite3_stmt *stmt = NULL;
+  sqlite3_stmt* stmt = NULL;
   int rc = 0;
 
   if (!db) return -1;
@@ -367,7 +368,6 @@ int StatsManager::insertSampling(const char *sampling, const char *cache_name,
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Stats Insert Query: %s", query);
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Stats Insert Data: %s", sampling);
 #endif
-
 
   m.lock(__FILE__, __LINE__);
 
@@ -404,7 +404,7 @@ out:
  *
  * @return Zero in case of success, nonzero in case of failure.
  */
-int StatsManager::insertMinuteSampling(time_t epoch, const char *sampling) {
+int StatsManager::insertMinuteSampling(time_t epoch, const char* sampling) {
   if (!sampling) return -1;
 
   return insertSampling(sampling, MINUTE_CACHE_NAME,
@@ -423,7 +423,7 @@ int StatsManager::insertMinuteSampling(time_t epoch, const char *sampling) {
  *
  * @return Zero in case of success, nonzero in case of failure.
  */
-int StatsManager::insertHourSampling(time_t epoch, const char *sampling) {
+int StatsManager::insertHourSampling(time_t epoch, const char* sampling) {
   if (!sampling) return -1;
 
   return insertSampling(sampling, HOUR_CACHE_NAME,
@@ -442,7 +442,7 @@ int StatsManager::insertHourSampling(time_t epoch, const char *sampling) {
  *
  * @return Zero in case of success, nonzero in case of failure.
  */
-int StatsManager::insertDaySampling(time_t epoch, const char *sampling) {
+int StatsManager::insertDaySampling(time_t epoch, const char* sampling) {
   if (!sampling) return -1;
 
   return insertSampling(sampling, DAY_CACHE_NAME, static_cast<long int>(epoch));
@@ -460,9 +460,9 @@ int StatsManager::insertDaySampling(time_t epoch, const char *sampling) {
  *
  * @return Zero in case of success, nonzero in case of error.
  */
-static int get_sampling_db_callback(void *data, int argc, char **argv,
-                                    char **azColName) {
-  string *buffer = (string *)data;
+static int get_sampling_db_callback(void* data, int argc, char** argv,
+                                    char** azColName) {
+  string* buffer = (string*)data;
 
   if (argc > 1)
     ntop->getTrace()->traceEvent(
@@ -487,7 +487,7 @@ static int get_sampling_db_callback(void *data, int argc, char **argv,
  *
  * @return Zero in case of success, nonzero in case of error.
  */
-int StatsManager::getSampling(string *sampling, const char *cache_name,
+int StatsManager::getSampling(string* sampling, const char* cache_name,
                               time_t key_low, time_t key_high) {
   char query[STORE_MANAGER_MAX_QUERY];
   int rc;
@@ -507,7 +507,7 @@ int StatsManager::getSampling(string *sampling, const char *cache_name,
 
   m.lock(__FILE__, __LINE__);
 
-  rc = exec_query(query, get_sampling_db_callback, (void *)sampling);
+  rc = exec_query(query, get_sampling_db_callback, (void*)sampling);
 
   m.unlock(__FILE__, __LINE__);
 
@@ -527,7 +527,7 @@ int StatsManager::getSampling(string *sampling, const char *cache_name,
  *
  * @return Zero in case of success, nonzero in case of failure.
  */
-int StatsManager::getMinuteSampling(time_t epoch, string *sampling) {
+int StatsManager::getMinuteSampling(time_t epoch, string* sampling) {
   if (!sampling) return -1;
 
   time_t epoch_start = epoch - (epoch % 60);

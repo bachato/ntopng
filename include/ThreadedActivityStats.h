@@ -44,7 +44,8 @@ typedef struct {
                                       during the last run */
   bool last_slow; /* True if slow timeseries updates have been detected during
                      the last run */
-  threaded_activity_timeseries_delta_stats_t last; /* Keep stats for the last run */
+  threaded_activity_timeseries_delta_stats_t
+      last; /* Keep stats for the last run */
 } threaded_activity_timeseries_stats_t;
 
 typedef struct {
@@ -66,7 +67,7 @@ typedef struct {
   struct {
     bool has_drops;
   } alerts;
-  
+
   struct {
     threaded_activity_snmp_stats_t calls;
   } snmp;
@@ -76,7 +77,7 @@ class ThreadedActivityStats {
  private:
   threaded_activity_stats_t ta_stats;
   time_t last_start_time, in_progress_since, last_queued_time;
-  const ThreadedActivity *threaded_activity;
+  const ThreadedActivity* threaded_activity;
   u_long num_not_executed, num_is_slow;
   u_long max_duration_ms, last_duration_ms;
   int progress;
@@ -89,7 +90,7 @@ class ThreadedActivityStats {
   void updateTimeseriesStats(bool write, ticks cur_ticks);
 
  public:
-  ThreadedActivityStats(const ThreadedActivity *ta);
+  ThreadedActivityStats(const ThreadedActivity* ta);
   ~ThreadedActivityStats();
 
   inline time_t getLastQueueTime() const { return (last_queued_time); }
@@ -102,15 +103,15 @@ class ThreadedActivityStats {
   /* Timeseries stats and drops for writes */
   void updateTimeseriesWriteStats(ticks cur_ticks);
   void incTimeseriesWriteDrops(u_long num_drops);
-  void sumTimeseriesStats(ThreadedActivityStats *oth_tas);
+  void sumTimeseriesStats(ThreadedActivityStats* oth_tas);
 
   /* SNMP calls stats */
-  void sumSNMPStats(ThreadedActivityStats *oth_tas);
+  void sumSNMPStats(ThreadedActivityStats* oth_tas);
   void incSNMPStats(u_int8_t version);
   void setFatMIBMode(bool fatMibCall) { snmp_fat_mib_call = fatMibCall; }
-  
+
   void updateStatsQueuedTime(time_t queued_time);
-  void updateStatsBegin(struct timeval *begin);
+  void updateStatsBegin(struct timeval* begin);
   void updateStatsEnd(u_long duration_ms);
 
   void setNotExecutedActivity(bool _not_executed);
@@ -122,9 +123,9 @@ class ThreadedActivityStats {
   }
   inline void setAlertsDrops() { ta_stats.alerts.has_drops = true; }
 
-  void luaTimeseriesStats(lua_State *vm);
-  void luaSNMPStats(lua_State *vm);
-  void lua(lua_State *vm, bool includeTimeseriesStats = true);
+  void luaTimeseriesStats(lua_State* vm);
+  void luaSNMPStats(lua_State* vm);
+  void lua(lua_State* vm, bool includeTimeseriesStats = true);
 
   inline ThreadedActivityState getState() { return (state); }
   void setState(ThreadedActivityState s);

@@ -33,10 +33,10 @@ FlowHits::FlowHits()
 
 /* ***************************************************** */
 
-void FlowHits::triggerFlowHitsAlert(Host *h, HostAlert *engaged, bool attacker,
+void FlowHits::triggerFlowHitsAlert(Host* h, HostAlert* engaged, bool attacker,
                                     u_int16_t hits, u_int64_t threshold,
                                     risk_percentage cli_pctg) {
-  FlowHitsAlert *alert = static_cast<FlowHitsAlert *>(engaged);
+  FlowHitsAlert* alert = static_cast<FlowHitsAlert*>(engaged);
 
   if (!alert) {
     alert = allocAlert(h, cli_pctg, hits, threshold, attacker);
@@ -61,8 +61,8 @@ void FlowHits::triggerFlowHitsAlert(Host *h, HostAlert *engaged, bool attacker,
 
 /* ***************************************************** */
 
-bool FlowHits::loadConfiguration(json_object *config) {
-  json_object *json_threshold;
+bool FlowHits::loadConfiguration(json_object* config) {
+  json_object* json_threshold;
 
   HostCheck::loadConfiguration(config); /* Parse parameters in common */
 

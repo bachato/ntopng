@@ -34,9 +34,9 @@ class RoundTripStats {
   ~RoundTripStats();
 
   void addPoint(u_int32_t thpt);
-  void sum(RoundTripStats *_stats);
-  void luaRTStats(lua_State *vm, const char *stats_name);
-  inline u_int32_t *getStats() { return (stats); };
+  void sum(RoundTripStats* _stats);
+  void luaRTStats(lua_State* vm, const char* stats_name);
+  inline u_int32_t* getStats() { return (stats); };
 };
 
 #endif /* _ROUND_TRIP_STATS_H_ */

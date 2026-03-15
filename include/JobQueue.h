@@ -27,7 +27,7 @@
 /* ******************************* */
 
 class JobQueue {
-  private:
+ private:
   RwLock lock;
   u_int max_num_jobs, job_id;
   std::queue<std::pair<u_int32_t /* id */, std::string /* job */> > job_queue;
@@ -35,13 +35,13 @@ class JobQueue {
   std::map<u_int32_t /* id */, std::pair<time_t, std::string> > completed_jobs;
 
   void purgeOldResults();
-  
-  public:
+
+ public:
   JobQueue();
   ~JobQueue();
-  
-  bool queueJob(char *job, u_int32_t *id);
-  bool getJobResult(u_int32_t job_id, std::string *out);
+
+  bool queueJob(char* job, u_int32_t* id);
+  bool getJobResult(u_int32_t job_id, std::string* out);
   void idleTask();
 };
 

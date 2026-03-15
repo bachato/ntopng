@@ -401,7 +401,7 @@ using namespace std;
 #include "PcapInterface.h"
 #include "sFlowPktInterface.h"
 #endif
-#if defined(NTOPNG_PRO) 
+#if defined(NTOPNG_PRO)
 #include "ViewInterface.h"
 #endif
 #ifdef HAVE_PF_RING
@@ -478,7 +478,7 @@ using namespace clickhouse;
 #include "MacStats.h"
 #include "Mac.h"
 #include "PartializableFlowTrafficStats.h"
-#if defined(NTOPNG_PRO) 
+#if defined(NTOPNG_PRO)
 #include "ViewInterfaceFlowStats.h"
 #endif
 #include "FlowTrafficStats.h"

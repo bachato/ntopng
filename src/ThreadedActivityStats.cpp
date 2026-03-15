@@ -25,8 +25,9 @@ ticks ThreadedActivityStats::tickspersec = Utils::gettickspersec();
 
 /* ******************************************* */
 
-ThreadedActivityStats::ThreadedActivityStats(const ThreadedActivity *ta) {
-  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+ThreadedActivityStats::ThreadedActivityStats(const ThreadedActivity* ta) {
+  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s",
+  // __FILE__);
   memset(&ta_stats, 0, sizeof(ta_stats));
   last_start_time = in_progress_since = 0;
   last_queued_time = deadline = scheduled_time = 0;
@@ -52,7 +53,7 @@ void ThreadedActivityStats::incTimeseriesWriteDrops(u_long num_drops) {
 /* ******************************************* */
 
 void ThreadedActivityStats::updateTimeseriesWriteStats(ticks cur_ticks) {
-  threaded_activity_timeseries_delta_stats_t *last_stats =
+  threaded_activity_timeseries_delta_stats_t* last_stats =
       &ta_stats.timeseries.write.last;
 
   /* Increase overall total stats */
@@ -72,7 +73,7 @@ void ThreadedActivityStats::updateStatsQueuedTime(time_t queued_time) {
 
 /* ******************************************* */
 
-void ThreadedActivityStats::updateStatsBegin(struct timeval *begin) {
+void ThreadedActivityStats::updateStatsBegin(struct timeval* begin) {
   in_progress_since = last_start_time = begin->tv_sec;
 
   /* Start over */
@@ -104,33 +105,38 @@ void ThreadedActivityStats::updateStatsEnd(u_long duration_ms) {
 
 /* ******************************************* */
 
-void ThreadedActivityStats::sumTimeseriesStats(ThreadedActivityStats *oth_tas) {
-  threaded_activity_timeseries_stats_t *cur_stats = &ta_stats.timeseries.write;
-  threaded_activity_timeseries_stats_t *oth_stats = &oth_tas->ta_stats.timeseries.write;
+void ThreadedActivityStats::sumTimeseriesStats(ThreadedActivityStats* oth_tas) {
+  threaded_activity_timeseries_stats_t* cur_stats = &ta_stats.timeseries.write;
+  threaded_activity_timeseries_stats_t* oth_stats =
+      &oth_tas->ta_stats.timeseries.write;
 
   cur_stats->tot_calls += oth_stats->tot_calls;
   cur_stats->tot_drops += oth_stats->tot_drops;
-  cur_stats->last_max_call_duration_ms = max_val(cur_stats->last_max_call_duration_ms, oth_stats->last_max_call_duration_ms);
-  if (cur_stats->last_avg_call_duration_ms == 0) cur_stats->last_avg_call_duration_ms = oth_stats->last_avg_call_duration_ms;
+  cur_stats->last_max_call_duration_ms =
+      max_val(cur_stats->last_max_call_duration_ms,
+              oth_stats->last_max_call_duration_ms);
+  if (cur_stats->last_avg_call_duration_ms == 0)
+    cur_stats->last_avg_call_duration_ms = oth_stats->last_avg_call_duration_ms;
   if (oth_stats->last_slow) cur_stats->last_slow = true;
 }
 
 /* ******************************************* */
 
-void ThreadedActivityStats::sumSNMPStats(ThreadedActivityStats *oth_tas) {
-  threaded_activity_snmp_stats_t *cur_stats = &ta_stats.snmp.calls;
-  threaded_activity_snmp_stats_t *oth_stats = &oth_tas->ta_stats.snmp.calls;
+void ThreadedActivityStats::sumSNMPStats(ThreadedActivityStats* oth_tas) {
+  threaded_activity_snmp_stats_t* cur_stats = &ta_stats.snmp.calls;
+  threaded_activity_snmp_stats_t* oth_stats = &oth_tas->ta_stats.snmp.calls;
 
   cur_stats->num_calls_fat_mibs_v1_v2c += oth_stats->num_calls_fat_mibs_v1_v2c;
   cur_stats->num_calls_fat_mibs_v3 += oth_stats->num_calls_fat_mibs_v3;
-  cur_stats->num_calls_other_mibs_v1_v2c += oth_stats->num_calls_other_mibs_v1_v2c;
+  cur_stats->num_calls_other_mibs_v1_v2c +=
+      oth_stats->num_calls_other_mibs_v1_v2c;
   cur_stats->num_calls_other_mibs_v3 += oth_stats->num_calls_other_mibs_v3;
 }
 
 /* ******************************************* */
 
-void ThreadedActivityStats::luaTimeseriesStats(lua_State *vm) {
-  threaded_activity_timeseries_stats_t *cur_stats = &ta_stats.timeseries.write;
+void ThreadedActivityStats::luaTimeseriesStats(lua_State* vm) {
+  threaded_activity_timeseries_stats_t* cur_stats = &ta_stats.timeseries.write;
 
   lua_newtable(vm);
 
@@ -143,8 +149,10 @@ void ThreadedActivityStats::luaTimeseriesStats(lua_State *vm) {
   /* Stats for the last run */
   lua_newtable(vm); /* "last" */
 
-  lua_push_float_table_entry(vm, "max_call_duration_ms", cur_stats->last_max_call_duration_ms);
-  lua_push_float_table_entry(vm, "avg_call_duration_ms", cur_stats->last_avg_call_duration_ms);
+  lua_push_float_table_entry(vm, "max_call_duration_ms",
+                             cur_stats->last_max_call_duration_ms);
+  lua_push_float_table_entry(vm, "avg_call_duration_ms",
+                             cur_stats->last_avg_call_duration_ms);
   lua_push_bool_table_entry(vm, "is_slow", cur_stats->last_slow);
 
   lua_pushstring(vm, "last");
@@ -162,18 +170,23 @@ void ThreadedActivityStats::luaTimeseriesStats(lua_State *vm) {
 
 /* ******************************************* */
 
-void ThreadedActivityStats::luaSNMPStats(lua_State *vm) {
-  threaded_activity_snmp_stats_t *cur_stats = &ta_stats.snmp.calls;
+void ThreadedActivityStats::luaSNMPStats(lua_State* vm) {
+  threaded_activity_snmp_stats_t* cur_stats = &ta_stats.snmp.calls;
 
   lua_newtable(vm);
 
   lua_newtable(vm); /* "calls" */
 
   /* Overall totals */
-  lua_push_uint64_table_entry(vm, "fat_mibs_v1_v2c", (u_int64_t)cur_stats->num_calls_fat_mibs_v1_v2c);
-  lua_push_uint64_table_entry(vm, "fat_mibs_v3", (u_int64_t)cur_stats->num_calls_fat_mibs_v3);
-  lua_push_uint64_table_entry(vm, "other_mibs_v1_v2c", (u_int64_t)cur_stats->num_calls_other_mibs_v1_v2c);
-  lua_push_uint64_table_entry(vm, "other_mibs_v3", (u_int64_t)cur_stats->num_calls_other_mibs_v3);
+  lua_push_uint64_table_entry(vm, "fat_mibs_v1_v2c",
+                              (u_int64_t)cur_stats->num_calls_fat_mibs_v1_v2c);
+  lua_push_uint64_table_entry(vm, "fat_mibs_v3",
+                              (u_int64_t)cur_stats->num_calls_fat_mibs_v3);
+  lua_push_uint64_table_entry(
+      vm, "other_mibs_v1_v2c",
+      (u_int64_t)cur_stats->num_calls_other_mibs_v1_v2c);
+  lua_push_uint64_table_entry(vm, "other_mibs_v3",
+                              (u_int64_t)cur_stats->num_calls_other_mibs_v3);
 
   lua_pushstring(vm, "calls");
   lua_insert(vm, -2);
@@ -200,18 +213,19 @@ void ThreadedActivityStats::setSlowPeriodicActivity(bool _slow) {
 
 /* ******************************************* */
 
-void ThreadedActivityStats::lua(lua_State *vm, bool includeTimeseriesStats) {
+void ThreadedActivityStats::lua(lua_State* vm, bool includeTimeseriesStats) {
   lua_newtable(vm);
 
-  lua_push_uint64_table_entry(vm, "max_duration_ms", (u_int64_t)max_duration_ms);
-  lua_push_uint64_table_entry(vm, "last_duration_ms", (u_int64_t)last_duration_ms);
+  lua_push_uint64_table_entry(vm, "max_duration_ms",
+                              (u_int64_t)max_duration_ms);
+  lua_push_uint64_table_entry(vm, "last_duration_ms",
+                              (u_int64_t)last_duration_ms);
 
   lua_pushstring(vm, "duration");
   lua_insert(vm, -2);
   lua_settable(vm, -3);
 
-  if (includeTimeseriesStats)
-    luaTimeseriesStats(vm);
+  if (includeTimeseriesStats) luaTimeseriesStats(vm);
 
   if (in_progress_since)
     lua_push_uint64_table_entry(vm, "in_progress_since", in_progress_since);
@@ -261,27 +275,27 @@ void ThreadedActivityStats::setState(ThreadedActivityState next_state) {
 /* ******************************************* */
 
 void ThreadedActivityStats::incSNMPStats(u_int8_t version) {
-  if(snmp_fat_mib_call) {
-    switch(version) {
-    case 0: /* v1 */
-    case 1: /* v2c */
-      ta_stats.snmp.calls.num_calls_fat_mibs_v1_v2c++;
-      break;
+  if (snmp_fat_mib_call) {
+    switch (version) {
+      case 0: /* v1 */
+      case 1: /* v2c */
+        ta_stats.snmp.calls.num_calls_fat_mibs_v1_v2c++;
+        break;
 
-    case 2: /* v3 */
-      ta_stats.snmp.calls.num_calls_fat_mibs_v3++;
-      break;
+      case 2: /* v3 */
+        ta_stats.snmp.calls.num_calls_fat_mibs_v3++;
+        break;
     }
   } else {
-    switch(version) {
-    case 0: /* v1 */
-    case 1: /* v2c */
-      ta_stats.snmp.calls.num_calls_other_mibs_v1_v2c++;
-      break;
+    switch (version) {
+      case 0: /* v1 */
+      case 1: /* v2c */
+        ta_stats.snmp.calls.num_calls_other_mibs_v1_v2c++;
+        break;
 
-    case 2: /* v3 */
-      ta_stats.snmp.calls.num_calls_other_mibs_v3++;
-      break;
+      case 2: /* v3 */
+        ta_stats.snmp.calls.num_calls_other_mibs_v3++;
+        break;
     }
   }
 }

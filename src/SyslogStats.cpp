@@ -24,7 +24,8 @@
 /* *************************************** */
 
 SyslogStats::SyslogStats() {
-  //if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s",
+  // __FILE__);
   resetStats();
 }
 
@@ -43,10 +44,8 @@ void SyslogStats::resetStats() {
 /* *************************************** */
 
 void SyslogStats::incStats(u_int32_t _num_total_events,
-                           u_int32_t _num_malformed,
-                           u_int32_t _num_dispatched,
-                           u_int32_t _num_unhandled,
-                           u_int32_t _num_alerts,
+                           u_int32_t _num_malformed, u_int32_t _num_dispatched,
+                           u_int32_t _num_unhandled, u_int32_t _num_alerts,
                            u_int32_t _num_host_correlations,
                            u_int32_t _num_collected_flows) {
   num_total_events += _num_total_events;
@@ -60,9 +59,9 @@ void SyslogStats::incStats(u_int32_t _num_total_events,
 
 /* *************************************** */
 
-char *SyslogStats::serialize() {
-  json_object *my_object = getJSONObject();
-  char *rsp = strdup(json_object_to_json_string(my_object));
+char* SyslogStats::serialize() {
+  json_object* my_object = getJSONObject();
+  char* rsp = strdup(json_object_to_json_string(my_object));
 
   /* Free memory */
   json_object_put(my_object);
@@ -72,8 +71,8 @@ char *SyslogStats::serialize() {
 
 /* ******************************************* */
 
-json_object *SyslogStats::getJSONObject() {
-  json_object *my_object;
+json_object* SyslogStats::getJSONObject() {
+  json_object* my_object;
 
   my_object = json_object_new_object();
 
@@ -110,7 +109,7 @@ json_object *SyslogStats::getJSONObject() {
 
 /* ******************************************* */
 
-void SyslogStats::lua(lua_State *vm) {
+void SyslogStats::lua(lua_State* vm) {
   lua_newtable(vm);
 
   lua_push_uint64_table_entry(vm, "tot_events", num_total_events);
@@ -128,7 +127,7 @@ void SyslogStats::lua(lua_State *vm) {
 
 /* ******************************************* */
 
-void SyslogStats::sum(SyslogStats *s) const {
+void SyslogStats::sum(SyslogStats* s) const {
   s->num_total_events += num_total_events;
   s->num_malformed += num_malformed;
   s->num_dispatched += num_dispatched;

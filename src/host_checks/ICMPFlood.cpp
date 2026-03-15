@@ -24,7 +24,7 @@
 
 /* ***************************************************** */
 
-void ICMPFlood::periodicUpdate(Host *h, HostAlert *engaged_alert) {
+void ICMPFlood::periodicUpdate(Host* h, HostAlert* engaged_alert) {
   u_int16_t hits = 0;
 
   if ((hits = h->icmp_flood_attacker_hits()) > threshold)

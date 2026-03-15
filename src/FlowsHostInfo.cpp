@@ -23,36 +23,34 @@
 
 /* ************************************************ */
 
-FlowsHostInfo::FlowsHostInfo(IpAddress* _ip, Host* _host) { 
-    ip = NULL;
-    host = NULL;
-    if (_ip) ip = _ip;
-    if (host) host = _host; 
+FlowsHostInfo::FlowsHostInfo(IpAddress* _ip, Host* _host) {
+  ip = NULL;
+  host = NULL;
+  if (_ip) ip = _ip;
+  if (host) host = _host;
 };
 
 /* ************************************************ */
 
 const char* FlowsHostInfo::getIP(char* buf, u_int16_t buf_len) {
-  return (ip ? ip->print(buf, buf_len) : (char *)"");
+  return (ip ? ip->print(buf, buf_len) : (char*)"");
 }
 
 /* ************************************************ */
 
 char* FlowsHostInfo::getHostName(char* buf, u_int16_t buf_len) {
-  return(host ? host->get_visual_name(buf, buf_len) : (char *)"");
+  return (host ? host->get_visual_name(buf, buf_len) : (char*)"");
 }
 
 /* ************************************************ */
 
 const char* FlowsHostInfo::getIPHex(char* buf, u_int16_t buf_len) {
-  return (ip ? ip->get_ip_hex(buf, buf_len) : (char *)"");
+  return (ip ? ip->get_ip_hex(buf, buf_len) : (char*)"");
 }
 
 /* ************************************************ */
 
-bool FlowsHostInfo::isHostInMem() { 
-  return (host ? true : false); 
-}
+bool FlowsHostInfo::isHostInMem() { return (host ? true : false); }
 
 /* ************************************************ */
 

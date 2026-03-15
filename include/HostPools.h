@@ -31,64 +31,65 @@ class Mac;
 class HostPools {
  private:
   VLANAddressTree *tree, *tree_shadow;
-  NetworkInterface *iface;
+  NetworkInterface* iface;
   u_int16_t max_num_pools;
   int32_t *num_active_hosts_inline, *num_active_hosts_offline;
   int32_t *num_active_l2_devices_inline, *num_active_l2_devices_offline;
   HostPoolStats **stats, **stats_shadow;
 
 #ifdef HAVE_NEDGE
-  bool *children_safe;
-  bool *forge_global_dns;
-  bool *block_blacklisted_flows;
-  bool *dynamic_blacklist_enabled;
-  u_int8_t *routing_policy_id;
-  u_int16_t *pool_shaper;
-  u_int32_t *schedule_bitmap;
-  u_int32_t *max_flow_size;
-  bool *enforce_quotas_per_pool_member; /* quotas can be pool-wide or per pool
+  bool* children_safe;
+  bool* forge_global_dns;
+  bool* block_blacklisted_flows;
+  bool* dynamic_blacklist_enabled;
+  u_int8_t* routing_policy_id;
+  u_int16_t* pool_shaper;
+  u_int32_t* schedule_bitmap;
+  u_int32_t* max_flow_size;
+  bool* enforce_quotas_per_pool_member; /* quotas can be pool-wide or per pool
                                            member */
-  bool *enforce_shapers_per_pool_member;
+  bool* enforce_shapers_per_pool_member;
 #endif
 
 #ifdef HAVE_NEDGE
-  AddressTree **dynamicBlacklist;
+  AddressTree** dynamicBlacklist;
 #endif
 
-  inline HostPoolStats *getPoolStats(u_int16_t host_pool_id) {
+  inline HostPoolStats* getPoolStats(u_int16_t host_pool_id) {
     if ((host_pool_id >= max_num_pools) || (!stats)) return NULL;
     return stats[host_pool_id];
   }
   void reloadPoolStats();
-  void storeStats(HostPoolStats **stats);
-  static void deleteStats(HostPoolStats ***hps);
+  void storeStats(HostPoolStats** stats);
+  static void deleteStats(HostPoolStats*** hps);
 
-  void swap(VLANAddressTree *new_trees, HostPoolStats **new_stats);
+  void swap(VLANAddressTree* new_trees, HostPoolStats** new_stats);
 
-  inline void incNumMembers(u_int16_t pool_id, int32_t *ctr) const {
+  inline void incNumMembers(u_int16_t pool_id, int32_t* ctr) const {
     if (ctr && pool_id < max_num_pools) ctr[pool_id]++;
   };
-  inline void decNumMembers(u_int16_t pool_id, int32_t *ctr) const {
+  inline void decNumMembers(u_int16_t pool_id, int32_t* ctr) const {
     if (ctr && pool_id < max_num_pools) ctr[pool_id]--;
   };
 
  public:
-  HostPools(NetworkInterface *_iface);
+  HostPools(NetworkInterface* _iface);
   virtual ~HostPools();
 
   void reloadPools();
-  void reloadPool(u_int16_t _pool_id, VLANAddressTree *new_tree, HostPoolStats **new_stats);
-  u_int16_t getPool(Host *h, bool *mac_match = NULL);
-  u_int16_t getPool(Mac *m);
-  u_int16_t getPoolByName(const char *pool_name);
+  void reloadPool(u_int16_t _pool_id, VLANAddressTree* new_tree,
+                  HostPoolStats** new_stats);
+  u_int16_t getPool(Host* h, bool* mac_match = NULL);
+  u_int16_t getPool(Mac* m);
+  u_int16_t getPoolByName(const char* pool_name);
   u_int16_t getCurrentHostPoolsNumber();
   u_int32_t getCurrentMaxHostPoolsMembers();
 
-  bool findIpPool(IpAddress *ip, u_int16_t vlan_id, u_int16_t *found_pool,
-                  ndpi_patricia_node_t **found_node);
-  bool findMacPool(const u_int8_t *const mac, u_int16_t *found_pool);
-  bool findMacPool(Mac *mac, u_int16_t *found_pool);
-  void lua(lua_State *vm);
+  bool findIpPool(IpAddress* ip, u_int16_t vlan_id, u_int16_t* found_pool,
+                  ndpi_patricia_node_t** found_node);
+  bool findMacPool(const u_int8_t* const mac, u_int16_t* found_pool);
+  bool findMacPool(Mac* mac, u_int16_t* found_pool);
+  void lua(lua_State* vm);
 
   inline int32_t getNumPoolHosts(u_int16_t pool_id) {
     if (pool_id >= max_num_pools) return NO_HOST_POOL_ID;
@@ -124,16 +125,16 @@ class HostPools {
                     u_int16_t ndpi_proto, ndpi_protocol_category_t category_id,
                     u_int64_t sent_packets, u_int64_t sent_bytes,
                     u_int64_t rcvd_packets, u_int64_t rcvd_bytes);
-  void updateStats(const struct timeval *tv);
-  void luaStats(lua_State *vm);
-  void luaStats(lua_State *mv, u_int16_t pool_id);
+  void updateStats(const struct timeval* tv);
+  void luaStats(lua_State* vm);
+  void luaStats(lua_State* mv, u_int16_t pool_id);
 
   /* To be called on the same thread as incPoolStats */
   void checkPoolsStatsReset();
 
   inline bool getProtoStats(u_int16_t host_pool_id, u_int16_t ndpi_proto,
-                            u_int64_t *bytes, u_int32_t *duration) {
-    HostPoolStats *hps;
+                            u_int64_t* bytes, u_int32_t* duration) {
+    HostPoolStats* hps;
     if (!(hps = getPoolStats(host_pool_id))) return false;
 
     hps->getProtoStats(ndpi_proto, bytes, duration);
@@ -142,17 +143,17 @@ class HostPools {
 
   inline bool getCategoryStats(u_int16_t host_pool_id,
                                ndpi_protocol_category_t category_id,
-                               u_int64_t *bytes, u_int32_t *duration) {
-    HostPoolStats *hps;
+                               u_int64_t* bytes, u_int32_t* duration) {
+    HostPoolStats* hps;
     if (!(hps = getPoolStats(host_pool_id))) return false;
 
     hps->getCategoryStats(category_id, bytes, duration);
     return true;
   }
 
-  inline bool getStats(u_int16_t host_pool_id, u_int64_t *bytes,
-                       u_int32_t *duration) {
-    HostPoolStats *hps;
+  inline bool getStats(u_int16_t host_pool_id, u_int64_t* bytes,
+                       u_int32_t* duration) {
+    HostPoolStats* hps;
     if (!(hps = getPoolStats(host_pool_id))) return false;
 
     hps->getStats(bytes, duration);
@@ -197,7 +198,8 @@ class HostPools {
   }
 
   inline bool doBlockBlacklistedFlows(u_int16_t pool_id) {
-    return ((pool_id < max_num_pools) ? block_blacklisted_flows[pool_id] : false);
+    return ((pool_id < max_num_pools) ? block_blacklisted_flows[pool_id]
+                                      : false);
   }
 
   inline u_int32_t getMaxFlowSize(u_int16_t pool_id) {
@@ -209,13 +211,13 @@ class HostPools {
   inline AddressTree* getDynamicBlacklist(u_int16_t pool_id) const {
     return ((pool_id < max_num_pools) ? dynamicBlacklist[pool_id] : NULL);
   }
-  
-  inline bool setDynamicBlacklist(u_int16_t pool_id, AddressTree *at) const {
-    if(pool_id < max_num_pools) {
+
+  inline bool setDynamicBlacklist(u_int16_t pool_id, AddressTree* at) const {
+    if (pool_id < max_num_pools) {
       dynamicBlacklist[pool_id] = at;
-      return(true);
+      return (true);
     } else
-      return(false);
+      return (false);
   }
 #endif
 };

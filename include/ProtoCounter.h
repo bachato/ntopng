@@ -28,9 +28,9 @@ class ProtoCounter {
  private:
   u_int16_t proto_id;
 #ifdef NTOPNG_PRO
-  BehaviorAnalysis *behavior_bytes_traffic;
+  BehaviorAnalysis* behavior_bytes_traffic;
 #endif
-  ThroughputStats *bytes_thpt;
+  ThroughputStats* bytes_thpt;
   TrafficCounter packets, bytes;
   u_int32_t duration /* sec */,
       last_epoch_update; /* useful to avoid multiple updates */
@@ -41,10 +41,10 @@ class ProtoCounter {
                bool enable_behavior_stats);
   ~ProtoCounter();
 
-  void set(ProtoCounter *p);
-  void sum(ProtoCounter *p);
-  void print(u_int16_t proto_id, NetworkInterface *iface);
-  void lua(lua_State *vm, NetworkInterface *iface, bool tsLua, bool diff);
+  void set(ProtoCounter* p);
+  void sum(ProtoCounter* p);
+  void print(u_int16_t proto_id, NetworkInterface* iface);
+  void lua(lua_State* vm, NetworkInterface* iface, bool tsLua, bool diff);
 
   inline bool has_throughput_stats() {
     return (
@@ -63,7 +63,7 @@ class ProtoCounter {
 #endif
   }
 
-  void updateStats(const struct timeval *tv, time_t nextMinPeriodicUpdate);
+  void updateStats(const struct timeval* tv, time_t nextMinPeriodicUpdate);
   void incStats(u_int32_t when, u_int64_t sent_packets, u_int64_t sent_bytes,
                 u_int64_t rcvd_packets, u_int64_t rcvd_bytes);
   inline TrafficCounter get_packets() { return (packets); }
@@ -71,9 +71,9 @@ class ProtoCounter {
   inline u_int32_t get_duration() { return (duration); }
   inline u_int32_t get_total_flows() { return (total_flows); }
   inline void inc_total_flows() { total_flows++; }
-  void addProtoJson(json_object *my_object, NetworkInterface *iface);
+  void addProtoJson(json_object* my_object, NetworkInterface* iface);
   void resetStats();
-  bool deserialize(json_object *o);
+  bool deserialize(json_object* o);
 };
 
 #endif /* _PROTO_COUNTER_H_ */

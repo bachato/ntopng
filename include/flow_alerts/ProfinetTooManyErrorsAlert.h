@@ -32,15 +32,17 @@ class ProfinetTooManyErrorsAlert : public FlowAlert {
 
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_profinet_too_many_errors, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_profinet_too_many_errors,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_ERROR; };
 
-  ProfinetTooManyErrorsAlert(FlowCheck* c, Flow* f, u_int32_t _num_errors) : FlowAlert(c, f) {
+  ProfinetTooManyErrorsAlert(FlowCheck* c, Flow* f, u_int32_t _num_errors)
+      : FlowAlert(c, f) {
     num_errors = _num_errors;
     setAlertScore(getDefaultScore());
   };
-  ~ProfinetTooManyErrorsAlert(){};
+  ~ProfinetTooManyErrorsAlert() {};
 
   bool autoAck() const { return false; };
 

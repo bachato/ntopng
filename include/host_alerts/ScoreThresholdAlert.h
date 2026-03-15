@@ -29,7 +29,7 @@ class ScoreThresholdAlert : public HostAlert {
   bool is_client_alert;
   u_int32_t value, threshold;
   u_int8_t alert_score;
-  
+
   ndpi_serializer* getAlertJSON(ndpi_serializer* serializer) {
     if (serializer == NULL) return NULL;
 
@@ -52,7 +52,7 @@ class ScoreThresholdAlert : public HostAlert {
     threshold = _threshold;
     alert_score = SCORE_LEVEL_SEVERE;
   }
-  ~ScoreThresholdAlert(){};
+  ~ScoreThresholdAlert() {};
 
   static HostAlertType getClassType() {
     return {host_alert_score_threshold, alert_category_security};

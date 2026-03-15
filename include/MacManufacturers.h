@@ -25,8 +25,8 @@
 #include "ntop_includes.h"
 
 typedef struct {
-  char *manufacturer_name;
-  char *short_name;
+  char* manufacturer_name;
+  char* short_name;
 } mac_manufacturers_t;
 
 class MacManufacturers {
@@ -43,11 +43,11 @@ class MacManufacturers {
   void init();
 
  public:
-  MacManufacturers(const char *mac_file_home);
+  MacManufacturers(const char* mac_file_home);
   ~MacManufacturers();
 
-  const char *getManufacturer(u_int8_t mac[]);
-  void getMacManufacturer(u_int8_t mac[], lua_State *vm);
+  const char* getManufacturer(u_int8_t mac[]);
+  void getMacManufacturer(u_int8_t mac[], lua_State* vm);
 };
 
 #endif /* _MAC_MANUFACTURERS_H_ */

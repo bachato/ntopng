@@ -19,35 +19,35 @@
  *
  */
 
-
 #include "ntop_includes.h"
 #include "flow_checks_includes.h"
 
 /* ***************************************************** */
 
-void RemoteAccess::protocolDetected(Flow *f) {
+void RemoteAccess::protocolDetected(Flow* f) {
   FlowAlertType alert_type = RemoteAccessAlert::getClassType();
   u_int8_t c_score, s_score;
   risk_percentage cli_score_pctg = CLIENT_FAIR_RISK_PERCENTAGE;
-  Host *cli = f->get_cli_host();
+  Host* cli = f->get_cli_host();
 
   switch (f->get_protocol_category()) {
     case NDPI_PROTOCOL_CATEGORY_REMOTE_ACCESS:
     case NDPI_PROTOCOL_CATEGORY_VPN:
     case NDPI_PROTOCOL_CATEGORY_FILE_SHARING:
       if (!f->isLocalToLocal()) {
-  #ifdef DEBUG_REMOTE_ACCESS
+#ifdef DEBUG_REMOTE_ACCESS
         ntop->getTrace()->traceEvent(
             TRACE_WARNING, "SYN Flag %s for flow %p; flags: %u",
             (f->getTcpFlags() & TH_SYN) ? "set" : "not set", f,
             f->getTcpFlags());
         break;
-  #endif
+#endif
         if (cli) cli->incrRemoteAccess();
 
-        computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
+        computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id),
+                           cli_score_pctg, &c_score, &s_score);
 
-        FlowAlert *alert = buildAlert(f);
+        FlowAlert* alert = buildAlert(f);
         alert->setCliSrvScores(c_score, s_score);
         f->triggerAlert(alert);
       }
@@ -59,8 +59,8 @@ void RemoteAccess::protocolDetected(Flow *f) {
 
 /* ***************************************************** */
 
-void RemoteAccess::flowEnd(Flow *f) {
-  Host *cli = f->get_cli_host();
+void RemoteAccess::flowEnd(Flow* f) {
+  Host* cli = f->get_cli_host();
 
   switch (f->get_protocol_category()) {
     case NDPI_PROTOCOL_CATEGORY_REMOTE_ACCESS:
@@ -76,7 +76,7 @@ void RemoteAccess::flowEnd(Flow *f) {
 
 /* ***************************************************** */
 
-FlowAlert *RemoteAccess::buildAlert(Flow *f) {
+FlowAlert* RemoteAccess::buildAlert(Flow* f) {
   return new RemoteAccessAlert(this, f);
 }
 

@@ -8,7 +8,7 @@ class CountriesContacts : public HostCheck {
   u_int8_t countries_contacts_threshold;
 
  private:
-  CountriesContactsAlert *allocAlert(HostCheck *c, Host *f,
+  CountriesContactsAlert* allocAlert(HostCheck* c, Host* f,
                                      risk_percentage cli_pctg,
                                      u_int8_t _countries_contacts,
                                      u_int8_t _countries_contacts_threshold) {
@@ -20,11 +20,11 @@ class CountriesContacts : public HostCheck {
   CountriesContacts();
   ~CountriesContacts() {}
 
-  u_int8_t getContactedCountries(Host *h) {
+  u_int8_t getContactedCountries(Host* h) {
     return h->getCountriesContactsCardinality();
   }
-  void periodicUpdate(Host *h, HostAlert *engaged_alert);
-  bool loadConfiguration(json_object *config);
+  void periodicUpdate(Host* h, HostAlert* engaged_alert);
+  bool loadConfiguration(json_object* config);
   HostCheckID getID() const { return host_check_countries_contacts; }
   std::string getName() const { return (std::string("countries_contacts")); }
 };

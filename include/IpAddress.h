@@ -65,9 +65,9 @@ class IpAddress {
     return ((addr.ipVersion == 6) ? &addr.ipType.ipv6 : NULL);
   }
 
-  void fillIP(ndpi_ip_addr_t *ip_addr);
+  void fillIP(ndpi_ip_addr_t* ip_addr);
   inline const struct ipAddress* getIP() const { return (&addr); };
-  inline u_int8_t getVersion() { return(addr.ipVersion); }
+  inline u_int8_t getVersion() { return (addr.ipVersion); }
   inline bool equal(u_int32_t ipv4_addr) const {
     if ((addr.ipVersion == 4) && (addr.ipType.ipv4 == ipv4_addr))
       return (true);
@@ -81,7 +81,9 @@ class IpAddress {
     else
       return (false);
   };
-  inline bool equal(const IpAddress* const _ip) const { return((this->compare(_ip) == 0) ? true : false); };
+  inline bool equal(const IpAddress* const _ip) const {
+    return ((this->compare(_ip) == 0) ? true : false);
+  };
   int compare(const IpAddress* const ip) const;
   inline u_int32_t key() const { return (ip_key); };
   inline void set(u_int32_t _ipv4) {
@@ -111,14 +113,20 @@ class IpAddress {
   void set(union usa* ip);
   void set(const char* ip);
   void reloadBlacklist(ndpi_detection_module_struct* ndpi_struct);
-  inline bool isLoopbackAddress() const  { return (addr.loopbackIP); };
-  inline bool isPrivateAddress() const   { return (addr.privateIP); };
+  inline bool isLoopbackAddress() const { return (addr.loopbackIP); };
+  inline bool isPrivateAddress() const { return (addr.privateIP); };
   inline bool isMulticastAddress() const { return (addr.multicastIP); };
   inline bool isBroadcastAddress() const { return (addr.broadcastIP); };
   inline bool isBlacklistedAddress() const { return (addr.blacklistedIP); };
-  inline bool isBroadMulticastAddress() const { return (addr.broadcastIP || addr.multicastIP); };
-  inline bool isNonEmptyUnicastAddress() const { return (!isMulticastAddress() && !isBroadcastAddress() && !isEmpty()); };
-  inline bool isPublicAddress() const{ return ((!isPrivateAddress()) && isNonEmptyUnicastAddress()); }
+  inline bool isBroadMulticastAddress() const {
+    return (addr.broadcastIP || addr.multicastIP);
+  };
+  inline bool isNonEmptyUnicastAddress() const {
+    return (!isMulticastAddress() && !isBroadcastAddress() && !isEmpty());
+  };
+  inline bool isPublicAddress() const {
+    return ((!isPrivateAddress()) && isNonEmptyUnicastAddress());
+  }
   inline u_int8_t getVersion() const { return (addr.ipVersion); };
   inline void setVersion(u_int8_t version) { addr.ipVersion = version; };
 
@@ -126,7 +134,7 @@ class IpAddress {
     return (addr.services_bitmap & (1 << service_enum));
   }
   inline void setService(int service_enum) {
-    if(!(addr.services_bitmap & (1 << service_enum)))
+    if (!(addr.services_bitmap & (1 << service_enum)))
       addr.services_bitmap |= 1 << service_enum;
   }
   inline u_int16_t getServicesMap() { return addr.services_bitmap; }
@@ -134,7 +142,7 @@ class IpAddress {
   inline bool isGateway() const { return (addr.gateway); }
   inline void setGateway(bool is_gateway) { addr.gateway = is_gateway; }
   /* NOTE: update Host::updateView() when adding new services */
-  
+
   char* print(char* str, u_int str_len, u_int8_t bitmask = 0xFF) const;
   char* printMask(char* str, u_int str_len, bool isLocalIP);
   bool isLocalHost() const;

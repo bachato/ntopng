@@ -33,8 +33,8 @@ ServerContacts::ServerContacts()
 
 /* ***************************************************** */
 
-void ServerContacts::periodicUpdate(Host *h, HostAlert *engaged_alert) {
-  HostAlert *alert = engaged_alert;
+void ServerContacts::periodicUpdate(Host* h, HostAlert* engaged_alert) {
+  HostAlert* alert = engaged_alert;
   u_int32_t contacted_servers = 0;
 
   if (((contacted_servers = getContactedServers(h)) > contacts_threshold) &&
@@ -48,8 +48,8 @@ void ServerContacts::periodicUpdate(Host *h, HostAlert *engaged_alert) {
 
 /* ***************************************************** */
 
-bool ServerContacts::loadConfiguration(json_object *config) {
-  json_object *json_threshold;
+bool ServerContacts::loadConfiguration(json_object* config) {
+  json_object* json_threshold;
 
   HostCheck::loadConfiguration(config); /* Parse parameters in common */
 

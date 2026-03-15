@@ -46,7 +46,7 @@ class Ntop {
   bool interfacesShuttedDown;
   bool offline, forced_offline;
   bool broadcast_ip_disabled;
-  Bloom *resolvedHostsBloom; /* Used by all redis class instances */
+  Bloom* resolvedHostsBloom; /* Used by all redis class instances */
   JobQueue jobsQueue;
   AddressTree local_interface_addresses;
   char epoch_buf[11], *zoneinfo, *myTZname;
@@ -54,55 +54,56 @@ class Ntop {
   char install_dir[MAX_PATH]; /**< Install directory. */
   char startup_dir[MAX_PATH]; /**< Startup directory. */
   char scripts_dir[MAX_PATH + 16];
-  char *custom_ndpi_protos; /**< Pointer of a custom protocol for nDPI. */
-  NetworkInterface **iface; /**< Array of network interfaces. */
-  NetworkInterface *system_interface; /** The system interface */
-  NetworkInterface *old_iface_to_purge;
+  char* custom_ndpi_protos; /**< Pointer of a custom protocol for nDPI. */
+  NetworkInterface** iface; /**< Array of network interfaces. */
+  NetworkInterface* system_interface; /** The system interface */
+  NetworkInterface* old_iface_to_purge;
   u_int8_t num_defined_interfaces; /**< Number of defined interfaces. */
   bool flow_id_initialized;
   std::atomic<u_int64_t> flow_id;
   std::atomic<u_int16_t> num_active_lua_vms;
-  HTTPserver *httpd;    /**< Pointer of httpd server. */
-  NtopGlobals *globals; /**< Pointer of Ntop globals info and variables. */
+  HTTPserver* httpd;    /**< Pointer of httpd server. */
+  NtopGlobals* globals; /**< Pointer of Ntop globals info and variables. */
   u_int num_cpus;       /**< Number of physical CPU cores. */
-  Redis *redis;         /**< Pointer to the Redis server. */
+  Redis* redis;         /**< Pointer to the Redis server. */
   Mutex m, users_m, speedtest_m, pools_lock;
-  std::map<std::string, u_int8_t> cachedCustomLists; /* Cache of lists filenames */
+  std::map<std::string, u_int8_t>
+      cachedCustomLists;                       /* Cache of lists filenames */
   std::map<std::string, std::string> luaCache; /* Cache used by Lua */
   RwLock luaCacheLock;
   u_int32_t current_time; /* Updated by current_time */
 #ifndef HAVE_NEDGE
-  ElasticSearch *elastic_search; /**< Pointer of Elastic Search. */
+  ElasticSearch* elastic_search; /**< Pointer of Elastic Search. */
 #ifdef HAVE_ZMQ
-  ZMQPublisher *zmqPublisher;
+  ZMQPublisher* zmqPublisher;
 #endif
 #if !defined(WIN32) && !defined(__APPLE__)
-  SyslogDump *syslog; /**< Pointer of Logstash. */
+  SyslogDump* syslog; /**< Pointer of Logstash. */
 #endif
 
 #ifdef HAVE_ZMQ
-  ExportInterface *export_interface;
- #endif
+  ExportInterface* export_interface;
+#endif
 #endif
 
 #ifdef HAVE_RADIUS
-  Radius *radiusAcc;
+  Radius* radiusAcc;
 #endif
 
-  TimelineExtract *extract;
-  PeriodicActivities *pa; /**< Instance of periodical activities. */
-  AddressResolution *address;
-  Prefs *prefs;
+  TimelineExtract* extract;
+  PeriodicActivities* pa; /**< Instance of periodical activities. */
+  AddressResolution* address;
+  Prefs* prefs;
   BlacklistStats blStats;
-  Geolocation *geo;
-  MacManufacturers *mac_manufacturers;
-  void *trackers_automa;
+  Geolocation* geo;
+  MacManufacturers* mac_manufacturers;
+  void* trackers_automa;
   long time_offset;
   time_t start_time; /**< Time when start() was called */
   time_t last_stats_reset;
   u_int32_t last_modified_static_file_epoch;
   int udp_socket;
-  NtopPro *pro;
+  NtopPro* pro;
   DeviceProtocolBitmask deviceProtocolPresets[device_max_type];
   cpu_load_stats cpu_stats;
   float cpu_load;
@@ -110,7 +111,7 @@ class Ntop {
 #ifndef HAVE_NEDGE
   bool refresh_ips_rules;
 #endif
-  FifoSerializerQueue *internal_alerts_queue;
+  FifoSerializerQueue* internal_alerts_queue;
   Recipients recipients; /* Handle notification recipients */
   std::atomic<u_int32_t> num_flow_exporters;
   std::atomic<u_int32_t> num_flow_interfaces;
@@ -118,25 +119,25 @@ class Ntop {
 #ifdef HAVE_KAFKA
   KafkaClient kafkaClient;
 #endif
-  MessageBroker *message_broker;
+  MessageBroker* message_broker;
 #endif
 #ifdef HAVE_NEDGE
   std::vector<PacketForwarder*> multicastForwarders;
 #endif
 #ifdef HAVE_SNMP_TRAP
-  SNMPTrap *trap_collector;
+  SNMPTrap* trap_collector;
 #endif
 
   /* Local network address list */
-  char *local_network_names[CONST_MAX_NUM_NETWORKS];
-  char *local_network_aliases[CONST_MAX_NUM_NETWORKS];
+  char* local_network_names[CONST_MAX_NUM_NETWORKS];
+  char* local_network_aliases[CONST_MAX_NUM_NETWORKS];
   AddressTree local_network_tree, cloud_local_network_tree;
 
   /* Threads info */
   struct ThreadInfo {
     std::string name;
-    struct timespec last_cpu_ts;   /* last CPU clock sample */
-    struct timespec last_elapsed_ts;  /* cpu time of last clock sample */
+    struct timespec last_cpu_ts;     /* last CPU clock sample */
+    struct timespec last_elapsed_ts; /* cpu time of last clock sample */
   };
   std::map<pthread_t, ThreadInfo> threads_info;
   Mutex threads_info_m;
@@ -148,59 +149,63 @@ class Ntop {
   FlowAlertsLoader flow_alerts_loader;
 
   /* Checks */
-  FlowChecksLoader *flow_checks_loader;
-  HostChecksLoader *host_checks_loader;
+  FlowChecksLoader* flow_checks_loader;
+  HostChecksLoader* host_checks_loader;
 
   /* Hosts Control (e.g., disabled alerts) */
 #ifdef NTOPNG_PRO
   bool alertExclusionsReloadInProgress;
   AlertExclusions *alert_exclusions, *alert_exclusions_shadow;
-  std::map<std::tuple<u_int32_t /* exporter IP (network base address) */, u_int32_t /* interface_id */>,
-	   SNMPInterfaceRole> ifRoles;
+  std::map<std::tuple<u_int32_t /* exporter IP (network base address) */,
+                      u_int32_t /* interface_id */>,
+           SNMPInterfaceRole>
+      ifRoles;
 #endif
 
-  bool assignUserId(u_int8_t *new_user_id);
+  bool assignUserId(u_int8_t* new_user_id);
 
 #ifndef WIN32
-  ContinuousPing *cping;
-  Ping *default_ping;
+  ContinuousPing* cping;
+  Ping* default_ping;
   bool ping_initialized;
-  std::map<std::string /* ifname */, Ping *> ping;
+  std::map<std::string /* ifname */, Ping*> ping;
 #endif
 
   /* For local network */
-  inline int32_t localNetworkLookup(int family, void *addr,
-                                    u_int8_t *network_mask_bits = NULL);
-  inline int32_t cloudNetworkLookup(int family, void *addr,
-                                    u_int8_t *network_mask_bits = NULL);
-  bool addLocalNetwork(char *_net);
+  inline int32_t localNetworkLookup(int family, void* addr,
+                                    u_int8_t* network_mask_bits = NULL);
+  inline int32_t cloudNetworkLookup(int family, void* addr,
+                                    u_int8_t* network_mask_bits = NULL);
+  bool addLocalNetwork(char* _net);
 
   void loadLocalInterfaceAddress();
   void initAllowedProtocolPresets();
 
   void reloadASNPrefsOnInterfaces();
 
-  bool getUserPasswordHashLocal(const char *user, char *password_hash,
+  bool getUserPasswordHashLocal(const char* user, char* password_hash,
                                 u_int password_hash_len) const;
-  bool checkLocalAuth(const char *user, const char *password, char *group) const;
-  bool checkHTTPAuth(const char *user, const char *password, char *group) const;
-  bool checkLDAPAuth(const char *user, const char *password, char *group) const;
-  bool checkRadiusAuth(const char *user, const char *password, char *group) const;
-  bool checkUserPassword(const char *user, const char *password, char *group,
-                         bool *localuser, bool *redirect_to_change_pwd) const;
+  bool checkLocalAuth(const char* user, const char* password,
+                      char* group) const;
+  bool checkHTTPAuth(const char* user, const char* password, char* group) const;
+  bool checkLDAPAuth(const char* user, const char* password, char* group) const;
+  bool checkRadiusAuth(const char* user, const char* password,
+                       char* group) const;
+  bool checkUserPassword(const char* user, const char* password, char* group,
+                         bool* localuser, bool* redirect_to_change_pwd) const;
 
   void checkReloadFlowChecks();
   void checkReloadHostChecks();
   void checkReloadAlertExclusions();
   void checkReloadHostPools();
   void setZoneInfo();
-  char* getPersistentCustomListName(char *name, u_int8_t *list_id /* out */);
+  char* getPersistentCustomListName(char* name, u_int8_t* list_id /* out */);
 #ifdef NTOPNG_PRO
   void connectMessageBroker();
   void reloadMessageBroker();
 #endif
-  bool downloadCustomnDPIProtos(char *url, char *dest_file);
-  
+  bool downloadCustomnDPIProtos(char* url, char* dest_file);
+
  public:
   /**
    * @brief A Constructor
@@ -209,7 +214,7 @@ class Ntop {
    * @param appName  Describe the application name.
    * @return A new instance of Ntop.
    */
-  Ntop(const char *appName);
+  Ntop(const char* appName);
   /**
    * @brief A Destructor.
    *
@@ -222,7 +227,7 @@ class Ntop {
    * @param _prefs Prefs instance containing the ntopng preferences.
    * @param quick_registration Set it to true to do a limited initialization
    */
-  void registerPrefs(Prefs *_prefs, bool quick_registration);
+  void registerPrefs(Prefs* _prefs, bool quick_registration);
 
   /**
    * @brief Register an ntopng log file
@@ -230,7 +235,7 @@ class Ntop {
    *
    * @param logFile A valid path to a log file
    */
-  inline void registerLogFile(const char *logFile) {
+  inline void registerLogFile(const char* logFile) {
     getTrace()->set_log_file(logFile);
   };
   inline void rotateLogs(bool mode) { getTrace()->rotate_logs(mode); };
@@ -243,14 +248,14 @@ class Ntop {
    *
    * @param path Path of protos.file.
    */
-  void setCustomnDPIProtos(char *path);
+  void setCustomnDPIProtos(char* path);
   /**
    * @brief Get the custom nDPI protocols.
    * @details Inline function.
    *
    * @return The path of custom nDPI protocols file.
    */
-  char *getCustomnDPIProtos();
+  char* getCustomnDPIProtos();
   /**
    * @brief Get the offset time.
    * @details ....
@@ -272,7 +277,7 @@ class Ntop {
    * @param path String path to validate.
    * @return A valid path.
    */
-  char *getValidPath(char *path);
+  char* getValidPath(char* path);
   /**
    * @brief Load the @ref Geolocation module.
    * @details Initialize the variable @ref geo with the input directory.
@@ -284,9 +289,9 @@ class Ntop {
    *
    * @param dir Path to database home directory.
    */
-  void loadMacManufacturers(char *dir);
+  void loadMacManufacturers(char* dir);
 
-  inline void getMacManufacturer(const char *mac, lua_State *vm) {
+  inline void getMacManufacturer(const char* mac, lua_State* vm) {
     u_int8_t mac_bytes[6];
     Utils::parseMac(mac_bytes, mac);
     if (mac_manufacturers)
@@ -302,7 +307,7 @@ class Ntop {
    * @param nets String that defined the local network with this Format:
    * 131.114.21.0/24,10.0.0.0/255.0.0.0 .
    */
-  void setLocalNetworks(char *nets);
+  void setLocalNetworks(char* nets);
 
   /**
    * @brief Check if the ingress parameter is in the local networks.
@@ -314,8 +319,8 @@ class Ntop {
    * @param network_mask_bits It returns the number of bits of the network mask
    * @return True if the address is in the local networks, false otherwise.
    */
-  bool isLocalAddress(int family, void *addr, int32_t *network_id,
-                      u_int8_t *network_mask_bits = NULL);
+  bool isLocalAddress(int family, void* addr, int32_t* network_id,
+                      u_int8_t* network_mask_bits = NULL);
 
   /**
    * @brief Return true is broadcast addresses are disabled (point-to-point).
@@ -337,12 +342,12 @@ class Ntop {
    * @param symbolic Symbolic name.
    * @param symbolic_len Length of symbolic name.
    */
-  inline void resolveHostName(const char *numeric_ip, char *symbolic,
+  inline void resolveHostName(const char* numeric_ip, char* symbolic,
                               u_int symbolic_len) {
     address->resolveHostName(numeric_ip, symbolic, symbolic_len);
   }
 
-  inline bool resolveHost(const char *host, char *rsp, u_int rsp_len, bool v4) {
+  inline bool resolveHost(const char* host, char* rsp, u_int rsp_len, bool v4) {
     return address->resolveHost(host, rsp, rsp_len, v4);
   }
 
@@ -351,13 +356,13 @@ class Ntop {
    *
    * @return Current geolocation instance.
    */
-  inline Geolocation *getGeolocation() { return (geo); };
+  inline Geolocation* getGeolocation() { return (geo); };
   /**
    * @brief Get the mac manufacturers instance.
    *
    * @return Current mac manufacturers instance.
    */
-  inline MacManufacturers *getMacManufacturers() {
+  inline MacManufacturers* getMacManufacturers() {
     return (mac_manufacturers);
   };
   /**
@@ -367,14 +372,14 @@ class Ntop {
    * @param id Index of ifName.
    * @return ....
    */
-  inline char *get_if_name(int id) { return (prefs->get_if_name(id)); };
-  inline const char *get_if_descr(int id) { return (prefs->get_if_descr(id)); };
-  inline char *get_data_dir() { return (prefs->get_data_dir()); };
-  inline const char *get_callbacks_dir() {
+  inline char* get_if_name(int id) { return (prefs->get_if_name(id)); };
+  inline const char* get_if_descr(int id) { return (prefs->get_if_descr(id)); };
+  inline char* get_data_dir() { return (prefs->get_data_dir()); };
+  inline const char* get_callbacks_dir() {
     return (prefs->get_callbacks_dir());
   };
 #ifdef NTOPNG_PRO
-  inline const char *get_pro_callbacks_dir() {
+  inline const char* get_pro_callbacks_dir() {
     return (prefs->get_pro_callbacks_dir());
   };
 #endif
@@ -383,7 +388,7 @@ class Ntop {
    *
    * @return The absolute path of the httpdocs directory.
    */
-  inline const char *get_docs_dir() { return (prefs->get_docs_dir()); };
+  inline const char* get_docs_dir() { return (prefs->get_docs_dir()); };
 
   /**
    * @brief Register the network interface.
@@ -393,14 +398,14 @@ class Ntop {
    * @param i Network interface.
    * @return true on success, false otherwise
    */
-  bool registerInterface(NetworkInterface *i);
+  bool registerInterface(NetworkInterface* i);
 
   /**
    * @brief Finalize the network interface initialization.
    *
    * @param i Network interface.
    */
-  void initInterface(NetworkInterface *i, bool disable_dump = false);
+  void initInterface(NetworkInterface* i, bool disable_dump = false);
 
   /**
    * @brief Get the number of defined network interfaces.
@@ -416,7 +421,7 @@ class Ntop {
    * @param name Name of network interface.
    * @return The network interface Id if exists, -1 otherwise.
    */
-  int getInterfaceIdByName(lua_State *vm, const char *name);
+  int getInterfaceIdByName(lua_State* vm, const char* name);
 
   /**
    * @brief Get the network interface with the specified Id
@@ -424,7 +429,7 @@ class Ntop {
    * @param if_id Id of network interface.
    * @return Pointer to the network interface, NULL otherwise.
    */
-  NetworkInterface *getInterfaceById(int if_id);
+  NetworkInterface* getInterfaceById(int if_id);
 
   /**
    * @brief Get the network interface at the specified position
@@ -432,7 +437,7 @@ class Ntop {
    * @param id Position of network interface.
    * @return Pointer to the network interface, NULL otherwise.
    */
-  inline NetworkInterface *getInterfaceAtId(u_int8_t id) {
+  inline NetworkInterface* getInterfaceAtId(u_int8_t id) {
     return ((id < num_defined_interfaces) ? iface[id] : NULL);
   }
 
@@ -441,7 +446,7 @@ class Ntop {
    *
    * @param h HTTP server instance.
    */
-  inline void registerHTTPserver(HTTPserver *h) { httpd = h; };
+  inline void registerHTTPserver(HTTPserver* h) { httpd = h; };
 
   /**
    * @brief Get the network interface identified by name or Id.
@@ -452,168 +457,173 @@ class Ntop {
    * @param name Names or Id of network interface.
    * @return The network interface instance if exists, NULL otherwise.
    */
-  NetworkInterface *getNetworkInterface(const char *name, lua_State *vm = NULL);
-  
-  inline NetworkInterface *getNetworkInterface(lua_State *vm, int ifid) {
+  NetworkInterface* getNetworkInterface(const char* name, lua_State* vm = NULL);
+
+  inline NetworkInterface* getNetworkInterface(lua_State* vm, int ifid) {
     char ifname[MAX_INTERFACE_NAME_LEN];
-    
+
     snprintf(ifname, sizeof(ifname), "%d", ifid);
-    return getNetworkInterface(ifname, vm /* enforce the check on the allowed interface */);
+    return getNetworkInterface(
+        ifname, vm /* enforce the check on the allowed interface */);
   };
 
-  bool viewHasZMQInterface(NetworkInterface *viewInterface);
-  
+  bool viewHasZMQInterface(NetworkInterface* viewInterface);
+
   /**
    * @brief Get the current HTTPserver instance.
    *
    * @return The current instance of HTTP server.
    */
-  inline HTTPserver *get_HTTPserver() { return (httpd); };
+  inline HTTPserver* get_HTTPserver() { return (httpd); };
 
-  inline const char *get_bin_dir() { return (CONST_BIN_DIR); };
+  inline const char* get_bin_dir() { return (CONST_BIN_DIR); };
 
   /**
    * @brief Get the current working directory.
    *
    * @return The absolute path of working directory.
    */
-  inline char *get_working_dir() { return (working_dir); };
+  inline char* get_working_dir() { return (working_dir); };
 
   /**
    * @brief Get the installation path of ntopng.
    *
    * @return The path of installed directory.
    */
-  inline char *get_install_dir() { return (install_dir); };
-  inline void set_install_dir(char *id) {
+  inline char* get_install_dir() { return (install_dir); };
+  inline void set_install_dir(char* id) {
     snprintf(install_dir, MAX_PATH, "%s", id);
   };
 
-  inline char *get_scripts_dir() { return (scripts_dir); };
-  inline Bloom *getResolutionBloom() { return (resolvedHostsBloom); };
-  inline NtopGlobals *getGlobals() { return (globals); };
-  inline Trace *getTrace() {
+  inline char* get_scripts_dir() { return (scripts_dir); };
+  inline Bloom* getResolutionBloom() { return (resolvedHostsBloom); };
+  inline NtopGlobals* getGlobals() { return (globals); };
+  inline Trace* getTrace() {
     return ((globals != NULL) ? globals->getTrace() : NULL);
   };
-  inline Redis *getRedis() { return (redis); };
-  inline TimelineExtract *getTimelineExtract() { return (extract); };
+  inline Redis* getRedis() { return (redis); };
+  inline TimelineExtract* getTimelineExtract() { return (extract); };
 
 #ifdef HAVE_ZMQ
 #ifndef HAVE_NEDGE
-  inline ExportInterface *get_export_interface() { return (export_interface); };
+  inline ExportInterface* get_export_interface() { return (export_interface); };
 #endif
 #endif
 
-  inline Prefs *getPrefs() { return (prefs); };
+  inline Prefs* getPrefs() { return (prefs); };
   void initPing();
 #ifndef WIN32
-  inline bool isPingInitialized() { return (ping_initialized);};
+  inline bool isPingInitialized() { return (ping_initialized); };
   void lockNtopInstance();
 #endif
 #ifdef NTOPNG_PRO
 #ifdef WIN32
-  char *getIfName(int if_id, char *name, u_int name_len);
+  char* getIfName(int if_id, char* name, u_int name_len);
 #endif
 #endif
   void setScriptsDir();
-  void lua_periodic_activities_stats(NetworkInterface *iface, lua_State *vm);
-  void lua_threadsInfo(lua_State *vm);
-  void getUsers(lua_State *vm);
-  bool getLocalNetworkAlias(lua_State *vm, u_int32_t network_id);
-  bool isUserAdministrator(lua_State *vm);
-  void getAllowedInterface(lua_State *vm);
-  void getAllowedNetworks(lua_State *vm);
-  bool getInterfaceAllowed(lua_State *vm, char *ifname) const;
-  bool isInterfaceAllowed(lua_State *vm, const char *ifname) const;
-  bool isInterfaceAllowed(lua_State *vm, int ifid) const;
-  bool isPcapDownloadAllowed(lua_State *vm, const char *ifname);
-  char *preparePcapDownloadFilter(lua_State *vm, char *filter);
+  void lua_periodic_activities_stats(NetworkInterface* iface, lua_State* vm);
+  void lua_threadsInfo(lua_State* vm);
+  void getUsers(lua_State* vm);
+  bool getLocalNetworkAlias(lua_State* vm, u_int32_t network_id);
+  bool isUserAdministrator(lua_State* vm);
+  void getAllowedInterface(lua_State* vm);
+  void getAllowedNetworks(lua_State* vm);
+  bool getInterfaceAllowed(lua_State* vm, char* ifname) const;
+  bool isInterfaceAllowed(lua_State* vm, const char* ifname) const;
+  bool isInterfaceAllowed(lua_State* vm, int ifid) const;
+  bool isPcapDownloadAllowed(lua_State* vm, const char* ifname);
+  char* preparePcapDownloadFilter(lua_State* vm, char* filter);
   bool isLocalAuthEnabled() const;
-  bool isLocalUser(lua_State *vm);
-  bool checkCaptiveUserPassword(const char *user, const char *password,
-                                char *group) const;
-  bool checkGuiUserPassword(struct mg_connection *conn, const char *user,
-                            const char *password, char *group,
-                            bool *localuser, bool *redirect_to_change_pwd) const;
-  bool isBlacklistedLogin(struct mg_connection *conn) const;
-  bool checkUserInterfaces(const char *user) const;
-  bool resetUserPassword(char *username, char *old_password,
-                         char *new_password);
-  bool mustChangePassword(const char *user);
-  bool changeUserFullName(const char *username, const char *full_name) const;
-  bool changeUserRole(char *username, char *user_role) const;
-  bool changeAllowedNets(char *username, char *allowed_nets) const;
-  bool changeAllowedIfname(char *username, char *allowed_ifname) const;
-  bool changeUserHostPool(const char *username, const char *host_pool_id) const;
-  bool changeAllowedHostPools(const char *username, const char *allowed_host_pools) const;
-  void getAllowedHostPools(lua_State *vm);
-  bool changeUserLanguage(const char *username, const char *language) const;
-  bool changeUserPcapDownloadPermission(const char *username,
+  bool isLocalUser(lua_State* vm);
+  bool checkCaptiveUserPassword(const char* user, const char* password,
+                                char* group) const;
+  bool checkGuiUserPassword(struct mg_connection* conn, const char* user,
+                            const char* password, char* group, bool* localuser,
+                            bool* redirect_to_change_pwd) const;
+  bool isBlacklistedLogin(struct mg_connection* conn) const;
+  bool checkUserInterfaces(const char* user) const;
+  bool resetUserPassword(char* username, char* old_password,
+                         char* new_password);
+  bool mustChangePassword(const char* user);
+  bool changeUserFullName(const char* username, const char* full_name) const;
+  bool changeUserRole(char* username, char* user_role) const;
+  bool changeAllowedNets(char* username, char* allowed_nets) const;
+  bool changeAllowedIfname(char* username, char* allowed_ifname) const;
+  bool changeUserHostPool(const char* username, const char* host_pool_id) const;
+  bool changeAllowedHostPools(const char* username,
+                              const char* allowed_host_pools) const;
+  void getAllowedHostPools(lua_State* vm);
+  bool changeUserLanguage(const char* username, const char* language) const;
+  bool changeUserPcapDownloadPermission(const char* username,
                                         bool allow_pcap_download,
                                         u_int32_t ttl = 0 /* Forever */) const;
   bool changeUserHistoricalFlowPermission(
-      const char *username, bool allow_historical_flows,
+      const char* username, bool allow_historical_flows,
       u_int32_t ttl = 0 /* Forever */) const;
-  bool changeUserAlertsPermission(const char *username, bool allow_alerts,
+  bool changeUserAlertsPermission(const char* username, bool allow_alerts,
                                   u_int32_t ttl = 0 /* Forever */) const;
-  void resetUserPermissions(const char *user) const;
-  bool hasCapability(lua_State *vm, UserCapabilities capability);
-  bool getUserCapabilities(const char *username, bool *allow_pcap_download,
-                           bool *allow_historical_flows,
-                           bool *allow_alerts) const;
-  bool existsUser(const char *username) const;
+  void resetUserPermissions(const char* user) const;
+  bool hasCapability(lua_State* vm, UserCapabilities capability);
+  bool getUserCapabilities(const char* username, bool* allow_pcap_download,
+                           bool* allow_historical_flows,
+                           bool* allow_alerts) const;
+  bool existsUser(const char* username) const;
 
   /* TOTP/MFA */
-  bool generateTOTPSecret(char *secret, size_t secret_len) const;
-  bool setUserTOTPSecret(const char *username, const char *secret) const;
-  bool getUserTOTPSecret(const char *username, char *secret, size_t secret_len) const;
-  bool isTOTPEnabled(const char *username) const;
-  bool setUserTOTPEnabled(const char *username, bool enabled) const;
-  bool validateTOTPCode(const char *username, const char *code) const;
-  void getTOTPProvisioningUri(const char *username, char *uri, size_t uri_len) const;
-  bool createMFAPendingToken(const char *username, const char *referer,
-                             char *token, size_t token_len) const;
-  bool getMFAPendingToken(const char *token, char *username, size_t username_len,
-                          char *referer, size_t referer_len) const;
-  void deleteMFAPendingToken(const char *token) const;
+  bool generateTOTPSecret(char* secret, size_t secret_len) const;
+  bool setUserTOTPSecret(const char* username, const char* secret) const;
+  bool getUserTOTPSecret(const char* username, char* secret,
+                         size_t secret_len) const;
+  bool isTOTPEnabled(const char* username) const;
+  bool setUserTOTPEnabled(const char* username, bool enabled) const;
+  bool validateTOTPCode(const char* username, const char* code) const;
+  void getTOTPProvisioningUri(const char* username, char* uri,
+                              size_t uri_len) const;
+  bool createMFAPendingToken(const char* username, const char* referer,
+                             char* token, size_t token_len) const;
+  bool getMFAPendingToken(const char* token, char* username,
+                          size_t username_len, char* referer,
+                          size_t referer_len) const;
+  void deleteMFAPendingToken(const char* token) const;
 
-  bool addUser(char *username, char *full_name, char *password, char *host_role,
-               char *allowed_networks, char *allowed_ifname, char *host_pool_id,
-               char *language, bool allow_pcap_download,
+  bool addUser(char* username, char* full_name, char* password, char* host_role,
+               char* allowed_networks, char* allowed_ifname, char* host_pool_id,
+               char* language, bool allow_pcap_download,
                bool allow_historical_flows, bool allow_alerts,
-               char *allowed_host_pools = NULL);
-  bool addUserAPIToken(const char *username, const char *api_token);
-  bool isCaptivePortalUser(const char *username);
-  bool deleteUser(char *username);
-  bool getUserHostPool(char *username, u_int16_t *host_pool_id);
-  bool getUserAllowedIfname(const char *username, char *buf,
+               char* allowed_host_pools = NULL);
+  bool addUserAPIToken(const char* username, const char* api_token);
+  bool isCaptivePortalUser(const char* username);
+  bool deleteUser(char* username);
+  bool getUserHostPool(char* username, u_int16_t* host_pool_id);
+  bool getUserAllowedIfname(const char* username, char* buf,
                             size_t buflen) const;
-  bool getUserAPIToken(const char *username, char *buf, size_t buflen) const;
-  void setWorkingDir(char *dir);
-  void fixPath(char *str, bool replaceDots = true);
-  void removeTrailingSlash(char *str);
+  bool getUserAPIToken(const char* username, char* buf, size_t buflen) const;
+  void setWorkingDir(char* dir);
+  void fixPath(char* str, bool replaceDots = true);
+  void removeTrailingSlash(char* str);
   void daemonize();
   void shutdownPeriodicActivities();
   void shutdownInterfaces();
   void shutdownAll();
-  void registerThread(const char *name, pthread_t id);
+  void registerThread(const char* name, pthread_t id);
   void runHousekeepingTasks();
   void runPeriodicHousekeepingTasks();
   void runShutdownTasks();
   void checkShutdownWhenDone();
-  bool isLocalInterfaceAddress(int family, void *addr) {
+  bool isLocalInterfaceAddress(int family, void* addr) {
     return (local_interface_addresses.findAddress(family, addr) == -1 ? false
                                                                       : true);
   };
-  void getLocalNetworkIp(int32_t local_network_id, IpAddress **network_ip,
-                         u_int8_t *network_prefix);
-  void addLocalNetworkList(const char *network);
+  void getLocalNetworkIp(int32_t local_network_id, IpAddress** network_ip,
+                         u_int8_t* network_prefix);
+  void addLocalNetworkList(const char* network);
   void createExportInterface();
   void resetNetworkInterfaces();
   void initElasticSearch();
 
   inline u_int32_t getStartTime() { return ((u_int32_t)start_time); }
-  inline char *getStartTimeString() { return (epoch_buf); }
+  inline char* getStartTimeString() { return (epoch_buf); }
   inline u_int32_t getLastModifiedStaticFileEpoch() {
     return (last_modified_static_file_epoch);
   }
@@ -626,12 +636,12 @@ class Ntop {
   }
   inline int getUdpSock() { return (udp_socket); }
 #ifdef NTOPNG_PRO
-  inline AlertExclusions *getAlertExclusions() { return alert_exclusions; }
+  inline AlertExclusions* getAlertExclusions() { return alert_exclusions; }
   u_int32_t getMaxNumFlowExporters();
   u_int32_t getMaxNumFlowExportersInterfaces();
 #endif
-  u_int32_t getNumFlowExporters()              { return num_flow_exporters;  }
-  u_int32_t getNumFlowExportersInterfaces()    { return num_flow_interfaces; }
+  u_int32_t getNumFlowExporters() { return num_flow_exporters; }
+  u_int32_t getNumFlowExportersInterfaces() { return num_flow_interfaces; }
   bool incNumFlowExporters();
   bool incNumFlowExportersInterfaces();
   void decNumFlowExporters();
@@ -648,49 +658,51 @@ class Ntop {
 #endif
   }
 
-  inline NtopPro *getPro() { return ((NtopPro *)pro); };
+  inline NtopPro* getPro() { return ((NtopPro*)pro); };
 
   void loadTrackers();
-  bool isATrackerHost(char *host);
-  bool isExistingInterface(const char *name) const;
-  inline NetworkInterface *getFirstInterface() const {
+  bool isATrackerHost(char* host);
+  bool isExistingInterface(const char* name) const;
+  inline NetworkInterface* getFirstInterface() const {
     return (iface ? iface[0] : NULL);
   }
-  inline NetworkInterface *getInterface(int i) const {
+  inline NetworkInterface* getInterface(int i) const {
     return (((i < num_defined_interfaces) && iface[i]) ? iface[i] : NULL);
   }
-  inline NetworkInterface *getSystemInterface() const {
+  inline NetworkInterface* getSystemInterface() const {
     return (system_interface);
   }
 #ifdef HAVE_NEDGE
   void addToNotifiedInformativeCaptivePortal(u_int32_t client_ip);
   bool addIPToLRUMatches(u_int32_t client_ip, u_int16_t user_pool_id,
-                         char *label, char *ifname);
+                         char* label, char* ifname);
 #endif /* NTOPNG_PRO */
 
-  DeviceProtocolBitmask *getDeviceAllowedProtocols(DeviceType t) {
+  DeviceProtocolBitmask* getDeviceAllowedProtocols(DeviceType t) {
     return (&deviceProtocolPresets[t]);
   }
-  void refreshAllowedProtocolPresets(DeviceType t, bool client, lua_State *L, int index);
+  void refreshAllowedProtocolPresets(DeviceType t, bool client, lua_State* L,
+                                     int index);
   DeviceProtoStatus getDeviceAllowedProtocolStatus(DeviceType dev_type,
                                                    ndpi_protocol proto,
                                                    u_int16_t pool_id,
                                                    bool as_client);
   void refreshCPULoad();
-  bool getCPULoad(float *out);
-  inline FifoSerializerQueue *getInternalAlertsQueue() {
+  bool getCPULoad(float* out);
+  inline FifoSerializerQueue* getInternalAlertsQueue() {
     return (internal_alerts_queue);
   }
-  void lua_alert_queues_stats(lua_State *vm);
+  void lua_alert_queues_stats(lua_State* vm);
   bool recipients_are_empty();
-  bool recipients_enqueue(AlertFifoItem *notification);
+  bool recipients_enqueue(AlertFifoItem* notification);
   AlertLevel get_default_recipient_minimum_severity();
   bool recipient_enqueue(u_int16_t recipient_id,
-                         const AlertFifoItem *const notification);
-  AlertFifoItem *recipient_dequeue(u_int16_t recipient_id);
-  void recipient_stats(u_int16_t recipient_id, lua_State *vm);
+                         const AlertFifoItem* const notification);
+  AlertFifoItem* recipient_dequeue(u_int16_t recipient_id);
+  void recipient_stats(u_int16_t recipient_id, lua_State* vm);
   time_t recipient_last_use(u_int16_t recipient_id);
-  void inc_recipient_stats(u_int16_t recipient_id, u_int64_t delivered, u_int64_t filtered_out, u_int64_t delivery_failures);
+  void inc_recipient_stats(u_int16_t recipient_id, u_int64_t delivered,
+                           u_int64_t filtered_out, u_int64_t delivery_failures);
   void recipient_delete(u_int16_t recipient_id);
   void recipient_register(u_int16_t recipient_id, AlertLevel minimum_severity,
                           Bitmap128 enabled_categories,
@@ -699,14 +711,13 @@ class Ntop {
                           Bitmap128 enabled_flow_alert_types,
                           Bitmap128 enabled_host_alert_types,
                           Bitmap128 enabled_other_alert_types,
-                          bool match_alert_id,
-                          bool skip_alerts);
+                          bool match_alert_id, bool skip_alerts);
 
   void sendNetworkInterfacesTermination();
   inline time_t getLastStatsReset() { return (last_stats_reset); }
   void resetStats();
 
-  struct ndpi_detection_module_struct *initnDPIStruct();
+  struct ndpi_detection_module_struct* initnDPIStruct();
 
   void checkReloadHostsBroadcastDomain();
 
@@ -719,31 +730,32 @@ class Ntop {
   };
   inline void reloadHostPools() { hostPoolsReloadInProgress = true; };
 
-  void addToPool(char *host_or_mac, u_int16_t user_pool_id);
+  void addToPool(char* host_or_mac, u_int16_t user_pool_id);
 
-  char *getAlertJSON(FlowAlertType fat, Flow *f) const;
-  ndpi_serializer *getAlertSerializer(FlowAlertType fat, Flow *f) const;
+  char* getAlertJSON(FlowAlertType fat, Flow* f) const;
+  ndpi_serializer* getAlertSerializer(FlowAlertType fat, Flow* f) const;
 
 #ifndef WIN32
-  inline ContinuousPing *getContinuousPing() { return (cping); }
-  Ping *getPing(char *ifname);
+  inline ContinuousPing* getContinuousPing() { return (cping); }
+  Ping* getPing(char* ifname);
 #endif
 
 #ifdef HAVE_RADIUS
-  inline Radius *getRadius() { return radiusAcc; };
+  inline Radius* getRadius() { return radiusAcc; };
   inline void updateRadiusLoginInfo() { radiusAcc->updateLoginInfo(); };
-  inline bool radiusAuthenticate(const char *username, const char *password,  
-                                bool *has_unprivileged_capabilities,
-                                bool *is_admin) {
-    return radiusAcc->authenticate(username, password, has_unprivileged_capabilities, is_admin);
+  inline bool radiusAuthenticate(const char* username, const char* password,
+                                 bool* has_unprivileged_capabilities,
+                                 bool* is_admin) {
+    return radiusAcc->authenticate(username, password,
+                                   has_unprivileged_capabilities, is_admin);
   };
-  inline bool radiusAccountingStart(RadiusTraffic *info) {
+  inline bool radiusAccountingStart(RadiusTraffic* info) {
     return radiusAcc->startSession(info);
   };
-  inline bool radiusAccountingUpdate(RadiusTraffic *info) {
+  inline bool radiusAccountingUpdate(RadiusTraffic* info) {
     return radiusAcc->updateSession(info);
   };
-  inline bool radiusAccountingStop(RadiusTraffic *info) {
+  inline bool radiusAccountingStop(RadiusTraffic* info) {
     return radiusAcc->stopSession(info);
   };
 #endif
@@ -751,8 +763,8 @@ class Ntop {
   inline bool hasDroppedPrivileges() { return (privileges_dropped); }
   inline void setDroppedPrivileges() { privileges_dropped = true; }
 
-  void getUserGroupLocal(const char *user, char *group) const;
-  bool existsUserLocal(const char *user) {
+  void getUserGroupLocal(const char* user, char* group) const;
+  bool existsUserLocal(const char* user) {
     char val[64];
     return getUserPasswordHashLocal(user, val, sizeof(val));
   }
@@ -763,23 +775,25 @@ class Ntop {
   inline u_int32_t getNumLocalNetworks() {
     return local_network_tree.getNumAddresses();
   };
-  inline const char *getLocalNetworkName(int32_t local_network_id) {
+  inline const char* getLocalNetworkName(int32_t local_network_id) {
     return (((u_int32_t)local_network_id < local_network_tree.getNumAddresses())
                 ? local_network_names[(u_int32_t)local_network_id]
                 : NULL);
   };
 
-  u_int32_t getLocalNetworkId(const char *network_name);
+  u_int32_t getLocalNetworkId(const char* network_name);
 
-  void addLocalCloudAddress(char *str) { cloud_local_network_tree.addAddress(str); }
-  
+  void addLocalCloudAddress(char* str) {
+    cloud_local_network_tree.addAddress(str);
+  }
+
   // void getLocalAddresses(lua_State* vm) {
   // return(local_network_tree.getAddresses(vm)); };
 
-  inline FlowChecksLoader *getFlowChecksLoader() {
+  inline FlowChecksLoader* getFlowChecksLoader() {
     return (flow_checks_loader);
   }
-  inline HostChecksLoader *getHostChecksLoader() {
+  inline HostChecksLoader* getHostChecksLoader() {
     return (host_checks_loader);
   }
   inline u_int8_t getFlowAlertScore(FlowAlertTypeEnum alert_id) const {
@@ -788,18 +802,18 @@ class Ntop {
   inline ndpi_risk_enum getFlowAlertRisk(FlowAlertTypeEnum alert_id) const {
     return flow_alerts_loader.getAlertRisk(alert_id);
   };
-  inline const char *getRiskStr(ndpi_risk_enum risk_id) {
+  inline const char* getRiskStr(ndpi_risk_enum risk_id) {
     return (ndpi_risk2str(risk_id));
   };
-  bool luaFlowCheckInfo(lua_State *vm, std::string check_name) const;
-  bool luaHostCheckInfo(lua_State *vm, std::string check_name) const;
+  bool luaFlowCheckInfo(lua_State* vm, std::string check_name) const;
+  bool luaHostCheckInfo(lua_State* vm, std::string check_name) const;
   inline ndpi_risk getUnhandledRisks() const {
     return flow_checks_loader ? flow_checks_loader->getUnhandledRisks() : 0;
   };
 #ifndef HAVE_NEDGE
   bool initPublisher();
-  bool broadcastControlMessage(char *msg);
-  bool broadcastIPSMessage(char *msg);
+  bool broadcastControlMessage(char* msg);
+  bool broadcastIPSMessage(char* msg);
   inline void askToRefreshIPSRules() { refresh_ips_rules = true; }
   inline bool timeToRefreshIPSRules() {
     bool rc = refresh_ips_rules;
@@ -825,55 +839,60 @@ class Ntop {
   ndpi_protocol_category_t get_ndpi_proto_category(u_int protoid);
   void setnDPIProtocolCategory(u_int16_t protoId,
                                ndpi_protocol_category_t protoCategory);
-  bool nDPILoadIPCategory(char *what, ndpi_protocol_category_t id,
-                          char *list_name);
-  bool nDPILoadHostnameCategory(char *what, ndpi_protocol_category_t id,
-                                char *list_name);
-  int nDPISetDomainMask(const char *domain, u_int64_t domain_mask);
+  bool nDPILoadIPCategory(char* what, ndpi_protocol_category_t id,
+                          char* list_name);
+  bool nDPILoadHostnameCategory(char* what, ndpi_protocol_category_t id,
+                                char* list_name);
+  int nDPISetDomainMask(const char* domain, u_int64_t domain_mask);
   void setLastInterfacenDPIReload(time_t now);
   bool needsnDPICleanup();
   void setnDPICleanupNeeded(bool needed);
-  u_int16_t getnDPIProtoByName(const char *name);
+  u_int16_t getnDPIProtoByName(const char* name);
   bool isDbCreated();
-  void collectResponses(lua_State *vm);
-  void collectContinuousResponses(lua_State *vm);
-  inline char *getZoneInfo() { return (zoneinfo); }
+  void collectResponses(lua_State* vm);
+  void collectContinuousResponses(lua_State* vm);
+  inline char* getZoneInfo() { return (zoneinfo); }
 
-  void speedtest(lua_State *vm);
+  void speedtest(lua_State* vm);
 #if defined(NTOPNG_PRO)
-  MessageBroker* getMessageBroker() { return(message_broker); };
-  void snmpSetInterfaceRole(u_int32_t exporter_ip_v4, u_int32_t interface_id, SNMPInterfaceRole interface_role);
-  SNMPInterfaceRole snmpGetInterfaceRole(u_int32_t exporter_ip_v4, u_int32_t interface_id);
+  MessageBroker* getMessageBroker() { return (message_broker); };
+  void snmpSetInterfaceRole(u_int32_t exporter_ip_v4, u_int32_t interface_id,
+                            SNMPInterfaceRole interface_role);
+  SNMPInterfaceRole snmpGetInterfaceRole(u_int32_t exporter_ip_v4,
+                                         u_int32_t interface_id);
 #endif
 
 #if defined(NTOPNG_PRO) && defined(HAVE_CLICKHOUSE)
-  void setFlowId(u_int64_t id) { flow_id = id; flow_id_initialized = true; }
+  void setFlowId(u_int64_t id) {
+    flow_id = id;
+    flow_id_initialized = true;
+  }
   bool isFlowIdInitialized() { return flow_id_initialized; }
   u_int64_t getNextFlowId() { return (flow_id++); }
 #endif
 
-  inline char *getTZname() { return (myTZname); }
-  inline Mutex *get_pools_lock()      { return (&pools_lock); };
-  inline u_int32_t get_current_time() { return(current_time); };
+  inline char* getTZname() { return (myTZname); }
+  inline Mutex* get_pools_lock() { return (&pools_lock); };
+  inline u_int32_t get_current_time() { return (current_time); };
 
-  bool createRuntimeInterface(char *name, char *source, int *iface_id);
+  bool createRuntimeInterface(char* name, char* source, int* iface_id);
 
   void incBlacklisHits(std::string listname);
 #if defined(NTOPNG_PRO) && defined(HAVE_KAFKA)
-  inline bool sendKafkaMessage(char *kafka_broker_info, char *msg,
+  inline bool sendKafkaMessage(char* kafka_broker_info, char* msg,
                                u_int msg_len) {
     return (kafkaClient.sendMessage(kafka_broker_info, msg, msg_len));
   }
 #endif
   u_int64_t getNumActiveProbes() const;
-  inline BlacklistStats* getBlacklistStats() { return(&blStats); }
-  inline void resetBlacklistStats()          { blStats.reset();  }
-  inline JobQueue* getJobsQueue()            { return(&jobsQueue); }
-  inline PeriodicActivities* getPeriodicActivities() { return(pa); }
+  inline BlacklistStats* getBlacklistStats() { return (&blStats); }
+  inline void resetBlacklistStats() { blStats.reset(); }
+  inline JobQueue* getJobsQueue() { return (&jobsQueue); }
+  inline PeriodicActivities* getPeriodicActivities() { return (pa); }
 
-  void incNumLuaVMs()                   { num_active_lua_vms++;       }
-  void decNumLuaVMs()                   { num_active_lua_vms--;       } 
-  inline u_int16_t getNumActiveLuaVMs() { return(num_active_lua_vms); }
+  void incNumLuaVMs() { num_active_lua_vms++; }
+  void decNumLuaVMs() { num_active_lua_vms--; }
+  inline u_int16_t getNumActiveLuaVMs() { return (num_active_lua_vms); }
   const char* getPersistentCustomListNameById(u_int8_t list_id);
 #ifdef HAVE_SNMP_TRAP
   void initSNMPTrapCollector();
@@ -882,21 +901,21 @@ class Ntop {
   u_int16_t getNumberHostPools();
   u_int32_t getNumberHostPoolsMembers();
   u_int8_t getNumberProfiles();
-  bool isInLocalASN(IpAddress *ip);
+  bool isInLocalASN(IpAddress* ip);
   void reloadASNConfiguration();
 
-  void trackAssetChange(const char *protocol, const char *action,
-			Mac *mac, IpAddress *target_ip,
-			Host *target, Flow *flow, char *note);
+  void trackAssetChange(const char* protocol, const char* action, Mac* mac,
+                        IpAddress* target_ip, Host* target, Flow* flow,
+                        char* note);
 
   static const ndpi_protocol getConstNdpiUnknownProtocol();
 
   std::string getLuaCache(std::string);
   void setLuaCache(std::string, std::string);
-  void dumpLuaCache(lua_State *vm);
+  void dumpLuaCache(lua_State* vm);
 };
 
-extern Ntop *ntop;
+extern Ntop* ntop;
 
 #ifdef NTOPNG_PRO
 #include "ntoppro_defines.h"

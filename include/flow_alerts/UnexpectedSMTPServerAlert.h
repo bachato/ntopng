@@ -28,13 +28,16 @@ class UnexpectedSMTPServerAlert : public UnexpectedServerAlert {
  private:
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_unexpected_smtp_server, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_unexpected_smtp_server,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_ERROR; };
 
-  UnexpectedSMTPServerAlert(FlowCheck *c, Flow *f)
-      : UnexpectedServerAlert(c, f){setAlertScore(getDefaultScore());};
-  ~UnexpectedSMTPServerAlert(){};
+  UnexpectedSMTPServerAlert(FlowCheck* c, Flow* f)
+      : UnexpectedServerAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~UnexpectedSMTPServerAlert() {};
 
   bool autoAck() const { return false; };
 

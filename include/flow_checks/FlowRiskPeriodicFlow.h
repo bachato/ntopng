@@ -31,10 +31,10 @@ class FlowRiskPeriodicFlow : public FlowRisk {
   }
 
  public:
-  FlowRiskPeriodicFlow(){};
-  ~FlowRiskPeriodicFlow(){};
+  FlowRiskPeriodicFlow() {};
+  ~FlowRiskPeriodicFlow() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskPeriodicFlowAlert(this, f);
   }
 

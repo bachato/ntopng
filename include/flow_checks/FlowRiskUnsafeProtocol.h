@@ -31,11 +31,11 @@ class FlowRiskUnsafeProtocol : public FlowRisk {
   }
 
  public:
-  FlowRiskUnsafeProtocol() : FlowRisk(){};
-  ~FlowRiskUnsafeProtocol(){};
+  FlowRiskUnsafeProtocol() : FlowRisk() {};
+  ~FlowRiskUnsafeProtocol() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    FlowRiskUnsafeProtocolAlert *alert =
+  FlowAlert* buildAlert(Flow* f) {
+    FlowRiskUnsafeProtocolAlert* alert =
         new FlowRiskUnsafeProtocolAlert(this, f);
 
     alert->setCliAttacker();

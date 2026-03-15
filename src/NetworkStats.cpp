@@ -23,14 +23,15 @@
 
 /* *************************************** */
 
-NetworkStats::NetworkStats(NetworkInterface *iface, u_int32_t _network_id)
+NetworkStats::NetworkStats(NetworkInterface* iface, u_int32_t _network_id)
     : InterfaceMemberAlertableEntity(iface, alert_entity_network),
       GenericTrafficElement(),
       Score(iface) {
-  const char *netname;
+  const char* netname;
 
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   network_id = _network_id;
   numHosts = 0, alerted_flows_as_client = alerted_flows_as_server = 0;
   syn_recvd_last_min = synack_sent_last_min = 0;
@@ -38,8 +39,8 @@ NetworkStats::NetworkStats(NetworkInterface *iface, u_int32_t _network_id)
 
 #ifdef NTOPNG_PRO
   network_matrix =
-      (InOutTraffic *)calloc(ntop->getNumLocalNetworks(), sizeof(InOutTraffic));
-  nextMinPeriodicUpdate = 0;  
+      (InOutTraffic*)calloc(ntop->getNumLocalNetworks(), sizeof(InOutTraffic));
+  nextMinPeriodicUpdate = 0;
 #endif
 
   netname = ntop->getLocalNetworkName(network_id);
@@ -48,8 +49,8 @@ NetworkStats::NetworkStats(NetworkInterface *iface, u_int32_t _network_id)
 
 /* *************************************** */
 
-bool NetworkStats::match(AddressTree *tree) {
-  IpAddress *network_address = NULL;
+bool NetworkStats::match(AddressTree* tree) {
+  IpAddress* network_address = NULL;
   u_int8_t network_prefix;
   bool res = true;
 
@@ -71,8 +72,9 @@ bool NetworkStats::match(AddressTree *tree) {
 }
 
 NetworkStats::~NetworkStats() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+
 #ifdef NTOPNG_PRO
   if (network_matrix) free(network_matrix);
 #endif
@@ -80,7 +82,7 @@ NetworkStats::~NetworkStats() {
 
 /* *************************************** */
 
-void NetworkStats::lua(lua_State *vm, bool diff, bool fullStats) {
+void NetworkStats::lua(lua_State* vm, bool diff, bool fullStats) {
   int hits;
 
   lua_push_str_table_entry(vm, "network_key",
@@ -120,12 +122,13 @@ void NetworkStats::lua(lua_State *vm, bool diff, bool fullStats) {
 
     for (u_int32_t i = 0; i < ntop->getNumLocalNetworks(); i++) {
       /* Safety check in case a local network is NULL */
-      if(!ntop->getLocalNetworkName(i))
-        continue;
+      if (!ntop->getLocalNetworkName(i)) continue;
 
       lua_newtable(vm);
-      lua_push_uint64_table_entry(vm, "bytes_sent", network_matrix[i].bytes_sent);
-      lua_push_uint64_table_entry(vm, "bytes_rcvd", network_matrix[i].bytes_rcvd);
+      lua_push_uint64_table_entry(vm, "bytes_sent",
+                                  network_matrix[i].bytes_sent);
+      lua_push_uint64_table_entry(vm, "bytes_rcvd",
+                                  network_matrix[i].bytes_rcvd);
       lua_pushstring(vm, ntop->getLocalNetworkName(i));
       lua_insert(vm, -2);
       lua_settable(vm, -3);
@@ -159,7 +162,7 @@ void NetworkStats::lua(lua_State *vm, bool diff, bool fullStats) {
 
 /* *************************************** */
 
-bool NetworkStats::serialize(json_object *my_object) {
+bool NetworkStats::serialize(json_object* my_object) {
   json_object_object_add(my_object, "ingress",
                          json_object_new_int64(ingress.getNumBytes()));
   json_object_object_add(my_object, "egress",
@@ -231,7 +234,7 @@ void NetworkStats::incNumFlows(time_t t, bool as_client) {
 
 /* ***************************************** */
 
-void NetworkStats::updateStats(const struct timeval *tv) {
+void NetworkStats::updateStats(const struct timeval* tv) {
   GenericTrafficElement::updateStats(tv);
 
 #ifdef NTOPNG_PRO
@@ -266,6 +269,6 @@ void NetworkStats::resetTrafficBetweenNets() {
 
 /* ***************************************** */
 
-void NetworkStats::updateBehaviorStats(const struct timeval *tv) {}
+void NetworkStats::updateBehaviorStats(const struct timeval* tv) {}
 
 #endif

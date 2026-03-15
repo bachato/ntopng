@@ -20,16 +20,20 @@
 
 class ZMQUtils {
  private:
-
  public:
-  static void setKeepalive(void *zmq_socket);
+  static void setKeepalive(void* zmq_socket);
 #if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 1, 0)
-  static int setServerEncryptionKeys(void *zmq_socket, const char *secret_key);
-  static int setClientEncryptionKeys(void *zmq_socket, const char *server_public_key);
-  static bool readEncryptionKeysFromFile(char *public_key_path, char *secret_key_path,
-    char *public_key, char *secret_key, int public_key_len, int secret_key_len);
+  static int setServerEncryptionKeys(void* zmq_socket, const char* secret_key);
+  static int setClientEncryptionKeys(void* zmq_socket,
+                                     const char* server_public_key);
+  static bool readEncryptionKeysFromFile(char* public_key_path,
+                                         char* secret_key_path,
+                                         char* public_key, char* secret_key,
+                                         int public_key_len,
+                                         int secret_key_len);
   static void generateEncryptionKeys();
-  static char *findEncryptionKeys(char *public_key, char *secret_key, int public_key_len, int secret_key_len);
+  static char* findEncryptionKeys(char* public_key, char* secret_key,
+                                  int public_key_len, int secret_key_len);
 #endif
 };
 

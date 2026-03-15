@@ -23,7 +23,7 @@
 
 ndpi_serializer* FlowRiskTLSSuspiciousExtensionAlert::getAlertJSON(
     ndpi_serializer* serializer) {
-  Flow *f = getFlow();
+  Flow* f = getFlow();
 
   if (serializer) {
     ndpi_serialize_string_int32(serializer, "tls_version", f->getTLSVersion());

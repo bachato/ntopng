@@ -31,9 +31,9 @@ class DNSServerContactsAlert : public ServerContactsAlert {
     return {host_alert_dns_server_contacts, alert_category_security};
   }
 
-  DNSServerContactsAlert(HostCheck *c, Host *f, risk_percentage cli_pctg,
+  DNSServerContactsAlert(HostCheck* c, Host* f, risk_percentage cli_pctg,
                          u_int64_t _contacts, u_int64_t _contacts_threshold);
-  ~DNSServerContactsAlert(){};
+  ~DNSServerContactsAlert() {};
 
   HostAlertType getAlertType() const { return getClassType(); }
 };

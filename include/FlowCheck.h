@@ -41,23 +41,22 @@ class FlowCheck : public Check {
   virtual ~FlowCheck();
 
   /* Check hooks */
-  virtual void protocolDetected(Flow *f){};
-  virtual void periodicUpdate(Flow *f){};
-  virtual void flowEnd(Flow *f){};
-  virtual void flowBegin(Flow *f){};
+  virtual void protocolDetected(Flow* f) {};
+  virtual void periodicUpdate(Flow* f) {};
+  virtual void flowEnd(Flow* f) {};
+  virtual void flowBegin(Flow* f) {};
 
   /* Used to build an alert */
-  virtual FlowAlert *buildAlert(Flow *f) { return NULL; };
+  virtual FlowAlert* buildAlert(Flow* f) { return NULL; };
 
-  void addCheck(std::list<FlowCheck *> *l, NetworkInterface *iface,
+  void addCheck(std::list<FlowCheck*>* l, NetworkInterface* iface,
                 FlowChecks check);
-  virtual bool loadConfiguration(json_object *config);
+  virtual bool loadConfiguration(json_object* config);
 
   virtual std::string getName() const = 0;
 
-  static void computeCliSrvScore(u_int8_t alert_score,
-                                 risk_percentage cli_pctg, u_int8_t *cli_score,
-                                 u_int8_t *srv_score);
+  static void computeCliSrvScore(u_int8_t alert_score, risk_percentage cli_pctg,
+                                 u_int8_t* cli_score, u_int8_t* srv_score);
 
 #ifdef CHECKS_PROFILING
   inline void incStats(u_int64_t exec_time) {
@@ -65,7 +64,7 @@ class FlowCheck : public Check {
   };
 #endif
 
-  void lua(lua_State *vm);
+  void lua(lua_State* vm);
 };
 
 #endif /* _FLOW_CHECK_H_ */

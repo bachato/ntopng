@@ -31,10 +31,10 @@ class FlowRiskTLSMissingSNI : public FlowRiskTLS {
   }
 
  public:
-  FlowRiskTLSMissingSNI() : FlowRiskTLS(){};
-  ~FlowRiskTLSMissingSNI(){};
+  FlowRiskTLSMissingSNI() : FlowRiskTLS() {};
+  ~FlowRiskTLSMissingSNI() {};
 
-  FlowAlert *buildAlert(Flow *f) {
+  FlowAlert* buildAlert(Flow* f) {
     return new FlowRiskTLSMissingSNIAlert(this, f);
   }
 

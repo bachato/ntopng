@@ -24,7 +24,8 @@
 /* *************************************** */
 
 TrafficStats::TrafficStats() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   numPkts = 0, numBytes = 0;
 }
 
@@ -39,9 +40,9 @@ void TrafficStats::printStats() {
 
 /* *************************************** */
 
-char *TrafficStats::serialize() {
-  json_object *my_object = getJSONObject();
-  char *rsp = strdup(json_object_to_json_string(my_object));
+char* TrafficStats::serialize() {
+  json_object* my_object = getJSONObject();
+  char* rsp = strdup(json_object_to_json_string(my_object));
 
   /* Free memory */
   json_object_put(my_object);
@@ -51,8 +52,8 @@ char *TrafficStats::serialize() {
 
 /* ******************************************* */
 
-void TrafficStats::deserialize(json_object *o) {
-  json_object *obj;
+void TrafficStats::deserialize(json_object* o) {
+  json_object* obj;
 
   if (!o) return;
 
@@ -69,14 +70,13 @@ void TrafficStats::deserialize(json_object *o) {
 
 /* ******************************************* */
 
-json_object *TrafficStats::getJSONObject() {
-  json_object *my_object = json_object_new_object();
+json_object* TrafficStats::getJSONObject() {
+  json_object* my_object = json_object_new_object();
 
   if (my_object) {
     json_object_object_add(my_object, "packets",
                            json_object_new_int64(numPkts));
-    json_object_object_add(my_object, "bytes",
-                           json_object_new_int64(numBytes));
+    json_object_object_add(my_object, "bytes", json_object_new_int64(numBytes));
   }
 
   return (my_object);
@@ -84,8 +84,7 @@ json_object *TrafficStats::getJSONObject() {
 
 /* *************************************** */
 
-void TrafficStats::serialize(ndpi_serializer *s) {
+void TrafficStats::serialize(ndpi_serializer* s) {
   ndpi_serialize_string_uint32(s, "packets", numPkts);
   ndpi_serialize_string_uint32(s, "bytes", numBytes);
 }
-

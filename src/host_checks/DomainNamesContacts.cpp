@@ -30,15 +30,16 @@ DomainNamesContacts::DomainNamesContacts() : ServerContacts() {
 
 /* ***************************************************** */
 
-void DomainNamesContacts::periodicUpdate(Host *h, HostAlert *engaged_alert) {
-  HostAlert *alert = engaged_alert;
+void DomainNamesContacts::periodicUpdate(Host* h, HostAlert* engaged_alert) {
+  HostAlert* alert = engaged_alert;
   u_int32_t num_domain_names = 0;
 
-  IpAddress *ip = h->get_ip();
+  IpAddress* ip = h->get_ip();
 
   /* If the host is a DNS or SMTP server, the alert is not triggered
   for both statically specified and dynamically identified hosts.*/
-  if (h->providesService(HOST_SERVICE_DNS) || h->providesService(HOST_SERVICE_SMTP) ||
+  if (h->providesService(HOST_SERVICE_DNS) ||
+      h->providesService(HOST_SERVICE_SMTP) ||
       ntop->getPrefs()->isDNSServer(ip, h->get_vlan_id()) ||
       ntop->getPrefs()->isSMTPServer(ip, h->get_vlan_id()))
     return;
@@ -54,8 +55,8 @@ void DomainNamesContacts::periodicUpdate(Host *h, HostAlert *engaged_alert) {
   h->resetDomainNamesCardinality();
 }
 
-bool DomainNamesContacts::loadConfiguration(json_object *config) {
-  json_object *json_threshold;
+bool DomainNamesContacts::loadConfiguration(json_object* config) {
+  json_object* json_threshold;
 
   HostCheck::loadConfiguration(config); /* Parse parameters in common */
 

@@ -26,8 +26,9 @@
 
 nDPIStats::nDPIStats(bool _enable_throughput_stats,
                      bool _enable_behavior_stats) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
 #ifdef NTOPNG_PRO
   nextMinPeriodicUpdate = 0;
 #endif
@@ -37,11 +38,12 @@ nDPIStats::nDPIStats(bool _enable_throughput_stats,
 
 /* *************************************** */
 
-nDPIStats::nDPIStats(nDPIStats &stats) {
-  std::unordered_map<u_int16_t, ProtoCounter *>::iterator it;
+nDPIStats::nDPIStats(nDPIStats& stats) {
+  std::unordered_map<u_int16_t, ProtoCounter*>::iterator it;
 
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
 #ifdef NTOPNG_PRO
   nextMinPeriodicUpdate = 0;
 #endif
@@ -49,11 +51,11 @@ nDPIStats::nDPIStats(nDPIStats &stats) {
   enable_behavior_stats = false;
 
   for (it = stats.counters.begin(); it != stats.counters.end(); ++it) {
-    ProtoCounter *c = it->second;
+    ProtoCounter* c = it->second;
 
     if (c != NULL) {
       if (counters.find(it->first) == counters.end()) {
-        ProtoCounter *pc =
+        ProtoCounter* pc =
             new (std::nothrow) ProtoCounter(it->first,
 #ifdef NTOPNG_PRO
                                             stats.getEnableThptStats(),
@@ -73,7 +75,8 @@ nDPIStats::nDPIStats(nDPIStats &stats) {
   }
 
   std::unordered_map<u_int16_t, CategoryCounter>::iterator c_it;
-  for (c_it = stats.cat_counters.begin(); c_it != stats.cat_counters.end(); ++c_it) {
+  for (c_it = stats.cat_counters.begin(); c_it != stats.cat_counters.end();
+       ++c_it) {
     u_int16_t cat_id = c_it->first;
     cat_counters[cat_id] = c_it->second;
   }
@@ -82,12 +85,13 @@ nDPIStats::nDPIStats(nDPIStats &stats) {
 /* *************************************** */
 
 nDPIStats::~nDPIStats() {
-  std::unordered_map<u_int16_t, ProtoCounter *>::iterator it;
+  std::unordered_map<u_int16_t, ProtoCounter*>::iterator it;
 
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+
   for (it = counters.begin(); it != counters.end(); ++it) {
-    ProtoCounter *c = it->second;
+    ProtoCounter* c = it->second;
 
     delete c;
   }
@@ -95,19 +99,19 @@ nDPIStats::~nDPIStats() {
 
 /* *************************************** */
 
-void nDPIStats::sum(nDPIStats *stats) {
-  std::unordered_map<u_int16_t, ProtoCounter *>::iterator p_it;
+void nDPIStats::sum(nDPIStats* stats) {
+  std::unordered_map<u_int16_t, ProtoCounter*>::iterator p_it;
 
   for (p_it = counters.begin(); p_it != counters.end(); ++p_it) {
     u_int16_t proto_id = p_it->first;
-    ProtoCounter *c = p_it->second;
-    std::unordered_map<u_int16_t, ProtoCounter *>::iterator p_it1 =
+    ProtoCounter* c = p_it->second;
+    std::unordered_map<u_int16_t, ProtoCounter*>::iterator p_it1 =
         stats->counters.find(proto_id);
 
     if (p_it1 != stats->counters.end())
       p_it1->second->sum(c);
     else {
-      ProtoCounter *pc = new (std::nothrow) ProtoCounter(
+      ProtoCounter* pc = new (std::nothrow) ProtoCounter(
           proto_id, enable_throughput_stats, enable_behavior_stats);
 
       if (pc != NULL) {
@@ -130,9 +134,9 @@ void nDPIStats::sum(nDPIStats *stats) {
 
 /* *************************************** */
 
-void nDPIStats::lua(NetworkInterface *iface, lua_State *vm,
+void nDPIStats::lua(NetworkInterface* iface, lua_State* vm,
                     bool with_categories, bool tsLua, bool diff) {
-  std::unordered_map<u_int16_t, ProtoCounter *>::iterator it;
+  std::unordered_map<u_int16_t, ProtoCounter*>::iterator it;
 
   lua_newtable(vm);
 
@@ -161,8 +165,8 @@ void nDPIStats::lua(NetworkInterface *iface, lua_State *vm,
 
 /* *************************************** */
 
-void nDPIStats::updateStats(const struct timeval *tv) {
-  std::unordered_map<u_int16_t, ProtoCounter *>::iterator it;
+void nDPIStats::updateStats(const struct timeval* tv) {
+  std::unordered_map<u_int16_t, ProtoCounter*>::iterator it;
 
   for (it = counters.begin(); it != counters.end(); ++it)
     it->second->updateStats(tv, nextMinPeriodicUpdate);
@@ -175,14 +179,15 @@ void nDPIStats::updateStats(const struct timeval *tv) {
 void nDPIStats::incStats(u_int32_t when, u_int16_t proto_id,
                          u_int64_t sent_packets, u_int64_t sent_bytes,
                          u_int64_t rcvd_packets, u_int64_t rcvd_bytes) {
-  std::unordered_map<u_int16_t, ProtoCounter *>::iterator cbr =
+  std::unordered_map<u_int16_t, ProtoCounter*>::iterator cbr =
       counters.find(proto_id);
-  ProtoCounter *pc;
+  ProtoCounter* pc;
 
   if (cbr != counters.end()) {
     pc = cbr->second;
   } else {
-    pc = new (std::nothrow)ProtoCounter(proto_id, enable_throughput_stats, enable_behavior_stats);
+    pc = new (std::nothrow)
+        ProtoCounter(proto_id, enable_throughput_stats, enable_behavior_stats);
 
     if (!pc) return;
 
@@ -214,7 +219,7 @@ void nDPIStats::incCategoryStats(u_int32_t when,
 /* *************************************** */
 
 void nDPIStats::incFlowsStats(u_int16_t proto_id) {
-  std::unordered_map<u_int16_t, ProtoCounter *>::iterator pc =
+  std::unordered_map<u_int16_t, ProtoCounter*>::iterator pc =
       counters.find(proto_id);
 
   if (pc != counters.end()) pc->second->inc_total_flows();
@@ -222,9 +227,9 @@ void nDPIStats::incFlowsStats(u_int16_t proto_id) {
 
 /* *************************************** */
 
-char *nDPIStats::serialize(NetworkInterface *iface) {
-  json_object *my_object = getJSONObject(iface);
-  char *rsp = strdup(json_object_to_json_string(my_object));
+char* nDPIStats::serialize(NetworkInterface* iface) {
+  json_object* my_object = getJSONObject(iface);
+  char* rsp = strdup(json_object_to_json_string(my_object));
 
   /* Free memory */
   json_object_put(my_object);
@@ -234,14 +239,13 @@ char *nDPIStats::serialize(NetworkInterface *iface) {
 
 /* *************************************** */
 
-bool nDPIStats::deserialize(json_object *o, NetworkInterface *iface) {
-  if (!o || !json_object_is_type(o, json_type_object))
-    return false;
-  
+bool nDPIStats::deserialize(json_object* o, NetworkInterface* iface) {
+  if (!o || !json_object_is_type(o, json_type_object)) return false;
+
   resetStats();
 
-  json_object *obj;
-  //CategoryCounter
+  json_object* obj;
+  // CategoryCounter
   if (json_object_object_get_ex(o, "categories", &obj) &&
       json_object_is_type(obj, json_type_object)) {
     json_object_object_foreach(obj, cat_key, cat_val) {
@@ -250,11 +254,10 @@ bool nDPIStats::deserialize(json_object *o, NetworkInterface *iface) {
       u_int16_t cat_id = iface->get_ndpi_category_id(cat_key);
       CategoryCounter cat;
 
-      if (cat.deserialize(cat_val))
-        cat_counters[cat_id] = cat;
+      if (cat.deserialize(cat_val)) cat_counters[cat_id] = cat;
     }
   }
-  //ProtoCounter
+  // ProtoCounter
   json_object_object_foreach(o, key, val) {
     if (!key || !val || strcmp(key, "categories") == 0) continue;
     u_int16_t proto_id = iface->get_ndpi_proto_id(key);
@@ -262,13 +265,13 @@ bool nDPIStats::deserialize(json_object *o, NetworkInterface *iface) {
       continue;
     }
 
-    ProtoCounter *pc = new (std::nothrow) ProtoCounter(proto_id,
-    #ifdef NTOPNG_PRO
-      enable_throughput_stats,
-    #else
-      false,
-    #endif
-      enable_behavior_stats);
+    ProtoCounter* pc = new (std::nothrow) ProtoCounter(proto_id,
+#ifdef NTOPNG_PRO
+                                                       enable_throughput_stats,
+#else
+                                                       false,
+#endif
+                                                       enable_behavior_stats);
 
     if (!pc) continue;
 
@@ -283,10 +286,10 @@ bool nDPIStats::deserialize(json_object *o, NetworkInterface *iface) {
 
 /* *************************************** */
 
-json_object *nDPIStats::getJSONObject(NetworkInterface *iface) {
-  json_object *my_object;
-  json_object *inner;
-  std::unordered_map<u_int16_t, ProtoCounter *>::iterator it;
+json_object* nDPIStats::getJSONObject(NetworkInterface* iface) {
+  json_object* my_object;
+  json_object* inner;
+  std::unordered_map<u_int16_t, ProtoCounter*>::iterator it;
   std::unordered_map<u_int16_t, CategoryCounter>::iterator it1;
 
   my_object = json_object_new_object();
@@ -299,7 +302,8 @@ json_object *nDPIStats::getJSONObject(NetworkInterface *iface) {
   inner = json_object_new_object();
 
   for (it1 = cat_counters.begin(); it1 != cat_counters.end(); ++it1)
-    it1->second.addProtoJson(inner, iface, (ndpi_protocol_category_t)it1->first);
+    it1->second.addProtoJson(inner, iface,
+                             (ndpi_protocol_category_t)it1->first);
 
   json_object_object_add(my_object, "categories", inner);
 
@@ -309,7 +313,7 @@ json_object *nDPIStats::getJSONObject(NetworkInterface *iface) {
 /* *************************************** */
 
 void nDPIStats::resetStats() {
-  std::unordered_map<u_int16_t, ProtoCounter *>::iterator it;
+  std::unordered_map<u_int16_t, ProtoCounter*>::iterator it;
   std::unordered_map<u_int16_t, CategoryCounter>::iterator it1;
 
   /* NOTE: do not deallocate counters since they can be in use by other threads

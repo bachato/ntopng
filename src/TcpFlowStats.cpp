@@ -24,15 +24,16 @@
 /* *************************************** */
 
 TcpFlowStats::TcpFlowStats() {
-  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  // if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s",
+  // __FILE__);
   numSynFlows = numEstablishedFlows = numResetFlows = numFinFlows = 0;
 }
 
 /* *************************************** */
 
-char *TcpFlowStats::serialize() {
-  json_object *my_object = getJSONObject();
-  char *rsp = strdup(json_object_to_json_string(my_object));
+char* TcpFlowStats::serialize() {
+  json_object* my_object = getJSONObject();
+  char* rsp = strdup(json_object_to_json_string(my_object));
 
   /* Free memory */
   json_object_put(my_object);
@@ -42,8 +43,8 @@ char *TcpFlowStats::serialize() {
 
 /* ******************************************* */
 
-json_object *TcpFlowStats::getJSONObject() {
-  json_object *my_object;
+json_object* TcpFlowStats::getJSONObject() {
+  json_object* my_object;
 
   my_object = json_object_new_object();
 
@@ -65,7 +66,7 @@ json_object *TcpFlowStats::getJSONObject() {
 
 /* ******************************************* */
 
-void TcpFlowStats::lua(lua_State *vm, const char *label) {
+void TcpFlowStats::lua(lua_State* vm, const char* label) {
   lua_newtable(vm);
 
   lua_push_uint64_table_entry(vm, "numSynFlows", numSynFlows);

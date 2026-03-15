@@ -29,9 +29,9 @@
 
 /* **************************************************** */
 
-pfring *PF_RINGInterface::pfringSocketInit(const char *name) {
+pfring* PF_RINGInterface::pfringSocketInit(const char* name) {
   u_int flags = ntop->getPrefs()->use_promiscuous() ? PF_RING_PROMISC : 0;
-  pfring *handle;
+  pfring* handle;
   packet_direction direction;
   u_int32_t version;
   int rc;
@@ -46,14 +46,15 @@ pfring *PF_RINGInterface::pfringSocketInit(const char *name) {
   if (ntop->getPrefs()->are_ixia_timestamps_enabled())
     flags |= PF_RING_IXIA_TIMESTAMP;
 
-  if ((handle = pfring_open(name, ntop->getGlobals()->getSnaplen(name),  flags)) == NULL)
+  if ((handle = pfring_open(name, ntop->getGlobals()->getSnaplen(name),
+                            flags)) == NULL)
     return NULL;
 
   rc = pfring_version(handle, &version);
 
   if (rc == -1) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR,
-				 "Unexpected socket error: unable to read PF_RING version");
+    ntop->getTrace()->traceEvent(
+        TRACE_ERROR, "Unexpected socket error: unable to read PF_RING version");
     exit(0);
   }
 
@@ -75,7 +76,7 @@ pfring *PF_RINGInterface::pfringSocketInit(const char *name) {
 
   pfring_get_bound_device_address(handle, ifMac);
   pfring_set_poll_watermark(handle, 8);
-  pfring_set_application_name(handle, (char *)"ntopng");
+  pfring_set_application_name(handle, (char*)"ntopng");
 
   if (ntop->getPrefs()->hasPF_RINGClusterID())
     pfring_set_cluster(handle, ntop->getPrefs()->getPF_RINGClusterID(),
@@ -99,11 +100,13 @@ pfring *PF_RINGInterface::pfringSocketInit(const char *name) {
   }
 
   if (pfring_set_direction(handle, direction) != 0) {
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to set packet capture direction on %s", name);
-    
+    ntop->getTrace()->traceEvent(
+        TRACE_WARNING, "Unable to set packet capture direction on %s", name);
+
     if (strstr(name, "zc:") && direction != rx_only_direction)
-      ntop->getTrace()->traceEvent(TRACE_WARNING,
-				   "ZC supports RX capture only, please use --capture-direction 1");
+      ntop->getTrace()->traceEvent(
+          TRACE_WARNING,
+          "ZC supports RX capture only, please use --capture-direction 1");
   }
 
   if (pfring_set_socket_mode(handle, recv_only_mode) != 0)
@@ -123,13 +126,14 @@ pfring *PF_RINGInterface::pfringSocketInit(const char *name) {
 
 /* **************************************************** */
 
-PF_RINGInterface::PF_RINGInterface(const char *_name)
-  : NetworkInterface(_name) {
+PF_RINGInterface::PF_RINGInterface(const char* _name)
+    : NetworkInterface(_name) {
   char name[MAX_INTERFACE_NAME_LEN];
   int err;
 
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   num_pfring_handles = 0;
   dropped_packets = 0;
   merged_interfaces = strchr(_name, ',') ? true : false;
@@ -161,7 +165,7 @@ PF_RINGInterface::PF_RINGInterface(const char *_name)
     if (ntop->getPrefs()->hasPF_RINGClusterID() && !strchr(name, ':')) {
       /* PF_RING cluster configured, cleaning up queue from the interface name
        */
-      char *at = strchr(name, '@');
+      char* at = strchr(name, '@');
       if (at) *at = '\0';
     }
 
@@ -181,7 +185,8 @@ PF_RINGInterface::PF_RINGInterface(const char *_name)
 PF_RINGInterface::~PF_RINGInterface() {
   int i;
 
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
   shutdown();
 
   for (i = 0; i < num_pfring_handles; i++) {
@@ -192,9 +197,9 @@ PF_RINGInterface::~PF_RINGInterface() {
 /* **************************************************** */
 
 void PF_RINGInterface::singlePacketPollLoop() {
-  pfring *pd = pfring_handle[0];
+  pfring* pd = pfring_handle[0];
   u_int sleep_time, max_sleep = 1000, step_sleep = 100;
-  u_char *buffer;
+  u_char* buffer;
   struct pfring_pkthdr hdr;
 
   sleep_time = step_sleep;
@@ -204,17 +209,18 @@ void PF_RINGInterface::singlePacketPollLoop() {
       try {
         u_int16_t p;
         Host *srcHost = NULL, *dstHost = NULL;
-        Flow *flow = NULL;
+        Flow* flow = NULL;
 
         if (hdr.ts.tv_sec == 0) gettimeofday(&hdr.ts, NULL);
-        dissectPacket(merged_interfaces ? hdr.extended_hdr.if_index : UNKNOWN_PKT_IFACE_IDX,
-		      DUMMY_BRIDGE_INTERFACE_ID, get_datalink(),
+        dissectPacket(merged_interfaces ? hdr.extended_hdr.if_index
+                                        : UNKNOWN_PKT_IFACE_IDX,
+                      DUMMY_BRIDGE_INTERFACE_ID, get_datalink(),
                       (hdr.extended_hdr.rx_direction == 1) ? true /* ingress */
                                                            : false /* egress */,
-                      NULL, (const struct pcap_pkthdr *)&hdr, buffer, &p,
+                      NULL, (const struct pcap_pkthdr*)&hdr, buffer, &p,
                       &srcHost, &dstHost, &flow);
         sleep_time = step_sleep;
-      } catch (std::bad_alloc &ba) {
+      } catch (std::bad_alloc& ba) {
         static bool oom_warning_sent = false;
 
         if (!oom_warning_sent) {
@@ -233,7 +239,7 @@ void PF_RINGInterface::singlePacketPollLoop() {
 /* **************************************************** */
 
 void PF_RINGInterface::multiPacketPollLoop() {
-  u_char *buffer;
+  u_char* buffer;
   struct pfring_pkthdr hdr;
   u_int sleep_time, max_sleep = 1000, step_sleep = 100;
   int rc, idx = 0;
@@ -254,16 +260,17 @@ void PF_RINGInterface::multiPacketPollLoop() {
       try {
         u_int16_t p;
         Host *srcHost = NULL, *dstHost = NULL;
-        Flow *flow = NULL;
+        Flow* flow = NULL;
 
         if (hdr.ts.tv_sec == 0) gettimeofday(&hdr.ts, NULL);
-	dissectPacket(merged_interfaces ? hdr.extended_hdr.if_index : UNKNOWN_PKT_IFACE_IDX,
-		      DUMMY_BRIDGE_INTERFACE_ID, get_datalink(),
+        dissectPacket(merged_interfaces ? hdr.extended_hdr.if_index
+                                        : UNKNOWN_PKT_IFACE_IDX,
+                      DUMMY_BRIDGE_INTERFACE_ID, get_datalink(),
                       (idx == 0) /* Assuming 0 ingress, 1 egress (TAP) */, NULL,
-                      (const struct pcap_pkthdr *)&hdr, buffer, &p, &srcHost,
+                      (const struct pcap_pkthdr*)&hdr, buffer, &p, &srcHost,
                       &dstHost, &flow);
         sleep_time = step_sleep;
-      } catch (std::bad_alloc &ba) {
+      } catch (std::bad_alloc& ba) {
         static bool oom_warning_sent = false;
 
         if (!oom_warning_sent) {
@@ -283,8 +290,8 @@ void PF_RINGInterface::multiPacketPollLoop() {
 
 /* **************************************************** */
 
-static void *packetPollLoop(void *ptr) {
-  PF_RINGInterface *iface = (PF_RINGInterface *)ptr;
+static void* packetPollLoop(void* ptr) {
+  PF_RINGInterface* iface = (PF_RINGInterface*)ptr;
 
   iface->setPollerThreadName();
 
@@ -310,7 +317,7 @@ static void *packetPollLoop(void *ptr) {
 /* **************************************************** */
 
 void PF_RINGInterface::startPacketPolling() {
-  pthread_create(&pollLoop, NULL, packetPollLoop, (void *)this);
+  pthread_create(&pollLoop, NULL, packetPollLoop, (void*)this);
   pollLoopCreated = true;
   NetworkInterface::startPacketPolling();
 }
@@ -355,7 +362,7 @@ u_int32_t PF_RINGInterface::getNumDroppedPackets() { return dropped_packets; }
 
 /* **************************************************** */
 
-bool PF_RINGInterface::set_packet_filter(char *filter) {
+bool PF_RINGInterface::set_packet_filter(char* filter) {
   int i;
 
   for (i = 0; i < num_pfring_handles; i++) {

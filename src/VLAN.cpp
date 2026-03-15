@@ -25,7 +25,8 @@
 
 VLAN::VLAN(NetworkInterface* _iface, u_int16_t _vlan_id)
     : GenericHashEntry(_iface), GenericTrafficElement(), Score(_iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   vlan_id = _vlan_id;
 
 #ifdef VLAN_DEBUG
@@ -39,8 +40,7 @@ void VLAN::set_hash_entry_state_idle() { ; /* Nothing to do */ }
 
 /* *************************************** */
 
-VLAN::~VLAN() { /* NOTE: ndpiStats is alredy freed by GenericTrafficElement */
-}
+VLAN::~VLAN() { /* NOTE: ndpiStats is alredy freed by GenericTrafficElement */ }
 
 /* *************************************** */
 

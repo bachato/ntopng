@@ -36,7 +36,7 @@ class HostCheck : public Check {
   /* Check hook (periodic)
    * engaged_alert is the alert already engaged by the check
    * in a previous iteration, if any. */
-  virtual void periodicUpdate(Host *h, HostAlert *engaged_alert){};
+  virtual void periodicUpdate(Host* h, HostAlert* engaged_alert) {};
 
   virtual u_int32_t getPeriod() { return periodicity_secs; }
   inline bool isMinCheck() const { return periodicity_secs == 60; };
@@ -47,10 +47,10 @@ class HostCheck : public Check {
     periodicity_secs = _periodicity_secs;
   }
 
-  inline void addCheck(std::list<HostCheck *> *l, NetworkInterface *iface) {
+  inline void addCheck(std::list<HostCheck*>* l, NetworkInterface* iface) {
     l->push_back(this);
   }
-  virtual bool loadConfiguration(json_object *config);
+  virtual bool loadConfiguration(json_object* config);
 
   virtual HostCheckID getID() const = 0;
   virtual std::string getName() const = 0;

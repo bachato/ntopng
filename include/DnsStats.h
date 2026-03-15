@@ -38,30 +38,26 @@ class DnsStats {
  private:
   struct dns_stats sent_stats, rcvd_stats;
 
-  json_object *getStatsJSONObject(struct dns_stats *stats);
-  void luaStats(lua_State *vm, struct dns_stats *stats, const char *label,
+  json_object* getStatsJSONObject(struct dns_stats* stats);
+  void luaStats(lua_State* vm, struct dns_stats* stats, const char* label,
                 bool verbose);
 
  public:
   DnsStats();
 
-  void incStats(bool as_client, const FlowDNSStats *fts);
-  void updateStats(const struct timeval *const tv);
+  void incStats(bool as_client, const FlowDNSStats* fts);
+  void updateStats(const struct timeval* const tv);
 
   u_int32_t getSentNumQueries() { return sent_stats.num_queries; }
   u_int32_t getSentNumRepliesOk() { return sent_stats.num_replies_ok; }
-  u_int32_t getSentNumRepliesError() {
-    return sent_stats.num_replies_error;
-  }
+  u_int32_t getSentNumRepliesError() { return sent_stats.num_replies_error; }
 
   u_int32_t getRcvdNumQueries() { return rcvd_stats.num_queries; }
   u_int32_t getRcvdNumRepliesOk() { return rcvd_stats.num_replies_ok; }
-  u_int32_t getRcvdNumRepliesError() {
-    return rcvd_stats.num_replies_error;
-  }
+  u_int32_t getRcvdNumRepliesError() { return rcvd_stats.num_replies_error; }
 
-  json_object *getJSONObject();
-  void lua(lua_State *vm, bool verbose);
+  json_object* getJSONObject();
+  void lua(lua_State* vm, bool verbose);
 };
 
 #endif /* _STATS_H_ */

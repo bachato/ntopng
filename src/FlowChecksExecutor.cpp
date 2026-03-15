@@ -23,9 +23,10 @@
 
 /* **************************************************** */
 
-FlowChecksExecutor::FlowChecksExecutor(FlowChecksLoader *fcl,
-                                       NetworkInterface *_iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+FlowChecksExecutor::FlowChecksExecutor(FlowChecksLoader* fcl,
+                                       NetworkInterface* _iface) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
   iface = _iface;
   loadFlowChecks(fcl);
 };
@@ -33,7 +34,8 @@ FlowChecksExecutor::FlowChecksExecutor(FlowChecksLoader *fcl,
 /* **************************************************** */
 
 FlowChecksExecutor::~FlowChecksExecutor() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
   if (protocol_detected) delete protocol_detected;
   if (periodic_update) delete periodic_update;
   if (flow_end) delete flow_end;
@@ -42,7 +44,7 @@ FlowChecksExecutor::~FlowChecksExecutor() {
 
 /* **************************************************** */
 
-void FlowChecksExecutor::loadFlowChecks(FlowChecksLoader *fcl) {
+void FlowChecksExecutor::loadFlowChecks(FlowChecksLoader* fcl) {
   protocol_detected = fcl->getProtocolDetectedChecks(iface);
   periodic_update = fcl->getPeriodicUpdateChecks(iface);
   flow_end = fcl->getFlowEndChecks(iface);
@@ -51,8 +53,8 @@ void FlowChecksExecutor::loadFlowChecks(FlowChecksLoader *fcl) {
 
 /* **************************************************** */
 
-void FlowChecksExecutor::execChecks(Flow *f, FlowChecks c) {
-  std::list<FlowCheck *> *checks = NULL;
+void FlowChecksExecutor::execChecks(Flow* f, FlowChecks c) {
+  std::list<FlowCheck*>* checks = NULL;
 #ifdef CHECKS_PROFILING
   u_int64_t t1, t2;
 #endif
@@ -74,14 +76,16 @@ void FlowChecksExecutor::execChecks(Flow *f, FlowChecks c) {
       return;
   }
 
-  for (list<FlowCheck *>::iterator it = checks->begin(); it != checks->end(); ++it) {
-    FlowCheck *fc = (*it);
+  for (list<FlowCheck*>::iterator it = checks->begin(); it != checks->end();
+       ++it) {
+    FlowCheck* fc = (*it);
 
 #ifdef CHECKS_PROFILING
     t1 = Utils::getTimeNsec();
 #endif
 
-    // ntop->getTrace()->traceEvent(TRACE_ERROR, "[state: %u] %s", c, fc->getName().c_str());
+    // ntop->getTrace()->traceEvent(TRACE_ERROR, "[state: %u] %s", c,
+    // fc->getName().c_str());
 
     switch (c) {
       case flow_check_flow_begin:

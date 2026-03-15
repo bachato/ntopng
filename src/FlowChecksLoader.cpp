@@ -22,8 +22,8 @@
 #include "ntop_includes.h"
 #include "flow_checks_includes.h"
 
-#define NDPI_RISK_CLR_BIT(num, n)    num &= ~(1ULL << ( n ))
-#define NDPI_RISK_ISSET_BIT(num, n)  (num & (1ULL << ( n )))
+#define NDPI_RISK_CLR_BIT(num, n) num &= ~(1ULL << (n))
+#define NDPI_RISK_ISSET_BIT(num, n) (num & (1ULL << (n)))
 
 /* **************************************************** */
 
@@ -32,49 +32,53 @@ FlowChecksLoader::FlowChecksLoader() : ChecksLoader() {
     Assuments all risks as unhanlded. Bits corresponding to risks handled by
     checks will be set to zero during checks registration.
    */
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 
-  memset(&unhandled_ndpi_risks, 0xFF, sizeof(unhandled_ndpi_risks)); /* Set all bits */
+  memset(&unhandled_ndpi_risks, 0xFF,
+         sizeof(unhandled_ndpi_risks)); /* Set all bits */
   NDPI_RISK_CLR_BIT(unhandled_ndpi_risks, NDPI_NO_RISK);
 }
 
 /* **************************************************** */
 
 FlowChecksLoader::~FlowChecksLoader() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
-  
-  for (std::map<std::string, FlowCheck *>::const_iterator it = cb_all.begin();
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+
+  for (std::map<std::string, FlowCheck*>::const_iterator it = cb_all.begin();
        it != cb_all.end(); ++it)
     delete it->second;
 }
 
 /* **************************************************** */
 
-void FlowChecksLoader::registerCheck(FlowCheck *cb) {
+void FlowChecksLoader::registerCheck(FlowCheck* cb) {
   std::string name = cb->getName();
 
-  if(name != std::string("")) {
+  if (name != std::string("")) {
     if (cb_all.find(name) != cb_all.end()) {
-      ntop->getTrace()->traceEvent(TRACE_ERROR, "Ignoring duplicate flow check %s", name.c_str());
+      ntop->getTrace()->traceEvent(
+          TRACE_ERROR, "Ignoring duplicate flow check %s", name.c_str());
       delete cb;
       return;
     }
-    
+
     cb_all[name] = cb;
   }
-  
+
   /*
     If this is a check that handles an nDPI flow risk,
     the corresponding risk is cleared in the unhandled risks bitmap
    */
-  FlowRisk *fr = dynamic_cast<FlowRisk *>(cb);
+  FlowRisk* fr = dynamic_cast<FlowRisk*>(cb);
   if (fr) NDPI_RISK_CLR_BIT(unhandled_ndpi_risks, fr->handledRisk());
 }
 /* **************************************************** */
 
 void FlowChecksLoader::registerChecks() {
   /* TODO: implement dynamic loading */
-  FlowCheck *fcb;
+  FlowCheck* fcb;
 
   if ((fcb = new BlacklistedFlow())) registerCheck(fcb);
   if ((fcb = new BlacklistedCountry())) registerCheck(fcb);
@@ -187,8 +191,9 @@ void FlowChecksLoader::registerChecks() {
         && FlowRiskAlerts::getFlowRiskAlertType(risk).id != flow_alert_normal) {
       /* Instantiate a simple risk class to handle it */
       if ((fcb = new FlowRiskGeneric(risk))) {
-	registerCheck(fcb);
-	ntop->getTrace()->traceEvent(TRACE_INFO, "Defined generic flow risk for riskId %u", risk);
+        registerCheck(fcb);
+        ntop->getTrace()->traceEvent(
+            TRACE_INFO, "Defined generic flow risk for riskId %u", risk);
       }
     }
   }
@@ -210,25 +215,26 @@ void FlowChecksLoader::loadConfiguration() {
   struct json_object_iterator it;
   struct json_object_iterator itEnd;
   enum json_tokener_error jerr = json_tokener_success;
-  char *value = NULL;
+  char* value = NULL;
   u_int actual_len = ntop->getRedis()->len(CHECKS_CONFIG);
 
-  if ((value = (char *)malloc(actual_len + 1)) == NULL) {
+  if ((value = (char*)malloc(actual_len + 1)) == NULL) {
     ntop->getTrace()->traceEvent(TRACE_ERROR,
                                  "Unable to allocate memory to deserialize %s",
                                  CHECKS_CONFIG);
     goto out;
   }
 
-  if (ntop->getRedis()->get((char *)CHECKS_CONFIG, value, actual_len + 1) != 0) {
+  if (ntop->getRedis()->get((char*)CHECKS_CONFIG, value, actual_len + 1) != 0) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to find configuration %s",
                                  CHECKS_CONFIG);
     goto out;
   }
 
   if ((json = json_tokener_parse_verbose(value, &jerr)) == NULL) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "JSON Parse error [%s] %s [len: %u][strlen: %u]",
-				 json_tokener_error_desc(jerr), value, actual_len, strlen(value));
+    ntop->getTrace()->traceEvent(
+        TRACE_ERROR, "JSON Parse error [%s] %s [len: %u][strlen: %u]",
+        json_tokener_error_desc(jerr), value, actual_len, strlen(value));
     goto out;
   }
 
@@ -252,45 +258,52 @@ void FlowChecksLoader::loadConfiguration() {
   itEnd = json_object_iter_end(json_config_flow);
 
   while (!json_object_iter_equal(&it, &itEnd)) {
-    const char *check_key = json_object_iter_peek_name(&it);
-    json_object *check_config = json_object_iter_peek_value(&it);
+    const char* check_key = json_object_iter_peek_name(&it);
+    json_object* check_config = json_object_iter_peek_value(&it);
     json_object *json_script_conf, *json_hook_all;
-    
+
     if (json_object_object_get_ex(check_config, "all", &json_hook_all)) {
-      json_object *json_enabled;
+      json_object* json_enabled;
       bool enabled;
 
       if (cb_all.find(check_key) != cb_all.end()) {
-        FlowCheck *cb = cb_all[check_key];
-	
+        FlowCheck* cb = cb_all[check_key];
+
         if (!cb->isCheckCompatibleWithEdition()) {
-          ntop->getTrace()->traceEvent(TRACE_INFO,
-				       "Check not compatible with current edition [check: %s]",
-				       check_key);
+          ntop->getTrace()->traceEvent(
+              TRACE_INFO,
+              "Check not compatible with current edition [check: %s]",
+              check_key);
           goto next_object;
         }
 
-        if (json_object_object_get_ex(json_hook_all, "enabled", &json_enabled)) {
+        if (json_object_object_get_ex(json_hook_all, "enabled",
+                                      &json_enabled)) {
           enabled = json_object_get_boolean(json_enabled);
 
 #if 0
 	  ntop->getTrace()->traceEvent(TRACE_WARNING, "*** %s *** [%s][%s]", check_key,
 				       cb->isGenericCheck() ? "GENERIC" : "", enabled ? "ENABLED" : "NOT enabled");
-#endif	    
-	} else 
+#endif
+        } else
           enabled = false;
 
         if (!enabled) {
-          ntop->getTrace()->traceEvent(TRACE_INFO, "Skipping check not enabled [check: %s]", check_key);
+          ntop->getTrace()->traceEvent(
+              TRACE_INFO, "Skipping check not enabled [check: %s]", check_key);
           goto next_object;
         }
 
         /* Script enabled */
-        if (json_object_object_get_ex(json_hook_all, "script_conf", &json_script_conf)) {
+        if (json_object_object_get_ex(json_hook_all, "script_conf",
+                                      &json_script_conf)) {
           if (cb->loadConfiguration(json_script_conf)) {
-            ntop->getTrace()->traceEvent(TRACE_INFO, "Successfully enabled check %s", check_key);
+            ntop->getTrace()->traceEvent(
+                TRACE_INFO, "Successfully enabled check %s", check_key);
           } else {
-            ntop->getTrace()->traceEvent(TRACE_WARNING, "Error while loading check %s configuration", check_key);
+            ntop->getTrace()->traceEvent(
+                TRACE_WARNING, "Error while loading check %s configuration",
+                check_key);
           }
 
           cb->enable();
@@ -310,16 +323,17 @@ void FlowChecksLoader::loadConfiguration() {
             strcmp(check_key, "tcp_connection_refused") &&
             strcmp(check_key, "ndpi_tls_suspicious_esni_usage") &&
             strcmp(check_key, "ndpi_fully_encrypted") &&
-	    strcmp(check_key, "ndpi_unresolved_hostname") /* Handled in UnresolvedHostname.cpp */
+            strcmp(check_key,
+                   "ndpi_unresolved_hostname") /* Handled in
+                                                  UnresolvedHostname.cpp */
 #ifdef HAVE_NEDGE
-            &&
-            strcmp(check_key, "lateral_movement") &&
+            && strcmp(check_key, "lateral_movement") &&
             strcmp(check_key, "periodicity_changed")
 #endif
-           )
-          ntop->getTrace()->traceEvent(TRACE_WARNING,
-				       "Unable to find flow check '%s': skipping it",
-				       check_key);
+        )
+          ntop->getTrace()->traceEvent(
+              TRACE_WARNING, "Unable to find flow check '%s': skipping it",
+              check_key);
       }
     }
 
@@ -339,7 +353,7 @@ out:
 void FlowChecksLoader::printChecks() {
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Available Checks:");
 
-  for (std::map<std::string, FlowCheck *>::const_iterator it = cb_all.begin();
+  for (std::map<std::string, FlowCheck*>::const_iterator it = cb_all.begin();
        it != cb_all.end(); ++it)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "\t%s", it->first.c_str());
 
@@ -355,13 +369,13 @@ void FlowChecksLoader::printChecks() {
 
 /* **************************************************** */
 
-std::list<FlowCheck *> *FlowChecksLoader::getChecks(NetworkInterface *iface,
-                                                    FlowChecks check) {
-  std::list<FlowCheck *> *l = new std::list<FlowCheck *>;
+std::list<FlowCheck*>* FlowChecksLoader::getChecks(NetworkInterface* iface,
+                                                   FlowChecks check) {
+  std::list<FlowCheck*>* l = new std::list<FlowCheck*>;
 
-  for (std::map<std::string, FlowCheck *>::const_iterator it = cb_all.begin();
+  for (std::map<std::string, FlowCheck*>::const_iterator it = cb_all.begin();
        it != cb_all.end(); ++it) {
-    FlowCheck *cb = it->second;
+    FlowCheck* cb = it->second;
 
     if (cb->isEnabled()) cb->addCheck(l, iface, check);
   }
@@ -371,9 +385,9 @@ std::list<FlowCheck *> *FlowChecksLoader::getChecks(NetworkInterface *iface,
 
 /* **************************************************** */
 
-bool FlowChecksLoader::luaCheckInfo(lua_State *vm,
+bool FlowChecksLoader::luaCheckInfo(lua_State* vm,
                                     std::string check_name) const {
-  std::map<std::string, FlowCheck *>::const_iterator it =
+  std::map<std::string, FlowCheck*>::const_iterator it =
       cb_all.find(check_name);
 
   if (it == cb_all.end()) return false;
@@ -389,12 +403,12 @@ bool FlowChecksLoader::luaCheckInfo(lua_State *vm,
 
 /* **************************************************** */
 
-void FlowChecksLoader::lua(lua_State *vm) {
+void FlowChecksLoader::lua(lua_State* vm) {
   lua_newtable(vm);
 
-  for (std::map<std::string, FlowCheck *>::const_iterator it = cb_all.begin();
+  for (std::map<std::string, FlowCheck*>::const_iterator it = cb_all.begin();
        it != cb_all.end(); ++it) {
-    FlowCheck *fc = it->second;
+    FlowCheck* fc = it->second;
 
     lua_newtable(vm);
 

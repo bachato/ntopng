@@ -31,8 +31,10 @@ class NedgeBlockedFlowAlert : public FlowAlert {
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_WARNING; };
 
-  NedgeBlockedFlowAlert(FlowCheck *c, Flow *f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-  ~NedgeBlockedFlowAlert(){};
+  NedgeBlockedFlowAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~NedgeBlockedFlowAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
 };

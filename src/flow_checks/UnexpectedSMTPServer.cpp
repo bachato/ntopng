@@ -24,11 +24,11 @@
 
 /* ***************************************************** */
 
-bool UnexpectedSMTPServer::isAllowedHost(Flow *f) {
+bool UnexpectedSMTPServer::isAllowedHost(Flow* f) {
   if (ntop->getPrefs()->getConfiguredSMTPServers()->isEmptyConfiguration())
     return (true);
   else {
-    IpAddress *p = (IpAddress *)getServerIP(f);
+    IpAddress* p = (IpAddress*)getServerIP(f);
 
     if (p != NULL)
       return (ntop->getPrefs()->isSMTPServer(p, f->get_vlan_id()) ||

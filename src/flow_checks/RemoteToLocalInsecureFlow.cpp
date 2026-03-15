@@ -24,11 +24,9 @@
 
 /* ***************************************************** */
 
-void RemoteToLocalInsecureFlow::protocolDetected(Flow *f) {
-  if (f->isRemoteToLocal()
-      && f->isDPIDetectedFlow()
-      && ((!f->isTCP()) || (f->getMajorConnState() >= ESTABLISHED))
-      ) {
+void RemoteToLocalInsecureFlow::protocolDetected(Flow* f) {
+  if (f->isRemoteToLocal() && f->isDPIDetectedFlow() &&
+      ((!f->isTCP()) || (f->getMajorConnState() >= ESTABLISHED))) {
     risk_percentage cli_score_pctg = CLIENT_FAIR_RISK_PERCENTAGE;
     /* Remote to local */
     bool unsafe;
@@ -70,10 +68,11 @@ void RemoteToLocalInsecureFlow::protocolDetected(Flow *f) {
     if (unsafe) {
       FlowAlertType alert_type = RemoteToLocalInsecureFlowAlert::getClassType();
       u_int8_t c_score, s_score;
-      
-      computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg, &c_score, &s_score);
 
-      FlowAlert *alert = buildAlert(f);
+      computeCliSrvScore(ntop->getFlowAlertScore(alert_type.id), cli_score_pctg,
+                         &c_score, &s_score);
+
+      FlowAlert* alert = buildAlert(f);
       alert->setCliSrvScores(c_score, s_score);
       f->triggerAlert(alert);
     }
@@ -82,8 +81,8 @@ void RemoteToLocalInsecureFlow::protocolDetected(Flow *f) {
 
 /* ***************************************************** */
 
-FlowAlert *RemoteToLocalInsecureFlow::buildAlert(Flow *f) {
-  RemoteToLocalInsecureFlowAlert *alert =
+FlowAlert* RemoteToLocalInsecureFlow::buildAlert(Flow* f) {
+  RemoteToLocalInsecureFlowAlert* alert =
       new (std::nothrow) RemoteToLocalInsecureFlowAlert(this, f);
 
   if (alert) {

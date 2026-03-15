@@ -28,21 +28,21 @@ class Host;
 
 class HostChecksExecutor { /* One instance per ntopng Interface */
  private:
-  NetworkInterface *iface;
-  std::list<HostCheck *> *periodic_host_cb;
-  HostCheck *host_cb_arr[NUM_DEFINED_HOST_CHECKS];
+  NetworkInterface* iface;
+  std::list<HostCheck*>* periodic_host_cb;
+  HostCheck* host_cb_arr[NUM_DEFINED_HOST_CHECKS];
 
-  void loadHostChecksAlerts(std::list<HostCheck *> *cb_list);
-  void loadHostChecks(HostChecksLoader *fcl);
+  void loadHostChecksAlerts(std::list<HostCheck*>* cb_list);
+  void loadHostChecks(HostChecksLoader* fcl);
 
-  void releaseAllDisabledAlerts(Host *h, time_t now);
+  void releaseAllDisabledAlerts(Host* h, time_t now);
 
  public:
-  HostChecksExecutor(HostChecksLoader *fcl, NetworkInterface *_iface);
+  HostChecksExecutor(HostChecksLoader* fcl, NetworkInterface* _iface);
   virtual ~HostChecksExecutor();
 
-  HostCheck *getCheck(HostCheckID t) { return host_cb_arr[t]; }
-  void execChecks(Host *h);
+  HostCheck* getCheck(HostCheckID t) { return host_cb_arr[t]; }
+  void execChecks(Host* h);
 };
 
 #endif /* _HOST_CHECKS_EXECUTOR_H_ */

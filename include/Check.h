@@ -36,13 +36,13 @@ class Check {
   virtual ~Check();
 
   /* Compatibility */
-  bool isCheckCompatibleWithInterface(NetworkInterface *iface);
+  bool isCheckCompatibleWithInterface(NetworkInterface* iface);
   bool isCheckCompatibleWithEdition() const;
   inline NtopngEdition getEdition() const { return check_edition; };
 
   /* Enable/Disable hooks */
-  virtual void scriptEnable(){};
-  virtual void scriptDisable(){};
+  virtual void scriptEnable() {};
+  virtual void scriptDisable() {};
 
   inline void enable() { enabled = true; }
   inline bool isEnabled() const { return (enabled ? true : false); }

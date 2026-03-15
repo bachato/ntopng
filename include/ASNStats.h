@@ -29,7 +29,7 @@ class Flow; /* Forward */
 /* *************************************** */
 
 /* This class is used to collect information from live flows and
- * store those info here, in order to do any kind of computation 
+ * store those info here, in order to do any kind of computation
  * with ASN and be more "free" to just get ASN stats instead of all
  * the stats if interested in the live info.
  * Also this class is used by FlowStats.cpp for the same reason (but that is
@@ -50,9 +50,9 @@ class ASNStats {
   ASNStats();
   ~ASNStats();
 
-  void incStats(Flow *flow);
+  void incStats(Flow* flow);
 
-  void lua(lua_State *vm, bool show_all_stats = false);
+  void lua(lua_State* vm, bool show_all_stats = false);
 
   void resetStats();
 };

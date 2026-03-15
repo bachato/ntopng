@@ -29,16 +29,17 @@
 class PcapInterface : public NetworkInterface {
  private:
   u_int8_t num_ifaces;
-  char* pcap_ifaces[MAX_NUM_PCAP_INTERFACES]; /* Used when interfaces such as eth0,eth1 */
+  char* pcap_ifaces[MAX_NUM_PCAP_INTERFACES]; /* Used when interfaces such as
+                                                 eth0,eth1 */
   pcap_t* pcap_handle[MAX_NUM_PCAP_INTERFACES];
   unsigned int ifname_indexes[MAX_NUM_PCAP_INTERFACES];
   int iface_datalink[MAX_NUM_PCAP_INTERFACES];
-  char *pcap_path;
-  bool read_pkts_from_pcap_dump, read_pkts_from_pcap_dump_done, processing_from_pcap_dump_done,
-    read_pkts_from_directory, emulate_traffic_directions, read_from_stdin_pipe,
-    delete_pcap_when_done;
+  char* pcap_path;
+  bool read_pkts_from_pcap_dump, read_pkts_from_pcap_dump_done,
+      processing_from_pcap_dump_done, read_pkts_from_directory,
+      emulate_traffic_directions, read_from_stdin_pipe, delete_pcap_when_done;
   ProtoStats prev_stats_in, prev_stats_out;
-  FILE *pcap_list;
+  FILE* pcap_list;
   struct timeval startTS, firstPktTS;
   std::vector<std::string> pcap_files_queue;
   pcap_stat last_pcap_stat;
@@ -55,7 +56,7 @@ class PcapInterface : public NetworkInterface {
   };
 
  public:
-  PcapInterface(const char *name, u_int8_t ifIdx, bool _delete_pcap_when_done);
+  PcapInterface(const char* name, u_int8_t ifIdx, bool _delete_pcap_when_done);
   virtual ~PcapInterface();
 
   bool isDiscoverableInterface() {
@@ -66,19 +67,25 @@ class PcapInterface : public NetworkInterface {
                 ? interface_type_PCAP_DUMP
                 : interface_type_PCAP);
   }
-  virtual const char *get_type() const {
+  virtual const char* get_type() const {
     return ((read_pkts_from_pcap_dump && !reproducePcapOriginalSpeed())
                 ? CONST_INTERFACE_TYPE_PCAP_DUMP
                 : CONST_INTERFACE_TYPE_PCAP);
   };
-  inline pcap_t *get_pcap_handle(u_int8_t id) { return ((id < num_ifaces) ? pcap_handle[id] : NULL); };
+  inline pcap_t* get_pcap_handle(u_int8_t id) {
+    return ((id < num_ifaces) ? pcap_handle[id] : NULL);
+  };
   inline virtual bool areTrafficDirectionsSupported() {
     return (emulate_traffic_directions);
   };
-  inline void set_pcap_handle(pcap_t *p, u_int8_t id) { if(id < num_ifaces) pcap_handle[id] = p; };
-  inline std::vector<std::string>* get_pcap_files_queue() { return (&pcap_files_queue); };
+  inline void set_pcap_handle(pcap_t* p, u_int8_t id) {
+    if (id < num_ifaces) pcap_handle[id] = p;
+  };
+  inline std::vector<std::string>* get_pcap_files_queue() {
+    return (&pcap_files_queue);
+  };
   void startPacketPolling();
-  bool set_packet_filter(char *filter);
+  bool set_packet_filter(char* filter);
   bool read_from_stdin() const { return (read_from_stdin_pipe); };
   bool read_from_pcap_dump() const { return (read_pkts_from_pcap_dump); };
   bool read_from_pcap_dump_done() const {
@@ -88,21 +95,24 @@ class PcapInterface : public NetworkInterface {
   bool pcap_dump_processing_done() const {
     return (processing_from_pcap_dump_done);
   };
-  void set_pcap_dump_processing_done() { processing_from_pcap_dump_done = true; };
+  void set_pcap_dump_processing_done() {
+    processing_from_pcap_dump_done = true;
+  };
   void sendTermination();
   bool reproducePcapOriginalSpeed() const;
   virtual void updateDirectionStats();
-  inline u_int8_t get_num_ifaces() { return(num_ifaces); }
-  bool processNextPacket(pcap_t *pd, int32_t if_index, int datalink_type);
-  bool reopen(u_int8_t iface_id);  
-  unsigned int get_ifindex(int i) { return(ifname_indexes[i]); }
-  int get_ifdatalink(int i)       { return(iface_datalink[i]); }
-  char* getPcapIfaceName(int i)   { return(pcap_ifaces[i]);    }
-  inline bool readFromPcapDump()  { return(read_pkts_from_pcap_dump); }
-  inline bool readFromPcapDir()   { return(read_pkts_from_directory); }
+  inline u_int8_t get_num_ifaces() { return (num_ifaces); }
+  bool processNextPacket(pcap_t* pd, int32_t if_index, int datalink_type);
+  bool reopen(u_int8_t iface_id);
+  unsigned int get_ifindex(int i) { return (ifname_indexes[i]); }
+  int get_ifdatalink(int i) { return (iface_datalink[i]); }
+  char* getPcapIfaceName(int i) { return (pcap_ifaces[i]); }
+  inline bool readFromPcapDump() { return (read_pkts_from_pcap_dump); }
+  inline bool readFromPcapDir() { return (read_pkts_from_directory); }
   bool loadPcapFilesFromDir();
   virtual bool is_purge_idle_interface() {
-    return(purge_idle_flows_hosts || NetworkInterface::is_purge_idle_interface());
+    return (purge_idle_flows_hosts ||
+            NetworkInterface::is_purge_idle_interface());
   }
 };
 

@@ -24,8 +24,9 @@
 /* *************************************** */
 
 ParsedeBPF::ParsedeBPF() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   ifname = NULL;
 
   event_type = ebpf_event_type_unknown;
@@ -43,7 +44,7 @@ ParsedeBPF::ParsedeBPF() {
 
 /* *************************************** */
 
-ParsedeBPF::ParsedeBPF(const ParsedeBPF &pe, bool swap_directions) {
+ParsedeBPF::ParsedeBPF(const ParsedeBPF& pe, bool swap_directions) {
   ifname = NULL;
 
   if (!swap_directions) {
@@ -180,7 +181,7 @@ ParsedeBPF::~ParsedeBPF() {
 
 /* *************************************** */
 
-bool ParsedeBPF::update(const ParsedeBPF *const pe) {
+bool ParsedeBPF::update(const ParsedeBPF* const pe) {
   /* Update tcp stats */
   if (pe) {
     if (container_info_set && pe->container_info_set &&
@@ -227,8 +228,8 @@ void ParsedeBPF::print() {
 
 /* *************************************** */
 
-void ParsedeBPF::getProcessInfoJSONObject(const ProcessInfo *proc,
-                                          json_object *proc_object) const {
+void ParsedeBPF::getProcessInfoJSONObject(const ProcessInfo* proc,
+                                          json_object* proc_object) const {
   json_object_object_add(proc_object, "PID", json_object_new_int64(proc->pid));
   json_object_object_add(
       proc_object, "NAME",
@@ -273,8 +274,8 @@ void ParsedeBPF::getProcessInfoJSONObject(const ProcessInfo *proc,
 
 /* *************************************** */
 
-void ParsedeBPF::getContainerInfoJSONObject(const ContainerInfo *cont,
-                                            json_object *cont_object) const {
+void ParsedeBPF::getContainerInfoJSONObject(const ContainerInfo* cont,
+                                            json_object* cont_object) const {
   if (cont->id)
     json_object_object_add(cont_object, "ID", json_object_new_string(cont->id));
 
@@ -297,8 +298,8 @@ void ParsedeBPF::getContainerInfoJSONObject(const ContainerInfo *cont,
 
 /* *************************************** */
 
-void ParsedeBPF::getTCPInfoJSONObject(const TcpInfo *tcp,
-                                      json_object *tcp_object) const {
+void ParsedeBPF::getTCPInfoJSONObject(const TcpInfo* tcp,
+                                      json_object* tcp_object) const {
   json_object_object_add(tcp_object, "RTT", json_object_new_double(tcp->rtt));
   json_object_object_add(tcp_object, "RTT_VAR",
                          json_object_new_double(tcp->rtt_var));
@@ -306,13 +307,13 @@ void ParsedeBPF::getTCPInfoJSONObject(const TcpInfo *tcp,
 
 /* *************************************** */
 
-void ParsedeBPF::getJSONObject(json_object *my_object) const {
-  const ProcessInfo *proc;
-  const ContainerInfo *cont;
-  const TcpInfo *tcp;
+void ParsedeBPF::getJSONObject(json_object* my_object) const {
+  const ProcessInfo* proc;
+  const ContainerInfo* cont;
+  const TcpInfo* tcp;
 
   if (process_info_set && src_process_info.pid > 0) {
-    json_object *proc_object = json_object_new_object();
+    json_object* proc_object = json_object_new_object();
     if (proc_object) {
       proc = &src_process_info;
       getProcessInfoJSONObject(proc, proc_object);
@@ -321,7 +322,7 @@ void ParsedeBPF::getJSONObject(json_object *my_object) const {
   }
 
   if (process_info_set && dst_process_info.pid > 0) {
-    json_object *proc_object = json_object_new_object();
+    json_object* proc_object = json_object_new_object();
     if (proc_object) {
       proc = &dst_process_info;
       getProcessInfoJSONObject(proc, proc_object);
@@ -330,7 +331,7 @@ void ParsedeBPF::getJSONObject(json_object *my_object) const {
   }
 
   if (container_info_set) {
-    json_object *cont_object;
+    json_object* cont_object;
 
     cont_object = json_object_new_object();
     if (cont_object) {
@@ -348,7 +349,7 @@ void ParsedeBPF::getJSONObject(json_object *my_object) const {
   }
 
   if (tcp_info_set) {
-    json_object *tcp_object;
+    json_object* tcp_object;
 
     tcp_object = json_object_new_object();
     if (tcp_object) {
@@ -368,7 +369,7 @@ void ParsedeBPF::getJSONObject(json_object *my_object) const {
 
 /* *************************************** */
 
-void ParsedeBPF::processInfoLua(lua_State *vm, const ProcessInfo *proc) const {
+void ParsedeBPF::processInfoLua(lua_State* vm, const ProcessInfo* proc) const {
   lua_push_uint64_table_entry(vm, "pid", proc->pid);
   lua_push_str_table_entry(vm, "name",
                            proc->process_name ? proc->process_name : "");
@@ -400,10 +401,10 @@ void ParsedeBPF::processInfoLua(lua_State *vm, const ProcessInfo *proc) const {
 
 /* *************************************** */
 
-void ParsedeBPF::lua(lua_State *vm) const {
-  const ProcessInfo *proc;
-  const ContainerInfo *cont;
-  const TcpInfo *tcp;
+void ParsedeBPF::lua(lua_State* vm) const {
+  const ProcessInfo* proc;
+  const ContainerInfo* cont;
+  const TcpInfo* tcp;
 
   if (process_info_set && src_process_info.pid > 0) {
     lua_newtable(vm);

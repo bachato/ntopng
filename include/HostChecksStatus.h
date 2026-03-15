@@ -32,12 +32,16 @@ class HostChecksStatus { /* Container to keep per-check status (e.g., traffic
 
  public:
   HostChecksStatus() { last_call_min = last_call_5min = 0; }
-  virtual ~HostChecksStatus(){};
+  virtual ~HostChecksStatus() {};
 
-  inline bool isTimeToRunMinChecks(time_t now) const  { return last_call_min + 60 <= now;   }
-  inline bool isTimeToRun5MinChecks(time_t now) const { return last_call_5min + 300 <= now; }
+  inline bool isTimeToRunMinChecks(time_t now) const {
+    return last_call_min + 60 <= now;
+  }
+  inline bool isTimeToRun5MinChecks(time_t now) const {
+    return last_call_5min + 300 <= now;
+  }
 
-  inline void setMinLastCallTime(time_t now)  { last_call_min = now;  }
+  inline void setMinLastCallTime(time_t now) { last_call_min = now; }
   inline void set5MinLastCallTime(time_t now) { last_call_5min = now; }
 };
 

@@ -45,68 +45,68 @@ class Redis {
   bool checkSet(std::string key);
 
  public:
-  Redis(const char *redis_host = NULL, const char *redis_password = NULL,
+  Redis(const char* redis_host = NULL, const char* redis_password = NULL,
         u_int16_t redis_port = 0, u_int8_t _redis_db_id = 0,
         bool giveup_on_failure = false);
 
-  char *getVersion();
+  char* getVersion();
   u_int32_t getNumVersion();
   bool hasRedisDump();
   void setDefaults();
   bool isOperational();
   void setInitializationComplete();
-  int info(char *rsp, u_int rsp_len);
+  int info(char* rsp, u_int rsp_len);
   u_int dbsize();
-  int expire(char *key, u_int expire_sec);
-  char* getWithAlloc(char *key, bool cache_it = false);
-  int get(char *key, char *rsp, u_int rsp_len, bool cache_it = false);
-  int hashGet(const char *key, const char *member, char *const rsp,
+  int expire(char* key, u_int expire_sec);
+  char* getWithAlloc(char* key, bool cache_it = false);
+  int get(char* key, char* rsp, u_int rsp_len, bool cache_it = false);
+  int hashGet(const char* key, const char* member, char* const rsp,
               u_int rsp_len);
-  int hashDel(const char *key, const char *field);
-  int hashSet(const char *key, const char *field, const char *value);
-  int delHash(char *key, char *member);
-  int set(const char *key, const char *value, u_int expire_secs = 0);
+  int hashDel(const char* key, const char* field);
+  int hashSet(const char* key, const char* field, const char* value);
+  int delHash(char* key, char* member);
+  int set(const char* key, const char* value, u_int expire_secs = 0);
   /* setnx = set if not existing */
-  int setnx(const char *key, const char *value, u_int expire_secs = 0);
-  int keys(const char *pattern, char ***keys_p);
-  int hashKeys(const char *pattern, char ***keys_p);
-  int hashGetAll(const char *key, char ***keys_p, char ***values_p);
-  int del(char *key);
-  int rename(char *key, char *new_key);
-  int pushHostToResolve(char *hostname, bool dont_check_for_existence,
+  int setnx(const char* key, const char* value, u_int expire_secs = 0);
+  int keys(const char* pattern, char*** keys_p);
+  int hashKeys(const char* pattern, char*** keys_p);
+  int hashGetAll(const char* key, char*** keys_p, char*** values_p);
+  int del(char* key);
+  int rename(char* key, char* new_key);
+  int pushHostToResolve(char* hostname, bool dont_check_for_existence,
                         bool localHost);
 
-  int popHostToResolve(char *hostname, u_int hostname_len);
-  int getAddress(char *numeric_ip, char *rsp, u_int rsp_len,
+  int popHostToResolve(char* hostname, u_int hostname_len);
+  int getAddress(char* numeric_ip, char* rsp, u_int rsp_len,
                  bool queue_if_not_found);
-  int setResolvedAddress(char *numeric_ip, char *symbolic_ip);
+  int setResolvedAddress(char* numeric_ip, char* symbolic_ip);
 
-  int sadd(const char *set_name, char *item);
-  int srem(const char *set_name, char *item);
-  int smembers(lua_State *vm, char *setName);
-  int smembers(const char *set_name, char ***members);
-  bool sismember(const char *set_name, const char *member);
+  int sadd(const char* set_name, char* item);
+  int srem(const char* set_name, char* item);
+  int smembers(lua_State* vm, char* setName);
+  int smembers(const char* set_name, char*** members);
+  bool sismember(const char* set_name, const char* member);
 
-  int lpush(const char *queue_name, const char *msg, u_int queue_trim_size,
+  int lpush(const char* queue_name, const char* msg, u_int queue_trim_size,
             bool trace_errors = true);
-  int rpush(const char *queue_name, const char *msg, u_int queue_trim_size);
-  int lindex(const char *queue_name, int idx, char *buf, u_int buf_len);
-  int ltrim(const char *queue_name, int start_idx, int end_idx);
-  u_int hstrlen(const char *key, const char *value);
-  u_int len(const char *key);
-  u_int llen(const char *queue_name);
-  int lset(const char *queue_name, u_int32_t idx, const char *value);
-  int lrem(const char *queue_name, const char *value);
-  int lrange(const char *list_name, char ***elements, int start_offset,
+  int rpush(const char* queue_name, const char* msg, u_int queue_trim_size);
+  int lindex(const char* queue_name, int idx, char* buf, u_int buf_len);
+  int ltrim(const char* queue_name, int start_idx, int end_idx);
+  u_int hstrlen(const char* key, const char* value);
+  u_int len(const char* key);
+  u_int llen(const char* queue_name);
+  int lset(const char* queue_name, u_int32_t idx, const char* value);
+  int lrem(const char* queue_name, const char* value);
+  int lrange(const char* list_name, char*** elements, int start_offset,
              int end_offset);
-  int lpop(const char *queue_name, char *buf, u_int buf_len);
-  int rpop(const char *queue_name, char *buf, u_int buf_len);
-  int incr(const char *key, int amount);
+  int lpop(const char* queue_name, char* buf, u_int buf_len);
+  int rpop(const char* queue_name, char* buf, u_int buf_len);
+  int incr(const char* key, int amount);
   int flushDb();
   void flushCache();
-  void lua(lua_State *vm);
-  char *dump(char *key);
-  int restore(char *key, char *buf);
+  void lua(lua_State* vm);
+  char* dump(char* key);
+  int restore(char* key, char* buf);
 };
 
 #endif /* _REDIS_H_ */

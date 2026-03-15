@@ -35,8 +35,10 @@ class FlowRiskDNSLargePacketAlert : public FlowRiskAlert {
     return FlowRiskAlerts::getFlowRiskScore(getClassRisk());
   }
 
-  FlowRiskDNSLargePacketAlert(FlowCheck *c, Flow *f) : FlowRiskAlert(c, f){  setAlertScore(getDefaultScore());};
-  ~FlowRiskDNSLargePacketAlert(){};
+  FlowRiskDNSLargePacketAlert(FlowCheck* c, Flow* f) : FlowRiskAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~FlowRiskDNSLargePacketAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); }
   ndpi_risk_enum getAlertRisk() const { return getClassRisk(); }

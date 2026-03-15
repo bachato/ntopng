@@ -31,11 +31,11 @@ class FlowRiskDNSSuspiciousTraffic : public FlowRisk {
   };
 
  public:
-  FlowRiskDNSSuspiciousTraffic() : FlowRisk(){};
-  ~FlowRiskDNSSuspiciousTraffic(){};
+  FlowRiskDNSSuspiciousTraffic() : FlowRisk() {};
+  ~FlowRiskDNSSuspiciousTraffic() {};
 
-  FlowAlert *buildAlert(Flow *f) {
-    FlowRiskDNSSuspiciousTrafficAlert *alert =
+  FlowAlert* buildAlert(Flow* f) {
+    FlowRiskDNSSuspiciousTrafficAlert* alert =
         new FlowRiskDNSSuspiciousTrafficAlert(this, f);
 
     /* The client is assuming to be probing the victim DNS server with

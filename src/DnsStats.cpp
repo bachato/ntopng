@@ -24,20 +24,21 @@
 /* *************************************** */
 
 DnsStats::DnsStats() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   memset(&sent_stats.breakdown, 0, sizeof(sent_stats.breakdown)),
       memset(&rcvd_stats.breakdown, 0, sizeof(rcvd_stats.breakdown));
   sent_stats.num_queries = 0, sent_stats.num_replies_ok = 0,
-      sent_stats.num_replies_error = 0, rcvd_stats.num_queries = 0,
-      rcvd_stats.num_replies_ok = 0, rcvd_stats.num_replies_error = 0;
+  sent_stats.num_replies_error = 0, rcvd_stats.num_queries = 0,
+  rcvd_stats.num_replies_ok = 0, rcvd_stats.num_replies_error = 0;
 }
 
 /* *************************************** */
 
-void DnsStats::incStats(bool as_client, const FlowDNSStats *fts) {
-  struct dns_stats *qry = as_client ? &sent_stats : &rcvd_stats;
-  struct dns_stats *rsp = as_client ? &rcvd_stats : &sent_stats;
+void DnsStats::incStats(bool as_client, const FlowDNSStats* fts) {
+  struct dns_stats* qry = as_client ? &sent_stats : &rcvd_stats;
+  struct dns_stats* rsp = as_client ? &rcvd_stats : &sent_stats;
   u_int16_t tot_qry = 0;
 
   if (fts->num_a) qry->breakdown.num_a += fts->num_a, tot_qry += fts->num_a;
@@ -60,19 +61,17 @@ void DnsStats::incStats(bool as_client, const FlowDNSStats *fts) {
   if (tot_qry) qry->num_queries += tot_qry;
 
   if (fts->num_replies_ok) rsp->num_replies_ok += fts->num_replies_ok;
-  if (fts->num_replies_error)
-    rsp->num_replies_error += fts->num_replies_error;
+  if (fts->num_replies_error) rsp->num_replies_error += fts->num_replies_error;
 }
 
 /* *************************************** */
 
-void DnsStats::luaStats(lua_State *vm, struct dns_stats *stats,
-                        const char *label, bool verbose) {
+void DnsStats::luaStats(lua_State* vm, struct dns_stats* stats,
+                        const char* label, bool verbose) {
   lua_newtable(vm);
 
   lua_push_uint64_table_entry(vm, "num_queries", stats->num_queries);
-  lua_push_uint64_table_entry(vm, "num_replies_ok",
-                              stats->num_replies_ok);
+  lua_push_uint64_table_entry(vm, "num_replies_ok", stats->num_replies_ok);
   lua_push_uint64_table_entry(vm, "num_replies_error",
                               stats->num_replies_error);
 
@@ -100,7 +99,7 @@ void DnsStats::luaStats(lua_State *vm, struct dns_stats *stats,
 
 /* *************************************** */
 
-void DnsStats::lua(lua_State *vm, bool verbose) {
+void DnsStats::lua(lua_State* vm, bool verbose) {
   lua_newtable(vm);
 
   luaStats(vm, &sent_stats, "sent", verbose);
@@ -113,9 +112,9 @@ void DnsStats::lua(lua_State *vm, bool verbose) {
 
 /* ******************************************* */
 
-json_object *DnsStats::getStatsJSONObject(struct dns_stats *stats) {
-  json_object *my_object = json_object_new_object();
-  json_object *my_stats = json_object_new_object();
+json_object* DnsStats::getStatsJSONObject(struct dns_stats* stats) {
+  json_object* my_object = json_object_new_object();
+  json_object* my_stats = json_object_new_object();
 
   if (stats->num_queries > 0)
     json_object_object_add(my_object, "num_queries",
@@ -124,9 +123,8 @@ json_object *DnsStats::getStatsJSONObject(struct dns_stats *stats) {
     json_object_object_add(my_object, "num_replies_ok",
                            json_object_new_int64(stats->num_replies_ok));
   if (stats->num_replies_error > 0)
-    json_object_object_add(
-        my_object, "num_replies_error",
-        json_object_new_int64(stats->num_replies_error));
+    json_object_object_add(my_object, "num_replies_error",
+                           json_object_new_int64(stats->num_replies_error));
 
   if (stats->breakdown.num_a > 0)
     json_object_object_add(my_stats, "num_a",
@@ -165,8 +163,8 @@ json_object *DnsStats::getStatsJSONObject(struct dns_stats *stats) {
 
 /* ******************************************* */
 
-json_object *DnsStats::getJSONObject() {
-  json_object *my_object = json_object_new_object();
+json_object* DnsStats::getJSONObject() {
+  json_object* my_object = json_object_new_object();
 
   json_object_object_add(my_object, "sent", getStatsJSONObject(&sent_stats));
   json_object_object_add(my_object, "rcvd", getStatsJSONObject(&rcvd_stats));
@@ -176,6 +174,4 @@ json_object *DnsStats::getJSONObject() {
 
 /* ******************************************* */
 
-void DnsStats::updateStats(const struct timeval *const tv) {
-  /* REMOVE */  
-}
+void DnsStats::updateStats(const struct timeval* const tv) { /* REMOVE */ }

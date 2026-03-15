@@ -26,7 +26,7 @@
 
 class TCPNoDataExchanged : public FlowCheck {
  private:
-  void checkTCPNoDataExchanged(Flow *f);
+  void checkTCPNoDataExchanged(Flow* f);
 
  public:
   TCPNoDataExchanged()
@@ -34,13 +34,13 @@ class TCPNoDataExchanged : public FlowCheck {
                   false /* Don't exclude for nEdge */,
                   false /* NOT only for nEdge */,
                   false /* has_protocol_detected */,
-                  false /* has_periodic_update */, true /* has_flow_end */){};
-  ~TCPNoDataExchanged(){};
+                  false /* has_periodic_update */, true /* has_flow_end */) {};
+  ~TCPNoDataExchanged() {};
 
-  bool loadConfiguration(json_object *config1) { return (true); }
+  bool loadConfiguration(json_object* config1) { return (true); }
 
-  void flowEnd(Flow *f);
-  FlowAlert *buildAlert(Flow *f);
+  void flowEnd(Flow* f);
+  FlowAlert* buildAlert(Flow* f);
 
   std::string getName() const { return (std::string("tcp_no_data_exchanged")); }
 };

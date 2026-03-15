@@ -23,9 +23,10 @@
 
 /* ******************************************* */
 
-DB::DB(NetworkInterface *_iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+DB::DB(NetworkInterface* _iface) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   running = false;
   iface = _iface;
 }

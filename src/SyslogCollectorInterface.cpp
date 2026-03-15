@@ -25,17 +25,19 @@
 
 /* **************************************************** */
 
-bool SyslogCollectorInterface::openSocket(syslog_socket *ss,
-                                          const char *server_address,
+bool SyslogCollectorInterface::openSocket(syslog_socket* ss,
+                                          const char* server_address,
                                           int server_port, int protocol) {
   struct sockaddr_in listen_addr;
   int reuse = 1;
 
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Starting %s syslog collector on %s:%d",
-			       protocol == SOCK_DGRAM ? "UDP" : "TCP", server_address, server_port);
-  
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
+  ntop->getTrace()->traceEvent(
+      TRACE_NORMAL, "Starting %s syslog collector on %s:%d",
+      protocol == SOCK_DGRAM ? "UDP" : "TCP", server_address, server_port);
+
   ss->sock =
       Utils::openSocket(AF_INET, protocol, 0, "SyslogCollectorInterface");
 
@@ -47,7 +49,7 @@ bool SyslogCollectorInterface::openSocket(syslog_socket *ss,
   /* Allow to re-bind in case previous instance died */
   if (setsockopt(ss->sock, SOL_SOCKET, SO_REUSEADDR,
 #ifdef WIN32
-                 (const char *)
+                 (const char*)
 #endif
                  &reuse,
                  sizeof(reuse)) != 0) {
@@ -61,7 +63,7 @@ bool SyslogCollectorInterface::openSocket(syslog_socket *ss,
   listen_addr.sin_addr.s_addr = inet_addr(server_address);
   listen_addr.sin_port = htons(server_port);
 
-  if (::bind(ss->sock, (struct sockaddr *)&listen_addr,
+  if (::bind(ss->sock, (struct sockaddr*)&listen_addr,
              sizeof(struct sockaddr)) != 0) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "bind error");
     return false;
@@ -85,7 +87,7 @@ bool SyslogCollectorInterface::openSocket(syslog_socket *ss,
 
 /* **************************************************** */
 
-void SyslogCollectorInterface::closeSocket(syslog_socket *ss, int protocol) {
+void SyslogCollectorInterface::closeSocket(syslog_socket* ss, int protocol) {
   close(ss->sock);
 
   if (protocol == SOCK_STREAM) {
@@ -97,10 +99,10 @@ void SyslogCollectorInterface::closeSocket(syslog_socket *ss, int protocol) {
 
 /* **************************************************** */
 
-SyslogCollectorInterface::SyslogCollectorInterface(const char *_endpoint)
+SyslogCollectorInterface::SyslogCollectorInterface(const char* _endpoint)
     : SyslogParserInterface(_endpoint) {
   char *tmp, *pos, *port, *address, *protocol;
-  const char *server_address;
+  const char* server_address;
   int server_port;
 
   udp_socket.enable = true;
@@ -119,7 +121,7 @@ SyslogCollectorInterface::SyslogCollectorInterface(const char *_endpoint)
    * syslog://<ip>:<port>[@{udp,tcp}]
    */
 
-  if (strncmp(tmp, (char *)"syslog://", 9) == 0) {
+  if (strncmp(tmp, (char*)"syslog://", 9) == 0) {
     address = &tmp[9];
   } else {
     address = tmp;
@@ -179,10 +181,10 @@ SyslogCollectorInterface::~SyslogCollectorInterface() {
 /* **************************************************** */
 
 /* set FDs and returns the max sock */
-int SyslogCollectorInterface::initFDSetsSocket(syslog_socket *ss,
-                                               fd_set *read_fds,
-                                               fd_set *write_fds,
-                                               fd_set *except_fds,
+int SyslogCollectorInterface::initFDSetsSocket(syslog_socket* ss,
+                                               fd_set* read_fds,
+                                               fd_set* write_fds,
+                                               fd_set* except_fds,
                                                int protocol) {
   int high_sock = ss->sock;
 
@@ -206,8 +208,8 @@ int SyslogCollectorInterface::initFDSetsSocket(syslog_socket *ss,
 /* **************************************************** */
 
 /* set FDs and returns the max sock */
-int SyslogCollectorInterface::initFDSets(fd_set *read_fds, fd_set *write_fds,
-                                         fd_set *except_fds) {
+int SyslogCollectorInterface::initFDSets(fd_set* read_fds, fd_set* write_fds,
+                                         fd_set* except_fds) {
   int high_sock = 0;
 
   FD_ZERO(read_fds);
@@ -240,7 +242,7 @@ int SyslogCollectorInterface::handleNewConnection() {
   memset(&client_addr, 0, sizeof(client_addr));
 
   new_client_sock =
-      accept(tcp_socket.sock, (struct sockaddr *)&client_addr, &client_len);
+      accept(tcp_socket.sock, (struct sockaddr*)&client_addr, &client_len);
 
   if (new_client_sock < 0) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "accept() failure");
@@ -273,7 +275,7 @@ int SyslogCollectorInterface::handleNewConnection() {
 
 /* **************************************************** */
 
-void SyslogCollectorInterface::closeConnection(syslog_client *client) {
+void SyslogCollectorInterface::closeConnection(syslog_client* client) {
   ntop->getTrace()->traceEvent(TRACE_NORMAL,
                                "Closing client socket for %s:%d\n",
                                client->ip_str, client->address.sin_port);
@@ -285,7 +287,7 @@ void SyslogCollectorInterface::closeConnection(syslog_client *client) {
 /* **************************************************** */
 
 #ifdef USE_RECVLINE
-int SyslogCollectorInterface::recvLine(int socket, char *buffer, size_t n) {
+int SyslogCollectorInterface::recvLine(int socket, char* buffer, size_t n) {
   ssize_t num_read;
   size_t tot_read = 0;
   char c;
@@ -320,7 +322,7 @@ int SyslogCollectorInterface::recvLine(int socket, char *buffer, size_t n) {
 
 /* **************************************************** */
 
-int SyslogCollectorInterface::receive(int socket, char *client_ip,
+int SyslogCollectorInterface::receive(int socket, char* client_ip,
                                       bool use_recvfrom) {
   char buffer[8192];
   int len, received_total = 0;
@@ -337,7 +339,7 @@ int SyslogCollectorInterface::receive(int socket, char *client_ip,
   if (use_recvfrom)
     len = recvfrom(socket,
 #ifndef WIN32
-                   (void *)
+                   (void*)
 #endif
                        buffer,
                    buffer_size,
@@ -347,13 +349,13 @@ int SyslogCollectorInterface::receive(int socket, char *client_ip,
                    0
 #endif
                    ,
-                   (struct sockaddr *)&client_addr, &client_addr_len);
+                   (struct sockaddr*)&client_addr, &client_addr_len);
   else
 #ifdef USE_RECVLINE
     /* Read single line to avoid splitting lines across chunks */
-    len = recvLine(socket, (char *)buffer, buffer_size);
+    len = recvLine(socket, (char*)buffer, buffer_size);
 #else
-    len = recv(socket, (char *)buffer, buffer_size,
+    len = recv(socket, (char*)buffer, buffer_size,
 #ifndef WIN32
                MSG_DONTWAIT
 #else
@@ -402,7 +404,7 @@ done:
 
 /* **************************************************** */
 
-int SyslogCollectorInterface::receiveFromClient(syslog_client *client) {
+int SyslogCollectorInterface::receiveFromClient(syslog_client* client) {
   ntop->getTrace()->traceEvent(TRACE_INFO, "Trying to receive from %s:%d",
                                client->ip_str, client->address.sin_port);
 
@@ -491,8 +493,8 @@ void SyslogCollectorInterface::collect_events() {
 
 /* **************************************************** */
 
-static void *messagePollLoop(void *ptr) {
-  SyslogCollectorInterface *iface = (SyslogCollectorInterface *)ptr;
+static void* messagePollLoop(void* ptr) {
+  SyslogCollectorInterface* iface = (SyslogCollectorInterface*)ptr;
 
   iface->setPollerThreadName();
 
@@ -507,7 +509,7 @@ static void *messagePollLoop(void *ptr) {
 /* **************************************************** */
 
 void SyslogCollectorInterface::startPacketPolling() {
-  pthread_create(&pollLoop, NULL, messagePollLoop, (void *)this);
+  pthread_create(&pollLoop, NULL, messagePollLoop, (void*)this);
   pollLoopCreated = true;
 
   SyslogParserInterface::startPacketPolling();
@@ -516,7 +518,7 @@ void SyslogCollectorInterface::startPacketPolling() {
 /* **************************************************** */
 
 void SyslogCollectorInterface::shutdown() {
-  void *res;
+  void* res;
 
   if (running) {
     NetworkInterface::shutdown();
@@ -526,7 +528,7 @@ void SyslogCollectorInterface::shutdown() {
 
 /* **************************************************** */
 
-bool SyslogCollectorInterface::set_packet_filter(char *filter) {
+bool SyslogCollectorInterface::set_packet_filter(char* filter) {
   ntop->getTrace()->traceEvent(
       TRACE_ERROR, "No filter can be set on a collector interface. Ignored %s",
       filter);
@@ -535,7 +537,7 @@ bool SyslogCollectorInterface::set_packet_filter(char *filter) {
 
 /* **************************************************** */
 
-void SyslogCollectorInterface::lua(lua_State *vm, bool fullStats) {
+void SyslogCollectorInterface::lua(lua_State* vm, bool fullStats) {
   SyslogParserInterface::lua(vm, fullStats);
 
   lua_push_bool_table_entry(vm, "isSyslog", true);

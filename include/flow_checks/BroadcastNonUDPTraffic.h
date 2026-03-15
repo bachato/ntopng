@@ -32,11 +32,11 @@ class BroadcastNonUDPTraffic : public FlowCheck {
             ntopng_edition_community, false /* All interfaces */,
             false /* Don't exclude for nEdge */, false /* NOT only for nEdge */,
             false /* has_protocol_detected */, false /* has_periodic_update */,
-            false /* has_flow_end */, true /* has_flow_begin */){};
-  ~BroadcastNonUDPTraffic(){};
+            false /* has_flow_end */, true /* has_flow_begin */) {};
+  ~BroadcastNonUDPTraffic() {};
 
-  void flowBegin(Flow *f);
-  FlowAlert *buildAlert(Flow *f);
+  void flowBegin(Flow* f);
+  FlowAlert* buildAlert(Flow* f);
 
   std::string getName() const {
     return (std::string("broadcast_non_udp_traffic"));

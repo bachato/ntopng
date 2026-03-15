@@ -37,56 +37,60 @@ class HostDetails {
   u_int32_t active_flows_as_server;
   u_int64_t host_key;
   u_int16_t port;
-    
+
  public:
-  HostDetails(char* _ip, char* _mac_address,
-              char* _mac_manufacturer, u_int64_t _total_traffic, 
-              char* _ip_hex, u_int16_t _vlan_id, 
-              u_int8_t _score, u_int32_t _active_flows_count,
-              char* _name, u_int64_t _host_key) {
-    ip                     = _ip ? strdup(_ip) : NULL;
-    mac_address            = _mac_address ? strdup(_mac_address) : NULL;
-    mac_manufacturer       = _mac_manufacturer ? strdup(_mac_manufacturer) : NULL;
-    total_traffic          = _total_traffic;
-    ip_hex                 = _ip_hex ? strdup(_ip_hex) : NULL;
-    vlan_id                = _vlan_id;
-    score                  = _score;
+  HostDetails(char* _ip, char* _mac_address, char* _mac_manufacturer,
+              u_int64_t _total_traffic, char* _ip_hex, u_int16_t _vlan_id,
+              u_int8_t _score, u_int32_t _active_flows_count, char* _name,
+              u_int64_t _host_key) {
+    ip = _ip ? strdup(_ip) : NULL;
+    mac_address = _mac_address ? strdup(_mac_address) : NULL;
+    mac_manufacturer = _mac_manufacturer ? strdup(_mac_manufacturer) : NULL;
+    total_traffic = _total_traffic;
+    ip_hex = _ip_hex ? strdup(_ip_hex) : NULL;
+    vlan_id = _vlan_id;
+    score = _score;
     active_flows_as_server = _active_flows_count;
-    name                   = _name ? strdup(_name) : NULL;
-    host_key               = _host_key;
+    name = _name ? strdup(_name) : NULL;
+    host_key = _host_key;
   };
-  
+
   ~HostDetails() {
-    if(ip_hex)            free(ip_hex);
-    if(ip)                free(ip);
-    if(mac_address)       free(mac_address);
-    if(name)              free(name);
-    if(mac_manufacturer)  free(mac_manufacturer);
+    if (ip_hex) free(ip_hex);
+    if (ip) free(ip);
+    if (mac_address) free(mac_address);
+    if (name) free(name);
+    if (mac_manufacturer) free(mac_manufacturer);
   };
 
   /* Getters */
-  inline char* get_ip()               { return(ip ? ip : (char*)""); };
-  inline char* get_ip_hex()           { return(ip_hex ? ip_hex : (char*)""); };
-  inline char* get_mac_address()      {  return(mac_address ? mac_address : (char*)""); };
-  inline char* get_mac_manufacturer() {  return(mac_manufacturer ? mac_manufacturer : (char*)""); };  
-  inline char* get_name()             {  return(name ? name : (char*)"");   };
+  inline char* get_ip() { return (ip ? ip : (char*)""); };
+  inline char* get_ip_hex() { return (ip_hex ? ip_hex : (char*)""); };
+  inline char* get_mac_address() {
+    return (mac_address ? mac_address : (char*)"");
+  };
+  inline char* get_mac_manufacturer() {
+    return (mac_manufacturer ? mac_manufacturer : (char*)"");
+  };
+  inline char* get_name() { return (name ? name : (char*)""); };
 
-  inline u_int64_t get_total_traffic()          { return(total_traffic); }; 
-  inline u_int8_t  get_score()                  { return(score); };
-  inline u_int32_t get_active_flows_as_server() { return(active_flows_as_server); };
-  inline u_int16_t get_vlan_id()                { return(vlan_id); };
-  inline u_int64_t get_host_key()               { return(host_key); };
-  inline u_int16_t get_port()                   { return(port); };
+  inline u_int64_t get_total_traffic() { return (total_traffic); };
+  inline u_int8_t get_score() { return (score); };
+  inline u_int32_t get_active_flows_as_server() {
+    return (active_flows_as_server);
+  };
+  inline u_int16_t get_vlan_id() { return (vlan_id); };
+  inline u_int64_t get_host_key() { return (host_key); };
+  inline u_int16_t get_port() { return (port); };
 
   /* Setters */
-  inline void set_port(u_int16_t _port) { port = _port; }; 
+  inline void set_port(u_int16_t _port) { port = _port; };
 
   /* Inc stats */
   inline void inc_stats(u_int64_t f_traffic) {
     total_traffic += f_traffic;
     active_flows_as_server++;
   }
-
 };
 
 #endif /* _HOST_DETAILS_H_ */

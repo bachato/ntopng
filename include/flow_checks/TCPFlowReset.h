@@ -26,20 +26,20 @@
 
 class TCPFlowReset : public FlowCheck {
  private:
-  void checkFlowReset(Flow *f);
+  void checkFlowReset(Flow* f);
+
  public:
-  TCPFlowReset() : FlowCheck(ntopng_edition_community, false /* Packet Interfaces only */,
-                true /* Exclude for nEdge */, false /* NOT only for nEdge */,
-                false /* has_protocol_detected */,
-                false /* has_periodic_update */, true /* has_flow_end */){};  
-  ~TCPFlowReset(){};
+  TCPFlowReset()
+      : FlowCheck(ntopng_edition_community, false /* Packet Interfaces only */,
+                  true /* Exclude for nEdge */, false /* NOT only for nEdge */,
+                  false /* has_protocol_detected */,
+                  false /* has_periodic_update */, true /* has_flow_end */) {};
+  ~TCPFlowReset() {};
 
-  void flowEnd(Flow *f);
-  FlowAlert *buildAlert(Flow *f);
+  void flowEnd(Flow* f);
+  FlowAlert* buildAlert(Flow* f);
 
-  std::string getName() const {
-    return (std::string("tcp_flow_reset"));
-  }
+  std::string getName() const { return (std::string("tcp_flow_reset")); }
 };
 
 #endif /* _FLOW_RESET_H */

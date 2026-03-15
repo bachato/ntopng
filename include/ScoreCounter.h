@@ -28,11 +28,14 @@ class ScoreCounter {
   float alpha; /* Linear decrease rate */
 
  public:
-  ScoreCounter()  { value = decay_time = 0, alpha = 0, beta = 0; }
+  ScoreCounter() { value = decay_time = 0, alpha = 0, beta = 0; }
 
   u_int32_t get();
-  
-  inline u_int32_t inc(u_int16_t score) { value += score, decay_time = 0; return(value); }
+
+  inline u_int32_t inc(u_int16_t score) {
+    value += score, decay_time = 0;
+    return (value);
+  }
 
   u_int32_t dec(u_int16_t score);
 };

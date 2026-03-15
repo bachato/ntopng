@@ -23,13 +23,13 @@
 
 /* ******************************* */
 
-static void *resolverCheckFctn(void *ptr) {
+static void* resolverCheckFctn(void* ptr) {
   static std::atomic<u_int32_t> counter = 0;
   char name[16];
 
   snprintf(name, sizeof(name), "mdns-res-%d", counter++);
   ntop->registerThread(name, pthread_self());
-  MDNS *m = (MDNS *)ptr;
+  MDNS* m = (MDNS*)ptr;
 
   m->initializeResolver();
   return (NULL);
@@ -37,9 +37,10 @@ static void *resolverCheckFctn(void *ptr) {
 
 /* ******************************* */
 
-MDNS::MDNS(NetworkInterface *iface) {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
-  
+MDNS::MDNS(NetworkInterface* iface) {
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
+
   if (((udp_sock = Utils::openSocket(AF_INET, SOCK_DGRAM, 0, "MDNS UDP")) ==
        -1) ||
       ((batch_udp_sock =
@@ -49,13 +50,14 @@ MDNS::MDNS(NetworkInterface *iface) {
   /* Multicast group is 224.0.0.251 */
   gatewayIPv4 = Utils::findInterfaceGatewayIPv4(iface->get_name());
 
-  pthread_create(&resolverCheck, NULL, resolverCheckFctn, (void *)this);
+  pthread_create(&resolverCheck, NULL, resolverCheckFctn, (void*)this);
 }
 
 /* ******************************* */
 
 MDNS::~MDNS() {
-  if(trace_new_delete) ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
+  if (trace_new_delete)
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
   Utils::closeSocket(udp_sock);
   Utils::closeSocket(batch_udp_sock);
 
@@ -78,12 +80,12 @@ void MDNS::initializeResolver() {
     mdns_dest.sin_family = AF_INET, mdns_dest.sin_port = htons(53),
     mdns_dest.sin_addr.s_addr = gatewayIPv4;
     if (sendto(udp_sock, mdnsbuf, dns_query_len, 0,
-               (struct sockaddr *)&mdns_dest, sizeof(struct sockaddr_in)) > 0) {
+               (struct sockaddr*)&mdns_dest, sizeof(struct sockaddr_in)) > 0) {
       if (Utils::pollSocket(udp_sock, 2000) > 0) {
         struct sockaddr_in from;
         socklen_t from_len = sizeof(from);
         int len = recvfrom(udp_sock, mdnsbuf, sizeof(mdnsbuf), 0,
-                           (struct sockaddr *)&from, &from_len);
+                           (struct sockaddr*)&from, &from_len);
 
         if (len > 0) return; /* This is a valid resolver */
       }
@@ -95,13 +97,13 @@ void MDNS::initializeResolver() {
 
 /* ******************************* */
 
-u_int16_t MDNS::buildMDNSRequest(char *query, u_int8_t query_type,
-                                 char *mdnsbuf, u_int mdnsbuf_len,
+u_int16_t MDNS::buildMDNSRequest(char* query, u_int8_t query_type,
+                                 char* mdnsbuf, u_int mdnsbuf_len,
                                  u_int16_t tid) {
   u_int16_t last_dot = 0, dns_query_len;
-  struct ndpi_dns_packet_header *dns_h =
-      (struct ndpi_dns_packet_header *)mdnsbuf;
-  char *queries;
+  struct ndpi_dns_packet_header* dns_h =
+      (struct ndpi_dns_packet_header*)mdnsbuf;
+  char* queries;
 
   dns_h->tr_id = tid;
   dns_h->flags = 0 /* query */;
@@ -140,7 +142,7 @@ u_int16_t MDNS::buildMDNSRequest(char *query, u_int8_t query_type,
 /* ******************************* */
 
 u_int16_t MDNS::prepareIPv4ResolveQuery(
-    u_int32_t ipv4addr /* network byte order */, char *mdnsbuf,
+    u_int32_t ipv4addr /* network byte order */, char* mdnsbuf,
     u_int mdnsbuf_len, u_int16_t tid) {
   char query[64], addrbuf[32];
 
@@ -155,7 +157,7 @@ u_int16_t MDNS::prepareIPv4ResolveQuery(
 
 /* ******************************* */
 
-bool MDNS::sendAnyQuery(char *targetIPv4, char *query) {
+bool MDNS::sendAnyQuery(char* targetIPv4, char* query) {
   char mdnsbuf[512];
   u_int16_t len =
       buildMDNSRequest(query, 0xFF /* ANY */, mdnsbuf, sizeof(mdnsbuf), 0);
@@ -165,7 +167,7 @@ bool MDNS::sendAnyQuery(char *targetIPv4, char *query) {
 
   dest.sin_family = AF_INET, dest.sin_port = htons(5353),
   dest.sin_addr.s_addr = inet_addr(targetIPv4);
-  if (sendto(batch_udp_sock, mdnsbuf, len, 0, (struct sockaddr *)&dest,
+  if (sendto(batch_udp_sock, mdnsbuf, len, 0, (struct sockaddr*)&dest,
              sizeof(struct sockaddr_in)) < 0) {
     return (false);
   }
@@ -175,12 +177,12 @@ bool MDNS::sendAnyQuery(char *targetIPv4, char *query) {
 
 /* ******************************* */
 
-char *MDNS::decodePTRResponse(char *mdnsbuf, u_int mdnsbuf_len, char *buf,
-                              u_int buf_len, u_int32_t *resolved_ip) {
-  struct ndpi_dns_packet_header *dns_h =
-      (struct ndpi_dns_packet_header *)mdnsbuf;
+char* MDNS::decodePTRResponse(char* mdnsbuf, u_int mdnsbuf_len, char* buf,
+                              u_int buf_len, u_int32_t* resolved_ip) {
+  struct ndpi_dns_packet_header* dns_h =
+      (struct ndpi_dns_packet_header*)mdnsbuf;
   u_int offset = 0, i, idx, to_skip = ntohs(dns_h->num_queries);
-  char *queries = &mdnsbuf[sizeof(struct ndpi_dns_packet_header)];
+  char* queries = &mdnsbuf[sizeof(struct ndpi_dns_packet_header)];
 
   mdnsbuf_len -= sizeof(struct ndpi_dns_packet_header);
   *resolved_ip = 0;
@@ -233,12 +235,12 @@ char *MDNS::decodePTRResponse(char *mdnsbuf, u_int mdnsbuf_len, char *buf,
 
 /* ******************************* */
 
-char *MDNS::decodeAnyResponse(char *mdnsbuf, u_int mdnsbuf_len, char *buf,
+char* MDNS::decodeAnyResponse(char* mdnsbuf, u_int mdnsbuf_len, char* buf,
                               u_int buf_len) {
-  struct ndpi_dns_packet_header *dns_h =
-      (struct ndpi_dns_packet_header *)mdnsbuf;
+  struct ndpi_dns_packet_header* dns_h =
+      (struct ndpi_dns_packet_header*)mdnsbuf;
   u_int offset = 0, i, idx, to_skip;
-  u_char *queries = (u_char *)&mdnsbuf[sizeof(struct ndpi_dns_packet_header)];
+  u_char* queries = (u_char*)&mdnsbuf[sizeof(struct ndpi_dns_packet_header)];
 
   mdnsbuf_len -= sizeof(struct ndpi_dns_packet_header);
 
@@ -263,7 +265,7 @@ char *MDNS::decodeAnyResponse(char *mdnsbuf, u_int mdnsbuf_len, char *buf,
 
     offset += 10;
 
-    len = ntohs(*(u_int16_t *)&queries[offset]);
+    len = ntohs(*(u_int16_t*)&queries[offset]);
     offset += len + 2;
 
     i++; /* Found one reply */
@@ -278,9 +280,9 @@ char *MDNS::decodeAnyResponse(char *mdnsbuf, u_int mdnsbuf_len, char *buf,
         offset++;
     }
 
-    qtype = ntohs(*(u_int16_t *)&queries[offset + 2]);
+    qtype = ntohs(*(u_int16_t*)&queries[offset + 2]);
 
-    len = ntohs(*(u_int16_t *)&queries[offset + 10]);
+    len = ntohs(*(u_int16_t*)&queries[offset + 10]);
     offset += 12;
 
     if (qtype == 0x10) {
@@ -330,7 +332,7 @@ bool MDNS::queueResolveIPv4(u_int32_t ipv4addr, bool alsoUseGatewayDNS) {
   mdns_dest.sin_family = AF_INET, mdns_dest.sin_port = htons(5353),
   mdns_dest.sin_addr.s_addr = ipv4addr;
   if (sendto(batch_udp_sock, mdnsbuf, dns_query_len, 0,
-             (struct sockaddr *)&mdns_dest, sizeof(struct sockaddr_in)) < 0) {
+             (struct sockaddr*)&mdns_dest, sizeof(struct sockaddr_in)) < 0) {
     ntop->getTrace()->traceEvent(
         TRACE_ERROR, "Send error %s [%d/%s]",
         Utils::intoaV4(ntohl(ipv4addr), src, sizeof(src)), errno,
@@ -342,7 +344,7 @@ bool MDNS::queueResolveIPv4(u_int32_t ipv4addr, bool alsoUseGatewayDNS) {
     mdns_dest.sin_family = AF_INET, mdns_dest.sin_port = htons(53),
     mdns_dest.sin_addr.s_addr = gatewayIPv4;
     if (sendto(batch_udp_sock, mdnsbuf, dns_query_len, 0,
-               (struct sockaddr *)&mdns_dest, sizeof(struct sockaddr_in)) < 0) {
+               (struct sockaddr*)&mdns_dest, sizeof(struct sockaddr_in)) < 0) {
       ntop->getTrace()->traceEvent(
           TRACE_ERROR, "Send error %s [%d/%s]",
           Utils::intoaV4(ntohl(gatewayIPv4), src, sizeof(src)), errno,
@@ -353,8 +355,8 @@ bool MDNS::queueResolveIPv4(u_int32_t ipv4addr, bool alsoUseGatewayDNS) {
 
   nbns_dest.sin_family = AF_INET, nbns_dest.sin_port = htons(137),
   nbns_dest.sin_addr.s_addr = ipv4addr;
-  if (sendto(batch_udp_sock, (const char *)nbns_discover, sizeof(nbns_discover),
-             0, (struct sockaddr *)&nbns_dest, sizeof(struct sockaddr_in)) < 0)
+  if (sendto(batch_udp_sock, (const char*)nbns_discover, sizeof(nbns_discover),
+             0, (struct sockaddr*)&nbns_dest, sizeof(struct sockaddr_in)) < 0)
     ntop->getTrace()->traceEvent(
         TRACE_ERROR, "Send error %s [%d/%s]",
         Utils::intoaV4(ntohl(ipv4addr), src, sizeof(src)), errno,
@@ -365,34 +367,34 @@ bool MDNS::queueResolveIPv4(u_int32_t ipv4addr, bool alsoUseGatewayDNS) {
 
 /* ******************************* */
 
-void MDNS::fetchResolveResponses(lua_State *vm, int32_t timeout_sec) {
+void MDNS::fetchResolveResponses(lua_State* vm, int32_t timeout_sec) {
   char src[32], buf[128];
   u_int16_t onethreeseven = ntohs(137);
 
   lua_newtable(vm);
 
   while (true) {
-    if (Utils::pollSocket(batch_udp_sock, timeout_sec*1000) > 0) {
+    if (Utils::pollSocket(batch_udp_sock, timeout_sec * 1000) > 0) {
       struct sockaddr_in from;
       char mdnsbuf[512];
       socklen_t from_len = sizeof(from);
       int len = recvfrom(batch_udp_sock, mdnsbuf, sizeof(mdnsbuf), 0,
-                         (struct sockaddr *)&from, &from_len);
+                         (struct sockaddr*)&from, &from_len);
 
       if (len > 0) {
         if (from.sin_port == onethreeseven) {
           /* NetBIOS */
-          decodeNetBIOS((u_char *)mdnsbuf, len, buf, sizeof(buf));
+          decodeNetBIOS((u_char*)mdnsbuf, len, buf, sizeof(buf));
           lua_push_str_table_entry(
               vm, Utils::intoaV4(ntohl(from.sin_addr.s_addr), src, sizeof(src)),
               buf);
         } else {
-          struct ndpi_dns_packet_header *dns_h =
-              (struct ndpi_dns_packet_header *)mdnsbuf;
+          struct ndpi_dns_packet_header* dns_h =
+              (struct ndpi_dns_packet_header*)mdnsbuf;
 
           if (ntohs(dns_h->num_answers) > 0) {
             u_int32_t resolved_ip;
-            char *dot;
+            char* dot;
 
             if (!sentAnyQuery)
               decodePTRResponse(mdnsbuf, (u_int)len, buf, sizeof(buf),
@@ -426,13 +428,13 @@ void MDNS::fetchResolveResponses(lua_State *vm, int32_t timeout_sec) {
   Ok I know this is not a MDNS packet but it is convenient to combine
   MDNS with NetBIOS address resolution
 */
-char *MDNS::decodeNetBIOS(u_char *buf, u_int buf_len, char *out,
+char* MDNS::decodeNetBIOS(u_char* buf, u_int buf_len, char* out,
                           u_int out_len) {
   struct netbios_header {
     u_int16_t transaction_id, flags, questions, answer_rrs, authority_rrs,
         additional_rrs;
   };
-  struct netbios_header *h = (struct netbios_header *)buf;
+  struct netbios_header* h = (struct netbios_header*)buf;
   u_int16_t i16;
   u_int offset;
 
@@ -448,8 +450,8 @@ char *MDNS::decodeNetBIOS(u_char *buf, u_int buf_len, char *out,
   offset += buf[offset] + 2; /* Skip name */
 
   if (offset > buf_len) return (out);
-  i16 = ntohs(*((u_int16_t *)&buf[offset])); /* Type */
-  if (i16 != 0x21)                           /* NBSTAT */
+  i16 = ntohs(*((u_int16_t*)&buf[offset])); /* Type */
+  if (i16 != 0x21)                          /* NBSTAT */
     return (out);
   else
     offset += 2;
@@ -463,7 +465,7 @@ char *MDNS::decodeNetBIOS(u_char *buf, u_int buf_len, char *out,
     offset += 1;
   if ((u_int)(offset + 16) > buf_len) return (out);
 
-  strncpy(out, (char *)&buf[offset], 16);
+  strncpy(out, (char*)&buf[offset], 16);
 
   for (i16 = 15; i16 > 0; i16--)
     if ((out[i16] == ' ') || (out[i16] == 0x0))

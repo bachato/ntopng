@@ -28,8 +28,8 @@ class Flow;
 class HostHash;
 
 class VirtualHost : public GenericHashEntry {
-  HostHash *h;
-  char *name;
+  HostHash* h;
+  char* name;
   TrafficStats sent_stats, rcvd_stats, num_requests;
   u_int64_t last_num_requests;
   u_int32_t last_diff;
@@ -37,11 +37,11 @@ class VirtualHost : public GenericHashEntry {
   ValueTrend trend;
 
  public:
-  VirtualHost(HostHash *_h, char *_name);
+  VirtualHost(HostHash* _h, char* _name);
   ~VirtualHost();
 
   u_int32_t key() { return vhost_key; };
-  inline char *get_name() { return name; };
+  inline char* get_name() { return name; };
   inline void incStats(time_t t, u_int32_t num_req, u_int32_t bytes_sent,
                        u_int32_t bytes_rcvd) {
     updateSeen(t);

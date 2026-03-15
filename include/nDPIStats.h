@@ -33,16 +33,16 @@ class nDPIStats {
  private:
   bool enable_throughput_stats, enable_behavior_stats;
   time_t nextMinPeriodicUpdate;
-  std::unordered_map<u_int16_t, ProtoCounter *> counters;
+  std::unordered_map<u_int16_t, ProtoCounter*> counters;
   std::unordered_map<u_int16_t, CategoryCounter> cat_counters;
 
  public:
   nDPIStats(bool enable_throughput_stats = false,
             bool enable_behavior_stats = false);
-  nDPIStats(nDPIStats &stats);
+  nDPIStats(nDPIStats& stats);
   ~nDPIStats();
 
-  void updateStats(const struct timeval *tv);
+  void updateStats(const struct timeval* tv);
 
   void incStats(u_int32_t when, u_int16_t proto_id, u_int64_t sent_packets,
                 u_int64_t sent_bytes, u_int64_t rcvd_packets,
@@ -52,16 +52,16 @@ class nDPIStats {
                         u_int64_t sent_bytes, u_int64_t rcvd_bytes);
 
   void incFlowsStats(u_int16_t proto_id);
-  void lua(NetworkInterface *iface, lua_State *vm, bool with_categories = false,
+  void lua(NetworkInterface* iface, lua_State* vm, bool with_categories = false,
            bool tsLua = false, bool diff = false);
-  json_object *getJSONObject(NetworkInterface *iface);
-  void sum(nDPIStats *s);
+  json_object* getJSONObject(NetworkInterface* iface);
+  void sum(nDPIStats* s);
 #ifdef NTOPNG_PRO
   bool getEnableThptStats() { return enable_throughput_stats; }
 #endif
   bool getEnableBehaviorStats() { return enable_behavior_stats; }
   inline u_int64_t getProtoBytes(u_int16_t proto_id) {
-    std::unordered_map<u_int16_t, ProtoCounter *>::iterator pi =
+    std::unordered_map<u_int16_t, ProtoCounter*>::iterator pi =
         counters.find(proto_id);
 
     if (pi != counters.end()) {
@@ -73,7 +73,7 @@ class nDPIStats {
   }
 
   inline u_int32_t getProtoDuration(u_int16_t proto_id) {
-    std::unordered_map<u_int16_t, ProtoCounter *>::iterator pi =
+    std::unordered_map<u_int16_t, ProtoCounter*>::iterator pi =
         counters.find(proto_id);
 
     if (pi != counters.end())
@@ -103,8 +103,8 @@ class nDPIStats {
   }
 
   void resetStats();
-  char *serialize(NetworkInterface *iface);
-  bool deserialize(json_object *o, NetworkInterface *iface);
+  char* serialize(NetworkInterface* iface);
+  bool deserialize(json_object* o, NetworkInterface* iface);
 };
 
 #endif /* _NDPI_STATS_H_ */

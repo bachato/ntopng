@@ -31,10 +31,10 @@ class SYNFloodAlert : public FlowHitsAlert {
     return {host_alert_syn_flood, alert_category_security};
   }
 
-  SYNFloodAlert(HostCheck *c, Host *h, risk_percentage cli_pctg, u_int16_t hits,
+  SYNFloodAlert(HostCheck* c, Host* h, risk_percentage cli_pctg, u_int16_t hits,
                 u_int64_t threshold, bool is_attacker)
-      : FlowHitsAlert(c, h, cli_pctg, hits, threshold, is_attacker){};
-  ~SYNFloodAlert(){};
+      : FlowHitsAlert(c, h, cli_pctg, hits, threshold, is_attacker) {};
+  ~SYNFloodAlert() {};
 
   HostAlertType getAlertType() const { return getClassType(); }
   u_int8_t getAlertScore() const { return SCORE_LEVEL_EMERGENCY; };

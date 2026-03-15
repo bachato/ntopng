@@ -24,24 +24,24 @@
 
 /* ***************************************************** */
 
-void BlacklistedServerContact::protocolDetected(Flow *f) {
+void BlacklistedServerContact::protocolDetected(Flow* f) {
   if (f->isBlacklistedServer() && f->isLocalToRemote()) {
     FlowAlertType alert_type = BlacklistedServerContactAlert::getClassType();
     u_int8_t c_score, s_score;
     risk_percentage cli_score_pctg = CLIENT_HIGH_RISK_PERCENTAGE;
 
-    if(f->get_protocol() == IPPROTO_ICMP) {
+    if (f->get_protocol() == IPPROTO_ICMP) {
       /*
-	ICMP is not really relevant and it can be an indication of
-	a previous communication (e.g. ICMP port unreacheable)
+        ICMP is not really relevant and it can be an indication of
+        a previous communication (e.g. ICMP port unreacheable)
       */
       score = SCORE_LEVEL_NOTICE;
     } else
       score = ntop->getFlowAlertScore(alert_type.id);
-    
+
     computeCliSrvScore(score, cli_score_pctg, &c_score, &s_score);
-    
-    FlowAlert *alert = buildAlert(f);
+
+    FlowAlert* alert = buildAlert(f);
     alert->setCliSrvScores(c_score, s_score);
     f->triggerAlert(alert);
   }
@@ -49,10 +49,11 @@ void BlacklistedServerContact::protocolDetected(Flow *f) {
 
 /* ***************************************************** */
 
-FlowAlert* BlacklistedServerContact::buildAlert(Flow *f) {
+FlowAlert* BlacklistedServerContact::buildAlert(Flow* f) {
   bool is_server_bl = f->isBlacklistedServer();
   bool is_client_bl = f->isBlacklistedClient();
-  BlacklistedServerContactAlert *alert = new (std::nothrow) BlacklistedServerContactAlert(this, f);
+  BlacklistedServerContactAlert* alert =
+      new (std::nothrow) BlacklistedServerContactAlert(this, f);
 
   if (alert) {
     /*
@@ -89,7 +90,7 @@ FlowAlert* BlacklistedServerContact::buildAlert(Flow *f) {
   }
 */
 
-bool BlacklistedServerContact::loadConfiguration(json_object *config) {
+bool BlacklistedServerContact::loadConfiguration(json_object* config) {
   FlowCheck::loadConfiguration(config); /* Parse parameters in common */
 
   /* Parse additional parameters */

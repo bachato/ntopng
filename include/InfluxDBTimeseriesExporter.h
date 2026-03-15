@@ -29,7 +29,7 @@ class InfluxDBTimeseriesExporter : public TimeseriesExporter {
   time_t flushTime;
   u_int32_t cursize;
   u_int32_t num_exports;
-  FILE *fp;
+  FILE* fp;
   char fbase[PATH_MAX], fname[PATH_MAX + 32];
   u_int num_cached_entries;
   Mutex m;
@@ -37,11 +37,11 @@ class InfluxDBTimeseriesExporter : public TimeseriesExporter {
   void createDump();
 
  public:
-  InfluxDBTimeseriesExporter(NetworkInterface *_if);
+  InfluxDBTimeseriesExporter(NetworkInterface* _if);
   ~InfluxDBTimeseriesExporter();
 
-  bool enqueueData(lua_State *vm, bool do_lock = true);
-  char *dequeueData();
+  bool enqueueData(lua_State* vm, bool do_lock = true);
+  char* dequeueData();
   void flush();
 };
 

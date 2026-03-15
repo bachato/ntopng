@@ -21,13 +21,15 @@
 
 #include "ntop_includes.h"
 
-template <size_t N> void Bitmap<N>::lua(lua_State *vm, const char *label) const {
+template <size_t N>
+void Bitmap<N>::lua(lua_State* vm, const char* label) const {
   lua_newtable(vm);
 
   for (u_int i = 0; i < numBits(); i++) {
     if (isSetBit(i)) {
       lua_pushboolean(vm, true); /* The boolean indicating this bit is set */
-      lua_pushinteger(vm, i); /* The integer bit id, used as key of this lua table */
+      lua_pushinteger(
+          vm, i); /* The integer bit id, used as key of this lua table */
       lua_insert(vm, -2);
       lua_settable(vm, -3);
     }

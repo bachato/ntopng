@@ -34,8 +34,8 @@ DangerousHost::DangerousHost()
 
 /* ***************************************************** */
 
-void DangerousHost::periodicUpdate(Host *h, HostAlert *engaged_alert) {
-  HostAlert *alert = engaged_alert;
+void DangerousHost::periodicUpdate(Host* h, HostAlert* engaged_alert) {
+  HostAlert* alert = engaged_alert;
 
   if (h->getScore() > score_threshold)
     h->incrConsecutiveHighScore();
@@ -119,8 +119,8 @@ void DangerousHost::periodicUpdate(Host *h, HostAlert *engaged_alert) {
 
 /* ***************************************************** */
 
-bool DangerousHost::loadConfiguration(json_object *config) {
-  json_object *json_threshold;
+bool DangerousHost::loadConfiguration(json_object* config) {
+  json_object* json_threshold;
 
   HostCheck::loadConfiguration(config); /* Parse parameters in common */
 

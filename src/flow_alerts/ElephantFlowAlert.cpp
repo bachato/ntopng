@@ -21,17 +21,16 @@
 
 #include "flow_alerts_includes.h"
 
-ndpi_serializer* ElephantFlowAlert::getAlertJSON(
-    ndpi_serializer* serializer) {
-  Flow *f = getFlow();
+ndpi_serializer* ElephantFlowAlert::getAlertJSON(ndpi_serializer* serializer) {
+  Flow* f = getFlow();
 
   if (serializer) {
     ndpi_serialize_string_uint64(
-      serializer, "l2r_bytes",
-      f->isLocalToRemote() ? f->get_bytes_cli2srv() : f->get_bytes_srv2cli());
+        serializer, "l2r_bytes",
+        f->isLocalToRemote() ? f->get_bytes_cli2srv() : f->get_bytes_srv2cli());
     ndpi_serialize_string_uint64(
-      serializer, "r2l_bytes",
-      f->isRemoteToLocal() ? f->get_bytes_cli2srv() : f->get_bytes_srv2cli());
+        serializer, "r2l_bytes",
+        f->isRemoteToLocal() ? f->get_bytes_cli2srv() : f->get_bytes_srv2cli());
     ndpi_serialize_string_uint64(serializer, "l2r_threshold", l2r_th);
     ndpi_serialize_string_uint64(serializer, "r2l_threshold", r2l_th);
   }

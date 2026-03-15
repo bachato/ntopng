@@ -27,9 +27,9 @@
 
 /* ****************************************** */
 
-static int ntop_flow_get_bytes(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_bytes(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f)
     lua_pushinteger(vm, f->get_bytes());
@@ -41,9 +41,9 @@ static int ntop_flow_get_bytes(lua_State *vm) {
 
 /* ****************************************** */
 
-static int ntop_flow_get_cli2srv_bytes(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_cli2srv_bytes(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f)
     lua_pushinteger(vm, f->get_bytes_cli2srv());
@@ -55,9 +55,9 @@ static int ntop_flow_get_cli2srv_bytes(lua_State *vm) {
 
 /* ****************************************** */
 
-static int ntop_flow_get_srv2cli_bytes(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_srv2cli_bytes(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f)
     lua_pushinteger(vm, f->get_bytes_srv2cli());
@@ -69,9 +69,9 @@ static int ntop_flow_get_srv2cli_bytes(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_get_client(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_client(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f && f->get_cli_ip_addr()) {
     char buf[64];
@@ -85,9 +85,9 @@ static int ntop_flow_get_client(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_get_client_port(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_client_port(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f)
     lua_pushinteger(vm, f->get_cli_port());
@@ -99,9 +99,9 @@ static int ntop_flow_get_client_port(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_get_server(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_server(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f && f->get_srv_ip_addr()) {
     char buf[64];
@@ -115,9 +115,9 @@ static int ntop_flow_get_server(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_get_server_port(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_server_port(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f)
     lua_pushinteger(vm, f->get_srv_port());
@@ -129,9 +129,9 @@ static int ntop_flow_get_server_port(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_get_protocol(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_protocol(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f)
     lua_pushinteger(vm, f->get_protocol());
@@ -143,9 +143,9 @@ static int ntop_flow_get_protocol(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_get_vlan_id(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_vlan_id(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f)
     lua_pushinteger(vm, f->get_vlan_id());
@@ -157,9 +157,9 @@ static int ntop_flow_get_vlan_id(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_get_l7_master_proto(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_l7_master_proto(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f)
     lua_pushinteger(vm, f->get_detected_protocol().proto.master_protocol);
@@ -171,9 +171,9 @@ static int ntop_flow_get_l7_master_proto(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_get_l7_proto(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_l7_proto(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f)
     lua_pushinteger(vm, f->get_detected_protocol().proto.app_protocol);
@@ -185,12 +185,12 @@ static int ntop_flow_get_l7_proto(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_get_direction(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_direction(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f) {
-    const char *rsp;
+    const char* rsp;
 
     if (f->isRemoteToRemote())
       rsp = "remote2remote";
@@ -212,9 +212,9 @@ static int ntop_flow_get_direction(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_is_oneway(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_is_oneway(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   lua_pushboolean(vm, f ? f->isOneWay() : false);
 
@@ -223,9 +223,9 @@ static int ntop_flow_is_oneway(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_is_unicast(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_is_unicast(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   lua_pushboolean(vm, f ? f->isUnicast() : false);
 
@@ -234,9 +234,9 @@ static int ntop_flow_is_unicast(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_get_l7_proto_name(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_l7_proto_name(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f) {
     char buf[64];
@@ -250,9 +250,9 @@ static int ntop_flow_get_l7_proto_name(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_get_l7_proto_http(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_l7_proto_http(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f) {
     lua_newtable(vm);
@@ -265,9 +265,9 @@ static int ntop_flow_get_l7_proto_http(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_get_l7_proto_dns(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_l7_proto_dns(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f) {
     lua_newtable(vm);
@@ -280,9 +280,9 @@ static int ntop_flow_get_l7_proto_dns(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_get_l7_proto_ssh(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_l7_proto_ssh(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f) {
     lua_newtable(vm);
@@ -295,9 +295,9 @@ static int ntop_flow_get_l7_proto_ssh(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_flow_get_l7_proto_tls_quic(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_flow_get_l7_proto_tls_quic(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f) {
     lua_newtable(vm);
@@ -310,13 +310,13 @@ static int ntop_flow_get_l7_proto_tls_quic(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_trigger_flow_alert(lua_State *vm) {
-  NtopngLuaContext *c = getLuaVMContext(vm);
-  Flow *f = c ? c->flow : NULL;
+static int ntop_trigger_flow_alert(lua_State* vm) {
+  NtopngLuaContext* c = getLuaVMContext(vm);
+  Flow* f = c ? c->flow : NULL;
 
   if (f) {
     u_int32_t value;
-    char *msg;
+    char* msg;
 
     if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
       return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
@@ -324,7 +324,7 @@ static int ntop_trigger_flow_alert(lua_State *vm) {
 
     if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
       return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-    msg = (char *)lua_tostring(vm, 2);
+    msg = (char*)lua_tostring(vm, 2);
 
     f->triggerCustomFlowAlert(value, msg);
   } else
@@ -365,4 +365,4 @@ static luaL_Reg _ntop_flow_reg[] = {
 
     {NULL, NULL}};
 
-luaL_Reg *ntop_flow_reg = _ntop_flow_reg;
+luaL_Reg* ntop_flow_reg = _ntop_flow_reg;

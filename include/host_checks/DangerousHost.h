@@ -28,10 +28,11 @@ class DangerousHost : public HostCheck {
  private:
   u_int32_t score_threshold;
 
-  HostAlert *allocAlert(HostCheck *c, Host *h, risk_percentage cli_pctg,
-                        u_int32_t _score, u_int32_t _consecutive_high_score, u_int32_t score_threshold) {
-    DangerousHostAlert *alert =
-        new DangerousHostAlert(c, h, cli_pctg, _score, _consecutive_high_score, score_threshold);
+  HostAlert* allocAlert(HostCheck* c, Host* h, risk_percentage cli_pctg,
+                        u_int32_t _score, u_int32_t _consecutive_high_score,
+                        u_int32_t score_threshold) {
+    DangerousHostAlert* alert = new DangerousHostAlert(
+        c, h, cli_pctg, _score, _consecutive_high_score, score_threshold);
 
     if (cli_pctg != CLIENT_NO_RISK_PERCENTAGE) alert->setAttacker();
 
@@ -40,10 +41,10 @@ class DangerousHost : public HostCheck {
 
  public:
   DangerousHost();
-  ~DangerousHost(){};
+  ~DangerousHost() {};
 
-  void periodicUpdate(Host *h, HostAlert *engaged_alert);
-  bool loadConfiguration(json_object *config);
+  void periodicUpdate(Host* h, HostAlert* engaged_alert);
+  bool loadConfiguration(json_object* config);
 
   HostCheckID getID() const { return host_check_dangerous_host; }
   std::string getName() const { return (std::string("dangerous_host")); }

@@ -28,12 +28,15 @@ class VLANBidirectionalTrafficAlert : public FlowAlert {
  private:
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_vlan_bidirectional_traffic, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_vlan_bidirectional_traffic,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_ERROR; };
 
-  VLANBidirectionalTrafficAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f){setAlertScore(getDefaultScore());};
-  ~VLANBidirectionalTrafficAlert(){};
+  VLANBidirectionalTrafficAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(getDefaultScore());
+  };
+  ~VLANBidirectionalTrafficAlert() {};
   FlowAlertType getAlertType() const { return getClassType(); }
 };
 

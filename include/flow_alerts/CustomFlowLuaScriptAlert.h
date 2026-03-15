@@ -31,14 +31,17 @@ class CustomFlowLuaScriptAlert : public FlowAlert {
 
  public:
   static FlowAlertType getClassType() {
-    return {NDPI_NO_RISK, flow_alert_custom_lua_script, alert_category_security};
+    return {NDPI_NO_RISK, flow_alert_custom_lua_script,
+            alert_category_security};
   }
   static u_int8_t getDefaultScore() { return SCORE_LEVEL_ERROR; };
- 
+
   inline std::string get_msg() { return msg; };
- 
-  CustomFlowLuaScriptAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f){ setAlertScore(SCORE_LEVEL_ERROR); };
-  ~CustomFlowLuaScriptAlert(){};
+
+  CustomFlowLuaScriptAlert(FlowCheck* c, Flow* f) : FlowAlert(c, f) {
+    setAlertScore(SCORE_LEVEL_ERROR);
+  };
+  ~CustomFlowLuaScriptAlert() {};
 
   FlowAlertType getAlertType() const { return getClassType(); };
   void setAlertMessage(std::string m) { msg = m; };

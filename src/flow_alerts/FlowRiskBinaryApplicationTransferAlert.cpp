@@ -23,7 +23,7 @@
 
 ndpi_serializer* FlowRiskBinaryApplicationTransferAlert::getAlertJSON(
     ndpi_serializer* serializer) {
-  Flow *f = getFlow();
+  Flow* f = getFlow();
 
   if (serializer) {
     f->getHTTPInfo(serializer);
