@@ -97,6 +97,7 @@ void get_host_vlan_info(char* lua_ip, char** host_ip, u_int16_t* vlan_id,
 
 /* ****************************************** */
 
+/* @brief Reads a text file and writes its content to the HTTP response, performing string substitutions.  Lua: ntop.dumpFile(path) → nil */
 static int ntop_dump_file(lua_State* vm) {
   char* fname;
   FILE* fd;
@@ -138,6 +139,7 @@ static int ntop_dump_file(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Reads a binary file and writes it verbatim to the HTTP response.  Lua: ntop.dumpBinaryFile(path) → nil */
 static int ntop_dump_binary_file(lua_State* vm) {
   char* fname;
   FILE* fd;
@@ -172,6 +174,7 @@ static int ntop_dump_binary_file(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the vendor/manufacturer name for a MAC address OUI.  Lua: ntop.getMacManufacturer(mac) → string */
 static int ntop_get_mac_manufacturer(lua_State* vm) {
   const char* mac = NULL;
 
@@ -186,6 +189,7 @@ static int ntop_get_mac_manufacturer(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns combined host information table for an IP address.  Lua: ntop.getHostInformation(ip) → table */
 static int ntop_get_host_information(lua_State* vm) {
   struct in_addr management_addr;
   management_addr.s_addr = Utils::getHostManagementIPv4Address();
@@ -201,6 +205,7 @@ static int ntop_get_host_information(lua_State* vm) {
 /* ****************************************** */
 
 #ifdef HAVE_NEDGE
+/* @brief Internal helper that sets HTTP or HTTPS bind address (called by set_http/https_bind_addr).  Lua: (internal helper) → nil */
 static int ntop_set_bind_addr(lua_State* vm, bool http) {
   char *addr, *addr2 = (char*)CONST_LOOPBACK_ADDRESS;
 
@@ -224,10 +229,12 @@ static int ntop_set_bind_addr(lua_State* vm, bool http) {
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
+/* @brief Sets the HTTP bind address (nEdge only).  Lua: ntop.setHTTPBindAddr(addr) → nil */
 static int ntop_set_http_bind_addr(lua_State* vm) {
   return ntop_set_bind_addr(vm, true /* http */);
 }
 
+/* @brief Sets the HTTPS bind address (nEdge only).  Lua: ntop.setHTTPSBindAddr(addr) → nil */
 static int ntop_set_https_bind_addr(lua_State* vm) {
   return ntop_set_bind_addr(vm, false /* https */);
 }
@@ -236,6 +243,7 @@ static int ntop_set_https_bind_addr(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Initiates ntopng shutdown (nEdge/Appliance only).  Lua: ntop.shutdown() → nil */
 static int ntop_shutdown(lua_State* vm) {
   char* action;
   extern AfterShutdownAction afterShutdownAction;
@@ -264,6 +272,7 @@ static int ntop_shutdown(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if ntopng is currently in shutdown sequence.  Lua: ntop.isShuttingDown() → boolean */
 static int ntop_is_shuttingdown(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -273,6 +282,7 @@ static int ntop_is_shuttingdown(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a table of all available network interfaces.  Lua: ntop.listInterfaces() → table */
 static int ntop_list_interfaces(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   lua_newtable(vm);
@@ -282,6 +292,7 @@ static int ntop_list_interfaces(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Compares two IP address strings; returns -1, 0, or 1.  Lua: ntop.ipCmp(ip1, ip2) → integer */
 static int ntop_ip_cmp(lua_State* vm) {
   IpAddress a, b;
 
@@ -301,6 +312,7 @@ static int ntop_ip_cmp(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Applies a traffic mask to a domain name for nDPI classification.  Lua: ntop.setDomainMask(domain, mask) → integer */
 static int ntop_setDomainMask(lua_State* vm) {
   const char* domain;
   int rc;
@@ -319,6 +331,7 @@ static int ntop_setDomainMask(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Adds a trusted TLS certificate issuer Distinguished Name.  Lua: ntop.addTrustedIssuerDN(dn) → integer */
 static int ntop_addTrustedIssuerDN(lua_State* vm) {
   const char* dn;
   int rc;
@@ -337,6 +350,7 @@ static int ntop_addTrustedIssuerDN(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sets the device type classification for a MAC address.  Lua: ntop.setMacDeviceType(mac, type) → nil */
 static int ntop_set_mac_device_type(lua_State* vm) {
   char* mac = NULL;
   DeviceType dtype = device_unknown;
@@ -368,6 +382,7 @@ static int ntop_set_mac_device_type(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Triggers a reload of host pool configuration from Redis.  Lua: ntop.reloadHostPools() → nil */
 static int ntop_reload_host_pools(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -380,6 +395,7 @@ static int ntop_reload_host_pools(lua_State* vm) {
 /* ****************************************** */
 
 #ifdef HAVE_NEDGE
+/* @brief Enables or disables routing mode (nEdge only).  Lua: ntop.setRoutingMode(enabled) → nil */
 static int ntop_set_routing_mode(lua_State* vm) {
   bool routing_enabled;
 
@@ -400,6 +416,7 @@ static int ntop_set_routing_mode(lua_State* vm) {
 /* ****************************************** */
 
 #ifdef HAVE_NEDGE
+/* @brief Returns true if nEdge is in routing mode (nEdge only).  Lua: ntop.isRoutingMode() → boolean */
 static int ntop_is_routing_mode(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -411,6 +428,7 @@ static int ntop_is_routing_mode(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the given path is an existing directory.  Lua: ntop.isdir(path) → boolean */
 static int ntop_is_dir(lua_State* vm) {
   char* path;
 
@@ -427,6 +445,7 @@ static int ntop_is_dir(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the given path is a non-empty file.  Lua: ntop.notEmptyFile(path) → boolean */
 static int ntop_is_not_empty_file(lua_State* vm) {
   char* path;
   struct stat buf;
@@ -447,6 +466,7 @@ static int ntop_is_not_empty_file(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Executes a query on the alert database and streams JSON results to the HTTP response.  Lua: ntop.alert_store_query(query[,ifid,limit]) → nil */
 static int ntop_alert_store_query(lua_State* vm) {
   NetworkInterface* iface = NULL;
   char* query;
@@ -583,6 +603,7 @@ int ntop_store_triggered_alert(lua_State* vm, OtherAlertableEntity* alertable,
 
 /* ****************************************** */
 
+/* @brief Returns true if the given file or directory exists.  Lua: ntop.exists(path) → boolean */
 static int ntop_get_file_dir_exists(lua_State* vm) {
   char* path;
   struct stat buf;
@@ -603,6 +624,7 @@ static int ntop_get_file_dir_exists(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the last modification time of a file as a Unix epoch.  Lua: ntop.fileLastChange(path) → integer */
 static int ntop_get_file_last_change(lua_State* vm) {
   char* path;
   struct stat buf;
@@ -623,6 +645,7 @@ static int ntop_get_file_last_change(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if MaxMind GeoIP databases are loaded.  Lua: ntop.hasGeoIP() → boolean */
 static int ntop_has_geoip(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -634,6 +657,7 @@ static int ntop_has_geoip(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns Elasticsearch connection details or nil if not configured.  Lua: ntop.elasticsearchConnection() → table|nil */
 static int ntop_elasticsearch_connection(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -652,6 +676,7 @@ static int ntop_elasticsearch_connection(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the configured ntopng instance name.  Lua: ntop.getInstanceName() → string */
 static int ntop_get_instance_name(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -662,6 +687,7 @@ static int ntop_get_instance_name(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if ntopng is running on Windows.  Lua: ntop.isWindows() → boolean */
 static int ntop_is_windows(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -678,6 +704,7 @@ static int ntop_is_windows(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if ntopng is running on FreeBSD.  Lua: ntop.isFreeBSD() → boolean */
 static int ntop_is_freebsd(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -694,6 +721,7 @@ static int ntop_is_freebsd(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if ntopng is running on Linux.  Lua: ntop.isLinux() → boolean */
 static int ntop_is_linux(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -710,6 +738,7 @@ static int ntop_is_linux(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Begins a hot-reload of nDPI custom categories (call before loading categories).  Lua: ntop.initnDPIReload() → boolean */
 static int ntop_initnDPIReload(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -725,6 +754,7 @@ static int ntop_initnDPIReload(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Associates an IP or CIDR range with a custom nDPI category.  Lua: ntop.loadCustomCategoryIp(cat_id, ip_or_cidr) → boolean */
 static int ntop_loadCustomCategoryIp(lua_State* vm) {
   char *net, *listname;
   ndpi_protocol_category_t catid;
@@ -758,6 +788,7 @@ static int ntop_loadCustomCategoryIp(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Associates a hostname pattern with a custom nDPI category.  Lua: ntop.loadCustomCategoryHost(cat_id, hostname) → boolean */
 static int ntop_loadCustomCategoryHost(lua_State* vm) {
   char *host, *listname;
   ndpi_protocol_category_t catid;
@@ -845,6 +876,7 @@ static bool is_valid_host(char* _host, enum list_file_type t,
 
 /* ****************************************** */
 
+/* @brief Loads IP/hostname entries from a file into a custom nDPI category.  Lua: ntop.loadCustomCategoryFile(cat_id, path) → integer */
 static int ntop_loadCustomCategoryFile(lua_State* vm) {
   char *path, *listname;
   const char* format;
@@ -1028,6 +1060,7 @@ static int ntop_loadCustomCategoryFile(lua_State* vm) {
 /* ****************************************** */
 
 /* NOTE: ntop.initnDPIReload() must be called before this */
+/* @brief Commits the nDPI category hot-reload started by initnDPIReload.  Lua: ntop.finalizenDPIReload() → boolean */
 static int ntop_finalizenDPIReload(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "Starting category lists reload");
   ntop->finalizenDPIReload();
@@ -1042,6 +1075,7 @@ static int ntop_finalizenDPIReload(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the custom category id that matches a hostname, or nil.  Lua: ntop.matchCustomCategory(hostname) → integer|nil */
 static int ntop_match_custom_category(lua_State* vm) {
   char* host_to_match;
   NetworkInterface* iface;
@@ -1070,6 +1104,7 @@ static int ntop_match_custom_category(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the human-readable TLS version string for a numeric id.  Lua: ntop.getTLSVersionName(id) → string */
 static int ntop_get_tls_version_name(lua_State* vm) {
   u_int16_t tls_version;
   u_int8_t unknown_version = 0;
@@ -1089,6 +1124,7 @@ static int ntop_get_tls_version_name(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Expands a 48-bit MAC address string to 64-bit EUI-64 format.  Lua: ntop.getMac64(mac) → number */
 static int ntop_get_mac_64(lua_State* vm) {
   char* mac_str;
   u_int8_t mac[6];
@@ -1108,6 +1144,7 @@ static int ntop_get_mac_64(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Decodes a 64-bit EUI-64 address back to 48-bit MAC format.  Lua: ntop.decodeMac64(mac64) → string */
 static int ntop_decode_mac_64(lua_State* vm) {
   u_int64_t mac64;
   u_int8_t mac[6];
@@ -1127,6 +1164,7 @@ static int ntop_decode_mac_64(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the given address string is an IPv6 address.  Lua: ntop.isIPv6(ip) → boolean */
 static int ntop_is_ipv6(lua_State* vm) {
   char* ip;
   struct in6_addr addr6;
@@ -1150,6 +1188,7 @@ static int ntop_is_ipv6(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns execution statistics for all flow check scripts.  Lua: ntop.getFlowChecksStats() → table|nil */
 static int ntop_get_flow_checks_stats(lua_State* vm) {
   FlowChecksLoader* fcl = ntop->getFlowChecksLoader();
 
@@ -1165,6 +1204,7 @@ static int ntop_get_flow_checks_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Triggers a hot-reload of flow check scripts.  Lua: ntop.reloadFlowChecks() → nil */
 static int ntop_reload_flow_checks(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -1176,6 +1216,7 @@ static int ntop_reload_flow_checks(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Triggers a hot-reload of host check scripts.  Lua: ntop.reloadHostChecks() → nil */
 static int ntop_reload_host_checks(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -1187,6 +1228,7 @@ static int ntop_reload_host_checks(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the default risk score for a flow alert type id.  Lua: ntop.getFlowAlertScore(alert_id) → integer */
 static int ntop_get_flow_alert_score(lua_State* vm) {
   FlowAlertTypeEnum alert_id;
 
@@ -1200,6 +1242,7 @@ static int ntop_get_flow_alert_score(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a table of all known flow risk ids and their names.  Lua: ntop.getRiskList() → table */
 static int ntop_get_risk_list(lua_State* vm) {
   lua_newtable(vm);
 
@@ -1251,6 +1294,7 @@ bool check_network_entry(char* ip_addr, char* rsp, void* user_data) {
   This function is called whenever a new network configuration is is
   modified/defined.
  */
+/* @brief Evaluates and returns the network policy applicable to an IP address.  Lua: ntop.checkNetworkPolicy(ip) → table */
 static int ntop_check_network_policy(lua_State* vm) {
   char *local_devices, *corporate_devices, *whitelisted_networks;
   char* rsp = NULL;
@@ -1314,6 +1358,7 @@ free:
 
 /* ****************************************** */
 
+/* @brief Returns the human-readable name string for a flow risk id.  Lua: ntop.getRiskStr(risk_id) → string */
 static int ntop_get_risk_str(lua_State* vm) {
   ndpi_risk_enum risk_id;
 
@@ -1327,6 +1372,7 @@ static int ntop_get_risk_str(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the nDPI risk id associated with a flow alert type.  Lua: ntop.getFlowAlertRisk(alert_id) → integer */
 static int ntop_get_flow_alert_risk(lua_State* vm) {
   FlowAlertTypeEnum alert_id;
 
@@ -1340,6 +1386,7 @@ static int ntop_get_flow_alert_risk(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a table mapping nDPI risk ids to corresponding flow alert types.  Lua: ntop.getFlowRiskAlerts() → table */
 static int ntop_get_flow_risk_alerts(lua_State* vm) {
   FlowRiskAlerts::lua(vm);
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -1347,6 +1394,7 @@ static int ntop_get_flow_risk_alerts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns metadata table for a specific flow check.  Lua: ntop.getFlowCheckInfo(check_id) → table|nil */
 static int ntop_get_flow_check_info(lua_State* vm) {
   const char* check_name;
 
@@ -1364,6 +1412,7 @@ static int ntop_get_flow_check_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns metadata table for a specific host check.  Lua: ntop.getHostCheckInfo(check_id) → table|nil */
 static int ntop_get_host_check_info(lua_State* vm) {
   const char* check_name;
 
@@ -1381,6 +1430,7 @@ static int ntop_get_host_check_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Triggers a reload of alert exclusion rules from configuration.  Lua: ntop.reloadAlertExclusions() → nil */
 static int ntop_reload_alert_exclusions(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -1392,6 +1442,7 @@ static int ntop_reload_alert_exclusions(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if DNS resolution should be attempted for this host.  Lua: ntop.shouldResolveHost(ip) → boolean */
 static int ntop_should_resolve_host(lua_State* vm) {
   char* ip;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -1407,6 +1458,7 @@ static int ntop_should_resolve_host(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sets the whitelist of allowed IEC 104 SCADA type identifiers.  Lua: ntop.setIEC104AllowedTypeIDs(ids_table) → boolean */
 static int ntop_set_iec104_allowed_typeids(lua_State* vm) {
   char* typeids;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -1423,6 +1475,7 @@ static int ntop_set_iec104_allowed_typeids(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if flow deduplication is active.  Lua: ntop.isFlowDedupEnabled() → boolean */
 static int ntop_is_flow_deduplication_enabled(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   lua_pushboolean(vm, ntop->getPrefs()->isFlowDedupEnabled());
@@ -1432,6 +1485,7 @@ static int ntop_is_flow_deduplication_enabled(lua_State* vm) {
 /* ****************************************** */
 
 #ifdef NTOPNG_PRO
+/* @brief Sets the whitelist of allowed Modbus function codes (Pro only).  Lua: ntop.setModbusAllowedFunctionCodes(codes_table) → boolean */
 static int ntop_set_modbus_allowed_function_codes(lua_State* vm) {
   char* function_codes;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -1449,6 +1503,7 @@ static int ntop_set_modbus_allowed_function_codes(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Temporarily re-acquires elevated write capabilities on Unix.  Lua: ntop.gainWriteCapabilities() → boolean */
 static int ntop_gainWriteCapabilities(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   lua_pushboolean(vm, Utils::gainWriteCapabilities() == 0);
@@ -1457,6 +1512,7 @@ static int ntop_gainWriteCapabilities(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Drops back to low-privilege mode after gainWriteCapabilities.  Lua: ntop.dropWriteCapabilities() → boolean */
 static int ntop_dropWriteCapabilities(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   lua_pushboolean(vm, Utils::dropWriteCapabilities() == 0);
@@ -1465,6 +1521,7 @@ static int ntop_dropWriteCapabilities(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the well-known service name for a port/protocol pair.  Lua: ntop.getservbyport(port, proto) → string|nil */
 static int ntop_getservbyport(lua_State* vm) {
   int port;
   char* proto;
@@ -1496,6 +1553,7 @@ static int ntop_getservbyport(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sleeps for the given number of milliseconds.  Lua: ntop.msleep(ms) → nil */
 static int ntop_msleep(lua_State* vm) {
   u_int ms_duration, max_duration = 60000 /* 1 min */;
 
@@ -1595,6 +1653,7 @@ done:
 /* ****************************************** */
 
 /* Millisecond sleep */
+/* @brief Tests TCP reachability; returns true if connection succeeds.  Lua: ntop.tcpProbe(host, port[, timeout]) → string|nil */
 static int ntop_tcp_probe(lua_State* vm) {
   char* server_ip;
   u_int server_port, timeout = 3;
@@ -1657,6 +1716,7 @@ static int ntop_tcp_probe(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a table listing filenames in the given directory.  Lua: ntop.readdir(path) → table */
 static int ntop_list_dir_files(lua_State* vm) {
   char* path;
   DIR* dirp;
@@ -1686,6 +1746,7 @@ static int ntop_list_dir_files(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Recursively removes a directory and all its contents.  Lua: ntop.rmdir(path) → boolean */
 static int ntop_remove_dir_recursively(lua_State* vm) {
   char* path = NULL;
 
@@ -1704,6 +1765,7 @@ static int ntop_remove_dir_recursively(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Deletes a single file.  Lua: ntop.unlink(path) → boolean */
 static int ntop_unlink_file(lua_State* vm) {
   char* path = NULL;
 
@@ -1721,6 +1783,7 @@ static int ntop_unlink_file(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Registers a runtime PCAP or DB interface from Lua.  Lua: ntop.registerRuntimeInterface(params) → integer */
 static int ntop_register_runtime_interface(lua_State* vm) {
   char *source = NULL, *name = NULL;
   int if_id = -1, new_if_id = -99;
@@ -1769,6 +1832,7 @@ static int ntop_register_runtime_interface(lua_State* vm) {
 /* ****************************************** */
 
 #if defined(NTOPNG_PRO) && defined(HAVE_KAFKA)
+/* @brief Publishes a message to a Kafka topic (Pro + Kafka build).  Lua: ntop.sendKafkaMessage(topic, msg) → boolean */
 static int ntop_send_kafka_message(lua_State* vm) {
   char *kafka_broker_info, *message;
 
@@ -1793,6 +1857,7 @@ static int ntop_send_kafka_message(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the current time as a floating-point millisecond timestamp.  Lua: ntop.gettimemsec() → number */
 static int ntop_gettimemsec(lua_State* vm) {
   struct timeval tp;
   double ret;
@@ -1809,6 +1874,7 @@ static int ntop_gettimemsec(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the current CPU tick counter value.  Lua: ntop.getticks() → number */
 static int ntop_getticks(lua_State* vm) {
   lua_pushnumber(vm, Utils::getticks());
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -1816,6 +1882,7 @@ static int ntop_getticks(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the number of CPU ticks per second.  Lua: ntop.gettickspersec() → number */
 static int ntop_gettickspersec(lua_State* vm) {
   lua_pushnumber(vm, Utils::gettickspersec());
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -1830,6 +1897,7 @@ static int ntop_gettickspersec(lua_State* vm) {
  * @return CONST_LUA_OK.
  */
 
+/* @brief Refreshes the process timezone from the TZ environment variable.  Lua: ntop.tzset() → nil */
 static int ntop_tzset(lua_State* vm) {
 #ifndef WIN32
   tzset();
@@ -1840,6 +1908,7 @@ static int ntop_tzset(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Rounds a Unix epoch down to the nearest multiple of secs.  Lua: ntop.roundTime(epoch, secs[, tz]) → integer */
 static int ntop_round_time(lua_State* vm) {
   time_t now;
   u_int32_t rounder;
@@ -1865,6 +1934,7 @@ static int ntop_round_time(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Converts a 32-bit integer to an IPv4 dotted-decimal string.  Lua: ntop.inet_ntoa(n) → string */
 static int ntop_inet_ntoa(lua_State* vm) {
   u_int32_t ip;
   struct in_addr in;
@@ -1885,6 +1955,7 @@ static int ntop_inet_ntoa(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Converts an IPv4 dotted-decimal string to a 32-bit integer.  Lua: ntop.ipToNumber(ip) → integer */
 static int ntop_ip_to_number(lua_State* vm) {
   char* device_ip = NULL;
   struct in_addr addr;
@@ -1906,6 +1977,7 @@ static int ntop_ip_to_number(lua_State* vm) {
 
 #ifndef HAVE_NEDGE
 
+/* @brief Broadcasts a string message to the IPS subsystem (non-nEdge only).  Lua: ntop.broadcastIPSMessage(msg) → nil */
 static int ntop_brodcast_ips_message(lua_State* vm) {
   char* msg;
 
@@ -1918,6 +1990,7 @@ static int ntop_brodcast_ips_message(lua_State* vm) {
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
+/* @brief Returns true if IPS rules are due for a periodic refresh.  Lua: ntop.timeToRefreshIPSRules() → boolean */
 static int ntop_time_to_refresh_ips_rules(lua_State* vm) {
   /* Read and reset the variable */
   lua_pushboolean(vm, ntop->timeToRefreshIPSRules());
@@ -1925,6 +1998,7 @@ static int ntop_time_to_refresh_ips_rules(lua_State* vm) {
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
+/* @brief Signals the IPS subsystem to refresh its rules.  Lua: ntop.askToRefreshIPSRules() → boolean */
 static int ntop_ask_to_refresh_ips_rules(lua_State* vm) {
   ntop->askToRefreshIPSRules();
 
@@ -1934,6 +2008,7 @@ static int ntop_ask_to_refresh_ips_rules(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Connects to a ZMQ publisher endpoint (non-nEdge builds with ZMQ support).  Lua: ntop.zmq_connect(endpoint, topic) → nil */
 static int ntop_zmq_connect(lua_State* vm) {
   char *endpoint, *topic;
   void *context, *subscriber;
@@ -1977,6 +2052,7 @@ static int ntop_zmq_connect(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns Redis memory usage and command execution statistics.  Lua: ntop.getCacheStats() → table */
 static int ntop_get_redis_stats(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -1986,6 +2062,7 @@ static int ntop_get_redis_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Deletes a key (or pattern of keys) from Redis.  Lua: ntop.delCache(key) → nil */
 static int ntop_delete_redis_key(lua_State* vm) {
   char* key;
 
@@ -2002,6 +2079,7 @@ static int ntop_delete_redis_key(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Atomically renames a Redis key.  Lua: ntop.renameCache(old_key, new_key) → nil */
 static int ntop_rename_redis_key(lua_State* vm) {
   char *key, *new_key;
 
@@ -2024,6 +2102,7 @@ static int ntop_rename_redis_key(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Flushes ALL Redis data — destructive operation, admin only.  Lua: ntop.flushCache() → boolean */
 static int ntop_flush_redis(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -2036,6 +2115,7 @@ static int ntop_flush_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Adds a member to a Redis set.  Lua: ntop.setMembersCache(key, member) → nil */
 static int ntop_add_set_member_redis(lua_State* vm) {
   char *key, *value;
 
@@ -2060,6 +2140,7 @@ static int ntop_add_set_member_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Removes a member from a Redis set.  Lua: ntop.delMembersCache(key, member) → nil */
 static int ntop_del_set_member_redis(lua_State* vm) {
   char *key, *value;
 
@@ -2084,6 +2165,7 @@ static int ntop_del_set_member_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns all members of a Redis set as a Lua table.  Lua: ntop.getMembersCache(key) → table */
 static int ntop_get_set_members_redis(lua_State* vm) {
   char* key;
 
@@ -2102,6 +2184,7 @@ static int ntop_get_set_members_redis(lua_State* vm) {
 #ifdef HAVE_ZMQ
 #ifndef HAVE_NEDGE
 
+/* @brief Disconnects from the previously connected ZMQ publisher endpoint.  Lua: ntop.zmq_disconnect() → nil */
 static int ntop_zmq_disconnect(lua_State* vm) {
   void* context;
   void* subscriber;
@@ -2123,6 +2206,7 @@ static int ntop_zmq_disconnect(lua_State* vm) {
 /* ****************************************** */
 
 #ifndef HAVE_NEDGE
+/* @brief Receives and returns the next message from the active ZMQ subscription.  Lua: ntop.zmq_receive() → string */
 static int ntop_zmq_receive(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   void* subscriber;
@@ -2197,6 +2281,7 @@ static int ntop_zmq_receive(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Reloads all system preferences from Redis into process memory.  Lua: ntop.reloadPreferences([set_defaults]) → nil */
 static int ntop_reload_preferences(lua_State* vm) {
   bool set_redis_defaults = false;
 
@@ -2213,6 +2298,7 @@ static int ntop_reload_preferences(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Applies default ntopng file permissions (0640) to a path (Unix only).  Lua: ntop.setDefaultFilePermissions(path) → nil */
 static int ntop_set_default_file_permissions(lua_State* vm) {
   char* fpath;
 
@@ -2234,6 +2320,7 @@ static int ntop_set_default_file_permissions(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Logs a message only when verbose tracing mode is enabled.  Lua: ntop.verboseTrace(msg) → nil */
 static int ntop_verbose_trace(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -2245,6 +2332,7 @@ static int ntop_verbose_trace(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sends a UDP datagram to the specified host and port.  Lua: ntop.send_udp_data(host, port, data) → nil */
 static int ntop_send_udp_data(lua_State* vm) {
   int port;
   char *host, *data;
@@ -2271,6 +2359,7 @@ static int ntop_send_udp_data(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sends data over TCP to the specified host and port.  Lua: ntop.send_tcp_data(host, port, data) → nil */
 static int ntop_send_tcp_data(lua_State* vm) {
   bool rv = true;
   char *host, *data;
@@ -2302,6 +2391,7 @@ static int ntop_send_tcp_data(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the current periodic script is nearing its execution deadline.  Lua: ntop.isDeadlineApproaching() → boolean */
 static int ntop_script_is_deadline_approaching(lua_State* vm) {
   NtopngLuaContext* ctx = getLuaVMContext(vm);
 
@@ -2317,6 +2407,7 @@ static int ntop_script_is_deadline_approaching(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the Unix epoch deadline for the current periodic script execution.  Lua: ntop.getDeadline() → integer */
 static int ntop_script_get_deadline(lua_State* vm) {
   NtopngLuaContext* ctx = getLuaVMContext(vm);
 
@@ -2327,6 +2418,7 @@ static int ntop_script_get_deadline(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if network speedtest functionality is compiled in.  Lua: ntop.hasSpeedtestSupport() → boolean */
 static int ntop_has_speedtest_support(lua_State* vm) {
 #ifdef HAVE_EXPAT
   lua_pushboolean(vm, true);
@@ -2339,6 +2431,7 @@ static int ntop_has_speedtest_support(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Runs a network speedtest and returns download/upload/latency results (Pro).  Lua: ntop.speedtest() → table */
 static int ntop_speedtest(lua_State* vm) {
   ntop->speedtest(vm);
 
@@ -2347,6 +2440,7 @@ static int ntop_speedtest(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns IP blacklist hit counts and per-list statistics.  Lua: ntop.getBlacklistStats() → table */
 static int ntop_get_bl_stats(lua_State* vm) {
   ntop->getBlacklistStats()->lua(vm);
 
@@ -2355,6 +2449,7 @@ static int ntop_get_bl_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Resets all IP blacklist statistics counters to zero.  Lua: ntop.resetBlacklistStats() → nil */
 static int ntop_reset_bl_stats(lua_State* vm) {
   ntop->resetBlacklistStats();
   lua_pushnil(vm);
@@ -2363,6 +2458,7 @@ static int ntop_reset_bl_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the ClickHouse historical flows backend is active.  Lua: ntop.isClickHouseEnabled() → boolean */
 static int ntop_clickhouse_enabled(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool enabled = ntop->getPrefs()->do_dump_flows_on_clickhouse();
@@ -2379,6 +2475,7 @@ static int ntop_clickhouse_enabled(lua_State* vm) {
 /* ****************************************** */
 
 // *** API ***
+/* @brief Issues an HTTP 302 redirect to the given URL (for page-level Lua scripts).  Lua: ntop.httpRedirect(url) → nil */
 static int ntop_http_redirect(lua_State* vm) {
   char *url, str[512];
 
@@ -2398,6 +2495,7 @@ static int ntop_http_redirect(lua_State* vm) {
 /* ****************************************** */
 
 // *** API ***
+/* @brief Performs an outbound HTTP GET request and optionally returns the response body.  Lua: ntop.httpGet(url[,user,pass,timeout,return_content,...]) → string */
 static int ntop_http_get(lua_State* vm) {
   char *url, *username = NULL, *pwd = NULL;
   int connection_timeout = 30, lifetime_timeout = 0;
@@ -2458,6 +2556,7 @@ static int ntop_http_get(lua_State* vm) {
 /* ****************************************** */
 
 // *** API ***
+/* @brief Performs an HTTP GET with a Bearer authorization token header.  Lua: ntop.httpGetAuthToken(url, token[,timeout,return_content,no_verify]) → string */
 static int ntop_http_get_auth_token(lua_State* vm) {
   char *url, *auth_token = NULL;
   int connection_timeout = 30, lifetime_timeout = 0;
@@ -2511,6 +2610,7 @@ static int ntop_http_get_auth_token(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the HTTP path prefix configured for this ntopng instance.  Lua: ntop.getHttpPrefix() → string */
 static int ntop_http_get_prefix(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -2520,6 +2620,7 @@ static int ntop_http_get_prefix(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the Unix epoch when ntopng was last started.  Lua: ntop.getStartupEpoch() → integer */
 static int ntop_http_get_startup_epoch(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -2529,6 +2630,7 @@ static int ntop_http_get_startup_epoch(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns an epoch value used for HTTP static-file cache busting.  Lua: ntop.getStaticFileEpoch() → integer */
 static int ntop_http_get_static_file_epoch(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -2538,6 +2640,7 @@ static int ntop_http_get_static_file_epoch(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sanitizes a string to prevent XSS by removing dangerous characters.  Lua: ntop.httpPurifyParam(str) → string */
 static int ntop_http_purify_param(lua_State* vm) {
   char *str, *buf;
   bool strict = false, allowURL = true, allowDots = false;
@@ -2574,6 +2677,7 @@ static int ntop_http_purify_param(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns all current system preferences as a flat Lua table.  Lua: ntop.getPrefs() → table */
 static int ntop_get_prefs(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -2584,6 +2688,7 @@ static int ntop_get_prefs(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if raw ICMP ping is available on this system.  Lua: ntop.isPingAvailable() → boolean */
 static int ntop_is_ping_available(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -2594,6 +2699,7 @@ static int ntop_is_ping_available(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if ICMP ping is available on the given network interface.  Lua: ntop.isPingIfaceAvailable(ifname) → boolean */
 static int ntop_is_ping_iface_available(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -2604,6 +2710,7 @@ static int ntop_is_ping_iface_available(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sends an ICMP ping to a host; use collectPingResults to retrieve RTT.  Lua: ntop.pingHost(host, is_v6, iface) → nil */
 static int ntop_ping_host(lua_State* vm) {
 #ifdef WIN32
   lua_pushnil(vm);
@@ -2657,6 +2764,7 @@ static int ntop_ping_host(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Collects and returns RTT results from recently sent pings.  Lua: ntop.collectPingResults() → table */
 static int ntop_collect_ping_results(lua_State* vm) {
 #ifdef WIN32
   lua_pushnil(vm);
@@ -2685,6 +2793,7 @@ static int ntop_collect_ping_results(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a table of interface names usable for ICMP ping.  Lua: ntop.getPingIfNames() → table */
 static int ntop_get_ping_interface_names(lua_State* vm) {
 #ifndef WIN32
   ContinuousPing* cping = ntop->getContinuousPing();
@@ -2703,6 +2812,7 @@ static int ntop_get_ping_interface_names(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the special no-login username constant used for unauthenticated access.  Lua: ntop.getNologinUser() → string */
 static int ntop_get_nologin_username(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -2713,6 +2823,7 @@ static int ntop_get_nologin_username(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a table of all configured users with their attributes.  Lua: ntop.getUsers() → table */
 static int ntop_get_users(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -2722,6 +2833,7 @@ static int ntop_get_users(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the network CIDRs visible to the current user.  Lua: ntop.getAllowedNetworks() → table */
 static int ntop_get_allowed_networks(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -2731,6 +2843,7 @@ static int ntop_get_allowed_networks(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the current user has permission to download PCAP files.  Lua: ntop.isPcapDownloadAllowed() → boolean */
 static int ntop_is_pcap_download_allowed(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2742,6 +2855,7 @@ static int ntop_is_pcap_download_allowed(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the current request is authenticated as an administrator.  Lua: ntop.isAdministrator() → boolean */
 static int ntop_is_administrator(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -2761,6 +2875,7 @@ static bool allowLocalUserManagement(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Changes a user password (requires old password or admin privileges).  Lua: ntop.resetUserPassword(who, username, old_pw, new_pw) → boolean */
 static int ntop_reset_user_password(lua_State* vm) {
   char *who, *username, *old_password, *new_password;
   bool is_admin = ntop->isUserAdministrator(vm), ret;
@@ -2808,6 +2923,7 @@ static int ntop_reset_user_password(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Changes a user role: administrator, unprivileged, or captivePortal.  Lua: ntop.changeUserRole(username, role) → boolean */
 static int ntop_change_user_role(lua_State* vm) {
   char *username, *user_role;
 
@@ -2832,6 +2948,7 @@ static int ntop_change_user_role(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Updates the comma-separated allowed network CIDRs for a user.  Lua: ntop.changeAllowedNets(username, nets_csv) → boolean */
 static int ntop_change_allowed_nets(lua_State* vm) {
   char *username, *allowed_nets;
 
@@ -2856,6 +2973,7 @@ static int ntop_change_allowed_nets(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Updates the allowed interface restriction for a user.  Lua: ntop.changeAllowedIfname(username, ifname) → boolean */
 static int ntop_change_allowed_ifname(lua_State* vm) {
   char *username, *allowed_ifname;
 
@@ -2884,6 +3002,7 @@ static int ntop_change_allowed_ifname(lua_State* vm) {
  * Set the host pool for a captive portal user on authentication
  * (this is a 1-1 user-pool binding used for policy enforcement)
  */
+/* @brief Sets the captive portal host pool for a user.  Lua: ntop.changeUserHostPool(username, pool_id) → boolean */
 static int ntop_change_user_host_pool(lua_State* vm) {
   char *username, *host_pool_id;
 
@@ -2909,6 +3028,7 @@ static int ntop_change_user_host_pool(lua_State* vm) {
 /* ****************************************** */
 
 /* Set which pools an unprivileged user is allowed to view */
+/* @brief Sets the host pools viewable by an unprivileged user.  Lua: ntop.changeAllowedHostPools(username, pools) → boolean */
 static int ntop_change_user_allowed_host_pools(lua_State* vm) {
   char *username, *allowed_host_pools;
 
@@ -2934,6 +3054,7 @@ static int ntop_change_user_allowed_host_pools(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the host pools the current user is allowed to see.  Lua: ntop.getAllowedHostPools() → table */
 static int ntop_get_allowed_host_pools(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -2943,6 +3064,7 @@ static int ntop_get_allowed_host_pools(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Updates the display name for a user.  Lua: ntop.changeUserFullName(username, full_name) → boolean */
 static int ntop_change_user_full_name(lua_State* vm) {
   char *username, *full_name;
 
@@ -2967,6 +3089,7 @@ static int ntop_change_user_full_name(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Updates the UI language preference for a user.  Lua: ntop.changeUserLanguage(username, lang) → boolean */
 static int ntop_change_user_language(lua_State* vm) {
   char *username, *language;
 
@@ -2991,6 +3114,7 @@ static int ntop_change_user_language(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Grants or revokes historical flow data access for a user.  Lua: ntop.changeHistoricalFlowPermission(username, allow) → boolean */
 static int ntop_change_user_historical_flow_permission(lua_State* vm) {
   char* username;
   bool allow_historical_flows = false;
@@ -3016,6 +3140,7 @@ static int ntop_change_user_historical_flow_permission(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Grants or revokes alerts viewing permission for a user.  Lua: ntop.changeAlertsPermission(username, allow) → boolean */
 static int ntop_change_user_alerts_permission(lua_State* vm) {
   char* username;
   bool allow_alerts = false;
@@ -3040,6 +3165,7 @@ static int ntop_change_user_alerts_permission(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Grants or revokes PCAP download permission for a user.  Lua: ntop.changePcapDownloadPermission(username, allow) → boolean */
 static int ntop_change_user_pcap_download_permission(lua_State* vm) {
   char* username;
   bool allow_pcap_download = false;
@@ -3065,6 +3191,7 @@ static int ntop_change_user_pcap_download_permission(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Posts a JSON string body to a URL via HTTP POST.  Lua: ntop.postHTTPJsonData(url, json_body) → boolean */
 static int ntop_post_http_json_data(lua_State* vm) {
   char *username, *password, *url, *json, *bearer_token = NULL;
   HTTPTranferStats stats;
@@ -3106,6 +3233,7 @@ static int ntop_post_http_json_data(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Performs an outbound HTTP POST request.  Lua: ntop.httpPost(url, body[,user,pass,timeout,return_content,content_type]) → string */
 static int ntop_http_post(lua_State* vm) {
   char *username = (char*)"", *password = (char*)"", *url, *form_data;
   int connection_timeout = 30, lifetime_timeout = 0;
@@ -3150,6 +3278,7 @@ static int ntop_http_post(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Internal helper for HTTP requests requiring multiple auth token types.  Lua: (internal multi-auth helper) → string */
 static int ntop_http_multi_auth_token(lua_State* vm, HttpMethod method) {
   char *url, *auth_token = NULL, *form_data;
   int connection_timeout = 30, lifetime_timeout = 0;
@@ -3193,18 +3322,22 @@ static int ntop_http_multi_auth_token(lua_State* vm, HttpMethod method) {
 
 /* ****************************************** */
 
+/* @brief Performs an HTTP POST request with a Bearer authorization token.  Lua: ntop.httpPostAuthToken(url, token, body[,timeout,content_type]) → string */
 static int ntop_http_post_auth_token(lua_State* vm) {
   return (ntop_http_multi_auth_token(vm, method_post));
 }
+/* @brief Performs an HTTP PUT request with a Bearer authorization token.  Lua: ntop.httpPutAuthToken(url, token, body[,timeout]) → string */
 static int ntop_http_put_auth_token(lua_State* vm) {
   return (ntop_http_multi_auth_token(vm, method_put));
 }
+/* @brief Performs an HTTP PATCH request with a Bearer authorization token.  Lua: ntop.httpPatchAuthToken(url, token, body[,timeout]) → string */
 static int ntop_http_patch_auth_token(lua_State* vm) {
   return (ntop_http_multi_auth_token(vm, method_patch));
 }
 
 /* ****************************************** */
 
+/* @brief Full-featured HTTP fetch accepting all options in a single parameter table.  Lua: ntop.httpFetch(params_table) → table */
 static int ntop_http_fetch(lua_State* vm) {
   char *url, *f, fname[PATH_MAX];
   HTTPTranferStats stats;
@@ -3235,6 +3368,7 @@ static int ntop_http_fetch(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Posts the contents of a text file to a URL via HTTP POST.  Lua: ntop.postHTTPTextFile(url, file_path) → boolean */
 static int ntop_post_http_text_file(lua_State* vm) {
   char *username, *password, *url, *path;
   bool delete_file_after_post = false;
@@ -3287,6 +3421,7 @@ static int ntop_post_http_text_file(lua_State* vm) {
 /* ****************************************** */
 
 #ifdef HAVE_CURL_SMTP
+/* @brief Sends an email via SMTP (requires HAVE_CURL_SMTP build option).  Lua: ntop.sendMail(params_table) → boolean */
 static int ntop_send_mail(lua_State* vm) {
   char *from, *to, *cc, *msg, *smtp_server, *username = NULL, *password = NULL;
   bool verbose = false, use_proxy = false;
@@ -3337,6 +3472,7 @@ static int ntop_send_mail(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Creates a new user account with specified permissions and restrictions.  Lua: ntop.addUser(username, full_name, password, role, nets, iface, ...) → boolean */
 static int ntop_add_user(lua_State* vm) {
   char *username, *full_name, *password, *host_role, *allowed_networks,
       *allowed_interface;
@@ -3410,6 +3546,7 @@ static int ntop_add_user(lua_State* vm) {
 
 /* ******************************************* */
 
+/* @brief Creates a login session for a user and returns the session id.  Lua: ntop.createUserSession(username[, duration]) → string */
 static int ntop_create_user_session(lua_State* vm) {
   char* username;
   char session_id[NTOP_SESSION_ID_LENGTH];
@@ -3444,6 +3581,7 @@ static int ntop_create_user_session(lua_State* vm) {
 
 /* ******************************************* */
 
+/* @brief Generates and stores a new API token for a user.  Lua: ntop.createUserAPIToken(username) → string */
 static int ntop_create_user_api_token(lua_State* vm) {
   char* username = NULL;
   char api_token[NTOP_SESSION_ID_LENGTH];
@@ -3465,6 +3603,7 @@ static int ntop_create_user_api_token(lua_State* vm) {
 
 /* ******************************************* */
 
+/* @brief Returns the existing API token for a user, or nil if none exists.  Lua: ntop.getUserAPIToken(username) → string */
 static int ntop_get_user_api_token(lua_State* vm) {
   char* username = NULL;
   char api_token[NTOP_SESSION_ID_LENGTH];
@@ -3492,6 +3631,7 @@ static int ntop_get_user_api_token(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Permanently deletes a user account and all associated settings.  Lua: ntop.deleteUser(username) → boolean */
 static int ntop_delete_user(lua_State* vm) {
   char* username;
 
@@ -3513,6 +3653,7 @@ static int ntop_delete_user(lua_State* vm) {
 
 /* MFA/TOTP Lua bindings */
 
+/* @brief Generates a new base32 TOTP secret for two-factor authentication setup.  Lua: ntop.generateTOTPSecret() → string */
 static int ntop_generate_totp_secret(lua_State* vm) {
   char secret[64];
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -3526,6 +3667,7 @@ static int ntop_generate_totp_secret(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Stores a TOTP secret for a user.  Lua: ntop.setUserTOTPSecret(username, secret) → boolean */
 static int ntop_set_user_totp_secret(lua_State* vm) {
   char *username, *secret;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -3549,6 +3691,7 @@ static int ntop_set_user_totp_secret(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the TOTP secret for a user (admin only).  Lua: ntop.getUserTOTPSecret(username) → string */
 static int ntop_get_user_totp_secret(lua_State* vm) {
   char *username, secret[64];
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -3572,6 +3715,7 @@ static int ntop_get_user_totp_secret(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if TOTP two-factor authentication is enabled for a user.  Lua: ntop.isTOTPEnabled(username) → boolean */
 static int ntop_is_totp_enabled(lua_State* vm) {
   char* username;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -3587,6 +3731,7 @@ static int ntop_is_totp_enabled(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Enables or disables TOTP two-factor authentication for a user.  Lua: ntop.setUserTOTPEnabled(username, enabled) → boolean */
 static int ntop_set_user_totp_enabled(lua_State* vm) {
   char* username;
   bool enabled;
@@ -3610,6 +3755,7 @@ static int ntop_set_user_totp_enabled(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Validates a 6-digit TOTP code against the user's stored secret.  Lua: ntop.validateTOTP(username, code) → boolean */
 static int ntop_validate_totp(lua_State* vm) {
   char *username, *code;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -3630,6 +3776,7 @@ static int ntop_validate_totp(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the otpauth:// URI for scanning with an authenticator app.  Lua: ntop.getTOTPProvisioningUri(username) → string */
 static int ntop_get_totp_provisioning_uri(lua_State* vm) {
   char *username, uri[256];
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -3652,6 +3799,7 @@ static int ntop_get_totp_provisioning_uri(lua_State* vm) {
 
 /* Similar to ntop_get_resolved_address but actually perfoms the address
  * resolution now */
+/* @brief Triggers asynchronous DNS reverse lookup for an IP (prefer resolveAddress() from lua_utils).  Lua: ntop.resolveName(ip) → nil */
 static int ntop_resolve_address(lua_State* vm) {
   char *numIP, symIP[64];
 
@@ -3786,6 +3934,7 @@ void lua_push_float_table_entry(lua_State* L, const char* key, float value) {
 
 /* ****************************************** */
 
+/* @brief Returns true if ntopng is installed from a distribution package.  Lua: ntop.isPackage() → boolean */
 static int ntop_is_package(lua_State* vm) {
   bool is_package = false;
 
@@ -3805,6 +3954,7 @@ static int ntop_is_package(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if ntopng is forced to run in Community mode.  Lua: ntop.isForcedCommunity() → boolean */
 static int ntop_is_forced_community(lua_State* vm) {
   bool is_forced_community = true;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -3817,6 +3967,7 @@ static int ntop_is_forced_community(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if running Pro edition or higher.  Lua: ntop.isPro() → boolean */
 static int ntop_is_pro(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   lua_pushboolean(vm, ntop->getPrefs()->is_pro_edition());
@@ -3825,6 +3976,7 @@ static int ntop_is_pro(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if running Enterprise M edition or higher.  Lua: ntop.isEnterpriseM() / ntop.isEnterprise() → boolean */
 static int ntop_is_enterprise_m(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   lua_pushboolean(vm, ntop->getPrefs()->is_enterprise_m_edition());
@@ -3833,6 +3985,7 @@ static int ntop_is_enterprise_m(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if running Enterprise L edition or higher.  Lua: ntop.isEnterpriseL() → boolean */
 static int ntop_is_enterprise_l(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   lua_pushboolean(vm, ntop->getPrefs()->is_enterprise_l_edition());
@@ -3841,6 +3994,7 @@ static int ntop_is_enterprise_l(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if running Enterprise XL edition or higher.  Lua: ntop.isEnterpriseXL() → boolean */
 static int ntop_is_enterprise_xl(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   lua_pushboolean(vm, ntop->getPrefs()->is_enterprise_xl_edition());
@@ -3849,6 +4003,7 @@ static int ntop_is_enterprise_xl(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if running Enterprise XXL edition or higher.  Lua: ntop.isEnterpriseXXL() → boolean */
 static int ntop_is_enterprise_xxl(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   lua_pushboolean(vm, ntop->getPrefs()->is_enterprise_xxl_edition());
@@ -3857,6 +4012,7 @@ static int ntop_is_enterprise_xxl(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if running Enterprise XXXL edition or higher.  Lua: ntop.isEnterpriseXXXL() → boolean */
 static int ntop_is_enterprise_xxxl(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   lua_pushboolean(vm, ntop->getPrefs()->is_enterprise_xxxl_edition());
@@ -3865,6 +4021,7 @@ static int ntop_is_enterprise_xxxl(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if running nEdge Pro edition.  Lua: ntop.isnEdge() → boolean */
 static int ntop_is_nedge(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   lua_pushboolean(vm, ntop->getPrefs()->is_nedge_pro_edition());
@@ -3873,6 +4030,7 @@ static int ntop_is_nedge(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if running nEdge Enterprise edition.  Lua: ntop.isnEdgeEnterprise() → boolean */
 static int ntop_is_nedge_enterprise(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   lua_pushboolean(vm, ntop->getPrefs()->is_nedge_enterprise_edition());
@@ -3881,6 +4039,7 @@ static int ntop_is_nedge_enterprise(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if running on a dedicated ntopng hardware appliance.  Lua: ntop.isAppliance() → boolean */
 static int ntop_is_appliance(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 #ifndef HAVE_NEDGE
@@ -3893,6 +4052,7 @@ static int ntop_is_appliance(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if ntopng is configured in IoT Bridge mode.  Lua: ntop.isIoTBridge() → boolean */
 static int ntop_is_iot_bridge(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 #ifndef HAVE_NEDGE
@@ -3909,6 +4069,7 @@ static int ntop_is_iot_bridge(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Starts a PCAP extraction job from recorded traffic (admin only).  Lua: ntop.runExtraction(id, ifid, from, to, filter[,max_bytes,timeline]) → nil */
 static int ntop_run_extraction(lua_State* vm) {
   int id, ifid;
   time_t time_from, time_to;
@@ -3954,6 +4115,7 @@ static int ntop_run_extraction(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Stops a running PCAP extraction job by id.  Lua: ntop.stopExtraction(job_id) → nil */
 static int ntop_stop_extraction(lua_State* vm) {
   int id;
 
@@ -3974,6 +4136,7 @@ static int ntop_stop_extraction(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if any PCAP extraction job is currently running.  Lua: ntop.isExtractionRunning() → boolean */
 static int ntop_is_extraction_running(lua_State* vm) {
   bool rv;
 
@@ -3990,6 +4153,7 @@ static int ntop_is_extraction_running(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Reserved; returns extraction job status information.  Lua: ntop.getExtractionStatus() → nil */
 static int ntop_get_extraction_status(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -4003,6 +4167,7 @@ static int ntop_get_extraction_status(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Starts a live PCAP stream extraction for the given time window and BPF filter.  Lua: ntop.runLiveExtraction(ifid, from, to, bpf[, timeline]) → boolean */
 static int ntop_run_live_extraction(lua_State* vm) {
   NtopngLuaContext* c = NULL;
   NetworkInterface* iface = NULL;
@@ -4071,6 +4236,7 @@ static int ntop_run_live_extraction(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the specified bit is set in the bitmap integer.  Lua: ntop.bitmapIsSet(bitmap, bit_value) → boolean */
 static int ntop_bitmap_is_set(lua_State* vm) {
   u_int64_t bitmap;
   u_int64_t val;
@@ -4088,6 +4254,7 @@ static int ntop_bitmap_is_set(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sets the specified bit in the bitmap and returns the new bitmap value.  Lua: ntop.bitmapSet(bitmap, bit_value) → integer */
 static int ntop_bitmap_set(lua_State* vm) {
   u_int64_t bitmap;
   u_int64_t val;
@@ -4105,6 +4272,7 @@ static int ntop_bitmap_set(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Clears the specified bit in the bitmap and returns the new bitmap value.  Lua: ntop.bitmapClear(bitmap, bit_value) → integer */
 static int ntop_bitmap_clear(lua_State* vm) {
   u_int64_t bitmap;
   u_int64_t val;
@@ -4122,6 +4290,7 @@ static int ntop_bitmap_clear(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Converts a numeric alert score to an alert severity enum value.  Lua: ntop.mapScoreToSeverity(score) → integer */
 static int ntop_map_score_to_severity(lua_State* vm) {
   u_int64_t score;
 
@@ -4135,6 +4304,7 @@ static int ntop_map_score_to_severity(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Converts an alert severity enum value to a numeric score.  Lua: ntop.mapSeverityToScore(severity) → integer */
 static int ntop_map_severity_to_score(lua_State* vm) {
   AlertLevel alert_level;
 
@@ -4149,6 +4319,7 @@ static int ntop_map_severity_to_score(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Resets all per-interface traffic statistics counters.  Lua: ntop.resetStats() → nil */
 static int ntop_reset_stats(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -4160,6 +4331,7 @@ static int ntop_reset_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the absolute path of the currently executing scripts directory.  Lua: ntop.getCurrentScriptsDir() → string */
 static int ntop_get_current_scripts_dir(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -4170,6 +4342,7 @@ static int ntop_get_current_scripts_dir(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a table of all key directory paths: installdir, scriptdir, httpdocsdir, workingdir, etc..  Lua: ntop.getDirs() → table */
 static int ntop_get_dirs(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -4193,6 +4366,7 @@ static int ntop_get_dirs(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Enables the asset discovery logging feature.  Lua: ntop.enableAssetsLog() → nil */
 static int ntop_enable_assets_log(lua_State* vm) {
   bool enable_assets_log = false;
 
@@ -4207,6 +4381,7 @@ static int ntop_enable_assets_log(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the assets discovery and logging feature is enabled.  Lua: ntop.assetsEnabled() → boolean */
 static int ntop_assets_enabled(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -4221,6 +4396,7 @@ static int ntop_assets_enabled(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Recursively finds all files matching a pattern under base_path.  Lua: ntop.getAllPaths(base_path, filename_pattern) → table */
 static int ntop_get_all_paths(lua_State* vm) {
   const char *path, *filename;
 
@@ -4242,6 +4418,7 @@ static int ntop_get_all_paths(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the ntopng uptime in seconds since last restart.  Lua: ntop.getUptime() → integer */
 static int ntop_get_uptime(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -4251,6 +4428,7 @@ static int ntop_get_uptime(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns system statistics including CPU load, memory usage, and alert queue info.  Lua: ntop.systemHostStat() → table */
 static int ntop_system_host_stat(lua_State* vm) {
   float cpu_load;
   u_int64_t dropped_alerts = 0, written_alerts = 0, alerts_queries = 0;
@@ -4293,6 +4471,7 @@ static int ntop_system_host_stat(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns information about all running ntopng threads and their status.  Lua: ntop.threadsInfo() → table */
 static int ntop_threads_info(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -4304,6 +4483,7 @@ static int ntop_threads_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns system-level alert queue statistics (drops and writes).  Lua: ntop.getSystemAlertsStats() → table */
 static int ntop_get_system_alerts_stats(lua_State* vm) {
   NetworkInterface* iface;
 
@@ -4322,6 +4502,7 @@ static int ntop_get_system_alerts_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Refreshes and returns the current CPU load percentage.  Lua: ntop.refreshCPULoad() → number */
 static int ntop_refresh_cpu_load(lua_State* vm) {
   float cpu_load;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -4338,6 +4519,7 @@ static int ntop_refresh_cpu_load(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Triggers a license validation check and returns 1.  Lua: ntop.checkLicense() → integer */
 static int ntop_check_license(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -4351,6 +4533,7 @@ static int ntop_check_license(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns comprehensive product info: version, OS, license, uptime, listening ports.  Lua: ntop.getInfo([verbose]) → table */
 static int ntop_get_info(lua_State* vm) {
   char rsp[256];
 #ifdef NTOPNG_PRO
@@ -4530,6 +4713,7 @@ static int ntop_get_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the HTTP cookie security attributes string (e.g. SameSite=Strict; Secure).  Lua: ntop.getCookieAttributes() → string */
 static int ntop_get_cookie_attributes(lua_State* vm) {
   struct mg_request_info* request_info;
   struct mg_connection* conn;
@@ -4548,6 +4732,7 @@ static int ntop_get_cookie_attributes(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the current user is allowed to access the given interface.  Lua: ntop.isAllowedInterface(ifname) → boolean */
 static int ntop_is_allowed_interface(lua_State* vm) {
   int id;
   NetworkInterface* iface;
@@ -4571,6 +4756,7 @@ static int ntop_is_allowed_interface(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the current user is allowed to see the given network.  Lua: ntop.isAllowedNetwork(network) → boolean */
 static int ntop_is_allowed_network(lua_State* vm) {
   bool rv = false;
   u_int16_t vlan_id = 0;
@@ -4593,6 +4779,7 @@ static int ntop_is_allowed_network(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the IP belongs to one of this machine's network interfaces.  Lua: ntop.isLocalInterfaceAddress(ip) → boolean */
 static int ntop_is_local_interface_address(lua_State* vm) {
   char* host;
   IpAddress ipa;
@@ -4611,6 +4798,7 @@ static int ntop_is_local_interface_address(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the IP is in one of the configured local networks.  Lua: ntop.isLocalAddress(ip) → boolean */
 static int ntop_is_local_address(lua_State* vm) {
   char *host, *slash;
   IpAddress ipa;
@@ -4661,6 +4849,7 @@ static int ntop_is_local_address(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the local network info table for the network containing the given IP.  Lua: ntop.getAddressNetwork(ip) → table */
 static int ntop_get_address_network(lua_State* vm) {
   char* ip;
   IpAddress ipa;
@@ -4681,6 +4870,7 @@ static int ntop_get_address_network(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Retrieves a cached DNS reverse lookup result (prefer getResolvedAddress() from lua_utils).  Lua: ntop.getResolvedName(ip) → string */
 static int ntop_get_resolved_address(lua_State* vm) {
   char *key, *tmp, rsp[256], value[280];
   Redis* redis = ntop->getRedis();
@@ -4714,6 +4904,7 @@ static int ntop_get_resolved_address(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Synchronously resolves a hostname to its IP address.  Lua: ntop.resolveHost(hostname) → string */
 static int ntop_resolve_host(lua_State* vm) {
   char buf[64];
   char* host;
@@ -4740,6 +4931,7 @@ static int ntop_resolve_host(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Enables or disables full (fat) MIB polling mode for SNMP.  Lua: ntop.snmpSetFatMibPollingMode(enabled) → nil */
 static int ntop_snmp_set_fat_mib_polling_mode(lua_State* vm) {
   NtopngLuaContext* ctx = getLuaVMContext(vm);
 
@@ -4755,6 +4947,7 @@ static int ntop_snmp_set_fat_mib_polling_mode(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the corresponding SNMP capability is compiled in.  Lua: ntop.snmpv3available()/snmpsetavailable()/snmpgetbulkavailable() → boolean */
 static int ntop_is_libsnmp_available(lua_State* vm) {
   lua_pushboolean(vm,
 #ifdef HAVE_LIBSNMP
@@ -4769,6 +4962,7 @@ static int ntop_is_libsnmp_available(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the maximum number of concurrent SNMP engines supported.  Lua: ntop.snmpMaxNumEngines() → integer */
 static int ntop_snmp_max_num_engines(lua_State* vm) {
   u_int16_t num = 0;
 
@@ -4796,6 +4990,7 @@ static int ntop_snmp_max_num_engines(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sets the maximum number of variable repetitions for SNMP GETBULK requests.  Lua: ntop.snmpSetBulkMaxNumRepetitions(n) → nil */
 static int ntop_snmp_set_bulk_max_repetitions(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
 
@@ -4810,6 +5005,7 @@ static int ntop_snmp_set_bulk_max_repetitions(lua_State* vm) {
 /* ****************************************** */
 
 /* Synchronous calls */
+/* @brief Performs a blocking SNMP GET and returns the OID response table.  Lua: ntop.snmpget(host, community, oid, version) → table */
 static int ntop_snmpget(lua_State* vm) {
   SNMP s;
 
@@ -4818,6 +5014,7 @@ static int ntop_snmpget(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Performs a blocking SNMP GETNEXT and returns the next OID response.  Lua: ntop.snmpgetnext(host, community, oid, version) → table */
 static int ntop_snmpgetnext(lua_State* vm) {
   SNMP s;
 
@@ -4826,6 +5023,7 @@ static int ntop_snmpgetnext(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Performs a blocking SNMP GETBULK and returns all OID responses.  Lua: ntop.snmpgetnextbulk(host, community, oid, version) → table */
 static int ntop_snmpgetnextbulk(lua_State* vm) {
   SNMP s;
 
@@ -4834,6 +5032,7 @@ static int ntop_snmpgetnextbulk(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Performs a blocking SNMP SET operation on a remote OID.  Lua: ntop.snmpset(host, community, oid, type, value, version) → boolean */
 static int ntop_snmpset(lua_State* vm) {
   SNMP s;
 
@@ -4843,6 +5042,7 @@ static int ntop_snmpset(lua_State* vm) {
 /* ****************************************** */
 
 /* Asynchronous calls */
+/* @brief Allocates an async SNMP engine and returns its integer handle.  Lua: ntop.snmpallocasnyncengine() → integer */
 static int ntop_allocasnyncengine(lua_State* vm) {
   SNMP** snmpAsyncEngine = getLuaVMUserdata(vm, snmpAsyncEngine);
   u_int16_t slot_id;
@@ -4868,6 +5068,7 @@ static int ntop_allocasnyncengine(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Frees an async SNMP engine previously allocated with snmpallocasnyncengine.  Lua: ntop.snmpfreeasnycengine(handle) → nil */
 static int ntop_freeasnyncengine(lua_State* vm) {
   SNMP** snmpAsyncEngine = getLuaVMUserdata(vm, snmpAsyncEngine);
   u_int16_t slot_id;
@@ -4888,6 +5089,7 @@ static int ntop_freeasnyncengine(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Queues an asynchronous SNMP GET request on the given engine handle.  Lua: ntop.snmpgetasync(handle, host, community, oid, version) → nil */
 static int ntop_snmpgetasync(lua_State* vm) {
   SNMP** snmpAsyncEngine = getLuaVMUserdata(vm, snmpAsyncEngine);
   u_int16_t slot_id;
@@ -4906,6 +5108,7 @@ static int ntop_snmpgetasync(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Queues an asynchronous SNMP GETNEXT request on the given engine handle.  Lua: ntop.snmpgetnextasync(handle, host, community, oid, version) → nil */
 static int ntop_snmpgetnextasync(lua_State* vm) {
   SNMP** snmpAsyncEngine = getLuaVMUserdata(vm, snmpAsyncEngine);
   u_int16_t slot_id;
@@ -4924,6 +5127,7 @@ static int ntop_snmpgetnextasync(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Queues an asynchronous SNMP GETBULK request on the given engine handle.  Lua: ntop.snmpgetnextbulkasync(handle, ...) → nil */
 static int ntop_snmpgetnextbulkasync(lua_State* vm) {
   SNMP** snmpAsyncEngine = getLuaVMUserdata(vm, snmpAsyncEngine);
   u_int16_t slot_id;
@@ -4943,6 +5147,7 @@ static int ntop_snmpgetnextbulkasync(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Reads and returns all pending async SNMP responses from an engine handle.  Lua: ntop.snmpreadasyncrsp(handle) → table */
 static int ntop_snmpreadasyncrsp(lua_State* vm) {
   SNMP** snmpAsyncEngine = getLuaVMUserdata(vm, snmpAsyncEngine);
   u_int16_t slot_id;
@@ -4965,6 +5170,7 @@ static int ntop_snmpreadasyncrsp(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Internal helper that handles the SNMPv3-specific portion of batch GET operations.  Lua: (internal SNMPv3 helper) → nil */
 static int ntop_snmpv3_batch_get(lua_State* vm) {
 #ifdef HAVE_LIBSNMP
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -5033,6 +5239,7 @@ static int ntop_snmpv3_batch_get(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Submits a batch of SNMP GET requests (v1/v2c/v3) for async collection.  Lua: ntop.snmpGetBatch(params_table) → nil */
 static int ntop_snmp_batch_get(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* oid[SNMP_MAX_NUM_OIDS] = {NULL};
@@ -5078,6 +5285,7 @@ static int ntop_snmp_batch_get(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Collects and returns all pending batch SNMP GET responses.  Lua: ntop.snmpReadResponses() → table */
 static int ntop_snmp_read_responses(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   SNMP* snmp = getLuaVMUserdata(vm, snmpBatch);
@@ -5098,6 +5306,7 @@ static int ntop_snmp_read_responses(lua_State* vm) {
 /* ****************************************** */
 
 #if defined(NTOPNG_PRO)
+/* @brief Sets the LAN/WAN role for an SNMP-managed interface (Pro only).  Lua: ntop.snmpSetInterfaceRole(host, ifidx, role) → nil */
 static int ntop_snmp_set_interface_role(lua_State* vm) {
   u_int32_t exporter_ip_v4;
   u_int32_t interface_id;
@@ -5128,6 +5337,7 @@ static int ntop_snmp_set_interface_role(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Enables or disables SNMP trap collection.  Lua: ntop.snmpToggleTrapCollection(enabled) → nil */
 static int ntop_snmp_toggle_trap_collection(lua_State* vm) {
 #ifdef HAVE_SNMP_TRAP
   bool enable = false;
@@ -5146,6 +5356,7 @@ static int ntop_snmp_toggle_trap_collection(lua_State* vm) {
 /* ****************************************** */
 
 #ifndef WIN32
+/* @brief Writes a message to the system syslog at the given severity level (Unix only).  Lua: ntop.syslog(level, msg) → nil */
 static int ntop_syslog(lua_State* vm) {
   char* msg;
   int syslog_severity = LOG_INFO;
@@ -5175,6 +5386,7 @@ static int ntop_syslog(lua_State* vm) {
  * per-session tokens as explained in
  * https://www.sjoerdlangkemper.nl/2019/12/18/different-csrf-token-for-each-form
  */
+/* @brief Returns the current CSRF token for use in forms and AJAX requests.  Lua: ntop.getRandomCSRFValue() → string */
 static int ntop_get_csrf_value(lua_State* vm) {
   const char* csrf = getLuaVMUservalue(vm, csrf);
 
@@ -5188,6 +5400,7 @@ static int ntop_get_csrf_value(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the MD5 hex digest of the given string.  Lua: ntop.md5(data) → string */
 static int ntop_md5(lua_State* vm) {
   char result[33];
 
@@ -5204,6 +5417,7 @@ static int ntop_md5(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if RADIUS authentication support is compiled in.  Lua: ntop.hasRadiusSupport() → boolean */
 static int ntop_has_radius_support(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -5218,6 +5432,7 @@ static int ntop_has_radius_support(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Logs a RADIUS authentication event with user and result details.  Lua: ntop.logRadius(info_table) → nil */
 static int ntop_log_radius(lua_State* vm) {
   bool logged = false;
 
@@ -5249,6 +5464,7 @@ static int ntop_log_radius(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if LDAP authentication support is compiled in.  Lua: ntop.hasLdapSupport() → boolean */
 static int ntop_has_ldap_support(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -5301,6 +5517,7 @@ static int sqlite_callback(void* data, int argc, char** argv,
  *              CONST_LUA_ERROR in case of generic error, CONST_LUA_OK
  * otherwise.
  */
+/* @brief Inserts a minute-granularity statistics sample for an interface into the historical DB.  Lua: ntop.insertMinuteSampling(ifid, json_data) → nil */
 static int ntop_stats_insert_minute_sampling(lua_State* vm) {
   char* sampling;
   time_t rawtime;
@@ -5345,6 +5562,7 @@ static int ntop_stats_insert_minute_sampling(lua_State* vm) {
  *              CONST_LUA_ERROR in case of generic error, CONST_LUA_OK
  * otherwise.
  */
+/* @brief Inserts an hour-granularity statistics sample for an interface into the historical DB.  Lua: ntop.insertHourSampling(ifid, json_data) → nil */
 static int ntop_stats_insert_hour_sampling(lua_State* vm) {
   char* sampling;
   time_t rawtime;
@@ -5390,6 +5608,7 @@ static int ntop_stats_insert_hour_sampling(lua_State* vm) {
  *              CONST_LUA_ERROR in case of generic error, CONST_LUA_OK
  * otherwise.
  */
+/* @brief Inserts a day-granularity statistics sample for an interface into the historical DB.  Lua: ntop.insertDaySampling(ifid, json_data) → nil */
 static int ntop_stats_insert_day_sampling(lua_State* vm) {
   char* sampling;
   time_t rawtime;
@@ -5435,6 +5654,7 @@ static int ntop_stats_insert_day_sampling(lua_State* vm) {
  *              CONST_LUA_ERROR in case of generic error, CONST_LUA_OK
  * otherwise.
  */
+/* @brief Retrieves the minute statistics sample for an interface at a given epoch.  Lua: ntop.getMinuteSampling(ifid, epoch) → string */
 static int ntop_stats_get_minute_sampling(lua_State* vm) {
   time_t epoch;
   string sampling;
@@ -5477,6 +5697,7 @@ static int ntop_stats_get_minute_sampling(lua_State* vm) {
  *              CONST_LUA_ERROR in case of generic error, CONST_LUA_OK
  * otherwise.
  */
+/* @brief Purges minute-granularity statistics records older than the given number of days.  Lua: ntop.deleteMinuteStatsOlderThan(ifid, num_days) → nil */
 static int ntop_stats_delete_minute_older_than(lua_State* vm) {
   int num_days;
   int ifid;
@@ -5522,6 +5743,7 @@ static int ntop_stats_delete_minute_older_than(lua_State* vm) {
  *              CONST_LUA_ERROR in case of generic error, CONST_LUA_OK
  * otherwise.
  */
+/* @brief Purges hour-granularity statistics records older than the given number of days.  Lua: ntop.deleteHourStatsOlderThan(ifid, num_days) → nil */
 static int ntop_stats_delete_hour_older_than(lua_State* vm) {
   int num_days;
   int ifid;
@@ -5567,6 +5789,7 @@ static int ntop_stats_delete_hour_older_than(lua_State* vm) {
  *              CONST_LUA_ERROR in case of generic error, CONST_LUA_OK
  * otherwise.
  */
+/* @brief Purges day-granularity statistics records older than the given number of days.  Lua: ntop.deleteDayStatsOlderThan(ifid, num_days) → nil */
 static int ntop_stats_delete_day_older_than(lua_State* vm) {
   int num_days;
   int ifid;
@@ -5612,6 +5835,7 @@ static int ntop_stats_delete_day_older_than(lua_State* vm) {
  *              CONST_LUA_ERROR in case of generic error, CONST_LUA_OK
  * otherwise.
  */
+/* @brief Returns minute statistics samples in the given epoch range.  Lua: ntop.getMinuteSamplingsInterval(ifid, from_epoch, to_epoch) → table */
 static int ntop_stats_get_minute_samplings_interval(lua_State* vm) {
   time_t epoch_start, epoch_end;
   int ifid;
@@ -5666,6 +5890,7 @@ static int ntop_stats_get_minute_samplings_interval(lua_State* vm) {
  *              CONST_LUA_ERROR in case of generic error, CONST_LUA_OK
  * otherwise.
  */
+/* @brief Returns all minute-granularity statistics samples starting from a given epoch.  Lua: ntop.getMinuteSamplingsFromEpoch(ifid, epoch) → table */
 static int ntop_stats_get_samplings_of_minutes_from_epoch(lua_State* vm) {
   time_t epoch_start, epoch_end;
   NetworkInterface* iface = getCurrentInterface(vm);
@@ -5713,6 +5938,7 @@ static int ntop_stats_get_samplings_of_minutes_from_epoch(lua_State* vm) {
  *              CONST_LUA_ERROR in case of generic error, CONST_LUA_OK
  * otherwise.
  */
+/* @brief Returns all hour-granularity statistics samples starting from a given epoch.  Lua: ntop.getHourSamplingsFromEpoch(ifid, epoch) → table */
 static int ntop_stats_get_samplings_of_hours_from_epoch(lua_State* vm) {
   time_t epoch_start, epoch_end;
   NetworkInterface* iface = getCurrentInterface(vm);
@@ -5760,6 +5986,7 @@ static int ntop_stats_get_samplings_of_hours_from_epoch(lua_State* vm) {
  *              CONST_LUA_ERROR in case of generic error, CONST_LUA_OK
  * otherwise.
  */
+/* @brief Returns all day-granularity statistics samples starting from a given epoch.  Lua: ntop.getDaySamplingsFromEpoch(ifid, epoch) → table */
 static int ntop_stats_get_samplings_of_days_from_epoch(lua_State* vm) {
   time_t epoch_start, epoch_end;
   NetworkInterface* iface = getCurrentInterface(vm);
@@ -5881,6 +6108,7 @@ static bool ntop_delete_old_rrd_files_recursive(const char* dir_name,
 
 /* ****************************************** */
 
+/* @brief Removes stale/unused RRD files from the data directory.  Lua: ntop.deleteOldRRDs() → nil */
 static int ntop_delete_old_rrd_files(lua_State* vm) {
   char path[PATH_MAX + 8];
   int older_than_seconds;
@@ -5908,6 +6136,7 @@ static int ntop_delete_old_rrd_files(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Creates a directory tree recursively, equivalent to 'mkdir -p'.  Lua: ntop.mkdir(path) → nil */
 static int ntop_mkdir_tree(lua_State* vm) {
   char* dir;
 
@@ -5934,6 +6163,7 @@ static int ntop_mkdir_tree(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a table listing available report files.  Lua: ntop.listReports() → table */
 static int ntop_list_reports(lua_State* vm) {
   DIR* dir;
   char fullpath[MAX_PATH + 64];
@@ -5965,6 +6195,7 @@ static int ntop_list_reports(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns Redis connection status and server information.  Lua: ntop.getCacheStatus() → table */
 static int ntop_info_redis(lua_State* vm) {
   char* rsp;
   u_int rsp_len = CONST_MAX_LEN_REDIS_VALUE;
@@ -5986,6 +6217,7 @@ static int ntop_info_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Retrieves a string value from Redis by key; returns nil if not found.  Lua: ntop.getCache(key) / ntop.getPref(key) → string */
 static int ntop_get_redis(lua_State* vm) {
   char *key, *rsp = NULL;
   Redis* redis = ntop->getRedis();
@@ -6010,6 +6242,7 @@ static int ntop_get_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Atomically increments a Redis integer counter (default increment: 1).  Lua: ntop.incrCache(key[, increment]) → integer */
 static int ntop_incr_redis(lua_State* vm) {
   char* key;
   u_int rsp;
@@ -6034,6 +6267,7 @@ static int ntop_incr_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Retrieves a single field value from a Redis hash.  Lua: ntop.getHashCache(key, field) → string */
 static int ntop_get_hash_redis(lua_State* vm) {
   char *key, *member, *rsp;
   Redis* redis = ntop->getRedis();
@@ -6076,6 +6310,7 @@ static int ntop_get_hash_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sets a field value in a Redis hash.  Lua: ntop.setHashCache(key, field, value) → nil */
 static int ntop_set_hash_redis(lua_State* vm) {
   char *key, *member, *value;
   Redis* redis = ntop->getRedis();
@@ -6118,6 +6353,7 @@ static void ntop_reset_host_name(lua_State* vm, char* address) {
 
 /* ****************************************** */
 
+/* @brief Caches a DNS reverse mapping for an IP address in Redis.  Lua: ntop.setResolvedAddress(ip, hostname) → nil */
 static int ntop_set_resolved_address(lua_State* vm) {
   char *ip, *name;
   Redis* redis = ntop->getRedis();
@@ -6141,6 +6377,7 @@ static int ntop_set_resolved_address(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Deletes a field from a Redis hash.  Lua: ntop.delHashCache(key, field) → nil */
 static int ntop_delete_hash_redis_key(lua_State* vm) {
   char *key, *member;
 
@@ -6163,6 +6400,7 @@ static int ntop_delete_hash_redis_key(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns all field names present in a Redis hash.  Lua: ntop.getHashKeysCache(key) → table */
 static int ntop_get_hash_keys_redis(lua_State* vm) {
   char *key, **vals;
   Redis* redis = ntop->getRedis();
@@ -6193,6 +6431,7 @@ static int ntop_get_hash_keys_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns all field-value pairs from a Redis hash as a Lua table.  Lua: ntop.getHashAllCache(key) → table */
 static int ntop_get_hash_all_redis(lua_State* vm) {
   char *key, **keys, **values;
   Redis* redis = ntop->getRedis();
@@ -6227,6 +6466,7 @@ static int ntop_get_hash_all_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns all Redis keys matching the given glob pattern.  Lua: ntop.getKeysCache(pattern) → table */
 static int ntop_get_keys_redis(lua_State* vm) {
   char *pattern, **keys = NULL;
   Redis* redis = ntop->getRedis();
@@ -6258,6 +6498,7 @@ static int ntop_get_keys_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a range of elements from a Redis list (0-based indices).  Lua: ntop.lrangeCache(key, start, stop) → table */
 static int ntop_lrange_redis(lua_State* vm) {
   char *l_name, **l_elements = NULL;
   Redis* redis = ntop->getRedis();
@@ -6298,6 +6539,7 @@ static int ntop_lrange_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the current length of a Redis list.  Lua: ntop.llenCache(key) → integer */
 static int ntop_llen_redis(lua_State* vm) {
   char* l_name;
   Redis* redis = ntop->getRedis();
@@ -6316,6 +6558,7 @@ static int ntop_llen_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if a binary RDB dump is available for a Redis key.  Lua: ntop.hasDumpCache(key) → boolean */
 static int ntop_redis_has_dump(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -6325,6 +6568,7 @@ static int ntop_redis_has_dump(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a binary serialization (RDB dump) of a Redis key's value.  Lua: ntop.dumpCache(key) → string */
 static int ntop_redis_dump(lua_State* vm) {
   char *key, *dump;
   Redis* redis = ntop->getRedis();
@@ -6353,6 +6597,7 @@ static int ntop_redis_dump(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Restores a Redis key from a previously obtained binary RDB dump.  Lua: ntop.restoreCache(key, dump_data) → boolean */
 static int ntop_redis_restore(lua_State* vm) {
   char *key, *dump;
   Redis* redis = ntop->getRedis();
@@ -6380,6 +6625,7 @@ static int ntop_redis_restore(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the element at the given 0-based index in a Redis list.  Lua: ntop.listIndexCache(key, index) → string */
 static int ntop_list_index_redis(lua_State* vm) {
   char *index_name, *rsp;
   Redis* redis = ntop->getRedis();
@@ -6413,6 +6659,7 @@ static int ntop_list_index_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Internal helper implementing lpop/rpop; called by ntop_lpop_redis and ntop_rpop_redis.  Lua: (internal helper) → string */
 static int ntop_lrpop_redis(lua_State* vm, bool lpop) {
   char msg[1024], *list_name;
   Redis* redis = ntop->getRedis();
@@ -6434,18 +6681,21 @@ static int ntop_lrpop_redis(lua_State* vm, bool lpop) {
 
 /* ****************************************** */
 
+/* @brief Pops and returns the leftmost (head) element from a Redis list.  Lua: ntop.lpopCache(key) → string */
 static int ntop_lpop_redis(lua_State* vm) {
   return ntop_lrpop_redis(vm, true /* LPOP */);
 }
 
 /* ****************************************** */
 
+/* @brief Pops and returns the rightmost (tail) element from a Redis list.  Lua: ntop.rpopCache(key) → string */
 static int ntop_rpop_redis(lua_State* vm) {
   return ntop_lrpop_redis(vm, false /* RPOP */);
 }
 
 /* ****************************************** */
 
+/* @brief Removes up to count matching elements from a Redis list.  Lua: ntop.lremCache(key, count, value) → nil */
 static int ntop_lrem_redis(lua_State* vm) {
   char *list_name, *rem_value;
   int ret;
@@ -6475,6 +6725,7 @@ static int ntop_lrem_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Trims a Redis list to only the elements in the specified index range.  Lua: ntop.ltrimCache(key, start, stop) → nil */
 static int ntop_ltrim_redis(lua_State* vm) {
   char* list_name;
   int start_idx, end_idx;
@@ -6505,6 +6756,7 @@ static int ntop_ltrim_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Internal helper implementing lpush/rpush used by ntop_lpush_redis and ntop_rpush_redis.  Lua: (internal helper) → nil */
 static int ntop_push_redis(lua_State* vm, bool use_lpush) {
   char *list_name, *value;
   u_int list_trim_size = 0;  // default 0 = no trim
@@ -6539,6 +6791,7 @@ static int ntop_push_redis(lua_State* vm, bool use_lpush) {
 
 /* ****************************************** */
 
+/* @brief Pushes a value onto the left (head) of a Redis list.  Lua: ntop.lpushCache(key, value) → nil */
 static int ntop_lpush_redis(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   return ntop_push_redis(vm, true);
@@ -6546,6 +6799,7 @@ static int ntop_lpush_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Pushes a value onto the right (tail) of a Redis list.  Lua: ntop.rpushCache(key, value) → nil */
 static int ntop_rpush_redis(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   return ntop_push_redis(vm, false);
@@ -6553,6 +6807,7 @@ static int ntop_rpush_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Adds a CIDR network to the runtime list of local networks.  Lua: ntop.addLocalNetwork(cidr) → nil */
 static int ntop_add_local_network(lua_State* vm) {
   char* local_network;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -6573,6 +6828,7 @@ static int ntop_add_local_network(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the configured alias for a local network CIDR, or nil.  Lua: ntop.getLocalNetworkAlias(cidr) → string */
 static int ntop_check_local_network_alias(lua_State* vm) {
   u_int32_t network_id = (u_int32_t)-1;
 
@@ -6602,6 +6858,7 @@ static int ntop_check_local_network_alias(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the internal numeric id for a local network CIDR.  Lua: ntop.getLocalNetworkID(cidr) → integer */
 static int ntop_get_local_network_id(lua_State* vm) {
   char* local_network;
   u_int32_t network_id = (u_int32_t)-1;
@@ -6624,6 +6881,7 @@ static int ntop_get_local_network_id(lua_State* vm) {
 
 #ifndef HAVE_NEDGE
 #ifdef NTOPNG_PRO
+/* @brief Validates sub-interface configuration syntax (Pro, non-nEdge).  Lua: ntop.checkSubInterfaceSyntax(str) → boolean */
 static int ntop_check_sub_interface_syntax(lua_State* vm) {
 #ifdef HAVE_NBPF
   char* filter;
@@ -6653,6 +6911,7 @@ static int ntop_check_sub_interface_syntax(lua_State* vm) {
 /* ****************************************** */
 
 #ifdef NTOPNG_PRO
+/* @brief Validates a BPF-like filter expression syntax (Pro).  Lua: ntop.checkFilterSyntax(str) → boolean */
 static int ntop_check_filter_syntax(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -6687,6 +6946,7 @@ static int ntop_check_filter_syntax(lua_State* vm) {
 
 #ifndef HAVE_NEDGE
 #ifdef NTOPNG_PRO
+/* @brief Reloads traffic profiles from Redis configuration (Pro, non-nEdge).  Lua: ntop.reloadProfiles() → nil */
 static int ntop_reload_traffic_profiles(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -6749,19 +7009,23 @@ static int _ntop_set_redis(bool do_setnx, lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sets a string value in Redis with optional TTL expiration.  Lua: ntop.setCache(key, value[, ttl_secs]) → nil */
 static int ntop_set_redis(lua_State* vm) {
   return (_ntop_set_redis(false, vm));
 }
+/* @brief Sets a Redis key only if it does not already exist (atomic set-if-not-exists).  Lua: ntop.setnxCache(key, value) → boolean */
 static int ntop_setnx_redis(lua_State* vm) {
   return (_ntop_set_redis(true, vm));
 }
 
 /* ****************************************** */
 
+/* @brief Sets a system preference in Redis (alias for setCache with ntopng.prefs. prefix).  Lua: ntop.setPref(key, value) → nil */
 static int ntop_set_preference(lua_State* vm) { return (ntop_set_redis(vm)); }
 
 /* ****************************************** */
 
+/* @brief Returns true if login authentication is globally disabled.  Lua: ntop.isLoginDisabled() → boolean */
 static int ntop_is_login_disabled(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -6775,6 +7039,7 @@ static int ntop_is_login_disabled(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if a username is temporarily blocked due to brute-force attempts.  Lua: ntop.isLoginBlacklisted(username) → boolean */
 static int ntop_is_login_blacklisted(lua_State* vm) {
   struct mg_connection* conn;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -6788,6 +7053,7 @@ static int ntop_is_login_blacklisted(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if GUI access is restricted to specific source IP addresses.  Lua: ntop.isGuiAccessRestricted() → boolean */
 static int ntop_is_gui_access_restricted(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_INFO, "%s() called", __FUNCTION__);
 
@@ -6798,6 +7064,7 @@ static int ntop_is_gui_access_restricted(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Requests a ntopng service restart by writing a restart flag.  Lua: ntop.serviceRestart() → nil */
 static int ntop_service_restart(lua_State* vm) {
 #if defined(__linux__) && defined(NTOPNG_PRO)
   extern AfterShutdownAction afterShutdownAction;
@@ -6823,6 +7090,7 @@ static int ntop_service_restart(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the observation point id assigned to a user.  Lua: ntop.getUserObservationPointId(username) → integer */
 static int ntop_get_user_observation_point_id(lua_State* vm) {
   char* username;
 
@@ -6860,6 +7128,7 @@ static int ntop_get_user_observation_point_id(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sets the global log verbosity level (debug/normal/warning/error/quiet).  Lua: ntop.setLoggingLevel(level_str) → nil */
 static int ntop_set_logging_level(lua_State* vm) {
   char* lvlStr;
 
@@ -6894,6 +7163,7 @@ static int ntop_set_logging_level(lua_State* vm) {
 /* ****************************************** */
 
 /* NOTE: use lua traceError function */
+/* @brief Logs a message at the specified trace level to the ntopng trace log.  Lua: ntop.traceEvent(level, msg) → nil */
 static int ntop_trace_event(lua_State* vm) {
   char *msg, *fname;
   int level, line;
@@ -6926,6 +7196,7 @@ static int ntop_trace_event(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Computes the network address (e.g. 192.168.1.0) from an IP and prefix length.  Lua: ntop.networkPrefix(ip, prefix_bits) → string */
 static int ntop_network_prefix(lua_State* vm) {
   char* address;
   char buf[64];
@@ -6989,6 +7260,7 @@ static const char** make_argv(lua_State* vm, int* argc_out, u_int offset,
 
 /* ****************************************** */
 
+/* @brief Creates a new RRD file with specified data sources and round-robin archives.  Lua: ntop.rrd_create(path, step, start, ...) → nil */
 static int ntop_rrd_create(lua_State* vm) {
   const char* filename;
   unsigned long pdp_step;
@@ -7043,6 +7315,7 @@ static int ntop_rrd_create(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Appends a new timestamped data point to an existing RRD file.  Lua: ntop.rrd_update(path, timestamp, ...) → nil */
 static int ntop_rrd_update(lua_State* vm) {
   NtopngLuaContext* ctx = getLuaVMContext(vm);
   const char *filename, *when = NULL, *v1 = NULL, *v2 = NULL, *v3 = NULL,
@@ -7135,6 +7408,7 @@ static int ntop_rrd_update(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the Unix timestamp of the last update recorded in an RRD file.  Lua: ntop.rrd_lastupdate(path) → integer */
 static int ntop_rrd_lastupdate(lua_State* vm) {
   const char* filename;
   time_t last_update;
@@ -7158,6 +7432,7 @@ static int ntop_rrd_lastupdate(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Modifies parameters (heartbeat, min/max values) of an existing RRD file.  Lua: ntop.rrd_tune(path, ...) → nil */
 static int ntop_rrd_tune(lua_State* vm) {
   const char* filename;
   const char** argv;
@@ -7204,6 +7479,7 @@ static int ntop_rrd_tune(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Increments the packet drop counter in an interface RRD file.  Lua: ntop.rrd_inc_num_drops(path) → nil */
 static int ntop_rrd_inc_num_drops(lua_State* vm) {
   NtopngLuaContext* ctx = getLuaVMContext(vm);
   u_long num_drops = 1;
@@ -7218,6 +7494,7 @@ static int ntop_rrd_inc_num_drops(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns statistics about the packet drop pool (packets dropped vs configured limit).  Lua: ntop.getDropPoolInfo() → table */
 static int ntop_get_drop_pool_info(lua_State* vm) {
   lua_newtable(vm);
 
@@ -7231,6 +7508,7 @@ static int ntop_get_drop_pool_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if ntopng was forced offline via command-line flag.  Lua: ntop.isForcedOffline() → boolean */
 static int ntop_is_forced_offline(lua_State* vm) {
   lua_pushboolean(vm, ntop->isForcedOffline());
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -7238,6 +7516,7 @@ static int ntop_is_forced_offline(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if ntopng is currently in offline mode.  Lua: ntop.isOffline() → boolean */
 static int ntop_is_offline(lua_State* vm) {
   lua_pushboolean(vm, ntop->isOffline());
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -7245,6 +7524,7 @@ static int ntop_is_offline(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Puts ntopng into offline mode (disables outbound connectivity features).  Lua: ntop.setOffline() → nil */
 static int ntop_set_offline(lua_State* vm) {
   ntop->toggleOffline(true);
   lua_pushnil(vm);
@@ -7253,6 +7533,7 @@ static int ntop_set_offline(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Updates stored RADIUS login state and session information for a user.  Lua: ntop.updateRadiusLoginInfo(info_table) → nil */
 static int ntop_update_radius_login_info(lua_State* vm) {
 #ifdef HAVE_RADIUS
   ntop->updateRadiusLoginInfo();
@@ -7269,6 +7550,7 @@ static int ntop_update_radius_login_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Takes ntopng out of offline mode, re-enabling outbound connectivity.  Lua: ntop.setOnline() → nil */
 static int ntop_set_online(lua_State* vm) {
   ntop->toggleOffline(false);
   lua_pushnil(vm);
@@ -7277,6 +7559,7 @@ static int ntop_set_online(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if ntopng is in the process of shutting down.  Lua: ntop.isShuttingDown() → boolean */
 static int ntop_is_shutting_down(lua_State* vm) {
   lua_pushboolean(vm, ntop->getGlobals()->isShutdown());
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -7284,6 +7567,7 @@ static int ntop_is_shutting_down(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Voluntarily throttles CPU usage of the current Lua thread to avoid overloading.  Lua: ntop.limitResourcesUsage() → nil */
 static int ntop_limit_resources_usage(lua_State* vm) {
   lua_pushboolean(vm, ntop->getPrefs()->limitResourcesUsage());
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -7292,6 +7576,7 @@ static int ntop_limit_resources_usage(lua_State* vm) {
 /* ****************************************** */
 
 /* positional 1:4 parameters for ntop_rrd_fetch */
+/* @brief Internal helper that parses and validates RRD argument lists from the Lua stack.  Lua: (internal RRD helper) → nil */
 static int __ntop_rrd_args(lua_State* vm, char** filename, char** cf,
                            time_t* start, time_t* end) {
   char *start_s, *end_s, *err;
@@ -7339,6 +7624,7 @@ static int __ntop_rrd_args(lua_State* vm, char** filename, char** cf,
 
 /* ****************************************** */
 
+/* @brief Internal helper that checks RRD operation status and pushes error/ok to Lua.  Lua: (internal RRD helper) → nil */
 static int __ntop_rrd_status(lua_State* vm, int status, char* filename,
                              char* cf) {
   char* err;
@@ -7365,6 +7651,7 @@ static int __ntop_rrd_status(lua_State* vm, int status, char* filename,
 /* ****************************************** */
 
 /* Fetches data from RRD by rows */
+/* @brief Fetches consolidated data from an RRD file for the given time range.  Lua: ntop.rrd_fetch(path, cf, start, stop[, step]) → table */
 static int ntop_rrd_fetch(lua_State* vm) {
   unsigned long i, j, step = 0, ds_cnt = 0;
   rrd_value_t *data, *p;
@@ -7486,6 +7773,7 @@ static int ntop_rrd_fetch(lua_State* vm) {
  * data end: the time of the last data in each series npoints: the number of
  * points in each series
  */
+/* @brief Fetches RRD data in column-oriented format (one array per data source).  Lua: ntop.rrd_fetch_columns(path, cf, start, stop[, step]) → table */
 static int ntop_rrd_fetch_columns(lua_State* vm) {
   char *filename, *cf;
   time_t start, end;
@@ -7556,6 +7844,7 @@ static int ntop_rrd_fetch_columns(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the network CIDR or alias for the given local network id.  Lua: ntop.getNetworkNameById(id) → string */
 static int ntop_network_name_by_id(lua_State* vm) {
   int id;
   const char* name;
@@ -7575,6 +7864,7 @@ static int ntop_network_name_by_id(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the internal numeric id for a local network given its CIDR or alias.  Lua: ntop.getNetworkIdByName(name) → integer */
 static int ntop_network_id_by_name(lua_State* vm) {
   u_int32_t num_local_networks = ntop->getNumLocalNetworks();
   int found_id = -1;
@@ -7600,6 +7890,7 @@ static int ntop_network_id_by_name(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a table of all configured local networks with their ids and CIDRs.  Lua: ntop.getNetworks() → table */
 static int ntop_get_networks(lua_State* vm) {
   u_int32_t num_local_networks = ntop->getNumLocalNetworks();
 
@@ -7616,6 +7907,7 @@ static int ntop_get_networks(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Dequeues and returns pending internal alert events from the engine.  Lua: ntop.popInternalAlerts() → table */
 static int ntop_pop_internal_alerts(lua_State* vm) {
   ndpi_serializer* alert = ntop->getInternalAlertsQueue()->dequeue();
 
@@ -7633,6 +7925,7 @@ static int ntop_pop_internal_alerts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Enqueues a JSON notification string to the specified recipient channel.  Lua: ntop.recipient_enqueue(recipient_id, notification_json) → nil */
 static int ntop_recipient_enqueue(lua_State* vm) {
   NtopngLuaContext* ctx = getLuaVMContext(vm);
   u_int16_t recipient_id;
@@ -7696,6 +7989,7 @@ static int ntop_recipient_enqueue(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Dequeues and returns the next pending notification from a recipient channel.  Lua: ntop.recipient_dequeue(recipient_id) → string */
 static int ntop_recipient_dequeue(lua_State* vm) {
   u_int16_t recipient_id;
   AlertFifoItem* notification;
@@ -7723,6 +8017,7 @@ static int ntop_recipient_dequeue(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns queue length and throughput statistics for all recipient channels.  Lua: ntop.recipient_stats() → table */
 static int ntop_recipient_stats(lua_State* vm) {
   u_int16_t recipient_id;
 
@@ -7737,6 +8032,7 @@ static int ntop_recipient_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Increments a named performance counter for a recipient channel.  Lua: ntop.recipient_inc_stats(recipient_id, stat_name) → nil */
 static int ntop_recipient_inc_stats(lua_State* vm) {
   u_int16_t recipient_id;
   u_int64_t delivered = 0;
@@ -7761,6 +8057,7 @@ static int ntop_recipient_inc_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the Unix epoch when the recipient queue was last dequeued.  Lua: ntop.recipient_last_use(recipient_id) → integer */
 static int ntop_recipient_last_use(lua_State* vm) {
   u_int16_t recipient_id;
 
@@ -7775,6 +8072,7 @@ static int ntop_recipient_last_use(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Unregisters and removes a recipient notification channel.  Lua: ntop.recipient_delete(recipient_id) → nil */
 static int ntop_recipient_delete(lua_State* vm) {
   u_int16_t recipient_id;
 
@@ -7791,6 +8089,7 @@ static int ntop_recipient_delete(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Registers a new recipient channel for alert notification delivery.  Lua: ntop.recipient_register(recipient_id) → nil */
 static int ntop_recipient_register(lua_State* vm) {
   u_int16_t recipient_id;
   AlertLevel minimum_severity = alert_level_none;
@@ -7880,6 +8179,7 @@ static int ntop_recipient_register(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns true if the given nDPI protocol id is a user-defined custom application.  Lua: ntop.isCustomApplication(proto_id) → boolean */
 static int ndpi_is_custom_application(lua_State* vm) {
   u_int16_t app_id;
   NetworkInterface* iface = getCurrentInterface(vm);
@@ -7897,6 +8197,7 @@ static int ndpi_is_custom_application(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Executes a shell command synchronously and returns its stdout output.  Lua: ntop.execCmd(cmd) → string */
 static int ntop_exec_cmd(lua_State* vm) {
   char* cmd;
   std::string out;
@@ -7919,6 +8220,7 @@ static int ntop_exec_cmd(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Starts a shell command asynchronously and returns a result handle.  Lua: ntop.execCmdAsync(cmd) → integer */
 static int ntop_exec_cmd_async(lua_State* vm) {
   char* cmd;
   u_int32_t id;
@@ -7945,6 +8247,7 @@ static int ntop_exec_cmd_async(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Reads and returns available stdout from an async command handle.  Lua: ntop.readResultCmdAsync(handle) → string */
 static int ntop_read_result_cmd_async(lua_State* vm) {
   u_int32_t id;
   bool rc;
@@ -7971,6 +8274,7 @@ static int ntop_read_result_cmd_async(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Reloads device-to-protocol policy rules from Redis configuration.  Lua: ntop.reloadDeviceProtocols() → nil */
 static int ntop_reload_device_protocols(lua_State* vm) {
   DeviceType device_type = device_unknown;
   char* dir; /* client or server */
@@ -7998,6 +8302,7 @@ static int ntop_reload_device_protocols(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the ASN organization name for a given IP address via GeoIP.  Lua: ntop.getASName(ip) → string */
 static int ntop_get_asn_name(lua_State* vm) {
   IpAddress a;
   char* as_name;
@@ -8020,6 +8325,7 @@ static int ntop_get_asn_name(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the organization name for a given autonomous system number.  Lua: ntop.getASNameFromASN(asn_number) → string */
 static int ntop_get_as_name_from_asn(lua_State* vm) {
   u_int32_t asn;
   char as_name[128];
@@ -8039,6 +8345,7 @@ static int ntop_get_as_name_from_asn(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns geolocation data (country, city, lat, lon) for an IP via GeoIP.  Lua: ntop.getHostGeolocation(ip) → table */
 static int ntop_get_host_geolocation(lua_State* vm) {
   IpAddress ip;
   char *continent = NULL, *country_name = NULL, *city = NULL;
@@ -8067,6 +8374,7 @@ static int ntop_get_host_geolocation(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the nDPI category id assigned to a protocol id.  Lua: ntop.getnDPIProtoCategory(proto_id) → integer */
 static int ntop_get_ndpi_protocol_category(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int proto;
@@ -8092,6 +8400,7 @@ static int ntop_get_ndpi_protocol_category(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Overrides the nDPI category assignment for a protocol id.  Lua: ntop.setnDPIProtoCategory(proto_id, category_id) → nil */
 static int ntop_set_ndpi_protocol_category(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   u_int16_t proto;
@@ -8115,6 +8424,7 @@ static int ntop_set_ndpi_protocol_category(lua_State* vm) {
 /* ****************************************** */
 
 /* Replace the interfaces configured with -i with the provided one */
+/* @brief Overrides the current network interface context (Appliance builds only).  Lua: ntop.overrideInterface(ifname) → nil */
 static int ntop_override_interface(lua_State* vm) {
   char* ifname;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -8134,6 +8444,7 @@ static int ntop_override_interface(lua_State* vm) {
 
 #ifdef HAVE_NEDGE
 
+/* @brief Registers an interface as a LAN interface (nEdge only).  Lua: ntop.addLanInterface(ifname) → nil */
 static int ntop_add_lan_interface(lua_State* vm) {
   char* lan_ifname;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -8150,6 +8461,7 @@ static int ntop_add_lan_interface(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Registers an interface as a WAN interface (nEdge only).  Lua: ntop.addWanInterface(ifname) → nil */
 static int ntop_add_wan_interface(lua_State* vm) {
   char* lan_ifname;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -8166,6 +8478,7 @@ static int ntop_add_wan_interface(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Refreshes device-protocol policy configuration from preferences (nEdge only).  Lua: ntop.refreshDeviceProtocolsPoliciesConf() → nil */
 static int ntop_refresh_device_protocols_policies_pref(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -8179,6 +8492,7 @@ static int ntop_refresh_device_protocols_policies_pref(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Adds a weighted data point to a named bin for similarity analysis.  Lua: ntop.addBin(name, value, weight) → nil */
 static int ntop_add_bin(lua_State* vm) {
 #if defined(NTOPNG_PRO)
   NtopngLuaContext* ctx = getLuaVMContext(vm);
@@ -8196,6 +8510,7 @@ static int ntop_add_bin(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Finds and returns bins similar to the named bin by Euclidean distance.  Lua: ntop.findSimilarities(name) → table */
 static int ntop_find_bin_similarities(lua_State* vm) {
 #if defined(NTOPNG_PRO)
   NtopngLuaContext* ctx = getLuaVMContext(vm);
@@ -8211,6 +8526,7 @@ static int ntop_find_bin_similarities(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns true if nProbe IPS is configured and active.  Lua: ntop.isNProbeIPSConfigured() → boolean */
 static int ntop_check_nprobe_ips_configured(lua_State* vm) {
   lua_pushboolean(vm,
                   (ntop->getPrefs()->getZMQPublishEventsURL() ? true : false));
@@ -8220,6 +8536,7 @@ static int ntop_check_nprobe_ips_configured(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Acquires the global pools write lock (must be paired with poolsUnlock).  Lua: ntop.poolsLock() → nil */
 static int ntop_pools_lock(lua_State* vm) {
   u_int max_lock_duration;
   struct timespec wait;
@@ -8238,6 +8555,7 @@ static int ntop_pools_lock(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Releases the global pools write lock acquired by poolsLock.  Lua: ntop.poolsUnlock() → nil */
 static int ntop_pools_unlock(lua_State* vm) {
   ntop->get_pools_lock()->unlock(__FILE__, __LINE__);
   lua_pushboolean(vm, true);
@@ -8247,6 +8565,7 @@ static int ntop_pools_unlock(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Enables or disables debug tracing of C++ new/delete memory allocation calls.  Lua: ntop.toggleNewDeleteTrace(enabled) → nil */
 static int ntop_toggle_new_delete_trace(lua_State* vm) {
   trace_new_delete = !trace_new_delete;
   lua_pushboolean(vm, trace_new_delete);
@@ -8255,6 +8574,7 @@ static int ntop_toggle_new_delete_trace(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the internal InfluxDB database name used by ntopng.  Lua: ntop.getInfluxDBInternalDBName() → string */
 static int ntop_get_influxdb_internal_db_name(lua_State* vm) {
   lua_pushstring(vm, ntop->getPrefs()->get_influx_internal_db_name());
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -8262,6 +8582,7 @@ static int ntop_get_influxdb_internal_db_name(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Sets the internal InfluxDB database name used by ntopng.  Lua: ntop.setInfluxDBInternalDBName(name) → nil */
 static int ntop_set_influxdb_internal_db_name(lua_State* vm) {
   char* influx_internal_db;
 
@@ -8277,6 +8598,7 @@ static int ntop_set_influxdb_internal_db_name(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns true if the internal InfluxDB instance is ready and available.  Lua: ntop.isInfluxDBInternalAvailable() → boolean */
 static int ntop_get_influxdb_internal_available(lua_State* vm) {
   lua_pushboolean(vm, ntop->getPrefs()->get_influx_internal_available());
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -8284,6 +8606,7 @@ static int ntop_get_influxdb_internal_available(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Sets the availability flag for the internal InfluxDB instance.  Lua: ntop.setInfluxDBInternalAvailable(available) → nil */
 static int ntop_set_influxdb_internal_available(lua_State* vm) {
   bool influx_internal_db_available;
 
@@ -8297,6 +8620,7 @@ static int ntop_set_influxdb_internal_available(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the capacity limits imposed by the current license (max hosts, flows, etc.).  Lua: ntop.getLicenseLimits() → table */
 static int ntop_get_license_limits(lua_State* vm) {
   u_int32_t num_hosts = 0, num_local_hosts = 0, num_flows = 0;
 
@@ -8360,6 +8684,7 @@ static int ntop_get_license_limits(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Publishes a message to the internal message broker topic (Pro only).  Lua: ntop.publish(topic, message) → nil */
 static int m_broker_publish(lua_State* vm) {
   char *topic, *message;
 
@@ -8383,6 +8708,7 @@ static int m_broker_publish(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Performs a synchronous RPC call via the internal message broker (Pro only).  Lua: ntop.rpcCall(topic, request) → string */
 static int m_broker_rpc_call(lua_State* vm) {
   char *topic, *message, rsp[BROKER_RPC_CALL_MAX_RSP_LEN];
   u_int64_t timeout_ms;
@@ -8419,6 +8745,7 @@ static int m_broker_rpc_call(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Queries a Modbus/TCP device for its identification information.  Lua: ntop.readModbusDeviceInfo(host, port) → table */
 static int read_modbus_device_info(lua_State* vm) {
   char* device_ip;
   int timeout = 5;
@@ -8443,6 +8770,7 @@ static int read_modbus_device_info(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Queries an EtherNet/IP device for its identification information.  Lua: ntop.readEthernetIPDeviceInfo(host, port) → table */
 static int read_ether_ip_device_info(lua_State* vm) {
   char* device_ip;
   int timeout = 5;
@@ -8467,6 +8795,7 @@ static int read_ether_ip_device_info(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Reloads server configuration from Redis (DNS, NTP, DHCP server settings).  Lua: ntop.reloadServersConfiguration() → nil */
 static int reload_servers_configuration(lua_State* vm) {
   ntop->getPrefs()->reloadServersConfiguration();
   lua_pushnil(vm);
@@ -8475,6 +8804,7 @@ static int reload_servers_configuration(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Reloads custom ASN-to-name mappings from Redis configuration.  Lua: ntop.reloadASNConfiguration() → nil */
 static int reload_asn_configuration(lua_State* vm) {
   ntop->reloadASNConfiguration();
   lua_pushnil(vm);
@@ -8485,6 +8815,7 @@ static int reload_asn_configuration(lua_State* vm) {
 
 #ifdef NTOPNG_PRO
 
+/* @brief Reloads networks policy configuration from Redis (Pro only).  Lua: ntop.reloadNetworksPolicyConfiguration() → nil */
 static int reload_networks_policy_configuration(lua_State* vm) {
   if (ntop->getPrefs()->reloadNetworksPolicyConfiguration()) {
     lua_pushboolean(vm, 1);
@@ -8498,6 +8829,7 @@ static int reload_networks_policy_configuration(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Retrieves a value from the in-process Lua cache shared across all VMs.  Lua: ntop.getLuaCache(key) → any */
 static int ntop_get_lua_cache(lua_State* vm) {
   std::string ret;
 
@@ -8514,6 +8846,7 @@ static int ntop_get_lua_cache(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Stores a value in the in-process Lua cache with optional TTL seconds.  Lua: ntop.setLuaCache(key, value[, ttl_secs]) → nil */
 static int ntop_set_lua_cache(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
@@ -8535,6 +8868,7 @@ static int ntop_set_lua_cache(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns all entries in the in-process Lua cache (debug/inspection).  Lua: ntop.dumpLuaCache() → table */
 static int ntop_dump_lua_cache(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
   ntop->dumpLuaCache(vm);
