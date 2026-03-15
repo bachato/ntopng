@@ -136,4 +136,3 @@ interface.select(tostring(ifid))
 3. Register it in the `_ntop_*_reg[]` table at the bottom of the file.
 4. Update the corresponding `doc/README.lua_*_api.md`.
 
-See [CLAUDE.md](../CLAUDE.md) for the full binding pattern.
