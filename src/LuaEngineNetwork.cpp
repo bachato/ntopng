@@ -23,6 +23,7 @@
 
 /* ****************************************** */
 
+/* @brief Returns a table of traffic and alert statistics for the currently selected local network.  Lua: network.getNetworkStats() → table */
 static int ntop_network_get_network_stats(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   NetworkStats* ns = c ? c->network : NULL;
@@ -38,6 +39,7 @@ static int ntop_network_get_network_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Selects the active local network by its numeric ID for subsequent network.* calls in this Lua VM; pass nil to deselect.  Lua: network.select(network_id) → nil */
 static int ntop_select_local_network(lua_State* vm) {
   u_int32_t local_network_id = (u_int32_t)-1;
   NetworkInterface* iface = getCurrentInterface(vm);
@@ -62,6 +64,7 @@ static int ntop_select_local_network(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns alerts matching given filter criteria for the currently selected local network.  Lua: network.getAlerts(params_table) → table */
 static int ntop_network_get_alerts(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
 
@@ -70,6 +73,7 @@ static int ntop_network_get_alerts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Initializes the network check context for the given CIDR entity value, resolving it to a NetworkStats object for subsequent network.* calls.  Lua: network.checkContext(cidr_string) → boolean */
 static int ntop_network_check_context(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   char* entity_val;
@@ -103,6 +107,7 @@ static int ntop_network_check_context(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Retrieves a cached alert context value for the current network by key and periodicity index.  Lua: network.getCachedAlertValue(key, periodicity) → string */
 static int ntop_network_get_cached_alert_value(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   NetworkStats* ns = c ? c->network : NULL;
@@ -133,6 +138,7 @@ static int ntop_network_get_cached_alert_value(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Stores a cached alert context value for the current network by key, value, and periodicity index.  Lua: network.setCachedAlertValue(key, value, periodicity) → nil */
 static int ntop_network_set_cached_alert_value(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   NetworkStats* ns = c ? c->network : NULL;
@@ -170,6 +176,7 @@ static int ntop_network_set_cached_alert_value(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Stores a triggered alert record in the alert database for the currently selected local network.  Lua: network.storeTriggeredAlert(alert_table) → nil */
 static int ntop_network_store_triggered_alert(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
 
@@ -179,6 +186,7 @@ static int ntop_network_store_triggered_alert(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Marks a previously triggered alert for the current network as resolved/released.  Lua: network.releaseTriggeredAlert(alert_table) → nil */
 static int ntop_network_release_triggered_alert(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
 
@@ -187,6 +195,7 @@ static int ntop_network_release_triggered_alert(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Resets the inter-network traffic matrix counters for the current network (Pro only).  Lua: network.resetTrafficBetweenNets() → nil */
 static int ntop_network_reset_traffic_between_nets(lua_State* vm) {
 #ifdef NTOPNG_PRO
   NtopngLuaContext* c = getLuaVMContext(vm);

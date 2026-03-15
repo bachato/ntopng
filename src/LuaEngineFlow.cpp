@@ -27,6 +27,7 @@
 
 /* ****************************************** */
 
+/* @brief Returns total bytes (client→server + server→client) transferred by this flow.  Lua: flow.bytes() → integer */
 static int ntop_flow_get_bytes(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -41,6 +42,7 @@ static int ntop_flow_get_bytes(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns bytes transferred from client to server for this flow.  Lua: flow.cli2srv_bytes() → integer */
 static int ntop_flow_get_cli2srv_bytes(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -55,6 +57,7 @@ static int ntop_flow_get_cli2srv_bytes(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns bytes transferred from server to client for this flow.  Lua: flow.srv2cli_bytes() → integer */
 static int ntop_flow_get_srv2cli_bytes(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -69,6 +72,7 @@ static int ntop_flow_get_srv2cli_bytes(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the client (initiator) IP address string for this flow.  Lua: flow.cli() → string */
 static int ntop_flow_get_client(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -85,6 +89,7 @@ static int ntop_flow_get_client(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the client (initiator) TCP/UDP port number for this flow.  Lua: flow.cli_port() → integer */
 static int ntop_flow_get_client_port(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -99,6 +104,7 @@ static int ntop_flow_get_client_port(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the server (responder) IP address string for this flow.  Lua: flow.srv() → string */
 static int ntop_flow_get_server(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -115,6 +121,7 @@ static int ntop_flow_get_server(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the server (responder) TCP/UDP port number for this flow.  Lua: flow.srv_port() → integer */
 static int ntop_flow_get_server_port(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -129,6 +136,7 @@ static int ntop_flow_get_server_port(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the L4 protocol number (e.g. 6=TCP, 17=UDP) for this flow.  Lua: flow.protocol() → integer */
 static int ntop_flow_get_protocol(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -143,6 +151,7 @@ static int ntop_flow_get_protocol(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the VLAN ID associated with this flow (0 if untagged).  Lua: flow.vlan_id() → integer */
 static int ntop_flow_get_vlan_id(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -157,6 +166,7 @@ static int ntop_flow_get_vlan_id(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the nDPI master (encapsulating) protocol ID for this flow (e.g. HTTP in HTTP.Facebook).  Lua: flow.l7_master_proto() → integer */
 static int ntop_flow_get_l7_master_proto(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -171,6 +181,7 @@ static int ntop_flow_get_l7_master_proto(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the nDPI application protocol ID for this flow (e.g. Facebook in HTTP.Facebook).  Lua: flow.l7_proto() → integer */
 static int ntop_flow_get_l7_proto(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -185,6 +196,7 @@ static int ntop_flow_get_l7_proto(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the locality direction string for this flow: "local@local", "local@remote", "remote@local", or "remote2remote".  Lua: flow.direction() → string */
 static int ntop_flow_get_direction(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -212,6 +224,7 @@ static int ntop_flow_get_direction(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns true if only one direction of this flow has seen traffic (no reply packets).  Lua: flow.is_oneway() → boolean */
 static int ntop_flow_is_oneway(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -223,6 +236,7 @@ static int ntop_flow_is_oneway(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns true if both endpoints of this flow are unicast addresses (not broadcast/multicast).  Lua: flow.is_unicast() → boolean */
 static int ntop_flow_is_unicast(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -234,6 +248,7 @@ static int ntop_flow_is_unicast(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the full human-readable nDPI protocol name for this flow (e.g. "HTTP.Facebook").  Lua: flow.l7_proto_name() → string */
 static int ntop_flow_get_l7_proto_name(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -250,6 +265,7 @@ static int ntop_flow_get_l7_proto_name(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns a table with HTTP-specific flow metadata (method, URL, response code, content-type, etc.).  Lua: flow.http() → table */
 static int ntop_flow_get_l7_proto_http(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -265,6 +281,7 @@ static int ntop_flow_get_l7_proto_http(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns a table with DNS-specific flow metadata (query name, query type, response code, reply IPs, etc.).  Lua: flow.dns() → table */
 static int ntop_flow_get_l7_proto_dns(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -280,6 +297,7 @@ static int ntop_flow_get_l7_proto_dns(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns a table with SSH-specific flow metadata (client/server hassh fingerprints, etc.).  Lua: flow.ssh() → table */
 static int ntop_flow_get_l7_proto_ssh(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -295,6 +313,7 @@ static int ntop_flow_get_l7_proto_ssh(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns a table with TLS/QUIC-specific flow metadata (SNI, certificate subject/issuer, JA3/JA4 fingerprints, etc.).  Lua: flow.tls_quic() → table */
 static int ntop_flow_get_l7_proto_tls_quic(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;
@@ -310,6 +329,7 @@ static int ntop_flow_get_l7_proto_tls_quic(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Triggers a custom alert on the current flow with a numeric value and message string.  Lua: flow.triggerAlert(value, msg) → nil */
 static int ntop_trigger_flow_alert(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Flow* f = c ? c->flow : NULL;

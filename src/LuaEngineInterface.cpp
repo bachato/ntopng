@@ -64,6 +64,7 @@ bool matches_allowed_ifname(char* allowed_ifname, char* iface) {
 
 /* ****************************************** */
 
+/* @brief Returns a table mapping interface IDs to names; optionally excludes viewed sub-interfaces.  Lua: interface.getIfNames([exclude_viewed]) → table */
 static int ntop_get_interface_names(lua_State* vm) {
   char* allowed_ifname = getLuaVMUserdata(vm, allowed_ifname);
   bool exclude_viewed_interfaces = false;
@@ -103,6 +104,7 @@ static int ntop_get_interface_names(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the numeric ID of the first available network interface.  Lua: interface.getFirstInterfaceId() → integer */
 static int ntop_get_first_interface_id(lua_State* vm) {
   NetworkInterface* iface;
 
@@ -121,6 +123,7 @@ static int ntop_get_first_interface_id(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Selects the active interface for subsequent interface.* calls in this Lua VM.  Lua: interface.select(ifid) → nil */
 static int ntop_select_interface(lua_State* vm) {
   char* ifname;
   bool already_set = false;
@@ -151,6 +154,7 @@ static int ntop_select_interface(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the hardware MAC address of the currently selected interface.  Lua: interface.getIfMac() → string */
 static int ntop_get_interface_mac(lua_State* vm) {
   NetworkInterface* iface;
   char buf[32];
@@ -172,6 +176,7 @@ static int ntop_get_interface_mac(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the numeric ID of the currently selected interface.  Lua: interface.getId() → integer */
 static int ntop_get_interface_id(lua_State* vm) {
   NetworkInterface* iface;
 
@@ -188,6 +193,7 @@ static int ntop_get_interface_id(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the ID of the parent (master) interface for a sub-interface.  Lua: interface.getMasterInterfaceId() → integer */
 static int ntop_get_master_interface_id(lua_State* vm) {
   NetworkInterface* iface = NULL;
 
@@ -220,6 +226,7 @@ static int ntop_get_master_interface_id(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the name of the currently selected interface.  Lua: interface.getName() → string */
 static int ntop_get_interface_name(lua_State* vm) {
   NetworkInterface* iface;
 
@@ -236,6 +243,7 @@ static int ntop_get_interface_name(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the given interface ID or name corresponds to an existing interface.  Lua: interface.isValidIfId(ifid) → boolean */
 static int ntop_is_valid_interface_id(lua_State* vm) {
   int ifid;
   bool valid_int = false;
@@ -259,6 +267,7 @@ static int ntop_is_valid_interface_id(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the configured maximum speed (bps) of an interface.  Lua: interface.getMaxIfSpeed([ifname_or_id]) → integer */
 static int ntop_get_max_if_speed(lua_State* vm) {
   char* ifname = NULL;
   int ifid;
@@ -292,6 +301,7 @@ static int ntop_get_max_if_speed(lua_State* vm) {
  * @param vm The lua state.
  * @return @ref CONST_LUA_OK
  */
+/* @brief Returns SNMP-polled statistics for the current interface (Pro only).  Lua: interface.getSNMPStats() → table */
 static int ntop_interface_get_snmp_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   nDPIStats stats;
@@ -312,6 +322,7 @@ static int ntop_interface_get_snmp_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the interface has observed VLAN-tagged traffic.  Lua: interface.hasVLANs() → boolean */
 static int ntop_interface_has_vlans(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -327,6 +338,7 @@ static int ntop_interface_has_vlans(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the interface has received eBPF process-level events.  Lua: interface.hasEBPF() → boolean */
 static int ntop_interface_has_ebpf(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -342,6 +354,7 @@ static int ntop_interface_has_ebpf(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the interface has received external (injected) alerts.  Lua: interface.hasExternalAlerts() → boolean */
 static int ntop_interface_has_external_alerts(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -358,6 +371,7 @@ static int ntop_interface_has_external_alerts(lua_State* vm) {
 /* ****************************************** */
 
 // *** API ***
+/* @brief Returns true if this is a live packet-capture interface (not ZMQ/sFlow/eBPF).  Lua: interface.isPacketInterface() → boolean */
 static int ntop_interface_is_packet_interface(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -375,6 +389,7 @@ static int ntop_interface_is_packet_interface(lua_State* vm) {
 /* ****************************************** */
 
 // *** API ***
+/* @brief Returns true if network discovery is supported on this interface.  Lua: interface.isDiscoverableInterface() → boolean */
 static int ntop_interface_is_discoverable_interface(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -391,6 +406,7 @@ static int ntop_interface_is_discoverable_interface(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if this interface is operating in nEdge bridge/inline mode.  Lua: interface.isBridgeInterface() → boolean */
 static int ntop_interface_is_bridge_interface(lua_State* vm) {
   int ifid;
   NetworkInterface* iface = getCurrentInterface(vm);
@@ -410,6 +426,7 @@ static int ntop_interface_is_bridge_interface(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if this interface is a PCAP replay/dump interface.  Lua: interface.isPcapDumpInterface() → boolean */
 static int ntop_interface_is_pcap_dump_interface(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool rv = false;
@@ -425,6 +442,7 @@ static int ntop_interface_is_pcap_dump_interface(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if this is a ClickHouse/DB view interface.  Lua: interface.isDatabaseViewInterface() → boolean */
 static int ntop_interface_is_database_view_interface(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool rv = false;
@@ -440,6 +458,7 @@ static int ntop_interface_is_database_view_interface(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if this interface receives flows via ZMQ (nProbe integration).  Lua: interface.isZMQInterface() → boolean */
 static int ntop_interface_is_zmq_interface(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool rv = false;
@@ -464,6 +483,7 @@ static int ntop_interface_is_zmq_interface(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if this is an aggregated view interface covering multiple sub-interfaces.  Lua: interface.isView() → boolean */
 static int ntop_interface_is_view(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool rv = false;
@@ -477,6 +497,7 @@ static int ntop_interface_is_view(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the ID of the view interface that aggregates this interface, or nil.  Lua: interface.viewedBy() → integer */
 static int ntop_interface_viewed_by(lua_State* vm) {
 #ifdef NTOPNG_PRO
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -495,6 +516,7 @@ static int ntop_interface_viewed_by(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if this interface is aggregated by a view interface.  Lua: interface.isViewed() → boolean */
 static int ntop_interface_is_viewed(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool rv = false;
@@ -508,6 +530,7 @@ static int ntop_interface_is_viewed(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if this is a loopback interface.  Lua: interface.isLoopback() → boolean */
 static int ntop_interface_is_loopback(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool rv = false;
@@ -521,6 +544,7 @@ static int ntop_interface_is_loopback(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the interface capture thread is currently running.  Lua: interface.isRunning() → boolean */
 static int ntop_interface_is_running(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool rv = false;
@@ -534,6 +558,7 @@ static int ntop_interface_is_running(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the interface is idle (no recent traffic).  Lua: interface.isIdle() → boolean */
 static int ntop_interface_is_idle(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool rv = false;
@@ -547,6 +572,7 @@ static int ntop_interface_is_idle(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sets the idle state of the interface (used by management scripts).  Lua: interface.setInterfaceIdleState(is_idle) → nil */
 static int ntop_interface_set_idle(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool state;
@@ -573,6 +599,7 @@ static int ntop_interface_set_idle(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a table listing active live-capture sessions on this interface.  Lua: interface.dumpLiveCaptures() → table */
 static int ntop_interface_dump_live_captures(lua_State* vm) {
   NetworkInterface* iface = getCurrentInterface(vm);
 
@@ -600,6 +627,7 @@ AddressTree* get_allowed_nets(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Adds asset attributes to a local host's discovery record.  Lua: interface.addDataToLocalHostAssets(ip, data_table) → nil */
 static int ntop_add_data_to_assets(lua_State* vm) {
   NetworkInterface* iface = getCurrentInterface(vm);
   char *host = NULL, *field = NULL, *value = NULL;
@@ -650,6 +678,7 @@ static int ntop_add_data_to_assets(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Removes a local host's asset discovery record.  Lua: interface.removeDataFromLocalHostAssets(ip) → nil */
 static int ntop_remove_data_from_assets(lua_State* vm) {
   NetworkInterface* iface = getCurrentInterface(vm);
   char *host = NULL, *field = NULL;
@@ -695,6 +724,7 @@ static int ntop_remove_data_from_assets(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Starts a live packet capture session on the interface; returns session info.  Lua: interface.liveCapture(params_table) → table */
 static int ntop_interface_live_capture(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   NtopngLuaContext* c;
@@ -797,6 +827,7 @@ static int ntop_interface_live_capture(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Stops a running live capture session by its ID.  Lua: interface.stopLiveCapture(capture_id) → nil */
 static int ntop_interface_stop_live_capture(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   int capture_id;
@@ -825,6 +856,7 @@ static int ntop_interface_stop_live_capture(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Converts an interface name string to its numeric ID.  Lua: interface.name2id(ifname) → integer */
 static int ntop_interface_name2id(lua_State* vm) {
   char* if_name;
 
@@ -845,6 +877,7 @@ static int ntop_interface_name2id(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Resets all learned broadcast domain state for the interface.  Lua: interface.resetBroadcastDomains() → nil */
 static int ntop_interface_reset_broadcast_domains(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -860,6 +893,7 @@ static int ntop_interface_reset_broadcast_domains(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Resets traffic counters for the interface (optionally only drop counters).  Lua: interface.resetCounters([only_drops]) → nil */
 static int ntop_interface_reset_counters(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool only_drops = true;
@@ -879,6 +913,7 @@ static int ntop_interface_reset_counters(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Resets all traffic statistics for a specific host (internal helper for resetHostStats).  Lua: interface.resetHostStats(host, vlan) → nil */
 static int ntop_interface_reset_host_stats(lua_State* vm, bool delete_data) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char buf[64], *host_ip;
@@ -926,12 +961,14 @@ static inline int ntop_interface_reset_host_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Permanently deletes all stored data for a specific host.  Lua: interface.deleteHostData(host, vlan) → nil */
 static int ntop_interface_delete_host_data(lua_State* vm) {
   return (ntop_interface_reset_host_stats(vm, true));
 }
 
 /* ****************************************** */
 
+/* @brief Resets all traffic statistics for a specific MAC address (internal helper).  Lua: interface.resetMacStats(mac) → nil */
 static int ntop_interface_reset_mac_stats(lua_State* vm, bool delete_data) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* mac;
@@ -957,12 +994,14 @@ static inline int ntop_interface_reset_mac_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Permanently deletes all stored data for a specific MAC address.  Lua: interface.deleteMacData(mac) → nil */
 static int ntop_interface_delete_mac_data(lua_State* vm) {
   return (ntop_interface_reset_mac_stats(vm, true));
 }
 
 /* ****************************************** */
 
+/* @brief Executes a SQL query against the interface's local SQLite database.  Lua: interface.execSQLQuery(sql) → table */
 static int ntop_interface_exec_sql_query(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool limit_rows = true;  // honour the limit by default
@@ -1005,6 +1044,7 @@ static int ntop_interface_exec_sql_query(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns statistics for Kubernetes pods observed on this interface (eBPF).  Lua: interface.getPodsStats() → table */
 static int ntop_interface_get_pods_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -1019,6 +1059,7 @@ static int ntop_interface_get_pods_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns statistics for containers observed on this interface (eBPF).  Lua: interface.getContainersStats() → table */
 static int ntop_interface_get_containers_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* pod_filter = NULL;
@@ -1035,6 +1076,7 @@ static int ntop_interface_get_containers_stats(lua_State* vm) {
 }
 /* ****************************************** */
 
+/* @brief Reloads companion interface assignments from Redis configuration.  Lua: interface.reloadCompanions() → nil */
 static int ntop_interface_reload_companions(lua_State* vm) {
   int ifid;
   NetworkInterface* iface;
@@ -1071,6 +1113,7 @@ int ntop_get_alerts(lua_State* vm, AlertableEntity* entity) {
 
 /* ****************************************** */
 
+/* @brief Returns alerts matching the given filter criteria for this interface.  Lua: interface.getAlerts(params_table) → table */
 static int ntop_interface_get_alerts(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
 
@@ -1079,6 +1122,7 @@ static int ntop_interface_get_alerts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Stores an externally generated alert into the interface alert store.  Lua: interface.triggerExternalAlert(alert_table) → nil */
 static int ntop_interface_store_external_alert(lua_State* vm) {
   AlertEntity entity;
   const char* entity_value;
@@ -1111,6 +1155,7 @@ static int ntop_interface_store_external_alert(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Marks a triggered alert as resolved/released.  Lua: interface.releaseTriggeredAlert(alert_id) → nil */
 static int ntop_interface_release_triggered_alert(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
 
@@ -1119,6 +1164,7 @@ static int ntop_interface_release_triggered_alert(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Marks an external alert as resolved/released.  Lua: interface.releaseExternalAlert(alert_id) → nil */
 static int ntop_interface_release_external_alert(lua_State* vm) {
   AlertEntity entity;
   const char* entity_value;
@@ -1148,6 +1194,7 @@ static int ntop_interface_release_external_alert(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns all currently engaged (active/unresolved) alerts for this interface.  Lua: interface.getEngagedAlerts([params_table]) → table */
 static int ntop_interface_get_engaged_alerts(lua_State* vm) {
   AlertEntity entity_type = alert_entity_none;
   const char* entity_value = NULL;
@@ -1178,6 +1225,7 @@ static int ntop_interface_get_engaged_alerts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Increments a named syslog processing statistics counter.  Lua: interface.incSyslogStats(stat_name, n) → nil */
 static int ntop_interface_inc_syslog_stats(lua_State* vm) {
   NetworkInterface* iface = getCurrentInterface(vm);
   u_int32_t num_received_events;
@@ -1223,6 +1271,7 @@ static int ntop_interface_inc_syslog_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Executes a raw SQL query on the interface alert database and streams JSON to HTTP response.  Lua: interface.alert_store_query(query[,limit_rows]) → nil */
 static int ntop_interface_alert_store_query(lua_State* vm) {
   NetworkInterface* iface = getCurrentInterface(vm);
   char* query = NULL;
@@ -1264,6 +1313,7 @@ static int ntop_interface_alert_store_query(lua_State* vm) {
 /* ****************************************** */
 
 #ifndef HAVE_NEDGE
+/* @brief Injects a flow record from ZMQ/sFlow into the interface for processing (non-nEdge).  Lua: interface.processFlow(flow_table) → nil */
 static int ntop_process_flow(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -1292,6 +1342,7 @@ static int ntop_process_flow(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Reloads syslog producer configuration for this interface (non-nEdge).  Lua: interface.updateSyslogProducers() → nil */
 static int ntop_update_syslog_producers(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   SyslogParserInterface* syslog_parser_interface;
@@ -1313,6 +1364,7 @@ static int ntop_update_syslog_producers(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns descriptions of all ZMQ flow template fields (non-nEdge).  Lua: interface.getAllZMQFlowFieldDescr() → table */
 static int ntop_get_all_zmq_flow_field_descr(lua_State* vm) {
 #ifdef HAVE_ZMQ
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -1334,6 +1386,7 @@ static int ntop_get_all_zmq_flow_field_descr(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns description of a specific ZMQ flow field (non-nEdge).  Lua: interface.getZMQFlowFieldDescr(field_id) → table */
 static int ntop_get_zmq_flow_field_descr(lua_State* vm) {
 #ifdef HAVE_ZMQ
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -1365,6 +1418,7 @@ static int ntop_get_zmq_flow_field_descr(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns configuration and member counts for all host pools on this interface.  Lua: interface.getHostPoolsInfo() → table */
 static int ntop_get_host_pools_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -1384,6 +1438,7 @@ static int ntop_get_host_pools_info(lua_State* vm) {
  * @param vm The lua state.
  * @return @ref CONST_LUA_OK
  */
+/* @brief Returns traffic statistics for all host pools on this interface.  Lua: interface.getHostPoolsStats() → table */
 static int ntop_get_host_pools_interface_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -1404,6 +1459,7 @@ static int ntop_get_host_pools_interface_stats(lua_State* vm) {
  * @param vm The lua state.
  * @return @ref CONST_LUA_OK
  */
+/* @brief Returns traffic statistics for a specific host pool.  Lua: interface.getHostPoolStats(pool_id) → table */
 static int ntop_get_host_pool_interface_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   HostPools* hp;
@@ -1434,6 +1490,7 @@ static int ntop_get_host_pool_interface_stats(lua_State* vm) {
  * @param vm The lua state.
  * @return @ref CONST_LUA_OK
  */
+/* @brief Returns quota usage statistics for a specific host (nEdge Pro).  Lua: interface.getHostUsedQuotasStats(host, vlan) → table */
 static int ntop_get_host_used_quotas_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   Host* h;
@@ -1468,6 +1525,7 @@ static int ntop_get_host_used_quotas_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns per-protocol flow count statistics for this interface.  Lua: interface.getnDPIFlowsCount() → table */
 static int ntop_get_ndpi_interface_flows_count(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -1484,6 +1542,7 @@ static int ntop_get_ndpi_interface_flows_count(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns flow status distribution (normal, warning, alert) for this interface.  Lua: interface.getFlowsStatus() → table */
 static int ntop_get_ndpi_interface_flows_status(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -1500,6 +1559,7 @@ static int ntop_get_ndpi_interface_flows_status(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the human-readable name for an nDPI protocol ID.  Lua: interface.getnDPIProtoName(proto_id) → string */
 static int ntop_get_ndpi_protocol_name(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   nDPIStats stats;
@@ -1525,6 +1585,7 @@ static int ntop_get_ndpi_protocol_name(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the full hierarchical name (e.g. 'HTTP.Facebook') for an nDPI protocol.  Lua: interface.getnDPIFullProtoName(proto_id) → string */
 static int ntop_get_ndpi_full_protocol_name(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   ndpi_protocol proto;
@@ -1551,6 +1612,7 @@ static int ntop_get_ndpi_full_protocol_name(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the nDPI protocol ID for a given protocol name string.  Lua: interface.getnDPIProtoId(proto_name) → integer */
 static int ntop_get_ndpi_protocol_id(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   nDPIStats stats;
@@ -1572,6 +1634,7 @@ static int ntop_get_ndpi_protocol_id(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the nDPI category ID for a given category name string.  Lua: interface.getnDPICategoryId(category_name) → integer */
 static int ntop_get_ndpi_category_id(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   nDPIStats stats;
@@ -1593,6 +1656,7 @@ static int ntop_get_ndpi_category_id(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the human-readable name for an nDPI category ID.  Lua: interface.getnDPICategoryName(category_id) → string */
 static int ntop_get_ndpi_category_name(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   nDPIStats stats;
@@ -1621,6 +1685,7 @@ static int ntop_get_ndpi_category_name(lua_State* vm) {
  * @param vm The lua state.
  * @return CONST_LUA_ERROR if curr_iface is null, CONST_LUA_OK otherwise.
  */
+/* @brief Returns the nDPI breed (e.g. 'Safe', 'Unsafe') for a protocol.  Lua: interface.getnDPIProtoBreed(proto_id) → string */
 static int ntop_get_ndpi_protocol_breed(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   nDPIStats stats;
@@ -1648,6 +1713,7 @@ static int ntop_get_ndpi_protocol_breed(lua_State* vm) {
 
 /* This function is used by lua/rest/v2/charts/host/map.lua */
 
+/* @brief Returns all hosts active on this interface as a flat array.  Lua: interface.getInterfaceHosts([include_details]) → table */
 static int ntop_get_interface_hosts(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   HostWalkMode host_walk_mode = ALL_FLOWS;
@@ -1675,6 +1741,7 @@ static int ntop_get_interface_hosts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Internal helper implementing batched host enumeration with pagination.  Lua: (internal batched helper) → table */
 static int ntop_get_batched_interface_hosts(lua_State* vm,
                                             LocationPolicy location,
                                             bool tsLua = false,
@@ -1744,6 +1811,7 @@ static u_int8_t str_2_location(const char* s) {
 
 /* ****************************************** */
 
+/* @brief Internal helper implementing host filtering by various criteria.  Lua: (internal criteria helper) → table */
 static int ntop_get_interface_hosts_criteria(lua_State* vm,
                                              LocationPolicy location) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -1831,6 +1899,7 @@ static int ntop_get_interface_hosts_criteria(lua_State* vm,
 /* Receives in input a Lua table, having mac address as keys and tables as
  * values. Every IP address found for a mac is inserted into the table as an
  * 'ip' field. */
+/* @brief Forces re-association of MAC addresses with their known IP addresses.  Lua: interface.addMacsIpAddresses() → nil */
 static int ntop_add_macs_ip_addresses(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -1849,6 +1918,7 @@ static int ntop_add_macs_ip_addresses(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns currently active MAC addresses on the interface.  Lua: interface.getActiveMacs([vlan_id]) → table */
 static int ntop_get_interface_active_macs(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -1862,6 +1932,7 @@ static int ntop_get_interface_active_macs(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns detailed information for MAC addresses on the interface.  Lua: interface.getMacsInfo([params]) → table */
 static int ntop_get_interface_macs_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* sortColumn = (char*)"column_mac";
@@ -1903,6 +1974,7 @@ static int ntop_get_interface_macs_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a paginated batch of MAC address records.  Lua: interface.getBatchedMacsInfo(cursor, count) → table */
 static int ntop_get_batched_interface_macs_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* sortColumn = (char*)"column_mac";
@@ -1933,6 +2005,7 @@ static int ntop_get_batched_interface_macs_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the given MAC address is currently active.  Lua: interface.isMacActive(mac) → boolean */
 static int ntop_is_mac_active(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* mac = NULL;
@@ -1951,6 +2024,7 @@ static int ntop_is_mac_active(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns detailed information for a specific MAC address.  Lua: interface.getMacInfo(mac) → table */
 static int ntop_get_interface_mac_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* mac = NULL;
@@ -1966,6 +2040,7 @@ static int ntop_get_interface_mac_info(lua_State* vm) {
 /* ****************************************** */
 
 #ifdef HAVE_NEDGE
+/* @brief Appends a captive-portal event (login/logout) for a MAC address (nEdge).  Lua: interface.appendMacEvent(mac, event_type) → nil */
 static int ntop_append_mac_event(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char *mac, *event_message;
@@ -2006,6 +2081,7 @@ static int ntop_append_mac_event(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns all hosts associated with a given MAC address.  Lua: interface.getMacHosts(mac) → table */
 static int ntop_get_interface_mac_hosts(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* mac = NULL;
@@ -2023,6 +2099,7 @@ static int ntop_get_interface_mac_hosts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Overrides the detected operating system for a host.  Lua: interface.setHostOperatingSystem(host, vlan, os_id) → nil */
 static int ntop_set_host_operating_system(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char *host_ip = NULL, buf[64];
@@ -2057,6 +2134,7 @@ static int ntop_set_host_operating_system(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sets the resolved DNS name for a host.  Lua: interface.setHostResolvedName(host, vlan, name) → nil */
 static int ntop_set_host_resolved_name(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char *host_ip = NULL, buf[64];
@@ -2090,6 +2168,7 @@ static int ntop_set_host_resolved_name(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the count of currently active local hosts.  Lua: interface.getNumLocalHosts() → integer */
 static int ntop_get_num_local_hosts(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2103,6 +2182,7 @@ static int ntop_get_num_local_hosts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the count of local hosts seen only in receive direction.  Lua: interface.getNumLocalRxOnlyHosts() → integer */
 static int ntop_get_num_local_rxonly_hosts(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2116,6 +2196,7 @@ static int ntop_get_num_local_rxonly_hosts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the total count of active hosts (local + remote).  Lua: interface.getNumHosts() → integer */
 static int ntop_get_num_hosts(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2129,6 +2210,7 @@ static int ntop_get_num_hosts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the total count of active flows on this interface.  Lua: interface.getNumFlows() → integer */
 static int ntop_get_num_flows(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2142,6 +2224,7 @@ static int ntop_get_num_flows(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a mapping of MAC device type IDs to their names and counts.  Lua: interface.getMacDeviceTypes() → table */
 static int ntop_get_mac_device_types(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int16_t maxHits = CONST_MAX_NUM_HITS;
@@ -2169,6 +2252,7 @@ static int ntop_get_mac_device_types(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns statistics for all Autonomous Systems observed on this interface.  Lua: interface.getASesInfo([params]) → table */
 static int ntop_get_interface_ases_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool diff = false;
@@ -2200,6 +2284,7 @@ static int ntop_get_interface_ases_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns statistics for all observation points seen on this interface.  Lua: interface.getObsPointsInfo([params]) → table */
 static int ntop_get_interface_obs_points_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2225,6 +2310,7 @@ static int ntop_get_interface_obs_points_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Inserts an IP CIDR rule into the interface ACL (allow or block).  Lua: interface.insertIPACL(cidr, is_allow) → nil */
 static int ntop_interface_insert_ip_acl(lua_State* vm) {
   bool res = false;
 #ifdef NTOPNG_PRO
@@ -2266,6 +2352,7 @@ static int ntop_interface_insert_ip_acl(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Removes an IP CIDR rule from the interface ACL.  Lua: interface.removeIPACL(cidr) → nil */
 static int ntop_interface_remove_ip_acl(lua_State* vm) {
   bool res = false;
 
@@ -2303,6 +2390,7 @@ static int ntop_interface_remove_ip_acl(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Inserts a MAC address rule into the interface ACL (allow or block).  Lua: interface.insertMacACL(mac, is_allow) → nil */
 static int ntop_interface_insert_mac_acl(lua_State* vm) {
   bool res = false;
 #ifdef NTOPNG_PRO
@@ -2330,6 +2418,7 @@ static int ntop_interface_insert_mac_acl(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Removes a MAC address rule from the interface ACL.  Lua: interface.removeMacACL(mac) → nil */
 static int ntop_interface_remove_mac_acl(lua_State* vm) {
   bool res = false;
 #ifdef NTOPNG_PRO
@@ -2354,6 +2443,7 @@ static int ntop_interface_remove_mac_acl(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the current IP and MAC ACL rules for this interface.  Lua: interface.getACLInfo() → table */
 static int ntop_interface_get_acl_info(lua_State* vm) {
   lua_newtable(vm);
 #ifdef NTOPNG_PRO
@@ -2367,6 +2457,7 @@ static int ntop_interface_get_acl_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns current throughput (bps/pps) in both directions for this interface.  Lua: interface.getThroughput() → table */
 static int ntop_interface_get_throughput(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2387,6 +2478,7 @@ static int ntop_interface_get_throughput(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns per-L4-protocol flow and byte statistics.  Lua: interface.getProtocolFlowsStats() → table */
 static int ntop_get_protocol_flows_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2402,6 +2494,7 @@ static int ntop_get_protocol_flows_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns per-VLAN flow and byte statistics.  Lua: interface.getVLANFlowsStats() → table */
 static int ntop_get_vlan_flows_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2417,6 +2510,7 @@ static int ntop_get_vlan_flows_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a list of server ports used by hosts on this interface.  Lua: interface.getHostsPorts(params) → table */
 static int ntop_get_hosts_ports(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2432,6 +2526,7 @@ static int ntop_get_hosts_ports(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns hosts using the specified server port and transport protocol.  Lua: interface.getHostsByPort(port, proto) → table */
 static int ntop_get_hosts_by_port(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2448,6 +2543,7 @@ static int ntop_get_hosts_by_port(lua_State* vm) {
 /* ****************************************** */
 
 /* Function used to start the accounting of an Host */
+/* @brief Sends a RADIUS Accounting-Start packet for a captive-portal session.  Lua: interface.radiusAccountingStart(params) → nil */
 static int ntop_radius_accounting_start(lua_State* vm) {
   bool res = false;
 
@@ -2489,6 +2585,7 @@ static int ntop_radius_accounting_start(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sends a RADIUS Accounting-Stop packet for a captive-portal session.  Lua: interface.radiusAccountingStop(params) → nil */
 static int ntop_radius_accounting_stop(lua_State* vm) {
   bool res = false;
 
@@ -2549,6 +2646,7 @@ static int ntop_radius_accounting_stop(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns hosts using a specific application service.  Lua: interface.getHostsByService(service_name) → table */
 static int ntop_get_hosts_by_service(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2564,6 +2662,7 @@ static int ntop_get_hosts_by_service(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sends a RADIUS Accounting-Update (Interim-Update) for an active session.  Lua: interface.radiusAccountingUpdate(params) → nil */
 static int ntop_radius_accounting_update(lua_State* vm) {
   bool res = false;
 #ifdef HAVE_RADIUS
@@ -2622,6 +2721,7 @@ static int ntop_radius_accounting_update(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a table of currently active behavioral anomalies on this interface.  Lua: interface.getAnomalies() → table */
 static int ntop_get_interface_anomalies(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2637,6 +2737,7 @@ static int ntop_get_interface_anomalies(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns per-protocol byte/flow statistics, optionally filtered to a host.  Lua: interface.getnDPIStats([host,vlan]) → table */
 static int ntop_get_ndpi_interface_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool diff = false;
@@ -2656,6 +2757,7 @@ static int ntop_get_ndpi_interface_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the current alert score breakdown for this interface.  Lua: interface.getScore() → table */
 static int ntop_get_interface_score(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2671,6 +2773,7 @@ static int ntop_get_interface_score(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns per-country traffic statistics observed on this interface.  Lua: interface.getCountriesInfo([params]) → table */
 static int ntop_get_interface_countries_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2695,6 +2798,7 @@ static int ntop_get_interface_countries_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Converts a 2-letter ISO country code string to a 16-bit integer.  Lua: interface.convertCountryCode2U16(code) → integer */
 static int ntop_convert_country_code_to_u16(lua_State* vm) {
   const char* country_code;
   u_int16_t country_u16;
@@ -2711,6 +2815,7 @@ static int ntop_convert_country_code_to_u16(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Converts a 16-bit country integer back to its ISO country code string.  Lua: interface.convertCountryU162Code(n) → string */
 static int ntop_convert_country_u16_to_code(lua_State* vm) {
   char country_code[3];
   u_int16_t country_u16;
@@ -2727,6 +2832,7 @@ static int ntop_convert_country_u16_to_code(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns traffic statistics for a specific country on this interface.  Lua: interface.getCountryInfo(country_code) → table */
 static int ntop_get_interface_country_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   const char* country;
@@ -2743,6 +2849,7 @@ static int ntop_get_interface_country_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a list of VLAN IDs seen on this interface.  Lua: interface.getVLANsList() → table */
 static int ntop_get_interface_vlans_list(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -2756,6 +2863,7 @@ static int ntop_get_interface_vlans_list(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns per-VLAN traffic statistics for this interface.  Lua: interface.getVLANsInfo([params]) → table */
 static int ntop_get_interface_vlans_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* sortColumn = (char*)"column_vlan";
@@ -2794,6 +2902,7 @@ static int ntop_get_interface_vlans_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns traffic statistics for a specific Autonomous System number.  Lua: interface.getASInfo(asn) → table */
 static int ntop_get_interface_as_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int32_t asn;
@@ -2815,6 +2924,7 @@ static int ntop_get_interface_as_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns statistics for a specific observation point.  Lua: interface.getObsPointInfo(obs_point_id) → table */
 static int ntop_get_interface_obs_point_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int16_t obs_point;
@@ -2831,6 +2941,7 @@ static int ntop_get_interface_obs_point_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns traffic statistics for a specific VLAN.  Lua: interface.getVLANInfo(vlan_id) → table */
 static int ntop_get_interface_vlan_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int16_t vlan_id;
@@ -2847,6 +2958,7 @@ static int ntop_get_interface_vlan_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a grouped count of MAC addresses by their OUI manufacturer.  Lua: interface.getMacManufacturers([params]) → table */
 static int ntop_get_interface_macs_manufacturers(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int32_t maxHits = CONST_MAX_NUM_HITS;
@@ -2876,6 +2988,7 @@ static int ntop_get_interface_macs_manufacturers(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns detailed information for all active flows on the interface.  Lua: interface.getFlowsInfo([params_table]) → table */
 static int ntop_get_interface_flows_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   Host *host = NULL, *talking_with_host = NULL, *client = NULL, *server = NULL;
@@ -2953,6 +3066,7 @@ static int ntop_get_interface_flows_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a paginated batch of active flow records.  Lua: interface.getBatchedFlowsInfo(cursor, count[,filter]) → table */
 static int ntop_get_batched_interface_flows_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   Paginator* p = NULL;
@@ -2984,6 +3098,7 @@ static int ntop_get_batched_interface_flows_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns flows aggregated (grouped) by a specified key field.  Lua: interface.getGroupedFlows(params_table) → table */
 static int ntop_get_interface_get_grouped_flows(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   Paginator* p = NULL;
@@ -3014,6 +3129,7 @@ static int ntop_get_interface_get_grouped_flows(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns aggregate flow statistics counts for the interface.  Lua: interface.getFlowsStats() → table */
 static int ntop_get_interface_flows_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -3025,6 +3141,7 @@ static int ntop_get_interface_flows_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns per-local-network traffic statistics.  Lua: interface.getNetworksStats() → table */
 static int ntop_get_interface_networks_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool diff = false;
@@ -3047,6 +3164,7 @@ static int ntop_get_interface_networks_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns server ports observed on local hosts for a given L4 protocol.  Lua: interface.getLocalServerPorts(proto) → table */
 static int ntop_get_local_server_ports(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -3062,6 +3180,7 @@ static int ntop_get_local_server_ports(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns traffic statistics for a specific local network by ID.  Lua: interface.getNetworkStats(network_id) → table */
 static int ntop_get_interface_network_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int32_t network_id;
@@ -3084,6 +3203,7 @@ static int ntop_get_interface_network_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the specified host is currently active on this interface.  Lua: interface.isHostActive(host[,vlan]) → boolean */
 static int ntop_is_host_active(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* host_ip;
@@ -3110,6 +3230,7 @@ static int ntop_is_host_active(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns comprehensive information for a specific host.  Lua: interface.getHostInfo(host[,vlan]) → table */
 static int ntop_get_interface_host_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* host_ip;
@@ -3135,6 +3256,7 @@ static int ntop_get_interface_host_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Resets the top-sites statistics for a specific host.  Lua: interface.resetHostTopSites(host, vlan) → nil */
 static int ntop_reset_interface_host_top_sites(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* host_ip;
@@ -3162,6 +3284,7 @@ static int ntop_reset_interface_host_top_sites(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the 2-letter country code for a host's IP via GeoIP.  Lua: interface.getHostCountry(host[,vlan]) → string */
 static int ntop_get_interface_host_country(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* host_ip;
@@ -3189,6 +3312,7 @@ static int ntop_get_interface_host_country(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Marks an observation point for deletion (first step of two-step delete).  Lua: interface.prepareDeleteObsPoint(obs_point_id) → nil */
 static int ntop_prepare_delete_interface_observation_point(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int16_t obs_point_id;
@@ -3207,6 +3331,7 @@ static int ntop_prepare_delete_interface_observation_point(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Completes deletion of a previously prepared observation point.  Lua: interface.deleteObsPoint(obs_point_id) → nil */
 static int ntop_delete_interface_observation_point(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int16_t obs_point_id;
@@ -3226,6 +3351,7 @@ static int ntop_delete_interface_observation_point(lua_State* vm) {
 /* ****************************************** */
 
 #ifdef NTOPNG_PRO
+/* @brief Returns flow exporters (NetFlow/IPFIX probes) seen on this interface (Pro).  Lua: interface.getFlowDevices() → table */
 static int ntop_get_flow_devices(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -3247,6 +3373,7 @@ static int ntop_get_flow_devices(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns detailed information for a specific flow-exporting device (Pro).  Lua: interface.getFlowDeviceInfo(device_ip) → table */
 static int ntop_get_flow_device_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int32_t device_id;
@@ -3271,6 +3398,7 @@ static int ntop_get_flow_device_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns flow device information looked up by IP address (Pro).  Lua: interface.getFlowDeviceInfoByIP(ip) → table */
 static int ntop_get_flow_device_info_by_ip(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* device_ip;
@@ -3297,6 +3425,7 @@ static int ntop_get_flow_device_info_by_ip(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Refreshes the site-ID mapping for a flow-exporting device (Pro).  Lua: interface.refreshFlowDeviceSiteId(device_ip) → nil */
 static int ntop_refresh_flow_device_site_id(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* device_ip;
@@ -3325,6 +3454,7 @@ static int ntop_refresh_flow_device_site_id(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Triggers active host discovery (ping sweep) on the interface.  Lua: interface.discoverHosts(timeout_ms) → table */
 static int ntop_discover_iface_hosts(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int timeout = 3; /* sec */
@@ -3353,6 +3483,7 @@ static int ntop_discover_iface_hosts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Triggers ARP scan discovery of hosts on the interface.  Lua: interface.arpScanHosts() → table */
 static int ntop_arpscan_iface_hosts(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -3399,6 +3530,7 @@ static int ntop_arpscan_iface_hosts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Queues an mDNS ANY query for a service type for background resolution.  Lua: interface.mdnsQueueAnyQuery(service_type) → nil */
 static int ntop_mdns_batch_any_query(lua_State* vm) {
   char *query, *target;
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -3426,6 +3558,7 @@ static int ntop_mdns_batch_any_query(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Queues an mDNS/Bonjour name resolution request.  Lua: interface.mdnsQueueNameToResolve(name) → nil */
 static int ntop_mdns_queue_name_to_resolve(lua_State* vm) {
   char* numIP;
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -3448,6 +3581,7 @@ static int ntop_mdns_queue_name_to_resolve(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Reads and returns pending mDNS resolution results.  Lua: interface.mdnsReadQueuedResponses() → table */
 static int ntop_mdns_read_queued_responses(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -3463,6 +3597,7 @@ static int ntop_mdns_read_queued_responses(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns sFlow agent devices seen on this interface.  Lua: interface.getSFlowDevices() → table */
 static int ntop_getsflowdevices(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -3479,6 +3614,7 @@ static int ntop_getsflowdevices(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns per-port statistics for a specific sFlow agent.  Lua: interface.getSFlowDeviceInfo(agent_ip) → table */
 static int ntop_getsflowdeviceinfo(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* device_ip;
@@ -3501,6 +3637,7 @@ static int ntop_getsflowdeviceinfo(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Computes the hash key for a flow 5-tuple.  Lua: interface.getFlowKey(src_ip, src_port, dst_ip, dst_port, proto[,vlan]) → integer */
 static int ntop_get_interface_flow_key(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   Host *cli, *srv;
@@ -3564,6 +3701,7 @@ static int ntop_get_interface_flow_key(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Finds and returns an active flow by its hash key and bucket ID.  Lua: interface.findFlowByKeyAndHashId(key, hash_id) → table */
 static int ntop_get_interface_find_flow_by_key_and_hash_id(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int32_t key;
@@ -3605,6 +3743,7 @@ static int ntop_get_interface_find_flow_by_key_and_hash_id(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Finds and returns an active flow by its 5-tuple.  Lua: interface.findFlowByTuple(src_ip, src_port, dst_ip, dst_port, proto[,vlan]) → table */
 static int ntop_get_interface_find_flow_by_tuple(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   IpAddress src_ip_addr, dst_ip_addr;
@@ -3664,6 +3803,7 @@ static int ntop_get_interface_find_flow_by_tuple(lua_State* vm) {
 #ifdef HAVE_NEDGE
 
 /* Set policy to drop for the specified flow */
+/* @brief Marks a specific flow for traffic dropping (nEdge inline mode).  Lua: interface.dropFlowTraffic(key, hash_id) → nil */
 static int ntop_drop_flow_traffic(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int32_t key;
@@ -3702,6 +3842,7 @@ static int ntop_drop_flow_traffic(lua_State* vm) {
   Drops all flows where the specified IP is either client or server,
   and return the flow number
 */
+/* @brief Marks all traffic for a host for dropping (nEdge inline mode).  Lua: interface.dropHostTraffic(host, vlan) → nil */
 static int ntop_drop_host_traffic(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   AddressTree* ptree = get_allowed_nets(vm);
@@ -3731,6 +3872,7 @@ static int ntop_drop_host_traffic(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Drops traffic for multiple flows at once (nEdge inline mode).  Lua: interface.dropMultipleFlowsTraffic(flows_table) → nil */
 static int ntop_drop_multiple_flows_traffic(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   Paginator* p = NULL;
@@ -3761,6 +3903,7 @@ static int ntop_drop_multiple_flows_traffic(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns active flows associated with a specific process ID (eBPF).  Lua: interface.findPidFlows(pid) → table */
 static int ntop_get_interface_find_pid_flows(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int32_t pid;
@@ -3784,6 +3927,7 @@ static int ntop_get_interface_find_pid_flows(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns active flows associated with a process name (eBPF).  Lua: interface.findNameFlows(proc_name) → table */
 static int ntop_get_interface_find_proc_name_flows(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* proc_name;
@@ -3807,6 +3951,7 @@ static int ntop_get_interface_find_proc_name_flows(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a list of hosts with active HTTP/HTTPS flows.  Lua: interface.listHTTPhosts([filter]) → table */
 static int ntop_list_http_hosts(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* key;
@@ -3828,6 +3973,7 @@ static int ntop_list_http_hosts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Finds a host by IP or name and returns its info, or nil if not active.  Lua: interface.findHost(host[,vlan]) → table */
 static int ntop_get_interface_find_host(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* key;
@@ -3848,6 +3994,7 @@ static int ntop_get_interface_find_host(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Finds a host by its MAC address and returns its info.  Lua: interface.findHostByMac(mac) → table */
 static int ntop_get_interface_find_host_by_mac(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* mac;
@@ -3869,6 +4016,7 @@ static int ntop_get_interface_find_host_by_mac(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if the given MAC address is a multicast/broadcast address.  Lua: interface.isMulticastMac(mac) → boolean */
 static int ntop_is_multicast_mac(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* mac;
@@ -3892,6 +4040,7 @@ static int ntop_is_multicast_mac(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Updates the traffic-mirrored flag for the interface.  Lua: interface.updateTrafficMirrored(enabled) → nil */
 static int ntop_update_traffic_mirrored(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -3905,6 +4054,7 @@ static int ntop_update_traffic_mirrored(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Updates the smart-recording setting for the interface.  Lua: interface.updateSmartRecording(enabled) → nil */
 static int ntop_update_smart_recording(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -3918,6 +4068,7 @@ static int ntop_update_smart_recording(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Updates the dynamic traffic policy for this interface.  Lua: interface.updateDynIfaceTrafficPolicy(policy) → nil */
 static int ntop_update_dynamic_interface_traffic_policy(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -3931,6 +4082,7 @@ static int ntop_update_dynamic_interface_traffic_policy(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Updates push-filter settings (e.g. BPF rules) for the interface.  Lua: interface.updatePushFiltersSettings(params) → nil */
 static int ntop_update_push_filters_settings(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -3944,6 +4096,7 @@ static int ntop_update_push_filters_settings(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Updates the local broadcast domain host identifier (IP vs MAC).  Lua: interface.updateLbdIdentifier(use_mac) → nil */
 static int ntop_update_lbd_identifier(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -3957,6 +4110,7 @@ static int ntop_update_lbd_identifier(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sets the flows-only flag (no host tracking) on the interface.  Lua: interface.updateFlowsOnlyInterface(enabled) → nil */
 static int ntop_update_flows_only_interface(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -3970,6 +4124,7 @@ static int ntop_update_flows_only_interface(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Forces a traffic policy refresh for a specific host.  Lua: interface.updateHostTrafficPolicy(host, vlan) → nil */
 static int ntop_update_host_traffic_policy(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* host_ip;
@@ -3996,6 +4151,7 @@ static int ntop_update_host_traffic_policy(lua_State* vm) {
 /* ****************************************** */
 
 // *** API ***
+/* @brief Returns the capture endpoint/source string (e.g. 'eth0', 'tcp://...').  Lua: interface.getEndpoint() → string */
 static int ntop_get_interface_endpoint(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int8_t id;
@@ -4019,6 +4175,7 @@ static int ntop_get_interface_endpoint(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns all nDPI protocol IDs and names, optionally filtered by category.  Lua: interface.getnDPIProtocols([category_id]) → table */
 static int ntop_get_ndpi_protocols(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   ndpi_protocol_category_t category_filter = NDPI_PROTOCOL_ANY_CATEGORY;
@@ -4047,6 +4204,7 @@ static int ntop_get_ndpi_protocols(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns all nDPI category IDs and their names.  Lua: interface.getnDPICategories() → table */
 static int ntop_get_ndpi_categories(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -4075,6 +4233,7 @@ static int ntop_get_ndpi_categories(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Reloads interface throughput scaling factor preferences from Redis.  Lua: interface.loadScalingFactorPrefs() → nil */
 static int ntop_load_scaling_factor_prefs(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -4087,6 +4246,7 @@ static int ntop_load_scaling_factor_prefs(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Reloads the list of known gateway MAC addresses from Redis.  Lua: interface.reloadGwMacs() → nil */
 static int ntop_reload_gw_macs(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -4101,6 +4261,7 @@ static int ntop_reload_gw_macs(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Reloads DHCP address ranges from Redis configuration.  Lua: interface.reloadDhcpRanges() → nil */
 static int ntop_reload_dhcp_ranges(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -4115,6 +4276,7 @@ static int ntop_reload_dhcp_ranges(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Reloads per-host preference overrides from Redis for a specific host.  Lua: interface.reloadHostPrefs(host[,vlan]) → nil */
 static int ntop_reload_host_prefs(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char buf[64], *host_ip;
@@ -4182,6 +4344,7 @@ static void* pcapDumpLoop(void* ptr) {
 
 /* ****************************************** */
 
+/* @brief Starts a PCAP file capture session with BPF filter and duration.  Lua: interface.captureToPcap(params_table) → nil */
 static int ntop_capture_to_pcap(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int8_t capture_duration;
@@ -4273,6 +4436,7 @@ static int ntop_capture_to_pcap(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if a PCAP file capture session is currently active.  Lua: interface.isCaptureRunning() → boolean */
 static int ntop_is_capture_running(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   NtopngLuaContext* c;
@@ -4294,6 +4458,7 @@ static int ntop_is_capture_running(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Stops the currently running PCAP file capture session.  Lua: interface.stopRunningCapture() → nil */
 static int ntop_stop_running_capture(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   NtopngLuaContext* c;
@@ -4314,51 +4479,62 @@ static int ntop_stop_running_capture(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns information for all hosts (local + remote) on the interface.  Lua: interface.getHostsInfo([params]) → table */
 static int ntop_get_interface_hosts_info(lua_State* vm) {
   return (ntop_get_interface_hosts_criteria(vm, location_all));
 }
 
+/* @brief Returns information for local hosts only.  Lua: interface.getLocalHostsInfo([params]) → table */
 static int ntop_get_interface_local_hosts_info(lua_State* vm) {
   return (ntop_get_interface_hosts_criteria(vm, location_local_only));
 }
 
+/* @brief Returns local hosts that have received but not sent any traffic.  Lua: interface.getLocalHostsInfoNoTX([params]) → table */
 static int ntop_get_interface_local_hosts_no_tx_info(lua_State* vm) {
   return (ntop_get_interface_hosts_criteria(vm, location_local_only_no_tx));
 }
 
+/* @brief Returns local hosts that have not sent any TCP traffic.  Lua: interface.getLocalHostsInfoNoTXTCP([params]) → table */
 static int ntop_get_interface_local_hosts_no_tcp_tx_info(lua_State* vm) {
   return (ntop_get_interface_hosts_criteria(vm, location_local_only_no_tcp_tx));
 }
 
+/* @brief Returns information for remote (non-local) hosts only.  Lua: interface.getRemoteHostsInfo([params]) → table */
 static int ntop_get_interface_remote_hosts_info(lua_State* vm) {
   return (ntop_get_interface_hosts_criteria(vm, location_remote_only));
 }
 
+/* @brief Returns remote hosts that have received but not sent any traffic.  Lua: interface.getRemoteHostsInfoNoTX([params]) → table */
 static int ntop_get_interface_remote_hosts_no_tx_info(lua_State* vm) {
   return (ntop_get_interface_hosts_criteria(vm, location_remote_only_no_tx));
 }
 
+/* @brief Returns remote hosts that have not sent any TCP traffic.  Lua: interface.getRemoteHostsInfoNoTXTCP([params]) → table */
 static int ntop_get_interface_remote_hosts_no_tcp_tx_info(lua_State* vm) {
   return (
       ntop_get_interface_hosts_criteria(vm, location_remote_only_no_tcp_tx));
 }
 
+/* @brief Returns hosts that are part of broadcast domains on this interface.  Lua: interface.getBroadcastDomainHostsInfo([params]) → table */
 static int ntop_get_interface_broadcast_domain_hosts_info(lua_State* vm) {
   return (
       ntop_get_interface_hosts_criteria(vm, location_broadcast_domain_only));
 }
 
+/* @brief Returns broadcast/multicast group hosts on this interface.  Lua: interface.getBroadcastMulticastHostsInfo([params]) → table */
 static int ntop_get_interface_broadcast_multicast_hosts_info(lua_State* vm) {
   return (
       ntop_get_interface_hosts_criteria(vm, location_broadcat_multicast_only));
 }
 
+/* @brief Returns hosts with public (routable) IP addresses.  Lua: interface.getPublicHostsInfo([params]) → table */
 static int ntop_get_public_hosts_info(lua_State* vm) {
   return (ntop_get_interface_hosts_criteria(vm, location_public_only));
 }
 
 /* ****************************************** */
 
+/* @brief Returns hosts that have only been seen in the receive direction.  Lua: interface.getRxOnlyHostsList() → table */
 static int ntop_get_rxonly_hosts_list(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool local_host_rx_only = false, list_host_peers = false;
@@ -4377,20 +4553,24 @@ static int ntop_get_rxonly_hosts_list(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a paginated batch of host records for all hosts.  Lua: interface.getBatchedHostsInfo(cursor, count) → table */
 static int ntop_get_batched_interface_hosts_info(lua_State* vm) {
   return (ntop_get_batched_interface_hosts(vm, location_all, false, true));
 }
 
+/* @brief Returns a paginated batch of local host records.  Lua: interface.getBatchedLocalHostsInfo(cursor, count) → table */
 static int ntop_get_batched_interface_local_hosts_info(lua_State* vm) {
   return (
       ntop_get_batched_interface_hosts(vm, location_local_only, false, false));
 }
 
+/* @brief Returns a paginated batch of remote host records.  Lua: interface.getBatchedRemoteHostsInfo(cursor, count) → table */
 static int ntop_get_batched_interface_remote_hosts_info(lua_State* vm) {
   return (
       ntop_get_batched_interface_hosts(vm, location_remote_only, false, false));
 }
 
+/* @brief Returns a paginated batch of local host time-series data.  Lua: interface.getBatchedLocalHostsTs(cursor, count) → table */
 static int ntop_get_batched_interface_local_hosts_ts(lua_State* vm) {
   return (ntop_get_batched_interface_hosts(vm, location_local_only,
                                            true /* timeseries */, false));
@@ -4398,6 +4578,7 @@ static int ntop_get_batched_interface_local_hosts_ts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Stores a triggered alert record in the interface alert database.  Lua: interface.storeTriggeredAlert(alert_table) → nil */
 static int ntop_interface_store_triggered_alert(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
 
@@ -4406,6 +4587,7 @@ static int ntop_interface_store_triggered_alert(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns comprehensive real-time statistics for the interface.  Lua: interface.getStats() → table */
 static int ntop_get_interface_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   bool full_stats = true;
@@ -4425,6 +4607,7 @@ static int ntop_get_interface_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Forces an update of per-direction (upload/download) statistics.  Lua: interface.updateDirectionStats() → nil */
 static int ntop_update_interface_direction_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -4439,6 +4622,7 @@ static int ntop_update_interface_direction_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Triggers a refresh of the top-sites (popular domains) tracking.  Lua: interface.updateTopSites() → nil */
 static int ntop_update_interface_top_sites(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -4455,6 +4639,7 @@ static int ntop_update_interface_top_sites(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the statistics update frequency in seconds for this interface.  Lua: interface.getStatsUpdateFreq() → integer */
 static int ntop_get_interface_stats_update_freq(lua_State* vm) {
   NetworkInterface* curr_iface = NULL;
   int ifid;
@@ -4475,6 +4660,7 @@ static int ntop_get_interface_stats_update_freq(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns seconds elapsed since the interface first received traffic.  Lua: interface.getSecsToFirstData() → integer */
 static int ntop_get_secs_to_first_data(lua_State* vm) {
   NetworkInterface* curr_iface = NULL;
   int ifid;
@@ -4509,6 +4695,7 @@ static int ntop_get_secs_to_first_data(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns size and usage statistics for the interface hash tables (hosts, flows, etc.).  Lua: interface.getHashTablesStats() → table */
 static int ntop_get_interface_hash_tables_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -4522,6 +4709,7 @@ static int ntop_get_interface_hash_tables_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns timing stats for all periodic scripts on this interface.  Lua: interface.getPeriodicActivitiesStats() → table */
 static int ntop_get_interface_periodic_activities_stats(lua_State* vm) {
   NetworkInterface* curr_iface = NULL;
   int ifid;
@@ -4542,6 +4730,7 @@ static int ntop_get_interface_periodic_activities_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns enqueue/dequeue statistics for internal interface queues.  Lua: interface.getQueuesStats() → table */
 static int ntop_get_interface_queues_stats(lua_State* vm) {
   NetworkInterface* curr_iface = NULL;
   int ifid;
@@ -4561,6 +4750,7 @@ static int ntop_get_interface_queues_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Updates the completion percentage for a running periodic script.  Lua: interface.setPeriodicActivityProgress(activity, progress_pct) → nil */
 static int ntop_set_interface_periodic_activity_progress(lua_State* vm) {
   int progress;
   NtopngLuaContext* ctx = getLuaVMContext(vm);
@@ -4583,6 +4773,7 @@ static int ntop_set_interface_periodic_activity_progress(lua_State* vm) {
 /* This function reads live ASN information from flows
  * by iterating all the currently active flows
  */
+/* @brief Returns live (real-time) traffic statistics for a specific ASN.  Lua: interface.getLiveASNStats(asn) → table */
 static int ntop_get_live_asn_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   ASNStats asn_stats;
@@ -4606,6 +4797,7 @@ static int ntop_get_live_asn_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns statistics on currently active flows grouped by various dimensions.  Lua: interface.getActiveFlowsStats([params]) → table */
 static int ntop_get_active_flows_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   nDPIStats ndpi_stats;
@@ -4695,6 +4887,7 @@ static int ntop_get_active_flows_stats(lua_State* vm) {
 /* curl -i -XPOST "http://localhost:8086/write?precision=s&db=ntopng"
  * --data-binary 'profile:traffic,ifid=0,profile=a profile bytes=2506351
  * 1559634840' */
+/* @brief Appends time-series data points to the InfluxDB write queue.  Lua: interface.appendInfluxDB(json_points) → nil */
 static int ntop_append_influx_db(lua_State* vm) {
   bool rv = false;
   NetworkInterface* curr_iface;
@@ -4710,6 +4903,7 @@ static int ntop_append_influx_db(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Enqueues an RRD update for background writing.  Lua: interface.rrd_enqueue(rrd_path, value, step) → nil */
 static int ntop_rrd_queue_push(lua_State* vm) {
   bool rv = false;
   NetworkInterface* curr_iface;
@@ -4726,6 +4920,7 @@ static int ntop_rrd_queue_push(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Dequeues a pending RRD update task.  Lua: interface.rrd_dequeue() → table */
 static int ntop_rrd_queue_pop(lua_State* vm) {
   int ifid;
   NetworkInterface* iface;
@@ -4754,6 +4949,7 @@ static int ntop_rrd_queue_pop(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the number of pending items in the RRD update queue.  Lua: interface.rrd_queue_length() → integer */
 static int ntop_rrd_queue_length(lua_State* vm) {
   int ifid;
   NetworkInterface* iface;
@@ -4779,6 +4975,7 @@ static int ntop_rrd_queue_length(lua_State* vm) {
 #ifdef HAVE_NEDGE
 /* NOTE: do no call this directly - use host_pools_utils.resetPoolsQuotas
  * instead */
+/* @brief Resets traffic quota counters for all or a specific host pool (nEdge Pro).  Lua: interface.resetPoolsQuotas([pool_id]) → nil */
 static int ntop_reset_pools_quotas(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int16_t pool_id_filter = (u_int16_t)-1;
@@ -4799,6 +4996,7 @@ static int ntop_reset_pools_quotas(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Clears the dynamic blacklist for a host pool (nEdge Pro).  Lua: interface.flushPoolDynamicBlacklist(pool_id) → nil */
 static int ntop_flush_pool_dynamic_blacklist(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int16_t pool_id = (u_int16_t)-1;
@@ -4829,6 +5027,7 @@ static int ntop_flush_pool_dynamic_blacklist(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns blacklist statistics for a host pool (nEdge Pro).  Lua: interface.getPoolDynamicBlacklistStats(pool_id) → table */
 static int ntop_get_pool_dynamic_blacklist_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int16_t pool_id = (u_int16_t)-1;
@@ -4852,6 +5051,7 @@ static int ntop_get_pool_dynamic_blacklist_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the current dynamic blacklist members for a pool (nEdge Pro).  Lua: interface.getPoolDynamicBlacklistMembers(pool_id) → table */
 static int ntop_get_pool_dynamic_blacklist_members(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   u_int16_t pool_id = (u_int16_t)-1;
@@ -4880,6 +5080,7 @@ static int ntop_get_pool_dynamic_blacklist_members(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the host pool ID that a host belongs to.  Lua: interface.findMemberPool(host[,vlan]) → integer */
 static int ntop_find_member_pool(lua_State* vm) {
   NetworkInterface* curr_iface;
   char* address;
@@ -4948,6 +5149,7 @@ static int ntop_find_member_pool(lua_State* vm) {
 
 /* *******************************************/
 
+/* @brief Returns the host pool ID that a MAC address belongs to.  Lua: interface.findMacPool(mac) → integer */
 static int ntop_find_mac_pool(lua_State* vm) {
   const char* mac;
   u_int8_t mac_parsed[6];
@@ -4976,6 +5178,7 @@ static int ntop_find_mac_pool(lua_State* vm) {
 
 #ifdef HAVE_NEDGE
 
+/* @brief Reloads L7 (nDPI-based) shaping rules for a host pool (nEdge).  Lua: interface.reloadL7Rules(pool_id) → nil */
 static int ntop_reload_l7_rules(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -5004,6 +5207,7 @@ static int ntop_reload_l7_rules(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Reloads traffic shaper configurations from Redis (nEdge).  Lua: interface.reloadShapers() → nil */
 static int ntop_reload_shapers(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -5022,6 +5226,7 @@ static int ntop_reload_shapers(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Retrieves a cached alert context value by key for this interface.  Lua: interface.getCachedAlertValue(key) → string */
 static int ntop_interface_get_cached_alert_value(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   char* key;
@@ -5052,6 +5257,7 @@ static int ntop_interface_get_cached_alert_value(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Stores a cached alert context value for this interface.  Lua: interface.setCachedAlertValue(key, value[, expiry]) → nil */
 static int ntop_interface_set_cached_alert_value(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   char *key, *value;
@@ -5090,6 +5296,7 @@ static int ntop_interface_set_cached_alert_value(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Validates and initializes alert context for a script execution.  Lua: interface.checkContext(context_key) → nil */
 static int ntop_interface_check_context(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   char* entity_val;
@@ -5121,6 +5328,7 @@ static int ntop_interface_check_context(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Bulk-releases engaged alerts matching a script key and type.  Lua: interface.releaseEngagedAlerts(script_key, subtype, alert_type) → nil */
 static int ntop_interface_release_engaged_alerts(lua_State* vm) {
   NetworkInterface* iface = getCurrentInterface(vm);
 
@@ -5137,6 +5345,7 @@ static int ntop_interface_release_engaged_alerts(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns classification attributes for a host (device type, OS, category).  Lua: interface.getHostAttributes(host, vlan) → table */
 static int ntop_interface_get_host_attributes(lua_State* vm) {
   NetworkInterface* iface = getCurrentInterface(vm);
   u_int16_t vlan_id = 0;
@@ -5272,6 +5481,7 @@ static void ntop_get_maps_filters(lua_State* vm, MapsFilters* filters) {
 
 /* ****************************************** */
 
+/* @brief Internal helper for periodicity and service map queries.  Lua: (internal map helper) → table */
 static int ntop_get_interface_map(lua_State* vm, bool periodicity) {
   MapsFilters filters;
 
@@ -5298,6 +5508,7 @@ static int ntop_get_interface_map(lua_State* vm, bool periodicity) {
 
 /* ****************************************** */
 
+/* @brief Internal helper returning filter list for periodicity/service maps.  Lua: (internal map filter helper) → table */
 static int ntop_get_interface_map_filter_list(lua_State* vm, bool periodicity) {
   MapsFilters filters;
 
@@ -5323,30 +5534,35 @@ static int ntop_get_interface_map_filter_list(lua_State* vm, bool periodicity) {
 
 /* ****************************************** */
 
+/* @brief Returns available filter options for the periodicity map view.  Lua: interface.periodicityMapFilterList() → table */
 static int ntop_get_interface_periodicity_map_filter_list(lua_State* vm) {
   return ntop_get_interface_map_filter_list(vm, true /* periodicity */);
 }
 
 /* ****************************************** */
 
+/* @brief Returns available filter options for the service map view.  Lua: interface.serviceMapFilterList() → table */
 static int ntop_get_interface_service_map_filter_list(lua_State* vm) {
   return ntop_get_interface_map_filter_list(vm, false /* service */);
 }
 
 /* ****************************************** */
 
+/* @brief Returns the periodicity map data for hosts and protocols on this interface.  Lua: interface.periodicityMap([params]) → table */
 static int ntop_get_interface_periodicity_map(lua_State* vm) {
   return ntop_get_interface_map(vm, true /* periodicity */);
 }
 
 /* ****************************************** */
 
+/* @brief Returns the service map data (host-to-service relationships) for this interface.  Lua: interface.serviceMap([params]) → table */
 static int ntop_get_interface_service_map(lua_State* vm) {
   return ntop_get_interface_map(vm, false /* service */);
 }
 
 /* ****************************************** */
 
+/* @brief Clears all learned periodicity map data for this interface.  Lua: interface.flushPeriodicityMap() → nil */
 static int ntop_flush_interface_periodicity_map(lua_State* vm) {
 #if defined(NTOPNG_PRO)
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -5365,6 +5581,7 @@ static int ntop_flush_interface_periodicity_map(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Clears all learned service map data for this interface.  Lua: interface.flushServiceMap() → nil */
 static int ntop_flush_interface_service_map(lua_State* vm) {
 #if defined(NTOPNG_PRO)
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -5383,6 +5600,7 @@ static int ntop_flush_interface_service_map(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sets the learning/active status for a single service map entry.  Lua: interface.serviceMapSetStatus(key, status) → nil */
 static int ntop_interface_service_map_set_status(lua_State* vm) {
 #if defined(NTOPNG_PRO)
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -5417,6 +5635,7 @@ static int ntop_interface_service_map_set_status(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Sets status for multiple service map entries in a single call.  Lua: interface.serviceMapSetMultipleStatus(entries_table) → nil */
 static int ntop_interface_service_map_set_multiple_status(lua_State* vm) {
 #if defined(NTOPNG_PRO)
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -5450,6 +5669,7 @@ static int ntop_interface_service_map_set_multiple_status(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns whether the service map is in learning or enforcement mode.  Lua: interface.serviceMapLearningStatus() → table */
 static int ntop_interface_service_map_learning_status(lua_State* vm) {
 #if defined(NTOPNG_PRO)
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -5469,6 +5689,7 @@ static int ntop_interface_service_map_learning_status(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if behavioral analysis (periodicity/service maps) is available.  Lua: interface.isBehaviourAnalysisAvailable() → boolean */
 static int ntop_is_behaviour_analysis_available(lua_State* vm) {
 #if defined(NTOPNG_PRO)
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -5484,6 +5705,7 @@ static int ntop_is_behaviour_analysis_available(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns comprehensive address information (DNS, geolocation, ASN) for an IP or hostname.  Lua: interface.getAddressInfo(ip_or_name) → table */
 static int ntop_get_address_info(lua_State* vm) {
   char* addr;
   IpAddress ip;
@@ -5506,6 +5728,7 @@ static int ntop_get_address_info(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns per-protocol nDPI traffic statistics for a specific host.  Lua: interface.getnDPIHostStats(host, vlan) → table */
 static int ntop_get_ndpi_host_stats(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* host_ip;
@@ -5535,6 +5758,7 @@ static int ntop_get_ndpi_host_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns minimal host info (bytes, packets, score) for lightweight polling.  Lua: interface.getHostMinInfo(host[,vlan]) → table */
 static int ntop_get_interface_get_host_min_info(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   char* host_ip;
@@ -5567,6 +5791,7 @@ static int ntop_get_interface_get_host_min_info(lua_State* vm) {
 
 #ifdef HAVE_NEDGE
 
+/* @brief Triggers an update of traffic shaper state for all active flows (nEdge).  Lua: interface.updateFlowsShapers() → nil */
 static int ntop_update_flows_shapers(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -5578,6 +5803,7 @@ static int ntop_update_flows_shapers(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns a monotonic counter incremented on each policy change (nEdge).  Lua: interface.getPolicyChangeMarker() → integer */
 static int ntop_get_policy_change_marker(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -5592,6 +5818,7 @@ static int ntop_get_policy_change_marker(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Adds an IP/CIDR to the LAN address list for nEdge routing decisions.  Lua: interface.addLanIPAddress(ip_cidr) → nil */
 static int ntop_add_lan_ip_address(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -5612,6 +5839,7 @@ static int ntop_add_lan_ip_address(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the L7 policy rules for a host pool (nEdge).  Lua: interface.getl7PolicyInfo(pool_id) → table */
 static int ntop_get_l7_policy_info(lua_State* vm) {
   u_int16_t pool_id;
   u_int8_t shaper_id;
@@ -5673,6 +5901,7 @@ static int ntop_get_l7_policy_info(lua_State* vm) {
 /* ****************************************** */
 
 // *** API ***
+/* @brief Returns true if this is a disaggregated sub-interface.  Lua: interface.isSubInterface() → boolean */
 static int ntop_interface_is_sub_interface(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -5688,6 +5917,7 @@ static int ntop_interface_is_sub_interface(lua_State* vm) {
 /* ****************************************** */
 
 // *** API ***
+/* @brief Returns true if this interface receives syslog events.  Lua: interface.isSyslogInterface() → boolean */
 static int ntop_interface_is_syslog_interface(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -5702,6 +5932,7 @@ static int ntop_interface_is_syslog_interface(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Executes a ClickHouse SQL query and streams CSV results to the HTTP response.  Lua: interface.clickhouseExecCSVQuery(sql) → nil */
 static int ntop_clickhouse_exec_csv_query(lua_State* vm) {
 #ifdef HAVE_CLICKHOUSE
   NtopngLuaContext* ctx = getLuaVMContext(vm);
@@ -5755,6 +5986,7 @@ static int ntop_clickhouse_exec_csv_query(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Triggers archival of old interface data to ClickHouse storage.  Lua: interface.clickhouseArchiveData() → nil */
 static int ntop_clickhouse_archive_data(lua_State* vm) {
 #ifdef HAVE_CLICKHOUSE
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -5783,6 +6015,7 @@ static int ntop_clickhouse_archive_data(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Records a protocol observation for a host to the nDPI dump table.  Lua: interface.dumpnDPIProtocolId(host, vlan, proto_id) → nil */
 static int ntop_dump_host_based_protocol_id(lua_State* vm) {
   NetworkInterface* curr_iface = getLuaVMUserdata(vm, iface);
   struct mg_connection* conn = getLuaVMUserdata(vm, conn);
@@ -5797,6 +6030,7 @@ static int ntop_dump_host_based_protocol_id(lua_State* vm) {
 }
 /* ****************************************** */
 
+/* @brief Records a category observation for a host to the nDPI dump table.  Lua: interface.dumpnDPICategoryId(host, vlan, cat_id) → nil */
 static int ntop_dump_host_based_category_id(lua_State* vm) {
   NetworkInterface* curr_iface = getLuaVMUserdata(vm, iface);
   struct mg_connection* conn = getLuaVMUserdata(vm, conn);
@@ -5812,6 +6046,7 @@ static int ntop_dump_host_based_category_id(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Swaps the hostname-to-IP cache with a newly built version.  Lua: interface.swapHostnameIPCache() → nil */
 static int ntop_swap_hostname_ip_cache(lua_State* vm) {
   NetworkInterface* curr_iface = getLuaVMUserdata(vm, iface);
 
@@ -5827,6 +6062,7 @@ static int ntop_swap_hostname_ip_cache(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Triggers aggregation of flows by Autonomous System Number.  Lua: interface.aggregateASNFlows() → nil */
 static int ntop_aggregate_asn_flows(lua_State* vm) {
   NetworkInterface* curr_iface = getLuaVMUserdata(vm, iface);
 
@@ -5839,6 +6075,7 @@ static int ntop_aggregate_asn_flows(lua_State* vm) {
 /* ****************************************** */
 
 #ifdef NTOPNG_PRO
+/* @brief Triggers aggregation of flows by site/organization (Pro).  Lua: interface.aggregateSiteFlows() → nil */
 static int ntop_aggregate_site_flows(lua_State* vm) {
 #ifdef NTOPNG_PRO
   NetworkInterface* curr_iface = getLuaVMUserdata(vm, iface);
@@ -5857,6 +6094,7 @@ static int ntop_aggregate_site_flows(lua_State* vm) {
 /*
  * Execute a ClickHouse statement with no result expected (e.g. INSERT)
  */
+/* @brief Executes a SQL write statement on the ClickHouse interface database.  Lua: interface.execSQLWrite(sql) → nil */
 static int ntop_clickhouse_exec_sql_write(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   const char* sql;
@@ -5882,6 +6120,7 @@ static int ntop_clickhouse_exec_sql_write(lua_State* vm) {
  * Serialises the point to line protocol via CHTimeseriesExporter::enqueueData.
  * Lua signature: interface.chTsEnqueue(schema, timestamp, tags, metrics) ->
  * boolean */
+/* @brief Enqueues a ClickHouse time-series data batch for async insertion.  Lua: interface.chTsEnqueue(json_data) → nil */
 static int ntop_interface_ch_ts_enqueue(lua_State* vm) {
   bool rv = false;
   NetworkInterface* curr_iface;
@@ -5900,6 +6139,7 @@ static int ntop_interface_ch_ts_enqueue(lua_State* vm) {
 /* Dequeue one line-protocol-encoded timeseries row from the ClickHouse TS
  * queue. Returns the string on success, nil if the queue is empty. Lua
  * signature: interface.chTsDequeue() -> string|nil */
+/* @brief Dequeues a pending ClickHouse time-series data batch.  Lua: interface.chTsDequeue() → string */
 static int ntop_interface_ch_ts_dequeue(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -5922,6 +6162,7 @@ static int ntop_interface_ch_ts_dequeue(lua_State* vm) {
 
 /* Return the current length of the ClickHouse TS queue.
  * Lua signature: interface.chTsQueueLen() -> integer */
+/* @brief Returns the number of pending ClickHouse time-series batches in the queue.  Lua: interface.chTsQueueLen() → integer */
 static int ntop_interface_ch_ts_queue_len(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
 
@@ -5936,6 +6177,7 @@ static int ntop_interface_ch_ts_queue_len(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Executes a SQL query against the in-memory flow/host tables.  Lua: interface.execInMemoryQuery(sql) → table */
 static int ntop_exec_in_memory_sql_query(lua_State* vm) {
   char* sql;
   InMemorySQLiteDB* db = getLuaVMUserdata(vm, db);
@@ -5958,6 +6200,7 @@ static int ntop_exec_in_memory_sql_query(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Handles an IP address reassignment event (DHCP lease change).  Lua: interface.updateIPReassignment(params_table) → nil */
 static int ntop_interface_update_ip_reassignment(lua_State* vm) {
   NetworkInterface* iface = NULL;
   int ifid = -1;
@@ -5981,6 +6224,7 @@ static int ntop_interface_update_ip_reassignment(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Triggers a traffic-threshold alert with configurable severity and details.  Lua: interface.triggerTrafficAlert(params_table) → nil */
 static int ntop_interface_trigger_traffic_alert(lua_State* vm) {
   u_int32_t frequency_sec;
   bool t_sign = true;
@@ -6081,6 +6325,7 @@ static int ntop_interface_trigger_traffic_alert(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Updates the site/host ranking data for this interface (Pro).  Lua: interface.updateRanking(ranking_table) → nil */
 static int ntop_update_ranking(lua_State* vm) {
 #ifdef NTOPNG_PRO
   u_int32_t epoch;

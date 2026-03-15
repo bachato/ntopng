@@ -27,6 +27,7 @@
 
 /* **************************************************************** */
 
+/* @brief Returns the IP address (or IP/mask) string of the current host.  Lua: host.ip() → string */
 static int ntop_host_get_ip(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -43,6 +44,7 @@ static int ntop_host_get_ip(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the MAC address string associated with the current host, or an empty/zero MAC if unknown.  Lua: host.mac() → string */
 static int ntop_host_get_mac(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -61,6 +63,7 @@ static int ntop_host_get_mac(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the visual (display) name for the current host — resolved hostname, custom name, or IP string.  Lua: host.name() → string */
 static int ntop_host_get_name(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -77,6 +80,7 @@ static int ntop_host_get_name(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the VLAN ID associated with the current host (0 if untagged).  Lua: host.vlan_id() → integer */
 static int ntop_host_get_vlan_id(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -91,6 +95,7 @@ static int ntop_host_get_vlan_id(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the current alert score for the current host (sum of all active alert scores).  Lua: host.score() → integer */
 static int ntop_host_get_score(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -105,6 +110,7 @@ static int ntop_host_get_score(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns true if the current host belongs to a locally configured network.  Lua: host.is_local() → boolean */
 static int ntop_host_is_local(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -116,6 +122,7 @@ static int ntop_host_is_local(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns true if the current host's IP is a unicast address (not broadcast or multicast).  Lua: host.is_unicast() → boolean */
 static int ntop_host_is_unicast(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -128,6 +135,7 @@ static int ntop_host_is_unicast(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns true if the current host's IP is a multicast address.  Lua: host.is_multicast() → boolean */
 static int ntop_host_is_multicast(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -140,6 +148,7 @@ static int ntop_host_is_multicast(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns true if the current host's IP is a broadcast address.  Lua: host.is_broadcast() → boolean */
 static int ntop_host_is_broadcast(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -152,6 +161,7 @@ static int ntop_host_is_broadcast(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns true if the current host's IP appears on a configured blacklist.  Lua: host.is_blacklisted() → boolean */
 static int ntop_host_is_blacklisted(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -163,6 +173,7 @@ static int ntop_host_is_blacklisted(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns true if the current host has only been seen receiving traffic (no sent packets).  Lua: host.is_rx_only() → boolean */
 static int ntop_host_is_rx_only(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -174,6 +185,7 @@ static int ntop_host_is_rx_only(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the total bytes sent (uploaded) by the current host since it was first seen.  Lua: host.bytes_sent() → integer */
 static int ntop_host_get_bytes_sent(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -188,6 +200,7 @@ static int ntop_host_get_bytes_sent(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the total bytes received (downloaded) by the current host since it was first seen.  Lua: host.bytes_rcvd() → integer */
 static int ntop_host_get_bytes_rcvd(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -202,6 +215,7 @@ static int ntop_host_get_bytes_rcvd(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the total bytes (sent + received) for the current host since it was first seen.  Lua: host.bytes() → integer */
 static int ntop_host_get_bytes_total(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -216,6 +230,7 @@ static int ntop_host_get_bytes_total(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns a table of per-nDPI-protocol byte/flow statistics for the current host.  Lua: host.l7() → table */
 static int ntop_host_get_l7_stats(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -236,6 +251,7 @@ static int ntop_host_get_l7_stats(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Marks the current host to skip (or un-skip) re-evaluation by the custom host check script, optionally until a given Unix timestamp.  Lua: host.skipVisitedHost([skip[, skip_until]]) → nil */
 static int ntop_skip_visited_host(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -263,6 +279,7 @@ static int ntop_skip_visited_host(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Triggers a custom alert on the current host with a numeric value and message string.  Lua: host.triggerAlert(value, msg) → nil */
 static int ntop_trigger_host_alert(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -288,6 +305,7 @@ static int ntop_trigger_host_alert(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the number of distinct TCP/UDP server peers this host contacted but never received a reply from (no-TX peers as client).  Lua: host.getNumContactedPeersAsClientTCPUDPNoTX() → integer */
 static int ntop_get_num_contacted_peers_as_client_tcp_udp_notx(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -302,6 +320,7 @@ static int ntop_get_num_contacted_peers_as_client_tcp_udp_notx(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns a table with counts of unidirectional (no-reply) TCP/UDP flows for the current host, broken down by client/server role.  Lua: host.getUnidirectionalTCPUDPFlowsStats() → table */
 static int ntop_get_unidirectional_tcp_udp_flows_stats(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -316,6 +335,7 @@ static int ntop_get_unidirectional_tcp_udp_flows_stats(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns the number of distinct TCP/UDP clients that contacted this host as server but received no reply (no-TX peers as server).  Lua: host.getNumContactsFromPeersAsServerTCPUDPNoTX() → integer */
 static int ntop_get_num_contacts_from_peers_as_server_tcp_udp_notx(
     lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
@@ -331,6 +351,7 @@ static int ntop_get_num_contacts_from_peers_as_server_tcp_udp_notx(
 
 /* **************************************************************** */
 
+/* @brief Returns the number of distinct TCP/UDP server ports this host contacted but received no reply from (useful for port-scan detection).  Lua: host.getNumContactedTCPUDPServerPortsNoTX() → integer */
 static int ntop_get_num_contacted_tcp_udp_server_ports_notx(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -345,6 +366,7 @@ static int ntop_get_num_contacted_tcp_udp_server_ports_notx(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Resets all peer-contact counters for the current host (contacted peers, server ports, unidirectional flows).  Lua: host.resetHostContacts() → nil */
 static int ntop_reset_host_contacts(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
@@ -358,6 +380,7 @@ static int ntop_reset_host_contacts(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns true if this is the very first time the host check script has run for this host (useful for initialization logic).  Lua: host.isFirstCheckRun() → boolean */
 static int ntop_is_first_check_run(lua_State* vm) {
   NtopngLuaContext* c = getLuaVMContext(vm);
   Host* h = c ? c->host : NULL;
