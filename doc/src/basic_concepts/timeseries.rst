@@ -207,6 +207,33 @@ To use ClickHouse as the timeseries driver, set the timeseries driver preference
 ``clickhouse`` in the ntopng preferences UI, or configure the :code:`-F` option with a ClickHouse
 mode. See :ref:`ClickHouseTimeseriesAdvanced` for detailed configuration and architecture.
 
+Grafana Dashboard
+~~~~~~~~~~~~~~~~~
+
+When ClickHouse is enabled as the timeseries backend, ntopng provides a sample Grafana
+dashboard that can be downloaded directly from the ntopng Preferences page under the
+*Timeseries* section. The dashboard is pre-configured to connect to the same ClickHouse
+instance used by ntopng and includes panels for the most common traffic metrics such as
+interface throughput, top applications, and top hosts.
+
+.. figure:: ../img/basic_concepts_timeseries_clickhouse_grafana_dashboard.png
+  :align: center
+  :alt: ClickHouse Grafana Dashboard download button in ntopng Preferences
+
+  The Grafana dashboard download button appears in the Timeseries preferences when ClickHouse is selected as the driver.
+
+To import the dashboard into Grafana, download the JSON file from the Preferences page and
+use the Grafana *Import* function (*Dashboards* → *Import* → *Upload JSON file*).
+
+.. note::
+
+   The dashboard requires the `grafana-clickhouse-datasource
+   <https://grafana.com/grafana/plugins/grafana-clickhouse-datasource/>`_ plugin to be
+   installed in Grafana.
+
+   Once installed, configure a ClickHouse data source in Grafana pointing to the same server
+   and database used by ntopng, then import the downloaded JSON file.
+
 .. _RRD: https://oss.oetiker.ch/rrdtool
 
 .. _InfluxDB: https://www.influxdata.com

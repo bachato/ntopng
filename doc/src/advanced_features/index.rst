@@ -16,4 +16,5 @@ section.
     oem
     snapshots
     syslog
+    clickhouse_timeseries
 
