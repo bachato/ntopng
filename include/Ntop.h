@@ -157,9 +157,7 @@ class Ntop {
   bool alertExclusionsReloadInProgress;
   AlertExclusions *alert_exclusions, *alert_exclusions_shadow;
   std::map<std::tuple<u_int32_t /* exporter IP (network base address) */,
-                      u_int32_t /* interface_id */>,
-           SNMPInterfaceRole>
-      ifRoles;
+                      u_int32_t /* interface_id */>, SNMPInterfaceRole> *ifRoles, *ifRoles_shadow;
 #endif
 
   bool assignUserId(u_int8_t* new_user_id);
@@ -856,6 +854,8 @@ class Ntop {
   void speedtest(lua_State* vm);
 #if defined(NTOPNG_PRO)
   MessageBroker* getMessageBroker() { return (message_broker); };
+  void initSnmpInterfaceRole();
+  void activateSnmpInterfaceRoles();
   void snmpSetInterfaceRole(u_int32_t exporter_ip_v4, u_int32_t interface_id,
                             SNMPInterfaceRole interface_role);
   SNMPInterfaceRole snmpGetInterfaceRole(u_int32_t exporter_ip_v4,

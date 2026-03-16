@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS `flows` (
 `DST_ASN` UInt32 COMMENT 'Autonomous System Number of the destination IP',
 `PROBE_IP` UInt32 /* EXPORTER_IPV4_ADDRESS */ COMMENT 'IPv4 address of the NetFlow/IPFIX exporter (probe); same as EXPORTER_IPV4_ADDRESS',
 `EXPORTER_SITE` UInt16 COMMENT 'Site/location identifier of the flow exporter',
-`INTERFACE_ROLE` UInt8 COMMENT 'Role of the capturing interface (e.g. LAN, WAN)',
+`INTERFACE_ROLE` UInt8 COMMENT 'Role of the SMMP interface (e.g. peering, transit, internal network interface)',
 `OBSERVATION_POINT_ID` UInt16 COMMENT 'IPFIX observation point identifier',
 `SRC2DST_TCP_FLAGS` UInt8 COMMENT 'Bitwise OR of TCP flags seen in the client-to-server direction',
 `DST2SRC_TCP_FLAGS` UInt8 COMMENT 'Bitwise OR of TCP flags seen in the server-to-client direction',

@@ -229,6 +229,10 @@ Ntop::Ntop(const char* appName) {
         "Fatal error: nDPI risk alerts are out of sync with ntopng");
     exit(0);
   }
+
+#ifdef NTOPNG_PRO
+  ifRoles = ifRoles_shadow = NULL;
+#endif
 }
 
 /* ******************************************* */
@@ -401,6 +405,11 @@ Ntop::~Ntop() {
     ndpi_bitmask_free(&b->clientAllowed);
     ndpi_bitmask_free(&b->serverAllowed);
   }
+
+#ifdef NTOPNG_PRO
+  if(ifRoles_shadow) delete ifRoles_shadow;
+  if(ifRoles)        delete ifRoles;
+#endif
 }
 
 /* ******************************************* */
@@ -4948,31 +4957,53 @@ void Ntop::dumpLuaCache(lua_State* vm) {
 /* ******************************************* */
 
 #ifdef NTOPNG_PRO
-void Ntop::snmpSetInterfaceRole(u_int32_t exporter_ip_v4,
-                                u_int32_t interface_id,
-                                SNMPInterfaceRole interface_role) {
-  ifRoles.emplace(std::make_tuple(exporter_ip_v4, interface_id),
-                  interface_role);
 
-  // ntop->getTrace()->traceEvent(TRACE_NORMAL, "SET %u/%u = %u",
-  // exporter_ip_v4, interface_id, interface_role);
+void Ntop::initSnmpInterfaceRole() {
+  if(ifRoles_shadow != NULL) {
+    delete ifRoles_shadow;
+    ifRoles_shadow = NULL;
+  }
+  
+  ifRoles_shadow = new (std::nothrow) std::map<std::tuple<u_int32_t, u_int32_t>, SNMPInterfaceRole>;
 }
 
 /* ******************************************* */
 
-/* NOTE: add a mutex or another trick if dynamic interface reload is implemented
- */
+void Ntop::activateSnmpInterfaceRoles() {
+  if(ifRoles_shadow != NULL) {
+    std::map<std::tuple<u_int32_t, u_int32_t>, SNMPInterfaceRole> *tmp = ifRoles;
+
+    ifRoles = ifRoles_shadow;
+    ifRoles_shadow = tmp;
+  } else
+    ntop->getTrace()->traceEvent(TRACE_ERROR, "Invalid state");
+}
+
+/* ******************************************* */
+
+void Ntop::snmpSetInterfaceRole(u_int32_t exporter_ip_v4,
+                                u_int32_t interface_id,
+                                SNMPInterfaceRole interface_role) {
+  if(ifRoles_shadow == NULL) initSnmpInterfaceRole();
+
+  if(ifRoles_shadow)
+    ifRoles_shadow->emplace(std::make_tuple(exporter_ip_v4, interface_id), interface_role);
+}
+
+/* ******************************************* */
+
+/* NOTE: add a mutex or another trick if dynamic interface reload is implemented */
 SNMPInterfaceRole Ntop::snmpGetInterfaceRole(u_int32_t exporter_ip_v4,
                                              u_int32_t interface_id) {
-  std::tuple<u_int32_t, u_int32_t> searchKey = {exporter_ip_v4, interface_id};
-  std::map<std::tuple<u_int32_t, u_int32_t>, SNMPInterfaceRole>::iterator it =
-      ifRoles.find(searchKey);
+  if(ifRoles != NULL) {
+    std::tuple<u_int32_t, u_int32_t> searchKey = {exporter_ip_v4, interface_id};
+    std::map<std::tuple<u_int32_t, u_int32_t>, SNMPInterfaceRole>::iterator it =
+      ifRoles->find(searchKey);
 
-  if (it != ifRoles.end()) {
-    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "GET %u/%u = %u",
-    // exporter_ip_v4, interface_id, it->second);
-    return (it->second);
-  } else
-    return (role_other);
+    if (it != ifRoles->end())
+      return (it->second);    
+  }
+  
+  return (role_other);
 }
 #endif

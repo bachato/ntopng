@@ -5306,6 +5306,18 @@ static int ntop_snmp_read_responses(lua_State* vm) {
 /* ****************************************** */
 
 #if defined(NTOPNG_PRO)
+
+/* @brief Enables the SNMP interface roles set by ntop.snmpSetInterfaceRole,. Lua: ntop.activateSnmpInterfaceRoles() → nil */
+static int ntop_activate_snmp_interface_roles(lua_State* vm) {
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  ntop->activateSnmpInterfaceRoles();
+  lua_pushnil(vm);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));  
+}
+
+/* ****************************************** */
+
 /* @brief Sets the LAN/WAN role for an SNMP-managed interface (Pro only).  Lua: ntop.snmpSetInterfaceRole(host, ifidx, role) → nil */
 static int ntop_snmp_set_interface_role(lua_State* vm) {
   u_int32_t exporter_ip_v4;
@@ -9176,6 +9188,7 @@ static luaL_Reg _ntop_reg[] = {
 #if defined(NTOPNG_PRO)
     /* SNMP Interfaces */
     {"snmpSetInterfaceRole", ntop_snmp_set_interface_role},
+    {"activateSnmpInterfaceRoles", ntop_activate_snmp_interface_roles},
 #endif
 
     /* Runtime */
