@@ -360,6 +360,7 @@ const drawChart = async function (options, drawOnHidden) {
     if (drawOnHidden) {
         drawOnSecondDiv.value = !drawOnSecondDiv.value
     }
+    
     const targetDiv = drawOnSecondDiv.value ? second_chart.value : first_chart.value
     const newChart = new Dygraph(targetDiv, data, options);
 

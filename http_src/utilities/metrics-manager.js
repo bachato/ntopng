@@ -269,9 +269,9 @@ function get_metrics_url(http_prefix, source_type, source_array, epoch, include_
     }
     /* When include_empty_ts is set, all metrics are returned regardless of data availability,
      * so the epoch has no effect on the response — omit it to maximise cache hits. */
-    if (epoch != null && !include_empty_ts) {
+    //if (epoch != null && !include_empty_ts) {
         epoch_string = `epoch_end=${epoch.epoch_end}&epoch_begin=${epoch.epoch_begin}`
-    }
+    //}
     let url = `${http_prefix}/lua/rest/v2/get/timeseries/type/consts.lua?query=${source_type.query}&${params}&${epoch_string}&${include_empty_ts_string}`;
     return url;
 }
@@ -295,11 +295,13 @@ const get_metrics = async (http_prefix, source_type, source_array, status, inclu
         source_array = await get_default_source_array(http_prefix, source_type);
     }
     let key = get_metric_key(source_type, source_array);
+    let epoch_begin = status?.epoch_begin || ntopng_url_manager.get_url_entry("epoch_begin");
+    let epoch_end = status?.epoch_end || ntopng_url_manager.get_url_entry("epoch_end");
 
     /* include_empty_ts=true returns static metric definitions — cache permanently */
     if (include_empty_ts) {
         if (cache_metrics_static[key] == null) {
-            let url = get_metrics_url(http_prefix, source_type, source_array, null, true);
+            let url = get_metrics_url(http_prefix, source_type, source_array, { epoch_begin, epoch_end }, true);
             cache_metrics_static[key] = ntopng_utility.http_request(url);
         }
         let metrics = await cache_metrics_static[key];
@@ -310,8 +312,6 @@ const get_metrics = async (http_prefix, source_type, source_array, status, inclu
         return ntopng_utility.clone(metrics);
     }
 
-    let epoch_begin = status?.epoch_begin || ntopng_url_manager.get_url_entry("epoch_begin");
-    let epoch_end = status?.epoch_end || ntopng_url_manager.get_url_entry("epoch_end");
     let current_last_metrics_time_interval = `${epoch_begin}_${epoch_end}`;
     if (current_last_metrics_time_interval != last_metrics_time_interval) {
         cache_metrics[key] = null;
@@ -341,7 +341,6 @@ const get_current_page_source_type = () => {
 
 const get_metric_from_schema = async (http_prefix, source_type, source_array, metric_schema, metric_query, status, include_empty_ts) => {
     let metrics = await get_metrics(http_prefix, source_type, source_array, status, include_empty_ts);
-
     if (metric_schema === 'top:iface:ndpi') {
         return metrics.find((m) => m.schema == metric_schema && m.query == metric_query) ||
             metrics.find((m) => m.schema == 'top:iface:ndpi_full' && m.query == metric_query)
