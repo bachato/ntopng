@@ -9,7 +9,6 @@
 --   * Map(LowCardinality(String), String)  for tag key/value pairs
 --   * Map(LowCardinality(String), Float64) for metric key/value pairs
 --   * MergeTree engine partitioned by month for efficient time pruning
---   * TTL clause for automatic data-retention enforcement
 --   * Batch inserts (buffered through CHTimeseriesExporter, implementing
 --     an in-memory FIFO queue) to avoid small-part overhead; points 
 --     are serialised as line-protocol strings (same as RRD and InfluxDB)
@@ -32,7 +31,7 @@ local CH_EXPORTED_POINTS_KEY   = CH_TS_KEY_PREFIX .. "exported_points"
 local CH_FAILED_EXPORTS_KEY    = CH_TS_KEY_PREFIX .. "failed_exports"
 
 -- Table and batching settings
-local CH_TABLE_NAME     = "timeseries"
+local CH_TS_TABLE_NAME     = "timeseries"
 local CH_BATCH_SIZE     = 2000    -- maximum rows per INSERT statement
 
 -- ##############################################
@@ -238,7 +237,7 @@ function driver:query(schema, tstart, tend, tags, options)
          table.concat(mid_sel, ", "),
          time_step, time_step,
          table.concat(inner_sel, ", "),
-         ch_escape(self.db), CH_TABLE_NAME,
+         ch_escape(self.db), CH_TS_TABLE_NAME,
          ch_escape(schema.name), tw,
          tstart - time_step, tend,
          tstart)
@@ -264,7 +263,7 @@ function driver:query(schema, tstart, tend, tags, options)
          .. "GROUP BY t ORDER BY t ASC",
          time_step, time_step,
          table.concat(sel, ", "),
-         ch_escape(self.db), CH_TABLE_NAME,
+         ch_escape(self.db), CH_TS_TABLE_NAME,
          ch_escape(schema.name), tw,
          tstart, tend)
    end
@@ -404,7 +403,7 @@ function driver:queryTotal(schema, tstart, tend, tags, options)
       .. "WHERE schema_name = '%s'%s "
       .. "AND tstamp BETWEEN toDateTime(%d) AND toDateTime(%d)",
       table.concat(sel, ", "),
-      ch_escape(self.db), CH_TABLE_NAME,
+      ch_escape(self.db), CH_TS_TABLE_NAME,
       ch_escape(schema.name), tw,
       tstart, tend)
 
@@ -454,7 +453,7 @@ function driver:listSeries(schema, tags_filter, wildcard_tags, start_time, end_t
       .. "WHERE schema_name = '%s'%s AND %s"
       .. "%s LIMIT 200",
       sel_cols,
-      ch_escape(self.db), CH_TABLE_NAME,
+      ch_escape(self.db), CH_TS_TABLE_NAME,
       ch_escape(schema.name), tw, time_cond,
       group_clause)
 
@@ -514,7 +513,7 @@ function driver:topk(schema, tags, tstart, tend, options, top_tags)
       .. "ORDER BY value DESC LIMIT %d",
       ch_escape(top_tag),
       table.concat(value_parts, " + "),
-      ch_escape(self.db), CH_TABLE_NAME,
+      ch_escape(self.db), CH_TS_TABLE_NAME,
       ch_escape(schema.name), tw,
       tstart, tend,
       options.top or 8)
@@ -702,7 +701,7 @@ function driver:export()
 
    local sql = string.format(
       "INSERT INTO `%s`.`%s` (schema_name, tstamp, tags, metrics) VALUES %s",
-      ch_escape(self.db), CH_TABLE_NAME,
+      ch_escape(self.db), CH_TS_TABLE_NAME,
       table.concat(rows, ","))
 
    local ok = ch_write(sql)
@@ -745,7 +744,7 @@ function driver:delete(schema_prefix, tags)
    -- Use ALTER TABLE ... DELETE (asynchronous mutation, universally supported).
    local sql = string.format(
       "ALTER TABLE `%s`.`%s` DELETE WHERE %s%s",
-      ch_escape(self.db), CH_TABLE_NAME,
+      ch_escape(self.db), CH_TS_TABLE_NAME,
       schema_cond, tw)
 
    local ok = ch_write(sql)
@@ -754,8 +753,50 @@ end
 
 -- ##############################################
 
---! @brief Delete old data (TTL handles retention automatically in ClickHouse).
+--! @brief Delete old data by dropping daily partitions older than the configured
+--! retention period, rather then using a TTL clause set at table creation which
+--! complicates retention management in case the retention time is changed by the
+--! user.
 function driver:deleteOldData(ifid)
+   local data_retention_utils = require "data_retention_utils"
+   local retention_days = data_retention_utils.getTSAndStatsDataRetentionDays() or 365
+
+   -- Compute the cutoff epoch, aligned to the start of the day.
+   local now      = os.time()
+   local cutoff   = now - 86400 * retention_days
+   cutoff         = cutoff - (cutoff % 86400)
+
+   -- The table is partitioned by day (toYYYYMMDD), so the partition key is an
+   -- 8-digit integer YYYYMMDD.  Drop every active partition whose value is
+   -- <= the cutoff date (data on that day is entirely outside the window).
+   local cutoff_yyyymmdd = tonumber(os.date("%Y%m%d", cutoff))
+
+   local find_sql = string.format(
+      "SELECT DISTINCT database, table, toUInt32OrZero(partition) AS drop_part"
+      .. " FROM system.parts"
+      .. " WHERE active"
+      .. "   AND database = '%s'"
+      .. "   AND table    = '%s'"
+      .. "   AND drop_part <= %u"
+      .. "   AND drop_part > 999999",  -- guard against unexpected partition formats
+      ch_escape(self.db), ch_escape(CH_TS_TABLE_NAME), cutoff_yyyymmdd)
+
+   local partitions = ch_query(find_sql) or {}
+
+   for _, row in ipairs(partitions) do
+      local drop_sql = string.format(
+         "ALTER TABLE `%s`.`%s` DROP PARTITION '%s'",
+         ch_escape(row["database"]),
+         ch_escape(row["table"]),
+         ch_escape(tostring(row["drop_part"])))
+
+      traceError(TRACE_INFO, TRACE_CONSOLE,
+         string.format("[ClickHouse TS] Dropping partition %s (cutoff: %u)",
+            tostring(row["drop_part"]), cutoff_yyyymmdd))
+
+      ch_write(drop_sql)
+   end
+
    return true
 end
 
@@ -785,9 +826,13 @@ function driver:setup(ts_utils)
    --   * Map(LowCardinality(String), String) for tags  – LowCardinality keys avoid redundant
    --                                                      storage of repeated tag/metric names
    --   * Map(LowCardinality(String), Float64) metrics  – same benefit for metric keys
-   --   * MergeTree partitioned by month               – enables efficient partition pruning
+   --   * MergeTree partitioned by day                 – enables efficient partition pruning
    --   * ORDER BY (schema_name, tstamp)               – optimises time-range scans per schema
-   --   * TTL on tstamp                                – automatic retention management
+   --  Note: no TTL clause, retention is enforced by deleting daily partitions in deleteOldData(),
+   --  which always uses the current preference value. A TTL configured at CREATE TABLE time 
+   --  would become complicated to handle if the user changes the retention setting: it could 
+   --  delete data that should be kept (if retention is increased) or keep data too long (if
+   --  retention is decreased)
    local create_sql = string.format([[
 CREATE TABLE IF NOT EXISTS `%s`.`%s`
 (
@@ -797,10 +842,10 @@ CREATE TABLE IF NOT EXISTS `%s`.`%s`
     `metrics`      Map(LowCardinality(String), Float64)
 )
 ENGINE = MergeTree()
-PARTITION BY toYYYYMM(tstamp)
+PARTITION BY toYYYYMMDD(tstamp)
 ORDER BY (schema_name, tstamp)
-TTL tstamp + toIntervalDay(%d)]],
-      ch_escape(self.db), CH_TABLE_NAME, retention_days)
+-- TTL tstamp + toIntervalDay(N)  -- removed: see comment above]],
+      ch_escape(self.db), CH_TS_TABLE_NAME)
 
    local ok = ch_write(create_sql)
    if not ok then
@@ -811,7 +856,7 @@ TTL tstamp + toIntervalDay(%d)]],
 
    traceError(TRACE_INFO, TRACE_CONSOLE,
       string.format("[ClickHouse TS] Table `%s`.`%s` ready (retention: %d days)",
-         self.db, CH_TABLE_NAME, retention_days))
+         self.db, CH_TS_TABLE_NAME, retention_days))
    return true
 end
 
