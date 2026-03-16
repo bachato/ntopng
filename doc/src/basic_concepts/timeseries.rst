@@ -176,6 +176,39 @@ This pspecific timeseries is reported in all time presets except the last 5 minu
 
 
 
+.. _ClickHouseTimeseries Driver:
+
+ClickHouse Driver
+-----------------
+
+.. note::
+
+   ClickHouse timeseries support requires an Enterprise M or better license and ClickHouse
+   enabled via configuration file.
+
+ntopng supports writing and querying timeseries data from a ClickHouse_ server. ClickHouse is a
+database optimized for high-throughput analytical queries, making it well-suited for timeseries
+workloads at scale.
+
+Unlike RRD (which uses per-entity local files) ClickHouse stores all timeseries data in a single
+centralized table with a flexible tag/metric map layout, making it suitable for third party
+integrations like Grafana. This enables:
+
+- High write throughput: data is buffered in-memory per interface and flushed to ClickHouse
+  in batches, avoiding the I/O bottleneck of per-file RRD writes.
+- Flexible retention: a single TTL setting controls when data expires; no pre-defined
+  round-robin archives.
+- Efficient top-K queries: aggregations across all entities (e.g. top protocols, top hosts)
+  run as a single SQL query rather than scanning many individual files.
+- Cluster and cloud support: the driver supports standalone instances, distributed clusters,
+  and ClickHouse Cloud.
+
+To use ClickHouse as the timeseries driver, set the timeseries driver preference to
+``clickhouse`` in the ntopng preferences UI, or configure the :code:`-F` option with a ClickHouse
+mode. See :ref:`ClickHouseTimeseriesAdvanced` for detailed configuration and architecture.
+
 .. _RRD: https://oss.oetiker.ch/rrdtool
 
 .. _InfluxDB: https://www.influxdata.com
+
+.. _ClickHouse: https://clickhouse.com
