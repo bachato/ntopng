@@ -58,7 +58,7 @@ class ObservationPoint : public GenericHashEntry,
   bool is_hash_entry_state_idle_transition_ready();
 
   inline u_int64_t getNumFlows() { return num_flows; }
-  inline u_int16_t getNumHosts() { return getUses(); }
+  inline u_int32_t getNumHosts() { return getUses(); }
   inline u_int32_t key() { return obs_point; }
   inline u_int32_t getObsPoint() { return obs_point; }
   inline void addProbeIp(u_int32_t probe_ip) {

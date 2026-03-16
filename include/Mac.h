@@ -70,7 +70,7 @@ class Mac : public GenericHashEntry {
   Mac(NetworkInterface* _iface, u_int8_t _mac[6]);
   ~Mac();
 
-  inline u_int16_t getNumHosts() { return getUses(); }
+  inline u_int32_t getNumHosts() { return getUses(); }
   void setDeviceType(DeviceType devtype);
   inline void incUses() {
     GenericHashEntry::incUses();

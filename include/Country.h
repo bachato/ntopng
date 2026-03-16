@@ -46,7 +46,7 @@ class Country : public GenericHashEntry,
 
   void set_hash_entry_state_idle();
 
-  inline u_int16_t getNumHosts() { return getUses(); }
+  inline u_int32_t getNumHosts() { return getUses(); }
   inline u_int32_t key() { return Utils::stringHash(country_name); }
   inline char* get_country_name() { return country_name; }
 

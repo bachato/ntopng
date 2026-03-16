@@ -47,8 +47,8 @@ class VLAN : public GenericHashEntry,
 
   void set_hash_entry_state_idle();
 
-  inline u_int16_t getNumHosts() { return getUses(); }
-  inline u_int32_t key() { return (vlan_id); }
+  inline u_int32_t getNumHosts() { return getUses(); }
+  inline u_int32_t key()         { return (vlan_id); }
   inline u_int16_t get_vlan_id() { return (vlan_id); }
 
   bool equal(u_int16_t _vlan_id);
