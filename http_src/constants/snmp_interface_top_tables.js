@@ -50,15 +50,9 @@ const top_snmp_interface = {
 			]);
 		}
 	}, {
-		columnName: i18n("interface_name"), name: 'interface', data: 'interface', handlerId: handlerIdAddLink,
+		columnName: i18n("interface"), name: 'interface', data: 'interface', handlerId: handlerIdAddLink,
 		render: function (data, type, service) {
 			return `${data.label}`;
-		},
-	}, {
-		columnName: i18n("interface_alias"), name: 'interface', data: 'interface', handlerId: handlerIdAddLink,
-		render: function (data) {
-			let label_text = `${data.label}`;
-			return label_text;
 		},
 	}, {
 		columnName: i18n("page_stats.top.sent"), name: 'sent', className: 'text-end', data: 'sent', orderable: true,
