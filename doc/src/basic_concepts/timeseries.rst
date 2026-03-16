@@ -107,6 +107,64 @@ To enable InfluxDB authentication follow the steps highlighted at https://github
   Therefore, an admin user is required the first time ntopng is set up to use InfluxDB to allow creation of retention policies and continuous queries. Once the database has been created, a non-privileged user can used.
 
 
+.. _ClickHouseTimeseries Driver:
+
+ClickHouse Driver
+-----------------
+
+.. note::
+
+   ClickHouse timeseries support requires an Enterprise M or better license and ClickHouse
+   enabled via configuration file.
+
+ntopng supports writing and querying timeseries data from a ClickHouse_ server. ClickHouse is a
+database optimized for high-throughput analytical queries, making it well-suited for timeseries
+workloads at scale.
+
+Unlike RRD (which uses per-entity local files) ClickHouse stores all timeseries data in a single
+centralized table with a flexible tag/metric map layout, making it suitable for third party
+integrations like Grafana. This enables:
+
+- High write throughput: data is buffered in-memory per interface and flushed to ClickHouse
+  in batches, avoiding the I/O bottleneck of per-file RRD writes.
+- Flexible retention: a single TTL setting controls when data expires; no pre-defined
+  round-robin archives.
+- Efficient top-K queries: aggregations across all entities (e.g. top protocols, top hosts)
+  run as a single SQL query rather than scanning many individual files.
+- Cluster and cloud support: the driver supports standalone instances, distributed clusters,
+  and ClickHouse Cloud.
+
+To use ClickHouse as the timeseries driver, set the timeseries driver preference to
+``clickhouse`` in the ntopng preferences UI, or configure the :code:`-F` option with a ClickHouse
+mode. See :ref:`ClickHouseTimeseriesAdvanced` for detailed configuration and architecture.
+
+Grafana Dashboard
+~~~~~~~~~~~~~~~~~
+
+When ClickHouse is enabled as the timeseries backend, ntopng provides a sample Grafana
+dashboard that can be downloaded directly from the ntopng Preferences page under the
+*Timeseries* section. The dashboard is pre-configured to connect to the same ClickHouse
+instance used by ntopng and includes panels for the most common traffic metrics such as
+interface throughput, top applications, and top hosts.
+
+.. figure:: ../img/basic_concepts_timeseries_clickhouse_grafana_dashboard.png
+  :align: center
+  :alt: ClickHouse Grafana Dashboard download button in ntopng Preferences
+
+  The Grafana dashboard download button appears in the Timeseries preferences when ClickHouse is selected as the driver.
+
+To import the dashboard into Grafana, download the JSON file from the Preferences page and
+use the Grafana *Import* function (*Dashboards* → *Import* → *Upload JSON file*).
+
+.. note::
+
+   The dashboard requires the `grafana-clickhouse-datasource
+   <https://grafana.com/grafana/plugins/grafana-clickhouse-datasource/>`_ plugin to be
+   installed in Grafana.
+
+   Once installed, configure a ClickHouse data source in Grafana pointing to the same server
+   and database used by ntopng, then import the downloaded JSON file.
+
    
 Timeseries Configuration
 ------------------------
@@ -174,65 +232,6 @@ This pspecific timeseries is reported in all time presets except the last 5 minu
   :align: center
   :alt: Network Matrix
 
-
-
-.. _ClickHouseTimeseries Driver:
-
-ClickHouse Driver
------------------
-
-.. note::
-
-   ClickHouse timeseries support requires an Enterprise M or better license and ClickHouse
-   enabled via configuration file.
-
-ntopng supports writing and querying timeseries data from a ClickHouse_ server. ClickHouse is a
-database optimized for high-throughput analytical queries, making it well-suited for timeseries
-workloads at scale.
-
-Unlike RRD (which uses per-entity local files) ClickHouse stores all timeseries data in a single
-centralized table with a flexible tag/metric map layout, making it suitable for third party
-integrations like Grafana. This enables:
-
-- High write throughput: data is buffered in-memory per interface and flushed to ClickHouse
-  in batches, avoiding the I/O bottleneck of per-file RRD writes.
-- Flexible retention: a single TTL setting controls when data expires; no pre-defined
-  round-robin archives.
-- Efficient top-K queries: aggregations across all entities (e.g. top protocols, top hosts)
-  run as a single SQL query rather than scanning many individual files.
-- Cluster and cloud support: the driver supports standalone instances, distributed clusters,
-  and ClickHouse Cloud.
-
-To use ClickHouse as the timeseries driver, set the timeseries driver preference to
-``clickhouse`` in the ntopng preferences UI, or configure the :code:`-F` option with a ClickHouse
-mode. See :ref:`ClickHouseTimeseriesAdvanced` for detailed configuration and architecture.
-
-Grafana Dashboard
-~~~~~~~~~~~~~~~~~
-
-When ClickHouse is enabled as the timeseries backend, ntopng provides a sample Grafana
-dashboard that can be downloaded directly from the ntopng Preferences page under the
-*Timeseries* section. The dashboard is pre-configured to connect to the same ClickHouse
-instance used by ntopng and includes panels for the most common traffic metrics such as
-interface throughput, top applications, and top hosts.
-
-.. figure:: ../img/basic_concepts_timeseries_clickhouse_grafana_dashboard.png
-  :align: center
-  :alt: ClickHouse Grafana Dashboard download button in ntopng Preferences
-
-  The Grafana dashboard download button appears in the Timeseries preferences when ClickHouse is selected as the driver.
-
-To import the dashboard into Grafana, download the JSON file from the Preferences page and
-use the Grafana *Import* function (*Dashboards* → *Import* → *Upload JSON file*).
-
-.. note::
-
-   The dashboard requires the `grafana-clickhouse-datasource
-   <https://grafana.com/grafana/plugins/grafana-clickhouse-datasource/>`_ plugin to be
-   installed in Grafana.
-
-   Once installed, configure a ClickHouse data source in Grafana pointing to the same server
-   and database used by ntopng, then import the downloaded JSON file.
 
 .. _RRD: https://oss.oetiker.ch/rrdtool
 
