@@ -342,11 +342,6 @@ page_utils.menu_entries = {
     },
 
     -- ASN Mode
-    autonomous_systems_asn_mode = {
-        key = "autonomous_systems_asn_mode",
-        i18n_title = "as_stats.autonomous_systems",
-        section = "as"
-    },
     exporters_interfaces_traffic_asn_mode = {
         key = "exporters_interfaces_traffic_asn_mode",
         i18n_title = "exporters_interfaces_configuration.network_communications",

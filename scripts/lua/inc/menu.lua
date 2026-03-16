@@ -412,20 +412,6 @@ else
             }
         }
     })
-
-    -- ASN data + historical
-    page_utils.add_menubar_section({
-        section = page_utils.menu_sections.as,
-        hidden = not is_asn_mode_enabled or
-            (is_system_interface or is_viewed or infrastructure_view),
-        entries = {
-            {
-                entry = page_utils.menu_entries.autonomous_systems_asn_mode,
-                hidden = (not ntop.hasGeoIP()) or interface.isViewed(),
-                url = '/lua/as_stats.lua'
-            }
-        }
-    })
     -- ##############################################
     -- Hosts
 
@@ -532,13 +518,11 @@ page_utils.add_menubar_section({
             url = '/lua/pool_stats.lua'
         }, {
             entry = page_utils.menu_entries.autonomous_systems,
-            hidden = (not ntop.hasGeoIP()) or interface.isViewed() or
-                is_asn_mode_enabled,
+            hidden = (not ntop.hasGeoIP()) or interface.isViewed(),
             url = '/lua/as_stats.lua'
         }, {
             entry = page_utils.menu_entries.countries,
-            hidden = not ntop.hasGeoIP(),
-            hidden = interface.isViewed(),
+            hidden = not ntop.hasGeoIP() or interface.isViewed(),
             url = '/lua/country_stats.lua'
         }, {
             entry = page_utils.menu_entries.vlans,
