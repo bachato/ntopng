@@ -124,7 +124,7 @@ rm -fr $RPM_BUILD_ROOT
 /etc/logrotate.d/ntopng
 /etc/sudoers.d/ntopng
 /etc/rsyslog.d/20-ntopng.conf
-/etc/cron.d/ntopng
+%config(noreplace) /etc/cron.d/ntopng
 /usr/share/ntopng
 # Don't overwrite ntopng-cert.pem is the file is already present
 %config(noreplace) /usr/share/ntopng/httpdocs/ssl/ntopng-cert.pem
