@@ -92,14 +92,15 @@ function as_utils.formatFilters(options, add_to_existing_options)
             if interface_role_filter.id >= 0 then
                 if add_to_existing_options then
                     options.interface_role = nil
-                    options.interfaceRole = interface_role_filter.id
-                    return options
-                else
-                    filters.interfaceRole = interface_role_filter.id
                 end
+                filters.interfaceRole = interface_role_filter.id
             end
         end
     end
+    if add_to_existing_options then
+        filters = table.merge(filters, options)
+    end
+
     return filters
 end
 
