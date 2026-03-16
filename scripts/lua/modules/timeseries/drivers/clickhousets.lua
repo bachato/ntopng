@@ -652,6 +652,29 @@ end
 
 -- ##############################################
 
+--! @brief Return the last N non-NaN values for each metric in the time range.
+--! Note: values are already normalised by driver:query()
+function driver:queryLastValues(options)
+   local last_values = {}
+   local rsp = self:timeseries_query(options)
+
+   for _, data in pairs(rsp.series or {}) do
+      local values = {}
+      for i = (#data.data), 1, -1 do
+         if #values == options.num_points then break end
+         -- nan check
+         if data.data[i] == data.data[i] then
+            values[#values + 1] = data.data[i]
+         end
+      end
+      last_values[data.id] = values
+   end
+
+   return last_values
+end
+
+-- ##############################################
+
 --! @brief Flush the in-memory buffer to ClickHouse.
 --! Called periodically by the export script.
 function driver:export()
