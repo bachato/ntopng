@@ -214,7 +214,7 @@ export const ntopng_utility = function () {
             }
             return this.http_request(url, { method: 'post', headers, body: JSON.stringify(params) }, throw_exception, not_unwrap);
         },
-        http_request: async function (url, options, throw_exception, not_unwrap) {
+        http_request: async function (url, options, throw_exception, not_unwrap, return_error) {
             try {
                 if (options == null) {
                     options = {};
@@ -229,7 +229,7 @@ export const ntopng_utility = function () {
                     };
                 }
                 let res = await fetch(url, options);
-                if (res.ok === false) {
+                if (!res.ok && !return_error) {
                     console.error(`http_request ${url}\n ok == false`);
                     console.error(res);
                     return null;
