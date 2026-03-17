@@ -648,6 +648,8 @@ notification channels (e.g. Slack, email, syslog).
 | `ntop.snmpSetBulkMaxNumRepetitions(n)` | integer | nil | Set BULK repetitions |
 | `ntop.snmpSetFatMibPollingMode(enabled)` | bool | nil | Enable full MIB polling |
 | `ntop.snmpToggleTrapCollection(enabled)` | bool | nil | Enable/disable trap collection |
+| `ntop.snmpSetInterfaceRole(ip_addr, interface_idx, role_id)` | - | nil | Set the SNMP interface role in memory that is then activated using ntop.snmpSetInterfaceRole() |
+| `ntop.activateSnmpInterfaceRoles()` | - | nil | Activate the interface roles set with ntop.snmpSetInterfaceRole() |
 
 ### Synchronous (blocking)
 
