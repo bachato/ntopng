@@ -924,6 +924,42 @@ local menu_subpages = {{
             description = i18n("prefs.client_x509_auth_descr", {
                 product = info.product
             })
+        },
+        toggle_oidc_auth = {
+            title = i18n("prefs.toggle_oidc_auth"),
+            description = i18n("prefs.toggle_oidc_auth_descr")
+        },
+        oidc_issuer_url = {
+            title = i18n("prefs.oidc_issuer_url_title"),
+            description = i18n("prefs.oidc_issuer_url_description")
+        },
+        oidc_client_id = {
+            title = i18n("prefs.oidc_client_id_title"),
+            description = i18n("prefs.oidc_client_id_description")
+        },
+        oidc_client_secret = {
+            title = i18n("prefs.oidc_client_secret_title"),
+            description = i18n("prefs.oidc_client_secret_description")
+        },
+        oidc_base_redirect_uri = {
+            title = i18n("prefs.oidc_base_redirect_uri_title"),
+            description = i18n("prefs.oidc_base_redirect_uri_description")
+        },
+        oidc_scopes = {
+            title = i18n("prefs.oidc_scopes_title"),
+            description = i18n("prefs.oidc_scopes_description")
+        },
+        oidc_group_claim = {
+            title = i18n("prefs.oidc_group_claim_title"),
+            description = i18n("prefs.oidc_group_claim_description")
+        },
+        oidc_admin_group = {
+            title = i18n("prefs.oidc_admin_group_title"),
+            description = i18n("prefs.oidc_admin_group_description")
+        },
+        toggle_oidc_auto_create_users = {
+            title = i18n("prefs.toggle_oidc_auto_create_users_title"),
+            description = i18n("prefs.toggle_oidc_auto_create_users_description")
         }
     }
 }, {

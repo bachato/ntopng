@@ -396,6 +396,10 @@ Ntop::~Ntop() {
   if (radiusAcc) delete radiusAcc;
 #endif
 
+#ifdef NTOPNG_PRO
+  if (oidcAuth) delete oidcAuth;
+#endif
+
 #ifdef HAVE_SNMP_TRAP
   if (trap_collector) delete trap_collector;
 #endif
@@ -514,6 +518,10 @@ void Ntop::registerPrefs(Prefs* _prefs, bool quick_registration) {
     radiusAcc = new (std::nothrow) Radius();
   else
     radiusAcc = NULL;
+#endif
+
+#ifdef NTOPNG_PRO
+  oidcAuth = new (std::nothrow) OIDCAuthenticator();
 #endif
 
   redis->setInitializationComplete();

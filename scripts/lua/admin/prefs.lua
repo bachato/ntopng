@@ -69,6 +69,7 @@ local auth_toggles = {
     ["http"] = "toggle_http_auth",
     ["authentication_log"] = "toggle_http_auth_log",
     ["radius"] = "toggle_radius_auth",
+    ["oidc"] = "toggle_oidc_auth",
     ["menu_entries"] = {
         ["help"] = "toggle_menu_entry_help",
         ["developer"] = "toggle_menu_entry_developer"
@@ -138,6 +139,37 @@ if auth.has_capability(auth.capabilities.preferences) then
         ntop.setPref("ntopng.prefs.radius.external_auth_for_local_users_enabled",
             _POST["toggle_radius_external_auth_for_local_users"])
         ntop.updateRadiusLoginInfo()
+    end
+
+    -- OIDC configuration: always persist the toggle state, but only
+    -- overwrite the configuration fields when OIDC is being enabled so that
+    -- a form submission with OIDC disabled does not wipe stored values.
+    if not table.empty(_POST) and _GET["tab"] == "auth" then
+        local oidc_enabled = (_POST["toggle_oidc_auth"] == "1")
+        ntop.setPref("ntopng.prefs.oidc.enabled", oidc_enabled and "1" or "0")
+        if oidc_enabled then
+            ntop.setPref("ntopng.prefs.oidc.oidc_client_id",
+                _POST["oidc_client_id"] or "")
+            -- Only update client_secret if not the masked placeholder
+            local oidc_secret = _POST["oidc_client_secret"] or ""
+            if oidc_secret ~= "" and oidc_secret ~= "********" then
+                ntop.setPref("ntopng.prefs.oidc.oidc_client_secret", oidc_secret)
+            end
+            ntop.setPref("ntopng.prefs.oidc.oidc_issuer_url",
+                _POST["oidc_issuer_url"] or "")
+            ntop.setPref("ntopng.prefs.oidc.oidc_scopes",
+                (not isEmptyString(_POST["oidc_scopes"])) and _POST["oidc_scopes"]
+                or "openid profile email")
+            ntop.setPref("ntopng.prefs.oidc.oidc_group_claim",
+                (not isEmptyString(_POST["oidc_group_claim"])) and _POST["oidc_group_claim"]
+                or "groups")
+            ntop.setPref("ntopng.prefs.oidc.oidc_admin_group",
+                _POST["oidc_admin_group"] or "")
+            ntop.setPref("ntopng.prefs.oidc.oidc_base_redirect_uri",
+                _POST["oidc_base_redirect_uri"] or "")
+            ntop.setPref("ntopng.prefs.oidc.oidc_auto_create_users",
+                (_POST["toggle_oidc_auto_create_users"] == "1") and "1" or "0")
+        end
     end
 
     if (_POST["disable_alerts_generation"] == "1") then
@@ -1234,6 +1266,138 @@ if auth.has_capability(auth.capabilities.preferences) then
 
     -- #####################
 
+    local function printOIDCAuth()
+        print('<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n("prefs.oidc_auth") ..
+            '</th></tr></thead>')
+
+        local elementToSwitch = {
+            "oidc_issuer_url", "oidc_client_id", "oidc_client_secret",
+            "oidc_base_redirect_uri", "oidc_scopes", "oidc_group_claim",
+            "oidc_admin_group", "row_toggle_oidc_auto_create_users"
+        }
+
+        -- The outer enable toggle: reads/writes "ntopng.prefs.oidc.enabled" by
+        -- itself, which is also written by the explicit save block above.
+        prefsToggleButton(subpage_active, {
+            field = auth_toggles.oidc,
+            pref = "oidc.enabled",
+            default = "0",
+            to_switch = elementToSwitch
+        })
+
+        local showElements = (ntop.getPref("ntopng.prefs.oidc.enabled") == "1")
+
+        -- Pre-read current Redis values so that prefsInputFieldPrefs can
+        -- display them without writing back to Redis.  All persistence is
+        -- handled exclusively by the explicit save block earlier in this
+        -- file; using skip_redis=true here prevents the rendering helpers
+        -- from overwriting stored values when the OIDC section is hidden
+        -- (i.e. when the form is submitted with OIDC disabled and the
+        -- sub-fields are empty).
+        local function oidcPref(key)
+            return ntop.getPref("ntopng.prefs.oidc." .. key)
+        end
+
+        prefsInputFieldPrefs(subpage_active.entries["oidc_issuer_url"].title,
+            subpage_active.entries["oidc_issuer_url"].description,
+            "ntopng.prefs.oidc", "oidc_issuer_url",
+            oidcPref("oidc_issuer_url"), nil, showElements, true, true, {
+                skip_redis = true,
+                attributes = {
+                    spellcheck = "false",
+                    maxlength = 512,
+                    required = "required",
+                    pattern = getURLPattern()
+                }
+            })
+
+        prefsInputFieldPrefs(subpage_active.entries["oidc_client_id"].title,
+            subpage_active.entries["oidc_client_id"].description,
+            "ntopng.prefs.oidc", "oidc_client_id",
+            oidcPref("oidc_client_id"), nil, showElements, true, false, {
+                skip_redis = true,
+                attributes = {
+                    spellcheck = "false",
+                    maxlength = 255,
+                    required = "required"
+                }
+            })
+
+        prefsInputFieldPrefs(subpage_active.entries["oidc_client_secret"].title,
+            subpage_active.entries["oidc_client_secret"].description,
+            "ntopng.prefs.oidc", "oidc_client_secret",
+            oidcPref("oidc_client_secret"), "password", showElements, true, false, {
+                skip_redis = true,
+                attributes = {
+                    spellcheck = "false",
+                    maxlength = 512,
+                    required = "required"
+                }
+            })
+
+        prefsInputFieldPrefs(subpage_active.entries["oidc_base_redirect_uri"].title,
+            subpage_active.entries["oidc_base_redirect_uri"].description,
+            "ntopng.prefs.oidc", "oidc_base_redirect_uri",
+            oidcPref("oidc_base_redirect_uri"), nil, showElements, true, true, {
+                skip_redis = true,
+                attributes = {
+                    spellcheck = "false",
+                    maxlength = 512,
+                    required = "required",
+                    pattern = getURLPattern()
+                }
+            })
+
+        prefsInputFieldPrefs(subpage_active.entries["oidc_scopes"].title,
+            subpage_active.entries["oidc_scopes"].description,
+            "ntopng.prefs.oidc", "oidc_scopes",
+            not isEmptyString(oidcPref("oidc_scopes")) and oidcPref("oidc_scopes") or "openid profile email",
+            nil, showElements, true, false, {
+                skip_redis = true,
+                attributes = {
+                    spellcheck = "false",
+                    maxlength = 255
+                }
+            })
+
+        prefsInputFieldPrefs(subpage_active.entries["oidc_group_claim"].title,
+            subpage_active.entries["oidc_group_claim"].description,
+            "ntopng.prefs.oidc", "oidc_group_claim",
+            not isEmptyString(oidcPref("oidc_group_claim")) and oidcPref("oidc_group_claim") or "groups",
+            nil, showElements, true, false, {
+                skip_redis = true,
+                attributes = {
+                    spellcheck = "false",
+                    maxlength = 128,
+                    pattern = "[^\\s]+"
+                }
+            })
+
+        prefsInputFieldPrefs(subpage_active.entries["oidc_admin_group"].title,
+            subpage_active.entries["oidc_admin_group"].description,
+            "ntopng.prefs.oidc", "oidc_admin_group",
+            oidcPref("oidc_admin_group"), nil, showElements, true, false, {
+                skip_redis = true,
+                attributes = {
+                    spellcheck = "false",
+                    maxlength = 255
+                }
+            })
+
+        -- local_store=true prevents this toggle from writing back to Redis on
+        -- its own; the explicit save block above is the sole writer for this
+        -- preference (and only does so when OIDC is enabled).
+        prefsToggleButton(subpage_active, {
+            field = "toggle_oidc_auto_create_users",
+            pref = "oidc.oidc_auto_create_users",
+            default = oidcPref("oidc_auto_create_users") == "1" and "1" or "0",
+            hidden = not showElements,
+            local_store = true
+        })
+    end
+
+    -- #####################
+
     function printAuthentication()
         print('<form method="post">')
         print('<table class="table">')
@@ -1241,6 +1405,8 @@ if auth.has_capability(auth.capabilities.preferences) then
         local entries = subpage_active.entries
 
         printAuthDuration()
+
+        printOIDCAuth()
 
         -- Note: order must correspond to evaluation order in Ntop.cpp
         print('<thead class="table-primary"><tr><th class="info" colspan="2">' .. i18n("prefs.client_x509_auth") ..

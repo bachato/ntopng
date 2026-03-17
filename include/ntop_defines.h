@@ -1290,6 +1290,24 @@
 #define MAX_HTTP_AUTHENTICATOR_RETURN_DATA_LEN 4096
 #define PREF_NTOP_LOCAL_AUTH NTOPNG_PREFS_PREFIX ".local.auth_enabled"
 
+/* OpenID Connect (OIDC) authentication */
+#ifdef NTOPNG_PRO
+#define OIDC_START_URL "/oidc_start"
+#define OIDC_CALLBACK_URL "/oidc_callback"
+#define OIDC_STATE_KEY_PREFIX "oidc.state."
+#define OIDC_STATE_TTL 600 /* 10 minutes */
+#endif /* NTOPNG_PRO */
+
+#define PREF_OIDC_ENABLED NTOPNG_PREFS_PREFIX ".oidc.enabled"
+#define PREF_OIDC_CLIENT_ID NTOPNG_PREFS_PREFIX ".oidc.oidc_client_id"
+#define PREF_OIDC_CLIENT_SECRET NTOPNG_PREFS_PREFIX ".oidc.oidc_client_secret"
+#define PREF_OIDC_ISSUER_URL NTOPNG_PREFS_PREFIX ".oidc.oidc_issuer_url"
+#define PREF_OIDC_SCOPES NTOPNG_PREFS_PREFIX ".oidc.oidc_scopes"
+#define PREF_OIDC_GROUP_CLAIM NTOPNG_PREFS_PREFIX ".oidc.oidc_group_claim"
+#define PREF_OIDC_ADMIN_GROUP NTOPNG_PREFS_PREFIX ".oidc.oidc_admin_group"
+#define PREF_OIDC_BASE_REDIRECT_URI NTOPNG_PREFS_PREFIX ".oidc.oidc_base_redirect_uri"
+#define PREF_OIDC_AUTO_CREATE_USERS NTOPNG_PREFS_PREFIX ".oidc.oidc_auto_create_users"
+
 #define NTOP_API_TOKENS "ntopng.api_tokens"
 
 /* Elastic Search */

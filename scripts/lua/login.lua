@@ -65,7 +65,7 @@ print[[
       margin: auto;
       z-index: 1000;
     }
-  </style>    
+  </style>
 </head>
 <body class="body">
   <div id="particles-js"></div>
@@ -102,6 +102,27 @@ end
 print[[
     </div> <!-- Close .form-group mb-3 -->
     <button class="w-100 btn btn-lg btn-primary" type="submit">]] print(i18n("login.login")) print[[</button>
+]]
+
+-- SSO login button (shown only when OIDC is enabled)
+local oidc_enabled = ntop.getPref("ntopng.prefs.oidc.enabled") == "1"
+if oidc_enabled then
+  -- URL-encode the referer so embedded '?' and '&' don't break the query string
+  local oidc_referer = string.gsub(referer or "", "([^%w%-%.%_%~/])", function(c)
+    return string.format("%%%02X", string.byte(c))
+  end)
+  -- After a failed SSO the IdP may still have a valid session and redirect
+  -- back immediately (without showing any login UI), causing an invisible
+  -- loop. Adding prompt=login forces the IdP to ask for credentials again.
+  local prompt_param = (reason == "oidc-error") and "&prompt=login" or ""
+  print([[<a href="]] .. http_prefix .. [[/oidc_start?referer=]] .. oidc_referer .. prompt_param .. [["
+     class="w-100 btn btn-lg btn-outline-secondary mt-2">
+    ]] .. i18n("login.sso_login") .. [[
+  </a>
+]])
+end
+
+print[[
   	<div class="row">
 
       <div >&nbsp;</div>
@@ -132,6 +153,9 @@ end
       </div>
     </div>
   </form>
+]]
+
+print[[
 </main>
 </body>
 

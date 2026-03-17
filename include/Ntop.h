@@ -90,6 +90,10 @@ class Ntop {
   Radius* radiusAcc;
 #endif
 
+#ifdef NTOPNG_PRO
+  OIDCAuthenticator* oidcAuth;
+#endif
+
   TimelineExtract* extract;
   PeriodicActivities* pa; /**< Instance of periodical activities. */
   AddressResolution* address;
@@ -756,6 +760,10 @@ class Ntop {
   inline bool radiusAccountingStop(RadiusTraffic* info) {
     return radiusAcc->stopSession(info);
   };
+#endif
+
+#ifdef NTOPNG_PRO
+  inline OIDCAuthenticator* getOIDCAuthenticator() { return oidcAuth; };
 #endif
 
   inline bool hasDroppedPrivileges() { return (privileges_dropped); }

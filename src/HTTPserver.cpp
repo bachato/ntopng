@@ -389,6 +389,9 @@ static int isWhitelistedURI(const char* uri) {
   if ((!strcmp(uri, LOGIN_URL)) || (!strcmp(uri, AUTHORIZE_URL)) ||
       (!strcmp(uri, MFA_AUTHORIZE_URL)) || (!strcmp(uri, MFA_VERIFY_URL)) ||
       (!strcmp(uri, LOCALE_URL))
+#ifdef NTOPNG_PRO
+      || (!strcmp(uri, OIDC_START_URL)) || (!strcmp(uri, OIDC_CALLBACK_URL))
+#endif
 #ifdef HAVE_NEDGE
       || (!strcmp(uri, HOTSPOT_DETECT_URL)) ||
       (!strcmp(uri, HOTSPOT_DETECT_LUA_URL)) ||
@@ -993,6 +996,97 @@ static void redirect_to_mfa(struct mg_connection* conn, const char* token) {
 
 /* ****************************************** */
 
+#ifdef NTOPNG_PRO
+// Handler for /oidc_start — initiates the OIDC Authorization Code flow.
+// Redirects the user to the IdP authorization endpoint.
+static void oidc_start(struct mg_connection* conn,
+                       const struct mg_request_info* request_info) {
+  char referer[256] = {'\0'};
+  char prompt[32]   = {'\0'};
+  get_qsvar(request_info, "referer", referer, sizeof(referer));
+  get_qsvar(request_info, "prompt",  prompt,  sizeof(prompt));
+
+  OIDCAuthenticator* oidc = ntop->getOIDCAuthenticator();
+  if (!oidc || !oidc->isEnabled()) {
+    redirect_to_login(conn, request_info, NULL, NULL);
+    return;
+  }
+
+  std::string auth_url =
+      oidc->startAuthFlow(referer[0] ? referer : "/",
+                          prompt[0]  ? prompt  : nullptr);
+  if (auth_url.empty()) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING,
+                                 "[OIDC] Failed to build authorization URL");
+    redirect_to_login(conn, request_info, referer[0] ? referer : NULL,
+                      "oidc-error");
+    return;
+  }
+
+  /* No-cache ensures each click generates a fresh state/nonce even if the
+   * browser has seen this URL before. */
+  mg_printf(conn,
+            "HTTP/1.1 302 Found\r\n"
+            "Cache-Control: no-store, no-cache, must-revalidate\r\n"
+            "Pragma: no-cache\r\n"
+            "Location: %s\r\n\r\n",
+            auth_url.c_str());
+  traceHTTP(conn, 302);
+}
+
+/* ****************************************** */
+
+// Handler for /oidc_callback — processes the IdP callback after user login.
+// On success creates a session and redirects to the original referer.
+static void oidc_callback(struct mg_connection* conn,
+                           const struct mg_request_info* request_info,
+                           char* username, char* group, bool* localuser) {
+  char code[1024] = {'\0'}, state[256] = {'\0'}, error[256] = {'\0'};
+  get_qsvar(request_info, "code", code, sizeof(code));
+  get_qsvar(request_info, "state", state, sizeof(state));
+  get_qsvar(request_info, "error", error, sizeof(error));
+
+  /* IdP may redirect back with an error instead of a code */
+  if (error[0] != '\0') {
+    ntop->getTrace()->traceEvent(TRACE_WARNING,
+                                 "[OIDC] IdP returned error: %s", error);
+    redirect_to_login(conn, request_info, NULL, "oidc-error");
+    return;
+  }
+
+  if (!code[0] || !state[0]) {
+    redirect_to_login(conn, request_info, NULL, "oidc-error");
+    return;
+  }
+
+  OIDCAuthenticator* oidc = ntop->getOIDCAuthenticator();
+  if (!oidc || !oidc->isEnabled()) {
+    redirect_to_login(conn, request_info, NULL, NULL);
+    return;
+  }
+
+  std::string out_username, out_group, referer;
+  if (!oidc->handleCallback(code, state, out_username, out_group, referer)) {
+    redirect_to_login(conn, request_info, NULL, "oidc-error");
+    return;
+  }
+
+  /* Ensure referer is a safe relative path */
+  if (referer.empty() || referer[0] != '/') referer = "/";
+
+  strncpy(group, out_group.c_str(), NTOP_GROUP_MAXLEN - 1);
+  group[NTOP_GROUP_MAXLEN - 1] = '\0';
+  *localuser = false;
+
+  set_session_cookie(conn, out_username.c_str(), group, false,
+                     referer.c_str());
+  strncpy(username, out_username.c_str(), NTOP_USERNAME_MAXLEN - 1);
+  username[NTOP_USERNAME_MAXLEN - 1] = '\0';
+}
+#endif /* NTOPNG_PRO */
+
+/* ****************************************** */
+
 // A handler for the /authorize endpoint.
 // Login page form sends user name and password to this endpoint.
 static void authorize(struct mg_connection* conn,
@@ -1504,6 +1598,14 @@ static int handle_lua_request(struct mg_connection* conn) {
     } else if (strcmp(request_info->uri, MFA_AUTHORIZE_URL) == 0) {
       mfa_authorize(conn, request_info, username, group, &localuser);
       return (1);
+#ifdef NTOPNG_PRO
+    } else if (strcmp(request_info->uri, OIDC_START_URL) == 0) {
+      oidc_start(conn, request_info);
+      return (1);
+    } else if (strcmp(request_info->uri, OIDC_CALLBACK_URL) == 0) {
+      oidc_callback(conn, request_info, username, group, &localuser);
+      return (1);
+#endif /* NTOPNG_PRO */
     }
   }
 

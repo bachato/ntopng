@@ -312,6 +312,7 @@ using namespace std;
 #ifdef HAVE_LDAP
 #include "LdapAuthenticator.h"
 #endif /* HAVE_LDAP */
+#include "OIDCAuthenticator.h"
 #endif /* NTOPNG_PRO */
 #include "HostPoolStats.h"
 #include "HostPools.h"
