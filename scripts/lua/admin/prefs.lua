@@ -170,12 +170,12 @@ if auth.has_capability(auth.capabilities.preferences) then
             ntop.setPref("ntopng.prefs.oidc.oidc_auto_create_users",
                 (_POST["toggle_oidc_auto_create_users"] == "1") and "1" or "0")
             -- JWT claim name mappings (always saved; empty string clears mapping)
-            ntop.setPref("ntopng.prefs.oidc.claim_ifname",      _POST["oidc_claim_ifname"]      or "")
-            ntop.setPref("ntopng.prefs.oidc.claim_nets",        _POST["oidc_claim_nets"]        or "")
-            ntop.setPref("ntopng.prefs.oidc.claim_host_pools",  _POST["oidc_claim_host_pools"]  or "")
-            ntop.setPref("ntopng.prefs.oidc.claim_allow_pcap",  _POST["oidc_claim_allow_pcap"]  or "")
-            ntop.setPref("ntopng.prefs.oidc.claim_allow_historical", _POST["oidc_claim_allow_historical"] or "")
-            ntop.setPref("ntopng.prefs.oidc.claim_allow_alerts", _POST["oidc_claim_allow_alerts"] or "")
+            ntop.setPref("ntopng.prefs.oidc.claim_ifname",      _POST["claim_ifname"]      or "")
+            ntop.setPref("ntopng.prefs.oidc.claim_nets",        _POST["claim_nets"]        or "")
+            ntop.setPref("ntopng.prefs.oidc.claim_host_pools",  _POST["claim_host_pools"]  or "")
+            ntop.setPref("ntopng.prefs.oidc.claim_allow_pcap",  _POST["claim_allow_pcap"]  or "")
+            ntop.setPref("ntopng.prefs.oidc.claim_allow_historical", _POST["claim_allow_historical"] or "")
+            ntop.setPref("ntopng.prefs.oidc.claim_allow_alerts", _POST["claim_allow_alerts"] or "")
         end
     end
 
