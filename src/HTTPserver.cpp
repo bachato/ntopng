@@ -1787,8 +1787,7 @@ static int handle_lua_request(struct mg_connection* conn) {
     /* Prevent short URI or .inc files to be served */
     if ((len < 4) || (strncmp(&request_info->uri[len - 4], ".inc", 4) == 0) ||
         (strncmp(&request_info->uri[len - 4], ".pem", 4) == 0)) {
-      return (
-          redirect_to_error_page(conn, request_info, "forbidden", NULL, NULL));
+      return (redirect_to_error_page(conn, request_info, "forbidden", NULL, NULL));
     } else {
       char path[MAX_PATH + 8];
       struct stat s;

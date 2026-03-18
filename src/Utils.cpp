@@ -8055,3 +8055,21 @@ bool Utils::setProcessLimit(int resource, u_int32_t upper_limit) {
 
   return (true);
 }
+
+/* ******************************************* */
+
+/*
+  HTTP response sent from Lua is buffered for gzip compression.
+  Nevertheless there as some methods that send data directly
+  to the socket, thus we need to flush buffered data first
+*/
+void Utils::sendCompressionHeader(lua_State *vm) {
+  NtopngLuaContext *ctx = getLuaVMContext(vm);
+  struct mg_connection* conn = getLuaVMUserdata(vm, conn);
+
+  if (ctx && ctx->buffer_http_response && !ctx->http_response_buffer.empty()) {
+    mg_write(conn, ctx->http_response_buffer.data(), ctx->http_response_buffer.size());
+    ctx->buffer_http_response = false;
+    ctx->http_response_buffer.clear();
+  }	
+}

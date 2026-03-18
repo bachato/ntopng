@@ -5935,7 +5935,6 @@ static int ntop_interface_is_syslog_interface(lua_State* vm) {
 /* @brief Executes a ClickHouse SQL query and streams CSV results to the HTTP response.  Lua: interface.clickhouseExecCSVQuery(sql) → nil */
 static int ntop_clickhouse_exec_csv_query(lua_State* vm) {
 #ifdef HAVE_CLICKHOUSE
-  NtopngLuaContext* ctx = getLuaVMContext(vm);
   NetworkInterface* curr_iface = getCurrentInterface(vm);
   const char* sql;
   const char* delimiter = "|";
@@ -5965,16 +5964,7 @@ static int ntop_clickhouse_exec_csv_query(lua_State* vm) {
   if (lua_type(vm, 5) == LUA_TBOOLEAN) /* optional */
     remove_headers = lua_toboolean(vm, 5);
 
-  /* HTTP response sent from Lua is buffered for gzip compression
-   * but execSQLQuery2CSV() sends data directly to the socket,
-   * thus we need to flush buffered data first */
-  if (ctx && ctx->buffer_http_response && !ctx->http_response_buffer.empty()) {
-    mg_write(conn, ctx->http_response_buffer.data(),
-             ctx->http_response_buffer.size());
-    ctx->buffer_http_response = false;
-    ctx->http_response_buffer.clear();
-  }
-
+  Utils::sendCompressionHeader(vm);
   curr_iface->execSQLQuery2CSV(sql, delimiter, null_value, use_json,
                                remove_headers, conn);
 #endif
@@ -6022,8 +6012,11 @@ static int ntop_dump_host_based_protocol_id(lua_State* vm) {
 
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
-  if (curr_iface && conn) curr_iface->nDPIDumpHostBasedProtocols(conn);
-
+  if (curr_iface && conn) {
+    Utils::sendCompressionHeader(vm);
+    curr_iface->nDPIDumpHostBasedProtocols(conn);
+  }
+  
   lua_pushnil(vm);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -6037,8 +6030,11 @@ static int ntop_dump_host_based_category_id(lua_State* vm) {
 
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
-  if (curr_iface && conn) curr_iface->nDPIDumpHostBasedCategories(conn);
-
+  if (curr_iface && conn) {
+    Utils::sendCompressionHeader(vm);
+    curr_iface->nDPIDumpHostBasedCategories(conn);
+  }
+  
   lua_pushnil(vm);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));

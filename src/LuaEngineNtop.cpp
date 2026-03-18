@@ -117,9 +117,10 @@ static int ntop_dump_file(lua_State* vm) {
 
     ntop->getTrace()->traceEvent(TRACE_INFO, "[HTTP] Serving file %s", fname);
 
+    Utils::sendCompressionHeader(vm);
+    
     while ((fgets(tmp,
-                  sizeof(tmp) -
-                      256 /* To make sure we have room for replacements */,
+                  sizeof(tmp) - 256 /* To make sure we have room for replacements */,
                   fd)) != NULL) {
       for (int i = 0; string_to_replace[i].key != NULL; i++)
         Utils::replacestr(tmp, string_to_replace[i].key,
