@@ -960,6 +960,30 @@ local menu_subpages = {{
         toggle_oidc_auto_create_users = {
             title = i18n("prefs.toggle_oidc_auto_create_users_title"),
             description = i18n("prefs.toggle_oidc_auto_create_users_description")
+        },
+        oidc_claim_ifname = {
+            title = i18n("prefs.oidc_claim_ifname_title"),
+            description = i18n("prefs.oidc_claim_ifname_description")
+        },
+        oidc_claim_nets = {
+            title = i18n("prefs.oidc_claim_nets_title"),
+            description = i18n("prefs.oidc_claim_nets_description")
+        },
+        oidc_claim_host_pools = {
+            title = i18n("prefs.oidc_claim_host_pools_title"),
+            description = i18n("prefs.oidc_claim_host_pools_description")
+        },
+        oidc_claim_allow_pcap = {
+            title = i18n("prefs.oidc_claim_allow_pcap_title"),
+            description = i18n("prefs.oidc_claim_allow_pcap_description")
+        },
+        oidc_claim_allow_historical = {
+            title = i18n("prefs.oidc_claim_allow_historical_title"),
+            description = i18n("prefs.oidc_claim_allow_historical_description")
+        },
+        oidc_claim_allow_alerts = {
+            title = i18n("prefs.oidc_claim_allow_alerts_title"),
+            description = i18n("prefs.oidc_claim_allow_alerts_description")
         }
     }
 }, {

@@ -169,6 +169,13 @@ if auth.has_capability(auth.capabilities.preferences) then
                 _POST["oidc_base_redirect_uri"] or "")
             ntop.setPref("ntopng.prefs.oidc.oidc_auto_create_users",
                 (_POST["toggle_oidc_auto_create_users"] == "1") and "1" or "0")
+            -- JWT claim name mappings (always saved; empty string clears mapping)
+            ntop.setPref("ntopng.prefs.oidc.claim_ifname",      _POST["oidc_claim_ifname"]      or "")
+            ntop.setPref("ntopng.prefs.oidc.claim_nets",        _POST["oidc_claim_nets"]        or "")
+            ntop.setPref("ntopng.prefs.oidc.claim_host_pools",  _POST["oidc_claim_host_pools"]  or "")
+            ntop.setPref("ntopng.prefs.oidc.claim_allow_pcap",  _POST["oidc_claim_allow_pcap"]  or "")
+            ntop.setPref("ntopng.prefs.oidc.claim_allow_historical", _POST["oidc_claim_allow_historical"] or "")
+            ntop.setPref("ntopng.prefs.oidc.claim_allow_alerts", _POST["oidc_claim_allow_alerts"] or "")
         end
     end
 
@@ -1273,7 +1280,9 @@ if auth.has_capability(auth.capabilities.preferences) then
         local elementToSwitch = {
             "oidc_issuer_url", "oidc_client_id", "oidc_client_secret",
             "oidc_base_redirect_uri", "oidc_scopes", "oidc_group_claim",
-            "oidc_admin_group", "row_toggle_oidc_auto_create_users"
+            "oidc_admin_group", "row_toggle_oidc_auto_create_users",
+            "claim_ifname", "claim_nets", "claim_host_pools",
+            "claim_allow_pcap", "claim_allow_historical", "claim_allow_alerts"
         }
 
         -- The outer enable toggle: reads/writes "ntopng.prefs.oidc.enabled" by
@@ -1394,6 +1403,51 @@ if auth.has_capability(auth.capabilities.preferences) then
             hidden = not showElements,
             local_store = true
         })
+
+        -- JWT claim name mappings
+        local claimAttrs = { spellcheck = "false", maxlength = 128 }
+
+        prefsInputFieldPrefs(subpage_active.entries["oidc_claim_ifname"].title,
+            subpage_active.entries["oidc_claim_ifname"].description,
+            "ntopng.prefs.oidc", "claim_ifname",
+            oidcPref("claim_ifname"), nil, showElements, true, false, {
+                skip_redis = true, attributes = claimAttrs
+            })
+
+        prefsInputFieldPrefs(subpage_active.entries["oidc_claim_nets"].title,
+            subpage_active.entries["oidc_claim_nets"].description,
+            "ntopng.prefs.oidc", "claim_nets",
+            oidcPref("claim_nets"), nil, showElements, true, false, {
+                skip_redis = true, attributes = claimAttrs
+            })
+
+        prefsInputFieldPrefs(subpage_active.entries["oidc_claim_host_pools"].title,
+            subpage_active.entries["oidc_claim_host_pools"].description,
+            "ntopng.prefs.oidc", "claim_host_pools",
+            oidcPref("claim_host_pools"), nil, showElements, true, false, {
+                skip_redis = true, attributes = claimAttrs
+            })
+
+        prefsInputFieldPrefs(subpage_active.entries["oidc_claim_allow_pcap"].title,
+            subpage_active.entries["oidc_claim_allow_pcap"].description,
+            "ntopng.prefs.oidc", "claim_allow_pcap",
+            oidcPref("claim_allow_pcap"), nil, showElements, true, false, {
+                skip_redis = true, attributes = claimAttrs
+            })
+
+        prefsInputFieldPrefs(subpage_active.entries["oidc_claim_allow_historical"].title,
+            subpage_active.entries["oidc_claim_allow_historical"].description,
+            "ntopng.prefs.oidc", "claim_allow_historical",
+            oidcPref("claim_allow_historical"), nil, showElements, true, false, {
+                skip_redis = true, attributes = claimAttrs
+            })
+
+        prefsInputFieldPrefs(subpage_active.entries["oidc_claim_allow_alerts"].title,
+            subpage_active.entries["oidc_claim_allow_alerts"].description,
+            "ntopng.prefs.oidc", "claim_allow_alerts",
+            oidcPref("claim_allow_alerts"), nil, showElements, true, false, {
+                skip_redis = true, attributes = claimAttrs
+            })
     end
 
     -- #####################

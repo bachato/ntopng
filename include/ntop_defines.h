@@ -1307,6 +1307,15 @@
 #define PREF_OIDC_ADMIN_GROUP NTOPNG_PREFS_PREFIX ".oidc.oidc_admin_group"
 #define PREF_OIDC_BASE_REDIRECT_URI NTOPNG_PREFS_PREFIX ".oidc.oidc_base_redirect_uri"
 #define PREF_OIDC_AUTO_CREATE_USERS NTOPNG_PREFS_PREFIX ".oidc.oidc_auto_create_users"
+/* Claim-name mappings: each pref holds the JWT claim key to read for that
+ * capability.  Empty value means the attribute is not sourced from the JWT. */
+#define PREF_OIDC_CLAIM_IFNAME      NTOPNG_PREFS_PREFIX ".oidc.claim_ifname"
+#define PREF_OIDC_CLAIM_NETS        NTOPNG_PREFS_PREFIX ".oidc.claim_nets"
+#define PREF_OIDC_CLAIM_HOST_POOLS  NTOPNG_PREFS_PREFIX ".oidc.claim_host_pools"
+#define PREF_OIDC_CLAIM_ALLOW_PCAP  NTOPNG_PREFS_PREFIX ".oidc.claim_allow_pcap"
+#define PREF_OIDC_CLAIM_ALLOW_HISTORICAL \
+  NTOPNG_PREFS_PREFIX ".oidc.claim_allow_historical"
+#define PREF_OIDC_CLAIM_ALLOW_ALERTS NTOPNG_PREFS_PREFIX ".oidc.claim_allow_alerts"
 
 #define NTOP_API_TOKENS "ntopng.api_tokens"
 
