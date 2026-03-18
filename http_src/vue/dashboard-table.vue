@@ -4,6 +4,7 @@
 
 <template>
     <div class="table-responsive" style="margin-left:-1rem;margin-right:-1rem;">
+        <Loading v-if="!props.hideLoading" :isLoading="isLoading"></Loading>
         <BootstrapTable :id="table_id" :columns="columns" :rows="table_rows" :hide_head="hide_head"
             :no_background="no_background" :print_html_column="render_column" :print_html_row="render_row"
             :wrap_columns="true">
@@ -17,12 +18,15 @@ import { default as BootstrapTable } from "./bootstrap-table.vue";
 import { ntopng_custom_events, ntopng_events_manager } from "../services/context/ntopng_globals_services";
 import formatterUtils from "../utilities/formatter-utils";
 import NtopUtils from "../utilities/ntop-utils";
+import Loading from "./loading.vue";
 import { scan_type_f, last_scan_f, duration_f, scan_frequency_f, is_ok_last_scan_f, tcp_ports_f, tcp_port_f, hosts_f, host_f, cves_f, max_score_cve_f, udp_ports_f, num_vuln_found_f, tcp_udp_ports_list_f, discoverd_hosts_list_f } from "../utilities/vs_report_formatter.js";
 
 const _i18n = (t) => i18n(t);
 
 const table_id = ref('simple_table');
 const table_rows = ref([]);
+const isLoading = ref(true);
+const firstLoading = ref(true);
 
 const props = defineProps({
     id: String,          /* Component ID */
@@ -34,7 +38,9 @@ const props = defineProps({
     max_height: Number,  /* Component Hehght (4, 8, 12)*/
     params: Object,      /* Component-specific parameters from the JSON template definition */
     get_component_data: Function, /* Callback to request data (REST) */
-    filters: Object
+    filters: Object,
+    hideLoading: Boolean, /* If false, no Loading animation is shown */
+    showOnlyFirstLoading: Boolean, /* If true, shows only the first loading of the component, not the updates */
 });
 
 const hide_head = computed(() => {
@@ -76,6 +82,7 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
+    firstLoading.value = false
 });
 
 function init() {
@@ -267,6 +274,7 @@ const render_row = function (column, row) {
 }
 
 async function refresh_table() {
+    isLoading.value = (props?.showOnlyFirstLoading === true) ? (firstLoading.value && true) : true;
     const url_params = {
         ifid: props.ifid,
         epoch_begin: props.epoch_begin,
@@ -290,6 +298,7 @@ async function refresh_table() {
     }
 
     table_rows.value = rows;
+    isLoading.value = false // Always false
 }
 </script>
 

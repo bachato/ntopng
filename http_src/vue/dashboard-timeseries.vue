@@ -5,9 +5,11 @@
 
 <template>
     <div>
+        <Loading v-if="!props.hideLoading" :isLoading="isLoading"></Loading>
         <TimeseriesChart ref="chart" :id="id" :chart_type="chart_type" :base_url_request="base_url"
             :get_custom_chart_options="get_chart_options" :register_on_status_change="false"
-            :disable_fixed_height="true" @chart-updated="chartUpdatedCallback" @update-requested="updateRequestedCallback">
+            :disable_fixed_height="true" @chart-updated="chartUpdatedCallback"
+            @update-requested="updateRequestedCallback">
         </TimeseriesChart>
     </div>
 </template>
@@ -17,6 +19,7 @@ import { ref, onMounted, onBeforeMount, watch, computed } from "vue";
 import metricsManager from "../utilities/metrics-manager.js";
 import { default as TimeseriesChart } from "./timeseries-chart.vue";
 import timeseriesUtils from "../utilities/timeseries-utils.js";
+import Loading from "./loading.vue";
 
 /* *************************************************** */
 /* Constants and reactive variables */
@@ -31,6 +34,8 @@ const height = ref(null);  // Calculated height of the component
 const ts_request = ref([]);  // Timeseries requests to be processed
 const source_def = {};
 let refresh_generation = 0;  // Incremented on each refresh; lets async chains self-cancel when stale
+const isLoading = ref(true);
+const firstLoading = ref(true);
 
 const emit = defineEmits(['chart-updated', 'update-requested']);  // Events emitted to parent component
 
@@ -50,6 +55,8 @@ const props = defineProps({
     get_component_data: Function, /* Callback to request data from REST API */
     csrf: String,        /* CSRF token for security */
     filters: Object,     /* Additional filters for data query */
+    hideLoading: Boolean, /* If false, no Loading animation is shown */
+    showOnlyFirstLoading: Boolean, /* If true, shows only the first loading of the component, not the updates */
 });
 
 /* *************************************************** */
@@ -68,12 +75,14 @@ const base_url = computed(() => {
 /* Callback triggered when chart is updated */
 const chartUpdatedCallback = (options) => {
     emit("chart-updated", options)
+    isLoading.value = false // Always false
 }
 
 /* *************************************************** */
 
 /* Callback triggered when update is requested */
 const updateRequestedCallback = (options) => {
+    isLoading.value = (props?.showOnlyFirstLoading === true) ? (firstLoading.value && true) : true;
     emit("update-requested", options)
 }
 
@@ -348,7 +357,9 @@ onBeforeMount(async () => {
 
 /* *************************************************** */
 
-onMounted(async () => { });  // Mounted hook (currently empty)
+onMounted(() => {
+    firstLoading.value = false;
+});  // Mounted hook
 
 /* *************************************************** */
 /* Initialization and refresh functions */

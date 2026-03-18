@@ -184,14 +184,13 @@
                     </template>
                     <template v-slot:box_content>
                         <div>
-                            <Loading :isLoading="c.isLoading"></Loading>
                             <component :is="components_dict[c.component]" :id="c.id" :style="component_custom_style(c)"
                                 :epoch_begin="c.epoch_begin" :epoch_end="c.epoch_end" :i18n_title="c.i18n_name"
                                 :ifid="c.ifid ? c.ifid.toString() : context.ifid.toString()" :max_width="c.width"
                                 :max_height="c.height" :params="c.params"
                                 :get_component_data="get_component_data_func(c)"
                                 :set_component_attr="set_component_attr_func(c)" :csrf="context.csrf"
-                                :filters="c.filters">
+                                :filters="c.filters" :showOnlyFirstLoading="true">
                             </component>
                         </div>
                     </template>
@@ -243,7 +242,6 @@ import { default as ModalSelectComponent } from "./modal-select-component.vue";
 import { default as ModalEditComponent } from "./modal-edit-component.vue";
 import { default as ModalDeleteConfirm } from "./modal-delete-confirm.vue";
 import { default as Spinner } from "./spinner.vue";
-import { default as Loading } from "./loading.vue";
 
 import { default as Box } from "./dashboard-box.vue";
 
@@ -320,7 +318,6 @@ let printable = false;
 const edit_mode = ref(false);
 let template_sortable = null;
 const modal_new_template = ref(null);
-const isFirstLoading = ref(false);
 
 const is_live = computed(() => {
     return props.context.page != "report" && props.context.page != "vs-report";
@@ -579,7 +576,7 @@ async function load_filters(filters_available, res, show_second_load) {
 async function load_components(epoch_interval, template_name) {
     /* Enable REST calls */
     data_from_backup = false;
-
+    
     let url_request = `${props.context.template_endpoint}?template=${template_name}`;
     let res = await ntopng_utility.http_request(url_request);
     components.value = res.list.filter((c) => components_dict[c.component] != null)
@@ -587,7 +584,6 @@ async function load_components(epoch_interval, template_name) {
             let c_ext = {
                 filters: {},
                 component_id: `auto_${c.id}_${index}`,
-                isLoading: true,
                 ...c
             };
             if (any_interface.value) {
@@ -925,13 +921,6 @@ function check_diff_params(previous_params, current_params) {
 /* Callback to request REST data from components */
 function get_component_data_func(component) {
     const get_component_data = async (url, query_params, post_params, refresh_epoch, skip) => {
-        if (skip === true) {
-            component.isLoading = false;
-            return;
-        }
-        if (!isFirstLoading.value) {
-            component.isLoading = true;
-        }
         let info = {};
         if (data_from_backup) {
             // backward compatibility (component_id was not defined)
@@ -944,7 +933,6 @@ function get_component_data_func(component) {
             } else {
                 info = components_info[component.component_id];
             }
-            component.isLoading = false;
         } else {
             /* datasource_id is an optimization for components getting live data
              * from the same endpoint (e.g. multiple badges in the infrastructure dashboard) */
@@ -957,7 +945,6 @@ function get_component_data_func(component) {
                 if (info.data && !info.data.done) {
                     pending = true;
                     await info.data; /* wait in case of previous pending requests */
-                    component.isLoading = false;
                 }
             }
 
@@ -967,12 +954,6 @@ function get_component_data_func(component) {
                 /* Use data from other/pending requests */
 
             } else {
-                /* Request fresh data */
-                if (!url) {
-                    component.isLoading = false
-                    return;
-                }
-
                 /* If infrastructure monitor, call the aggregator endpoint */
                 if (props.context.is_infrastructure && !url.includes("infrastructure")) {
                     const infrastructure_proxy_url = "/lua/pro/rest/v2/get/infrastructure/aggregate.lua";
@@ -1002,17 +983,11 @@ function get_component_data_func(component) {
 
                 info.data.then(() => {
                     info.data.done = true;
-                    component.isLoading = false
-                    /* Disable the periodic loading component in case of Dashboard */
-                    if (!isFirstLoading.value && props.context.page !== "report") {
-                        isFirstLoading.value = true;
-                    }
                 });
 
             }
         }
         /* Safety check */
-        component.isLoading = false;
         return info.data;
     };
     return get_component_data

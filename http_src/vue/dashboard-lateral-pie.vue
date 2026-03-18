@@ -1,10 +1,13 @@
 <template>
     <div class="d-flex flex-column flex-grow-1 position-relative" ref="chartParent">
+        <Loading v-if="!props.hideLoading" :isLoading="isLoading"></Loading>
         <div v-if="chart_data_available" :id="id" class="d3-chart-container" ref="chartContainer">
             <h3 v-if="i18n_title">{{ _i18n(i18n_title) }}</h3>
         </div>
-        <div v-else style="position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; min-height: 250px; padding: 5% 20px; color: #666;">
-            <div style="font-size: clamp(16px, 2vw, 18px); margin-bottom: 2vh;"><i class="fas fa-search"></i> {{_i18n("dashboard.no_assets_discovered")}}</div>
+        <div v-else
+            style="position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; min-height: 250px; padding: 5% 20px; color: #666;">
+            <div style="font-size: clamp(16px, 2vw, 18px); margin-bottom: 2vh;"><i class="fas fa-search"></i>
+                {{ _i18n("dashboard.no_assets_discovered") }}</div>
             <div style="font-size: clamp(14px, 1.5vw, 16px);"> {{ _i18n("dashboard.waiting_assets_discovery") }} </div>
         </div>
     </div>
@@ -15,6 +18,7 @@
 import { ref, onMounted, onBeforeUnmount, watch, computed, nextTick } from "vue";
 const d3 = d3v7;
 import dataUtils from "../utilities/data-utils";
+import Loading from "./loading.vue";
 
 const _i18n = (t) => i18n(t);
 
@@ -25,6 +29,8 @@ const url_list = ref(null);
 const chartData = ref(null);
 let resizeObserver = null;
 const maxPieSectors = 5;
+const isLoading = ref(true);
+const firstLoading = ref(true);
 
 const props = defineProps({
     id: String,          /* Component ID */
@@ -37,7 +43,8 @@ const props = defineProps({
     params: Object,      /* Component-specific parameters from the JSON template definition */
     get_component_data: Function, /* Callback to request data (REST) */
     filters: Object,
-
+    hideLoading: Boolean, /* If false, no Loading animation is shown */
+    showOnlyFirstLoading: Boolean, /* If true, shows only the first loading of the component, not the updates */
 });
 
 const base_url = computed(() => {
@@ -68,8 +75,9 @@ async function get_chart_data() {
 }
 
 function drawChart(data) {
+    debugger;
     const container = chartContainer.value;
-    
+
     // Check that container exists before proceeding
     if (!container) {
         chart_data_available.value = false;
@@ -137,18 +145,18 @@ function drawChart(data) {
     // show first maxPieSectors sectors, group the remaining in others
     const topItems = [...chartPairs].slice(0, maxPieSectors);
     const otherItems = [...chartPairs].slice(maxPieSectors);
-    
+
     const othersSum = otherItems.reduce((sum, item) => sum + item.value, 0);
-    
+
     let finalChartItems = [...topItems];
-    
+
     // add others to the chart if there is at least an element
     if (otherItems.length > 0 && othersSum > 0) {
         finalChartItems.push({
             label: `Others (${othersSum})`, // othersSum is the total of devices count
             value: othersSum,
             color: "#999999", // gray for others
-            url: '' 
+            url: ''
         });
     }
 
@@ -169,7 +177,7 @@ function drawChart(data) {
     const chartColors = finalChartItems.map(item => item.color);
     const chartUrls = finalChartItems.map(item => item.url);
 
-    
+
     let legendItems = [...finalChartItems];
 
     // Prepare legend labels adding unknown to not known manufacturers
@@ -347,22 +355,26 @@ async function refresh_chart() {
         if (!chartContainer.value) {
             return;
         }
-        
+        isLoading.value = (props?.showOnlyFirstLoading === true) ? (firstLoading.value && true) : true;
+
         const data = await get_chart_data();
+        debugger;
         if (!data) {
             chart_data_available.value = false;
+            isLoading.value = false
             return;
         }
-        
+
         chartData.value = data;
-        
+
         // Use await with nextTick to ensure DOM is updated
         await nextTick();
-        
+
         // Only proceed if chartContainer still exists
         if (chartContainer.value) {
             chartContainer.value.innerHTML = '';
             drawChart(data);
+            isLoading.value = false;
         }
     } catch (error) {
         console.error("Error fetching chart data:", error);
@@ -400,7 +412,7 @@ const mountComponent = () => {
                 });
             }
         });
-        
+
         resizeObserver.observe(chartParent.value);
 
         // Use a slightly longer timeout to ensure DOM is fully rendered

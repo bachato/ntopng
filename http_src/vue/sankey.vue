@@ -31,7 +31,7 @@ import { sankey, sankeyLinkHorizontal } from "d3-sankey";
 import NoData from './components/no-data.vue'
 
 const d3 = d3v7;
-const emit = defineEmits(['node_click', 'update_width', 'update_height', 'autorefresh_toggle'])
+const emit = defineEmits(['node_click', 'update_width', 'update_height', 'autorefresh_toggle', 'drawn'])
 const _i18n = (t) => i18n(t);
 let eventsAttached = false;
 let resizeTimeout = null;
@@ -599,6 +599,8 @@ async function draw_sankey() {
     svg.on("mouseleave", function () {
         resetHighlight();
     });
+    
+    emit('drawn');
 }
 
 defineExpose({ draw_sankey, setNoDataFlag });

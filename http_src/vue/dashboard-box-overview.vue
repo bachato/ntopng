@@ -4,6 +4,7 @@
 
 <template>
     <div class="row d-flex align-items-center flex-wrap">
+        <Loading v-if="!props.hideLoading" :isLoading="isLoading"></Loading>
         <template v-for="(data, index) in box_data">
             <template v-if="data.add_separator_above">
                 <hr class="hr col-sm-12 mt-2" />
@@ -24,9 +25,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeMount, watch } from "vue";
-import { ntopng_custom_events, ntopng_events_manager } from "../services/context/ntopng_globals_services";
-import formatterUtils from "../utilities/formatter-utils";
-import NtopUtils from "../utilities/ntop-utils";
+import Loading from "./loading.vue";
 
 const _i18n = (t) => i18n(t);
 
@@ -35,6 +34,8 @@ const name = ref('')
 const icon = ref('')
 const link_url = ref('#')
 const box_data = ref([]);
+const isLoading = ref(true);
+const firstLoading = ref(true);
 
 const props = defineProps({
     id: String,          /* Component ID */
@@ -47,7 +48,9 @@ const props = defineProps({
     params: Object,      /* Component-specific parameters from the JSON template definition */
     get_component_data: Function, /* Callback to request data (REST) */
     set_component_attr: Function, /* Callback to set component attributes (e.g. Box active color) */
-    filters: Object
+    filters: Object,
+    hideLoading: Boolean, /* If false, no Loading animation is shown */
+    showOnlyFirstLoading: Boolean, /* If true, shows only the first loading of the component, not the updates */
 });
 
 /* Watch - detect changes on epoch_begin / epoch_end and refresh the component */
@@ -76,6 +79,7 @@ function init() {
 
 async function refresh_component() {
     /* Refresh component */
+    isLoading.value = (props?.showOnlyFirstLoading === true) ? (firstLoading.value && true) : true;
 
     if (props.params.url) {
 
@@ -90,6 +94,7 @@ async function refresh_component() {
         let data = await props.get_component_data(`${http_prefix}${props.params.url}`, url_params, undefined, props.epoch_begin);
         box_data.value = data
     }
+    isLoading.value = false // Always false
 }
 </script>
 

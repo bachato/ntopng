@@ -4,9 +4,11 @@
 
 <template>
     <div>
+        <Loading v-if="!props.hideLoading" :isLoading="isLoading"></Loading>
         <TimeseriesChart ref="chart" :id="id" :chart_type="chart_type" :base_url_request="base_url"
             :get_custom_chart_options="get_chart_options" :register_on_status_change="false"
-            :disable_fixed_height="true" @chart-updated="chartUpdatedCallback" @update-requested="updateRequestedCallback">
+            :disable_fixed_height="true" @chart-updated="chartUpdatedCallback"
+            @update-requested="updateRequestedCallback">
         </TimeseriesChart>
     </div>
 </template>
@@ -16,6 +18,7 @@ import { ref, onMounted, onBeforeMount, watch, computed } from "vue";
 import metricsManager from "../utilities/metrics-manager.js";
 import { default as TimeseriesChart } from "./timeseries-chart.vue";
 import timeseriesUtils from "../utilities/timeseries-utils.js";
+import Loading from "./loading.vue";
 
 /* *************************************************** */
 /* Constants and reactive variables */
@@ -30,6 +33,8 @@ const height = ref(null);  // Calculated height of the component
 const ts_request = ref([]);  // Timeseries requests to be processed
 const multi_ts_requests = ref([]);  // Multiple timeseries requests for bulk operations
 const ts_preferences = ref({})  // User preferences for timeseries display
+const isLoading = ref(true);
+const firstLoading = ref(true);
 const emit = defineEmits(['chart-updated', 'update-requested']);  // Events emitted to parent component
 
 /* *************************************************** */
@@ -56,11 +61,13 @@ const props = defineProps({
 
 const chartUpdatedCallback = (options) => {
     emit("chart-updated", options)
+    isLoading.value = false // Always false
 }
 
 /* *************************************************** */
 
 const updateRequestedCallback = (options) => {
+    isLoading.value = (props?.showOnlyFirstLoading === true) ? (firstLoading.value && true) : true;
     emit("update-requested", options)
 }
 
@@ -269,10 +276,11 @@ function remove_extra_params() {
 /* *************************************************** */
 
 /* Main function that fetches data from REST API and formats it for the chart */
-async function get_chart_options() {    
+async function get_chart_options() {
+    const data_url = `${http_prefix}/lua/pro/rest/v2/get/timeseries/ts_multi.lua`;
     // Initialize Tops - this ensures only one request when opening the chart
     await init();
-    
+
     const post_params = {
         csrf: props.csrf,
         epoch_begin: props.epoch_begin,
@@ -282,21 +290,18 @@ async function get_chart_options() {
             ts_requests: ts_request.value
         }
     }
-    
+
     // Use multi timeseries requests for bulk operations
     post_params.ts_requests = multi_ts_requests.value;
-    
-    const data_url = `${http_prefix}/lua/pro/rest/v2/get/timeseries/ts_multi.lua`;
-    props.get_component_data()  // Callback for component data (note: missing await?)
-    let result = await ntopng_utility.http_post_request(data_url, post_params);
-    
+    const result = await ntopng_utility.http_post_request(data_url, post_params);
+
     /* Format the result for Dygraph chart compatibility */
-    result = timeseriesUtils.tsArrayToOptionsArray(result, timeseries_groups.value, group_option_mode, '');
-    if (result[0]) {
-        result[0].height = height.value;
+    const formattedResults = timeseriesUtils.tsArrayToOptionsArray(result, timeseries_groups.value, group_option_mode, '');
+    if (formattedResults[0]) {
+        formattedResults[0].height = height.value;
     }
-    
-    return result?.[0];
+
+    return formattedResults?.[0];
 }
 
 /* *************************************************** */
@@ -307,18 +312,20 @@ async function get_chart_options() {
 onBeforeMount(async () => {
     // Initialize the height of the chart
     height.value = (props.max_height || 4) * height_per_row;
-    
+
     // Fetch user preferences for timeseries display
     const preferences_url = `${http_prefix}/lua/rest/v2/get/timeseries/preferences.lua`;
     const preferences = await ntopng_utility.http_request(`${preferences_url}`);
     if (preferences) {
         ts_preferences.value = preferences
-    } 
+    }
 });
 
 /* *************************************************** */
 
-onMounted(async () => { });  // Mounted hook (currently empty)
+onMounted(() => {
+    firstLoading.value = false;
+});  // Mounted hook
 
 /* *************************************************** */
 /* Initialization and helper functions */
@@ -346,7 +353,7 @@ async function getTopInfo() {
     if (multi_ts_requests.value.length > 0) {
         return;
     }
-    
+
     // Format the GET request for top data
     const url = base_url.value;
     const ts_source = []
@@ -358,14 +365,14 @@ async function getTopInfo() {
     query_params.ifid = props.ifid
     query_params.epoch_begin = props.epoch_begin
     query_params.epoch_end = props.epoch_end
-    
+
     const url_params = ntopng_url_manager.obj_to_url_params(query_params);
     const top_url = `${http_prefix}${url}?${url_params}`;
     const top_data = await ntopng_utility.http_request(top_url)
-    
+
     // Retrieve the top data and update the ts_requests used by ts_multi.lua
     let ts_query = {}
-    
+
     // Configure query based on schema type
     if (ts_request.value[0].ts_schema === "top:flowdev_port:traffic") {
         let ts_schema = `flowdev_port:traffic`
@@ -382,11 +389,11 @@ async function getTopInfo() {
             ts_schema: `asn:traffic`,
         }
     }
-    
+
     // Process each top data item and create corresponding timeseries queries
     top_data?.forEach((el, i) => {
         const tmp_query = { ...ts_query };
-        
+
         // Substitute the parameters based on schema type
         if (ts_request.value[0].ts_schema === "top:flowdev_port:traffic") {
             tmp_query.ts_query = tmp_query.ts_query.replace('$IFID$', el.ifid);
@@ -398,7 +405,7 @@ async function getTopInfo() {
             tmp_query.ts_query = tmp_query.ts_query.replace('$ASN$', el.asn);
             tmp_query.tskey = `${el.asn}`;  // Use ASN as key
         }
-        
+
         // Add source for the first item (interface-level data)
         if (i == 0) {
             const val = ts_request.value.find((source) =>
@@ -407,11 +414,11 @@ async function getTopInfo() {
             val.source_def = [props.ifid];
             ts_source.push(val);
         }
-        
+
         tmp_query.ts_unify = true  // Mark for unification in multi-request
         multi_ts_requests.value.push(tmp_query);
     })
-    
+
     // Retrieve basic info for the timeseries sources
     await retrieve_basic_info(ts_source);
 }

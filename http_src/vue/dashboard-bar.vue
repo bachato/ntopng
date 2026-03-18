@@ -1,5 +1,6 @@
 <template>
     <div>
+        <Loading v-if="!props.hideLoading" :isLoading="isLoading"></Loading>
         <template v-if="isDataAvailable">
             <Chart ref="chart" :id="id" :chart_type="chart_type" :base_url_request="base_url"
                 :get_custom_chart_options="get_chart_options" :register_on_status_change="false">
@@ -16,6 +17,7 @@
 import { ref, onMounted, onBeforeMount, watch, computed } from "vue";
 import dataUtils from "../utilities/data-utils";
 import { default as Chart } from "./chart.vue";
+import Loading from "./loading.vue";
 
 const _i18n = (t) => i18n(t);
 
@@ -23,6 +25,8 @@ const chart_type = ref(ntopChartApex.typeChart.BAR);
 const chart = ref(null);
 const url_list = ref(null);
 const isDataAvailable = ref(false);
+const isLoading = ref(true);
+const firstLoading = ref(true);
 
 const props = defineProps({
     id: String,          /* Component ID */
@@ -34,7 +38,9 @@ const props = defineProps({
     max_height: Number,  /* Component Hehght (4, 8, 12)*/
     params: Object,      /* Component-specific parameters from the JSON template definition */
     get_component_data: Function, /* Callback to request data (REST) */
-    filters: Object
+    filters: Object,
+    hideLoading: Boolean, /* If false, no Loading animation is shown */
+    showOnlyFirstLoading: Boolean, /* If true, shows only the first loading of the component, not the updates */
 });
 
 const base_url = computed(() => {
@@ -75,6 +81,7 @@ async function checkDataAvailability() {
 }
 
 function get_chart_options() {
+    isLoading.value = (props?.showOnlyFirstLoading === true) ? (firstLoading.value && true) : true;
     const url = base_url.value;
     const url_params = get_url_params();
     const options = props.get_component_data(url, url_params, undefined, props.epoch_begin);
@@ -138,6 +145,8 @@ function get_chart_options() {
     }).catch(error => {
         console.error("Error processing chart data:", error);
         isDataAvailable.value = false;
+    }).finally(() => {
+        isLoading.value = false // Always false
     });
     
     return options;
@@ -157,9 +166,10 @@ onBeforeMount(async () => {
 
 onMounted(() => {
     // No additional initialization needed here
+    firstLoading.value = false;
 });
 
-async function refresh_chart() {
+function refresh_chart() {
     if (isDataAvailable.value && chart.value) {
         chart.value.update_chart();
     }
