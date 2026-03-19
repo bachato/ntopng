@@ -3798,6 +3798,176 @@ static int ntop_get_totp_provisioning_uri(lua_State* vm) {
 
 /* ****************************************** */
 
+/* WebAuthn/Passkey Lua bindings */
+
+/* @brief Generate a WebAuthn registration challenge. Lua: ntop.generateWebAuthnRegistrationOptions(username) -> table or nil */
+static int ntop_generate_webauthn_registration_options(lua_State* vm) {
+  char *username;
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  if (!allowLocalUserManagement(vm))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((username = (char*)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  char challenge[64];
+  if (!ntop->generateWebAuthnChallenge(challenge, sizeof(challenge)))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  /* Store registration challenge in Redis with TTL */
+  char key[256], val[256];
+  snprintf(key, sizeof(key), "%s.%s", WEBAUTHN_REG_CHALLENGE_PREFIX, challenge);
+  snprintf(val, sizeof(val), "%s", username);
+  ntop->getRedis()->set(key, val, WEBAUTHN_REG_CHALLENGE_TTL);
+
+  lua_newtable(vm);
+  lua_pushstring(vm, challenge);  lua_setfield(vm, -2, "challenge");
+  lua_pushstring(vm, username);   lua_setfield(vm, -2, "username");
+  return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
+/* @brief Complete WebAuthn registration. Lua: ntop.completeWebAuthnRegistration(username, cred_name, cred_id, cdj_b64, att_obj_b64, challenge, origin, rp_id) -> boolean */
+static int ntop_complete_webauthn_registration(lua_State* vm) {
+  char *username, *cred_name, *cred_id, *cdj_b64, *att_obj_b64, *challenge, *origin, *rp_id;
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  if (!allowLocalUserManagement(vm))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((username = (char*)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((cred_name = (char*)lua_tostring(vm, 2)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 3, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((cred_id = (char*)lua_tostring(vm, 3)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 4, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((cdj_b64 = (char*)lua_tostring(vm, 4)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 5, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((att_obj_b64 = (char*)lua_tostring(vm, 5)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 6, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((challenge = (char*)lua_tostring(vm, 6)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 7, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((origin = (char*)lua_tostring(vm, 7)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 8, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((rp_id = (char*)lua_tostring(vm, 8)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+
+  /* Verify the registration challenge is valid */
+  char key[256], stored_user[64];
+  snprintf(key, sizeof(key), "%s.%s", WEBAUTHN_REG_CHALLENGE_PREFIX, challenge);
+  if (ntop->getRedis()->get(key, stored_user, sizeof(stored_user)) < 0 ||
+      strcmp(stored_user, username) != 0) {
+    lua_pushboolean(vm, false);
+    return CONST_LUA_OK;
+  }
+  ntop->getRedis()->del(key); /* Consume challenge */
+
+  bool ok = ntop->verifyAndStoreWebAuthnRegistration(
+      username, cred_name, cred_id, cdj_b64, att_obj_b64, challenge, origin, rp_id);
+  lua_pushboolean(vm, ok);
+  return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
+/* @brief Get WebAuthn credentials as JSON. Lua: ntop.getWebAuthnCredentials(username) -> string JSON */
+static int ntop_get_webauthn_credentials(lua_State* vm) {
+  char* username;
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((username = (char*)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  char json[4096];
+  ntop->getWebAuthnCredentialsJSON(username, json, sizeof(json));
+  lua_pushstring(vm, json);
+  return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
+/* @brief Delete a WebAuthn credential. Lua: ntop.deleteWebAuthnCredential(username, cred_id) -> boolean */
+static int ntop_delete_webauthn_credential(lua_State* vm) {
+  char *username, *cred_id;
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  if (!allowLocalUserManagement(vm))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((username = (char*)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((cred_id = (char*)lua_tostring(vm, 2)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  lua_pushboolean(vm, ntop->deleteWebAuthnCredential(username, cred_id));
+  return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
+/* @brief Check if user has WebAuthn enabled. Lua: ntop.isWebAuthnEnabled(username) -> boolean */
+static int ntop_is_webauthn_enabled(lua_State* vm) {
+  char* username;
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((username = (char*)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  lua_pushboolean(vm, ntop->isWebAuthnEnabled(username));
+  return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
+/* @brief Get pending WebAuthn token info. Lua: ntop.getWebAuthnPendingToken(token) -> table or nil */
+static int ntop_get_webauthn_pending_token(lua_State* vm) {
+  char* token;
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if ((token = (char*)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  char username[64], referer[512], challenge[128];
+  if (!ntop->getWebAuthnPendingToken(token, username, sizeof(username),
+                                     referer, sizeof(referer),
+                                     challenge, sizeof(challenge))) {
+    lua_pushnil(vm);
+    return CONST_LUA_OK;
+  }
+  lua_newtable(vm);
+  lua_pushstring(vm, username);  lua_setfield(vm, -2, "username");
+  lua_pushstring(vm, referer);   lua_setfield(vm, -2, "referer");
+  lua_pushstring(vm, challenge); lua_setfield(vm, -2, "challenge");
+  return CONST_LUA_OK;
+}
+
+/* ****************************************** */
+
 /* Similar to ntop_get_resolved_address but actually perfoms the address
  * resolution now */
 /* @brief Triggers asynchronous DNS reverse lookup for an IP (prefer resolveAddress() from lua_utils).  Lua: ntop.resolveName(ip) → nil */
@@ -9114,6 +9284,15 @@ static luaL_Reg _ntop_reg[] = {
     {"setUserTOTPEnabled", ntop_set_user_totp_enabled},
     {"validateTOTP", ntop_validate_totp},
     {"getTOTPProvisioningUri", ntop_get_totp_provisioning_uri},
+
+    /* WebAuthn/Passkey */
+    {"generateWebAuthnRegistrationOptions", ntop_generate_webauthn_registration_options},
+    {"completeWebAuthnRegistration", ntop_complete_webauthn_registration},
+    {"getWebAuthnCredentials", ntop_get_webauthn_credentials},
+    {"deleteWebAuthnCredential", ntop_delete_webauthn_credential},
+    {"isWebAuthnEnabled", ntop_is_webauthn_enabled},
+    {"getWebAuthnPendingToken", ntop_get_webauthn_pending_token},
+
     {"getNetworkNameById", ntop_network_name_by_id},
     {"getNetworkIdByName", ntop_network_id_by_name},
     {"getNetworks", ntop_get_networks},

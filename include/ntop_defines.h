@@ -139,6 +139,15 @@
 #define MFA_VERIFY_URL "/lua/mfa_verify.lua"
 #define MFA_PENDING_PREFIX "mfa.pending"
 #define MFA_PENDING_TTL 300 /* 5 minutes */
+#define WEBAUTHN_AUTHORIZE_URL "/webauthn_authorize.html"
+#define WEBAUTHN_VERIFY_URL "/lua/webauthn_verify.lua"
+#define WEBAUTHN_PENDING_PREFIX "webauthn.pending"
+#define WEBAUTHN_PENDING_TTL 300 /* 5 minutes */
+#define WEBAUTHN_REG_CHALLENGE_PREFIX "webauthn.reg"
+#define WEBAUTHN_REG_CHALLENGE_TTL 300
+#define CONST_STR_USER_WEBAUTHN_CRED_COUNT NTOPNG_USER_PREFIX ".%s.webauthn_cred_count"
+#define CONST_STR_USER_WEBAUTHN_CRED NTOPNG_USER_PREFIX ".%s.webauthn_cred_%d"
+#define WEBAUTHN_MAX_CREDS 10
 #define AUTHORIZE_CAPTIVE_LUA_URL "/lua/authorize_captive.lua"
 #define HOTSPOT_DETECT_URL "/hotspot-detect.html"        /* iOS    */
 #define KINDLE_WIFISTUB_URL "/kindle-wifi/wifistub.html" /* Kindle */

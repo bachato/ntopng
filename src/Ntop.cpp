@@ -28,6 +28,12 @@
 #include <sys/file.h>
 #endif
 
+/* WebAuthn / Passkey: OpenSSL EC/ECDSA and SHA-256 */
+#include <openssl/sha.h>
+#include <openssl/ec.h>
+#include <openssl/ecdsa.h>
+#include <vector>
+
 Ntop* ntop;
 
 static const char* dirs[] = {
@@ -2764,6 +2770,651 @@ void Ntop::deleteMFAPendingToken(const char* token) const {
   char key[128];
   snprintf(key, sizeof(key), "%s.%s", MFA_PENDING_PREFIX, token);
   ntop->getRedis()->del(key);
+}
+
+/* ******************************************* */
+
+/* ========================================================================
+ * WebAuthn / Passkey implementation
+ * Supports ES256 (P-256 / secp256r1) credentials.
+ * Requires OpenSSL (already a project dependency) for:
+ *   - RAND_bytes (random challenge generation)
+ *   - SHA256 (rpId hash + clientDataJSON hash)
+ *   - EC_KEY, ECDSA_verify (P-256 signature verification)
+ * ======================================================================== */
+
+/* ---------- Base64url helpers ---------- */
+
+static std::string webauthn_b64url_encode(const uint8_t* data, size_t len) {
+  static const char T[] =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  std::string out;
+  out.reserve((len + 2) / 3 * 4);
+  for (size_t i = 0; i < len; i += 3) {
+    uint32_t b = (uint32_t)data[i] << 16;
+    if (i + 1 < len) b |= (uint32_t)data[i + 1] << 8;
+    if (i + 2 < len) b |= data[i + 2];
+    int n = (i + 1 < len) ? ((i + 2 < len) ? 4 : 3) : 2;
+    out += T[(b >> 18) & 0x3F];
+    out += T[(b >> 12) & 0x3F];
+    if (n >= 3) out += T[(b >> 6) & 0x3F];
+    if (n >= 4) out += T[b & 0x3F];
+  }
+  return out;
+}
+
+/* Returns number of decoded bytes or -1 on error. */
+static int webauthn_b64url_decode(const char* src, uint8_t* dst,
+                                   int dst_max) {
+  int8_t V[256];
+  memset(V, -1, sizeof(V));
+  for (int i = 0; i < 26; i++) V[(uint8_t)('A' + i)] = (int8_t)i;
+  for (int i = 0; i < 26; i++) V[(uint8_t)('a' + i)] = (int8_t)(26 + i);
+  for (int i = 0; i < 10; i++) V[(uint8_t)('0' + i)] = (int8_t)(52 + i);
+  V[(uint8_t)'+'] = 62; V[(uint8_t)'-'] = 62;
+  V[(uint8_t)'/'] = 63; V[(uint8_t)'_'] = 63;
+  V[(uint8_t)'='] = -2; /* padding - stop */
+
+  int out = 0;
+  uint32_t acc = 0;
+  int bits = 0;
+  for (int i = 0; src[i]; i++) {
+    unsigned char c = (unsigned char)src[i];
+    if (c >= 128) return -1;
+    int8_t v = V[c];
+    if (v == -2) break;
+    if (v < 0) return -1;
+    acc = (acc << 6) | (uint32_t)v;
+    bits += 6;
+    if (bits >= 8) {
+      if (out >= dst_max) return -1;
+      dst[out++] = (uint8_t)((acc >> (bits - 8)) & 0xFF);
+      bits -= 8;
+    }
+  }
+  return out;
+}
+
+/* ---------- Minimal CBOR parser ---------- */
+/* Supports: uint (0), negint (1), bytes (2), text (3), array (4), map (5) */
+
+struct cbor_val {
+  uint8_t  type;   /* major type 0-7 */
+  int64_t  i;      /* for uint/negint */
+  const uint8_t* p; /* pointer into source for bytes/text */
+  size_t   n;      /* byte length for bytes/text; item count for array/map */
+};
+
+static uint64_t cbor_get_arg(const uint8_t* buf, size_t buf_len, size_t* off) {
+  if (*off >= buf_len) return UINT64_MAX;
+  uint8_t ai = buf[*off] & 0x1F;
+  (*off)++;
+  if (ai < 24) return ai;
+  if (ai == 24) {
+    if (*off >= buf_len) return UINT64_MAX;
+    return buf[(*off)++];
+  }
+  if (ai == 25) {
+    if (*off + 2 > buf_len) return UINT64_MAX;
+    uint64_t v = ((uint64_t)buf[*off] << 8) | buf[*off + 1];
+    *off += 2;
+    return v;
+  }
+  if (ai == 26) {
+    if (*off + 4 > buf_len) return UINT64_MAX;
+    uint64_t v = ((uint64_t)buf[*off] << 24) | ((uint64_t)buf[*off + 1] << 16) |
+                 ((uint64_t)buf[*off + 2] << 8) | buf[*off + 3];
+    *off += 4;
+    return v;
+  }
+  return UINT64_MAX; /* 8-byte or indefinite: not supported */
+}
+
+static bool cbor_next(const uint8_t* buf, size_t buf_len, size_t* off,
+                       cbor_val* v) {
+  if (*off >= buf_len) return false;
+  v->type = (buf[*off] >> 5) & 7;
+  uint64_t n = cbor_get_arg(buf, buf_len, off);
+  if (n == UINT64_MAX) return false;
+  switch (v->type) {
+    case 0: v->i = (int64_t)n; return true;
+    case 1: v->i = -(int64_t)n - 1; return true;
+    case 2: case 3:
+      if (*off + n > buf_len) return false;
+      v->p = buf + *off; v->n = (size_t)n; *off += n; return true;
+    case 4: case 5:
+      v->n = (size_t)n; return true;
+    default: return false;
+  }
+}
+
+static bool cbor_skip(const uint8_t* buf, size_t buf_len, size_t* off) {
+  cbor_val v;
+  if (!cbor_next(buf, buf_len, off, &v)) return false;
+  size_t count = (v.type == 4) ? v.n : (v.type == 5) ? v.n * 2 : 0;
+  for (size_t i = 0; i < count; i++)
+    if (!cbor_skip(buf, buf_len, off)) return false;
+  return true;
+}
+
+/* ---------- COSE / authenticatorData parsing ---------- */
+
+/* Parse a COSE EC2 public key (P-256 / ES256).
+ * Expected CBOR map: {1:2, 3:-7, -1:1, -2:<x 32B>, -3:<y 32B>}
+ * Returns true and sets x_out/y_out (each 32 bytes) on success. */
+static bool parse_cose_ec2(const uint8_t* cbor, size_t cbor_len,
+                             uint8_t* x_out, uint8_t* y_out) {
+  size_t off = 0;
+  cbor_val v;
+  if (!cbor_next(cbor, cbor_len, &off, &v) || v.type != 5) return false;
+  size_t map_items = v.n;
+  bool got_x = false, got_y = false;
+  for (size_t i = 0; i < map_items; i++) {
+    cbor_val key, val;
+    if (!cbor_next(cbor, cbor_len, &off, &key)) return false;
+    if (!cbor_next(cbor, cbor_len, &off, &val)) return false;
+    if (key.type == 0 || key.type == 1) {
+      if (key.i == -2 && val.type == 2 && val.n == 32) {
+        memcpy(x_out, val.p, 32); got_x = true;
+      } else if (key.i == -3 && val.type == 2 && val.n == 32) {
+        memcpy(y_out, val.p, 32); got_y = true;
+      }
+    }
+  }
+  return got_x && got_y;
+}
+
+/* Extract the authData bytes from a CBOR-encoded attestationObject.
+ * Returns a pointer into the cbor buffer and sets *len on success. */
+static bool extract_auth_data(const uint8_t* cbor, size_t cbor_len,
+                               const uint8_t** auth_data_out,
+                               size_t* auth_data_len_out) {
+  size_t off = 0;
+  cbor_val v;
+  if (!cbor_next(cbor, cbor_len, &off, &v) || v.type != 5) return false;
+  size_t map_items = v.n;
+  for (size_t i = 0; i < map_items; i++) {
+    cbor_val key;
+    if (!cbor_next(cbor, cbor_len, &off, &key)) return false;
+    if (key.type == 3 && key.n == 8 &&
+        memcmp(key.p, "authData", 8) == 0) {
+      cbor_val val;
+      if (!cbor_next(cbor, cbor_len, &off, &val) || val.type != 2)
+        return false;
+      *auth_data_out = val.p;
+      *auth_data_len_out = val.n;
+      return true;
+    }
+    if (!cbor_skip(cbor, cbor_len, &off)) return false;
+  }
+  return false;
+}
+
+struct wa_auth_data {
+  uint8_t  rp_id_hash[32];
+  uint8_t  flags;
+  uint32_t sign_count;
+  uint8_t  cred_id[512];
+  size_t   cred_id_len;
+  uint8_t  pk_x[32];
+  uint8_t  pk_y[32];
+  bool     has_cred;
+};
+
+/* Parse the binary authenticatorData structure. */
+static bool parse_auth_data(const uint8_t* d, size_t len, wa_auth_data* out) {
+  if (len < 37) return false;
+  memcpy(out->rp_id_hash, d, 32);
+  out->flags = d[32];
+  out->sign_count = ((uint32_t)d[33] << 24) | ((uint32_t)d[34] << 16) |
+                    ((uint32_t)d[35] << 8) | d[36];
+  out->has_cred = (out->flags & 0x40) != 0;
+  out->cred_id_len = 0;
+  if (out->has_cred) {
+    if (len < 37 + 18) return false;          /* aaguid(16) + credIdLen(2) */
+    size_t pos = 37 + 16;                      /* skip aaguid */
+    uint16_t cid_len = ((uint16_t)d[pos] << 8) | d[pos + 1];
+    pos += 2;
+    if (len < pos + cid_len || cid_len > sizeof(out->cred_id)) return false;
+    memcpy(out->cred_id, d + pos, cid_len);
+    out->cred_id_len = cid_len;
+    pos += cid_len;
+    if (!parse_cose_ec2(d + pos, len - pos, out->pk_x, out->pk_y))
+      return false;
+  }
+  return true;
+}
+
+/* ---------- Minimal JSON field extractor ---------- */
+
+/* Extract a JSON string value for key from a compact JSON object.
+ * Works for browser-generated clientDataJSON which is compact and ASCII. */
+static bool json_get_str(const char* json, const char* key,
+                          char* out, size_t out_len) {
+  char needle[128];
+  snprintf(needle, sizeof(needle), "\"%s\":\"", key);
+  const char* p = strstr(json, needle);
+  if (!p) return false;
+  p += strlen(needle);
+  size_t i = 0;
+  while (*p && *p != '"' && i < out_len - 1) {
+    if (*p == '\\') { p++; if (!*p) break; }
+    out[i++] = *p++;
+  }
+  out[i] = '\0';
+  return *p == '"';
+}
+
+/* ---------- ECDSA P-256 verification ---------- */
+
+/* Verify a DER-encoded ECDSA-P256 signature over data using public key (x,y).
+ * Internally hashes data with SHA-256 before verifying. */
+static bool verify_ecdsa_p256(const uint8_t* pk_x, const uint8_t* pk_y,
+                               const uint8_t* data, size_t data_len,
+                               const uint8_t* sig, int sig_len) {
+  bool ok = false;
+  EC_KEY* key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
+  if (!key) return false;
+
+  BIGNUM* bx = BN_bin2bn(pk_x, 32, NULL);
+  BIGNUM* by = BN_bin2bn(pk_y, 32, NULL);
+  if (!bx || !by) goto done;
+  if (!EC_KEY_set_public_key_affine_coordinates(key, bx, by)) goto done;
+
+  {
+    uint8_t hash[32];
+    SHA256(data, data_len, hash);
+    ok = (ECDSA_verify(0, hash, (int)sizeof(hash), sig, sig_len, key) == 1);
+  }
+done:
+  if (bx) BN_free(bx);
+  if (by) BN_free(by);
+  EC_KEY_free(key);
+  return ok;
+}
+
+/* ---------- Ntop WebAuthn method implementations ---------- */
+
+bool Ntop::generateWebAuthnChallenge(char* challenge_b64, size_t len) const {
+  uint8_t raw[32];
+  if (RAND_bytes(raw, sizeof(raw)) != 1) return false;
+  std::string enc = webauthn_b64url_encode(raw, sizeof(raw));
+  strncpy(challenge_b64, enc.c_str(), len - 1);
+  challenge_b64[len - 1] = '\0';
+  return true;
+}
+
+/* ---------------------------------------- */
+
+bool Ntop::createWebAuthnPendingToken(const char* username, const char* referer,
+                                       char* token, size_t token_len,
+                                       char* challenge_b64,
+                                       size_t challenge_len) const {
+  if (!generateWebAuthnChallenge(challenge_b64, challenge_len)) return false;
+
+  char rand_str[64], tmp_token[33];
+  srand((int)time(0) ^ (int)getpid());
+  snprintf(rand_str, sizeof(rand_str), "%d%s", rand(), username);
+  mg_md5(tmp_token, rand_str, NULL);
+  strncpy(token, tmp_token, token_len - 1);
+  token[token_len - 1] = '\0';
+
+  char key[128], val[768];
+  snprintf(key, sizeof(key), "%s.%s", WEBAUTHN_PENDING_PREFIX, token);
+  snprintf(val, sizeof(val), "%s|%s|%s", username,
+           referer ? referer : "/", challenge_b64);
+  return (ntop->getRedis()->set(key, val, WEBAUTHN_PENDING_TTL) >= 0);
+}
+
+/* ---------------------------------------- */
+
+bool Ntop::getWebAuthnPendingToken(const char* token, char* username,
+                                    size_t username_len, char* referer,
+                                    size_t referer_len, char* challenge_b64,
+                                    size_t challenge_len) const {
+  char key[128], val[768];
+  snprintf(key, sizeof(key), "%s.%s", WEBAUTHN_PENDING_PREFIX, token);
+  if (ntop->getRedis()->get(key, val, sizeof(val)) < 0) return false;
+
+  /* val = "username|referer|challenge" */
+  char* p1 = strchr(val, '|');
+  if (!p1) return false;
+  *p1 = '\0';
+  char* p2 = strchr(p1 + 1, '|');
+  if (!p2) return false;
+  *p2 = '\0';
+
+  strncpy(username, val, username_len - 1);
+  username[username_len - 1] = '\0';
+  strncpy(referer, p1 + 1, referer_len - 1);
+  referer[referer_len - 1] = '\0';
+  strncpy(challenge_b64, p2 + 1, challenge_len - 1);
+  challenge_b64[challenge_len - 1] = '\0';
+  return true;
+}
+
+/* ---------------------------------------- */
+
+void Ntop::deleteWebAuthnPendingToken(const char* token) const {
+  char key[128];
+  snprintf(key, sizeof(key), "%s.%s", WEBAUTHN_PENDING_PREFIX, token);
+  ntop->getRedis()->del(key);
+}
+
+/* ---------------------------------------- */
+
+bool Ntop::isWebAuthnEnabled(const char* username) const {
+  return (getWebAuthnCredentialCount(username) > 0);
+}
+
+/* ---------------------------------------- */
+
+int Ntop::getWebAuthnCredentialCount(const char* username) const {
+  char key[CONST_MAX_LEN_REDIS_KEY], val[16];
+  snprintf(key, sizeof(key), CONST_STR_USER_WEBAUTHN_CRED_COUNT, username);
+  if (ntop->getRedis()->get(key, val, sizeof(val)) < 0) return 0;
+  int n = atoi(val);
+  return (n > 0 && n <= WEBAUTHN_MAX_CREDS) ? n : 0;
+}
+
+/* Credential storage format (pipe-separated):
+ *   <cred_id_b64url>|<pk_x_hex>|<pk_y_hex>|<sign_count>|<name> */
+
+static void webauthn_bytes_to_hex(const uint8_t* b, size_t len, char* hex) {
+  for (size_t i = 0; i < len; i++)
+    snprintf(hex + i * 2, 3, "%02x", b[i]);
+}
+
+static bool webauthn_hex_to_bytes(const char* hex, uint8_t* out, size_t out_len) {
+  size_t hlen = strlen(hex);
+  if (hlen != out_len * 2) return false;
+  for (size_t i = 0; i < out_len; i++) {
+    char byte_str[3] = { hex[i*2], hex[i*2+1], '\0' };
+    char* end;
+    out[i] = (uint8_t)strtoul(byte_str, &end, 16);
+    if (end != byte_str + 2) return false;
+  }
+  return true;
+}
+
+bool Ntop::getWebAuthnCredential(const char* username, int idx,
+                                   char* cred_id_b64, size_t cred_id_len,
+                                   uint8_t* pk_x, uint8_t* pk_y,
+                                   uint32_t* sign_count,
+                                   char* name, size_t name_len) const {
+  char key[CONST_MAX_LEN_REDIS_KEY], val[1024];
+  snprintf(key, sizeof(key), CONST_STR_USER_WEBAUTHN_CRED, username, idx);
+  if (ntop->getRedis()->get(key, val, sizeof(val)) < 0) return false;
+
+  /* Parse: cred_id|pk_x_hex|pk_y_hex|sign_count|name */
+  char* fields[5];
+  char* p = val;
+  for (int f = 0; f < 5; f++) {
+    fields[f] = p;
+    if (f < 4) {
+      char* sep = strchr(p, '|');
+      if (!sep) return false;
+      *sep = '\0';
+      p = sep + 1;
+    }
+  }
+  strncpy(cred_id_b64, fields[0], cred_id_len - 1);
+  cred_id_b64[cred_id_len - 1] = '\0';
+  if (!webauthn_hex_to_bytes(fields[1], pk_x, 32)) return false;
+  if (!webauthn_hex_to_bytes(fields[2], pk_y, 32)) return false;
+  *sign_count = (uint32_t)strtoul(fields[3], NULL, 10);
+  strncpy(name, fields[4], name_len - 1);
+  name[name_len - 1] = '\0';
+  return true;
+}
+
+/* ---------------------------------------- */
+
+bool Ntop::storeWebAuthnCredential(const char* username,
+                                     const char* cred_id_b64,
+                                     const uint8_t* pk_x, const uint8_t* pk_y,
+                                     uint32_t sign_count,
+                                     const char* name) const {
+  int n = getWebAuthnCredentialCount(username);
+  if (n >= WEBAUTHN_MAX_CREDS) return false; /* Limit reached */
+
+  char x_hex[65], y_hex[65];
+  webauthn_bytes_to_hex(pk_x, 32, x_hex);
+  webauthn_bytes_to_hex(pk_y, 32, y_hex);
+
+  char key[CONST_MAX_LEN_REDIS_KEY], val[1024];
+  snprintf(key, sizeof(key), CONST_STR_USER_WEBAUTHN_CRED, username, n);
+  snprintf(val, sizeof(val), "%s|%s|%s|%u|%s",
+           cred_id_b64, x_hex, y_hex, sign_count, name ? name : "Passkey");
+  if (ntop->getRedis()->set(key, val, 0) < 0) return false;
+
+  char cnt_key[CONST_MAX_LEN_REDIS_KEY], cnt_val[16];
+  snprintf(cnt_key, sizeof(cnt_key), CONST_STR_USER_WEBAUTHN_CRED_COUNT, username);
+  snprintf(cnt_val, sizeof(cnt_val), "%d", n + 1);
+  return (ntop->getRedis()->set(cnt_key, cnt_val, 0) >= 0);
+}
+
+/* ---------------------------------------- */
+
+bool Ntop::deleteWebAuthnCredential(const char* username,
+                                     const char* cred_id_b64) const {
+  int n = getWebAuthnCredentialCount(username);
+  int found = -1;
+  for (int i = 0; i < n; i++) {
+    char id[512]; uint8_t x[32], y[32]; uint32_t sc; char nm[64];
+    if (getWebAuthnCredential(username, i, id, sizeof(id), x, y, &sc,
+                              nm, sizeof(nm)) &&
+        strcmp(id, cred_id_b64) == 0) {
+      found = i;
+      break;
+    }
+  }
+  if (found < 0) return false;
+
+  char key[CONST_MAX_LEN_REDIS_KEY];
+
+  /* Swap with last entry if not already the last */
+  if (found < n - 1) {
+    char last_val[1024];
+    snprintf(key, sizeof(key), CONST_STR_USER_WEBAUTHN_CRED, username, n - 1);
+    if (ntop->getRedis()->get(key, last_val, sizeof(last_val)) < 0) return false;
+    char found_key[CONST_MAX_LEN_REDIS_KEY];
+    snprintf(found_key, sizeof(found_key), CONST_STR_USER_WEBAUTHN_CRED, username, found);
+    ntop->getRedis()->set(found_key, last_val, 0);
+  }
+
+  /* Delete the last slot */
+  snprintf(key, sizeof(key), CONST_STR_USER_WEBAUTHN_CRED, username, n - 1);
+  ntop->getRedis()->del(key);
+
+  /* Update count */
+  char cnt_key[CONST_MAX_LEN_REDIS_KEY], cnt_val[16];
+  snprintf(cnt_key, sizeof(cnt_key), CONST_STR_USER_WEBAUTHN_CRED_COUNT, username);
+  snprintf(cnt_val, sizeof(cnt_val), "%d", n - 1);
+  ntop->getRedis()->set(cnt_key, cnt_val, 0);
+  return true;
+}
+
+/* ---------------------------------------- */
+
+bool Ntop::getWebAuthnCredentialsJSON(const char* username,
+                                       char* json_out, size_t len) const {
+  int n = getWebAuthnCredentialCount(username);
+  std::string out = "[";
+  for (int i = 0; i < n; i++) {
+    char id[512]; uint8_t x[32], y[32]; uint32_t sc; char nm[64];
+    if (!getWebAuthnCredential(username, i, id, sizeof(id), x, y, &sc,
+                               nm, sizeof(nm)))
+      continue;
+    if (out.size() > 1) out += ",";
+    char entry[768];
+    snprintf(entry, sizeof(entry),
+             "{\"id\":\"%s\",\"name\":\"%s\",\"sign_count\":%u}", id, nm, sc);
+    out += entry;
+  }
+  out += "]";
+  strncpy(json_out, out.c_str(), len - 1);
+  json_out[len - 1] = '\0';
+  return true;
+}
+
+/* ---------------------------------------- */
+
+bool Ntop::verifyWebAuthnAssertion(const char* username,
+                                    const char* cred_id_b64url,
+                                    const char* client_data_json_b64url,
+                                    const char* auth_data_b64url,
+                                    const char* signature_b64url,
+                                    const char* expected_challenge_b64url,
+                                    const char* expected_origin,
+                                    const char* rp_id) const {
+  /* 1. Decode base64url inputs */
+  uint8_t cdj_raw[8192]; int cdj_len;
+  uint8_t ad_raw[1024];  int ad_len;
+  uint8_t sig_raw[512];  int sig_len;
+
+  cdj_len = webauthn_b64url_decode(client_data_json_b64url, cdj_raw,
+                                    (int)sizeof(cdj_raw) - 1);
+  ad_len  = webauthn_b64url_decode(auth_data_b64url, ad_raw, (int)sizeof(ad_raw));
+  sig_len = webauthn_b64url_decode(signature_b64url, sig_raw, (int)sizeof(sig_raw));
+  if (cdj_len <= 0 || ad_len <= 0 || sig_len <= 0) return false;
+  cdj_raw[cdj_len] = '\0'; /* null-terminate for JSON parsing */
+
+  /* 2. Parse clientDataJSON */
+  char type_val[64], challenge_val[256], origin_val[256];
+  if (!json_get_str((char*)cdj_raw, "type",      type_val,      sizeof(type_val)))      return false;
+  if (!json_get_str((char*)cdj_raw, "challenge", challenge_val, sizeof(challenge_val))) return false;
+  if (!json_get_str((char*)cdj_raw, "origin",    origin_val,    sizeof(origin_val)))    return false;
+
+  if (strcmp(type_val, "webauthn.get") != 0) return false;
+
+  /* Compare challenges: decode both and compare bytes */
+  uint8_t ch_got[256], ch_exp[256];
+  int ch_got_len = webauthn_b64url_decode(challenge_val, ch_got, (int)sizeof(ch_got));
+  int ch_exp_len = webauthn_b64url_decode(expected_challenge_b64url, ch_exp, (int)sizeof(ch_exp));
+  if (ch_got_len <= 0 || ch_exp_len <= 0 || ch_got_len != ch_exp_len) return false;
+  if (memcmp(ch_got, ch_exp, ch_got_len) != 0) return false;
+
+  /* Compare origins */
+  if (strcmp(origin_val, expected_origin) != 0) return false;
+
+  /* 3. Verify rpIdHash */
+  uint8_t rp_hash[32];
+  SHA256((const uint8_t*)rp_id, strlen(rp_id), rp_hash);
+  if (ad_len < 37 || memcmp(ad_raw, rp_hash, 32) != 0) return false;
+
+  /* 4. Check UP (User Present) flag */
+  if (!(ad_raw[32] & 0x01)) return false;
+
+  /* 5. Extract signCount from authData */
+  uint32_t sign_count = ((uint32_t)ad_raw[33] << 24) | ((uint32_t)ad_raw[34] << 16) |
+                        ((uint32_t)ad_raw[35] << 8) | ad_raw[36];
+
+  /* 6. Find the credential by ID, saving pk and name for later */
+  int n = getWebAuthnCredentialCount(username);
+  uint8_t pk_x[32], pk_y[32];
+  uint32_t stored_sc = 0;
+  char found_name[64] = "Passkey";
+  bool found = false;
+  int found_idx = -1;
+  for (int i = 0; i < n && !found; i++) {
+    char id[512]; uint8_t x[32], y[32]; uint32_t sc; char nm[64];
+    if (getWebAuthnCredential(username, i, id, sizeof(id), x, y, &sc,
+                              nm, sizeof(nm)) &&
+        strcmp(id, cred_id_b64url) == 0) {
+      memcpy(pk_x, x, 32); memcpy(pk_y, y, 32);
+      stored_sc = sc;
+      found_idx = i;
+      strncpy(found_name, nm, sizeof(found_name) - 1);
+      found_name[sizeof(found_name) - 1] = '\0';
+      found = true;
+    }
+  }
+  if (!found) return false;
+
+  /* Sign count check: reject if stored > 0 and new <= stored (replay) */
+  if (stored_sc > 0 && sign_count <= stored_sc) return false;
+
+  /* 7. Verify ECDSA signature: msg = authData || SHA256(clientDataJSON) */
+  uint8_t cdj_hash[32];
+  SHA256(cdj_raw, (size_t)cdj_len, cdj_hash);
+
+  std::vector<uint8_t> msg((size_t)ad_len + 32);
+  memcpy(msg.data(), ad_raw, (size_t)ad_len);
+  memcpy(msg.data() + ad_len, cdj_hash, 32);
+
+  if (!verify_ecdsa_p256(pk_x, pk_y, msg.data(), msg.size(), sig_raw, sig_len))
+    return false;
+
+  /* 8. Update signCount in Redis using the saved name */
+  char key[CONST_MAX_LEN_REDIS_KEY], val[1024];
+  char x_hex[65], y_hex[65];
+  webauthn_bytes_to_hex(pk_x, 32, x_hex);
+  webauthn_bytes_to_hex(pk_y, 32, y_hex);
+  snprintf(key, sizeof(key), CONST_STR_USER_WEBAUTHN_CRED, username, found_idx);
+  snprintf(val, sizeof(val), "%s|%s|%s|%u|%s",
+           cred_id_b64url, x_hex, y_hex, sign_count, found_name);
+  ntop->getRedis()->set(key, val, 0);
+
+  return true;
+}
+
+/* ---------------------------------------- */
+
+bool Ntop::verifyAndStoreWebAuthnRegistration(
+    const char* username, const char* cred_name,
+    const char* cred_id_b64url, const char* client_data_json_b64url,
+    const char* attestation_obj_b64url, const char* expected_challenge_b64url,
+    const char* expected_origin, const char* rp_id) const {
+
+  /* 1. Decode inputs */
+  uint8_t cdj_raw[8192]; int cdj_len;
+  uint8_t ao_raw[8192];  int ao_len;
+
+  cdj_len = webauthn_b64url_decode(client_data_json_b64url, cdj_raw,
+                                    (int)sizeof(cdj_raw) - 1);
+  ao_len  = webauthn_b64url_decode(attestation_obj_b64url, ao_raw,
+                                    (int)sizeof(ao_raw));
+  if (cdj_len <= 0 || ao_len <= 0) return false;
+  cdj_raw[cdj_len] = '\0';
+
+  /* 2. Verify clientDataJSON */
+  char type_val[64], challenge_val[256], origin_val[256];
+  if (!json_get_str((char*)cdj_raw, "type",      type_val,      sizeof(type_val)))      return false;
+  if (!json_get_str((char*)cdj_raw, "challenge", challenge_val, sizeof(challenge_val))) return false;
+  if (!json_get_str((char*)cdj_raw, "origin",    origin_val,    sizeof(origin_val)))    return false;
+  if (strcmp(type_val, "webauthn.create") != 0) return false;
+
+  uint8_t ch_got[256], ch_exp[256];
+  int ch_got_len = webauthn_b64url_decode(challenge_val, ch_got, (int)sizeof(ch_got));
+  int ch_exp_len = webauthn_b64url_decode(expected_challenge_b64url, ch_exp, (int)sizeof(ch_exp));
+  if (ch_got_len <= 0 || ch_exp_len <= 0 || ch_got_len != ch_exp_len) return false;
+  if (memcmp(ch_got, ch_exp, ch_got_len) != 0) return false;
+  if (strcmp(origin_val, expected_origin) != 0) return false;
+
+  /* 3. Extract authData from attestationObject */
+  const uint8_t* auth_data;
+  size_t auth_data_len;
+  if (!extract_auth_data(ao_raw, (size_t)ao_len, &auth_data, &auth_data_len))
+    return false;
+
+  /* 4. Parse authenticatorData */
+  wa_auth_data ad;
+  if (!parse_auth_data(auth_data, auth_data_len, &ad)) return false;
+  if (!ad.has_cred) return false;
+
+  /* 5. Verify rpIdHash */
+  uint8_t rp_hash[32];
+  SHA256((const uint8_t*)rp_id, strlen(rp_id), rp_hash);
+  if (memcmp(ad.rp_id_hash, rp_hash, 32) != 0) return false;
+
+  /* 6. Check UP flag */
+  if (!(ad.flags & 0x01)) return false;
+
+  /* 7. Store the credential (cred_id comes from the client as b64url) */
+  return storeWebAuthnCredential(username, cred_id_b64url,
+                                 ad.pk_x, ad.pk_y, ad.sign_count,
+                                 cred_name && cred_name[0] ? cred_name : "Passkey");
 }
 
 /* ******************************************* */

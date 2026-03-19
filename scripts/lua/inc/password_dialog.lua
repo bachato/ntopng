@@ -30,6 +30,7 @@ print [[
     <li class="nav-item ]] print(ternary(is_admin, "", "active")) print[["><a class="nav-link ]] print(ternary(is_admin, "", "active")) print[[" href="#change-password-dialog" role="tab" data-bs-toggle="tab"> ]] print(i18n("login.password")) print[[ </a></li>
     <li class="nav-item"><a class="nav-link" href="#user-token-tab" role="tab" data-bs-toggle="tab"> ]] print(i18n("login.auth_token")) print[[ </a></li>
     <li class="nav-item"><a class="nav-link" href="#user-mfa-tab" role="tab" data-bs-toggle="tab"> <i class="fas fa-shield-alt"></i> ]] print(i18n("mfa.tab_title") or "MFA") print[[ </a></li>
+    <li class="nav-item"><a class="nav-link" href="#user-webauthn-tab" role="tab" data-bs-toggle="tab"> <i class="fas fa-fingerprint"></i> ]] print(i18n("webauthn.tab_title") or "Passkeys") print[[ </a></li>
 
   </ul>
   </div>
@@ -346,6 +347,22 @@ print([[
   </div>
 ]])
 
+-- WebAuthn/Passkeys Tab
+print([[
+  <div class='tab-pane' id='user-webauthn-tab'>
+    <div id="webauthn_alert_placeholder"></div>
+    <div class="mb-3">
+      <p class="text-muted">]] .. (i18n("webauthn.description") or "Use biometric authentication (Touch ID, Face ID) or hardware security keys as a second factor to protect your account.") .. [[</p>
+    </div>
+
+    <div id="webauthn-creds-list" class="mb-3"></div>
+
+    <button id="btn-webauthn-add" class="btn btn-primary">
+      <i class="fas fa-plus"></i> ]] .. (i18n("webauthn.add_passkey") or "Add Passkey") .. [[
+    </button>
+  </div>
+]])
+
 print [[
   <script type='text/javascript'>
 
@@ -572,6 +589,9 @@ function reset_pwd_dialog(user) {
 
       /* Update MFA tab status */
       updateMfaStatus(data.username, data.totp_enabled === true);
+
+      /* Update WebAuthn/Passkeys tab status */
+      if (typeof updateWebAuthnStatus === 'function') updateWebAuthnStatus(data.username);
     });
 
       return(true);
@@ -677,6 +697,127 @@ $('#password_reset_submit').click(function() {
   $('#form_password_reset').submit();
 });
 */
+</script>
+
+<script>
+(function() {
+  var _webauthn_user = '';
+  var wa_alert = {};
+  wa_alert.error   = function(m) { document.getElementById('webauthn_alert_placeholder').innerHTML = '<div class="alert alert-danger alert-dismissable">' + m + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>'; };
+  wa_alert.success = function(m) { document.getElementById('webauthn_alert_placeholder').innerHTML = '<div class="alert alert-success alert-dismissable">' + m + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>'; };
+  wa_alert.clear   = function()  { document.getElementById('webauthn_alert_placeholder').innerHTML = ''; };
+
+  function b64url_decode(str) {
+    str = str.replace(/-/g, '+').replace(/_/g, '/');
+    while (str.length % 4) str += '=';
+    var bin = atob(str);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes.buffer;
+  }
+
+  function b64url_encode(buf) {
+    var bytes = new Uint8Array(buf);
+    var str = '';
+    for (var i = 0; i < bytes.length; i++) str += String.fromCharCode(bytes[i]);
+    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  }
+
+  window.updateWebAuthnStatus = function(username) {
+    _webauthn_user = username;
+    wa_alert.clear();
+    fetch(http_prefix + '/lua/admin/change_user_webauthn.lua?action=list&username=' + encodeURIComponent(username))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var list = document.getElementById('webauthn-creds-list');
+        if (!list) return;
+        if (!data.credentials || data.credentials.length === 0) {
+          list.innerHTML = '<p class="text-muted">]] print(i18n("webauthn.no_creds") or "No passkeys registered.") print[[</p>';
+          return;
+        }
+        var html = '<table class="table table-sm"><thead><tr><th>Name</th><th>Uses</th><th></th></tr></thead><tbody>';
+        data.credentials.forEach(function(c) {
+          html += '<tr><td>' + (c.name || 'Passkey') + '</td><td>' + (c.sign_count || 0) + '</td>' +
+                  '<td><button class="btn btn-sm btn-danger btn-del-passkey" data-cred-id="' + c.id + '">]] print(i18n("webauthn.remove_passkey") or "Remove") print[[</button></td></tr>';
+        });
+        html += '</tbody></table>';
+        list.innerHTML = html;
+        document.querySelectorAll('.btn-del-passkey').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            if (!confirm('Remove this passkey?')) return;
+            var cid = this.getAttribute('data-cred-id');
+            fetch(http_prefix + '/lua/admin/change_user_webauthn.lua', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+              body: 'action=delete&username=' + encodeURIComponent(_webauthn_user) + '&cred_id=' + encodeURIComponent(cid)
+            }).then(function(r) { return r.json(); }).then(function(d) {
+              if (d.result === 0) { wa_alert.success(']] print(i18n("webauthn.removed") or "Passkey removed.") print[['); window.updateWebAuthnStatus(_webauthn_user); }
+              else wa_alert.error(d.message);
+            });
+          });
+        });
+      });
+  };
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var addBtn = document.getElementById('btn-webauthn-add');
+    if (!addBtn) return;
+    addBtn.addEventListener('click', async function() {
+      if (!window.PublicKeyCredential) { wa_alert.error(']] print(i18n("webauthn.not_supported") or "WebAuthn is not supported in this browser.") print[['); return; }
+      wa_alert.clear();
+      try {
+        var optResp = await fetch(http_prefix + '/lua/admin/change_user_webauthn.lua', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: 'action=get_registration_options&username=' + encodeURIComponent(_webauthn_user)
+        });
+        var opts = await optResp.json();
+        if (opts.result !== 0) { wa_alert.error(opts.message); return; }
+
+        var credName = prompt('Name for this passkey (e.g. "My iPhone"):', 'Passkey') || 'Passkey';
+
+        var challengeBuf = b64url_decode(opts.challenge);
+        var userIdBuf = new TextEncoder().encode(opts.user.id);
+        var cred = await navigator.credentials.create({
+          publicKey: {
+            challenge: challengeBuf,
+            rp: { name: opts.rp.name, id: window.location.hostname },
+            user: { id: userIdBuf, name: opts.user.name, displayName: opts.user.displayName },
+            pubKeyCredParams: opts.pubKeyCredParams,
+            authenticatorSelection: opts.authenticatorSelection,
+            attestation: opts.attestation,
+            timeout: opts.timeout
+          }
+        });
+
+        var completeResp = await fetch(http_prefix + '/lua/admin/change_user_webauthn.lua', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: [
+            'action=complete_registration',
+            'username=' + encodeURIComponent(_webauthn_user),
+            'cred_name=' + encodeURIComponent(credName),
+            'cred_id=' + encodeURIComponent(b64url_encode(cred.rawId)),
+            'client_data=' + encodeURIComponent(b64url_encode(cred.response.clientDataJSON)),
+            'att_obj=' + encodeURIComponent(b64url_encode(cred.response.attestationObject)),
+            'challenge=' + encodeURIComponent(opts.challenge),
+            'origin=' + encodeURIComponent(window.location.origin),
+            'rp_id=' + encodeURIComponent(window.location.hostname)
+          ].join('&')
+        });
+        var completeData = await completeResp.json();
+        if (completeData.result === 0) {
+          wa_alert.success(']] print(i18n("webauthn.registered") or "Passkey registered successfully!") print[[');
+          window.updateWebAuthnStatus(_webauthn_user);
+        } else {
+          wa_alert.error('Registration failed: ' + completeData.message);
+        }
+      } catch(e) {
+        if (e.name !== 'NotAllowedError') wa_alert.error('Error: ' + e.message);
+      }
+    });
+  });
+})();
 </script>
 
 </div>

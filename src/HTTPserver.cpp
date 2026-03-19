@@ -388,6 +388,7 @@ static int isWhitelistedURI(const char* uri) {
   /* URL whitelist */
   if ((!strcmp(uri, LOGIN_URL)) || (!strcmp(uri, AUTHORIZE_URL)) ||
       (!strcmp(uri, MFA_AUTHORIZE_URL)) || (!strcmp(uri, MFA_VERIFY_URL)) ||
+      (!strcmp(uri, WEBAUTHN_AUTHORIZE_URL)) || (!strcmp(uri, WEBAUTHN_VERIFY_URL)) ||
       (!strcmp(uri, LOCALE_URL))
 #ifdef NTOPNG_PRO
       || (!strcmp(uri, OIDC_START_URL)) || (!strcmp(uri, OIDC_CALLBACK_URL))
@@ -996,6 +997,18 @@ static void redirect_to_mfa(struct mg_connection* conn, const char* token) {
 
 /* ****************************************** */
 
+static void redirect_to_webauthn(struct mg_connection* conn, const char* token) {
+  char url[256];
+  snprintf(url, sizeof(url), "%s%s?token=%s",
+           ntop->getPrefs()->get_http_prefix(), WEBAUTHN_VERIFY_URL, token);
+  mg_printf(conn,
+            "HTTP/1.1 302 Found\r\n"
+            "Location: %s\r\n\r\n",
+            url);
+}
+
+/* ****************************************** */
+
 #ifdef NTOPNG_PRO
 // Handler for /oidc_start — initiates the OIDC Authorization Code flow.
 // Redirects the user to the IdP authorization endpoint.
@@ -1138,6 +1151,17 @@ static void authorize(struct mg_connection* conn,
       strcpy(referer, "/");
     }
 
+    /* If WebAuthn is enabled for this user, prefer it as second factor */
+    if (ntop->isWebAuthnEnabled(user)) {
+      char token[33], challenge[64];
+      if (ntop->createWebAuthnPendingToken(user, referer, token, sizeof(token),
+                                            challenge, sizeof(challenge))) {
+        redirect_to_webauthn(conn, token);
+        return;
+      }
+      /* If token creation fails, fall through */
+    }
+
     /* If TOTP/MFA is enabled for this user, require a second factor */
     if (ntop->isTOTPEnabled(user)) {
       char token[33];
@@ -1211,6 +1235,86 @@ static void mfa_authorize(struct mg_connection* conn,
 
   if (referer[0] != '/') strcpy(referer, "/");
 
+  set_session_cookie(conn, user, group, *localuser, referer);
+  strncpy(username, user, NTOP_USERNAME_MAXLEN);
+  username[NTOP_USERNAME_MAXLEN - 1] = '\0';
+}
+
+/* ****************************************** */
+
+static void webauthn_authorize(struct mg_connection* conn,
+                                const struct mg_request_info* request_info,
+                                char* username, char* group, bool* localuser) {
+  char token[64] = {'\0'};
+  char cred_id[1024] = {'\0'};
+  char cdj_b64[16384] = {'\0'};
+  char ad_b64[4096] = {'\0'};
+  char sig_b64[2048] = {'\0'};
+
+  if (!strcmp(request_info->request_method, "POST")) {
+    char post_data[32768];
+    int post_data_len = mg_read(conn, post_data, sizeof(post_data) - 1);
+    post_data[post_data_len] = '\0';
+    mg_get_var(post_data, post_data_len, "token",       token,   sizeof(token));
+    mg_get_var(post_data, post_data_len, "cred_id",     cred_id, sizeof(cred_id));
+    mg_get_var(post_data, post_data_len, "client_data", cdj_b64, sizeof(cdj_b64));
+    mg_get_var(post_data, post_data_len, "auth_data",   ad_b64,  sizeof(ad_b64));
+    mg_get_var(post_data, post_data_len, "signature",   sig_b64, sizeof(sig_b64));
+  }
+
+  char user[32] = {'\0'}, referer[256] = {'\0'}, challenge[128] = {'\0'};
+  bool got_token = false;
+  if (token[0] != '\0' &&
+      ntop->getWebAuthnPendingToken(token, user, sizeof(user),
+                                    referer, sizeof(referer),
+                                    challenge, sizeof(challenge))) {
+    got_token = true;
+  }
+
+  if (!got_token) {
+    char url[256];
+    snprintf(url, sizeof(url), "%s/lua/login.lua?reason=session-expired",
+             ntop->getPrefs()->get_http_prefix());
+    mg_printf(conn, "HTTP/1.1 302 Found\r\nLocation: %s\r\n\r\n", url);
+    return;
+  }
+
+  /* Build origin from request (scheme + host) */
+  char origin[256] = {'\0'};
+  const char* host_hdr = mg_get_header(conn, "Host");
+  snprintf(origin, sizeof(origin), "%s://%s",
+           request_info->is_ssl ? "https" : "http",
+           host_hdr ? host_hdr : "localhost");
+
+  /* Extract rp_id (hostname only, no port) */
+  char rp_id[256] = {'\0'};
+  if (host_hdr) {
+    strncpy(rp_id, host_hdr, sizeof(rp_id) - 1);
+    char* colon = strchr(rp_id, ':');
+    if (colon) *colon = '\0'; /* strip port */
+  } else {
+    strncpy(rp_id, "localhost", sizeof(rp_id) - 1);
+  }
+
+  if (!ntop->verifyWebAuthnAssertion(user, cred_id, cdj_b64, ad_b64,
+                                      sig_b64, challenge, origin, rp_id)) {
+    char url[256];
+    snprintf(url, sizeof(url), "%s%s?token=%s&reason=invalid-key",
+             ntop->getPrefs()->get_http_prefix(), WEBAUTHN_VERIFY_URL, token);
+    mg_printf(conn, "HTTP/1.1 302 Found\r\nLocation: %s\r\n\r\n", url);
+    return;
+  }
+
+  ntop->deleteWebAuthnPendingToken(token);
+
+  char grp[NTOP_GROUP_MAXLEN] = {0};
+  bool lu = true;
+  strncpy(grp, NTOP_UNKNOWN_GROUP, NTOP_GROUP_MAXLEN - 1);
+  ntop->getUserGroupLocal(user, grp);
+  strncpy(group, grp, NTOP_GROUP_MAXLEN - 1);
+  group[NTOP_GROUP_MAXLEN - 1] = '\0';
+  *localuser = lu;
+  if (referer[0] != '/') strcpy(referer, "/");
   set_session_cookie(conn, user, group, *localuser, referer);
   strncpy(username, user, NTOP_USERNAME_MAXLEN);
   username[NTOP_USERNAME_MAXLEN - 1] = '\0';
@@ -1597,6 +1701,9 @@ static int handle_lua_request(struct mg_connection* conn) {
       return (1);
     } else if (strcmp(request_info->uri, MFA_AUTHORIZE_URL) == 0) {
       mfa_authorize(conn, request_info, username, group, &localuser);
+      return (1);
+    } else if (strcmp(request_info->uri, WEBAUTHN_AUTHORIZE_URL) == 0) {
+      webauthn_authorize(conn, request_info, username, group, &localuser);
       return (1);
 #ifdef NTOPNG_PRO
     } else if (strcmp(request_info->uri, OIDC_START_URL) == 0) {

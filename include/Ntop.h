@@ -589,6 +589,49 @@ class Ntop {
                           size_t referer_len) const;
   void deleteMFAPendingToken(const char* token) const;
 
+  /* WebAuthn/Passkey */
+  bool generateWebAuthnChallenge(char* challenge_b64, size_t len) const;
+  bool createWebAuthnPendingToken(const char* username, const char* referer,
+                                  char* token, size_t token_len,
+                                  char* challenge_b64, size_t challenge_len) const;
+  bool getWebAuthnPendingToken(const char* token, char* username,
+                               size_t username_len, char* referer,
+                               size_t referer_len, char* challenge_b64,
+                               size_t challenge_len) const;
+  void deleteWebAuthnPendingToken(const char* token) const;
+  bool isWebAuthnEnabled(const char* username) const;
+  int  getWebAuthnCredentialCount(const char* username) const;
+  bool getWebAuthnCredential(const char* username, int idx,
+                             char* cred_id_b64, size_t cred_id_len,
+                             uint8_t* pk_x, uint8_t* pk_y,
+                             uint32_t* sign_count,
+                             char* name, size_t name_len) const;
+  bool storeWebAuthnCredential(const char* username,
+                               const char* cred_id_b64,
+                               const uint8_t* pk_x, const uint8_t* pk_y,
+                               uint32_t sign_count,
+                               const char* name) const;
+  bool deleteWebAuthnCredential(const char* username,
+                                const char* cred_id_b64) const;
+  bool getWebAuthnCredentialsJSON(const char* username,
+                                  char* json_out, size_t len) const;
+  bool verifyWebAuthnAssertion(const char* username,
+                               const char* cred_id_b64url,
+                               const char* client_data_json_b64url,
+                               const char* auth_data_b64url,
+                               const char* signature_b64url,
+                               const char* expected_challenge_b64url,
+                               const char* expected_origin,
+                               const char* rp_id) const;
+  bool verifyAndStoreWebAuthnRegistration(const char* username,
+                                          const char* cred_name,
+                                          const char* cred_id_b64url,
+                                          const char* client_data_json_b64url,
+                                          const char* attestation_obj_b64url,
+                                          const char* expected_challenge_b64url,
+                                          const char* expected_origin,
+                                          const char* rp_id) const;
+
   bool addUser(char* username, char* full_name, char* password, char* host_role,
                char* allowed_networks, char* allowed_ifname, char* host_pool_id,
                char* language, bool allow_pcap_download,
