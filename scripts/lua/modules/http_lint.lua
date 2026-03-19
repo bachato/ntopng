@@ -1774,7 +1774,7 @@ local known_parameters = {
    ["ts_unify"] = validateBool, -- timeseries name
    ["peer1"] = validateHost, -- a Peer in a connection
    ["peer2"] = validateHost, -- another Peer in a connection
-   ["origin"] = validateHost, -- the source of the alert
+   ["origin"] = validateUnquoted, -- the source of the alert (validateHost) or URL in case of passkey
    ["target"] = validateHost, -- the target of the alert
    ["member"] = validateMember, -- an IPv4 (optional @vlan, optional /suffix), IPv6 (optional @vlan, optional /suffix), or MAC address
    ["old_member"] = validateMember,
@@ -2608,6 +2608,15 @@ local known_parameters = {
 
    -- MFA
    ["totp"] = validateNumber,
+
+   -- PassKey
+   ["challenge"] = validateSingleWord,
+   ["cred_id"] = validateSingleWord,
+   ["client_data"] = validateSingleWord,
+   ["cred_name"] = validateSingleWord,
+   ["rd_id"] = validateSingleWord,
+   ["rp_id"] = validateSingleWord,
+   ["att_obj"] = validateSingleWord,
    
    -- Other
    ["send_test_email"] = validateEmpty,
