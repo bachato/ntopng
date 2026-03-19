@@ -3244,43 +3244,51 @@ decode_packet_eth:
 
           if ((sport == GTP_U_V1_PORT) || (dport == GTP_U_V1_PORT)) {
             /* Check if it's GTPv1 */
-            u_int offset =
-                (u_int)(ip_offset + ip_len + sizeof(struct ndpi_udphdr));
-            u_int8_t flags = packet[offset];
-            u_int8_t message_type = packet[offset + 1];
+            u_int offset = (u_int)(ip_offset + ip_len + sizeof(struct ndpi_udphdr));
+	    
+	    if((offset + 12 /* Just to be safe with GTP header */) < h->caplen) {
+	      u_int8_t flags = packet[offset];
+	      u_int8_t message_type = packet[offset + 1];
 
-            if ((((flags & 0xE0) >> 5) == 1 /* GTPv1 */) &&
-                (message_type == 0xFF /* T-PDU */)) {
-              ip_offset = ip_offset + ip_len + sizeof(struct ndpi_udphdr) +
-                          8 /* GTPv1 header len */;
+	      if ((((flags & 0xE0) >> 5) == 1 /* GTPv1 */) &&
+		  (message_type == 0xFF /* T-PDU */)) {
+		ip_offset = ip_offset + ip_len + sizeof(struct ndpi_udphdr) +
+		  8 /* GTPv1 header len */;
 
-              if (flags & 0x04)
-                ip_offset +=
+		if (flags & 0x04)
+		  ip_offset +=
                     1 + 3 /* pad */ +
                     4 /* next extension (TODO better decoding) */; /* next_ext_header
                                                                       is present
-                                                                    */
+								   */
 
-              if (flags & 0x02)
-                ip_offset += 4; /* sequence_number is present (it also includes
-                                   next_ext_header and pdu_number) */
+		if (flags & 0x02)
+		  ip_offset += 4; /* sequence_number is present (it also includes
+				     next_ext_header and pdu_number) */
 
-              if (flags & 0x01) ip_offset += 1; /* pdu_number is present */
+		if (flags & 0x01) ip_offset += 1; /* pdu_number is present */
 
-              iph = (struct ndpi_iphdr*)&packet[ip_offset];
+		iph = (struct ndpi_iphdr*)&packet[ip_offset];
 
-              if (iph->version != 4) {
-                /* FIX - Add IPv6 support */
-                incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IPV6,
-                         NDPI_PROTOCOL_UNKNOWN,
-                         NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1,
-                         NULL /* srcMac */, NULL /* dstMac */);
-                goto dissect_packet_end;
-              }
-            }
+		if (iph->version != 4) {
+		  /* FIX - Add IPv6 support */
+		  incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IPV6,
+			   NDPI_PROTOCOL_UNKNOWN,
+			   NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1,
+			   NULL /* srcMac */, NULL /* dstMac */);
+		  goto dissect_packet_end;
+		}
+	      }
+	    } else {
+	      incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
+		       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1,
+		       NULL /* srcMac */, NULL /* dstMac */);
+	      goto dissect_packet_end;
+	      
+	    }
           } else if ((sport == EOIP_PORT) && (dport == EOIP_PORT)) {
             u_int offset = ip_offset + ip_len + sizeof(struct ndpi_udphdr) + 12;
-
+	    
             eth_offset = offset;
             goto datalink_check;
           } else if ((sport == L2TP_PORT) && (dport == L2TP_PORT)) {
