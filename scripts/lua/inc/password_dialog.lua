@@ -763,7 +763,7 @@ $('#password_reset_submit').click(function() {
     var addBtn = document.getElementById('btn-webauthn-add');
     if (!addBtn) return;
     addBtn.addEventListener('click', async function() {
-      if (!window.PublicKeyCredential) { wa_alert.error(']] print(i18n("webauthn.not_supported") or "WebAuthn is not supported in this browser.") print[['); return; }
+      if (!window.isSecureContext || !window.PublicKeyCredential) { wa_alert.error(']] print(i18n("webauthn.not_supported") or "WebAuthn requires a secure context (HTTPS or localhost). Please access ntopng via HTTPS.") print[['); return; }
       wa_alert.clear();
       try {
         var optResp = await fetch(http_prefix + '/lua/admin/change_user_webauthn.lua', {

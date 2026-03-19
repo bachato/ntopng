@@ -6297,7 +6297,7 @@ local lang = {
     ["remove_passkey"] = "Remove",
     ["registered"] = "Passkey registered successfully!",
     ["removed"] = "Passkey removed.",
-    ["not_supported"] = "WebAuthn is not supported in this browser.",
+    ["not_supported"] = "WebAuthn requires a secure context (HTTPS or localhost). Please access ntopng via HTTPS.",
   },
   ["mac_details"] = {
     ["and_n_more_hosts"] = "<a href='%{host_url}'>%{host_label}</a> and <a href='%{url}'>%{num} more host(s)</a>",
