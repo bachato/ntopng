@@ -107,6 +107,89 @@ It will use the users credentials configured_ via the ntopng GUI to authenticate
 
 .. _`configured`: users.html
 
+.. _oidc-authentication:
+
+OpenID Connect (OIDC) / SSO Authentication
+-------------------------------------------
+
+ntopng supports Single Sign-On via the **OpenID Connect** protocol
+(Authorization Code Flow). This allows users to log in with an external
+Identity Provider (IdP) such as Keycloak, Okta, Auth0, Azure AD / Entra ID,
+or Google, without typing a password into ntopng.
+
+When OIDC is enabled, the ntopng login page shows a **"Login with SSO"**
+button. Clicking it redirects the browser to the IdP, which handles
+authentication (including any MFA the IdP enforces). After a successful
+login at the IdP, the browser is redirected back to ntopng, which validates
+the identity token and creates a session.
+
+.. note::
+
+  OIDC authentication requires ntopng to be reachable at a stable 
+  URL (``base_redirect_uri``) so the IdP can redirect back to it.
+
+Configuration
+~~~~~~~~~~~~~
+
+OIDC settings are available in **Settings → Preferences → User Authentication**.
+The following parameters must be configured:
+
+- **Enable OIDC Authentication** — toggle to activate SSO login.
+
+- **Issuer URL** — the base URL of the IdP realm or tenant. ntopng will
+  append ``/.well-known/openid-configuration`` to auto-discover all required
+  endpoints. Examples:
+
+  - Keycloak: ``https://keycloak.example.com/realms/myrealm``
+  - Azure AD: ``https://login.microsoftonline.com/<tenant-id>/v2.0``
+  - Google: ``https://accounts.google.com``
+
+- **Client ID** — the OAuth2 client ID registered at the IdP for ntopng.
+
+- **Client Secret** — the OAuth2 client secret for the registered client.
+
+- **Base Redirect URI** — ntopng base URL (e.g.
+  ``https://ntopng.example.com``). The IdP will redirect to
+  ``{base_redirect_uri}/oidc_callback`` after authentication; this exact URI
+  must be whitelisted in the IdP client configuration.
+
+- **Scopes** — space-separated OIDC scopes to request. The default value
+  ``openid profile email roles`` is suitable for most IdPs; adjust only if
+  your IdP requires different scopes.
+
+- **Group Claim** — name of the JWT claim that carries group membership
+  (default: ``groups``). Used to determine whether a user is an admin.
+
+- **Admin Group** — value in the group claim that grants the ntopng
+  administrator role. Users whose group claim contains this value will be
+  logged in as administrators. Leave empty to treat all OIDC users as
+  unprivileged.
+
+- **Auto-create users** — when enabled, ntopng automatically creates a local
+  user account on the first successful OIDC login. When disabled (default),
+  the ntopng account must be pre-created manually; users without a matching
+  account are denied access even if they authenticate successfully at the IdP.
+
+User Mapping
+~~~~~~~~~~~~
+
+ntopng derives the local username from the JWT claims returned by the IdP,
+in the following priority order:
+
+1. ``preferred_username`` claim
+2. ``email`` claim
+3. ``sub`` (subject) claim
+
+The derived value is sanitized: lowercased, with only ``[a-z0-9._-]``
+characters kept (``@`` is converted to ``_``).
+
+The administrator role is determined by checking whether the configured
+**Group Claim** in the token contains the value set in **Admin Group**
+(both string-valued and array-valued claims are supported).
+
+For a detailed technical description of the OIDC implementation, see
+``doc/developers/README.OIDC.md``.
+
 LDAP Authentication
 -------------------
 
