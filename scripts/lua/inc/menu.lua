@@ -1188,7 +1188,7 @@ print([[
 if (not _SESSION["localuser"] or not is_admin) and (not is_no_login_user) then
     print [[
       <li>
-         <a class="dropdown-item" href='#password_dialog' data-bs-toggle='modal'>
+         <a class="dropdown-item" href='#password_dialog' data-bs-toggle='modal' onclick="reset_pwd_dialog(']] print(_SESSION["user"]) print[[')">
             <i class='fas fa-user'></i> ]]
     print(i18n("manage_users.manage_user_x", {user = _SESSION["user"]}))
     print [[

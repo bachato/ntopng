@@ -2874,6 +2874,15 @@ static bool allowLocalUserManagement(lua_State* vm) {
   return (true);
 }
 
+/* Returns true if the caller is admin OR is managing their own account */
+static bool allowWebAuthnManagement(lua_State* vm, const char* target_username) {
+  if (!ntop->isLocalUser(vm) && !ntop->isLocalAuthEnabled()) return (false);
+  if (ntop->isUserAdministrator(vm)) return (true);
+  char* session_user = getLuaVMUserdata(vm, user);
+  return (session_user && target_username &&
+          strcmp(session_user, target_username) == 0);
+}
+
 /* ****************************************** */
 
 /* @brief Changes a user password (requires old password or admin privileges).  Lua: ntop.resetUserPassword(who, username, old_pw, new_pw) → boolean */
@@ -3804,12 +3813,12 @@ static int ntop_get_totp_provisioning_uri(lua_State* vm) {
 static int ntop_generate_webauthn_registration_options(lua_State* vm) {
   char *username;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  if (!allowLocalUserManagement(vm))
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
   if ((username = (char*)lua_tostring(vm, 1)) == NULL)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if (!allowWebAuthnManagement(vm, username))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
   char challenge[64];
   if (!ntop->generateWebAuthnChallenge(challenge, sizeof(challenge)))
@@ -3833,13 +3842,12 @@ static int ntop_generate_webauthn_registration_options(lua_State* vm) {
 static int ntop_complete_webauthn_registration(lua_State* vm) {
   char *username, *cred_name, *cred_id, *cdj_b64, *att_obj_b64, *challenge, *origin, *rp_id;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  if (!allowLocalUserManagement(vm))
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
-
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
   if ((username = (char*)lua_tostring(vm, 1)) == NULL)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if (!allowWebAuthnManagement(vm, username))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
   if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
@@ -3914,12 +3922,12 @@ static int ntop_get_webauthn_credentials(lua_State* vm) {
 static int ntop_delete_webauthn_credential(lua_State* vm) {
   char *username, *cred_id;
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  if (!allowLocalUserManagement(vm))
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
   if ((username = (char*)lua_tostring(vm, 1)) == NULL)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+  if (!allowWebAuthnManagement(vm, username))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
   if ((cred_id = (char*)lua_tostring(vm, 2)) == NULL)

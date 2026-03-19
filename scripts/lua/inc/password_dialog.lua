@@ -51,7 +51,7 @@ print [[
    print('<input name="csrf" type="hidden" value="'..ntop.getRandomCSRFValue()..'" />\n')
 
 print [[
-    <input id="password_dialog_username" type="hidden" name="username" value="" />
+    <input id="password_dialog_username" type="hidden" name="username" value="]] print(_SESSION["user"] or "") print[[" />
 
 <div class="control-group">
    ]]
@@ -749,7 +749,7 @@ $('#password_reset_submit').click(function() {
             fetch(http_prefix + '/lua/admin/change_user_webauthn.lua', {
               method: 'POST',
               headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-              body: 'action=delete&username=' + encodeURIComponent(_webauthn_user) + '&cred_id=' + encodeURIComponent(cid)
+              body: 'action=delete&username=' + encodeURIComponent(_webauthn_user) + '&cred_id=' + encodeURIComponent(cid) + '&csrf=]] print(ntop.getRandomCSRFValue()) print[['
             }).then(function(r) { return r.json(); }).then(function(d) {
               if (d.result === 0) { wa_alert.success(']] print(i18n("webauthn.removed") or "Passkey removed.") print[['); window.updateWebAuthnStatus(_webauthn_user); }
               else wa_alert.error(d.message);
@@ -765,11 +765,13 @@ $('#password_reset_submit').click(function() {
     addBtn.addEventListener('click', async function() {
       if (!window.isSecureContext || !window.PublicKeyCredential) { wa_alert.error(']] print(i18n("webauthn.not_supported") or "WebAuthn requires a secure context (HTTPS or localhost). Please access ntopng via HTTPS.") print[['); return; }
       wa_alert.clear();
+      var _username = _webauthn_user || document.getElementById('password_dialog_username').value || loggedUser;
+      if (!_username) { wa_alert.error('Missing username'); return; }
       try {
         var optResp = await fetch(http_prefix + '/lua/admin/change_user_webauthn.lua', {
           method: 'POST',
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-          body: 'action=get_registration_options&username=' + encodeURIComponent(_webauthn_user)
+          body: 'action=get_registration_options&username=' + encodeURIComponent(_username) + '&csrf=]] print(ntop.getRandomCSRFValue()) print[['
         });
         var opts = await optResp.json();
         if (opts.result !== 0) { wa_alert.error(opts.message); return; }
@@ -781,7 +783,7 @@ $('#password_reset_submit').click(function() {
         var cred = await navigator.credentials.create({
           publicKey: {
             challenge: challengeBuf,
-            rp: { name: opts.rp.name, id: window.location.hostname },
+            rp: { name: opts.rp.name },
             user: { id: userIdBuf, name: opts.user.name, displayName: opts.user.displayName },
             pubKeyCredParams: opts.pubKeyCredParams,
             authenticatorSelection: opts.authenticatorSelection,
@@ -795,20 +797,21 @@ $('#password_reset_submit').click(function() {
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
           body: [
             'action=complete_registration',
-            'username=' + encodeURIComponent(_webauthn_user),
+            'username=' + encodeURIComponent(_username),
             'cred_name=' + encodeURIComponent(credName),
             'cred_id=' + encodeURIComponent(b64url_encode(cred.rawId)),
             'client_data=' + encodeURIComponent(b64url_encode(cred.response.clientDataJSON)),
             'att_obj=' + encodeURIComponent(b64url_encode(cred.response.attestationObject)),
             'challenge=' + encodeURIComponent(opts.challenge),
             'origin=' + encodeURIComponent(window.location.origin),
-            'rp_id=' + encodeURIComponent(window.location.hostname)
+            'rp_id=' + encodeURIComponent(window.location.hostname),
+            'csrf=]] print(ntop.getRandomCSRFValue()) print[['
           ].join('&')
         });
         var completeData = await completeResp.json();
         if (completeData.result === 0) {
           wa_alert.success(']] print(i18n("webauthn.registered") or "Passkey registered successfully!") print[[');
-          window.updateWebAuthnStatus(_webauthn_user);
+          window.updateWebAuthnStatus(_username);
         } else {
           wa_alert.error('Registration failed: ' + completeData.message);
         }
