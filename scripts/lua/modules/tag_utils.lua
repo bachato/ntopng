@@ -1599,7 +1599,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
         local exporter_site_utils = require "exporter_site_utils"
         local sites = exporter_site_utils.getExporterSites() or {}
         local exporters = interface.getFlowDevices() or {}
-        if #sites > 0 and #exporters > 0 then
+        if #sites > 0 and table.len(exporters) > 0 then
             for _, site in pairs(sites) do
                 filter.options[#filter.options + 1] = {
                     value = site.id,
