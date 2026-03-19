@@ -1951,7 +1951,7 @@ bool HTTPserver::check_ssl_cert(char* ssl_cert_path, size_t ssl_cert_path_len) {
                                ssl_cert_path);
   ntop->getTrace()->traceEvent(
       TRACE_NORMAL,
-      "Please read https://github.com/ntop/ntopng/blob/dev/doc/README.SSL.md "
+      "Please read https://www.ntop.org/guides/ntopng/advanced_features/ssl.html "
       "if you want to enable TLS.");
 
   return false;
