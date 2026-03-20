@@ -556,8 +556,8 @@ const map_table_def_columns = async (columns) => {
         "DURATION": (duration, row) => {
             return NtopUtils.secondsToTime(duration)
         },
-        "THROUGHPUT": (throughput, row) => {
-            return FormatterUtils.getFormatter("bps_no_scale")(throughput);
+        "throughput": (throughput, row) => {
+            return throughput
         },
         "l4proto": (value, row) => {
             let l4proto_string = DataTableRenders.filterize('l4proto', value.value, value.label)

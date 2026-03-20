@@ -735,7 +735,11 @@ end
 -- #####################################
 
 local function dt_format_thpt(thpt)
-   return bitsToSize(tonumber(thpt) or 0)
+   if getThroughputType() == "bps" then
+      return bitsToSize(tonumber(thpt) or 0)
+   else
+      return pktsToSize(tonumber(thpt) or 0)
+   end
 end
 
 -- #####################################
@@ -1258,6 +1262,7 @@ local flow_columns = {
    ['IS_SRV_VICTIM'] =        { tag = "is_srv_victim" },
    ['IS_SRV_BLACKLISTED'] =   { tag = "is_srv_blacklisted" },
    ['PROTOCOL_INFO_JSON'] =   { tag = "protocol_info_json", dt_func = historical_format_utils.parseInfoJson },
+   ['THROUGHPUT'] =           { tag = "throughput", dt_func = dt_format_thpt },
    ['ALERT_JSON'] =           { tag = "json" },
    ['SRC_PROC_NAME'] =        { tag = "cli_proc_name", db_type = "String", db_raw_type = "String" },
    ['DST_PROC_NAME'] =        { tag = "srv_proc_name", db_type = "String", db_raw_type = "String" },
@@ -1402,7 +1407,7 @@ historical_flow_utils.min_aggregated_flow_db_columns = {
 }
 
 historical_flow_utils.extra_db_columns = {
-   ["throughput"] = "ABS(LAST_SEEN - FIRST_SEEN) as TIME_DELTA, (TOTAL_BYTES / (TIME_DELTA + 1)) * 8 as THROUGHPUT",
+   ["throughput"] = "ABS(LAST_SEEN - FIRST_SEEN) as TIME_DELTA, (" .. ternary(getThroughputType() == "bps", "TOTAL_BYTES", "PACKETS") .. " / (TIME_DELTA + 1)) * 8 as THROUGHPUT",
    ["duration"] = "ABS(LAST_SEEN - FIRST_SEEN) as DURATION",
    ["protocol_info_json"] = "PROTOCOL_INFO_JSON",
    ["alert_json"] = "ALERT_JSON"

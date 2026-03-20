@@ -180,7 +180,7 @@
 		},
 		{
 			"title_i18n": "db_search.throughput",
-			"data_field": "THROUGHPUT",
+			"data_field": "throughput",
 			"sortable": true,
 			"min-width": "100px",
 			"style": "text-align:right;",
