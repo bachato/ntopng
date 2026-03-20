@@ -28,10 +28,7 @@ Monitoring
 .. toctree::
     :maxdepth: 2
 
-    ../shared/monitoring/active_monitoring
-    ../shared/monitoring/infrastructure_monitoring
     monitoring/network_discovery
-    ../shared/snmp/index
     monitoring/vulnerability_scan
 
 Alerts
@@ -40,9 +37,7 @@ Alerts
 .. toctree::
     :maxdepth: 2
 
-    ../shared/alerts/alerts_explorer
     alerts/flow_alerts_analyser
-    ../shared/alerts/available_endpoints
 
 
 Flows
@@ -89,58 +84,5 @@ Interface
     interface/countries
     interface/operating_systems
 
-
-Policies
----------
-
-.. toctree::
-    :maxdepth: 2
-
-    ../shared/policies/access_control_list
-    ../shared/policies/allowed_applications
-    ../shared/policies/device_mac_address_tracking
-    ../shared/policies/network_configuration
-    ../shared/policies/traffic_rules
-    ../shared/alerts/others/available_alerts
-    ../shared/alerts/others/behavioural_checks_exclusion
-    ../shared/policies/traffic_profiles
-    
-
-Settings
---------
-
-.. toctree::
-  :maxdepth: 2
-
-  ../shared/settings/users
-  ../shared/settings/preferences
-  ../shared/settings/blacklists
-  ../shared/settings/configurations
-  ../shared/settings/applications_and_categories
-
-
-Developer
----------
-
-.. toctree::
-  :maxdepth: 2
-
-  ../shared/developer/rest_api
-  ../shared/developer/analyze_pcap_file
-  ../shared/developer/manage_data
-  ../shared/developer/behavioural_checks
-  ../shared/developer/alert_flow_status_definitions
-  ../shared/developer/directories
-
-
-Help
-----
-
-.. toctree::
-  :maxdepth: 2
-
-  ../shared/help/about
-  ../shared/help/ntop_blog
-  ../shared/help/report_an_issue
 
 
