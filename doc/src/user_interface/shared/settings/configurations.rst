@@ -48,8 +48,28 @@ Every night, ntopng automatically creates a backup of the whole application conf
 Pool Import via CSV
 ^^^^^^^^^^^^^^^^^^^
 
-In addition to the standard JSON format, pools can also be imported using a CSV file. Each line of the
-CSV file defines a single pool member assignment using the following format:
+In addition to the standard JSON format, pools can also be imported using a CSV file.
+
+**Accessing the import dialog**
+
+To import host pool members from a CSV file:
+
+1. Navigate to *Settings* -> *Configurations*.
+2. Select the **Pools** radio button.
+3. Click the **Import** button and choose the CSV file.
+
+Alternatively, the same dialog is reachable from the *Pools* -> *Host Pool Members* page by clicking
+the **Import Hosts** button at the bottom of the page, which opens the *Configurations* page with
+the *Pools* item pre-selected.
+
+.. note::
+
+  The uploaded file must have a ``.csv`` extension (in addition to files with a ``.json`` extension
+  which are also supported).
+
+**File format**
+
+Each line of the CSV file defines a single pool member assignment:
 
 .. code::
 
@@ -70,9 +90,9 @@ and valid:
 
   x.y.z.k/p@v
 
-where ``p`` is the prefix length (e.g. ``32`` for a single host) and ``v`` is the VLAN
-ID. The VLAN tag is optional: if omitted, VLAN ``0`` is assumed. The following two entries are therefore
-equivalent:
+where ``p`` is the prefix length (e.g. ``32`` for a single host, ``24`` for a /24 subnet) and ``v`` is
+the VLAN ID. The VLAN tag is optional: if omitted, VLAN ``0`` is assumed. The following two entries are
+therefore equivalent:
 
 .. code::
 
@@ -88,6 +108,27 @@ equivalent:
 Empty lines and lines starting with ``#`` are ignored and can be used as comments. Multiple members can be
 assigned to the same pool by repeating the pool name across different lines. Members belonging to different
 pools can be mixed freely in the same file.
+
+A complete example file:
+
+.. code::
+
+  # Office hosts
+  192.168.1.10/32   OfficePool
+  192.168.1.0/24    OfficePool
+
+  # Guest devices
+  192.168.2.0/24;GuestPool
+  AA:BB:CC:DD:EE:FF,GuestPool
+
+  # VLAN-tagged host (VLAN 10)
+  10.0.0.5/32@10 ServerPool
+
+**Merge behaviour**
+
+CSV import **adds** members to pools. If a pool with the matching name already exists, the imported
+members are merged into it. If no pool with that name exists, a new one is created. Existing members
+and pools that are not mentioned in the CSV file are not removed.
 
 Import/Export via API
 ^^^^^^^^^^^^^^^^^^^^^
