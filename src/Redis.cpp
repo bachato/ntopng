@@ -346,19 +346,21 @@ char* Redis::getWithAlloc(char* key, bool cache_it) {
     if ((it = stringCache.find(key)) != stringCache.end()) {
       StringCache* cached = &it->second;
 
+      rsp = strdup(cached->value.c_str());
+      
       if ((cached->expire > 0) && (time(NULL) >= cached->expire)) {
 #ifdef CACHE_DEBUG
         printf("**** Cache expired %s\n", key);
 #endif
 
         stringCache.erase(it);
-      } else
-        rsp = strdup(cached->value.c_str());
-
+      }
+      
 #ifdef CACHE_DEBUG
       printf("**** Read from cache %s=%s\n", key, rsp);
 #endif
       l->unlock(__FILE__, __LINE__);
+      
       return (rsp);
     } else {
 #ifdef CACHE_DEBUG
