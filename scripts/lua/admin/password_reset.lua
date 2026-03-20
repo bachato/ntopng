@@ -40,7 +40,7 @@ if(ntop.resetUserPassword(_SESSION["user"], username, old_password, new_password
    print ("{ \"result\" : 0, \"message\" : \"Password changed successfully\" }")
 
    -- Delete sessions for the current user
-   local keys = ntop.getKeysCache("sessions.*")
+   local keys = ntop.getKeysCache("ntopng.cache.sessions.*")
    for k,_ in pairs(keys) do
       local v = ntop.getCache(k)
       

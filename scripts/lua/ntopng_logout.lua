@@ -10,8 +10,8 @@ local debug = false
 
 sendHTTPHeaderLogout('text/html')
 
-ntop.delCache("sessions.".._SESSION["session"])
-if (debug) then io.write("Deleting ".."sessions.".._SESSION["session"].."\n") end
+ntop.delCache("ntopng.cache.sessions.".._SESSION["session"])
+if (debug) then io.write("Deleting ".."ntopng.cache.sessions.".._SESSION["session"].."\n") end
 
 print [[
  <meta http-equiv="refresh" content="1; URL=/">

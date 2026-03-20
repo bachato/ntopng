@@ -243,12 +243,12 @@ static void create_session(const char* user, const char* group, bool localuser,
   // ntop->getTrace()->traceEvent(TRACE_ERROR, "==> %s", session_id);
 
   /* Save session in redis */
-  snprintf(key, sizeof(key), "sessions.%s", session_id);
+  snprintf(key, sizeof(key), "ntopng.cache.sessions.%s", session_id);
   snprintf(val, sizeof(val), "%s|%s|%s|%c", user, group, csrf,
            localuser ? '1' : '0');
 
   ntop->getRedis()->set(key, val, session_duration);
-  ntop->getTrace()->traceEvent(TRACE_INFO, "[HTTP] Set session sessions.%s",
+  ntop->getTrace()->traceEvent(TRACE_INFO, "[HTTP] Set session ntopng.cache.sessions.%s",
                                session_id);
 
   HTTPserver::traceLogin(user, localuser ? "local" : "remote", true);
@@ -652,7 +652,7 @@ static int getAuthorizedUser(struct mg_connection* conn,
   }
 
   /* Important: validate the session */
-  snprintf(key, sizeof(key), "sessions.%s", session_id);
+  snprintf(key, sizeof(key), "ntopng.cache.sessions.%s", session_id);
 
   val[0] = '\0';
   if ((ntop->getRedis()->get(key, val, sizeof(val), true) < 0) || (!val[0])) {

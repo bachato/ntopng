@@ -1,5 +1,5 @@
 --
--- (C) 2021 - ntop.org
+-- (C) 2021-26 - ntop.org
 --
 
 local auth_sessions_utils = {}
@@ -16,7 +16,7 @@ function auth_sessions_utils.midnightCheck()
       return
    end
 
-   local session_keys = ntop.getKeysCache("sessions.*")
+   local session_keys = ntop.getKeysCache("ntopng.cache.sessions.*")
    for matching_key, _ in pairs(session_keys or {}) do
       ntop.delCache(matching_key)
    end

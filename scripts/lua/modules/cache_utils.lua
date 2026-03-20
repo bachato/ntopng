@@ -17,7 +17,7 @@ local cache_utils = {}
 
 -- Loaded at startup
 function cache_utils.initialize()
-   local basename = "ntopng.cachedsnmp."
+   local basename = "ntopng.cache.snmp."
    local len  = string.len(basename)
 
    -- system

@@ -208,9 +208,9 @@ int Redis::expire(char* key, u_int expire_secs) {
 /* **************************************** */
 
 bool Redis::isCacheable(const char* key) {
-  if (strstr(key, "ntopng.cache.") || strstr(key, "ntopng.prefs.") ||
-      strstr(key, "sessions.") || strstr(key, "ntopng.cachedsnmp") ||
-      (strstr(key, "ntopng.user.") && (!strstr(key, ".password"))))
+  if (strstr(key, "ntopng.cache.")
+      || strstr(key, "ntopng.prefs.")
+      || (strstr(key, "ntopng.user.") && (!strstr(key, ".password"))))
     return (true);
 
   return (false);
