@@ -160,6 +160,7 @@ static int ntop_dump_binary_file(lua_State* vm) {
     char tmp[1024];
     size_t n;
 
+    Utils::flushHTTPBuffer(vm);
     while ((n = fread(tmp, 1, sizeof(tmp), fd)) > 0) {
       if (mg_write(conn, tmp, n) < (int)n) break;
     }
