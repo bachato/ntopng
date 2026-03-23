@@ -3,15 +3,15 @@
 Device/MAC Address Tracking
 ---------------------------
 
-ntopng is able to detect devices (identified with MAC addresses) that connect to a network. On closed networks, only certain devices can connect, and a whenever a MAC address other than those authorized explicitly is considered a threat. This in particular holds on networks such as a datacenterr or industrial IoT.
+ntopng is able to detect devices (identified with MAC addresses) that connect to a network. On closed networks, only certain devices can connect, and a whenever a MAC address other than those authorized explicitly is considered a threat. This in particular holds on networks such as a datacenters or industrial IoT. 
 
 The `Unexpected Device Connected/Disconnected` alert (check `here <../alerts/others/interface_checks.html#unexpected-device-connected-disconnected>`_ for additional information) triggers and alert whenever an unknown MAC is detected.
 
 .. note::
 
-  This feature is available with at least Enterprise M License.
+  This feature is available only with ntopng Enterprise M license or better, and with the 'Device/MAC Address Tracking' behavioural check enabled.
 
-As described below in this page (left sidebar menu: Hosts -> Device/MAC Address Tracking), you can add a list of MAC addresses that are authorized on your network, and instruct ntopng to trigger alerts whenever:
+As described below in this page (left sidebar menu: Policies -> Device/MAC Address Tracking), you can add a list of MAC addresses that are authorized on your network, and instruct ntopng to trigger alerts whenever:
 
   - An unknown MAC (i.e. a device) connects to the network
   - (Optionally) A MAC (i.e. a device) disconnects from the network
