@@ -111,7 +111,7 @@ export function bpfValidator(filter_field, sync = false) {
         }, error: function() {
           finally_check(status.valid);
         }, success: function(data) {
-          var valid = data.response ? true : false;
+          var valid = (data.rsp && data.rsp.response) ? true : false;
           finally_check(valid);
         }
       });
