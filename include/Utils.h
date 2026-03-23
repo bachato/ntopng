@@ -365,7 +365,7 @@ class Utils {
   static void inc8bitNoOverflow(u_int8_t* v) {
     if (*v < 0xFF) (*v)++;
   }
-  static void sendCompressionHeader(lua_State *vm);
+  static void flushHTTPBuffer(lua_State *vm);
 };
 
 #endif /* _UTILS_H_ */

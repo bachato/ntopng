@@ -117,7 +117,7 @@ static int ntop_dump_file(lua_State* vm) {
 
     ntop->getTrace()->traceEvent(TRACE_INFO, "[HTTP] Serving file %s", fname);
 
-    Utils::sendCompressionHeader(vm);
+    Utils::flushHTTPBuffer(vm);
     
     while ((fgets(tmp,
                   sizeof(tmp) - 256 /* To make sure we have room for replacements */,
