@@ -106,23 +106,6 @@ function import_export_rest_utils.export(instances, is_download, return_envelope
         end
     end
 
-    -- nEdge: include the system.config file content
-    if ntop.isnEdge() then
-        local json = require("dkjson")
-        local system_config_path = dirs.workingdir .. "/system.config"
-        local f = io.open(system_config_path, "r")
-        if f then
-            local content = f:read("*a")
-            f:close()
-            if content then
-                local system_config_data = json.decode(content)
-                if system_config_data then
-                    modules['system_config'] = system_config_data
-                end
-            end
-        end
-    end
-
     local envelope = import_export_rest_utils.pack(modules)
 
     -- This if is to keep the compatibility with old code
