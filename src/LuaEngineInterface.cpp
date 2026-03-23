@@ -807,6 +807,8 @@ static int ntop_interface_live_capture(lua_State* vm) {
     }
   }
 
+  Utils::sendCompressionHeader(vm);
+
   if (curr_iface->registerLiveCapture(c, &capture_id)) {
     ntop->getTrace()->traceEvent(TRACE_INFO, "Starting live capture id %d",
                                  capture_id);
