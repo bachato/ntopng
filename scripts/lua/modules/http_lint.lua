@@ -2936,6 +2936,7 @@ local known_parameters = {
     ["host_visibility"] = validateSingleWord,
     ["hide"] = validateBool,
     ["pool_CSV"]  = {jsonCleanup, validatePoolCSV},
+    ["is_csv"] = validateBool,
 
     -- json POST DATA
     ["payload"] = {jsonCleanup, validateJSON},

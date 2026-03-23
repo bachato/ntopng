@@ -29,7 +29,8 @@ end
 
 -- ################################################
 
-local raw = _POST["pool_CSV"] or _POST["JSON"]
+local raw, is_csv = import_export_rest_utils.get_raw_conf()
+
 if not raw or raw == "" then
    rest_utils.answer(rest_utils.consts.err.invalid_args)
    return
@@ -38,14 +39,14 @@ end
 local items = {}
 local pool_ie = pool_import_export:create()
 
-if _POST["pool_CSV"] then
+if is_csv then
    -- CSV path
    items[#items+1] = {
       name     = "pool",
       conf     = pool_ie:parse_csv(raw),
       instance = pool_ie
    }
-elseif _POST["JSON"] then
+else
    -- Standard JSON path: unpack and extract only the "pool" module
    local modules = import_export_rest_utils.unpack(raw)
 
@@ -76,11 +77,6 @@ elseif _POST["JSON"] then
          instance = pool_ie
       }
    end
-else
-   traceError(TRACE_ERROR, TRACE_CONSOLE,
-      "Failure importing pool configuration: unrecognised file format")
-   rest_utils.answer(rest_utils.consts.err.invalid_args)
-   return
 end
 
 import_export_rest_utils.import(items)

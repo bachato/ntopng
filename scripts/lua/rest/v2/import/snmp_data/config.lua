@@ -25,7 +25,7 @@ end
 
 -- ################################################
 
-local modules = import_export_rest_utils.unpack(_POST["JSON"])
+local modules = import_export_rest_utils.unpack(import_export_rest_utils.get_json_conf())
 
 if not modules then
     rest_utils.answer(rest_utils.consts.err.invalid_args)

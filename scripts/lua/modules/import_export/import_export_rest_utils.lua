@@ -35,9 +35,39 @@ end
 
 -- ##############################################
 
+-- @brief Return the raw configuration string and a boolean indicating whether
+-- it is CSV. Handles both multipart file upload (_POST["uploaded_file"]) and
+-- plain POST fields (_POST["pool_CSV"] / _POST["JSON"]).
+-- When reading from a file upload the temp file is deleted after reading.
+function import_export_rest_utils.get_raw_conf()
+    local uploaded = _POST["uploaded_file"]
+    if uploaded then
+        local f = io.open(uploaded, "r")
+        if not f then return nil, false end
+        local content = f:read("*a")
+        f:close()
+        ntop.unlink(uploaded)
+        return content, (_POST["is_csv"] == "1")
+    end
+    local csv = _POST["pool_CSV"]
+    if csv then return csv, true end
+    return _POST["JSON"], false
+end
+
+-- ##############################################
+
+-- @brief Convenience wrapper around get_raw_conf() for callers that only
+-- handle JSON (i.e. do not need to distinguish CSV from JSON).
+function import_export_rest_utils.get_json_conf()
+    local content = import_export_rest_utils.get_raw_conf()
+    return content
+end
+
+-- ##############################################
+
 -- @brief Decode the configuration in json format
 -- and handle the envelope. Return the list of
--- configurations for all the modules to be imported. 
+-- configurations for all the modules to be imported.
 function import_export_rest_utils.unpack(json_conf)
 
     -- Decode the json

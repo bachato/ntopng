@@ -213,11 +213,8 @@ function on_file_selected(evt) {
   import_file_content.value = null;
   const file = evt.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
   import_file_name.value = file?.name ?? "";
-  reader.onload = (e) => { import_file_content.value = e.target.result; };
-  reader.onerror = () => { import_error.value = _i18n("invalid_file"); };
-  reader.readAsText(file);
+  import_file_content.value = file;
 }
 
 async function do_import() {
@@ -230,13 +227,13 @@ async function do_import() {
   const key = selected_key.value;
 
   try {
-    let json_str = import_file_content.value;
-
     const isCsv = import_file_name.value.toLowerCase().endsWith(".csv");
-    const body = new URLSearchParams({
-      [isCsv ? "pool_CSV" : "JSON"]: json_str,
-      csrf: props.context.csrf,
-    });
+
+    const formData = new FormData();
+    formData.append("JSON", import_file_content.value, import_file_content.value.name);
+
+    const urlParams = new URLSearchParams({ csrf: props.context.csrf });
+    if (isCsv) urlParams.set("is_csv", "1");
 
     const data = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -270,9 +267,8 @@ async function do_import() {
         catch { reject(new Error("Invalid JSON response")); }
       };
       xhr.onerror = () => reject(new Error("Network error"));
-      xhr.open("POST", `${http_prefix}/lua/rest/v2/import/${key}/config.lua`);
-      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      xhr.send(body.toString());
+      xhr.open("POST", `${http_prefix}/lua/rest/v2/import/${key}/config.lua?${urlParams}`);
+      xhr.send(formData);
     });
 
     if (data.rc < 0) {

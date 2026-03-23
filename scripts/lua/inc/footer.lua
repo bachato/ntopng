@@ -574,6 +574,9 @@ print [[
 print(ntop.getHttpPrefix())
 print [[/lua/logout.lua");  */
 			}
+		},
+		error: function() {
+			isFooterRefreshInProcess = false;
 		}
 	});
 }
