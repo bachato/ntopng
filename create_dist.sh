@@ -12,6 +12,7 @@ branch_name=`git branch | head | cut -d ' ' -f 2 | tail -n 1`
 
 echo "-- Pushing code -- "
 cd httpdocs/dist
+git stash
 git checkout $branch_name
 git pull --rebase
 cd $CURR_DIR
