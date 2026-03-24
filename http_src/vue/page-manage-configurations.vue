@@ -29,7 +29,7 @@
           <i class="fas fa-file-import"></i>
           <span>{{ import_button_label }}</span>
         </button>
-        <button type="button" class="btn btn-primary" :disabled="exporting" @click="on_export_click">
+        <button type="button" class="btn btn-primary" @click="on_export_click">
           <i class="fas fa-file-export"></i>
           <span>{{ export_button_label }}</span>
         </button>
@@ -125,7 +125,6 @@ const importing           = ref(false);
 const import_started      = ref(false);
 const upload_progress     = ref(0);
 const resetting           = ref(false);
-const exporting           = ref(false);
 
 const sorted_items = computed(() =>
   Object.values(props.context.configuration_items || {}).sort(
@@ -314,19 +313,6 @@ async function do_reset() {
 }
 
 // Export
-async function downloadAsFile(url, filename) {
-  const response = await fetch(url, { credentials: "same-origin" });
-  if (!response.ok) throw new Error(`Export failed: ${response.status}`);
-
-  const a = Object.assign(document.createElement("a"), {
-    href: URL.createObjectURL(await response.blob()),
-    download: filename,
-  });
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(a.href);
-}
 
 async function on_export_click() {
   const url = new URL(
@@ -334,10 +320,7 @@ async function on_export_click() {
     location.origin
   );
   url.searchParams.set("download", "1");
+  window.open(url.toString());
 
-  exporting.value = true;
-  downloadAsFile(url.toString(), `${selected_key.value}_config.json`)
-    .catch((err) => console.error("Export error:", err))
-    .finally(() => { exporting.value = false; });
 }
 </script>
