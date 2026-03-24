@@ -14,6 +14,6 @@ local ts_info       = require "timeseries_info"
 -- Example: curl -u admin:admin http://localhost:3000/lua/rest/v2/get/ntopng/timeseries.lua
 --
 
-local res = ts_info.retrieve_community_timeseries()
+local res = ts_info.getAllTimeseries()
 
 rest_utils.answer(rest_utils.consts.success.ok, res)
