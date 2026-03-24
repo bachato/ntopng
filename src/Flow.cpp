@@ -490,8 +490,8 @@ void Flow::freeDPIMemory() {
     if ((tcp_fingerprint == NULL) && ndpiFlow->tcp.fingerprint)
       setHostTCPFingerprint(ndpiFlow->tcp.fingerprint, ndpiFlow->tcp.os_hint);
 
-    if ((ndpi_fingerprint == NULL) && ndpiFlow->ndpi.fingerprint)
-      setnDPIFingerprint(ndpiFlow->ndpi.fingerprint);
+    if ((ndpi_fingerprint == NULL) && ndpiFlow->ndpi.client_fingerprint)
+      setnDPIFingerprint(ndpiFlow->ndpi.client_fingerprint);
 
 #ifdef DUMP_TLS_BLOCKS
     if ((protocol == IPPROTO_TCP) && (tls_blocks == NULL) &&
