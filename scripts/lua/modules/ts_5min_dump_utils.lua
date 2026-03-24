@@ -44,7 +44,7 @@ end
 
 function ts_dump.l2_device_update_stats_rrds(when, devicename, device, ifstats,
                                              verbose)
-   if not ifstats.isViewed and not ifstats.isView then
+   if not ifstats.isViewed then
       ts_utils.append("mac:traffic", {
 			 ifid = ifstats.id,
 			 mac = devicename,
