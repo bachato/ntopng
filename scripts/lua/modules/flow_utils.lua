@@ -1870,7 +1870,7 @@ function printFlowSNMPInfo(snmpdevice, input_idx, output_idx, as_row)
        if(inputidx_name ~= "0") then
 	  local v = ""
 
-	  if(input_role ~= nil) then v = input_role.value end
+	  if(input_role ~= nil) then v = input_role.value or "" end
 	  if(v ~= "") then v = " (".. v .. ")" end
 	     
 	  print("<span class=\"badge bg-info\">" .. "<a href=" .. url_input .. ">"
