@@ -2362,7 +2362,7 @@ static int progress_callback(void* clientp, double dltotal, double dlnow,
 bool Utils::httpGetPostPutPatch(lua_State* vm, char* url,
                                 /* NOTE if user_header_token != NULL, username
                                    AND password are ignored, and vice-versa */
-                                char* username, char* password,
+                                char* username, char* password, char *bearer,
                                 char* user_header_token, int connect_timeout,
                                 int max_duration_timeout, bool return_content,
                                 bool use_cookie_authentication,
@@ -2395,7 +2395,15 @@ bool Utils::httpGetPostPutPatch(lua_State* vm, char* url,
       snprintf(tokenBuffer, sizeof(tokenBuffer), "Authorization: Token %s",
                user_header_token);
     } else {
-      if (username || password) {
+      if (bearer && bearer[0] != '\0') {
+#ifdef CURLAUTH_BEARER
+	curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BEARER);
+	curl_easy_setopt(curl, CURLOPT_XOAUTH2_BEARER, bearer);
+#else
+	ntop->getTrace()->traceEvent(TRACE_WARNING, "Bearer auth is not supported by curl (%s)", url);
+	return (false);
+#endif
+      } else if (username || password) {
         char auth[64];
 
         if (use_cookie_authentication) {
@@ -2469,6 +2477,11 @@ bool Utils::httpGetPostPutPatch(lua_State* vm, char* url,
         break;
     }
 
+    if (!strncmp(url, "https", 5) && ntop->getPrefs()->do_insecure_tls()) {      
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    }
+    
     if (write_fname) {
       ntop->fixPath(write_fname);
       out_f = fopen(write_fname, "wb");

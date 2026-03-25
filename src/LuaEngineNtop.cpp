@@ -2499,7 +2499,7 @@ static int ntop_http_redirect(lua_State* vm) {
 // *** API ***
 /* @brief Performs an outbound HTTP GET request and optionally returns the response body.  Lua: ntop.httpGet(url[,user,pass,timeout,return_content,...]) → string */
 static int ntop_http_get(lua_State* vm) {
-  char *url, *username = NULL, *pwd = NULL;
+  char *url, *username = NULL, *pwd = NULL, *bearer = NULL;
   int connection_timeout = 30, lifetime_timeout = 0;
   bool return_content = true, use_cookie_authentication = false;
   bool follow_redirects = true;
@@ -2547,10 +2547,13 @@ static int ntop_http_get(lua_State* vm) {
 
   if (lua_type(vm, 8) == LUA_TNUMBER) ip_version = lua_tointeger(vm, 8);
 
-  Utils::httpGetPostPutPatch(
-      vm, url, username, pwd, NULL /* user_header_token */, connection_timeout,
-      lifetime_timeout, return_content, use_cookie_authentication, &stats, NULL,
-      NULL, follow_redirects, ip_version, method_get);
+  if (lua_type(vm, 9) == LUA_TSTRING)
+    bearer = (char*)lua_tostring(vm, 9);
+
+  Utils::httpGetPostPutPatch(vm, url, username, pwd, bearer,
+			     NULL /* user_header_token */, connection_timeout,
+			     lifetime_timeout, return_content, use_cookie_authentication, &stats, NULL,
+			     NULL, follow_redirects, ip_version, method_get);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
@@ -2602,6 +2605,7 @@ static int ntop_http_get_auth_token(lua_State* vm) {
   if (lua_type(vm, 7) == LUA_TNUMBER) ip_version = lua_tointeger(vm, 7);
 
   Utils::httpGetPostPutPatch(vm, url, NULL /* username */, NULL /* pwd */,
+			     NULL, /* bearer */
                              auth_token, connection_timeout, lifetime_timeout,
                              return_content, use_cookie_authentication, &stats,
                              NULL, NULL, follow_redirects, ip_version,
@@ -3279,8 +3283,8 @@ static int ntop_http_post(lua_State* vm) {
   if (lua_type(vm, 7) == LUA_TBOOLEAN) /* Optional */
     use_cookie_authentication = lua_toboolean(vm, 7) ? true : false;
 
-  Utils::httpGetPostPutPatch(
-      vm, url, username, password, NULL /* user_header_token */,
+  Utils::httpGetPostPutPatch(vm, url, username, password, NULL, /* bearer */
+			     NULL /* user_header_token */,
       connection_timeout, lifetime_timeout, return_content,
       use_cookie_authentication, &stats, form_data, NULL, true, 0, method_post);
 
@@ -3324,6 +3328,7 @@ static int ntop_http_multi_auth_token(lua_State* vm, HttpMethod method) {
     use_cookie_authentication = lua_toboolean(vm, 6) ? true : false;
 
   Utils::httpGetPostPutPatch(vm, url, NULL /* username */, NULL /* pwd */,
+			     NULL, /* bearer */
                              auth_token, connection_timeout, lifetime_timeout,
                              return_content, use_cookie_authentication, &stats,
                              form_data, NULL, true, 0, method);
@@ -3370,7 +3375,8 @@ static int ntop_http_fetch(lua_State* vm) {
   snprintf(fname, sizeof(fname), "%s", f);
   ntop->fixPath(fname);
 
-  Utils::httpGetPostPutPatch(vm, url, NULL, NULL, NULL /* user_header_token */,
+  Utils::httpGetPostPutPatch(vm, url, NULL, NULL, NULL, /* bearer */
+			     NULL /* user_header_token */,
                              connection_timeout, lifetime_timeout, false, false,
                              &stats, NULL, fname, true, 0, method_post);
 

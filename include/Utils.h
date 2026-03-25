@@ -125,12 +125,11 @@ class Utils {
                                char* url, char* path, int connect_timeout,
                                int max_duration_timeout,
                                HTTPTranferStats* stats);
-  static bool httpGetPostPutPatch(
-      lua_State* vm, char* url, char* username, char* password,
-      char* user_header_token, int connect_timeout, int max_duration_timeout,
-      bool return_content, bool use_cookie_authentication,
-      HTTPTranferStats* stats, const char* form_data, char* write_fname,
-      bool follow_redirects, int ip_version, HttpMethod method);
+  static bool httpGetPostPutPatch(lua_State* vm, char* url, char* username, char* password, char *bearer,
+				  char* user_header_token, int connect_timeout, int max_duration_timeout,
+				  bool return_content, bool use_cookie_authentication,
+				  HTTPTranferStats* stats, const char* form_data, char* write_fname,
+				  bool follow_redirects, int ip_version, HttpMethod method);
   static long httpGet(const char* url, const char* username,
                       const char* password, const char* user_header_token,
                       int connect_timeout, int max_duration_timeout,

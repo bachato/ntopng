@@ -5498,7 +5498,7 @@ bool Ntop::downloadCustomnDPIProtos(char* url, char* dest_file) {
       return (true); /* Fresh file: no need to re-download it */
   }
 
-  bool rc = Utils::httpGetPostPutPatch(NULL, custom_ndpi_protos, NULL, NULL,
+  bool rc = Utils::httpGetPostPutPatch(NULL, custom_ndpi_protos, NULL, NULL, NULL,
                                        NULL, 10, 30, false, false, NULL, NULL,
                                        dest_file, true, 4, method_get);
 
