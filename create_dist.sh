@@ -10,26 +10,26 @@ CURR_DIR=$(pwd)
 
 branch_name=`git branch | head | cut -d ' ' -f 2 | tail -n 1`
 
-echo "-- Pushing code -- "
+echo "-- Cleaning up dist -- "
 cd httpdocs/dist
-git stash
+git fetch
 git checkout $branch_name
-git pull --rebase
-cd $CURR_DIR
+git reset --hard @{u}
 
-echo "-- Compiling Dist -- "
+echo "-- Compiling dist -- "
+cd $CURR_DIR
 npm run build || exit 1
 
+echo "-- Pushing dist --"
 cd httpdocs/dist
 git add *
 git commit -m 'Update dist' || exit 1
-echo "Dist committed"
 git push || exit 1
-echo "Dist pushed"
-cd $CURR_DIR
 
+echo "-- Pushing ref --"
+cd $CURR_DIR
 git add httpdocs/dist
 git commit -m 'Update dist' || exit 1
-echo "Dist ref committed"
 git push || exit 1
-echo "Dist ref pushed"
+
+echo "Dist up to date"
