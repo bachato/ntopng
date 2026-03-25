@@ -158,7 +158,7 @@
 			"i18n_name" : "dashboard.asn_dashboard.top_ix_exporter_interfaces",
             "time_window" : "day",
 		    "time_offset" : "",
-			"width" : 12,
+			"width" : 4,
 			"height" : 4,
 			"params" : {
 				"url" : "/lua/pro/rest/v2/get/flowdevices/get_top_exporters_interfaces.lua",
@@ -185,12 +185,39 @@
 			"i18n_name" : "dashboard.asn_dashboard.top_peering_exporter_interfaces",
             "time_window" : "day",
 		    "time_offset" : "",
-			"width" : 12,
+			"width" : 4,
 			"height" : 4,
 			"params" : {
 				"url" : "/lua/pro/rest/v2/get/flowdevices/get_top_exporters_interfaces.lua",
 				"url_params" : {
                     "interface_role":"peering"
+                },
+				"post_params" : {
+					"limit" : 180,
+					"version" : 4,
+                    "ts_requests": {
+						"$CURRENT_IFID$" : {
+							"ts_query": "ifid:$IFID$",
+							"ts_schema": "top:flowdev_port:traffic",
+							"tskey": "$IFID$"
+						}
+					}
+				},
+				"source_type" : "flow_device"
+			}
+		},
+        {
+			"component" : "top-timeseries",
+			"id" : "top_transit_exporters_interfaces",
+			"i18n_name" : "dashboard.asn_dashboard.top_transit_exporter_interfaces",
+            "time_window" : "day",
+		    "time_offset" : "",
+			"width" : 4,
+			"height" : 4,
+			"params" : {
+				"url" : "/lua/pro/rest/v2/get/flowdevices/get_top_exporters_interfaces.lua",
+				"url_params" : {
+                    "interface_role":"transit"
                 },
 				"post_params" : {
 					"limit" : 180,

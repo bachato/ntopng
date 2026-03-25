@@ -2238,8 +2238,9 @@ local lang = {
   },
   ["dashboard"] = {
     ["asn_dashboard"] = {
-        ["top_ix_exporter_interfaces"] = "Top Internet Exchange Exporter Interfaces",
+        ["top_ix_exporter_interfaces"] = "Top IX Exporter Interfaces",
         ["top_peering_exporter_interfaces"] = "Top Peering Exporter Interfaces",
+        ["top_transit_exporter_interfaces"] = "Top Transit Exporter Interfaces",
     },
     ["no_assets_discovered"] = "No assets discovered yet",
     ["waiting_assets_discovery"] = "Waiting for assets to be detected on your network...",
