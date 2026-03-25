@@ -1,7 +1,7 @@
 <!-- (C) 2026 - ntop.org -->
 <template>
     <!-- Main container for the chart component with legend controls -->
-    <div class="mb-2" style="overflow-x: auto; white-space: nowrap;"> <!-- legend-wrapper -->
+    <div class="mb-2"> <!-- legend-wrapper -->
         <div class="d-flex align-items-center"> <!-- legend-div -->
             <!-- Stacked chart toggle switch (hidden when hide_stacked prop is true) -->
             <div v-if="!$props.hide_stacked" class="form-check form-switch form-control-sm ms-1"
@@ -14,7 +14,7 @@
                 </label>
             </div>
             <!-- Timeseries visibility toggles - dynamically generated checkboxes -->
-            <div class="ms-auto">
+            <div class="ms-auto" style="overflow-x: auto; white-space: nowrap;">
                 <label class="form-check-label form-control-sm" v-for="(item, i) in timeseries_list">
                     <input type="checkbox" class="form-check-input align-middle mt-0"
                         @click="changeVisibility(!item.checked, i)" :checked="item.checked"
