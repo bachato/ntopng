@@ -89,11 +89,6 @@ if ndpistats_mode == "count" then
       label = i18n("other"),
       value = tot,
     }
-  elseif num == 0 then
-    data[#data + 1] = {
-      label = i18n("no_flows"),
-      value = 0,
-    }
   end
 
   rest_utils.answer(rest_utils.consts.success.ok, data)

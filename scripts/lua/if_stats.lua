@@ -794,9 +794,8 @@ if (ifstats.type ~= "zmq") then
     }
 end
 
-print [[ <tr><th colspan=1 nowrap>]]
-print(i18n("if_stats_overview.traffic_breakdown"))
-print [[</th><td colspan=5>]]
+print [[ <tr>]]
+print [[<td colspan=6>]]
 
 template.render("pages/vue_page.template", {
     vue_page_name = "MultiPieChart",

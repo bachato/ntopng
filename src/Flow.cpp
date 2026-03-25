@@ -2264,6 +2264,14 @@ void Flow::hosts_periodic_stats_update(NetworkInterface* iface, Host* cli_host,
   update_pools_stats(iface, cli_host, srv_host, tv, diff_sent_packets,
                      diff_sent_bytes, diff_rcvd_packets, diff_rcvd_bytes);
 
+  // Update local stats (local vs remote)
+  // this replaces the old call to Flow::updateInterfaceLocalStats from packet
+  // processing
+  iface->incLocalStats(diff_sent_packets, diff_sent_bytes,
+                        get_cli_ip_addr()->isLocalHost(), get_srv_ip_addr()->isLocalHost());
+  iface->incLocalStats(diff_rcvd_packets, diff_rcvd_bytes,
+                        get_srv_ip_addr()->isLocalHost(), get_cli_ip_addr()->isLocalHost());
+
   if (cli_host && srv_host) {
     bool cli_and_srv_in_same_subnet = false;
     bool cli_and_srv_in_same_country = false;
@@ -2298,14 +2306,6 @@ void Flow::hosts_periodic_stats_update(NetworkInterface* iface, Host* cli_host,
       vl->incStats(tv->tv_sec, stats_protocol, diff_sent_packets,
                    diff_sent_bytes, diff_rcvd_packets, diff_rcvd_bytes);
     }
-
-    // Update local stats (local vs remote)
-    // this replaces the old call to Flow::updateInterfaceLocalStats from packet
-    // processing
-    iface->incLocalStats(diff_sent_packets, diff_sent_bytes,
-                         cli_host->isLocalHost(), srv_host->isLocalHost());
-    iface->incLocalStats(diff_rcvd_packets, diff_rcvd_bytes,
-                         srv_host->isLocalHost(), cli_host->isLocalHost());
 
     // Update network stats
     cli_network_stats = cli_host->getNetworkStats(cli_network_id);

@@ -29,11 +29,10 @@ interface.select(ifid)
 local ifstats = interface.getStats()
 
 if _GET["iflocalstat_mode"] == "distribution" then
-   if ifstats["localstats"]["bytes"] == 0 then
-      res[#res + 1] = { label = "No traffic yet", value = 0 }
-   else
-      local eth = ifstats["eth"]
-      local sum = eth.IPv4_packets + eth.IPv6_packets + eth.ARP_packets + eth.MPLS_packets + eth.other_packets
+   local eth = ifstats["eth"]
+   local sum = eth.IPv4_packets + eth.IPv6_packets + eth.ARP_packets + eth.MPLS_packets + eth.other_packets
+      
+   if sum > 0 then
       local five = 0.05 * sum
       local tot = 0
 
@@ -60,9 +59,7 @@ else
    local bytes = ifstats["localstats"]["bytes"]
    local sum = bytes["local2remote"] + bytes["local2local"] + bytes["remote2local"] + bytes["remote2remote"]
 
-   if sum == 0 then
-      res[#res + 1] = { label = "No traffic yet", value = 0 }
-   else
+   if sum > 0 then
       local five = 0.05 * sum
       local other = 0
 
