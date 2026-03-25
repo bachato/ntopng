@@ -6261,6 +6261,7 @@ local lang = {
     ["password_ph"] = "Password (default admin)",
     ["passwords_dont_match"] = "Passwords don't match.",
     ["unable_to_login"] = "Unable to login?",
+    ["mfa_passkey"] = "<A HREF='https://www.ntop.org/guides/ntopng/authentication.html'> <i class='fas fa-shield-alt'></i> |  <i class='fas fa-fingerprint'></i> | <i class='fa-brands fa-openid'></i> </A>",
     ["unsupported_browser"] = "Your browser is not supported.<br>Please consider using a recent Firefox or Chrome.",
     ["username"] = "Username",
     ["username_ph"] = "Username (default admin)",

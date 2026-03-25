@@ -127,8 +127,10 @@ print[[
 
       <div >&nbsp;</div>
       <div class="col-lg-12"><small><center> <i class="fas fa-lock"></i> <A target="_blank" HREF="https://www.ntop.org/guides/ntopng/faq.html#cannot-login-into-the-gui">]]
-      print(i18n("login.unable_to_login"))
-   print [[</A> </center></small></div>
+      print(i18n("login.unable_to_login") .. "</A>")
+      print("&nbsp | " .. i18n("login.mfa_passkey"))
+
+   print [[ </center></small></div>
       <div >&nbsp;</div>
       <div class="col-lg-12">
 ]]
