@@ -21,6 +21,8 @@ ExecStart=/usr/bin/@APP@ /run/ntopng.conf
 
 ExecStartPost=/bin/sh -c '/bin/echo "$(/bin/date) ntopng StartPost" >> /var/log/ntop-systemd.log'
 
+ExecPost=/bin/sh -c '/bin/echo "$(/bin/date) ntopng Stop" >> /var/log/ntop-systemd.log'
+
 ExecStopPost=-/bin/rm -rf /run/ntopng.conf /run/ntopng.conf.raw /run/ntopng.pid
 ExecStopPost=/bin/sh -c '/bin/echo "$(/bin/date) ntopng StopPost" >> /var/log/ntop-systemd.log'
 
