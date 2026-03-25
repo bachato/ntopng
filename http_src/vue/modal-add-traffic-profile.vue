@@ -58,19 +58,19 @@ import { default as NoteList } from "./note-list.vue";
 const _i18n = (t) => i18n(t);
 
 const simple_notes = [
-    _i18n("traffic_profiles.simple_filter_examples"),
-    _i18n("traffic_profiles.http_traffic") + " tcp and port 80",
-    _i18n("traffic_profiles.host_traffic") + " host 192.168.1.2",
-    _i18n("traffic_profiles.facebook_traffic") + " l7proto Facebook"
+    _i18n("traffic_profiles.simple_filter_examples") + ":",
+    _i18n("traffic_profiles.http_traffic") + ": <i>tcp and port 80 </i>",
+    _i18n("traffic_profiles.host_traffic") + ": <i>host 192.168.1.2 </i>",
+    _i18n("traffic_profiles.facebook_traffic") + ": <i> l7proto Facebook </i>"
 ];
 
 const advanced_notes = [
-    _i18n("traffic_profiles.advanced_filter_examples"),
-    _i18n("traffic_profiles.traffic_between") + " ip host 192.168.1.1 and 192.168.1.2",
-    _i18n("traffic_profiles.traffic_from_to") + " ip src 192.168.1.1 and dst 192.168.1.2",
-    _i18n("traffic_profiles.destination_network") + " ip dst net 192.168.1.0/24",
-    _i18n("traffic_profiles.host_http_https") + " ip host 192.168.1.1 and tcp port (80 or 443)",
-    _i18n("traffic_profiles.source_ethernet") + " ether src host 00:11:22:33:44:55"
+    _i18n("traffic_profiles.advanced_filter_examples") + ":",
+    _i18n("traffic_profiles.traffic_between") + ": <i> ip host 192.168.1.1 and 192.168.1.2 </i>",
+    _i18n("traffic_profiles.traffic_from_to") + ": <i> ip src 192.168.1.1 and dst 192.168.1.2 </i>",
+    _i18n("traffic_profiles.destination_network") + ": <i> ip dst net 192.168.1.0/24 </i>",
+    _i18n("traffic_profiles.host_http_https") + ": <i> ip host 192.168.1.1 and tcp port (80 or 443) </i>",
+    _i18n("traffic_profiles.source_ethernet") + ": <i> ether src host 00:11:22:33:44:55 </i>"
 ];
 
 const additional_notes = [
