@@ -9,7 +9,7 @@
         <Loading v-if="!props.hideLoading" :isLoading="loading" />
 
         <!-- no data -->
-        <NoData :show="no_data && !loading"></NoData>
+        <NoData :show="no_data"></NoData>
 
         <div class="pie-body">
             <div class="d-flex pie-row">
