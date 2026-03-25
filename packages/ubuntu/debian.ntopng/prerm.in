@@ -2,6 +2,8 @@
 
 set -e
 
+ACTION=$1
+
 # Check if systemd is supported (not a container)
 CMDLINE=$(tr -d '\0' < /proc/1/cmdline)
 if [ ! -z "${CMDLINE##*system*}" ] && [ ! -z "${CMDLINE##*init*}" ]; then
@@ -41,6 +43,8 @@ prompt_license_expired()
     fi
 }
 
+echo "$(/bin/date) ntopng prerm $ACTION called" >> /var/log/ntop-systemd.log
+
 # Only shut the daemon down if we're really removing the package.  If this is
 # an upgrade, we will instead do a restart in the postinst... this keeps ntopng
 # from being left shut down for a long time, which could pose problems.
@@ -78,5 +82,7 @@ case "$1" in
 	fi
 	;;
 esac
+
+echo "$(/bin/date) ntopng prerm $ACTION done" >> /var/log/ntop-systemd.log
 
 exit 0

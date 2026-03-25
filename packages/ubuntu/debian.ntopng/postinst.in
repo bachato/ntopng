@@ -3,6 +3,8 @@
 # Previous package version on upgrade
 PREV_VERSION=$2
 
+ACTION=$1
+
 case "$1" in
     configure)
 	# continue below
@@ -124,6 +126,7 @@ if [ -x /usr/bin/nmap ]; then
     setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip /usr/bin/nmap
 fi
 
+echo "$(/bin/date) ntopng postinst $ACTION called" >> /var/log/ntop-systemd.log
 
 # Start service after upgrade/install
 echo "(Re)Starting @APP@..."
@@ -155,6 +158,8 @@ elif [ -f /etc/init.d/ntopng ]; then
     # Restart service after upgrade/install
     /etc/init.d/ntopng restart
 fi
+
+echo "$(/bin/date) ntopng postinst $ACTION done" >> /var/log/ntop-systemd.log
 
 echo ""
 echo "NOTE"
