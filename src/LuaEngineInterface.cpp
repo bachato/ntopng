@@ -1273,6 +1273,40 @@ static int ntop_interface_inc_syslog_stats(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Executes a SQL write statement on the interface alert database. Lua: interface.alert_store_write(query[,ifid]) → boolean */
+static int ntop_interface_alert_store_write(lua_State* vm) {
+  NetworkInterface* iface = getCurrentInterface(vm);
+  char* query = NULL;
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  /* Query */
+  if (lua_type(vm, 1) == LUA_TSTRING) query = (char*)lua_tostring(vm, 1);
+
+  /* Optional: interface id */
+  if (lua_type(vm, 2) == LUA_TNUMBER) {
+    int ifid = lua_tointeger(vm, 2);
+
+    iface = ntop->getInterfaceById(ifid);
+  }
+
+  if (!iface || !query) {
+    lua_pushboolean(vm, false);
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+  }
+
+  if (ntop->getPrefs()->are_alerts_disabled()) {
+    lua_pushboolean(vm, true);
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  }
+
+  lua_pushboolean(vm, iface->alert_store_write(query));
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 /* @brief Executes a raw SQL query on the interface alert database and streams JSON to HTTP response.  Lua: interface.alert_store_query(query[,limit_rows]) → nil */
 static int ntop_interface_alert_store_query(lua_State* vm) {
   NetworkInterface* iface = getCurrentInterface(vm);
@@ -6635,6 +6669,7 @@ static luaL_Reg _ntop_interface_reg[] = {
 
     /* Alerts */
     {"alert_store_query", ntop_interface_alert_store_query},
+    {"alert_store_write", ntop_interface_alert_store_write},
     {"getCachedAlertValue", ntop_interface_get_cached_alert_value},
     {"setCachedAlertValue", ntop_interface_set_cached_alert_value},
     {"storeTriggeredAlert", ntop_interface_store_triggered_alert},
