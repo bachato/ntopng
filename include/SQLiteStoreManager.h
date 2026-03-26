@@ -43,7 +43,7 @@ class SQLiteStoreManager : public DB {
                  int (*callback)(void*, int, char**, char**), void* payload);
 
   int execSQLQuery(lua_State* vm, const char* sql, bool limitRows,
-                   bool wait_for_db_created);
+                   bool wait_for_db_created) override;
   int execSQLWrite(const char* sql) override;
 };
 
