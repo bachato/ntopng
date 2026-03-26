@@ -19,23 +19,23 @@
       :f_map_columns="mapColumns" :f_sort_rows="columns_sorting" @custom_event="on_table_event"
       @rows_loaded="on_rows_loaded">
       <template v-slot:custom_header>
-        <NavbarTabs :tabs="tabs_with_counts" :active_tab_id="active_status"
-          @on_click="(tab) => set_status(tab.id)" />
+        <NavbarTabs :tabs="tabs_with_counts" :active_tab_id="active_status" @on_click="(tab) => set_status(tab.id)" />
       </template>
 
     </TableWithConfig>
-    
+
     <!-- Reset to factory and disable all checks -->
     <div class="card-footer mt-3">
-        <button type="button" ref="delete_all_rules" @click="show_disable_modal = true" class="btn btn-danger">
-          <i class="fas fa-toggle-off"></i>
-          {{ _i18n("checks.disable_all") }}
-        </button>
-        <button v-if="props.context.check_subdir === 'all'" type="button" ref="restore_checks" @click="show_reset_modal = true" class="btn btn-primary ms-1">
-          <i class="fa-solid fa-eraser"></i>
-          {{ _i18n("restore_checks") }}
-        </button>
-      </div>
+      <button type="button" ref="delete_all_rules" @click="show_disable_modal = true" class="btn btn-danger">
+        <i class="fas fa-toggle-off"></i>
+        {{ _i18n("checks.disable_all") }}
+      </button>
+      <button v-if="props.context.check_subdir === 'all'" type="button" ref="restore_checks"
+        @click="show_reset_modal = true" class="btn btn-primary ms-1">
+        <i class="fa-solid fa-eraser"></i>
+        {{ _i18n("restore_checks") }}
+      </button>
+    </div>
 
     <!-- notes -->
     <div class="notes bg-light border rounded p-3 mt-3 small">
@@ -54,7 +54,7 @@
     <ModalEditCheck ref="modal_edit_check" :page_csrf="props.context.page_csrf" @saved="on_check_saved" />
 
     <!-- disable-all modal -->
-    <div v-if="show_disable_modal" class="modal d-block" tabindex="-1" >
+    <div v-if="show_disable_modal" class="modal d-block" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
@@ -107,6 +107,7 @@ import { default as ModalEditCheck } from "./modal-edit-check.vue";
 import { default as NavbarTabs } from "./components/navbar-tabs.vue";
 import { ntopng_utility } from "../services/context/ntopng_globals_services.js";
 import { default as sortingFunctions } from "../utilities/sorting-utils.js";
+import dataUtils from "../utilities/data-utils.js";
 
 const _i18n = (t) => i18n(t);
 
@@ -122,11 +123,12 @@ const error_msg = ref(null);
 const success_msg = ref(null);
 const show_disable_modal = ref(false);
 const show_reset_modal = ref(false);
+const is_first_load = ref(true)
 
 // Check status
 const STATUS_TABS = [
-  { id: "all",      label_i18n: "all" },
-  { id: "enabled",  label_i18n: "enabled" },
+  { id: "all", label_i18n: "all" },
+  { id: "enabled", label_i18n: "enabled" },
   { id: "disabled", label_i18n: "disabled" },
 ];
 
@@ -169,7 +171,7 @@ async function mapColumns(columns) {
 
           if (!row.is_editable) {
             current_class.push("disabled");
-            
+
           }
           return current_class;
         };
@@ -224,6 +226,14 @@ function on_rows_loaded(res) {
     tab_counts.disabled = rows.length - enabled;
   } else {
     tab_counts[active_status.value] = rows.length;
+  }
+
+  if (is_first_load.value === true) {
+    const checkToSearch = ntopng_url_manager.get_url_entry("check")
+    if (!dataUtils.isEmptyString(checkToSearch)) {
+      table_ref.value.search_value(checkToSearch)
+    }
+    is_first_load.value = false
   }
 }
 

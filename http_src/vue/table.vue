@@ -151,7 +151,7 @@
         <div v-if="query_info != null" class="mt-2">
             <div class="text-end">
                 <small style="" class="query text-end"><span class="records">{{ query_info.num_records_processed
-                }}</span>.</small>
+                        }}</span>.</small>
             </div>
             <div class="text-start">
                 <small id="historical_flows_table-query-time" style="" class="query">Query performed in <span
@@ -444,7 +444,7 @@ async function set_columns_wrap() {
     /* If defined this function is called to modify the loaded columns */
     if (props.handleLoadedColumns) {
         const tmp_loaded_columns = props.handleLoadedColumns(processedColumns.value);
-        if (typeof(tmp_loaded_columns) !== 'object' || tmp_loaded_columns.length == 0) {
+        if (typeof (tmp_loaded_columns) !== 'object' || tmp_loaded_columns.length == 0) {
             console.error('Incorrectly handled columns, no columns are available, rolling back to the default columns (Table: ' + props.id + ')')
         } else {
             processedColumns.value = tmp_loaded_columns

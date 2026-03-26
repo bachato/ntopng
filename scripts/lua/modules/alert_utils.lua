@@ -249,7 +249,9 @@ function alert_utils.getConfigsetAlertLink(alert_json, alert --[[ optional --]] 
                       i18n("edit_configuration") .. '"></i></a>'
          end
       elseif info then
-         return (' <a href="' .. alert_utils.getConfigsetURL(info.script_key, info.subdir) .. '">' .. '<i class="fas fa-cog" title="' ..
+         local alert_id = tonumber(alert)
+         local alert_name = alert_consts.alertTypeLabel(alert_id, true --[[ no_html --]] , alert_entity)
+         return (' <a href="' .. alert_utils.getConfigsetURL(alert_name or info.script_key, info.subdir) .. '">' .. '<i class="fas fa-cog" title="' ..
                    i18n("edit_configuration") .. '"></i></a>')
       else
          return (' <a href="' .. ntop.getHttpPrefix() .. '/lua/admin/edit_configset.lua?subdir=interface#all">' ..
