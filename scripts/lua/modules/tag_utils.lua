@@ -1192,7 +1192,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
       end
    end
 
-   if is_aggregated and tag.hourly_available 
+   if is_aggregated and tag.hourly_available
       and (is_aggregated ~= tag.hourly_available)
       or is_aggregated and not tag.hourly_available then
       return nil
@@ -1233,7 +1233,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
       local iface_id_key = "ntopng.prefs.iface_id"
       local keys = ntop.getHashKeysCache(iface_id_key) or {}
       for name, _ in pairs(keys) do
-	 if not isnumber(name) then 
+	 if not isnumber(name) then
 	    local id = ntop.getHashCache(iface_id_key, name)
 	    filter.options[#filter.options + 1] = {
 	       value = id,
@@ -1670,7 +1670,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
       filter.options = {}
       local snmp_roles = snmp_utils.get_snmp_interface_role_options()
       for _, role in pairs(snmp_roles) do
-	 
+
 	 filter.options[#filter.options + 1] = {
 	    value = role.id,
 	    label = role.label
@@ -1709,7 +1709,8 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
 	    local exporter_site_utils = require "exporter_site_utils"
 	    local devices = {}
 	    local group_cache = {}
-	    
+	    local total = 0
+
 	    if isEmptyString(probe_ip_requested) then
 	       devices = snmp_config.get_all_configured_devices()
 	    else
@@ -1722,7 +1723,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
 		  -- Use SNMP info, remove from flow devices list
 		  flow_devices[probe_ip] = nil
 	       end
-	       local cached_interfaces = snmp_cached_dev:get_interfaces(probe_ip)
+	       local cached_interfaces = snmp_cached_dev:get_interfaces_with_counters(probe_ip)
 	       local probe_label
 
 	       if not isEmptyString(probe_ip) then
@@ -1732,29 +1733,45 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
 	       if isEmptyString(probe_label) then
 		  probe_label = probe_ip
 	       end
-	       
+
 	       if cached_interfaces and cached_interfaces["interfaces"] then
 		  local interfaces = cached_interfaces["interfaces"]
 		  local group = nil
-		  
+
 		  if ntop.isEnterpriseM() then
 		     group = exporter_site_utils.getFlowDevExporterSite(probe_ip).name
 		     group_cache[probe_ip] = group
 		  end
-		  
-		  for if_index, if_info in pairs(interfaces) do
-		     local label = format_portidx_name(probe_ip, if_index, true)
 
-		     if not hide_exporters_name then
-			label = probe_label .. ' - ' .. label
+		  for if_index, if_info in pairs(interfaces) do
+		     local counters = cached_interfaces.if_counters[tostring(if_index)]
+		     local good_iface = false
+
+		     if(counters ~= nil) then
+			if((counters.inb > 0) or (counters.outb > 0)) then
+			   -- The interface made some traffic
+			   good_iface = true
+			end
 		     end
 
-		     interfaces_list[label] = {
-			value = probe_ip .. "_" .. if_index,
-			label = label,
-			show_only_value = probe_ip,
-			group = group
-		     }
+		     -- Skip interfaces down or with no traffic
+		     if(good_iface
+			and (tonumber(if_info.admin_status) == 1)
+			and (tonumber(if_info.status) == 1) -- operational status
+		     ) then
+			local label = format_portidx_name(probe_ip, if_index, true)
+
+			if not hide_exporters_name then
+			   label = probe_label .. ' - ' .. label
+			end
+
+			interfaces_list[label] = {
+			   value = probe_ip .. "_" .. if_index,
+			   label = label,
+			   show_only_value = probe_ip,
+			   group = group
+			}
+		     end
 		  end
 	       end
 	    end
@@ -1763,7 +1780,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
 	       -- Add interfaces for flow devices which are not polled by SNMP
 	       local interfaces = interface.getFlowDeviceInfoByIP(exporter_ip)
 	       local group = nil
-	       
+
 	       if ntop.isEnterpriseM() then
 		  group = group_cache[exporter_ip] -- use cache first
 
@@ -1772,7 +1789,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
 		     group_cache[exporter_ip] = group
 		  end
 	       end
-	       
+
 	       for _, interfaces_table in pairs(interfaces or {}) do
 		  for if_index, _ in pairsByKeys(interfaces_table) do
 		     local label = format_portidx_name(exporter_ip, if_index, true)
@@ -1780,7 +1797,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
 		     if not hide_exporters_name then
 			label = exporter_ip .. ' - ' .. label
 		     end
-		     
+
 		     interfaces_list[tostring(label)] = {
 			value = exporter_ip .. "_" .. if_index,
 			label = label,
@@ -1799,7 +1816,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
 	 end
       end
    end
-   
+
    if changed_ifid then
       interface.select(current_ifid)
    end
@@ -1960,7 +1977,7 @@ function tag_utils.get_tag_i18n(tag_name)
    if tag == nil then
       return nil
    end
-   
+
    return tag.i18n_label
 end
 
