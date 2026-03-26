@@ -1006,7 +1006,7 @@ function alert_store:insert(alert)
 
         -- traceError(TRACE_NORMAL, TRACE_CONSOLE, insert_stmt)
 
-        return interface.alert_store_query(insert_stmt, ifid)
+        return interface.alert_store_write(insert_stmt, ifid)
     end
 
     traceError(TRACE_NORMAL, TRACE_CONSOLE, "alert_store: write_table not defined for " .. self:get_family())
@@ -1035,7 +1035,7 @@ function alert_store:insert_engaged(alert)
         local insert_stmt = self:_build_insert_query(alert, engaged_write_table, alert_status, extra_columns, extra_values)
         local ifid = ternary(self:get_ifid() == getSystemInterfaceId(), getSystemInterfaceId(), nil)
         -- traceError(TRACE_NORMAL, TRACE_CONSOLE, insert_stmt)
-        return interface.alert_store_query(insert_stmt, ifid)
+        return interface.alert_store_write(insert_stmt, ifid)
     end
 
     traceError(TRACE_NORMAL, TRACE_CONSOLE, "alert_store: engaged_write_table not defined for " .. self:get_family())
@@ -1063,7 +1063,7 @@ function alert_store:delete_engaged(alert)
         end
         -- traceError(TRACE_NORMAL, TRACE_CONSOLE, delete_stmt)
         local ifid = ternary(self:get_ifid() == getSystemInterfaceId(), getSystemInterfaceId(), nil)
-        return interface.alert_store_query(delete_stmt, ifid)
+        return interface.alert_store_write(delete_stmt, ifid)
     end
 
     traceError(TRACE_NORMAL, TRACE_CONSOLE, "alert_store: engaged_write_table not defined for " .. self:get_family())
@@ -1086,9 +1086,9 @@ function alert_store:delete()
     end
 
     local ifid = ternary(self:get_ifid() == getSystemInterfaceId(), getSystemInterfaceId(), nil)
-    local res = interface.alert_store_query(delete_stmt, ifid)
+    local res = interface.alert_store_write(delete_stmt, ifid)
 
-    return res and table.len(res) == 0
+    return res
 end
 
 -- ##############################################
@@ -2526,7 +2526,7 @@ function alert_store:housekeeping(ifid)
             table_name, table_name, limit)
     end
 
-    local deleted = interface.alert_store_query(q)
+    local deleted = interface.alert_store_write(q)
 
     -- By Time
 
@@ -2542,7 +2542,7 @@ function alert_store:housekeeping(ifid)
         q = string.format("DELETE FROM `%s` WHERE tstamp < %u", table_name, expiration_epoch)
     end
 
-    deleted = interface.alert_store_query(q)
+    deleted = interface.alert_store_write(q)
 end
 
 -- ##############################################

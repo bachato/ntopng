@@ -546,8 +546,8 @@ function mitre_utils.insertDBMitreInfo()
    if hasClickHouseSupport() then
       table_name_with_values = "mitre_table_info (ALERT_ID, ENTITY_ID, TACTIC, TECHNIQUE, SUB_TECHNIQUE, MITRE_ID)"
       sql = "INSERT INTO "..table_name_with_values.." VALUES "..value_to_add
-      interface.alert_store_query(sql)
-      interface.alert_store_query("OPTIMIZE TABLE ".. table_name .. " FINAL;")
+      interface.alert_store_write(sql)
+      interface.alert_store_write("OPTIMIZE TABLE ".. table_name .. " FINAL;")
    end
 end
 

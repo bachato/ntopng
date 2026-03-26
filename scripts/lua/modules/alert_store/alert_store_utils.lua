@@ -68,7 +68,7 @@ function alert_store_utils.housekeeping(ifid)
         -- Should be called as disk space and defragmentation are not run
         -- automatically by sqlite.
         local q = string.format("VACUUM")
-        local vacuum = interface.alert_store_query(q)
+        local vacuum = interface.alert_store_write(q)
     end
 end
 

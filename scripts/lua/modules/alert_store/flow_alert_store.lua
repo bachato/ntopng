@@ -178,8 +178,8 @@ function flow_alert_store:acknowledge(label)
          alert_consts.alert_status.acknowledged.alert_status_id, self:_escape(label), os.time(), where_clause)
    end
 
-   local res = interface.alert_store_query(q)
-   return res and table.len(res) == 0
+   local res = interface.alert_store_write(q)
+   return res
 end
 
 -- ##############################################
@@ -205,8 +205,8 @@ function flow_alert_store:delete()
       q = string.format("DELETE FROM `%s` WHERE %s ", table_name, where_clause)
    end
 
-   local res = interface.alert_store_query(q)
-   return res and table.len(res) == 0
+   local res = interface.alert_store_write(q)
+   return res
 end
 
 -- ##############################################
@@ -284,7 +284,7 @@ function flow_alert_store:insert(alert)
 
    -- traceError(TRACE_NORMAL, TRACE_CONSOLE, insert_stmt)
 
-   return interface.alert_store_query(insert_stmt)
+   return interface.alert_store_write(insert_stmt)
 end
 
 -- ##############################################

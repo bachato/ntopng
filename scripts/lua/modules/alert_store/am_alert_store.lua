@@ -92,7 +92,7 @@ function am_alert_store:_build_insert_query(alert, write_table, alert_status, ex
 
    -- traceError(TRACE_NORMAL, TRACE_CONSOLE, insert_stmt)
 
-   return interface.alert_store_query(insert_stmt)
+   return interface.alert_store_write(insert_stmt)
 end
 
 -- ##############################################
