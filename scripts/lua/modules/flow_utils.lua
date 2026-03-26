@@ -1880,7 +1880,7 @@ function printFlowSNMPInfo(snmpdevice, input_idx, output_idx, as_row)
        if(outputidx_name ~= "0") then
 	  local v = ""
 
-	  if(output_role ~= nil) then v = output_role.value end
+	  if((output_role ~= nil) and (output_role.value ~= nil)) then v = output_role.value end
 	  if(v ~= "") then v = " (".. v .. ")" end
 	  
 	  print(' <i class="fas fa-long-arrow-alt-right"></i> ')
