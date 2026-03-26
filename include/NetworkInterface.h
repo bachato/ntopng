@@ -944,6 +944,7 @@ class NetworkInterface : public NetworkInterfaceAlertableEntity {
   inline StatsManager* getStatsManager() { return statsManager; };
   AlertsQueue* getAlertsQueue() const;
   bool alert_store_query(lua_State* vm, const char* sql, bool limit_rows);
+  bool alert_store_write(const char* sql);
 
   void listHTTPHosts(lua_State* vm, char* key);
 #ifdef HAVE_NEDGE
