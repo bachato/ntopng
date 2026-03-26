@@ -9415,6 +9415,16 @@ bool NetworkInterface::alert_store_query(lua_State* vm, const char* sql,
 
 /* **************************************** */
 
+bool NetworkInterface::alert_store_write(const char* sql) {
+  DB* alerts_db = db ? db : clickhouse_flows_db;
+
+  if (!alerts_db) return false;
+
+  return (alerts_db->execSQLWrite(sql) == 0);
+}
+
+/* **************************************** */
+
 void NetworkInterface::listHTTPHosts(lua_State* vm, char* key) {
   struct virtual_host_valk_info info;
   u_int32_t begin_slot = 0;
