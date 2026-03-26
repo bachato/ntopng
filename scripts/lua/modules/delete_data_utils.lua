@@ -120,7 +120,7 @@ local function delete_host_db_flows(interface_id, host_info)
       q = string.format("ALTER TABLE `flows` DELETE WHERE %s", where_clause)
 
       if not dry_run and q then
-         interface.execSQLQuery(q)
+         interface.execSQLWrite(q)
       end
    end
 

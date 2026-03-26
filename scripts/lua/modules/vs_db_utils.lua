@@ -42,8 +42,8 @@ function vs_db_utils.save_vs_result(scan_type, host, end_epoch, json_info, scan_
     
     sql = string.format("%s ('%s', '%s', %s, '%s', '%s');", sql, host, scan_type, end_epoch, json_info, scan_result)
     
-    return(interface.execSQLQuery(sql))
-    
+    return(interface.execSQLWrite(sql))
+
 end
 
 -- ####################################################################################
@@ -184,7 +184,7 @@ function vs_db_utils.save_report_info(report_info)
     local sql = string.format("INSERT INTO %s VALUES",report_table_name)
     local sql = string.format("%s ('%s', %s, '%s', %u, %u, %u, %u);",sql, report_name, report_date, json_info, num_scanned_host, num_cves, num_tcp_ports, num_udp_ports)
 
-    return(interface.execSQLQuery(sql))
+    return(interface.execSQLWrite(sql))
 end
 
 -- ####################################################################################
@@ -192,7 +192,7 @@ end
 function vs_db_utils.delete_report(epoch)
     if not ntop.isClickHouseEnabled() then return end
     local sql = string.format("DELETE FROM %s WHERE REPORT_DATE = %u;",report_table_name, tonumber(epoch))
-    return(interface.execSQLQuery(sql))
+    return(interface.execSQLWrite(sql))
 end
 
 -- ####################################################################################
@@ -200,7 +200,7 @@ end
 function vs_db_utils.edit_report(epoch, report_name)
     if not ntop.isClickHouseEnabled() then return end
     local sql = string.format("ALTER TABLE %s UPDATE REPORT_NAME = '%s' WHERE REPORT_DATE = %u;",report_table_name,report_name, tonumber(epoch))
-    return(interface.execSQLQuery(sql))
+    return(interface.execSQLWrite(sql))
 end
 
 function vs_db_utils.update_last_result(scan_result, scan_type, host, epoch, last_port)
@@ -212,7 +212,7 @@ function vs_db_utils.update_last_result(scan_result, scan_type, host, epoch, las
     local merged_results = vs_db_utils.get_updated_vs_result(db_current_scan_result, scan_result, last_port)
     
     local sql = string.format("ALTER TABLE %s UPDATE VS_RESULT_FILE = '%s' WHERE HOST = '%s' AND SCAN_TYPE = '%s' AND LAST_SCAN = %u;",data_table_name,merged_results,host,scan_type, tonumber(epoch))
-    return(interface.execSQLQuery(sql))
+    return(interface.execSQLWrite(sql))
 end
 
 function vs_db_utils.get_updated_vs_result(current_gloal_result, last_single_scan, last_port)
