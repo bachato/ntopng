@@ -248,6 +248,15 @@ static int process_sqlite_row(void* data, int argc, char** argv,
 
 /* **************************************************** */
 
+int SQLiteStoreManager::execSQLWrite(const char* sql) {
+  m.lock(__FILE__, __LINE__);
+  int rc = exec_query(sql, NULL, NULL);
+  m.unlock(__FILE__, __LINE__);
+  return rc;
+}
+
+/* **************************************************** */
+
 int SQLiteStoreManager::execSQLQuery(lua_State* vm, const char* sql,
                                      bool limitRows, bool wait_for_db_created) {
   int rc = SQLITE_ERROR;

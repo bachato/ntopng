@@ -44,6 +44,7 @@ class SQLiteStoreManager : public DB {
 
   int execSQLQuery(lua_State* vm, const char* sql, bool limitRows,
                    bool wait_for_db_created);
+  int execSQLWrite(const char* sql) override;
 };
 
 #endif /* _SQLITE_STORE_MANAGER_H_ */
