@@ -1262,7 +1262,7 @@ local flow_columns = {
    ['IS_SRV_VICTIM'] =        { tag = "is_srv_victim" },
    ['IS_SRV_BLACKLISTED'] =   { tag = "is_srv_blacklisted" },
    ['PROTOCOL_INFO_JSON'] =   { tag = "protocol_info_json", dt_func = historical_format_utils.parseInfoJson },
-   ['THROUGHPUT'] =           { tag = "throughput", dt_func = dt_format_thpt },
+   ['THROUGHPUT'] =           { tag = "throughput", dt_func = dt_format_thpt, exclude_from_details = true },
    ['ALERT_JSON'] =           { tag = "json" },
    ['SRC_PROC_NAME'] =        { tag = "cli_proc_name", db_type = "String", db_raw_type = "String" },
    ['DST_PROC_NAME'] =        { tag = "srv_proc_name", db_type = "String", db_raw_type = "String" },
