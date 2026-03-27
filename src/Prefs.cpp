@@ -224,6 +224,7 @@ Prefs::Prefs(Ntop* _ntop) {
   es_host = strdup((char*)"");
 
   clickhouse_host = clickhouse_dbname = clickhouse_user = clickhouse_pw = NULL;
+  clickhouse_ro_user = clickhouse_ro_pw = NULL;
 #if defined(HAVE_CLICKHOUSE) && defined(NTOPNG_PRO)
   clickhouse_cluster_user = NULL;
   ntopng_assets_inventory_enabled = true;
@@ -334,6 +335,8 @@ Prefs::~Prefs() {
   if (clickhouse_cluster_user) free(clickhouse_cluster_user);
 #endif
   if (clickhouse_pw) free(clickhouse_pw);
+  if (clickhouse_ro_user) free(clickhouse_ro_user);
+  if (clickhouse_ro_pw) free(clickhouse_ro_pw);
   if (ls_host) free(ls_host);
   if (ls_port) free(ls_port);
   if (ls_proto) free(ls_proto);
@@ -662,55 +665,36 @@ void usage() {
       "                                    | clickhouse    Dump in ClickHouse "
       "(Enterprise M and better)\n"
       "                                    |   Format:\n"
-      "                                    |   clickhouse;<host[@<tcp-"
-      "port>,<mysql-port>]|socket>;<dbname>;<user>;<pw>\n"
+      "                                    |   clickhouse[;<host[@<tcp-port>,<mysql-port>]|socket>;<dbname>;<user>;<pw>[;<ro-user>[;<ro-pw>]]]\n"
       "                                    |   Example:\n"
-      "                                    |   "
-      "clickhouse;127.0.0.1;ntopng;default;\n"
-      "                                    |   You can also use just -F "
-      "clickhouse as alias of:\n"
-      "                                    |   -F "
-      "\"clickhouse;127.0.0.1@%u,%u;ntopng;default;\"\n"
+      "                                    |   clickhouse;127.0.0.1;ntopng;default;xxx;ntop_ro;xxx\n"
+      "                                    |   You can also use just '-F clickhouse' as alias of:\n"
+      "                                    |   -F \"clickhouse;127.0.0.1@%u,%u;ntopng;default;\"\n"
+      "                                    |\n"
+      "                                    | NOTE:\n"
+      "                                    | - tcp-port used by the clickhouse API\n"
+      "                                    | - mysql-port used by the mysql API\n"
+      "                                    | - ro-user, when configured, is created by ntopng (if not exist)\n"
       "                                    |\n"
 #ifndef HAVE_NEDGE
-      "                                    | clickhouse-cluster    Dump in "
-      "ClickHouse Cluster (Enterprise M/L/XL/XXL)\n"
+      "                                    | clickhouse-cluster    Dump in ClickHouse Cluster (Enterprise M/L/XL/XXL)\n"
       "                                    |   Format:\n"
-      "                                    |   clickhouse-cluster;<host[@<tcp-"
-      "port>,<mysql-port>]|socket>;<dbname>;<user>;<pw>;<cluster name>\n"
+      "                                    |   clickhouse-cluster;<host[@<tcp-port>,<mysql-port>]|socket>;<dbname>;<user>;<pw>;<cluster name>[;<ro-user>[;<ro-pw>]]\n"
       "                                    |   Example:\n"
-      "                                    |   "
-      "clickhouse-cluster;127.0.0.1;ntopng;default;ntop_cluster\n"
-      "                                    |   You can also use just -F "
-      "clickhouse-cluster as alias of:\n"
-      "                                    |   -F "
-      "\"clickhouse-cluster;127.0.0.1@%u,%u;ntopng;default;ntop_cluster\"\n"
-      "                                    | NOTE:\n"
-      "                                    | - tcp-port used by the clickhouse "
-      "API\n"
-      "                                    | - mysql-port used by the mysql "
-      "API\n"
+      "                                    |   clickhouse-cluster;127.0.0.1;ntopng;default;ntop_cluster\n"
+      "                                    |   You can also use just -F clickhouse-cluster as alias of:\n"
+      "                                    |   -F \"clickhouse-cluster;127.0.0.1@%u,%u;ntopng;default;ntop_cluster\"\n"
       "                                    |\n"
 #endif
-      "                                    | clickhouse-cloud    Dump in "
-      "ClickHouse Cloud (Enterprise M/L/XL/XXL)\n"
+      "                                    | clickhouse-cloud    Dump in ClickHouse Cloud (Enterprise M/L/XL/XXL)\n"
       "                                    |   Format:\n"
-      "                                    |   clickhouse-cloud;<host[@<tcp-"
-      "port>,<mysql-port>]|socket>;<dbname>;<clickhouse-user>,<mysql-user>;<pw>"
-      ";\n"
+      "                                    |   clickhouse-cloud;<host[@<tcp-port>,<mysql-port>]|socket>;<dbname>;<clickhouse-user>,<mysql-user>;<pw>;\n"
       "                                    |   Example:\n"
-      "                                    |   "
-      "clickhouse-cloud;europe-east15.clickhouse.cloud@9440s,3306;ntopng;"
-      "default,mysql-user;mych-password\n"
+      "                                    |   clickhouse-cloud;europe-east15.clickhouse.cloud@9440s,3306;ntopng;default,mysql-user;mych-password\n"
+      "                                    |\n"
       "                                    | NOTE:\n"
-      "                                    | - clickhouse-user used by "
-      "clickhouse-client\n"
-      "                                    | - mysql-user used by the mysql "
-      "API\n"
-      "                                    | - tcp-port used by the clickhouse "
-      "API\n"
-      "                                    | - mysql-port used by the mysql "
-      "API\n"
+      "                                    | - clickhouse-user used by clickhouse-client\n"
+      "                                    | - mysql-user used by the mysql API\n"
       "                                    |\n",
       CONST_DEFAULT_CLICKHOUSE_TCP_PORT, CONST_DEFAULT_CLICKHOUSE_MYSQL_PORT
 #ifndef HAVE_NEDGE
@@ -2191,17 +2175,38 @@ int Prefs::setOption(int optkey, char* optarg) {
             clickhouse_pw = strdup((char*)"");
 
             if (use_clickhouse_cluster)
-              clickhouse_cluster_name =
-                  strdup((char*)DEFAULT_CLICKHOUSE_CLUSTER);
+              clickhouse_cluster_name = strdup((char*)DEFAULT_CLICKHOUSE_CLUSTER);
           } else {
+            char *after_pw;
+
             optarg = Utils::tokenizer(sep + 1, ';', &clickhouse_host);
             optarg = Utils::tokenizer(optarg, ';', &clickhouse_dbname);
             optarg = Utils::tokenizer(optarg, ';', &clickhouse_user);
-            clickhouse_pw = strdup(optarg ? optarg : "");
+            after_pw = Utils::tokenizer(optarg, ';', &clickhouse_pw);
 
-            if (use_clickhouse_cluster) {
-              optarg = Utils::tokenizer(optarg, ';', &clickhouse_pw);
-              if (optarg) clickhouse_cluster_name = strdup(optarg);
+            if (after_pw != optarg) {
+              if (use_clickhouse_cluster) {
+                /* read cluster_name */
+                char* cluster_name_tmp = NULL;
+                char* after_cluster;
+                after_cluster = Utils::tokenizer(after_pw, ';', &cluster_name_tmp);
+                if (cluster_name_tmp) clickhouse_cluster_name = cluster_name_tmp;
+                if (after_cluster != after_pw) {
+                  /* read optional ro user/pwd */
+                  char* after_ro_user;
+                  after_ro_user = Utils::tokenizer(after_cluster, ';', &clickhouse_ro_user);
+                  if (clickhouse_ro_user && clickhouse_ro_user[0] &&
+                      after_ro_user != after_cluster)
+                    clickhouse_ro_pw = strdup(after_ro_user);
+                }
+              } else {
+                char* after_ro_user;
+                /* read ro user/pwd */
+                after_ro_user = Utils::tokenizer(after_pw, ';', &clickhouse_ro_user);
+                if (clickhouse_ro_user && clickhouse_ro_user[0] &&
+                    after_ro_user != after_pw)
+                  clickhouse_ro_pw = strdup(after_ro_user);
+              }
             }
           }
 
@@ -2326,6 +2331,12 @@ int Prefs::setOption(int optkey, char* optarg) {
                 clickhouse_host = strdup("127.0.0.1");
               }
             }
+
+            if (!clickhouse_ro_user || !clickhouse_ro_user[0])
+              ntop->getTrace()->traceEvent(TRACE_WARNING,
+                  "ClickHouse configured without a read-only user: all queries "
+                  "will use the privileged account. Consider configuring it in "
+                  "the -F clickhouse option.");
           } else {
             ntop->getTrace()->traceEvent(
                 TRACE_WARNING, "Invalid format for -F clickhouse;....");
@@ -2988,6 +2999,8 @@ void Prefs::lua(lua_State* vm) {
 
   if (clickhouse_dbname)
     lua_push_str_table_entry(vm, "clickhouse_dbname", clickhouse_dbname);
+  if (clickhouse_ro_user && clickhouse_ro_user[0])
+    lua_push_str_table_entry(vm, "clickhouse_ro_user", clickhouse_ro_user);
   lua_push_bool_table_entry(vm, "is_dump_flows_to_es_enabled",
                             do_dump_flows_on_es());
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO)
