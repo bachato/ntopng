@@ -270,10 +270,16 @@ static int get_secure_random(void *dest, size_t size) {
 static void generate_session_id(char* buf, const char* user,
                                 const char* group) {
   unsigned char random_data[32]; /* 256 bits of entropy */
-
+  
   if (get_secure_random(random_data, sizeof(random_data)) != 0) {
+    NetworkInterface *i = ntop->getInterfaceAtId(0);
+    u_int32_t num_pkts;
+    
     srand((int)time(0));
-    snprintf((char*)random_data, sizeof(random_data), "%d", rand());
+
+    num_pkts = (i != NULL) ? i->getNumPackets() : rand();
+    snprintf((char*)random_data, sizeof(random_data), "%d-%u-%s",
+	     rand(), num_pkts, user);
   }
 
   mg_md5(buf, (const char*)random_data, user, group, NULL);
