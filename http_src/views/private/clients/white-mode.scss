@@ -59,6 +59,7 @@
   --input-bg: #FFFFFF;
   --input-text: #495057;
   --input-border: #CED4D9;
+  --ntop-disabled-text-color: #21252980;
 }
 
 /* Dark-Mode */
@@ -87,6 +88,7 @@
   --input-bg: #0D1117;
   --input-text: #C9D1D9;
   --input-border: #30363D;
+  --ntop-disabled-text-color: #8B949E;
 }
 
 * {
@@ -1348,4 +1350,8 @@ a.disabled {
 .fade-alert-leave-from {
   opacity: 1;
   transform: translateY(0);
+}
+
+.dropdown-item.disabled {
+  color: var(--ntop-disabled-text-color) !important;
 }
