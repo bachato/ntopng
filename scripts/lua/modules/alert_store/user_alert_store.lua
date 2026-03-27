@@ -113,7 +113,7 @@ function user_alert_store:format_record(value, no_html)
      fullname = alert_fullname,
      value = tonumber(value["alert_id"]),
      description = msg,
-     configset_ref = alert_utils.getConfigsetAlertLink(alert_info)
+     configset_ref = alert_utils.getConfigsetAlertLink(alert_info, value["alert_id"], alert_entities.user.entity_id)
    }
 
    return record

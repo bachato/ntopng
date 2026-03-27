@@ -551,7 +551,7 @@ function host_alert_store:format_record(value, no_html)
         fullname = alert_name,
         value = tonumber(value["alert_id"]),
         description = msg,
-        configset_ref = alert_utils.getConfigsetAlertLink(alert_info, value)
+        configset_ref = alert_utils.getConfigsetAlertLink(alert_info, value["alert_id"], alert_entities.host.entity_id)
     }
 
     record[RNAME.LINK_TO_PAST_FLOWS.name] = alert_utils.getLinkToPastFlows(ifid, value, alert_info)

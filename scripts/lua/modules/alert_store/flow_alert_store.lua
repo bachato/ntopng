@@ -1087,7 +1087,7 @@ function flow_alert_store:format_record(value, no_html, verbose)
       fullname = alert_name,
       value = tonumber(value["alert_id"]),
       description = msg,
-      configset_ref = alert_utils.getConfigsetAlertLink(predominant_alert_info, tonumber(value["alert_id"]), alert_entities.flow.entity_id)
+      configset_ref = alert_utils.getConfigsetAlertLink(predominant_alert_info, value["alert_id"], alert_entities.flow.entity_id)
    }
 
    -- Format Client

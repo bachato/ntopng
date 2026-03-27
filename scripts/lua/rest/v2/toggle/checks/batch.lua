@@ -63,7 +63,8 @@ local results  = {}
 local any_fail = false
 
 for _, key in ipairs(script_keys) do
-   tprint("Key: " .. tostring(key) .. " Subdir: " .. tostring(subdir) .. " Enable: " ..tostring(enable))
+   -- Debug print
+   -- tprint("Key: " .. tostring(key) .. " Subdir: " .. tostring(subdir) .. " Enable: " ..tostring(enable))
    local ok, err = checks.toggleScript(key, subdir, enable)
    results[#results + 1] = {
       key     = key,
