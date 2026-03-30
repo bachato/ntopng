@@ -49,6 +49,10 @@ function drop_host_pool_utils.check_pre_banned_hosts_to_add()
             -- Jailed pool cannot be found, unable to continue
             return
          end
+
+         -- Start a transaction to trigger a single ntop.reloadHostPools()
+         -- when calling end_transaction() and avoiding many reloads, also taking time
+         host_pool:start_transaction()
       end
 
       -- Add elem to the jailed host pool
@@ -63,6 +67,10 @@ function drop_host_pool_utils.check_pre_banned_hosts_to_add()
       end
 
       num_pending = num_pending - 1
+   end
+
+   if host_pool then
+      host_pool:end_transaction()
    end
 
    -- Read rules from configured pools and policies
