@@ -530,6 +530,20 @@ static int ntop_interface_is_viewed(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if this interface is aggregated by a view interface.  Lua: interface.isViewed() → boolean */
+static int ntop_interface_is_sampled_traffic(lua_State* vm) {
+  NetworkInterface* curr_iface = getCurrentInterface(vm);
+  bool rv = false;
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  if (curr_iface) rv = curr_iface->isSampledTraffic();
+
+  lua_pushboolean(vm, rv);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
 /* @brief Returns true if this is a loopback interface.  Lua: interface.isLoopback() → boolean */
 static int ntop_interface_is_loopback(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -2313,6 +2327,21 @@ static int ntop_get_interface_ases_info(lua_State* vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
   }
 
+  if (p) delete (p);
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* ****************************************** */
+
+/* @brief Returns statistics for all Autonomous Systems observed on this interface.  Lua: interface.getASesInfo([params]) → table */
+static int ntop_get_interface_as_list(lua_State* vm) {
+  NetworkInterface* curr_iface = getCurrentInterface(vm);
+
+  if (!curr_iface)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  curr_iface->getASList(vm);
   if (p) delete (p);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
@@ -6505,6 +6534,7 @@ static luaL_Reg _ntop_interface_reg[] = {
     {"isZMQInterface", ntop_interface_is_zmq_interface},
     {"isView", ntop_interface_is_view},
     {"isViewed", ntop_interface_is_viewed},
+    {"isSampledTraffic", ntop_interface_is_sampled_traffic},
     {"viewedBy", ntop_interface_viewed_by},
     {"isLoopback", ntop_interface_is_loopback},
     {"isRunning", ntop_interface_is_running},
@@ -6574,6 +6604,7 @@ static luaL_Reg _ntop_interface_reg[] = {
     /* Autonomous Systems */
     {"getASesInfo", ntop_get_interface_ases_info},
     {"getASInfo", ntop_get_interface_as_info},
+    {"getASList", ntop_get_interface_as_list},
 
     /* Autonomous Systems */
     {"getObsPointsInfo", ntop_get_interface_obs_points_info},

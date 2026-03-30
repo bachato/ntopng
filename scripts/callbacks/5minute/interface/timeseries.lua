@@ -18,9 +18,14 @@ local ts_dump = require "ts_5min_dump_utils"
 
 if not hasHighResolutionTs() then
   local when = os.time()
-  local ifstats = interface.getStats()
-  local _ifname = ifstats.name
+  local _ifname = interface.getName()
   local verbose = ntop.verboseTrace()
 
-  ts_dump.run_5min_dump(_ifname, ifstats, when, verbose)
+  ts_dump.run_5min_dump(_ifname, {
+    isViewed = interface.isViewed(),
+    isView = interface.isView(),
+    id = interface.getId(),
+    isSampledTraffic = interface.isSampledTraffic(),
+    has_seen_ebpf_events = interface.hasEBPF()
+  }, when, verbose)
 end

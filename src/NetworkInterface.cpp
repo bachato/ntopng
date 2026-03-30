@@ -9975,6 +9975,44 @@ int NetworkInterface::getActiveASList(lua_State* vm, const Paginator* p,
 
 /* **************************************** */
 
+void NetworkInterface::getASList(lua_State* vm) {
+  struct flowHostRetriever retriever;
+  u_int32_t begin_slot = 0;
+  bool walk_all = true;
+
+  retriever.actNumEntries = 0, retriever.maxNumEntries = getASesHashSize();
+  retriever.elems = (struct flowHostRetrieveList*)calloc(
+      sizeof(struct flowHostRetrieveList), retriever.maxNumEntries);
+  retriever.sorter = column_asn;
+
+  if (retriever.elems == NULL) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Out of memory :-(");
+    return;
+  }
+
+  // make sure the caller has disabled the purge!!
+  walker(&begin_slot, walk_all, walker_ases, as_search_walker,
+         (void*)&retriever);
+
+  lua_newtable(vm);
+
+  for (int i = 0, num = 0;
+        i < (int)retriever.actNumEntries && num < (int)retriever.maxNumEntries; i++) {
+    AutonomousSystem* as = retriever.elems[i].asValue;
+    char buf[64];
+    snprintf(buf, sizeof(buf), "%d", as->get_asn());
+    lua_pushstring(vm, buf);
+    lua_rawseti(vm, -2, num + 1); /* Must use integer keys to preserve and
+                                      iterate inorder with ipairs */
+    num++;
+  }
+
+  // finally free the elements regardless of the sorted kind
+  if (retriever.elems) free(retriever.elems);
+}
+
+/* **************************************** */
+
 int NetworkInterface::getActiveObsPointsList(lua_State* vm,
                                              const Paginator* p) {
   struct flowHostRetriever retriever;

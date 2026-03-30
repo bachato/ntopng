@@ -835,6 +835,7 @@ class NetworkInterface : public NetworkInterfaceAlertableEntity {
       u_int8_t mac_location_filter = -1, char* map_search = NULL);
   int getActiveASList(lua_State* vm, const Paginator* p, bool diff = false,
                       ASType as_type = all);
+  void getASList(lua_State* vm);
   int getActiveObsPointsList(lua_State* vm, const Paginator* p);
   int getActiveCountriesList(lua_State* vm, const Paginator* p);
   int getActiveVLANList(lua_State* vm, char* sortColumn, u_int32_t maxHits,
