@@ -195,26 +195,7 @@ flow_consts.flow_fields_description = {
    -- ["TCP_STATS_DST_TO_SRC"] = i18n("flow_fields_description.tcp_stats_dst_to_src"),
 
    -- BGP Update Listener
-   ["SRC_AS_PATH_1"] = i18n("flow_fields_description.src_as_path_1"),
-   ["SRC_AS_PATH_2"] = i18n("flow_fields_description.src_as_path_2"),
-   ["SRC_AS_PATH_3"] = i18n("flow_fields_description.src_as_path_3"),
-   ["SRC_AS_PATH_4"] = i18n("flow_fields_description.src_as_path_4"),
-   ["SRC_AS_PATH_5"] = i18n("flow_fields_description.src_as_path_5"),
-   ["SRC_AS_PATH_6"] = i18n("flow_fields_description.src_as_path_6"),
-   ["SRC_AS_PATH_7"] = i18n("flow_fields_description.src_as_path_7"),
-   ["SRC_AS_PATH_8"] = i18n("flow_fields_description.src_as_path_8"),
-   ["SRC_AS_PATH_9"] = i18n("flow_fields_description.src_as_path_9"),
-   ["SRC_AS_PATH_10"] = i18n("flow_fields_description.src_as_path_10"),
-   ["DST_AS_PATH_1"] = i18n("flow_fields_description.dst_as_path_1"),
-   ["DST_AS_PATH_2"] = i18n("flow_fields_description.dst_as_path_2"),
-   ["DST_AS_PATH_3"] = i18n("flow_fields_description.dst_as_path_3"),
-   ["DST_AS_PATH_4"] = i18n("flow_fields_description.dst_as_path_4"),
-   ["DST_AS_PATH_5"] = i18n("flow_fields_description.dst_as_path_5"),
-   ["DST_AS_PATH_6"] = i18n("flow_fields_description.dst_as_path_6"),
-   ["DST_AS_PATH_7"] = i18n("flow_fields_description.dst_as_path_7"),
-   ["DST_AS_PATH_8"] = i18n("flow_fields_description.dst_as_path_8"),
-   ["DST_AS_PATH_9"] = i18n("flow_fields_description.dst_as_path_9"),
-   ["DST_AS_PATH_10"] = i18n("flow_fields_description.dst_as_path_10"),
+   ["BGP_INFO"] = i18n("flow_fields_description.bgp_info"),
 
    -- DHCP Protocol
    ["DHCP_CLIENT_MAC"] = i18n("flow_fields_description.dhcp_client_mac"),

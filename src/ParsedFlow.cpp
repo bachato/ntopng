@@ -57,7 +57,7 @@ ParsedFlow::ParsedFlow() : ParsedFlowCore(), ParsedeBPF() {
   src_ip_addr_pre_nat = dst_ip_addr_pre_nat = src_ip_addr_post_nat =
       dst_ip_addr_post_nat = 0;
   memset(&custom_app, 0, sizeof(custom_app));
-  wlan_ssid = NULL;
+  wlan_ssid = bgp_info = NULL;
   memset(&wtp_mac_address, 0, sizeof(wtp_mac_address));
   l7_json = NULL;
   has_parsed_ebpf = false;
@@ -173,6 +173,11 @@ ParsedFlow::ParsedFlow(const ParsedFlow& pf)
     wlan_ssid = strdup(pf.wlan_ssid);
   else
     wlan_ssid = NULL;
+
+  if (pf.bgp_info)
+    bgp_info= strdup(pf.bgp_info);
+  else
+    bgp_info = NULL;
 
   if (pf.l7_json)
     l7_json = strdup(pf.l7_json);
@@ -442,6 +447,10 @@ void ParsedFlow::freeMemory() {
   if (wlan_ssid) {
     free(wlan_ssid);
     wlan_ssid = NULL;
+  }
+  if (bgp_info) {
+    free(bgp_info);
+    bgp_info = NULL;
   }
   if (l7_json) {
     free(l7_json);

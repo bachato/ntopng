@@ -1944,6 +1944,12 @@ if isEmptyString(page) or page == "overview" then
          print("</tr>\n")
       end
 
+      if(not isEmptyString(flow.bgp_info)) then
+         print('<tr><th class=\'colspan-4\'><a href="https://tools.ietf.org/html/rfc7301" data-bs-toggle="tooltip">' ..
+	       i18n("flow_details.bgp_info") .. '</A></th><td colspan=2>' ..
+	       flow.bgp_info .. '</td></tr>\n')
+      end
+      
       if (flow.prev_adjacent_as or flow.next_adjacent_as) then
          print("<tr>")
          print("<th class='colspan-4'>" .. i18n("flow_details.as_prev_next") .. "</th>")

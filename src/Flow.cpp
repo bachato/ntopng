@@ -683,7 +683,8 @@ Flow::~Flow() {
   if (end_reason) free(end_reason);
 
   if (collection) {
-    if (collection->wifi.wlan_ssid) free(collection->wifi.wlan_ssid);
+    if(collection->wifi.wlan_ssid) free(collection->wifi.wlan_ssid);
+    if(collection->bgpInfo)        free(collection->bgpInfo);
     free(collection);
   }
 
@@ -3497,20 +3498,27 @@ void Flow::lua(lua_State* vm, AddressTree* allowed_nets,
     if (end_reason)
       lua_push_str_table_entry(vm, "flow_end_reason", getEndReason());
 
-    if (collection && collection->wifi.wlan_ssid) {
-      char mac_buf[20];
+    if (collection) {
+      char *bgp_info = getBGPInfo();
+      
+      if(bgp_info)
+	lua_push_str_table_entry(vm, "bgp_info", bgp_info);
+      
+      if(collection->wifi.wlan_ssid) {
+	char mac_buf[20];
 
-      lua_newtable(vm);
+	lua_newtable(vm);
 
-      lua_push_str_table_entry(vm, "ssid", collection->wifi.wlan_ssid);
-      lua_push_str_table_entry(
-          vm, "wtp_mac_address",
-          Utils::formatMac(collection->wifi.wtp_mac_address, mac_buf,
-                           sizeof(mac_buf)));
+	lua_push_str_table_entry(vm, "ssid", collection->wifi.wlan_ssid);
+	lua_push_str_table_entry(
+				 vm, "wtp_mac_address",
+				 Utils::formatMac(collection->wifi.wtp_mac_address, mac_buf,
+						  sizeof(mac_buf)));
 
-      lua_pushstring(vm, "wlan");
-      lua_insert(vm, -2);
-      lua_settable(vm, -3);
+	lua_pushstring(vm, "wlan");
+	lua_insert(vm, -2);
+	lua_settable(vm, -3);
+      }
     }
 
     if (isSMTP()
@@ -9076,6 +9084,17 @@ void Flow::setEndReason(char* r) {
 /* *************************************** */
 
 char* Flow::getEndReason() { return (end_reason); }
+
+/* *************************************** */
+
+void Flow::setBGPInfo(char* bgp_info) {
+  if(!collection) allocateCollection();
+  
+  if(collection) {
+    if(collection->bgpInfo != NULL) free(collection->bgpInfo);
+    collection->bgpInfo = strdup(bgp_info);
+  }
+}
 
 /* *************************************** */
 

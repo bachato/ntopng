@@ -158,6 +158,7 @@ ZMQParserInterface::ZMQParserInterface(const char* endpoint,
   addMapping("TCP_STATS_SRC_TO_DST", TCP_STATS_SRC_TO_DST, NTOP_PEN);
   addMapping("TCP_STATS_DST_TO_SRC", TCP_STATS_DST_TO_SRC, NTOP_PEN);
   addMapping("OT_INFO", OT_INFO, NTOP_PEN);
+  addMapping("BGP_INFO", BGP_INFO, NTOP_PEN);
 
   /* eBPF / Process */
   addMapping("SRC_PROC_PID", SRC_PROC_PID, NTOP_PEN);
@@ -762,362 +763,362 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow* const flow,
   // ntop->getTrace()->traceEvent(TRACE_WARNING, "Field: %u", field);
 
   switch (field) {
-    case IN_SRC_MAC:
-    case OUT_SRC_MAC:
-      /* Format 00:00:00:00:00:00 */
-      Utils::parseMac(flow->src_mac, value->string);
-      break;
-    case IN_DST_MAC:
-    case OUT_DST_MAC:
-      Utils::parseMac(flow->dst_mac, value->string);
-      break;
-    case SRC_TOS:
-      flow->src_tos = value->int_num;
-      break;
-    case DST_TOS:
-      flow->dst_tos = value->int_num;
-      break;
-    case IPV4_SRC_ADDR:
-    case IPV6_SRC_ADDR:
-      /*
-        The following check prevents an empty ip address (e.g., ::) to
-        to overwrite another valid ip address already set.
-        This can happen for example when nProbe is configured (-T) to export
-        both %IPV4_SRC_ADDR and the %IPV6_SRC_ADDR. In that cases nProbe can
-        export a valid ipv4 and an empty ipv6. Without the check, the empty
-        v6 address may overwrite the non empty v4.
-      */
-      if (flow->src_ip.isEmpty()) {
-        if (value->string)
-          flow->src_ip.set((char*)value->string);
-        else
-          flow->src_ip.set(ntohl(value->int_num));
-      } else {
-        ip_aux.set((char*)value->string);
-
-        if (!ip_aux.isEmpty() &&
-            !ntop->getPrefs()->do_override_src_with_post_nat_src())
-          /* tried to overwrite a non-empty IP with another non-empty IP */
-          ntop->getTrace()->traceEvent(
-              TRACE_WARNING,
-              "Attempt to set source ip multiple times. "
-              "Check exported fields");
-      }
-      break;
-    case IP_PROTOCOL_VERSION:
-      flow->version = value->int_num;
-      break;
-
-    case IPV4_DST_ADDR:
-    case IPV6_DST_ADDR:
-      if (flow->dst_ip.isEmpty()) {
-        if (value->string)
-          flow->dst_ip.set((char*)value->string);
-        else
-          flow->dst_ip.set(ntohl(value->int_num));
-      } else {
-        ip_aux.set((char*)value->string);
-
-        if (!ip_aux.isEmpty() &&
-            !ntop->getPrefs()->do_override_dst_with_post_nat_dst())
-          ntop->getTrace()->traceEvent(
-              TRACE_WARNING,
-              "Attempt to set destination ip multiple times. "
-              "Check exported fields");
-      }
-      break;
-    case L4_SRC_PORT:
-      if (!flow->src_port) {
-        if (value->string)
-          flow->src_port = atoi(value->string);
-        else
-          flow->src_port = ntohs((u_int32_t)value->int_num);
-#ifdef DEBUG
-        ntop->getTrace()->traceEvent(TRACE_NORMAL, "L4_SRC_PORT %u",
-                                     htons(flow->src_port));
-#endif
-      }
-      break;
-    case L4_DST_PORT:
-      if (!flow->dst_port) {
-        if (value->string)
-          flow->dst_port = atoi(value->string);
-        else
-          flow->dst_port = ntohs((u_int32_t)value->int_num);
-
-#ifdef DEBUG
-        ntop->getTrace()->traceEvent(TRACE_NORMAL, "L4_DST_PORT %u",
-                                     htons(flow->dst_port));
-#endif
-      }
-      break;
-    case SRC_VLAN:
-    case DST_VLAN:
-      if ((flow->vlan_id = value->int_num) > 4095) /* Sanity check */
-        flow->vlan_id = 0;
-      break;
-    case DOT1Q_SRC_VLAN:
-    case DOT1Q_DST_VLAN:
-      if (flow->vlan_id == 0) {
-        /* as those fields are the outer vlans in q-in-q
-           we set the vlan_id only if there is no inner vlan
-           value set
-        */
-        flow->vlan_id = value->int_num;
-      }
-      break;
-    case PROTOCOL:
+  case IN_SRC_MAC:
+  case OUT_SRC_MAC:
+    /* Format 00:00:00:00:00:00 */
+    Utils::parseMac(flow->src_mac, value->string);
+    break;
+  case IN_DST_MAC:
+  case OUT_DST_MAC:
+    Utils::parseMac(flow->dst_mac, value->string);
+    break;
+  case SRC_TOS:
+    flow->src_tos = value->int_num;
+    break;
+  case DST_TOS:
+    flow->dst_tos = value->int_num;
+    break;
+  case IPV4_SRC_ADDR:
+  case IPV6_SRC_ADDR:
+    /*
+      The following check prevents an empty ip address (e.g., ::) to
+      to overwrite another valid ip address already set.
+      This can happen for example when nProbe is configured (-T) to export
+      both %IPV4_SRC_ADDR and the %IPV6_SRC_ADDR. In that cases nProbe can
+      export a valid ipv4 and an empty ipv6. Without the check, the empty
+      v6 address may overwrite the non empty v4.
+    */
+    if (flow->src_ip.isEmpty()) {
       if (value->string)
-        flow->l4_proto = atoi(value->string);
+	flow->src_ip.set((char*)value->string);
       else
-        flow->l4_proto = value->int_num;
-      break;
-    case TCP_FLAGS:
-      flow->tcp.tcp_flags = value->int_num;
-      break;
-    case INITIATOR_PKTS:
-      flow->absolute_packet_octet_counters = true;
-      /* Don't break */
-    case IN_PKTS:
-      if (value->string != NULL)
-        flow->in_pkts = atol(value->string);
+	flow->src_ip.set(ntohl(value->int_num));
+    } else {
+      ip_aux.set((char*)value->string);
+
+      if (!ip_aux.isEmpty() &&
+	  !ntop->getPrefs()->do_override_src_with_post_nat_src())
+	/* tried to overwrite a non-empty IP with another non-empty IP */
+	ntop->getTrace()->traceEvent(
+				     TRACE_WARNING,
+				     "Attempt to set source ip multiple times. "
+				     "Check exported fields");
+    }
+    break;
+  case IP_PROTOCOL_VERSION:
+    flow->version = value->int_num;
+    break;
+
+  case IPV4_DST_ADDR:
+  case IPV6_DST_ADDR:
+    if (flow->dst_ip.isEmpty()) {
+      if (value->string)
+	flow->dst_ip.set((char*)value->string);
       else
-        flow->in_pkts = value->int_num;
-      break;
-    case INITIATOR_OCTETS:
-      flow->absolute_packet_octet_counters = true;
-      /* Don't break */
-    case IN_BYTES: /* Byte sent */
-      if (value->string != NULL)
-        flow->in_bytes = atol(value->string);
+	flow->dst_ip.set(ntohl(value->int_num));
+    } else {
+      ip_aux.set((char*)value->string);
+
+      if (!ip_aux.isEmpty() &&
+	  !ntop->getPrefs()->do_override_dst_with_post_nat_dst())
+	ntop->getTrace()->traceEvent(
+				     TRACE_WARNING,
+				     "Attempt to set destination ip multiple times. "
+				     "Check exported fields");
+    }
+    break;
+  case L4_SRC_PORT:
+    if (!flow->src_port) {
+      if (value->string)
+	flow->src_port = atoi(value->string);
       else
-        flow->in_bytes = value->int_num;
+	flow->src_port = ntohs((u_int32_t)value->int_num);
+#ifdef DEBUG
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "L4_SRC_PORT %u",
+				   htons(flow->src_port));
+#endif
+    }
+    break;
+  case L4_DST_PORT:
+    if (!flow->dst_port) {
+      if (value->string)
+	flow->dst_port = atoi(value->string);
+      else
+	flow->dst_port = ntohs((u_int32_t)value->int_num);
 
 #ifdef DEBUG
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "IN_BYTES (sent) %u",
-                                   flow->in_bytes);
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "L4_DST_PORT %u",
+				   htons(flow->dst_port));
 #endif
-      break;
-    case RESPONDER_PKTS:
-      flow->absolute_packet_octet_counters = true;
-      /* Don't break */
-    case OUT_PKTS:
-      if (value->string != NULL)
-        flow->out_pkts = atol(value->string);
-      else
-        flow->out_pkts = value->int_num;
-      break;
-    case RESPONDER_OCTETS:
-      flow->absolute_packet_octet_counters = true;
-      /* Don't break */
-    case OUT_BYTES: /* Bytes received */
-      if (value->string != NULL)
-        flow->out_bytes = atol(value->string);
-      else
-        flow->out_bytes = value->int_num;
+    }
+    break;
+  case SRC_VLAN:
+  case DST_VLAN:
+    if ((flow->vlan_id = value->int_num) > 4095) /* Sanity check */
+      flow->vlan_id = 0;
+    break;
+  case DOT1Q_SRC_VLAN:
+  case DOT1Q_DST_VLAN:
+    if (flow->vlan_id == 0) {
+      /* as those fields are the outer vlans in q-in-q
+	 we set the vlan_id only if there is no inner vlan
+	 value set
+      */
+      flow->vlan_id = value->int_num;
+    }
+    break;
+  case PROTOCOL:
+    if (value->string)
+      flow->l4_proto = atoi(value->string);
+    else
+      flow->l4_proto = value->int_num;
+    break;
+  case TCP_FLAGS:
+    flow->tcp.tcp_flags = value->int_num;
+    break;
+  case INITIATOR_PKTS:
+    flow->absolute_packet_octet_counters = true;
+    /* Don't break */
+  case IN_PKTS:
+    if (value->string != NULL)
+      flow->in_pkts = atol(value->string);
+    else
+      flow->in_pkts = value->int_num;
+    break;
+  case INITIATOR_OCTETS:
+    flow->absolute_packet_octet_counters = true;
+    /* Don't break */
+  case IN_BYTES: /* Byte sent */
+    if (value->string != NULL)
+      flow->in_bytes = atol(value->string);
+    else
+      flow->in_bytes = value->int_num;
 
 #ifdef DEBUG
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "OUT_BYTES (rcvd) %u",
-                                   flow->out_bytes);
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "IN_BYTES (sent) %u",
+				 flow->in_bytes);
 #endif
-      break;
-    case FIRST_SWITCHED:
-      if (value->string != NULL)
-        flow->first_switched = atoi(value->string);
-      else
-        flow->first_switched = value->int_num;
-      break;
-    case LAST_SWITCHED:
-      if (value->string != NULL)
-        flow->last_switched = atoi(value->string);
-      else
-        flow->last_switched = value->int_num;
-      break;
-    case SAMPLING_INTERVAL:
+    break;
+  case RESPONDER_PKTS:
+    flow->absolute_packet_octet_counters = true;
+    /* Don't break */
+  case OUT_PKTS:
+    if (value->string != NULL)
+      flow->out_pkts = atol(value->string);
+    else
+      flow->out_pkts = value->int_num;
+    break;
+  case RESPONDER_OCTETS:
+    flow->absolute_packet_octet_counters = true;
+    /* Don't break */
+  case OUT_BYTES: /* Bytes received */
+    if (value->string != NULL)
+      flow->out_bytes = atol(value->string);
+    else
+      flow->out_bytes = value->int_num;
+
+#ifdef DEBUG
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "OUT_BYTES (rcvd) %u",
+				 flow->out_bytes);
+#endif
+    break;
+  case FIRST_SWITCHED:
+    if (value->string != NULL)
+      flow->first_switched = atoi(value->string);
+    else
+      flow->first_switched = value->int_num;
+    break;
+  case LAST_SWITCHED:
+    if (value->string != NULL)
+      flow->last_switched = atoi(value->string);
+    else
+      flow->last_switched = value->int_num;
+    break;
+  case SAMPLING_INTERVAL:
 #if 0
     /* Ignore it as nProbe as already implemented upscale */
     flow->pkt_sampling_rate = value->int_num;
 #endif
-      break;
-    case DIRECTION:
-      if (value->string != NULL) {
-        if (strcmp(value->string, "L2R") == 0)
-          flow->direction = 1 /* TX */;
-        else if (strcmp(value->string, "R2L") == 0)
-          flow->direction = 0 /* RX */;
-        else if ((strcmp(value->string, "L2L") == 0) ||
-                 (strcmp(value->string, "R2R") == 0))
-          flow->direction = UNKNOWN_FLOW_DIRECTION;
-        else
-          flow->direction = atoi(value->string);
-      } else
-        flow->direction = value->int_num;
-      break;
-    case ICMP_TYPE:
-      if (value->string != NULL)
-        flow->icmp_type_code = atoi(value->string);
+    break;
+  case DIRECTION:
+    if (value->string != NULL) {
+      if (strcmp(value->string, "L2R") == 0)
+	flow->direction = 1 /* TX */;
+      else if (strcmp(value->string, "R2L") == 0)
+	flow->direction = 0 /* RX */;
+      else if ((strcmp(value->string, "L2L") == 0) ||
+	       (strcmp(value->string, "R2R") == 0))
+	flow->direction = UNKNOWN_FLOW_DIRECTION;
       else
-        flow->icmp_type_code = value->int_num;
-      break;
-    case EXPORTER_IPV4_ADDRESS: {
-      u_int32_t ip;
+	flow->direction = atoi(value->string);
+    } else
+      flow->direction = value->int_num;
+    break;
+  case ICMP_TYPE:
+    if (value->string != NULL)
+      flow->icmp_type_code = atoi(value->string);
+    else
+      flow->icmp_type_code = value->int_num;
+    break;
+  case EXPORTER_IPV4_ADDRESS: {
+    u_int32_t ip;
 
-      if (value->int_num != 0)
-        ip = value->int_num;
-      else if (value->string != NULL) {
-        /* Format: a.b.c.d, possibly overrides NPROBE_IPV4_ADDRESS */
-        ip = ntohl(inet_addr(value->string));
-      } else
-        ip = 0;
+    if (value->int_num != 0)
+      ip = value->int_num;
+    else if (value->string != NULL) {
+      /* Format: a.b.c.d, possibly overrides NPROBE_IPV4_ADDRESS */
+      ip = ntohl(inet_addr(value->string));
+    } else
+      ip = 0;
 
-      if (ip) {
-        flow->exporter_device_ip = ip;
+    if (ip) {
+      flow->exporter_device_ip = ip;
 
-        if (ntop->getPrefs()->is_edr_mode()) {
-          char buf[32], ipb[24];
-          std::unordered_map<u_int32_t, bool>::iterator it =
-              cloud_flow_exporters.find(ip);
+      if (ntop->getPrefs()->is_edr_mode()) {
+	char buf[32], ipb[24];
+	std::unordered_map<u_int32_t, bool>::iterator it =
+	  cloud_flow_exporters.find(ip);
 
-          if (it == cloud_flow_exporters.end()) {
-            cloud_flow_exporters[ip] = true;
-            snprintf(buf, sizeof(buf), "%s",
-                     Utils::intoaV4(ip, ipb, sizeof(ipb)));
-            ntop->addLocalCloudAddress(buf);
+	if (it == cloud_flow_exporters.end()) {
+	  cloud_flow_exporters[ip] = true;
+	  snprintf(buf, sizeof(buf), "%s",
+		   Utils::intoaV4(ip, ipb, sizeof(ipb)));
+	  ntop->addLocalCloudAddress(buf);
 
-            /* Re-evaluate IPVx_SRC_ADDR/IPVx_DST_ADDR */
-            flow->src_ip.checkIP();
-            flow->dst_ip.checkIP();
-          }
-        }
+	  /* Re-evaluate IPVx_SRC_ADDR/IPVx_DST_ADDR */
+	  flow->src_ip.checkIP();
+	  flow->dst_ip.checkIP();
+	}
       }
-    } break;
-    case EXPORTER_IPV6_ADDRESS:
-      if (value->string != NULL && strlen(value->string) > 0)
-        inet_pton(AF_INET6, value->string, &flow->exporter_device_ipv6);
-      break;
-    case FLOW_END_REASON:
-      if (value->string) flow->setEndReason(value->string);
-      break;
-    case TOTAL_FLOWS_EXP:
-      /*
-        if(value->string != NULL)
-        total_flows_exp = atol(value->string);
-        else
-        total_flows_exp = value->int_num;
-        ntop->getTrace()->traceEvent(TRACE_INFO, "Total Exported Flows %u",
-        total_flows_exp);
-      */
-      break;
-    case INPUT_SNMP:
-      flow->inIndex = value->int_num;
-      break;
-    case OUTPUT_SNMP:
-      flow->outIndex = value->int_num;
-      break;
-    case OBSERVATION_POINT_ID:
-      flow->observationPointId = value->int_num;
-      break;
-    case POST_NAT_SRC_IPV4_ADDR:
-      /* Alwais set src_ip_addr_post_nat, however switch the src_ip only if
-       * preference is set*/
-      if (value->string) {
-        IpAddress tmp;
-        tmp.set(value->string);
-        if (!tmp.isEmpty()) {
-          flow->setPostNATSrcIp(tmp.get_ipv4());
-        }
-        if (ntop->getPrefs()->do_override_src_with_post_nat_src()) {
-          if (!tmp.isEmpty()) {
-            flow->src_ip.set((char*)value->string);
-          }
-        }
-      } else if (value->int_num) {
-        if (ntop->getPrefs()->do_override_src_with_post_nat_src()) {
-          flow->src_ip.set(ntohl(value->int_num));
-        }
-        flow->setPostNATSrcIp(ntohl(value->int_num));
+    }
+  } break;
+  case EXPORTER_IPV6_ADDRESS:
+    if (value->string != NULL && strlen(value->string) > 0)
+      inet_pton(AF_INET6, value->string, &flow->exporter_device_ipv6);
+    break;
+  case FLOW_END_REASON:
+    if (value->string) flow->setEndReason(value->string);
+    break;
+  case TOTAL_FLOWS_EXP:
+    /*
+      if(value->string != NULL)
+      total_flows_exp = atol(value->string);
+      else
+      total_flows_exp = value->int_num;
+      ntop->getTrace()->traceEvent(TRACE_INFO, "Total Exported Flows %u",
+      total_flows_exp);
+    */
+    break;
+  case INPUT_SNMP:
+    flow->inIndex = value->int_num;
+    break;
+  case OUTPUT_SNMP:
+    flow->outIndex = value->int_num;
+    break;
+  case OBSERVATION_POINT_ID:
+    flow->observationPointId = value->int_num;
+    break;
+  case POST_NAT_SRC_IPV4_ADDR:
+    /* Alwais set src_ip_addr_post_nat, however switch the src_ip only if
+     * preference is set*/
+    if (value->string) {
+      IpAddress tmp;
+      tmp.set(value->string);
+      if (!tmp.isEmpty()) {
+	flow->setPostNATSrcIp(tmp.get_ipv4());
       }
-      break;
-    case POST_NAT_DST_IPV4_ADDR:
-      /* Alwais set dst_ip_addr_post_nat, however switch the dst_ip only if
-       * preference is set*/
-      if (value->string) {
-        IpAddress tmp;
-        tmp.set(value->string);
-        if (!tmp.isEmpty()) {
-          flow->setPostNATDstIp(tmp.get_ipv4());
-        }
-        if (ntop->getPrefs()->do_override_dst_with_post_nat_dst()) {
-          if (!tmp.isEmpty()) {
-            flow->dst_ip.set((char*)value->string);
-          }
-        }
-      } else if (value->int_num) {
-        if (ntop->getPrefs()->do_override_dst_with_post_nat_dst()) {
-          flow->dst_ip.set(ntohl(value->int_num));
-        }
-        flow->setPostNATDstIp(ntohl(value->int_num));
+      if (ntop->getPrefs()->do_override_src_with_post_nat_src()) {
+	if (!tmp.isEmpty()) {
+	  flow->src_ip.set((char*)value->string);
+	}
       }
-      break;
-    case POST_NAT_SRC_TRANSPORT_PORT:
-      if (ntop->getPrefs()->do_override_src_with_post_nat_src() &&
-          (value->int_num != 0))
-        flow->src_port = htons((u_int16_t)value->int_num);
-      if (value->int_num != 0)
-        flow->setPostNATSrcPort(htons((u_int16_t)value->int_num));
-      break;
-    case POST_NAT_DST_TRANSPORT_PORT:
-      if (ntop->getPrefs()->do_override_dst_with_post_nat_dst() &&
-          (value->int_num != 0))
-        flow->dst_port = htons((u_int16_t)value->int_num);
-      if (value->int_num != 0)
-        flow->setPostNATDstPort(htons((u_int16_t)value->int_num));
-      break;
-    case INGRESS_VRFID:
-      flow->vrfId = value->int_num;
-      break;
-    case IPV4_SRC_MASK:
-    case IPV4_DST_MASK:
-      if (value->int_num != 0) return false;
-      break;
-    case IPV4_NEXT_HOP:
-    case IPV6_NEXT_HOP:
-      if (flow->getNextHop()->isEmpty()) {
-        IpAddress a;
+    } else if (value->int_num) {
+      if (ntop->getPrefs()->do_override_src_with_post_nat_src()) {
+	flow->src_ip.set(ntohl(value->int_num));
+      }
+      flow->setPostNATSrcIp(ntohl(value->int_num));
+    }
+    break;
+  case POST_NAT_DST_IPV4_ADDR:
+    /* Alwais set dst_ip_addr_post_nat, however switch the dst_ip only if
+     * preference is set*/
+    if (value->string) {
+      IpAddress tmp;
+      tmp.set(value->string);
+      if (!tmp.isEmpty()) {
+	flow->setPostNATDstIp(tmp.get_ipv4());
+      }
+      if (ntop->getPrefs()->do_override_dst_with_post_nat_dst()) {
+	if (!tmp.isEmpty()) {
+	  flow->dst_ip.set((char*)value->string);
+	}
+      }
+    } else if (value->int_num) {
+      if (ntop->getPrefs()->do_override_dst_with_post_nat_dst()) {
+	flow->dst_ip.set(ntohl(value->int_num));
+      }
+      flow->setPostNATDstIp(ntohl(value->int_num));
+    }
+    break;
+  case POST_NAT_SRC_TRANSPORT_PORT:
+    if (ntop->getPrefs()->do_override_src_with_post_nat_src() &&
+	(value->int_num != 0))
+      flow->src_port = htons((u_int16_t)value->int_num);
+    if (value->int_num != 0)
+      flow->setPostNATSrcPort(htons((u_int16_t)value->int_num));
+    break;
+  case POST_NAT_DST_TRANSPORT_PORT:
+    if (ntop->getPrefs()->do_override_dst_with_post_nat_dst() &&
+	(value->int_num != 0))
+      flow->dst_port = htons((u_int16_t)value->int_num);
+    if (value->int_num != 0)
+      flow->setPostNATDstPort(htons((u_int16_t)value->int_num));
+    break;
+  case INGRESS_VRFID:
+    flow->vrfId = value->int_num;
+    break;
+  case IPV4_SRC_MASK:
+  case IPV4_DST_MASK:
+    if (value->int_num != 0) return false;
+    break;
+  case IPV4_NEXT_HOP:
+  case IPV6_NEXT_HOP:
+    if (flow->getNextHop()->isEmpty()) {
+      IpAddress a;
 
-        if (value->string)
-          a.set((char*)value->string);
-        else
-          a.set(ntohl(value->int_num));
+      if (value->string)
+	a.set((char*)value->string);
+      else
+	a.set(ntohl(value->int_num));
 
-        flow->setNextHop(&a);
-      }
-      break;
-    case SRC_AS:
-      flow->src_as = value->int_num;
-      break;
-    case DST_AS:
-      flow->dst_as = value->int_num;
-      break;
-    case BGP_NEXT_ADJACENT_ASN:
-      flow->next_adjacent_as = value->int_num;
-      break;
-    case BGP_PREV_ADJACENT_ASN:
-      flow->prev_adjacent_as = value->int_num;
-      break;
-    case WLAN_SSID:
-      if (value->string) flow->setWLANSSID(value->string);
-      break;
-    case WTP_MAC_ADDRESS:
-      if (value->string) flow->setWTPMACAddress(value->string);
-      break;
-    case L7_DETAILS:
-      if (value->string) flow->setL7JSON(value->string);
-      break;
-    default:
-      ntop->getTrace()->traceEvent(TRACE_INFO,
-                                   "Skipping no-PEN flow fieldId %u", field);
-      return false;
+      flow->setNextHop(&a);
+    }
+    break;
+  case SRC_AS:
+    flow->src_as = value->int_num;
+    break;
+  case DST_AS:
+    flow->dst_as = value->int_num;
+    break;
+  case BGP_NEXT_ADJACENT_ASN:
+    flow->next_adjacent_as = value->int_num;
+    break;
+  case BGP_PREV_ADJACENT_ASN:
+    flow->prev_adjacent_as = value->int_num;
+    break;
+  case WLAN_SSID:
+    if (value->string) flow->setWLANSSID(value->string);
+    break;
+  case WTP_MAC_ADDRESS:
+    if (value->string) flow->setWTPMACAddress(value->string);
+    break;
+  case L7_DETAILS:
+    if (value->string) flow->setL7JSON(value->string);
+    break;
+  default:
+    ntop->getTrace()->traceEvent(TRACE_INFO,
+				 "Skipping no-PEN flow fieldId %u", field);
+    return false;
   }
 
   return true;
@@ -1173,6 +1174,13 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow* const flow,
         flow->vlan_id = vlan_id;
       }
       break;
+      
+     case BGP_INFO:
+       if (value->string && (value->string[0] != '\0')) {
+	 // ntop->getTrace()->traceEvent(TRACE_NORMAL, "** %s", value->string);
+	flow->setBGPInfo(value->string);
+       }
+      break;    
 
     case L7_PROTO_NAME:
       break;

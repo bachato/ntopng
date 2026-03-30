@@ -80,7 +80,8 @@ typedef struct {
 typedef struct {
   u_int32_t prevAdjacentAS, nextAdjacentAS;
   u_int32_t vrfId;
-
+  char *bgpInfo;
+  
   struct {
     char* wlan_ssid;
     u_int8_t wtp_mac_address[6];
@@ -117,10 +118,9 @@ class Flow : public GenericHashEntry {
   /* Data collected from nProbe */
   std::string l7_json;
   ICMPinfo* icmp_info;
-  char*
-      category_list_name_shared_pointer; /* NOTE: this is a pointer handled by
-                                            Ntop::getPersistentCustomListNameById()
-                                            and it MUST NOT BE FREED */
+  char* category_list_name_shared_pointer; /* NOTE: this is a pointer handled by
+					      Ntop::getPersistentCustomListNameById()
+					      and it MUST NOT BE FREED */
   ndpi_confidence_t ndpi_confidence;
   ndpi_protocol_category_t flow_category;
   ndpi_protocol_breed_t flow_breed;
@@ -1590,6 +1590,8 @@ class Flow : public GenericHashEntry {
   void getVerdictInfo(ndpi_serializer* serializer);
   void getTCPFlagsAnalysis(ndpi_serializer* serializer);
   void setWLANInfo(char* wlan_ssid, u_int8_t* wtp_mac_address);
+  void setBGPInfo(char* bgp_info);
+  char* getBGPInfo() { return((collection && collection->bgpInfo) ? collection->bgpInfo : (char*)""); }
   char* getWLANSSID() {
     return (collection ? collection->wifi.wlan_ssid : NULL);
   };
