@@ -43,6 +43,8 @@
     <div class="notes bg-light border mt-3">
       <b>{{ _i18n('notes') }}</b>
       <ul>
+        <li><p class="mb-1">{{ _i18n('manage_configurations.restart_required') }}</p></li>
+        <li><p class="mb-1">{{ _i18n('manage_configurations.clean_installation') }}</p></li>
         <li><p class="mb-1">{{ _i18n('manage_configurations.snmp_config_moved') }}</p></li>
         <li><p class="mb-1">{{ _i18n('manage_configurations.pool_import_doc') }}</p></li>
       </ul>
