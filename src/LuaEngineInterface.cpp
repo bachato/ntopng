@@ -2342,7 +2342,6 @@ static int ntop_get_interface_as_list(lua_State* vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
   curr_iface->getASList(vm);
-  if (p) delete (p);
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
