@@ -96,10 +96,12 @@ end
 
 -- @brief Ends a pool transaction.
 function host_pools:end_transaction()
-   -- Perform end-of-transaction operations. Basically all the operations
-   -- that are needed when doing a _persist
-   -- Reload pools
-    ntop.reloadHostPools()
+    if self.transaction_started then
+        -- Perform end-of-transaction operations. Basically all the operations
+        -- that are needed when doing a _persist
+        -- Reload pools
+        ntop.reloadHostPools()
+    end
 
     self.transaction_started = nil
 end
