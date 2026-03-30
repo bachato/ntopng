@@ -156,7 +156,7 @@ const types = {
     percentage_no_limit: {
         id: "percentage_no_limit",
         um: ["%"],
-        step: 101,
+        step: null,
         decimal: 1,
         scale_values: null,
         absolute_value: true,
@@ -244,7 +244,7 @@ function getFormatter(type, absoluteValue, scaleFactorIndex, label) {
         if (type == types.no_formatting.id) {
             return value;
         }
-        if (typeOptions.scale_values != null) {
+        if (typeOptions.scale_values) {
             value *= typeOptions.scale_values;
         }
         let negativeValue = value < 0;
@@ -271,9 +271,11 @@ function getFormatter(type, absoluteValue, scaleFactorIndex, label) {
         let measures = typeOptions.um;
         let i = 0;
 
-        while ((value >= step && i < measures.length && !scaleFactorIndex) || (scaleFactorIndex != null && i < scaleFactorIndex)) {
-            value = value / step;
-            i += 1;
+        if (step) {
+            while ((value >= step && i < measures.length && !scaleFactorIndex) || (scaleFactorIndex != null && i < scaleFactorIndex)) {
+                value = value / step;
+                i += 1;
+            }
         }
 
         if (decimal != null && decimal > 0) {
