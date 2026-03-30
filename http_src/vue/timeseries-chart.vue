@@ -483,6 +483,29 @@ const onZoomed = function (minDate, maxDate) {
     emit('zoom', new_epoch_status);
 }
 
+// Used to redraw the legend
+function clampDygraphLegend() {
+    if (!legend.value) return;
+
+    const observer = new MutationObserver(() => {
+        debugger;
+        const rect = legend.value.getBoundingClientRect();
+        const margin = 8;
+
+        if (rect.bottom > window.innerHeight) {
+            const overflow = rect.bottom - window.innerHeight;
+            const newTop = Math.max(margin, parseFloat(legend.value.style.top) - overflow - margin);
+            legend.value.style.top = newTop + 'px';
+        }
+
+        if (rect.top < margin) {
+            legend.value.style.top = margin + 'px';
+        }
+    });
+
+    observer.observe(legend.value, { attributes: true, attributeFilter: ['style'] });
+}
+
 /* *************************************************** */
 
 /** 
@@ -492,6 +515,8 @@ const onZoomed = function (minDate, maxDate) {
 onMounted(async () => {
     await init();
     ntopng_sync.ready(props.id);
+    await nextTick();
+    clampDygraphLegend();
 });
 
 /* *************************************************** */
