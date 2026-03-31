@@ -47,7 +47,7 @@ local function formatInterfaceData(exporter_ip, new_ports_list, res, uuid_list, 
          local role = nil
 
          -- Resolve interface name from exporter IP and interface ID
-         local interface_name = format_portidx_name(exporter_ip, tostring(id), true)
+         local interface_name = format_portidx_name(exporter_ip, tonumber(id), true)
 
          -- Resolve exporter display name
          local exporter_name = getProbeName(exporter_ip, true, true, false)
