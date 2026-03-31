@@ -127,7 +127,7 @@ const map_table_def_columns = (columns) => {
       "ifindex": (value, row) => {
          get_notes(value);
          const snmp_interface_url = `${snmp_interface_details_url}ip=${get_ip_from_url()}&page=config&snmp_port_idx=${value}&ifid=${props.context.ifid}`
-         if (row.snmp_interface_available)
+         if (row.snmp_interface_available && props.context.isAdministrator)
             return `<a href=${snmp_interface_url}>${value}</i></a>`
          else
             return value
@@ -174,7 +174,7 @@ const map_table_def_columns = (columns) => {
             jump_to_snmp: props.context.isSNMPAvailable,
             jump_to_stats: true,
             timeseries: props.context.showTimeseries,
-            configuration: true,
+            configuration: props.context.isAdministrator,
          };
          c.button_def_array.forEach((b) => {
             b.f_map_class = (current_class, row) => {

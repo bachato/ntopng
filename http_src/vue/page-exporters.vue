@@ -269,7 +269,7 @@ const map_table_def_columns = (columns) => {
             const visible_dict = {
                 live_hosts: true,
                 live_flows: true,
-                configuration: true,
+                configuration: props.context.isAdministrator,
                 timeseries: props.context.showTimeseries
             };
             c.button_def_array.forEach((b) => {

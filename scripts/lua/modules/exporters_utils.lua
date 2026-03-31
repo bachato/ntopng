@@ -471,6 +471,9 @@ end
 -- @return boolean true if SNMP data is available, false otherwise
 --
 function exporters_utils.isSNMPAvailable(device_ip)
+   if not isAdministrator() then
+      return false
+   end
    -- Ensure the device IP is valid and not empty
    if not isEmptyString(device_ip) then
       local snmp_cached_dev = require "snmp_cached_dev"

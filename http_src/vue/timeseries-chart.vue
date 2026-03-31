@@ -488,7 +488,6 @@ function clampDygraphLegend() {
     if (!legend.value) return;
 
     const observer = new MutationObserver(() => {
-        debugger;
         const rect = legend.value.getBoundingClientRect();
         const margin = 8;
 
