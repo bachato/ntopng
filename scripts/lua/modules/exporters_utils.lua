@@ -39,7 +39,7 @@ local exporters_utils = {}
 -- @param uuid_list table Contains probe_source_id, exporter_source_id and ifid
 -- @param add_role_to_interfaces boolean Whether to enrich interfaces with SNMP role
 --
-local function formatInterfaceData(exporter_ip, new_ports_list, res, uuid_list, add_role_to_interfaces)
+local function formatInterfaceData(exporter_ip, new_ports_list, res, uuid_list, add_role_to_interfaces, filter_by_role)
    -- Iterate over all port groups
    for _, v in pairs(new_ports_list or {}) do
       -- Sort interfaces by total bytes (descending)
@@ -55,6 +55,11 @@ local function formatInterfaceData(exporter_ip, new_ports_list, res, uuid_list, 
          -- Optionally retrieve interface role via SNMP
          if (add_role_to_interfaces) then
             role = snmp_utils.get_snmp_interface_role(exporter_ip, id)
+            if not isEmptyString(filter_by_role) then
+               if (not role) or (role.value ~= filter_by_role) then
+                  goto continue
+               end
+            end
          end
 
          -- Append formatted interface entry
@@ -71,6 +76,7 @@ local function formatInterfaceData(exporter_ip, new_ports_list, res, uuid_list, 
             total_bytes = info["bytes.total"],
             role = role
          }
+      ::continue::
       end
    end
 end
@@ -85,7 +91,7 @@ end
 -- @param add_role_to_interfaces boolean Whether to add SNMP interface roles
 -- @return table List of exporter interfaces
 --
-function exporters_utils.getAllInterfacesList(add_role_to_interfaces)
+function exporters_utils.getAllInterfacesList(add_role_to_interfaces, filter_by_role)
    local list = {}
 
    -- Global interface statistics
@@ -108,7 +114,7 @@ function exporters_utils.getAllInterfacesList(add_role_to_interfaces)
                   probe_source_id = source_id,
                   exporter_source_id = source_id,
                   ifid = ifid
-               }, add_role_to_interfaces)
+               }, add_role_to_interfaces, filter_by_role)
             else
                -- Collector probe (NetFlow / IPFIX / sFlow)
                for exporter_ip, exporter_info in pairsByKeys(probe_info.exporters or {}) do
@@ -118,7 +124,7 @@ function exporters_utils.getAllInterfacesList(add_role_to_interfaces)
                      probe_source_id = source_id,
                      exporter_source_id = exporter_info.unique_source_id,
                      ifid = ifid
-                  }, add_role_to_interfaces)
+                  }, add_role_to_interfaces, filter_by_role)
                end
             end
          end

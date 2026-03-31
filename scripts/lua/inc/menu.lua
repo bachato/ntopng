@@ -739,7 +739,7 @@ page_utils.add_menubar_section({
 -- Rules & Policies
 page_utils.add_menubar_section({
     section = page_utils.menu_sections.policies,
-    hidden = infrastructure_view,
+    hidden = infrastructure_view or not is_admin,
     entries = {
         {
             entry = page_utils.menu_entries.access_control_list,
@@ -885,10 +885,14 @@ if not ntop.isEnterpriseM() or has_help_enabled then
         entries = {
             {entry = page_utils.menu_entries.about, url = '/lua/about.lua'}, {
                 entry = page_utils.menu_entries.license,
-                hidden = info["pro.forced_community"],
+                hidden = info["pro.forced_community"] or (not is_admin),
                 url = '/lua/license.lua'
             },
-            {entry = page_utils.menu_entries.limits, url = '/lua/limits.lua'},
+            {
+                entry = page_utils.menu_entries.limits, 
+                hidden = (not is_admin), 
+                url = '/lua/limits.lua'
+            },
             {
                 entry = page_utils.menu_entries.blog,
                 url = 'http://blog.ntop.org/'
