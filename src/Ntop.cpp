@@ -5040,6 +5040,9 @@ void Ntop::initPing() {
   if (!can_send_icmp) return;
 
   if (ntop->getPrefs()->get_active_monitoring_pref()) {
+
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Initializing Continuous Ping");
+
     cping = new (std::nothrow) ContinuousPing();
 
     /* Default */

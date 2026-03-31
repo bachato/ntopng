@@ -74,6 +74,7 @@ ContinuousPing::ContinuousPing() {
   }
 
   /* Create pingers for all interfaces with IP */
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Detecting Network Interfaces to be used for Continuous Ping");
   if (Utils::ntop_findalldevs(&devpointer) == 0) {
     for (cur = devpointer; cur; cur = cur->next) {
       if (cur->name && strcmp(cur->name, "lo") != 0) {
@@ -91,6 +92,8 @@ ContinuousPing::ContinuousPing() {
           if (Utils::readIPv4(cur->name) ||
               Utils::readIPv6(cur->name, &sin6.sin6_addr)) {
             Ping* pinger;
+
+            ntop->getTrace()->traceEvent(TRACE_NORMAL, "Enabling Continuous Ping on %s", cur->name);
 
             /* Create pinger for the interface */
             try {
