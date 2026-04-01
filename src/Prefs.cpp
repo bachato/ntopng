@@ -93,6 +93,7 @@ Prefs::Prefs(Ntop* _ntop) {
   auto_assigned_pool_id = NO_HOST_POOL_ID;
   default_l7policy = PASS_ALL_SHAPER_ID;
   use_mac_in_flow_key = false;
+  use_host_pools_for_local = false;
   fingerprint_stats = false;
   ciphers_list = NULL;
   device_protocol_policies_enabled = false, enable_vlan_trunk_bridge = false;
@@ -983,6 +984,8 @@ void Prefs::reloadPrefsFromRedis() {
   enable_sql_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_SQL_LOG, false);
   use_mac_in_flow_key =
       getDefaultPrefsValue(CONST_PREFS_USE_MAC_IN_FLOW_KEY, false);
+  use_host_pools_for_local =
+      getDefaultBoolPrefsValue(CONST_PREFS_USE_HOST_POOLS_FOR_LOCAL, false);
   fingerprint_stats =
       getDefaultPrefsValue(CONST_PREFS_FINGERPRINT_STATS, false);
   // vulnerability scan preferences
@@ -3099,6 +3102,8 @@ void Prefs::lua(lua_State* vm) {
                             enable_flow_device_port_rrd_creation);
 
   lua_push_bool_table_entry(vm, "are_alerts_enabled", !disable_alerts);
+  lua_push_bool_table_entry(vm, "use_host_pools_for_local",
+                            use_host_pools_for_local);
   lua_push_bool_table_entry(vm, "is_arp_matrix_generation_enabled",
                             is_arp_matrix_generation_enabled());
   lua_push_bool_table_entry(vm, "is_users_login_enabled", enable_users_login);

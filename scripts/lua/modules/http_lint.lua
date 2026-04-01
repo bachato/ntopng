@@ -2435,6 +2435,7 @@ local known_parameters = {
    ["toggle_src_with_post_nat_src"] = validateBool,
    ["toggle_behaviour_analysis"] = validateBool,
    ["toggle_use_mac_in_flow_key"] = validateBool,
+   ["toggle_use_host_pools_for_local"] = validateBool,
    ["toggle_fingerprint_stats"] = validateBool,
    ["toggle_starttls"] = validateBool,
    ["toggle_dump_pcap_to_clickhouse"] = validateBool,

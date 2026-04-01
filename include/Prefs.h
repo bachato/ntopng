@@ -231,6 +231,7 @@ class Prefs {
   bool print_version, print_version_json;
   bool snmp_polling;
   bool active_monitoring, network_discovery, starttls;
+  bool use_host_pools_for_local;
   bool dump_pcap_to_clickhouse; /* Dump pcap-interface flows to ClickHouse */
   bool query_performance_log;
 
@@ -870,6 +871,7 @@ class Prefs {
   ASNConfiguration* getRemoteASN() { return (remote_asn); }
 
   inline bool useMacAddressInFlowKey() { return (use_mac_in_flow_key); }
+  inline bool useHostPoolsForLocal() const { return use_host_pools_for_local; }
   inline bool areFingerprintStatsEnabled() { return (fingerprint_stats); }
   inline bool doReforgeTimestamps() { return (do_reforge_timestamps); }
   inline void enableVLANCloudToExporters() {

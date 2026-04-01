@@ -459,6 +459,10 @@ local menu_subpages = {{
             title = i18n("prefs.toggle_use_mac_in_flow_key_title"),
             description = i18n("prefs.toggle_use_mac_in_flow_key_description")
         },
+        toggle_use_host_pools_for_local = {
+            title = i18n("prefs.toggle_use_host_pools_for_local_title"),
+            description = i18n("prefs.toggle_use_host_pools_for_local_description")
+        },
         topk_heuristic_precision = {
             title = i18n("prefs.topk_heuristic_precision_title"),
             description = i18n("prefs.topk_heuristic_precision_description")

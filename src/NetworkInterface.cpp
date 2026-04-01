@@ -4396,9 +4396,22 @@ void NetworkInterface::findFlowHosts(int32_t iface_idx, u_int16_t vlan_id,
       return;
     }
 
-    if (_src_ip &&
-        (_src_ip->isLocalHost() || _src_ip->isLocalInterfaceAddress() ||
-         ntop->isInLocalASN(_src_ip))) {
+    bool src_is_local =
+        _src_ip && (_src_ip->isLocalHost() ||
+                    _src_ip->isLocalInterfaceAddress() ||
+                    ntop->isInLocalASN(_src_ip));
+
+    if (!src_is_local && _src_ip &&
+        ntop->getPrefs()->useHostPoolsForLocal() && host_pools) {
+      u_int16_t src_pool_id;
+      ndpi_patricia_node_t* src_node;
+      if (host_pools->findIpPool(_src_ip, vlan_id, &src_pool_id, &src_node) &&
+          src_pool_id != NO_HOST_POOL_ID &&
+          src_pool_id != DROP_HOST_POOL_ID)
+        src_is_local = true;
+    }
+
+    if (src_is_local) {
       INTERFACE_PROFILING_SECTION_ENTER(
           "NetworkInterface::findFlowHosts: new LocalHost", 4);
       (*src) = new (std::nothrow) LocalHost(this, iface_idx, src_mac, vlan_id,
@@ -4447,9 +4460,22 @@ void NetworkInterface::findFlowHosts(int32_t iface_idx, u_int16_t vlan_id,
       return;
     }
 
-    if (_dst_ip &&
-        (_dst_ip->isLocalHost() || _dst_ip->isLocalInterfaceAddress() ||
-         ntop->isInLocalASN(_dst_ip))) {
+    bool dst_is_local =
+        _dst_ip && (_dst_ip->isLocalHost() ||
+                    _dst_ip->isLocalInterfaceAddress() ||
+                    ntop->isInLocalASN(_dst_ip));
+
+    if (!dst_is_local && _dst_ip &&
+        ntop->getPrefs()->useHostPoolsForLocal() && host_pools) {
+      u_int16_t dst_pool_id;
+      ndpi_patricia_node_t* dst_node;
+      if (host_pools->findIpPool(_dst_ip, vlan_id, &dst_pool_id, &dst_node) &&
+          dst_pool_id != NO_HOST_POOL_ID &&
+          dst_pool_id != DROP_HOST_POOL_ID)
+        dst_is_local = true;
+    }
+
+    if (dst_is_local) {
       INTERFACE_PROFILING_SECTION_ENTER(
           "NetworkInterface::findFlowHosts: new LocalHost", 4);
       (*dst) = new (std::nothrow) LocalHost(this, iface_idx, dst_mac, vlan_id,

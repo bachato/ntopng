@@ -953,6 +953,12 @@ if auth.has_capability(auth.capabilities.preferences) then
                 default = "0",
                 pref = "use_mac_in_flow_key"
             })
+
+            prefsToggleButton(subpage_active, {
+                field = "toggle_use_host_pools_for_local",
+                default = "0",
+                pref = "use_host_pools_for_local"
+            })
         end
 
         print('<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n("prefs.flow_table") ..
