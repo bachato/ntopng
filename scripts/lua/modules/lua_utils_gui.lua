@@ -986,22 +986,15 @@ local _exporters_ports_names = {}
 --         short_version: boolean, long formatting version (e.g. flow info) or short version (e.g. dropdown menu)
 function format_portidx_name(device_ip, portidx, short_version)
    local idx_name = portidx
-   local cached_val
 
    if tonumber(device_ip) then
       device_ip = ntop.inet_ntoa(device_ip)
    end
 
-   cached_val = cache_utils.getifname(device_ip, portidx)
+   local cached_val = cache_utils.getifname(device_ip, portidx)
 
    if (cached_val ~= nil) then
       local num_value = tonumber(cached_val)
-      
-      if(num_value and (num_value == tonumber(portidx))) then
-         -- With integer it seems there is some problem when caching the value
-         -- returning values like 6.00000 instead of 6
-         return(portidx)
-      end
       
       if(short_version) then
 	 cached_val = shortenString(cached_val, 26)
