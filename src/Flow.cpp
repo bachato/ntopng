@@ -3500,10 +3500,10 @@ void Flow::lua(lua_State* vm, AddressTree* allowed_nets,
 
     if (collection) {
       char *bgp_info = getBGPInfo();
-      
+
       if(bgp_info)
 	lua_push_str_table_entry(vm, "bgp_info", bgp_info);
-      
+
       if(collection->wifi.wlan_ssid) {
 	char mac_buf[20];
 
@@ -7162,6 +7162,9 @@ void Flow::dissectMDNS(u_int8_t* payload, u_int16_t payload_len) {
           while ((off < data_len) && ((off + base_off) < payload_len)) {
             u_int8_t txt_len = (u_int8_t)txt[off];
 
+	    /* Ensure we don't read the length byte itself out of bounds */
+	    if (off + 1 > data_len) break;
+
             if (txt_len < data_len) {
               txt_len = min_val(data_len - off, txt_len);
 
@@ -7173,7 +7176,7 @@ void Flow::dissectMDNS(u_int8_t* payload, u_int16_t payload_len) {
 
                 if ((base_off + off + txt_buf_len) < payload_len) break;
 		txt_buf_len = ndpi_min(txt_buf_len, sizeof(txt_buf)-1);
-		
+
                 strncpy(txt_buf, &txt[off], txt_buf_len);
                 txt_buf[txt_buf_len] = '\0';
                 off += txt_len;
@@ -9098,7 +9101,7 @@ char* Flow::getEndReason() { return (end_reason); }
 
 void Flow::setBGPInfo(char* bgp_info) {
   if(!collection) allocateCollection();
-  
+
   if(collection) {
     if(collection->bgpInfo != NULL) free(collection->bgpInfo);
     collection->bgpInfo = strdup(bgp_info);
