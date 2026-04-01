@@ -6907,19 +6907,28 @@ void Flow::dissectHTTP(bool src2dst_direction, char* payload,
         }
 
         if ((ua = ndpi_strnstr(payload, "User-Agent:", payload_len)) != NULL) {
-          char buf[128];
-          u_int i;
+	  char buf[128];
+	  u_int i;
 
-          ua = &ua[11];
-          while (ua[0] == ' ') ua++;
+	  /* 1. Calculate how much actual data is left in the payload after "User-Agent:" */
+	  size_t remaining_len = payload_len - (size_t)(ua - payload);
 
-          for (i = 0;
-               (i < payload_len) && (i < (sizeof(buf) - 1) && (ua[i] != '\r'));
-               i++)
-            buf[i] = ua[i];
+	  ua = &ua[11];
+	  /* 2. Adjust remaining_len after skipping "User-Agent:" and leading spaces */
+	  if (remaining_len > 11) remaining_len -= 11; else remaining_len = 0;
 
-          buf[i] = '\0';
+	  while (remaining_len > 0 && ua[0] == ' ') {
+	    ua++;
+	    remaining_len--;
+	  }
 
+	  /* 3. Ensure we don't read past remaining_len OR write past buf size */
+	  for (i = 0;
+	       (i < remaining_len) && (i < (sizeof(buf) - 1)) && (ua[i] != '\r') && (ua[i] != '\n');
+	       i++)
+	    buf[i] = ua[i];
+
+	  buf[i] = '\0';
 #ifdef DEBUG_UA
           ntop->getTrace()->traceEvent(TRACE_WARNING, "[UA] %s", buf);
 #endif
