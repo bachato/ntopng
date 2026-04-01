@@ -8,6 +8,7 @@ package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 
 require "check_redis_prefs"
 require "ntop_utils"
+local format_utils = require "format_utils"
 local am_utils = require "am_utils"
 local auth = require "auth"
 
