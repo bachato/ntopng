@@ -1839,7 +1839,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                             value = value.exporter_ip .. "_" .. value.interface_id,
                             label = label,
                             show_only_value = value.exporter_ip,
-                            group = ternary(value.role, value.role.name, "")
+                            group = ternary(value.role, value.role.label, "")
                         }
                     end
                 end
