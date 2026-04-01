@@ -133,7 +133,8 @@ else
          selected_item        = selected_item,
          configuration_items  = configuration_items,
          product              = info["product"],
-         csrf                 = ntop.getRandomCSRFValue()
+         csrf                 = ntop.getRandomCSRFValue(),
+         is_nedge             = ntop.isnEdge()
       })
    })
 end

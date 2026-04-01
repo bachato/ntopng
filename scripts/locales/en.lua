@@ -6358,6 +6358,7 @@ local lang = {
     ["pool_import_doc"] = "Pools can be imported through CSV files with the format <ip or mac>,<pool name> (comma, and semicolon and space are allowed as separators).",
     ["restart_request"] = "<b>Restart</b> %{product} to make the changes set effective.",
     ["restart_required"] = "Restart ntopng when importing an entire configuration to make changes effective.",
+    ["nedge_reboot_required"] = "nEdge is automatically rebooted when importing an entire configuration as system is completely reconfigured.",
     ["snmp"] = "SNMP (Devices Only)",
     ["snmp_config_moved"] = "SNMP Configuration import/export can be found in the SNMP Page",
     ["snmp_data"] = "SNMP (Devices & Data)",
