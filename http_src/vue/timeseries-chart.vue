@@ -28,19 +28,19 @@
     <div>
         <template v-if="disable_fixed_height == true">
             <!-- First chart container (active) - no fixed height -->
-            <div class="mb-3 w-100 position-relative" ref="first_chart">
+            <div class="mb-3 w-100 position-relative first-chart" ref="first_chart">
             </div>
             <!-- Second chart container (hidden) - used for smooth transitions -->
-            <div class="mb-3 w-100 d-none position-relative" ref="second_chart">
+            <div class="mb-3 w-100 d-none position-relative second-chart" ref="second_chart">
             </div>
             <!-- Legend display element (hidden by default) -->
             <div class="dygraph-legend" ref="legend" style="display:none;"></div>
         </template>
         <template v-else>
             <!-- Chart containers with fixed minimum height of 320px -->
-            <div class="mb-3 w-100 position-relative" style="min-height:320px;" ref="first_chart">
+            <div class="mb-3 w-100 position-relative first-chart" style="min-height:320px;" ref="first_chart">
             </div>
-            <div class="mb-3 w-100 d-none position-relative" style="min-height:320px;" ref="second_chart">
+            <div class="mb-3 w-100 d-none position-relative second-chart" style="min-height:320px;" ref="second_chart">
             </div>
             <div class="dygraph-legend" ref="legend" style="display:none;"></div>
         </template>
