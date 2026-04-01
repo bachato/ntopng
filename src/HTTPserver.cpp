@@ -2175,7 +2175,7 @@ HTTPserver::HTTPserver(const char* _docs_dir, const char* _scripts_dir) {
   /* (char*)"extra_mime_types", (char*)"" */ /* see mongoose.c */
 
   addHTTPOption("num_threads",
-                ntop->getPrefs()->limitResourcesUsage() ? "3" : "5");
+                ntop->getPrefs()->limitResourcesUsage() ? "3" : "8");
 
   /* Randomize data */
   gettimeofday(&tv, NULL);
