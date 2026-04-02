@@ -431,8 +431,7 @@ end
 
 local function multiQueryPost(queries, url, username, password)
     local query_str = table.concat(queries, ";")
-    local res = ntop.httpPost(url .. "/query", "q=" .. urlencode(query_str), username, password,
-        getInfluxDBQueryTimeout(), true)
+    local res = ntop.httpPost(url .. "/query", "q=" .. urlencode(query_str), { username = username, password = password, timeout = getInfluxDBQueryTimeout(), return_content = true })
 
     if not res then
         local err = "Invalid response for query: " .. query_str
@@ -1987,7 +1986,7 @@ function driver.init(dbname, url, days_retention, username, password, verbose)
         traceError(TRACE_NORMAL, TRACE_CONSOLE, "Checking database " .. dbname .. " ...")
     end
     local query = "SHOW DATABASES"
-    local res = ntop.httpPost(url .. "/query", "q=" .. query, username, password, timeout, true)
+    local res = ntop.httpPost(url .. "/query", "q=" .. query, { username = username, password = password, timeout = timeout, return_content = true })
     local db_found = false
 
     if res and (res.RESPONSE_CODE == 200) and res.CONTENT then
@@ -2016,7 +2015,7 @@ function driver.init(dbname, url, days_retention, username, password, verbose)
         end
         local query = "CREATE DATABASE \"" .. dbname .. "\""
 
-        local res = ntop.httpPost(url .. "/query", "q=" .. query, username, password, timeout, true)
+        local res = ntop.httpPost(url .. "/query", "q=" .. query, { username = username, password = password, timeout = timeout, return_content = true })
         if not res or (res.RESPONSE_CODE ~= 200) then
             local err = i18n("prefs.influxdb_create_error", {
                 db = dbname,
@@ -2040,7 +2039,7 @@ function driver.init(dbname, url, days_retention, username, password, verbose)
         local query = makeRetentionPolicyQuery("ALTER", "autogen", dbname, days_retention)
 
         -- tprint(query)
-        local res = ntop.httpPost(url .. "/query", "q=" .. query, username, password, timeout, true)
+        local res = ntop.httpPost(url .. "/query", "q=" .. query, { username = username, password = password, timeout = timeout, return_content = true })
         if not res or (res.RESPONSE_CODE ~= 200) then
             local warning = i18n("prefs.influxdb_retention_error", {
                 db = dbname,

@@ -8,16 +8,20 @@
 --! @return table (RESPONSE_CODE, CONTENT_TYPE, EFFECTIVE_URL), with additional CONTENT and CONTENT_LEN if return_content is enabled on success, nil otherwise.
 function ntop.httpGet(string url, string username=nil, string password=nil, int timeout=nil, bool return_content=false, bool cookie_auth=false)
 
---! @brief Send an HTTP POST request with url encoded data.
+--! @brief Send an HTTP POST request.
 --! @param url the target URL.
---! @param data the url encoded data to send.
---! @param username for HTTP authentication.
---! @param password for HTTP authentication.
---! @param timeout maximum connection timeout in seconds.
---! @param return_content enable sending response content back to the caller.
---! @param cookie_auth Use basic (default) or cookie (used by ntopng) authentication
+--! @param data the request body to send.
+--! @param params optional table with the following fields:
+--!   username (string, optional): HTTP basic auth username.
+--!   password (string, optional): HTTP basic auth password.
+--!   timeout (number, optional): connection timeout in seconds (default 30).
+--!   return_content (boolean, optional): include response body in result (default false).
+--!   use_cookie_auth (boolean, optional): use cookie-based auth instead of basic (default false).
+--!   bearer (string, optional): Authorization: Bearer token value.
+--!   x_api_key (string, optional): x-api-key header value.
+--!   extra_header (string, optional): raw extra header line (e.g. "Foo: bar").
 --! @return table (RESPONSE_CODE, CONTENT_TYPE, EFFECTIVE_URL), with additional CONTENT and CONTENT_LEN if return_content is enabled on success, nil otherwise.
-function ntop.httpPost(string url, string data, string username=nil, string password=nil, int timeout=nil, bool return_content=false, bool cookie_auth=false)
+function ntop.httpPost(string url, string data, table params=nil)
 
 --! @brief Send an HTTP POST request with json content.
 --! @param username for HTTP authentication. Pass empty string to disable authentication.

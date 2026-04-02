@@ -2359,17 +2359,9 @@ static int progress_callback(void* clientp, double dltotal, double dlnow,
 /* **************************************** */
 
 /* form_data is in format param=value&param1=&value1... */
-bool Utils::httpGetPostPutPatch(lua_State* vm, char* url,
-                                /* NOTE if user_header_token != NULL, username
-                                   AND password are ignored, and vice-versa */
-                                char* username, char* password, char *bearer,
-                                char* user_header_token, int connect_timeout,
-                                int max_duration_timeout, bool return_content,
-                                bool use_cookie_authentication,
-                                HTTPTranferStats* stats, const char* form_data,
-                                char* write_fname, bool follow_redirects,
-                                int ip_version, HttpMethod method,
-                                char* x_api_key, char* extra_header) {
+/* NOTE if user_header_token != NULL, username AND password are ignored, and vice-versa */
+bool Utils::httpGetPostPutPatch(lua_State* vm, char* url, HttpMethod method,
+                                const HttpGetPostOptions& opts) {
   CURL* curl = curl_easy_init();
   FILE* out_f = NULL;
   bool ret = true;
@@ -2389,32 +2381,32 @@ bool Utils::httpGetPostPutPatch(lua_State* vm, char* url,
 
     fillcURLProxy(curl);
 
-    if (stats) memset(stats, 0, sizeof(HTTPTranferStats));
+    if (opts.stats) memset(opts.stats, 0, sizeof(HTTPTranferStats));
     curl_easy_setopt(curl, CURLOPT_URL, url);
 
-    if (user_header_token != NULL) {
+    if (opts.user_header_token != NULL) {
       snprintf(tokenBuffer, sizeof(tokenBuffer), "Authorization: Token %s",
-               user_header_token);
+               opts.user_header_token);
     } else {
-      if (bearer && bearer[0] != '\0') {
+      if (opts.bearer && opts.bearer[0] != '\0') {
 #ifdef CURLAUTH_BEARER
 	curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BEARER);
-	curl_easy_setopt(curl, CURLOPT_XOAUTH2_BEARER, bearer);
+	curl_easy_setopt(curl, CURLOPT_XOAUTH2_BEARER, opts.bearer);
 #else
 	ntop->getTrace()->traceEvent(TRACE_WARNING, "Bearer auth is not supported by curl (%s)", url);
 	return (false);
 #endif
-      } else if (username || password) {
+      } else if (opts.username || opts.password) {
         char auth[64];
 
-        if (use_cookie_authentication) {
+        if (opts.use_cookie_auth) {
           snprintf(auth, sizeof(auth), "user=%s; password=%s",
-                   username ? username : "", password ? password : "");
+                   opts.username ? opts.username : "", opts.password ? opts.password : "");
           curl_easy_setopt(curl, CURLOPT_COOKIE, auth);
         } else {
-          if (username && (username[0] != '\0')) {
-            snprintf(auth, sizeof(auth), "%s:%s", username ? username : "",
-                     password ? password : "");
+          if (opts.username && (opts.username[0] != '\0')) {
+            snprintf(auth, sizeof(auth), "%s:%s",
+                     opts.username ? opts.username : "", opts.password ? opts.password : "");
             curl_easy_setopt(curl, CURLOPT_USERPWD, auth);
             curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_BASIC);
           }
@@ -2438,15 +2430,15 @@ bool Utils::httpGetPostPutPatch(lua_State* vm, char* url,
 #endif
     }
 
-    if (form_data) {
+    if (opts.form_data) {
       /* This is a POST request */
 
       if (method == method_post) curl_easy_setopt(curl, CURLOPT_POST, 1L);
 
-      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, form_data);
-      curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(form_data));
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, opts.form_data);
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(opts.form_data));
 
-      if (form_data[0] == '{' /* JSON */) {
+      if (opts.form_data[0] == '{' /* JSON */) {
         headers = curl_slist_append(headers, "Content-Type: application/json");
 
         if (tokenBuffer[0] != '\0') {
@@ -2461,15 +2453,15 @@ bool Utils::httpGetPostPutPatch(lua_State* vm, char* url,
       used_tokenBuffer = true;
     }
 
-    if (x_api_key != NULL && x_api_key[0] != '\0') {
+    if (opts.x_api_key != NULL && opts.x_api_key[0] != '\0') {
       char x_api_key_header[512];
-      
-      snprintf(x_api_key_header, sizeof(x_api_key_header), "X-API-Key: %s", x_api_key);
+
+      snprintf(x_api_key_header, sizeof(x_api_key_header), "X-API-Key: %s", opts.x_api_key);
       headers = curl_slist_append(headers, x_api_key_header);
     }
 
-    if (extra_header != NULL && extra_header[0] != '\0')
-      headers = curl_slist_append(headers, extra_header);
+    if (opts.extra_header != NULL && opts.extra_header[0] != '\0')
+      headers = curl_slist_append(headers, opts.extra_header);
 
     if (headers != NULL) curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
@@ -2488,18 +2480,18 @@ bool Utils::httpGetPostPutPatch(lua_State* vm, char* url,
         break;
     }
 
-    if (!strncmp(url, "https", 5) && ntop->getPrefs()->do_insecure_tls()) {      
+    if (!strncmp(url, "https", 5) && ntop->getPrefs()->do_insecure_tls()) {
       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
     }
-    
-    if (write_fname) {
-      ntop->fixPath(write_fname);
-      out_f = fopen(write_fname, "wb");
+
+    if (opts.write_fname) {
+      ntop->fixPath(opts.write_fname);
+      out_f = fopen(opts.write_fname, "wb");
 
       if (out_f == NULL) {
         ntop->getTrace()->traceEvent(TRACE_ERROR, "Could not open %s for write",
-                                     write_fname, strerror(errno));
+                                     opts.write_fname, strerror(errno));
         curl_easy_cleanup(curl);
         if (vm) lua_pushnil(vm);
         return (false);
@@ -2518,7 +2510,7 @@ bool Utils::httpGetPostPutPatch(lua_State* vm, char* url,
         curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curl_hdf);
 
         state->vm = vm, state->header_over = 0,
-        state->return_content = return_content;
+        state->return_content = opts.return_content;
       } else {
         ntop->getTrace()->traceEvent(TRACE_WARNING, "Out of memory");
         curl_easy_cleanup(curl);
@@ -2527,29 +2519,29 @@ bool Utils::httpGetPostPutPatch(lua_State* vm, char* url,
       }
     }
 
-    if (follow_redirects) {
+    if (opts.follow_redirects) {
       curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
       curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 5);
     }
 
-    if (ip_version == 4)
+    if (opts.ip_version == 4)
       curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-    else if (ip_version == 6)
+    else if (opts.ip_version == 6)
       curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6);
 
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 
-    if (connect_timeout > 0) {
-      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, connect_timeout);
+    if (opts.connect_timeout > 0) {
+      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, opts.connect_timeout);
 #ifdef CURLOPT_CONNECTTIMEOUT_MS
-      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout * 1000);
+      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, opts.connect_timeout * 1000);
 #endif
     }
 
-    if (max_duration_timeout > 0)
-      curl_easy_setopt(curl, CURLOPT_TIMEOUT, max_duration_timeout);
+    if (opts.max_duration_timeout > 0)
+      curl_easy_setopt(curl, CURLOPT_TIMEOUT, opts.max_duration_timeout);
 
-    if (!form_data) {
+    if (!opts.form_data) {
       /* A GET request, track client connection status */
       memset(&progressState, 0, sizeof(progressState));
       progressState.vm = vm;
@@ -2586,7 +2578,7 @@ bool Utils::httpGetPostPutPatch(lua_State* vm, char* url,
 
     if (curlcode == CURLE_OK) {
       if (vm) {
-        if (return_content && state) {
+        if (opts.return_content && state) {
           lua_push_str_table_entry(vm, "CONTENT", state->outbuf);
           lua_push_uint64_table_entry(vm, "CONTENT_LEN", state->num_bytes);
         }
@@ -2606,7 +2598,7 @@ bool Utils::httpGetPostPutPatch(lua_State* vm, char* url,
     }
 
     if (vm) {
-      if (stats) readCurlStats(curl, stats, vm);
+      if (opts.stats) readCurlStats(curl, opts.stats, vm);
 
       if (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code) ==
           CURLE_OK)
@@ -2621,7 +2613,7 @@ bool Utils::httpGetPostPutPatch(lua_State* vm, char* url,
           CURLE_OK)
         lua_push_str_table_entry(vm, "EFFECTIVE_URL", redirection);
 
-      if (!form_data) {
+      if (!opts.form_data) {
         lua_push_uint64_table_entry(vm, "BYTES_DOWNLOAD",
                                     progressState.bytes.download);
         lua_push_uint64_table_entry(vm, "BYTES_UPLOAD",

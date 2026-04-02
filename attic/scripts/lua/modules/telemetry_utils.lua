@@ -41,7 +41,7 @@ function telemetry_utils.notify(obj)
       local msg = {data = obj, mail = mail, timestamp = os.time()}
       local encoded_msg = json.encode(msg)
 
-      local res = ntop.httpPost(TELEMETRY_URL, encoded_msg, nil, nil, TELEMETRY_TIMEOUT, true)
+      local res = ntop.httpPost(TELEMETRY_URL, encoded_msg, { timeout = TELEMETRY_TIMEOUT, return_content = true })
 
       if res and res["RESPONSE_CODE"] == 200 then
 	 ntop.rpushCache(TELEMETRY_RECORDS_SENT, encoded_msg, TELEMETRY_MAX_NUM_RECORDS)

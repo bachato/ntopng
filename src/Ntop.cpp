@@ -5501,9 +5501,14 @@ bool Ntop::downloadCustomnDPIProtos(char* url, char* dest_file) {
       return (true); /* Fresh file: no need to re-download it */
   }
 
-  bool rc = Utils::httpGetPostPutPatch(NULL, custom_ndpi_protos, NULL, NULL, NULL,
-                                       NULL, 10, 30, false, false, NULL, NULL,
-                                       dest_file, true, 4, method_get);
+  HttpGetPostOptions opts;
+  memset(&opts, 0, sizeof(opts));
+  opts.connect_timeout      = 10;
+  opts.max_duration_timeout = 30;
+  opts.write_fname          = dest_file;
+  opts.follow_redirects     = true;
+  opts.ip_version           = 4;
+  bool rc = Utils::httpGetPostPutPatch(NULL, custom_ndpi_protos, method_get, opts);
 
   if (rc == false) {
     ntop->getTrace()->traceEvent(TRACE_WARNING,

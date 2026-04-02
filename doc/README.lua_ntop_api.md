@@ -504,7 +504,7 @@ These functions let Lua scripts make outbound HTTP requests.
 | Lua call | Params | Returns | Description |
 |----------|--------|---------|-------------|
 | `ntop.httpGet(url [, user, pass, timeout, return_content, no_verify_cert, use_compression, follow_redirects])` | … | string\|table | GET request; returns body or nil |
-| `ntop.httpPost(url, body [, user, pass, timeout, return_content, content_type])` | … | string | POST request |
+| `ntop.httpPost(url, data [, params])` | `data`: request body; `params`: optional table with `username`, `password`, `timeout`, `return_content`, `use_cookie_auth`, `bearer`, `x_api_key`, `extra_header` | table | POST request |
 | `ntop.httpFetch(params_table)` | table | table | Full-featured HTTP fetch with all options |
 | `ntop.httpGetAuthToken(url, token [, timeout, return_content, no_verify_cert])` | … | string | GET with Bearer token |
 | `ntop.httpPostAuthToken(url, token, body [, timeout, content_type])` | … | string | POST with Bearer token |

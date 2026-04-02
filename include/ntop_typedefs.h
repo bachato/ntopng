@@ -1288,6 +1288,25 @@ typedef enum {
   method_patch,
 } HttpMethod;
 
+/* Optional parameters for Utils::httpGetPostPutPatch() */
+struct HttpGetPostOptions {
+  char*             username;
+  char*             password;
+  char*             bearer;
+  char*             user_header_token;
+  int               connect_timeout;
+  int               max_duration_timeout;
+  bool              return_content;
+  bool              use_cookie_auth;
+  HTTPTranferStats* stats;
+  const char*       form_data;
+  char*             write_fname;
+  bool              follow_redirects;
+  int               ip_version;
+  char*             x_api_key;
+  char*             extra_header;
+};
+
 typedef enum {
   all,
   customer_asn,
