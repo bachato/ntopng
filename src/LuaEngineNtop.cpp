@@ -4456,6 +4456,9 @@ static int ntop_run_live_extraction(lua_State* vm) {
     bpf = ntop->preparePcapDownloadFilter(vm, bpf);
 
     if (bpf) {
+
+      Utils::flushHTTPBuffer(vm);
+
       success = timeline.extractLive(c->conn, iface, time_from, time_to, bpf,
                                      timeline_path);
 
