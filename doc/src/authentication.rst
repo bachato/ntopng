@@ -93,7 +93,7 @@ Passkey authentication is a passwordless sign-in method that allows you to log i
 Passkey will only work if selected conditions are met:
 
 - It workly only over a secure TLS 1.2+ connection (except for localhost during development). This means that you must to enable HTTPs on ntopng (-W <https port>).
-- For passkey authentication to work, your HTTP server must use HTTPS with a valid, trusted TLS certificate and modern hash algorithms. The signature algorithm must use the SHA-2 family (e.g., SHA-256). SHA-1 is no longer considered secure and is rejected by modern platforms. A simple way to create a valid certificate suitable with passkey is to use Let's Encrypt that can be uses as described in [this post](https://www.ntop.org/securing-ntopng-with-ssl-and-lets-encrypt/).
+- For passkey authentication to work, your HTTP server must use HTTPS with a valid, trusted TLS certificate and modern hash algorithms. The signature algorithm must use the SHA-2 family (e.g., SHA-256). SHA-1 is no longer considered secure and is rejected by modern platforms. A simple way to create a valid certificate suitable with passkey is to use Let's Encrypt that can be uses as described in this post https://www.ntop.org/securing-ntopng-with-ssl-and-lets-encrypt/.
 
 Similar to MFA, you can enable Passkey in the user's configuration page. As Passkey is a kind of MFA, either you enable MFA or Passkey (not both at the same time).
 
