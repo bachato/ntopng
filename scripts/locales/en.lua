@@ -6282,6 +6282,15 @@ local lang = {
     ["oidc-error"] = "SSO authentication failed. Please try again or use local login.",
     ["sso_login"] = "Login with SSO",
   },
+  ["webauthn"] = {
+     ["passkeys"] = "Passkeys",
+     ["description"] = "Use biometric authentication (Touch ID, Face ID) or hardware security keys as a second factor to protect your account.",
+     ["add_passkey"] = "Add Passkey",
+     ["no_creds"] = "No passkeys registered.",
+     ["remove_passkey"] = "Remove",
+     ["tab_title"] = "Passkey",
+
+  },
   ["mfa"] = {
     ["title"] = "Two-Factor Authentication",
     ["two_factor_auth"] = "Two-Factor Authentication",

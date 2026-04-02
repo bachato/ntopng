@@ -30,7 +30,7 @@ print [[
     <li class="nav-item ]] print(ternary(is_admin, "", "active")) print[["><a class="nav-link ]] print(ternary(is_admin, "", "active")) print[[" href="#change-password-dialog" role="tab" data-bs-toggle="tab"> ]] print(i18n("login.password")) print[[ </a></li>
     <li class="nav-item"><a class="nav-link" href="#user-token-tab" role="tab" data-bs-toggle="tab"> ]] print(i18n("login.auth_token")) print[[ </a></li>
     <li class="nav-item"><a class="nav-link" href="#user-mfa-tab" role="tab" data-bs-toggle="tab"> <i class="fas fa-shield-alt"></i> ]] print(i18n("mfa.tab_title") or "MFA") print[[ </a></li>
-    <li class="nav-item"><a class="nav-link" href="#user-webauthn-tab" role="tab" data-bs-toggle="tab"> <i class="fas fa-fingerprint"></i> ]] print(i18n("webauthn.tab_title") or "Passkeys") print[[ </a></li>
+    <li class="nav-item"><a class="nav-link" href="#user-webauthn-tab" role="tab" data-bs-toggle="tab"> <i class="fas fa-fingerprint"></i> ]] print(i18n("webauthn.tab_title")) print[[ </a></li>
 
   </ul>
   </div>
@@ -334,13 +334,13 @@ print([[
     <!-- Disable MFA confirm (hidden) -->
     <div id="mfa-disable-confirm-section" style="display:none" class="mt-3">
       <hr>
-      <p class="text-warning">]] .. (i18n("mfa.disable_warning") or "Enter your current TOTP code to confirm disabling MFA.") .. [[</p>
+      <p class="text-warning">]] .. (i18n("mfa.disable_warning")) .. [[</p>
       <div class="input-group mb-3" style="max-width:220px">
         <input type="text" id="mfa-disable-code" class="form-control text-center"
                maxlength="6" pattern="[0-9]{6}" placeholder="000000"
                inputmode="numeric" autocomplete="one-time-code"> &nbsp;
         <button id="btn-mfa-disable-confirm" class="btn btn-danger">
-          ]] .. (i18n("mfa.disable_confirm_button") or "Confirm Disable") .. [[
+          ]] .. (i18n("mfa.disable_confirm_button")) .. [[
         </button>
       </div>
     </div>
@@ -348,20 +348,24 @@ print([[
 ]])
 
 -- WebAuthn/Passkeys Tab
-print([[
+print[[
   <div class='tab-pane' id='user-webauthn-tab'>
     <div id="webauthn_alert_placeholder"></div>
     <div class="mb-3">
-      <p class="text-muted">]] .. (i18n("webauthn.description") or "Use biometric authentication (Touch ID, Face ID) or hardware security keys as a second factor to protect your account.") .. [[</p>
+      <p class="text-muted">]]
+      print(i18n("webauthn.description"))
+	 print [[</p>
     </div>
 
     <div id="webauthn-creds-list" class="mb-3"></div>
 
     <button id="btn-webauthn-add" class="btn btn-primary">
-      <i class="fas fa-plus"></i> ]] .. (i18n("webauthn.add_passkey") or "Add Passkey") .. [[
+      <i class="fas fa-plus"></i> ]]
+      print(i18n("webauthn.add_passkey"))
+      print [[
     </button>
   </div>
-]])
+]]
 
 print [[
   <script type='text/javascript'>
@@ -800,15 +804,15 @@ $('#password_reset_submit').click(function() {
         if (!data.credentials || data.credentials.length === 0) {
           _has_passkeys = false;
           syncAuthTabStates();
-          list.innerHTML = '<p class="text-muted">]] print(i18n("webauthn.no_creds") or "No passkeys registered.") print[[</p>';
+          list.innerHTML = '<p class="text-muted">]] print(i18n("webauthn.no_creds")) print[[</p>';
           return;
         }
-        var html = '<table class="table table-sm"><thead><tr><th>Name</th><th>Uses</th><th></th></tr></thead><tbody>';
+        var html = '<table class="table table-sm"><thead><tr><th>Name</th><th></th></tr></thead><tbody>';
         _has_passkeys = true;
         syncAuthTabStates();
         data.credentials.forEach(function(c) {
-          html += '<tr><td>' + (c.name || 'Passkey') + '</td><td>' + (c.sign_count || 0) + '</td>' +
-                  '<td><button class="btn btn-sm btn-danger btn-del-passkey" data-cred-id="' + c.id + '">]] print(i18n("webauthn.remove_passkey") or "Remove") print[[</button></td></tr>';
+          html += '<tr><td>' + (c.name || 'Passkey') + '</td>' +
+                  '<td><button class="btn btn-sm btn-danger btn-del-passkey" data-cred-id="' + c.id + '">]] print(i18n("webauthn.remove_passkey")) print[[</button></td></tr>';
         });
         html += '</tbody></table>';
         list.innerHTML = html;
