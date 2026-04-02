@@ -79,6 +79,45 @@ Whenver you login to ntopng using username and passowrd with a user with MFA ena
 
 If you fail to enter the MFA code, login will not be completed.
 
+.. note::
+  MFA and Passkey cannot be enable at the same time. So if you enable MFA, you cannot enable Passkey and vice-versa.
+
+
+.. _oidc-passkey:
+
+Passkey
+-------
+
+Passkey authentication is a passwordless sign-in method that allows you to log in to websites and apps using the same way you unlock your device—such as a fingerprint, face scan, or a screen lock PIN. It is designed to replace traditional passwords entirely, offering a significantly more secure and faster experience. In ntopng it can be enabled to implement a multi-factor authentication method.
+
+Passkey will only work if selected conditions are met:
+
+- It workly only over a secure TLS 1.2+ connection (except for localhost during development). This means that you must to enable HTTPs on ntopng (-W <https port>).
+- For passkey authentication to work, your HTTP server must use HTTPS with a valid, trusted TLS certificate and modern hash algorithms. The signature algorithm must use the SHA-2 family (e.g., SHA-256). SHA-1 is no longer considered secure and is rejected by modern platforms. A simple way to create a valid certificate suitable with passkey is to use Let's Encrypt that can be uses as described in [this post](https://www.ntop.org/securing-ntopng-with-ssl-and-lets-encrypt/).
+
+Similar to MFA, you can enable Passkey in the user's configuration page. As Passkey is a kind of MFA, either you enable MFA or Passkey (not both at the same time).
+
+.. figure:: img/add_passkey.png
+  :align: center
+  :alt: Enable Passkey
+
+After you clicked on the "Add Passkey" button, ntopng asks you how you want to name the passkey for ntopng: you can pick any name. Then it show you a dialog for configuring it.
+
+.. figure:: img/set_passkey.png
+  :align: center
+  :alt: Set Passkey Configuration
+
+Done that it's all set. Now whenever you login to ntopng for the use for whcih you enabled Passkey, after the authentication step a new dialog is displayed
+
+.. figure:: img/auth_passkey.png
+  :align: center
+  :alt: Passkey Authentication
+
+where you can authenticate. Most passkeys are synced across your devices through services like the Google Password Manager, Apple iCloud Keychain, or Microsoft Windows Hello. This ensures that if you set up a passkey on your phone, it is automatically available on your laptop or tablet. Alternatively, they can be stored on physical hardware like a YubiKey for the highest level of security. This means that once you have configured a user Passkey on a system (e.g. on a macOS device), only the macOS user of such device can succesfully authenticate with Passkey.
+
+As with MFA, if you want to disable Passkey, you ca do it from the user configuration page in ntopng.
+
+
 .. _oidc-authentication:
 
 OpenID Connect (OIDC) / SSO Authentication
