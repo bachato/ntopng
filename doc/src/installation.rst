@@ -16,21 +16,28 @@ http://packages.ntop.org/. Development and stable builds are
 available. Stable builds are intended for production environments whereas
 development builds are intended for testing or early feature access.
 
-Installing on MacOS
+Installing on macOS
 -------------------
 
 Package
 ^^^^^^^
 
-MacOS installation packages can be found at
+macOS installation packages can be found at
 http://packages.ntop.org/ and are installed with a GUI.
-ntopng requires Redis to be installed in order to start. During the ntopng installation,
-if Redis is not present, Redis is installed and activated, otherwise the one already installed on
-the system is used. After the installation, ntopng is started and active on local port 3000
+
+.. note::
+  macOS install package is not signed hence prior to install it, you need:
+
+  - locate the ntopng package (usually under the Downloads directory). Suppose its name is ntopng-6.X.YYYY-macos-arm64.pkg
+  - xattr -d com.apple.quarantine ntopng-6.X.YYYY-macos-arm64.pkg
+  - double click on the installer icon
+
+ntopng requires Redis to be installed in order to start, therefore you must install it first using
+Homebrew as listed below in this section. After the installation, ntopng is started and active on local port 3000
 (i.e. ntopng is available at http://127.0.0.1:3000). If you want to uninstall ntopng you can
 open a terminal and type :code:`sudo /usr/local/bin/ntopng-uninstall.sh`
 
-To enable geolocation, MacOS packages require database files to be manually placed under :code:`/usr/local/share/ntopng/httpdocs/geoip`. Detailed instructions on how to obtain database files and install them are available at https://github.com/ntop/ntopng/blob/dev/doc/README.geolocation.md/. Once the files have been downloaded and placed in the folder, a restart of ntopng is necessary to read load them.
+To enable geolocation, macOS packages require database files to be manually placed under :code:`/usr/local/share/ntopng/httpdocs/geoip`. Detailed instructions on how to obtain database files and install them are available at https://github.com/ntop/ntopng/blob/dev/doc/README.geolocation.md/. Once the files have been downloaded and placed in the folder, a restart of ntopng is necessary to read load them.
 
 The ntopng configuration file is installed in /usr/local/etc/ntopng/ntopng.conf that can be edited
 (as privileged user) with a text editor.
@@ -42,7 +49,7 @@ The ntopng service can be started/stopped using the launchctl command:
 
 Homebrew
 ^^^^^^^
-- Install :code:`brew install ntopng redis`
+- Install :code:`brew install redis`
 - Start redis :code:`brew services start redis`
 - Start ntopng :code:`sudo ntopng`
 
