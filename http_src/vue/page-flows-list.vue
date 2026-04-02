@@ -606,7 +606,7 @@ const get_extra_params_obj = () => {
 /* ************************************** */
 
 function create_config_url_link(row) {
-    return `${http_prefix}/lua/flow_details.lua?flow_key=${row.key}&flow_hash_id=${row.hash_id}`
+    return `${http_prefix}/lua/flow_details.lua?flow_key=${row.key}&flow_hash_id=${row.hash_id}&ifid=${row.ifid}`
 }
 
 /* ************************************** */

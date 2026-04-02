@@ -148,7 +148,24 @@ const change_create_interface_option = function () {
 }
 
 const loadNewInterface = function () {
-    window.open(`${http_prefix}/lua/flows_stats.lua?ifid=${new_iface_id.value}`)
+    const form = document.createElement('form')
+    form.method = 'post'
+    form.action = `${http_prefix}/lua/flows_stats.lua?ifid=${new_iface_id.value}`
+
+    const addField = (name, value) => {
+        const input = document.createElement('input')
+        input.type = 'hidden'
+        input.name = name
+        input.value = value
+        form.appendChild(input)
+    }
+
+    addField('switch_interface', '1')
+    addField('csrf', props.context.csrf)
+    addField('ifid', new_iface_id.value)
+
+    document.body.appendChild(form)
+    form.submit()
 }
 
 </script>

@@ -14,6 +14,10 @@ local json = require ("dkjson")
 local flow_key = _GET["flow_key"]
 local flow_hash_id = _GET["flow_hash_id"]
 
+if not isEmptyString(_GET["ifid"]) then
+   interface.select(_GET["ifid"])
+end
+
 local flow = interface.findFlowByKeyAndHashId(tonumber(flow_key), tonumber(flow_hash_id))
 
 local throughput_type = getThroughputType()
