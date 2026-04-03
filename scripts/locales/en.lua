@@ -3544,7 +3544,7 @@ local lang = {
   },
   ["flow_details"] = {
     ["bgp_peer_id"]    = "Peer ID",
-    ["bgp_prefix"]     = "BGP Prefix",
+    ["bgp_prefix"]     = "Prefix",
     ["bgp_peer_id"]    = "Peer ID",
     ["bgp_origin"]     = "Origin",
     ["bgp_as_path"]    = "AS Path",

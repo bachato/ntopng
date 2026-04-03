@@ -14,13 +14,11 @@ function format_utils.formatBgpBmpInfo(bgp_data)
          peer_list[#peer_list + 1] = { id = bgp_id, info = info }
       end
 
-      print("</table>\n")
-
-      print("<table class='table table-bordered table-striped' width='100%'>")
+      print("<table class='table table-bordered table-striped' width='100%' height='100%'>")
 
       -- Prefix
-      print("<tr><th colspan=" .. (#peer_list + 1) .. ">" ..
-            i18n("flow_details.bgp_prefix") .. ":&nbsp;" .. prefix .. "</th></tr>\n")
+      print("<tr><td colspan=" .. (#peer_list + 1) .. "><b>" ..
+            i18n("flow_details.bgp_prefix") .. "</b>&nbsp;" .. prefix .. "</th></tr>\n")
 
       -- Peer ID
       print("<tr><th>" .. i18n("flow_details.bgp_peer_id") .."</th>")
@@ -32,7 +30,7 @@ function format_utils.formatBgpBmpInfo(bgp_data)
       -- BGP Origin
       print("<tr><th>" .. i18n("flow_details.bgp_origin") .. "</th>")
       for _, peer in ipairs(peer_list) do
-         print("<td>" .. (peer.info["origin"] or "") .. "</td>")
+         print("<td>" .. string.upper(peer.info["origin"] or "") .. "</td>")
       end
 
       print("</tr>\n")
@@ -46,13 +44,13 @@ function format_utils.formatBgpBmpInfo(bgp_data)
             local parts = {}
 
             for _, asn in ipairs(peer.info["as_path"]) do
-               parts[#parts + 1] = tostring(asn)
+               parts[#parts + 1] = "("..asn..") "..shortenString(ntop.getASNameFromASN(tonumber(asn)), 8)
             end
 
-            as_path_string = table.concat(parts, ' ')
+            as_path_string = table.concat(parts, '<li>')
          end
 
-         print("<td>" .. as_path_string .. "</td>")
+         print("<td><ol><li>" .. as_path_string .. "</ol></td>")
       end
 
       print("</tr>\n")
@@ -92,18 +90,17 @@ function format_utils.formatBgpBmpInfo(bgp_data)
             local badges = {}
          
             for _, c in ipairs(peer.info["communities"]) do
-               badges[#badges + 1] = "<span class='badge bg-secondary'>" .. c .. "</span>"
+               badges[#badges + 1] = "<li><span class='badge bg-secondary'>" .. c .. "</span></li>"
             end
+	    
             communities_string = table.concat(badges, " ")
          end
-         print("<td>" .. communities_string .. "</td>")
+         print("<td><ul>" .. communities_string .. "</ul></td>")
       
       end
       print("</tr>\n")
 
       print("</table>\n")
-      print("<table class='table table-bordered table-striped'>\n")
-
    end
 end
 
