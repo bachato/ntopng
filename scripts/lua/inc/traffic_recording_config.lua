@@ -10,7 +10,7 @@ local format_utils = require "format_utils"
 local master_ifid = interface.getMasterInterfaceId()
 local info = ntop.getInfo()
 
-if((not isAdministrator()) or (not recording_utils.isAvailable())) then
+if((not isAdministrator()) or (not recording_utils.isAvailable()) or interface.isView()) then
   return
 end
 

@@ -297,8 +297,8 @@ if _SERVER["REQUEST_METHOD"] == "POST" and not isEmptyString(_POST["traffic_reco
     recording_utils.setCurrentTrafficRecordingProvider(ifstats.id, _POST["traffic_recording_provider"])
 end
 
-local has_traffic_recording_page = (recording_utils.isAvailable() and
-    (is_packet_interface or (ifstats.isView)                                    -- Allows view interfaces (e.g., views of ZMQ)
+local has_traffic_recording_page = (recording_utils.isAvailable() and not interface.isView() and
+    (is_packet_interface
         or ((recording_utils.isSupportedZMQInterface(ifid) and not table.empty(ext_interfaces))) or
         (recording_utils.getCurrentTrafficRecordingProvider(ifid) ~= "ntopng")))
 
