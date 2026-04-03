@@ -31,7 +31,7 @@
             <div class="mb-3 w-100 position-relative first-chart" ref="first_chart">
             </div>
             <!-- Second chart container (hidden) - used for smooth transitions -->
-            <div class="mb-3 w-100 d-none position-relative second-chart" ref="second_chart">
+            <div class="mb-3 w-100 position-relative second-chart d-none" ref="second_chart">
             </div>
             <!-- Legend display element (hidden by default) -->
             <div class="dygraph-legend" ref="legend" style="display:none;"></div>
@@ -134,7 +134,6 @@ const register_status = function (status) {
  * Sets up status change listeners if configured and loads initial data.
  */
 const init = function () {
-    emit('update-requested', { firstLoad: true });
     const status = ntopng_status_manager.get_status();
     const url_request = get_url_request(status);
     if (props.register_on_status_change) {
@@ -360,7 +359,7 @@ const drawChart = async function (options, drawOnHidden) {
     if (drawOnHidden) {
         drawOnSecondDiv.value = !drawOnSecondDiv.value
     }
-    
+
     const targetDiv = drawOnSecondDiv.value ? second_chart.value : first_chart.value
     const newChart = new Dygraph(targetDiv, data, options);
 
@@ -374,6 +373,9 @@ const drawChart = async function (options, drawOnHidden) {
         newChart.resetZoom();
         chart.value.destroy();
         chart.value = null;
+        // Clean the width and height used by Dygraph
+        toHideDiv.style.width = '';
+        toHideDiv.style.height = '';
     }
     chart.value = newChart;
 }
@@ -513,10 +515,18 @@ function clampDygraphLegend() {
  * Initializes the chart and signals readiness to synchronization system.
  */
 onMounted(async () => {
-    await init();
-    ntopng_sync.ready(props.id);
+    emit('update-requested', { firstLoad: true });
     await nextTick();
-    clampDygraphLegend();
+    // In this way, with the double requestAnimationFrame, it's sure that the DOM layout + style
+    // is complitely loaded, and this should avoid problems with slow systems, e.g. loading the chart
+    // outside the div (wrong height + width)
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            init();
+            ntopng_sync.ready(props.id);
+            clampDygraphLegend();
+        })
+    })
 });
 
 /* *************************************************** */
