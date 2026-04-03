@@ -422,7 +422,6 @@ async function copyToClipboard(text) {
 .about-table th {
   width: 42%;
   font-weight: 600;
-  font-size: 0.82rem;
   vertical-align: middle;
   padding: 0.55rem 1rem;
   white-space: nowrap;
@@ -430,7 +429,6 @@ async function copyToClipboard(text) {
 }
 
 .about-table td {
-  font-size: 0.82rem;
   vertical-align: middle;
   padding: 0.55rem 1rem;
   word-break: break-word;
@@ -442,7 +440,7 @@ async function copyToClipboard(text) {
 }
 
 .about-sys-id {
-  font-size: 0.78rem;
+  font-size: 1rem;
 }
 
 /* ── External links ───────────────────────────────────────── */
