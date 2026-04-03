@@ -9477,6 +9477,7 @@ local lang = {
     ["storage_utilization"] = "Storage Utilization",
     ["storage_utilization_pcap"] = "PCAP Storage Utilization",
     ["traffic_extraction_jobs"] = "Traffic Extraction Jobs",
+    ["view_extraction_note"] = "Traffic recording is enabled on the following viewed interfaces: %{interfaces}. Packet extractions will extract traffic from all of them.",
     ["traffic_extractions"] = "Extractions",
     ["traffic_on_disk"] = "Traffic On Disk",
     ["traffic_recording"] = "Traffic Recording",

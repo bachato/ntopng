@@ -774,9 +774,28 @@ function recording_utils.isSmartEnabled(ifid)
   return false
 end
 
+--! @brief Return the list of viewed interfaces that have traffic recording enabled.
+--! @return array of { ifid, ifname }
+function recording_utils.getViewedInterfacesWithRecording(view_ifid)
+  local result = {}
+  interface.select(tostring(view_ifid))
+  local view_id = interface.getId()
+
+  for other_ifid, other_ifname in pairs(interface.getIfNames() or {}) do
+    interface.select(tostring(other_ifid))
+    if interface.viewedBy() == view_id then
+      local sub_ifid = interface.getId()
+      if recording_utils.isEnabled(sub_ifid) then
+        table.insert(result, { ifid = sub_ifid, ifname = other_ifname })
+      end
+    end
+  end
+
+  interface.select(tostring(view_ifid))
+  return result
+end
+
 --! @brief Check if traffic extraction is available and recording is enabled on an interface
---! @param ifid the interface identifier 
---! @return true if extraction is available and recording is enabled, false otherwise
 function recording_utils.isExtractionEnabled(ifid)
   if recording_utils.isExtractionAvailable() then
     return isRecordingEnabled(ifid)
@@ -887,6 +906,34 @@ end
 function recording_utils.stats(ifid)
    local proc_stats = n2diskctl("stats", ifid)
    return parse_proc_stats(proc_stats)
+end
+
+--! @brief Return dump window stats using recording_utils.stats()
+--! In case of View interface stats are aggregated from all virwed interfaces
+--! @return stats with FirstDumpedEpoch/LastDumpedEpoch, is_active boolean
+function recording_utils.getStats(ifid)
+   interface.select(ifid)
+   if interface.isView() then
+      local viewed_ifaces = recording_utils.getViewedInterfacesWithRecording(ifid)
+      local view_first_epoch = nil
+      local view_last_epoch = 0
+      local any_active = false
+
+      for _, iface in ipairs(viewed_ifaces) do
+         if recording_utils.isActive(iface.ifid) or recording_utils.isExtractionActive(iface.ifid) then
+            any_active = true
+            local iface_stats = recording_utils.stats(iface.ifid)
+            local fe = tonumber(iface_stats['FirstDumpedEpoch'] or 0)
+            local le = tonumber(iface_stats['LastDumpedEpoch'] or 0)
+            if fe > 0 and (view_first_epoch == nil or fe < view_first_epoch) then view_first_epoch = fe end
+            if le > 0 and (view_last_epoch == nil or le > view_last_epoch)   then view_last_epoch = le  end
+         end
+      end
+
+      return { FirstDumpedEpoch = view_first_epoch or 0, LastDumpedEpoch = view_last_epoch }, any_active
+   else
+      return recording_utils.stats(ifid), (recording_utils.isActive(ifid) or recording_utils.isExtractionActive(ifid))
+   end
 end
 
 --! @brief Return statistics from the traffic recording service (n2disk)
@@ -1109,14 +1156,33 @@ function recording_utils.recommendedSpace(ifid, storage_info)
   return math.floor(recommended)
 end
 
---! @brief Check if there is pcap data for a specified time interval (fully included in the dump window) 
---! @param ifid the interface identifier 
+--! @brief Check if there is pcap data for a specified time interval (fully included in the dump window)
+--! @param ifid the interface identifier
 --! @param epoch_begin the begin time (epoch)
 --! @param epoch_end the end time (epoch)
 --! @return a table with 'available' = true if the specified interval is included in the dump window, 'epoch_begin'/'epoch_end' are also returned with the actual available window.
 function recording_utils.isDataAvailable(ifid, epoch_begin, epoch_end)
    local info = {}
    info.available = false
+
+   interface.select(ifid)
+   if interface.isView() then
+      -- View interface: aggregate availability from all viewed interfaces
+      local viewed_ifaces = recording_utils.getViewedInterfacesWithRecording(ifid)
+      for _, iface in ipairs(viewed_ifaces) do
+         local iface_info = recording_utils.isDataAvailable(iface.ifid, epoch_begin, epoch_end)
+         if iface_info.available then
+            if not info.available then
+               info = iface_info
+            else
+               -- Extend the window to cover all available constituent data
+               if iface_info.epoch_begin < info.epoch_begin then info.epoch_begin = iface_info.epoch_begin end
+               if iface_info.epoch_end   > info.epoch_end   then info.epoch_end   = iface_info.epoch_end   end
+            end
+         end
+      end
+      return info
+   end
 
    if recording_utils.isExtractionEnabled(ifid) then
       local stats = recording_utils.stats(ifid)

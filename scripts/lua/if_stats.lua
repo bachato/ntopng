@@ -297,10 +297,17 @@ if _SERVER["REQUEST_METHOD"] == "POST" and not isEmptyString(_POST["traffic_reco
     recording_utils.setCurrentTrafficRecordingProvider(ifstats.id, _POST["traffic_recording_provider"])
 end
 
-local has_traffic_recording_page = (recording_utils.isAvailable() and not interface.isView() and
-    (is_packet_interface
-        or ((recording_utils.isSupportedZMQInterface(ifid) and not table.empty(ext_interfaces))) or
-        (recording_utils.getCurrentTrafficRecordingProvider(ifid) ~= "ntopng")))
+local viewed_ifaces_with_recording = {}
+if interface.isView() then
+  viewed_ifaces_with_recording = recording_utils.getViewedInterfacesWithRecording(ifid)
+end
+
+local has_traffic_recording_page = (recording_utils.isAvailable() and
+    ((not interface.isView() and
+        (is_packet_interface
+            or ((recording_utils.isSupportedZMQInterface(ifid) and not table.empty(ext_interfaces)))
+            or (recording_utils.getCurrentTrafficRecordingProvider(ifid) ~= "ntopng")))
+    or (interface.isView() and not table.empty(viewed_ifaces_with_recording))))
 
 local dismiss_recording_providers_reminder = recording_utils.isExternalProvidersReminderDismissed(ifstats.id)
 
@@ -1628,6 +1635,28 @@ elseif (page == "trafficprofiles") then
 elseif (page == "traffic_recording" and has_traffic_recording_page) then
     local master_ifid = interface.getMasterInterfaceId()
 
+    if interface.isView() then
+        -- View: we cannot enable recording here, but we can extract traffic
+        -- from all viewed interfaces (if they have recording enabled)
+        if ntop.isEnterpriseM() then
+            local iface_names = {}
+            for _, iface in ipairs(viewed_ifaces_with_recording) do
+                table.insert(iface_names, iface.ifname)
+            end
+            print('<div class="alert alert-info">' ..
+                i18n('traffic_recording.view_extraction_note',
+                    { interfaces = table.concat(iface_names, ", ") }) ..
+                '</div>')
+
+            print('<ul id="traffic-recording-nav" class="nav nav-tabs" role="tablist">')
+            print('<li class="nav-item active"><a class="nav-link active" href="?ifid=' .. ifstats.id ..
+                '&page=traffic_recording">' .. i18n("traffic_recording.jobs") .. '</a></li>')
+            print('</ul>')
+            print('<div class="tab-content">')
+            dofile(dirs.installdir .. "/scripts/lua/inc/traffic_recording_jobs.lua")
+            print('</div></div>')
+        end
+    else
     if not dismiss_recording_providers_reminder then
         print('<div id="traffic-recording-providers-detected" class="alert alert-info alert-dismissable">' ..
             i18n('traffic_recording.msg_external_providers_detected', {
@@ -1716,6 +1745,7 @@ elseif (page == "traffic_recording" and has_traffic_recording_page) then
     end
 
     print('</div></div>')
+    end -- not interface.isView()
 elseif (page == "config") then
     if (not isAdministrator()) then
         return
@@ -2113,7 +2143,7 @@ function toggle_mirrored_traffic_function_off(){
         end
     end
 
-    if has_traffic_recording_page then
+    if has_traffic_recording_page and not interface.isView() then
         local cur_provider = recording_utils.getCurrentTrafficRecordingProvider(ifstats.id)
         local providers = recording_utils.getAvailableTrafficRecordingProviders()
 

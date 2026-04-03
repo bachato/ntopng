@@ -49,10 +49,38 @@ if filter == nil then
    filter = ""
 end
 
-local timeline_path = recording_utils.getTimelineByInterval(ifid, time_from, time_to)
+local ifstats = interface.getStats()
+local timeline_path
+
+if ifstats.isView then
+   -- View: return a comma-separated list of timelines from all viewed interfaces
+   -- that have recording enabled and data in the interval
+   local viewed_ifaces = recording_utils.getViewedInterfacesWithRecording(ifstats.id)
+
+   if table.empty(viewed_ifaces) then
+      rest_utils.answer(rest_utils.consts.err.not_granted)
+      return
+   end
+
+   local paths = {}
+   for _, iface in ipairs(viewed_ifaces) do
+      local tl = recording_utils.getTimelineByInterval(iface.ifid, time_from, time_to)
+      if tl then
+         table.insert(paths, tl)
+      end
+   end
+
+   if #paths == 0 then
+      rest_utils.answer(rest_utils.consts.err.bad_content)
+      return
+   end
+
+   timeline_path = table.concat(paths, ",")
+else
+   timeline_path = recording_utils.getTimelineByInterval(ifid, time_from, time_to)
+end
 
 local fname = time_from.."-"..time_to..".pcap"
 sendHTTPContentTypeHeader('application/vnd.tcpdump.pcap', 'attachment; filename="'..fname..'"')
 
 ntop.runLiveExtraction(ifid, time_from, time_to, filter, timeline_path)
-

@@ -303,10 +303,8 @@ function graph_utils.drawNewGraphs(source_value_object)
     local ifstats = interface.getStats()
     local ifid = (source_value_object.ifid) or (ifstats.id)
 
-    -- Check extraction permissions
-    local traffic_extraction_permitted =
-        recording_utils.isActive(ifid) or
-            recording_utils.isExtractionActive(ifid)
+    -- Check extraction permissions (handles View interfaces transparently)
+    local _, traffic_extraction_permitted = recording_utils.getStats(ifid)
 
     if source_value_object == nil then source_value_object = {} end
 

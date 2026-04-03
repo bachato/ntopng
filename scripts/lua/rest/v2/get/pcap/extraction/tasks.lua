@@ -116,7 +116,7 @@ for id, _ in pairsByValues(sorter, sOrder) do
     job_files = #job_files
   end
 
-  local status_desc = i18n("traffic_recording."..job.status) 
+  local status_desc = i18n("traffic_recording."..job.status)
   if job.status == "failure" then
     local error_desc
     if job.error_code == 2 or job.error_code == 3 then error_desc = i18n("traffic_recording.err_alloc")
@@ -143,8 +143,8 @@ for id, _ in pairsByValues(sorter, sOrder) do
     end
   end
 
-  res[#res + 1] = { 
-    column_id = job.id, 
+  res[#res + 1] = {
+    column_id = job.id,
     column_job_time = format_utils.formatEpoch(job.time),
     column_job_files = job_files,
     column_status = status_desc,
