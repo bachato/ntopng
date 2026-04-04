@@ -2467,7 +2467,7 @@ if isEmptyString(page) or page == "overview" then
                            $('#srv2cli').html(NtopUtils.addCommas(rsp["srv2cli.packets"])+" Pkts / " + NtopUtils.addCommas(NtopUtils.bytesToVolume(rsp["srv2cli.bytes"])));
                            $('#flow-throughput').html(rsp.throughput);
 
-                           if(` rsp["c2sOOO"] !== "undefined") {
+                           if(rsp["c2sOOO"] !== "undefined") {
                               $('#c2sOOO').html(NtopUtils.formatPackets(rsp["c2sOOO"]));
                               $('#s2cOOO').html(NtopUtils.formatPackets(rsp["s2cOOO"]));
                               $('#c2slost').html(NtopUtils.formatPackets(rsp["c2slost"]));
