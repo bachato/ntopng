@@ -7,8 +7,9 @@ local format_utils = {}
 local clock_start = os.clock()
 
 function format_utils.formatBgpBmpInfo(bgp_data)
+   if(bgp_data == nil) then print("&nbsp;") return end
+   
    for prefix, peers in pairs(bgp_data) do
-
       local peer_list = {}
       for bgp_id, info in pairs(peers) do
          peer_list[#peer_list + 1] = { id = bgp_id, info = info }
@@ -37,6 +38,10 @@ function format_utils.formatBgpBmpInfo(bgp_data)
 
       -- AS Path
       print("<tr><th>" .. i18n("flow_details.bgp_as_path") .. "</th>")
+
+      local max_len
+      if(#peer_list > 2) then max_len = 8 else max_len = 32 end
+	 
       for _, peer in ipairs(peer_list) do
          local as_path_string = ""
          
@@ -44,7 +49,7 @@ function format_utils.formatBgpBmpInfo(bgp_data)
             local parts = {}
 
             for _, asn in ipairs(peer.info["as_path"]) do
-               parts[#parts + 1] = "("..asn..") "..shortenString(ntop.getASNameFromASN(tonumber(asn)), 8)
+               parts[#parts + 1] = "("..asn..") "..shortenString(ntop.getASNameFromASN(tonumber(asn)), max_len)
             end
 
 	    if(#parts == 0) then
@@ -68,42 +73,44 @@ function format_utils.formatBgpBmpInfo(bgp_data)
       print("</tr>\n")
 
       -- MED
-      print("<tr><th>" .. i18n("flow_details.bgp_med") .. "</th>")
-      for _, peer in ipairs(peer_list) do
-         local med_string = (peer.info["med"] ~= nil) and tostring(peer.info["med"]) or ""
-         print("<td>" .. med_string .. "</td>")
-      end
-      
-      print("</tr>\n")
+      if not ((#bgp_data == 1) and (#peer_list == 0)) then	 
+	 print("<tr><th>" .. i18n("flow_details.bgp_med") .. "</th>")
+	 for _, peer in ipairs(peer_list) do
+	    local med_string = (peer.info["med"] ~= nil) and tostring(peer.info["med"]) or ""
+	    print("<td>" .. med_string .. "</td>")
+	 end
+	 
+	 print("</tr>\n")
 
-      -- Local Preference
-      print("<tr><th>" .. i18n("flow_details.bgp_local_pref") .. "</th>")
-      for _, peer in ipairs(peer_list) do
-         local lp_string = (peer.info["local_pref"] ~= nil) and tostring(peer.info["local_pref"]) or ""
-         print("<td>" .. lp_string .. "</td>")
-      end
-      
-      print("</tr>\n")
+	 -- Local Preference
+	 print("<tr><th>" .. i18n("flow_details.bgp_local_pref") .. "</th>")
+	 for _, peer in ipairs(peer_list) do
+	    local lp_string = (peer.info["local_pref"] ~= nil) and tostring(peer.info["local_pref"]) or ""
+	    print("<td>" .. lp_string .. "</td>")
+	 end
+	 
+	 print("</tr>\n")
 
-      -- Communities
-      print("<tr><th>" .. i18n("flow_details.bgp_communities") .. "</th>")
-      for _, peer in ipairs(peer_list) do
-         local communities_string = ""
+	 -- Communities
+	 print("<tr><th>" .. i18n("flow_details.bgp_communities") .. "</th>")
+	 for _, peer in ipairs(peer_list) do
+	    local communities_string = ""
 
-         if peer.info["communities"] and #peer.info["communities"] > 0 then
-            local badges = {}
-         
-            for _, c in ipairs(peer.info["communities"]) do
-               badges[#badges + 1] = "<li>" .. c .. "</li>"
-            end
+	    if peer.info["communities"] and #peer.info["communities"] > 0 then
+	       local badges = {}
+	       
+	       for _, c in ipairs(peer.info["communities"]) do
+		  badges[#badges + 1] = "<li>" .. c .. "</li>"
+	       end
+	       
+	       communities_string = table.concat(badges, " ")
+	    end
+	    print("<td><ul>" .. communities_string .. "</ul></td>")
 	    
-            communities_string = table.concat(badges, " ")
-         end
-         print("<td><ul>" .. communities_string .. "</ul></td>")
-      
+	 end
       end
       print("</tr>\n")
-
+      
       print("</table>\n")
    end
 end
