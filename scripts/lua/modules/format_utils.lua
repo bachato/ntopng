@@ -17,8 +17,8 @@ function format_utils.formatBgpBmpInfo(bgp_data)
       print("<table class='table table-bordered table-striped' width='100%' height='100%'>")
 
       -- Prefix
-      print("<tr><td colspan=" .. (#peer_list + 1) .. "><b>" ..
-            i18n("flow_details.bgp_prefix") .. "</b>&nbsp;" .. prefix .. "</th></tr>\n")
+      print("<tr><td><b>" ..
+            i18n("flow_details.bgp_prefix") .. "</b></th><td  colspan=" .. (#peer_list) .. ">" .. prefix .. "</th></tr>\n")
 
       -- Peer ID
       print("<tr><th>" .. i18n("flow_details.bgp_peer_id") .."</th>")
@@ -47,7 +47,11 @@ function format_utils.formatBgpBmpInfo(bgp_data)
                parts[#parts + 1] = "("..asn..") "..shortenString(ntop.getASNameFromASN(tonumber(asn)), 8)
             end
 
-            as_path_string = table.concat(parts, '<li>')
+	    if(#parts == 0) then
+	       as_path_string = "Local"
+	    else
+	       as_path_string = table.concat(parts, '<li>')
+	    end
          end
 
          print("<td><ol><li>" .. as_path_string .. "</ol></td>")
@@ -90,7 +94,7 @@ function format_utils.formatBgpBmpInfo(bgp_data)
             local badges = {}
          
             for _, c in ipairs(peer.info["communities"]) do
-               badges[#badges + 1] = "<li><span class='badge bg-secondary'>" .. c .. "</span></li>"
+               badges[#badges + 1] = "<li>" .. c .. "</li>"
             end
 	    
             communities_string = table.concat(badges, " ")
