@@ -1057,8 +1057,9 @@ static int ntop_interface_exec_sql_query(lua_State* vm) {
     lua_pushnil(vm);     /* [empty_table, error_string, nil] */
     lua_replace(vm, -3); /* [nil, error_string] */
   }
+
   /* stack top: [result_table_or_nil, error_or_nil] */
-  return 2;
+  return (ntop_lua_return_value(vm, __FUNCTION__, 2 /* 2 return values */));
 }
 
 /* ****************************************** */
