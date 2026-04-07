@@ -22,9 +22,9 @@ function format_utils.formatBgpBmpInfo(bgp_data)
             i18n("flow_details.bgp_prefix") .. "</b></th><td  colspan=" .. (#peer_list) .. ">" .. prefix .. "</th></tr>\n")
 
       -- Peer ID
-      print("<tr><th>" .. i18n("flow_details.bgp_peer_id") .."</th>")
+      print("<tr><td>" .. i18n("flow_details.bgp_peer_id") .."</td>")
       for _, peer in ipairs(peer_list) do
-         print("<th>" .. peer.id .. "</th>")
+	 print("<td>" .. formatNextHop(peer.id) .. "</td>")
       end
       print("</tr>\n")
 
@@ -49,7 +49,9 @@ function format_utils.formatBgpBmpInfo(bgp_data)
             local parts = {}
 
             for _, asn in ipairs(peer.info["as_path"]) do
-               parts[#parts + 1] = "("..asn..") "..shortenString(ntop.getASNameFromASN(tonumber(asn)), max_len)
+               -- parts[#parts + 1] = "("..asn..") "..shortenString(ntop.getASNameFromASN(tonumber(asn)), max_len)
+	       parts[#parts + 1] =  "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. asn
+		  .. "\">"..asn.." ("..shortenString(ntop.getASNameFromASN(tonumber(asn)), max_len)..")</A>"
             end
 
 	    if(#parts == 0) then
@@ -73,7 +75,7 @@ function format_utils.formatBgpBmpInfo(bgp_data)
       print("</tr>\n")
 
       -- MED
-      if not ((#bgp_data == 1) and (#peer_list == 0)) then	 
+      if not ((#bgp_data == 1) and (#peer_list > 0)) then	 
 	 print("<tr><th>" .. i18n("flow_details.bgp_med") .. "</th>")
 	 for _, peer in ipairs(peer_list) do
 	    local med_string = (peer.info["med"] ~= nil) and tostring(peer.info["med"]) or ""

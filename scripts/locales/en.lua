@@ -3546,9 +3546,8 @@ local lang = {
     ["unresolved_hostname_description"] = "Trigger an alert when a TLS/QUIC/HTTP flow connects with a symbolic hostname not previously resolved via DNS",
   },
   ["flow_details"] = {
-    ["bgp_peer_id"]    = "Peer ID",
+    ["bgp_peer_id"]    = "BGP Peer Id",
     ["bgp_prefix"]     = "Prefix",
-    ["bgp_peer_id"]    = "Peer ID",
     ["bgp_origin"]     = "Origin",
     ["bgp_as_path"]    = "AS Path",
     ["bgp_next_hop"]   = "Next Hop",

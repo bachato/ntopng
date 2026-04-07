@@ -1873,7 +1873,7 @@ function printFlowSNMPInfo(snmpdevice, input_idx, output_idx, as_row)
 	  if(input_role ~= nil) then v = input_role.value or "" end
 	  if(v ~= "") then v = " (".. v .. ")" end
 	     
-	  print("<span class=\"badge bg-info\">" .. "<a href=" .. url_input .. ">"
+	  print("<span class=\"badge\">" .. "<a href=" .. url_input .. ">"
 		.. (inputidx_name or "") .. v .. "</span></a>")
        end
        
@@ -1885,7 +1885,7 @@ function printFlowSNMPInfo(snmpdevice, input_idx, output_idx, as_row)
 	  
 	  print(' <i class="fas fa-long-arrow-alt-right"></i> ')
 	  
-	  print("<span class=\"badge bg-info\">" .. "<a href=" .. url_output .. ">" ..
+	  print("<span class=\"badge\">" .. "<a href=" .. url_output .. ">" ..
 		(outputidx_name or "") .. v .. "</span></a>")
        end
        
