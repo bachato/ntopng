@@ -1775,11 +1775,13 @@ function buildExportersGraph(flow_trajectory, node_names, cli_ip, srv_ip)
       if(table.len(flow_trajectory) > 0) then
 	 -- Build graph_edges
 	 local graph_edges = {}
-
+	 local links = {} -- used to remove duplicates
+	 
 	 -- Add dummy node from client (id 1) to server (id 2)
 	 for k,v in pairs(flow_trajectory) do
 	    if(table.len(v) == 0) then
 	       graph_edges[#graph_edges + 1] = { from = 1, to = 2 }
+	       links["1".."-".."2"] = true
 	    end
 	 end
 
@@ -1788,9 +1790,14 @@ function buildExportersGraph(flow_trajectory, node_names, cli_ip, srv_ip)
 	       local next_hop = v.next_hop
 	       local return_path = v.return_path
 	       if next_hop ~= nil then
-		  local edge = { from = nodes[exporter_ip], to = nodes[next_hop] }
+		  local edge = { from = nodes[exporter_ip], to = nodes[next_hop] }		
+		  
 		  if return_path then edge["return_path"] = true end
-		  graph_edges[#graph_edges + 1] = edge
+
+		  if(links[nodes[exporter_ip].."-"..nodes[next_hop]] == nil) then
+		     graph_edges[#graph_edges + 1] = edge
+		     links[nodes[exporter_ip].."-"..nodes[next_hop]] = true
+		  end
 	       end
 	    end
 	 end
@@ -1802,13 +1809,22 @@ function buildExportersGraph(flow_trajectory, node_names, cli_ip, srv_ip)
 	       if next_hop ~= nil then
 		  if flow_trajectory[next_hop] == nil then
 		     if return_path then
-			graph_edges[#graph_edges + 1] = { from = nodes[next_hop], to = client_id, return_path = true }
+			if(links[nodes[next_hop].."-"..client_id] == nil) then
+			   graph_edges[#graph_edges + 1] = { from = nodes[next_hop], to = client_id, return_path = true }
+			   links[nodes[next_hop].."-"..client_id] = true
+			end
 		     else
-			graph_edges[#graph_edges + 1] = { from = nodes[next_hop], to = server_id }
+			if(links[nodes[next_hop].."-"..server_id] == nil) then
+			   links[nodes[next_hop].."-"..server_id] = true
+			   graph_edges[#graph_edges + 1] = { from = nodes[next_hop], to = server_id }
+			end
 		     end
 		  end
 	       else
-		  graph_edges[#graph_edges + 1] = { from = nodes[exporter_ip], to = server_id }
+		  if(links[nodes[exporter_ip].."-"..server_id] == nil) then
+		     links[nodes[exporter_ip].."-"..server_id] = true
+		     graph_edges[#graph_edges + 1] = { from = nodes[exporter_ip], to = server_id }
+		  end
 	       end
 	    end
 	 end
@@ -1819,16 +1835,23 @@ function buildExportersGraph(flow_trajectory, node_names, cli_ip, srv_ip)
 	       if next_hops[exporter_ip] == nil then
 		  if return_path then
 		     if(server_id ~= nodes[exporter_ip]) then
-			graph_edges[#graph_edges + 1] = { from = server_id, to = nodes[exporter_ip], return_path = true }
+			if(links[server_id.."-"..nodes[exporter_ip]] == nil) then
+			   links[server_id.."-"..nodes[exporter_ip]] = true
+			   graph_edges[#graph_edges + 1] = { from = server_id, to = nodes[exporter_ip], return_path = true }
+			end
 		     end
 		  else
 		     if(client_id ~=  nodes[exporter_ip]) then
-			graph_edges[#graph_edges + 1] = { from = client_id, to = nodes[exporter_ip] }
+			if(links[client_id.."-"..nodes[exporter_ip]] == nil) then
+			   links[client_id.."-"..nodes[exporter_ip]] = true
+			   graph_edges[#graph_edges + 1] = { from = client_id, to = nodes[exporter_ip] }
+			end
 		     end
 		  end
 	       end
 	    end
 	 end
+
 	 return graph_nodes, graph_edges
       end
    end
@@ -1873,7 +1896,7 @@ function printFlowSNMPInfo(snmpdevice, input_idx, output_idx, as_row)
 	  if(input_role ~= nil) then v = input_role.value or "" end
 	  if(v ~= "") then v = " (".. v .. ")" end
 	     
-	  print("<span class=\"badge\">" .. "<a href=" .. url_input .. ">"
+	  print("<span class=\"badge \">" .. "<a href=" .. url_input .. ">"
 		.. (inputidx_name or "") .. v .. "</span></a>")
        end
        
