@@ -75,18 +75,17 @@
                 <Geomap ref="geomap" :geomapDataArray="geomapDataArray" :tooltipFormatter="formatTooltipData"
                     :glowDots="true" :style="['height: 25vh']" :onMapClick="handleMapClick" />
             </Transition>
-
-            <!-- Error message display area (validation errors, server errors) -->
-            <div v-if="errorMessage" class="alert alert-danger mb-3">
-                {{ errorMessage }}
-            </div>
         </template>
 
         <!-- Modal footer with action buttons -->
         <template v-slot:footer>
-            <div class="d-flex justify-content-end w-100">
+            <div class="d-flex w-100">
+                <!-- Error message display area (validation errors, server errors) -->
+                <div v-if="errorMessage" class="alert alert-danger alert-danger-sm col-8">
+                    {{ errorMessage }}
+                </div>
                 <!-- Submit button - disabled until form is valid -->
-                <button type="button" class="btn btn-primary" @click="handleSubmit" :disabled="!is_form_valid">
+                <button type="button" class="btn btn-primary ms-auto" @click="handleSubmit" :disabled="!is_form_valid">
                     {{ _i18n("save") }}
                 </button>
             </div>
@@ -332,5 +331,10 @@ defineExpose({ open, close });
 .fade-scale-leave-to {
     opacity: 0;
     transform: scaleY(0);
+}
+
+.alert-danger-sm {
+    margin-bottom: 0 !important;
+    padding: 0.3rem !important
 }
 </style>

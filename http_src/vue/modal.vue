@@ -24,10 +24,7 @@
 
             <!-- Modal Footer Section - Action buttons area -->
             <div class="modal-footer">
-               <div class="mr-auto"></div>
                <slot name="footer"></slot> <!-- Footer content from parent -->
-               <!-- Hidden feedback area for testing purposes -->
-               <div class="alert alert-info test-feedback w-100" style="display: none;"></div>
             </div>
          </div>
       </div>
