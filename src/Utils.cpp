@@ -5603,6 +5603,30 @@ void Utils::tlv2lua(lua_State* vm, ndpi_serializer* serializer) {
 
 /* ****************************************************** */
 
+char* Utils::getCountry(char* buf, u_int buf_len, IpAddress* ip) {
+  char *continent = NULL, *country_name = NULL, *city = NULL;
+  float latitude = 0, longitude = 0;
+  
+  if (!ntop->getGeolocation()) {
+    buf[0] = '\0';
+    return (buf);
+  }
+
+  ntop->getGeolocation()->getInfo(ip, &continent, &country_name, &city,
+                                  &latitude, &longitude);
+
+  if (country_name)
+    snprintf(buf, buf_len, "%s", country_name);
+  else
+    buf[0] = '\0';
+
+  ntop->getGeolocation()->freeInfo(&continent, &country_name, &city);
+
+  return (buf);
+}
+
+/* ****************************************************** */
+
 u_int16_t Utils::countryCode2U16(const char* country_code) {
   if (country_code == NULL || strlen(country_code) < 2) return 0;
   return ((((u_int16_t)country_code[0]) << 8) | ((u_int16_t)country_code[1]));

@@ -5435,6 +5435,24 @@ bool Flow::isBlacklistedFlow() const {
 
 /* *************************************** */
 
+char* Flow::getCliCountry(char* buf, u_int buf_len) {
+  if (cli_host)
+    return cli_host->get_country(buf, buf_len);
+  else
+    return get_cli_ip_addr()->get_country(buf, buf_len);
+}
+
+/* *************************************** */
+
+char* Flow::getSrvCountry(char* buf, u_int buf_len) {
+  if (srv_host)
+    return srv_host->get_country(buf, buf_len);
+  else
+    return get_srv_ip_addr()->get_country(buf, buf_len);
+}
+
+/* *************************************** */
+
 bool Flow::isBlacklistedClient() const {
   if (cli_host)
     return cli_host->isBlacklisted();

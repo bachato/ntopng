@@ -28,7 +28,7 @@ class BlacklistedCountry : public FlowCheck {
  private:
   std::set<std::string> blacklisted_countries;
 
-  bool hasBlacklistedCountry(Host* h) const;
+  bool hasBlacklistedCountry(char* country) const;
 
  public:
   BlacklistedCountry()

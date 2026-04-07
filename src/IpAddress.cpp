@@ -118,6 +118,12 @@ bool IpAddress::isEmpty() const {
   return false;
 }
 
+/* *************************************** */
+
+char* IpAddress::get_country(char* buf, u_int buf_len) {
+  return Utils::getCountry(buf, buf_len, this);
+}
+
 /* ******************************************* */
 
 void IpAddress::checkIP() {

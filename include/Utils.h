@@ -301,6 +301,7 @@ class Utils {
   static void tlv2lua(lua_State* vm, ndpi_serializer* serializer);
   static void tlv2serializer(ndpi_serializer* tvl_serializer,
                              ndpi_serializer* serializer);
+  static char* getCountry(char* buf, u_int buf_len, IpAddress* ip);
   static u_int16_t countryCode2U16(const char* country_code);
   static char* countryU162Code(u_int16_t country_u16, char* country_code,
                                size_t country_code_size);

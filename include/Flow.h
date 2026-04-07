@@ -554,6 +554,8 @@ class Flow : public GenericHashEntry {
 
   inline char* getJa4CliHash() { return (protos.tls.ja4.client_hash); }
 
+  char* getCliCountry(char* buf, u_int buf_len);
+  char* getSrvCountry(char* buf, u_int buf_len);
   bool isBlacklistedFlow() const;
   bool isBlacklistedClient() const;
   bool isBlacklistedServer() const;

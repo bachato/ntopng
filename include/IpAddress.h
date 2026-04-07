@@ -143,6 +143,7 @@ class IpAddress {
   inline void setGateway(bool is_gateway) { addr.gateway = is_gateway; }
   /* NOTE: update Host::updateView() when adding new services */
 
+  char* get_country(char* buf, u_int buf_len);
   char* print(char* str, u_int str_len, u_int8_t bitmask = 0xFF) const;
   char* printMask(char* str, u_int str_len, bool isLocalIP);
   bool isLocalHost() const;

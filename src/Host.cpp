@@ -1799,20 +1799,7 @@ void Host::setResolvedName(const char* resolved_name) {
 /* *************************************** */
 
 char* Host::get_country(char* buf, u_int buf_len) {
-  char *continent = NULL, *country_name = NULL, *city = NULL;
-  float latitude = 0, longitude = 0;
-
-  ntop->getGeolocation()->getInfo(&ip, &continent, &country_name, &city,
-                                  &latitude, &longitude);
-
-  if (country_name)
-    snprintf(buf, buf_len, "%s", country_name);
-  else
-    buf[0] = '\0';
-
-  ntop->getGeolocation()->freeInfo(&continent, &country_name, &city);
-
-  return (buf);
+  return Utils::getCountry(buf, buf_len, get_ip());
 }
 
 /* *************************************** */

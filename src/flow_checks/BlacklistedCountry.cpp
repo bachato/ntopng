@@ -24,31 +24,30 @@
 
 /* ***************************************************** */
 
-bool BlacklistedCountry::hasBlacklistedCountry(Host* h) const {
-  char buf[3], *country;
-
-  if (!h) return false;
-
-  country = h->get_country(buf, sizeof(buf));
-
+bool BlacklistedCountry::hasBlacklistedCountry(char *country) const {
+  // Safekeeping, in case the buffer is empty
+  if (!country || country[0] == '\0') {
+    return false;
+  }
   return blacklisted_countries.find(country) != blacklisted_countries.end();
 }
 
 /* ***************************************************** */
 
 void BlacklistedCountry::protocolDetected(Flow* f) {
+  char buf[3];
   u_int8_t c_score, s_score;
+  bool is_client_bl = false, is_server_bl = false;
   risk_percentage cli_score_pctg = CLIENT_FAIR_RISK_PERCENTAGE;
-  bool is_server_bl = false, is_client_bl = false;
 
   if (blacklisted_countries.size() == 0)
     return; /* Check enabled but no blacklisted country is configured */
 
-  if (hasBlacklistedCountry(f->get_cli_host())) {
+  if (hasBlacklistedCountry(f->getCliCountry(buf, sizeof(buf)))) {
     is_client_bl = true;
   }
 
-  if (hasBlacklistedCountry(f->get_srv_host())) {
+  if (hasBlacklistedCountry(f->getSrvCountry(buf, sizeof(buf)))) {
     is_server_bl = true;
     cli_score_pctg = CLIENT_HIGH_RISK_PERCENTAGE; /* Client is being attacked */
   }
@@ -68,8 +67,9 @@ void BlacklistedCountry::protocolDetected(Flow* f) {
 /* ***************************************************** */
 
 FlowAlert* BlacklistedCountry::buildAlert(Flow* f) {
-  bool is_server_bl = hasBlacklistedCountry(f->get_srv_host());
-  bool is_client_bl = hasBlacklistedCountry(f->get_cli_host());
+  char buf[3];
+  bool is_client_bl = hasBlacklistedCountry(f->getCliCountry(buf, sizeof(buf)));
+  bool is_server_bl = hasBlacklistedCountry(f->getSrvCountry(buf, sizeof(buf)));
   BlacklistedCountryAlert* alert =
       new (std::nothrow) BlacklistedCountryAlert(this, f, is_server_bl);
 
