@@ -3085,25 +3085,28 @@ u_int32_t Utils::readIPv4(char* ifname) {
   u_int32_t ret_ip = 0;
 
 #ifndef WIN32
-  struct ifreq ifr;
-  int fd;
+  struct ifaddrs *ifaddr, *ifa;
 
-  memset(&ifr, 0, sizeof(ifr));
-  strncpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name) - 1);
-  ifr.ifr_addr.sa_family = AF_INET;
-
-  if ((fd = Utils::openSocket(AF_INET, SOCK_DGRAM, IPPROTO_IP, "readIPv4")) <
-      0) {
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to create socket");
-  } else {
-    if (ioctl(fd, SIOCGIFADDR, &ifr) == -1)
-      ntop->getTrace()->traceEvent(TRACE_INFO,
-                                   "Unable to read IPv4 for device %s", ifname);
-    else
-      ret_ip = (((struct sockaddr_in*)&ifr.ifr_addr)->sin_addr).s_addr;
-
-    Utils::closeSocket(fd);
+  if (getifaddrs(&ifaddr) == -1) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "getifaddrs failed: %s",
+                                 strerror(errno));
+    return ret_ip;
   }
+
+  for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+    if (ifa->ifa_addr == NULL) continue;
+    if (ifa->ifa_addr->sa_family != AF_INET) continue;
+    if (strcmp(ifa->ifa_name, ifname) != 0) continue;
+
+    ret_ip = ((struct sockaddr_in*)ifa->ifa_addr)->sin_addr.s_addr;
+    break;
+  }
+
+  freeifaddrs(ifaddr);
+
+  if (ret_ip == 0)
+    ntop->getTrace()->traceEvent(TRACE_INFO,
+                                 "Unable to read IPv4 for device %s", ifname);
 #endif
 
   return (ret_ip);
