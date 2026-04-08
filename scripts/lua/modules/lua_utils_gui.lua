@@ -1605,7 +1605,7 @@ function formatInterfaceIP(ip, href)
       ret = ret .. " (".. site ..")"
    end
 
-   if(exporter_name ~= ip) then ret = ret .. '</A> [ <A HREF="' .. ntop.getHttpPrefix() ..'/lua/host_details.lua?host='.. ip .. '">'..ip.."</A>]" end
+   if(exporter_name ~= ip) then ret = ret .. '</A> [<A HREF="' .. ntop.getHttpPrefix() ..'/lua/host_details.lua?host='.. ip .. '">'..ip.."</A>]" end
    ret = ret .. "</a>"
 
    return(ret)
