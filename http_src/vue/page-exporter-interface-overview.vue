@@ -7,8 +7,9 @@
                 @select_option="changeCriteria">
             </SelectSearch>
         </div>
-        <div class="button-group d-flex align-items-center" :class="{ 'w-100': !toggle_slider, 'w-25': toggle_slider }">
-            <div v-if="props.context.isEnterpriseL" class="w-100 d-flex align-items-center button-group">
+        <div v-if="props.context.isEnterpriseXL && props.context.hasClickHouseSupport"
+            class="button-group d-flex align-items-center" :class="{ 'w-100': !toggle_slider, 'w-25': toggle_slider }">
+            <div class="w-100 d-flex align-items-center button-group">
                 <CustomSwitch v-model:value="toggle_slider" :change_label_side="true" :label="toggle_slider_label"
                     style="" class="me-1" icon="fa-calendar-days" :title="toggle_slider_label"
                     @change_value="saveSwitch">
@@ -40,9 +41,9 @@
                 </div>
             </div>
         </Transition>
-        <Transition name="add-effect" mode="out-in">
-            <div class="position-relative" v-if="props.context.isEnterpriseL" :key="reRenderTable"
-                style="min-height: 614px;">
+        <Transition name="add-effect" mode="out-in"
+            v-if="props.context.isEnterpriseXL && props.context.hasClickHouseSupport">
+            <div class="position-relative" :key="reRenderTable" style="min-height: 614px;">
                 <TableWithConfig ref="table_exporter_as_stats" :table_id="table_id" :showLoading="true"
                     :f_map_columns="mapTableColumns" :f_sort_rows="columnsSorting"
                     :get_extra_params_obj="getExtraParameters">
@@ -243,6 +244,10 @@ function onNodeClick(_, node) {
 
 const getExtraParameters = () => {
     let extra_params = ntopng_url_manager.get_url_object();
+    if (!props.context.isEnterpriseXL || !props.context.hasClickHouseSupport) {
+        extra_params.epoch_begin = null
+        extra_params.epoch_end = null
+    }
     return extra_params;
 };
 

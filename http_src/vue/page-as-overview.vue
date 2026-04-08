@@ -45,8 +45,8 @@
                 </div>
             </div>
         </Transition>
-        <Transition name="add-effect" mode="out-in">
-            <div class="position-relative" v-if="props.context.isEnterpriseXL" :key="reRenderTable"
+        <Transition name="add-effect" v-if="props.context.isEnterpriseXL && props.context.hasClickHouseSupport" mode="out-in">
+            <div class="position-relative" :key="reRenderTable"
                 style="min-height: 614px;">
                 <TableWithConfig ref="table_as_stats" :table_id="table_id" :csrf="props.context.csrf"
                     :showLoading="true" :f_map_columns="mapTableColumns" :f_sort_rows="columnsSorting"
