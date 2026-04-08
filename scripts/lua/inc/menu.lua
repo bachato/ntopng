@@ -283,7 +283,7 @@ else
         entries = {
             {
                 entry = page_utils.menu_entries.active_monitoring,
-                hidden = is_windows or interface.isZMQInterface(),
+                hidden = is_windows,
                 url = "/lua/active_monitoring.lua"
             }, {
                 entry = page_utils.menu_entries.network_discovery,
