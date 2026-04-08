@@ -430,6 +430,8 @@ else
   fi
 fi
 
+AC_CHECK_HEADERS([openssl/core_names.h])
+
 AC_MSG_CHECKING([PF_RING nBPF])
 NBPF_HOME=${PWD}/../PF_RING/userland/nbpf
 LIBNBPF=${NBPF_HOME}/libnbpf.a
