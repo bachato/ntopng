@@ -9432,7 +9432,11 @@ bool NetworkInterface::alert_store_query(lua_State* vm, const char* sql,
                                          bool limit_rows) {
   DB* alerts_db = db ? db : clickhouse_flows_db;
 
-  if (!alerts_db) return false;
+  if (!alerts_db) {
+    lua_newtable(vm);
+    lua_pushstring(vm, "no alerts db");
+    return false;
+  }
 
   incNumAlertsQueries();
 

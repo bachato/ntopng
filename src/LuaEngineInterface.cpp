@@ -1052,11 +1052,7 @@ static int ntop_interface_exec_sql_query(lua_State* vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
   }
 
-  if (curr_iface->execSQLQuery(vm, sql, limit_rows, wait_for_db_created) < 0) {
-    /* stack top: [empty_table, error_string] — replace empty_table with nil */
-    lua_pushnil(vm);     /* [empty_table, error_string, nil] */
-    lua_replace(vm, -3); /* [nil, error_string] */
-  }
+  curr_iface->execSQLQuery(vm, sql, limit_rows, wait_for_db_created);
 
   /* stack top: [result_table_or_nil, error_or_nil] */
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_TWO_RETURN_VALUES));
@@ -1347,21 +1343,15 @@ static int ntop_interface_alert_store_query(lua_State* vm) {
   if (lua_type(vm, 3) == LUA_TBOOLEAN)
     limit_rows = lua_toboolean(vm, 3) ? true : false;
 
-  if (!iface || !query) {
-    lua_pushnil(vm);
+  if (!iface || !query)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  }
 
-  if (ntop->getPrefs()->are_alerts_disabled()) {
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-  }
-
-  if (!iface->alert_store_query(vm, query, limit_rows)) {
-    lua_pushnil(vm);
+  if (ntop->getPrefs()->are_alerts_disabled())
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  }
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
+  iface->alert_store_query(vm, query, limit_rows);
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_TWO_RETURN_VALUES));
 }
 
 /* ****************************************** */
@@ -6253,17 +6243,10 @@ static int ntop_exec_in_memory_sql_query(lua_State* vm) {
   sql = (char*)lua_tostring(vm, 1);
 
   if (db == NULL)
-    lua_pushnil(vm);
-  else {
-    if(db->execSQLQuery(vm, sql, false, false) < 0) {
-      /* stack top: [empty_table, error_string] — replace empty_table with nil */
-      lua_pushnil(vm);     /* [empty_table, error_string, nil] */
-      lua_replace(vm, -3); /* [nil, error_string] */
-    }
-  }
-  
-  // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", sql);
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
 
+  db->execSQLQuery(vm, sql, false, false);
+  
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_TWO_RETURN_VALUES));
 }
 
