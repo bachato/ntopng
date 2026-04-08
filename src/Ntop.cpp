@@ -32,6 +32,10 @@
 #include <openssl/sha.h>
 #include <openssl/ec.h>
 #include <openssl/ecdsa.h>
+#include <openssl/evp.h>
+#include <openssl/core_names.h>   // OSSL_PKEY_PARAM_GROUP_NAME, etc.
+#include <openssl/param_build.h>  // OSSL_PARAM_BLD
+#include <openssl/bn.h>
 #include <vector>
 
 Ntop* ntop;
@@ -3010,28 +3014,44 @@ static bool json_get_str(const char* json, const char* key,
 /* Verify a DER-encoded ECDSA-P256 signature over data using public key (x,y).
  * Internally hashes data with SHA-256 before verifying. */
 static bool verify_ecdsa_p256(const uint8_t* pk_x, const uint8_t* pk_y,
-                               const uint8_t* data, size_t data_len,
-                               const uint8_t* sig, int sig_len) {
+			      const uint8_t* data, size_t data_len,
+			      const uint8_t* sig, size_t sig_len) {
   bool ok = false;
-  EC_KEY* key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
-  if (!key) return false;
+  EVP_PKEY* pkey = NULL;
+  EVP_PKEY_CTX* ctx = NULL;
+  OSSL_PARAM_BLD* param_bld = OSSL_PARAM_BLD_new();
+  OSSL_PARAM* params = NULL;
 
-  BIGNUM* bx = BN_bin2bn(pk_x, 32, NULL);
-  BIGNUM* by = BN_bin2bn(pk_y, 32, NULL);
-  if (!bx || !by) goto done;
-  if (!EC_KEY_set_public_key_affine_coordinates(key, bx, by)) goto done;
+  // 1. Costruisci i parametri della chiave pubblica (P-256)
+  OSSL_PARAM_BLD_push_utf8_string(param_bld, OSSL_PKEY_PARAM_GROUP_NAME, "prime256v1", 0);
+  OSSL_PARAM_BLD_push_BN(param_bld, OSSL_PKEY_PARAM_EC_PUB_X, BN_bin2bn(pk_x, 32, NULL));
+  OSSL_PARAM_BLD_push_BN(param_bld, OSSL_PKEY_PARAM_EC_PUB_Y, BN_bin2bn(pk_y, 32, NULL));
 
-  {
-    uint8_t hash[32];
-    SHA256(data, data_len, hash);
-    ok = (ECDSA_verify(0, hash, (int)sizeof(hash), sig, sig_len, key) == 1);
+  params = OSSL_PARAM_BLD_to_param(param_bld);
+  ctx = EVP_PKEY_CTX_new_from_name(NULL, "EC", NULL);
+
+  if (!ctx || EVP_PKEY_fromdata_init(ctx) <= 0 ||
+      EVP_PKEY_fromdata(ctx, &pkey, EVP_PKEY_PUBLIC_KEY, params) <= 0) {
+    goto cleanup;
   }
-done:
-  if (bx) BN_free(bx);
-  if (by) BN_free(by);
-  EC_KEY_free(key);
+
+  // 2. Verifica della firma con digest integrato
+  {
+    EVP_MD_CTX* mctx = EVP_MD_CTX_new();
+    if (EVP_DigestVerifyInit(mctx, NULL, EVP_sha256(), NULL, pkey) > 0) {
+      ok = (EVP_DigestVerify(mctx, sig, sig_len, data, data_len) == 1);
+    }
+    EVP_MD_CTX_free(mctx);
+  }
+
+ cleanup:
+  OSSL_PARAM_BLD_free(param_bld);
+  OSSL_PARAM_free(params);
+  EVP_PKEY_free(pkey);
+  EVP_PKEY_CTX_free(ctx);
   return ok;
 }
+			      
 
 /* ---------- Ntop WebAuthn method implementations ---------- */
 
