@@ -262,6 +262,7 @@ int SQLiteStoreManager::execSQLQuery(lua_State* vm, const char* sql,
   int rc = SQLITE_ERROR;
   SQLiteDataRetriever ar;
   char* zErrMsg = NULL;
+  bool failure = false;
 
   m.lock(__FILE__, __LINE__);
 
@@ -277,12 +278,21 @@ int SQLiteStoreManager::execSQLQuery(lua_State* vm, const char* sql,
     ntop->getTrace()->traceEvent(TRACE_ERROR, "SQL Error: %s\n%s", zErrMsg,
                                  sql);
     lua_pushstring(vm, zErrMsg ? zErrMsg : "unknown error");
+    failure = true;
     sqlite3_free(zErrMsg);
   } else {
     lua_pushnil(vm); /* no error */
   }
 
   m.unlock(__FILE__, __LINE__);
+
+  if (failure) {
+   /* stack top: [empty_table, error_string] — replace empty_table with nil */
+    lua_pushnil(vm);     /* [empty_table, error_string, nil] */
+    lua_replace(vm, -3); /* [nil, error_string] */
+  } else {
+    /* stack top: [table, nil] */
+  }
 
   return (rc == SQLITE_OK ? 0 : -1);
 }
