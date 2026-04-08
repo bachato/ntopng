@@ -240,27 +240,26 @@ int ntop_lua_return_value(lua_State* vm, const char* function_name, int val) {
   bool show_warning;
 
   switch (val) {
-    case CONST_LUA_OK:
-      show_warning = true;
-      break;
-
-    default:
-      show_warning = false; /* CONST_LUA_PARAM_ERROR and CONST_LUA_ERROR */
-      break;
+  case CONST_LUA_NO_RETURN_VALUE:
+    show_warning = false;
+    break;
+    
+  default:
+    show_warning = true;
+    break;
   }
-
+  
   if (lua_gettop(vm) == 0) {
     if (show_warning) {
-      ntop->getTrace()->traceEvent(
-          TRACE_ERROR, "[INTERNAL ERROR] Invalid lua VM state returned by %s()",
-          function_name);
+      ntop->getTrace()->traceEvent(TRACE_ERROR,
+				   "[INTERNAL ERROR] Invalid lua VM state returned by %s()",
+				   function_name);
       ntop->getTrace()->traceEvent(TRACE_ERROR,
                                    "[INTERNAL ERROR] Please report it here "
                                    "https://github.com/ntop/ntopng/issues");
     }
 
-    lua_pushnil(
-        vm); /* Add dummy push to make sure the stack has a return value */
+    lua_pushnil(vm); /* Add dummy push to make sure the stack has a return value */
   }
 
   return (val);
