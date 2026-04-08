@@ -183,7 +183,7 @@ local function scan_check(params)
          "AND ip_src IS NOT NULL AND ip_dst IS NOT NULL ORDER BY total_flows DESC " ..
          "LIMIT 1000", tonumber(interface.getId()), interval_begin, interval_end, interval_end, threshold)
 
-   local results_port_query = interface.execSQLQuery(q_port)
+   local results_port_query,err = interface.execSQLQuery(q_port)
    local results_port = iterative_src_dst_alert(params, results_port_query, false, "Port")
 
    -- Service down
@@ -201,7 +201,8 @@ local function scan_check(params)
                                            "HAVING count_src_ports >= %u AND ip_src IS NOT NULL AND ip_dst IS NOT NULL " .. 
                                            "ORDER BY total_flows DESC " .. "LIMIT 500",
       tonumber(interface.getId()), interval_begin, interval_end, interval_end, 50)
-   local results_service_down = interface.execSQLQuery(q_service_down)
+
+   local results_service_down, rerr = interface.execSQLQuery(q_service_down)
    for _, row in ipairs(results_service_down) do
       local vlan_id = tonumber(row.vlan_id) or 0
       local attacker_ip = row.ip_src
@@ -232,8 +233,10 @@ local function scan_check(params)
          "AND DST2SRC_PACKETS <= 1 " .. "GROUP BY vlan_id, ip_src, dst_port, src_location, " .. "src_blacklisted, src_name " ..
          "HAVING count_ip_dst >= %u AND ip_src IS NOT NULL " .. "ORDER BY total_flows DESC " .. "LIMIT 1000", tonumber(interface.getId()), interval_begin,
       interval_end, interval_end, 50)
-   local results_service = interface.execSQLQuery(q_service)
+
+   local results_service,s_err = interface.execSQLQuery(q_service)
    local service_attackers = {}
+   
    for _, row in ipairs(results_service) do
       local vlan_id = tonumber(row.vlan_id) or 0
       local attacker_ip = row.ip_src
@@ -268,7 +271,8 @@ local function scan_check(params)
          "AND (FIRST_SEEN >= %u AND FIRST_SEEN <= %u AND LAST_SEEN <= %u) " .. "AND L7_PROTO != 5 " .. "AND DST2SRC_PACKETS <= 1 " ..
          "GROUP BY vlan_id, ip_src, dst_network, src_location, " .. "src_blacklisted, src_name " .. "HAVING count_ip_dst >= %u AND ip_src IS NOT NULL " ..
          "ORDER BY total_flows DESC " .. "LIMIT 1000", tonumber(interface.getId()), interval_begin, interval_end, interval_end, 100)
-   local results_network = interface.execSQLQuery(q_network)
+
+   local results_network, n_err = interface.execSQLQuery(q_network)
    for _, row in ipairs(results_network) do
       local vlan_id = tonumber(row.vlan_id) or 0
       local attacker_ip = row.ip_src

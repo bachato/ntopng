@@ -52,7 +52,7 @@ function vs_db_utils.retrieve_scan_result(scan_type, host, end_epoch)
     if not ntop.isClickHouseEnabled() then return end
     local sql = "SELECT VS_RESULT_FILE FROM %s WHERE HOST = '%s' AND SCAN_TYPE = '%s' AND LAST_SCAN = %u;"
     sql = string.format(sql, data_table_name, host, scan_type, tonumber(end_epoch))
-    local res = interface.execSQLQuery(sql)
+    local res,err = interface.execSQLQuery(sql)
     local response = ""
     -- replace back all the "|" with "'"
     for _, item in ipairs(res) do
@@ -93,7 +93,7 @@ function vs_db_utils.retrieve_reports(sort_item, epoch)
     
     sql = string.format(sql,report_table_name, sort_item)
 
-    local query_result = interface.execSQLQuery(sql)
+    local query_result,err = interface.execSQLQuery(sql)
     local result = {}
 
     -- format data
@@ -124,7 +124,7 @@ function vs_db_utils.retrieve_report(epoch)
                 "WHERE REPORT_DATE = %u"
     sql = string.format(sql,report_table_name, tonumber(epoch))
 
-    local query_result = interface.execSQLQuery(sql)
+    local query_result,err = interface.execSQLQuery(sql)
     local result = {}
     local report_info
 
@@ -156,7 +156,7 @@ function vs_db_utils.retrieve_report_name(epoch)
                 "WHERE REPORT_DATE = %u"
     sql = string.format(sql,report_table_name, tonumber(epoch))
 
-    local query_result = interface.execSQLQuery(sql)
+    local query_result,err = interface.execSQLQuery(sql)
     local report_name
 
     -- format data

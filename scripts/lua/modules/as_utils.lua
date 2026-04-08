@@ -410,9 +410,11 @@ function as_utils.retrieveASHistoricalTraffic(options)
             ") GROUP BY asn", where, ternary(isEmptyString(src_asn_filters), "", " AND " .. src_asn_filters), where,
         ternary(isEmptyString(dst_asn_filters), "", " AND " .. dst_asn_filters))
 
-    local historical_asn_stats = interface.execSQLQuery(query) or {}
+    local historical_asn_stats,err = interface.execSQLQuery(query)
     local asn_stats = {}
 
+    historical_asn_stats = historical_asn_stats or {}
+    
     if (perform_profiling) then
         traceError(TRACE_NORMAL, TRACE_CONSOLE,
             string.format("[ASN Profiling][Time: %s] End request to DB (Historical)\n", os.time()))

@@ -95,7 +95,7 @@ end
 -- Execute a query via the C++ ClickHouse native client.
 -- Returns a list of row-tables on success, nil on failure.
 local function ch_query(sql)
-   local res = interface.execSQLQuery(sql, false --[[no row limit]], false --[[don't wait for db]])
+   local res,err = interface.execSQLQuery(sql, false --[[no row limit]], false --[[don't wait for db]])
    if type(res) ~= "table" then
       return nil
    end

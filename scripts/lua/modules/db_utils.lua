@@ -208,7 +208,7 @@ function getInterfaceTopFlows(interface_id, version, host_or_profile, peer, l7pr
 
    if(db_debug == true) then io.write(sql.."\n") end
 
-   res = interface.execSQLQuery(sql, false) -- do not limit the maximum number of flows
+   local res,err = interface.execSQLQuery(sql, false) -- do not limit the maximum number of flows
    if(type(res) == "string") then
       if(db_debug == true) then io.write(res.."\n") end
       return {}
@@ -236,7 +236,7 @@ function getFlowInfo(interface_id, version, flow_idx)
 
    if(db_debug == true) then io.write(sql.."\n") end
 
-   res = interface.execSQLQuery(sql)
+   local res,err = interface.execSQLQuery(sql)
    if(type(res) == "string") then
       if(db_debug == true) then io.write(res.."\n") end
       return {}
@@ -309,7 +309,7 @@ function getNumFlows(interface_id, version, host, protocol, port, l7proto, info,
    end
 
    if(db_debug == true) then io.write(sql.."\n") end
-   res = interface.execSQLQuery(sql)
+   local res,err = interface.execSQLQuery(sql)
 
    if(type(res) == "string") then
       if(db_debug == true) then io.write(res.."\n") end
@@ -434,7 +434,7 @@ function getOverallTopTalkers(interface_id, l4proto, port, vlan, profile, info, 
 
    if(db_debug == true) then io.write(sql.."\n") end
 
-   res = interface.execSQLQuery(sql)
+   local res,err = interface.execSQLQuery(sql)
    if(type(res) == "string") then
       if(db_debug == true) then io.write(res.."\n") end
       return {}
@@ -541,7 +541,7 @@ function getHostTopTalkers(interface_id, host, l7_proto_id, l4_proto_id, port, v
 
    if(db_debug == true) then io.write(sql.."\n") end
 
-   res = interface.execSQLQuery(sql)
+   local res,err = interface.execSQLQuery(sql)
 
    if(type(res) == "string") then
       if(db_debug == true) then io.write(res.."\n") end
@@ -667,7 +667,8 @@ function getAppTopTalkers(interface_id, l7_proto_id, l4_proto_id, port, vlan, pr
 
    if(db_debug == true) then io.write(sql.."\n") end
 
-   res = interface.execSQLQuery(sql)
+   local res,err = interface.execSQLQuery(sql)
+   
    if(type(res) == "string") then
       if(db_debug == true) then io.write(res.."\n") end
       return {}
@@ -760,7 +761,8 @@ function getTopApplications(interface_id, peer1, peer2, l7_proto_id, l4_proto_id
 
    if(db_debug == true) then io.write(sql.."\n") end
 
-   res = interface.execSQLQuery(sql)
+   local res,err = interface.execSQLQuery(sql)
+   
    if(type(res) == "string") then
       if(db_debug == true) then io.write(res.."\n") end
       return {}

@@ -114,7 +114,7 @@ local function domains_check(params)
       threshold
    )
 
-   local results = interface.execSQLQuery(q)
+   local results,err = interface.execSQLQuery(q)
 
    for _, row in ipairs(results) do
       local count = tonumber(row.count) or 0

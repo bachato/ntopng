@@ -76,7 +76,7 @@ if page == "overview" or not page then
     -- Get the first record time, if any
     if ntop.isClickHouseEnabled() then
         show_historical = true
-        local res = interface.execSQLQuery("SELECT FIRST_SEEN FROM hourly_asn ORDER BY FIRST_SEEN ASC LIMIT 1")
+        local res,err = interface.execSQLQuery("SELECT FIRST_SEEN FROM hourly_asn ORDER BY FIRST_SEEN ASC LIMIT 1")
         if res and type(res) == "table" and #res > 0 then
             first_seen = tonumber(res[1]["FIRST_SEEN"])
         end
