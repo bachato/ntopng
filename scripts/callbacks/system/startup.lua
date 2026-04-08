@@ -301,7 +301,7 @@ if (ntop.isPro()) then
         -- Check if DB column types are good or need to be fixed
         interface.select(getSystemInterfaceId())
         local db_migration_required = false
-        local res = interface.execSQLQuery("DESCRIBE flows")
+        local res, err = interface.execSQLQuery("DESCRIBE flows")
         if res and type(res) == "table" then
             for _, row in ipairs(res) do
                 if row['name'] == 'SRC_NETWORK_ID' or row['name'] == 'DST_NETWORK_ID' then
