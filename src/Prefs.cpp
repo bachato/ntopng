@@ -3446,6 +3446,13 @@ void Prefs::validate() {
     dump_flows_on_clickhouse = false;
   }
 
+  if (timeseries_driver == ts_driver_clickhouse && !do_dump_flows_on_clickhouse()) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "ClickHouse timeseries enabled in preferences but ClickHouse is not "
+        "available (-F clickhouse not set): disabling ClickHouse timeseries, falling back to RRD");
+    timeseries_driver = ts_driver_rrd;
+    ntop->getRedis()->set((char *)CONST_RUNTIME_PREFS_TS_DRIVER, (char *)"rrd");
+  }
+
   /* Use max num flows as upper limit for flows/hosts cache size to avoid
    * configuration mistakes */
   /* Note: check the size here, after detecting the model (and setting the
