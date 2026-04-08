@@ -174,7 +174,7 @@ function flow_data_historical.retrieveFlowData(select_columns, where_filters,
                       "SELECT %s FROM %s WHERE %s GROUP BY %s %s LIMIT 2000", -- Upper floor
                       select_query, TABLE_NAME, where, group_by, order_by)
 
-    -- tprint(query)
+    --query = "SELECT * FROM hourly_asn"
     if isHistorical and hasClickHouseSupport() then
         results = interface.execSQLQuery(query) or {}
     else

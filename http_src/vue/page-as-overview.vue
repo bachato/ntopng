@@ -8,21 +8,25 @@
                 @select_option="changeCriteria">
             </SelectSearch>
         </div>
-        <div v-if="props.context.isEnterpriseXL" class="w-100 d-flex align-items-center button-group">
+        <div v-if="props.context.isEnterpriseXL && props.context.hasClickHouseSupport" class="w-100 d-flex align-items-center button-group">
+            <!--
             <CustomSwitch v-model:value="toggle_slider" :change_label_side="true" :label="toggle_slider_label" style=""
                 class="me-1" icon="fa-calendar-days" :title="toggle_slider_label" @change_value="saveSwitch">
             </CustomSwitch>
+            -->
             <div class="w-100 position-relative">
                 <Transition name="add-effect" mode="out-in">
-                    <DateTimeRangePicker v-if="!toggle_slider" class="dontprint" id="as-date-time-picker"
+                    <DateTimeRangePicker class="dontprint" id="as-date-time-picker"
                         :round_time="true" :custom_time_interval_list="time_preset_list" min_time_interval_id="live"
                         :custom_change_select_time="changeTime" @epoch_change="setTimeInterval">
                     </DateTimeRangePicker>
                 </Transition>
+                <!--
                 <Transition name="add-effect" mode="out-in">
                     <DateSlider v-if="toggle_slider" id="as-date-slider" :min_epoch="first_date_epoch"
                         @epoch_change="setTimeInterval" style="width: 100%" />
                 </Transition>
+                -->
             </div>
         </div>
     </div>
@@ -35,18 +39,18 @@
                     <Sankey v-if="show_sankey" ref="sankey_chart" :no_data_message="no_data_message"
                         :sankey_data="sankey_data" @node_click="onNodeClick" @autorefresh_toggle="onAutoRefreshToggle">
                     </Sankey>
-                    <Pie v-if="show_pie" :key="reRenderPie" ref="pie_chart" :no_data_message="no_data_message" :pie_data="pie_data"
-                        @autorefresh_toggle="onAutoRefreshToggle">>
+                    <Pie v-if="show_pie" :key="reRenderPie" ref="pie_chart" :no_data_message="no_data_message"
+                        :pie_data="pie_data" @autorefresh_toggle="onAutoRefreshToggle">>
                     </Pie>
                 </div>
             </div>
         </Transition>
         <Transition name="add-effect" mode="out-in">
-            <div class="position-relative" v-if="props.context.isEnterpriseXL" :key="reRenderTable" style="min-height: 614px;">
-                <TableWithConfig ref="table_as_stats" :table_id="table_id"
-                    :csrf="props.context.csrf" :showLoading="true" :f_map_columns="mapTableColumns"
-                    :f_sort_rows="columnsSorting" :get_extra_params_obj="getExtraParameters"
-                    @custom_event="onTableCustomEvent">
+            <div class="position-relative" v-if="props.context.isEnterpriseXL" :key="reRenderTable"
+                style="min-height: 614px;">
+                <TableWithConfig ref="table_as_stats" :table_id="table_id" :csrf="props.context.csrf"
+                    :showLoading="true" :f_map_columns="mapTableColumns" :f_sort_rows="columnsSorting"
+                    :get_extra_params_obj="getExtraParameters" @custom_event="onTableCustomEvent">
                 </TableWithConfig>
             </div>
         </Transition>
@@ -331,6 +335,10 @@ function onNodeClick(_, node) {
 
 const getExtraParameters = () => {
     let extra_params = ntopng_url_manager.get_url_object();
+    if (!props.context.isEnterpriseXL || !props.context.hasClickHouseSupport) {
+        extra_params.epoch_begin = null
+        extra_params.epoch_end = null
+    }
     return extra_params;
 };
 
@@ -436,7 +444,7 @@ const mapTableColumns = (columns) => {
             if (dataUtils.isEmptyString(value.name)) {
                 return value.id
             }
-            if(!dataUtils.isEmptyString(value.url)){
+            if (!dataUtils.isEmptyString(value.url)) {
                 return `<a href="${value.url}" title="${value.id}">${value.name}</a>`
             }
             return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;
@@ -445,7 +453,7 @@ const mapTableColumns = (columns) => {
             if (dataUtils.isEmptyString(value.name)) {
                 return value.id
             }
-            if(!dataUtils.isEmptyString(value.url)){
+            if (!dataUtils.isEmptyString(value.url)) {
                 return `<a href="${value.url}" title="${value.id}">${value.name}</a>`
             }
             return `<span data-bs-toggle="tooltip" data-bs-placement="top" title="${value.id}">${value.name}</span>`;

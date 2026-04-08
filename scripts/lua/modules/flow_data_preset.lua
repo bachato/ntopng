@@ -273,7 +273,7 @@ function flow_data_preset.convertFilters(where, available_filters, isHistorical)
     end
 
     -- Ifid filter is mandatory, add it in case it's missing, only in live data
-    if not where_query["ifid"] and not where_query["INTERFACE_ID"] then
+    if isHistorical and not where_query["ifid"] and not where_query["INTERFACE_ID"] then
         local ifid = available_filters["ifid"] or interface.getId() -- Use current ifid
         where_query["INTERFACE_ID"] = ifid
     end

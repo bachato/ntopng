@@ -70,7 +70,7 @@ if criteria_as == "ingress_egress_traffic_criteria" then
             }
         }
     }
-elseif isEmptyString(criteria) or (criteria == "traffic_between_ases") then
+elseif isEmptyString(criteria_as) or (criteria_as == "traffic_between_ases") then
     queries = {
         {
             select_query = {

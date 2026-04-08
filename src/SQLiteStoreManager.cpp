@@ -269,6 +269,9 @@ int SQLiteStoreManager::execSQLQuery(lua_State* vm, const char* sql,
 
   ar.vm = vm, ar.current_offset = 0;
   rc = sqlite3_exec(db, sql, process_sqlite_row, (void*)&ar, &zErrMsg);
+  
+  //ntop->getTrace()->traceEvent(TRACE_NORMAL, "SQL Query: %s", sql);
+  //ntop->getTrace()->traceEvent(TRACE_NORMAL, "Last Offset: %d", ar.current_offset);
 
   if (rc != SQLITE_OK) {
     ntop->getTrace()->traceEvent(TRACE_ERROR, "SQL Error: %s\n%s", zErrMsg,

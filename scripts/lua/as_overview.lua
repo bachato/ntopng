@@ -17,7 +17,6 @@ local asn = _GET["asn"]
 local criteria_as = _GET["criteria_as"]
 local tableId = "ingress_egress_as_stats"
 local page = _GET["page"]
-local is_asn_mode_enabled = isASNModeEnabled()
 
 if (not criteria_as) or (criteria_as == "traffic_between_ases") then
     tableId = "traffic_between_ases"
@@ -91,7 +90,7 @@ if page == "overview" or not page then
             configuration = as_utils.getASNConfiguration(asn),
             isEnterpriseXL = ntop.isEnterpriseXL(),
             tableId = tableId,
-            historical = show_historical,
+            hasClickHouseSupport = show_historical,
             first_date_epoch = first_seen,
             showTimeseries = areASTimeseriesEnabled(interface.getId())
         })
