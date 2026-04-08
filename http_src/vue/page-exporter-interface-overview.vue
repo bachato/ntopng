@@ -50,9 +50,6 @@
                 </TableWithConfig>
             </div>
         </Transition>
-        <div class="card-footer">
-            <NoteList :note_list="note_list"> </NoteList>
-        </div>
     </div>
 </template>
 
@@ -101,9 +98,6 @@ const time_preset_list = [
 ]
 const sankey_format_list = [
     { key: "criteria_exporter_interface_view", value: 'traffic_with_ases', label: _i18n('exporter_interface_overview.as_view') },
-];
-const note_list = [
-    _i18n("exporter_interface_overview.note_ingress_egress"),
 ];
 
 /* ************************************** */
