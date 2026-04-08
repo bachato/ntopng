@@ -644,9 +644,16 @@
 #define CONST_DEFAULT_NTOP_USER "ntopng"
 #define CONST_TOO_EARLY "TooEarly"
 
+#define CONST_LUA_ONE_RETURN_VALUE   1
+#define CONST_LUA_TWO_RETURN_VALUES  2
+#define CONST_LUA_NO_RETURN_VALUE    0
+
 #define CONST_LUA_OK 1
 #define CONST_LUA_ERROR 0
 #define CONST_LUA_PARAM_ERROR -1
+
+
+
 #define CONST_MAX_NUM_SYN_PER_SECOND                                       \
   25                                  /* keep in sync with alert_utils.lua \
                                        */

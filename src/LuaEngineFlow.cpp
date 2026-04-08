@@ -37,7 +37,7 @@ static int ntop_flow_get_bytes(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* ****************************************** */
@@ -52,7 +52,7 @@ static int ntop_flow_get_cli2srv_bytes(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* ****************************************** */
@@ -67,7 +67,7 @@ static int ntop_flow_get_srv2cli_bytes(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -84,7 +84,7 @@ static int ntop_flow_get_client(lua_State* vm) {
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -99,7 +99,7 @@ static int ntop_flow_get_client_port(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -116,7 +116,7 @@ static int ntop_flow_get_server(lua_State* vm) {
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -131,7 +131,7 @@ static int ntop_flow_get_server_port(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -146,7 +146,7 @@ static int ntop_flow_get_protocol(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -161,7 +161,7 @@ static int ntop_flow_get_vlan_id(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -176,7 +176,7 @@ static int ntop_flow_get_l7_master_proto(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -191,7 +191,7 @@ static int ntop_flow_get_l7_proto(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -219,7 +219,7 @@ static int ntop_flow_get_direction(lua_State* vm) {
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -231,7 +231,7 @@ static int ntop_flow_is_oneway(lua_State* vm) {
 
   lua_pushboolean(vm, f ? f->isOneWay() : false);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -243,7 +243,7 @@ static int ntop_flow_is_unicast(lua_State* vm) {
 
   lua_pushboolean(vm, f ? f->isUnicast() : false);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -260,7 +260,7 @@ static int ntop_flow_get_l7_proto_name(lua_State* vm) {
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -276,7 +276,7 @@ static int ntop_flow_get_l7_proto_http(lua_State* vm) {
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -292,7 +292,7 @@ static int ntop_flow_get_l7_proto_dns(lua_State* vm) {
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -308,7 +308,7 @@ static int ntop_flow_get_l7_proto_ssh(lua_State* vm) {
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -324,7 +324,7 @@ static int ntop_flow_get_l7_proto_tls_quic(lua_State* vm) {
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -339,18 +339,18 @@ static int ntop_trigger_flow_alert(lua_State* vm) {
     char* msg;
 
     if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
-      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
     value = (u_int32_t)lua_tointeger(vm, 1);
 
     if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
-      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
     msg = (char*)lua_tostring(vm, 2);
 
     f->triggerCustomFlowAlert(value, msg);
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */

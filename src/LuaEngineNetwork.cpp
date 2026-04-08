@@ -34,7 +34,7 @@ static int ntop_network_get_network_stats(lua_State* vm) {
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* ****************************************** */
@@ -50,7 +50,7 @@ static int ntop_select_local_network(lua_State* vm) {
     local_network_id = (u_int32_t)-1;
   else {
     if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
-      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
     local_network_id = (u_int32_t)lua_tointeger(vm, 1);
   }
 
@@ -59,7 +59,7 @@ static int ntop_select_local_network(lua_State* vm) {
 
   // lua_pop(vm, 1); /* Cleanup the Lua stack */
   lua_pushnil(vm);
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* ****************************************** */
@@ -82,9 +82,10 @@ static int ntop_network_check_context(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+
   if ((entity_val = (char*)lua_tostring(vm, 1)) == NULL)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
 
   if ((c->network == NULL) ||
       (strcmp(c->network->getEntityValue().c_str(), entity_val)) != 0) {
@@ -102,7 +103,7 @@ static int ntop_network_check_context(lua_State* vm) {
 
   lua_pushboolean(vm, ret);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* ****************************************** */
@@ -117,23 +118,23 @@ static int ntop_network_get_cached_alert_value(lua_State* vm) {
 
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
-  if (!ns) return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+  if (!ns) return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
 
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
   if ((key = (char*)lua_tostring(vm, 1)) == NULL)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
 
   if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
   if ((periodicity = (ScriptPeriodicity)lua_tointeger(vm, 2)) >=
       MAX_NUM_PERIODIC_SCRIPTS)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
 
   val = ns->getAlertCachedValue(std::string(key), periodicity);
   lua_pushstring(vm, val.c_str());
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* ****************************************** */
@@ -147,31 +148,33 @@ static int ntop_network_set_cached_alert_value(lua_State* vm) {
 
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
 
-  if (!ns) return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+  if (!ns) return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
 
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
   if ((key = (char*)lua_tostring(vm, 1)) == NULL)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
 
   if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+
   if ((value = (char*)lua_tostring(vm, 2)) == NULL)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
 
   if (ntop_lua_check(vm, __FUNCTION__, 3, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+  
   if ((periodicity = (ScriptPeriodicity)lua_tointeger(vm, 3)) >=
       MAX_NUM_PERIODIC_SCRIPTS)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
 
   if ((!key) || (!value))
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_PARAM_ERROR));
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
 
   ns->setAlertCacheValue(std::string(key), std::string(value), periodicity);
   lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* ****************************************** */
@@ -205,7 +208,7 @@ static int ntop_network_reset_traffic_between_nets(lua_State* vm) {
 #endif
 
   lua_pushnil(vm);
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */

@@ -39,7 +39,7 @@ static int ntop_host_get_ip(lua_State* vm) {
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -58,7 +58,7 @@ static int ntop_host_get_mac(lua_State* vm) {
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -75,7 +75,7 @@ static int ntop_host_get_name(lua_State* vm) {
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -90,7 +90,7 @@ static int ntop_host_get_vlan_id(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -105,7 +105,7 @@ static int ntop_host_get_score(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -117,7 +117,7 @@ static int ntop_host_is_local(lua_State* vm) {
 
   lua_pushboolean(vm, h ? h->isLocalHost() : false);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -130,7 +130,7 @@ static int ntop_host_is_unicast(lua_State* vm) {
 
   lua_pushboolean(vm, ip ? (!ip->isBroadMulticastAddress()) : true);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -143,7 +143,7 @@ static int ntop_host_is_multicast(lua_State* vm) {
 
   lua_pushboolean(vm, ip ? ip->isMulticastAddress() : false);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -156,7 +156,7 @@ static int ntop_host_is_broadcast(lua_State* vm) {
 
   lua_pushboolean(vm, ip ? ip->isBroadcastAddress() : false);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -168,7 +168,7 @@ static int ntop_host_is_blacklisted(lua_State* vm) {
 
   lua_pushboolean(vm, h ? h->isBlacklisted() : false);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -180,7 +180,7 @@ static int ntop_host_is_rx_only(lua_State* vm) {
 
   lua_pushboolean(vm, h ? h->isRxOnlyHost() : false);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -195,7 +195,7 @@ static int ntop_host_get_bytes_sent(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -210,7 +210,7 @@ static int ntop_host_get_bytes_rcvd(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -225,7 +225,7 @@ static int ntop_host_get_bytes_total(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -246,7 +246,7 @@ static int ntop_host_get_l7_stats(lua_State* vm) {
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -274,7 +274,7 @@ static int ntop_skip_visited_host(lua_State* vm) {
 
   lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -289,18 +289,18 @@ static int ntop_trigger_host_alert(lua_State* vm) {
     char* msg;
 
     if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
-      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
     value = (u_int32_t)lua_tointeger(vm, 1);
 
     if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
-      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
     msg = (char*)lua_tostring(vm, 2);
 
     h->triggerCustomHostAlert(value, msg);
   } else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -315,7 +315,7 @@ static int ntop_get_num_contacted_peers_as_client_tcp_udp_notx(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -330,7 +330,7 @@ static int ntop_get_unidirectional_tcp_udp_flows_stats(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -346,7 +346,7 @@ static int ntop_get_num_contacts_from_peers_as_server_tcp_udp_notx(
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -361,7 +361,7 @@ static int ntop_get_num_contacted_tcp_udp_server_ports_notx(lua_State* vm) {
   else
     lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -375,7 +375,7 @@ static int ntop_reset_host_contacts(lua_State* vm) {
 
   lua_pushnil(vm);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
@@ -387,7 +387,7 @@ static int ntop_is_first_check_run(lua_State* vm) {
 
   lua_pushboolean(vm, h ? h->isCustomHostScriptFirstRun() : false);
 
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* **************************************************************** */
