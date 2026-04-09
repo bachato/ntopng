@@ -461,7 +461,7 @@ class Flow : public GenericHashEntry {
 #endif
   void updateMac();
   void decodeTCPstats(u_int32_t v, TCPStats* stats);
-  void getTCPFlagsJSON(ndpi_serializer* serializer, TCPStats* stats,
+  void serializeTCPFlagsJSON(ndpi_serializer* serializer, TCPStats* stats,
                        const char* label);
   void allocTCPStats();
   void allocUDPStats();
@@ -550,8 +550,8 @@ class Flow : public GenericHashEntry {
   const char* getDomainName();
   void callFlowUpdate(time_t t);
   void setProtocolJSONInfo();
-  void getProtocolJSONInfo(ndpi_serializer* serializer);
-  void getCustomFieldsInfo(ndpi_serializer* serializer);
+  void serializeProtocolJSONInfo(ndpi_serializer* serializer);
+  void serializeCustomFieldsInfo(ndpi_serializer* serializer);
 
   inline char* getJa4CliHash() { return (protos.tls.ja4.client_hash); }
 
@@ -779,7 +779,7 @@ class Flow : public GenericHashEntry {
                               std::vector<std::string>* issues);
   u_int8_t computeQoEMOSscore(bool cli_to_srv);
   u_int8_t getQoEScore();
-  void getQoEInfo(ndpi_serializer* serializer);
+  void serializeQoEInfo(ndpi_serializer* serializer);
   QoEType getQoEType();
 #endif
   void endProtocolDissection(bool src2dst_direction);
@@ -1589,9 +1589,10 @@ class Flow : public GenericHashEntry {
   char* getSMTPRcptTo();
   void setFlowRiskName(char* r);
   char* getFlowRiskName();
-  void getJSONRiskInfo(ndpi_serializer* serializer);
-  void getVerdictInfo(ndpi_serializer* serializer);
-  void getTCPFlagsAnalysis(ndpi_serializer* serializer);
+  void serializeJSONRiskInfo(ndpi_serializer* serializer);
+  void serializeVerdictInfo(ndpi_serializer* serializer);
+  void serializeTCPFlagsAnalysis(ndpi_serializer* serializer);
+  void serializeBGPInfo(ndpi_serializer* serializer);
   void setWLANInfo(char* wlan_ssid, u_int8_t* wtp_mac_address);
   void setBGPInfo(char* bgp_info);
   char* getBGPInfo() { return((collection && collection->bgpInfo) ? collection->bgpInfo : (char*)""); }

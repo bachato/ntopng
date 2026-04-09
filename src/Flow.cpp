@@ -8488,15 +8488,16 @@ void Flow::setProtocolJSONInfo() {
 
     if (ndpi_init_serializer(&s, ndpi_serialization_format_json) == -1) return;
 
-    getProtocolJSONInfo(&s);
-    getCustomFieldsInfo(&s);
-    getJSONRiskInfo(&s);
+    serializeProtocolJSONInfo(&s);
+    serializeCustomFieldsInfo(&s);
+    serializeJSONRiskInfo(&s);
+    serializeBGPInfo(&s);
 #ifdef NTOPNG_PRO
-    getQoEInfo(&s);
+    serializeQoEInfo(&s);
 #endif
-    getVerdictInfo(&s);
+    serializeVerdictInfo(&s);
 
-    if (protocol == IPPROTO_TCP) getTCPFlagsAnalysis(&s);
+    if (protocol == IPPROTO_TCP) serializeTCPFlagsAnalysis(&s);
 
     json = ndpi_serializer_get_buffer(&s, &json_len);
 
@@ -8509,16 +8510,26 @@ void Flow::setProtocolJSONInfo() {
 
 /* ***************************************************** */
 
-void Flow::getJSONRiskInfo(ndpi_serializer* serializer) {
+void Flow::serializeJSONRiskInfo(ndpi_serializer* serializer) {
   if (serializer && riskInfo) {
     ndpi_serialize_string_raw(serializer, "flow_risk_info", riskInfo,
                               strlen(riskInfo));
   }
 }
 
+/* ***************************************************** */
+
+void Flow::serializeBGPInfo(ndpi_serializer* serializer) {
+  if (serializer && collection && collection->bgpInfo &&
+      collection->bgpInfo[0] != '\0') {
+    ndpi_serialize_string_raw(serializer, "bgp", collection->bgpInfo,
+                              strlen(collection->bgpInfo));
+  }
+}
+
 /* *************************************** */
 
-void Flow::getTCPFlagsJSON(ndpi_serializer* serializer, TCPStats* stats,
+void Flow::serializeTCPFlagsJSON(ndpi_serializer* serializer, TCPStats* stats,
                            const char* label) {
   ndpi_serialize_start_of_block(serializer, label);
   ndpi_serialize_string_uint32(serializer, "num_syn", stats->num_syn);
@@ -8531,18 +8542,18 @@ void Flow::getTCPFlagsJSON(ndpi_serializer* serializer, TCPStats* stats,
 
 /* ***************************************************** */
 
-void Flow::getTCPFlagsAnalysis(ndpi_serializer* serializer) {
+void Flow::serializeTCPFlagsAnalysis(ndpi_serializer* serializer) {
   ndpi_serialize_start_of_block(serializer, "tcp_flags_analysis");
 
-  getTCPFlagsJSON(serializer, &tcp_stats.cli2srv, "cli2srv");
-  getTCPFlagsJSON(serializer, &tcp_stats.srv2cli, "srv2cli");
+  serializeTCPFlagsJSON(serializer,&tcp_stats.cli2srv, "cli2srv");
+  serializeTCPFlagsJSON(serializer,&tcp_stats.srv2cli, "srv2cli");
 
   ndpi_serialize_end_of_block(serializer);
 }
 
 /* ***************************************************** */
 
-void Flow::getVerdictInfo(ndpi_serializer* serializer) {
+void Flow::serializeVerdictInfo(ndpi_serializer* serializer) {
   if (serializer) {
 #ifdef HAVE_NEDGE
     ndpi_serialize_start_of_block(serializer,
@@ -8557,7 +8568,7 @@ void Flow::getVerdictInfo(ndpi_serializer* serializer) {
 
 /* ***************************************************** */
 
-void Flow::getCustomFieldsInfo(ndpi_serializer* serializer) {
+void Flow::serializeCustomFieldsInfo(ndpi_serializer* serializer) {
   if (get_tlv_info()) {
     ndpi_serialize_start_of_block(serializer,
                                   "custom_fields"); /* Custom fields block */
@@ -8568,7 +8579,7 @@ void Flow::getCustomFieldsInfo(ndpi_serializer* serializer) {
 
 /* ***************************************************** */
 
-void Flow::getProtocolJSONInfo(ndpi_serializer* serializer) {
+void Flow::serializeProtocolJSONInfo(ndpi_serializer* serializer) {
   /* Check JSON info != NULL to not override info */
 
   if (serializer == NULL) return;
@@ -8779,7 +8790,7 @@ void Flow::updateAlertsJSON() {
   ndpi_serialize_string_uint64(&serializer, "hash_entry_id",
                                get_hash_entry_id());
 
-  getJSONRiskInfo(&serializer);
+  serializeJSONRiskInfo(&serializer);
 
   if (isBlacklistedFlow())
     ndpi_serialize_string_string(
