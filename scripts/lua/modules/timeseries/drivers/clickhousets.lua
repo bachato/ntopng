@@ -118,26 +118,23 @@ local function ch_escape(s)
    return s
 end
 
--- Serialise a Lua table as a ClickHouse map(String, String).
--- e.g. map('ifid', '0', 'host', '192.168.1.1')
--- Note: using 'map(k, v, ...)' instead of '{k:v, ...}' to avoid ClickHouse parser issues
+-- Serialise a Lua table as a ClickHouse map literal {'k': 'v', ...}.
 local function tags_to_ch_map(t)
    local parts = {}
    for k, v in pairs(t) do
-      parts[#parts + 1] = string.format("'%s','%s'", ch_escape(k), ch_escape(v))
+      parts[#parts + 1] = string.format("'%s': '%s'", ch_escape(k), ch_escape(v))
    end
-   return "map(" .. table.concat(parts, ",") .. ")"
+   return "{" .. table.concat(parts, ", ") .. "}"
 end
 
--- Serialise a Lua table as a ClickHouse map(String, Float64).
--- e.g. map('bytes', 12345.0, 'pkts', 10.0)
+-- Serialise a Lua table as a ClickHouse map literal {'k': v, ...} for Float64 values.
 local function metrics_to_ch_map(t)
    local parts = {}
    for k, v in pairs(t) do
       local num = tonumber(v) or 0
-      parts[#parts + 1] = string.format("'%s',%.6g", ch_escape(k), num)
+      parts[#parts + 1] = string.format("'%s': %.6g", ch_escape(k), num)
    end
-   return "map(" .. table.concat(parts, ",") .. ")"
+   return "{" .. table.concat(parts, ", ") .. "}"
 end
 
 -- Build a ClickHouse WHERE fragment for the supplied tags table.
