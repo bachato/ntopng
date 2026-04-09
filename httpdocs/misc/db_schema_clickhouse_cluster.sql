@@ -99,7 +99,8 @@ CREATE TABLE IF NOT EXISTS `flows` ON CLUSTER '$CLUSTER' (
 `DOMAIN_NAME` String COMMENT 'Domain name extracted from the flow (from SNI, DNS, or HTTP Host header)',
 `SRC_PEER_ASN` UInt32 COMMENT 'BGP peer ASN upstream of the source IP',
 `DST_PEER_ASN` UInt32 COMMENT 'BGP peer ASN upstream of the destination IP',
-`REQUIRE_ATTENTION` Boolean COMMENT 'True if this flow/alert has been flagged as requiring manual review'
+`REQUIRE_ATTENTION` Boolean COMMENT 'True if this flow/alert has been flagged as requiring manual review',
+`NEXT_ADJACENT_ASN` UInt32 COMMENT 'BGP next adjacent ASN (BGP_NEXT_ADJACENT_ASN / IPFIX field 128)'
 ) ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{database}/{table}', '{replica}') PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (FIRST_SEEN, IPV4_SRC_ADDR, IPV4_DST_ADDR)
 COMMENT 'Per-flow telemetry records captured locally or received via NetFlow/sFlow/IPFIX. Each row represents one bidirectional network flow with 5-tuple (src/dst IP, src/dst port, protocol), byte/packet counters, L7 application identification, flow-risk bitmap, DSCP, NAT addresses, process info, and optional alert metadata. Partitioned by day on FIRST_SEEN.';
 @
@@ -196,6 +197,8 @@ ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `QOE_SCORE` U
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `SRC_PEER_ASN` UInt32;
 @
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `DST_PEER_ASN` UInt32;
+@
+ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `NEXT_ADJACENT_ASN` UInt32;
 @
 ALTER TABLE flows DROP COLUMN IF EXISTS `PRE_NAT_IPV4_SRC_ADDR`;
 @

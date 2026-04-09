@@ -536,6 +536,7 @@ class Flow : public GenericHashEntry {
 #endif
   inline u_int32_t getSrcPeerAS() const { return srcPeerAS; }
   inline u_int32_t getDstPeerAS() const { return dstPeerAS; }
+  inline u_int32_t getNextAdjacentAS() const { return (collection ? collection->nextAdjacentAS : 0); }
 
   void setAlertInfo(FlowAlert* alert);
   inline bool isAlertAutoAck() { return !!alert_info.auto_acknowledge; };
