@@ -247,6 +247,17 @@ end
 
 -- ###############################################
 
+local function format_historical_bgp_info(protocol_info_json)
+   local bgp_data = protocol_info_json["bgp"]
+   if bgp_data == nil or table.len(bgp_data) == 0 then return nil end
+   return {
+      name = i18n("flow_details.bgp_info"),
+      values = {format_utils.formatBgpBmpInfo(bgp_data)}
+   }
+end
+
+-- ###############################################
+
 local function format_historical_wlan_ssid(flow, info)
    return {
       name = i18n("flow_fields_description.wlan_ssid"),
@@ -946,7 +957,11 @@ function historical_flow_details_formatter.formatHistoricalFlowDetails(flow)
 
       if src_peer_asn ~= nil or dst_peer_asn ~= nil then
          flow_details[#flow_details + 1] = asn_data
+      end
 
+      local bgp_info = format_historical_bgp_info(protocol_info_json)
+      if bgp_info then
+         flow_details[#flow_details + 1] = bgp_info
       end
 
       if flow["QOE_SCORE"] and tonumber(flow["QOE_SCORE"]) > 0 then
