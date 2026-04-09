@@ -22,7 +22,7 @@ function format_utils.formatBgpBmpInfo(bgp_data)
             i18n("flow_details.bgp_prefix") .. "</b></th><td  colspan=" .. (#peer_list) .. ">" .. prefix .. "</th></tr>\n")
 
       -- Peer ID
-      print("<tr><td>" .. i18n("flow_details.bgp_peer_id") .."</td>")
+      print("<tr><th>" .. i18n("flow_details.bgp_peer_id") .."</th>")
       for _, peer in ipairs(peer_list) do
 	 print("<td>" .. formatNextHop(peer.id) .. "</td>")
       end
