@@ -6,7 +6,7 @@
             :f_sort_rows="columns_sorting" :handleLoadedColumns="handleLoadedColumns"
             @custom_event="on_table_custom_event">
             <template v-slot:custom_header>
-                <div class="dropdown me-3 d-inline-block" v-for="item in filter_table_array">
+                <div class="dropdown d-inline-block" v-for="item in filter_table_array">
                     <span class="no-wrap d-flex align-items-center my-auto me-2 filters-label"><b>{{ item["basic_label"]
                             }}</b></span>
                     <SelectSearch v-model:selected_option="item['current_option']" theme="bootstrap-5"
@@ -15,10 +15,12 @@
                     </SelectSearch>
                 </div>
                 <div class="d-flex justify-content-center align-items-center">
-                    <div class="btn btn-sm btn-primary mt-2 me-3" type="button" @click="reset_filters">
+                    <!-- Little trick to have a smooth GUI, empty span so everything is on the same level -->
+                    <span class="no-wrap d-flex align-items-center my-auto me-2 filters-label">&nbsp;</span>
+                    <div class="btn btn-sm btn-primary" type="button" @click="reset_filters">
                         {{ _i18n('reset') }}
                     </div>
-                    <Spinner :show="loading" size="1rem" class="me-1"></Spinner>
+                    <Spinner :show="loading" size="1rem"></Spinner>
                 </div>
             </template> <!-- Dropdown filters -->
         </TableWithConfig>
