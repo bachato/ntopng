@@ -56,9 +56,20 @@ local function format_post_nat_info(flow, info)
    end
 
    -- Format all info
-   local post_nat_flow = nat_values.post_nat_src_ip .. " : " .. nat_values.post_nat_src_port ..
-                            ' <i class="fas fa-exchange-alt fa-lg"></i> ' .. nat_values.post_nat_dst_ip .. " : " ..
-                            nat_values.post_nat_dst_port
+   local post_nat_flow = ""
+   if nat_values.post_nat_src_ip then
+      post_nat_flow = post_nat_flow .. nat_values.post_nat_src_ip
+      if nat_values.post_nat_src_port then
+         post_nat_flow = post_nat_flow .. " : " .. nat_values.post_nat_src_port
+      end
+   end
+   if nat_values.post_nat_dst_ip then
+      post_nat_flow = post_nat_flow .. ' <i class="fas fa-exchange-alt fa-lg"></i> ' .. nat_values.post_nat_dst_ip
+      if nat_values.post_nat_dst_port then
+        post_nat_flow = post_nat_flow .. " : " .. nat_values.post_nat_dst_port
+      end
+   end
+
    flow[#flow + 1] = {
       name = i18n('db_explorer.post_nat_info'),
       values = {post_nat_flow}
