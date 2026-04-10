@@ -4955,7 +4955,7 @@ bool Utils::validInterfaceName(const char* name) {
   */
   for (int i = 0; name[i] != '\0'; i++) {
     if (!isalnum(name[i]) && name[i] != '@' && name[i] != '-' &&
-        name[i] != ':' && name[i] != '_')
+        name[i] != ':' && name[i] != '_' && name[i] != '.')
       return false;
   }
 #endif
