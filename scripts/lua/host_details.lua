@@ -8,6 +8,7 @@ package.path = dirs.installdir .. "/scripts/lua/modules/pools/?.lua;" .. package
 package.path = dirs.installdir .. "/scripts/lua/modules/vulnerability_scan/?.lua;" .. package.path
 package.path = dirs.installdir .. "/scripts/lua/modules/timeseries/?.lua;" .. package.path
 
+require "lua_utils"
 local snmp_utils
 local snmp_location
 local host_sites_update
@@ -25,7 +26,6 @@ if (ntop.isPro()) then
    host_sites_update = require("host_sites_update")
 end
 
-require "lua_utils"
 local graph_utils = require "graph_utils"
 local json = require("dkjson")
 local discover = require "discover_utils"
@@ -80,7 +80,6 @@ local hostkey = hostinfo2hostkey(host_info, nil, true --[[ force show vlan --]] 
 local hostkey_compact = hostinfo2hostkey(host_info) -- do not force vlan
 
 local http_prefix = ntop.getHttpPrefix()
-
 if not host_ip then
    sendHTTPContentTypeHeader('text/html')
 
@@ -100,6 +99,7 @@ if (debug_hosts) then
    }) .. "\n")
 end
 local host = interface.getHostInfo(host_info["host"], host_vlan, host_mac)
+local mac_info = interface.getMacInfo(host["mac"])
 local tskey
 
 -- if(host) then tprint(host.mac_meaningful) end
@@ -286,6 +286,7 @@ local only_historical = (host == nil) and ((page == "historical") or (page == "c
 local host_label
 
 if (host == nil) and (not only_historical) then
+
    -- We need to check if this is an aggregated host
    sendHTTPContentTypeHeader('text/html')
 
@@ -402,6 +403,7 @@ else
    end
 
    local has_snmp_location = snmp_location and snmp_location.host_has_snmp_location(host["mac"])
+
    local has_icmp = ((table.len(host["ICMPv4"]) + table.len(host["ICMPv6"])) ~= 0)
    local has_assets = ntop.isEnterpriseXL() and (host.asset_key ~= nil) and (ntop.getHashKeysCache(host.asset_key) ~= nil)
    local periodicity_map_available = false
@@ -450,11 +452,9 @@ else
          end
       end
 
-      local eth_stats = interface.getMacInfo(host["mac"])
-
-      if eth_stats then
-         total_packets_data = total_packets_data + eth_stats["arp_requests.sent"] + eth_stats["arp_replies.sent"]
-         total_packets_data = total_packets_data + eth_stats["arp_requests.rcvd"] + eth_stats["arp_replies.rcvd"]
+      if mac_info then
+         total_packets_data = total_packets_data + mac_info["arp_requests.sent"] + mac_info["arp_replies.sent"]
+         total_packets_data = total_packets_data + mac_info["arp_requests.rcvd"] + mac_info["arp_replies.rcvd"]
       end
    end
 
@@ -614,9 +614,6 @@ else
    end
 
    -- tprint(host.bins)
-   local macinfo = interface.getMacInfo(host["mac"])
-   local has_snmp_location = host['localhost'] and (host["mac"] ~= "") and snmp_location and
-                                snmp_location.host_has_snmp_location(host["mac"]) and isAllowedSystemInterface()
 
    if ((page == "overview") or (page == nil)) then
       print [[
