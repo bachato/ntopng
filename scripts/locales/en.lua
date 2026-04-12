@@ -3559,11 +3559,12 @@ local lang = {
   },
   ["flow_details"] = {
     ["bgp_peer_id"]    = "BGP Peer Id",
+    ["bgp_peer_asn"]   = "BGP Peer ASN",
     ["bgp_prefix"]     = "Prefix",
     ["bgp_origin"]     = "Origin",
     ["bgp_as_path"]    = "AS Path",
     ["bgp_next_hop"]   = "Next Hop",
-    ["bgp_med"]        = "MED",
+    ["bgp_med"]        = "MED Multi-Exit Discriminator)",
     ["bgp_local_pref"] = "Local Pref.",
     ["bgp_communities"]= "Communities",
     ["acceptable_label"] = "Acceptable",

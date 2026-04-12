@@ -29,6 +29,13 @@ function format_utils.formatBgpBmpInfo(bgp_data)
       end
       out[#out + 1] = "</tr>"
 
+      -- ASN
+      out[#out + 1] = "<tr><th>" .. i18n("flow_details.bgp_peer_asn") .. "</th>"
+      for _, peer in ipairs(peer_list) do
+         out[#out + 1] = "<td>" .. peer.info.asn .. "</td>"
+      end
+      out[#out + 1] = "</tr>"
+
       -- BGP Origin
       out[#out + 1] = "<tr><th>" .. i18n("flow_details.bgp_origin") .. "</th>"
       for _, peer in ipairs(peer_list) do
