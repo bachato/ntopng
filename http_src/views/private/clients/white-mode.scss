@@ -15,7 +15,7 @@
   --navbar-tabs-active-shadow: rgba(0, 0, 0, 0.3);
   --slider-tooltip-bg: #D1D5DB;
   --slider-height: 3px;
-  
+
   /* ENABLE AFTER UPDATING ALL NAVBAR TABS COMPONENTS
   --navbar-tab-hover-color: #e06910;
   --navbar-tab-hover-bg: #fd7e141f;
@@ -1093,6 +1093,19 @@ li.select2-selection__choice {
   display: inline-block !important;
 }
 
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--disabled,
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option[aria-disabled=true] {
+  color: var(--bs-secondary-color, #6c757d) !important;
+  opacity: 0.45;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  background: repeating-linear-gradient(135deg,
+      transparent,
+      transparent 4px,
+      rgba(128, 128, 128, 0.05) 4px,
+      rgba(128, 128, 128, 0.05) 5px);
+}
+
 .invalid {
   border: 1px solid #FF0000;
 }
@@ -1535,14 +1548,14 @@ span.flatpickr-weekday {
 }
 
 /* Restore input-group border-radius joining */
-.input-group > .form-control:not(:first-child),
-.input-group > .form-select:not(:first-child) {
+.input-group>.form-control:not(:first-child),
+.input-group>.form-select:not(:first-child) {
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
 }
 
-.input-group > .form-control:not(:last-child),
-.input-group > .form-select:not(:last-child) {
+.input-group>.form-control:not(:last-child),
+.input-group>.form-select:not(:last-child) {
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
 }

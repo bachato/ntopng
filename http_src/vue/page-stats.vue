@@ -60,9 +60,15 @@
                 </BootstrapTable>
             </div>
         </Transition>
+        <Transition name="list" mode="out-in">
+            <div v-if="disable_top_stats" class="alert alert-warning" role="alert" id='error-alert'
+                v-html="_i18n('prefs.no_top_timeseries_available')">
+            </div>
+        </Transition>
 
         <Transition name="list" mode="out-in">
-            <div class="mt-4 position-relative" v-if="props.context.is_ntop_pro && selected_top_table?.table_config_def">
+            <div class="mt-4 position-relative" :class="[(disable_top_stats) ? 'ntopng-gray-out' : '']"
+                v-if="props.context.is_ntop_pro && selected_top_table?.table_config_def">
                 <div class="inline select2-size me-2 mt-2">
                     <SelectSearch v-model:selected_option="selected_top_table" :options="top_table_options">
                     </SelectSearch>
@@ -147,6 +153,7 @@ const source_type = metricsManager.get_current_page_source_type();
 
 const enable_stats_table = ref(false);
 const enable_top_table = ref(false);
+const disable_top_stats = ref(false);
 
 /**
  * { key: identifier of Chart component, if change Chart will be destroyed and recreated,
@@ -615,7 +622,7 @@ function set_top_table_options(timeseries_groups, status) {
             let enables_table_value = props.context.sources_types_top_enabled[table_def.table_value];
             if (enables_table_value == null) { return; }
             let enable_table_def = enables_table_value[table_def.view];
-            if (!enable_table_def) { return; }
+            //if (!enable_table_def) { return; }
             let table_source_def_value_dict = table_def.table_source_def_value_dict
 
             let data_url = get_top_table_url(ts_group, table_def.table_value, table_def.view, table_source_def_value_dict, status);
@@ -666,6 +673,12 @@ function set_top_table_options(timeseries_groups, status) {
                 return c;
             });
             let option = { value, label, table_config_def };
+            option.disabled = !enable_table_def
+            // If disabled, add a new label explaining to jump to preferences
+            if (option.disabled) {
+                option.icon = `fas fa-exclamation-triangle`
+                option.tooltip = `${_i18n("prefs.enable_timeseries_preference")}`
+            }
             top_table_options.value.push(option);
         });
     }
@@ -674,8 +687,16 @@ function set_top_table_options(timeseries_groups, status) {
     }
 
     selected_top_table.value = top_table_options.value.find((option) => option.table_config_def.default == true);
+    // First Fallback, search for the first option not disabled
+    if (selected_top_table.value == null) {
+        selected_top_table.value = top_table_options.value.find((option) => option.disabled == false);
+    }
+    // Second Fallback, get the first option and add the message to enable the Top
     if (selected_top_table.value == null) {
         selected_top_table.value = top_table_options.value[0];
+        // Also, being that no available options where found, it means that all of them are disabled in the preferences
+        // so handle this case with the disabled section for the top table 
+        disable_top_stats.value = true
     }
 }
 

@@ -4,14 +4,14 @@
         <select class="select2 form-select ss-control" ref="select2" required name="filter_type" :multiple="multiple"
             :disabled="disabled">
             <!-- Render regular options (without groups) -->
-            <option class="no-wrap  p-0" v-for="(item, i) in options_2" :selected="is_selected(item)" :value="item.value"
-                :disabled="item.disabled" :data-icon="item.icon">
+            <option class="no-wrap  p-0" v-for="(item, i) in options_2" :selected="is_selected(item)"
+                :value="item.value" :disabled="item.disabled" :data-icon="item.icon" :data-tooltip="item.tooltip">
                 {{ item.label }}
             </option>
             <!-- Render grouped options with optgroup elements -->
             <optgroup v-for="(item, i) in groups_options_2" :label="item.group">
                 <option v-for="(opt, j) in item.options" :selected="is_selected(opt)" :value="opt.value"
-                    :disabled="opt.disabled" :data-icon="item.icon">
+                    :disabled="opt.disabled" :data-icon="item.icon" :data-tooltip="item.tooltip">
                     {{ opt.label }}
                 </option>
             </optgroup>
@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";
+import { ref, onMounted, computed, watch, onBeforeUnmount, nextTick } from "vue";
 
 /* *************************************************** */
 /* Reactive references and state variables */
@@ -67,6 +67,16 @@ onMounted(() => {
     if (!props.disable_change || !first_time_render) {
         set_input();  // Setup options and selection state
     }
+    $(select2.value).on('select2:open', function () {
+        setTimeout(() => {
+            // Enable the tooltip only in the dropdown option
+            document.querySelectorAll('.select2-dropdown [data-bs-toggle="tooltip"]').forEach(el => {
+                if (!bootstrap.Tooltip.getInstance(el)) {
+                    new bootstrap.Tooltip(el, { container: 'body' });
+                }
+            });
+        }, 50); // Small delay, enough to render the dropdown
+    });
 });
 
 /* *************************************************** */
@@ -251,23 +261,30 @@ function matchCustom(params, data) {
  * @returns {string|jQuery} - Formatted HTML string or jQuery object with icon if present
  */
 const formatOption = (option) => {
+    let formattedOption = option.text
     if (!option.id) {
-        return option.text;  // Return plain text for placeholder
+        return formattedOption;  // Return plain text for placeholder
     }
 
-    const icon_class = option?.element?.dataset?.icon;  // Get icon class from data-icon attribute
+    const icon = option?.element?.dataset?.icon;  // Get icon class from data-icon attribute
+    const tooltip = option?.element?.dataset?.tooltip;
 
-    if (!icon_class) {
-        return option.text;  // No icon, return plain text
+    if (icon) {
+        formattedOption = `<i class="${icon}"></i> ${option.text}`
+    }
+
+    if (tooltip) {
+        formattedOption = $(`<span 
+            data-bs-toggle="tooltip" 
+            data-bs-placement="right" 
+            data-bs-title="${tooltip}" 
+            style="display:block; width:100%;">
+            ${formattedOption}
+        </span>`);
     }
 
     // Return HTML with icon and text
-    return $(`
-        <span>
-            <i class="${icon_class}"></i>
-            ${option.text}
-        </span>
-    `);
+    return formattedOption
 }
 
 /* *************************************************** */
@@ -745,6 +762,11 @@ defineExpose({ render });
     color: var(--ntop-disabled-text-color, rgba(33, 37, 41, 0.5));
     cursor: not-allowed;
     border-color: var(--border-subtle, #e9ecef);
+}
+
+.ss-root :deep(.select2-results__option[aria-disabled=true]) {
+    pointer-events: all !important;
+    cursor: not-allowed;
 }
 
 /* Isolate the native <select> from global .form-select overrides */
