@@ -2,7 +2,7 @@
     <div class="m-2 mb-3">
         <!-- Table component -->
         <TableWithConfig ref="table_host_pools" :table_id="table_id" :csrf="csrf" :f_map_columns="map_table_def_columns"
-            :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event"
+            :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event" :showLoading="true"
             :get_extra_params_obj="get_extra_params_obj">
             <template v-slot:custom_buttons>
                 <button class="btn btn-link" type="button" ref="add_new_pool" @click="addNewPool">

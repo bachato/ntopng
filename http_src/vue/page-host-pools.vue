@@ -1,7 +1,7 @@
 <template>
     <div class="m-2 mb-3">
         <TableWithConfig ref="table_host_pools" :table_id="table_id" :csrf="csrf" :f_map_columns="map_table_def_columns"
-            :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event">
+            :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event" :showLoading="true">
             <template v-slot:custom_buttons>
                 <button class="btn btn-link" type="button" ref="add_new_pool" @click="addNewPool">
                     <i class="fas fa-plus"></i>
@@ -28,7 +28,8 @@
     </div>
 
     <!-- Modals to add and delete host pools -->
-    <ModalAddHostPool ref="modal_add_pool" :errorMessage="modalErrorMessage" :context="context" @add="handleAddPool" @edit="handleEditPool">
+    <ModalAddHostPool ref="modal_add_pool" :errorMessage="modalErrorMessage" :context="context" @add="handleAddPool"
+        @edit="handleEditPool">
     </ModalAddHostPool>
 
     <ModalDeleteConfirm ref="modal_delete_pool" :title="title_delete" :body="body_delete" @delete="handleDeletePool">
@@ -89,18 +90,18 @@ const handleAddPool = async (params) => {
     };
 
     ntopng_utility.http_request(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestParams)
-        }, false, true, true).then((res) => {
-            if (!res || res.rc < 0) {
-                modalErrorMessage.value = res?.rc_str_hr || res?.rc_str || _i18n("error");
-                return;
-            }
-            // Success
-            modal_add_pool.value.close();
-            table_host_pools.value.refresh_table(true);
-        })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestParams)
+    }, false, true, true).then((res) => {
+        if (!res || res.rc < 0) {
+            modalErrorMessage.value = res?.rc_str_hr || res?.rc_str || _i18n("error");
+            return;
+        }
+        // Success
+        modal_add_pool.value.close();
+        table_host_pools.value.refresh_table(true);
+    })
         .catch((e) => {
             modalErrorMessage.value = _i18n("error");
         });
