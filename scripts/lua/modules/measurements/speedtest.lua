@@ -19,7 +19,11 @@ local collected_results = {}
 -- see (am_utils.key2host for the details on such format).
 local function run_speedtest(hosts, granularity)
     local rsp
-    local do_trace = false
+    local do_trace = ntop.getCache("ntopng.prefs.trace.active_monitoring")
+
+    if isEmptyString(do_trace) then
+        do_trace = false
+    end
 
     if (do_trace) then
         tprint("[run_speedtest] [" .. granularity .. "]\n")
