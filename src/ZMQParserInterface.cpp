@@ -514,8 +514,9 @@ u_int8_t ZMQParserInterface::parseEvent(const char* payload, int payload_size,
         // nprobe_ip = ntohl(inet_addr(ip));
       }
 
-      /* This is an ID (number) actually used to identify a probe in ntopng
-       * and also named probe_uuid somewhere in the code.
+      /* nprobe.unique_source_id is an ID (number) actually used to identify
+       * a probe in ntopng (also named probe_uuid somewhere in the code).
+       * Do note confuse it with unique_source_id in the code, identifying nProbe+exporter.
        * Note: all the below refer to the nprobe_source_id:
        * - uuid_num (old)
        * - unique_source_id (new) */
@@ -670,6 +671,8 @@ u_int8_t ZMQParserInterface::parseEvent(const char* payload, int payload_size,
           if (json_object_object_get_ex(val, "num_drops", &x))
             exp_stats.num_drops = (u_int32_t)json_object_get_int64(x);
 
+          /* Exporter unique_source_id is an ID (number) used to identify
+           * a nprobe+exporter in ntopng */
           if (json_object_object_get_ex(val, "unique_source_id", &x))
             exp_stats.unique_source_id = (u_int32_t)json_object_get_int64(x);
 
@@ -2152,9 +2155,9 @@ bool ZMQParserInterface::preprocessFlow(ParsedFlow* flow) {
     if (flow->nprobe_ip == 0) flow->nprobe_ip = flow->exporter_device_ip;
 
     if (flow->unique_source_id == 0) {
-      if (flow->nprobe_source_id)
+      if (flow->nprobe_source_id) /* use nProbe ID */
         flow->unique_source_id = flow->nprobe_source_id;
-      else
+      else /* Last resort: use exporter and nProbe IPs */
         flow->unique_source_id = getExporterUniqueSourceID(
             flow->exporter_device_ip, flow->nprobe_ip);
     }

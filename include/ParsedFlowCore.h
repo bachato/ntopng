@@ -35,8 +35,8 @@ class ParsedFlowCore {
   u_int8_t l4_proto;
   u_int32_t exporter_device_ip;
   u_int32_t nprobe_ip;
-  u_int32_t unique_source_id;
-  u_int32_t nprobe_source_id;
+  u_int32_t unique_source_id; /* identifies nProbe + exporter */
+  u_int32_t nprobe_source_id; /* identifies a nProbe instance */
   struct ndpi_in6_addr exporter_device_ipv6;
   u_int16_t src_port, dst_port;
   u_int32_t inIndex, outIndex;
