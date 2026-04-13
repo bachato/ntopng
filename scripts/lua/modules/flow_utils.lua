@@ -815,7 +815,8 @@ function getFlowLabel(flow, show_macs, add_hyperlinks, historical_bounds, hyperl
     end
 
     local label = ""
-
+    local icon
+    
     if not isEmptyString(cli_name) then
         label = label .. cli_name
     end
@@ -840,8 +841,14 @@ function getFlowLabel(flow, show_macs, add_hyperlinks, historical_bounds, hyperl
         end
     end
 
+    if(flow["srv2cli.packets"] > 0) then
+       icon = "fa-exchange-alt"
+    else
+       icon = "fa-long-arrow-alt-right"
+    end
+    
     if (not nohtml) then
-        label = label .. "&nbsp; <i class=\"fas fa-exchange-alt fa-lg\"  aria-hidden=\"true\"></i> &nbsp;"
+        label = label .. "&nbsp; <i class=\"fas "..icon.." fa-lg\"  aria-hidden=\"true\"></i> &nbsp;"
     else
         label = label .. " -> "
     end
