@@ -686,17 +686,19 @@ function set_top_table_options(timeseries_groups, status) {
         return;
     }
 
-    selected_top_table.value = top_table_options.value.find((option) => option.table_config_def.default == true);
-    // First Fallback, search for the first option not disabled
-    if (selected_top_table.value == null) {
-        selected_top_table.value = top_table_options.value.find((option) => option.disabled == false);
-    }
-    // Second Fallback, get the first option and add the message to enable the Top
-    if (selected_top_table.value == null) {
-        selected_top_table.value = top_table_options.value[0];
-        // Also, being that no available options where found, it means that all of them are disabled in the preferences
-        // so handle this case with the disabled section for the top table 
-        disable_top_stats.value = true
+    if (top_table_options.value.length > 0) {
+        selected_top_table.value = top_table_options.value.find((option) => option.table_config_def.default == true);
+        // First Fallback, search for the first option not disabled
+        if (selected_top_table.value == null) {
+            selected_top_table.value = top_table_options.value.find((option) => option.disabled == false);
+        }
+        // Second Fallback, get the first option and add the message to enable the Top
+        if (selected_top_table.value == null) {
+            selected_top_table.value = top_table_options.value[0];
+            // Also, being that no available options where found, it means that all of them are disabled in the preferences
+            // so handle this case with the disabled section for the top table 
+            disable_top_stats.value = true
+        }
     }
 }
 
