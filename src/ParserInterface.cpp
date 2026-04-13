@@ -448,8 +448,8 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
   if (zflow->getWLANSSID())
     flow->setWLANInfo(zflow->getWLANSSID(), zflow->getWTPMACAddress());
 
-  if (zflow->getBGPInfo())
-    flow->setBGPInfo(zflow->getBGPInfo());
+  if (zflow->getClientBGPInfo()) flow->setClientBGPInfo(zflow->getClientBGPInfo());
+  if (zflow->getServerBGPInfo()) flow->setServerBGPInfo(zflow->getServerBGPInfo());
 
   if (zflow->getL7JSON()) flow->setL7JSON(zflow->getL7JSON());
 

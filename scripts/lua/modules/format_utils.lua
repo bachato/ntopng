@@ -32,7 +32,9 @@ function format_utils.formatBgpBmpInfo(bgp_data)
       -- ASN
       out[#out + 1] = "<tr><th>" .. i18n("flow_details.bgp_peer_asn") .. "</th>"
       for _, peer in ipairs(peer_list) do
-         out[#out + 1] = "<td>" .. peer.info.asn .. "</td>"
+         out[#out + 1] = "<td>"
+	    .. "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. peer.info.asn
+	    .. "\">" .. peer.info.asn .. " (" .. shortenString(ntop.getASNameFromASN(tonumber(peer.info.asn)), max_len) .. ")</A>"
       end
       out[#out + 1] = "</tr>"
 

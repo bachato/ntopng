@@ -684,7 +684,8 @@ Flow::~Flow() {
 
   if (collection) {
     if(collection->wifi.wlan_ssid) free(collection->wifi.wlan_ssid);
-    if(collection->bgpInfo)        free(collection->bgpInfo);
+    if(collection->bgp.src)        free(collection->bgp.src);
+    if(collection->bgp.dst)        free(collection->bgp.dst);
     free(collection);
   }
 
@@ -3499,11 +3500,18 @@ void Flow::lua(lua_State* vm, AddressTree* allowed_nets,
       lua_push_str_table_entry(vm, "flow_end_reason", getEndReason());
 
     if (collection) {
-      char *bgp_info = getBGPInfo();
+      char *c = getClientBGPInfo(), *s = getServerBGPInfo();
+      if(c || s) {
+	lua_newtable(vm);
 
-      if(bgp_info)
-	lua_push_str_table_entry(vm, "bgp_info", bgp_info);
+	if(c) lua_push_str_table_entry(vm, "src", c);
+	if(s) lua_push_str_table_entry(vm, "dst", s);
 
+	lua_pushstring(vm, "bgp");
+	lua_insert(vm, -2);
+	lua_settable(vm, -3);
+      }
+  
       if(collection->wifi.wlan_ssid) {
 	char mac_buf[20];
 
@@ -8520,10 +8528,17 @@ void Flow::serializeJSONRiskInfo(ndpi_serializer* serializer) {
 /* ***************************************************** */
 
 void Flow::serializeBGPInfo(ndpi_serializer* serializer) {
-  if (serializer && collection && collection->bgpInfo &&
-      collection->bgpInfo[0] != '\0') {
-    ndpi_serialize_string_raw(serializer, "bgp", collection->bgpInfo,
-                              strlen(collection->bgpInfo));
+  if (serializer && collection
+      && (collection->bgp.src || collection->bgp.dst)) {
+    ndpi_serialize_start_of_block(serializer, "bgp");				  
+
+    if(collection->bgp.src)
+      ndpi_serialize_string_raw(serializer, "src", collection->bgp.src, strlen(collection->bgp.src));
+    
+    if(collection->bgp.dst)
+      ndpi_serialize_string_raw(serializer, "dst", collection->bgp.dst, strlen(collection->bgp.dst));
+    
+    ndpi_serialize_end_of_block(serializer);
   }
 }
 
@@ -9128,12 +9143,27 @@ char* Flow::getEndReason() { return (end_reason); }
 
 /* *************************************** */
 
-void Flow::setBGPInfo(char* bgp_info) {
+void Flow::setClientBGPInfo(char* bgp_info) {
+  if((bgp_info == NULL) || (bgp_info[0] == '\0')) return;
+  
   if(!collection) allocateCollection();
 
   if(collection) {
-    if(collection->bgpInfo != NULL) free(collection->bgpInfo);
-    collection->bgpInfo = strdup(bgp_info);
+    if(collection->bgp.src != NULL) free(collection->bgp.src);
+    collection->bgp.src = strdup(bgp_info);
+  }
+}
+
+/* *************************************** */
+
+void Flow::setServerBGPInfo(char* bgp_info) {
+  if((bgp_info == NULL) || (bgp_info[0] == '\0')) return;
+  
+  if(!collection) allocateCollection();
+
+  if(collection) {
+    if(collection->bgp.dst != NULL) free(collection->bgp.dst);
+    collection->bgp.dst = strdup(bgp_info);
   }
 }
 

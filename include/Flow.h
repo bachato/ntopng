@@ -80,7 +80,10 @@ typedef struct {
 typedef struct {
   u_int32_t prevAdjacentAS, nextAdjacentAS;
   u_int32_t vrfId;
-  char *bgpInfo;
+
+  struct {
+    char *src, *dst;
+  } bgp;
   
   struct {
     char* wlan_ssid;
@@ -1594,8 +1597,10 @@ class Flow : public GenericHashEntry {
   void serializeTCPFlagsAnalysis(ndpi_serializer* serializer);
   void serializeBGPInfo(ndpi_serializer* serializer);
   void setWLANInfo(char* wlan_ssid, u_int8_t* wtp_mac_address);
-  void setBGPInfo(char* bgp_info);
-  char* getBGPInfo() { return((collection && collection->bgpInfo) ? collection->bgpInfo : (char*)""); }
+  void setClientBGPInfo(char* bgp_info);
+  void setServerBGPInfo(char* bgp_info);
+  inline char* getClientBGPInfo() { return((collection && collection->bgp.src) ? collection->bgp.src : (char*)""); }
+  inline char* getServerBGPInfo() { return((collection && collection->bgp.dst) ? collection->bgp.dst : (char*)""); }
   char* getWLANSSID() {
     return (collection ? collection->wifi.wlan_ssid : NULL);
   };

@@ -58,7 +58,10 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   ndpi_risk ndpi_flow_risk_bitmap;
   char* ndpi_flow_risk_name;
   FlowSource flow_source;
-  char* wlan_ssid, *bgp_info;
+  char* wlan_ssid;
+  struct {
+    char *src, *dst;
+  } bgp;
   u_int8_t wtp_mac_address[6];
   struct {
     u_int8_t src_to_dst, dst_to_src;
@@ -256,9 +259,13 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
     if (wlan_ssid != NULL) free(wlan_ssid);
     if (str) wlan_ssid = strdup(str); else wlan_ssid = NULL;
   }
-  inline void setBGPInfo(const char* str) {
-    if (bgp_info != NULL) free(bgp_info);
-    if (str) bgp_info = strdup(str); else bgp_info = NULL;
+  inline void setClientBGPInfo(const char* str) {
+    if (bgp.src != NULL) free(bgp.src);
+    if (str) bgp.src = strdup(str); else bgp.src = NULL;
+  }
+  inline void setServerBGPInfo(const char* str) {
+    if (bgp.dst != NULL) free(bgp.dst);
+    if (str) bgp.dst = strdup(str); else bgp.dst = NULL;
   }
   inline void setWTPMACAddress(const char* str) {
     Utils::parseMac(wtp_mac_address, str);
@@ -362,11 +369,9 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
     if (setToNull) wlan_ssid = NULL;
     return (r);
   }
-  inline char* getBGPInfo(bool setToNull = false) {
-    char* r = bgp_info;
-    if (setToNull) bgp_info = NULL;
-    return (r);
-  }
+  inline char* getClientBGPInfo() { return(bgp.src ? bgp.src : (char*)""); }
+  inline char* getServerBGPInfo() { return(bgp.dst ? bgp.dst : (char*)""); }
+  
   inline u_int8_t* getWTPMACAddress() { return wtp_mac_address; }
 
   inline u_int32_t getPreNATSrcIp() { return src_ip_addr_pre_nat; };

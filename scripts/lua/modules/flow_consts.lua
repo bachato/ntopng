@@ -195,7 +195,8 @@ flow_consts.flow_fields_description = {
    -- ["TCP_STATS_DST_TO_SRC"] = i18n("flow_fields_description.tcp_stats_dst_to_src"),
 
    -- BGP Update Listener
-   ["BGP_INFO"] = i18n("flow_fields_description.bgp_info"),
+   ["SRC_BGP_INFO"] = i18n("flow_fields_description.src_bgp_info"),
+   ["DST_BGP_INFO"] = i18n("flow_fields_description.dst_bgp_info"),
 
    -- DHCP Protocol
    ["DHCP_CLIENT_MAC"] = i18n("flow_fields_description.dhcp_client_mac"),

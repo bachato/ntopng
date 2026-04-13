@@ -1938,10 +1938,18 @@ if isEmptyString(page) or page == "overview" then
          print("</tr>\n")
       end
 
-      if(not isEmptyString(flow.bgp_info)) then
-         print('<tr><th class=\'colspan-4\'><a href="https://tools.ietf.org/html/rfc7301" data-bs-toggle="tooltip">' ..
-	       i18n("flow_details.bgp_info") .. '</A></th><td colspan=2>')
-	 print(format_utils.formatBgpBmpInfo(json.decode(flow.bgp_info)))
+      -- tprint(flow.bgp)
+      if(not isEmptyString(flow.bgp.src)) then
+         print('<tr><th class=\'colspan-4\'>' ..
+	       i18n("flow_details.src_bgp_info") .. '</th><td colspan=2>')
+	 print(format_utils.formatBgpBmpInfo(json.decode(flow.bgp.src)))
+	 print('</td></tr>\n')
+      end
+      
+      if(not isEmptyString(flow.bgp.dst)) then
+         print('<tr><th class=\'colspan-4\'>' ..
+	       i18n("flow_details.dst_bgp_info") .. '</th><td colspan=2>')
+	 print(format_utils.formatBgpBmpInfo(json.decode(flow.bgp.dst)))
 	 print('</td></tr>\n')
       end
       
