@@ -28,8 +28,6 @@ if not isEmptyString(_POST["job_action"]) then
   end
 end
 
-print("<H2>"..i18n("traffic_recording.traffic_extraction_jobs") .. "</H2>")
-
 print(template.gen("modal_confirm_dialog.html", {
   dialog = {
     id      = "PcapDownloadDialog",

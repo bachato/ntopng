@@ -163,8 +163,6 @@ end
 -- Convert disk space to GUI unit
 disk_space = tostring(math.floor(tonumber(disk_space)/1024))
 
-print("<h2>"..i18n("traffic_recording.traffic_recording_settings").."</h2><br>")
-
 print [[
   <form id="traffic_recording_form" class="form-inline" method="post">
     <table class="table table-striped table-bordered">

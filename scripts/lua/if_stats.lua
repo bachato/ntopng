@@ -1634,6 +1634,7 @@ elseif (page == "trafficprofiles") then
 ]]
 elseif (page == "traffic_recording" and has_traffic_recording_page) then
     local master_ifid = interface.getMasterInterfaceId()
+    print('<h3 class="mb-3">' .. i18n('prefs.recording') .. '</h3>')
 
     if interface.isView() then
         -- View: we cannot enable recording here, but we can extract traffic
