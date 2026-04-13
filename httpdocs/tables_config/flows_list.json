@@ -99,7 +99,7 @@
 			"title_i18n": "db_search.cli_asn",
 			"data_field": "cli_asn",
 			"sortable": true,
-			"min-width" : "200px",
+			"min-width" : "95px",
 			"class": [
 				"text-nowrap"
 			]
@@ -108,7 +108,7 @@
 			"title_i18n": "db_search.srv_asn",
 			"data_field": "srv_asn",
 			"sortable": true,
-			"min-width" : "200px",
+			"min-width" : "95px",
 			"class": [
 				"text-nowrap"
 			]
@@ -117,7 +117,7 @@
 			"title_i18n": "db_search.transit_asn",
 			"data_field": "transit_asn",
 			"sortable": true,
-			"min-width" : "200px",
+			"min-width" : "102px",
 			"class": [
 				"text-nowrap"
 			]
