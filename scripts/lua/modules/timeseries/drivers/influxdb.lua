@@ -1669,12 +1669,14 @@ function driver:queryTotal(schema, tstart, tend, tags, options)
     local query_schema, raw_step, data_type = getQuerySchema(schema, tstart, tend, self.db, options)
     local query
 
-    if tags.epoch_begin then
-        tags.epoch_begin = nil
+    local copy_tags = table.clone(tags)
+
+    if copy_tags.epoch_begin then
+        copy_tags.epoch_begin = nil
     end
 
-    if tags.epoch_end then
-        tags.epoch_end = nil
+    if copy_tags.epoch_end then
+        copy_tags.epoch_end = nil
     end
 
     if data_type == ts_common.metrics.counter then
@@ -1690,7 +1692,7 @@ function driver:queryTotal(schema, tstart, tend, tags, options)
         --  (SELECT DIFFERENCE("bytes_sent") AS "bytes_sent", DIFFERENCE("bytes_rcvd") AS "bytes_rcvd"
         --    FROM "host:traffic" WHERE ifid='1' AND host='192.168.1.1' AND time >= 1536321770000000000 AND time <= 1536322070000000000)
         query = 'SELECT ' .. table.concat(sum_metrics, ", ") .. ' FROM ' .. '(SELECT ' .. table.concat(metrics, ", ") ..
-                    ' FROM ' .. query_schema .. where_tags(tags) .. ' time >= ' .. tstart .. '000000000 AND time <= ' ..
+                    ' FROM ' .. query_schema .. where_tags(copy_tags) .. ' time >= ' .. tstart .. '000000000 AND time <= ' ..
                     tend .. '000000000)'
     else
         -- gauge/derivative
@@ -1707,7 +1709,7 @@ function driver:queryTotal(schema, tstart, tend, tags, options)
         end
 
         query =
-            'SELECT ' .. table.concat(metrics, ", ") .. ' FROM ' .. query_schema .. where_tags(tags) .. ' time >= ' ..
+            'SELECT ' .. table.concat(metrics, ", ") .. ' FROM ' .. query_schema .. where_tags(copy_tags) .. ' time >= ' ..
                 tstart .. '000000000 AND time <= ' .. tend .. '000000000'
     end
 

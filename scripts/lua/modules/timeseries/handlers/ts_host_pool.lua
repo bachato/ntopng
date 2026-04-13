@@ -54,6 +54,7 @@ local timeseries_list = {{
     id = timeseries_id,
     label = i18n("graphs.blocked_flows"),
     description = i18n("graphs.metric_descr.host_pool_blocked_flows"),
+    nedge_only = true,
     priority = 0,
     measure_unit = "number",
     scale = i18n('graphs.metric_labels.flows'),
