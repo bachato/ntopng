@@ -258,11 +258,12 @@ end
 
 -- ###############################################
 
-local function format_historical_bgp_info(protocol_info_json)
-   local bgp_data = protocol_info_json["bgp"]
-   if bgp_data == nil or table.len(bgp_data) == 0 then return nil end
+local function format_historical_bgp_info(bgp_data, name)
+   if bgp_data == nil or table.len(bgp_data) == 0 then
+      return nil
+   end
    return {
-      name = i18n("flow_details.bgp_info"),
+      name = name,
       values = {format_utils.formatBgpBmpInfo(bgp_data)}
    }
 end
@@ -970,9 +971,14 @@ function historical_flow_details_formatter.formatHistoricalFlowDetails(flow)
          flow_details[#flow_details + 1] = asn_data
       end
 
-      local bgp_info = format_historical_bgp_info(protocol_info_json)
+      local bgp_info = protocol_info_json["bgp"]
       if bgp_info then
-         flow_details[#flow_details + 1] = bgp_info
+         if bgp_info.src then
+            flow_details[#flow_details + 1] = format_historical_bgp_info(bgp_info.src, i18n("flow_details.src_bgp_info"))
+         end
+         if bgp_info.dst then
+            flow_details[#flow_details + 1] = format_historical_bgp_info(bgp_info.dst, i18n("flow_details.dst_bgp_info"))
+         end
       end
 
       if flow["QOE_SCORE"] and tonumber(flow["QOE_SCORE"]) > 0 then
