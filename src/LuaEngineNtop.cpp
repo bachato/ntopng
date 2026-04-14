@@ -6587,6 +6587,64 @@ static int ntop_set_hash_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the label bitmap for the host identified by the given IP. */
+static int ntop_get_host_labels(lua_State* vm) {
+  char *host_ip, buf[64];
+  u_int16_t vlan_id = 0;
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+  if ((host_ip = (char*)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+
+  get_host_vlan_info(host_ip, &host_ip, &vlan_id, buf, sizeof(buf));
+
+  lua_pushinteger(vm, (lua_Integer)ntop->getHostLabels(host_ip));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
+}
+
+/* ****************************************** */
+
+/* @brief Sets the label bitmap for the host identified by the given IP.
+ *        Updates the radix tree, Redis, and any active host. */
+static int ntop_set_host_labels(lua_State* vm) {
+  char *host_ip, buf[64];
+  u_int16_t vlan_id = 0;
+  u_int64_t bitmap;
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+  if ((host_ip = (char*)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TNUMBER) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+  bitmap = (u_int64_t)lua_tonumber(vm, 2);
+
+  get_host_vlan_info(host_ip, &host_ip, &vlan_id, buf, sizeof(buf));
+
+  /* Update radix tree and Redis */
+  ntop->setHostLabels(host_ip, bitmap);
+
+  /* Update active hosts in memory */
+  for (int i = 0; i < ntop->get_num_interfaces(); i++) {
+    NetworkInterface* iface = ntop->getInterface(i);
+    if (iface) {
+      Host* host = iface->findHostByIP(get_allowed_nets(vm), host_ip, vlan_id,
+                                       getLuaVMUservalue(vm, observationPointId));
+      if (host) host->setLabels(bitmap);
+    }
+  }
+
+  lua_pushnil(vm);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
+}
+
+/* ****************************************** */
+
 static void ntop_reset_host_name(lua_State* vm, char* address) {
   NetworkInterface* iface;
   char buf[64], *host_ip;
@@ -9198,6 +9256,10 @@ static luaL_Reg _ntop_reg[] = {
     {"getHashKeysCache", ntop_get_hash_keys_redis},
     {"getHashAllCache", ntop_get_hash_all_redis},
     {"getKeysCache", ntop_get_keys_redis},
+
+    /* Host Labels */
+    {"getHostLabels", ntop_get_host_labels},
+    {"setHostLabels", ntop_set_host_labels},
     {"hasDumpCache", ntop_redis_has_dump},
     {"dumpCache", ntop_redis_dump},
     {"restoreCache", ntop_redis_restore},

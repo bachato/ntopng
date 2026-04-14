@@ -860,7 +860,7 @@ page_utils.add_menubar_section({
             hidden = not is_admin,
             url = '/lua/admin/prefs.lua'
         }, {
-            hidden = true,
+            hidden = not is_admin,
             entry = page_utils.menu_entries.labels,
             url = '/lua/labels.lua'
         }, {entry = page_utils.menu_entries.divider}, {

@@ -4,14 +4,14 @@
         <select class="select2 form-select ss-control" ref="select2" required name="filter_type" :multiple="multiple"
             :disabled="disabled">
             <!-- Render regular options (without groups) -->
-            <option class="no-wrap  p-0" v-for="(item, i) in options_2" :selected="is_selected(item)"
-                :value="item.value" :disabled="item.disabled" :data-icon="item.icon" :data-tooltip="item.tooltip">
+            <option class="no-wrap  p-0" v-for="(item, i) in options_2" :selected="is_selected(item)" :value="item.value"
+                :disabled="item.disabled" :data-icon="item.icon" :data-tooltip="item.tooltip" :data-color="item.color">
                 {{ item.label }}
             </option>
             <!-- Render grouped options with optgroup elements -->
             <optgroup v-for="(item, i) in groups_options_2" :label="item.group">
                 <option v-for="(opt, j) in item.options" :selected="is_selected(opt)" :value="opt.value"
-                    :disabled="opt.disabled" :data-icon="item.icon" :data-tooltip="item.tooltip">
+                    :disabled="opt.disabled" :data-icon="item.icon" :data-tooltip="opt.tooltip" :data-color="opt.color">
                     {{ opt.label }}
                 </option>
             </optgroup>
@@ -260,31 +260,75 @@ function matchCustom(params, data) {
  * @param {HTMLElement} option.element - Original DOM element containing data-icon attribute
  * @returns {string|jQuery} - Formatted HTML string or jQuery object with icon if present
  */
-const formatOption = (option) => {
-    let formattedOption = option.text
+// Format for dropdown list: show color swatch and/or icon before the text, with optional tooltip
+const formatResult = (option) => {
     if (!option.id) {
-        return formattedOption;  // Return plain text for placeholder
+        return option.text;  // Placeholder
     }
 
-    const icon = option?.element?.dataset?.icon;  // Get icon class from data-icon attribute
+    const icon_class = option?.element?.dataset?.icon;
+    const color = option?.element?.dataset?.color;
     const tooltip = option?.element?.dataset?.tooltip;
 
-    if (icon) {
-        formattedOption = `<i class="${icon}"></i> ${option.text}`
+    if (!icon_class && !color && !tooltip) {
+        return option.text;
     }
+
+    const $inner = $('<span>').css({ display: 'inline-flex', alignItems: 'center' });
+
+    if (color) {
+        $('<span>').css({
+            display: 'inline-block', width: '10px', height: '10px',
+            borderRadius: '2px', backgroundColor: color,
+            marginRight: '5px', verticalAlign: 'middle', flexShrink: 0,
+        }).appendTo($inner);
+    }
+
+    if (icon_class) {
+        $('<i>').addClass(icon_class).css('margin-right', '4px').appendTo($inner);
+    }
+
+    $inner.append(document.createTextNode(option.text));
 
     if (tooltip) {
-        formattedOption = $(`<span 
-            data-bs-toggle="tooltip" 
-            data-bs-placement="right" 
-            data-bs-title="${tooltip}" 
-            style="display:block; width:100%;">
-            ${formattedOption}
-        </span>`);
+        return $('<span>').attr({
+            'data-bs-toggle': 'tooltip',
+            'data-bs-placement': 'right',
+            'data-bs-title': tooltip,
+        }).css({ display: 'block', width: '100%' }).append($inner);
     }
 
-    // Return HTML with icon and text
-    return formattedOption
+    return $inner;
+}
+
+// Format for selected chip: plain text only — chip background is colored via apply_chip_colors()
+const formatSelection = (option) => {
+    if (!option.id) {
+        return option.text;
+    }
+
+    const icon_class = option?.element?.dataset?.icon;
+    if (!icon_class) {
+        return option.text;
+    }
+
+    return $('<span>').append($('<i>').addClass(icon_class)).append('\u00a0' + option.text);
+}
+
+// After Select2 re-renders chips, set each chip's background/border to its option's data-color
+function apply_chip_colors() {
+    const select2Div = select2.value;
+    if (!select2Div) return;
+    $(select2Div).parent().find('.select2-selection__choice').each(function () {
+        const chip = $(this);
+        const title = chip.attr('title');
+        const opt = $(select2Div).find('option').filter((_, el) => $(el).text().trim() === title).first();
+        const color = opt.data('color');
+        if (color) {
+            chip.css({ 'background-color': color, 'border-color': color });
+            chip.find('.select2-selection__choice__remove').css('color', '#fff');
+        }
+    });
 }
 
 /* *************************************************** */
@@ -319,8 +363,8 @@ const render = () => {
     }
     if (!$(select2Div).hasClass("select2-hidden-accessible")) {
         $(select2Div).select2({
-            templateResult: formatOption,      // Custom rendering with icons
-            templateSelection: formatOption,   // Custom rendering for selected item
+            templateResult: formatResult,      // Custom rendering with icons/swatches in dropdown
+            templateSelection: formatSelection, // Custom rendering for selected chip
             matcher: matchCustom,               // Hierarchical search matcher
             width: '100%',                       // Full width
             theme: props.theme ? props.theme : 'bootstrap-5',  // Theme (default to bootstrap-5)
@@ -360,6 +404,7 @@ const render = () => {
             let options = find_options_from_values(selected_values.value);
             emit('update:selected_options', options);
             emit('change_selected_options', options);
+            apply_chip_colors();
         });
 
         // Handle option unselection event (multiple select only)
@@ -375,6 +420,7 @@ const render = () => {
             emit('unselect_option', option);
             emit('update:selected_options', options);
             emit('change_selected_options', options);
+            apply_chip_colors();
         });
     }
     first_time_render = false;
@@ -409,6 +455,7 @@ function change_select_2_selected_value() {
     } else {
         $(select2Div).val(selected_values.value);
         $(select2Div).trigger("change");
+        apply_chip_colors();
     }
 }
 

@@ -620,6 +620,7 @@ void Ntop::start() {
   FlowRiskAlerts::checkUndefinedRisks();
 
   loadLocalInterfaceAddress();
+  loadHostLabels();
 
   address->startResolveAddressLoop();
 
@@ -888,6 +889,85 @@ char* Ntop::getIfName(int if_id, char* name, u_int name_len) {
 }
 
 #endif
+
+/* ******************************************* */
+
+/*
+ * Read from Redis for all labels and build host_labels_tree
+ * so that Host::initialize() can initialize labels without a per-host Redis request.
+ */
+void Ntop::loadHostLabels() {
+  char pattern[128];
+  char **keys = NULL;
+  int nkeys;
+
+  snprintf(pattern, sizeof(pattern), "%s*", HOST_LABELS_BITMAP_PREFIX);
+  nkeys = redis->keys(pattern, &keys);
+
+  for (int i = 0; i < nkeys; i++) {
+    char val_buf[32];
+
+    if (redis->get(keys[i], val_buf, sizeof(val_buf)) == 0 && val_buf[0] != '\0') {
+      u_int64_t bitmap = (u_int64_t)strtoull(val_buf, NULL, 10);
+
+      if (bitmap != 0) {
+        const char *ip_str = keys[i] + strlen(HOST_LABELS_BITMAP_PREFIX);
+        host_labels_tree.addAddress(ip_str, (int64_t)bitmap);
+      }
+    }
+
+    if (keys[i]) free(keys[i]);
+  }
+
+  if (keys) free(keys);
+
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Loaded %d host label bitmap(s) from Redis", nkeys);
+}
+
+/* ******************************************* */
+
+u_int64_t Ntop::getHostLabels(const char* ip_str) {
+  int64_t val = host_labels_tree.find(ip_str);
+  /* Note: find() returns -1 when the address is not in the tree */
+  return (val == -1) ? 0 : (u_int64_t)val;
+}
+
+/* ******************************************* */
+
+u_int64_t Ntop::getHostLabels(const IpAddress* ip) {
+  int64_t val;
+
+  if (ip->isIPv4()) {
+    u_int32_t addr = ip->get_ipv4(); /* network byte order, as stored in tree */
+    val = host_labels_tree.findAddress(AF_INET, &addr, NULL);
+  } else if (ip->isIPv6()) {
+    val = host_labels_tree.findAddress(AF_INET6,
+                                       (void*)ip->get_ipv6(), NULL);
+  } else {
+    return 0;
+  }
+
+  return (val == -1) ? 0 : (u_int64_t)val;
+}
+
+/* ******************************************* */
+
+void Ntop::setHostLabels(const char* ip_str, u_int64_t bitmap) {
+  char redis_key[CONST_MAX_LEN_REDIS_KEY];
+  char val_buf[32];
+
+  /* Update radix tree (in memory) */
+  host_labels_tree.addAddress(ip_str, (int64_t)bitmap);
+
+  /* Update Redis (persistent) */
+  snprintf(redis_key, sizeof(redis_key), HOST_LABELS_BITMAP_KEY, ip_str);
+  if (bitmap == 0)
+    redis->del(redis_key);
+  else {
+    snprintf(val_buf, sizeof(val_buf), "%llu", (unsigned long long)bitmap);
+    redis->set(redis_key, val_buf);
+  }
+}
 
 /* ******************************************* */
 

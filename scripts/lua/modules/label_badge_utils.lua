@@ -15,14 +15,15 @@ end
 -- ##############################################
 
 local function get_default_labels_table()
-    labels = {}
+    local labels = {}
 
-    for i = 16, 31 do
+    -- Bits 32-63: user-customizable labels
+    for i = 32, 63 do
         labels[i] = {
             id = i,
             color = "#000000",
             description = "",
-            name = "Customizable_Label",
+            name = "Customizable_Label_" .. i,
             reserved = "false"
         }
     end

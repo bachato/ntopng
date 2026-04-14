@@ -288,6 +288,8 @@
 #define LOCAL_HOSTS_CACHE_DURATION 3600        /*  1 h */
 #define LOCALHOST_SERVER_PORT_BITMAP "ntopng.cache.localhost_srv_port_bitmap.%s"
 #define HOST_LABEL_NAMES_KEY "ntopng.cache.host_labels.%s"
+#define HOST_LABELS_BITMAP_KEY    "ntopng.prefs.host_labels_bitmap.%s"
+#define HOST_LABELS_BITMAP_PREFIX "ntopng.prefs.host_labels_bitmap."
 #define IFACE_DHCP_RANGE_KEY "ntopng.prefs.ifid_%u.dhcp_ranges"
 #define IFACE_BROADCAST_DOMAINS_KEY "ntopng.prefs.ifid_%u.broadcast_domains"
 #define HOST_SERIALIZED_KEY "ntopng.serialized_hosts.ifid_%u_%s@%d"

@@ -963,6 +963,7 @@ class Flow : public GenericHashEntry {
 
   inline Host* get_cli_host() const { return (cli_host); };
   inline Host* get_srv_host() const { return (srv_host); };
+  u_int64_t getLabels();
   inline IpAddress* get_cli_ip_addr() const { return (cli_ip_addr); };
   inline IpAddress* get_srv_ip_addr() const { return (srv_ip_addr); };
   inline IpAddress* get_dns_srv_ip_addr() const {
@@ -1008,7 +1009,7 @@ class Flow : public GenericHashEntry {
   };
 
 #ifdef NTOPNG_PRO
-  /* NOTE: the caller must ensure that the hosts returned bxoy these methods are
+  /* NOTE: the caller must ensure that the hosts returned by these methods are
    * not used concurrently by subinterfaces since hosts are shared between all
    * the subinterfaces of the same ViewInterface. */
   inline Host* getViewSharedClient() {

@@ -279,6 +279,7 @@ void Host::initialize(Mac* _mac, int32_t _iface_idx, u_int16_t _vlanId,
   name_reset_requested = 0, prefs_loaded = 0;
   host_services_bitmap = 0, disabled_alerts_tstamp = 0, num_remote_access = 0,
   num_incomplete_flows = 0, deferred_init = 0;
+  labels_bitmap = ntop->getHostLabels(&ip);
 
   num_resolve_attempts = 0, nextResolveAttempt = 0,
   num_active_flows_as_client = 0, num_active_flows_as_server = 0,
@@ -930,6 +931,7 @@ void Host::lua(lua_State* vm, AddressTree* ptree, bool host_details,
     lua_get_as(vm);
     lua_get_os(vm);
     lua_get_host_pool(vm);
+    lua_get_labels(vm);
 #ifdef NTOPNG_PRO
     qoe_stats.lua_qoe_stats(vm);
 #endif
@@ -1153,6 +1155,21 @@ char* Host::get_host_label(char* const buf, ssize_t buf_len) {
   }
 
   return (buf);
+}
+
+/* ***************************************** */
+
+void Host::setLabels(u_int64_t bitmap) {
+  char ip_buf[64];
+
+  labels_bitmap = bitmap;
+  ntop->setHostLabels(ip.print(ip_buf, sizeof(ip_buf)), bitmap);
+}
+
+/* ***************************************** */
+
+void Host::lua_get_labels(lua_State* vm) const {
+  lua_push_uint64_table_entry(vm, "labels", labels_bitmap);
 }
 
 /* ***************************************** */

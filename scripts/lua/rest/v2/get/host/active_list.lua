@@ -39,6 +39,7 @@ local os_ = tonumber(_GET["os"])
 local mac = _GET["mac"]
 local mac_location = _GET["location"]
 local map_search = _GET["map_search"] or ""
+local label_filter = tonumber(_GET["label"])
 
 local c_order = true
 local lua_order = asc
@@ -224,7 +225,17 @@ for key, value in pairs(hosts_stats["hosts"]) do
     record["score"] = value["score"]
     record["isBlocked"] = drop_traffic
 
+    -- Label filter
+    -- TODO move this to C++
+    if label_filter then
+        local host_labels = value["labels"] or 0
+        if (host_labels & (1 << label_filter)) == 0 then
+            goto continue
+        end
+    end
+
     rsp[#rsp + 1] = record
+    ::continue::
 end
 
 rest_utils.extended_answer(rest_utils.consts.success.ok, rsp, {

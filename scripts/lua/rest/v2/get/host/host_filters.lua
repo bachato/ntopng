@@ -293,4 +293,24 @@ if ntop.isnEdge() then
     }
 end
 
+-- Label filter
+local label_badge_utils = require "label_badge_utils"
+local all_labels = label_badge_utils.getLabels()
+if #all_labels > 0 then
+    local label_filters = {{key = "label", value = "", label = i18n("all")}}
+    for _, lbl in ipairs(all_labels) do
+        label_filters[#label_filters + 1] = {
+            key = "label",
+            value = tostring(lbl.id),
+            label = lbl.name
+        }
+    end
+    rsp[#rsp + 1] = {
+        action = "label",
+        label = i18n("labels_page.labels"),
+        name = "label",
+        value = label_filters
+    }
+end
+
 rest_utils.answer(rest_utils.consts.success.ok, rsp)

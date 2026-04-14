@@ -81,6 +81,9 @@ class Host : public GenericHashEntry,
 
   /* END Host data */
 
+  /* 64-bit label bitmap: bits 0-31 reserved for ntop, bits 32-63 user-defined */
+  u_int64_t labels_bitmap;
+
   /* Counters used by host alerts */
   AttackVictimCounter flow_flood, icmp_flood, dns_flood, snmp_flood, rst_scan;
 
@@ -522,6 +525,10 @@ class Host : public GenericHashEntry,
   void lua_blacklisted_flows(lua_State* vm) const;
   void lua_unidirectional_tcp_udp_flows(lua_State* vm, bool as_subtable) const;
   void lua_get_listening_ports(lua_State* vm);
+  void lua_get_labels(lua_State* vm) const;
+
+  inline u_int64_t getLabels() const { return labels_bitmap; }
+  void setLabels(u_int64_t bitmap);
 
   void resolveHostName();
   char* get_host_label(char* const buf, ssize_t buf_size);

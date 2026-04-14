@@ -385,7 +385,11 @@ int64_t AddressTree::findAddress(int family, void* addr,
 
   if (p == NULL) return (-1);
 
+  updateLock.rdlock(__FILE__, __LINE__);
+
   node = Utils::ptree_match(p, family, addr, bits);
+
+  updateLock.unlock(__FILE__, __LINE__);
 
   if (node == NULL)
     return (-1);

@@ -2931,6 +2931,8 @@ local known_parameters = {
     ["label_id"] = validateNumber,
     ["label_name"] = validateUnquoted,
     ["color"] = validateSingleWord,
+    ["label"] = validateNumber,
+    ["host_labels_bitmap"] = validateNumber, -- 64-bit host label bitmap
 
     -- exporter sites
     ["latitude"] = validateSingleWord,

@@ -5095,6 +5095,7 @@ local lang = {
     ["drop_all_host_traffic_description"] = "By enabling this option all the traffic of this host is going to be dropped.",
     ["host_alias"] = "Host Alias",
     ["host_alias_description"] = "The host alias is going to be used instead of the host name.",
+    ["host_labels_description"] = "Labels to tag this host for filtering and classification.",
     ["host_config"] = "Host Configuration",
     ["host_notes_description"] = "This save a note for this host (e.g. to remember the role of the host, like router, switch, ...).",
     ["host_pool"] = "Host Pool",
