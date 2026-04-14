@@ -394,10 +394,11 @@ void ZMQCollectorInterface::collect_flows() {
         // ntop->getTrace()->traceEvent(TRACE_NORMAL, "[size: %u][source_id:
         // %u][topic: %s]", size, source_id, h->url);
 #endif
-        if (active_probes.find(source_id) != active_probes.end()) {
+        std::map<u_int32_t, zmq_probe*>::iterator it = active_probes.find(source_id);
+        if (it != active_probes.end()) {
           /* Found - read last message ID for the current source ID */
 
-          probe = active_probes[source_id];
+          probe = it->second;
 
           if (!on_event_socket && probe->last_msg_id_set) {
             /* Check drops / rollback by using msg_id on data messages */
