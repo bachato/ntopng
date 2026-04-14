@@ -411,42 +411,35 @@ void ZMQCollectorInterface::collect_flows() {
 
             if (msg_id == (probe->last_msg_id + 1)) {
               /* No drop */
-            } else {
-              if (msg_id < probe->last_msg_id) {
-                /* Start over (just reset active_probes) */
+            } else if (msg_id == probe->last_msg_id) {
+              /* Same ID? Not expected */
+            } else if (msg_id < probe->last_msg_id) {
+              /* Start over (just reset last_msg_id) */
+#ifdef DEBUG_ZMQ_MSGID
+              ntop->getTrace()->traceEvent(
+                  TRACE_NORMAL,
+                  "ROLLBACK [%s][subscriber_id: %u][source_id: %u][msg_id: "
+                  "%u][last: %u][tot msgs/drops: %u/%u]",
+                  ifname, subscriber_id, source_id, msg_id,
+                  probe->last_msg_id, recvStats.zmq_msg_rcvd,
+                  recvStats.zmq_msg_drops);
+#endif
+            } else { /* msg_id > probe->last_msg_id + 1 (Drop!) */
+                int32_t diff = msg_id - probe->last_msg_id; /* Delta: lost messages */
+
+                if (now - ntop->getGlobals()->getStartTime() > 15 /* Ignore startup drops */)
+                  recvStats.zmq_msg_drops += diff - 1; /* Increase msg drops */
+
+                check_clock_drift = false;
 #ifdef DEBUG_ZMQ_MSGID
                 ntop->getTrace()->traceEvent(
                     TRACE_NORMAL,
-                    "ROLLBACK [%s][subscriber_id: %u][source_id: %u][msg_id: "
-                    "%u][last: %u][tot msgs/drops: %u/%u]",
+                    "DROP [%s][subscriber_id: %u][source_id: %u][msg_id: "
+                    "%u][last: %u][tot msgs/drops: %u/%u][drops: +%u]",
                     ifname, subscriber_id, source_id, msg_id,
                     probe->last_msg_id, recvStats.zmq_msg_rcvd,
-                    recvStats.zmq_msg_drops);
+                    recvStats.zmq_msg_drops, diff - 1);
 #endif
-              } else {
-                /* Compute delta (this message ID - last message ID) */
-                int32_t diff = msg_id - probe->last_msg_id;
-
-                if (diff > 1) {
-                  /* Lost message detected */
-
-                  if (now - ntop->getGlobals()->getStartTime() > 15) {
-                    /* Increase msg drops (ignore startup drops) */
-                    recvStats.zmq_msg_drops += diff - 1;
-                  }
-
-                  check_clock_drift = false;
-#ifdef DEBUG_ZMQ_MSGID
-                  ntop->getTrace()->traceEvent(
-                      TRACE_NORMAL,
-                      "DROP [%s][subscriber_id: %u][source_id: %u][msg_id: "
-                      "%u][last: %u][tot msgs/drops: %u/%u][drops: +%u]",
-                      ifname, subscriber_id, source_id, msg_id,
-                      probe->last_msg_id, recvStats.zmq_msg_rcvd,
-                      recvStats.zmq_msg_drops, diff - 1);
-#endif
-                }
-              }
             }
           }
         }
