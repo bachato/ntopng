@@ -588,7 +588,7 @@ page_utils.print_navbar(title, url, {{
 			      page_name = "modbus",
 			      label = i18n("details.label_modbus_server")
 					}, {
-			      hidden = not flow or not (flow.bgp) or not ntop.isEnterpriseL(),
+			      hidden = true, -- not flow or not (flow.bgp) or not ntop.isEnterpriseL(),
 			      active = page == "bgp",
 			      page_name = "bgp",
 			      label = i18n("details.label_bgp")
@@ -2628,6 +2628,7 @@ elseif page == "s7comm" then
 		      vue_page_name = "PageFlowDetailsS7Comm",
 		      page_context = json_context
    })
+
 elseif page == "bgp" then
    local json = require "dkjson"
    local json_context = json.encode({
