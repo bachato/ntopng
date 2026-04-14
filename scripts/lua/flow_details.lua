@@ -24,6 +24,7 @@ local flow_consts = require "flow_consts"
 local template = require "template_utils"
 local categories_utils = require "categories_utils"
 local protos_utils = require("protos_utils")
+local label_badge_utils = require("label_badge_utils")
 local discover = require("discover_utils")
 local http_utils = require("http_utils")
 local json = require("dkjson")
@@ -760,6 +761,23 @@ if isEmptyString(page) or page == "overview" then
       end
 
       print("</tr>\n")
+
+      local flow_labels = flow["labels"] or 0
+      if flow_labels ~= 0 then
+         local all_labels = label_badge_utils.getLabels()
+         local badges_html = ""
+         for _, lbl in ipairs(all_labels) do
+            if math.floor(flow_labels / (2 ^ lbl.id)) % 2 ~= 0 then
+               badges_html = badges_html ..
+                  '<span class="badge" style="background-color:' .. lbl.color ..
+                  '; color:#fff; margin-right:4px;">' .. lbl.name .. '</span>'
+            end
+         end
+         if badges_html ~= "" then
+            print('<tr><th>' .. i18n("labels_page.labels") .. '</th>')
+            print('<td colspan=3>' .. badges_html .. '</td></tr>\n')
+         end
+      end
 
       if not flow["verdict.pass"] and flow["verdict.reason"] then
          print("<tr>")
@@ -1939,14 +1957,14 @@ if isEmptyString(page) or page == "overview" then
       end
 
       -- tprint(flow.bgp)
-      if(not isEmptyString(flow.bgp.src)) then
+      if flow.bgp and not isEmptyString(flow.bgp.src) then
          print('<tr><th class=\'colspan-4\'>' ..
 	       i18n("flow_details.src_bgp_info") .. '</th><td colspan=2>')
 	 print(format_utils.formatBgpBmpInfo(json.decode(flow.bgp.src)))
 	 print('</td></tr>\n')
       end
       
-      if(not isEmptyString(flow.bgp.dst)) then
+      if flow.bgp and not isEmptyString(flow.bgp.dst) then
          print('<tr><th class=\'colspan-4\'>' ..
 	       i18n("flow_details.dst_bgp_info") .. '</th><td colspan=2>')
 	 print(format_utils.formatBgpBmpInfo(json.decode(flow.bgp.dst)))
