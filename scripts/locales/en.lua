@@ -2801,6 +2801,7 @@ local lang = {
     ["label_http_server"] = "HTTP(S)",
     ["label_ssh_server"] = "SSH",
     ["label_rdp_server"] = "RDP",
+    ["label_bgp"] = "BGP",
     ["label_modbus_server"] = "Modbus",
     ["label_s7comm_server"] = "S7Comm",
     ["label_profinet_server"] = "Profinet",

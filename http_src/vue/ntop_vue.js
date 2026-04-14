@@ -119,6 +119,7 @@ import { default as PageTest } from "./page-test.vue";
 import { default as PageFlowDetailsModbus } from "./page-flow-details-modbus.vue"
 import { default as PageFlowDetailsS7Comm } from "./page-flow-details-s7comm.vue"
 import { default as PageFlowDetailsProfinet } from "./page-flow-details-profinet.vue"
+import { default as PageFlowDetailsBGP } from "./page-flow-details-bgp.vue"
 
 /* Config pages */
 import { default as PageSNMPConfig } from "./page-snmp-config.vue"
@@ -279,6 +280,7 @@ let ntopVue = {
     PageFlowDetailsModbus: PageFlowDetailsModbus,
     PageFlowDetailsS7Comm: PageFlowDetailsS7Comm,
     PageFlowDetailsProfinet: PageFlowDetailsProfinet,
+    PageFlowDetailsBGP: PageFlowDetailsBGP,
     
     /* SNMP */
     PageSNMPDevices: PageSNMPDevices,
