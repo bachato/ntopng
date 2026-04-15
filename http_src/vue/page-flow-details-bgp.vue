@@ -3,6 +3,7 @@
         <div class="row">
             <Transition name="add-effect" mode="out-in">
                 <div class="position-relative col-6">
+                    <h4>{{ _i18n('flow_details.bgp_client_info') }}</h4>
                     <BootstrapTable id="bgp_client_info" :columns="stats_columns" :rows="stats_rows_client"
                         :print_html_column="(col) => print_stats_column(col)"
                         :print_html_row="(col, row) => print_stats_row(col, row)">
@@ -11,6 +12,7 @@
             </Transition>
             <Transition name="add-effect" mode="out-in">
                 <div class="position-relative col-6">
+                    <h4>{{ _i18n('flow_details.bgp_server_info') }}</h4>
                     <BootstrapTable id="bgp_server_info" :columns="stats_columns" :rows="stats_rows_server"
                         :print_html_column="(col) => print_stats_column(col)"
                         :print_html_row="(col, row) => print_stats_row(col, row)">
@@ -36,10 +38,10 @@ const stats_rows_client = ref([]);
 const stats_rows_server = ref([]);
 const bgp_info_url = '/lua/pro/rest/v2/get/flow/bgp/general_stats.lua'
 const stats_columns = ref([{
+    class: "nowrap w-25",
     name: _i18n("map_page.info"),
     id: "info"
 }, {
-    class: "text-center w-25",
     name: _i18n("value"),
     id: "num"
 }
@@ -91,7 +93,7 @@ function print_stats_row(col, row) {
     if (row[col.id] == null) {
         return i18n('flow_details.' + row.name)
     } else {
-        return FormatterUtils.getFormatter("full_number")(row[col.id] || 0);
+        return row[col.id];
     }
 }
 </script>
