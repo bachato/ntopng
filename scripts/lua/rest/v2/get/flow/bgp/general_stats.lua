@@ -58,7 +58,7 @@ local function formatBgpBmpInfo(bgp_info)
         local max_len = (#peer_list > 2) and 8 or 32
         for _, peer in ipairs(peer_list) do
             peer_id[#peer_id + 1] = {
-                name = string.format("%s%s", peer_id, formatNextHop(peer.id))
+                name = formatNextHop(peer.id)
             }
             asn_list[#asn_list + 1] = {
                 name = string.format("%s (%s)", peer.info.asn, ntop.getASNameFromASN(tonumber(peer.info.asn))),
@@ -91,9 +91,9 @@ local function formatBgpBmpInfo(bgp_info)
             -- Formatting Communities list
             if peer.info["communities"] and #peer.info["communities"] > 0 then
                 for _, c in ipairs(peer.info["communities"]) do
-                communities[#communities + 1] = {
-                    name = c
-                }
+                    communities[#communities + 1] = {
+                        name = c
+                    }
                 end
             end
         end
