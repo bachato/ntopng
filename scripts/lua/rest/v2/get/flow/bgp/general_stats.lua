@@ -82,7 +82,7 @@ local function formatBgpBmpInfo(bgp_info)
                 local parts = {}
                 for _, asn in ipairs(peer.info["as_path"]) do
                     as_path[#as_path + 1] = {
-                        name = ntop.getASNameFromASN(tonumber(asn)),
+                        name = string.format("%d (%s)", tonumber(asn), ntop.getASNameFromASN(tonumber(asn))),
                         url = string.format("%s/lua/hosts_stats.lua?asn=%s", ntop.getHttpPrefix(), asn)
                     }
                 end
