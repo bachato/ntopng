@@ -588,7 +588,7 @@ page_utils.print_navbar(title, url, {{
 			      page_name = "modbus",
 			      label = i18n("details.label_modbus_server")
 					}, {
-			      hidden = true, -- not flow or not (flow.bgp) or not ntop.isEnterpriseL(),
+			      hidden = not flow or not (flow.bgp),
 			      active = page == "bgp",
 			      page_name = "bgp",
 			      label = i18n("details.label_bgp")
