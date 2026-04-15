@@ -274,6 +274,12 @@
   "ntopng.prefs.delete_pcap_dump_interfaces_data"
 #define CUSTOM_NDPI_PROTOCOLS_ASSOCIATIONS_HASH \
   "ntop.prefs.custom_nDPI_proto_categories"
+
+#define CONST_BGP_SERVER_ADDRESS_REDIS_KEY \
+  "ntopng.prefs.bgp_server.ip_address"
+#define CONST_BGP_SERVER_PORT_REDIS_KEY \
+  "ntopng.prefs.bgp_server.port"
+
 #define TRAFFIC_FILTERING_CACHE "ntopng.trafficfiltering.cache"
 #define TRAFFIC_FILTERING_TO_RESOLVE "ntopng.trafficfiltering.toresolve"
 #define PREFS_CHANGED "ntopng.cache.prefs_changed"

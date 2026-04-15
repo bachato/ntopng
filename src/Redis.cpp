@@ -116,26 +116,28 @@ void Redis::reconnectRedis(bool giveup_on_failure) {
       }
     }
 
-    if (reply) freeReplyObject(reply);
-    stats.num_other++;
-    reply = (redisReply*)redisCommand(redis, "PING");
-    if (reply && (reply->type == REDIS_REPLY_ERROR)) {
-      ntop->getTrace()->traceEvent(TRACE_ERROR, "%s",
-                                   reply->str ? reply->str : "???");
-
-      goto conn_retry;
+    if(!skip_checks) {
+      if (reply) freeReplyObject(reply);
+      stats.num_other++;
+      reply = (redisReply*)redisCommand(redis, "PING");
+      if (reply && (reply->type == REDIS_REPLY_ERROR)) {
+	ntop->getTrace()->traceEvent(TRACE_ERROR, "%s",
+				     reply->str ? reply->str : "???");
+	
+	goto conn_retry;
+      }
+      
+      if (reply) freeReplyObject(reply);
+      stats.num_other++;
+      reply = (redisReply*)redisCommand(redis, "SELECT %u", redis_db_id);
+      if (reply && (reply->type == REDIS_REPLY_ERROR)) {
+	ntop->getTrace()->traceEvent(TRACE_ERROR, "%s",
+				     reply->str ? reply->str : "???");
+	
+	goto conn_retry;
+      }
     }
-
-    if (reply) freeReplyObject(reply);
-    stats.num_other++;
-    reply = (redisReply*)redisCommand(redis, "SELECT %u", redis_db_id);
-    if (reply && (reply->type == REDIS_REPLY_ERROR)) {
-      ntop->getTrace()->traceEvent(TRACE_ERROR, "%s",
-                                   reply->str ? reply->str : "???");
-
-      goto conn_retry;
-    }
-
+    
     if (reply) freeReplyObject(reply);
     connected = true;
     break;

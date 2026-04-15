@@ -9188,6 +9188,48 @@ static int ntop_dump_lua_cache(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Returns all RIB BGP entries for the specified IP address */
+static int ntop_rib_find(lua_State* vm) {
+  char *ip_address, ip_address_s[32], port_s[8];
+  Redis* redis = ntop->getRedis();
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  
+  redis->get((char*)CONST_BGP_SERVER_ADDRESS_REDIS_KEY, ip_address_s, sizeof(ip_address_s));
+  redis->get((char*)CONST_BGP_SERVER_PORT_REDIS_KEY, port_s, sizeof(port_s));  
+
+  ntop->getTrace()->traceEvent(TRACE_WARNING, "%s / %s", ip_address_s, port_s);
+  
+  if((ip_address_s[0] == '\0') || (port_s[0] == '\0')
+     || (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK))
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+  else
+    ip_address = (char*)lua_tostring(vm, 1);
+
+  try {
+    Redis *r = new Redis(ip_address_s, NULL, atoi(port_s));
+
+    if(r != NULL) {
+      char *rsp = redis->getWithAlloc(ip_address);
+
+      if(rsp != NULL) {
+	lua_pushstring(vm, rsp);
+	free(rsp);
+      } else
+	lua_pushnil(vm);
+      
+      delete r;
+      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
+    }
+  } catch (...) {
+    ;
+  }
+  
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+}
+
+/* **************************************************************** */
+
 static luaL_Reg _ntop_reg[] = {
     {"getDirs", ntop_get_dirs},
     {"getInfo", ntop_get_info},
@@ -9694,6 +9736,9 @@ static luaL_Reg _ntop_reg[] = {
     {"setLuaCache", ntop_set_lua_cache},
     {"dumpLuaCache", ntop_dump_lua_cache},
 
+    /* RIB (Routing Information Base) */
+    {"ribFind", ntop_rib_find },
+    
     {NULL, NULL}};
 
 luaL_Reg* ntop_reg = _ntop_reg;
