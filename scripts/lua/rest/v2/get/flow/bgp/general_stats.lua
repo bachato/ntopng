@@ -3,8 +3,6 @@
 --
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
-package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
-package.path = dirs.installdir .. "/scripts/lua/pro/modules/flow_db/?.lua;" .. package.path
 
 require "http_lint"
 require "lua_utils_gui"
