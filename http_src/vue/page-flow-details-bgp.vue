@@ -36,7 +36,7 @@ const props = defineProps({
 const _i18n = (t) => i18n(t);
 const stats_rows_client = ref([]);
 const stats_rows_server = ref([]);
-const bgp_info_url = '/lua/pro/rest/v2/get/flow/bgp/general_stats.lua'
+const bgp_info_url = '/lua/rest/v2/get/flow/bgp/general_stats.lua'
 const stats_columns = ref([{
     class: "nowrap w-25",
     name: _i18n("map_page.info"),
