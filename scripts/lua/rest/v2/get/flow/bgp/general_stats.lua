@@ -41,14 +41,14 @@ local function formatBgpBmpInfo(bgp_info)
     local rsp = {}
     for prefix, peers in pairs(bgp_info) do
         local peer_list = {}
-        local peer_id = ""
-        local asn_list = ""
-        local bgp_origin = ""
-        local bgp_next_hop = ""
-        local as_path = ""
-        local communities = ""
-        local med_list = ""
-        local local_pref_list = ""
+        local peer_id = {}
+        local asn_list = {}
+        local bgp_origin = {}
+        local bgp_next_hop = {}
+        local as_path = {}
+        local communities = {}
+        local med_list = {}
+        local local_pref_list = {}
         for bgp_id, info in pairs(peers) do
             peer_list[#peer_list + 1] = {
                 id = bgp_id,
@@ -57,17 +57,26 @@ local function formatBgpBmpInfo(bgp_info)
         end
         local max_len = (#peer_list > 2) and 8 or 32
         for _, peer in ipairs(peer_list) do
-            peer_id = string.format("%s%s\r\n", peer_id, formatNextHop(peer.id))
-            asn_list = string.format("%s<a href='%s/lua/hosts_stats.lua?asn=%s'>%s(%s)</a>\r\n", asn_list,
-                ntop.getHttpPrefix(), peer.info.asn, peer.info.asn, ntop.getASNameFromASN(tonumber(peer.info.asn)))
-            bgp_origin = string.format("%s%s\r\n", bgp_origin, string.upper(peer.info["origin"] or ""))
-            bgp_next_hop = string.format("%s%s\r\n", bgp_next_hop, (peer.info["next_hop"] or ""))
-            med_list =
-                string.format("%s%s\r\n", med_list, ((peer.info["med"] ~= nil) and tostring(peer.info["med"]) or ""))
-            local_pref_list = string.format("%s%s\r\n", local_pref_list, ((peer.info["local_pref"] ~= nil) and
-                tostring(peer.info["local_pref"]) or ""))
+            peer_id[#peer_id + 1] = {
+                name = string.format("%s%s", peer_id, formatNextHop(peer.id))
+            }
+            asn_list[#asn_list + 1] = {
+                name = string.format("%s (%s)", peer.info.asn, ntop.getASNameFromASN(tonumber(peer.info.asn))),
+                url = string.format("%s/lua/hosts_stats.lua?asn=%s", ntop.getHttpPrefix(), peer.info.asn)
+            }
+            bgp_origin[#bgp_origin + 1] = {
+                name = string.upper(peer.info["origin"] or "")
+            }
+            bgp_next_hop[#bgp_next_hop + 1] = {
+                name = peer.info["next_hop"] or ""
+            }
+            med_list[#med_list + 1] = {
+                name = ((peer.info["med"] ~= nil) and tostring(peer.info["med"]) or "")
+            }
+            local_pref_list[#local_pref_list + 1] = {
+                name = ((peer.info["local_pref"] ~= nil) and tostring(peer.info["local_pref"]) or "")
+            }
 
-                
             local as_path_string = ""
             local communities_string = ""
 
@@ -96,40 +105,40 @@ local function formatBgpBmpInfo(bgp_info)
         end
         rsp[#rsp + 1] = {
             name = "bgp_prefix",
-            num = prefix
+            value = prefix
         }
         rsp[#rsp + 1] = {
             name = "bgp_peer_id",
-            num = peer_id
+            value = peer_id
         }
         rsp[#rsp + 1] = {
             name = "bgp_peer_asn",
-            num = asn_list
+            value = asn_list
         }
         rsp[#rsp + 1] = {
             name = "bgp_origin",
-            num = bgp_origin
+            value = bgp_origin
         }
         rsp[#rsp + 1] = {
             name = "bgp_next_hop",
-            num = bgp_next_hop
+            value = bgp_next_hop
         }
         rsp[#rsp + 1] = {
             name = "bgp_as_path",
-            num = as_path
+            value = as_path
         }
         if not ((#bgp_info == 1) and (#peer_list > 0)) then
             rsp[#rsp + 1] = {
                 name = "bgp_med",
-                num = med_list
+                value = med_list
             }
             rsp[#rsp + 1] = {
                 name = "bgp_local_pref",
-                num = local_pref_list
+                value = local_pref_list
             }
             rsp[#rsp + 1] = {
                 name = "bgp_communities",
-                num = communities
+                value = communities
             }
         end
     end

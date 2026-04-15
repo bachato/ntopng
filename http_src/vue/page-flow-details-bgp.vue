@@ -1,32 +1,29 @@
 <template>
     <div class="m-2 mb-3 row">
-        <div class="row">
-            <Transition name="add-effect" mode="out-in">
-                <div class="position-relative col-6">
-                    <h4>{{ _i18n('flow_details.bgp_client_info') }}</h4>
-                    <BootstrapTable id="bgp_client_info" :columns="stats_columns" :rows="stats_rows_client"
-                        :print_html_column="(col) => print_stats_column(col)"
-                        :print_html_row="(col, row) => print_stats_row(col, row)">
-                    </BootstrapTable>
-                </div>
-            </Transition>
-            <Transition name="add-effect" mode="out-in">
-                <div class="position-relative col-6">
-                    <h4>{{ _i18n('flow_details.bgp_server_info') }}</h4>
-                    <BootstrapTable id="bgp_server_info" :columns="stats_columns" :rows="stats_rows_server"
-                        :print_html_column="(col) => print_stats_column(col)"
-                        :print_html_row="(col, row) => print_stats_row(col, row)">
-                    </BootstrapTable>
-                </div>
-            </Transition>
-        </div>
+        <Transition name="add-effect" mode="out-in">
+            <div class="position-relative col-6">
+                <h4>{{ _i18n('flow_details.bgp_client_info') }}</h4>
+                <BootstrapTable id="bgp_client_info" :columns="stats_columns" :rows="stats_rows_client"
+                    :hide_head="true" :wrap_columns="true" :print_html_column="(col) => print_stats_column(col)"
+                    :print_html_row="(col, row) => print_stats_row(col, row)">
+                </BootstrapTable>
+            </div>
+        </Transition>
+        <Transition name="add-effect" mode="out-in">
+            <div class="position-relative col-6">
+                <h4>{{ _i18n('flow_details.bgp_server_info') }}</h4>
+                <BootstrapTable id="bgp_server_info" :columns="stats_columns" :rows="stats_rows_server"
+                    :hide_head="true" :wrap_columns="true" :print_html_column="(col) => print_stats_column(col)"
+                    :print_html_row="(col, row) => print_stats_row(col, row)">
+                </BootstrapTable>
+            </div>
+        </Transition>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeMount } from "vue";
 import { default as BootstrapTable } from "./bootstrap-table.vue";
-import FormatterUtils from "../utilities/formatter-utils.js";
 import { ntopng_url_manager, ntopng_utility } from "../services/context/ntopng_globals_services.js";
 
 const props = defineProps({
@@ -43,7 +40,7 @@ const stats_columns = ref([{
     id: "info"
 }, {
     name: _i18n("value"),
-    id: "num"
+    id: "value"
 }
 ])
 
@@ -66,7 +63,6 @@ const getExtraParametersUrl = () => {
 const refreshBSTable = async () => {
     const params = getExtraParametersUrl()
     const stats = await ntopng_utility.http_request(`${http_prefix}${bgp_info_url}?${params}`);
-    debugger;
     stats_rows_client.value = stats.client_info
     stats_rows_server.value = stats.server_info
 }
@@ -91,9 +87,24 @@ function print_stats_column(col) {
 
 function print_stats_row(col, row) {
     if (row[col.id] == null) {
-        return i18n('flow_details.' + row.name)
+        return `<b>${i18n('flow_details.' + row.name)}</b>`
     } else {
-        return row[col.id];
+        const info = row[col.id]
+        if (typeof info === "object") {
+            let formattedInfo = ""
+            info.forEach((el) => {
+                let singleElementInfo = ""
+                if (el.url) {
+                    singleElementInfo = `<a href='${el.url}'>${el.name}</a>`
+                } else {
+                    singleElementInfo = el.name
+                }
+                formattedInfo = `${formattedInfo}${singleElementInfo}<br>`
+            })
+            return formattedInfo
+        } else {
+            return row[col.id];
+        }
     }
 }
 </script>
