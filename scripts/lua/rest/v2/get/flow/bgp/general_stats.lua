@@ -77,31 +77,25 @@ local function formatBgpBmpInfo(bgp_info)
                 name = ((peer.info["local_pref"] ~= nil) and tostring(peer.info["local_pref"]) or "")
             }
 
-            local as_path_string = ""
-            local communities_string = ""
-
             -- Formatting AS Path list
             if peer.info["as_path"] and #peer.info["as_path"] > 0 then
                 local parts = {}
                 for _, asn in ipairs(peer.info["as_path"]) do
-                    parts[#parts + 1] = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. asn ..
-                                            "\">" .. asn .. " (" ..
-                                            shortenString(ntop.getASNameFromASN(tonumber(asn)), max_len) .. ")</A>"
+                    as_path[#as_path + 1] = {
+                        name = ntop.getASNameFromASN(tonumber(asn)),
+                        url = string.format()"%s/lua/hosts_stats.lua?asn=%s", ntop.getHttpPrefix(), asn")
+                    }
                 end
-                as_path_string = (#parts == 0) and "Local" or table.concat(parts, "<li>")
             end
 
             -- Formatting Communities list
             if peer.info["communities"] and #peer.info["communities"] > 0 then
-                local badges = {}
                 for _, c in ipairs(peer.info["communities"]) do
-                    badges[#badges + 1] = "<li>" .. c .. "</li>"
+                communities[#communities + 1] = {
+                    name = c
+                }
                 end
-                communities_string = table.concat(badges, " ")
             end
-
-            as_path = string.format("%s<ol><li>%s</ol>\r\n", as_path, as_path_string)
-            communities = string.format("%s<ol><li>%s</ol>\r\n", as_path, as_path_string)
         end
         rsp[#rsp + 1] = {
             name = "bgp_prefix",
