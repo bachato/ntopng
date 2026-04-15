@@ -39,7 +39,7 @@ end
 
 local function formatBgpBmpInfo(bgp_info)
     local rsp = {}
-    for prefix, peers in pairs(bgp_info) do
+    for prefix, peers in pairs(bgp_info or {}) do
         local peer_list = {}
         local peer_id = {}
         local asn_list = {}
