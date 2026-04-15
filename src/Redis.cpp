@@ -335,6 +335,12 @@ void Redis::addToCache(const char* key, const char* value, u_int expire_secs) {
   the returned string must be freed by the caller
 */
 char* Redis::getWithAlloc(char* key, bool cache_it) {
+  return(customGetWithAlloc("GET", key, cache_it));
+}
+
+/* **************************************** */
+
+char* Redis::customGetWithAlloc(const char *cmd, char* key, bool cache_it) {
   char* rsp = NULL;
   bool cacheable = cache_it || isCacheable(key);
   redisReply* reply;
@@ -370,7 +376,7 @@ char* Redis::getWithAlloc(char* key, bool cache_it) {
   }
 
   stats.num_get++;
-  reply = (redisReply*)redisCommand(redis, "GET %s", key);
+  reply = (redisReply*)redisCommand(redis, "%s %s", cmd, key);
   if (!reply) reconnectRedis(true);
   if (reply && (reply->type == REDIS_REPLY_ERROR))
     ntop->getTrace()->traceEvent(TRACE_ERROR, "%s",
@@ -540,6 +546,18 @@ int Redis::rename(char* key, char* new_key) {
   l->unlock(__FILE__, __LINE__);
 
   return (rc);
+}
+
+/* **************************************** */
+
+char* Redis::findAllWithAlloc(char* key) {
+  return(customGetWithAlloc("FINDALL", key, false));
+}
+
+/* **************************************** */
+
+char* Redis::findBestWithAlloc(char* key) {
+  return(customGetWithAlloc("FINDBEST", key, false));
 }
 
 /* **************************************** */
