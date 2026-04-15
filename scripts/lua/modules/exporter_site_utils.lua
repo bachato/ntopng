@@ -43,6 +43,7 @@ local exporter_to_name  = nil
 --
 local function cache_exporters()
    if((iface_to_exporter == nil) and ntop.isPro()) then
+    local dirs = ntop.getDirs()
 	 package.path = dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" .. package.path
 	 local snmp_cached_dev = require "snmp_cached_dev"
 
