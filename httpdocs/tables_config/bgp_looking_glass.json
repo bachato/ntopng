@@ -8,51 +8,70 @@
     "columns": [
         {
             "title_i18n": "flow_details.bgp_peer_id",
-            "data_field": "peer_ip",
+            "data_field": "bgp_peer_id",
             "sortable": true,
-            "class": ["text-nowrap"]
+            "class": [
+                "text-nowrap"
+            ]
         },
         {
             "title_i18n": "flow_details.bgp_peer_asn",
-            "data_field": "asn",
+            "data_field": "bgp_peer_asn",
             "sortable": true,
-            "class": ["text-center", "text-nowrap"]
+            "class": [
+                "text-nowrap"
+            ]
         },
         {
             "title_i18n": "flow_details.bgp_origin",
-            "data_field": "origin",
+            "data_field": "bgp_origin",
             "sortable": true,
-            "class": ["text-center", "text-nowrap"]
+            "class": [
+                "text-center",
+                "text-nowrap"
+            ]
         },
         {
             "title_i18n": "flow_details.bgp_as_path",
-            "data_field": "as_path",
+            "data_field": "bgp_as_path",
             "sortable": true,
-            "class": ["text-nowrap"]
+            "class": [
+                "text-nowrap"
+            ]
         },
         {
             "title_i18n": "flow_details.bgp_next_hop",
-            "data_field": "next_hop",
+            "data_field": "bgp_next_hop",
             "sortable": true,
-            "class": ["text-nowrap"]
+            "class": [
+                "text-nowrap"
+            ]
         },
         {
             "title_i18n": "flow_details.bgp_local_pref",
-            "data_field": "local_pref",
+            "data_field": "bgp_local_pref",
             "sortable": true,
-            "class": ["text-center", "text-nowrap"]
+            "class": [
+                "text-center",
+                "text-nowrap"
+            ]
         },
         {
-            "title_i18n": "flow_details.bgp_med",
-            "data_field": "med",
+            "title_i18n": "flow_details.bgp_med_short",
+            "data_field": "bgp_med",
             "sortable": true,
-            "class": ["text-center", "text-nowrap"]
+            "class": [
+                "text-center",
+                "text-nowrap"
+            ]
         },
         {
             "title_i18n": "flow_details.bgp_communities",
-            "data_field": "communities",
+            "data_field": "bgp_communities",
             "sortable": true,
-            "class": ["text-nowrap"]
+            "class": [
+                "text-nowrap"
+            ]
         }
     ]
 }

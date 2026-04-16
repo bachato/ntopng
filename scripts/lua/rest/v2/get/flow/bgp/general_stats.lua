@@ -61,4 +61,56 @@ end
 
 -- ################################################
 
+--[[
+DEBUG
+rsp = {
+    client_info = {},
+    server_info = {{
+        name = "bgp_prefix",
+        value = "1.1.1.0/24"
+    }, {
+        name = "bgp_peer_id",
+        value = {{
+            name = "table: 0x799050485480<a href=/lua/host_details.lua?host=185.54.80.3>185.54.80.3</a></a>"
+        }}
+    }, {
+        name = "bgp_peer_asn",
+        value = {{
+            name = "202032 (GOLINE - GOLINE SA)",
+            url = "/lua/hosts_stats.lua?asn=202032"
+        }}
+    }, {
+        name = "bgp_origin",
+        value = {{
+            name = "IGP"
+        }}
+    }, {
+        name = "bgp_next_hop",
+        value = {{
+            name = "185.54.80.3"
+        }}
+    }, {
+        name = "bgp_as_path",
+        value = {{
+            name = "CLOUDFLARENET - Cloudflare",
+            url = "/lua/hosts_stats.lua?asn=13335"
+        }}
+    }, {
+        name = "bgp_med",
+        value = {{
+            name = ""
+        }}
+    }, {
+        name = "bgp_local_pref",
+        value = {{
+            name = "305"
+        }}
+    }, {
+        name = "bgp_communities",
+        value = {{
+            name = "20203:2003"
+        }}
+    }}
+}
+]]
 rest_utils.answer(rest_utils.consts.success.ok, rsp)

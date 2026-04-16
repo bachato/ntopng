@@ -1,48 +1,39 @@
 <!-- (C) 2026 - ntop.org -->
 <template>
-    <div class="container-fluid px-3">
-
-        <div class="row align-items-center mt-3 mb-3 g-2">
-            <div class="col-auto">
-                <div class="input-group">
-                    <input ref="searchInput" name="search" type="text" class="form-control"
-                        style="min-width: 280px;"
-                        autocomplete="off" autocorrect="off"
-                        :placeholder="_i18n('details.label_bgp_search_ip')"
-                        @keydown.enter="searchPrefix" />
-                    <button class="btn btn-primary" type="button" @click="searchPrefix">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
+    <div class="row px-3 align-items-center justify-content-center">
+        <div class="d-flex col-auto align-items-center mt-3">
+            <div class="input-group me-2">
+                <input ref="searchInput" name="search" type="text" class="form-control" autocomplete="off"
+                    autocorrect="off" :placeholder="_i18n('details.label_bgp_search_ip')"
+                    @keydown.enter="searchPrefix" />
+                <button class="btn btn-primary" type="button" @click="searchPrefix">
+                    <i class="fas fa-search"></i>
+                </button>
             </div>
-
             <!-- Prefix -->
             <div class="col-auto" v-if="active_host">
                 <span class="badge bg-secondary fs-6 px-3 py-2">
                     <i class="fas fa-network-wired me-1"></i>
                     {{ active_host }}
                     <button type="button" class="btn-close btn-close-white ms-2"
-                        style="font-size: 0.6rem; vertical-align: middle;"
-                        @click="clearSearch" aria-label="Clear"></button>
+                        style="font-size: 0.6rem; vertical-align: middle;" @click="clearSearch"
+                        aria-label="Clear"></button>
                 </span>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-12">
-                <TableWithConfig ref="table_ref" :table_id="table_id"
-                    :get_extra_params_obj="get_extra_params_obj" :f_map_columns="map_table_def_columns"
-                    :f_sort_rows="columns_sorting">
-                </TableWithConfig>
-            </div>
+        <div class="col-12">
+            <TableWithConfig ref="table_ref" :table_id="table_id" :get_extra_params_obj="get_extra_params_obj"
+                :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting">
+            </TableWithConfig>
         </div>
-
     </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { default as TableWithConfig } from "./table-with-config.vue";
+import { default as dataUtils } from "../utilities/data-utils.js";
 import { ntopng_url_manager } from "../services/context/ntopng_globals_services.js";
 import { default as sortingFunctions } from "../utilities/sorting-utils.js";
 
@@ -55,6 +46,9 @@ const searchInput = ref(null);
 const table_ref = ref(null);
 const table_id = ref('bgp_looking_glass');
 const active_host = ref(ntopng_url_manager.get_url_entry('host') || '');
+const note_list = [
+    _i18n("flow_details.bgp_looking_glass_descr")
+]
 
 /* ***************************************************** */
 
@@ -84,11 +78,11 @@ const clearSearch = () => {
 
 const ASLink = (as_obj) => {
     if (!as_obj || !as_obj.raw) return '';
-    
+
     const asn_val = as_obj.raw;
     const asn_name = as_obj.name || `AS ${asn_val}`;
     const url = `${http_prefix}/lua/hosts_stats.lua?asn=${asn_val}`;
-    
+
     return `<a href="${url}" 
                 class="text-decoration-none" 
                 data-bs-toggle="tooltip" 
@@ -96,39 +90,68 @@ const ASLink = (as_obj) => {
                 title="${asn_name}">${asn_val}</a>`;
 };
 
+/* ************************************** */
+
+const formatNameValue = function (value) {
+    let info = (value.name) ? (value.name) : (value.value)
+    if (value.url) {
+        info = `<a href='${value.url}'>${info}</a>`
+    }
+    return `${info}`
+}
+
+/* ************************************** */
+
+const formatMultipleValues = function (value) {
+    let formatted_info = ""
+    const add_ul = value.length > 1
+    value?.forEach((el) => {
+        let info = (el.name) ? (el.name) : (el.value)
+        if (el.url) {
+            info = `<a href='${el.url}'>${info}</a>`
+        }
+        formatted_info = `${formatted_info}<li>${info}`
+    })
+    formatted_info = `<ul class="m-0">${formatted_info}</ul>`
+    return formatted_info
+}
+
+/* ************************************** */
+
 const map_table_def_columns = (columns) => {
     let map_columns = {
         "bgp_peer_id": (value, row) => {
-            return value;
+            return formatNameValue(value);
         },
-        "asn": (value, row) => {
-            return value ? ASLink(value) : '';
+        "bgp_peer_asn": (value, row) => {
+            return formatNameValue(value);
         },
-        "origin": (value, row) => {
-            return value ? value.toUpperCase() : '';
+        "bgp_origin": (value, row) => {
+            return formatNameValue(value);
         },
-        "as_path": (value, row) => {
-            if (!Array.isArray(value)) return '';
-            return value.map(as_obj => ASLink(as_obj)).join(' ');
+        "bgp_as_path": (value, row) => {
+            return formatMultipleValues(value)
         },
-        "next_hop": (value, row) => {
-            return value;
+        "bgp_next_hop": (value, row) => {
+            return formatNameValue(value);
         },
-        "local_pref": (value, row) => {
-            return value || 100;
+        "bgp_local_pref": (value, row) => {
+            if (dataUtils.isZeroOrEmptyString(value.name)) {
+                return '100'
+            }
+            return value.name
         },
-        "med": (value, row) => {
-            return value || 0;
+        "bgp_med": (value, row) => {
+            if (dataUtils.isZeroOrEmptyString(value.name)) {
+                return ''
+            }
+            return value.name
         },
-        "communities": (value) => {
-            if (!Array.isArray(value)) return value ?? '';
-            return value.map(comm => {
-                if (!comm.left || !comm.right) return comm.raw;
-                return `${ASLink(comm.left)}:${ASLink(comm.right)}`;
-            }).join(' ');
+        "bgp_communities": (value) => {
+            return formatMultipleValues(value)
         },
     };
-    
+
     columns.forEach((c) => {
         c.render_func = map_columns[c.data_field];
     });
@@ -144,19 +167,24 @@ function columns_sorting(col, r0, r1) {
         const r0_col = r0[col.data.data_field];
         const r1_col = r1[col.data.data_field];
 
-        if (col.id == "peer_ip" || col.id == "next_hop") {
-            return sortingFunctions.sortByIP(r0_col, r1_col, col ? col.sort : null);
-        } else if (col.id == "local_pref" || col.id == "med") {
-            return sortingFunctions.sortByNumber(r0_col, r1_col, col.sort);
-        } else if (col.id == "asn") {
-            // extract asn value
-            const val0 = r0_col && r0_col.raw ? parseInt(r0_col.raw) : 0;
-            const val1 = r1_col && r1_col.raw ? parseInt(r1_col.raw) : 0;
-            return sortingFunctions.sortByNumber(val0, val1, col.sort);
-        } else if (col.id == "as_path" || col.id == "communities") {
+        if (col.id == "bgp_peer_id" || col.id == "bgp_next_hop") {
+            return sortingFunctions.sortByIP(r0_col.value, r1_col.value, col ? col.sort : null);
+        } else if (col.id == "bgp_local_pref") {
+            return sortingFunctions.sortByNumber(r0_col.name, r1_col.name, col.sort);
+        } else if (col.id == "bgp_med") {
+            return sortingFunctions.sortByNumber(r0_col.name, r1_col.name, col.sort);
+        } else if (col.id == "bgp_peer_asn") {
+            return sortingFunctions.sortByNumber(r0_col.value, r1_col.value, col.sort);
+        } else if (col.id == "bgp_as_path" || col.id == "bgp_communities") {
             return sortingFunctions.sortByArrayLength(r0_col, r1_col, col.sort);
-        } 
+        }
     }
 }
+
+onMounted(() => {
+    if (!dataUtils.isEmptyString(active_host.value)) {
+        searchInput.value.value = active_host.value
+    }
+})
 
 </script>
