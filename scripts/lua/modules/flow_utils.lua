@@ -841,7 +841,7 @@ function getFlowLabel(flow, show_macs, add_hyperlinks, historical_bounds, hyperl
         end
     end
 
-    if(flow["srv2cli.packets"] > 0) then
+    if((flow["srv2cli.packets"] ~= nil) and (flow["srv2cli.packets"] > 0)) then
        icon = "fa-exchange-alt"
     else
        icon = "fa-long-arrow-alt-right"
