@@ -34,6 +34,7 @@ class AddressTree {
   std::map<u_int64_t, int64_t> macs;
   ndpi_void_fn_t free_func;
   RwLock updateLock;
+  bool lock_enabled;
 
   void removePrefix(bool isV4, ndpi_prefix_t* prefix);
   static void walk(ndpi_patricia_tree_t* ptree, ndpi_void_fn3_t func,
@@ -42,8 +43,10 @@ class AddressTree {
   void cleanup(ndpi_void_fn_t free_func);
 
  public:
-  AddressTree(bool handleIPv6 = true, ndpi_void_fn_t data_free_func = NULL);
-  AddressTree(const AddressTree& at, ndpi_void_fn_t data_free_func = NULL);
+  AddressTree(bool handleIPv6 = true, ndpi_void_fn_t data_free_func = NULL,
+              bool use_locking = true);
+  AddressTree(const AddressTree& at, ndpi_void_fn_t data_free_func = NULL,
+              bool use_locking = true);
   virtual ~AddressTree();
 
   void init(bool handleIPv6);
