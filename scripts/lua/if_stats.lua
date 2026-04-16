@@ -38,6 +38,7 @@ local have_nedge = ntop.isnEdge()
 local sites_granularities = nil
 local show_zmq_encryption_public_key = false
 local http_prefix = ntop.getHttpPrefix()
+local prefs = ntop.getPrefs()
 
 if ntop.isPro() then
     shaper_utils = require("shaper_utils")
