@@ -11,20 +11,17 @@
                 </button>
             </div>
             <!-- Prefix -->
-            <div class="col-auto" v-if="active_host">
-                <span class="badge bg-secondary fs-6 px-3 py-2">
-                    <i class="fas fa-network-wired me-1"></i>
-                    {{ active_host }}
-                    <button type="button" class="btn-close btn-close-white ms-2"
-                        style="font-size: 0.6rem; vertical-align: middle;" @click="clearSearch"
-                        aria-label="Clear"></button>
+            <div class="col-auto" v-if="prefix">
+                <span class="badge bg-secondary fs-6">
+                    {{ _i18n('flow_details.bgp_prefix') }}: {{ prefix }}
                 </span>
             </div>
+            <Spinner :show="loading" size="1rem" class="me-1"></Spinner>
         </div>
 
         <div class="col-12">
             <TableWithConfig ref="table_ref" :table_id="table_id" :get_extra_params_obj="get_extra_params_obj"
-                :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting">
+                :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting" @rows_loaded="disableLoading">
             </TableWithConfig>
         </div>
     </div>
@@ -45,7 +42,9 @@ const _i18n = (t) => i18n(t);
 const searchInput = ref(null);
 const table_ref = ref(null);
 const table_id = ref('bgp_looking_glass');
+const prefix = ref('')
 const active_host = ref(ntopng_url_manager.get_url_entry('host') || '');
+const loading = ref(false);
 const note_list = [
     _i18n("flow_details.bgp_looking_glass_descr")
 ]
@@ -62,7 +61,7 @@ const searchPrefix = () => {
     const host = searchInput.value?.value?.trim();
     active_host.value = host || '';
     ntopng_url_manager.set_key_to_url('host', active_host.value);
-    table_ref.value?.refresh_table();
+    refreshTable();
 };
 
 /* ***************************************************** */
@@ -71,7 +70,7 @@ const clearSearch = () => {
     active_host.value = '';
     if (searchInput.value) searchInput.value.value = '';
     ntopng_url_manager.set_key_to_url('host', '');
-    table_ref.value?.refresh_table();
+    refreshTable()
 };
 
 /* ************************************** */
@@ -121,6 +120,8 @@ const formatMultipleValues = function (value) {
 const map_table_def_columns = (columns) => {
     let map_columns = {
         "bgp_peer_id": (value, row) => {
+            // Small trick to handle the prefix
+            prefix.value = row.bgp_prefix
             return formatNameValue(value);
         },
         "bgp_peer_asn": (value, row) => {
@@ -159,7 +160,6 @@ const map_table_def_columns = (columns) => {
     return columns;
 };
 
-
 /* ************************************** */
 
 function columns_sorting(col, r0, r1) {
@@ -180,6 +180,21 @@ function columns_sorting(col, r0, r1) {
         }
     }
 }
+
+/* ************************************** */
+
+function disableLoading() {
+    loading.value = false
+}
+
+/* ************************************** */
+
+function refreshTable() {
+    loading.value = true
+    table_ref.value?.refresh_table();
+}
+
+/* ************************************** */
 
 onMounted(() => {
     if (!dataUtils.isEmptyString(active_host.value)) {
