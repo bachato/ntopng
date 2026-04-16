@@ -1005,7 +1005,11 @@ class Host : public GenericHashEntry,
   };
   virtual char* getSerializationKey(char* buf, u_int bufsize,
                                     bool short_format = false) {
-    return (NULL);
+    char ip_buf[64];
+    snprintf(buf, bufsize,
+             short_format ? HOST_SERIALIZED_SHORT_KEY : HOST_SERIALIZED_KEY,
+             iface->get_id(), ip.print(ip_buf, sizeof(ip_buf)), vlan_id);
+    return buf;
   };
   virtual void setTCPfingerprint(char* tcp_fingerprint, ndpi_os os) { ; }
 #ifdef NTOPNG_PRO
