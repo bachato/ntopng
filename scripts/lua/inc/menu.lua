@@ -445,6 +445,14 @@ else
             entry = page_utils.menu_entries.server_ports_asn_mode,
             url = '/lua/server_ports.lua',
             hidden = not is_enterprise_L
+        }, {
+            entry = page_utils.menu_entries.divider
+        }, {
+            entry = page_utils.menu_entries.bgp_looking_glass,
+            url = '/lua/bgp_looking_glass.lua',
+            hidden = isEmptyString(ntop.getPref("ntopng.prefs.bgp_server.ip_address")) or
+                isEmptyString(ntop.getPref('ntopng.prefs.bgp_server.port'))
+                
         }}
     })
     -- ##############################################
