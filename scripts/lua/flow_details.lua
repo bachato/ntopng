@@ -1960,21 +1960,6 @@ if isEmptyString(page) or page == "overview" then
 
          print("</tr>\n")
       end
-
-      -- tprint(flow.bgp)
-      if flow.bgp and not isEmptyString(flow.bgp.src) then
-         print('<tr><th class=\'colspan-4\'>' ..
-	       i18n("flow_details.src_bgp_info") .. '</th><td colspan=2>')
-	 print(format_utils.formatBgpBmpInfo(json.decode(flow.bgp.src)))
-	 print('</td></tr>\n')
-      end
-      
-      if flow.bgp and not isEmptyString(flow.bgp.dst) then
-         print('<tr><th class=\'colspan-4\'>' ..
-	       i18n("flow_details.dst_bgp_info") .. '</th><td colspan=2>')
-	 print(format_utils.formatBgpBmpInfo(json.decode(flow.bgp.dst)))
-	 print('</td></tr>\n')
-      end
       
       if (flow.prev_adjacent_as or flow.next_adjacent_as) then
          print("<tr>")
