@@ -29,9 +29,11 @@ class VLANAddressTree {
   AddressTree** tree;
   ndpi_void_fn_t free_func;
   u_int32_t num_addresses;
+  RwLock updateLock;
+  bool lock_enabled;
 
  public:
-  VLANAddressTree(ndpi_void_fn_t data_free_func = NULL);
+  VLANAddressTree(ndpi_void_fn_t data_free_func = NULL, bool use_locking = true);
   ~VLANAddressTree();
 
   inline bool isEmpty() { return (num_addresses == 0); }
@@ -41,7 +43,8 @@ class VLANAddressTree {
   int16_t findAddress(u_int16_t vlan_id, int family, void* addr,
                       u_int8_t* network_mask_bits = NULL);
   int16_t findMac(u_int16_t vlan_id, const u_int8_t addr[]);
-  void* findAndGetData(u_int16_t vlan_id, IpAddress* ipa) const;
+
+  void* findAndGetData(u_int16_t vlan_id, IpAddress* ipa);
   bool addVLANAddressAndData(u_int16_t vlan_id, const char* _what,
                              void* user_data);
 
