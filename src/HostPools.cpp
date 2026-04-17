@@ -591,7 +591,7 @@ void HostPools::reloadPools() {
 
 bool HostPools::findMacPool(const u_int8_t* const mac, u_int16_t* found_pool) {
   VLANAddressTree* cur_tree; /* must use this as tree can be swapped */
-  int16_t ret;
+  int64_t ret;
 
   if (!tree || !(cur_tree = tree)) return (false);
 

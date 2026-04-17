@@ -37,12 +37,12 @@ class VLANAddressTree {
   ~VLANAddressTree();
 
   inline bool isEmpty() { return (num_addresses == 0); }
-  bool addAddress(u_int16_t vlan_id, char* _net, const int16_t user_data = -1);
+  bool addAddress(u_int16_t vlan_id, const char* net, int64_t user_data = -1);
   bool addAddresses(u_int16_t vlan_id, char* net, const int16_t user_data = -1);
 
-  int16_t findAddress(u_int16_t vlan_id, int family, void* addr,
+  int64_t findAddress(u_int16_t vlan_id, int family, void* addr,
                       u_int8_t* network_mask_bits = NULL);
-  int16_t findMac(u_int16_t vlan_id, const u_int8_t addr[]);
+  int64_t findMac(u_int16_t vlan_id, const u_int8_t addr[]);
 
   void* findAndGetData(u_int16_t vlan_id, IpAddress* ipa);
   bool addVLANAddressAndData(u_int16_t vlan_id, const char* _what,
