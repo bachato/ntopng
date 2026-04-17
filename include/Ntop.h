@@ -137,9 +137,6 @@ class Ntop {
   char* local_network_aliases[CONST_MAX_NUM_NETWORKS];
   AddressTree local_network_tree, cloud_local_network_tree;
 
-  /* Host label bitmaps preloaded from Redis at startup */
-  AddressTree host_labels_tree;
-
   /* Threads info */
   struct ThreadInfo {
     std::string name;
@@ -184,7 +181,6 @@ class Ntop {
   bool addLocalNetwork(char* _net);
 
   void loadLocalInterfaceAddress();
-  void loadHostLabels();
   void initAllowedProtocolPresets();
 
   void reloadASNPrefsOnInterfaces();
@@ -509,10 +505,6 @@ class Ntop {
   };
   inline Redis* getRedis() { return (redis); };
   inline TimelineExtract* getTimelineExtract() { return (extract); };
-
-  u_int64_t getHostLabels(const char* ip_str);
-  u_int64_t getHostLabels(const IpAddress* ip);
-  void setHostLabels(const char* ip_str, u_int64_t bitmap);
 
 #ifdef HAVE_ZMQ
 #ifndef HAVE_NEDGE

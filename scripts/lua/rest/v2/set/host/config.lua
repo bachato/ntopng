@@ -69,7 +69,7 @@ end
 
 if (_POST["host_labels_bitmap"] ~= nil) and isAdministrator() then
     local labels_bitmap = tonumber(_POST["host_labels_bitmap"]) or 0
-    ntop.setHostLabels(host_info["host"], labels_bitmap)
+    interface.setHostLabels(host_info["host"], labels_bitmap)
 end
 
 local rc = rest_utils.consts.success.ok

@@ -225,6 +225,7 @@ using namespace std;
 #include "AddressTree.h"
 #include "VLANAddressTree.h"
 #include "ServerConfiguration.h"
+#include "LabelsConfiguration.h"
 #include "ASNConfiguration.h"
 #include "BroadcastDomains.h"
 #include "Cardinality.h"

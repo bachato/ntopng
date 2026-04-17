@@ -9707,6 +9707,28 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
   setEntityValue(buf);
   reloadGwMacs();
   removeRedisSitesKey();
+
+  if (id >= 0)
+    host_labels.loadFromRedis(id);
+}
+
+/* **************************************** */
+
+u_int64_t NetworkInterface::getHostLabels(Host* host) {
+  Mac* mac = host->getMac();
+  if (mac) {
+    u_int64_t v = host_labels.getLabels(mac->get_mac());
+    if (v) return v;
+  }
+  return host_labels.getLabels(host->get_ip(), host->get_vlan_id());
+}
+
+/* **************************************** */
+
+void NetworkInterface::setHostLabels(Host* host, u_int64_t bitmap) {
+  char key_buf[CONST_MAX_LEN_REDIS_KEY];
+  char* key = host->getSerializationKey(key_buf, sizeof(key_buf), true);
+  host_labels.setLabels(key, bitmap);
 }
 
 /* **************************************** */

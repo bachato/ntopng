@@ -207,6 +207,7 @@ class NetworkInterface : public NetworkInterfaceAlertableEntity {
 
   string ip_addresses;
   AddressTree interface_networks;
+  LabelsConfiguration host_labels;
   int id;
   bool bridge_interface;
 
@@ -487,6 +488,11 @@ class NetworkInterface : public NetworkInterfaceAlertableEntity {
     ip_reassignment_alerts_enabled = status;
   };
   inline AddressTree* getInterfaceNetworks() { return (&interface_networks); };
+  u_int64_t getHostLabels(Host* host);
+  void setHostLabels(Host* host, u_int64_t bitmap);
+  /* Key-based overload used when Host is not available (e.g. inactive hosts from Lua) */
+  inline u_int64_t getHostLabels(const char* key) { return host_labels.getLabels(key); };
+  inline void setHostLabels(const char* key, u_int64_t bitmap) { host_labels.setLabels(key, bitmap); };
   virtual void startPacketPolling();
   virtual void startFlowDumping();
   virtual bool isLoading() { return false; };

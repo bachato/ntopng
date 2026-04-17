@@ -731,7 +731,7 @@ else
          print("</td></tr>")
 
          -- Labels row
-         local host_labels_bitmap = ntop.getHostLabels(host_ip)
+         local host_labels_bitmap = interface.getHostLabels(host_ip)
          if host_labels_bitmap and host_labels_bitmap ~= 0 then
             local all_labels = label_badge_utils.getLabels()
             local badges_html = ""

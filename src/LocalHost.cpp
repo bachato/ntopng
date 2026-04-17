@@ -115,6 +115,7 @@ void LocalHost::set_hash_entry_state_idle() {
  * initialization */
 void LocalHost::initialize() {
   char buf[64], host[96], rsp[256];
+
   BroadcastDomains* bd = iface->getBroadcastDomains();
 
   stats = allocateStats();
@@ -203,7 +204,12 @@ void LocalHost::initialize() {
 
 /* *************************************** */
 
-void LocalHost::deferredInitialization() { Host::deferredInitialization(); }
+void LocalHost::deferredInitialization() {
+
+  Host::deferredInitialization(); /* this also sets is_in_broadcast_domain */
+
+  labels_bitmap = iface->getHostLabels(this); 
+}
 
 /* *************************************** */
 

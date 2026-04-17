@@ -279,7 +279,7 @@ void Host::initialize(Mac* _mac, int32_t _iface_idx, u_int16_t _vlanId,
   name_reset_requested = 0, prefs_loaded = 0;
   host_services_bitmap = 0, disabled_alerts_tstamp = 0, num_remote_access = 0,
   num_incomplete_flows = 0, deferred_init = 0;
-  labels_bitmap = ntop->getHostLabels(&ip);
+  labels_bitmap = 0;
 
   num_resolve_attempts = 0, nextResolveAttempt = 0,
   num_active_flows_as_client = 0, num_active_flows_as_server = 0,
@@ -1160,10 +1160,8 @@ char* Host::get_host_label(char* const buf, ssize_t buf_len) {
 /* ***************************************** */
 
 void Host::setLabels(u_int64_t bitmap) {
-  char ip_buf[64];
-
   labels_bitmap = bitmap;
-  ntop->setHostLabels(ip.print(ip_buf, sizeof(ip_buf)), bitmap);
+  iface->setHostLabels(this, bitmap);
 }
 
 /* ***************************************** */
