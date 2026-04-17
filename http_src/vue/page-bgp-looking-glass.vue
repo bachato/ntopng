@@ -12,8 +12,13 @@
             </div>
             <!-- Prefix -->
             <div class="col-auto" v-if="prefix">
-                <span class="badge bg-secondary fs-6">
-                    {{ _i18n('flow_details.bgp_prefix') }}: {{ prefix }}
+                <span class="d-inline-flex align-items-center 
+                        gap-2 px-3 py-2 rounded-3 
+                        border border-primary-subtle 
+                        bg-primary-subtle text-primary fw-semibold font-monospace fs-6" data-bs-toggle="tooltip"
+                    data-bs-placement="top" :title="_i18n('flow_details.bgp_prefix')">
+                    <i class="fa-solid fa-network-wired"></i>
+                    {{ prefix }}
                 </span>
             </div>
             <Spinner :show="loading" size="1rem" class="me-1"></Spinner>
@@ -122,7 +127,10 @@ const map_table_def_columns = (columns) => {
         "bgp_peer_id": (value, row) => {
             // Small trick to handle the prefix
             prefix.value = row.bgp_prefix
-            return formatNameValue(value);
+            const formattedPeer = formatNameValue(value)
+            return `${formattedPeer}${value.is_best_path ?
+                `<span class="badge bg-success ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                    title="${_i18n('flow_details.bgp_best_path')}">${_i18n('flow_details.bgp_best')} <i class="fa-solid fa-trophy"></i></span>` : ''}`;
         },
         "bgp_peer_asn": (value, row) => {
             return formatNameValue(value);

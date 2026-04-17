@@ -36,7 +36,8 @@ function bgp_utils.formatBgpBmpInfo(bgp_info)
         for _, peer in ipairs(peer_list) do
             peer_id[#peer_id + 1] = {
                 name = formatNextHop(peer.id),
-                value = peer.id
+                value = peer.id,
+                is_best_path = (peer.info.best_entry or false)
             }
             asn_list[#asn_list + 1] = {
                 name = string.format("%s (%s)", peer.info.asn, ntop.getASNameFromASN(tonumber(peer.info.asn))),

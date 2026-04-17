@@ -1627,26 +1627,25 @@ function formatNextHop(ip)
       local exporter_name
       
       if(exporter_site_utils ~= nil) then
-	 ip1, site, exporter_name = exporter_site_utils.map_host_to_exporter_ip(ip)
+	      ip1, site, exporter_name = exporter_site_utils.map_host_to_exporter_ip(ip)
       end
 
       if(exporter_name ~= ip) then
-	 ret = "<a href=\"" .. ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporter_interfaces.lua?ip=" .. ip1 .. "\">" .. exporter_name
+         ret = "<a href=\"" .. ntop.getHttpPrefix() .. "/lua/host_details.lua?host=" .. ip .. "\">" .. ip .. "</a>" 
+	      ret = ret .. " (<a href=\"" .. ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporter_interfaces.lua?ip=" .. ip1 .. "\">" .. exporter_name .. "</a>"
 	 
-	 if(site ~= nil) then
-	    ret = ret .. " (".. site ..")</A>"
-	 end
-	 
-	 ret = ret .. " ["..  "<a href=\"" .. ntop.getHttpPrefix() .. "/lua/host_details.lua?host=" .. ip .. "\">" .. ip .. "</a>".."]"      
+         if(site ~= nil) then
+            ret = ret .. " - ".. site
+         end
+         
+         ret = ret .. ")"
       else
-	 if(ip == "0.0.0.0") then
-	    ret = ip
-	 else
-	    ret = "<a href=" .. ntop.getHttpPrefix() .. "/lua/host_details.lua?host=" .. ip1 .. ">" .. ip1 .. "</a>"
-	 end
+         if(ip == "0.0.0.0") then
+            ret = ip
+         else
+            ret = "<a href=" .. ntop.getHttpPrefix() .. "/lua/host_details.lua?host=" .. ip1 .. ">" .. ip1 .. "</a>"
+         end
       end
-
-      ret = ret .. "</a>"
       
       return ret, ip1, exporter_name or ip1, site
    else
