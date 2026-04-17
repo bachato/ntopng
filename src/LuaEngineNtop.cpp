@@ -8656,6 +8656,30 @@ static int ntop_get_as_name_from_asn(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns the organization name for a given autonomous system number.  Lua: ntop.getASNameFromASN(asn_number) → string */
+static int ntop_get_host_asn(lua_State* vm) {
+  IpAddress ip;
+  u_int32_t asn;
+  char* asname;
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+
+  ip.set((char*)lua_tostring(vm, 1));
+
+  ntop->getGeolocation()->getAS(&ip, &asn,
+                                &asname /* to free */);
+  lua_newtable(vm);
+  lua_push_int32_table_entry(vm, "asn", asn);
+  lua_push_str_table_entry(vm, "as_name", asname ? asname : (char*)"");
+
+  if(asname) free(asname);
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
+}
+
+/* ****************************************** */
+
 /* @brief Returns geolocation data (country, city, lat, lon) for an IP via GeoIP.  Lua: ntop.getHostGeolocation(ip) → table */
 static int ntop_get_host_geolocation(lua_State* vm) {
   IpAddress ip;
@@ -9604,6 +9628,7 @@ static luaL_Reg _ntop_reg[] = {
     /* ASN */
     {"getASName", ntop_get_asn_name},
     {"getASNameFromASN", ntop_get_as_name_from_asn},
+    {"getHostASN", ntop_get_host_asn},
     {"getHostGeolocation", ntop_get_host_geolocation},
 
     /* Mac */

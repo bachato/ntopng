@@ -1,7 +1,7 @@
 <!-- (C) 2026 - ntop.org -->
 <template>
     <div class="row px-3 align-items-center justify-content-center">
-        <div class="d-flex col-auto align-items-center mt-3">
+        <div class="d-flex col-auto align-items-center mt-3 gap-1 mb-2">
             <div class="input-group me-2">
                 <input ref="searchInput" name="search" type="text" class="form-control" autocomplete="off"
                     autocorrect="off" :placeholder="_i18n('details.label_bgp_search_ip')"
@@ -13,31 +13,43 @@
             <!-- Prefix -->
             <div class="col-auto" v-if="prefix">
                 <span class="d-inline-flex align-items-center 
-                        gap-2 px-3 py-2 rounded-3 
-                        border border-primary-subtle 
-                        bg-primary-subtle text-primary fw-semibold font-monospace fs-6" data-bs-toggle="tooltip"
-                    data-bs-placement="top" :title="_i18n('flow_details.bgp_prefix')">
+                        gap-2 px-3 py-2 rounded-3 border border-primary-subtle 
+                        fw-semibold font-monospace fs-6 prefix-color" data-bs-toggle="tooltip" data-bs-placement="top"
+                    :title="_i18n('flow_details.bgp_prefix')">
                     <i class="fa-solid fa-network-wired"></i>
                     {{ prefix }}
                 </span>
+            </div>
+            <!-- Prefix -->
+            <div class="col-auto" v-if="rpki">
+                <a class="badge" :class="rpki === 'Valid' ? 'bg-success' : 'bg-danger'"
+                    :href="`https://rpki-validator.ripe.net/ui/?prefix=${prefix}&asns=${asn}`" target="_blank"
+                    data-bs-toggle="tooltip" data-bs-placement="top"
+                    :title="_i18n('flow_details.   bgp_jump_to_routinator')">
+                    {{ _i18n('flow_details.bgp_rpki') }}: {{ rpki }}
+                    <i class="fas fa-external-link-alt text-white"></i>
+                </a>
             </div>
             <Spinner :show="loading" size="1rem" class="me-1"></Spinner>
         </div>
 
         <div class="col-12">
-            <TableWithConfig ref="table_ref" :table_id="table_id" :get_extra_params_obj="get_extra_params_obj"
-                :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting" @rows_loaded="disableLoading">
-            </TableWithConfig>
+            <div class="position-relative">
+                <TableWithConfig ref="table_ref" :table_id="table_id" :get_extra_params_obj="get_extra_params_obj"
+                    :show-loading="true" :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting">
+                </TableWithConfig>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch, nextTick } from "vue";
 import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as dataUtils } from "../utilities/data-utils.js";
 import { ntopng_url_manager } from "../services/context/ntopng_globals_services.js";
 import { default as sortingFunctions } from "../utilities/sorting-utils.js";
+import { default as Spinner } from "./spinner.vue";
 
 const props = defineProps({
     context: Object,
@@ -47,12 +59,33 @@ const _i18n = (t) => i18n(t);
 const searchInput = ref(null);
 const table_ref = ref(null);
 const table_id = ref('bgp_looking_glass');
+const rpki_ripe_url = 'https://rpki-validator.ripe.net/api/v1/validity/AS'
 const prefix = ref('')
+const rpki = ref('')
+const asn = ref(0)
 const active_host = ref(ntopng_url_manager.get_url_entry('host') || '');
 const loading = ref(false);
 const note_list = [
     _i18n("flow_details.bgp_looking_glass_descr")
 ]
+
+watch(() => asn.value, (cur_value, old_value) => {
+    updateRPKI();
+}, { flush: 'pre' });
+
+/* ***************************************************** */
+
+const updateRPKI = async () => {
+    if (!dataUtils.isZeroOrEmptyString(asn.value) && !dataUtils.isEmptyString(prefix.value)) {
+        const rsp = await ntopng_utility.http_request(`${rpki_ripe_url}${asn.value}/${prefix.value}`, null, null, true);
+        if (rsp?.validated_route?.validity?.state) {
+            rpki.value = rsp.validated_route.validity.state
+            rpki.value = rpki.value[0].toUpperCase() + rpki.value.slice(1); // Capitalize the first letter
+        }
+    }
+    await nextTick();
+    disableLoading();
+}
 
 /* ***************************************************** */
 
@@ -127,6 +160,8 @@ const map_table_def_columns = (columns) => {
         "bgp_peer_id": (value, row) => {
             // Small trick to handle the prefix
             prefix.value = row.bgp_prefix
+            if (asn.value === row.asn) loading.value = false;
+            asn.value = row.asn
             const formattedPeer = formatNameValue(value)
             return `${formattedPeer}${value.is_best_path ?
                 `<span class="badge bg-success ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
@@ -199,6 +234,7 @@ function disableLoading() {
 
 function refreshTable() {
     loading.value = true
+    debugger;
     table_ref.value?.refresh_table();
 }
 
@@ -211,3 +247,11 @@ onMounted(() => {
 })
 
 </script>
+
+<style scoped>
+.prefix-color {
+    border-color: var(--bs-border-color) !important;
+    background-color: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+}
+</style>
