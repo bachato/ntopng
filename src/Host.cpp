@@ -1159,6 +1159,22 @@ char* Host::get_host_label(char* const buf, ssize_t buf_len) {
 
 /* ***************************************** */
 
+u_int64_t Host::getLabels() {
+  u_int64_t bm = labels_bitmap;
+  Prefs* p = ntop->getPrefs();
+  u_int16_t vlan = vlan_id;
+
+  if (p->isDNSServer(&ip, vlan))    bm |= ((u_int64_t)1 << HOST_LABEL_DNS_SERVER);
+  if (p->isNTPServer(&ip, vlan))    bm |= ((u_int64_t)1 << HOST_LABEL_NTP_SERVER);
+  if (p->isDHCPServer(&ip, vlan))   bm |= ((u_int64_t)1 << HOST_LABEL_DHCP_SERVER);
+  if (p->isSMTPServer(&ip, vlan))   bm |= ((u_int64_t)1 << HOST_LABEL_SMTP_SERVER);
+  if (p->isGateway(&ip, vlan))      bm |= ((u_int64_t)1 << HOST_LABEL_NETWORK_GATEWAY);
+
+  return bm;
+}
+
+/* ***************************************** */
+
 void Host::setLabels(u_int64_t bitmap) {
   labels_bitmap = bitmap;
   iface->setHostLabels(this, bitmap);

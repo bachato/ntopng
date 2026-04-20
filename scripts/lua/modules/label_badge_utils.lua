@@ -11,11 +11,11 @@ local label_badge_utils = {}
 -- Built-in host labels (bits 0-31).
 -- Keep in sync with include/ntop_defines.h
 label_badge_utils.builtin_labels = {
-    [0] = { i18n = "checks.dns_server"      }, -- HOST_LABEL_DNS_SERVER
-    [1] = { i18n = "checks.ntp_server"      }, -- HOST_LABEL_NTP_SERVER
-    [2] = { i18n = "checks.dhcp_server"     }, -- HOST_LABEL_DHCP_SERVER
-    [3] = { i18n = "checks.smtp_server"     }, -- HOST_LABEL_SMTP_SERVER
-    [4] = { i18n = "checks.network_gateway" }, -- HOST_LABEL_NETWORK_GATEWAY
+    [0] = { i18n = "asset_details.dns_server"      }, -- HOST_LABEL_DNS_SERVER
+    [1] = { i18n = "asset_details.ntp_server"      }, -- HOST_LABEL_NTP_SERVER
+    [2] = { i18n = "asset_details.dhcp_server"     }, -- HOST_LABEL_DHCP_SERVER
+    [3] = { i18n = "asset_details.smtp_server"     }, -- HOST_LABEL_SMTP_SERVER
+    [4] = { i18n = "asset_details.network_gateway" }, -- HOST_LABEL_NETWORK_GATEWAY
 }
 
 -- ##############################################
@@ -31,11 +31,16 @@ local function get_default_labels_table()
 
     -- Bits 0-31: ntop built-in labels (read-only, auto-assigned by ntopng)
     for id, entry in pairs(label_badge_utils.builtin_labels) do
+        local name = i18n(entry.i18n)
+        if name == nil then
+            traceError(TRACE_WARNING, TRACE_CONSOLE,
+                "label_badge_utils: i18n key not found: " .. entry.i18n)
+        end
         labels[id] = {
             id          = id,
             color       = "#0d6efd",
             description = "",
-            name        = i18n(entry.i18n),
+            name        = name,
             reserved    = "true"
         }
     end

@@ -527,7 +527,7 @@ class Host : public GenericHashEntry,
   void lua_get_listening_ports(lua_State* vm);
   void lua_get_labels(lua_State* vm) const;
 
-  inline u_int64_t getLabels() const { return labels_bitmap; }
+  u_int64_t getLabels();
   void setLabels(u_int64_t bitmap);
 
   void resolveHostName();
