@@ -3830,11 +3830,15 @@ int Utils::numberOfSetBits(u_int32_t i) {
 
 void Utils::initRedis(Redis** r, const char* redis_host,
                       const char* redis_password, u_int16_t redis_port,
-                      u_int8_t _redis_db_id, bool giveup_on_failure) {
+                      u_int8_t _redis_db_id, bool giveup_on_failure,
+                      const char* tls_ca_cert, const char* tls_cert,
+                      const char* tls_key, bool tls_skip_verify) {
   if (r) {
     if (*r) delete (*r);
-    (*r) = new (std::nothrow) Redis(redis_host, redis_password, redis_port,
-                                    _redis_db_id, giveup_on_failure);
+    (*r) = new (std::nothrow)
+        Redis(redis_host, redis_password, redis_port, _redis_db_id,
+              giveup_on_failure, tls_ca_cert, tls_cert, tls_key,
+              tls_skip_verify);
   }
 }
 

@@ -161,6 +161,10 @@ Prefs::Prefs(Ntop* _ntop) {
 #endif
   redis_host = strdup("127.0.0.1");
   redis_password = NULL;
+  redis_tls_ca_cert = NULL;
+  redis_tls_cert = NULL;
+  redis_tls_key = NULL;
+  redis_tls_skip_verify = false;
   redis_port = 6379;
   redis_db_id = 0;
   dns_mode = 0;
@@ -327,6 +331,9 @@ Prefs::~Prefs() {
   free(local_networks);
   free(redis_host);
   if (redis_password) free(redis_password);
+  if (redis_tls_ca_cert) free(redis_tls_ca_cert);
+  if (redis_tls_cert) free(redis_tls_cert);
+  if (redis_tls_key) free(redis_tls_key);
   if (cli) free(cli);
   if (ciphers_list) free(ciphers_list);
   if (clickhouse_host) free(clickhouse_host);
@@ -514,32 +521,20 @@ void usage() {
       "[--ndpi-protocols|-p] <file>|<URL>  | Specify a nDPI protocol file\n"
       "                                    | (e.g. protos.txt) or URL (e.g. "
       "https://localhost/protos.txt)\n"
-      "[--redis|-r] <fmt>                  | Redis connection. <fmt> is "
-      "specified as\n"
-      "                                    | [h[:port[:pwd]]][@db-id] where "
-      "db-id\n"
-      "                                    | identifies the database Id "
-      "(default 0).\n"
-      "                                    | h is the host running Redis "
-      "(default\n"
-      "                                    | localhost), optionally followed "
-      "by a\n"
-      "                                    |  ':'-separated port (default "
-      "6379).\n"
-      "                                    | The special characters \\ and ` "
-      "are not\n"
+      "[--redis|-r] <fmt>                  | Redis connection. <fmt> is specified as\n"
+      "                                    | [h[:port[:pwd]]][@db-id] where db-id\n"
+      "                                    | identifies the database Id (default 0).\n"
+      "                                    | h is the host running Redis (default\n"
+      "                                    | localhost), optionally followed by a\n"
+      "                                    |  ':'-separated port (default 6379).\n"
+      "                                    | The special characters \\ and ` are not\n"
       "                                    | supported by ntopng.\n"
-      "                                    | A password can be specified "
-      "after\n"
-      "                                    | the port when Redis auth is "
-      "required.\n"
-      "                                    | By default password auth is "
-      "disabled.\n"
+      "                                    | A password can be specified after\n"
+      "                                    | the port when Redis auth is required.\n"
+      "                                    | By default password auth is disabled.\n"
 #ifdef __linux__
-      "                                    | On unix <fmt> can also be the "
-      "redis socket file path.\n"
-      "                                    | Port is ignored for socket-based "
-      "connections.\n"
+      "                                    | On unix <fmt> can also be the redis socket file path.\n"
+      "                                    | Port is ignored for socket-based connections.\n"
 #endif
       "                                    | Examples:\n"
       "                                    | -r @2\n"
@@ -549,6 +544,18 @@ void usage() {
 #ifdef __linux__
       "                                    | -r /var/run/redis/redis.sock\n"
       "                                    | -r /var/run/redis/redis.sock@2\n"
+#endif
+#ifdef HAVE_HIREDIS_SSL
+      "[--redis-tls-ca-cert] <path>        | CA certificate file to verify the\n"
+      "                                    | Redis server TLS certificate.\n"
+      "[--redis-tls-cert] <path>           | Client certificate file for mutual\n"
+      "                                    | TLS authentication with Redis.\n"
+      "[--redis-tls-key] <path>            | Client private key file for mutual\n"
+      "                                    | TLS authentication with Redis.\n"
+      "[--redis-tls-skip-verify]           | Disable Redis server TLS certificate\n"
+      "                                    | verification (insecure).\n"
+#endif
+#ifdef __linux__
       "[--core-affinity|-g] <ids>          | Bind the capture/processing "
       "threads to\n"
       "                                    | specific CPU cores (specified as "
@@ -1416,6 +1423,12 @@ static const struct option long_options[] = {
     {"readonly-flows-dump", no_argument, NULL, 227},
     {"strict-startup", no_argument, NULL, 228},
     {"mtu", required_argument, NULL, 229},
+#ifdef HAVE_HIREDIS_SSL
+    {"redis-tls-ca-cert", required_argument, NULL, 230},
+    {"redis-tls-cert", required_argument, NULL, 231},
+    {"redis-tls-key", required_argument, NULL, 232},
+    {"redis-tls-skip-verify", no_argument, NULL, 233},
+#endif
 #ifdef NTOPNG_PRO
     {"dump-queue-len", no_argument, NULL, 248},
     {"dump-queue-block-size", no_argument, NULL, 249},
@@ -2553,6 +2566,27 @@ int Prefs::setOption(int optkey, char* optarg) {
     case 229:
       custom_if_mtu = (u_int16_t)atoi(optarg);
       break;
+
+#ifdef HAVE_HIREDIS_SSL
+    case 230:
+      if (redis_tls_ca_cert) free(redis_tls_ca_cert);
+      redis_tls_ca_cert = strdup(optarg);
+      break;
+
+    case 231:
+      if (redis_tls_cert) free(redis_tls_cert);
+      redis_tls_cert = strdup(optarg);
+      break;
+
+    case 232:
+      if (redis_tls_key) free(redis_tls_key);
+      redis_tls_key = strdup(optarg);
+      break;
+
+    case 233:
+      redis_tls_skip_verify = true;
+      break;
+#endif
 
 #ifdef NTOPNG_PRO
     case 248:

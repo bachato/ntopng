@@ -24,6 +24,10 @@
 
 #include "ntop_includes.h"
 
+#ifdef HAVE_HIREDIS_SSL
+#include <hiredis/hiredis_ssl.h>
+#endif
+
 class Host;
 
 class Redis {
@@ -31,6 +35,11 @@ class Redis {
   redisContext* redis;
   Mutex* l;
   char *redis_host, *redis_password, *redis_version;
+  char *redis_tls_ca_cert, *redis_tls_cert, *redis_tls_key;
+  bool redis_tls_skip_verify;
+#ifdef HAVE_HIREDIS_SSL
+  redisSSLContext* ssl_ctx;
+#endif
 #ifdef __linux__
   bool is_socket_connection;
 #endif
@@ -67,7 +76,9 @@ class Redis {
  public:
   Redis(const char* redis_host = (char*)"127.0.0.1",
         const char* redis_password = NULL, u_int16_t redis_port = 6379,
-        u_int8_t _redis_db_id = 0, bool giveup_on_failure = false);
+        u_int8_t _redis_db_id = 0, bool giveup_on_failure = false,
+        const char* tls_ca_cert = NULL, const char* tls_cert = NULL,
+        const char* tls_key = NULL, bool tls_skip_verify = false);
   ~Redis();
 
   inline char* getVersion() { return (redis_version); }

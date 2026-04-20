@@ -27,15 +27,40 @@
 
 Redis::Redis(const char* _redis_host, const char* _redis_password,
              u_int16_t _redis_port, u_int8_t _redis_db_id,
-             bool giveup_on_failure) {
+             bool giveup_on_failure, const char* tls_ca_cert,
+             const char* tls_cert, const char* tls_key,
+             bool tls_skip_verify) {
   if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 
   redis_host = _redis_host ? strdup(_redis_host) : NULL;
   redis_password = _redis_password ? strdup(_redis_password) : NULL;
+  redis_tls_ca_cert = tls_ca_cert ? strdup(tls_ca_cert) : NULL;
+  redis_tls_cert = tls_cert ? strdup(tls_cert) : NULL;
+  redis_tls_key = tls_key ? strdup(tls_key) : NULL;
+  redis_tls_skip_verify = tls_skip_verify;
   redis_port = _redis_port, redis_db_id = _redis_db_id;
 #ifdef __linux__
   is_socket_connection = false;
+#endif
+
+#ifdef HAVE_HIREDIS_SSL
+  ssl_ctx = NULL;
+  if (redis_tls_ca_cert || redis_tls_cert || redis_tls_skip_verify) {
+    redisSSLContextError ssl_error = REDIS_SSL_CTX_NONE;
+    redisSSLOptions ssl_opts = {};
+    redisInitOpenSSL();
+    ssl_opts.cacert_filename = redis_tls_ca_cert;
+    ssl_opts.cert_filename = redis_tls_cert;
+    ssl_opts.private_key_filename = redis_tls_key;
+    ssl_opts.server_name = redis_host;
+    ssl_opts.verify_mode = redis_tls_skip_verify ? REDIS_SSL_VERIFY_NONE : REDIS_SSL_VERIFY_PEER;
+    ssl_ctx = redisCreateSSLContextWithOptions(&ssl_opts, &ssl_error);
+    if (!ssl_ctx)
+      ntop->getTrace()->traceEvent(TRACE_ERROR,
+                                   "Redis TLS context creation failed: %s",
+                                   redisSSLContextGetError(ssl_error));
+  }
 #endif
 
   memset(&stats, 0, sizeof(stats));
@@ -61,9 +86,15 @@ Redis::~Redis() {
 
   if (redis_host) free(redis_host);
   if (redis_password) free(redis_password);
+  if (redis_tls_ca_cert) free(redis_tls_ca_cert);
+  if (redis_tls_cert) free(redis_tls_cert);
+  if (redis_tls_key) free(redis_tls_key);
   if (redis_version) free(redis_version);
   if (localToResolve) delete (localToResolve);
   if (remoteToResolve) delete (remoteToResolve);
+#ifdef HAVE_HIREDIS_SSL
+  if (ssl_ctx) redisFreeSSLContext(ssl_ctx);
+#endif
 }
 
 /* **************************************** */
@@ -103,6 +134,17 @@ void Redis::reconnectRedis(bool giveup_on_failure) {
 
       goto conn_retry;
     }
+
+#ifdef HAVE_HIREDIS_SSL
+    if (ssl_ctx) {
+      if (redisInitiateSSLWithContext(redis, ssl_ctx) != REDIS_OK) {
+        ntop->getTrace()->traceEvent(TRACE_ERROR,
+                                     "Redis TLS handshake failed: %s",
+                                     redis->errstr);
+        goto conn_retry;
+      }
+    }
+#endif
 
     if (redis_password) {
       stats.num_other++;

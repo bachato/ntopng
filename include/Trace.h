@@ -66,7 +66,9 @@ class Trace {
 
   void init();
   void initRedis(const char* redis_host, const char* redis_password,
-                 u_int16_t redis_port, u_int8_t _redis_db_id);
+                 u_int16_t redis_port, u_int8_t _redis_db_id,
+                 const char* tls_ca_cert = NULL, const char* tls_cert = NULL,
+                 const char* tls_key = NULL, bool tls_skip_verify = false);
   void setRedis(Redis* r);
   void rotate_logs(bool forceRotation);
   void set_log_file(const char* log_file);

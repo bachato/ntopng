@@ -462,7 +462,9 @@ void Ntop::registerPrefs(Prefs* _prefs, bool quick_registration) {
     /* Initialize redis and populate some default values */
     Utils::initRedis(&redis, prefs->get_redis_host(),
                      prefs->get_redis_password(), prefs->get_redis_port(),
-                     prefs->get_redis_db_id(), quick_registration);
+                     prefs->get_redis_db_id(), quick_registration,
+                     prefs->get_redis_tls_ca_cert(), prefs->get_redis_tls_cert(),
+                     prefs->get_redis_tls_key(), prefs->get_redis_tls_skip_verify());
     if (redis) redis->setDefaults();
   }
 
@@ -470,7 +472,9 @@ void Ntop::registerPrefs(Prefs* _prefs, bool quick_registration) {
     /* Initialize another redis instance for the trace of events */
     ntop->getTrace()->initRedis(
         prefs->get_redis_host(), prefs->get_redis_password(),
-        prefs->get_redis_port(), prefs->get_redis_db_id());
+        prefs->get_redis_port(), prefs->get_redis_db_id(),
+        prefs->get_redis_tls_ca_cert(), prefs->get_redis_tls_cert(),
+        prefs->get_redis_tls_key(), prefs->get_redis_tls_skip_verify());
 
     if (ntop->getRedis() == NULL) {
       ntop->getTrace()->traceEvent(TRACE_ERROR,

@@ -172,6 +172,10 @@ class Prefs {
   bool user_set;
   char* redis_host;
   char* redis_password;
+  char* redis_tls_ca_cert;
+  char* redis_tls_cert;
+  char* redis_tls_key;
+  bool redis_tls_skip_verify;
   char* pid_path;
   char *cpu_affinity, *other_cpu_affinity;
 #ifdef __linux__
@@ -467,6 +471,10 @@ class Prefs {
   };
   inline char* get_redis_host() { return (redis_host); }
   inline char* get_redis_password() { return (redis_password); }
+  inline char* get_redis_tls_ca_cert() { return (redis_tls_ca_cert); }
+  inline char* get_redis_tls_cert() { return (redis_tls_cert); }
+  inline char* get_redis_tls_key() { return (redis_tls_key); }
+  inline bool get_redis_tls_skip_verify() { return (redis_tls_skip_verify); }
   inline u_int get_redis_port() { return (redis_port); };
   inline u_int get_redis_db_id() { return (redis_db_id); };
   inline char* get_pid_path() { return (pid_path); };

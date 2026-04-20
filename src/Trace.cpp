@@ -108,9 +108,12 @@ void Trace::set_trace_level(u_int8_t id) {
 /* ******************************* */
 
 void Trace::initRedis(const char* redis_host, const char* redis_password,
-                      u_int16_t redis_port, u_int8_t _redis_db_id) {
+                      u_int16_t redis_port, u_int8_t _redis_db_id,
+                      const char* tls_ca_cert, const char* tls_cert,
+                      const char* tls_key, bool tls_skip_verify) {
   Utils::initRedis(&traceRedis, redis_host, redis_password, redis_port,
-                   _redis_db_id, false);
+                   _redis_db_id, false, tls_ca_cert, tls_cert, tls_key,
+                   tls_skip_verify);
   dontFreeRedis = false; /* Free traceRedis on shutdown */
 }
 

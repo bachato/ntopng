@@ -604,6 +604,14 @@ AS_VAR_IF(with_hiredis, yes, [
 
    AC_DEFINE_UNQUOTED(HAVE_HIREDIS, 1, [Hiredis support
    ])
+
+   dnl> Check for hiredis TLS (hiredis_ssl) support
+   AC_CHECK_HEADER([hiredis/hiredis_ssl.h], [
+     AC_CHECK_LIB([hiredis_ssl], [redisCreateSSLContext], [
+       HIREDIS_LIB="$HIREDIS_LIB -lhiredis_ssl"
+       AC_DEFINE_UNQUOTED(HAVE_HIREDIS_SSL, 1, [Hiredis SSL/TLS support])
+     ], [], [$HIREDIS_LIB -lssl])
+   ], [], [[#include <hiredis/hiredis.h>]])
 ])
 
 if test "${with_nedge+set}" != set; then
