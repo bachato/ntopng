@@ -8,6 +8,18 @@ local label_badge_utils = {}
 
 -- ##############################################
 
+-- Built-in host labels (bits 0-31).
+-- Keep in sync with include/ntop_defines.h
+label_badge_utils.builtin_labels = {
+    [0] = { i18n = "checks.dns_server"      }, -- HOST_LABEL_DNS_SERVER
+    [1] = { i18n = "checks.ntp_server"      }, -- HOST_LABEL_NTP_SERVER
+    [2] = { i18n = "checks.dhcp_server"     }, -- HOST_LABEL_DHCP_SERVER
+    [3] = { i18n = "checks.smtp_server"     }, -- HOST_LABEL_SMTP_SERVER
+    [4] = { i18n = "checks.network_gateway" }, -- HOST_LABEL_NETWORK_GATEWAY
+}
+
+-- ##############################################
+
 local function get_redis_key()
     return "ntopng.prefs.labels"
 end
@@ -17,14 +29,25 @@ end
 local function get_default_labels_table()
     local labels = {}
 
+    -- Bits 0-31: ntop built-in labels (read-only, auto-assigned by ntopng)
+    for id, entry in pairs(label_badge_utils.builtin_labels) do
+        labels[id] = {
+            id          = id,
+            color       = "#0d6efd",
+            description = "",
+            name        = i18n(entry.i18n),
+            reserved    = "true"
+        }
+    end
+
     -- Bits 32-63: user-customizable labels
     for i = 32, 63 do
         labels[i] = {
-            id = i,
-            color = "#000000",
+            id          = i,
+            color       = "#000000",
             description = "",
-            name = "Customizable_Label_" .. i,
-            reserved = "false"
+            name        = "Customizable_Label_" .. i,
+            reserved    = "false"
         }
     end
     return labels

@@ -296,6 +296,17 @@
 #define HOST_LABEL_NAMES_KEY "ntopng.cache.host_labels.%s"
 #define HOST_LABELS_BITMAP_KEY    "ntopng.prefs.host_labels_bitmap.%s"
 #define HOST_LABELS_BITMAP_PREFIX "ntopng.prefs.host_labels_bitmap."
+
+/* Built-in host labels (bits 0-31)
+ * Note: bit 32-63 are user-defined */
+typedef enum {
+  HOST_LABEL_DNS_SERVER    = 0,
+  HOST_LABEL_NTP_SERVER    = 1,
+  HOST_LABEL_DHCP_SERVER   = 2,
+  HOST_LABEL_SMTP_SERVER   = 3,
+  HOST_LABEL_NETWORK_GATEWAY = 4,
+} HostLabelId;
+
 #define IFACE_DHCP_RANGE_KEY "ntopng.prefs.ifid_%u.dhcp_ranges"
 #define IFACE_BROADCAST_DOMAINS_KEY "ntopng.prefs.ifid_%u.broadcast_domains"
 #define HOST_SERIALIZED_KEY "ntopng.serialized_hosts.ifid_%u_%s@%d"

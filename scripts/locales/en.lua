@@ -521,6 +521,7 @@ local lang = {
     ["switch_port"] = "Switch Port",
     ["smtp_server"] = "SMTP Server",
     ["smtp_servers"] = "SMTP Servers",
+    ["network_gateway"] = "Network Gateway",
     ["ssh_server"] = "SSH Server",
     ["ssid"] = "<a class='ntopng-external-link' href='https://en.wikipedia.org/wiki/Service_set_(802.11_network)'>SSID</A>",
     ["tcp_fingerprint"] = "TCP Fingerprint",
