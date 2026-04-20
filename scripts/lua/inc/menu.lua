@@ -99,7 +99,7 @@ local is_no_login_user = isNoLoginUser()
 local http_prefix = ntop.getHttpPrefix()
 
 -- exporters
-local flowDevices = interface.getFlowDevices() or {}
+local flowDevices = (interface.getFlowDevices and interface.getFlowDevices()) or {}
 local sFlowDevices = interface.getSFlowDevices() or {}
 local obsPointsInfo = interface.getObsPointsInfo() or {}
 local obs_points = obsPointsInfo["ObsPoints"] or {}
