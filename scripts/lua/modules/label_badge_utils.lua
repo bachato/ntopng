@@ -11,11 +11,19 @@ local label_badge_utils = {}
 -- Built-in host labels (bits 0-31).
 -- Keep in sync with include/ntop_defines.h
 label_badge_utils.builtin_labels = {
-    [0] = { i18n = "asset_details.dns_server"      }, -- HOST_LABEL_DNS_SERVER
-    [1] = { i18n = "asset_details.ntp_server"      }, -- HOST_LABEL_NTP_SERVER
-    [2] = { i18n = "asset_details.dhcp_server"     }, -- HOST_LABEL_DHCP_SERVER
-    [3] = { i18n = "asset_details.smtp_server"     }, -- HOST_LABEL_SMTP_SERVER
-    [4] = { i18n = "asset_details.network_gateway" }, -- HOST_LABEL_NETWORK_GATEWAY
+    [0]  = { i18n = "asset_details.dns_server"      }, -- HOST_LABEL_DNS_SERVER
+    [1]  = { i18n = "asset_details.ntp_server"      }, -- HOST_LABEL_NTP_SERVER
+    [2]  = { i18n = "asset_details.dhcp_server"     }, -- HOST_LABEL_DHCP_SERVER
+    [3]  = { i18n = "asset_details.smtp_server"     }, -- HOST_LABEL_SMTP_SERVER
+    [4]  = { i18n = "asset_details.network_gateway" }, -- HOST_LABEL_NETWORK_GATEWAY
+    [5]  = { i18n = "asset_details.imap_server"     }, -- HOST_LABEL_IMAP_SERVER
+    [6]  = { i18n = "asset_details.pop_server"      }, -- HOST_LABEL_POP_SERVER
+    [7]  = { i18n = "asset_details.http_server"     }, -- HOST_LABEL_HTTP_SERVER
+    [8]  = { i18n = "asset_details.ssh_server"      }, -- HOST_LABEL_SSH_SERVER
+    [9]  = { i18n = "asset_details.rdp_server"      }, -- HOST_LABEL_RDP_SERVER
+    [10] = { i18n = "asset_details.modbus_server"   }, -- HOST_LABEL_MODBUS_SERVER
+    [11] = { i18n = "asset_details.s7comm_server"   }, -- HOST_LABEL_S7COMM_SERVER
+    [12] = { i18n = "asset_details.profinet_server" }, -- HOST_LABEL_PROFINET_SERVER
 }
 
 -- ##############################################

@@ -1164,11 +1164,26 @@ u_int64_t Host::getLabels() {
   Prefs* p = ntop->getPrefs();
   u_int16_t vlan = vlan_id;
 
-  if (p->isDNSServer(&ip, vlan))    bm |= ((u_int64_t)1 << HOST_LABEL_DNS_SERVER);
-  if (p->isNTPServer(&ip, vlan))    bm |= ((u_int64_t)1 << HOST_LABEL_NTP_SERVER);
-  if (p->isDHCPServer(&ip, vlan))   bm |= ((u_int64_t)1 << HOST_LABEL_DHCP_SERVER);
-  if (p->isSMTPServer(&ip, vlan))   bm |= ((u_int64_t)1 << HOST_LABEL_SMTP_SERVER);
-  if (p->isGateway(&ip, vlan))      bm |= ((u_int64_t)1 << HOST_LABEL_NETWORK_GATEWAY);
+  /* Network Configuration (admin-configured server lists) */
+  if (p->isDNSServer(&ip, vlan))  bm |= ((u_int64_t)1 << HOST_LABEL_DNS_SERVER);
+  if (p->isNTPServer(&ip, vlan))  bm |= ((u_int64_t)1 << HOST_LABEL_NTP_SERVER);
+  if (p->isDHCPServer(&ip, vlan)) bm |= ((u_int64_t)1 << HOST_LABEL_DHCP_SERVER);
+  if (p->isSMTPServer(&ip, vlan)) bm |= ((u_int64_t)1 << HOST_LABEL_SMTP_SERVER);
+  if (p->isGateway(&ip, vlan))    bm |= ((u_int64_t)1 << HOST_LABEL_NETWORK_GATEWAY);
+
+  /* Traffic-observed services (auto-detected from flows) */
+  if (providesService(HOST_SERVICE_DNS))      bm |= ((u_int64_t)1 << HOST_LABEL_DNS_SERVER);
+  if (providesService(HOST_SERVICE_NTP))      bm |= ((u_int64_t)1 << HOST_LABEL_NTP_SERVER);
+  if (providesService(HOST_SERVICE_DHCP))     bm |= ((u_int64_t)1 << HOST_LABEL_DHCP_SERVER);
+  if (providesService(HOST_SERVICE_SMTP))     bm |= ((u_int64_t)1 << HOST_LABEL_SMTP_SERVER);
+  if (providesService(HOST_SERVICE_IMAP))     bm |= ((u_int64_t)1 << HOST_LABEL_IMAP_SERVER);
+  if (providesService(HOST_SERVICE_POP))      bm |= ((u_int64_t)1 << HOST_LABEL_POP_SERVER);
+  if (providesService(HOST_SERVICE_HTTP))     bm |= ((u_int64_t)1 << HOST_LABEL_HTTP_SERVER);
+  if (providesService(HOST_SERVICE_SSH))      bm |= ((u_int64_t)1 << HOST_LABEL_SSH_SERVER);
+  if (providesService(HOST_SERVICE_RDP))      bm |= ((u_int64_t)1 << HOST_LABEL_RDP_SERVER);
+  if (providesService(HOST_SERVICE_MODBUS))   bm |= ((u_int64_t)1 << HOST_LABEL_MODBUS_SERVER);
+  if (providesService(HOST_SERVICE_S7COMM))   bm |= ((u_int64_t)1 << HOST_LABEL_S7COMM_SERVER);
+  if (providesService(HOST_SERVICE_PROFINET)) bm |= ((u_int64_t)1 << HOST_LABEL_PROFINET_SERVER);
 
   return bm;
 }

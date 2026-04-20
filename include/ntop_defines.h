@@ -297,14 +297,23 @@
 #define HOST_LABELS_BITMAP_KEY    "ntopng.prefs.host_labels_bitmap.%s"
 #define HOST_LABELS_BITMAP_PREFIX "ntopng.prefs.host_labels_bitmap."
 
-/* Built-in host labels (bits 0-31)
- * Note: bit 32-63 are user-defined */
+/* Built-in host labels (bits 0-31).
+ * Bits 0-31 are reserved for ntop; bits 32-63 are user-defined.
+ * Keep in sync with label_badge_utils.builtin_labels in label_badge_utils.lua */
 typedef enum {
-  HOST_LABEL_DNS_SERVER    = 0,
-  HOST_LABEL_NTP_SERVER    = 1,
-  HOST_LABEL_DHCP_SERVER   = 2,
-  HOST_LABEL_SMTP_SERVER   = 3,
+  HOST_LABEL_DNS_SERVER      = 0,
+  HOST_LABEL_NTP_SERVER      = 1,
+  HOST_LABEL_DHCP_SERVER     = 2,
+  HOST_LABEL_SMTP_SERVER     = 3,
   HOST_LABEL_NETWORK_GATEWAY = 4,
+  HOST_LABEL_IMAP_SERVER     = 5,
+  HOST_LABEL_POP_SERVER      = 6,
+  HOST_LABEL_HTTP_SERVER     = 7,
+  HOST_LABEL_SSH_SERVER      = 8,
+  HOST_LABEL_RDP_SERVER      = 9,
+  HOST_LABEL_MODBUS_SERVER   = 10,
+  HOST_LABEL_S7COMM_SERVER   = 11,
+  HOST_LABEL_PROFINET_SERVER = 12,
 } HostLabelId;
 
 #define IFACE_DHCP_RANGE_KEY "ntopng.prefs.ifid_%u.dhcp_ranges"
