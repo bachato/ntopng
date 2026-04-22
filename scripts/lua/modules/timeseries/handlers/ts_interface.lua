@@ -745,7 +745,7 @@ local function addTopTimeseries(tags, emptyEpoch, tsOptions)
                         timeseries = {
                             bytes = {
                                 label = serie.profile,
-                                color = timeseries_info.get_timeseries_color('bytes')
+                                color = ts_gui_utils.get_timeseries_color('bytes')
                             }
                         }
                     }
