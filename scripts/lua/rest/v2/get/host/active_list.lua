@@ -111,7 +111,8 @@ local mapping_column_lua_c = {
 
 local hosts_stats = hosts_retrv_function(false, mapping_column_lua_c[sort_column], length, start, c_order, country, os_, tonumber(vlan),
     tonumber(asn), tonumber(network), mac, tonumber(pool), tonumber(ipversion), tonumber(protocol), traffic_type_filter,
-    filtered_hosts, blacklisted_hosts, anomalous, dhcp_hosts, cidr, device_ip, true --[[ Array format ]], false, mac_location, map_search)
+    filtered_hosts, blacklisted_hosts, anomalous, dhcp_hosts, cidr, device_ip, true --[[ Array format ]], false, mac_location, map_search,
+    label_filter)
 
 for key, value in pairs(hosts_stats["hosts"]) do
     local record = {}
@@ -225,17 +226,7 @@ for key, value in pairs(hosts_stats["hosts"]) do
     record["score"] = value["score"]
     record["isBlocked"] = drop_traffic
 
-    -- Label filter
-    -- TODO move this to C++
-    if label_filter then
-        local host_labels = value["labels"] or 0
-        if (host_labels & (1 << label_filter)) == 0 then
-            goto continue
-        end
-    end
-
     rsp[#rsp + 1] = record
-    ::continue::
 end
 
 rest_utils.extended_answer(rest_utils.consts.success.ok, rsp, {
