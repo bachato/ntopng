@@ -98,11 +98,14 @@ function label_badge_utils.getLabels()
         local record = {}
         record["id"] = label.id
         record["name"] = label.name
-        record["color"] = label.color 
+        record["color"] = label.color
         record["description"] = label.description
         record["reserved"] = label.reserved
         result[#result + 1] = label
     end
+    table.sort(result, function(a, b)
+        return (tonumber(a.id) or 0) < (tonumber(b.id) or 0)
+    end)
     return result
 end
 
