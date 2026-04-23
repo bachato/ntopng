@@ -316,7 +316,7 @@ function getFlowsFilter()
             pageinfo["transitAS"] = status
         elseif status == "connecting" or
             status == "closed" or
-            status == "enstablished" or
+            status == "established" or
             status == "reset" then -- TCP Flow State
             pageinfo["tcpFlowStateFilter"] = status
         elseif status == "normal" then -- Alerts

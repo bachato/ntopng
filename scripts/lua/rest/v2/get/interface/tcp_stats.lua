@@ -26,7 +26,7 @@ local function add_entry(t, label_key, val)
 end
 
 local data = {}
-add_entry(data, 'enstablished', ifstats["Established"])
+add_entry(data, 'established',  ifstats["Established"])
 add_entry(data, 'syn',          ifstats["SYN"])
 add_entry(data, 'rst',          ifstats["RST"])
 add_entry(data, 'fin',          ifstats["FIN"])
