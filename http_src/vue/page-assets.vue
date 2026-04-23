@@ -173,41 +173,10 @@ const map_table_def_columns = (columns) => {
             if (!dataUtils.isEmptyOrNull(host.is_blackhole)) {
                 icons = `${icons} ${blackhole_icon}`
             }
-            if (!dataUtils.isEmptyOrNull(host.is_dhcp_server)) {
-                icons = `${icons} <span class="badge bg-success">${i18n("details.label_dhcp_server")}</span>`
-            }
-            if (!dataUtils.isEmptyOrNull(host.is_dns_server)) {
-                icons = `${icons} <span class="badge bg-success">${i18n("details.label_dns_server")}</span>`
-            }
-            if (!dataUtils.isEmptyOrNull(host.is_smtp_server)) {
-                icons = `${icons} <span class="badge bg-success">${i18n("details.label_smtp_server")}</span>`
-            }
-            if (!dataUtils.isEmptyOrNull(host.is_ntp_server)) {
-                icons = `${icons} <span class="badge bg-success">${i18n("details.label_ntp_server")}</span>`
-            }
-            if (!dataUtils.isEmptyOrNull(host.is_imap_server)) {
-                icons = `${icons} <span class="badge bg-success">${i18n("details.label_imap_server")}</span>`
-            }
-            if (!dataUtils.isEmptyOrNull(host.is_pop_server)) {
-                icons = `${icons} <span class="badge bg-success">${i18n("details.label_pop_server")}</span>`
-            }
-            if (!dataUtils.isEmptyOrNull(host.is_ssh_server)) {
-                icons = `${icons} <span class="badge bg-success">${i18n("details.label_ssh_server")}</span>`
-            }
-            if (!dataUtils.isEmptyOrNull(host.is_http_server)) {
-                icons = `${icons} <span class="badge bg-success">${i18n("details.label_http_server")}</span>`
-            }
-            if (!dataUtils.isEmptyOrNull(host.is_rdp_server)) {
-                icons = `${icons} <span class="badge bg-success">${i18n("details.label_rdp_server")}</span>`
-            }
-            if (!dataUtils.isEmptyOrNull(host.is_modbus_server)) {
-                icons = `${icons} <span class="badge bg-success">${i18n("details.label_modbus_server")}</span>`
-            }
-            if (!dataUtils.isEmptyOrNull(host.is_s7comm_server)) {
-                icons = `${icons} <span class="badge bg-success">${i18n("details.label_s7comm_server")}</span>`
-            }
-            if (!dataUtils.isEmptyOrNull(host.is_profinet_server)) {
-                icons = `${icons} <span class="badge bg-success">${i18n("details.label_profinet_server")}</span>`
+            if (!dataUtils.isEmptyOrNull(host.labels)) {
+                host.labels.forEach(label => {
+                    icons = `${icons} <span class="badge" style="background-color: ${label.color}">${label.name}</span>`
+                })
             }
 
             const host_url = create_button_host_details(row);
