@@ -120,6 +120,21 @@ Clicking on an enriched asset opens its detail page, where a dedicated **Wazuh**
 
 .. note:: Timestamp fields are stored and displayed in UTC, consistent with the rest of ntopng.
 
+
+.. figure:: ../img/wazuh_agent.png
+  :align: center
+  :alt: Wazuh Agent Information
+
+  Wazuh Agent Information
+  
+
+Above you can see an example of the information reported by Wazuh that includes (but not limited to)
+
+- Operating System and Architecture
+- Available resources (memory and CPU)
+- Network Interfaces
+
+  
 Keeping Data Up to Date
 =======================
 
