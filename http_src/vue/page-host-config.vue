@@ -81,7 +81,7 @@
               <td>
                 <div class="d-flex align-items-center">
                   <div class="col-8">
-                    <b>{{ _i18n('labels_page.labels') }}</b><br>
+                    <b>{{ _i18n('labels_page.user_defined_labels') }}</b><br>
                     <small>{{ _i18n('host_config.host_labels_description') }}</small>
                   </div>
                   <div class="col-4 form-group d-flex justify-content-end" :key="labels_key">
