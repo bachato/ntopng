@@ -296,6 +296,7 @@
 #define HOST_LABEL_NAMES_KEY "ntopng.cache.host_labels.%s"
 #define HOST_LABELS_BITMAP_KEY    "ntopng.prefs.host_labels_bitmap.%s"
 #define HOST_LABELS_BITMAP_PREFIX "ntopng.prefs.host_labels_bitmap."
+#define HOST_USER_LABELS_MASK     ((u_int64_t)0xFFFFFFFF00000000ULL) /* bits 32-63: user-defined */
 
 /* Built-in host labels (bits 0-31).
  * Bits 0-31 are reserved for ntop; bits 32-63 are user-defined.

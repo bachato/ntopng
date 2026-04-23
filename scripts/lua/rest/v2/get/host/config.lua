@@ -30,7 +30,8 @@ local rsp = {
     host_pool_id = host["host_pool_id"],
     has_traffic_policies = ifstats.inline and (host.localhost or host.systemhost),
     drop_traffic = ntop.getHashCache("ntopng.prefs.drop_host_traffic", host_key),
-    labels = interface.getHostLabels(host_info["host"])
+    labels = interface.getHostLabels(host_info["host"]),
+    user_labels = interface.getUserDefinedHostLabels(host_info["host"])
 }
 
 local rc = rest_utils.consts.success.ok

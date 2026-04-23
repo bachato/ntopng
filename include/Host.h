@@ -528,6 +528,7 @@ class Host : public GenericHashEntry,
   void lua_get_labels(lua_State* vm) const;
 
   u_int64_t getLabels();
+  inline u_int64_t getUserLabels() const { return labels_bitmap /* & HOST_USER_LABELS_MASK */; }
   void setLabels(u_int64_t bitmap);
 
   void resolveHostName();

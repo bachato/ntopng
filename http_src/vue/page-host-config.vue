@@ -189,9 +189,11 @@ onMounted(async () => {
   const labels_rsp = await ntopng_utility.http_request(labels_url);
   if (labels_rsp && labels_rsp.length > 0) {
     labels_rsp.forEach((lbl) => {
-      labels_list.value.push({ id: lbl.id, label: lbl.name, value: lbl.id, color: lbl.color });
+      //if (lbl.id >= 32) {
+        labels_list.value.push({ id: lbl.id, label: lbl.name, value: lbl.id, color: lbl.color });
+      //}
     });
-    const bitmap = BigInt(host_config.labels || 0);
+    const bitmap = BigInt(host_config.user_labels || 0);
     initial_labels_bitmap.value = bitmap;
     selected_labels.value = labels_list.value.filter(
       (lbl) => (bitmap & (1n << BigInt(lbl.id))) !== 0n

@@ -5441,6 +5441,41 @@ static int ntop_interface_get_host_labels(lua_State* vm) {
 
 /* ****************************************** */
 
+static int ntop_interface_get_user_defined_host_labels(lua_State* vm) {
+  NetworkInterface* iface = getCurrentInterface(vm);
+  Host *host;
+  char *host_ip, buf[64];
+  u_int16_t vlan_id = 0;
+  u_int64_t bitmap = 0;
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (!iface)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+
+  get_host_vlan_info((char*)lua_tostring(vm, 1), &host_ip, &vlan_id, buf,
+                     sizeof(buf));
+
+  host = iface->findHostByIP(get_allowed_nets(vm), host_ip, vlan_id,
+                                   getLuaVMUservalue(vm, observationPointId));
+
+  if (host) {
+    bitmap = host->getUserLabels();
+  } else {
+    char key_buf[CONST_MAX_LEN_REDIS_KEY];
+    snprintf(key_buf, sizeof(key_buf), HOST_SERIALIZED_SHORT_KEY,
+             iface->get_id(), host_ip, vlan_id);
+    bitmap = iface->getHostLabels(key_buf) & HOST_USER_LABELS_MASK;
+  }
+
+  lua_pushinteger(vm, (lua_Integer)bitmap);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
+}
+
+/* ****************************************** */
+
 static int ntop_interface_set_host_labels(lua_State* vm) {
   NetworkInterface* iface = getCurrentInterface(vm);
   Host *host;
@@ -6782,6 +6817,7 @@ static luaL_Reg _ntop_interface_reg[] = {
     {"triggerTrafficAlert", ntop_interface_trigger_traffic_alert},
     {"getHostAttributes", ntop_interface_get_host_attributes},
     {"getHostLabels", ntop_interface_get_host_labels},
+    {"getUserDefinedHostLabels", ntop_interface_get_user_defined_host_labels},
     {"setHostLabels", ntop_interface_set_host_labels},
 
     {"addDataToLocalHostAssets", ntop_add_data_to_assets},
