@@ -63,10 +63,13 @@ class Prefs {
       enable_mac_ndpi_stats, enable_activities_debug, enable_behaviour_analysis,
       enable_asn_behaviour_analysis, enable_network_behaviour_analysis,
       enable_iface_l7_behaviour_analysis, emit_flow_alerts, emit_host_alerts,
-      dump_flows_on_clickhouse, readonly_flows_dump, use_mac_in_flow_key,
+      dump_flows_on_clickhouse, readonly_flows_dump, 
       do_reforge_timestamps, add_vlan_tags_to_cloud_exporters,
       collect_blacklist_stats, fail_on_invalid_license, limited_resources_mode,
       fingerprint_stats, tls_quic_hostnaming;
+#ifndef HAVE_NEDGE
+  bool use_mac_in_flow_key;
+#endif
   u_int32_t behaviour_analysis_learning_period;
   u_int32_t iec60870_learning_period, modbus_learning_period,
       s7comm_learning_period, devices_learning_period,
@@ -878,7 +881,9 @@ class Prefs {
   ASNConfiguration* getSubCustomerASN() { return (sub_customer_asn); }
   ASNConfiguration* getRemoteASN() { return (remote_asn); }
 
+#ifndef HAVE_NEDGE
   inline bool useMacAddressInFlowKey() { return (use_mac_in_flow_key); }
+#endif
   inline bool useHostPoolsForLocal() const { return use_host_pools_for_local; }
   inline bool areFingerprintStatsEnabled() { return (fingerprint_stats); }
   inline bool doReforgeTimestamps() { return (do_reforge_timestamps); }

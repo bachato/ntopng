@@ -92,7 +92,9 @@ Prefs::Prefs(Ntop* _ntop) {
   enable_mac_ndpi_stats = false;
   auto_assigned_pool_id = NO_HOST_POOL_ID;
   default_l7policy = PASS_ALL_SHAPER_ID;
+#ifndef HAVE_NEDGE
   use_mac_in_flow_key = false;
+#endif
   use_host_pools_for_local = false;
   fingerprint_stats = false;
   ciphers_list = NULL;
@@ -989,8 +991,10 @@ void Prefs::reloadPrefsFromRedis() {
   enable_assets_log =
       getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_ASSETS_LOG, false);
   enable_sql_log = getDefaultBoolPrefsValue(CONST_PREFS_ENABLE_SQL_LOG, false);
+#ifndef HAVE_NEDGE
   use_mac_in_flow_key =
       getDefaultPrefsValue(CONST_PREFS_USE_MAC_IN_FLOW_KEY, false);
+#endif
   use_host_pools_for_local =
       getDefaultBoolPrefsValue(CONST_PREFS_USE_HOST_POOLS_FOR_LOCAL, false);
   fingerprint_stats =
@@ -3087,8 +3091,10 @@ void Prefs::lua(lua_State* vm) {
 
   lua_push_bool_table_entry(vm, "fingerprint_stats",
                             areFingerprintStatsEnabled());
+#ifndef HAVE_NEDGE
   lua_push_uint64_table_entry(vm, "use_mac_in_flow_key",
                               useMacAddressInFlowKey());
+#endif
   lua_push_uint64_table_entry(vm, "housekeeping_frequency",
                               housekeeping_frequency);
   lua_push_uint64_table_entry(vm, "local_host_cache_duration",

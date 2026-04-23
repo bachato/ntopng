@@ -948,11 +948,13 @@ if auth.has_capability(auth.capabilities.preferences) then
 				  subpage_active.entries["toggle_host_mask"].description, h_labels, h_values, "0", "primary",
 				  "toggle_host_mask", "ntopng.prefs.host_mask")
 
+         if not ntop.isnEdge() then
 	 prefsToggleButton(subpage_active, {
 			      field = "toggle_use_mac_in_flow_key",
 			      default = "0",
 			      pref = "use_mac_in_flow_key"
 	 })
+         end
 
 	 prefsToggleButton(subpage_active, {
 			      field = "toggle_use_host_pools_for_local",
