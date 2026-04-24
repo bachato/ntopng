@@ -125,6 +125,31 @@ end
 
 -- ##############################################
 
+-- @brief Parses and validates a comma-separated list of label ids
+-- @return A lua array of label ids
+function recipients_rest_utils.parse_labels(labels_string)
+   if isEmptyString(labels_string) then return {} end
+
+   local label_badge_utils = require "label_badge_utils"
+   local all_labels = label_badge_utils.getLabels()
+   local valid_ids = {}
+   for _, lbl in pairs(all_labels) do
+      valid_ids[lbl.id] = true
+   end
+
+   local labels_list = labels_string:split(",") or {labels_string}
+   local res = {}
+   for _, id_str in pairs(labels_list) do
+      local id = tonumber(id_str)
+      if id and valid_ids[id] then
+	 res[#res + 1] = id
+      end
+   end
+   return res
+end
+
+-- ##############################################
+
 -- @brief Parses and validates a severity id string and returns it as a number
 -- @param minimum_severity_id_string An string with an integer severity id as found in `alert_severities`
 -- @return A valid integer severity id or nil when validation fails

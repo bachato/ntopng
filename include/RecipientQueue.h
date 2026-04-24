@@ -77,6 +77,9 @@ class RecipientQueue {
   /* MUST be large enough to contain MAX_NUM_HOST_POOLS */
   Bitmap4096 enabled_host_pools;
 
+  /* Labels bitmap (all zero = no filter) */
+  Bitmap64 enabled_labels;
+
   bool doDebug(const AlertFifoItem* const notification);
 
  public:
@@ -140,6 +143,16 @@ class RecipientQueue {
    */
   inline void setEnabledHostPools(Bitmap4096 _enabled_pools) {
     enabled_host_pools = _enabled_pools;
+  };
+
+  /**
+   * @brief Sets enabled label bitmap for this recipient (0 = no filter)
+   * @param _enabled_labels A label bitmap
+   *
+   * @return
+   */
+  inline void setEnabledLabels(Bitmap64 _enabled_labels) {
+    enabled_labels = _enabled_labels;
   };
 
   /**

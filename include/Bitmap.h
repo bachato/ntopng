@@ -104,6 +104,11 @@ class Bitmap {
     return (memcmp(bitmap, b->bitmap, sizeof(bitmap)) == 0);
   }
 
+  /* Returns the 64-bit value at position idx */
+  u_int64_t getBits64(size_t idx = 0) const {
+    return (idx < N) ? bitmap[idx] : 0;
+  }
+
   void lua(lua_State* vm, const char* label) const;
 
   const char* toHexString(char* buf, ssize_t buf_len) const {

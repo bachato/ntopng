@@ -115,6 +115,7 @@
             endpoint_id: $(`${formSelector} [name='endpoint']`).val(),
             recipient_host_pools: $(`${formSelector} [name='recipient_host_pools']`).val().join(","),
             recipient_am_hosts: $(`${formSelector} [name='recipient_am_hosts']`).val().join(","),
+            recipient_labels: ($(`${formSelector} [name='recipient_labels']`).val() || []).join(","),
             recipient_silence_multiple_alerts: $(`${formSelector} [name='recipient_silence_alerts']`).is(':checked'),
             recipient_notifications_type: $(`${formSelector} [name='recipient_notifications_type']`).val()
         };
@@ -240,6 +241,8 @@
                 $('#add-recipient-host-pools-select').selectpicker('refresh');
                 $('#add-recipient-am-hosts-select').selectpicker('selectAll');
                 $('#add-recipient-am-hosts-select').selectpicker('refresh');
+                $('#add-recipient-labels-select').selectpicker('deselectAll');
+                $('#add-recipient-labels-select').selectpicker('refresh');
                 $('#add-recipient-modal').modal('show');
             }
         },
@@ -691,6 +694,9 @@
 
             $(`#edit-recipient-modal form [name='recipient_am_hosts']`).val(recipient.am_hosts);
             $(`#edit-recipient-modal form [name='recipient_am_hosts']`).selectpicker('refresh');
+
+            $(`#edit-recipient-modal form [name='recipient_labels']`).val(recipient.labels || []);
+            $(`#edit-recipient-modal form [name='recipient_labels']`).selectpicker('refresh');
 
             const checks_array = recipient.checks || [];
             $(`#edit_recipient_alert_select`).val(checks_array).trigger('change');

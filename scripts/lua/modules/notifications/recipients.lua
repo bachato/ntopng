@@ -236,6 +236,7 @@ function recipients.initialize()
                     "builtin_recipient_" .. endpoint_key --[[ the name of the endpoint recipient --]] , all_categories,
                     all_entities, default_builtin_minimum_severity, all_host_pools, -- host pools
                     all_am_hosts, -- active monitoring hosts
+                    {}, -- labels (no filter)
                     {} --[[ no recipient params --]] )
 
             end
@@ -287,7 +288,8 @@ function recipients.initialize()
         ntop.recipient_register(recipient.recipient_id, recipient.minimum_severity,
             table.concat(recipient.check_categories, ','), table.concat(recipient.host_pools, ','),
             table.concat(recipient.check_entities, ','), flow_alert_types, host_alert_types, other_alert_types,
-                ternary((notifications_type ~= "alerts"), true --[[skip alerts]] , false --[[dont skip alerts]] ))
+                ternary((notifications_type ~= "alerts"), true --[[skip alerts]] , false --[[dont skip alerts]] ),
+                table.concat(recipient.labels or {}, ','))
     end
 end
 
@@ -479,6 +481,7 @@ local function _set_endpoint_recipient_params(recipient_data, safe_params)
         minimum_severity = recipient_data.minimum_severity,
         host_pools = recipient_data.host_pools_ids,
         am_hosts = recipient_data.am_hosts_ids,
+        labels = recipient_data.labels_ids or {},
         checks = recipient_data.checks,
         silence_alerts = recipient_data.silence_alerts,
         notifications_type = recipient_data.notifications_type,
@@ -534,7 +537,7 @@ end
 -- @param recipient_params A table with endpoint recipient params that will be possibly sanitized
 -- @return A table with a key status which is either "OK" or "failed", and the recipient id assigned to the newly added recipient. When "failed", the table contains another key "error" with an indication of the issue
 function recipients.add_recipient(endpoint_id, endpoint_recipient_name, check_categories, check_entities,
-    minimum_severity, host_pools_ids, am_hosts_ids, recipient_params, silence_duplicate_alerts)
+    minimum_severity, host_pools_ids, am_hosts_ids, labels_ids, recipient_params, silence_duplicate_alerts)
     local endpoints = require "endpoints"
     local locked = _lock()
     local res = {
@@ -602,6 +605,7 @@ function recipients.add_recipient(endpoint_id, endpoint_recipient_name, check_ca
                         minimum_severity = minimum_severity,
                         host_pools_ids = host_pools_ids,
                         am_hosts_ids = am_hosts_ids,
+                        labels_ids = labels_ids or {},
                         silence_alerts = silence_duplicate_alerts,
                         checks = checks,
                         notifications_type = notifications_type
@@ -613,7 +617,8 @@ function recipients.add_recipient(endpoint_id, endpoint_recipient_name, check_ca
                         flow_alert_types, -- Flow Alerts bitmap
                         host_alert_types, -- Host Alerts bitmap
                         other_alert_types, -- Other Alerts bitmap
-                        ternary((notifications_type ~= "alerts"), true --[[skip alerts]] , false --[[dont skip alerts]] ))
+                        ternary((notifications_type ~= "alerts"), true --[[skip alerts]] , false --[[dont skip alerts]] ),
+                        table.concat(labels_ids or {}, ','))
 
                     -- Set a flag to indicate that a recipient has been created
                     if not ec.endpoint_conf.builtin and
@@ -654,7 +659,7 @@ end
 -- @param recipient_params A table with endpoint recipient params that will be possibly sanitized
 -- @return A table with a key status which is either "OK" or "failed". When "failed", the table contains another key "error" with an indication of the issue
 function recipients.edit_recipient(recipient_id, endpoint_recipient_name, check_categories, check_entities,
-    minimum_severity, host_pools_ids, am_hosts_ids, recipient_params)
+    minimum_severity, host_pools_ids, am_hosts_ids, labels_ids, recipient_params)
     local endpoints = require "endpoints"
     local locked = _lock()
     local res = {
@@ -720,6 +725,7 @@ function recipients.edit_recipient(recipient_id, endpoint_recipient_name, check_
                         minimum_severity = minimum_severity,
                         host_pools_ids = host_pools_ids,
                         am_hosts_ids = am_hosts_ids,
+                        labels_ids = labels_ids or {},
                         silence_alerts = silence_alerts,
                         checks = checks,
                         notifications_type = notifications_type
@@ -730,7 +736,8 @@ function recipients.edit_recipient(recipient_id, endpoint_recipient_name, check_
                     ntop.recipient_register(tonumber(recipient_id), minimum_severity,
                         table.concat(check_categories, ','), table.concat(host_pools_ids, ','),
                         table.concat(check_entities, ','), flow_alert_types, host_alert_types, other_alert_types,
-                            ternary((notifications_type ~= "alerts"), true --[[skip alerts]] , false --[[dont skip alerts]] ))
+                            ternary((notifications_type ~= "alerts"), true --[[skip alerts]] , false --[[dont skip alerts]] ),
+                            table.concat(labels_ids or {}, ','))
 
                     res = {
                         status = "OK"
@@ -950,6 +957,12 @@ function recipients.get_recipient(recipient_id, include_stats)
             if not recipient_details["am_hosts"] then
                 -- No hosts by default
                 recipient_details["am_hosts"] = {}
+            end
+
+            -- Add labels filter
+            if not recipient_details["labels"] then
+                -- No labels by default
+                recipient_details["labels"] = {}
             end
 
             -- Add minimum alert severity. nil or empty minimum severity assumes a minimum severity of notice
@@ -1284,6 +1297,24 @@ function recipients.dispatch_notification(notification, current_script, notifica
                             end
                         end
                     end
+                end
+            end
+
+            -- Check Labels
+            if recipient_ok and recipient.labels and #recipient.labels > 0 then
+                local labels_bitmap = notification.labels_bitmap or 0
+                local match = false
+                for _, label_id in pairs(recipient.labels) do
+                    local bit_val = 2 ^ label_id
+                    if math.floor(labels_bitmap / bit_val) % 2 >= 1 then
+                        match = true
+                        break
+                    end
+                end
+                if not match then
+                    debug_print("X Discarding " .. (notification.entity_val or "?") .. " alert for recipient " ..
+                        recipient.recipient_name .. " due to label selection")
+                    recipient_ok = false
                 end
             end
 

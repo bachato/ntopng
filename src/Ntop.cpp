@@ -1277,11 +1277,11 @@ void Ntop::recipient_register(
     Bitmap128 enabled_categories, Bitmap4096 enabled_host_pools,
     Bitmap128 enabled_entities, Bitmap128 enabled_flow_alert_types,
     Bitmap128 enabled_host_alert_types, Bitmap128 enabled_other_alert_types,
-    bool match_alert_id, bool skip_alerts) {
+    bool match_alert_id, bool skip_alerts, Bitmap64 enabled_labels) {
   recipients.register_recipient(
       recipient_id, minimum_severity, enabled_categories, enabled_host_pools,
       enabled_entities, enabled_flow_alert_types, enabled_host_alert_types,
-      enabled_other_alert_types, match_alert_id, skip_alerts);
+      enabled_other_alert_types, match_alert_id, skip_alerts, enabled_labels);
 }
 
 /* ******************************************* */

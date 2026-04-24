@@ -2284,6 +2284,7 @@ void Host::alert2JSON(HostAlert* alert, bool released, ndpi_serializer* s) {
   ndpi_serialize_string_int32(s, "observation_point_id",
                               get_observation_point_id());
   serialize_geocoordinates(s, "");
+  ndpi_serialize_string_uint64(s, "labels_bitmap", getLabels());
 
   HostCheck* cb = getInterface()->getCheck(alert->getCheckType());
   ndpi_serialize_string_int32(s, "granularity", cb ? cb->getPeriod() : 0);
@@ -2330,6 +2331,7 @@ bool Host::enqueueAlertToRecipients(HostAlert* alert, bool released) {
     notification->alert_id = alert->getAlertType().id;
     notification->host.host_pool = get_host_pool();
     notification->alert_entity = alert_entity_host;
+    notification->labels_bitmap = getLabels();
 
     rv = ntop->recipients_enqueue(notification);
 

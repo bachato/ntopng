@@ -1994,6 +1994,7 @@ local known_parameters = {
    ["recipient_check_entities"] = validateEmptyOr(validateListOfTypeInline(validateNumber)),
    ["recipient_host_pools"] = validateEmptyOr(validateListOfTypeInline(validateNumber)),
    ["recipient_am_hosts"] = validateEmptyOr(validateListOfTypeInline(validateUnquoted)),
+   ["recipient_labels"] = validateEmptyOr(validateListOfTypeInline(validateNumber)),
    ["recipient_interface_pools"] = validateEmptyOr(validateListOfTypeInline(validateNumber)),
    ["recipient_minimum_severity"] = validateNumber,
    ["recipient_silence_multiple_alerts"] = validateBool,

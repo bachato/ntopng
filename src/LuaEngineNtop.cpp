@@ -8354,8 +8354,9 @@ static int ntop_recipient_register(lua_State* vm) {
   u_int16_t recipient_id;
   AlertLevel minimum_severity = alert_level_none;
   char *str_categories, *str_host_pools, *str_entities, *str_flow_alert_types,
-      *str_host_alert_types, *str_other_alert_types;
+      *str_host_alert_types, *str_other_alert_types, *str_labels;
   bool match_alert_id = false, skip_alerts = false;
+  Bitmap64 enabled_labels;
   Bitmap128 enabled_categories, enabled_entities, enabled_flow_alert_types,
       enabled_host_alert_types, enabled_other_alert_types;
   Bitmap4096 enabled_host_pools;
@@ -8409,6 +8410,10 @@ static int ntop_recipient_register(lua_State* vm) {
 
   if (lua_type(vm, 9) == LUA_TBOOLEAN) skip_alerts = (bool)lua_toboolean(vm, 9);
 
+  if ((lua_type(vm, 10) == LUA_TSTRING) &&
+      ((str_labels = (char*)lua_tostring(vm, 10)) != NULL))
+    enabled_labels.setBits(str_labels);
+
   /*
   char bitmap_buf[64];
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Skip alerts: %s", skip_alerts ?
@@ -8430,7 +8435,7 @@ static int ntop_recipient_register(lua_State* vm) {
   ntop->recipient_register(
       recipient_id, minimum_severity, enabled_categories, enabled_host_pools,
       enabled_entities, enabled_flow_alert_types, enabled_host_alert_types,
-      enabled_other_alert_types, match_alert_id, skip_alerts);
+      enabled_other_alert_types, match_alert_id, skip_alerts, enabled_labels);
 
   lua_pushnil(vm);
 

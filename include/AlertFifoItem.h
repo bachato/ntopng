@@ -33,6 +33,8 @@ class AlertFifoItem {
   u_int32_t score;
   u_int16_t alert_id;
 
+  u_int64_t labels_bitmap;
+
   struct {
     u_int16_t host_pool;
   } host;
@@ -47,6 +49,7 @@ class AlertFifoItem {
     alert_severity = alert_level_none;
     alert_category = alert_category_other;
     score = 0;
+    labels_bitmap = 0;
     host.host_pool = 0;
     alert_id = 0;
     flow.cli_host_pool = flow.srv_host_pool = 0;
@@ -59,6 +62,7 @@ class AlertFifoItem {
     score = i->score;
     alert = i->alert;
     alert_id = i->alert_id;
+    labels_bitmap = i->labels_bitmap;
     host.host_pool = i->host.host_pool;
     flow.cli_host_pool = i->flow.cli_host_pool;
     flow.srv_host_pool = i->flow.srv_host_pool;

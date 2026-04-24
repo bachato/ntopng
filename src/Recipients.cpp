@@ -130,7 +130,7 @@ void Recipients::register_recipient(
     Bitmap128 enabled_categories, Bitmap4096 enabled_host_pools,
     Bitmap128 enabled_entities, Bitmap128 enabled_flow_alert_types,
     Bitmap128 enabled_host_alert_types, Bitmap128 enabled_other_alert_types,
-    bool match_alert_id, bool skip_alerts) {
+    bool match_alert_id, bool skip_alerts, Bitmap64 enabled_labels) {
   if (recipient_id >= MAX_NUM_RECIPIENTS) return;
 
   m.lock(__FILE__, __LINE__);
@@ -151,6 +151,7 @@ void Recipients::register_recipient(
         enabled_other_alert_types);
     recipient_queues[recipient_id]->toggleAlertIDMatch(match_alert_id);
     recipient_queues[recipient_id]->setSkipAlerts(skip_alerts);
+    recipient_queues[recipient_id]->setEnabledLabels(enabled_labels);
   }
 
   if (recipient_id == 0) /* Default recipient (DB) */

@@ -5112,6 +5112,8 @@ void Flow::alert2JSON(FlowAlert* alert, ndpi_serializer* s) {
 
   ndpi_serialize_string_string(s, "info", getFlowInfo(false).c_str());
 
+  ndpi_serialize_string_uint64(s, "labels_bitmap", getLabels());
+
   char* json =
       alerts_json; /* Copying ref as it may be moved to the shadow meantime */
   ndpi_serialize_string_string(s, "json", json ? json : "");
@@ -5555,6 +5557,7 @@ bool Flow::enqueueAlertToRecipients(FlowAlert* alert) {
     notification->flow.cli_host_pool = cli_host ? cli_host->get_host_pool() : 0;
     notification->flow.srv_host_pool = srv_host ? srv_host->get_host_pool() : 0;
     notification->alert_entity = alert_entity_flow;
+    notification->labels_bitmap = getLabels();
 
     rv = ntop->recipients_enqueue(notification);
 

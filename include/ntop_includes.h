@@ -255,6 +255,7 @@ using namespace std;
 #include "FlowRiskAlerts.h"
 #include "Utils.h"
 #include "Bitmap.h"
+#include "Bitmap64.h"
 #include "Bitmap128.h"
 #include "Bitmap4096.h"
 #include "NtopGlobals.h"

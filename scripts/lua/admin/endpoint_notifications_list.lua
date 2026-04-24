@@ -18,6 +18,7 @@ local am_utils = require "am_utils"
 local alert_consts = require "alert_consts"
 local host_pools = require "host_pools":create()
 local recipients = require "recipients"
+local label_badge_utils = require "label_badge_utils"
 
 sendHTTPContentTypeHeader('text/html')
 
@@ -166,6 +167,7 @@ local context = {
     pools = {
         host_pools = host_pools:get_all_pools(),
     },
+    labels = label_badge_utils.getLabels(),
   },
   ui_utils = ui_utils,
   template_utils = template_utils,

@@ -85,7 +85,8 @@ class Recipients {
                           Bitmap128 enabled_flow_alert_types,
                           Bitmap128 enabled_host_alert_types,
                           Bitmap128 enabled_other_alert_types,
-                          bool match_alert_id, bool skip_alerts);
+                          bool match_alert_id, bool skip_alerts,
+                          Bitmap64 enabled_labels = Bitmap64());
 
   /**
    * @brief Marks a recipient as deleted

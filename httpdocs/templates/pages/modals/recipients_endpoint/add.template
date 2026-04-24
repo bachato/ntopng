@@ -194,6 +194,19 @@
                                 <small>{{ i18n('endpoint_notifications.message_am_hosts') }}</small>
                             </div>
                         </div>
+                        <div class="mb-3 row">
+                            <label class="col-form-label col-sm-3" for="add-recipient-labels-select">
+                                <b>{{ i18n("endpoint_notifications.recipient_labels") }}</b>
+                            </label>
+                            <div class="col-sm-7">
+                                <select multiple name="recipient_labels" class="selectpicker allow-no-selection col-sm-12" id="add-recipient-labels-select">
+                                    {% for _, label in ipairs(labels) do %}
+                                        <option value="{{ label.id }}" style="color: {{ label.color }}">{{ label.name }}</option>
+                                    {% end %}
+                                </select>
+                                <small>{{ i18n('endpoint_notifications.message_labels') }}</small>
+                            </div>
+                        </div>
 
                     </div>
                     <span class="invalid-feedback"></span>
