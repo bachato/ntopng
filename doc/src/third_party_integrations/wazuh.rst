@@ -19,7 +19,7 @@ Before enabling the integration, ensure the following requirements are met:
 
 **ntopng Requirements:**
 
-- ntopng with asset inventory support enabled.
+- ntopng with asset inventory support enabled (Enterprise M or better).
 - Network connectivity from the ntopng host to the Wazuh Manager API endpoint.
 - Host assets already present in the ntopng asset inventory (the integration updates existing assets only; it does not create new ones)
 
