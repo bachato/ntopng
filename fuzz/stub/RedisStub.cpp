@@ -21,10 +21,11 @@
 
 #include "ntop_includes.h"
 
-Redis::Redis(const char *redis_host /* = NULL */,
-             const char *redis_password /* = NULL */,
-             u_int16_t redis_port /* = 0 */, u_int8_t _redis_db_id /* = 0 */,
-             bool giveup_on_failure /* = false */) {
+Redis::Redis(const char* redis_host,
+	     const char* redis_password, u_int16_t redis_port,
+	     u_int8_t _redis_db_id, bool giveup_on_failure,
+	     const char* tls_ca_cert, const char* tls_cert,
+	     const char* tls_key, bool tls_skip_verify) {
   this->redisVersion = "RedisStub";
   this->localToResolve =
     std::make_unique<StringFifoQueue>(MAX_NUM_QUEUED_ADDRS);

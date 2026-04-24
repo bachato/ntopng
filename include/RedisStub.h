@@ -45,9 +45,11 @@ class Redis {
   bool checkSet(std::string key);
 
  public:
-  Redis(const char* redis_host = NULL, const char* redis_password = NULL,
-        u_int16_t redis_port = 0, u_int8_t _redis_db_id = 0,
-        bool giveup_on_failure = false);
+  Redis(const char* redis_host = (char*)"127.0.0.1",
+        const char* redis_password = NULL, u_int16_t redis_port = 6379,
+        u_int8_t _redis_db_id = 0, bool giveup_on_failure = false,
+        const char* tls_ca_cert = NULL, const char* tls_cert = NULL,
+        const char* tls_key = NULL, bool tls_skip_verify = false);
 
   char* getVersion();
   u_int32_t getNumVersion();
