@@ -73,7 +73,7 @@ end
 local is_nedge = ntop.isnEdge()
 -- for ntopng is always false
 local is_routing_mode = false
-if is_nededge then
+if is_nedge then
     is_routing_mode = ntop.isRoutingMode()
 end
 local is_nedge_enterprise = ntop.isnEdgeEnterprise()
