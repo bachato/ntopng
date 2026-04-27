@@ -1092,8 +1092,7 @@ if auth.has_capability(auth.capabilities.preferences) then
 			   field = "toggle_wazuh_automerge",
 			   default = "0",
 			   pref = "wazuh_automerge_enabled",
-			   -- Replace with: hidden = not ntop.isEnterpriseM()
-			   hidden = true
+			   hidden = not ntop.isEnterpriseM()
       })
 
       print(
