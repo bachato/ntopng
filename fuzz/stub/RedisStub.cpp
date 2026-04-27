@@ -584,4 +584,8 @@ char *Redis::dump(char *key) {
   return ret;
 }
 
-int Redis::restore(char *key, char *buf) { return 0; }
+int Redis::restore(char *key, char *buf)  { return 0;     }
+
+char* Redis::findAllWithAlloc(char* key)  { return(NULL); }
+
+char* Redis::findBestWithAlloc(char* key) { return(NULL); }

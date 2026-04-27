@@ -109,6 +109,8 @@ class Redis {
   void lua(lua_State* vm);
   char* dump(char* key);
   int restore(char* key, char* buf);
+  char* findAllWithAlloc(char* key);
+  char* findBestWithAlloc(char* key);
 };
 
 #endif /* _REDIS_H_ */
