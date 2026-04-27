@@ -79,6 +79,9 @@ The operation runs synchronously and returns a brief summary indicating how many
 .. note::	
 Only assets that already exist in the ntopng inventory are updated. Wazuh agents whose IP address does not match any known ntopng asset are silently skipped and counted as "not found" in the summary.
 
+
+In case you want to nightly automatical;y syncronize Wazuh with ntopng, you can avoid manual import and set this option in the wazuh preferences.
+
 Step 3: Review Enriched Assets
 -------------------------------
 
@@ -133,6 +136,7 @@ Above you can see an example of the information reported by Wazuh that includes 
 - Operating System and Architecture
 - Available resources (memory and CPU)
 - Network Interfaces
+- Open TCP/UDP server ports including process name
 
   
 Keeping Data Up to Date
@@ -155,7 +159,7 @@ Troubleshooting
 - The merge matches agents to assets exclusively by IP address. Ensure that the IP addresses reported by Wazuh agents correspond to IPs already present in the ntopng asset inventory
 - Assets that have never been seen by ntopng cannot be created by the merge; traffic must be observed first for an asset to exist in the inventory
 
-**The W badge does not appear after the merge**
+**The "W" badge does not appear after the merge**
 
 - Reload the asset inventory page; the badge is rendered client-side and may require a page refresh
 - Confirm the merge summary reported at least one updated asset
