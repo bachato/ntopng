@@ -84,11 +84,12 @@ typedef struct {
   struct {
     char *src, *dst;
   } bgp;
-  
+
   struct {
     char* wlan_ssid;
     u_int8_t wtp_mac_address[6];
   } wifi;
+
 
   struct {
     /* IPv4 only, so a int32 bit is only needed */
@@ -120,6 +121,7 @@ class Flow : public GenericHashEntry {
 
   /* Data collected from nProbe */
   std::string l7_json;
+  std::vector<uint64_t> hr_src2dst_bytes, hr_dst2src_bytes;
   ICMPinfo* icmp_info;
   char* category_list_name_shared_pointer; /* NOTE: this is a pointer handled by
 					      Ntop::getPersistentCustomListNameById()
@@ -1602,6 +1604,10 @@ class Flow : public GenericHashEntry {
   void setServerBGPInfo(char* bgp_info);
   inline char* getClientBGPInfo() { return((collection && collection->bgp.src) ? collection->bgp.src : (char*)""); }
   inline char* getServerBGPInfo() { return((collection && collection->bgp.dst) ? collection->bgp.dst : (char*)""); }
+  inline void setHRSrc2DstBytes(const std::vector<uint64_t>& v) { hr_src2dst_bytes = v; }
+  inline void setHRDst2SrcBytes(const std::vector<uint64_t>& v) { hr_dst2src_bytes = v; }
+  inline const std::vector<uint64_t>& getHRSrc2DstBytes() const { return hr_src2dst_bytes; }
+  inline const std::vector<uint64_t>& getHRDst2SrcBytes() const { return hr_dst2src_bytes; }
   char* getWLANSSID() {
     return (collection ? collection->wifi.wlan_ssid : NULL);
   };

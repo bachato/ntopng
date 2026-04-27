@@ -21,6 +21,25 @@
 
 #include "ntop_includes.h"
 
+/* Parser for high-resolution counters string (JSON like) */
+static std::vector<uint64_t> parseHRBytesString(const char *s) {
+  std::vector<uint64_t> v;
+  const char *p;
+
+  if (s == NULL || s[0] != '[') return v;
+  p = s + 1;
+  while (*p && *p != ']') {
+    char *end;
+    uint64_t val = strtoull(p, &end, 10);
+    if (end == p) break;
+    v.push_back(val);
+    p = end;
+    if (*p == ',') p++;
+  }
+
+  return v;
+}
+
 #ifndef HAVE_NEDGE
 
 /* **************************************************** */
@@ -739,6 +758,9 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
       flow->setNextAdjacentAS(zflow->next_adjacent_as);
 
     flow->setQoE(zflow->getQoESrc2Dst(), zflow->getQoEDst2Src());
+
+    if (zflow->getHRSrcToDstBytes()) flow->setHRSrc2DstBytes(parseHRBytesString(zflow->getHRSrcToDstBytes()));
+    if (zflow->getHRDstToSrcBytes()) flow->setHRDst2SrcBytes(parseHRBytesString(zflow->getHRDstToSrcBytes()));
 
     if (zflow->getOSHint() != ndpi_os_unknown) {
       if (flow->get_cli_host() != NULL)

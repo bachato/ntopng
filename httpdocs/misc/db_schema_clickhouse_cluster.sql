@@ -100,7 +100,9 @@ CREATE TABLE IF NOT EXISTS `flows` ON CLUSTER '$CLUSTER' (
 `SRC_PEER_ASN` UInt32 COMMENT 'BGP peer ASN upstream of the source IP',
 `DST_PEER_ASN` UInt32 COMMENT 'BGP peer ASN upstream of the destination IP',
 `REQUIRE_ATTENTION` Boolean COMMENT 'True if this flow/alert has been flagged as requiring manual review',
-`NEXT_ADJACENT_ASN` UInt32 COMMENT 'BGP next adjacent ASN (BGP_NEXT_ADJACENT_ASN / IPFIX field 128)'
+`NEXT_ADJACENT_ASN` UInt32 COMMENT 'BGP next adjacent ASN (BGP_NEXT_ADJACENT_ASN / IPFIX field 128)',
+`HR_SRC2DST_BYTES` Array(UInt64) COMMENT '15-second delta byte counters src->dst from nProbe high-resolution counters',
+`HR_DST2SRC_BYTES` Array(UInt64) COMMENT '15-second delta byte counters dst->src from nProbe high-resolution counters'
 ) ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{database}/{table}', '{replica}') PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (FIRST_SEEN, IPV4_SRC_ADDR, IPV4_DST_ADDR)
 COMMENT 'Per-flow telemetry records captured locally or received via NetFlow/sFlow/IPFIX. Each row represents one bidirectional network flow with 5-tuple (src/dst IP, src/dst port, protocol), byte/packet counters, L7 application identification, flow-risk bitmap, DSCP, NAT addresses, process info, and optional alert metadata. Partitioned by day on FIRST_SEEN.';
 @
@@ -209,6 +211,10 @@ ALTER TABLE flows DROP COLUMN IF EXISTS `PRE_NAT_IPV4_DST_ADDR`;
 ALTER TABLE flows DROP COLUMN IF EXISTS `PRE_NAT_DST_PORT`;
 @
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `EXPORTER_SITE` UInt16;
+@
+ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `HR_SRC2DST_BYTES` Array(UInt64);
+@
+ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `HR_DST2SRC_BYTES` Array(UInt64);
 @
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `INTERFACE_ROLE` UInt8;
 
