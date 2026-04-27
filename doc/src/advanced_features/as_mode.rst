@@ -19,11 +19,6 @@ The ntopng Dashboard will now display information related to Autonomous Systems,
 
 .. figure:: ../img/as_mode_dashboard.png
 
-Exporters
----------
-
-It will also be possible to understand from which Exporter each AS is seen and with the relative amount of traffic.
-
 Exporter Interfaces
 -------------------
 
