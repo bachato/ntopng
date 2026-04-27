@@ -66,6 +66,7 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   struct {
     u_int8_t src_to_dst, dst_to_src;
   } qoe;
+  char *hr_src_to_dst_bytes, *hr_dst_to_src_bytes;
 
  public:
   ParsedFlow();
@@ -401,6 +402,24 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   inline void setQoESrc2Dst(u_int8_t t) { qoe.src_to_dst = t; }
   inline void setQoEDst2Src(u_int8_t t) { qoe.dst_to_src = t; }
   inline void setOSHint(ndpi_os t) { os_hint = t; }
+  inline void setHRSrcToDstBytes(const char* str) {
+    if (hr_src_to_dst_bytes != NULL) free(hr_src_to_dst_bytes);
+    hr_src_to_dst_bytes = str ? strdup(str) : NULL;
+  }
+  inline void setHRDstToSrcBytes(const char* str) {
+    if (hr_dst_to_src_bytes != NULL) free(hr_dst_to_src_bytes);
+    hr_dst_to_src_bytes = str ? strdup(str) : NULL;
+  }
+  inline char* getHRSrcToDstBytes(bool setToNull = false) {
+    char* r = hr_src_to_dst_bytes;
+    if (setToNull) hr_src_to_dst_bytes = NULL;
+    return r;
+  }
+  inline char* getHRDstToSrcBytes(bool setToNull = false) {
+    char* r = hr_dst_to_src_bytes;
+    if (setToNull) hr_dst_to_src_bytes = NULL;
+    return r;
+  }
   inline ndpi_os getOSHint() { return (os_hint); }
   inline void setTCPStats(u_int32_t value, bool cli2src) {
     if (cli2src)

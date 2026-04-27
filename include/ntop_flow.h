@@ -560,6 +560,8 @@
 #define NPROBE_SOURCE_ID NTOP_BASE_ID + 600 /* Unique nProbe identifier */
 #define TCP_STATS_SRC_TO_DST NTOP_BASE_ID + 601
 #define TCP_STATS_DST_TO_SRC NTOP_BASE_ID + 602
+#define HR_SRC_TO_DST_BYTES  NTOP_BASE_ID + 612 /* 15 sec delta bytes (src->dst) */
+#define HR_DST_TO_SRC_BYTES  NTOP_BASE_ID + 613 /* 15 sec delta bytes (dst->src) */
 
 /* sFlow Counter Fields */
 #define SFLOW_DEVICE_IP 0

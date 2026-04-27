@@ -63,6 +63,7 @@ ParsedFlow::ParsedFlow() : ParsedFlowCore(), ParsedeBPF() {
   has_parsed_ebpf = false;
   memset(&qoe, 0, sizeof(qoe));
   tcp_stats_src_to_dst = tcp_stats_dst_to_src = 0;
+  hr_src_to_dst_bytes = hr_dst_to_src_bytes = NULL;
 }
 
 /* *************************************** */
@@ -222,6 +223,9 @@ ParsedFlow::ParsedFlow(const ParsedFlow& pf)
   l7_error_code = pf.l7_error_code;
 
   memcpy(&qoe, &pf.qoe, sizeof(qoe));
+
+  hr_src_to_dst_bytes = pf.hr_src_to_dst_bytes ? strdup(pf.hr_src_to_dst_bytes) : NULL;
+  hr_dst_to_src_bytes = pf.hr_dst_to_src_bytes ? strdup(pf.hr_dst_to_src_bytes) : NULL;
 }
 
 /* *************************************** */
@@ -456,10 +460,18 @@ void ParsedFlow::freeMemory() {
   
   if (bgp.src) { free(bgp.src); bgp.src = NULL; }
   if (bgp.dst) { free(bgp.dst); bgp.dst = NULL; }
-  
+
   if (l7_json) {
     free(l7_json);
     l7_json = NULL;
+  }
+  if (hr_src_to_dst_bytes) {
+    free(hr_src_to_dst_bytes);
+    hr_src_to_dst_bytes = NULL;
+  }
+  if (hr_dst_to_src_bytes) {
+    free(hr_dst_to_src_bytes);
+    hr_dst_to_src_bytes = NULL;
   }
 }
 

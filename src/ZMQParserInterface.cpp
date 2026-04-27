@@ -161,6 +161,8 @@ ZMQParserInterface::ZMQParserInterface(const char* endpoint,
   addMapping("OT_INFO", OT_INFO, NTOP_PEN);
   addMapping("SRC_BGP_INFO", SRC_BGP_INFO, NTOP_PEN);
   addMapping("DST_BGP_INFO", DST_BGP_INFO, NTOP_PEN);
+  addMapping("HR_SRC_TO_DST_BYTES", HR_SRC_TO_DST_BYTES, NTOP_PEN);
+  addMapping("HR_DST_TO_SRC_BYTES", HR_DST_TO_SRC_BYTES, NTOP_PEN);
 
   /* eBPF / Process */
   addMapping("SRC_PROC_PID", SRC_PROC_PID, NTOP_PEN);
@@ -1415,12 +1417,6 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow* const flow,
     if (value->string && value->string[0]) {
       flow->setParsedProcessInfo();
       flow->src_process_info.process_name = strdup(value->string);
-
-#if 0
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "[SRC] %s (%u)",
-				   flow->src_process_info.process_name,
-				   ntohs(flow->src_port));
-#endif
     }
     break;
 
@@ -1483,12 +1479,6 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow* const flow,
     if (value->string && value->string[0]) {
       flow->setParsedProcessInfo();
       flow->dst_process_info.process_name = strdup(value->string);
-
-#if 0
-      ntop->getTrace()->traceEvent(TRACE_NORMAL, "[DST] %s (%u)",
-				   flow->dst_process_info.process_name,
-				   ntohs(flow->dst_port));
-#endif
     }
     break;
 
@@ -1568,6 +1558,16 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow* const flow,
   case L7_OS_HINT:
     flow->setOSHint((ndpi_os)value->int_num);
     ;
+    break;
+
+  case HR_SRC_TO_DST_BYTES:
+    if (value->string && value->string[0])
+      flow->setHRSrcToDstBytes(value->string);
+    break;
+
+  case HR_DST_TO_SRC_BYTES:
+    if (value->string && value->string[0])
+      flow->setHRDstToSrcBytes(value->string);
     break;
 
   default:
