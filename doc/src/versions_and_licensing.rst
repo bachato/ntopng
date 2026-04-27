@@ -782,6 +782,22 @@ Versions Comparison Table
      - 2K
      - 8K
      - 16K
+   * - Asset Inventory
+     - -
+     - -
+     - ✓ (no dashboard)
+     - ✓
+     - ✓
+     - ✓
+     - ✓
+   * - Wazuh Integration
+     - -
+     - -
+     - ✓
+     - ✓
+     - ✓
+     - ✓
+     - ✓
 
 
 ✓ = Feature available, ✗ = Feature NOT available
