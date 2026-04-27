@@ -349,7 +349,7 @@ page_utils.menu_entries = {
         help_link = "https://www.ntop.org/guides/ntopng/user_interface/network_interface/interface/autonomous_systems.html"
     },
 
-    -- ASN Mode
+    -- AS Mode
     exporters_interfaces_traffic_asn_mode = {
         key = "exporters_interfaces_traffic_asn_mode",
         i18n_title = "exporters_interfaces_configuration.network_communications",
