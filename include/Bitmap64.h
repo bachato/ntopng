@@ -25,6 +25,11 @@
 #include "ntop_includes.h"
 
 /* Bitmap64 is implemented as a generic Bitmap with 1x uint64 */
-typedef Bitmap<1> Bitmap64;
+class Bitmap64 : public Bitmap<1> {
+ public:
+  Bitmap64() : Bitmap<1>() {}
+  Bitmap64(char* list) : Bitmap<1>(list) {}
+  Bitmap64(u_int64_t raw) : Bitmap<1>() { setBits64(raw); }
+};
 
 #endif /* _BITMAP64_H_ */

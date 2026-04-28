@@ -109,6 +109,11 @@ class Bitmap {
     return (idx < N) ? bitmap[idx] : 0;
   }
 
+  /* Sets the 64-bit value at position idx */
+  void setBits64(u_int64_t val, size_t idx = 0) {
+    if (idx < N) bitmap[idx] = val;
+  }
+
   void lua(lua_State* vm, const char* label) const;
 
   const char* toHexString(char* buf, ssize_t buf_len) const {

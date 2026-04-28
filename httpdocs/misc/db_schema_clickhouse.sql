@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS `flows` (
 `SRC_PROC_USER_NAME` String COMMENT 'OS username owning the source process',
 `DST_PROC_USER_NAME` String COMMENT 'OS username owning the destination process',
 `ALERTS_MAP` String COMMENT 'Serialized bitmap of individual alert conditions triggered on this flow',
+`LABELS_MAP` String COMMENT 'Serialized bitmap of labels associated with this flow',
 `SEVERITY` UInt8 COMMENT 'Alert severity level; meaningful only when STATUS != 0',
 `IS_CLI_ATTACKER` UInt8 COMMENT '1 if the client host is flagged as an attacker, 0 otherwise',
 `IS_CLI_VICTIM` UInt8 COMMENT '1 if the client host is flagged as a victim, 0 otherwise',
@@ -133,6 +134,8 @@ ALTER TABLE flows ADD COLUMN IF NOT EXISTS `SRC_PROC_USER_NAME` String;
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `DST_PROC_USER_NAME` String;
 @
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `ALERTS_MAP` String;
+@
+ALTER TABLE flows ADD COLUMN IF NOT EXISTS `LABELS_MAP` String;
 @
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `SEVERITY` UInt8;
 @
@@ -1065,6 +1068,7 @@ SELECT
     f.CLIENT_LOCATION AS cli_location,
     f.SERVER_LOCATION AS srv_location,
     f.ALERTS_MAP AS alerts_map,
+    f.LABELS_MAP AS labels_map,
     f.INFO AS info,
     IPv4NumToString(f.PROBE_IP) AS probe_ip,
     f.SRC2DST_TCP_FLAGS AS src2dst_tcp_flags,

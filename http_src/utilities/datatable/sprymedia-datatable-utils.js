@@ -958,6 +958,13 @@ export class DataTableRenders {
             srvLocation = srvLocation + " <abbr data-bs-toggle='tooltip' data-bs-placement='bottom' title='" + i18n("details.label_remote") + "'><span class='badge bg-secondary'>" + i18n("details.label_short_remote") + "</span></abbr> "
         }
 
+        let flowLabels = "";
+        if (flow.labels && flow.labels.length > 0) {
+            flow.labels.forEach(label => {
+                flowLabels += ` <span class="badge" style="background-color: ${label.color}">${label.name}</span>`;
+            });
+        }
+
         let cliIcons = "";
         let srvIcons = "";
         if (row.cli_role) {
@@ -974,7 +981,7 @@ export class DataTableRenders {
                 srvIcons += DataTableRenders.filterize('role', 'victim', '<i class="fas fa-sad-tear" data-bs-toggle="tooltip" data-bs-placement="bottom" title="' + row.srv_role.label + '"></i>', row.srv_role.tag_label);
         }
 
-        let flow_string = `${active_ref} ${cliLabel}${cliBlacklisted}${cliLocation}${cliFlagLabel}${cliPortLabel} ${cliIcons} ${flow.cli_ip.reference} <i class="fas fa-exchange-alt fa-lg" aria-hidden="true"></i> ${srvLabel}${srvBlacklisted}${srvLocation}${srvFlagLabel}${srvPortLabel} ${srvIcons} ${flow.srv_ip.reference}`
+        let flow_string = `${active_ref} ${cliLabel}${cliBlacklisted}${cliLocation}${cliFlagLabel}${cliPortLabel} ${cliIcons} ${flow.cli_ip.reference} <i class="fas fa-exchange-alt fa-lg" aria-hidden="true"></i> ${srvLabel}${srvBlacklisted}${srvLocation}${srvFlagLabel}${srvPortLabel} ${srvIcons} ${flow.srv_ip.reference}${flowLabels}`
         
         if (row.protocol_info_json && row.protocol_info_json.verdict && row.protocol_info_json.verdict.pass === 0)
             flow_string = `<strike>${flow_string}</strike>`
