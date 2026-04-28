@@ -563,6 +563,9 @@
 #define HR_SRC_TO_DST_BYTES  NTOP_BASE_ID + 612 /* 15 sec delta bytes (src->dst) */
 #define HR_DST_TO_SRC_BYTES  NTOP_BASE_ID + 613 /* 15 sec delta bytes (dst->src) */
 
+/* High-Resolution counters settings (hardcoded for the time being */
+#define HR_COUNTERS_SLOT_DURATION_SECS 15 /* nProbe high-resolution slot width (sec) */
+
 /* sFlow Counter Fields */
 #define SFLOW_DEVICE_IP 0
 #define SFLOW_SAMPLES_GENERATED 1

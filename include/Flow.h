@@ -457,6 +457,9 @@ class Flow : public GenericHashEntry {
   void updateUDPHostServices(bool src2dst_direction);
   void updateServerName(Host* h);
   void allocateCollection();
+  void mergeHRCounters(std::vector<uint64_t>& flow_counters,
+                    const std::vector<uint64_t>& update_counters,
+                    time_t update_first_seen) const;
   void computeKey();
   void accountBidirectionalTCPProtocolServices();
   void accountBidirectionalUDPProtocolServices();
@@ -1604,10 +1607,15 @@ class Flow : public GenericHashEntry {
   void setServerBGPInfo(char* bgp_info);
   inline char* getClientBGPInfo() { return((collection && collection->bgp.src) ? collection->bgp.src : (char*)""); }
   inline char* getServerBGPInfo() { return((collection && collection->bgp.dst) ? collection->bgp.dst : (char*)""); }
-  inline void setHRSrc2DstBytes(const std::vector<uint64_t>& v) { hr_src2dst_bytes = v; }
-  inline void setHRDst2SrcBytes(const std::vector<uint64_t>& v) { hr_dst2src_bytes = v; }
+  void updateHRSrc2DstBytes(const std::vector<uint64_t>& v, time_t update_first_seen) {
+    mergeHRCounters(hr_src2dst_bytes, v, update_first_seen);
+  }
+  void updateHRDst2SrcBytes(const std::vector<uint64_t>& v, time_t update_first_seen) {
+    mergeHRCounters(hr_dst2src_bytes, v, update_first_seen);
+  }
   inline const std::vector<uint64_t>& getHRSrc2DstBytes() const { return hr_src2dst_bytes; }
   inline const std::vector<uint64_t>& getHRDst2SrcBytes() const { return hr_dst2src_bytes; }
+  inline void resetHRCounters() { hr_src2dst_bytes.clear(); hr_dst2src_bytes.clear(); }
   char* getWLANSSID() {
     return (collection ? collection->wifi.wlan_ssid : NULL);
   };

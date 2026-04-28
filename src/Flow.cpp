@@ -9959,6 +9959,30 @@ void Flow::allocateCollection() {
 
 /* *************************************** */
 
+void Flow::mergeHRCounters(std::vector<uint64_t>& flow_counters,
+                         const std::vector<uint64_t>& update_counters,
+                         time_t update_first_seen) const {
+  time_t partial_first_seen = get_partial_first_seen();
+  time_t base_first_seen = (partial_first_seen != 0) ? partial_first_seen : get_first_seen();
+  time_t base_minute   = base_first_seen   - (base_first_seen   % 60);
+  time_t update_minute = update_first_seen - (update_first_seen % 60);
+  u_int i, padding, size;
+
+  if (update_counters.empty()) return;
+  if (update_minute < base_minute) return;
+
+  padding = ((update_minute - base_minute) / HR_COUNTERS_SLOT_DURATION_SECS);
+  size = padding + update_counters.size();
+
+  if (size > flow_counters.size())
+    flow_counters.resize(size, 0);
+
+  for (i = 0; i < update_counters.size(); i++)
+    flow_counters[padding + i] = update_counters[i];
+}
+
+/* *************************************** */
+
 /* Quick check that both sides have (likely) done a 3WH */
 bool Flow::isThreeWayHandshakeOK() const {
   u_int16_t mask = TH_SYN | TH_ACK;
