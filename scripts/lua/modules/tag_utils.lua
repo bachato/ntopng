@@ -15,6 +15,7 @@ package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 local alert_consts = require "alert_consts"
 local host_pools = require "host_pools"
 local consts = require "consts"
+local label_badge_utils = require "label_badge_utils"
 local qoe_utils
 
 if ntop.isEnterpriseL() then
@@ -115,6 +116,13 @@ tag_utils.defined_tags = {
         i18n_label = i18n('db_search.tags.flow_risk'),
         operators = {'eq', 'neq', 'in', 'nin'},
         hourly_available = false
+    },
+    flow_label = {
+        type = tag_utils.input_types.select,
+        value_type = 'label_id',
+        i18n_label = i18n('db_search.tags.flow_label'),
+        operators = {'in', 'nin'},
+        hourly_available = true
     },
     l4proto = {
         type = tag_utils.input_types.select,
@@ -1169,6 +1177,14 @@ tag_utils.formatters = {
         local flow_risk_list = ntop.getRiskList() or {}
         flow_risk_list[1] = i18n("flow_risk.ndpi_no_risk")
         return flow_risk_list[tonumber(risk) + 1] or risk
+    end,
+    flow_label = function(id)
+        for _, lbl in ipairs(label_badge_utils.getLabels()) do
+            if tostring(lbl.id) == tostring(id) then
+                return lbl.name
+            end
+        end
+        return id
     end
 }
 
@@ -1367,6 +1383,15 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
             filter.options[#filter.options + 1] = {
                 value = id - 1,
                 label = info
+            }
+        end
+    elseif tag.value_type == "label_id" then
+        filter.value_type = 'array'
+        filter.options = {}
+        for _, lbl in ipairs(label_badge_utils.getLabels()) do
+            filter.options[#filter.options + 1] = {
+                value = lbl.id,
+                label = lbl.name
             }
         end
     elseif tag.value_type == "host_pool_id" or tag.value_type == "host_pool" then

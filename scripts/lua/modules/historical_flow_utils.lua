@@ -43,7 +43,7 @@ local function dt_format_labels_map(hex_str)
    for _, label in ipairs(get_all_labels()) do
       local bit_index = tonumber(label.id) or 0
       if (bitmap & (1 << bit_index)) ~= 0 then
-         result[#result + 1] = { name = label.name, color = label.color }
+         result[#result + 1] = { id = label.id, name = label.name, color = label.color }
       end
    end
    return #result > 0 and result or nil
@@ -1649,6 +1649,7 @@ function historical_flow_utils.get_tags()
    flow_defined_tags["ndpi_fingerprint"] = tag_utils.defined_tags["ndpi_fingerprint"]
    flow_defined_tags["exporter_site"] = tag_utils.defined_tags["exporter_site"] -- required?
    flow_defined_tags["asn"] = tag_utils.defined_tags["asn"]
+   flow_defined_tags["flow_label"] = tag_utils.defined_tags["flow_label"]
 
    return flow_defined_tags
 end

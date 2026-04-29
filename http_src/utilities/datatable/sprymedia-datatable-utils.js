@@ -634,8 +634,9 @@ export class DataTableRenders {
         return seconds;
     }
 
-    static filterize(key, value, label, tag_label, title, html, is_snmp_ip, ip) {
-        let content = `<a class='tag-filter' data-bs-toggle='tooltip' data-bs-placement="bottom" data-tag-key='${key}' title='${title || value}' data-tag-value='${value}' data-tag-label='${tag_label || label || value}' href='javascript:void(0)'>${html || label || value}</a>`;
+    static filterize(key, value, label, tag_label, title, html, is_snmp_ip, ip, operator) {
+        const op_attr = operator ? ` data-tag-operator='${operator}'` : '';
+        let content = `<a class='tag-filter' data-bs-toggle='tooltip' data-bs-placement="bottom" data-tag-key='${key}' title='${title || value}' data-tag-value='${value}'${op_attr} data-tag-label='${tag_label || label || value}' href='javascript:void(0)'>${html || label || value}</a>`;
         if (is_snmp_ip != null) {
             if (is_snmp_ip) {
                 if (value) {
@@ -961,7 +962,8 @@ export class DataTableRenders {
         let flowLabels = "";
         if (flow.labels && flow.labels.length > 0) {
             flow.labels.forEach(label => {
-                flowLabels += ` <span class="badge" style="background-color: ${label.color}">${label.name}</span>`;
+                const badge = `<span class="badge" style="background-color: ${label.color}">${label.name}</span>`;
+                flowLabels += ` ` + DataTableRenders.filterize('flow_label', label.id, label.name, label.name, label.name, badge, null, null, 'in');
             });
         }
 
