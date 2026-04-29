@@ -1,6 +1,6 @@
 <template>
     <!-- Select2 wrapper component with Vue integration -->
-    <div class="ss-root">
+    <div class="ss-root no-wrap">
         <select class="select2 form-select ss-control" ref="select2" required name="filter_type" :multiple="multiple"
             :disabled="disabled">
             <!-- Render regular options (without groups) -->
@@ -674,10 +674,6 @@ defineExpose({ render });
 .ss-root {
     width: 100%;
     position: relative;
-}
-
-.ss-root :deep(.select2-container) {
-    width: 100% !important;
 }
 
 
