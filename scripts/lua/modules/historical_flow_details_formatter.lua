@@ -10,6 +10,7 @@ require("flow_utils")
 local json = require "dkjson"
 local dscp_consts = require "dscp_consts"
 local flow_risk_utils = require "flow_risk_utils"
+local label_badge_utils = require "label_badge_utils"
 local alert_utils = require "alert_utils"
 local format_utils = require "format_utils"
 
@@ -773,6 +774,27 @@ end
 
 -- ###############################################
 
+local function format_historical_labels(flow)
+   local labels_map_hex = flow["LABELS_MAP"]
+   if isEmptyString(labels_map_hex) then return nil end
+   local bitmap = tonumber(labels_map_hex, 16)
+   if not bitmap or bitmap == 0 then return nil end
+   local badges_html = ""
+   for _, lbl in ipairs(label_badge_utils.getLabels()) do
+      local bit_index = tonumber(lbl.id) or 0
+      if (bitmap & (1 << bit_index)) ~= 0 then
+         badges_html = badges_html .. '<span class="badge" style="background-color:' .. lbl.color .. '; color:#fff; margin-right:4px;">' .. lbl.name .. '</span>'
+      end
+   end
+   if isEmptyString(badges_html) then return nil end
+   return {
+      name = i18n("labels_page.labels"),
+      values = { badges_html }
+   }
+end
+
+-- ###############################################
+
 local function format_snmp_url(exporter_ip, if_idx, label)
    local url = "<A HREF=\""..ntop.getHttpPrefix() ..
       "/lua/pro/enterprise/snmp_interface_details.lua?host="
@@ -952,6 +974,10 @@ function historical_flow_details_formatter.formatHistoricalFlowDetails(flow)
       local protocol_info_json = json.decode(flow["PROTOCOL_INFO_JSON"] or '') or {}
       local info = historical_flow_utils.format_clickhouse_record(flow)
       flow_details[#flow_details + 1] = format_historical_flow_label(flow)
+      local labels_entry = format_historical_labels(flow)
+      if labels_entry then
+         flow_details[#flow_details + 1] = labels_entry
+      end
       flow_details = format_post_nat_info(flow_details, flow, info)
       flow_details[#flow_details + 1] = format_historical_protocol_label(flow)
       flow_details[#flow_details + 1] = format_historical_last_first_seen(flow, info)
