@@ -133,7 +133,7 @@ rm -fr $RPM_BUILD_ROOT
 /usr/share/nmap/scripts/vulscan/vulscan.nse
 /usr/share/nmap/scripts/vulscan/cve.csv
 
-%dir %attr(700, ntopng, ntopng) /var/lib/ntopng
+%dir %attr(700, ntopng, ntop) /var/lib/ntopng
 
 # Set the default attributes of all of the files specified to have an
 # owner and group of root and to inherit the permissions of the file
@@ -180,9 +180,9 @@ fi
 
 %post
 
-/bin/chown ntopng:ntopng /usr/bin/ntopng-config
+/bin/chown ntopng:ntop /usr/bin/ntopng-config
 /bin/chmod gou+s /usr/bin/ntopng-config
-/bin/chown -R ntopng:ntopng /etc/ntopng
+/bin/chown -R ntopng:ntop /etc/ntopng
 
 CMDLINE=$(tr -d '\0' < /proc/1/cmdline)
 if [ -z "${CMDLINE##*system*}" ] || [ -z "${CMDLINE##*init*}" ]; then # init/systemd (not a container)
