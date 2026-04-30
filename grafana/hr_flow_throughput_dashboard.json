@@ -1,0 +1,263 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_CLICKHOUSE",
+      "label": "ClickHouse",
+      "description": "ClickHouse datasource pointing to the ntopng database",
+      "type": "datasource",
+      "pluginId": "grafana-clickhouse-datasource",
+      "pluginName": "ClickHouse"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "9.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "grafana-clickhouse-datasource",
+      "name": "ClickHouse",
+      "version": "2.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": []
+  },
+  "description": "Per-flow bidirectional throughput at 15-second granularity using ntopng nProbe HR_SRC2DST_BYTES / HR_DST2SRC_BYTES arrays from the ClickHouse flows table. Filter by source IP, destination IP, and destination port.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "${DS_CLICKHOUSE}"
+      },
+      "description": "Bidirectional throughput in bits per second. Each point is a 15-second nProbe HR slot (or the Grafana auto-interval when that is wider). The HR arrays are unnested via ARRAY JOIN; slot timestamps are reconstructed from toStartOfMinute(FIRST_SEEN) + (slot_index - 1) * 15s. Multiple flow records for the same tuple within the time range are summed.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "${DS_CLICKHOUSE}"
+          },
+          "rawSql": "SELECT * FROM (\nSELECT\n    toDateTime(intDiv(toUnixTimestamp(toStartOfMinute(FIRST_SEEN)) + toInt64(slot_idx - 1) * 15, greatest($__interval_s, 15)) * greatest($__interval_s, 15)) AS time,\n    'Src2Dst' AS metric,\n    sum(arrayElement(HR_SRC2DST_BYTES, slot_idx)) * 8 / greatest($__interval_s, 15) AS bps\nFROM ${db}.flows\nARRAY JOIN arrayEnumerate(arrayResize(HR_SRC2DST_BYTES, greatest(length(HR_SRC2DST_BYTES), length(HR_DST2SRC_BYTES)), toUInt64(0))) AS slot_idx\nWHERE IPV4_SRC_ADDR = IPv4StringToNum('${src_ip}')\n  AND IPV4_DST_ADDR = IPv4StringToNum('${dst_ip}')\n  AND IP_DST_PORT = toUInt16('${dst_port}')\n  AND $__timeFilter(FIRST_SEEN)\n  AND greatest(length(HR_SRC2DST_BYTES), length(HR_DST2SRC_BYTES)) > 0\nGROUP BY time\nUNION ALL\nSELECT\n    toDateTime(intDiv(toUnixTimestamp(toStartOfMinute(FIRST_SEEN)) + toInt64(slot_idx - 1) * 15, greatest($__interval_s, 15)) * greatest($__interval_s, 15)) AS time,\n    'Dst2Src' AS metric,\n    sum(arrayElement(HR_DST2SRC_BYTES, slot_idx)) * 8 / greatest($__interval_s, 15) AS bps\nFROM ${db}.flows\nARRAY JOIN arrayEnumerate(arrayResize(HR_SRC2DST_BYTES, greatest(length(HR_SRC2DST_BYTES), length(HR_DST2SRC_BYTES)), toUInt64(0))) AS slot_idx\nWHERE IPV4_SRC_ADDR = IPv4StringToNum('${src_ip}')\n  AND IPV4_DST_ADDR = IPv4StringToNum('${dst_ip}')\n  AND IP_DST_PORT = toUInt16('${dst_port}')\n  AND $__timeFilter(FIRST_SEEN)\n  AND greatest(length(HR_SRC2DST_BYTES), length(HR_DST2SRC_BYTES)) > 0\nGROUP BY time\n) ORDER BY time, metric",
+          "format": 0,
+          "refId": "A"
+        }
+      ],
+      "title": "HR Flow Throughput — ${src_ip} → ${dst_ip}:${dst_port}",
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "metric"
+            ]
+          }
+        }
+      ],
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "ntopng",
+    "clickhouse",
+    "hr-counters",
+    "flow-throughput"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "DS_CLICKHOUSE",
+        "options": [],
+        "query": "grafana-clickhouse-datasource",
+        "refresh": 1,
+        "type": "datasource",
+        "label": "ClickHouse Datasource"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "ntopng",
+          "value": "ntopng"
+        },
+        "hide": 0,
+        "name": "db",
+        "label": "Database",
+        "options": [
+          {
+            "selected": true,
+            "text": "ntopng",
+            "value": "ntopng"
+          }
+        ],
+        "query": "ntopng",
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "name": "src_ip",
+        "label": "Source IP",
+        "options": [],
+        "query": "",
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "name": "dst_ip",
+        "label": "Destination IP",
+        "options": [],
+        "query": "",
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "443",
+          "value": "443"
+        },
+        "hide": 0,
+        "name": "dst_port",
+        "label": "Destination Port",
+        "options": [
+          {
+            "selected": true,
+            "text": "443",
+            "value": "443"
+          }
+        ],
+        "query": "443",
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "browser",
+  "title": "ntopng HR Flow Throughput",
+  "uid": "ntopng-hr-flow-throughput",
+  "version": 1
+}
