@@ -3904,10 +3904,9 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
   while (idleFlowsToDump->isNotEmpty()) {
     Flow* f = idleFlowsToDump->dequeue();
 
-    if (dumpFlowOut(f, when)) {
-      idle_flows_done++;
-    }
-
+    if (dumpFlowOut(f, when))
+      idle_flows_done++;   
+    
     if (idle_flows_budget > 0 /* Budget requested */
         && idle_flows_done >= idle_flows_budget /* Budget exceeded */)
       break;
@@ -4046,7 +4045,7 @@ bool NetworkInterface::dumpFlowOut(Flow* f, time_t now) {
 
   f->decUses(); /* Add done, decrease the reference counter */
   f->set_dump_done();
-
+  
   return (true);
 }
 

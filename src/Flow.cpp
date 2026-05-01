@@ -133,7 +133,8 @@ Flow::Flow(NetworkInterface* _iface, int32_t _iface_idx, u_int16_t _vlanId,
   last_db_dump.partial = NULL;
   last_db_dump.first_seen = last_db_dump.last_seen = 0;
   last_db_dump.in_progress = false;
-
+  last_db_dump.is_first_dump = true;
+    
   memset(&protos, 0, sizeof(protos));
   flow_device.device_ip = flow_device.in_index = flow_device.out_index =
       flow_device.observation_point_id = flow_device.site_id = 0;

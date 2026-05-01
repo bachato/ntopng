@@ -368,7 +368,8 @@ class Flow : public GenericHashEntry {
     PartializableFlowTrafficStats* partial;
     PartializableFlowTrafficStats delta;
     time_t first_seen, last_seen;
-    bool in_progress; /* Set to true when the flow is enqueued to be dumped */
+    bool in_progress, /* Set to true when the flow is enqueued to be dumped */
+      is_first_dump;
   } last_db_dump;
 
 #ifdef NTOPNG_PRO
@@ -942,7 +943,7 @@ class Flow : public GenericHashEntry {
     return last_db_dump.delta.get_srv2cli_packets();
   };
   inline void set_dump_in_progress() { last_db_dump.in_progress = true; };
-  inline void set_dump_done() { last_db_dump.in_progress = false; };
+  inline void set_dump_done() { last_db_dump.in_progress = false, last_db_dump.is_first_dump = false; };
   bool needsExtraDissection();
   bool hasDissectedTooManyPackets();
 #ifdef NTOPNG_PRO
@@ -1766,6 +1767,8 @@ class Flow : public GenericHashEntry {
   inline void setSNMPExporterInterfaceRole(SNMPInterfaceRole r) {
     flowExporterInterfaceRole = r;
   }
+
+  inline bool isFirstFlowDump()  { return(last_db_dump.is_first_dump); }
 };
 
 #endif /* _FLOW_H_ */
