@@ -109,6 +109,7 @@ class PcapInterface : public NetworkInterface {
   char* getPcapIfaceName(int i) { return (pcap_ifaces[i]); }
   inline bool readFromPcapDump() { return (read_pkts_from_pcap_dump); }
   inline bool readFromPcapDir() { return (read_pkts_from_directory); }
+  virtual inline bool readPacketsFromFileDump() { return (read_pkts_from_pcap_dump); }
   bool loadPcapFilesFromDir();
   virtual bool is_purge_idle_interface() {
     return (purge_idle_flows_hosts ||

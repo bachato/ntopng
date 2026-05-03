@@ -2794,6 +2794,9 @@ pre_get_flow:
     flow->periodic_stats_update(when, false);
   }
 
+  if(flow && readPacketsFromFileDump())
+    flow->periodic_stats_update(&h->ts, false);
+  
   return (pass_verdict);
 }
 

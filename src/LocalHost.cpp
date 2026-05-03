@@ -76,6 +76,65 @@ LocalHost::~LocalHost() {
 
 /* *************************************** */
 
+void LocalHost::resetLocalFlowStats() {
+#ifdef EXPERIMENTAL
+  flow_stats.num_new_flows_as_client_toward_local_servers = 0,
+    flow_stats.num_new_flows_as_client_toward_remote_servers = 0,
+    flow_stats.num_dns_queries_ok = 0, 
+    flow_stats.next_flow_stats_reset = iface->getTimeLastPktRcvd() + LOCAL_HOST_STATS_FREQUENCY;
+#endif
+}
+
+/* *************************************** */
+
+void LocalHost::incActiveFlowStats(bool isRemotePeer) {
+#ifdef EXPERIMENTAL
+  if(iface->getTimeLastPktRcvd() > flow_stats.next_flow_stats_reset) {
+    u_int32_t l = flow_stats.num_new_flows_as_client_toward_local_servers;
+    u_int32_t r = flow_stats.num_new_flows_as_client_toward_remote_servers;
+    const u_int16_t local_flows_threshold = 10;
+    
+    char buf[64];
+    DnsStats *d = getDNSstats();
+
+    if(l > local_flows_threshold) {
+      float ratio = (r > 0) ? ((float)(100*l) / (float)r) : 99999;
+      const float ratio_threshold = 500.; /* 5x */
+      
+      if(ratio > ratio_threshold) {
+	time_t now = (time_t)iface->getTimeLastPktRcvd();
+	const u_int16_t dns_threshold = 10;
+	
+	if((d != NULL) && (d->getSentNumQueries() > dns_threshold)) {
+	  if(flow_stats.num_consec_threshold_cross > 3) {
+	    char t_buffer[64];
+	    struct tm *t = localtime(&now);
+	    
+	    strftime(t_buffer, sizeof(t_buffer), "%c", t);
+	    
+	    ntop->getTrace()->traceEvent(TRACE_NORMAL,
+					 "[%s] Flows toward_local_servers: %u / toward_remote_servers: %u [%.1f %%] POSSIBLE VPN [DNS queries sent: %u][%s]",
+					 get_ip()->print(buf, sizeof(buf)), l, r, ratio, d->getSentNumQueries(), t_buffer);
+	  }
+	  
+	  flow_stats.num_consec_threshold_cross++;
+	}
+      } else
+	flow_stats.num_consec_threshold_cross = 0;
+
+      resetLocalFlowStats();
+    }
+  }
+  
+  if(isRemotePeer)
+    flow_stats.num_new_flows_as_client_toward_local_servers++;
+  else
+    flow_stats.num_new_flows_as_client_toward_remote_servers++;
+#endif
+}
+
+/* *************************************** */
+
 void LocalHost::set_hash_entry_state_idle() {
   if (ntop->getPrefs()->is_active_local_host_cache_enabled() &&
       (!ip.isEmpty())) {
@@ -200,6 +259,12 @@ void LocalHost::initialize() {
 #ifdef NTOPNG_PRO
   loadAssetInfo();
 #endif
+
+#ifdef EXPERIMENTAL
+  memset(&flow_stats, 0, sizeof(flow_stats));
+#endif
+  
+  resetLocalFlowStats();
 }
 
 /* *************************************** */
@@ -208,7 +273,7 @@ void LocalHost::deferredInitialization() {
 
   Host::deferredInitialization(); /* this also sets is_in_broadcast_domain */
 
-  labels_bitmap = iface->getHostLabels(this); 
+  labels_bitmap = iface->getHostLabels(this);
 }
 
 /* *************************************** */

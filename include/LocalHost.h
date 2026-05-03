@@ -48,13 +48,23 @@ class LocalHost : public Host {
   std::map<std::string, std::string>
       asset_map; /* For generic purposes, a <string, string> pair is done */
   struct timeval last_periodic_asset_update;
+
+#ifdef EXPERIMENTAL
+  struct {
+    std::atomic<u_int32_t> num_new_flows_as_client_toward_local_servers,
+      num_new_flows_as_client_toward_remote_servers;
+    u_int32_t num_dns_queries_ok, next_flow_stats_reset;
+    u_int8_t num_consec_threshold_cross;
+  } flow_stats;
+#endif
   /* END Host data: */
 
   void initialize();
   void deferredInitialization();
   void freeLocalHostData();
   virtual void deleteHostData();
-
+  void resetLocalFlowStats();
+  
   char* getMacBasedSerializationKey(char* redis_key, size_t size, char* mac_key,
                                     bool short_format);
   char* getIPBasedSerializationKey(char* redis_key, size_t size,
@@ -267,6 +277,7 @@ class LocalHost : public Host {
 #endif
 
   void setDeviceType(DeviceType devtype);
+  void incActiveFlowStats(bool isRemotePeer);
 };
 
 #endif /* _LOCAL_HOST_H_ */

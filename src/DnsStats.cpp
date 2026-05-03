@@ -62,7 +62,19 @@ void DnsStats::incStats(bool as_client, const FlowDNSStats* fts) {
 
   if (fts->num_replies_ok) rsp->num_replies_ok += fts->num_replies_ok;
   if (fts->num_replies_error) rsp->num_replies_error += fts->num_replies_error;
+
+#if 0 
+  if(tot_qry > 0) {
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "[DNS] queries=%u/%u [OK %u]",
+				 getSentNumQueries(),
+				 getRcvdNumQueries(),
+				 getSentNumRepliesOk()
+				 );
+    /* TODO: rapporto tra nuovi flussi creati e queries DNS fatte */  
+  }
+#endif
 }
+
 
 /* *************************************** */
 

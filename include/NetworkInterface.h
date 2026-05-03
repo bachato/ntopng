@@ -1504,6 +1504,7 @@ class NetworkInterface : public NetworkInterfaceAlertableEntity {
   void nDPIDumpHostBasedProtocols(struct mg_connection* mg_conn);
   void nDPIDumpHostBasedCategories(struct mg_connection* mg_conn);
   void incRoleBytes(u_int64_t bytes, SNMPInterfaceRole role);
+  virtual inline bool readPacketsFromFileDump() { return (false); }
 };
 
 #endif /* _NETWORK_INTERFACE_H_ */

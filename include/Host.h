@@ -205,6 +205,7 @@ class Host : public GenericHashEntry,
   inline bool isBroadcastDomainHost() const {
     return (is_in_broadcast_domain ? true : false);
   };
+  virtual void incActiveFlowStats(bool isRemotePeer) { ; }
   virtual bool serializeByMac() const { return (false); }
   inline bool isDHCPHost() const { return (is_dhcp_host ? true : false); };
   inline bool isCrawlerBotScannerHost() const {

@@ -226,6 +226,7 @@
 #define MAX_LOCAL_HOST_IDLE 300 /* sec */
 #define MAX_MAC_IDLE 300        /* sec */
 #define MAX_REMOTE_HOST_IDLE 60 /* sec */
+#define LOCAL_HOST_STATS_FREQUENCY 60 /* sec */
 #define MAX_HASH_ENTRY_IDLE                                               \
   60 /* sec - Generic idle time for hash entries different from hosts and \
         flows (i.e., ASes and Countries) */
