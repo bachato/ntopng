@@ -979,7 +979,7 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow* const flow,
       ip = 0;
 
     if (ip) {
-      flow->exporter_device_ip = ip;
+      flow->exporter_device_ipv4 = ip;
 
       if (ntop->getPrefs()->is_edr_mode()) {
 	char buf[32], ipb[24];
@@ -1383,8 +1383,8 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow* const flow,
   case NPROBE_IPV4_ADDRESS:
     if (value->string) {
       flow->nprobe_ip = ntohl(inet_addr(value->string));
-      if (flow->exporter_device_ip == 0 &&
-	  (flow->exporter_device_ip = ntohl(inet_addr(value->string))))
+      if (flow->exporter_device_ipv4 == 0 &&
+	  (flow->exporter_device_ipv4 = ntohl(inet_addr(value->string))))
 	return false;
     }
     break;
@@ -1677,7 +1677,7 @@ bool ZMQParserInterface::matchPENZeroField(ParsedFlow* const flow,
       }
 
     case EXPORTER_IPV4_ADDRESS:
-      return (flow->exporter_device_ip == ntohl(inet_addr(value->string)));
+      return (flow->exporter_device_ipv4 == ntohl(inet_addr(value->string)));
 
     case EXPORTER_IPV6_ADDRESS:
       if (value->string != NULL && strlen(value->string) > 0) {
@@ -2160,14 +2160,14 @@ bool ZMQParserInterface::preprocessFlow(ParsedFlow* flow) {
 
     if (flow->pkt_sampling_rate == 0) flow->pkt_sampling_rate = 1;
 
-    if (flow->nprobe_ip == 0) flow->nprobe_ip = flow->exporter_device_ip;
+    if (flow->nprobe_ip == 0) flow->nprobe_ip = flow->exporter_device_ipv4;
 
     if (flow->unique_source_id == 0) {
       if (flow->nprobe_source_id) /* use nProbe ID */
         flow->unique_source_id = flow->nprobe_source_id;
       else /* Last resort: use exporter and nProbe IPs */
         flow->unique_source_id = getExporterUniqueSourceID(
-            flow->exporter_device_ip, flow->nprobe_ip);
+            flow->exporter_device_ipv4, flow->nprobe_ip);
     }
 
     if (flow->nprobe_source_id == 0)

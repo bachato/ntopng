@@ -3641,9 +3641,8 @@ void Flow::lua(lua_State* vm, AddressTree* allowed_nets,
 
         if (it->exporter_ipv4 != 0) {
           lua_newtable(vm);
-          lua_push_str_table_entry(
-              vm, "exporter_ip",
-              Utils::intoaV4(it->exporter_ipv4, b1, sizeof(b1)));
+          lua_push_str_table_entry(vm, "exporter_ip",
+				   Utils::intoaV4(it->exporter_ipv4, b1, sizeof(b1)));
           lua_push_str_table_entry(vm, "next_hop",
                                    it->next_hop.print(b2, sizeof(b2)));
           lua_push_bool_table_entry(vm, "return_path", it->return_path);

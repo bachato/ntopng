@@ -35,13 +35,13 @@ class ParserInterface : public NetworkInterface {
  protected:
 #ifdef NTOPNG_PRO
   void exportersLimitReached();
-  SNMPInterfaceRole getRole(u_int32_t exporter_device_ip, u_int32_t if_id_in,
+  SNMPInterfaceRole getRole(u_int32_t exporter_device_ipv4, u_int32_t if_id_in,
                             u_int32_t if_id_out);
 #endif
 
-  inline u_int32_t getExporterUniqueSourceID(u_int32_t exporter_device_ip,
+  inline u_int32_t getExporterUniqueSourceID(u_int32_t exporter_device_ipv4,
                                              u_int32_t nprobe_ip) {
-    return exporter_device_ip + nprobe_ip;
+    return exporter_device_ipv4 + nprobe_ip;
   }
 
  public:
