@@ -60,7 +60,7 @@ void DangerousHost::periodicUpdate(Host* h, HostAlert* engaged_alert) {
       Save the host based on if we have to serialize by Mac (DHCP) or by IP. The
       pool addition is deferred because pools reload is a costly operation
     */
-    if (h->serializeByMac()) {
+    if (h->serializeByMac() && h->getMac()) {
       e = h->getMac()->print(buf, sizeof(buf));
 
       /* The MAC as-is */
