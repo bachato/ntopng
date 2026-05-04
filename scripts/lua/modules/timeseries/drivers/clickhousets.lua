@@ -373,6 +373,12 @@ end
 
 --! @brief Calculate per-metric totals over a time range.
 function driver:queryTotal(schema, tstart, tend, tags, options)
+   if (tags.epoch_begin) or (tags.epoch_end) then
+		local tmp_tags = table.clone(tags)
+      tmp_tags.epoch_begin = nil
+      tmp_tags.epoch_end = nil
+      tags = tmp_tags
+   end
 
    local is_counter    = (schema.options.metrics_type == ts_common.metrics.counter)
    local is_derivative = (schema.options.metrics_type == ts_common.metrics.derivative)
