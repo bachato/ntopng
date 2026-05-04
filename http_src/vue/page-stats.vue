@@ -558,6 +558,7 @@ function get_top_table_url(ts_group, table_value, table_view, table_source_def_v
     if (!status) {
         status = retrieveGlobalStatus();
     }
+    debugger;
     let ts_query = timeseriesUtils.getTsQuery(ts_group, true, table_source_def_value_dict);
     let v = table_value;
     let data_url = `${http_prefix}/lua/pro/rest/v2/get/${v}/top/ts_stats.lua`;
@@ -577,6 +578,7 @@ function get_top_table_url(ts_group, table_value, table_view, table_source_def_v
 }
 
 async function refresh_top_table() {
+debugger;
     if (!props.context.is_ntop_pro) { return; }
     let table_config = selected_top_table.value?.table_config_def;
     if (table_config == null) { return; }
@@ -651,7 +653,8 @@ function set_top_table_options(timeseries_groups, status) {
                     serverSide: false,
                     order: [[table_def.default_sorting_columns, 'desc']],
                     columnDefs: table_def.columnDefs || [],
-                }
+                },
+                table_source_def_value_dict: table_source_def_value_dict
             };
             // it should be here in this instance the vuetify object with its properties
             table_config_def.columns_config = table_def.columns.map((column) => {

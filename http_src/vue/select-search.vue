@@ -355,6 +355,7 @@ const render = () => {
     }
     if (!$(select2Div).hasClass("select2-hidden-accessible")) {
         $(select2Div).select2({
+            //dropdownParent: $('body'),
             templateResult: formatResult,      // Custom rendering with icons/swatches in dropdown
             templateSelection: formatSelection, // Custom rendering for selected chip
             matcher: matchCustom,               // Hierarchical search matcher
