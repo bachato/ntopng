@@ -108,6 +108,19 @@ if (debug_hosts) then
    }) .. "\n")
 end
 local host = interface.getHostInfo(host_info["host"], host_vlan, host_mac)
+
+if(host == nil) then
+   sendHTTPContentTypeHeader('text/html')
+
+   page_utils.print_header()
+   dofile(dirs.installdir .. "/scripts/lua/inc/menu.lua")
+   tprint(_GET['host'])
+   print("<div class=\"alert alert alert-danger\"><i class='fas fa-exclamation-triangle fa-lg fa-ntopng-warning'></i> " ..
+	 i18n("host_details.host_cannot_be_found_message", { host = _GET['host'] }) .. "</div>")
+   dofile(dirs.installdir .. "/scripts/lua/inc/footer.lua")
+   return
+end
+
 local mac_info = interface.getMacInfo(host["mac"])
 local tskey
 
