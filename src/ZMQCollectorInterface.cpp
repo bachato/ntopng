@@ -106,13 +106,22 @@ ZMQCollectorInterface::ZMQCollectorInterface(const char* _endpoint)
     if (last_char == 'c') is_collector = true, e[l] = '\0';
 
     if (is_collector) {
+      if(strchr(e, '[' /* IPv6 address tcp://[::1]:1234 */) != NULL) {
+	/* Enable IPv6 support */
+        int ipv6 = 1;
+	int rc = zmq_setsockopt(subscriber[num_subscribers].socket, ZMQ_IPV6, &ipv6, sizeof(int));
+
+	if(rc != 0)
+	  ntop->getTrace()->traceEvent(TRACE_ERROR, "Unable to enable IPv6 support with ZMQ");
+      }
+      
       if (zmq_bind(subscriber[num_subscribers].socket, e) != 0) {
         zmq_close(subscriber[num_subscribers].socket);
         zmq_ctx_destroy(context);
         ntop->getTrace()->traceEvent(
-            TRACE_ERROR,
-            "Unable to bind to ZMQ endpoint %s [collector]: %s (%d)", e,
-            strerror(errno), errno);
+				     TRACE_ERROR,
+				     "Unable to bind to ZMQ endpoint %s [collector]: %s (%d)", e,
+				     strerror(errno), errno);
         free(tmp);
         throw("Unable to bind to the specified ZMQ endpoint");
       }
