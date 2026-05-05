@@ -3981,7 +3981,9 @@ bool NetworkInterface::dumpFlowOut(Flow* f, time_t now) {
       the scan periodicity (~1 min) and capped to the flow timeout
     */
 
-    if (clickhouse_flows_db
+    bool ch_dump_enabled = clickhouse_flows_db &&
+                           ntop->getPrefs()->do_dump_flows_on_clickhouse();
+    if (ch_dump_enabled
 #if defined(HAVE_KAFKA) && defined(NTOPNG_PRO) && !defined(HAVE_NEDGE)
         || kafka_exporter
 #endif
@@ -3998,7 +4000,7 @@ bool NetworkInterface::dumpFlowOut(Flow* f, time_t now) {
       if (ntop->get_export_interface()) generate_json = true;
 #endif
 
-      if (clickhouse_flows_db) rc = clickhouse_flows_db->dumpFlow(now, f, NULL);
+      if (ch_dump_enabled) rc = clickhouse_flows_db->dumpFlow(now, f, NULL);
 
       if (generate_json) {
         json = f->serialize(export_format_GENERIC);
@@ -9437,7 +9439,9 @@ static bool virtual_http_hosts_walker(GenericHashEntry* node, void* data,
 
 bool NetworkInterface::alert_store_query(lua_State* vm, const char* sql,
                                          bool limit_rows) {
-  DB* alerts_db = db ? db : clickhouse_flows_db;
+  DB* alerts_db = db ? db : (ntop->getPrefs()->do_dump_flows_on_clickhouse()
+                                  ? clickhouse_flows_db
+                                  : NULL);
 
   if (!alerts_db) {
     lua_newtable(vm);
@@ -9453,7 +9457,9 @@ bool NetworkInterface::alert_store_query(lua_State* vm, const char* sql,
 /* **************************************** */
 
 bool NetworkInterface::alert_store_write(const char* sql) {
-  DB* alerts_db = db ? db : clickhouse_flows_db;
+  DB* alerts_db = db ? db : (ntop->getPrefs()->do_dump_flows_on_clickhouse()
+                                  ? clickhouse_flows_db
+                                  : NULL);
 
   if (!alerts_db) return false;
 
