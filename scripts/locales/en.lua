@@ -1473,11 +1473,7 @@ local lang = {
     ["unknown_contacted_peers"] = "Too many Peers contacted by %{host} %{host_category}.",
     ["vlan_bidirectional_traffic"] = "Detected bidirectional traffic flow on VLAN %{vlan} [RX : %{rx}] [TX : %{tx}]",
     ["x_alerts"] = "%{num} alerts",
-    ["wazuh_old_port_no_longer_open"] = "Port no longer open [Host: <a href='/lua/pro/asset_details.lua?ifid=%{ifid}&serial_key=%{key}'>%{host}</a>][Port: %{port}]",
-    ["wazuh_new_port_open"] = "New port open [Host: <a href='/lua/pro/asset_details.lua?ifid=%{ifid}&serial_key=%{key}'>%{host}</a>][Port: %{port}]",
-    ["wazuh_process_changed"] = "Process %{process} changed [Host: <a href='/lua/pro/asset_details.lua?ifid=%{ifid}&serial_key=%{key}'>%{host}</a>][Port: %{port}][New Process: %{new_process}]",
-    ["wazuh_network_interface_removed"] = "Network Interface removed [Host: <a href='/lua/pro/asset_details.lua?ifid=%{ifid}&serial_key=%{key}'>%{host}</a>][Network Interface: %{iface}]",
-    ["wazuh_network_interface_added"] = "New Network Interface detected [Host: <a href='/lua/pro/asset_details.lua?ifid=%{ifid}&serial_key=%{key}'>%{host}</a>][Network Interface: %{iface}]",
+    ["wazuh_asset_info_changed"] = "Asset info changed ",
   },
   ["alerts_analysis_page"] = {
     ["flow_dst_alertid_density"] = "AlertType: Server",
