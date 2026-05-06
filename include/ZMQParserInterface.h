@@ -22,6 +22,7 @@
 #ifndef _ZMQ_PARSER_INTERFACE_H_
 #define _ZMQ_PARSER_INTERFACE_H_
 
+#include <cstring>
 #include "ntop_includes.h"
 
 struct In6AddrCompare {

@@ -22,6 +22,7 @@
 #ifndef _NTOP_CLASS_H_
 #define _NTOP_CLASS_H_
 
+#include <cstring>
 #include "ntop_includes.h"
 
 /** @defgroup Ntop Ntop
