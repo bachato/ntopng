@@ -303,7 +303,8 @@ CREATE TABLE IF NOT EXISTS `host_alerts` (
 `network` UInt16 COMMENT 'ntopng local-network ID the host belongs to',
 `country` String COMMENT 'Two-letter ISO 3166-1 country code derived from the host IP',
 `alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
+`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention',
+`labels_map` String DEFAULT '' COMMENT 'HEX-encoded bitmap of host labels set at the time the alert triggered'
 ) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp)
 COMMENT 'Historical alerts associated with individual hosts (identified by IP address and VLAN). Rows are appended when an engaged host alert is archived. See engaged_host_alerts for currently-firing alerts and host_alerts_view to query both together (with MITRE ATT&CK enrichment).';
 @
@@ -316,6 +317,8 @@ ALTER TABLE `host_alerts` ADD COLUMN IF NOT EXISTS `country` String;
 ALTER TABLE `host_alerts` ADD COLUMN IF NOT EXISTS `alert_category` UInt8;
 @
 ALTER TABLE `host_alerts` ADD COLUMN IF NOT EXISTS `require_attention` UInt8;
+@
+ALTER TABLE `host_alerts` ADD COLUMN IF NOT EXISTS `labels_map` String DEFAULT '';
 
 @
 
@@ -348,7 +351,8 @@ CREATE TABLE `engaged_host_alerts` (
 `network` UInt16 COMMENT 'ntopng local-network ID the host belongs to',
 `country` String COMMENT 'Two-letter ISO 3166-1 country code derived from the host IP',
 `alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
+`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention',
+`labels_map` String DEFAULT '' COMMENT 'HEX-encoded bitmap of host labels set at the time the alert triggered'
 ) ENGINE = Memory
 COMMENT 'In-memory table holding currently active (engaged) host alerts. Rows are inserted when an alert fires and removed when resolved. Merged with host_alerts in host_alerts_view.';
 
@@ -995,6 +999,7 @@ SELECT
     ha.country,
     ha.alert_category,
     ha.require_attention,
+    ha.labels_map,
     mitre.TACTIC AS mitre_tactic,
     mitre.TECHNIQUE AS mitre_technique,
     mitre.SUB_TECHNIQUE AS mitre_subtechnique,

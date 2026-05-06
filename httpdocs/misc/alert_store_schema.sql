@@ -85,6 +85,7 @@ alerts_map BLOB DEFAULT 0, -- An HEX bitmap of all flow statuses
 alerts_map_h INTEGER NULL DEFAULT 0,
 alerts_map_l INTEGER NULL DEFAULT 0,
 flow_risk_bitmap INTEGER NOT NULL DEFAULT 0,
+labels_map TEXT DEFAULT '', -- A HEX bitmap of host labels (cli | srv) active at alert time
 user_label TEXT NULL,
 user_label_tstamp DATETIME NULL DEFAULT 0,
 cli_network INTEGER NULL,
@@ -104,6 +105,8 @@ require_attention INTEGER NULL DEFAULT 0
 ALTER TABLE flow_alerts ADD alerts_map_h INTEGER NULL;
 @
 ALTER TABLE flow_alerts ADD alerts_map_l INTEGER NULL;
+@
+ALTER TABLE flow_alerts ADD labels_map TEXT DEFAULT '';
 @
 ALTER TABLE flow_alerts ADD require_attention INTEGER NULL;
 @
@@ -174,7 +177,8 @@ json TEXT NULL,
 user_label TEXT NULL,
 user_label_tstamp DATETIME NULL DEFAULT 0,
 alert_category INTEGER NULL,
-require_attention INTEGER NULL DEFAULT 0
+require_attention INTEGER NULL DEFAULT 0,
+labels_map TEXT DEFAULT '' -- A HEX bitmap of host labels active at alert time
 );
 @
 ALTER TABLE host_alerts ADD require_attention INTEGER NULL;
@@ -189,6 +193,8 @@ ALTER TABLE host_alerts ADD country TEXT NULL;
 @
 -- Added for compatibility reasons but not used by SQLite
 ALTER TABLE host_alerts ADD interface_id INTEGER NULL;
+@
+ALTER TABLE host_alerts ADD labels_map TEXT DEFAULT '';
 @
 CREATE INDEX IF NOT EXISTS host_alerts_i_id ON host_alerts(alert_id);
 CREATE INDEX IF NOT EXISTS host_alerts_i_alert_status ON host_alerts(alert_status);
@@ -753,7 +759,8 @@ country TEXT NULL,
 network INTEGER NULL,
 host_pool_id INTEGER NULL,
 alert_category INTEGER NULL,
-require_attention INTEGER NULL DEFAULT 0
+require_attention INTEGER NULL DEFAULT 0,
+labels_map TEXT DEFAULT '' -- A HEX bitmap of host labels active at alert time
 );
 
 @
@@ -823,7 +830,7 @@ SELECT * FROM mem_db.engaged_system_alerts
 
 -- Note: columns are listed manually as order may change due to alter table
 CREATE TEMP VIEW host_alerts_view AS
-SELECT 
+SELECT
     rowid,
     alert_id,
     alert_status,
@@ -850,7 +857,8 @@ SELECT
     network,
     host_pool_id,
     alert_category,
-    require_attention
+    require_attention,
+    labels_map
 FROM host_alerts
 UNION ALL
 SELECT
@@ -880,5 +888,6 @@ SELECT
     network,
     host_pool_id,
     alert_category,
-    require_attention
+    require_attention,
+    labels_map
 FROM mem_db.engaged_host_alerts;
