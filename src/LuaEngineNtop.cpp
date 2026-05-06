@@ -4276,6 +4276,15 @@ static int ntop_is_enterprise_xxxl(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Returns true if nAnalyst is available.  Lua: ntop.hasnAnalyst() → boolean */
+static int ntop_has_nanalyst(lua_State* vm) {
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  lua_pushboolean(vm, ntop->getPrefs()->is_nanalyst_available());
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
+}
+
+/* ****************************************** */
+
 /* @brief Returns true if running nEdge Pro edition.  Lua: ntop.isnEdge() → boolean */
 static int ntop_is_nedge(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -9352,6 +9361,7 @@ static luaL_Reg _ntop_reg[] = {
     {"isEnterpriseXL", ntop_is_enterprise_xl},
     {"isEnterpriseXXL", ntop_is_enterprise_xxl},
     {"isnEdge", ntop_is_nedge},
+    {"hasnAnalyst", ntop_has_nanalyst},
     {"isnEdgeEnterprise", ntop_is_nedge_enterprise},
     {"isPackage", ntop_is_package},
     {"isAppliance", ntop_is_appliance},

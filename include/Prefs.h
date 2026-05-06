@@ -278,7 +278,8 @@ class Prefs {
   bool is_nedge_enterprise_edition();
 
   bool is_embedded_edition();
-
+  bool is_nanalyst_available();
+  
   time_t pro_edition_demo_ends_at();
   inline char* get_local_networks() {
     if (!local_networks_set) return NULL;

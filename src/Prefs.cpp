@@ -3347,7 +3347,19 @@ bool Prefs::is_pro_edition() {
 #else
       false
 #endif
-          ;
+    ;
+}
+
+/* *************************************** */
+
+bool Prefs::is_nanalyst_available() {
+  return
+#ifdef NTOPNG_PRO
+      ntop->getPro()->is_nanalyst_available()
+#else
+      false
+#endif
+    ;
 }
 
 /* *************************************** */
