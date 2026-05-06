@@ -120,6 +120,12 @@ for key, value in pairs(ases_info or {}) do
         bytes_rcvd = bytes_rcvd
     }
 
+    record["breakdown_role"] = {
+        bytes_other = (value["bytes_sent_other"] or 0) + (value["bytes_rcvd_other"] or 0),
+        bytes_transit = (value["bytes_sent_transit"] or 0) + (value["bytes_rcvd_transit"] or 0),
+        bytes_peering = (value["bytes_sent_peering"] or 0) + (value["bytes_rcvd_peering"] or 0),
+    }
+
     if add_record then
         table.insert(res, record)
     end

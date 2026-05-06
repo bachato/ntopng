@@ -572,6 +572,30 @@ const map_table_def_columns = (columns) => {
         },
 
         /**
+         * Creates per-role traffic breakdown visualization (Other / Transit / Peering)
+         */
+        "breakdown_role": (value, row) => {
+            const total_bytes = (value.bytes_other || 0) + (value.bytes_transit || 0) + (value.bytes_peering || 0);
+            if (!total_bytes) return NtopUtils.createBreakdown_multi_elem([0], [_i18n("no_data")]);
+            const raw = [
+                (value.bytes_other / total_bytes) * 100,
+                (value.bytes_transit / total_bytes) * 100,
+                (value.bytes_peering / total_bytes) * 100,
+            ];
+
+            const [pct_other, pct_transit, pct_peering] = NtopUtils.largestRemainderRound(raw);
+
+            return NtopUtils.createBreakdown_multi_elem(
+                [pct_other, pct_transit, pct_peering],
+                [
+                    _i18n("asn_configuration.other_asn"),
+                    _i18n("prefs.snmp_interface_role_list.transit"),
+                    _i18n("prefs.snmp_interface_role_list.peering"),
+                ]
+            );
+        },
+
+        /**
          * Formats throughput in bps
          */
         "throughput": (value, row) => FormatterUtils.getFormatter("bps")(value),
