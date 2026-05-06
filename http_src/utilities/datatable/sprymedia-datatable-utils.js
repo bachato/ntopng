@@ -714,6 +714,14 @@ export class DataTableRenders {
         return ""
     }
 
+    static formatLabelBadges(labels) {
+        if (!labels || labels.length === 0) return "";
+        return labels.map(lbl => {
+            const badge = `<span class="badge" style="background-color: ${lbl.color}">${lbl.name}</span>`;
+            return DataTableRenders.filterize('label', lbl.id, lbl.name, lbl.name, lbl.name, badge, null, null, 'in');
+        }).join(' ');
+    }
+
     static formatSRC2DSTTCPFlags(obj, type, row, zero_is_null) {
         if (type !== "display") return obj.value;
         let cell = `<a class='tag-filter' data-tag-key='src2dst_tcp_flags' data-tag-value='${obj.value}' data-tag-label='${obj.label}' href='javascript:void(0)'>${obj.label}</a>`;
