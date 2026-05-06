@@ -36,7 +36,6 @@ class LocalHost : public Host {
   UsedPorts* usedPorts;            /* List of server+client-contacted ports */
   ndpi_os tcp_fingerprint_host_os; /* Learnt from TCP Fingerprinting */
   HostFingerprints* fingerprints;  /* Application fingerprints */
-  std::unordered_map<u_int32_t, DoHDoTStats*> doh_dot_map;
   u_int8_t router_mac[6]; /* MAC address pf the first router used (no Mac* to
                              avoid purging race conditions) */
   u_int8_t router_mac_set : 1, drop_all_host_traffic : 1, systemHost : 1,
@@ -69,7 +68,6 @@ class LocalHost : public Host {
                                     bool short_format);
   char* getIPBasedSerializationKey(char* redis_key, size_t size,
                                    bool short_format);
-  void luaDoHDot(lua_State* vm);
   void syncMACMetadata(bool force_update);
 
  public:
@@ -113,7 +111,6 @@ class LocalHost : public Host {
   virtual void luaHTTP(lua_State* vm) { stats->luaHTTP(vm); };
   virtual void luaDNS(lua_State* vm, bool verbose) {
     stats->luaDNS(vm, verbose);
-    luaDoHDot(vm);
   };
   virtual void luaICMP(lua_State* vm, bool isV4, bool verbose) {
     stats->luaICMP(vm, isV4, verbose);
@@ -163,7 +160,6 @@ class LocalHost : public Host {
   virtual void luaHostBehaviour(lua_State* vm) {
     if (stats) stats->luaHostBehaviour(vm);
   }
-  virtual void incDohDoTUses(Host* srv_host);
 
   virtual inline void incCountriesContacts(char* country) {
     stats->incCountriesContacts(country);

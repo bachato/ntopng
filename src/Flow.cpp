@@ -9481,14 +9481,6 @@ void Flow::updateUDPHostServices(bool src2dst_direction) {
       }
       break;
 
-    case NDPI_PROTOCOL_TOR:
-    case NDPI_PROTOCOL_TLS:
-    case NDPI_PROTOCOL_QUIC:
-      if ((ndpiDetectedProtocol.proto.app_protocol == NDPI_PROTOCOL_DOH_DOT) &&
-          cli_h && srv_h && cli_h->isLocalHost())
-        cli_h->incDohDoTUses(srv_h);
-      break;
-
     default:
       break;
   } /* switch */

@@ -643,11 +643,6 @@ void LocalHost::freeLocalHostData() {
 
   if (tcp_fingerprint) free(tcp_fingerprint);
 
-  for (std::unordered_map<u_int32_t, DoHDoTStats*>::iterator it =
-           doh_dot_map.begin();
-       it != doh_dot_map.end(); ++it)
-    delete it->second;
-
   if (fingerprints) delete fingerprints;
 }
 
@@ -696,62 +691,6 @@ char* LocalHost::getIPBasedSerializationKey(char* redis_key, size_t size,
  * host initializer) will be returned until this delayed method is called.
  */
 void LocalHost::reloadPrefs() { Host::reloadPrefs(); }
-
-/* *************************************** */
-
-void LocalHost::incDohDoTUses(Host* host) {
-  u_int32_t key = host->get_ip()->key() + host->get_vlan_id();
-  std::unordered_map<u_int32_t, DoHDoTStats*>::iterator it;
-
-  m.lock(__FILE__, __LINE__);
-  it = doh_dot_map.find(key);
-
-  if (it == doh_dot_map.end()) {
-    if (doh_dot_map.size() < 8 /* Max # entries */) {
-      DoHDoTStats* doh_dot =
-          new (nothrow) DoHDoTStats(*(host->get_ip()), host->get_vlan_id());
-
-      if (doh_dot) {
-        doh_dot->incUses();
-        doh_dot_map[key] = doh_dot;
-      }
-    }
-  } else
-    it->second->incUses();
-
-  m.unlock(__FILE__, __LINE__);
-}
-
-/* *************************************** */
-
-void LocalHost::luaDoHDot(lua_State* vm) {
-  u_int8_t i = 0;
-
-  if (doh_dot_map.size() == 0) return;
-
-  lua_newtable(vm);
-
-  m.lock(__FILE__, __LINE__);
-
-  for (std::unordered_map<u_int32_t, DoHDoTStats*>::iterator it =
-           doh_dot_map.begin();
-       it != doh_dot_map.end(); ++it) {
-    lua_newtable(vm);
-
-    it->second->lua(vm);
-
-    lua_pushinteger(vm, i);
-    lua_insert(vm, -2);
-    lua_settable(vm, -3);
-    i++;
-  }
-
-  m.unlock(__FILE__, __LINE__);
-
-  lua_pushstring(vm, "DoH_DoT");
-  lua_insert(vm, -2);
-  lua_settable(vm, -3);
-}
 
 /* *************************************** */
 

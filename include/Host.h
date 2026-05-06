@@ -821,7 +821,6 @@ class Host : public GenericHashEntry,
 
   virtual void luaHostBehaviour(lua_State* vm) { lua_pushnil(vm); }
   void luaCountriesBehaviour(lua_State* vm) { lua_pushnil(vm); }
-  virtual void incDohDoTUses(Host* srv_host) {}
 
   virtual void incCountriesContacts(char* country) { ; }
   virtual void resetCountriesContacts() { ; }
