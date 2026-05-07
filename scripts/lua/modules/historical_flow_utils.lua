@@ -714,14 +714,24 @@ local function dt_format_probe(probe_ip)
       value     = probe_ip or "",
    }
 
-   if isEmptyString(probe_ip) or probe_ip == "0.0.0.0" or probe_ip == "0" then
+   if isEmptyString(probe_ip) or probe_ip == "0.0.0.0" or probe_ip == "0" or probe_ip == "::" then
       probe_info["title"] = ""
       probe_info["label"] = ""
       probe_info["value"] = ""
    else
-      probe_info["label"] = getProbeName(probe_ip)
+
+      -- Handle IPv4-mapped addresses (::ffff:a.b.c.d) by stripping prefix
+      local display_ip = probe_ip
+      local ipv4_mapped = string.match(probe_ip, "^::ffff:(.+)$")
+      if ipv4_mapped then
+         display_ip = ipv4_mapped
+      end
+
+      probe_info["title"] = display_ip
+      probe_info["value"] = probe_ip
+      probe_info["label"] = getProbeName(display_ip)
       if (probe_info["label"]
-            and (probe_info["title"] ~= probe_info["label"]) 
+            and (probe_info["title"] ~= probe_info["label"])
             and not isEmptyString(probe_info["label"])) then
          probe_info["title"] = probe_info["title"] .. " [" .. probe_info["label"] .. "]"
       end
@@ -883,7 +893,7 @@ local function dt_format_snmp_interface(interface, flow)
   local label = interface
   local value = interface
 
-  if tostring(interface) ~= "0" and not isEmptyString(exporter) then
+  if tostring(interface) ~= "0" and not isEmptyString(exporter) and exporter ~= "::" then
     label = format_portidx_name(exporter, tostring(interface), true)
     value = exporter .. "_" .. tostring(interface)
   end
@@ -1262,7 +1272,7 @@ local flow_columns = {
    
    ['SRC_ASN'] =              { tag = "cli_asn", simple_dt_func = simple_format_src_asn, db_type = "Number", db_raw_type = "Uint32" },
    ['DST_ASN'] =              { tag = "srv_asn", simple_dt_func = simple_format_dst_asn, db_type = "Number", db_raw_type = "Uint32" },
-   ['PROBE_IP'] =             { tag = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", db_type = "Number", db_raw_type = "Uint32" },
+   ['PROBE_IP'] =             { tag = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv6NumToString", where_func = "toIPv6", db_type = "IPv6", db_raw_type = "IPv6" },
    ['EXPORTER_SITE'] =        { tag = "exporter_site", dt_func = dt_format_exporter_site, db_type = "Number", db_raw_type = "Uint16" },
    ['OBSERVATION_POINT_ID'] = { tag = "observation_point_id", dt_func = dt_format_obs_point, format_func = format_flow_observation_point, i18n = i18n("details.observation_point_id"), order = 12 , db_type = "Number", db_raw_type = "Uint16" },
    ['SRC2DST_TCP_FLAGS'] =    { tag = "src2dst_tcp_flags", dt_func = dt_format_tcp_flags, db_type = "Number", db_raw_type = "Uint8" },
@@ -1347,7 +1357,7 @@ local aggregated_flow_columns = {
    ['DST_LABEL'] =            { tag = "srv_name", db_type = "String", db_raw_type = "String" },
    ['SRC_MAC'] =              { tag = "cli_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
    ['DST_MAC'] =              { tag = "srv_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
-   ['PROBE_IP'] =             { tag = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", db_type = "Number", db_raw_type = "Uint32" },
+   ['PROBE_IP'] =             { tag = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv6NumToString", where_func = "toIPv6", db_type = "IPv6", db_raw_type = "IPv6" },
    ['EXPORTER_SITE'] =        { tag = "exporter_site", dt_func = dt_format_exporter_site, db_type = "Number", db_raw_type = "Uint16" },
    ['SRC_COUNTRY_CODE'] =     { tag = "cli_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
    ['DST_COUNTRY_CODE'] =     { tag = "srv_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
