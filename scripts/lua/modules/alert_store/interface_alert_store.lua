@@ -14,7 +14,7 @@ local format_utils = require "format_utils"
 local alert_consts = require "alert_consts"
 local alert_utils = require "alert_utils"
 local alert_entities = require "alert_entities"
-local tag_utils = require "tag_utils"
+local flowfilter_utils = require "flowfilter_utils"
 local json = require "dkjson"
 
 -- ##############################################
@@ -85,7 +85,7 @@ end
 --@brief Get info about additional available filters
 function interface_alert_store:_get_additional_available_filters()
    local filters = {
-      subtype = tag_utils.defined_tags.subtype,
+      subtype = flowfilter_utils.defined_filters.subtype,
    }
 
    return filters

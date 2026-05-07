@@ -1460,27 +1460,27 @@ function format_query_direction(op, val)
    local direction_where = ""
    if val == "0" then
       direction_where = "(" ..
-	 historical_flow_utils.get_flow_column_by_tag(
+	 historical_flow_utils.get_flow_column_by_flowfilter(
 	    "cli_location") .. " " .. op .. " '0' AND " ..
-	 historical_flow_utils.get_flow_column_by_tag(
+	 historical_flow_utils.get_flow_column_by_flowfilter(
 	    "srv_location") .. " " .. op .. " '0')"
    elseif val == "1" then
       direction_where = "(" ..
-	 historical_flow_utils.get_flow_column_by_tag(
+	 historical_flow_utils.get_flow_column_by_flowfilter(
 	    "cli_location") .. " " .. op .. " '1' AND " ..
-	 historical_flow_utils.get_flow_column_by_tag(
+	 historical_flow_utils.get_flow_column_by_flowfilter(
 	    "srv_location") .. " " .. op .. " '1')"
    elseif val == "2" then
       direction_where = "(" ..
-	 historical_flow_utils.get_flow_column_by_tag(
+	 historical_flow_utils.get_flow_column_by_flowfilter(
 	    "cli_location") .. " " .. op .. " '0' AND " ..
-	 historical_flow_utils.get_flow_column_by_tag(
+	 historical_flow_utils.get_flow_column_by_flowfilter(
 	    "srv_location") .. " " .. op .. " '1')"
    elseif val == "3" then
       direction_where = "(" ..
-	 historical_flow_utils.get_flow_column_by_tag(
+	 historical_flow_utils.get_flow_column_by_flowfilter(
 	    "cli_location") .. " " .. op .. " '1' AND " ..
-	 historical_flow_utils.get_flow_column_by_tag(
+	 historical_flow_utils.get_flow_column_by_flowfilter(
 	    "srv_location") .. " " .. op .. " '0')"
    end
 

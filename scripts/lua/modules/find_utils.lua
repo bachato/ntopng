@@ -3,7 +3,7 @@
 --
 require "label_utils"
 local json = require "dkjson"
-local tag_utils = require "tag_utils"
+local flowfilter_utils = require "flowfilter_utils"
 local snmp_utils
 local snmp_location
 
@@ -26,10 +26,10 @@ local function build_flow_alerts_url(key, value, ifid)
 
    local host_info = hostkey2hostinfo(value)
    if host_info['host'] then
-      url = url .. '&' .. tag_utils.build_request_filter(key, 'eq', host_info['host'])
+      url = url .. '&' .. flowfilter_utils.build_request_filter(key, 'eq', host_info['host'])
    end
    if host_info['vlan'] and host_info['vlan'] ~= 0 then
-      url = url .. '&' .. tag_utils.build_request_filter('vlan_id', 'eq', host_info['vlan'])
+      url = url .. '&' .. flowfilter_utils.build_request_filter('vlan_id', 'eq', host_info['vlan'])
    end
 
    return url
@@ -42,10 +42,10 @@ local function build_historical_flows_url(key, value, ifid)
 
    local host_info = hostkey2hostinfo(value)
    if host_info['host'] then
-      url = url .. '&' .. tag_utils.build_request_filter(key, 'eq', host_info['host'])
+      url = url .. '&' .. flowfilter_utils.build_request_filter(key, 'eq', host_info['host'])
    end
    if host_info['vlan'] and host_info['vlan'] ~= 0 then
-      url = url .. '&' .. tag_utils.build_request_filter('vlan_id', 'eq', host_info['vlan'])
+      url = url .. '&' .. flowfilter_utils.build_request_filter('vlan_id', 'eq', host_info['vlan'])
    end
 
    return url
@@ -183,28 +183,28 @@ local function build_no_results_entry(query, ifid)
          what = what,
          query = query
       })
-      query = query .. tag_utils.SEPARATOR .. "eq"
+      query = query .. flowfilter_utils.SEPARATOR .. "eq"
    elseif isMacAddress(query) then
       what = "mac"
       label = i18n("db_search.find_in_historical", {
          what = what,
          query = query
       })
-      query = query .. tag_utils.SEPARATOR .. "eq"
+      query = query .. flowfilter_utils.SEPARATOR .. "eq"
    elseif isCommunityId(query) then
       what = "community_id"
       label = i18n("db_search.find_in_historical", {
          what = what,
          query = query
       })
-      query = query .. tag_utils.SEPARATOR .. "eq"
+      query = query .. flowfilter_utils.SEPARATOR .. "eq"
    else
       what = "hostname"
       label = i18n("db_search.find_in_historical", {
          what = what,
          query = query
       })
-      query = query .. tag_utils.SEPARATOR .. "in"
+      query = query .. flowfilter_utils.SEPARATOR .. "in"
    end
    return build_result(label, query, what, nil, nil, "historical", ifid)
 end
@@ -218,7 +218,7 @@ local function build_no_exact_match_entry(query, ifid)
       what = what,
       query = query
    })
-   query = query .. tag_utils.SEPARATOR .. "eq"
+   query = query .. flowfilter_utils.SEPARATOR .. "eq"
    return build_result(label, query, what, nil, nil, "historical", ifid)
 end
 

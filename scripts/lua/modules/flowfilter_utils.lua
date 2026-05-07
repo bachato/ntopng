@@ -1,13 +1,13 @@
 --
 -- (C) 2020-26 - ntop.org
 --
-if (pragma_once_tag_utils == true) then
+if (pragma_once_flowfilter_utils == true) then
     -- io.write(debug.traceback().."\n")
     -- avoid multiple inclusions
     return
 end
 
-pragma_once_tag_utils = true
+pragma_once_flowfilter_utils = true
 
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
@@ -26,16 +26,16 @@ end
 local MAX_NUM_ENTRIES = 300
 local snmp_filter_options_cache
 
-local tag_utils = {}
+local flowfilter_utils = {}
 
 -- Operator Separator in query strings
-tag_utils.SEPARATOR = consts.SEPARATOR
+flowfilter_utils.SEPARATOR = consts.SEPARATOR
 
 -- #####################################
 
 -- Supported operators
 -- (empty string if there is no direct match)
-tag_utils.tag_operators_sql = {
+flowfilter_utils.flowfilter_operators_sql = {
     ["eq"] = "=",
     ["neq"] = "!=",
     ["lt"] = "<",
@@ -49,7 +49,7 @@ tag_utils.tag_operators_sql = {
 }
 
 -- Operator to string (i18n)
-tag_utils.tag_operators_label = {
+flowfilter_utils.flowfilter_operators_label = {
     ["eq"] = "=",
     ["neq"] = "!=",
     ["lt"] = "<",
@@ -65,7 +65,7 @@ tag_utils.tag_operators_label = {
 -- #####################################
 
 -- Supported input types
-tag_utils.input_types = {
+flowfilter_utils.input_types = {
     input = 'input',
     select = 'select',
     select_with_input = 'select-with-input'
@@ -73,30 +73,30 @@ tag_utils.input_types = {
 
 -- #####################################
 
-tag_utils.defined_tags = {
+flowfilter_utils.defined_filters = {
     alert_id = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'alert_id',
         i18n_label = i18n('db_search.tags.alert_id'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     alert_category = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'alert_category',
         i18n_label = i18n('db_search.tags.alert_category'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     l7proto = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'l7_proto',
         i18n_label = i18n('db_search.tags.l7_proto'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     l7proto_master = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'l7_proto',
         i18n_label = i18n('db_search.tags.l7_proto'),
         operators = {'eq', 'neq'},
@@ -104,28 +104,28 @@ tag_utils.defined_tags = {
         hourly_available = true
     },
     l7cat = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'l7_category',
         i18n_label = i18n('db_search.tags.l7cat'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     flow_risk = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'flow_risk',
         i18n_label = i18n('db_search.tags.flow_risk'),
         operators = {'eq', 'neq', 'in', 'nin'},
         hourly_available = false
     },
     flow_label = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'label_id',
         i18n_label = i18n('db_search.tags.flow_label'),
         operators = {'in', 'nin'},
         hourly_available = true
     },
     l4proto = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'l4_proto',
         i18n_label = i18n('db_search.tags.l4proto'),
         operators = {'eq', 'neq'},
@@ -133,7 +133,7 @@ tag_utils.defined_tags = {
         hourly_available = true
     },
     ip_version = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'ip_version',
         i18n_label = i18n('db_search.tags.ip_version'),
         operators = {'eq', 'neq'},
@@ -182,7 +182,7 @@ tag_utils.defined_tags = {
         hourly_available = true
     },
     traffic_direction = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'traffic_direction',
         i18n_label = i18n('db_search.tags.traffic_direction'),
         operators = {'eq', 'neq'},
@@ -213,14 +213,14 @@ tag_utils.defined_tags = {
         hourly_available = true
     },
     src2dst_dscp = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'dscp_type',
         i18n_label = i18n('db_search.tags.src2dst_dscp'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     dst2src_dscp = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'dscp_type',
         i18n_label = i18n('db_search.tags.dst2src_dscp'),
         operators = {'eq', 'neq'},
@@ -247,21 +247,21 @@ tag_utils.defined_tags = {
         hourly_available = true
     },
     country = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'country',
         i18n_label = i18n('db_search.tags.country'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     cli_country = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'country',
         i18n_label = i18n('db_search.tags.cli_country'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     srv_country = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'country',
         i18n_label = i18n('db_search.tags.srv_country'),
         operators = {'eq', 'neq'},
@@ -310,21 +310,21 @@ tag_utils.defined_tags = {
         hourly_available = false
     },
     observation_point_id = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'observation_point_id',
         i18n_label = i18n('db_search.tags.observation_point_id'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     probe_ip = {
-        type = tag_utils.input_types.select_with_input,
+        type = flowfilter_utils.input_types.select_with_input,
         value_type = 'probe_ip',
         i18n_label = i18n('db_search.tags.probe_ip'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     exporter_site = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'exporter_site',
         i18n_label = i18n('db_search.tags.exporter_site'),
         operators = {'eq', 'neq'},
@@ -337,28 +337,28 @@ tag_utils.defined_tags = {
         hourly_available = true
     },
     snmp_interface = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'snmp_interface',
         i18n_label = i18n('db_search.tags.snmp_interface'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     input_snmp = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'snmp_interface',
         i18n_label = i18n('db_search.tags.input_snmp'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     output_snmp = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'snmp_interface',
         i18n_label = i18n('db_search.tags.output_snmp'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     iface_role = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'iface_role',
         i18n_label = i18n('as_stats.interface_role'),
         operators = {'eq', 'neq'},
@@ -377,7 +377,7 @@ tag_utils.defined_tags = {
         hourly_available = false
     },
     alert_status = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'alert_status',
         i18n_label = i18n('db_search.tags.alert_status'),
         operators = {'eq', 'neq'},
@@ -390,7 +390,7 @@ tag_utils.defined_tags = {
         hourly_available = false
     },
     severity = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'severity',
         i18n_label = i18n('db_search.tags.severity'),
         operators = {'eq', 'lte', 'gte', 'neq'},
@@ -403,7 +403,7 @@ tag_utils.defined_tags = {
         hourly_available = true
     },
     qoe_score = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'qoe_score',
         i18n_label = i18n('db_search.tags.qoe'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
@@ -431,21 +431,21 @@ tag_utils.defined_tags = {
         hourly_available = true
     },
     network = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'network_id',
         i18n_label = i18n('db_search.tags.network'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     cli_network = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'network_id',
         i18n_label = i18n('db_search.tags.cli_network'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     srv_network = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'network_id',
         i18n_label = i18n('db_search.tags.srv_network'),
         operators = {'eq', 'neq'},
@@ -464,14 +464,14 @@ tag_utils.defined_tags = {
         hourly_available = true
     },
     cli2srv_bytes = {
-        type = tag_utils.input_types.input,
+        type = flowfilter_utils.input_types.input,
         value_type = 'number',
         i18n_label = i18n('traffic_labels.cli2srv_bytes'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = true
     },
     srv2cli_bytes = {
-        type = tag_utils.input_types.input,
+        type = flowfilter_utils.input_types.input,
         value_type = 'number',
         i18n_label = i18n('traffic_labels.srv2cli_bytes'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
@@ -526,21 +526,21 @@ tag_utils.defined_tags = {
         hourly_available = true
     },
     host_pool = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'host_pool',
         i18n_label = i18n('db_search.tags.host_pool_id'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = true
     },
     cli_host_pool_id = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'host_pool_id',
         i18n_label = i18n('db_search.tags.cli_host_pool_id'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = true
     },
     srv_host_pool_id = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'host_pool_id',
         i18n_label = i18n('db_search.tags.srv_host_pool_id'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
@@ -553,14 +553,14 @@ tag_utils.defined_tags = {
         hourly_available = false
     },
     role = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'role',
         i18n_label = i18n('db_search.tags.role'),
         operators = {'eq'},
         hourly_available = false
     },
     role_cli_srv = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'role_cli_srv',
         i18n_label = i18n('db_search.tags.role_cli_srv'),
         operators = {'eq'},
@@ -573,7 +573,7 @@ tag_utils.defined_tags = {
         hourly_available = false
     },
     confidence = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'confidence',
         i18n_label = i18n('db_search.tags.confidence'),
         operators = {'eq', 'neq'},
@@ -609,14 +609,14 @@ tag_utils.defined_tags = {
     --    operators = { 'eq', 'neq' }
     -- },
     http_method = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'http_method',
         i18n_label = i18n('db_search.tags.http_method'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     http_return = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'http_return',
         i18n_label = i18n('db_search.tags.http_return_code'),
         operators = {'eq', 'neq'},
@@ -701,21 +701,21 @@ tag_utils.defined_tags = {
         hourly_available = false
     },
     cli_location = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'location',
         i18n_label = i18n('db_search.tags.cli_location'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     srv_location = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'location',
         i18n_label = i18n('db_search.tags.srv_location'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     host_location = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'location',
         i18n_label = i18n('db_search.tags.host_location'),
         operators = {'eq', 'neq'},
@@ -746,14 +746,14 @@ tag_utils.defined_tags = {
         hourly_available = false
     },
     major_connection_state = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'major_connection_state',
         i18n_label = i18n("db_search.tags.major_connection_state"),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     minor_connection_state = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'minor_connection_state',
         i18n_label = i18n("db_search.tags.minor_connection_state"),
         operators = {'eq', 'neq'},
@@ -790,35 +790,35 @@ tag_utils.defined_tags = {
         hourly_available = false
     },
     mitre_tactic = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'mitre_tactic',
         i18n_label = i18n('db_search.tags.mitre_tactic'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     mitre_technique = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'mitre_technique',
         i18n_label = i18n('db_search.tags.mitre_technique'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     mitre_subtechnique = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'mitre_subtechnique',
         i18n_label = i18n('db_search.tags.mitre_subtechnique'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     mitre_id = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'mitre_id',
         i18n_label = i18n('db_search.tags.mitre_id'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     wlan_ssid = {
-        -- type = tag_utils.input_types.select,
+        -- type = flowfilter_utils.input_types.select,
         -- value_type = 'wlan_ssid',
         value_type = 'text',
         i18n_label = i18n('db_search.tags.wlan_ssid'),
@@ -866,14 +866,14 @@ tag_utils.defined_tags = {
         hourly_available = false
     },
     verdict = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'verdict',
         i18n_label = i18n('details.flow_verdict'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     ntopng_interface = {
-        type = tag_utils.input_types.select,
+        type = flowfilter_utils.input_types.select,
         value_type = 'interface_id',
         i18n_label = i18n('db_search.tags.ntopng_interface'),
         operators = {'eq', 'neq'},
@@ -894,7 +894,7 @@ tag_utils.defined_tags = {
 }
 -- #####################################
 
-tag_utils.traffic_direction = {{
+flowfilter_utils.traffic_direction = {{
     label = i18n("flows_page.remote_only"),
     id = 0
 }, {
@@ -910,7 +910,7 @@ tag_utils.traffic_direction = {{
 
 -- #####################################
 
-tag_utils.confidence = {{
+flowfilter_utils.confidence = {{
     label = i18n("confidence_unknown"),
     id = -1
 }, {
@@ -923,7 +923,7 @@ tag_utils.confidence = {{
 
 -- #####################################
 
-tag_utils.http_return = {{
+flowfilter_utils.http_return = {{
     label = i18n("http_info.return_codes.200"),
     id = 200
 }, {
@@ -981,7 +981,7 @@ tag_utils.http_return = {{
 
 -- #####################################
 
-tag_utils.http_method = {{
+flowfilter_utils.http_method = {{
     label = i18n("http_info.methods.get"),
     id = 'GET'
 }, {
@@ -1012,7 +1012,7 @@ tag_utils.http_method = {{
 
 -- #####################################
 
-tag_utils.location = {{
+flowfilter_utils.location = {{
     label = i18n("details.label_remote"),
     id = 0
 }, {
@@ -1025,22 +1025,22 @@ tag_utils.location = {{
 
 -- #####################################
 
-function tag_utils.build_request_filter(key, op, value)
-    return key .. '=' .. value .. tag_utils.SEPARATOR .. op
+function flowfilter_utils.build_request_filter(key, op, value)
+    return key .. '=' .. value .. flowfilter_utils.SEPARATOR .. op
 end
 
 -- #####################################
 
-function tag_utils.get_tag_filters_from_request()
+function flowfilter_utils.get_flowfilter_filters_from_request()
     local filters = {}
-    for key, value in pairs(tag_utils.defined_tags) do
+    for key, value in pairs(flowfilter_utils.defined_filters) do
         if _GET[key] ~= nil then
             filters[key] = _GET[key]
         end
     end
 
     if _GET["host"] then -- from the host page
-        filters["ip"] = _GET["host"] -- convert to tag key
+        filters["ip"] = _GET["host"] -- convert to flowfilter key
     end
 
     for key, value in pairs(_GET or {}) do
@@ -1088,7 +1088,7 @@ end
 -- ##############################################
 
 -- @brief Evaluate operator
-function tag_utils.eval_op(v1, op, v2)
+function flowfilter_utils.eval_op(v1, op, v2)
     local default_verdict = true
 
     -- Convert boolean for compatibility
@@ -1137,7 +1137,7 @@ end
 
 -- #####################################
 
-tag_utils.formatters = {
+flowfilter_utils.formatters = {
     l4proto = function(proto)
         return l4_proto_to_string(proto)
     end,
@@ -1190,13 +1190,13 @@ tag_utils.formatters = {
 
 -- ######################################
 
-function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filters, ifid, is_aggregated)
+function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, restrict_filters, ifid, is_aggregated)
     local alert_utils = require "alert_utils"
-    local tag = tag_utils.defined_tags[id]
+    local filter_def = flowfilter_utils.defined_filters[id]
     local changed_ifid = false
     local current_ifid = interface.getId()
-    if tag == nil then
-        -- traceError(TRACE_WARNING, TRACE_CONSOLE, "Tag " .. id .. " not found")
+    if filter_def == nil then
+        -- traceError(TRACE_WARNING, TRACE_CONSOLE, "Flowfilter " .. id .. " not found")
         return nil
     end
 
@@ -1209,30 +1209,29 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
         end
     end
 
-    if is_aggregated and tag.hourly_available and (is_aggregated ~= tag.hourly_available) or is_aggregated and
-        not tag.hourly_available then
+    if is_aggregated and filter_def.hourly_available and (is_aggregated ~= filter_def.hourly_available) or is_aggregated and
+        not filter_def.hourly_available then
         return nil
     end
 
     local filter = {
         id = id,
-        label = tag.i18n_label,
-        value_type = tag.value_type,
-        value_label = tag.value_i18n_label or tag.i18n_label,
+        label = filter_def.i18n_label,
+        value_type = filter_def.value_type,
+        value_label = filter_def.value_i18n_label or filter_def.i18n_label,
         operators = {},
-        type = tag.type
+        type = filter_def.type
     }
 
-    for _, op in ipairs(tag.operators) do
+    for _, op in ipairs(filter_def.operators) do
         filter.operators[#filter.operators + 1] = {
             id = op,
-            label = tag_utils.tag_operators_label[op]
+            label = flowfilter_utils.flowfilter_operators_label[op]
         }
     end
 
     -- select (array of values)
-    -- tprint(tag.value_type)
-    if (tag.value_type == "alert_id" or tag.value_type == "alert_type" --[[ alert_id should be used --]] ) and entity ~=
+    if (filter_def.value_type == "alert_id" or filter_def.value_type == "alert_type" --[[ alert_id should be used --]] ) and entity ~=
         nil then
         filter.value_type = 'array'
         filter.options = {}
@@ -1243,7 +1242,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = info.label
             }
         end
-    elseif tag.value_type == "interface_id" then
+    elseif filter_def.value_type == "interface_id" then
         filter.value_type = 'array'
         filter.options = {}
         local iface_id_key = "ntopng.prefs.iface_id"
@@ -1257,7 +1256,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 }
             end
         end
-    elseif tag.value_type == "qoe_score" then
+    elseif filter_def.value_type == "qoe_score" then
         if not qoe_utils then
             -- Exclude the filter if it's not L, this info is found only in the l version
             filter = nil
@@ -1271,7 +1270,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = i18n(info.i18n_label)
             }
         end
-    elseif tag.value_type == "mitre_id" then
+    elseif filter_def.value_type == "mitre_id" then
         filter.value_type = 'array'
         filter.options = {}
         for name, info in pairsByField(alert_consts.getAllAlertMitreInfoIDs(), 'mitre_id', asc) do
@@ -1281,7 +1280,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
             }
         end
         --[[ Temporary commented out to reduce overhead (using open 'text' as value_type)
-	 elseif tag.value_type == "wlan_ssid" then
+	 elseif filter_def.value_type == "wlan_ssid" then
 	 local flows_stats = interface.getActiveFlowsStats()
 	 filter.value_type = 'array'
 	 filter.options = {}
@@ -1304,7 +1303,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
 	 end
 	 end
       --]]
-    elseif tag.value_type == "mitre_tactic" then
+    elseif filter_def.value_type == "mitre_tactic" then
         filter.value_type = 'array'
         filter.options = {}
         local mitre_utils = require "mitre_utils"
@@ -1314,7 +1313,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = i18n(info.i18n_label)
             }
         end
-    elseif tag.value_type == "mitre_technique" then
+    elseif filter_def.value_type == "mitre_technique" then
         filter.value_type = 'array'
         filter.options = {}
         local mitre_utils = require "mitre_utils"
@@ -1324,7 +1323,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = i18n(info.i18n_label)
             }
         end
-    elseif tag.value_type == "mitre_subtechnique" then
+    elseif filter_def.value_type == "mitre_subtechnique" then
         filter.value_type = 'array'
         filter.options = {}
         local mitre_utils = require "mitre_utils"
@@ -1334,7 +1333,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = i18n(info.i18n_label)
             }
         end
-    elseif tag.value_type == "alert_category" then
+    elseif filter_def.value_type == "alert_category" then
         filter.value_type = 'array'
         filter.options = {}
         local alert_categories = require "alert_categories"
@@ -1344,7 +1343,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = i18n(info.i18n_title)
             }
         end
-    elseif tag.value_type == "dscp_type" then
+    elseif filter_def.value_type == "dscp_type" then
         local dscp_consts = require "dscp_consts"
         filter.value_type = 'array'
         filter.options = {}
@@ -1355,7 +1354,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = info.label
             }
         end
-    elseif tag.value_type == "verdict" then
+    elseif filter_def.value_type == "verdict" then
         if not ntop.isnEdge() then
             return nil
         end
@@ -1372,7 +1371,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
             value = 2,
             label = i18n('policy.pass')
         }
-    elseif tag.value_type == "flow_risk" then
+    elseif filter_def.value_type == "flow_risk" then
         filter.value_type = 'array'
         filter.options = {}
         local flow_risk_list = ntop.getRiskList() or {}
@@ -1385,7 +1384,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = info
             }
         end
-    elseif tag.value_type == "label_id" then
+    elseif filter_def.value_type == "label_id" then
         filter.value_type = 'array'
         filter.options = {}
         for _, lbl in ipairs(label_badge_utils.getLabels()) do
@@ -1394,7 +1393,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = lbl.name
             }
         end
-    elseif tag.value_type == "host_pool_id" or tag.value_type == "host_pool" then
+    elseif filter_def.value_type == "host_pool_id" or filter_def.value_type == "host_pool" then
         filter.value_type = 'array'
         filter.options = {}
         local host_pools_instance = host_pools:create()
@@ -1407,7 +1406,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = label
             }
         end
-    elseif tag.value_type == "minor_connection_state" then
+    elseif filter_def.value_type == "minor_connection_state" then
         local flow_consts = require "flow_consts"
         filter.value_type = 'array'
         filter.options = {}
@@ -1420,7 +1419,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 }
             end
         end
-    elseif tag.value_type == "major_connection_state" then
+    elseif filter_def.value_type == "major_connection_state" then
         local flow_consts = require "flow_consts"
         filter.value_type = 'array'
         filter.options = {}
@@ -1433,52 +1432,52 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 }
             end
         end
-    elseif tag.value_type == "traffic_direction" then
+    elseif filter_def.value_type == "traffic_direction" then
         filter.value_type = 'array'
         filter.options = {}
-        for _, v in pairsByField(tag_utils.traffic_direction, 'label', asc) do
+        for _, v in pairsByField(flowfilter_utils.traffic_direction, 'label', asc) do
             filter.options[#filter.options + 1] = {
                 value = v.id,
                 label = v.label
             }
         end
-    elseif tag.value_type == "confidence" then
+    elseif filter_def.value_type == "confidence" then
         filter.value_type = 'array'
         filter.options = {}
-        for _, v in pairsByField(tag_utils.confidence, 'label', asc) do
+        for _, v in pairsByField(flowfilter_utils.confidence, 'label', asc) do
             filter.options[#filter.options + 1] = {
                 value = v.id,
                 label = v.label
             }
         end
-    elseif tag.value_type == "http_return" then
+    elseif filter_def.value_type == "http_return" then
         filter.value_type = 'array'
         filter.options = {}
-        for _, v in pairsByField(tag_utils.http_return, 'label', asc) do
+        for _, v in pairsByField(flowfilter_utils.http_return, 'label', asc) do
             filter.options[#filter.options + 1] = {
                 value = v.id,
                 label = v.label
             }
         end
-    elseif tag.value_type == "http_method" then
+    elseif filter_def.value_type == "http_method" then
         filter.value_type = 'array'
         filter.options = {}
-        for _, v in pairsByField(tag_utils.http_method, 'label', asc) do
+        for _, v in pairsByField(flowfilter_utils.http_method, 'label', asc) do
             filter.options[#filter.options + 1] = {
                 value = v.id,
                 label = v.label
             }
         end
-    elseif tag.value_type == "location" then
+    elseif filter_def.value_type == "location" then
         filter.value_type = 'array'
         filter.options = {}
-        for _, v in pairsByField(tag_utils.location, 'label', asc) do
+        for _, v in pairsByField(flowfilter_utils.location, 'label', asc) do
             filter.options[#filter.options + 1] = {
                 value = v.id,
                 label = v.label
             }
         end
-    elseif tag.value_type == "l4_proto" then
+    elseif filter_def.value_type == "l4_proto" then
         filter.value_type = 'array'
         filter.options = {}
         local l4_protocol_list = require "l4_protocol_list"
@@ -1500,7 +1499,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = name
             }
         end
-    elseif tag.value_type == "l7_proto" then
+    elseif filter_def.value_type == "l7_proto" then
         filter.value_type = 'array'
         filter.options = {}
         local l7_protocols = interface.getnDPIProtocols()
@@ -1510,7 +1509,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = name
             }
         end
-    elseif tag.value_type == "l7_category" then
+    elseif filter_def.value_type == "l7_category" then
         filter.value_type = 'array'
         filter.options = {}
         local l7_categories = interface.getnDPICategories()
@@ -1520,7 +1519,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = getCategoryLabel(name, id)
             }
         end
-    elseif tag.value_type == "network_id" then
+    elseif filter_def.value_type == "network_id" then
         filter.options = {}
         local networks_stats = interface.getNetworksStats()
         for n, ns in pairs(networks_stats) do
@@ -1529,7 +1528,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = getFullLocalNetworkName(ns.network_key)
             }
         end
-    elseif tag.value_type == "observation_point_id" then
+    elseif filter_def.value_type == "observation_point_id" then
         filter.value_type = 'array'
         filter.options = {}
         local obs_points = interface.getObsPointsInfo()
@@ -1546,7 +1545,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = v.alias
             }
         end
-    elseif tag.value_type == "country" then
+    elseif filter_def.value_type == "country" then
         local country_codes = require "country_codes"
         filter.value_type = 'array'
         filter.options = {}
@@ -1560,7 +1559,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = label
             }
         end
-    elseif tag.value_type == "vlan_id" then
+    elseif filter_def.value_type == "vlan_id" then
         filter.options = {}
         local vlans = interface.getVLANsList()
 
@@ -1580,7 +1579,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = vlan_name
             }
         end
-    elseif tag.value_type == "probe_ip" then
+    elseif filter_def.value_type == "probe_ip" then
         local exporter_site_utils = require "exporter_site_utils"
         filter.options = {}
         local full_dev_list = {}
@@ -1624,7 +1623,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
         for _, device_info in pairsByKeys(full_dev_list, asc) do
             filter.options[#filter.options + 1] = device_info
         end
-    elseif tag.value_type == "exporter_site" then
+    elseif filter_def.value_type == "exporter_site" then
         filter.value_type = 'array'
         filter.options = {}
         local exporter_site_utils = require "exporter_site_utils"
@@ -1638,7 +1637,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 }
             end
         end
-    elseif tag.value_type == "ip_version" then
+    elseif filter_def.value_type == "ip_version" then
         filter.value_type = 'array'
         filter.options = {}
         filter.options[#filter.options + 1] = {
@@ -1649,7 +1648,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
             value = "6",
             label = i18n("ipv6")
         }
-    elseif tag.value_type == "role" then
+    elseif filter_def.value_type == "role" then
         filter.value_type = 'array'
         filter.options = {}
         filter.options[#filter.options + 1] = {
@@ -1664,7 +1663,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
             value = "no_attacker_no_victim",
             label = i18n("no_attacker_no_victim")
         }
-    elseif tag.value_type == "role_cli_srv" then
+    elseif filter_def.value_type == "role_cli_srv" then
         filter.value_type = 'array'
         filter.options = {}
         filter.options[#filter.options + 1] = {
@@ -1675,7 +1674,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
             value = "server",
             label = i18n("server")
         }
-    elseif tag.value_type == "alert_status" then
+    elseif filter_def.value_type == "alert_status" then
         filter.value_type = 'array'
         filter.options = {}
         for key, info in pairs(alert_consts.alert_status) do
@@ -1686,7 +1685,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 }
             end
         end
-    elseif tag.value_type == "severity" then
+    elseif filter_def.value_type == "severity" then
         filter.value_type = 'array'
         filter.options = {}
         for _, severity in pairsByField(alert_consts.get_printable_severities(), "severity_id", asc) do
@@ -1695,7 +1694,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = i18n(severity.i18n_title)
             }
         end
-    elseif tag.value_type == "iface_role" then
+    elseif filter_def.value_type == "iface_role" then
         local snmp_utils = require "snmp_utils"
         filter.value_type = 'array'
         filter.options = {}
@@ -1707,7 +1706,7 @@ function tag_utils.get_tag_info(id, entity, hide_exporters_name, restrict_filter
                 label = role.label
             }
         end
-    elseif tag.value_type == "snmp_interface" then
+    elseif filter_def.value_type == "snmp_interface" then
         if ntop.isPro() then
             filter.value_type = 'array'
 
@@ -1887,18 +1886,18 @@ end
 
 -- ######################################
 
-function tag_utils.add_tag_if_valid(tags, tag_key, operators, i18n_prefix)
-    if isEmptyString(_GET[tag_key]) then
+function flowfilter_utils.add_flowfilter_if_valid(filters, filter_key, operators, i18n_prefix)
+    if isEmptyString(_GET[filter_key]) then
         return
     end
 
-    local get_value = _GET[tag_key]
+    local get_value = _GET[filter_key]
     local list = split(get_value, ',')
 
     for _, item in ipairs(list) do
         local selected_operator = 'eq'
 
-        local splitted = split(item, tag_utils.SEPARATOR)
+        local splitted = split(item, flowfilter_utils.SEPARATOR)
 
         local realValue
         if #splitted == 2 then
@@ -1907,26 +1906,26 @@ function tag_utils.add_tag_if_valid(tags, tag_key, operators, i18n_prefix)
         end
 
         local value = realValue
-        if tag_utils.formatters[tag_key] ~= nil then
-            value = tag_utils.formatters[tag_key](value)
+        if flowfilter_utils.formatters[filter_key] ~= nil then
+            value = flowfilter_utils.formatters[filter_key](value)
         end
 
-        tag = {
+        local filter_item = {
             realValue = realValue,
             value = value,
-            label = i18n(i18n_prefix .. "." .. tag_key),
-            key = tag_key,
+            label = i18n(i18n_prefix .. "." .. filter_key),
+            key = filter_key,
             operators = operators,
             selectedOperator = selected_operator
         }
 
-        table.insert(tags, tag)
+        table.insert(filters, filter_item)
     end
 end
 
 -- #####################################
 
-function tag_utils.build_bpf(filters)
+function flowfilter_utils.build_bpf(filters)
     local bpf = ""
 
     local n = 0
@@ -1936,10 +1935,10 @@ function tag_utils.build_bpf(filters)
 
     -- Build 'or' groups (same key)
     for key, _value in pairs(filters) do
-        if not tag_utils.defined_tags[key] then
+        if not flowfilter_utils.defined_filters[key] then
             goto skip_filter
         end
-        local bpf_key = tag_utils.defined_tags[key].bpf_key
+        local bpf_key = flowfilter_utils.defined_filters[key].bpf_key
 
         if not bpf_key then
             goto skip_filter
@@ -1953,7 +1952,7 @@ function tag_utils.build_bpf(filters)
 
             -- tags has value formatted in this way: (e.g.) cli_port = 888,eq
             -- it means, search for values with port == 888
-            local splitted_value = split(value, tag_utils.SEPARATOR)
+            local splitted_value = split(value, flowfilter_utils.SEPARATOR)
 
             if table.len(splitted_value) == 2 then
                 op = splitted_value[2]
@@ -2032,16 +2031,16 @@ end
 
 -- #####################################
 
--- given a tag, returns the associated formatted i18n value
-function tag_utils.get_tag_i18n(tag_name)
-    local tag = tag_utils.defined_tags[tag_name]
-    if tag == nil then
+-- given a flowfilter key, returns the associated formatted i18n value
+function flowfilter_utils.get_flowfilter_i18n(filter_name)
+    local filter_def = flowfilter_utils.defined_filters[filter_name]
+    if filter_def == nil then
         return nil
     end
 
-    return tag.i18n_label
+    return filter_def.i18n_label
 end
 
 -- #####################################
 
-return tag_utils
+return flowfilter_utils

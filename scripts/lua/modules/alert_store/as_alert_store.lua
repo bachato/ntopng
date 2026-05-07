@@ -14,7 +14,7 @@ local alert_consts = require "alert_consts"
 local alert_utils = require "alert_utils"
 local alert_entities = require "alert_entities"
 local format_utils = require "format_utils"
-local tag_utils = require "tag_utils"
+local flowfilter_utils = require "flowfilter_utils"
 local json = require "dkjson"
 
 -- ##############################################
@@ -78,7 +78,7 @@ end
 
 -- @brief Get info about additional available filters
 function as_alert_store:_get_additional_available_filters()
-    local filters = {asn = tag_utils.defined_tags.asn}
+    local filters = {asn = flowfilter_utils.defined_filters.asn}
 
     return filters
 end

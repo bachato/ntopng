@@ -1003,8 +1003,8 @@ local function validateApplication(app)
 end
 
 local function validateTagsOperator(p)
-   local tag_utils = require "tag_utils"
-   return (tag_utils.tag_operators_label[p] ~= nil)
+   local flowfilter_utils = require "flowfilter_utils"
+   return (flowfilter_utils.flowfilter_operators_label[p] ~= nil)
 end
 
 --[[ 

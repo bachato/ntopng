@@ -3,7 +3,7 @@
 --
 
 require "lua_utils_get"
-local tag_utils = require "tag_utils"
+local flowfilter_utils = require "flowfilter_utils"
 local dscp_consts = require "dscp_consts"
 local alert_consts = require "alert_consts"
 local format_utils = require "format_utils"
@@ -79,7 +79,7 @@ function historical_flow_utils.parse_asn(asn)
       local tmp_asn = asn
       asn = nil
       for _, p in pairs(split(tmp_asn, ",")) do
-         local p_info = split(p, tag_utils.SEPARATOR)
+         local p_info = split(p, flowfilter_utils.SEPARATOR)
 
          if not tonumber(p_info[1]) then
             local tmp = p_info[1]
@@ -92,7 +92,7 @@ function historical_flow_utils.parse_asn(asn)
          end
 
          if asn == nil then asn = '' else asn = asn .. "," end
-         asn = asn .. p_info[1] .. tag_utils.SEPARATOR .. p_info[2]
+         asn = asn .. p_info[1] .. flowfilter_utils.SEPARATOR .. p_info[2]
       end
    end
 
@@ -107,7 +107,7 @@ function historical_flow_utils.parse_l4_proto(l4_proto)
       local tmp_l4_proto = l4_proto
       l4_proto = nil
       for _, p in pairs(split(tmp_l4_proto, ",")) do
-         local p_info = split(p, tag_utils.SEPARATOR)
+         local p_info = split(p, flowfilter_utils.SEPARATOR)
 
          if not tonumber(p_info[1]) then
             local tmp = string.lower(p_info[1])
@@ -121,7 +121,7 @@ function historical_flow_utils.parse_l4_proto(l4_proto)
          end
 
          if l4_proto == nil then l4_proto = '' else l4_proto = l4_proto .. "," end
-         l4_proto = l4_proto .. p_info[1] .. tag_utils.SEPARATOR .. p_info[2]
+         l4_proto = l4_proto .. p_info[1] .. flowfilter_utils.SEPARATOR .. p_info[2]
       end
    end
 
@@ -136,7 +136,7 @@ function historical_flow_utils.parse_l7_cat(l7_cat)
       local tmp_l7_cat = l7_cat
       l7_cat = nil
       for _, p in pairs(split(tmp_l7_cat, ",")) do
-         local p_info = split(p, tag_utils.SEPARATOR)
+         local p_info = split(p, flowfilter_utils.SEPARATOR)
 
          if not tonumber(p_info[1]) then
             local tmp = string.lower(p_info[1])
@@ -150,7 +150,7 @@ function historical_flow_utils.parse_l7_cat(l7_cat)
          end
 
          if l7_cat == nil then l7_cat = '' else l7_cat = l7_cat.. "," end
-         l7_cat = l7_cat .. p_info[1] .. tag_utils.SEPARATOR .. p_info[2]
+         l7_cat = l7_cat .. p_info[1] .. flowfilter_utils.SEPARATOR .. p_info[2]
       end
    end
 
@@ -160,7 +160,7 @@ end
 -- #####################################
 
 function historical_flow_utils.get_selected_filters(ifid)
-   local selected_filters = tag_utils.get_tag_filters_from_request()
+   local selected_filters = flowfilter_utils.get_flowfilter_filters_from_request()
 
    if ifid ~= nil then
       selected_filters['ifid'] = ifid
@@ -1034,7 +1034,7 @@ local function dt_add_alerts_url(processed_record, record, is_aggregated)
       return -- not from the row flow page
    end
 
-   local op_suffix = tag_utils.SEPARATOR .. 'eq'
+   local op_suffix = flowfilter_utils.SEPARATOR .. 'eq'
    local cli_port = ''
    if (not is_aggregated and processed_record.cli_port and  processed_record.cli_port.value) then
       cli_port = processed_record.cli_port.value
@@ -1221,7 +1221,7 @@ end
 
 -- List of flow columns in the database
 --
--- Keep in sync with ClickHouseDB.cpp and tag_utils.lua
+-- Keep in sync with ClickHouseDB.cpp and flowfilter_utils.lua
 --
 -- - select_func is used in SELECT clause to convert DB-to-Lua the value (e.g. IP addresses)
 -- - where_func is used in WHERE clause to convert Lua-to-DB the value
@@ -1603,70 +1603,70 @@ end
 
 -- #####################################
 
-function historical_flow_utils.get_tags()
+function historical_flow_utils.get_flowfilters()
    local columns = historical_flow_utils.get_flow_columns()
-   local tags = tag_utils.defined_tags
-   local flow_defined_tags = {}
+   local filters = flowfilter_utils.defined_filters
+   local flow_defined_filters = {}
 
    for _, v in pairs(columns) do
-      if v.tag and tag_utils.defined_tags[v.tag] then
-         local tag = tag_utils.defined_tags[v.tag]
+      if v.tag and flowfilter_utils.defined_filters[v.tag] then
+         local tag = flowfilter_utils.defined_filters[v.tag]
          if not tag.hide then
-            flow_defined_tags[v.tag] = tag_utils.defined_tags[v.tag]
+            flow_defined_filters[v.tag] = flowfilter_utils.defined_filters[v.tag]
          end
       end
    end
 
    -- Add extra tags
-   flow_defined_tags["ip"] = tag_utils.defined_tags["ip"]
-   flow_defined_tags["name"] = tag_utils.defined_tags["name"]
-   flow_defined_tags["mac"] = tag_utils.defined_tags["mac"]
-   flow_defined_tags["snmp_interface"] = tag_utils.defined_tags["snmp_interface"]
-   flow_defined_tags["country"] = tag_utils.defined_tags["country"]
-   flow_defined_tags["l7_error_id"] = tag_utils.defined_tags["l7_error_id"]
-   -- flow_defined_tags["ja4_client"] = tag_utils.defined_tags["ja4_client"]
-   flow_defined_tags["issuer_dn"] = tag_utils.defined_tags["issuer_dn"]
-   flow_defined_tags["http_method"] = tag_utils.defined_tags["http_method"]
-   flow_defined_tags["http_url"] = tag_utils.defined_tags["http_url"]
-   flow_defined_tags["http_return"] = tag_utils.defined_tags["http_return"]
-   flow_defined_tags["user_agent"] = tag_utils.defined_tags["user_agent"]
-   flow_defined_tags["last_server"] = tag_utils.defined_tags["last_server"]
-   flow_defined_tags["netbios_name"] = tag_utils.defined_tags["netbios_name"]
-   flow_defined_tags["dns_query"] = tag_utils.defined_tags["dns_query"]
-   flow_defined_tags["dns_answer"] = tag_utils.defined_tags["dns_answer"]
-   flow_defined_tags["mdns_answer"] = tag_utils.defined_tags["mdns_answer"]
-   flow_defined_tags["mdns_name"] = tag_utils.defined_tags["mdns_name"]
-   flow_defined_tags["mdns_name_txt"] = tag_utils.defined_tags["mdns_name_txt"]
-   flow_defined_tags["mdns_ssid"] = tag_utils.defined_tags["mdns_ssid"]
-   flow_defined_tags["cli_location"] = tag_utils.defined_tags["cli_location"]
-   flow_defined_tags["srv_location"] = tag_utils.defined_tags["srv_location"]
-   flow_defined_tags["traffic_direction"] = tag_utils.defined_tags["traffic_direction"]
-   flow_defined_tags["confidence"] = tag_utils.defined_tags["confidence"]
-   flow_defined_tags["network_cidr"] = tag_utils.defined_tags["network_cidr"]
-   flow_defined_tags["srv_network_cidr"] = tag_utils.defined_tags["srv_network_cidr"]
-   flow_defined_tags["cli_network_cidr"] = tag_utils.defined_tags["cli_network_cidr"]
-   flow_defined_tags["duration"] = tag_utils.defined_tags["duration"]
-   flow_defined_tags["network"] = tag_utils.defined_tags["network"]
-   flow_defined_tags["retransmissions"] = tag_utils.defined_tags["retransmissions"]
-   flow_defined_tags["out_of_order"] = tag_utils.defined_tags["out_of_order"]
-   flow_defined_tags["lost"] = tag_utils.defined_tags["lost"]
-   flow_defined_tags["l4proto"] = tag_utils.defined_tags["l4proto"]
-   flow_defined_tags["post_nat_ipv4_src_addr"] = tag_utils.defined_tags["post_nat_ipv4_src_addr"]
-   flow_defined_tags["post_nat_src_port"] = tag_utils.defined_tags["post_nat_src_port"]
-   flow_defined_tags["post_nat_ipv4_dst_addr"] = tag_utils.defined_tags["post_nat_ipv4_dst_addr"]
-   flow_defined_tags["post_nat_dst_port"] = tag_utils.defined_tags["post_nat_dst_port"]
-   flow_defined_tags["verdict"] = tag_utils.defined_tags["verdict"]
-   flow_defined_tags["ndpi_fingerprint"] = tag_utils.defined_tags["ndpi_fingerprint"]
-   flow_defined_tags["exporter_site"] = tag_utils.defined_tags["exporter_site"] -- required?
-   flow_defined_tags["asn"] = tag_utils.defined_tags["asn"]
-   flow_defined_tags["flow_label"] = tag_utils.defined_tags["flow_label"]
+   flow_defined_filters["ip"] = flowfilter_utils.defined_filters["ip"]
+   flow_defined_filters["name"] = flowfilter_utils.defined_filters["name"]
+   flow_defined_filters["mac"] = flowfilter_utils.defined_filters["mac"]
+   flow_defined_filters["snmp_interface"] = flowfilter_utils.defined_filters["snmp_interface"]
+   flow_defined_filters["country"] = flowfilter_utils.defined_filters["country"]
+   flow_defined_filters["l7_error_id"] = flowfilter_utils.defined_filters["l7_error_id"]
+   -- flow_defined_filters["ja4_client"] = flowfilter_utils.defined_filters["ja4_client"]
+   flow_defined_filters["issuer_dn"] = flowfilter_utils.defined_filters["issuer_dn"]
+   flow_defined_filters["http_method"] = flowfilter_utils.defined_filters["http_method"]
+   flow_defined_filters["http_url"] = flowfilter_utils.defined_filters["http_url"]
+   flow_defined_filters["http_return"] = flowfilter_utils.defined_filters["http_return"]
+   flow_defined_filters["user_agent"] = flowfilter_utils.defined_filters["user_agent"]
+   flow_defined_filters["last_server"] = flowfilter_utils.defined_filters["last_server"]
+   flow_defined_filters["netbios_name"] = flowfilter_utils.defined_filters["netbios_name"]
+   flow_defined_filters["dns_query"] = flowfilter_utils.defined_filters["dns_query"]
+   flow_defined_filters["dns_answer"] = flowfilter_utils.defined_filters["dns_answer"]
+   flow_defined_filters["mdns_answer"] = flowfilter_utils.defined_filters["mdns_answer"]
+   flow_defined_filters["mdns_name"] = flowfilter_utils.defined_filters["mdns_name"]
+   flow_defined_filters["mdns_name_txt"] = flowfilter_utils.defined_filters["mdns_name_txt"]
+   flow_defined_filters["mdns_ssid"] = flowfilter_utils.defined_filters["mdns_ssid"]
+   flow_defined_filters["cli_location"] = flowfilter_utils.defined_filters["cli_location"]
+   flow_defined_filters["srv_location"] = flowfilter_utils.defined_filters["srv_location"]
+   flow_defined_filters["traffic_direction"] = flowfilter_utils.defined_filters["traffic_direction"]
+   flow_defined_filters["confidence"] = flowfilter_utils.defined_filters["confidence"]
+   flow_defined_filters["network_cidr"] = flowfilter_utils.defined_filters["network_cidr"]
+   flow_defined_filters["srv_network_cidr"] = flowfilter_utils.defined_filters["srv_network_cidr"]
+   flow_defined_filters["cli_network_cidr"] = flowfilter_utils.defined_filters["cli_network_cidr"]
+   flow_defined_filters["duration"] = flowfilter_utils.defined_filters["duration"]
+   flow_defined_filters["network"] = flowfilter_utils.defined_filters["network"]
+   flow_defined_filters["retransmissions"] = flowfilter_utils.defined_filters["retransmissions"]
+   flow_defined_filters["out_of_order"] = flowfilter_utils.defined_filters["out_of_order"]
+   flow_defined_filters["lost"] = flowfilter_utils.defined_filters["lost"]
+   flow_defined_filters["l4proto"] = flowfilter_utils.defined_filters["l4proto"]
+   flow_defined_filters["post_nat_ipv4_src_addr"] = flowfilter_utils.defined_filters["post_nat_ipv4_src_addr"]
+   flow_defined_filters["post_nat_src_port"] = flowfilter_utils.defined_filters["post_nat_src_port"]
+   flow_defined_filters["post_nat_ipv4_dst_addr"] = flowfilter_utils.defined_filters["post_nat_ipv4_dst_addr"]
+   flow_defined_filters["post_nat_dst_port"] = flowfilter_utils.defined_filters["post_nat_dst_port"]
+   flow_defined_filters["verdict"] = flowfilter_utils.defined_filters["verdict"]
+   flow_defined_filters["ndpi_fingerprint"] = flowfilter_utils.defined_filters["ndpi_fingerprint"]
+   flow_defined_filters["exporter_site"] = flowfilter_utils.defined_filters["exporter_site"] -- required?
+   flow_defined_filters["asn"] = flowfilter_utils.defined_filters["asn"]
+   flow_defined_filters["flow_label"] = flowfilter_utils.defined_filters["flow_label"]
 
-   return flow_defined_tags
+   return flow_defined_filters
 end
 
 -- #####################################
 
-function historical_flow_utils.get_flow_columns_to_tags(aggregated, real_cols_only)
+function historical_flow_utils.get_flow_columns_to_flowfilters(aggregated, real_cols_only)
 
    local c2t = {}
    local t2c = {}
@@ -1708,9 +1708,9 @@ end
 -- Return a table with a list of DB columns for each tag
 -- Example:
 -- { ["srv_ip"] = ["IPV4_DST_ADDR"], ["IPV6_DST_ADDR"], .. }
-local function get_flow_tags_to_columns(aggregated)
+local function get_flow_flowfilters_to_columns(aggregated)
    local t2c = {}
-   local c2t = historical_flow_utils.get_flow_columns_to_tags(aggregated)
+   local c2t = historical_flow_utils.get_flow_columns_to_flowfilters(aggregated)
 
    for c, t in pairs(c2t) do
       if not t2c[t] then
@@ -1724,13 +1724,13 @@ end
 
 -- Return DB select by tag
 -- Example: 'srv_ip' -> "IPV4_DST_ADDR, IPV6_DST_ADDR"
-function historical_flow_utils.get_flow_select_by_tag(tag, aggregated)
-   local tags_to_columns = get_flow_tags_to_columns(aggregated)
+function historical_flow_utils.get_flow_select_by_flowfilter(filter_key, aggregated)
+   local flowfilters_to_columns = get_flow_flowfilters_to_columns(aggregated)
    local s = ''
 
    ::next::
-   if tags_to_columns[tag] then
-      for _, column in ipairs(tags_to_columns[tag]) do
+   if flowfilters_to_columns[filter_key] then
+      for _, column in ipairs(flowfilters_to_columns[filter_key]) do
          if isEmptyString(s) then
             s = column
          else
@@ -1739,27 +1739,27 @@ function historical_flow_utils.get_flow_select_by_tag(tag, aggregated)
       end
 
       -- l7proto also includes l7proto_master
-      if tag == 'l7proto' then
-         tag = 'l7proto_master'
+      if filter_key == 'l7proto' then
+         filter_key = 'l7proto_master'
          goto next
       end
    end
-   
+
    return s
 end
 
--- Return DB column by tag
+-- Return DB column by flowfilter
 -- First or ip_version-based in case of multiple
--- nil in case of undefined tag
-function historical_flow_utils.get_flow_column_by_tag(tag, ip_version, aggregated)
-   local tags_to_columns = get_flow_tags_to_columns(aggregated)
+-- nil in case of undefined flowfilter
+function historical_flow_utils.get_flow_column_by_flowfilter(filter_key, ip_version, aggregated)
+   local flowfilters_to_columns = get_flow_flowfilters_to_columns(aggregated)
 
-   if tags_to_columns[tag] then
-      if tag:ends('ip') and ip_version and ip_version == 6 then
-         return tags_to_columns[tag][2]
+   if flowfilters_to_columns[filter_key] then
+      if filter_key:ends('ip') and ip_version and ip_version == 6 then
+         return flowfilters_to_columns[filter_key][2]
       end
 
-      return tags_to_columns[tag][1]
+      return flowfilters_to_columns[filter_key][1]
    end
 
    return nil
@@ -1890,12 +1890,12 @@ function historical_flow_utils.get_historical_url(label, tag, value, add_hyperli
    else
       if add_copy_button ~= nil and add_copy_button then
          return "<span><button data-to-copy='"..value.."' class='copy-http-url btn btn-light btn-sm border ms-1' style='cursor: pointer;'><i class='fas fa-copy'></i></button> <a href=\"" .. ntop.getHttpPrefix() .. "/lua/pro/db_search.lua?" .. 
-            tag .. "=" .. value .. tag_utils.SEPARATOR .. "eq\" " .. 
+            tag .. "=" .. value .. flowfilter_utils.SEPARATOR .. "eq\" " .. 
             ternary(title ~= nil, "title=\"" .. (title or "") .."\"", "") .. 
             " target='_blank'>" .. label .. "</a>"
       end
       return "<a href=\"" .. ntop.getHttpPrefix() .. "/lua/pro/db_search.lua?" .. 
-            tag .. "=" .. value .. tag_utils.SEPARATOR .. "eq\" " .. 
+            tag .. "=" .. value .. flowfilter_utils.SEPARATOR .. "eq\" " .. 
             ternary(title ~= nil, "title=\"" .. (title or "") .."\"", "") .. 
             " target='_blank'>" .. label .. "</a>"
       

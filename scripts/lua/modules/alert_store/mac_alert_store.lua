@@ -97,9 +97,9 @@ end
 
 -- @brief Get info about additional available filters
 function mac_alert_store:_get_additional_available_filters()
-   local tag_utils = require "tag_utils"
+   local flowfilter_utils = require "flowfilter_utils"
    local filters = {
-      mac = tag_utils.defined_tags.mac,
+      mac = flowfilter_utils.defined_filters.mac,
    }
 
    return filters

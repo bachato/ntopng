@@ -18,7 +18,7 @@ local alert_consts = require "alert_consts"
 local alert_utils = require "alert_utils"
 local alert_entities = require "alert_entities"
 local dscp_consts = require "dscp_consts"
-local tag_utils = require "tag_utils"
+local flowfilter_utils = require "flowfilter_utils"
 local flow_risk_utils = require "flow_risk_utils"
 local flow_consts = require "flow_consts"
 local template = require "template_utils"
@@ -1627,11 +1627,11 @@ if isEmptyString(page) or page == "overview" then
                         -- As this is the page of active flows, it is meaningful to use the current time for the epoch end.
                         -- This will also enable multiple flows with the same tuple to be shown.
                         local epoch_end = os.time()
-                        local l7_proto = flow["proto.ndpi_id"] .. tag_utils.SEPARATOR .. "eq"
-                        local cli_ip = flow["cli.ip"] .. tag_utils.SEPARATOR .. "eq"
-                        local srv_ip = flow["srv.ip"] .. tag_utils.SEPARATOR .. "eq"
-                        local cli_port = flow["cli.port"] .. tag_utils.SEPARATOR .. "eq"
-                        local srv_port = flow["srv.port"] .. tag_utils.SEPARATOR .. "eq"
+                        local l7_proto = flow["proto.ndpi_id"] .. flowfilter_utils.SEPARATOR .. "eq"
+                        local cli_ip = flow["cli.ip"] .. flowfilter_utils.SEPARATOR .. "eq"
+                        local srv_ip = flow["srv.ip"] .. flowfilter_utils.SEPARATOR .. "eq"
+                        local cli_port = flow["cli.port"] .. flowfilter_utils.SEPARATOR .. "eq"
+                        local srv_port = flow["srv.port"] .. flowfilter_utils.SEPARATOR .. "eq"
 
                         print(string.format(
 				 '&nbsp;<a href="%s/lua/alert_stats.lua?status=historical&page=flow&epoch_begin=%u&epoch_end=%u&l7_proto=%s&cli_ip=%s&cli_port=%s&srv_ip=%s&srv_port=%s" class="btn btn-sm btn-info" role="button"><i class="fas fa-exclamation-triangle"></i></a>',

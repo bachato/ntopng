@@ -1144,13 +1144,13 @@ end
 -- ##############################################
 
 function get_confidence(confidence_id, shorten_string)
-    local tag_utils = require "tag_utils"
+    local flowfilter_utils = require "flowfilter_utils"
     local confidence_name = confidence_id
 
     if confidence_id and tonumber(confidence_id) then
         confidence_id = tonumber(confidence_id)
 
-        for _, confidence in pairs(tag_utils.confidence or {}) do
+        for _, confidence in pairs(flowfilter_utils.confidence or {}) do
             if confidence.id == confidence_id then
                 confidence_name = confidence.label
 

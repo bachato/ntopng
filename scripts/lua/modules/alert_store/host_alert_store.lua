@@ -16,7 +16,7 @@ local alert_utils = require "alert_utils"
 local alert_entities = require "alert_entities"
 local alert_roles = require "alert_roles"
 local json = require "dkjson"
-local tag_utils = require "tag_utils"
+local flowfilter_utils = require "flowfilter_utils"
 local mitre_utils = require "mitre_utils"
 local network_consts = require "network_consts"
 
@@ -302,20 +302,20 @@ end
 -- @brief Get info about additional available filters
 function host_alert_store:_get_additional_available_filters()
     local filters = {
-        alert_status = tag_utils.defined_tags.alert_status,
-        vlan_id = tag_utils.defined_tags.vlan_id,
-        ip_version = tag_utils.defined_tags.ip_version,
-        ip = tag_utils.defined_tags.ip,
-        name = tag_utils.defined_tags.name,
-        role = tag_utils.defined_tags.role,
-        role_cli_srv = tag_utils.defined_tags.role_cli_srv,
-        host_pool_id = tag_utils.defined_tags.host_pool_id,
-        network = tag_utils.defined_tags.network,
-        host_location = tag_utils.defined_tags.host_location,
-        mitre_id = tag_utils.defined_tags.mitre_id,
-        mitre_tactic = tag_utils.defined_tags.mitre_tactic,
-        mitre_technique = tag_utils.defined_tags.mitre_technique,
-        mitre_subtechnique = tag_utils.defined_tags.mitre_subtechnique,
+        alert_status = flowfilter_utils.defined_filters.alert_status,
+        vlan_id = flowfilter_utils.defined_filters.vlan_id,
+        ip_version = flowfilter_utils.defined_filters.ip_version,
+        ip = flowfilter_utils.defined_filters.ip,
+        name = flowfilter_utils.defined_filters.name,
+        role = flowfilter_utils.defined_filters.role,
+        role_cli_srv = flowfilter_utils.defined_filters.role_cli_srv,
+        host_pool_id = flowfilter_utils.defined_filters.host_pool_id,
+        network = flowfilter_utils.defined_filters.network,
+        host_location = flowfilter_utils.defined_filters.host_location,
+        mitre_id = flowfilter_utils.defined_filters.mitre_id,
+        mitre_tactic = flowfilter_utils.defined_filters.mitre_tactic,
+        mitre_technique = flowfilter_utils.defined_filters.mitre_technique,
+        mitre_subtechnique = flowfilter_utils.defined_filters.mitre_subtechnique,
     }
 
     return filters

@@ -12,7 +12,7 @@ end
 
 require "lua_utils"
 local graph_utils = require "graph_utils"
-local tag_utils = require("tag_utils")
+local flowfilter_utils = require("flowfilter_utils")
 local page_utils = require("page_utils")
 local auth = require "auth"
 
@@ -67,7 +67,7 @@ page_utils.print_navbar(title, nav_url,
 			      hidden = not areAlertsEnabled() or  not auth.has_capability(auth.capabilities.alerts),
 			      active = page == "alerts",
 			      page_name = "alerts",
-			      url = ntop.getHttpPrefix() .. "/lua/alert_stats.lua?&page=network&network_name=" .. network_name .. tag_utils.SEPARATOR .. "eq",
+			      url = ntop.getHttpPrefix() .. "/lua/alert_stats.lua?&page=network&network_name=" .. network_name .. flowfilter_utils.SEPARATOR .. "eq",
 			      label = "<i class=\"fas fa-exclamation-triangle fa-lg\"></i>",
 			   },
 			   {

@@ -11,7 +11,7 @@ local alert_entities = require "alert_entities"
 local alert_store_utils = require "alert_store_utils"
 local alert_store_instances = alert_store_utils.all_instances_factory()
 local alert_consts = require "alert_consts"
-local tag_utils = require "tag_utils"
+local flowfilter_utils = require "flowfilter_utils"
 
 --
 -- Get list of available filters
@@ -39,7 +39,7 @@ for id, v in pairs(tags) do
    -- FIXX rename l7_proto to l7proto in flow alert store for consistency
    if id == "l7_proto" then id = "l7proto" end
 
-   local filter = tag_utils.get_tag_info(id, alert_entities[page])
+   local filter = flowfilter_utils.get_flowfilter_info(id, alert_entities[page])
    
    res[#res+1] = filter
 end

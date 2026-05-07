@@ -12,7 +12,7 @@ local format_utils = require "format_utils"
 local alert_consts = require "alert_consts"
 local alert_utils = require "alert_utils"
 local alert_severities = require "alert_severities"
-local tag_utils = require "tag_utils"
+local flowfilter_utils = require "flowfilter_utils"
 local alert_entities = require "alert_entities"
 local alert_category_utils = require "alert_category_utils"
 local os_utils = require("os_utils")
@@ -305,7 +305,7 @@ function alert_store:build_sql_cond(cond, is_write)
 
     local sql_cond
 
-    local sql_op = tag_utils.tag_operators_sql[cond.op]
+    local sql_op = flowfilter_utils.flowfilter_operators_sql[cond.op]
 
     -- Special case: l7proto
     if cond.field == 'l7proto' then
@@ -587,11 +587,11 @@ function alert_store:eval_alert_cond(alert, cond)
         end
 
         if cond.op == and_cond then
-            return tag_utils.eval_op(alert['l7_proto'], cond.op, cond.value) and
-                       tag_utils.eval_op(alert['l7_master_proto'], cond.op, cond.value)
+            return flowfilter_utils.eval_op(alert['l7_proto'], cond.op, cond.value) and
+                       flowfilter_utils.eval_op(alert['l7_master_proto'], cond.op, cond.value)
         else
-            return tag_utils.eval_op(alert['l7_proto'], cond.op, cond.value) or
-                       tag_utils.eval_op(alert['l7_master_proto'], cond.op, cond.value)
+            return flowfilter_utils.eval_op(alert['l7_proto'], cond.op, cond.value) or
+                       flowfilter_utils.eval_op(alert['l7_master_proto'], cond.op, cond.value)
         end
 
         -- Special case: ip (with vlan)
@@ -600,29 +600,29 @@ function alert_store:eval_alert_cond(alert, cond)
         if not isEmptyString(host["host"]) then
             if not host["vlan"] or host["vlan"] == 0 then
                 if cond.field == 'ip' and self._alert_entity == alert_entities.flow then
-                    return tag_utils.eval_op(alert['cli_ip'], cond.op, host["host"]) or
-                               tag_utils.eval_op(alert['srv_ip'], cond.op, host["host"])
+                    return flowfilter_utils.eval_op(alert['cli_ip'], cond.op, host["host"]) or
+                               flowfilter_utils.eval_op(alert['srv_ip'], cond.op, host["host"])
                 else
-                    return tag_utils.eval_op(alert[cond.field], cond.op, host["host"])
+                    return flowfilter_utils.eval_op(alert[cond.field], cond.op, host["host"])
                 end
             else
                 if cond.op == 'neq' then
                     if cond.field == 'ip' and self._alert_entity == alert_entities.flow then
-                        return tag_utils.eval_op(alert['cli_ip'], cond.op, host["host"]) or
-                                   tag_utils.eval_op(alert['srv_ip'], cond.op, host["host"]) or
-                                   tag_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
+                        return flowfilter_utils.eval_op(alert['cli_ip'], cond.op, host["host"]) or
+                                   flowfilter_utils.eval_op(alert['srv_ip'], cond.op, host["host"]) or
+                                   flowfilter_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
                     else
-                        return tag_utils.eval_op(alert[cond.field], cond.op, host["host"]) or
-                                   tag_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
+                        return flowfilter_utils.eval_op(alert[cond.field], cond.op, host["host"]) or
+                                   flowfilter_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
                     end
                 else
                     if cond.field == 'ip' and self._alert_entity == alert_entities.flow then
-                        return (tag_utils.eval_op(alert['cli_ip'], cond.op, host["host"]) or
-                                   tag_utils.eval_op(alert['srv_ip'], cond.op, host["host"])) and
-                                   tag_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
+                        return (flowfilter_utils.eval_op(alert['cli_ip'], cond.op, host["host"]) or
+                                   flowfilter_utils.eval_op(alert['srv_ip'], cond.op, host["host"])) and
+                                   flowfilter_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
                     else
-                        return tag_utils.eval_op(alert[cond.field], cond.op, host["host"]) and
-                                   tag_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
+                        return flowfilter_utils.eval_op(alert[cond.field], cond.op, host["host"]) and
+                                   flowfilter_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
                     end
                 end
             end
@@ -635,21 +635,21 @@ function alert_store:eval_alert_cond(alert, cond)
         if not isEmptyString(host["host"]) then
             if not host["vlan"] or host["vlan"] == 0 then
                 if cond.field == 'name' and self._alert_entity == alert_entities.flow then
-                    return (tag_utils.eval_op(alert['cli_name'], cond.op, host["host"]) or
-                               tag_utils.eval_op(alert['srv_name'], cond.op, host["host"])) and
-                               tag_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
+                    return (flowfilter_utils.eval_op(alert['cli_name'], cond.op, host["host"]) or
+                               flowfilter_utils.eval_op(alert['srv_name'], cond.op, host["host"])) and
+                               flowfilter_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
                 else
-                    return tag_utils.eval_op(alert[cond.field], cond.op, host["host"]) and
-                               tag_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
+                    return flowfilter_utils.eval_op(alert[cond.field], cond.op, host["host"]) and
+                               flowfilter_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
                 end
             else
                 if cond.field == 'name' and self._alert_entity == alert_entities.flow then
-                    return (tag_utils.eval_op(alert['cli_name'], cond.op, host["host"]) or
-                               tag_utils.eval_op(alert['srv_name'], cond.op, host["host"])) and
-                               tag_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
+                    return (flowfilter_utils.eval_op(alert['cli_name'], cond.op, host["host"]) or
+                               flowfilter_utils.eval_op(alert['srv_name'], cond.op, host["host"])) and
+                               flowfilter_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
                 else
-                    return tag_utils.eval_op(alert[cond.field], cond.op, host["host"]) and
-                               tag_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
+                    return flowfilter_utils.eval_op(alert[cond.field], cond.op, host["host"]) and
+                               flowfilter_utils.eval_op(alert['vlan_id'], cond.op, host["vlan"])
                 end
             end
         end
@@ -661,45 +661,45 @@ function alert_store:eval_alert_cond(alert, cond)
             -- in engaged snmp alerts case the cond.value is made by <device_ip>_<port>
             local device_ip = splitted_engaged_condition[1]
             local port = tonumber(splitted_engaged_condition[2])
-            return tag_utils.eval_op(alert['port'], cond.op, port) and
-                       tag_utils.eval_op(alert['ip'], cond.op, device_ip)
+            return flowfilter_utils.eval_op(alert['port'], cond.op, port) and
+                       flowfilter_utils.eval_op(alert['ip'], cond.op, device_ip)
         else
-            return tag_utils.eval_op(alert['input_snmp'], cond.op, cond.value) or
-                       tag_utils.eval_op(alert['output_snmp'], cond.op, cond.value)
+            return flowfilter_utils.eval_op(alert['input_snmp'], cond.op, cond.value) or
+                       flowfilter_utils.eval_op(alert['output_snmp'], cond.op, cond.value)
         end
 
         -- Special case: role (host)
     elseif cond.field == 'host_role' then
         if cond.value == 'attacker' then
-            return tag_utils.eval_op(alert['is_attacker'], cond.op, 1)
+            return flowfilter_utils.eval_op(alert['is_attacker'], cond.op, 1)
         elseif cond.value == 'victim' then
-            return tag_utils.eval_op(alert['is_victim'], cond.op, 1)
+            return flowfilter_utils.eval_op(alert['is_victim'], cond.op, 1)
         else -- 'no_attacker_no_victim'
-            return tag_utils.eval_op(alert['is_attacker'], cond.op, 0) and
-                       tag_utils.eval_op(alert['is_victim'], cond.op, 0)
+            return flowfilter_utils.eval_op(alert['is_attacker'], cond.op, 0) and
+                       flowfilter_utils.eval_op(alert['is_victim'], cond.op, 0)
         end
 
         -- Special case: role (flow)
     elseif cond.field == 'flow_role' then
         if cond.value == 'attacker' then
-            return tag_utils.eval_op(alert['is_cli_attacker'], cond.op, 1) or
-                       tag_utils.eval_op(alert['is_srv_attacker'], cond.op, 1)
+            return flowfilter_utils.eval_op(alert['is_cli_attacker'], cond.op, 1) or
+                       flowfilter_utils.eval_op(alert['is_srv_attacker'], cond.op, 1)
         elseif cond.value == 'victim' then
-            return tag_utils.eval_op(alert['is_cli_victim'], cond.op, 1) or
-                       tag_utils.eval_op(alert['is_srv_victim'], cond.op, 1)
+            return flowfilter_utils.eval_op(alert['is_cli_victim'], cond.op, 1) or
+                       flowfilter_utils.eval_op(alert['is_srv_victim'], cond.op, 1)
         else -- 'no_attacker_no_victim'
-            return tag_utils.eval_op(alert['is_cli_attacker'], cond.op, 0) and
-                       tag_utils.eval_op(alert['is_srv_attacker'], cond.op, 0) and
-                       tag_utils.eval_op(alert['is_cli_victim'], cond.op, 0) and
-                       tag_utils.eval_op(alert['is_srv_victim'], cond.op, 0)
+            return flowfilter_utils.eval_op(alert['is_cli_attacker'], cond.op, 0) and
+                       flowfilter_utils.eval_op(alert['is_srv_attacker'], cond.op, 0) and
+                       flowfilter_utils.eval_op(alert['is_cli_victim'], cond.op, 0) and
+                       flowfilter_utils.eval_op(alert['is_srv_victim'], cond.op, 0)
         end
 
         -- Special case: role_cli_srv)
     elseif cond.field == 'role_cli_srv' then
         if cond.value == 'client' then
-            return tag_utils.eval_op(alert['is_client'], cond.op, 1)
+            return flowfilter_utils.eval_op(alert['is_client'], cond.op, 1)
         else -- 'server'
-            return tag_utils.eval_op(alert['is_server'], cond.op, 1)
+            return flowfilter_utils.eval_op(alert['is_server'], cond.op, 1)
         end
     end
 
@@ -710,7 +710,7 @@ function alert_store:eval_alert_cond(alert, cond)
        field_value = alert_json[cond.field]
     end
 
-    return tag_utils.eval_op(field_value, cond.op, cond.value)
+    return flowfilter_utils.eval_op(field_value, cond.op, cond.value)
 end
 
 -- ##############################################
@@ -794,7 +794,7 @@ end
 -- @param value The value
 -- @param value_type The value type (e.g. 'number')
 function alert_store:add_filter_condition(field, op, value, value_type)
-    if not op or not tag_utils.tag_operators_sql[op] then
+    if not op or not flowfilter_utils.flowfilter_operators_sql[op] then
         op = 'eq'
     end
 
@@ -830,7 +830,7 @@ function alert_store:strip_filter_operator(value)
     if isEmptyString(value) then
         return nil, nil
     end
-    local filter = split(value, tag_utils.SEPARATOR)
+    local filter = split(value, flowfilter_utils.SEPARATOR)
     local value = filter[1]
     local op = filter[2]
     return value, op
@@ -2179,11 +2179,11 @@ function alert_store:get_available_filters()
     local additional_filters = self:_get_additional_available_filters()
 
     local filters = {
-        alert_id = tag_utils.defined_tags.alert_id,
-        alert_category = tag_utils.defined_tags.alert_category,
-        severity = tag_utils.defined_tags.severity,
-        score = tag_utils.defined_tags.score,
-        description = tag_utils.defined_tags.description
+        alert_id = flowfilter_utils.defined_filters.alert_id,
+        alert_category = flowfilter_utils.defined_filters.alert_category,
+        severity = flowfilter_utils.defined_filters.severity,
+        score = flowfilter_utils.defined_filters.score,
+        description = flowfilter_utils.defined_filters.description
     }
 
     return table.merge(filters, additional_filters)
@@ -2493,7 +2493,7 @@ function alert_store.get_label_link(label_info, tag, value_info, add_hyperlink)
       return "<a href=\"" .. ntop.getHttpPrefix() ..
 	 "/lua/alert_stats.lua?status=" .. _GET['status'] .. "&page=" ..
 	 _GET['page'] .. "&" .. tag .. "=" .. value ..
-	 tag_utils.SEPARATOR .. "eq\" " .. ">" .. (label or "") ..
+	 flowfilter_utils.SEPARATOR .. "eq\" " .. ">" .. (label or "") ..
 	 "</a>"
    else
       return label

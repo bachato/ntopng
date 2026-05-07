@@ -20,7 +20,7 @@ local flow_risk_utils = require "flow_risk_utils"
 local alert_consts = require "alert_consts"
 local alert_utils = require "alert_utils"
 local alert_entities = require "alert_entities"
-local tag_utils = require "tag_utils"
+local flowfilter_utils = require "flowfilter_utils"
 local network_consts = require "network_consts"
 local json = require "dkjson"
 local pools = require "pools"
@@ -143,7 +143,7 @@ function flow_alert_store:get_column_name(field, is_write, value)
             field = 'flow_risk'
          end
 
-         col = historical_flow_utils.get_flow_column_by_tag(field)
+         col = historical_flow_utils.get_flow_column_by_flowfilter(field)
       end
 
       if not col then
@@ -627,7 +627,7 @@ function flow_alert_store:_add_additional_request_filters()
 
    -- Filter out flows with no alert
    -- Any reason we need this?
-   -- self:add_filter_condition_list('alert_id', "0"..tag_utils.SEPARATOR.."neq", 'number')
+   -- self:add_filter_condition_list('alert_id', "0"..flowfilter_utils.SEPARATOR.."neq", 'number')
 
    self:add_filter_condition_list('vlan_id', vlan_id, 'number')
    self:add_filter_condition_list('ip_version', ip_version)
@@ -676,52 +676,52 @@ end
 -- @brief Get info about additional available filters
 function flow_alert_store:_get_additional_available_filters()
    local filters = {
-      vlan_id = tag_utils.defined_tags.vlan_id,
-      ip_version = tag_utils.defined_tags.ip_version,
-      ip = tag_utils.defined_tags.ip,
-      cli_ip = tag_utils.defined_tags.cli_ip,
-      srv_ip = tag_utils.defined_tags.srv_ip,
-      cli_name = tag_utils.defined_tags.cli_name,
-      srv_name = tag_utils.defined_tags.srv_name,
-      cli_port = tag_utils.defined_tags.cli_port,
-      srv_port = tag_utils.defined_tags.srv_port,
-      cli_country = tag_utils.defined_tags.cli_country,
-      srv_country = tag_utils.defined_tags.srv_country,
-      role = tag_utils.defined_tags.role,
-      l7proto = tag_utils.defined_tags.l7proto,
-      info = tag_utils.defined_tags.info,
-      flow_risk = tag_utils.defined_tags.flow_risk,
+      vlan_id = flowfilter_utils.defined_filters.vlan_id,
+      ip_version = flowfilter_utils.defined_filters.ip_version,
+      ip = flowfilter_utils.defined_filters.ip,
+      cli_ip = flowfilter_utils.defined_filters.cli_ip,
+      srv_ip = flowfilter_utils.defined_filters.srv_ip,
+      cli_name = flowfilter_utils.defined_filters.cli_name,
+      srv_name = flowfilter_utils.defined_filters.srv_name,
+      cli_port = flowfilter_utils.defined_filters.cli_port,
+      srv_port = flowfilter_utils.defined_filters.srv_port,
+      cli_country = flowfilter_utils.defined_filters.cli_country,
+      srv_country = flowfilter_utils.defined_filters.srv_country,
+      role = flowfilter_utils.defined_filters.role,
+      l7proto = flowfilter_utils.defined_filters.l7proto,
+      info = flowfilter_utils.defined_filters.info,
+      flow_risk = flowfilter_utils.defined_filters.flow_risk,
 
-      cli_host_pool_id = tag_utils.defined_tags.cli_host_pool_id,
-      srv_host_pool_id = tag_utils.defined_tags.srv_host_pool_id,
-      cli_network = tag_utils.defined_tags.cli_network,
-      srv_network = tag_utils.defined_tags.srv_network,
+      cli_host_pool_id = flowfilter_utils.defined_filters.cli_host_pool_id,
+      srv_host_pool_id = flowfilter_utils.defined_filters.srv_host_pool_id,
+      cli_network = flowfilter_utils.defined_filters.cli_network,
+      srv_network = flowfilter_utils.defined_filters.srv_network,
 
-      l7_error_id = tag_utils.defined_tags.l7_error_id,
-      confidence = tag_utils.defined_tags.confidence,
-      community_id = tag_utils.defined_tags.community_id,
-      ja4_client = tag_utils.defined_tags.ja4_client,
-      traffic_direction = tag_utils.defined_tags.traffic_direction,
-      alert_domain = tag_utils.defined_tags.alert_domain,
+      l7_error_id = flowfilter_utils.defined_filters.l7_error_id,
+      confidence = flowfilter_utils.defined_filters.confidence,
+      community_id = flowfilter_utils.defined_filters.community_id,
+      ja4_client = flowfilter_utils.defined_filters.ja4_client,
+      traffic_direction = flowfilter_utils.defined_filters.traffic_direction,
+      alert_domain = flowfilter_utils.defined_filters.alert_domain,
 
-      probe_ip = tag_utils.defined_tags.probe_ip,
-      input_snmp = tag_utils.defined_tags.input_snmp,
-      output_snmp = tag_utils.defined_tags.output_snmp,
-      snmp_interface = tag_utils.defined_tags.snmp_interface,
-      host_location = tag_utils.defined_tags.host_location,
-      cli_location = tag_utils.defined_tags.cli_location,
-      srv_location = tag_utils.defined_tags.srv_location,
-      last_server = tag_utils.defined_tags.last_server,
-      issuer_dn = tag_utils.defined_tags.issuer_dn,
-      l4proto = tag_utils.defined_tags.l4proto,
+      probe_ip = flowfilter_utils.defined_filters.probe_ip,
+      input_snmp = flowfilter_utils.defined_filters.input_snmp,
+      output_snmp = flowfilter_utils.defined_filters.output_snmp,
+      snmp_interface = flowfilter_utils.defined_filters.snmp_interface,
+      host_location = flowfilter_utils.defined_filters.host_location,
+      cli_location = flowfilter_utils.defined_filters.cli_location,
+      srv_location = flowfilter_utils.defined_filters.srv_location,
+      last_server = flowfilter_utils.defined_filters.last_server,
+      issuer_dn = flowfilter_utils.defined_filters.issuer_dn,
+      l4proto = flowfilter_utils.defined_filters.l4proto,
 
-      cli2srv_bytes = tag_utils.defined_tags.cli2srv_bytes,
-      srv2cli_bytes = tag_utils.defined_tags.srv2cli_bytes,
+      cli2srv_bytes = flowfilter_utils.defined_filters.cli2srv_bytes,
+      srv2cli_bytes = flowfilter_utils.defined_filters.srv2cli_bytes,
 
-      mitre_id = tag_utils.defined_tags.mitre_id,
-      mitre_tactic = tag_utils.defined_tags.mitre_tactic,
-      mitre_technique = tag_utils.defined_tags.mitre_technique,
-      mitre_subtechnique = tag_utils.defined_tags.mitre_subtechnique
+      mitre_id = flowfilter_utils.defined_filters.mitre_id,
+      mitre_tactic = flowfilter_utils.defined_filters.mitre_tactic,
+      mitre_technique = flowfilter_utils.defined_filters.mitre_technique,
+      mitre_subtechnique = flowfilter_utils.defined_filters.mitre_subtechnique
    }
 
    return filters
@@ -1307,7 +1307,7 @@ function flow_alert_store:format_record(value, no_html, verbose)
 
    -- Add link to historical flow
    if ntop.isEnterpriseM() and hasClickHouseSupport() and not no_html and tonumber(value["tstamp"]) and tonumber(value["tstamp_end"]) then
-      local op_suffix = tag_utils.SEPARATOR .. 'eq'
+      local op_suffix = flowfilter_utils.SEPARATOR .. 'eq'
       local href = string.format(
          '%s/lua/pro/db_search.lua?epoch_begin=%u&epoch_end=%u&cli_ip=%s%s&srv_ip=%s%s&cli_port=%s%s&srv_port=%s%s&l4proto=%s%s',
          ntop.getHttpPrefix(), tonumber(value["tstamp"]) - (5 * 60), tonumber(value["tstamp_end"]) + (5 * 60), value["cli_ip"], op_suffix,
