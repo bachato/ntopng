@@ -48,11 +48,11 @@ class LocalHost : public Host {
       asset_map; /* For generic purposes, a <string, string> pair is done */
   struct timeval last_periodic_asset_update;
 
-#ifdef EXPERIMENTAL
+#ifdef NTOPNG_PRO
   struct {
     std::atomic<u_int32_t> num_new_flows_as_client_toward_local_servers,
       num_new_flows_as_client_toward_remote_servers;
-    u_int32_t num_dns_queries_ok, next_flow_stats_reset;
+    u_int32_t next_flow_stats_reset;
     u_int8_t num_consec_threshold_cross;
   } flow_stats;
 #endif
@@ -62,7 +62,10 @@ class LocalHost : public Host {
   void deferredInitialization();
   void freeLocalHostData();
   virtual void deleteHostData();
+
+#ifdef NTOPNG_PRO
   void resetLocalFlowStats();
+#endif
   
   char* getMacBasedSerializationKey(char* redis_key, size_t size, char* mac_key,
                                     bool short_format);
@@ -270,10 +273,10 @@ class LocalHost : public Host {
   bool removeDataFromAssets(char* field);
   void dumpAssetJson(ndpi_serializer* serializer);
   void dumpAssetPortsJson(ndpi_serializer* serializer);
+  void incActiveFlowStats(bool isRemotePeer);
 #endif
 
   void setDeviceType(DeviceType devtype);
-  void incActiveFlowStats(bool isRemotePeer);
 };
 
 #endif /* _LOCAL_HOST_H_ */

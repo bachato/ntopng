@@ -191,8 +191,10 @@ Flow::Flow(NetworkInterface* _iface, int32_t _iface_idx, u_int16_t _vlanId,
     cli_host->incCliContactedPorts(_srv_port);
     cli_ip_addr = cli_host->get_ip();
 
+#ifdef NTOPNG_PRO
     if(cli_host->isLocalHost() && (srv_host != NULL))
-      cli_host->incActiveFlowStats(srv_host->isLocalHost());       
+      cli_host->incActiveFlowStats(srv_host->isLocalHost());
+#endif
   } else {
     /*
       View Interface
