@@ -271,6 +271,10 @@ local mitre_utils = {
         id = 1016,
         i18n_label = "mitre.technique.system_network_conf_discovery"
       },
+      system_info_discovery = {
+        id = 1082,
+        i18n_label = "mitre.technique.system_info_discovery"
+      },
       traffic_signaling = {
         id = 1205,
         i18n_label = "mitre.technique.traffic_signaling"

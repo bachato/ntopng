@@ -6703,6 +6703,7 @@ local lang = {
       ["session_hijacking"] = "Session Hijacking",
       ["steal_web_session_cookie"] = "Steal Web Session Cookie",
       ["system_network_conf_discovery"] = "System Network Configuration Discovery",
+      ["system_info_discovery"] = "System Information Discovery",
       ["traffic_signaling"] = "Traffic Signaling",
       ["user_execution"] = "User Execution",
       ["valid_accounts"] = "Valid Accounts",
