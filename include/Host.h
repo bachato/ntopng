@@ -1022,6 +1022,7 @@ class Host : public GenericHashEntry,
   inline bool isMACmeaningful() {
     return (is_mac_meaningful || isSystemHost());
   }
+  virtual bool isVPNActivityDetected() { return false; }
 };
 
 #endif /* _HOST_H_ */
