@@ -54,16 +54,14 @@ Query id: 97d9131a-dc97-4b1e-958e-c8e2d00b2c87
 
 You can reduce the table TTL (i.e. how long data is kept in memory) of the system tables by using *ALTER TABLE system.XXX MODIFY TTL event_date + INTERVAL 3 DAY;* where XXX is the table you want to use. 
 
-We suggest to reduce the space used by large tables (column site in the above report), and in particular:
- 
- ```
- ALTER TABLE system.query_log MODIFY TTL event_date + INTERVAL 3 DAY;
- ALTER TABLE system.asynchronous_metric_log MODIFY TTL event_date + INTERVAL 3 DAY;
- ALTER TABLE system.metric_log MODIFY TTL event_date + INTERVAL 3 DAY;
- ALTER TABLE system.trace_log MODIFY TTL event_date + INTERVAL 3 DAY;
- ```
- 
- should be enough to reduce disk usage for most setups.
+We suggest to reduce the space used by large tables (column site in the above report), and in particular run this script
+
+```
+clickhouse-client -q "SELECT name FROM system.tables WHERE database = 'system' AND name LIKE '%_log%'" | \
+xargs -I{} clickhouse-client -q "ALTER TABLE system.{} MODIFY TTL event_date + INTERVAL 1 DAY"
+```
+
+to set all tables TTL to one day.
  
 Finally, you need to reduce the disk space used by ClickHouse logs by editing (as root) 
 /etc/clickhouse-server/config.xml and under the <logger> section do:
