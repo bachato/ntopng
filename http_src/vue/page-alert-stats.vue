@@ -417,8 +417,10 @@ const map_table_def_columns = async (columns) => {
         },
         "asn": (info, row) =>{
             return `${DataTableRenders.filterize('asn', info, row.name)}`;
+        },
+        "description": (info, row) => {
+            return info ? info.replace(/\n/g, "<br>") : "";
         }
-
     };
     let set_query_preset_columns = selected_query_preset.value.is_preset && columns.length > 0;
     if (set_query_preset_columns) {
