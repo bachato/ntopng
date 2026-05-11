@@ -274,6 +274,7 @@ class LocalHost : public Host {
   void dumpAssetJson(ndpi_serializer* serializer);
   void dumpAssetPortsJson(ndpi_serializer* serializer);
   void incActiveFlowStats(bool isRemotePeer);
+  bool isVPNActivityDetected();
 #endif
 
   void setDeviceType(DeviceType devtype);
