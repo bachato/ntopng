@@ -9,7 +9,7 @@ const ui_types = {
 	hide: "hide",
 	select: "select",
 	input: "input",
-	input: "input_confirm",
+	input_confirm: "input_confirm",
 };
 
 const sources_url_el_to_source = {
