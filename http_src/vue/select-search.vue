@@ -355,10 +355,10 @@ const render = () => {
     }
     if (!$(select2Div).hasClass("select2-hidden-accessible")) {
         $(select2Div).select2({
-            dropdownParent: $('body'),
             templateResult: formatResult,      // Custom rendering with icons/swatches in dropdown
             templateSelection: formatSelection, // Custom rendering for selected chip
             matcher: matchCustom,               // Hierarchical search matcher
+            dropdownParent: $(select2Div).parent(),  // Parent container for dropdown
             width: '100%',                       // Full width
             theme: props.theme ? props.theme : 'bootstrap-5',  // Theme (default to bootstrap-5)
             dropdownAutoWidth: true,                   // Auto-adjust dropdown width
