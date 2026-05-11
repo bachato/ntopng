@@ -1441,7 +1441,7 @@ class Flow : public GenericHashEntry {
   inline void setFlowDevice(struct ndpi_in6_addr *device_ip, u_int16_t observation_point_id,
                             u_int32_t inidx, u_int32_t outidx) {
     ObservationPoint* obs_point;
-    
+
     memcpy(&flow_device.device_ip, device_ip, sizeof(struct ndpi_in6_addr));
     flow_device.observation_point_id = observation_point_id;
     flow_device.in_index = inidx, flow_device.out_index = outidx;
@@ -1769,6 +1769,9 @@ class Flow : public GenericHashEntry {
   }
 
   inline bool isFirstFlowDump()  { return(last_db_dump.is_first_dump); }
+
+  u_int64_t get_transit_bytes() const;
+  u_int64_t get_peering_bytes() const;
 };
 
 #endif /* _FLOW_H_ */

@@ -10228,3 +10228,21 @@ void Flow::addExporterInfo(struct ndpi_in6_addr *exporter_ip, IpAddress* next_ho
 
   exporterStats.push_back(d);
 }
+
+/* *************************************** */
+
+u_int64_t Flow::get_transit_bytes() const {
+  if(flowExporterInterfaceRole == role_transit)
+    return(get_bytes());
+  else
+    return(0);
+}
+
+/* *************************************** */
+
+u_int64_t Flow::get_peering_bytes() const {
+  if(flowExporterInterfaceRole == role_peering)
+    return(get_bytes());
+  else
+    return(0);
+}

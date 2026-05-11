@@ -51,6 +51,7 @@ void ASNStats::incStats(Flow* flow) {
               dstPeerAS = flow->getDstPeerAS();
     char *src_as_name, *dst_as_name;
     std::map<u_int32_t, ASNTrafficStats>::iterator it;
+
     flow->getSrcAS(&srcAS, &src_as_name);
     flow->getDstAS(&dstAS, &dst_as_name);
 
@@ -63,23 +64,29 @@ void ASNStats::incStats(Flow* flow) {
     /* Now handle the source ASN */
     it = src_asn.find(srcAS);
     if (it == src_asn.end()) {
-      src_asn[srcAS] = {flow->get_bytes_cli2srv(), flow->get_bytes_srv2cli(),
-                        flow->get_bytes()};
+      src_asn[srcAS] = {
+	flow->get_bytes_cli2srv(), flow->get_bytes_srv2cli(),
+	flow->get_transit_bytes(), flow->get_peering_bytes()
+      };
     } else {
-      it->second.bytes_sent += flow->get_bytes_cli2srv();
-      it->second.bytes_rcvd += flow->get_bytes_srv2cli();
-      it->second.total_bytes += flow->get_bytes();
+      it->second.bytes_sent    += flow->get_bytes_cli2srv();
+      it->second.bytes_rcvd    += flow->get_bytes_srv2cli();
+      it->second.transit_bytes += flow->get_transit_bytes();
+      it->second.peering_bytes += flow->get_peering_bytes();
     }
 
     /* Now handle the destination ASN */
     it = dst_asn.find(dstAS);
     if (it == dst_asn.end()) {
-      dst_asn[dstAS] = {flow->get_bytes_srv2cli(), flow->get_bytes_cli2srv(),
-                        flow->get_bytes()};
+      dst_asn[dstAS] = {
+	flow->get_bytes_srv2cli(), flow->get_bytes_cli2srv(),
+	flow->get_transit_bytes(), flow->get_peering_bytes()
+      };
     } else {
-      it->second.bytes_sent += flow->get_bytes_srv2cli();
-      it->second.bytes_rcvd += flow->get_bytes_cli2srv();
-      it->second.total_bytes += flow->get_bytes();
+      it->second.bytes_sent    += flow->get_bytes_srv2cli();
+      it->second.bytes_rcvd    += flow->get_bytes_cli2srv();
+      it->second.transit_bytes += flow->get_transit_bytes();
+      it->second.peering_bytes += flow->get_peering_bytes();
     }
   }
 }
@@ -101,17 +108,18 @@ void ASNStats::lua(lua_State* vm, bool show_all_stats) {
 
   lua_newtable(vm);
   for (it2 = src_asn.begin(); it2 != src_asn.end(); it2++) {
+    u_int64_t total_bytes = it2->second.bytes_sent + it2->second.bytes_rcvd;
+
     if (show_all_stats) {
       lua_newtable(vm);
       lua_push_uint64_table_entry(vm, "bytes_sent", it2->second.bytes_sent);
       lua_push_uint64_table_entry(vm, "bytes_rcvd", it2->second.bytes_rcvd);
-      lua_push_uint64_table_entry(vm, "total_bytes", it2->second.total_bytes);
+      lua_push_uint64_table_entry(vm, "total_bytes", total_bytes);
       lua_pushstring(vm, std::to_string(it2->first).c_str());
       lua_insert(vm, -2);
       lua_settable(vm, -3);
     } else {
-      lua_push_uint64_table_entry(vm, std::to_string(it2->first).c_str(),
-                                  it2->second.total_bytes);
+      lua_push_uint64_table_entry(vm, std::to_string(it2->first).c_str(), total_bytes);
     }
   }
   lua_pushstring(vm, "src_asn");
@@ -120,17 +128,19 @@ void ASNStats::lua(lua_State* vm, bool show_all_stats) {
 
   lua_newtable(vm);
   for (it2 = dst_asn.begin(); it2 != dst_asn.end(); it2++) {
+    u_int64_t total_bytes = it2->second.bytes_sent + it2->second.bytes_rcvd;
+
     if (show_all_stats) {
       lua_newtable(vm);
       lua_push_uint64_table_entry(vm, "bytes_sent", it2->second.bytes_sent);
       lua_push_uint64_table_entry(vm, "bytes_rcvd", it2->second.bytes_rcvd);
-      lua_push_uint64_table_entry(vm, "total_bytes", it2->second.total_bytes);
+      lua_push_uint64_table_entry(vm, "total_bytes", total_bytes);
       lua_pushstring(vm, std::to_string(it2->first).c_str());
       lua_insert(vm, -2);
       lua_settable(vm, -3);
     } else {
       lua_push_uint64_table_entry(vm, std::to_string(it2->first).c_str(),
-                                  it2->second.total_bytes);
+                                  total_bytes);
     }
   }
   lua_pushstring(vm, "dst_asn");
