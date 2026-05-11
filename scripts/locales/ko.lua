@@ -2109,7 +2109,7 @@ local lang = {
       ["vlan_id"] = "모든 VLAN",
       ["host_pool"] = "모든 호스트 풀",
     },
-    ["tags"] = {
+    ["flowfilters"] = {
       ["acknowledged"] = "확인됨",
       ["alert_category"] = "범주",
       ["alert_description"] = "설명",

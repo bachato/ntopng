@@ -2116,7 +2116,7 @@ local lang = {
       ["probe_ip"] = "Alle Exporteure",
       ["vlan_id"] = "Alle VLANs",
     },
-    ["tags"] = {
+    ["flowfilters"] = {
       ["acknowledged"] = "Anerkannt",
       ["alert_category"] = "Kategorie",
       ["alert_description"] = "Beschreibung",

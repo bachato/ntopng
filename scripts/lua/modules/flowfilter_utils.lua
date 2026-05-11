@@ -77,28 +77,28 @@ flowfilter_utils.defined_filters = {
     alert_id = {
         type = flowfilter_utils.input_types.select,
         value_type = 'alert_id',
-        i18n_label = i18n('db_search.tags.alert_id'),
+        i18n_label = i18n('db_search.flowfilters.alert_id'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     alert_category = {
         type = flowfilter_utils.input_types.select,
         value_type = 'alert_category',
-        i18n_label = i18n('db_search.tags.alert_category'),
+        i18n_label = i18n('db_search.flowfilters.alert_category'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     l7proto = {
         type = flowfilter_utils.input_types.select,
         value_type = 'l7_proto',
-        i18n_label = i18n('db_search.tags.l7_proto'),
+        i18n_label = i18n('db_search.flowfilters.l7_proto'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     l7proto_master = {
         type = flowfilter_utils.input_types.select,
         value_type = 'l7_proto',
-        i18n_label = i18n('db_search.tags.l7_proto'),
+        i18n_label = i18n('db_search.flowfilters.l7_proto'),
         operators = {'eq', 'neq'},
         hide = true,
         hourly_available = true
@@ -106,28 +106,28 @@ flowfilter_utils.defined_filters = {
     l7cat = {
         type = flowfilter_utils.input_types.select,
         value_type = 'l7_category',
-        i18n_label = i18n('db_search.tags.l7cat'),
+        i18n_label = i18n('db_search.flowfilters.l7cat'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     flow_risk = {
         type = flowfilter_utils.input_types.select,
         value_type = 'flow_risk',
-        i18n_label = i18n('db_search.tags.flow_risk'),
+        i18n_label = i18n('db_search.flowfilters.flow_risk'),
         operators = {'eq', 'neq', 'in', 'nin'},
         hourly_available = false
     },
     flow_label = {
         type = flowfilter_utils.input_types.select,
         value_type = 'label_id',
-        i18n_label = i18n('db_search.tags.flow_label'),
+        i18n_label = i18n('db_search.flowfilters.flow_label'),
         operators = {'in', 'nin'},
         hourly_available = true
     },
     l4proto = {
         type = flowfilter_utils.input_types.select,
         value_type = 'l4_proto',
-        i18n_label = i18n('db_search.tags.l4proto'),
+        i18n_label = i18n('db_search.flowfilters.l4proto'),
         operators = {'eq', 'neq'},
         bpf_key = 'ip proto',
         hourly_available = true
@@ -135,48 +135,48 @@ flowfilter_utils.defined_filters = {
     ip_version = {
         type = flowfilter_utils.input_types.select,
         value_type = 'ip_version',
-        i18n_label = i18n('db_search.tags.ip_version'),
+        i18n_label = i18n('db_search.flowfilters.ip_version'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     ip = {
         value_type = 'ip,cidr', -- Set to 'ip' to accept IP only
-        i18n_label = i18n('db_search.tags.ip'),
+        i18n_label = i18n('db_search.flowfilters.ip'),
         operators = {'eq', 'neq'},
         bpf_key = 'ip host',
         hourly_available = true
     },
     cli_ip = {
         value_type = 'ip,cidr', -- Set to 'ip' to accept IP only
-        i18n_label = i18n('db_search.tags.cli_ip'),
+        i18n_label = i18n('db_search.flowfilters.cli_ip'),
         operators = {'eq', 'neq'},
         bpf_key = 'ip host',
         hourly_available = true
     },
     srv_ip = {
         value_type = 'ip,cidr', -- Set to 'ip' to accept IP only
-        i18n_label = i18n('db_search.tags.srv_ip'),
+        i18n_label = i18n('db_search.flowfilters.srv_ip'),
         operators = {'eq', 'neq'},
         bpf_key = 'ip host',
         hourly_available = true
     },
     network_cidr = {
         value_type = 'cidr',
-        i18n_label = i18n('db_search.tags.network_cidr'),
+        i18n_label = i18n('db_search.flowfilters.network_cidr'),
         operators = {'eq', 'neq'},
         bpf_key = 'net',
         hourly_available = true
     },
     cli_network_cidr = {
         value_type = 'cidr',
-        i18n_label = i18n('db_search.tags.cli_network_cidr'),
+        i18n_label = i18n('db_search.flowfilters.cli_network_cidr'),
         operators = {'eq', 'neq'},
         bpf_key = 'net',
         hourly_available = true
     },
     srv_network_cidr = {
         value_type = 'cidr',
-        i18n_label = i18n('db_search.tags.srv_network_cidr'),
+        i18n_label = i18n('db_search.flowfilters.srv_network_cidr'),
         operators = {'eq', 'neq'},
         bpf_key = 'net',
         hourly_available = true
@@ -184,45 +184,45 @@ flowfilter_utils.defined_filters = {
     traffic_direction = {
         type = flowfilter_utils.input_types.select,
         value_type = 'traffic_direction',
-        i18n_label = i18n('db_search.tags.traffic_direction'),
+        i18n_label = i18n('db_search.flowfilters.traffic_direction'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     name = {
         value_type = 'hostname',
-        i18n_label = i18n('db_search.tags.name'),
+        i18n_label = i18n('db_search.flowfilters.name'),
         operators = {'eq', 'neq', 'in', 'nin'},
         hourly_available = true
     },
     cli_name = {
         value_type = 'hostname',
-        i18n_label = i18n('db_search.tags.cli_name'),
+        i18n_label = i18n('db_search.flowfilters.cli_name'),
         operators = {'eq', 'neq', 'in', 'nin'},
         hourly_available = true
     },
     srv_name = {
         value_type = 'hostname',
-        i18n_label = i18n('db_search.tags.srv_name'),
+        i18n_label = i18n('db_search.flowfilters.srv_name'),
         operators = {'eq', 'neq', 'in', 'nin'},
         hourly_available = true
     },
     network_name = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.network_name'),
+        i18n_label = i18n('db_search.flowfilters.network_name'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     src2dst_dscp = {
         type = flowfilter_utils.input_types.select,
         value_type = 'dscp_type',
-        i18n_label = i18n('db_search.tags.src2dst_dscp'),
+        i18n_label = i18n('db_search.flowfilters.src2dst_dscp'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     dst2src_dscp = {
         type = flowfilter_utils.input_types.select,
         value_type = 'dscp_type',
-        i18n_label = i18n('db_search.tags.dst2src_dscp'),
+        i18n_label = i18n('db_search.flowfilters.dst2src_dscp'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
@@ -234,14 +234,14 @@ flowfilter_utils.defined_filters = {
     },
     cli_port = {
         value_type = 'port',
-        i18n_label = i18n('db_search.tags.cli_port'),
+        i18n_label = i18n('db_search.flowfilters.cli_port'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         bpf_key = 'port',
         hourly_available = false
     },
     srv_port = {
         value_type = 'port',
-        i18n_label = i18n('db_search.tags.srv_port'),
+        i18n_label = i18n('db_search.flowfilters.srv_port'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         bpf_key = 'port',
         hourly_available = true
@@ -249,111 +249,111 @@ flowfilter_utils.defined_filters = {
     country = {
         type = flowfilter_utils.input_types.select,
         value_type = 'country',
-        i18n_label = i18n('db_search.tags.country'),
+        i18n_label = i18n('db_search.flowfilters.country'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     cli_country = {
         type = flowfilter_utils.input_types.select,
         value_type = 'country',
-        i18n_label = i18n('db_search.tags.cli_country'),
+        i18n_label = i18n('db_search.flowfilters.cli_country'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     srv_country = {
         type = flowfilter_utils.input_types.select,
         value_type = 'country',
-        i18n_label = i18n('db_search.tags.srv_country'),
+        i18n_label = i18n('db_search.flowfilters.srv_country'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     asn = {
         value_type = 'asn',
-        i18n_label = i18n('db_search.tags.asn'),
+        i18n_label = i18n('db_search.flowfilters.asn'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     cli_asn = {
         value_type = 'asn',
-        i18n_label = i18n('db_search.tags.cli_asn'),
+        i18n_label = i18n('db_search.flowfilters.cli_asn'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     srv_asn = {
         value_type = 'asn',
-        i18n_label = i18n('db_search.tags.srv_asn'),
+        i18n_label = i18n('db_search.flowfilters.srv_asn'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     src_peer_asn = {
         value_type = 'asn',
-        i18n_label = i18n('db_search.tags.src_peer_asn'),
+        i18n_label = i18n('db_search.flowfilters.src_peer_asn'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     dst_peer_asn = {
         value_type = 'asn',
-        i18n_label = i18n('db_search.tags.dst_peer_asn'),
+        i18n_label = i18n('db_search.flowfilters.dst_peer_asn'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     cli_nw_latency = {
         value_type = 'nw_latency_type',
-        i18n_label = i18n('db_search.tags.cli_nw_latency'),
+        i18n_label = i18n('db_search.flowfilters.cli_nw_latency'),
         operators = {'eq', 'lt', 'gt', 'lte', 'gte'},
         hourly_available = false
     },
     srv_nw_latency = {
         value_type = 'nw_latency_type',
-        i18n_label = i18n('db_search.tags.srv_nw_latency'),
+        i18n_label = i18n('db_search.flowfilters.srv_nw_latency'),
         operators = {'eq', 'lt', 'gt', 'lte', 'gte'},
         hourly_available = false
     },
     observation_point_id = {
         type = flowfilter_utils.input_types.select,
         value_type = 'observation_point_id',
-        i18n_label = i18n('db_search.tags.observation_point_id'),
+        i18n_label = i18n('db_search.flowfilters.observation_point_id'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     probe_ip = {
         type = flowfilter_utils.input_types.select_with_input,
         value_type = 'probe_ip',
-        i18n_label = i18n('db_search.tags.probe_ip'),
+        i18n_label = i18n('db_search.flowfilters.probe_ip'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     exporter_site = {
         type = flowfilter_utils.input_types.select,
         value_type = 'exporter_site',
-        i18n_label = i18n('db_search.tags.exporter_site'),
+        i18n_label = i18n('db_search.flowfilters.exporter_site'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     vlan_id = {
         value_type = 'vlan_id',
-        i18n_label = i18n('db_search.tags.vlan_id'),
+        i18n_label = i18n('db_search.flowfilters.vlan_id'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = true
     },
     snmp_interface = {
         type = flowfilter_utils.input_types.select,
         value_type = 'snmp_interface',
-        i18n_label = i18n('db_search.tags.snmp_interface'),
+        i18n_label = i18n('db_search.flowfilters.snmp_interface'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     input_snmp = {
         type = flowfilter_utils.input_types.select,
         value_type = 'snmp_interface',
-        i18n_label = i18n('db_search.tags.input_snmp'),
+        i18n_label = i18n('db_search.flowfilters.input_snmp'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     output_snmp = {
         type = flowfilter_utils.input_types.select,
         value_type = 'snmp_interface',
-        i18n_label = i18n('db_search.tags.output_snmp'),
+        i18n_label = i18n('db_search.flowfilters.output_snmp'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
@@ -379,53 +379,53 @@ flowfilter_utils.defined_filters = {
     alert_status = {
         type = flowfilter_utils.input_types.select,
         value_type = 'alert_status',
-        i18n_label = i18n('db_search.tags.alert_status'),
+        i18n_label = i18n('db_search.flowfilters.alert_status'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     require_attention = {
         value_type = 'boolean',
-        i18n_label = i18n('db_search.tags.require_attention'),
+        i18n_label = i18n('db_search.flowfilters.require_attention'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     severity = {
         type = flowfilter_utils.input_types.select,
         value_type = 'severity',
-        i18n_label = i18n('db_search.tags.severity'),
+        i18n_label = i18n('db_search.flowfilters.severity'),
         operators = {'eq', 'lte', 'gte', 'neq'},
         hourly_available = false
     },
     score = {
         value_type = 'score',
-        i18n_label = i18n('db_search.tags.score'),
+        i18n_label = i18n('db_search.flowfilters.score'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = true
     },
     qoe_score = {
         type = flowfilter_utils.input_types.select,
         value_type = 'qoe_score',
-        i18n_label = i18n('db_search.tags.qoe'),
+        i18n_label = i18n('db_search.flowfilters.qoe'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = false
     },
     mac = {
         value_type = 'mac',
-        i18n_label = i18n('db_search.tags.mac'),
+        i18n_label = i18n('db_search.flowfilters.mac'),
         operators = {'eq', 'neq'},
         bpf_key = 'ether host',
         hourly_available = true
     },
     cli_mac = {
         value_type = 'mac',
-        i18n_label = i18n('db_search.tags.cli_mac'),
+        i18n_label = i18n('db_search.flowfilters.cli_mac'),
         operators = {'eq', 'neq'},
         bpf_key = 'ether host',
         hourly_available = true
     },
     srv_mac = {
         value_type = 'mac',
-        i18n_label = i18n('db_search.tags.srv_mac'),
+        i18n_label = i18n('db_search.flowfilters.srv_mac'),
         operators = {'eq', 'neq'},
         bpf_key = 'ether host',
         hourly_available = true
@@ -433,33 +433,33 @@ flowfilter_utils.defined_filters = {
     network = {
         type = flowfilter_utils.input_types.select,
         value_type = 'network_id',
-        i18n_label = i18n('db_search.tags.network'),
+        i18n_label = i18n('db_search.flowfilters.network'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     cli_network = {
         type = flowfilter_utils.input_types.select,
         value_type = 'network_id',
-        i18n_label = i18n('db_search.tags.cli_network'),
+        i18n_label = i18n('db_search.flowfilters.cli_network'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     srv_network = {
         type = flowfilter_utils.input_types.select,
         value_type = 'network_id',
-        i18n_label = i18n('db_search.tags.srv_network'),
+        i18n_label = i18n('db_search.flowfilters.srv_network'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     info = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.info'),
+        i18n_label = i18n('db_search.flowfilters.info'),
         operators = {'eq', 'neq', 'in', 'nin', 'empty', 'nempty'},
         hourly_available = false
     },
     bytes = {
         value_type = 'bytes',
-        i18n_label = i18n('db_search.tags.bytes'),
+        i18n_label = i18n('db_search.flowfilters.bytes'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = true
     },
@@ -479,7 +479,7 @@ flowfilter_utils.defined_filters = {
     },
     packets = {
         value_type = 'packets',
-        i18n_label = i18n('db_search.tags.packets'),
+        i18n_label = i18n('db_search.flowfilters.packets'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = true
     },
@@ -497,109 +497,109 @@ flowfilter_utils.defined_filters = {
     },
     number = {
         value_type = 'number',
-        i18n_label = i18n('db_search.tags.number'),
+        i18n_label = i18n('db_search.flowfilters.number'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = false
     },
     out_of_order = {
         value_type = 'number',
-        i18n_label = i18n('db_search.tags.out_of_order'),
+        i18n_label = i18n('db_search.flowfilters.out_of_order'),
         operators = {'eq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = false
     },
     lost = {
         value_type = 'number',
-        i18n_label = i18n('db_search.tags.lost'),
+        i18n_label = i18n('db_search.flowfilters.lost'),
         operators = {'eq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = false
     },
     retransmissions = {
         value_type = 'number',
-        i18n_label = i18n('db_search.tags.retransmissions'),
+        i18n_label = i18n('db_search.flowfilters.retransmissions'),
         operators = {'eq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = false
     },
     flows_number = {
         value_type = 'number',
-        i18n_label = i18n('db_search.tags.flows_number'),
+        i18n_label = i18n('db_search.flowfilters.flows_number'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = true
     },
     host_pool = {
         type = flowfilter_utils.input_types.select,
         value_type = 'host_pool',
-        i18n_label = i18n('db_search.tags.host_pool_id'),
+        i18n_label = i18n('db_search.flowfilters.host_pool_id'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = true
     },
     cli_host_pool_id = {
         type = flowfilter_utils.input_types.select,
         value_type = 'host_pool_id',
-        i18n_label = i18n('db_search.tags.cli_host_pool_id'),
+        i18n_label = i18n('db_search.flowfilters.cli_host_pool_id'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = true
     },
     srv_host_pool_id = {
         type = flowfilter_utils.input_types.select,
         value_type = 'host_pool_id',
-        i18n_label = i18n('db_search.tags.srv_host_pool_id'),
+        i18n_label = i18n('db_search.flowfilters.srv_host_pool_id'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = true
     },
     subtype = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.subtype'),
+        i18n_label = i18n('db_search.flowfilters.subtype'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     role = {
         type = flowfilter_utils.input_types.select,
         value_type = 'role',
-        i18n_label = i18n('db_search.tags.role'),
+        i18n_label = i18n('db_search.flowfilters.role'),
         operators = {'eq'},
         hourly_available = false
     },
     role_cli_srv = {
         type = flowfilter_utils.input_types.select,
         value_type = 'role_cli_srv',
-        i18n_label = i18n('db_search.tags.role_cli_srv'),
+        i18n_label = i18n('db_search.flowfilters.role_cli_srv'),
         operators = {'eq'},
         hourly_available = false
     },
     l7_error_id = {
         value_type = 'l7_error_id',
-        i18n_label = i18n('db_search.tags.error_code'),
+        i18n_label = i18n('db_search.flowfilters.error_code'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     confidence = {
         type = flowfilter_utils.input_types.select,
         value_type = 'confidence',
-        i18n_label = i18n('db_search.tags.confidence'),
+        i18n_label = i18n('db_search.flowfilters.confidence'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     community_id = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.community_id'),
+        i18n_label = i18n('db_search.flowfilters.community_id'),
         operators = {'eq', 'neq', 'in', 'nin', 'empty', 'nempty'},
         hourly_available = false
     },
     cli_fingerprint = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.cli_fingerprint'),
+        i18n_label = i18n('db_search.flowfilters.cli_fingerprint'),
         operators = {'eq', 'neq', 'empty', 'nempty'},
         hourly_available = false
     },
     tcp_fingerprint = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.tcp_fingerprint'),
+        i18n_label = i18n('db_search.flowfilters.tcp_fingerprint'),
         operators = {'eq', 'neq', 'empty', 'nempty'},
         hourly_available = false
     },
     ndpi_fingerprint = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.ndpi_fingerprint'),
+        i18n_label = i18n('db_search.flowfilters.ndpi_fingerprint'),
         operators = {'eq', 'neq', 'empty', 'nempty'},
         hourly_available = false
     },
@@ -611,209 +611,209 @@ flowfilter_utils.defined_filters = {
     http_method = {
         type = flowfilter_utils.input_types.select,
         value_type = 'http_method',
-        i18n_label = i18n('db_search.tags.http_method'),
+        i18n_label = i18n('db_search.flowfilters.http_method'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     http_return = {
         type = flowfilter_utils.input_types.select,
         value_type = 'http_return',
-        i18n_label = i18n('db_search.tags.http_return_code'),
+        i18n_label = i18n('db_search.flowfilters.http_return_code'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     http_url = {
         value_type = 'http_url',
-        i18n_label = i18n('db_search.tags.http_url'),
+        i18n_label = i18n('db_search.flowfilters.http_url'),
         operators = {'eq', 'neq', 'in', 'nin'},
         hourly_available = false
     },
     issuer_dn = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.issuer_dn'),
+        i18n_label = i18n('db_search.flowfilters.issuer_dn'),
         operators = {'eq', 'neq', 'in', 'nin', 'empty', 'nempty'},
         hourly_available = false
     },
     user_agent = {
         value_type = 'user_agent',
-        i18n_label = i18n('db_search.tags.user_agent'),
+        i18n_label = i18n('db_search.flowfilters.user_agent'),
         operators = {'eq', 'neq', 'in', 'nin', 'empty', 'nempty'},
         hourly_available = false
     },
     last_server = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.last_server'),
+        i18n_label = i18n('db_search.flowfilters.last_server'),
         operators = {'eq', 'neq', 'in', 'nin'},
         hourly_available = false
     },
     netbios_name = {
         value_type = 'netbios_name',
-        i18n_label = i18n('db_search.tags.netbios_name'),
+        i18n_label = i18n('db_search.flowfilters.netbios_name'),
         operators = {'eq', 'neq', 'in', 'nin'},
         hourly_available = false
     },
     dns_query = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.dns_query'),
+        i18n_label = i18n('db_search.flowfilters.dns_query'),
         operators = {'eq', 'neq', 'in', 'nin', 'empty', 'nempty'},
         hourly_available = false
     },
     dns_answer = {
         value_type = 'dns_answer',
-        i18n_label = i18n('db_search.tags.dns_answer'),
+        i18n_label = i18n('db_search.flowfilters.dns_answer'),
         operators = {'eq', 'neq', 'in', 'nin'},
         hourly_available = false
     },
     mdns_answer = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.mdns_answer'),
+        i18n_label = i18n('db_search.flowfilters.mdns_answer'),
         operators = {'eq', 'neq', 'empty', 'nempty'},
         hourly_available = false
     },
     mdns_name = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.mdns_name'),
+        i18n_label = i18n('db_search.flowfilters.mdns_name'),
         operators = {'eq', 'neq', 'in', 'nin', 'empty', 'nempty'},
         hourly_available = false
     },
     mdns_name_txt = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.mdns_name_txt'),
+        i18n_label = i18n('db_search.flowfilters.mdns_name_txt'),
         operators = {'eq', 'neq', 'in', 'nin', 'empty', 'nempty'},
         hourly_available = false
     },
     mdns_ssid = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.mdns_ssid'),
+        i18n_label = i18n('db_search.flowfilters.mdns_ssid'),
         operators = {'eq', 'neq', 'in', 'nin', 'empty', 'nempty'},
         hourly_available = false
     },
     domain_name = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.domain_name'),
+        i18n_label = i18n('db_search.flowfilters.domain_name'),
         operators = {'eq', 'neq', 'in', 'nin', 'empty', 'nempty'},
         hourly_available = false
     },
     alert_domain = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.dga_domain_name'),
+        i18n_label = i18n('db_search.flowfilters.dga_domain_name'),
         operators = {'eq', 'neq', 'in', 'nin', 'empty', 'nempty'},
         hourly_available = false
     },
     cli_location = {
         type = flowfilter_utils.input_types.select,
         value_type = 'location',
-        i18n_label = i18n('db_search.tags.cli_location'),
+        i18n_label = i18n('db_search.flowfilters.cli_location'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     srv_location = {
         type = flowfilter_utils.input_types.select,
         value_type = 'location',
-        i18n_label = i18n('db_search.tags.srv_location'),
+        i18n_label = i18n('db_search.flowfilters.srv_location'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     host_location = {
         type = flowfilter_utils.input_types.select,
         value_type = 'location',
-        i18n_label = i18n('db_search.tags.host_location'),
+        i18n_label = i18n('db_search.flowfilters.host_location'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     cli_proc_name = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.cli_proc_name'),
+        i18n_label = i18n('db_search.flowfilters.cli_proc_name'),
         operators = {'eq', 'neq', 'empty', 'nempty'},
         hourly_available = false
     },
     srv_proc_name = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.srv_proc_name'),
+        i18n_label = i18n('db_search.flowfilters.srv_proc_name'),
         operators = {'eq', 'neq', 'empty', 'nempty'},
         hourly_available = false
     },
     cli_user_name = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.cli_user_name'),
+        i18n_label = i18n('db_search.flowfilters.cli_user_name'),
         operators = {'eq', 'neq', 'empty', 'nempty'},
         hourly_available = false
     },
     srv_user_name = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.srv_user_name'),
+        i18n_label = i18n('db_search.flowfilters.srv_user_name'),
         operators = {'eq', 'neq', 'empty', 'nempty'},
         hourly_available = false
     },
     major_connection_state = {
         type = flowfilter_utils.input_types.select,
         value_type = 'major_connection_state',
-        i18n_label = i18n("db_search.tags.major_connection_state"),
+        i18n_label = i18n("db_search.flowfilters.major_connection_state"),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     minor_connection_state = {
         type = flowfilter_utils.input_types.select,
         value_type = 'minor_connection_state',
-        i18n_label = i18n("db_search.tags.minor_connection_state"),
+        i18n_label = i18n("db_search.flowfilters.minor_connection_state"),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     post_nat_ipv4_src_addr = {
         value_type = 'ip',
-        i18n_label = i18n("db_search.tags.post_nat_ipv4_src_addr"),
+        i18n_label = i18n("db_search.flowfilters.post_nat_ipv4_src_addr"),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     post_nat_ipv4_dst_addr = {
         value_type = 'ip',
-        i18n_label = i18n("db_search.tags.post_nat_ipv4_dst_addr"),
+        i18n_label = i18n("db_search.flowfilters.post_nat_ipv4_dst_addr"),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     post_nat_src_port = {
         value_type = 'port',
-        i18n_label = i18n("db_search.tags.post_nat_src_port"),
+        i18n_label = i18n("db_search.flowfilters.post_nat_src_port"),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     post_nat_dst_port = {
         value_type = 'port',
-        i18n_label = i18n("db_search.tags.post_nat_dst_port"),
+        i18n_label = i18n("db_search.flowfilters.post_nat_dst_port"),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     description = {
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.alert_description'),
+        i18n_label = i18n('db_search.flowfilters.alert_description'),
         operators = {'in', 'empty', 'nempty'},
         hourly_available = false
     },
     mitre_tactic = {
         type = flowfilter_utils.input_types.select,
         value_type = 'mitre_tactic',
-        i18n_label = i18n('db_search.tags.mitre_tactic'),
+        i18n_label = i18n('db_search.flowfilters.mitre_tactic'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     mitre_technique = {
         type = flowfilter_utils.input_types.select,
         value_type = 'mitre_technique',
-        i18n_label = i18n('db_search.tags.mitre_technique'),
+        i18n_label = i18n('db_search.flowfilters.mitre_technique'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     mitre_subtechnique = {
         type = flowfilter_utils.input_types.select,
         value_type = 'mitre_subtechnique',
-        i18n_label = i18n('db_search.tags.mitre_subtechnique'),
+        i18n_label = i18n('db_search.flowfilters.mitre_subtechnique'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     mitre_id = {
         type = flowfilter_utils.input_types.select,
         value_type = 'mitre_id',
-        i18n_label = i18n('db_search.tags.mitre_id'),
+        i18n_label = i18n('db_search.flowfilters.mitre_id'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
@@ -821,47 +821,47 @@ flowfilter_utils.defined_filters = {
         -- type = flowfilter_utils.input_types.select,
         -- value_type = 'wlan_ssid',
         value_type = 'text',
-        i18n_label = i18n('db_search.tags.wlan_ssid'),
+        i18n_label = i18n('db_search.flowfilters.wlan_ssid'),
         operators = {'eq', 'neq', 'in', 'nin', 'empty', 'nempty'}
     },
     apn_mac = {
         value_type = 'mac',
-        i18n_label = i18n('db_search.tags.apn_mac'),
+        i18n_label = i18n('db_search.flowfilters.apn_mac'),
         operators = {'eq', 'neq'}
     },
     is_srv_blacklisted = {
         value_type = 'boolean',
-        i18n_label = i18n('db_search.tags.is_srv_blacklisted'),
+        i18n_label = i18n('db_search.flowfilters.is_srv_blacklisted'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     is_cli_blacklisted = {
         value_type = 'boolean',
-        i18n_label = i18n('db_search.tags.is_cli_blacklisted'),
+        i18n_label = i18n('db_search.flowfilters.is_cli_blacklisted'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     is_srv_victim = {
         value_type = 'boolean',
-        i18n_label = i18n('db_search.tags.is_srv_victim'),
+        i18n_label = i18n('db_search.flowfilters.is_srv_victim'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     is_cli_victim = {
         value_type = 'boolean',
-        i18n_label = i18n('db_search.tags.is_cli_victim'),
+        i18n_label = i18n('db_search.flowfilters.is_cli_victim'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     is_srv_attacker = {
         value_type = 'boolean',
-        i18n_label = i18n('db_search.tags.is_srv_attacker'),
+        i18n_label = i18n('db_search.flowfilters.is_srv_attacker'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
     is_cli_attacker = {
         value_type = 'boolean',
-        i18n_label = i18n('db_search.tags.is_cli_attacker'),
+        i18n_label = i18n('db_search.flowfilters.is_cli_attacker'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
@@ -875,19 +875,19 @@ flowfilter_utils.defined_filters = {
     ntopng_interface = {
         type = flowfilter_utils.input_types.select,
         value_type = 'interface_id',
-        i18n_label = i18n('db_search.tags.ntopng_interface'),
+        i18n_label = i18n('db_search.flowfilters.ntopng_interface'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
     first_seen = {
         value_type = 'number',
-        i18n_label = i18n('db_search.tags.first_seen'),
+        i18n_label = i18n('db_search.flowfilters.first_seen'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = true
     },
     last_seen = {
         value_type = 'number',
-        i18n_label = i18n('db_search.tags.last_seen'),
+        i18n_label = i18n('db_search.flowfilters.last_seen'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = true
     }
@@ -1415,7 +1415,7 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
             if (id ~= 0) then
                 filter.options[#filter.options + 1] = {
                     value = id,
-                    label = i18n(string.format("db_search.tags.minor_connection_states.%u", id))
+                    label = i18n(string.format("db_search.flowfilters.minor_connection_states.%u", id))
                 }
             end
         end
@@ -1930,8 +1930,8 @@ function flowfilter_utils.build_bpf(filters)
 
     local n = 0
 
-    local and_tags = {}
-    local or_tags = {}
+    local and_filters = {}
+    local or_filters = {}
 
     -- Build 'or' groups (same key)
     for key, _value in pairs(filters) do
@@ -1950,7 +1950,7 @@ function flowfilter_utils.build_bpf(filters)
             local op = "eq" -- default
             local bpf_val = value
 
-            -- tags has value formatted in this way: (e.g.) cli_port = 888,eq
+            -- filters has value formatted in this way: (e.g.) cli_port = 888,eq
             -- it means, search for values with port == 888
             local splitted_value = split(value, flowfilter_utils.SEPARATOR)
 
@@ -1981,16 +1981,16 @@ function flowfilter_utils.build_bpf(filters)
             end
 
             if op == "neq" then -- All 'neq' with the same key are in 'and'
-                if and_tags[key] then
-                    and_tags[key] = and_tags[key] .. " AND " .. cond
+                if and_filters[key] then
+                    and_filters[key] = and_filters[key] .. " AND " .. cond
                 else
-                    and_tags[key] = cond
+                    and_filters[key] = cond
                 end
             else -- All other operators with the same key are in 'or'
-                if or_tags[key] then
-                    or_tags[key] = or_tags[key] .. " OR " .. cond
+                if or_filters[key] then
+                    or_filters[key] = or_filters[key] .. " OR " .. cond
                 else
-                    or_tags[key] = cond
+                    or_filters[key] = cond
                 end
             end
 
@@ -2009,7 +2009,7 @@ function flowfilter_utils.build_bpf(filters)
     -- Join all groups with 'and'
 
     -- AND groups
-    for key, value in pairs(and_tags) do
+    for key, value in pairs(and_filters) do
         if isEmptyString(bpf) then
             bpf = "(" .. value .. ")"
         else
@@ -2018,7 +2018,7 @@ function flowfilter_utils.build_bpf(filters)
     end
 
     -- OR groups
-    for key, value in pairs(or_tags) do
+    for key, value in pairs(or_filters) do
         if isEmptyString(bpf) then
             bpf = "(" .. value .. ")"
         else

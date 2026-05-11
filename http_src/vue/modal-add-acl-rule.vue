@@ -130,9 +130,9 @@ const feedback = ref('');
 const error = ref(i18n('acl_page.error_detected'))
 const title = ref(i18n('acl_page.add_acl_rule'));
 const new_rules_array = ref([])
-const client_ip_place_holder = ref(_i18n('db_search.tags.cli_ip'))
-const client_mac_place_holder = ref(_i18n('db_search.tags.cli_mac'))
-const server_ip_place_holder = ref(_i18n('db_search.tags.srv_ip'))
+const client_ip_place_holder = ref(_i18n('db_search.flowfilters.cli_ip'))
+const client_mac_place_holder = ref(_i18n('db_search.flowfilters.cli_mac'))
+const server_ip_place_holder = ref(_i18n('db_search.flowfilters.srv_ip'))
 const notes_placeholder = ref(_i18n('acl_page.notes'))
 const port_place_holder = ref(_i18n('port'))
 

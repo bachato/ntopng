@@ -1229,158 +1229,158 @@ end
 -- - dt_func is used to convert the value in the format expected by the js datatable
 -- - order is used to sort the fields in the flow details
 local flow_columns = {
-   ['FLOW_ID'] =              { tag = "rowid", db_type = "Number", db_raw_type = "Uint64" },
+   ['FLOW_ID'] =              { flowfilter = "rowid", db_type = "Number", db_raw_type = "Uint64" },
    ['IP_PROTOCOL_VERSION'] =  { db_type = "Number", db_raw_type = "Uint8" },
-   ['FIRST_SEEN'] =           { tag = "first_seen",   dt_func = dt_format_time_with_highlight, db_type = "DateTime", db_raw_type = "DateTime" },
-   ['LAST_SEEN'] =            { tag = "last_seen",    dt_func = dt_format_time, db_type = "DateTime", db_raw_type = "DateTime" },
-   ['VLAN_ID'] =              { tag = "vlan_id",      dt_func = dt_format_vlan, db_type = "Number", db_raw_type = "Uint16" },
-   ['PACKETS'] =              { tag = "packets",      dt_func = dt_format_pkts, db_type = "Number", db_raw_type = "Uint32" },
-   ['TOTAL_BYTES'] =          { tag = "bytes",        dt_func = dt_format_bytes, js_chart_func = "bytesToSize", db_type = "Number", db_raw_type = "Uint64" },
-   ['SRC2DST_BYTES'] =        { tag = "cli2srv_bytes", dt_func = dt_format_bytes, js_chart_func = "bytesToSize", db_type = "Number", db_raw_type = "Uint64" },
-   ['DST2SRC_BYTES'] =        { tag = "srv2cli_bytes", dt_func = dt_format_bytes, js_chart_func = "bytesToSize", db_type = "Number", db_raw_type = "Uint64" },
-   ['SRC2DST_PACKETS'] =      { tag = "cli2srv_packets", dt_func = dt_format_pkts, db_type = "Number", db_raw_type = "Uint32" },
-   ['DST2SRC_PACKETS'] =      { tag = "srv2cli_packets", dt_func = dt_format_pkts, db_type = "Number", db_raw_type = "Uint32" },
-   ['SRC2DST_DSCP'] =         { tag = "src2dst_dscp", dt_func = dt_format_dscp, simple_dt_func = dscp_consts.dscp_class_descr, db_type = "Number", db_raw_type = "Uint8" },
-   ['DST2SRC_DSCP'] =         { tag = "dst2src_dscp", dt_func = dt_format_dscp, simple_dt_func = dscp_consts.dscp_class_descr, db_type = "Number", db_raw_type = "Uint8" },
-   ['PROTOCOL'] =             { tag = "l4proto",      dt_func = dt_format_l4_proto, simple_dt_func = l4_proto_to_string, db_type = "Number", db_raw_type = "Uint8" },
-   ['IPV4_SRC_ADDR'] =        { tag = "cli_ip",       dt_func = dt_format_src_ip, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", simple_dt_func = simple_format_src_ip, db_type = "Number", db_raw_type = "Uint32" },
-   ['IPV6_SRC_ADDR'] =        { tag = "cli_ip",       dt_func = dt_format_src_ip, where_func = "IPv6StringToNum", simple_dt_func = simple_format_src_ip, db_type = "IPv6", db_raw_type = "IPv6" },
-   ['IP_SRC_PORT'] =          { tag = "cli_port",     dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
-   ['IPV4_DST_ADDR'] =        { tag = "srv_ip",       dt_func = dt_format_dst_ip, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", simple_dt_func = simple_format_dst_ip, db_type = "Number", db_raw_type = "Uint32" },
-   ['IPV6_DST_ADDR'] =        { tag = "srv_ip",       dt_func = dt_format_dst_ip, where_func = "IPv6StringToNum", simple_dt_func = simple_format_dst_ip, db_type = "IPv6", db_raw_type = "IPv6" },
-   ['IP_DST_PORT'] =          { tag = "srv_port",     dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
-   ['L7_PROTO'] =             { tag = "l7proto",      dt_func = dt_format_l7_proto, simple_dt_func = interface.getnDPIProtoName, db_type = "Number", db_raw_type = "Uint16" },
-   ['L7_CATEGORY'] =          { tag = "l7cat",        dt_func = dt_format_l7_category, simple_dt_func = interface.getnDPICategoryName, db_type = "Number", db_raw_type = "Uint16" },
-   ['FLOW_RISK'] =            { tag = "flow_risk",    dt_func = dt_format_flow_risk, db_type = "Number", db_raw_type = "Uint64" },
-   ['INFO'] =                 { tag = "info",         dt_func = dt_format_info, format_func = format_flow_info, i18n = i18n("info"), order = 11, db_type = "String", db_raw_type = "String" },
+   ['FIRST_SEEN'] =           { flowfilter = "first_seen",   dt_func = dt_format_time_with_highlight, db_type = "DateTime", db_raw_type = "DateTime" },
+   ['LAST_SEEN'] =            { flowfilter = "last_seen",    dt_func = dt_format_time, db_type = "DateTime", db_raw_type = "DateTime" },
+   ['VLAN_ID'] =              { flowfilter = "vlan_id",      dt_func = dt_format_vlan, db_type = "Number", db_raw_type = "Uint16" },
+   ['PACKETS'] =              { flowfilter = "packets",      dt_func = dt_format_pkts, db_type = "Number", db_raw_type = "Uint32" },
+   ['TOTAL_BYTES'] =          { flowfilter = "bytes",        dt_func = dt_format_bytes, js_chart_func = "bytesToSize", db_type = "Number", db_raw_type = "Uint64" },
+   ['SRC2DST_BYTES'] =        { flowfilter = "cli2srv_bytes", dt_func = dt_format_bytes, js_chart_func = "bytesToSize", db_type = "Number", db_raw_type = "Uint64" },
+   ['DST2SRC_BYTES'] =        { flowfilter = "srv2cli_bytes", dt_func = dt_format_bytes, js_chart_func = "bytesToSize", db_type = "Number", db_raw_type = "Uint64" },
+   ['SRC2DST_PACKETS'] =      { flowfilter = "cli2srv_packets", dt_func = dt_format_pkts, db_type = "Number", db_raw_type = "Uint32" },
+   ['DST2SRC_PACKETS'] =      { flowfilter = "srv2cli_packets", dt_func = dt_format_pkts, db_type = "Number", db_raw_type = "Uint32" },
+   ['SRC2DST_DSCP'] =         { flowfilter = "src2dst_dscp", dt_func = dt_format_dscp, simple_dt_func = dscp_consts.dscp_class_descr, db_type = "Number", db_raw_type = "Uint8" },
+   ['DST2SRC_DSCP'] =         { flowfilter = "dst2src_dscp", dt_func = dt_format_dscp, simple_dt_func = dscp_consts.dscp_class_descr, db_type = "Number", db_raw_type = "Uint8" },
+   ['PROTOCOL'] =             { flowfilter = "l4proto",      dt_func = dt_format_l4_proto, simple_dt_func = l4_proto_to_string, db_type = "Number", db_raw_type = "Uint8" },
+   ['IPV4_SRC_ADDR'] =        { flowfilter = "cli_ip",       dt_func = dt_format_src_ip, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", simple_dt_func = simple_format_src_ip, db_type = "Number", db_raw_type = "Uint32" },
+   ['IPV6_SRC_ADDR'] =        { flowfilter = "cli_ip",       dt_func = dt_format_src_ip, where_func = "IPv6StringToNum", simple_dt_func = simple_format_src_ip, db_type = "IPv6", db_raw_type = "IPv6" },
+   ['IP_SRC_PORT'] =          { flowfilter = "cli_port",     dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
+   ['IPV4_DST_ADDR'] =        { flowfilter = "srv_ip",       dt_func = dt_format_dst_ip, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", simple_dt_func = simple_format_dst_ip, db_type = "Number", db_raw_type = "Uint32" },
+   ['IPV6_DST_ADDR'] =        { flowfilter = "srv_ip",       dt_func = dt_format_dst_ip, where_func = "IPv6StringToNum", simple_dt_func = simple_format_dst_ip, db_type = "IPv6", db_raw_type = "IPv6" },
+   ['IP_DST_PORT'] =          { flowfilter = "srv_port",     dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
+   ['L7_PROTO'] =             { flowfilter = "l7proto",      dt_func = dt_format_l7_proto, simple_dt_func = interface.getnDPIProtoName, db_type = "Number", db_raw_type = "Uint16" },
+   ['L7_CATEGORY'] =          { flowfilter = "l7cat",        dt_func = dt_format_l7_category, simple_dt_func = interface.getnDPICategoryName, db_type = "Number", db_raw_type = "Uint16" },
+   ['FLOW_RISK'] =            { flowfilter = "flow_risk",    dt_func = dt_format_flow_risk, db_type = "Number", db_raw_type = "Uint64" },
+   ['INFO'] =                 { flowfilter = "info",         dt_func = dt_format_info, format_func = format_flow_info, i18n = i18n("info"), order = 11, db_type = "String", db_raw_type = "String" },
    ['PROFILE'] =              { db_type = "String", db_raw_type = "String" },
    ['NTOPNG_INSTANCE_NAME'] = { db_type = "String", db_raw_type = "String" },
-   ['INTERFACE_ID'] =         { tag = "ntopng_interface", dt_func = dt_format_interface, db_type = "Number", db_raw_type = "Uint16" },
-   ['STATUS'] =               { tag = "alert_id",       dt_func = dt_format_flow_alert_id, format_func = format_flow_alert_id, i18n = i18n("status"), simple_dt_func = format_flow_alert_id , order = 8, db_type = "Number", db_raw_type = "Uint8" },
-   ['SRC_COUNTRY_CODE'] =     { tag = "cli_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
-   ['DST_COUNTRY_CODE'] =     { tag = "srv_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
-   ['SRC_LABEL'] =            { tag = "cli_name", db_type = "String", db_raw_type = "String" },
-   ['DST_LABEL'] =            { tag = "srv_name", db_type = "String", db_raw_type = "String" },
-   ['SRC_MAC'] =              { tag = "cli_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
-   ['DST_MAC'] =              { tag = "srv_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
-   ['COMMUNITY_ID'] =         { tag = "community_id", format_func = format_flow_info, i18n = i18n("flow_fields_description.community_id"), order = 10, db_type = "String", db_raw_type = "String" },
-   ['CLIENT_FINGERPRINT'] =   { tag = "cli_fingerprint", dt_func = dt_format_generic, order = 11, db_type = "String", db_raw_type = "String" },
-   ['TCP_FINGERPRINT'] =      { tag = "tcp_fingerprint", dt_func = dt_format_generic, order = 11, db_type = "String", db_raw_type = "String" },
+   ['INTERFACE_ID'] =         { flowfilter = "ntopng_interface", dt_func = dt_format_interface, db_type = "Number", db_raw_type = "Uint16" },
+   ['STATUS'] =               { flowfilter = "alert_id",       dt_func = dt_format_flow_alert_id, format_func = format_flow_alert_id, i18n = i18n("status"), simple_dt_func = format_flow_alert_id , order = 8, db_type = "Number", db_raw_type = "Uint8" },
+   ['SRC_COUNTRY_CODE'] =     { flowfilter = "cli_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
+   ['DST_COUNTRY_CODE'] =     { flowfilter = "srv_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
+   ['SRC_LABEL'] =            { flowfilter = "cli_name", db_type = "String", db_raw_type = "String" },
+   ['DST_LABEL'] =            { flowfilter = "srv_name", db_type = "String", db_raw_type = "String" },
+   ['SRC_MAC'] =              { flowfilter = "cli_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
+   ['DST_MAC'] =              { flowfilter = "srv_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
+   ['COMMUNITY_ID'] =         { flowfilter = "community_id", format_func = format_flow_info, i18n = i18n("flow_fields_description.community_id"), order = 10, db_type = "String", db_raw_type = "String" },
+   ['CLIENT_FINGERPRINT'] =   { flowfilter = "cli_fingerprint", dt_func = dt_format_generic, order = 11, db_type = "String", db_raw_type = "String" },
+   ['TCP_FINGERPRINT'] =      { flowfilter = "tcp_fingerprint", dt_func = dt_format_generic, order = 11, db_type = "String", db_raw_type = "String" },
 
-   -- ['TCP_STATS_SRC_TO_DST'] = { tag = "tcp_stats_src_to_dst", dt_func = dt_format_tcp_stats, order = 11, db_type = "String", db_raw_type = "String" },
-   -- ['TCP_STATS_SRC_TO_DST'] = { tag = "tcp_stats_src_to_dst", dt_func = dt_format_tcp_stats, order = 11, db_type = "String", db_raw_type = "String" },
+   -- ['TCP_STATS_SRC_TO_DST'] = { flowfilter = "tcp_stats_src_to_dst", dt_func = dt_format_tcp_stats, order = 11, db_type = "String", db_raw_type = "String" },
+   -- ['TCP_STATS_SRC_TO_DST'] = { flowfilter = "tcp_stats_src_to_dst", dt_func = dt_format_tcp_stats, order = 11, db_type = "String", db_raw_type = "String" },
    
-   ['SRC_ASN'] =              { tag = "cli_asn", simple_dt_func = simple_format_src_asn, db_type = "Number", db_raw_type = "Uint32" },
-   ['DST_ASN'] =              { tag = "srv_asn", simple_dt_func = simple_format_dst_asn, db_type = "Number", db_raw_type = "Uint32" },
-   ['PROBE_IP'] =             { tag = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv6NumToString", where_func = "toIPv6", db_type = "IPv6", db_raw_type = "IPv6" },
-   ['EXPORTER_SITE'] =        { tag = "exporter_site", dt_func = dt_format_exporter_site, db_type = "Number", db_raw_type = "Uint16" },
-   ['OBSERVATION_POINT_ID'] = { tag = "observation_point_id", dt_func = dt_format_obs_point, format_func = format_flow_observation_point, i18n = i18n("details.observation_point_id"), order = 12 , db_type = "Number", db_raw_type = "Uint16" },
-   ['SRC2DST_TCP_FLAGS'] =    { tag = "src2dst_tcp_flags", dt_func = dt_format_tcp_flags, db_type = "Number", db_raw_type = "Uint8" },
-   ['DST2SRC_TCP_FLAGS'] =    { tag = "dst2src_tcp_flags", dt_func = dt_format_tcp_flags, db_type = "Number", db_raw_type = "Uint8" },
-   ['SCORE'] =                { tag = "score",        dt_func = dt_format_score, format_func = format_flow_score, i18n = i18n("score"), order = 9, db_type = "Number", db_raw_type = "Uint16" },
-   ['QOE_SCORE'] =            { tag = "qoe_score",    dt_func = dt_format_qoe_score, format_func = format_flow_qoe_score, simple_dt_func = chart_format_flow_qoe_score, i18n = i18n("db_search.tags.qoe_score"), order = 10, db_type = "Number", db_raw_type = "Uint8" },
-   ['L7_PROTO_MASTER'] =      { tag = "l7proto_master", dt_func = dt_format_l7_proto, simple_dt_func = interface.getnDPIProtoName, hide = true },
-   ['CLIENT_NW_LATENCY_US'] = { tag = "cli_nw_latency", dt_func = dt_format_latency_ms, i18n = i18n("db_search.cli_nw_latency"), order = 13, db_type = "Number", db_raw_type = "Uint32" },
-   ['SERVER_NW_LATENCY_US'] = { tag = "srv_nw_latency", dt_func = dt_format_latency_ms, i18n = i18n("db_search.srv_nw_latency"), order = 14, db_type = "Number", db_raw_type = "Uint32" },
-   ['CLIENT_LOCATION'] =      { tag = "cli_location", dt_func = dt_format_location, db_type = "Number", db_raw_type = "Uint8" },
-   ['SERVER_LOCATION'] =      { tag = "srv_location", dt_func = dt_format_location, db_type = "Number", db_raw_type = "Uint8" },
-   ['SRC_NETWORK_ID'] =       { tag = "cli_network", dt_func = dt_format_network, db_type = "Number", db_raw_type = "Uint32" },
-   ['DST_NETWORK_ID'] =       { tag = "srv_network", dt_func = dt_format_network, db_type = "Number", db_raw_type = "Uint32" },
-   ['INPUT_SNMP'] =           { tag = "input_snmp", dt_func = dt_format_snmp_interface, db_type = "Number", db_raw_type = "Uint32" },
-   ['OUTPUT_SNMP'] =          { tag = "output_snmp", dt_func = dt_format_snmp_interface, db_type = "Number", db_raw_type = "Uint32" },
-   ['SRC_HOST_POOL_ID'] =     { tag = "cli_host_pool_id", dt_func = dt_format_pool_id, db_type = "Number", db_raw_type = "Uint16" },
-   ['DST_HOST_POOL_ID'] =     { tag = "srv_host_pool_id", dt_func = dt_format_pool_id, db_type = "Number", db_raw_type = "Uint16" },
-   ['ALERTS_MAP'] =           { tag = "alerts_map" },
-   ['LABELS_MAP'] =           { tag = "labels_map", dt_func = dt_format_labels_map, db_type = "String", db_raw_type = "String" },
-   ['SEVERITY'] =             { tag = "severity" },
-   ['IS_CLI_ATTACKER'] =      { tag = "is_cli_attacker" },
-   ['IS_CLI_VICTIM'] =        { tag = "is_cli_victim" },
-   ['IS_CLI_BLACKLISTED'] =   { tag = "is_cli_blacklisted" },
-   ['IS_SRV_ATTACKER'] =      { tag = "is_srv_attacker" },
-   ['IS_SRV_VICTIM'] =        { tag = "is_srv_victim" },
-   ['IS_SRV_BLACKLISTED'] =   { tag = "is_srv_blacklisted" },
-   ['PROTOCOL_INFO_JSON'] =   { tag = "protocol_info_json", dt_func = historical_format_utils.parseInfoJson },
-   ['THROUGHPUT'] =           { tag = "throughput", dt_func = dt_format_thpt, exclude_from_details = true },
-   ['ALERT_JSON'] =           { tag = "json" },
-   ['SRC_PROC_NAME'] =        { tag = "cli_proc_name", db_type = "String", db_raw_type = "String" },
-   ['DST_PROC_NAME'] =        { tag = "srv_proc_name", db_type = "String", db_raw_type = "String" },
-   ['SRC_PROC_USER_NAME'] =   { tag = "cli_user_name", db_type = "String", db_raw_type = "String" },
-   ['DST_PROC_USER_NAME'] =   { tag = "srv_user_name", db_type = "String", db_raw_type = "String" },
-   ['MAJOR_CONNECTION_STATE'] = { tag = "major_connection_state", dt_func = dt_format_major_connection_state, db_type = "Number", db_raw_type = "Uint8" },
-   ['MINOR_CONNECTION_STATE'] = { tag = "minor_connection_state", dt_func = dt_format_minor_connection_state, db_type = "Number", db_raw_type = "Uint8" },
-   ['POST_NAT_IPV4_SRC_ADDR'] = { tag = "post_nat_ipv4_src_addr", dt_func = dt_format_nat_ip, select_func = "IPv4NumToString", db_type = "Number", db_raw_type = "Uint32"  },
-   ['POST_NAT_SRC_PORT']      = { tag = "post_nat_src_port", dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
-   ['POST_NAT_IPV4_DST_ADDR'] = { tag = "post_nat_ipv4_dst_addr", dt_func = dt_format_nat_ip, select_func = "IPv4NumToString", db_type = "Number", db_raw_type = "Uint32"  },
-   ['POST_NAT_DST_PORT']      = { tag = "post_nat_dst_port", dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
-   ['WLAN_SSID']              = { tag = "wlan_ssid", dt_func = dt_format_generic, db_type = "String", db_raw_type = "String" },
-   ['WTP_MAC_ADDRESS']        = { tag = "apn_mac", dt_func = dt_format_mac_obj, db_type = "Number", db_raw_type = "Uint64" },
-   ['DOMAIN_NAME']            = { tag = "domain_name", dt_func = dt_format_generic, db_type = "String", db_raw_type = "String" },
+   ['SRC_ASN'] =              { flowfilter = "cli_asn", simple_dt_func = simple_format_src_asn, db_type = "Number", db_raw_type = "Uint32" },
+   ['DST_ASN'] =              { flowfilter = "srv_asn", simple_dt_func = simple_format_dst_asn, db_type = "Number", db_raw_type = "Uint32" },
+   ['PROBE_IP'] =             { flowfilter = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv6NumToString", where_func = "toIPv6", db_type = "IPv6", db_raw_type = "IPv6" },
+   ['EXPORTER_SITE'] =        { flowfilter = "exporter_site", dt_func = dt_format_exporter_site, db_type = "Number", db_raw_type = "Uint16" },
+   ['OBSERVATION_POINT_ID'] = { flowfilter = "observation_point_id", dt_func = dt_format_obs_point, format_func = format_flow_observation_point, i18n = i18n("details.observation_point_id"), order = 12 , db_type = "Number", db_raw_type = "Uint16" },
+   ['SRC2DST_TCP_FLAGS'] =    { flowfilter = "src2dst_tcp_flags", dt_func = dt_format_tcp_flags, db_type = "Number", db_raw_type = "Uint8" },
+   ['DST2SRC_TCP_FLAGS'] =    { flowfilter = "dst2src_tcp_flags", dt_func = dt_format_tcp_flags, db_type = "Number", db_raw_type = "Uint8" },
+   ['SCORE'] =                { flowfilter = "score",        dt_func = dt_format_score, format_func = format_flow_score, i18n = i18n("score"), order = 9, db_type = "Number", db_raw_type = "Uint16" },
+   ['QOE_SCORE'] =            { flowfilter = "qoe_score",    dt_func = dt_format_qoe_score, format_func = format_flow_qoe_score, simple_dt_func = chart_format_flow_qoe_score, i18n = i18n("db_search.flowfilters.qoe_score"), order = 10, db_type = "Number", db_raw_type = "Uint8" },
+   ['L7_PROTO_MASTER'] =      { flowfilter = "l7proto_master", dt_func = dt_format_l7_proto, simple_dt_func = interface.getnDPIProtoName, hide = true },
+   ['CLIENT_NW_LATENCY_US'] = { flowfilter = "cli_nw_latency", dt_func = dt_format_latency_ms, i18n = i18n("db_search.cli_nw_latency"), order = 13, db_type = "Number", db_raw_type = "Uint32" },
+   ['SERVER_NW_LATENCY_US'] = { flowfilter = "srv_nw_latency", dt_func = dt_format_latency_ms, i18n = i18n("db_search.srv_nw_latency"), order = 14, db_type = "Number", db_raw_type = "Uint32" },
+   ['CLIENT_LOCATION'] =      { flowfilter = "cli_location", dt_func = dt_format_location, db_type = "Number", db_raw_type = "Uint8" },
+   ['SERVER_LOCATION'] =      { flowfilter = "srv_location", dt_func = dt_format_location, db_type = "Number", db_raw_type = "Uint8" },
+   ['SRC_NETWORK_ID'] =       { flowfilter = "cli_network", dt_func = dt_format_network, db_type = "Number", db_raw_type = "Uint32" },
+   ['DST_NETWORK_ID'] =       { flowfilter = "srv_network", dt_func = dt_format_network, db_type = "Number", db_raw_type = "Uint32" },
+   ['INPUT_SNMP'] =           { flowfilter = "input_snmp", dt_func = dt_format_snmp_interface, db_type = "Number", db_raw_type = "Uint32" },
+   ['OUTPUT_SNMP'] =          { flowfilter = "output_snmp", dt_func = dt_format_snmp_interface, db_type = "Number", db_raw_type = "Uint32" },
+   ['SRC_HOST_POOL_ID'] =     { flowfilter = "cli_host_pool_id", dt_func = dt_format_pool_id, db_type = "Number", db_raw_type = "Uint16" },
+   ['DST_HOST_POOL_ID'] =     { flowfilter = "srv_host_pool_id", dt_func = dt_format_pool_id, db_type = "Number", db_raw_type = "Uint16" },
+   ['ALERTS_MAP'] =           { flowfilter = "alerts_map" },
+   ['LABELS_MAP'] =           { flowfilter = "labels_map", dt_func = dt_format_labels_map, db_type = "String", db_raw_type = "String" },
+   ['SEVERITY'] =             { flowfilter = "severity" },
+   ['IS_CLI_ATTACKER'] =      { flowfilter = "is_cli_attacker" },
+   ['IS_CLI_VICTIM'] =        { flowfilter = "is_cli_victim" },
+   ['IS_CLI_BLACKLISTED'] =   { flowfilter = "is_cli_blacklisted" },
+   ['IS_SRV_ATTACKER'] =      { flowfilter = "is_srv_attacker" },
+   ['IS_SRV_VICTIM'] =        { flowfilter = "is_srv_victim" },
+   ['IS_SRV_BLACKLISTED'] =   { flowfilter = "is_srv_blacklisted" },
+   ['PROTOCOL_INFO_JSON'] =   { flowfilter = "protocol_info_json", dt_func = historical_format_utils.parseInfoJson },
+   ['THROUGHPUT'] =           { flowfilter = "throughput", dt_func = dt_format_thpt, exclude_from_details = true },
+   ['ALERT_JSON'] =           { flowfilter = "json" },
+   ['SRC_PROC_NAME'] =        { flowfilter = "cli_proc_name", db_type = "String", db_raw_type = "String" },
+   ['DST_PROC_NAME'] =        { flowfilter = "srv_proc_name", db_type = "String", db_raw_type = "String" },
+   ['SRC_PROC_USER_NAME'] =   { flowfilter = "cli_user_name", db_type = "String", db_raw_type = "String" },
+   ['DST_PROC_USER_NAME'] =   { flowfilter = "srv_user_name", db_type = "String", db_raw_type = "String" },
+   ['MAJOR_CONNECTION_STATE'] = { flowfilter = "major_connection_state", dt_func = dt_format_major_connection_state, db_type = "Number", db_raw_type = "Uint8" },
+   ['MINOR_CONNECTION_STATE'] = { flowfilter = "minor_connection_state", dt_func = dt_format_minor_connection_state, db_type = "Number", db_raw_type = "Uint8" },
+   ['POST_NAT_IPV4_SRC_ADDR'] = { flowfilter = "post_nat_ipv4_src_addr", dt_func = dt_format_nat_ip, select_func = "IPv4NumToString", db_type = "Number", db_raw_type = "Uint32"  },
+   ['POST_NAT_SRC_PORT']      = { flowfilter = "post_nat_src_port", dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
+   ['POST_NAT_IPV4_DST_ADDR'] = { flowfilter = "post_nat_ipv4_dst_addr", dt_func = dt_format_nat_ip, select_func = "IPv4NumToString", db_type = "Number", db_raw_type = "Uint32"  },
+   ['POST_NAT_DST_PORT']      = { flowfilter = "post_nat_dst_port", dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
+   ['WLAN_SSID']              = { flowfilter = "wlan_ssid", dt_func = dt_format_generic, db_type = "String", db_raw_type = "String" },
+   ['WTP_MAC_ADDRESS']        = { flowfilter = "apn_mac", dt_func = dt_format_mac_obj, db_type = "Number", db_raw_type = "Uint64" },
+   ['DOMAIN_NAME']            = { flowfilter = "domain_name", dt_func = dt_format_generic, db_type = "String", db_raw_type = "String" },
    
    --[[ TODO: this column is for the aggregated_flow_columns but the parsing Function
               only parses these columns, so a new logic to parse only the aggregated_flow_columns
               is needed 
    ]]
-   --['NUM_FLOWS'] =            { tag = "flows_number", dt_func = dt_format_high_number },
+   --['NUM_FLOWS'] =            { flowfilter = "flows_number", dt_func = dt_format_high_number },
    
    -- Alert data
-   ['ALERT_STATUS'] =         { tag = "alert_status" },
-   ['REQUIRE_ATTENTION'] =    { tag = "require_attention" },
-   ['USER_LABEL'] =           { tag = "user_label" },
-   ['USER_LABEL_TSTAMP'] =    { tag = "user_label_tstamp" },
-   ['SRC_PEER_ASN'] =         { tag = "src_peer_asn" },
-   ['DST_PEER_ASN'] =         { tag = "dst_peer_asn" },
-   ['INTERFACE_ROLE'] =         { tag = "iface_role", simple_dt_func = simple_format_interface_role, db_type = "Number", db_raw_type = "Uint8" }
+   ['ALERT_STATUS'] =         { flowfilter = "alert_status" },
+   ['REQUIRE_ATTENTION'] =    { flowfilter = "require_attention" },
+   ['USER_LABEL'] =           { flowfilter = "user_label" },
+   ['USER_LABEL_TSTAMP'] =    { flowfilter = "user_label_tstamp" },
+   ['SRC_PEER_ASN'] =         { flowfilter = "src_peer_asn" },
+   ['DST_PEER_ASN'] =         { flowfilter = "dst_peer_asn" },
+   ['INTERFACE_ROLE'] =         { flowfilter = "iface_role", simple_dt_func = simple_format_interface_role, db_type = "Number", db_raw_type = "Uint8" }
 }
 local aggregated_flow_columns = {
-   ['FLOW_ID'] =              { tag = "rowid", db_type = "Number", db_raw_type = "Uint64" },
+   ['FLOW_ID'] =              { flowfilter = "rowid", db_type = "Number", db_raw_type = "Uint64" },
    ['IP_PROTOCOL_VERSION'] =  { db_type = "Number", db_raw_type = "Uint8" },
-   ['FIRST_SEEN'] =           { tag = "first_seen",   dt_func = dt_format_time_with_highlight, db_type = "DateTime", db_raw_type = "DateTime" },
-   ['LAST_SEEN'] =            { tag = "last_seen",    dt_func = dt_format_time, db_type = "DateTime", db_raw_type = "DateTime" },
-   ['VLAN_ID'] =              { tag = "vlan_id",      dt_func = dt_format_vlan, db_type = "Number", db_raw_type = "Uint16"  },
-   ['PACKETS'] =              { tag = "packets",      dt_func = dt_format_pkts, db_type = "Number", db_raw_type = "Uint32" },
-   ['TOTAL_BYTES'] =          { tag = "bytes",        dt_func = dt_format_bytes, js_chart_func = "bytesToSize", db_type = "Number", db_raw_type = "Uint64"  },
-   ['SRC2DST_BYTES'] =        { tag = "src2dst_bytes", dt_func = dt_format_bytes, js_chart_func = "bytesToSize", db_type = "Number", db_raw_type = "Uint64"  },
-   ['DST2SRC_BYTES'] =        { tag = "dst2src_bytes", dt_func = dt_format_bytes, js_chart_func = "bytesToSize", db_type = "Number", db_raw_type = "Uint64"  },
-   ['PROTOCOL'] =             { tag = "l4proto",      dt_func = dt_format_l4_proto, simple_dt_func = l4_proto_to_string, db_type = "Number", db_raw_type = "Uint8" },
-   ['IPV4_SRC_ADDR'] =        { tag = "cli_ip",       dt_func = dt_format_src_ip, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", simple_dt_func = simple_format_src_ip, db_type = "Number", db_raw_type = "Uint32" },
-   ['IPV6_SRC_ADDR'] =        { tag = "cli_ip",       dt_func = dt_format_src_ip, where_func = "IPv6StringToNum", simple_dt_func = simple_format_src_ip, db_type = "IPv6", db_raw_type = "IPv6"  },
-   ['IPV4_DST_ADDR'] =        { tag = "srv_ip",       dt_func = dt_format_dst_ip, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", simple_dt_func = simple_format_dst_ip, db_type = "Number", db_raw_type = "Uint32" },
-   ['IPV6_DST_ADDR'] =        { tag = "srv_ip",       dt_func = dt_format_dst_ip, where_func = "IPv6StringToNum", simple_dt_func = simple_format_dst_ip, db_type = "IPv6", db_raw_type = "IPv6"  },
-   ['IP_DST_PORT'] =          { tag = "srv_port",     dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
-   ['L7_PROTO'] =             { tag = "l7proto",      dt_func = dt_format_l7_proto, simple_dt_func = interface.getnDPIProtoName, db_type = "Number", db_raw_type = "Uint16" },
+   ['FIRST_SEEN'] =           { flowfilter = "first_seen",   dt_func = dt_format_time_with_highlight, db_type = "DateTime", db_raw_type = "DateTime" },
+   ['LAST_SEEN'] =            { flowfilter = "last_seen",    dt_func = dt_format_time, db_type = "DateTime", db_raw_type = "DateTime" },
+   ['VLAN_ID'] =              { flowfilter = "vlan_id",      dt_func = dt_format_vlan, db_type = "Number", db_raw_type = "Uint16"  },
+   ['PACKETS'] =              { flowfilter = "packets",      dt_func = dt_format_pkts, db_type = "Number", db_raw_type = "Uint32" },
+   ['TOTAL_BYTES'] =          { flowfilter = "bytes",        dt_func = dt_format_bytes, js_chart_func = "bytesToSize", db_type = "Number", db_raw_type = "Uint64"  },
+   ['SRC2DST_BYTES'] =        { flowfilter = "src2dst_bytes", dt_func = dt_format_bytes, js_chart_func = "bytesToSize", db_type = "Number", db_raw_type = "Uint64"  },
+   ['DST2SRC_BYTES'] =        { flowfilter = "dst2src_bytes", dt_func = dt_format_bytes, js_chart_func = "bytesToSize", db_type = "Number", db_raw_type = "Uint64"  },
+   ['PROTOCOL'] =             { flowfilter = "l4proto",      dt_func = dt_format_l4_proto, simple_dt_func = l4_proto_to_string, db_type = "Number", db_raw_type = "Uint8" },
+   ['IPV4_SRC_ADDR'] =        { flowfilter = "cli_ip",       dt_func = dt_format_src_ip, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", simple_dt_func = simple_format_src_ip, db_type = "Number", db_raw_type = "Uint32" },
+   ['IPV6_SRC_ADDR'] =        { flowfilter = "cli_ip",       dt_func = dt_format_src_ip, where_func = "IPv6StringToNum", simple_dt_func = simple_format_src_ip, db_type = "IPv6", db_raw_type = "IPv6"  },
+   ['IPV4_DST_ADDR'] =        { flowfilter = "srv_ip",       dt_func = dt_format_dst_ip, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", simple_dt_func = simple_format_dst_ip, db_type = "Number", db_raw_type = "Uint32" },
+   ['IPV6_DST_ADDR'] =        { flowfilter = "srv_ip",       dt_func = dt_format_dst_ip, where_func = "IPv6StringToNum", simple_dt_func = simple_format_dst_ip, db_type = "IPv6", db_raw_type = "IPv6"  },
+   ['IP_DST_PORT'] =          { flowfilter = "srv_port",     dt_func = dt_format_port, db_type = "Number", db_raw_type = "Uint16" },
+   ['L7_PROTO'] =             { flowfilter = "l7proto",      dt_func = dt_format_l7_proto, simple_dt_func = interface.getnDPIProtoName, db_type = "Number", db_raw_type = "Uint16" },
    ['NTOPNG_INSTANCE_NAME'] = { db_type = "String", db_raw_type = "String" },
-   ['SCORE'] =                { tag = "score",        dt_func = dt_format_score, format_func = format_flow_score, i18n = i18n("score"), order = 9, db_type = "Number", db_raw_type = "Uint16" },
-   ['L7_PROTO_MASTER'] =      { tag = "l7proto_master", dt_func = dt_format_l7_proto, simple_dt_func = interface.getnDPIProtoName },
-   ['NUM_FLOWS'] =            { tag = "flows_number", dt_func = dt_format_high_number },
-   ['FLOW_RISK'] =            { tag = "flow_risk",    dt_func = dt_format_flow_risk, db_type = "Number", db_raw_type = "Uint64" },
-   ['SRC_LABEL'] =            { tag = "cli_name", db_type = "String", db_raw_type = "String" },
-   ['DST_LABEL'] =            { tag = "srv_name", db_type = "String", db_raw_type = "String" },
-   ['SRC_MAC'] =              { tag = "cli_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
-   ['DST_MAC'] =              { tag = "srv_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
-   ['PROBE_IP'] =             { tag = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv6NumToString", where_func = "toIPv6", db_type = "IPv6", db_raw_type = "IPv6" },
-   ['EXPORTER_SITE'] =        { tag = "exporter_site", dt_func = dt_format_exporter_site, db_type = "Number", db_raw_type = "Uint16" },
-   ['SRC_COUNTRY_CODE'] =     { tag = "cli_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
-   ['DST_COUNTRY_CODE'] =     { tag = "srv_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
-   ['SRC_ASN'] =              { tag = "cli_asn", simple_dt_func = simple_format_src_asn, db_type = "Number", db_raw_type = "Uint32" },
-   ['DST_ASN'] =              { tag = "srv_asn", simple_dt_func = simple_format_dst_asn, db_type = "Number", db_raw_type = "Uint32" },
-   ['INPUT_SNMP'] =           { tag = "input_snmp", dt_func = dt_format_snmp_interface, db_type = "Number", db_raw_type = "Uint32" },
-   ['OUTPUT_SNMP'] =          { tag = "output_snmp", dt_func = dt_format_snmp_interface, db_type = "Number", db_raw_type = "Uint32" },
-   ['SRC_NETWORK_ID'] =       { tag = "cli_network", dt_func = dt_format_network, db_type = "Number", db_raw_type = "Uint32" },
-   ['DST_NETWORK_ID'] =       { tag = "srv_network", dt_func = dt_format_network, db_type = "Number", db_raw_type = "Uint32" },
-   ['WLAN_SSID'] =            { tag = "wlan_ssid", db_type = "String", db_raw_type = "String" },
-   ['WTP_MAC_ADDRESS'] =      { tag = "apn_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
-   ['INTERFACE_ID'] =         { tag = "ntopng_interface", dt_func = dt_format_interface, db_type = "Number", db_raw_type = "Uint16" },
+   ['SCORE'] =                { flowfilter = "score",        dt_func = dt_format_score, format_func = format_flow_score, i18n = i18n("score"), order = 9, db_type = "Number", db_raw_type = "Uint16" },
+   ['L7_PROTO_MASTER'] =      { flowfilter = "l7proto_master", dt_func = dt_format_l7_proto, simple_dt_func = interface.getnDPIProtoName },
+   ['NUM_FLOWS'] =            { flowfilter = "flows_number", dt_func = dt_format_high_number },
+   ['FLOW_RISK'] =            { flowfilter = "flow_risk",    dt_func = dt_format_flow_risk, db_type = "Number", db_raw_type = "Uint64" },
+   ['SRC_LABEL'] =            { flowfilter = "cli_name", db_type = "String", db_raw_type = "String" },
+   ['DST_LABEL'] =            { flowfilter = "srv_name", db_type = "String", db_raw_type = "String" },
+   ['SRC_MAC'] =              { flowfilter = "cli_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
+   ['DST_MAC'] =              { flowfilter = "srv_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
+   ['PROBE_IP'] =             { flowfilter = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv6NumToString", where_func = "toIPv6", db_type = "IPv6", db_raw_type = "IPv6" },
+   ['EXPORTER_SITE'] =        { flowfilter = "exporter_site", dt_func = dt_format_exporter_site, db_type = "Number", db_raw_type = "Uint16" },
+   ['SRC_COUNTRY_CODE'] =     { flowfilter = "cli_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
+   ['DST_COUNTRY_CODE'] =     { flowfilter = "srv_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
+   ['SRC_ASN'] =              { flowfilter = "cli_asn", simple_dt_func = simple_format_src_asn, db_type = "Number", db_raw_type = "Uint32" },
+   ['DST_ASN'] =              { flowfilter = "srv_asn", simple_dt_func = simple_format_dst_asn, db_type = "Number", db_raw_type = "Uint32" },
+   ['INPUT_SNMP'] =           { flowfilter = "input_snmp", dt_func = dt_format_snmp_interface, db_type = "Number", db_raw_type = "Uint32" },
+   ['OUTPUT_SNMP'] =          { flowfilter = "output_snmp", dt_func = dt_format_snmp_interface, db_type = "Number", db_raw_type = "Uint32" },
+   ['SRC_NETWORK_ID'] =       { flowfilter = "cli_network", dt_func = dt_format_network, db_type = "Number", db_raw_type = "Uint32" },
+   ['DST_NETWORK_ID'] =       { flowfilter = "srv_network", dt_func = dt_format_network, db_type = "Number", db_raw_type = "Uint32" },
+   ['WLAN_SSID'] =            { flowfilter = "wlan_ssid", db_type = "String", db_raw_type = "String" },
+   ['WTP_MAC_ADDRESS'] =      { flowfilter = "apn_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
+   ['INTERFACE_ID'] =         { flowfilter = "ntopng_interface", dt_func = dt_format_interface, db_type = "Number", db_raw_type = "Uint16" },
 }
 -- Extra columns (e.g. result of SQL functions)
 local additional_flow_columns = {
-   ['bytes'] =                { tag = "bytes",        dt_func = dt_format_bytes },
-   ['packets'] =              { tag = "packets",      dt_func = dt_format_pkts }, 
-   ['IPV4_ADDR'] =            { tag = "ip",           dt_func = dt_format_ip, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", simple_dt_func = simple_format_ip },
-   ['IPV6_ADDR'] =            { tag = "ip",           dt_func = dt_format_ip, where_func = "IPv6StringToNum", simple_dt_func = simple_format_ip },
-   ['NETWORK_ID'] =           { tag = "network", dt_func = dt_format_network },
-   ['ASN'] =                  { tag = "asn", simple_dt_func = simple_format_asn },
-   ['COUNTRY_CODE'] =         { tag = "country", dt_func = dt_format_country },
-   ['snmp_interface'] =       { tag = "snmp_interface", dt_func = dt_format_snmp_interface },
+   ['bytes'] =                { flowfilter = "bytes",        dt_func = dt_format_bytes },
+   ['packets'] =              { flowfilter = "packets",      dt_func = dt_format_pkts }, 
+   ['IPV4_ADDR'] =            { flowfilter = "ip",           dt_func = dt_format_ip, select_func = "IPv4NumToString", where_func = "IPv4StringToNum", simple_dt_func = simple_format_ip },
+   ['IPV6_ADDR'] =            { flowfilter = "ip",           dt_func = dt_format_ip, where_func = "IPv6StringToNum", simple_dt_func = simple_format_ip },
+   ['NETWORK_ID'] =           { flowfilter = "network", dt_func = dt_format_network },
+   ['ASN'] =                  { flowfilter = "asn", simple_dt_func = simple_format_asn },
+   ['COUNTRY_CODE'] =         { flowfilter = "country", dt_func = dt_format_country },
+   ['snmp_interface'] =       { flowfilter = "snmp_interface", dt_func = dt_format_snmp_interface },
 }
 
 -- #####################################
@@ -1460,7 +1460,7 @@ historical_flow_utils.ordering_special_columns = {
    ["throughput"] = "THROUGHPUT"
 }
 
-historical_flow_utils.extra_where_tags = {
+historical_flow_utils.extra_where_flowfilters = {
    ["ip"]       = { [4] = { "IPV4_DST_ADDR", "IPV4_SRC_ADDR" } , [6] = { "IPV6_DST_ADDR", "IPV6_SRC_ADDR" } },
    ["srv_ip"]   = { [4] = "IPV4_DST_ADDR", [6] = "IPV6_DST_ADDR" },
    ["cli_ip"]   = { [4] = "IPV4_SRC_ADDR", [6] = "IPV6_SRC_ADDR" },
@@ -1483,7 +1483,7 @@ historical_flow_utils.extra_where_tags = {
    ["exporter_site"] = "EXPORTER_SITE", -- required?
 }
 
-historical_flow_utils.topk_tags_v4 = {
+historical_flow_utils.topk_flowfilters_v4 = {
    ["host"]   = {
       "IPV4_DST_ADDR",
       "IPV4_SRC_ADDR",
@@ -1493,7 +1493,7 @@ historical_flow_utils.topk_tags_v4 = {
    }
 }
 
-historical_flow_utils.topk_tags_v6 = {
+historical_flow_utils.topk_flowfilters_v6 = {
    ["host"]   = {
       "IPV6_DST_ADDR",
       "IPV6_SRC_ADDR",
@@ -1609,10 +1609,10 @@ function historical_flow_utils.get_flowfilters()
    local flow_defined_filters = {}
 
    for _, v in pairs(columns) do
-      if v.tag and flowfilter_utils.defined_filters[v.tag] then
-         local tag = flowfilter_utils.defined_filters[v.tag]
-         if not tag.hide then
-            flow_defined_filters[v.tag] = flowfilter_utils.defined_filters[v.tag]
+      if v.flowfilter and flowfilter_utils.defined_filters[v.flowfilter] then
+         local flowfilter = flowfilter_utils.defined_filters[v.flowfilter]
+         if not flowfilter.hide then
+            flow_defined_filters[v.flowfilter] = flowfilter_utils.defined_filters[v.flowfilter]
          end
       end
    end
@@ -1674,16 +1674,16 @@ function historical_flow_utils.get_flow_columns_to_flowfilters(aggregated, real_
    if aggregated then
       for k, v in pairs(aggregated_flow_columns) do
 
-         if v.tag then
-            c2t[k] = v.tag
-            t2c[v.tag] = k
+         if v.flowfilter then
+            c2t[k] = v.flowfilter
+            t2c[v.flowfilter] = k
          end
       end
    else
       for k, v in pairs(flow_columns) do
-         if v.tag then
-            c2t[k] = v.tag
-            t2c[v.tag] = k
+         if v.flowfilter then
+            c2t[k] = v.flowfilter
+            t2c[v.flowfilter] = k
          end
       end
    end
@@ -1691,10 +1691,10 @@ function historical_flow_utils.get_flow_columns_to_flowfilters(aggregated, real_
    -- if real_cols_only is provided, exclude additional_flow_columns for historical flow export errors
    if not real_cols_only then
       for k, v in pairs(additional_flow_columns) do
-         if v.tag then 
-            if not t2c[v.tag] then -- tag not already defined in real columns
-               c2t[k] = v.tag
-               -- t2c[v.tag] = k
+         if v.flowfilter then 
+            if not t2c[v.flowfilter] then -- flowfilter not already defined in real columns
+               c2t[k] = v.flowfilter
+               -- t2c[v.flowfilter] = k
             end
          end
       end
@@ -1705,7 +1705,7 @@ end
 
 -- #####################################
 
--- Return a table with a list of DB columns for each tag
+-- Return a table with a list of DB columns for each flowfilter
 -- Example:
 -- { ["srv_ip"] = ["IPV4_DST_ADDR"], ["IPV6_DST_ADDR"], .. }
 local function get_flow_flowfilters_to_columns(aggregated)
@@ -1722,7 +1722,7 @@ local function get_flow_flowfilters_to_columns(aggregated)
    return t2c
 end
 
--- Return DB select by tag
+-- Return DB select by flowfilter
 -- Example: 'srv_ip' -> "IPV4_DST_ADDR, IPV6_DST_ADDR"
 function historical_flow_utils.get_flow_select_by_flowfilter(filter_key, aggregated)
    local flowfilters_to_columns = get_flow_flowfilters_to_columns(aggregated)
@@ -1807,7 +1807,7 @@ function historical_flow_utils.format_record(record, csv_format, formatted_recor
          local new_value = nil
          -- Format the values and pass to the answer
          if extended_flow_columns[column_name] then
-            new_column_name = extended_flow_columns[column_name]["tag"]
+            new_column_name = extended_flow_columns[column_name]["flowfilter"]
             new_value = extended_flow_columns[column_name]["dt_func"](value, record, column_name, formatted_record)
          end
          
@@ -1858,9 +1858,9 @@ function historical_flow_utils.format_clickhouse_record(record, csv_format, form
       	 -- Format the values and pass to the answer
       	 if extended_flow_columns[column_name] and 
             --extended_flow_columns[column_name]["dt_func"] and
-            extended_flow_columns[column_name]["tag"] then
+            extended_flow_columns[column_name]["flowfilter"] then
 
-            new_column_name = extended_flow_columns[column_name]["tag"]
+            new_column_name = extended_flow_columns[column_name]["flowfilter"]
 
             if extended_flow_columns[column_name]["dt_func"] then
                new_value = extended_flow_columns[column_name]["dt_func"](value, record, column_name, formatted_record)
@@ -1884,18 +1884,18 @@ end
 
 -- #####################################
 
-function historical_flow_utils.get_historical_url(label, tag, value, add_hyperlink, title, add_copy_button)
+function historical_flow_utils.get_historical_url(label, flowfilter, value, add_hyperlink, title, add_copy_button)
    if not add_hyperlink then 
       return label
    else
       if add_copy_button ~= nil and add_copy_button then
          return "<span><button data-to-copy='"..value.."' class='copy-http-url btn btn-light btn-sm border ms-1' style='cursor: pointer;'><i class='fas fa-copy'></i></button> <a href=\"" .. ntop.getHttpPrefix() .. "/lua/pro/db_search.lua?" .. 
-            tag .. "=" .. value .. flowfilter_utils.SEPARATOR .. "eq\" " .. 
+            flowfilter .. "=" .. value .. flowfilter_utils.SEPARATOR .. "eq\" " .. 
             ternary(title ~= nil, "title=\"" .. (title or "") .."\"", "") .. 
             " target='_blank'>" .. label .. "</a>"
       end
       return "<a href=\"" .. ntop.getHttpPrefix() .. "/lua/pro/db_search.lua?" .. 
-            tag .. "=" .. value .. flowfilter_utils.SEPARATOR .. "eq\" " .. 
+            flowfilter .. "=" .. value .. flowfilter_utils.SEPARATOR .. "eq\" " .. 
             ternary(title ~= nil, "title=\"" .. (title or "") .."\"", "") .. 
             " target='_blank'>" .. label .. "</a>"
       
@@ -2144,7 +2144,7 @@ function historical_flow_utils.getAvailableColumns()
   for column_name, column_options in pairs(extended_flow_columns) do
     data[#data + 1] = {
       column_name = column_name,
-      tag = column_options["tag"]
+      flowfilter = column_options["flowfilter"]
     }
   end
 

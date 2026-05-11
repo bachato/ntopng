@@ -1746,7 +1746,7 @@ local lang = {
     ["traffic_direction"] = "Direzione del Traffico",
     ["vlan_id"] = "VLAN",
     ["where_note"] = "Usa &lt;field&gt; &lt;operator&gt; &lt;value&gt; conditions, where &lt;operator&gt; could be &lt;, &gt;, =, !=. AND/OR sono permessi per combinare le condizioni. Si raccomanda di usare i doppi apici per i campi stringa (es. INFO='www.ntop.org')",
-    ["tags"] = {
+    ["flowfilters"] = {
       ["acknowledged"] = "Acknowledged",
       ["alert_id"] = "Tipo di Allarme",
       ["bytes"] = "Bytes",

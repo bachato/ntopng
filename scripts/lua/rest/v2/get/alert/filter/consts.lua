@@ -33,9 +33,9 @@ else
    alert_store_instance = require "all_alert_store".new()
 end
 
-local tags = alert_store_instance:get_available_filters()
+local filters = alert_store_instance:get_available_filters()
 
-for id, v in pairs(tags) do
+for id, v in pairs(filters) do
    -- FIXX rename l7_proto to l7proto in flow alert store for consistency
    if id == "l7_proto" then id = "l7proto" end
 

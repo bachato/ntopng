@@ -99,11 +99,11 @@ async function get_filter_const(is_alert_stats_url, page) {
 }
 
 let FILTERS_CONST = [];
-let TAG_OPERATORS;
-let DEFINED_TAGS;
+let FLOWFILTER_OPERATORS;
+let DEFINED_FLOWFILTERS;
 const VIEW_ONLY_TAGS = true;
 /* Initial Tags */
-let initialTags;
+let initialFlowfilters;
 //let pageHandle = {};
 let TAGIFY;
 let IS_ALERT_STATS_URL = window.location.toString().match(/alert_stats.lua/) != null;
@@ -144,13 +144,13 @@ const load_filters_data = async function () {
     FILTERS_CONST = await get_filter_const(IS_ALERT_STATS_URL, PAGE);
     FILTERS_CONST.filter((x) => x.label == null).forEach((x) => { console.error(`label not defined for filter ${JSON.stringify(x)}`); x.label = ""; });
     FILTERS_CONST.sort((a, b) => a.label.localeCompare(b.label));
-    i18n_ext.tags = {};
-    TAG_OPERATORS = {};
-    DEFINED_TAGS = {};
+    i18n_ext.flowfilters = {};
+    FLOWFILTER_OPERATORS = {};
+    DEFINED_FLOWFILTERS = {};
     FILTERS_CONST.forEach((f_def) => {
-        i18n_ext.tags[f_def.id] = f_def.label;
-        f_def.operators.forEach((op) => TAG_OPERATORS[op.id] = op.label);
-        DEFINED_TAGS[f_def.id] = f_def.operators.map((op) => op.id);
+        i18n_ext.flowfilters[f_def.id] = f_def.label;
+        f_def.operators.forEach((op) => FLOWFILTER_OPERATORS[op.id] = op.label);
+        DEFINED_FLOWFILTERS[f_def.id] = f_def.operators.map((op) => op.id);
     });
     let entries = ntopng_url_manager.get_url_entries();
     let filters = [];
@@ -220,7 +220,7 @@ export default {
     },
     methods: {
         is_filter_defined: function (filter) {
-            return DEFINED_TAGS[filter.id] != null;
+            return DEFINED_FLOWFILTERS[filter.id] != null;
         },
         update_status_view: function (status) {
             ntopng_url_manager.set_key_to_url("status", status);
@@ -287,7 +287,7 @@ function create_tagify(range_picker_vue) {
                         <x title='remove tag' class='tagify__tag__removeBtn'></x>
                         <div>
                            <b>${tagData.label ? tagData.label : tagData.key}</b>&nbsp;
-                           <b class='operator'>${tagData.selectedOperator ? TAG_OPERATORS[tagData.selectedOperator] : '='}</b>&nbsp;
+                           <b class='operator'>${tagData.selectedOperator ? FLOWFILTER_OPERATORS[tagData.selectedOperator] : '='}</b>&nbsp;
                             <span class='tagify__tag-text'>${tagData.value == "&#039;&#039;" ? '' : tagData.value}</span>
                         </div>
                     </tag>`
@@ -306,7 +306,7 @@ function create_tagify(range_picker_vue) {
 
     $(document).ready(function () {
         // add existing tags
-        tagify.addTags(initialTags);
+        tagify.addTags(initialFlowfilters);
     }); /* $(document).ready() */
 
     const createValueFromTag = function (tag) {
@@ -333,8 +333,8 @@ function create_tagify(range_picker_vue) {
         }
 
         // has the tag an operator object?
-        if (DEFINED_TAGS[tag.key] && !Array.isArray(DEFINED_TAGS[tag.key])) {
-            tag.operators = DEFINED_TAGS[tag.key].operators;
+        if (DEFINED_FLOWFILTERS[tag.key] && !Array.isArray(DEFINED_FLOWFILTERS[tag.key])) {
+            tag.operators = DEFINED_FLOWFILTERS[tag.key].operators;
         }
 
         if (!tag.selectedOperator) {

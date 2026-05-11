@@ -3855,7 +3855,7 @@ local lang = {
     ["time_range"] = "时间范围",
     ["vlan_id"] = "VLAN",
     ["where_note"] = "使用&lt;field&gt;&lt;operator&gt;&lt;value&gt;条件,其中&lt;operator&gt;可以是&lt;, &gt;, =, !=. AND/OR 运算符也可以组合条件. 请为字符串字段使用引号（例如 INFO='www.ntop.org'）",
-    ["tags"] = {
+    ["flowfilters"] = {
       ["cli_asn"] = "客户端 ASN",
       ["cli_ip"] = "客户端 IP",
       ["cli_port"] = "客户端端口",

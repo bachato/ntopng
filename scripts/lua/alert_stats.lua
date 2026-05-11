@@ -197,8 +197,8 @@ if ntop.isEnterpriseL() then
                goto continue
             end
 
-            if item.tag then
-               column_def = datatable_utils.get_datatable_column_def_by_tag(item.tag)
+            if item.flowfilter then
+               column_def = datatable_utils.get_datatable_column_def_by_flowfilter(item.flowfilter)
                i18n_label = column_def.title_i18n
             else
 
@@ -214,8 +214,8 @@ if ntop.isEnterpriseL() then
                   i18n_label = item.name
                elseif i18n("db_search." .. item.name) then
                   i18n_label = "db_search." .. item.name
-               elseif i18n("db_search.tags." .. item.name) then
-                  i18n_label = "db_search.tags." .. item.name
+               elseif i18n("db_search.flowfilters." .. item.name) then
+                  i18n_label = "db_search.flowfilters." .. item.name
                end
 
                -- if the localized title is not available, set title to the label from the preset

@@ -28,7 +28,7 @@
 
                         <div class="d-flex align-items-center mb-2">
                             <div class="d-flex no-wrap" style="text-align:left;margin-right:1rem;min-width:25rem;">
-                                <label class="my-auto me-1">{{ _i18n('db_search.tags.srv_port') }}: </label>
+                                <label class="my-auto me-1">{{ _i18n('db_search.flowfilters.srv_port') }}: </label>
                                 <SelectSearch v-model:selected_option="selected_port" :options="port_list"
                                     @select_option="update_port">
                                 </SelectSearch>

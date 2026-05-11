@@ -2601,7 +2601,7 @@ local lang = {
       ["vlan_id"] = "All VLANs",
       ["wlan_ssid"] = "All WLAN SSID",
     },
-    ["tags"] = {
+    ["flowfilters"] = {
       ["src_peer_asn"] = "Src Peer ASN",
       ["dst_peer_asn"] = "Dst Peer ASN",
       ["acknowledged"] = "Acknowledged",

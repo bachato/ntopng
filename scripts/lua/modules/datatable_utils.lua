@@ -407,55 +407,55 @@ local all_datatable_columns_def_by_tag = {
       render_type = "formatProbeIP",
    },
    ['exporter_site'] = {
-      title_i18n = "db_search.tags.exporter_site",
+      title_i18n = "db_search.flowfilters.exporter_site",
       data_field = "exporter_site",
       sortable = true,
       class = { "no-wrap" },
       render_type = "formatExporterSite",
    },
-   ['network'] = build_datatable_column_def_network('network', "db_search.tags.network"),
-   ['cli_network'] = build_datatable_column_def_network('cli_network', "db_search.tags.cli_network"),
-   ['srv_network'] = build_datatable_column_def_network('srv_network', "db_search.tags.srv_network"),
-   ['cli_host_pool_id'] = build_datatable_column_def_pool_id('cli_host_pool_id', "db_search.tags.cli_host_pool_id"),
-   ['srv_host_pool_id'] = build_datatable_column_def_pool_id('srv_host_pool_id', "db_search.tags.srv_host_pool_id"),
-   ["input_snmp"] = build_datatable_column_def_snmp_interface("input_snmp", "db_search.tags.input_snmp"),
-   ["output_snmp"] = build_datatable_column_def_snmp_interface("output_snmp", "db_search.tags.output_snmp"),
-   ["snmp_interface"] = build_datatable_column_def_snmp_interface("snmp_interface", "db_search.tags.snmp_interface"),
-   ['interface_id'] = build_datatable_column_def_obj('interface_id', "db_search.tags.interface_id"),
-   ['country'] = build_datatable_column_def_country('country', "db_search.tags.country"),
-   ['cli_country'] = build_datatable_column_def_country('cli_country', "db_search.tags.cli_country"),
-   ['srv_country'] = build_datatable_column_def_country('srv_country', "db_search.tags.srv_country"),
-   ['community_id'] = build_datatable_column_def_community_id('community_id', "db_search.tags.community_id"),
-   ['cli_fingerprint'] = build_datatable_column_def_obj('cli_fingerprint', "db_search.tags.cli_fingerprint"),
+   ['network'] = build_datatable_column_def_network('network', "db_search.flowfilters.network"),
+   ['cli_network'] = build_datatable_column_def_network('cli_network', "db_search.flowfilters.cli_network"),
+   ['srv_network'] = build_datatable_column_def_network('srv_network', "db_search.flowfilters.srv_network"),
+   ['cli_host_pool_id'] = build_datatable_column_def_pool_id('cli_host_pool_id', "db_search.flowfilters.cli_host_pool_id"),
+   ['srv_host_pool_id'] = build_datatable_column_def_pool_id('srv_host_pool_id', "db_search.flowfilters.srv_host_pool_id"),
+   ["input_snmp"] = build_datatable_column_def_snmp_interface("input_snmp", "db_search.flowfilters.input_snmp"),
+   ["output_snmp"] = build_datatable_column_def_snmp_interface("output_snmp", "db_search.flowfilters.output_snmp"),
+   ["snmp_interface"] = build_datatable_column_def_snmp_interface("snmp_interface", "db_search.flowfilters.snmp_interface"),
+   ['interface_id'] = build_datatable_column_def_obj('interface_id', "db_search.flowfilters.interface_id"),
+   ['country'] = build_datatable_column_def_country('country', "db_search.flowfilters.country"),
+   ['cli_country'] = build_datatable_column_def_country('cli_country', "db_search.flowfilters.cli_country"),
+   ['srv_country'] = build_datatable_column_def_country('srv_country', "db_search.flowfilters.srv_country"),
+   ['community_id'] = build_datatable_column_def_community_id('community_id', "db_search.flowfilters.community_id"),
+   ['cli_fingerprint'] = build_datatable_column_def_obj('cli_fingerprint', "db_search.flowfilters.cli_fingerprint"),
    ['mitre_id'] = {
-      title_i18n = "db_search.tags.mitre_id",
+      title_i18n = "db_search.flowfilters.mitre_id",
       data_field = "mitre_data",
       sortable = true,
       class = { "no-wrap" },
       render_type = "formatMitreId",
    },
    ['mitre_tactic'] = {
-      title_i18n = "db_search.tags.mitre_tactic",
+      title_i18n = "db_search.flowfilters.mitre_tactic",
       data_field = "mitre_data",
       sortable = true,
       class = { "no-wrap" },
       render_type = "formatMitreTactic",
    },
    ['mitre_technique'] = {
-      title_i18n = "db_search.tags.mitre_technique",
+      title_i18n = "db_search.flowfilters.mitre_technique",
       data_field = "mitre_data",
       sortable = true,
       class = { "no-wrap" },
       render_type = "formatMitreTechnique",
    },
    ['mitre_subtechnique'] = {
-      title_i18n = "db_search.tags.mitre_subtechnique",
+      title_i18n = "db_search.flowfilters.mitre_subtechnique",
       data_field = "mitre_data",
       sortable = true,
       class = { "no-wrap" },
       render_type = "formatMitreSubTechnique",
    },
-   ['domain_name'] = build_datatable_column_def_obj('domain_name', "db_search.tags.domain_name"),
+   ['domain_name'] = build_datatable_column_def_obj('domain_name', "db_search.flowfilters.domain_name"),
 }
 
 -- #####################################
@@ -481,12 +481,12 @@ datatable_utils.datatable_column_def_builder_by_type = {
 
 -- #####################################
 
-function datatable_utils.get_datatable_column_def_by_tag(tag)
-   if all_datatable_columns_def_by_tag[tag] then
-      return all_datatable_columns_def_by_tag[tag]
+function datatable_utils.get_datatable_column_def_by_flowfilter(flowfilter)
+   if all_datatable_columns_def_by_tag[flowfilter] then
+      return all_datatable_columns_def_by_tag[flowfilter]
    else
-      return build_datatable_column_def_default(tag, 
-               (i18n("db_search.tags."..tag) and "db_search.tags."..tag) or tag)
+      return build_datatable_column_def_default(flowfilter, 
+               (i18n("db_search.flowfilters."..flowfilter) and "db_search.flowfilters."..flowfilter) or flowfilter)
    end
 end
 

@@ -34,7 +34,7 @@ const tagify_ref = ref(null);
 const tags_2 = ref([]);
 let tagify_obj = null;
 
-const tag_operator_label_dict = filtersManager.tag_operator_label_dict;
+const flowfilter_operator_label_dict = filtersManager.flowfilter_operator_label_dict;
 
 onBeforeMount(async () => {
 });
@@ -87,7 +87,7 @@ function create_tagify() {
                         <x title='remove tag' class='tagify__tag__removeBtn'></x>
                         <div>
                            <b>${tagData.label ? tagData.label : tagData.key}</b>&nbsp;
-                           <b class='operator'>${tagData.selectedOperator ? tag_operator_label_dict[tagData.selectedOperator] : '='}</b>&nbsp;
+                           <b class='operator'>${tagData.selectedOperator ? flowfilter_operator_label_dict[tagData.selectedOperator] : '='}</b>&nbsp;
                             <span class='tagify__tag-text'>${tagData.value}</span>
                         </div>
                     </tag>`

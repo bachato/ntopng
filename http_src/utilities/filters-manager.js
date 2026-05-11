@@ -8,7 +8,7 @@ async function get_filter_const(url_request) {
     return filter_consts;
 }
 
-const tag_operator_label_dict = {
+const flowfilter_operator_label_dict = {
     "eq": "=",
     "neq": "!=",
     "lt": "<",
@@ -22,13 +22,13 @@ const tag_operator_label_dict = {
 const load_filters_data = async function (filters_const) {
     filters_const.filter((x) => x.label == null).forEach((x) => { console.error(`label not defined for filter ${JSON.stringify(x)}`); x.label = ""; });
     filters_const.sort((a, b) => a.label.localeCompare(b.label));
-    i18n_ext.tags = {};
-    TAG_OPERATORS = {};
-    DEFINED_TAGS = {};
+    i18n_ext.flowfilters = {};
+    FLOWFILTER_OPERATORS = {};
+    DEFINED_FLOWFILTERS = {};
     filters_const.forEach((f_def) => {
-        i18n_ext.tags[f_def.id] = f_def.label;
-        f_def.operators.forEach((op) => TAG_OPERATORS[op.id] = op.label);
-        DEFINED_TAGS[f_def.id] = f_def.operators.map((op) => op.id);
+        i18n_ext.flowfilters[f_def.id] = f_def.label;
+        f_def.operators.forEach((op) => FLOWFILTER_OPERATORS[op.id] = op.label);
+        DEFINED_FLOWFILTERS[f_def.id] = f_def.operators.map((op) => op.id);
     });
     let entries = ntopng_url_manager.get_url_entries();
     let filters = [];
@@ -81,7 +81,7 @@ const filtersManager = function () {
 	get_filter_const,
 	get_filters_object,
 	load_filters_data,
-	tag_operator_label_dict,
+	flowfilter_operator_label_dict,
     };
 }();
 

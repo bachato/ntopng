@@ -68,11 +68,11 @@ onMounted(() => {
 const show = (status) => {
   begin_time.value = ntopng_utility.from_utc_to_server_date_format(status.epoch_begin * 1000);
   end_time.value = ntopng_utility.from_utc_to_server_date_format(status.epoch_end * 1000);
-  const tag_operator_label_dict = filtersManager.tag_operator_label_dict;
+  const flowfilter_operator_label_dict = filtersManager.flowfilter_operator_label_dict;
   filters.value = status.filters.map((f) => {
     return {
       label: f.label,
-      value: `${tag_operator_label_dict[f.operator]} ${f.value_label}`,
+      value: `${flowfilter_operator_label_dict[f.operator]} ${f.value_label}`,
     };
   });
   let message_body = _i18n("show_alerts.confirm_delete_alerts");

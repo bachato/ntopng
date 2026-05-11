@@ -1940,7 +1940,7 @@ local lang = {
      ["traffic_direction"] = "トラフィック方向",
      ["vlan_id"] = "VLAN",
      ["where_note"] = "条件として <field> <operator> <value> を使用します。ここで、<operator> は <, >, =, != が使用できます。条件を組み合わせるために AND/OR 演算子も使用できます。文字列フィールドの場合はクォートを使用してください（例: INFO='www.ntop.org')",
-     ["tags"] = {
+     ["flowfilters"] = {
        ["acknowledged"] = "認識済み",
        ["alert_category"] = "カテゴリ",
        ["alert_id"] = "アラートタイプ",
