@@ -1764,10 +1764,8 @@ class Flow : public GenericHashEntry {
   inline SNMPInterfaceRole getSNMPExporterInterfaceRole() {
     return (flowExporterInterfaceRole);
   }
-  inline void setSNMPExporterInterfaceRole(SNMPInterfaceRole r) {
-    flowExporterInterfaceRole = r;
-  }
 
+  void setSNMPExporterInterfaceRole(SNMPInterfaceRole r);
   inline bool isFirstFlowDump()  { return(last_db_dump.is_first_dump); }
 
   u_int64_t get_transit_bytes() const;

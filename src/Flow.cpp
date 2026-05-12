@@ -10246,3 +10246,16 @@ u_int64_t Flow::get_peering_bytes() const {
   else
     return(0);
 }
+
+/* *************************************** */
+
+void Flow::setSNMPExporterInterfaceRole(SNMPInterfaceRole r) {
+  if(r == role_other)
+    return;
+  
+  if((flowExporterInterfaceRole == role_peering)
+     || (flowExporterInterfaceRole == role_transit))
+    flowExporterInterfaceRole = r; /* Priority */
+  else if(flowExporterInterfaceRole == role_other /* Not yet set */)
+    flowExporterInterfaceRole = r;
+}

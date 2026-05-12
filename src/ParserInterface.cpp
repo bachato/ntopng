@@ -281,7 +281,7 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
       SNMPInterfaceRole r =
           getRole(&zflow->exporter_device_ip, zflow->inIndex, zflow->outIndex);
 
-      if (r != role_other) flow->setSNMPExporterInterfaceRole(r);
+      flow->setSNMPExporterInterfaceRole(r);
       incRoleBytes(zflow->in_pkts + zflow->in_bytes, r);
 #endif
     } else {
@@ -294,7 +294,7 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
       if (r == role_other) {
         r = getRole(&zflow->exporter_device_ip, zflow->inIndex, zflow->outIndex);
 
-        if (r != role_other) flow->setSNMPExporterInterfaceRole(r);
+	flow->setSNMPExporterInterfaceRole(r);
       }
 
       incRoleBytes(zflow->in_pkts + zflow->in_bytes, r);
