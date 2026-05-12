@@ -115,6 +115,8 @@ void ASNStats::lua(lua_State* vm, bool show_all_stats) {
       lua_push_uint64_table_entry(vm, "bytes_sent", it2->second.bytes_sent);
       lua_push_uint64_table_entry(vm, "bytes_rcvd", it2->second.bytes_rcvd);
       lua_push_uint64_table_entry(vm, "total_bytes", total_bytes);
+      lua_push_uint64_table_entry(vm, "transit_bytes", it2->second.transit_bytes);
+      lua_push_uint64_table_entry(vm, "peering_bytes", it2->second.peering_bytes);
       lua_pushstring(vm, std::to_string(it2->first).c_str());
       lua_insert(vm, -2);
       lua_settable(vm, -3);
@@ -135,6 +137,8 @@ void ASNStats::lua(lua_State* vm, bool show_all_stats) {
       lua_push_uint64_table_entry(vm, "bytes_sent", it2->second.bytes_sent);
       lua_push_uint64_table_entry(vm, "bytes_rcvd", it2->second.bytes_rcvd);
       lua_push_uint64_table_entry(vm, "total_bytes", total_bytes);
+      lua_push_uint64_table_entry(vm, "transit_bytes", it2->second.transit_bytes);
+      lua_push_uint64_table_entry(vm, "peering_bytes", it2->second.peering_bytes);
       lua_pushstring(vm, std::to_string(it2->first).c_str());
       lua_insert(vm, -2);
       lua_settable(vm, -3);
