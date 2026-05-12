@@ -141,7 +141,7 @@ const asn_type_option = ref([
     { key: "show_as", value: "my_as", label: i18n("asn_configuration.customer_asn_title") },
     { key: "show_as", value: "my_customer_as", label: i18n("asn_configuration.sub_customer_asn_title") },
     { key: "show_as", value: "remote_as", label: i18n("asn_configuration.remote_asn_title") },
-    { key: "show_as", value: "other", label: i18n("asn_configuration.other") }
+    { key: "show_as", value: "other_as", label: i18n("asn_configuration.other") }
 ]);
 
 // Interface Role Filter Options
@@ -588,7 +588,7 @@ const map_table_def_columns = (columns) => {
             return NtopUtils.createBreakdown_multi_elem(
                 [pct_other, pct_transit, pct_peering],
                 [
-                    _i18n("asn_configuration.other_asn"),
+                    _i18n("asn_configuration.other"),
                     _i18n("prefs.snmp_interface_role_list.transit"),
                     _i18n("prefs.snmp_interface_role_list.peering"),
                 ]
