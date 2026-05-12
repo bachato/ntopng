@@ -2348,6 +2348,7 @@ local known_parameters = {
    ["host_pool"] = validateListOfTypeInline(validateFilters(validateNumber)),
    ["cli_host_pool_id"] = validateListOfTypeInline(validateFilters(validateNumber)),
    ["srv_host_pool_id"] = validateListOfTypeInline(validateFilters(validateNumber)),
+   ["first_flow_dump"] = validateListOfTypeInline(validateFilters(validateBool)),
 
    -- Widget and Datasources
    ["ds_type"] = validateSingleWord,

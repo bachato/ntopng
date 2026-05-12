@@ -890,6 +890,13 @@ flowfilter_utils.defined_filters = {
         i18n_label = i18n('db_search.flowfilters.last_seen'),
         operators = {'eq', 'neq', 'lt', 'gt', 'gte', 'lte'},
         hourly_available = true
+    },
+    first_flow_dump = {
+        type = flowfilter_utils.input_types.select,
+        value_type = 'first_flow_dump',
+        i18n_label = i18n('db_search.flowfilters.first_flow_dump'),
+        operators = {'eq', 'neq'},
+        hourly_available = false
     }
 }
 -- #####################################
@@ -1256,6 +1263,18 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
                 }
             end
         end
+    elseif filter_def.value_type == "first_flow_dump" then
+        filter.value_type = 'array'
+        filter.options = {
+            {
+                value = 1,
+                label = i18n('db_search.flowfilters.first_flow_dump_only')
+            },
+            {
+                value = 0,
+                label = i18n('db_search.flowfilters.first_flow_dump_excluded')
+            }
+        }
     elseif filter_def.value_type == "qoe_score" then
         if not qoe_utils then
             -- Exclude the filter if it's not L, this info is found only in the l version
