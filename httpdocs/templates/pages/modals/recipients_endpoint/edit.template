@@ -182,7 +182,7 @@
                             </label>
                             <div class="col-sm-7">
                                 <select multiple name="recipient_labels" class="selectpicker allow-no-selection col-sm-12" id="edit-recipient-labels-select">
-                                    {% for _, label in ipairs(labels) do %}
+                                    {% for _, label in ipairs(tags) do %}
                                         <option value="{{ label.id }}" style="color: {{ label.color }}">{{ label.name }}</option>
                                     {% end %}
                                 </select>
