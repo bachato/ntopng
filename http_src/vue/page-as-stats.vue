@@ -141,7 +141,7 @@ const asn_type_option = ref([
     { key: "show_as", value: "my_as", label: i18n("asn_configuration.customer_asn_title") },
     { key: "show_as", value: "my_customer_as", label: i18n("asn_configuration.sub_customer_asn_title") },
     { key: "show_as", value: "remote_as", label: i18n("asn_configuration.remote_asn_title") },
-    { key: "show_as", value: "other_as", label: i18n("asn_configuration.other_asn") }
+    { key: "show_as", value: "other", label: i18n("asn_configuration.other") }
 ]);
 
 // Interface Role Filter Options
