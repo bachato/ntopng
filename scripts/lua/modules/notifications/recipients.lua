@@ -1300,7 +1300,7 @@ function recipients.dispatch_notification(notification, current_script, notifica
                 end
             end
 
-            -- Check Labels
+            -- Check Tags
             if recipient_ok and recipient.tags and #recipient.tags > 0 then
                 local tags_bitmap = notification.tags_bitmap or 0
                 local match = false
@@ -1313,7 +1313,7 @@ function recipients.dispatch_notification(notification, current_script, notifica
                 end
                 if not match then
                     debug_print("X Discarding " .. (notification.entity_val or "?") .. " alert for recipient " ..
-                        recipient.recipient_name .. " due to label selection")
+                        recipient.recipient_name .. " due to tag selection")
                     recipient_ok = false
                 end
             end
