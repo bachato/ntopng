@@ -86,5 +86,5 @@ void RemoteHost::initialize() {
   iface->incNumHosts(
       this, true /* Initialization: bytes are 0, considered RX only */);
 
-  labels_bitmap = iface->getHostLabels(this);
+  tags_bitmap = iface->getHostTags(this);
 }

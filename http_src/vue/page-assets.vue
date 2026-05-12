@@ -174,9 +174,9 @@ const map_table_def_columns = (columns) => {
             if (!dataUtils.isEmptyOrNull(host.is_blackhole)) {
                 icons = `${icons} ${blackhole_icon}`
             }
-            if (!dataUtils.isEmptyOrNull(host.labels)) {
-                host.labels.forEach(label => {
-                    icons = `${icons} <span class="badge" style="background-color: ${label.color}">${label.name}</span>`
+            if (!dataUtils.isEmptyOrNull(host.tags)) {
+                host.tags.forEach(tag => {
+                    icons = `${icons} <span class="badge" style="background-color: ${tag.color}">${tag.name}</span>`
                 })
             }
 

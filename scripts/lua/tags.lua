@@ -11,17 +11,17 @@ local template_utils = require("template_utils")
 local json = require("dkjson")
 
 sendHTTPContentTypeHeader('text/html')
-page_utils.print_header_and_set_active_menu_entry(page_utils.menu_entries.labels)
+page_utils.print_header_and_set_active_menu_entry(page_utils.menu_entries.tags)
 dofile(dirs.installdir .. "/scripts/lua/inc/menu.lua")
 
 local page = _GET["page"]
 
-page_utils.print_navbar(i18n("labels_page.labels"), ntop.getHttpPrefix() .. "/lua/labels.lua", {
+page_utils.print_navbar(i18n("tags_page.tags"), ntop.getHttpPrefix() .. "/lua/tags.lua", {
   {
     active = page == "overview" or page == nil,
     page_name = "overview",
     label = "<i class=\"fas fa-lg fa-home\"  data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" title=\"" ..
-        i18n("labels_page.labels") .. "\"></i>"
+        i18n("tags_page.tags") .. "\"></i>"
   }
 })
 
@@ -35,7 +35,7 @@ local context = {
 local json_context = json.encode(context)
 
 template_utils.render("pages/vue_page.template", {
-    vue_page_name = "PageLabels",
+    vue_page_name = "PageTags",
     page_context  = json_context
 })
 

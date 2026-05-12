@@ -19,18 +19,18 @@
  *
  */
 
-#ifndef _LABELS_CONFIGURATION_H
-#define _LABELS_CONFIGURATION_H
+#ifndef _TAGS_CONFIGURATION_H
+#define _TAGS_CONFIGURATION_H
 
 #include "ntop_includes.h"
 
 /*
- * LabelsConfiguration manages host-label bitmaps.
+ * TagsConfiguration manages host-tag bitmaps.
  *
  * Data is stored in-memory in VLANAddressTree
- * and stored in redis for persistency (ntopng.prefs.host_labels_bitmap.<serialization_key>)
+ * and stored in redis for persistency (ntopng.prefs.host_tags_bitmap.<serialization_key>)
  */
-class LabelsConfiguration {
+class TagsConfiguration {
  private:
   VLANAddressTree tree;
 
@@ -38,20 +38,20 @@ class LabelsConfiguration {
   void add_to_tree(const char *key, u_int64_t bitmap);
 
  public:
-  LabelsConfiguration() = default;
-  ~LabelsConfiguration() = default;
+  TagsConfiguration() = default;
+  ~TagsConfiguration() = default;
 
-  /* Scan Redis for ntopng.prefs.host_labels_bitmap.<iface_id>_* keys and initialize the tree at startup */
+  /* Scan Redis for ntopng.prefs.host_tags_bitmap.<iface_id>_* keys and initialize the tree at startup */
   void loadFromRedis(int iface_id);
 
   /* Direct lookups (radix tree) */
-  u_int64_t getLabels(const u_int8_t mac[6]);
-  u_int64_t getLabels(IpAddress *ip, u_int16_t vlan_id);
+  u_int64_t getTags(const u_int8_t mac[6]);
+  u_int64_t getTags(IpAddress *ip, u_int16_t vlan_id);
 
-  /* Look up a label bitmap by serialization key (return 0 when not found) */
-  u_int64_t getLabels(const char *key);
+  /* Look up a tag bitmap by serialization key (return 0 when not found) */
+  u_int64_t getTags(const char *key);
 
-  void setLabels(const char *key, u_int64_t bitmap);
+  void setTags(const char *key, u_int64_t bitmap);
 };
 
-#endif /* _LABELS_CONFIGURATION_H */
+#endif /* _TAGS_CONFIGURATION_H */

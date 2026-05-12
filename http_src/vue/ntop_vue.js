@@ -53,7 +53,7 @@ import { default as PageHostsList } from "./page-hosts-list.vue"
 import { default as PageFlowsList } from "./page-flows-list.vue"
 import { default as PageMacsList } from "./page-macs-list.vue"
 import { default as PageInterfaceICMP } from "./page-interface-icmp.vue"
-import { default as PageLabels } from "./page-labels.vue"
+import { default as PageTags } from "./page-tags.vue"
 import { default as PageExporterSites } from "./page-exporter-sites.vue"
 import { default as PageSNMPInterfaces } from "./page-snmp-interfaces.vue"
 import { default as PageSNMPTopology } from "./page-snmp-topology.vue"
@@ -235,7 +235,7 @@ let ntopVue = {
     PageFlowsList: PageFlowsList,
     PageMacsList: PageMacsList,
     PageInterfaceICMP: PageInterfaceICMP,
-    PageLabels: PageLabels,
+    PageTags: PageTags,
     PageExporterSites: PageExporterSites,
     PageAsStats: PageAsStats,
     PageExportersInterfacesStats: PageExportersInterfacesStats,

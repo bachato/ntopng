@@ -77,19 +77,19 @@
               </td>
             </tr>
 
-            <tr v-if="labels_list.length > 0">
+            <tr v-if="tags_list.length > 0">
               <td>
                 <div class="d-flex align-items-center">
                   <div class="col-8">
-                    <b>{{ _i18n('labels_page.user_defined_labels') }}</b><br>
-                    <small>{{ _i18n('host_config.host_labels_description') }}</small>
+                    <b>{{ _i18n('tags_page.user_defined_tags') }}</b><br>
+                    <small>{{ _i18n('host_config.host_tags_description') }}</small>
                   </div>
-                  <div class="col-4 form-group d-flex justify-content-end" :key="labels_key">
+                  <div class="col-4 form-group d-flex justify-content-end" :key="tags_key">
                     <SelectSearch
-                      v-model:selected_options="selected_labels"
-                      @change_selected_options="update_selected_labels"
-                      @unselect_option="remove_selected_label"
-                      :options="labels_list"
+                      v-model:selected_options="selected_tags"
+                      @change_selected_options="update_selected_tags"
+                      @unselect_option="remove_selected_tag"
+                      :options="tags_list"
                       :multiple="true">
                     </SelectSearch>
                   </div>
@@ -122,7 +122,7 @@ const _i18n = (t) => i18n(t);
 const get_url = `${http_prefix}/lua/rest/v2/get/host/config.lua`;
 const post_url = `${http_prefix}/lua/rest/v2/set/host/config.lua`;
 const pool_url = `${http_prefix}/lua/rest/v2/get/pools.lua`;
-const labels_url = `${http_prefix}/lua/rest/v2/get/label/labels_list.lua`;
+const tags_url = `${http_prefix}/lua/rest/v2/get/tag/tags_list.lua`;
 
 const disable_save = ref(true);
 const props = defineProps({
@@ -147,10 +147,10 @@ const host_pool_title = ref(i18n("host_config.host_pool"))
 const host_pool_description = ref(i18n("host_config.host_pool_description"))
 const pool_key = ref(0)
 
-const labels_list = ref([]);
-const selected_labels = ref([]);
-const initial_labels_bitmap = ref(0n);
-const labels_key = ref(0);
+const tags_list = ref([]);
+const selected_tags = ref([]);
+const initial_tags_bitmap = ref(0n);
+const tags_key = ref(0);
 
 onMounted(async () => {
   const extra_params = ntopng_url_manager.get_url_object();
@@ -186,19 +186,19 @@ onMounted(async () => {
   }
   pool_key.value = 1 /* Trick used to re-render the dropdown */
 
-  const labels_rsp = await ntopng_utility.http_request(labels_url);
-  if (labels_rsp && labels_rsp.length > 0) {
-    labels_rsp.forEach((lbl) => {
-      //if (lbl.id >= 32) {
-        labels_list.value.push({ id: lbl.id, label: lbl.name, value: lbl.id, color: lbl.color });
+  const tags_rsp = await ntopng_utility.http_request(tags_url);
+  if (tags_rsp && tags_rsp.length > 0) {
+    tags_rsp.forEach((t) => {
+      //if (t.id >= 32) {
+        tags_list.value.push({ id: t.id, label: t.name, value: t.id, color: t.color });
       //}
     });
-    const bitmap = BigInt(host_config.user_labels || 0);
-    initial_labels_bitmap.value = bitmap;
-    selected_labels.value = labels_list.value.filter(
-      (lbl) => (bitmap & (1n << BigInt(lbl.id))) !== 0n
+    const bitmap = BigInt(host_config.user_tags || 0);
+    initial_tags_bitmap.value = bitmap;
+    selected_tags.value = tags_list.value.filter(
+      (t) => (bitmap & (1n << BigInt(t.id))) !== 0n
     );
-    labels_key.value = 1;
+    tags_key.value = 1;
   }
 });
 
@@ -206,21 +206,21 @@ function update_selected_pool(item) {
   update_save_button_state()
 }
 
-function get_labels_bitmap() {
+function get_tags_bitmap() {
   let bitmap = 0n;
-  selected_labels.value.forEach((lbl) => {
-    bitmap |= (1n << BigInt(lbl.id));
+  selected_tags.value.forEach((t) => {
+    bitmap |= (1n << BigInt(t.id));
   });
   return bitmap;
 }
 
-function update_selected_labels(items) {
-  selected_labels.value = items;
+function update_selected_tags(items) {
+  selected_tags.value = items;
   update_save_button_state();
 }
 
-function remove_selected_label(item) {
-  selected_labels.value = selected_labels.value.filter((l) => l.id !== item.id);
+function remove_selected_tag(item) {
+  selected_tags.value = selected_tags.value.filter((t) => t.id !== item.id);
   update_save_button_state();
 }
 
@@ -229,7 +229,7 @@ function update_save_button_state() {
     (initial_host_alias.value === host_alias.value.value) &&
     (initial_host_notes.value === host_notes.value.value) &&
     (initial_selected_pool.value === selected_pool.value.value) &&
-    (get_labels_bitmap() === initial_labels_bitmap.value);
+    (get_tags_bitmap() === initial_tags_bitmap.value);
 }
 
 function change_toggle_drop_host_traffic() {
@@ -248,7 +248,7 @@ async function reload_page() {
     pool: selected_pool.value.value,
     custom_name: host_alias.value.value,
     custom_notes: host_notes.value.value,
-    host_labels_bitmap: get_labels_bitmap().toString(),
+    host_tags_bitmap: get_tags_bitmap().toString(),
     ...extra_params
   };
   const headers = {

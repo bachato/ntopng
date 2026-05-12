@@ -2971,12 +2971,12 @@ local known_parameters = {
     ["rules"] = validateUnquoted,
     ["include_empty_ts"] = validateBool,
 
-    -- labels
-    ["label_id"] = validateNumber,
-    ["label_name"] = validateUnquoted,
+    -- tags
+    ["tag_id"] = validateNumber,
+    ["tag_name"] = validateUnquoted,
     ["color"] = validateSingleWord,
     ["label"] = validateNumber,
-    ["host_labels_bitmap"] = validateNumber, -- 64-bit host label bitmap
+    ["host_tags_bitmap"] = validateNumber, -- 64-bit host tag bitmap
 
     -- exporter sites
     ["latitude"] = validateSingleWord,

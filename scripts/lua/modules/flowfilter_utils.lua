@@ -15,7 +15,7 @@ package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 local alert_consts = require "alert_consts"
 local host_pools = require "host_pools"
 local consts = require "consts"
-local label_badge_utils = require "label_badge_utils"
+local tag_badge_utils = require "tag_badge_utils"
 local qoe_utils
 
 if ntop.isEnterpriseL() then
@@ -1186,7 +1186,7 @@ flowfilter_utils.formatters = {
         return flow_risk_list[tonumber(risk) + 1] or risk
     end,
     flow_label = function(id)
-        for _, lbl in ipairs(label_badge_utils.getLabels()) do
+        for _, lbl in ipairs(tag_badge_utils.getTags()) do
             if tostring(lbl.id) == tostring(id) then
                 return lbl.name
             end
@@ -1406,7 +1406,7 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
     elseif filter_def.value_type == "label_id" then
         filter.value_type = 'array'
         filter.options = {}
-        for _, lbl in ipairs(label_badge_utils.getLabels()) do
+        for _, lbl in ipairs(tag_badge_utils.getTags()) do
             filter.options[#filter.options + 1] = {
                 value = lbl.id,
                 label = lbl.name

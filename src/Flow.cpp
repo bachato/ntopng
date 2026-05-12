@@ -3685,7 +3685,7 @@ void Flow::lua(lua_State* vm, AddressTree* allowed_nets,
   // this is used to dynamicall update entries in the GUI
   lua_push_uint64_table_entry(vm, "ntopng.key", key());  // Key
   lua_push_uint64_table_entry(vm, "hash_entry_id", get_hash_entry_id());
-  lua_push_uint64_table_entry(vm, "labels", getLabels());
+  lua_push_uint64_table_entry(vm, "tags", getTags());
 
   if (c_mac != NULL) {
     if (c_mac->getDHCPfingerprint())
@@ -3696,13 +3696,13 @@ void Flow::lua(lua_State* vm, AddressTree* allowed_nets,
 
 /* *************************************** */
 
-u_int64_t Flow::getLabels() {
+u_int64_t Flow::getTags() {
   Host *cli = getViewSharedClient();
   Host *srv = getViewSharedServer();
   u_int64_t bm = 0;
 
-  if (cli) bm |= cli->getLabels();
-  if (srv) bm |= srv->getLabels();
+  if (cli) bm |= cli->getTags();
+  if (srv) bm |= srv->getTags();
 
   return bm;
 }
@@ -5124,7 +5124,7 @@ void Flow::alert2JSON(FlowAlert* alert, ndpi_serializer* s) {
 
   ndpi_serialize_string_string(s, "info", getFlowInfo(false).c_str());
 
-  ndpi_serialize_string_uint64(s, "labels_bitmap", getLabels());
+  ndpi_serialize_string_uint64(s, "tags_bitmap", getTags());
 
   char* json =
       alerts_json; /* Copying ref as it may be moved to the shadow meantime */
@@ -5569,7 +5569,7 @@ bool Flow::enqueueAlertToRecipients(FlowAlert* alert) {
     notification->flow.cli_host_pool = cli_host ? cli_host->get_host_pool() : 0;
     notification->flow.srv_host_pool = srv_host ? srv_host->get_host_pool() : 0;
     notification->alert_entity = alert_entity_flow;
-    notification->labels_bitmap = getLabels();
+    notification->tags_bitmap = getTags();
 
     rv = ntop->recipients_enqueue(notification);
 
@@ -7786,8 +7786,8 @@ void Flow::lua_get_info(lua_State* vm, bool client) const {
                                  h->get_local_network_id());
       lua_push_uint64_table_entry(vm, client ? "cli.pool_id" : "srv.pool_id",
                                   h->get_host_pool());
-      lua_push_uint64_table_entry(vm, client ? "cli.labels" : "srv.labels",
-                                  h->getLabels());
+      lua_push_uint64_table_entry(vm, client ? "cli.tags" : "srv.tags",
+                                  h->getTags());
       lua_push_uint64_table_entry(vm, client ? "cli.asn" : "srv.asn",
                                   h->get_asn());
       lua_push_str_table_entry(vm, client ? "cli.country" : "srv.country",
@@ -7850,7 +7850,7 @@ void Flow::lua_get_min_info(lua_State* vm) {
   lua_push_uint64_table_entry(vm, "cli2srv.packets", get_packets_cli2srv());
   lua_push_uint64_table_entry(vm, "srv2cli.packets", get_packets_srv2cli());
   lua_push_str_table_entry(vm, "info", getFlowInfo(true).c_str());
-  lua_push_uint64_table_entry(vm, "labels", getLabels());
+  lua_push_uint64_table_entry(vm, "tags", getTags());
 }
 
 /* ***************************************************** */

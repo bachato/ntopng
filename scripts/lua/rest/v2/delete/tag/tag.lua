@@ -10,11 +10,11 @@ require "ntop_utils"
 require "http_lint"
 
 local rest_utils = require "rest_utils"
-local label_badge_utils = require "label_badge_utils"
+local tag_badge_utils = require "tag_badge_utils"
 
 local post_data = _POST or {}
-local label_id = post_data["label_id"]
+local tag_id = post_data["tag_id"]
 
-label_badge_utils.deleteLabel(label_id)
+tag_badge_utils.deleteTag(tag_id)
 
 rest_utils.answer(rest_utils.consts.success.ok)

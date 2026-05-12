@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `flows` ON CLUSTER '$CLUSTER' (
 `SRC_PROC_USER_NAME` String COMMENT 'OS username owning the source process',
 `DST_PROC_USER_NAME` String COMMENT 'OS username owning the destination process',
 `ALERTS_MAP` String COMMENT 'Serialized bitmap of individual alert conditions triggered on this flow',
-`LABELS_MAP` String COMMENT 'Serialized bitmap of labels associated with this flow',
+`TAGS_MAP` String COMMENT 'Serialized bitmap of tags associated with this flow',
 `SEVERITY` UInt8 COMMENT 'Alert severity level; meaningful only when STATUS != 0',
 `IS_CLI_ATTACKER` UInt8 COMMENT '1 if the client host is flagged as an attacker, 0 otherwise',
 `IS_CLI_VICTIM` UInt8 COMMENT '1 if the client host is flagged as a victim, 0 otherwise',
@@ -144,7 +144,7 @@ ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `DST_PROC_USE
 @
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `ALERTS_MAP` String;
 @
-ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `LABELS_MAP` String;
+ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `TAGS_MAP` String;
 @
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `SEVERITY` UInt8;
 @
@@ -312,7 +312,7 @@ CREATE TABLE IF NOT EXISTS `host_alerts` ON CLUSTER '$CLUSTER' (
 `country` String COMMENT 'Two-letter ISO 3166-1 country code derived from the host IP',
 `alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
 `require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention',
-`labels_map` String DEFAULT '' COMMENT 'HEX-encoded bitmap of host labels set at the time the alert triggered'
+`tags_map` String DEFAULT '' COMMENT 'HEX-encoded bitmap of host tags set at the time the alert triggered'
 ) ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{database}/{table}', '{replica}') PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp)
 COMMENT 'Historical alerts associated with individual hosts (identified by IP address and VLAN). Rows are appended when an engaged host alert is archived. See engaged_host_alerts for currently-firing alerts and host_alerts_view to query both together (with MITRE ATT&CK enrichment).';
 @
@@ -326,7 +326,9 @@ ALTER TABLE `host_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS alert_c
 @
 ALTER TABLE `host_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS require_attention Boolean;
 @
-ALTER TABLE `host_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `labels_map` String DEFAULT '';
+ALTER TABLE `host_alerts` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `tags_map` String DEFAULT '';
+@
+ALTER TABLE `host_alerts` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `labels_map`;
 
 @
 
@@ -362,7 +364,7 @@ CREATE TABLE `engaged_host_alerts` (
 `country` String COMMENT 'Two-letter ISO 3166-1 country code derived from the host IP',
 `alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
 `require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention',
-`labels_map` String DEFAULT '' COMMENT 'HEX-encoded bitmap of host labels set at the time the alert triggered'
+`tags_map` String DEFAULT '' COMMENT 'HEX-encoded bitmap of host tags set at the time the alert triggered'
 ) ENGINE = Memory
 COMMENT 'In-memory table holding currently active (engaged) host alerts. Rows are inserted when an alert fires and removed when resolved. Merged with host_alerts in host_alerts_view.';
 
@@ -1007,7 +1009,7 @@ SELECT
     ha.country,
     ha.alert_category,
     ha.require_attention,
-    ha.labels_map,
+    ha.tags_map,
     mitre.TACTIC AS mitre_tactic,
     mitre.TECHNIQUE AS mitre_technique,
     mitre.SUB_TECHNIQUE AS mitre_subtechnique,
@@ -1084,7 +1086,7 @@ SELECT
     f.CLIENT_LOCATION AS cli_location,
     f.SERVER_LOCATION AS srv_location,
     f.ALERTS_MAP AS alerts_map,
-    f.LABELS_MAP AS labels_map,
+    f.TAGS_MAP AS tags_map,
     f.INFO AS info,
     f.PROBE_IP AS probe_ip,
     f.SRC2DST_TCP_FLAGS AS src2dst_tcp_flags,

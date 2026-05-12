@@ -10,7 +10,7 @@
       </div>
     </template><!-- modal-body -->
     <template v-slot:footer>
-      <button type="button" @click="reset_label" class="btn btn-danger">{{ _i18n("reset") }}</button>
+      <button type="button" @click="reset_tag" class="btn btn-danger">{{ _i18n("reset") }}</button>
     </template>
   </modal>
 </template>
@@ -27,7 +27,7 @@ const show_return_msg = ref(false)
 const title = ref('')
 const err = ref(false);
 const row = ref(null);
-const label_id = ref(null);
+const tag_id = ref(null);
 
 const emit = defineEmits(["reset"]);
 
@@ -52,20 +52,20 @@ async function resetModal() {
 /* ****************************************** */
 
 /* This function formats the reset message */
-async function formatMessage(label) {
-  title.value = i18n("labels_page.reset_label_title")
-  if (label) {
-    const label_name = label.label_name;
-    title.value = title.value + ": " + label_name;
+async function formatMessage(tag) {
+  title.value = i18n("tags_page.reset_tag_title")
+  if (tag) {
+    const tag_name = tag.tag_name;
+    title.value = title.value + ": " + tag_name;
   }
-  message.value = i18n('labels_page.reset_label');
+  message.value = i18n('tags_page.reset_tag');
 }
 
 /* ****************************************** */
 
-async function reset_label() {
+async function reset_tag() {
   const formData = {
-    label_id: label_id.value,
+    tag_id: tag_id.value,
     reset: true
   };
   emit("reset", formData);
@@ -74,7 +74,7 @@ async function reset_label() {
 
 const showReset = async (item) => {
   resetModal();
-  label_id.value = item.label_id;
+  tag_id.value = item.tag_id;
   formatMessage(item);
   modal_id.value.show();
 };

@@ -211,7 +211,7 @@ void LocalHost::deferredInitialization() {
 
   Host::deferredInitialization(); /* this also sets is_in_broadcast_domain */
 
-  labels_bitmap = iface->getHostLabels(this);
+  tags_bitmap = iface->getHostTags(this);
 }
 
 /* *************************************** */

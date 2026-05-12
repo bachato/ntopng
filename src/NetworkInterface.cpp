@@ -6270,7 +6270,7 @@ static bool host_search_walker(GenericHashEntry* he, void* user_data,
        (strstr(ipstr, r->map_search) == NULL &&
         strstr(namestr, r->map_search) == NULL)) ||
       (r->labelFilter != (u_int64_t)-1 &&
-       !(h->getLabels() & r->labelFilter)))
+       !(h->getTags() & r->labelFilter)))
     return (false); /* false = keep on walking */
 
   if (r->currentSize == r->actNumEntries) {
@@ -9737,26 +9737,26 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
   removeRedisSitesKey();
 
   if (id >= 0)
-    host_labels.loadFromRedis(id);
+    host_tags.loadFromRedis(id);
 }
 
 /* **************************************** */
 
-u_int64_t NetworkInterface::getHostLabels(Host* host) {
+u_int64_t NetworkInterface::getHostTags(Host* host) {
   Mac* mac = host->getMac();
   if (mac) {
-    u_int64_t v = host_labels.getLabels(mac->get_mac());
+    u_int64_t v = host_tags.getTags(mac->get_mac());
     if (v) return v;
   }
-  return host_labels.getLabels(host->get_ip(), host->get_vlan_id());
+  return host_tags.getTags(host->get_ip(), host->get_vlan_id());
 }
 
 /* **************************************** */
 
-void NetworkInterface::setHostLabels(Host* host, u_int64_t bitmap) {
+void NetworkInterface::setHostTags(Host* host, u_int64_t bitmap) {
   char key_buf[CONST_MAX_LEN_REDIS_KEY];
   char* key = host->getSerializationKey(key_buf, sizeof(key_buf), true);
-  host_labels.setLabels(key, bitmap);
+  host_tags.setTags(key, bitmap);
 }
 
 /* **************************************** */

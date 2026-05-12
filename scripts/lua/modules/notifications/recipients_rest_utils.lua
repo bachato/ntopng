@@ -125,21 +125,21 @@ end
 
 -- ##############################################
 
--- @brief Parses and validates a comma-separated list of label ids
--- @return A lua array of label ids
-function recipients_rest_utils.parse_labels(labels_string)
-   if isEmptyString(labels_string) then return {} end
+-- @brief Parses and validates a comma-separated list of tag ids
+-- @return A lua array of tag ids
+function recipients_rest_utils.parse_tags(tags_string)
+   if isEmptyString(tags_string) then return {} end
 
-   local label_badge_utils = require "label_badge_utils"
-   local all_labels = label_badge_utils.getLabels()
+   local tag_badge_utils = require "tag_badge_utils"
+   local all_tags = tag_badge_utils.getTags()
    local valid_ids = {}
-   for _, lbl in pairs(all_labels) do
-      valid_ids[lbl.id] = true
+   for _, t in pairs(all_tags) do
+      valid_ids[t.id] = true
    end
 
-   local labels_list = labels_string:split(",") or {labels_string}
+   local tags_list = tags_string:split(",") or {tags_string}
    local res = {}
-   for _, id_str in pairs(labels_list) do
+   for _, id_str in pairs(tags_list) do
       local id = tonumber(id_str)
       if id and valid_ids[id] then
 	 res[#res + 1] = id

@@ -10,10 +10,10 @@ require "ntop_utils"
 require "http_lint"
 
 local rest_utils = require "rest_utils"
-local label_badge_utils = require "label_badge_utils"
+local tag_badge_utils = require "tag_badge_utils"
 
--- label, color, description
-local labels = label_badge_utils.getLabels()
-local total_rows = #labels
+-- tag, color, description
+local tags = tag_badge_utils.getTags()
+local total_rows = #tags
 
-rest_utils.extended_answer(rest_utils.consts.success.ok, labels, {["recordsTotal"] = total_rows})
+rest_utils.extended_answer(rest_utils.consts.success.ok, tags, {["recordsTotal"] = total_rows})

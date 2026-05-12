@@ -295,28 +295,28 @@
 #define LOCAL_HOSTS_CACHE_DURATION 3600        /*  1 h */
 #define LOCALHOST_SERVER_PORT_BITMAP "ntopng.cache.localhost_srv_port_bitmap.%s"
 #define HOST_LABEL_NAMES_KEY "ntopng.cache.host_labels.%s"
-#define HOST_LABELS_BITMAP_KEY    "ntopng.prefs.host_labels_bitmap.%s"
-#define HOST_LABELS_BITMAP_PREFIX "ntopng.prefs.host_labels_bitmap."
-#define HOST_USER_LABELS_MASK     ((u_int64_t)0xFFFFFFFF00000000ULL) /* bits 32-63: user-defined */
+#define HOST_TAGS_BITMAP_KEY    "ntopng.prefs.host_tags_bitmap.%s"
+#define HOST_TAGS_BITMAP_PREFIX "ntopng.prefs.host_tags_bitmap."
+#define HOST_USER_TAGS_MASK     ((u_int64_t)0xFFFFFFFF00000000ULL) /* bits 32-63: user-defined */
 
-/* Built-in host labels (bits 0-31).
+/* Built-in host tags (bits 0-31).
  * Bits 0-31 are reserved for ntop; bits 32-63 are user-defined.
- * Keep in sync with label_badge_utils.builtin_labels in label_badge_utils.lua */
+ * Keep in sync with tag_badge_utils.builtin_tags in tag_badge_utils.lua */
 typedef enum {
-  HOST_LABEL_DNS_SERVER      = 0,
-  HOST_LABEL_NTP_SERVER      = 1,
-  HOST_LABEL_DHCP_SERVER     = 2,
-  HOST_LABEL_SMTP_SERVER     = 3,
-  HOST_LABEL_NETWORK_GATEWAY = 4,
-  HOST_LABEL_IMAP_SERVER     = 5,
-  HOST_LABEL_POP_SERVER      = 6,
-  HOST_LABEL_HTTP_SERVER     = 7,
-  HOST_LABEL_SSH_SERVER      = 8,
-  HOST_LABEL_RDP_SERVER      = 9,
-  HOST_LABEL_MODBUS_SERVER   = 10,
-  HOST_LABEL_S7COMM_SERVER   = 11,
-  HOST_LABEL_PROFINET_SERVER = 12,
-} HostLabelId;
+  HOST_TAG_DNS_SERVER      = 0,
+  HOST_TAG_NTP_SERVER      = 1,
+  HOST_TAG_DHCP_SERVER     = 2,
+  HOST_TAG_SMTP_SERVER     = 3,
+  HOST_TAG_NETWORK_GATEWAY = 4,
+  HOST_TAG_IMAP_SERVER     = 5,
+  HOST_TAG_POP_SERVER      = 6,
+  HOST_TAG_HTTP_SERVER     = 7,
+  HOST_TAG_SSH_SERVER      = 8,
+  HOST_TAG_RDP_SERVER      = 9,
+  HOST_TAG_MODBUS_SERVER   = 10,
+  HOST_TAG_S7COMM_SERVER   = 11,
+  HOST_TAG_PROFINET_SERVER = 12,
+} HostTagId;
 
 #define IFACE_DHCP_RANGE_KEY "ntopng.prefs.ifid_%u.dhcp_ranges"
 #define IFACE_BROADCAST_DOMAINS_KEY "ntopng.prefs.ifid_%u.broadcast_domains"

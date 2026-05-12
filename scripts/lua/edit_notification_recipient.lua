@@ -39,7 +39,7 @@ local categories = recipients_rest_utils.parse_check_categories(_POST["recipient
 local entities = recipients_rest_utils.parse_check_entities(_POST["recipient_check_entities"])
 local host_pools_ids = recipients_rest_utils.parse_host_pools(_POST["recipient_host_pools"])
 local am_hosts_ids = recipients_rest_utils.parse_am_hosts(_POST["recipient_am_hosts"])
-local labels_ids = recipients_rest_utils.parse_labels(_POST["recipient_labels"])
+local tags_ids = recipients_rest_utils.parse_tags(_POST["recipient_tags"])
 local minimum_severity = recipients_rest_utils.parse_minimum_severity(_POST["recipient_minimum_severity"])
 
 if (action == "add") then
@@ -51,7 +51,7 @@ if (action == "add") then
 					      minimum_severity,
 					      host_pools_ids,
 					      am_hosts_ids,
-					      labels_ids,
+					      tags_ids,
 					      _POST)
 elseif (action == "edit") then
    response.result = recipients.edit_recipient(recipient_id,
@@ -61,7 +61,7 @@ elseif (action == "edit") then
 					       minimum_severity,
 					       host_pools_ids,
 					       am_hosts_ids,
-					       labels_ids,
+					       tags_ids,
 					       _POST)
 elseif (action == "remove") then
    response.result = recipients.delete_recipient(recipient_id)

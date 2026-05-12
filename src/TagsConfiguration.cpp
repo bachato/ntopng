@@ -28,7 +28,7 @@
  * addr_part is a MAC (AA:BB:CC:DD:EE:FF) or an IP (<ip>@<vlan>)
  * and insert the bitmap into the in-memory tree.
  */
-void LabelsConfiguration::add_to_tree(const char* key, u_int64_t bitmap) {
+void TagsConfiguration::add_to_tree(const char* key, u_int64_t bitmap) {
   const char* addr_part = strchr(key, '_');
   if (!addr_part) return;
   addr_part++;
@@ -51,13 +51,13 @@ void LabelsConfiguration::add_to_tree(const char* key, u_int64_t bitmap) {
 
 /* ***************************************************** */
 
-/* Store a label on redis */
-void LabelsConfiguration::store_to_redis(const char* key, u_int64_t bitmap) {
+/* Store a tag bitmap on redis */
+void TagsConfiguration::store_to_redis(const char* key, u_int64_t bitmap) {
   char redis_key[CONST_MAX_LEN_REDIS_KEY];
   char val_buf[32];
   Redis* redis = ntop->getRedis();
 
-  snprintf(redis_key, sizeof(redis_key), HOST_LABELS_BITMAP_KEY, key);
+  snprintf(redis_key, sizeof(redis_key), HOST_TAGS_BITMAP_KEY, key);
 
   if (bitmap == 0)
     redis->del(redis_key);
@@ -69,14 +69,14 @@ void LabelsConfiguration::store_to_redis(const char* key, u_int64_t bitmap) {
 
 /* ***************************************************** */
 
-/* Load from redis all labels for the current interface */
-void LabelsConfiguration::loadFromRedis(int iface_id) {
+/* Load from redis all tags for the current interface */
+void TagsConfiguration::loadFromRedis(int iface_id) {
   char pattern[128];
   char** keys = NULL;
   int nkeys;
   Redis* redis = ntop->getRedis();
 
-  snprintf(pattern, sizeof(pattern), "%s%d_*", HOST_LABELS_BITMAP_PREFIX, iface_id);
+  snprintf(pattern, sizeof(pattern), "%s%d_*", HOST_TAGS_BITMAP_PREFIX, iface_id);
   nkeys = redis->keys(pattern, &keys);
 
   for (int i = 0; i < nkeys; i++) {
@@ -87,7 +87,7 @@ void LabelsConfiguration::loadFromRedis(int iface_id) {
       u_int64_t bitmap = (u_int64_t)strtoull(val_buf, NULL, 10);
 
       if (bitmap != 0) {
-        const char* ser_key = keys[i] + strlen(HOST_LABELS_BITMAP_PREFIX);
+        const char* ser_key = keys[i] + strlen(HOST_TAGS_BITMAP_PREFIX);
         add_to_tree(ser_key, bitmap);
       }
     }
@@ -97,13 +97,13 @@ void LabelsConfiguration::loadFromRedis(int iface_id) {
 
   if (keys) free(keys);
 
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Loaded %d host label bitmaps (ifid = %d)",
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Loaded %d host tag bitmaps (ifid = %d)",
                                nkeys, iface_id);
 }
 
 /* ***************************************************** */
 
-u_int64_t LabelsConfiguration::getLabels(const char *key) {
+u_int64_t TagsConfiguration::getTags(const char *key) {
   const char *addr_part;
   const char *at;
   char ip_buf[64];
@@ -149,14 +149,14 @@ u_int64_t LabelsConfiguration::getLabels(const char *key) {
 
 /* ***************************************************** */
 
-u_int64_t LabelsConfiguration::getLabels(const u_int8_t mac[6]) {
+u_int64_t TagsConfiguration::getTags(const u_int8_t mac[6]) {
   int64_t val = tree.findMac(0, mac);
   return (val == -1) ? 0 : (u_int64_t)val;
 }
 
 /* ***************************************************** */
 
-u_int64_t LabelsConfiguration::getLabels(IpAddress *ip, u_int16_t vlan_id) {
+u_int64_t TagsConfiguration::getTags(IpAddress *ip, u_int16_t vlan_id) {
   if (!ip) return 0;
   int64_t val;
 
@@ -174,7 +174,7 @@ u_int64_t LabelsConfiguration::getLabels(IpAddress *ip, u_int16_t vlan_id) {
 
 /* ***************************************************** */
 
-void LabelsConfiguration::setLabels(const char* key, u_int64_t bitmap) {
+void TagsConfiguration::setTags(const char* key, u_int64_t bitmap) {
   if (!key || !key[0]) return;
 
   add_to_tree(key, bitmap);

@@ -24,7 +24,7 @@ local flow_consts = require "flow_consts"
 local template = require "template_utils"
 local categories_utils = require "categories_utils"
 local protos_utils = require("protos_utils")
-local label_badge_utils = require("label_badge_utils")
+local tag_badge_utils = require("tag_badge_utils")
 local discover = require("discover_utils")
 local http_utils = require("http_utils")
 local json = require("dkjson")
@@ -767,19 +767,19 @@ if isEmptyString(page) or page == "overview" then
 
       print("</tr>\n")
 
-      local flow_labels = flow["labels"] or 0
-      if flow_labels ~= 0 then
-         local all_labels = label_badge_utils.getLabels()
+      local flow_tags = flow["tags"] or 0
+      if flow_tags ~= 0 then
+         local all_tags = tag_badge_utils.getTags()
          local badges_html = ""
-         for _, lbl in ipairs(all_labels) do
-            if math.floor(flow_labels / (2 ^ lbl.id)) % 2 ~= 0 then
+         for _, tag in ipairs(all_tags) do
+            if math.floor(flow_tags / (2 ^ tag.id)) % 2 ~= 0 then
                badges_html = badges_html ..
-                  '<span class="badge" style="background-color:' .. lbl.color ..
-                  '; color:#fff; margin-right:4px;">' .. lbl.name .. '</span>'
+                  '<span class="badge" style="background-color:' .. tag.color ..
+                  '; color:#fff; margin-right:4px;">' .. tag.name .. '</span>'
             end
          end
          if badges_html ~= "" then
-            print('<tr><th>' .. i18n("labels_page.labels") .. '</th>')
+            print('<tr><th>' .. i18n("tags_page.tags") .. '</th>')
             print('<td colspan=3>' .. badges_html .. '</td></tr>\n')
          end
       end

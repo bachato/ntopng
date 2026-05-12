@@ -67,9 +67,9 @@ if (_POST["custom_notes"] ~= nil) and isAdministrator() then
     setHostNotes(host_info, _POST["custom_notes"])
 end
 
-if (_POST["host_labels_bitmap"] ~= nil) and isAdministrator() then
-    local labels_bitmap = tonumber(_POST["host_labels_bitmap"]) or 0
-    interface.setHostLabels(host_info["host"], labels_bitmap)
+if (_POST["host_tags_bitmap"] ~= nil) and isAdministrator() then
+    local tags_bitmap = tonumber(_POST["host_tags_bitmap"]) or 0
+    interface.setHostTags(host_info["host"], tags_bitmap)
 end
 
 local rc = rest_utils.consts.success.ok

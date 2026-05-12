@@ -1,12 +1,12 @@
 <!-- (C) 2026 - ntop.org -->
 <template>
   <div class="m-2 mb-3">
-    <TableWithConfig ref="labels_list" :table_id="table_id" :csrf="csrf" :showLoading="true"
+    <TableWithConfig ref="tags_list" :table_id="table_id" :csrf="csrf" :showLoading="true"
       @custom_event="on_table_custom_event" :f_map_columns="map_table_def_columns"
       :get_extra_params_obj="get_extra_params_obj"
       :f_sort_rows="columns_sorting">
     </TableWithConfig>
-    <ModalEditLabel ref="labelModal" @edit="handleEditLabel" @reset="handleResetLabel"> </ModalEditLabel>
+    <ModalEditTag ref="tagModal" @edit="handleEditTag" @reset="handleResetTag"> </ModalEditTag>
   </div>
 </template>
 
@@ -14,7 +14,7 @@
 import { ref, onMounted } from "vue";
 import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as sortingFunctions } from "../utilities/sorting-utils.js";
-import { default as ModalEditLabel } from "./modal-edit-label.vue";
+import { default as ModalEditTag } from "./modal-edit-tag.vue";
 
 
 /* ************************************** */
@@ -24,13 +24,13 @@ const props = defineProps({ context: Object });
 
 /* ************************************** */
 const loading = ref(false);
-const table_id = ref("labels_list");
-const labels_list = ref(null);
+const table_id = ref("tags_list");
+const tags_list = ref(null);
 const csrf = props.context.csrf;
-const labelModal = ref(null);
-const edit_label_url = `${http_prefix}/lua/rest/v2/edit/label/label.lua`;
-const reset_label_url = `${http_prefix}/lua/rest/v2/delete/label/label.lua`;
-let edit_label_id = ref(null);
+const tagModal = ref(null);
+const edit_tag_url = `${http_prefix}/lua/rest/v2/edit/tag/tag.lua`;
+const reset_tag_url = `${http_prefix}/lua/rest/v2/delete/tag/tag.lua`;
+let edit_tag_id = ref(null);
 /* ************************************** */
 
 const map_table_def_columns = (columns) => {
@@ -72,7 +72,7 @@ const get_extra_params_obj = () => {
 
 function on_table_custom_event(event) {
     let events_managed = {
-        "click_button_edit_label": click_button_edit_label
+        "click_button_edit_tag": click_button_edit_tag
     };
     if (events_managed[event.event_id] == null) {
         return;
@@ -80,32 +80,32 @@ function on_table_custom_event(event) {
     events_managed[event.event_id](event);
 }
 
-const click_button_edit_label = (event) => {
-    edit_label_id = event.row.id;
-    const label_data = {
-        label_id: event.row.id,
-        label_name: event.row.name,
-        label_color: event.row.color,
-        label_description: event.row.description,
-        label_reserved: event.row.reserved,
+const click_button_edit_tag = (event) => {
+    edit_tag_id = event.row.id;
+    const tag_data = {
+        tag_id: event.row.id,
+        tag_name: event.row.name,
+        tag_color: event.row.color,
+        tag_description: event.row.description,
+        tag_reserved: event.row.reserved,
     };
 
-    showEditModal(label_data);
+    showEditModal(tag_data);
 };
 
 /* ************************************** */
 
 const showEditModal = (item) => {
-    labelModal.value.showEdit(item);
+    tagModal.value.showEdit(item);
 };
 
 /* ************************************** */
 
-const handleEditLabel = async (data) => {
-    const new_label_id = edit_label_id;
-    const new_label_name = data.label_name;
-    const new_label_color = data.label_color;
-    const new_label_description = data.label_description;
+const handleEditTag = async (data) => {
+    const new_tag_id = edit_tag_id;
+    const new_tag_name = data.tag_name;
+    const new_tag_color = data.tag_color;
+    const new_tag_description = data.tag_description;
 
     const headers = {
         'Content-Type': 'application/json'
@@ -114,54 +114,54 @@ const handleEditLabel = async (data) => {
     try {
         const addParams = {
             csrf: props.context.csrf,
-            labels: [{
-                label_id: new_label_id,
-                label_name: new_label_name,
-                color: new_label_color,
-                description: new_label_description
+            tags: [{
+                tag_id: new_tag_id,
+                tag_name: new_tag_name,
+                color: new_tag_color,
+                description: new_tag_description
             }]
         };
 
-        await ntopng_utility.http_request(edit_label_url, {
+        await ntopng_utility.http_request(edit_tag_url, {
             method: 'post',
             headers,
             body: JSON.stringify(addParams)
         });
 
         // Refresh table
-        labels_list.value.refresh_table(true);
+        tags_list.value.refresh_table(true);
 
     } catch (e) {
-        console.error('Error during label edit:', e);
-        labels_list.value.refresh_table(true);
+        console.error('Error during tag edit:', e);
+        tags_list.value.refresh_table(true);
     }
 };
 
 /* ************************************** */
 
-const handleResetLabel = async (item) => {
+const handleResetTag = async (item) => {
     if (item) {
-        const label_id = item.label_id;
-    
+        const tag_id = item.tag_id;
+
         const requestParams = {
             csrf: props.context.csrf,
-            label_id: label_id
+            tag_id: tag_id
         };
 
         const headers = { 'Content-Type': 'application/json' };
 
         try {
-            await ntopng_utility.http_request(reset_label_url, {
+            await ntopng_utility.http_request(reset_tag_url, {
                 method: 'post',
                 headers,
                 body: JSON.stringify(requestParams)
             });
 
             // Refresh table after delete
-            labels_list.value.refresh_table(true);
+            tags_list.value.refresh_table(true);
         } catch (e) {
-            console.error('Error deleting exporter site:', e);
-            labels_list.value.refresh_table(true);
+            console.error('Error deleting tag:', e);
+            tags_list.value.refresh_table(true);
         }
     }
 };

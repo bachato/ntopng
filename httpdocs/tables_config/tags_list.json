@@ -1,6 +1,6 @@
 {
-	"id": "labels_list",
-	"data_url": "lua/rest/v2/get/label/labels_list.lua",
+	"id": "tags_list",
+	"data_url": "lua/rest/v2/get/tag/tags_list.lua",
 	"use_current_page": false,
 	"enable_search": true,
 	"paging": false,
@@ -24,22 +24,22 @@
 			"render_v_node_type": "button_list",
 			"button_def_array": [
 				{
-					"id": "edit_label",
+					"id": "edit_tag",
 					"icon": "fas fa-cog",
-					"title_i18n": "labels_page.edit_label",
+					"title_i18n": "tags_page.edit_tag",
 					"class": [],
-					"event_id": "click_button_edit_label"
+					"event_id": "click_button_edit_tag"
 				}, {
 					"id": "hosts",
 					"icon": "fas fa-laptop",
-					"title_i18n": "labels_page.hosts",
+					"title_i18n": "tags_page.hosts",
 					"class": [],
 					"event_id": "click_button_hosts"
 				}
 			]
 		},
 		{
-			"title_i18n": "labels_page.label_name",
+			"title_i18n": "tags_page.tag_name",
 			"data_field": "name",
 			"sortable": true,
 			"min-width" : "120px",
@@ -48,7 +48,7 @@
 			]
 		},
         {
-			"title_i18n": "labels_page.label_description",
+			"title_i18n": "tags_page.tag_description",
 			"data_field": "description",
 			"sortable": false,
 			"min-width" : "180px",

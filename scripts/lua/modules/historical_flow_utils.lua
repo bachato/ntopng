@@ -22,25 +22,25 @@ if ntop.isEnterpriseL() then
     qoe_utils = require "qoe_utils"
 end
 
-local label_badge_utils = require "label_badge_utils"
+local tag_badge_utils = require "tag_badge_utils"
 
 local historical_flow_utils = {}
 
-local _all_labels_cache = nil
-local function get_all_labels()
-   if _all_labels_cache == nil then
-      _all_labels_cache = label_badge_utils.getLabels()
+local _all_tags_cache = nil
+local function get_all_tags()
+   if _all_tags_cache == nil then
+      _all_tags_cache = tag_badge_utils.getTags()
    end
-   return _all_labels_cache
+   return _all_tags_cache
 end
 
--- Parse LABELS_MAP hex string stored in ClickHouse into an array of name/color
-local function dt_format_labels_map(hex_str)
+-- Parse TAGS_MAP hex string stored in ClickHouse into an array of name/color
+local function dt_format_tags_map(hex_str)
    if isEmptyString(hex_str) then return nil end
    local bitmap = tonumber(hex_str, 16)
    if not bitmap or bitmap == 0 then return nil end
    local result = {}
-   for _, label in ipairs(get_all_labels()) do
+   for _, label in ipairs(get_all_tags()) do
       local bit_index = tonumber(label.id) or 0
       if (bitmap & (1 << bit_index)) ~= 0 then
          result[#result + 1] = { id = label.id, name = label.name, color = label.color }
@@ -1130,10 +1130,10 @@ local function dt_format_flow(processed_record, record)
       flow["srv_port"] = srv_port
       flow["cli_mac"] = cli_mac
       flow["srv_mac"] = srv_mac
-      flow["labels"] = processed_record["labels_map"]
+      flow["labels"] = processed_record["tags_map"]
 
       processed_record["flow"] = flow
-      processed_record["labels_map"] = nil
+      processed_record["tags_map"] = nil
 
       processed_record["cli_ip"] = nil
       processed_record["srv_ip"] = nil
@@ -1300,7 +1300,7 @@ local flow_columns = {
    ['SRC_HOST_POOL_ID'] =     { flowfilter = "cli_host_pool_id", dt_func = dt_format_pool_id, db_type = "Number", db_raw_type = "Uint16" },
    ['DST_HOST_POOL_ID'] =     { flowfilter = "srv_host_pool_id", dt_func = dt_format_pool_id, db_type = "Number", db_raw_type = "Uint16" },
    ['ALERTS_MAP'] =           { flowfilter = "alerts_map" },
-   ['LABELS_MAP'] =           { flowfilter = "labels_map", dt_func = dt_format_labels_map, db_type = "String", db_raw_type = "String" },
+   ['TAGS_MAP'] =           { flowfilter = "tags_map", dt_func = dt_format_tags_map, db_type = "String", db_raw_type = "String" },
    ['SEVERITY'] =             { flowfilter = "severity" },
    ['IS_CLI_ATTACKER'] =      { flowfilter = "is_cli_attacker" },
    ['IS_CLI_VICTIM'] =        { flowfilter = "is_cli_victim" },
@@ -1414,7 +1414,7 @@ historical_flow_utils.min_db_columns = {
    "CLIENT_LOCATION",
    "SERVER_LOCATION",
    "COMMUNITY_ID",
-   "LABELS_MAP",
+   "TAGS_MAP",
    "NTOPNG_INSTANCE_NAME"
 }
 
@@ -1453,7 +1453,7 @@ historical_flow_utils.min_aggregated_flow_db_columns = {
    "OUTPUT_SNMP",
    "SRC_NETWORK_ID",
    "DST_NETWORK_ID",
-   "LABELS_MAP"
+   "TAGS_MAP"
 }
 
 historical_flow_utils.extra_db_columns = {

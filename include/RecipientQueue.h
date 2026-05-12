@@ -77,8 +77,8 @@ class RecipientQueue {
   /* MUST be large enough to contain MAX_NUM_HOST_POOLS */
   Bitmap4096 enabled_host_pools;
 
-  /* Labels bitmap (all zero = no filter) */
-  Bitmap64 enabled_labels;
+  /* Tags bitmap (all zero = no filter) */
+  Bitmap64 enabled_tags;
 
   bool doDebug(const AlertFifoItem* const notification);
 
@@ -146,13 +146,13 @@ class RecipientQueue {
   };
 
   /**
-   * @brief Sets enabled label bitmap for this recipient (0 = no filter)
-   * @param _enabled_labels A label bitmap
+   * @brief Sets enabled tag bitmap for this recipient (0 = no filter)
+   * @param _enabled_tags A tag bitmap
    *
    * @return
    */
-  inline void setEnabledLabels(Bitmap64 _enabled_labels) {
-    enabled_labels = _enabled_labels;
+  inline void setEnabledTags(Bitmap64 _enabled_tags) {
+    enabled_tags = _enabled_tags;
   };
 
   /**

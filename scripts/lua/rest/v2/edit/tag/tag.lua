@@ -10,14 +10,14 @@ require "ntop_utils"
 require "http_lint"
 
 local rest_utils = require "rest_utils"
-local label_badge_utils = require "label_badge_utils"
+local tag_badge_utils = require "tag_badge_utils"
 
 local post_data = _POST or {}
-local labels = post_data["labels"]
+local tags = post_data["tags"]
 
-if labels then
-    for index, l in pairs(labels) do
-        label_badge_utils.editLabel(l.label_id, l.label_name, l.color, l.description, false)
+if tags then
+    for index, t in pairs(tags) do
+        tag_badge_utils.editTag(t.tag_id, t.tag_name, t.color, t.description, false)
     end
 end
 

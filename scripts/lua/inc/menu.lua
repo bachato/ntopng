@@ -844,8 +844,8 @@ page_utils.add_menubar_section({
         url = '/lua/admin/prefs.lua'
     }, {
         hidden = not is_admin,
-        entry = page_utils.menu_entries.labels,
-        url = '/lua/labels.lua'
+        entry = page_utils.menu_entries.tags,
+        url = '/lua/tags.lua'
     }, {
         entry = page_utils.menu_entries.divider
     }, {

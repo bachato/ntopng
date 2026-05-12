@@ -2,26 +2,26 @@
 <template>
     <modal ref="modal_id">
         <template v-slot:title>
-            {{ _i18n("labels_page.edit_label") }}
+            {{ _i18n("tags_page.edit_tag") }}
         </template>
 
         <template v-slot:body>
-            <!-- Label Name -->
+            <!-- Tag Name -->
             <div class="row mb-3 align-items-center">
                 <div class="col-md-3">
-                    <label for="label_name" class="form-label fw-bold mb-0">
-                        {{ _i18n("labels_page.label_name") }}
+                    <label for="tag_name" class="form-label fw-bold mb-0">
+                        {{ _i18n("tags_page.tag_name") }}
                     </label>
                 </div>
                 <div class="col-md-9">
                     <input
-                        id="label_name"
+                        id="tag_name"
                         type="text"
                         class="form-control"
                         :class="{ 'is-invalid': name_error }"
-                        v-model="label_name"
+                        v-model="tag_name"
                         @input="validateName"
-                        :title="isReserved ? _i18n('labels_page.reserved_message') : ''"
+                        :title="isReserved ? _i18n('tags_page.reserved_message') : ''"
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
                         :disabled="isReserved"
@@ -33,38 +33,38 @@
                 </div>
             </div>
 
-            <!-- Label Color -->
+            <!-- Tag Color -->
             <div class="row mb-3 align-items-center">
                 <div class="col-md-3">
-                    <label for="label_color" class="form-label fw-bold mb-0">
-                        {{ _i18n("labels_page.label_color") }}
+                    <label for="tag_color" class="form-label fw-bold mb-0">
+                        {{ _i18n("tags_page.tag_color") }}
                     </label>
                 </div>
                 <div class="col-md-9">
                     <input
-                        id="label_color"
+                        id="tag_color"
                         type="color"
                         class="form-control form-control-color"
-                        v-model="label_color"
+                        v-model="tag_color"
                         required
                     />
                 </div>
             </div>
 
-            <!-- Label Description -->
+            <!-- Tag Description -->
             <div class="row mb-3 align-items-center">
                 <div class="col-md-3">
-                    <label for="label_description" class="form-label fw-bold mb-0">
-                        {{ _i18n("labels_page.label_description") }}
+                    <label for="tag_description" class="form-label fw-bold mb-0">
+                        {{ _i18n("tags_page.tag_description") }}
                     </label>
                 </div>
                 <div class="col-md-9">
                     <textarea
-                        id="label_description"
+                        id="tag_description"
                         class="form-control"
                         rows="3"
-                        v-model="label_description"
-                        :title="isReserved ? _i18n('labels_page.reserved_message') : ''"
+                        v-model="tag_description"
+                        :title="isReserved ? _i18n('tags_page.reserved_message') : ''"
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
                         :disabled="isReserved"
@@ -93,9 +93,9 @@
             </button>
         </template>
     </modal>
-    <ModalResetLabel
-        ref="labelReset" @reset="handleReset">
-    </ModalResetLabel>
+    <ModalResetTag
+        ref="tagReset" @reset="handleReset">
+    </ModalResetTag>
 </template>
 
 
@@ -103,7 +103,7 @@
 
 import { ref, computed, nextTick } from "vue";
 import { default as modal } from "./modal.vue";
-import { default as ModalResetLabel } from "./modal-reset-label.vue";
+import { default as ModalResetTag } from "./modal-reset-tag.vue";
 
 const _i18n = (t) => i18n(t);
 
@@ -111,16 +111,16 @@ const modal_id = ref(null);
 
 const emit = defineEmits(["edit"]);
 
-const label_name = ref("");
-const label_color = ref("#000000");
-const label_description = ref("");
-const label_id = ref("");
-const labelReset = ref(null);
+const tag_name = ref("");
+const tag_color = ref("#000000");
+const tag_description = ref("");
+const tag_id = ref("");
+const tagReset = ref(null);
 const name_error = ref("");
 const currentItem = ref(null);
 
 const isReserved = computed(() => {
-    return currentItem.value?.label_reserved === 'true';
+    return currentItem.value?.tag_reserved === 'true';
 });
 
 const props = defineProps({
@@ -128,7 +128,7 @@ const props = defineProps({
 });
 
 const is_form_valid = computed(() => {
-    return label_name.value.trim().length > 1 && !name_error.value;
+    return tag_name.value.trim().length > 1 && !name_error.value;
 });
 
 /* ************************************** */
@@ -138,7 +138,7 @@ const validateName = () => {
         name_error.value = "";
         return;
     }
-    const name = label_name.value;
+    const name = tag_name.value;
 
     const alphanumericRegex = /^[\p{L}0-9]+$/u;
 
@@ -165,9 +165,9 @@ const handleSubmit = () => {
     }
 
     emit("edit", {
-        label_name: label_name.value.trim(),
-        label_color: label_color.value,
-        label_description: label_description.value.trim(),
+        tag_name: tag_name.value.trim(),
+        tag_color: tag_color.value,
+        tag_description: tag_description.value.trim(),
         item: currentItem.value
     });
 
@@ -178,10 +178,10 @@ const handleSubmit = () => {
 
 const showEdit = async (item) => {
     currentItem.value = item;
-    label_name.value = item.label_name;
-    label_color.value = item.label_color || "#000000";
-    label_description.value = item.label_description || "";
-    label_id.value = item.label_id;
+    tag_name.value = item.tag_name;
+    tag_color.value = item.tag_color || "#000000";
+    tag_description.value = item.tag_description || "";
+    tag_id.value = item.tag_id;
 
     name_error.value = "";
 
@@ -192,23 +192,23 @@ const showEdit = async (item) => {
 /* ************************************** */
 
 const showReset = (item) => {
-    labelReset.value.showReset(item);
+    tagReset.value.showReset(item);
 };
 
 const handleResetButton = () => {
-    const label_data = {
-        label_name: label_name.value,
-        label_id: label_id.value,
+    const tag_data = {
+        tag_name: tag_name.value,
+        tag_id: tag_id.value,
     };
 
-    showReset(label_data);
+    showReset(tag_data);
 };
 
 /* ****************************************** */
 
 async function handleReset(item) {
     emit("reset", item);
-    labelReset.value.close();
+    tagReset.value.close();
     close();
 }
 
@@ -221,4 +221,3 @@ const close = () => {
 defineExpose({ showEdit, close });
 
 </script>
-

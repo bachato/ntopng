@@ -190,7 +190,7 @@ bool RecipientQueue::enqueue(const AlertFifoItem* const notification) {
 
     } else {
       /* Other recipients (notifications) */
-      u_int64_t raw_labels = enabled_labels.getBits64();
+      u_int64_t raw_tags = enabled_tags.getBits64();
 
       if (notification->alert_entity == alert_entity_flow) {
         if (!enabled_host_pools.isSetBit(notification->flow.cli_host_pool) &&
@@ -207,11 +207,11 @@ bool RecipientQueue::enqueue(const AlertFifoItem* const notification) {
         }
       }
 
-      /* Label filter: if enabled_labels is non-zero, only pass alerts that
-       * match at least one label */
-      if (raw_labels != 0 &&
-          (notification->labels_bitmap & raw_labels) == 0)
-        return true; /* Filtered out: no matching label */
+      /* Tag filter: if enabled_tags is non-zero, only pass alerts that
+       * match at least one tag */
+      if (raw_tags != 0 &&
+          (notification->tags_bitmap & raw_tags) == 0)
+        return true; /* Filtered out: no matching tag */
     }
   }
 

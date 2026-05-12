@@ -65,7 +65,7 @@ local host_ip = host_info["host"]
 local host_vlan = host_info["vlan"] or 0
 local host_mac = _GET["mac"] or ""
 local format_utils = require("format_utils")
-local label_badge_utils = require "label_badge_utils"
+local tag_badge_utils = require "tag_badge_utils"
 
 if not isEmptyString(_GET["ifid"]) then
    interface.select(_GET["ifid"])
@@ -744,20 +744,20 @@ else
          print("</td></tr>")
 
          -- Labels row
-         local host_labels_bitmap = interface.getHostLabels(host_ip)
-         if host_labels_bitmap and host_labels_bitmap ~= 0 then
-            local all_labels = label_badge_utils.getLabels()
+         local host_tags_bitmap = interface.getHostTags(host_ip)
+         if host_tags_bitmap and host_tags_bitmap ~= 0 then
+            local all_labels = tag_badge_utils.getTags()
             local badges_html = ""
             for _, lbl in ipairs(all_labels) do
                -- Check if bit lbl.id is set (bits 32-63)
-               if math.floor(host_labels_bitmap / (2 ^ lbl.id)) % 2 ~= 0 then
+               if math.floor(host_tags_bitmap / (2 ^ lbl.id)) % 2 ~= 0 then
                   badges_html = badges_html ..
                      '<span class="badge" style="background-color:' .. lbl.color ..
                      '; color:#fff; margin-right:4px;">' .. lbl.name .. '</span>'
                end
             end
             if badges_html ~= "" then
-               print('<tr><th>' .. i18n("labels_page.labels") .. '</th><td colspan="2">' .. badges_html .. '</td></tr>')
+               print('<tr><th>' .. i18n("tags_page.tags") .. '</th><td colspan="2">' .. badges_html .. '</td></tr>')
             end
          end
       else
