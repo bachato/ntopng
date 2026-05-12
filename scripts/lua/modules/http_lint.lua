@@ -1906,7 +1906,7 @@ local known_parameters = {
    ["filtered_query"] = validateBool, -- Parameter used to download historical flows
    ["l7cat"] = validateListOfTypeInline(validateFilters(validateCategory)), -- An nDPI category, layer 7
    ["flow_risk"] = validateListOfTypeInline(validateFilters(validateUnquoted)), -- Flow risk
-   ["flow_label"] = validateListOfTypeInline(validateFilters(validateNumber)), -- Flow label (bitmap bit index)
+   ["tag"] = validateListOfTypeInline(validateFilters(validateNumber)), -- Tag (bitmap bit index)
    ["protocol"] = validateProtocolIdOrName, -- An nDPI application protocol ID or name
    ["ndpi"] = validateApplicationsList, -- a list applications
    ["ndpi_new_cat_id"] = validateNumber, -- An ndpi category id after change
@@ -2975,7 +2975,6 @@ local known_parameters = {
     ["tag_id"] = validateNumber,
     ["tag_name"] = validateUnquoted,
     ["color"] = validateSingleWord,
-    ["label"] = validateNumber,
     ["host_tags_bitmap"] = validateNumber, -- 64-bit host tag bitmap
 
     -- exporter sites

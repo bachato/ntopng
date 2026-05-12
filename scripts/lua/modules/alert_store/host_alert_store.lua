@@ -130,8 +130,8 @@ function host_alert_store:_build_insert_query(alert, write_table, alert_status, 
     -- IMPORTANT: keep in sync with check_alert_params function, to be sure to not have issues with empty parameters
     local insert_stmt = string.format("INSERT INTO %s " ..
         "(%salert_id, alert_status, require_attention, alert_category, interface_id, ip_version, ip, vlan_id, name, country, is_attacker, is_victim, " ..
-        "is_client, is_server, tstamp, tstamp_end, severity, score, granularity, host_pool_id, network, json) " ..
-        "VALUES (%s%u, %u, %u, %u, %d, %u, '%s', %u, '%s', '%s', %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, '%s'); ",
+        "is_client, is_server, tstamp, tstamp_end, severity, score, granularity, host_pool_id, network, tags_map, json) " ..
+        "VALUES (%s%u, %u, %u, %u, %d, %u, '%s', %u, '%s', '%s', %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, '%s', '%s'); ",
         write_table,
         extra_columns, extra_values,
         alert.alert_id,
@@ -152,6 +152,7 @@ function host_alert_store:_build_insert_query(alert, write_table, alert_status, 
         alert.granularity,
         alert.host_pool_id or 0,
         alert.network or 0,
+        string.format("%x", alert.tags_bitmap or 0),
         self:_escape(alert.json or ""))
 
    return insert_stmt
@@ -239,6 +240,7 @@ function host_alert_store:_add_additional_request_filters()
     local mitre_technique = _GET["mitre_technique"]
     local mitre_subtechnique = _GET["mitre_subtechnique"]
     local mitre_id = _GET["mitre_id"]
+    local tag = _GET["tag"]
 
     local is_engaged = self._status == alert_consts.alert_status.engaged.alert_status_id
     if location then
@@ -289,6 +291,7 @@ function host_alert_store:_add_additional_request_filters()
     self:add_filter_condition_list('mitre_technique', mitre_technique);
     self:add_filter_condition_list('mitre_subtechnique', mitre_subtechnique);
     self:add_filter_condition_list('mitre_id', mitre_id);
+    self:add_filter_condition_list('tag', tag, 'number')
 
     if is_engaged then
         self:add_filter_condition_list(location_filter, location, "number")
@@ -316,6 +319,7 @@ function host_alert_store:_get_additional_available_filters()
         mitre_tactic = flowfilter_utils.defined_filters.mitre_tactic,
         mitre_technique = flowfilter_utils.defined_filters.mitre_technique,
         mitre_subtechnique = flowfilter_utils.defined_filters.mitre_subtechnique,
+        tag = flowfilter_utils.defined_filters.tag,
     }
 
     return filters
@@ -375,6 +379,10 @@ local RNAME = {
     },
     MITRE = {
         name = "mitre_data",
+        export = false
+    },
+    TAGS = {
+        name = "tags",
         export = false
     }
 }
@@ -449,6 +457,8 @@ function host_alert_store:format_record(value, no_html)
         mitre_technique_i18n = (mitre_utils.technique_by_id[mitre_technique] and mitre_utils.technique_by_id[mitre_technique].i18n_label) or "",
         mitre_subtechnique_i18n = (mitre_utils.sub_technique_by_id[mitre_subtechnique] and mitre_utils.sub_technique_by_id[mitre_subtechnique].i18n_label) or "",
     }
+
+    record[RNAME.TAGS.name] = self:format_tags_map(value["tags_map"])
 
     record[RNAME.IS_VICTIM.name] = ""
     record[RNAME.IS_ATTACKER.name] = ""

@@ -622,6 +622,7 @@ function flow_alert_store:_add_additional_request_filters()
    local mitre_technique = _GET["mitre_technique"]
    local mitre_subtechnique = _GET["mitre_subtechnique"]
    local mitre_id = _GET["mitre_id"]
+   local tag = _GET["tag"]
 
    self:format_traffic_direction(_GET["traffic_direction"])
    self:format_location()
@@ -664,6 +665,7 @@ function flow_alert_store:_add_additional_request_filters()
    self:add_filter_condition_list('mitre_technique', mitre_technique);
    self:add_filter_condition_list('mitre_subtechnique', mitre_subtechnique);
    self:add_filter_condition_list('mitre_id', mitre_id);
+   self:add_filter_condition_list('tag', tag, 'number')
 
    self:add_filter_condition_list(self:format_query_json_value('proto.tls.ja4_client_hash'), ja4_client, 'string')
    self:add_filter_condition_list(self:format_query_json_value('proto.l7_error_code'), error_code, 'string')
@@ -722,7 +724,8 @@ function flow_alert_store:_get_additional_available_filters()
       mitre_id = flowfilter_utils.defined_filters.mitre_id,
       mitre_tactic = flowfilter_utils.defined_filters.mitre_tactic,
       mitre_technique = flowfilter_utils.defined_filters.mitre_technique,
-      mitre_subtechnique = flowfilter_utils.defined_filters.mitre_subtechnique
+      mitre_subtechnique = flowfilter_utils.defined_filters.mitre_subtechnique,
+      tag = flowfilter_utils.defined_filters.tag,
    }
 
    return filters
@@ -831,6 +834,10 @@ local RNAME = {
    },
    MITRE = {
       name = "mitre_data",
+      export = false
+   },
+   TAGS = {
+      name = "tags",
       export = false
    }
 }
@@ -1023,6 +1030,8 @@ function flow_alert_store:format_record(value, no_html, verbose)
       mitre_subtechnique_i18n = (mitre_utils.sub_technique_by_id[mitre_subtechnique] and
          mitre_utils.sub_technique_by_id[mitre_subtechnique].i18n_label) or ""
    }
+
+   record[RNAME.TAGS.name] = self:format_tags_map(value["tags_map"])
 
    -- local proto = string.lower(interface.getnDPIProtoName(tonumber(value["l7_master_proto"])))
 

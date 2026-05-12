@@ -714,11 +714,11 @@ export class DataTableRenders {
         return ""
     }
 
-    static formatLabelBadges(labels) {
-        if (!labels || labels.length === 0) return "";
-        return labels.map(lbl => {
-            const badge = `<span class="badge" style="background-color: ${lbl.color}">${lbl.name}</span>`;
-            return DataTableRenders.filterize('label', lbl.id, lbl.name, lbl.name, lbl.name, badge, null, null, 'in');
+    static formatTagBadges(tags) {
+        if (!tags || tags.length === 0) return "";
+        return tags.map(tag => {
+            const badge = `<span class="badge" style="background-color: ${tag.color}">${tag.name}</span>`;
+            return DataTableRenders.filterize('tag', tag.id, tag.name, tag.name, tag.name, badge, null, null, 'in');
         }).join(' ');
     }
 
@@ -963,13 +963,7 @@ export class DataTableRenders {
             srvLocation = srvLocation + " <abbr data-bs-toggle='tooltip' data-bs-placement='bottom' title='" + i18n("details.label_remote") + "'><span class='badge bg-secondary'>" + i18n("details.label_short_remote") + "</span></abbr> "
         }
 
-        let flowLabels = "";
-        if (flow.labels && flow.labels.length > 0) {
-            flow.labels.forEach(label => {
-                const badge = `<span class="badge" style="background-color: ${label.color}">${label.name}</span>`;
-                flowLabels += ` ` + DataTableRenders.filterize('flow_label', label.id, label.name, label.name, label.name, badge, null, null, 'in');
-            });
-        }
+
 
         let cliIcons = "";
         let srvIcons = "";
@@ -987,7 +981,7 @@ export class DataTableRenders {
                 srvIcons += DataTableRenders.filterize('role', 'victim', '<i class="fas fa-sad-tear" data-bs-toggle="tooltip" data-bs-placement="bottom" title="' + row.srv_role.label + '"></i>', row.srv_role.tag_label);
         }
 
-        let flow_string = `${active_ref} ${cliLabel}${cliBlacklisted}${cliLocation}${cliFlagLabel}${cliPortLabel} ${cliIcons} ${flow.cli_ip.reference} <i class="fas fa-exchange-alt fa-lg" aria-hidden="true"></i> ${srvLabel}${srvBlacklisted}${srvLocation}${srvFlagLabel}${srvPortLabel} ${srvIcons} ${flow.srv_ip.reference}${flowLabels}`
+        let flow_string = `${active_ref} ${cliLabel}${cliBlacklisted}${cliLocation}${cliFlagLabel}${cliPortLabel} ${cliIcons} ${flow.cli_ip.reference} <i class="fas fa-exchange-alt fa-lg" aria-hidden="true"></i> ${srvLabel}${srvBlacklisted}${srvLocation}${srvFlagLabel}${srvPortLabel} ${srvIcons} ${flow.srv_ip.reference}`
         
         if (row.protocol_info_json && row.protocol_info_json.verdict && row.protocol_info_json.verdict.pass === 0)
             flow_string = `<strike>${flow_string}</strike>`

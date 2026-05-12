@@ -129,6 +129,16 @@
 			]
 		},
 		{
+			"title_i18n": "tags_page.tags",
+			"data_field": "tags",
+			"render_type": "formatTagBadges",
+			"sortable": false,
+			"min-width": "120px",
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
 			"title_i18n": "mitre.mitre_id",
 			"data_field": "mitre_data",
 			"render_type": "formatMitreId",

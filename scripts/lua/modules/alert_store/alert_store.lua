@@ -16,6 +16,7 @@ local flowfilter_utils = require "flowfilter_utils"
 local alert_entities = require "alert_entities"
 local alert_category_utils = require "alert_category_utils"
 local os_utils = require("os_utils")
+local tag_badge_utils = require "tag_badge_utils"
 
 -- ##############################################
 
@@ -475,6 +476,22 @@ function alert_store:build_sql_cond(cond, is_write)
             sql_cond = string.format("%s = 1", self:get_column_name('is_client', is_write))
         else -- 'server'
             sql_cond = string.format("%s = 1", self:get_column_name('is_server', is_write))
+        end
+
+        -- Special case: tag (hex: use bit test)
+    elseif cond.field == 'tag' then
+        local bit_index = tonumber(cond.value) or 0
+        if ntop.isClickHouseEnabled() then
+            local is_set = ternary(cond.op == 'in', '= 1', '= 0')
+            sql_cond = string.format(
+                "(bitTest(reinterpretAsUInt64(reverse(unhex(leftPad(tags_map, 16, '0')))), %u) %s)",
+                bit_index, is_set)
+        else
+            -- SQLite: cast hex TEXT to integer, then test the bit
+            local is_set = ternary(cond.op == 'in', '!= 0', '= 0')
+            sql_cond = string.format(
+                "((CAST('0x' || COALESCE(tags_map, '0') AS INTEGER) & (1 << %u)) %s)",
+                bit_index, is_set)
         end
 
         -- Number
@@ -2261,6 +2278,22 @@ local BASE_RNAME = {
         export = true
     }
 }
+
+-- @brief Convert a hex tags_map string from the DB into an array of {id, name, color} tag objects
+function alert_store:format_tags_map(tags_hex)
+    local tags_array = {}
+    if not isEmptyString(tags_hex) then
+        local tags_bitmap = tonumber(tags_hex, 16) or 0
+        if tags_bitmap ~= 0 then
+            for _, tag in ipairs(tag_badge_utils.getTags()) do
+                if math.floor(tags_bitmap / (2 ^ tag.id)) % 2 ~= 0 then
+                    tags_array[#tags_array + 1] = { id = tag.id, name = tag.name, color = tag.color }
+                end
+            end
+        end
+    end
+    return tags_array
+end
 
 -- @brief Convert an alert coming from the DB (value) to a record returned by the REST API
 function alert_store:format_json_record_common(value, entity_id, no_html)

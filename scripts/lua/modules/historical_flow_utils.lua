@@ -1130,9 +1130,8 @@ local function dt_format_flow(processed_record, record)
       flow["srv_port"] = srv_port
       flow["cli_mac"] = cli_mac
       flow["srv_mac"] = srv_mac
-      flow["tags"] = processed_record["tags_map"]
-
       processed_record["flow"] = flow
+      processed_record["tags"] = processed_record["tags_map"]
       processed_record["tags_map"] = nil
 
       processed_record["cli_ip"] = nil
@@ -1669,7 +1668,7 @@ function historical_flow_utils.get_flowfilters()
    flow_defined_filters["ndpi_fingerprint"] = flowfilter_utils.defined_filters["ndpi_fingerprint"]
    flow_defined_filters["exporter_site"] = flowfilter_utils.defined_filters["exporter_site"] -- required?
    flow_defined_filters["asn"] = flowfilter_utils.defined_filters["asn"]
-   flow_defined_filters["flow_label"] = flowfilter_utils.defined_filters["flow_label"]
+   flow_defined_filters["tag"] = flowfilter_utils.defined_filters["tag"]
 
    return flow_defined_filters
 end

@@ -117,10 +117,10 @@ flowfilter_utils.defined_filters = {
         operators = {'eq', 'neq', 'in', 'nin'},
         hourly_available = false
     },
-    flow_label = {
+    tag = {
         type = flowfilter_utils.input_types.select,
-        value_type = 'label_id',
-        i18n_label = i18n('db_search.flowfilters.flow_label'),
+        value_type = 'tag_id',
+        i18n_label = i18n('db_search.flowfilters.tag'),
         operators = {'in', 'nin'},
         hourly_available = true
     },
@@ -1185,7 +1185,7 @@ flowfilter_utils.formatters = {
         flow_risk_list[1] = i18n("flow_risk.ndpi_no_risk")
         return flow_risk_list[tonumber(risk) + 1] or risk
     end,
-    flow_label = function(id)
+    tag = function(id)
         for _, lbl in ipairs(tag_badge_utils.getTags()) do
             if tostring(lbl.id) == tostring(id) then
                 return lbl.name
@@ -1403,7 +1403,7 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
                 label = info
             }
         end
-    elseif filter_def.value_type == "label_id" then
+    elseif filter_def.value_type == "tag_id" then
         filter.value_type = 'array'
         filter.options = {}
         for _, lbl in ipairs(tag_badge_utils.getTags()) do

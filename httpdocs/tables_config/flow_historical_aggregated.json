@@ -95,6 +95,17 @@
 			]
 		},
 		{
+			"title_i18n": "tags_page.tags",
+			"data_field": "tags",
+			"render_type": "formatTagBadges",
+			"sortable": false,
+			"min-width": "120px",
+			"class": [
+				"text-nowrap",
+				"none"
+			]
+		},
+		{
 			"title_i18n": "db_explorer.total_flows",
 			"data_field": "flows_number",
 			"sortable": true,
