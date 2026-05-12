@@ -1130,7 +1130,7 @@ local function dt_format_flow(processed_record, record)
       flow["srv_port"] = srv_port
       flow["cli_mac"] = cli_mac
       flow["srv_mac"] = srv_mac
-      flow["labels"] = processed_record["tags_map"]
+      flow["tags"] = processed_record["tags_map"]
 
       processed_record["flow"] = flow
       processed_record["tags_map"] = nil

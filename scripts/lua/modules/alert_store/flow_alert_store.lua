@@ -264,9 +264,9 @@ function flow_alert_store:insert(alert)
                   "cli_name, srv_name, cli_country, srv_country, cli_blacklisted, srv_blacklisted, cli_location, srv_location, " ..
                   "cli2srv_bytes, srv2cli_bytes, cli2srv_pkts, srv2cli_pkts, first_seen, community_id, score, " ..
                   "flow_risk_bitmap, alerts_map, cli_host_pool_id, srv_host_pool_id, cli_network, srv_network, probe_ip, input_snmp, output_snmp, " ..
-                  "json, info) " ..
+                  "tags_map, json, info) " ..
                   "VALUES (%s%u, %u, %u, %u, %u, %u, %u, %u, %u, '%s', '%s', %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, '%s', '%s', '%s', " ..
-                  "'%s', %u, %u, %u, %u, %u, %u, %u, %u, %u, '%s', %u, %u, %s'%s', %u, %u, %u, %u, '%s', %u, %u, '%s', '%s'); "
+                  "'%s', %u, %u, %u, %u, %u, %u, %u, %u, %u, '%s', %u, %u, %s'%s', %u, %u, %u, %u, '%s', %u, %u, '%s', '%s', '%s'); "
 
    local insert_stmt = string.format(fmt, self:get_write_table_name(), extra_columns, extra_values, alert.alert_id, alert_status,
       ternary(alert.require_attention, 1, 0), alert.alert_category, self:_convert_ifid(interface.getId()), alert.first_seen, alert.tstamp, -- 10
@@ -279,7 +279,8 @@ function flow_alert_store:insert(alert)
       hex_prefix, alert.alerts_map, tonumber(alert.cli_host_pool_id or pools.DEFAULT_POOL_ID),
       tonumber(alert.srv_host_pool_id or pools.DEFAULT_POOL_ID), tonumber(alert.cli_network or network_consts.UNKNOWN_NETWORK),
       tonumber(alert.srv_network or network_consts.UNKNOWN_NETWORK), alert.probe_ip, alert.input_snmp, alert.output_snmp,
-      self:_escape(alert.json), -- 50
+      string.format("%x", alert.tags_bitmap or 0), -- 50
+      self:_escape(alert.json),
       self:_escape(alert.info or ''))
 
    -- traceError(TRACE_NORMAL, TRACE_CONSOLE, insert_stmt)
