@@ -14,7 +14,7 @@ ntop.delCache("ntopng.cache.sessions.".._SESSION["session"])
 if (debug) then io.write("Deleting ".."ntopng.cache.sessions.".._SESSION["session"].."\n") end
 
 print [[
- <meta http-equiv="refresh" content="1; URL=/">
+<meta http-equiv="refresh" content="1; URL=]] print(ntop.getHttpPrefix()) print [[/">
 <html>
 <body>
  ]] print(i18n("login.logging_out")) print[[
