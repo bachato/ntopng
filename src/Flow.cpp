@@ -139,8 +139,9 @@ Flow::Flow(NetworkInterface* _iface, int32_t _iface_idx, u_int16_t _vlanId,
   memset(&flow_device.device_ip, 0, sizeof(struct ndpi_in6_addr));
   
   flow_device.in_index = flow_device.out_index =
-      flow_device.observation_point_id = flow_device.site_id = 0;
+      flow_device.observation_point_id = 0;
 
+  site_id = 0;
   flow_score = 0;
 
   rtp_stream_type = ndpi_multimedia_unknown_flow;
