@@ -1451,8 +1451,7 @@ historical_flow_utils.min_aggregated_flow_db_columns = {
    "INPUT_SNMP",
    "OUTPUT_SNMP",
    "SRC_NETWORK_ID",
-   "DST_NETWORK_ID",
-   "TAGS_MAP"
+   "DST_NETWORK_ID"
 }
 
 historical_flow_utils.extra_db_columns = {
