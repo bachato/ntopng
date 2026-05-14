@@ -142,6 +142,7 @@ class Flow : public GenericHashEntry {
   u_int32_t protocolErrorCode;
   u_int8_t protocol, flow_verdict;
   u_int16_t flow_score;
+  u_int16_t site_id;
   bool twh_over_view : 1 /* This flag is used for view interfaces */,
       shapers_profile_set : 1, iface_flow_accounted : 1, _notused : 5;
   u_int8_t cli_mac[6], srv_mac[6];
@@ -346,7 +347,6 @@ class Flow : public GenericHashEntry {
     IpAddress next_hop;
     u_int32_t in_index, out_index;
     u_int16_t observation_point_id;
-    u_int16_t site_id;
   } flow_device;
 
   /* eBPF Information */
@@ -1474,8 +1474,8 @@ class Flow : public GenericHashEntry {
   }
   inline IpAddress* getFlowDeviceNextHop() { return (&flow_device.next_hop); }
 
-  inline void setFlowExporterSiteId(u_int16_t id) { flow_device.site_id = id; }
-  inline u_int16_t getFlowExporterSiteId() { return (flow_device.site_id); }
+  inline void setFlowSiteId(u_int16_t id) { site_id = id; }
+  inline u_int16_t getFlowSiteId() { return (site_id); }
 
   inline const u_int16_t getScore() const { return (flow_score); };
 

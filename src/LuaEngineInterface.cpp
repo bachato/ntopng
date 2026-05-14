@@ -3486,35 +3486,6 @@ static int ntop_get_flow_device_info_by_ip(lua_State* vm) {
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
   }
 }
-
-/* ****************************************** */
-
-/* @brief Refreshes the site-ID mapping for a flow-exporting device (Pro).  Lua: interface.refreshFlowDeviceSiteId(device_ip) → nil */
-static int ntop_refresh_flow_device_site_id(lua_State* vm) {
-  NetworkInterface* curr_iface = getCurrentInterface(vm);
-  char* device_ip;
-  FlowDevicesStats* flow_devices_stats;
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  device_ip = (char*)lua_tostring(vm, 1);
-
-  if (!curr_iface)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-
-  flow_devices_stats = curr_iface->getFlowInterfacesStats();
-  if (flow_devices_stats) {
-    struct ndpi_in6_addr addr;
-    
-    Utils::parseIPv4v6Address(device_ip, &addr);
-    flow_devices_stats->refreshExporterSiteIdFromRedis(&addr);
-  }
-
-  lua_pushnil(vm);
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-}
 #endif
 
 /* ****************************************** */
@@ -6761,7 +6732,6 @@ static luaL_Reg _ntop_interface_reg[] = {
     {"getFlowDevices", ntop_get_flow_devices},
     {"getFlowDeviceInfo", ntop_get_flow_device_info},
     {"getFlowDeviceInfoByIP", ntop_get_flow_device_info_by_ip},
-    {"refreshFlowDeviceSiteId", ntop_refresh_flow_device_site_id},
 #endif
 
 #ifdef HAVE_NEDGE

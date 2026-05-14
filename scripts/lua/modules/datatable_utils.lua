@@ -406,12 +406,12 @@ local all_datatable_columns_def_by_tag = {
       class = { "no-wrap" },
       render_type = "formatProbeIP",
    },
-   ['exporter_site'] = {
-      title_i18n = "db_search.flowfilters.exporter_site",
-      data_field = "exporter_site",
+   ['site'] = {
+      title_i18n = "db_search.flowfilters.site",
+      data_field = "site",
       sortable = true,
       class = { "no-wrap" },
-      render_type = "formatExporterSite",
+      render_type = "formatSite",
    },
    ['network'] = build_datatable_column_def_network('network', "db_search.flowfilters.network"),
    ['cli_network'] = build_datatable_column_def_network('cli_network', "db_search.flowfilters.cli_network"),

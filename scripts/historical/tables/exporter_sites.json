@@ -1,6 +1,6 @@
 {
-	"name" : "Top Exporter Sites",
-	"i18n_name" : "top_exporter_sites",
+	"name" : "Top Sites",
+	"i18n_name" : "top_sites",
 	"data_source" : "flows",
 	"show_in_page" : "overview",
 	"visualization_type" : "table",

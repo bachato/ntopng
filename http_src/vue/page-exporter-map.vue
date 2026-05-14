@@ -29,11 +29,11 @@ const is_sites_map = ref(0);
 
 
 const note_list_exporters_map = [
-  _i18n("exporter_sites_page.exporters_map_notes")
+  _i18n("sites_page.exporters_map_notes")
 ]
 
 const note_list_sites_map = [
-  _i18n("exporter_sites_page.sites_map_notes")
+  _i18n("sites_page.sites_map_notes")
 ]
 
 const chord_data = ref({});

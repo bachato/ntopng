@@ -73,9 +73,9 @@
 			]
 		},
 		{
-			"id": "exporter_site",
-			"title_i18n": "flow_devices.exporter_site",
-			"data_field": "exporter_site",
+			"id": "site",
+			"title_i18n": "flow_devices.site",
+			"data_field": "site",
 			"sortable": true,
 			"min-width": "40px",
 			"class": [

@@ -3115,7 +3115,6 @@ local cached_devices = {}
 
 if ntop.isPro() then
    package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
-   exporter_site_utils = require "exporter_site_utils"
    snmp_cached_dev = require "snmp_cached_dev"
 end
 

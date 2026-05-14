@@ -29,8 +29,7 @@ const show_return_msg = ref(false)
 const title = ref('')
 const err = ref(false);
 const row = ref(null);
-const exporter_site_id = ref(null);
-const delete_exporter_site_url = `${http_prefix}/lua/pro/rest/v2/delete/exporter_site/exporter_site.lua`;
+const site_id = ref(null);
 
 const emit = defineEmits(["delete"]);
 
@@ -56,19 +55,19 @@ async function resetModal() {
 
 /* This function formats the delete message */
 async function formatMessage(site) {
-  title.value = i18n("exporter_sites_page.delete_exporter_site_title")
+  title.value = i18n("sites_page.delete_site_title")
   if (site) {
-    const site_name = site.exporter_site_name;
+    const site_name = site.site_name;
     title.value = title.value + ": " + site_name;
   }
-  message.value = i18n('exporter_sites_page.delete_exporter_site');
+  message.value = i18n('sites_page.delete_site');
 }
 
 /* ****************************************** */
 
 async function delete_site() {
   const formData = {
-    exporter_site_id: exporter_site_id.value,
+    site_id: site_id.value,
     delete: true
   };
   emit("delete", formData);
@@ -77,7 +76,7 @@ async function delete_site() {
 
 const showDelete = async (item) => {
   resetModal();
-  exporter_site_id.value = item.exporter_site_id;
+  site_id.value = item.site_id;
   formatMessage(item);
   modal_id.value.show();
 };

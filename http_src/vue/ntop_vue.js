@@ -54,7 +54,6 @@ import { default as PageFlowsList } from "./page-flows-list.vue"
 import { default as PageMacsList } from "./page-macs-list.vue"
 import { default as PageInterfaceICMP } from "./page-interface-icmp.vue"
 import { default as PageTags } from "./page-tags.vue"
-import { default as PageExporterSites } from "./page-exporter-sites.vue"
 import { default as PageSNMPInterfaces } from "./page-snmp-interfaces.vue"
 import { default as PageSNMPTopology } from "./page-snmp-topology.vue"
 import { default as PageSNMPTopologyMap } from "./page-snmp-topology-map.vue"
@@ -94,7 +93,7 @@ import { default as PageActiveMonitoring } from "./page-active-monitoring.vue"
 import { default as PageAlertsGraph } from "./page-alerts-graph.vue"
 import { default as PageAlertsGeoMap } from "./page-alerts-geomap.vue"
 import { default as PageTrafficProfiles } from "./page-traffic-profiles.vue"
-import { default as PageNetworksList } from "./page-networks-list.vue"
+import { default as PageNetworksSites } from "./page-networks-sites.vue"
 import { default as PageDHCPLeases } from "./page-DHCP-leases.vue"
 import { default as PageExporterInterfaceOverview } from "./page-exporter-interface-overview.vue"
 import { default as PageExporterMap } from "./page-exporter-map.vue"
@@ -236,7 +235,6 @@ let ntopVue = {
     PageMacsList: PageMacsList,
     PageInterfaceICMP: PageInterfaceICMP,
     PageTags: PageTags,
-    PageExporterSites: PageExporterSites,
     PageAsStats: PageAsStats,
     PageExportersInterfacesStats: PageExportersInterfacesStats,
     PageAsOverview: PageAsOverview,
@@ -337,7 +335,7 @@ let ntopVue = {
     PageTrafficRules: PageTrafficRules,
     PageAlertsGraph: PageAlertsGraph,
     PageAlertsGeoMap: PageAlertsGeoMap,
-    PageNetworksList: PageNetworksList,
+    PageNetworksSites: PageNetworksSites,
     
     // components
     AlertInfo: AlertInfo,

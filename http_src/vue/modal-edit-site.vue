@@ -1,10 +1,10 @@
 <!-- (C) 2026 - ntop.org     -->
 <template>
-    <!-- Modal component wrapper for add/edit exporter site form -->
-    <modal ref="modal_id" @showed="redrawGeomap">
+    <!-- Modal component wrapper for add/edit site form -->
+    <modal ref="modal_id">
         <!-- Modal header title - changes based on context (add/edit) -->
         <template v-slot:title>
-            {{ _i18n("exporter_sites_page.edit_exporter_site") }}
+            {{ _i18n("sites_page.edit_site") }}
         </template>
 
         <!-- Modal body containing the form fields -->
@@ -12,16 +12,16 @@
             <!-- ==================== Site Name Field ==================== -->
             <div class="row mb-3 align-items-center">
                 <div class="col-md-3">
-                    <label for="exporter_site_name" class="form-label fw-bold mb-0">
-                        {{ _i18n("exporter_sites_page.exporter_site_name") }}
+                    <label for="site_name" class="form-label fw-bold mb-0">
+                        {{ _i18n("sites_page.site_name") }}
                     </label>
                 </div>
                 <div class="col-md-9">
                     <!-- Name input with validation styling -->
-                    <input id="exporter_site_name" type="text" class="form-control"
-                        :class="{ 'is-invalid': name_error }" v-model="exporter_site_name" @input="validateName"
-                        :title="isReserved ? _i18n('exporter_sites_page.reserved_message') : ''"
-                        data-bs-toggle="tooltip" data-bs-placement="top" :disabled="isReserved" required />
+                    <input id="site_name" type="text" class="form-control" :class="{ 'is-invalid': name_error }"
+                        v-model="site_name" @input="validateNameDebounced"
+                        :title="isReserved ? _i18n('sites_page.reserved_message') : ''" data-bs-toggle="tooltip"
+                        data-bs-placement="top" :disabled="isReserved" required />
                     <!-- Validation error message display -->
                     <div v-if="name_error" class="invalid-feedback">
                         {{ name_error }}
@@ -29,19 +29,41 @@
                 </div>
             </div>
 
+            <!-- ==================== Site Networks List ==================== -->
+            <div class="row mb-3 align-items-center">
+                <div class="col-md-3">
+                    <label for="site_networks" class="form-label fw-bold mb-0">
+                        {{ _i18n("sites_page.site_networks") }}
+                        <i class="fa-solid fa-circle-question text-secondary ms-1" data-bs-toggle="tooltip"
+                            data-bs-placement="top" :title="_i18n('sites_page.networks_format')"></i>
+                    </label>
+                </div>
+                <div class="col-md-9">
+                    <!-- Name input with validation styling -->
+                    <textarea id="site_networks" type="text" class="form-control"
+                        :class="{ 'is-invalid': networks_error }" v-model="site_networks"
+                        @input="validateNetworksListDebounced"
+                        :title="isReserved ? _i18n('sites_page.reserved_message') : ''" data-bs-toggle="tooltip"
+                        data-bs-placement="top" :disabled="isReserved" required />
+                    <!-- Validation error message display -->
+                    <div v-if="networks_error" class="invalid-feedback">
+                        {{ networks_error }}
+                    </div>
+                </div>
+            </div>
+
             <!-- ==================== Site Description Field ==================== -->
             <div class="row mb-3 align-items-center">
                 <div class="col-md-3">
-                    <label for="exporter_site_description" class="form-label fw-bold mb-0">
-                        {{ _i18n("exporter_sites_page.exporter_site_description") }}
+                    <label for="site_description" class="form-label fw-bold mb-0">
+                        {{ _i18n("sites_page.site_description") }}
                     </label>
                 </div>
                 <div class="col-md-9">
                     <!-- Multi-line textarea for description -->
-                    <textarea id="exporter_site_description" class="form-control" rows="3"
-                        v-model="exporter_site_description"
-                        :title="isReserved ? _i18n('exporter_sites_page.reserved_message') : ''"
-                        data-bs-toggle="tooltip" data-bs-placement="top" :disabled="isReserved"></textarea>
+                    <textarea id="site_description" class="form-control" rows="3" v-model="site_description"
+                        :title="isReserved ? _i18n('sites_page.reserved_message') : ''" data-bs-toggle="tooltip"
+                        data-bs-placement="top" :disabled="isReserved"></textarea>
                 </div>
             </div>
 
@@ -49,7 +71,7 @@
             <div class="row mb-3">
                 <div class="col-md-3">
                     <label class="form-label fw-bold mb-0">
-                        {{ _i18n("exporter_sites_page.exporter_site_location") }}
+                        {{ _i18n("sites_page.site_location") }}
                     </label>
                 </div>
 
@@ -59,12 +81,12 @@
                         <div class="col">
                             <!-- Latitude input with high precision (6 decimal places) -->
                             <input type="number" step="0.000001" class="form-control" placeholder="Latitude"
-                                v-model.number="exporter_site_lat" />
+                                v-model.number="site_lat" />
                         </div>
                         <div class="col">
                             <!-- Longitude input with high precision (6 decimal places) -->
                             <input type="number" step="0.000001" class="form-control" placeholder="Longitude"
-                                v-model.number="exporter_site_lng" />
+                                v-model.number="site_lng" />
                         </div>
                     </div>
                 </div>
@@ -97,6 +119,7 @@
 <script setup>
 import { ref, computed, nextTick, watch } from "vue";
 import { default as modal } from "./modal.vue";
+import regexValidation from "../utilities/regex-validation"
 import { default as Geomap } from "./geomap.vue";
 
 // Internationalization helper
@@ -108,13 +131,15 @@ const geomapDataArray = ref([]);                // Data for the map visualizatio
 const geomap = ref(null);
 
 // Form field bindings
-const exporter_site_name = ref("");             // Site name
-const exporter_site_description = ref("");      // Site description
-const exporter_site_lat = ref(0);               // Latitude coordinate
-const exporter_site_lng = ref(0);                // Longitude coordinate
+const site_name = ref("");             // Site name
+const site_networks = ref("");             // Site networks
+const site_description = ref("");      // Site description
+const site_lat = ref(0);               // Latitude coordinate
+const site_lng = ref(0);                // Longitude coordinate
 
 // Form state management
 const name_error = ref("");                      // Validation error message for name field
+const networks_error = ref("");                      // Validation error message for name field
 const isEditMode = ref(false);                   // Flag: true = edit mode, false = add mode
 const currentItem = ref(null);                    // Currently edited item (null for add mode)
 
@@ -131,13 +156,13 @@ const props = defineProps({
 
 // Check if current site is reserved (default site that cannot be modified)
 const isReserved = computed(() => {
-    return currentItem.value?.exporter_site_reserved === 'true';
+    return currentItem.value?.site_reserved === 'true';
 });
 
 // Form validity check for enabling/disabling submit button
 // Requirements: name not empty, name length > 1, no validation errors
 const is_form_valid = computed(() => {
-    return exporter_site_name.value.trim().length > 1 && !name_error.value;
+    return site_name.value.trim().length > 1 && !name_error.value && !networks_error.value;
 });
 
 // ==================== Watchers ====================
@@ -145,18 +170,18 @@ const is_form_valid = computed(() => {
 /**
  * Watcher for latitude and longitude.
  * This watcher is triggered whenever the user updates the
- * `exporter_site_lat` or `exporter_site_lng` fields.
+ * `site_lat` or `site_lng` fields.
  * 
  * Purpose:
  * - Updates `geomapDataArray` with a single point representing
  *   the current site location.
  */
 
-watch([exporter_site_lat, exporter_site_lng], ([newLat, newLng]) => {
+watch([site_lat, site_lng], ([newLat, newLng]) => {
     if (newLat != null && newLng != null) {
         geomapDataArray.value = [{
-            name: exporter_site_name.value || "",               // Current site name
-            description: exporter_site_description.value || "", // Current description
+            name: site_name.value || "",               // Current site name
+            description: site_description.value || "", // Current description
             lat: newLat,                                        // Updated latitude
             lng: newLng                                         // Updated longitude
         }];
@@ -164,6 +189,15 @@ watch([exporter_site_lat, exporter_site_lng], ([newLat, newLng]) => {
 });
 
 // ==================== Validation Methods ====================
+
+let debounce_name_timer = null
+
+function validateNameDebounced() {
+    clearTimeout(debounce_name_timer)
+    debounce_name_timer = setTimeout(() => {
+        validateName()
+    }, 400) // wait 400 ms before checking the input in order to not check each single character
+}
 
 /**
  * Validates the site name according to business rules:
@@ -180,7 +214,7 @@ const validateName = () => {
         return;
     }
 
-    const trimmed = exporter_site_name.value.trim();
+    const trimmed = site_name.value.trim();
     // Unicode-aware regex that allows letters, numbers, and spaces
     const alphanumericRegex = /^[\p{L}0-9 ]+$/u;
 
@@ -197,13 +231,38 @@ const validateName = () => {
 
 /* ************************************** */
 
+let debounce_networks_timer = null
+
+function validateNetworksListDebounced() {
+    clearTimeout(debounce_networks_timer)
+    debounce_networks_timer = setTimeout(() => {
+        validateNetworksList()
+    }, 800) // wait 400 ms before checking the input in order to not check each single character
+}
+
+function validateNetworksList() {
+    const entries = site_networks.value
+        .split(/[\n,]+/)
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+
+    // validateCIDR returns false if there is an error, so if it's okay it !validateCIDR returns false
+    if (entries.some(entry => !regexValidation.validateCIDR(entry))) {
+        networks_error.value = _i18n("error_messages.incorrect_network")
+    } else {
+        networks_error.value = ""
+    }
+}
+
+/* ************************************** */
+
 /**
  * Updates latitude and longitude when the user clicks on the map.
  * Called by the <Geomap> component via the onMapClick prop.
  */
 const handleMapClick = ({ lat, lng }) => {
-    exporter_site_lat.value = parseFloat(lat.toFixed(6)); // round to 6 decimals
-    exporter_site_lng.value = parseFloat(lng.toFixed(6));
+    site_lat.value = parseFloat(lat.toFixed(6)); // round to 6 decimals
+    site_lng.value = parseFloat(lng.toFixed(6));
 };
 
 /* ************************************** */
@@ -233,14 +292,22 @@ function formatTooltipData(site) {
  */
 const handleSubmit = () => {
     validateName();
+    validateNetworksList();
     if (!is_form_valid.value) return;
+
+    site_networks.value = site_networks.value
+        .split(/[\n,]/)          // split newline and comma
+        .map(s => s.trim())      // remove empty spaces
+        .filter(Boolean)         // rimuove empty elements
+        .join(',')               // separates by comma
 
     // Prepare form data object
     const formData = {
-        exporter_site_name: exporter_site_name.value.trim(),
-        exporter_site_description: exporter_site_description.value.trim(),
-        exporter_site_lat: exporter_site_lat.value,
-        exporter_site_lng: exporter_site_lng.value,
+        site_name: site_name.value.trim(),
+        site_description: site_description.value.trim(),
+        site_networks: site_networks.value,
+        site_lat: site_lat.value,
+        site_lng: site_lng.value,
         item: currentItem.value
     };
 
@@ -256,28 +323,32 @@ const handleSubmit = () => {
  * Opens the modal, optionally with pre-filled data for editing
  * 
  * @param {Object|null} item - Site data for editing, null for add mode
- * @param {string} item.exporter_site_name - Site name
- * @param {string} item.exporter_site_description - Site description
- * @param {number} item.exporter_site_lat - Latitude
- * @param {number} item.exporter_site_lng - Longitude
+ * @param {string} item.site_name - Site name
+ * @param {string} item.site_description - Site description
+ * @param {string} item.site_networks - Site Networks
+ * @param {number} item.site_lat - Latitude
+ * @param {number} item.site_lng - Longitude
  */
 const open = (item = null) => {
     // Destructure item with defaults (handles both edit and add modes)
     const {
-        exporter_site_name: site_name = "",
-        exporter_site_description: site_description = "",
-        exporter_site_lat: site_lat = 0,
-        exporter_site_lng: site_lng = 0
+        site_name: edited_site_name = "",
+        site_description: edited_site_description = "",
+        site_networks: edited_site_networks = "",
+        site_lat: edited_site_lat = 0,
+        site_lng: edited_site_lng = 0
     } = item || {}
 
     // Populate form fields
-    exporter_site_name.value = site_name;
-    exporter_site_description.value = site_description;
-    exporter_site_lat.value = site_lat;
-    exporter_site_lng.value = site_lng;
+    site_name.value = edited_site_name;
+    site_description.value = edited_site_description;
+    site_networks.value = edited_site_networks;
+    site_lat.value = edited_site_lat;
+    site_lng.value = edited_site_lng;
 
     // Reset state
     name_error.value = "";
+    networks_error.value = "";
     currentItem.value = item;
     // Determine mode: !!item converts to boolean (true if item exists)
     isEditMode.value = !!item;
@@ -291,15 +362,6 @@ const open = (item = null) => {
  */
 const close = () => {
     modal_id.value.close();
-};
-
-/**
- * Redraw the geomap
- */
-const redrawGeomap = () => {
-    nextTick(() => {
-        geomap.value?.redraw(); // ridisegna mappa con altezza corretta
-    });
 };
 
 // Expose methods to parent components

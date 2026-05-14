@@ -453,7 +453,6 @@ rest_utils.answer(rest_utils.consts.success.ok, ndpi)
 | `interface.getFlowDevices()` | `table` | Returns flow exporters (NetFlow/IPFIX probes) seen on this interface (Pro). |
 | `interface.getFlowDeviceInfo(device_ip)` | `table` | Returns detailed information for a specific flow-exporting device (Pro). |
 | `interface.getFlowDeviceInfoByIP(ip)` | `table` | Returns flow device information looked up by IP address (Pro). |
-| `interface.refreshFlowDeviceSiteId(device_ip)` | `nil` | Refreshes the site-ID mapping for a flow-exporting device (Pro). |
 
 ---
 
@@ -731,7 +730,7 @@ All 245 `interface.*` functions in alphabetical order:
 `periodicityMap` · `periodicityMapFilterList` · `prepareDeleteObsPoint` ·
 `processFlow` ·
 `radiusAccountingStart` · `radiusAccountingStop` · `radiusAccountingUpdate` ·
-`refreshFlowDeviceSiteId` · `releaseEngagedAlerts` · `releaseExternalAlert` ·
+`releaseEngagedAlerts` · `releaseExternalAlert` ·
 `releaseTriggeredAlert` · `reloadCompanions` · `reloadDhcpRanges` ·
 `reloadGwMacs` · `reloadHostPrefs` · `reloadL7Rules` · `reloadShapers` ·
 `removeDataFromLocalHostAssets` · `removeIPACL` · `removeMacACL` ·

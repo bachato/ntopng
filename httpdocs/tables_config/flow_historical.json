@@ -373,11 +373,11 @@
 			]
 		},
 		{
-			"title_i18n": "db_search.flowfilters.exporter_site",
-			"data_field": "exporter_site",
+			"title_i18n": "db_search.flowfilters.site",
+			"data_field": "site",
 			"sortable": true,
 			"min-width": "120px",
-			"render_type": "formatExporterSite",
+			"render_type": "formatSite",
 			"class": [
 				"text-nowrap"
 			]

@@ -27,17 +27,17 @@
                 </td>
               </tr>
 
-              <!-- Exporter site selection row -->
+              <!-- Exporter Site selection row -->
               <tr>
                 <td>
                   <div class="d-flex align-items-center">
                     <div class="col-8">
-                      <b>{{ _i18n('flowdev_exporter_site') }}</b><br>
+                      <b>{{ _i18n('flowdev_site') }}</b><br>
                     </div>
                     <div class="col-4">
-                      <!-- Dropdown for exporter site selection -->
-                      <SelectSearch v-model:selected_option="selectedExporterSite" :options="exporterSiteOptions"
-                        :disabled="false" @select_option="handleExporterSiteSelect" />
+                      <!-- Dropdown for Site selection -->
+                      <SelectSearch v-model:selected_option="selectedSite" :options="siteOptions"
+                        :disabled="false" @select_option="handleSiteSelect" />
                     </div>
                   </div>
                 </td>
@@ -79,17 +79,17 @@ const props = defineProps({
 });
 
 // Exporter sites data
-const exporterSites = ref([]); // Raw exporter sites from API
-const originalExporterSiteId = ref(''); // Original site ID for change detection
-const exporterSiteOptions = ref([]); // Formatted options for dropdown
-const selectedExporterSite = ref({
+const sites = ref([]); // Raw Sites from API
+const originalSiteId = ref(''); // Original site ID for change detection
+const siteOptions = ref([]); // Formatted options for dropdown
+const selectedSite = ref({
   value: '',
   label: ''
 });
 
 // API endpoint URLs
 const FLOWDEV_CONFIG_UPDATE_URL = `${http_prefix}/lua/pro/rest/v2/set/flowdevice/config.lua`;
-const EXPORTER_SITES_LIST_URL = `${http_prefix}/lua/pro/rest/v2/get/exporter_site/exporter_sites_list.lua`;
+const SITES_LIST_URL = `${http_prefix}/lua/pro/rest/v2/get/sites/list.lua`;
 const FLOWDEV_EXPORTER_CONFIG_GET_URL = `${http_prefix}/lua/pro/rest/v2/get/flowdevice/config.lua?flowdev_ip=${getDeviceIpFromUrl()}&ifid=${props.context.ifid}`;
 
 /**
@@ -97,7 +97,7 @@ const FLOWDEV_EXPORTER_CONFIG_GET_URL = `${http_prefix}/lua/pro/rest/v2/get/flow
  * Loads initial data for the form
  */
 onMounted(async () => {
-  await loadExporterSitesList();
+  await loadSitesList();
   await loadFlowDeviceConfiguration();
 });
 
@@ -127,29 +127,29 @@ async function loadFlowDeviceConfiguration() {
     aliasInput.value.value = aliasValue;
     originalAlias.value = aliasValue;
 
-    // Get the exporter site
-    if (response.exporter_site && response.exporter_site.id) {
-      selectedExporterSite.value = {
-        value: response.exporter_site.id,
-        label: response.exporter_site.name
+    // Get the Ssite
+    if (response.site && response.site.id) {
+      selectedSite.value = {
+        value: response.site.id,
+        label: response.site.name
       };
     } else {
       // No site found, use the default one, that is in the first position of the entire list
-      selectedExporterSite.value = exporterSiteOptions.value[0]
+      selectedSite.value = siteOptions.value[0]
     }
-    originalExporterSiteId.value = selectedExporterSite.value.value;
+    originalSiteId.value = selectedSite.value.value;
   }
 }
 
 /**
- * Saves the updated flow device settings (alias and exporter site)
+ * Saves the updated flow device settings (alias and Site)
  * to the server and disables the save button on success
  */
 const saveFlowDeviceSettings = async function () {
   const requestData = {
     csrf: props.context.csrf,
     ip: ntopng_url_manager.get_url_entry('ip'),
-    exporter_site_id: selectedExporterSite.value.value,
+    site_id: selectedSite.value.value,
     alias: aliasInput.value.value,
     ifid: props.context.ifid,
   };
@@ -169,7 +169,7 @@ const saveFlowDeviceSettings = async function () {
 
   // Update original values and disable save button
   originalAlias.value = aliasInput.value.value;
-  originalExporterSiteId.value = selectedExporterSite.value.value;
+  originalSiteId.value = selectedSite.value.value;
   isSaveDisabled.value = true;
 }
 
@@ -179,28 +179,28 @@ const saveFlowDeviceSettings = async function () {
  */
 const validateFormChanges = function () {
   const isAliasChanged = originalAlias.value !== aliasInput.value.value;
-  const isExporterSiteChanged = originalExporterSiteId.value !== selectedExporterSite.value.value;
+  const isSiteChanged = originalSiteId.value !== selectedSite.value.value;
 
-  isSaveDisabled.value = !(isAliasChanged || isExporterSiteChanged);
+  isSaveDisabled.value = !(isAliasChanged || isSiteChanged);
 }
 
 /**
- * Loads the list of available exporter sites from the server
+ * Loads the list of available Sites from the server
  * and sets up the dropdown options
  */
-async function loadExporterSitesList() {
+async function loadSitesList() {
   const response = await ntopng_utility.http_request(
-    EXPORTER_SITES_LIST_URL,
+    SITES_LIST_URL,
     { method: 'get' }
   );
 
-  exporterSites.value = response || [];
-  const tmpSites = exporterSites.value.map(site => ({
+  sites.value = response || [];
+  const tmpSites = sites.value.map(site => ({
     value: site.id,
     label: site.name
   }));
   
-  exporterSiteOptions.value = [
+  siteOptions.value = [
     tmpSites.find(e => e.value == 0),
     ...tmpSites.filter(site => site.value != 0).sort(sortByLabel)
   ];
@@ -211,12 +211,12 @@ function sortByLabel(a, b) {
 }
 
 /**
- * Handles selection of an exporter site from the dropdown
+ * Handles selection of a Site from the dropdown
  * 
  * @param {Object} option - Selected option object with value and label
  */
-function handleExporterSiteSelect(option) {
-  selectedExporterSite.value = {
+function handleSiteSelect(option) {
+  selectedSite.value = {
     value: option.value,
     label: option.label
   };

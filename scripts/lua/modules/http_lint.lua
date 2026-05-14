@@ -2980,10 +2980,11 @@ local known_parameters = {
     -- exporter sites
     ["latitude"] = validateSingleWord,
     ["longitude"] = validateSingleWord,
-    ["exporter_site"] = validateSingleWord,
-    ["exporter_site_id"] = validateSingleWord,
-    ["exporter_site_name"] = validateUnquoted,
-    ["exporter_site_description"] = validateUnchecked,
+    ["site"] = validateSingleWord,
+    ["site_id"] = validateSingleWord,
+    ["site_name"] = validateUnquoted,
+    ["site_description"] = validateUnquoted,
+    ["site_networks"] = validateNetworksList,
 
     -- nEdge policy
     ["default_policy"] = validatePolicy, -- users, nedge policies

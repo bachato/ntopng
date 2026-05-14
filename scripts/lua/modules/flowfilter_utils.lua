@@ -323,10 +323,10 @@ flowfilter_utils.defined_filters = {
         operators = {'eq', 'neq'},
         hourly_available = true
     },
-    exporter_site = {
+    site = {
         type = flowfilter_utils.input_types.select,
-        value_type = 'exporter_site',
-        i18n_label = i18n('db_search.flowfilters.exporter_site'),
+        value_type = 'site',
+        i18n_label = i18n('db_search.flowfilters.site'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
@@ -1599,18 +1599,15 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
             }
         end
     elseif filter_def.value_type == "probe_ip" then
-        local exporter_site_utils = require "exporter_site_utils"
+        local site_utils = require "site_utils"
         filter.options = {}
         local full_dev_list = {}
 
         -- Add both Flow devices
         if interface.getFlowDevices then -- Pro Only
             for exporter_ip, _ in pairs(getExporterList()) do
-                local group = nil
+                local group = nil -- TODO: add the site
                 local probe_name = getProbeName(exporter_ip)
-                if ntop.isEnterpriseM() then
-                    group = exporter_site_utils.getFlowDevExporterSite(exporter_ip).name
-                end
                 full_dev_list[exporter_ip] = {
                     value = exporter_ip,
                     label = probe_name,
@@ -1623,11 +1620,8 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
         if interface.getSFlowDevices then -- Pro Only
             for interface, device_list in pairs(interface.getSFlowDevices() or {}) do
                 for probe, _ in pairsByValues(device_list or {}, asc) do
-                    local group = nil
+                    local group = nil -- TODO: Add the site
                     local probe_name = getProbeName(probe)
-                    if ntop.isEnterpriseM() then
-                        group = exporter_site_utils.getFlowDevExporterSite(probe).name
-                    end
                     -- local label = format_name_value(probe_name, probe)
                     full_dev_list[probe] = {
                         value = probe,
@@ -1642,11 +1636,11 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
         for _, device_info in pairsByKeys(full_dev_list, asc) do
             filter.options[#filter.options + 1] = device_info
         end
-    elseif filter_def.value_type == "exporter_site" then
+    elseif filter_def.value_type == "site" then
         filter.value_type = 'array'
         filter.options = {}
-        local exporter_site_utils = require "exporter_site_utils"
-        local sites = exporter_site_utils.getExporterSites() or {}
+        local site_utils = require "site_utils"
+        local sites = site_utils.getSites() or {}
         local exporters = interface.getFlowDevices() or {}
         if #sites > 0 and table.len(exporters) > 0 then
             for _, site in pairs(sites) do
@@ -1755,7 +1749,7 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
                 -- SNMP devices
                 local snmp_cached_dev = require "snmp_cached_dev"
                 local snmp_config = require "snmp_config"
-                local exporter_site_utils = require "exporter_site_utils"
+                local site_utils = require "site_utils"
                 local devices = {}
                 local group_cache = {}
                 local total = 0
@@ -1794,10 +1788,12 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
                             goto maxEntriesFallback
                         end
 
+                        --[[
                         if ntop.isEnterpriseM() then
-                            group = exporter_site_utils.getFlowDevExporterSite(probe_ip).name
+                            group = site_utils.getFlowDevSite(probe_ip).name
                             group_cache[probe_ip] = group
                         end
+                        ]]
 
                         for if_index, if_info in pairs(interfaces) do
                             local counters = cached_interfaces.if_counters[tostring(if_index)]
@@ -1843,11 +1839,13 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
 
                     if ntop.isEnterpriseM() then
                         group = group_cache[exporter_ip] -- use cache first
-
+                        
+                        --[[
                         if (group == nil) then
-                            group = exporter_site_utils.getFlowDevExporterSite(exporter_ip).name
+                            group = site_utils.getFlowDevSite(exporter_ip).name
                             group_cache[exporter_ip] = group
                         end
+                        ]]
                     end
 
                     for _, interfaces_table in pairs(interfaces or {}) do

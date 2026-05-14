@@ -586,7 +586,7 @@ end
 
 if ntop.isPro() and interface.isPacketInterface() == false then
    package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
-   local exporter_site_utils = require "exporter_site_utils"
+   local site_utils = require "site_utils"
    local flowdevs = interface.getFlowDevices() or {}
    local devips = getProbesName(flowdevs)
    if table.len(devips) > 0 then
@@ -600,12 +600,9 @@ if ntop.isPro() and interface.isPacketInterface() == false then
       for _, device_list in pairs(devips or {}) do
          for dev_ip, dev_resolved_name in pairsByValues(device_list, asc) do
             local dev_name = dev_ip
-            local group = nil
+            local group = nil -- TODO: add the site
             if not isEmptyString(dev_resolved_name) and dev_resolved_name ~= dev_name then
                dev_name = dev_resolved_name
-            end
-            if ntop.isEnterpriseM() then
-               group = exporter_site_utils.getFlowDevExporterSite(dev_ip).name
             end
             tmp_list[dev_name] = {
                key = "deviceIP",

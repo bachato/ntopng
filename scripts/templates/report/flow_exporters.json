@@ -31,7 +31,7 @@
 			"name": "l7proto"
 		},
 		{
-			"name": "exporter_site"
+			"name": "site"
 		}
 	],
 	"components": [

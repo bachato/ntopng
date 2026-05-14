@@ -33,7 +33,6 @@ local icmp_utils = require("icmp_utils")
 local alert_consts = require("alert_consts")
 local mitre_utils = require("mitre_utils")
 local auth = require "auth"
-local exporter_site_utils = nil
 local live_flow_info = nil
 
 

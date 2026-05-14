@@ -368,22 +368,22 @@ local rest_utils = {
                 str = "SNMP_UNSUPPORTED_VERSION"
             },
 
-            add_exporter_site_failed = {
+            add_site_failed = {
                 http_code = 409,
                 rc = -62,
-                str = "ADD_EXPORTER_SITE_FAILED"
+                str = "ADD_SITE_FAILED"
             },
 
-            edit_exporter_site_failed = {
+            edit_site_failed = {
                 http_code = 409,
                 rc = -63,
-                str = "EDIT_EXPORTER_SITE_FAILED"
+                str = "EDIT_SITE_FAILED"
             },
 
-            delete_exporter_site_failed = {
+            delete_site_failed = {
                 http_code = 409,
                 rc = -64,
-                str = "DELETE_EXPORTER_SITE_FAILED"
+                str = "DELETE_SITE_FAILED"
             },
 
             merge_wazuh_info_failed = {

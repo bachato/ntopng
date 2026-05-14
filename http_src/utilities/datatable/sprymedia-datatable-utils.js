@@ -827,10 +827,10 @@ export class DataTableRenders {
         return label;
     }
 
-    static formatExporterSite(obj, type, row, zero_is_null) {
+    static formatSite(obj, type, row, zero_is_null) {
         if (type !== "display") return obj;
 
-        let label = DataTableRenders.filterize('exporter_site', obj.value, obj.label, obj.label, obj.title);
+        let label = DataTableRenders.filterize('site', obj.value, obj.label, obj.label, obj.title);
 
         return label;
     }

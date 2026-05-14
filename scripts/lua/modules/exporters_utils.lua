@@ -430,7 +430,7 @@ function exporters_utils.printNavbar(ifid, page, ip, probe_source_id, num_export
       hidden = (num_exporters < 2) or not(isASNModeEnabled()),
       page_name = "exporter_map",
       active = page == "exporter_map",
-      label = "<i class=\"fas fa-lg fa-map\" data-bs-toggle=\"tooltip\" " .. "title=\"" .. i18n("exporter_sites_page.exporters_map") .. "\"></i>"
+      label = "<i class=\"fas fa-lg fa-map\" data-bs-toggle=\"tooltip\" " .. "title=\"" .. i18n("sites_page.exporters_map") .. "\"></i>"
    }, {
       hidden = not snmp_available or isEmptyString(ip),
       url = snmp_url,
@@ -450,10 +450,10 @@ function exporters_utils.printNavbar(ifid, page, ip, probe_source_id, num_export
       label = "<i class=\"fas fa-lg fa-cog\" data-bs-toggle=\"tooltip\" " .. "title=\"" .. i18n("flow_checks.callback_config") .. "\"></i>"
    },{
       page_name = "sites",
-      hidden = page ~= "exporter_map" and page ~= "exporter_sites_map",
-      active = page == "exporter_sites_map",
+      hidden = page ~= "exporter_map" and page ~= "sites_map",
+      active = page == "sites_map",
       url = ntop.getHttpPrefix() .. "/lua/pro/enterprise/exporters_sites_map.lua?site_mode=1&probe_source_id=" .. probe_source_id,
-      label = i18n("exporter_sites_page.sites")
+      label = i18n("sites_page.sites")
    }})
 end
 

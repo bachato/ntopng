@@ -339,7 +339,7 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
 
 #ifdef NTOPNG_PRO
   if (zflow->unique_source_id != 0) {
-    u_int16_t exporter_site_id = 0;
+    u_int16_t site_id = 0;
 
 #if 0
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "unique_source_id=%u, inIndex=%u, outIndex=%u, exporter_device_ip=%u, nprobe_ip=%u [%u / %u]",
@@ -352,12 +352,12 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
 
     if (!flow_devices_stats->checkExporterInterfaces(zflow->unique_source_id, flow->getFlowDeviceInIndex(),
 						     flow->getFlowDeviceOutIndex(), &zflow->exporter_device_ip,
-						     zflow->nprobe_source_id, &zflow->nprobe_ip, &exporter_site_id)) {
+						     zflow->nprobe_source_id, &zflow->nprobe_ip)) {
       exportersLimitReached();
       return (false);
     }
 
-    flow->setFlowExporterSiteId(exporter_site_id);
+    flow->setFlowSiteId(site_id);
   }
 #endif
 

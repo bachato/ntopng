@@ -25,7 +25,6 @@ local http_utils = require "http_utils"
 local rest_utils = require "rest_utils"
 --local snmp_utils
 local cache_utils = require "cache_utils"
-local exporter_site_utils
 
 if ntop.isPro() then
    local dirs = ntop.getDirs()
@@ -33,7 +32,6 @@ if ntop.isPro() then
    package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
    require "flow_exporter_utils"
    -- snmp_utils = require "snmp_utils"
-   exporter_site_utils = require "exporter_site_utils"
 end
 
 -- For backward compatibility override these functions
@@ -1592,18 +1590,9 @@ end
 
 function formatInterfaceIP(ip, href)
    local ret
-   local site = nil
-   local exporter_name
-
-   if(exporter_site_utils ~= nil) then
-      ip, site, exporter_name = exporter_site_utils.map_exporter_ip(ip)
-   end
+   local exporter_name = getProbeName(ip, true, true, false)
 
    ret = "<a href=\"" .. ntop.getHttpPrefix() .. href .. ip .. "\">" .. exporter_name
-
-   if(site ~= nil) then
-      ret = ret .. " (".. site ..")"
-   end
 
    if(exporter_name ~= ip) then ret = ret .. '</A> [<A HREF="' .. ntop.getHttpPrefix() ..'/lua/host_details.lua?host='.. ip .. '">'..ip.."</A>]" end
    ret = ret .. "</a>"
@@ -1623,12 +1612,7 @@ function formatNextHop(ip)
    if ntop.isPro() then
       local ret
       local site = nil
-      local ip1
-      local exporter_name
-      
-      if(exporter_site_utils ~= nil) then
-	      ip1, site, exporter_name = exporter_site_utils.map_host_to_exporter_ip(ip)
-      end
+      local exporter_name = getProbeName(ip, true, true, false)
 
       if(exporter_name ~= ip) then
          ret = "<a href=\"" .. ntop.getHttpPrefix() .. "/lua/host_details.lua?host=" .. ip .. "\">" .. ip .. "</a>" 
@@ -1643,11 +1627,11 @@ function formatNextHop(ip)
          if(ip == "0.0.0.0") then
             ret = ip
          else
-            ret = "<a href=" .. ntop.getHttpPrefix() .. "/lua/host_details.lua?host=" .. ip1 .. ">" .. ip1 .. "</a>"
+            ret = "<a href=" .. ntop.getHttpPrefix() .. "/lua/host_details.lua?host=" .. ip .. ">" .. ip .. "</a>"
          end
       end
       
-      return ret, ip1, exporter_name or ip1, site
+      return ret, ip, exporter_name or ip, site
    else
       return ip, ip, ip, nil
    end

@@ -511,10 +511,6 @@ else
             entry = page_utils.menu_entries.observation_points,
             hidden = (num_obs_points) == 0,
             url = '/lua/pro/enterprise/observation_points.lua'
-        }, {
-            entry = page_utils.menu_entries.exporter_sites,
-            hidden = not is_pro,
-            url = '/lua/pro/enterprise/exporter_sites.lua'
         }}
     })
 end

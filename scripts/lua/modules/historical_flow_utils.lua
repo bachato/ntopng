@@ -751,29 +751,29 @@ end
 
 -- #####################################
 
-local function dt_format_exporter_site(exporter_site_id)
-   local exporter_site = {
+local function dt_format_site(site_id)
+   local site = {
       title     = i18n("unknown"),
       label     = i18n("unknown"),
-      value     = tonumber(exporter_site_id) or 0,
+      value     = tonumber(site_id) or 0,
    }
 
-   if tonumber(exporter_site["value"]) ~= 0 then
-      local exporter_site_utils = require "exporter_site_utils"
-      local sites = exporter_site_utils.getExporterSites() or {}
+   if tonumber(site["value"]) ~= 0 then
+      local site_utils = require "site_utils"
+      local sites = site_utils.getSites() or {}
       for _, site in pairs(sites) do
-         if site.id == tostring(exporter_site_id) then
-            exporter_site["title"] = site.name
-            exporter_site["label"] = site.name
+         if site.id == tostring(site_id) then
+            site["title"] = site.name
+            site["label"] = site.name
             break
          end
       end
    else
-      exporter_site["title"] = i18n("default")
-      exporter_site["label"] = i18n("default")
+      site["title"] = i18n("default")
+      site["label"] = i18n("default")
    end
 
-   return exporter_site
+   return site
 end
 
 -- #####################################
@@ -1281,7 +1281,7 @@ local flow_columns = {
    ['SRC_ASN'] =              { flowfilter = "cli_asn", simple_dt_func = simple_format_src_asn, db_type = "Number", db_raw_type = "Uint32" },
    ['DST_ASN'] =              { flowfilter = "srv_asn", simple_dt_func = simple_format_dst_asn, db_type = "Number", db_raw_type = "Uint32" },
    ['PROBE_IP'] =             { flowfilter = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv6NumToString", where_func = "toIPv6", db_type = "IPv6", db_raw_type = "IPv6" },
-   ['EXPORTER_SITE'] =        { flowfilter = "exporter_site", dt_func = dt_format_exporter_site, db_type = "Number", db_raw_type = "Uint16" },
+   ['EXPORTER_SITE'] =        { flowfilter = "site", dt_func = dt_format_site, db_type = "Number", db_raw_type = "Uint16" },
    ['OBSERVATION_POINT_ID'] = { flowfilter = "observation_point_id", dt_func = dt_format_obs_point, format_func = format_flow_observation_point, i18n = i18n("details.observation_point_id"), order = 12 , db_type = "Number", db_raw_type = "Uint16" },
    ['SRC2DST_TCP_FLAGS'] =    { flowfilter = "src2dst_tcp_flags", dt_func = dt_format_tcp_flags, db_type = "Number", db_raw_type = "Uint8" },
    ['DST2SRC_TCP_FLAGS'] =    { flowfilter = "dst2src_tcp_flags", dt_func = dt_format_tcp_flags, db_type = "Number", db_raw_type = "Uint8" },
@@ -1367,7 +1367,7 @@ local aggregated_flow_columns = {
    ['SRC_MAC'] =              { flowfilter = "cli_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
    ['DST_MAC'] =              { flowfilter = "srv_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
    ['PROBE_IP'] =             { flowfilter = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv6NumToString", where_func = "toIPv6", db_type = "IPv6", db_raw_type = "IPv6" },
-   ['EXPORTER_SITE'] =        { flowfilter = "exporter_site", dt_func = dt_format_exporter_site, db_type = "Number", db_raw_type = "Uint16" },
+   ['EXPORTER_SITE'] =        { flowfilter = "site", dt_func = dt_format_site, db_type = "Number", db_raw_type = "Uint16" },
    ['SRC_COUNTRY_CODE'] =     { flowfilter = "cli_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
    ['DST_COUNTRY_CODE'] =     { flowfilter = "srv_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
    ['SRC_ASN'] =              { flowfilter = "cli_asn", simple_dt_func = simple_format_src_asn, db_type = "Number", db_raw_type = "Uint32" },
@@ -1489,7 +1489,7 @@ historical_flow_utils.extra_where_flowfilters = {
    ["cli_fingerprint"] = "CLIENT_FINGERPRINT",
    ["tcp_fingerprint"] = "TCP_FINGERPRINT",
    ["duration"] = "DURATION",
-   ["exporter_site"] = "EXPORTER_SITE", -- required?
+   ["site"] = "EXPORTER_SITE", -- required?
 }
 
 historical_flow_utils.topk_flowfilters_v4 = {
@@ -1666,7 +1666,7 @@ function historical_flow_utils.get_flowfilters()
    flow_defined_filters["post_nat_dst_port"] = flowfilter_utils.defined_filters["post_nat_dst_port"]
    flow_defined_filters["verdict"] = flowfilter_utils.defined_filters["verdict"]
    flow_defined_filters["ndpi_fingerprint"] = flowfilter_utils.defined_filters["ndpi_fingerprint"]
-   flow_defined_filters["exporter_site"] = flowfilter_utils.defined_filters["exporter_site"] -- required?
+   flow_defined_filters["site"] = flowfilter_utils.defined_filters["site"] -- required?
    flow_defined_filters["asn"] = flowfilter_utils.defined_filters["asn"]
    flow_defined_filters["tag"] = flowfilter_utils.defined_filters["tag"]
 
