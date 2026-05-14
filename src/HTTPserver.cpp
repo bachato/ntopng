@@ -1200,41 +1200,42 @@ static void authorize(struct mg_connection* conn,
     // Authentication failure, redirect to login
     const char* reason = NULL;
     if (bad_user_pwd) reason = "wrong-credentials";
-
     redirect_to_login(conn, request_info, (referer[0] == '\0') ? NULL : referer,
                       reason);
-  } else {
-    /* Referer url must begin with '/' */
-    if ((referer[0] != '/') || (strcmp(referer, AUTHORIZE_URL) == 0)) {
-      strcpy(referer, "/");
-    }
-
-    /* If WebAuthn is enabled for this user, prefer it as second factor */
-    if (ntop->isWebAuthnEnabled(user)) {
-      char token[33], challenge[64];
-      if (ntop->createWebAuthnPendingToken(user, referer, token, sizeof(token),
-                                            challenge, sizeof(challenge))) {
-        redirect_to_webauthn(conn, token);
-        return;
-      }
-      /* If token creation fails, fall through */
-    }
-
-    /* If TOTP/MFA is enabled for this user, require a second factor */
-    if (ntop->isTOTPEnabled(user)) {
-      char token[33];
-      if (ntop->createMFAPendingToken(user, referer, token, sizeof(token))) {
-        redirect_to_mfa(conn, token);
-        return;
-      }
-      /* If token creation fails, fall through to normal login */
-    }
-
-    /* Send session cookie and set user for the new session */
-    set_session_cookie(conn, user, group, *localuser, referer);
-    strncpy(username, user, NTOP_USERNAME_MAXLEN);
-    username[NTOP_USERNAME_MAXLEN - 1] = '\0';
+    return;
   }
+
+  /* Referer url must begin with '/' */
+  if (referer[0] != '/') {
+    snprintf(referer, sizeof(referer), "%s/",
+             ntop->getPrefs()->get_http_prefix());
+  }
+
+  /* If WebAuthn is enabled for this user, prefer it as second factor */
+  if (ntop->isWebAuthnEnabled(user)) {
+    char token[33], challenge[64];
+    if (ntop->createWebAuthnPendingToken(user, referer, token, sizeof(token),
+                                          challenge, sizeof(challenge))) {
+      redirect_to_webauthn(conn, token);
+      return;
+    }
+      /* If token creation fails, fall through */
+  }
+
+  /* If TOTP/MFA is enabled for this user, require a second factor */
+  if (ntop->isTOTPEnabled(user)) {
+    char token[33];
+    if (ntop->createMFAPendingToken(user, referer, token, sizeof(token))) {
+      redirect_to_mfa(conn, token);
+      return;
+    }
+    /* If token creation fails, fall through to normal login */
+  }
+
+  /* Send session cookie and set user for the new session */
+  set_session_cookie(conn, user, group, *localuser, referer);
+  strncpy(username, user, NTOP_USERNAME_MAXLEN);
+  username[NTOP_USERNAME_MAXLEN - 1] = '\0';
 }
 
 /* ****************************************** */
@@ -1291,7 +1292,8 @@ static void mfa_authorize(struct mg_connection* conn,
   group[NTOP_GROUP_MAXLEN - 1] = '\0';
   *localuser = lu;
 
-  if (referer[0] != '/') strcpy(referer, "/");
+  if (referer[0] != '/')
+    snprintf(referer, sizeof(referer), "%s/", ntop->getPrefs()->get_http_prefix());
 
   set_session_cookie(conn, user, group, *localuser, referer);
   strncpy(username, user, NTOP_USERNAME_MAXLEN);
@@ -1372,7 +1374,8 @@ static void webauthn_authorize(struct mg_connection* conn,
   strncpy(group, grp, NTOP_GROUP_MAXLEN - 1);
   group[NTOP_GROUP_MAXLEN - 1] = '\0';
   *localuser = lu;
-  if (referer[0] != '/') strcpy(referer, "/");
+  if (referer[0] != '/')
+    snprintf(referer, sizeof(referer), "%s/", ntop->getPrefs()->get_http_prefix());
   set_session_cookie(conn, user, group, *localuser, referer);
   strncpy(username, user, NTOP_USERNAME_MAXLEN);
   username[NTOP_USERNAME_MAXLEN - 1] = '\0';
