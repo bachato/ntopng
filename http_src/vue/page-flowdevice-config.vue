@@ -34,10 +34,13 @@
                     <div class="col-8">
                       <b>{{ _i18n('flowdev_site') }}</b><br>
                     </div>
-                    <div class="col-4">
+                    <div class="col-4 d-flex justify-content-center align-items-center">
                       <!-- Dropdown for Site selection -->
-                      <SelectSearch v-model:selected_option="selectedSite" :options="siteOptions"
-                        :disabled="false" @select_option="handleSiteSelect" />
+                      <SelectSearch v-model:selected_option="selectedSite" :options="siteOptions" :disabled="true"
+                        @select_option="handleSiteSelect" />
+                      <i class="fa-solid fa-circle-question text-secondary ms-1 me-1" data-bs-toggle="tooltip"
+                        data-bs-placement="top" :title="_i18n('flowdev_site_help')"></i>
+                      <a :href="SITES_PAGE_URL"><i class="fa-solid fa-gear"></i></a>
                     </div>
                   </div>
                 </td>
@@ -88,6 +91,7 @@ const selectedSite = ref({
 });
 
 // API endpoint URLs
+const SITES_PAGE_URL = `${http_prefix}/lua/network_stats.lua?page=sites`
 const FLOWDEV_CONFIG_UPDATE_URL = `${http_prefix}/lua/pro/rest/v2/set/flowdevice/config.lua`;
 const SITES_LIST_URL = `${http_prefix}/lua/pro/rest/v2/get/sites/list.lua`;
 const FLOWDEV_EXPORTER_CONFIG_GET_URL = `${http_prefix}/lua/pro/rest/v2/get/flowdevice/config.lua?flowdev_ip=${getDeviceIpFromUrl()}&ifid=${props.context.ifid}`;
@@ -149,7 +153,6 @@ const saveFlowDeviceSettings = async function () {
   const requestData = {
     csrf: props.context.csrf,
     ip: ntopng_url_manager.get_url_entry('ip'),
-    site_id: selectedSite.value.value,
     alias: aliasInput.value.value,
     ifid: props.context.ifid,
   };
@@ -199,7 +202,7 @@ async function loadSitesList() {
     value: site.id,
     label: site.name
   }));
-  
+
   siteOptions.value = [
     tmpSites.find(e => e.value == 0),
     ...tmpSites.filter(site => site.value != 0).sort(sortByLabel)

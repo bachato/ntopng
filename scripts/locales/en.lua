@@ -390,6 +390,7 @@ local lang = {
    ["flow_status"] = "Flows",
    ["flowdev_alias"] = "Flow Device Alias",
    ["flowdev_site"] = "Flow Device Site",
+   ["flowdev_site_help"] = "To configure the site for this device, please jump to the Sites by clicking the settings next to this icon and configure a site with the IP of this device inside the Network List of the new Site.",
    ["flows"] = "Flows",
    ["block"] = "Block",
    ["flush_map_data"] = "Flush Data",

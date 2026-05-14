@@ -144,6 +144,16 @@ const map_table_def_columns = (columns) => {
             }
             return href
         },
+        // Site name column - displays the name directly
+        "site": (value, row) => {
+            if(!value) {
+                return ''
+            }
+            if(value.name) {
+                return value.name
+            }
+            return ''
+        },
         "hosts": (value, row) => {
             return formatterUtils.getFormatter("number")(value);
         },

@@ -17,6 +17,15 @@
 			]
 		},
 		{
+			"title_i18n": "sites_page.site_name",
+			"data_field": "site",
+			"sortable": true,
+			"min-width" : "120px",
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
 			"id": "hosts",
 			"title_i18n": "hosts",
 			"data_field": "hosts",
