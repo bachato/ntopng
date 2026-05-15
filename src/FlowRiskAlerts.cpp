@@ -39,7 +39,7 @@
  *   the live flow information, without contributing to the score for instance)
  */
 
-static const FlowAlertTypeExtended risk_enum_to_alert_type[NDPI_MAX_RISK]{
+static const FlowAlertTypeExtended risk_enum_to_alert_type[NDPI_MAX_RISK] {
     {{NDPI_NO_RISK, flow_alert_normal, alert_category_other}, "ndpi_no_risk"},
     {{NDPI_URL_POSSIBLE_XSS, flow_alert_ndpi_url_possible_xss,
       alert_category_security},
@@ -206,6 +206,8 @@ static const FlowAlertTypeExtended risk_enum_to_alert_type[NDPI_MAX_RISK]{
      "ndpi_obfuscated_traffic"},
     {{NDPI_SLOW_DOS, flow_alert_ndpi_slow_dos, alert_category_security},
      "ndpi_slow_dos"},
+    {{NDPI_NON_PQC, flow_alert_ndpi_non_pqc, alert_category_security},
+     "ndpi_non_pqc"},
 };
 
 /* **************************************************** */
