@@ -1102,7 +1102,7 @@ SNMPInterfaceRole ParserInterface::getRole(struct ndpi_in6_addr *exporter_device
                                            u_int32_t if_id_out) {
   SNMPInterfaceRole r = ntop->snmpGetInterfaceRole(exporter_device_ip, if_id_in);
 
-  if ((r != role_transit) && (r != role_peering))
+  if ((r != role_transit) && (r != role_peering) && (r != role_ix))
     r = ntop->snmpGetInterfaceRole(exporter_device_ip, if_id_out);
 
   return (r);
