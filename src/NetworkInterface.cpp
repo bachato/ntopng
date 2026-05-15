@@ -2796,7 +2796,7 @@ pre_get_flow:
 
   if(flow && readPacketsFromFileDump())
     flow->periodic_stats_update(&h->ts, false);
-  
+
   return (pass_verdict);
 }
 
@@ -3248,7 +3248,7 @@ decode_packet_eth:
           if ((sport == GTP_U_V1_PORT) || (dport == GTP_U_V1_PORT)) {
             /* Check if it's GTPv1 */
             u_int offset = (u_int)(ip_offset + ip_len + sizeof(struct ndpi_udphdr));
-	    
+
 	    if((offset + 12 /* Just to be safe with GTP header */) < h->caplen) {
 	      u_int8_t flags = packet[offset];
 	      u_int8_t message_type = packet[offset + 1];
@@ -3287,11 +3287,11 @@ decode_packet_eth:
 		       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1,
 		       NULL /* srcMac */, NULL /* dstMac */);
 	      goto dissect_packet_end;
-	      
+
 	    }
           } else if ((sport == EOIP_PORT) && (dport == EOIP_PORT)) {
             u_int offset = ip_offset + ip_len + sizeof(struct ndpi_udphdr) + 12;
-	    
+
             eth_offset = offset;
             goto datalink_check;
           } else if ((sport == L2TP_PORT) && (dport == L2TP_PORT)) {
@@ -3736,7 +3736,7 @@ void NetworkInterface::pollQueuedeCompanionEvents() {
     while (dequeueFlowFromCompanion(&dequeued)) {
       Flow* flow = NULL;
       bool src2dst_direction, new_flow;
-      
+
       flow =
           getFlow(UNKNOWN_PKT_IFACE_IDX, NULL /* srcMac */, NULL /* dstMac */,
                   dequeued->vlan_id, 0 /* observationPointId */,
@@ -3908,8 +3908,8 @@ u_int64_t NetworkInterface::dequeueFlowsForDump(u_int idle_flows_budget,
     Flow* f = idleFlowsToDump->dequeue();
 
     if (dumpFlowOut(f, when))
-      idle_flows_done++;   
-    
+      idle_flows_done++;
+
     if (idle_flows_budget > 0 /* Budget requested */
         && idle_flows_done >= idle_flows_budget /* Budget exceeded */)
       break;
@@ -4050,7 +4050,7 @@ bool NetworkInterface::dumpFlowOut(Flow* f, time_t now) {
 
   f->decUses(); /* Add done, decrease the reference counter */
   f->set_dump_done();
-  
+
   return (true);
 }
 
@@ -5529,7 +5529,7 @@ static bool flow_matches(Flow* f, struct flowHostRetriever* retriever) {
 #endif
 
   memset(&deviceIP, 0, sizeof(deviceIP));
-  
+
   if (f && (!f->idle())) {
     if (f->get_observation_point_id() != retriever->observationPointId) {
 #if 0
@@ -7417,7 +7417,7 @@ int NetworkInterface::sortHosts(
 
   if(device_ip != NULL)
     memcpy(&retriever->device_ip, device_ip, sizeof(struct ndpi_in6_addr));
-  
+
   retriever->elems = (struct flowHostRetrieveList*)calloc(
       sizeof(struct flowHostRetrieveList), retriever->currentSize);
 
@@ -13382,12 +13382,12 @@ void NetworkInterface::getFilteredLiveFlowsStats(lua_State* vm) {
     Utils::parseIPv4v6Address(flow_device_ip, &stats.flow_device_ip);
   else
     memset(&stats.flow_device_ip, 0, sizeof(stats.flow_device_ip));
-  
+
   stats.in_if_index = in_if_idx;
   stats.out_if_index = out_if_idx;
   stats.if_index = if_idx;
   stats.alert_status = alert_status;
-  
+
   switch (filter_type) {
     case AnalysisCriteria::application_criteria:
       /* application protocol criteria flows stats case */
@@ -14432,8 +14432,6 @@ static bool aggregate_asn_flows(GenericHashEntry* node, void* user_data,
   return (false); /* false = keep on walking */
 }
 
-/* **************************************************** */
-
 bool NetworkInterface::aggregateASNModeFlows(lua_State* vm) {
   u_int32_t begin_slot = 0;
   InMemorySQLiteDB* inmem_db = getLuaVMUserdata(vm, db);
@@ -14450,6 +14448,8 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State* vm) {
       return (false);
     else {
       getUserdata(vm)->db = inmem_db;
+
+      /* Create schema from httpdocs/misc/db_schema_as_sqlite.sql */
       inmem_db->execFile("db_schema_as_sqlite.sql");
     }
   }
@@ -14463,6 +14463,9 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State* vm) {
   for (it = agg_flows.begin(); it != agg_flows.end(); it++) {
     const AggregatedASNFlowKey* k = &(it->first);
     const AggregatedASNFlowValue* v = &(it->second);
+    char ip_buf[64], *probe_ip;
+
+    probe_ip = Utils::intoaV6(k->probe_ip, ip_buf, sizeof(ip_buf));
 
     std::string sql =
       "INSERT INTO hourly_asn VALUES (" + std::to_string(get_id()) + "," +
@@ -14475,16 +14478,12 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State* vm) {
       std::to_string(v->dst2src_packets) + "," + std::to_string(k->src_asn) +
       "," + std::to_string(k->dst_asn) + "," +
       std::to_string(k->src_peer_asn) + "," +
-      std::to_string(k->dst_peer_asn) + "," +
-      std::to_string(ntohl(k->probe_ip.u6_addr.u6_addr32[3])) // TODO Add IPv6 support
-      + "," + std::to_string(k->input_snmp) + "," +
+      std::to_string(k->dst_peer_asn) + ",'" + probe_ip
+      + "'," + std::to_string(k->input_snmp) + "," +
       std::to_string(k->output_snmp) + ")";
-    
-    // if(k->src_asn == 12912 || k->dst_asn == 12912))
-    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", sql.c_str());
 
-    // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%u -> %u", k->src_asn,
-    // k->dst_asn);
+    /* ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", sql.c_str()); */
+
     inmem_db->exec_query(sql.c_str(), NULL, NULL);
   }
 
