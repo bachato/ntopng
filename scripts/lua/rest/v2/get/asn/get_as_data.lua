@@ -121,9 +121,10 @@ for key, value in pairs(ases_info or {}) do
     }
 
     record["breakdown_role"] = {
-        bytes_other = (value["bytes_other"] or 0),
+        bytes_other  = (value["bytes_other"] or 0),
         bytes_transit = (value["bytes_transit"] or 0),
-        bytes_peering = (value["bytes_peering"] or 0),    
+        bytes_peering = (value["bytes_peering"] or 0),
+	bytes_ix      = (value["bytes_ix"] or 0),    
     }
 
     if add_record then

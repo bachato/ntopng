@@ -116,6 +116,7 @@ local function aggregateHistoricalASNRows(historical_asn_stats)
                 bytes_other = 0, 
                 bytes_transit = 0, 
                 bytes_peering = 0,
+		bytes_ix = 0,
             }
         else
             -- Subsequent row for same ASN: aggregate into the existing entry.
@@ -151,6 +152,8 @@ local function aggregateHistoricalASNRows(historical_asn_stats)
             existing.bytes_transit = existing.bytes_transit + b_sent + b_rcvd
         elseif role == INTERFACE_ROLE_PEERING then
             existing.bytes_peering = existing.bytes_peering + b_sent + b_rcvd
+        elseif role == INTERFACE_ROLE_IX then
+            existing.bytes_ix = existing.bytes_ix + b_sent + b_rcvd
         end
 
     end
@@ -367,7 +370,8 @@ function as_utils.retrieveASLiveTraffic(options)
         
         local b_transit = bytes_stats.transit_bytes or 0
         local b_peering = bytes_stats.peering_bytes or 0
-        local b_total = bytes_stats.total_bytes or 0
+        local b_ix = bytes_stats.ix_bytes or 0
+	local b_total = bytes_stats.total_bytes or 0
         
         if not asn_stats[asn] then
             -- New ASN: get info and initialize
@@ -378,6 +382,7 @@ function as_utils.retrieveASLiveTraffic(options)
                 as_info["traffic"] = b_total
                 as_info["bytes_transit"] = b_transit
                 as_info["bytes_peering"] = b_peering
+		as_info["bytes_ix"] = b_ix
                 as_info["bytes_other"] = b_total - b_transit - b_peering
                 asn_stats[asn] = as_info
             end
@@ -388,7 +393,8 @@ function as_utils.retrieveASLiveTraffic(options)
             asn_stats[asn]["traffic"] = asn_stats[asn]["traffic"] + b_total
             asn_stats[asn]["bytes_transit"] = asn_stats[asn]["bytes_transit"] + b_transit
             asn_stats[asn]["bytes_peering"] = asn_stats[asn]["bytes_peering"] + b_peering
-            asn_stats[asn]["bytes_other"] = asn_stats[asn]["bytes_other"] + b_total - b_transit - b_peering
+	    asn_stats[asn]["bytes_ix"] = asn_stats[asn]["bytes_ix"] + b_ix
+            asn_stats[asn]["bytes_other"] = asn_stats[asn]["bytes_other"] + b_total - b_transit - b_peering - b_ix
         end
     end
 
@@ -398,6 +404,7 @@ function as_utils.retrieveASLiveTraffic(options)
         
         local b_transit = bytes_stats.transit_bytes or 0
         local b_peering = bytes_stats.peering_bytes or 0
+	local b_ix      = bytes_stats.ix_bytes or 0
         local b_total   = bytes_stats.total_bytes or 0
         
         if not asn_stats[asn] then
@@ -409,7 +416,8 @@ function as_utils.retrieveASLiveTraffic(options)
                 as_info["traffic"] = b_total
                 as_info["bytes_transit"] = b_transit
                 as_info["bytes_peering"] = b_peering
-                as_info["bytes_other"] = b_total - b_transit - b_peering
+		as_info["bytes_ix"] = b_ix
+                as_info["bytes_other"] = b_total - b_transit - b_peering - b_ix
                 asn_stats[asn] = as_info
             end
         else
@@ -419,7 +427,8 @@ function as_utils.retrieveASLiveTraffic(options)
             asn_stats[asn]["traffic"] = asn_stats[asn]["traffic"] + b_total
             asn_stats[asn]["bytes_transit"] = asn_stats[asn]["bytes_transit"] + b_transit
             asn_stats[asn]["bytes_peering"] = asn_stats[asn]["bytes_peering"] + b_peering
-            asn_stats[asn]["bytes_other"] = asn_stats[asn]["bytes_other"] + b_total - b_transit - b_peering
+	    asn_stats[asn]["bytes_ix"] = asn_stats[asn]["bytes_ix"] + b_ix
+            asn_stats[asn]["bytes_other"] = asn_stats[asn]["bytes_other"] + b_total - b_transit - b_peering - b_ix
         end
     end
 
