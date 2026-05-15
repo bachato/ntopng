@@ -55,8 +55,7 @@ local columns = {
         is_key = true,
         filters = "PROBE_IP",
         db_formatting_fun = {
-            historical = "IPv4NumToString",
-            live = ntop.ipToNumber
+            historical = "IPv6NumToString"
         },
         formatter = {
             funct = getProbeName,
@@ -67,8 +66,7 @@ local columns = {
         column_id = "PROBE_IP",
         is_key = true,
         db_formatting_fun = {
-            historical = "IPv4NumToString",
-            live = ntop.ipToNumber
+            historical = "IPv6NumToString"
         },
         filters = "PROBE_IP",
         formatter = {
@@ -81,8 +79,7 @@ local columns = {
         is_key = true,
         filters = "PROBE_IP",
         db_formatting_fun = {
-            historical = "IPv4NumToString",
-            live = ntop.ipToNumber
+            historical = "IPv6NumToString"
         },
         formatter = {
             funct = getProbeName,
