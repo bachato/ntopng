@@ -524,7 +524,7 @@ local timeseries_list = {{
         }
     }
 }, {
-    schema = "iface:role_traffic",
+    schema = "iface:role_traffic_v3",
     id = timeseries_id,
     label = i18n("graphs.role_traffic"),
     priority = 0,
@@ -538,6 +538,10 @@ local timeseries_list = {{
         },
         transit = {
             label = i18n("prefs.snmp_interface_role_list.transit"),
+            color = ts_gui_utils.get_timeseries_color('bytes')
+        },
+        ix = {
+            label = i18n("prefs.snmp_interface_role_list.ix"),
             color = ts_gui_utils.get_timeseries_color('bytes')
         },
         other = {

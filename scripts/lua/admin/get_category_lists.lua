@@ -168,7 +168,7 @@ for key in pairsByValues(sort_to_key, sOrder) do
             column_chart = ternary(list.status.num_hits.current > 0,
                 ' <A HREF="' .. ntop.getHttpPrefix() .. '/lua/blacklists_stats.lua?ts_query=blacklist_name:' ..
                     list.name:gsub("%s+", "_") ..
-                    '&ts_schema=top:blacklist:hits"><i class="fas fa-lg fa-chart-area"></i></A>', ''),
+                    '&ts_schema=top:blacklist_v2:hits"><i class="fas fa-lg fa-chart-area"></i></A>', ''),
             column_update_interval = list.update_interval,
             column_update_interval_label = update_interval_label,
             column_category = "cat_" .. list.category,

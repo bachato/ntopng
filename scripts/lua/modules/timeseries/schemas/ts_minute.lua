@@ -241,13 +241,14 @@ end
 
 -- ##############################################
 
-schema = ts_utils.newSchema("iface:role_traffic", {
+schema = ts_utils.newSchema("iface:role_traffic_v3", {
    step = 60,
    metrics_type = ts_utils.metrics.counter
 })
 schema:addTag("ifid")
 schema:addMetric("peering")
 schema:addMetric("transit")
+schema:addMetric("ix")
 schema:addMetric("other")
 
 -- ##############################################
