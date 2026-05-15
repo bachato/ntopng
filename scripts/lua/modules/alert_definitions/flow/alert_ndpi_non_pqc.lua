@@ -14,7 +14,7 @@ local mitre = require "mitre_utils"
 
 -- ##############################################
 
-local alert_ndpi_slow_dos = classes.class(alert)
+local alert_ndpi_non_pqc = classes.class(alert)
 
 -- ##############################################
 
@@ -26,7 +26,7 @@ alert_ndpi_non_pqc.meta = {
    -- Mitre Att&ck Matrix values
    mitre_values = {
       mitre_tactic = mitre.tactic.defense_evasion,
-      mitre_technique = mitre.technique.obfuscated_files_info,
+      mitre_technique = mitre.technique.remote_services,
       mitre_id = "T1027"
    },
 

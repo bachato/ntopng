@@ -224,7 +224,6 @@ AC_CHECK_LIB([sodium], [sodium_init], LIBS="${LIBS} -lsodium")
 AC_CHECK_LIB([rdkafka], [rd_kafka_metadata], AC_DEFINE_UNQUOTED(HAVE_KAFKA, 1, [librdkafka is installed] LIBS="${LIBS} -lrdkafka") LIBS="${LIBS} -lrdkafka")
 AC_CHECK_LIB([nats], [natsOptions_Create], AC_DEFINE_UNQUOTED(HAVE_NATS, 1, [nats is installed]  LIBS="${LIBS} -lnats") LIBS="${LIBS} -lnats")
 
-
 NEDGE=0
 if test "${with_nedge+set}" = set; then
   AC_DEFINE(HAVE_NEDGE, 1, [nedge support is present])
@@ -384,6 +383,15 @@ if test -z "$NDPI_LIB" ; then :
   echo "and try again"
   exit 1
 fi
+
+AC_MSG_CHECKING(for nDPI Pro)
+if test -d "../ndpi-pro"; then
+ AC_DEFINE_UNQUOTED(HAVE_NDPI_PRO, 1, [Building with nDPI Pro])
+ AC_MSG_RESULT(found)
+else
+ AC_MSG_RESULT(not found)    
+fi
+
 dnl finish: nDPI handling
 
 AC_ARG_WITH(json-c-static,

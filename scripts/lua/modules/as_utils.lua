@@ -20,6 +20,8 @@ local ASN_PROFILING_KEY = "ntopng.profiling.asn"
 local INTERFACE_ROLE_OTHER = 0
 local INTERFACE_ROLE_TRANSIT = 1
 local INTERFACE_ROLE_PEERING = 2
+-- See SNMPInterfaceRole in ntop_typedefs.h
+local INTERFACE_ROLE_INTERNET_EXCHANGE = 4
 
 --- ASN utilities module
 local as_utils = {}
@@ -152,7 +154,7 @@ local function aggregateHistoricalASNRows(historical_asn_stats)
             existing.bytes_transit = existing.bytes_transit + b_sent + b_rcvd
         elseif role == INTERFACE_ROLE_PEERING then
             existing.bytes_peering = existing.bytes_peering + b_sent + b_rcvd
-        elseif role == INTERFACE_ROLE_IX then
+        elseif role == INTERFACE_ROLE_INTERNET_EXCHANGE then
             existing.bytes_ix = existing.bytes_ix + b_sent + b_rcvd
         end
 

@@ -1396,6 +1396,8 @@ class Flow : public GenericHashEntry {
   inline ViewInterfaceFlowStats* getViewInterfaceFlowStats() {
     return (viewFlowStats);
   }
+
+  void postDetectionCallback();
 #endif
 
   inline double getFlowRTT(bool client) const {

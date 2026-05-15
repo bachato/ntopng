@@ -33,8 +33,8 @@ local icmp_utils = require("icmp_utils")
 local alert_consts = require("alert_consts")
 local mitre_utils = require("mitre_utils")
 local auth = require "auth"
+local as_utils = require "as_utils"
 local live_flow_info = nil
-
 
 local page = _GET["page"]
 
@@ -1678,6 +1678,24 @@ if isEmptyString(page) or page == "overview" then
 
             print("</td></tr>\n")
          end
+      end
+
+
+      local role
+
+      -- See SNMPInterfaceRole in ntop_typedefs.h  
+      if(flow.iface_role == 1) then
+	 role = i18n("flows_page.interface_role_transit")
+      elseif(flow.iface_role == 2) then
+	 role = i18n("flows_page.interface_role_peering")
+      elseif(flow.iface_role == 4) then
+	 role = i18n("flows_page.interface_role_ix")
+      else
+	 role = nil
+      end
+      
+      if(role ~= nil) then
+	 print("<tr><th class='colspan-4'>" .. i18n("role") .. "</th><td colspan=2>" .. role .. "</td></tr>\n")
       end
 
       if ((flow.community_id ~= nil) and (flow.community_id ~= "")) then

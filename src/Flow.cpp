@@ -1649,6 +1649,8 @@ void Flow::setExtraDissectionCompleted(bool src2dst_direction) {
 
   /* 2(**) */
 #ifdef NTOPNG_PRO
+  postDetectionCallback();
+  
   if (!shapers_profile_set) {
 #ifdef HAVE_NEDGE
     updateFlowShapers(true);

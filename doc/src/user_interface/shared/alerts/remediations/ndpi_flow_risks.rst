@@ -514,3 +514,19 @@ BINARY DATA TRANSFER
 PROBING ATTEMPT
 ===============
 
+.. _Risk 056:
+  
+OBFUSCATED_TRAFFIC
+=================
+
+.. _Risk 057:
+  
+NDPI_SLOW_DOS
+=============
+
+
+.. _Risk 058:
+  
+NDPI_NON_PQC
+============
+

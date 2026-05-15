@@ -471,6 +471,8 @@ struct ndpi_detection_module_struct* NetworkInterface::initnDPIStruct() {
       {"tls", "metadata.ndpifp_ignore_sni_tls_extn", "1"},
       {"tls", "metadata.ja_ignore_ephemeral_tls_extn", "1"},
       {NULL, "metadata.ndpi_fingerprint_ignore_tcp_fp", "1"},
+      { "tls",  "metadata.ja_data",                     "1"  },
+      { "ssh",  "metadata.ssh_data",                    "1"  },       
       {NULL, NULL, NULL}};
 
   if (ndpi_s == NULL) {
