@@ -14476,7 +14476,7 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State* vm) {
       "," + std::to_string(k->dst_asn) + "," +
       std::to_string(k->src_peer_asn) + "," +
       std::to_string(k->dst_peer_asn) + "," +
-      std::to_string(k->probe_ip.u6_addr.u6_addr32[3]) // TODO Add IPv6 support
+      std::to_string(ntohl(k->probe_ip.u6_addr.u6_addr32[3])) // TODO Add IPv6 support
       + "," + std::to_string(k->input_snmp) + "," +
       std::to_string(k->output_snmp) + ")";
     
