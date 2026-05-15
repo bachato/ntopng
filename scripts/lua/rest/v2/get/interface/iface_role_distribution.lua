@@ -37,6 +37,10 @@ if (ifstats.iface_role_traffic ~= nil) then
       res[#res + 1] = { label = i18n("prefs.snmp_interface_role_list.transit"), value = ifstats.iface_role_traffic.transit }
    end
 
+   if(ifstats.iface_role_traffic.ix > 0) then
+      res[#res + 1] = { label = i18n("prefs.snmp_interface_role_list.ix"), value = ifstats.iface_role_traffic.ix }
+   end
+
    if(ifstats.iface_role_traffic.other > 0) then
       res[#res + 1] = { label = i18n("prefs.snmp_interface_role_list.other"), value = ifstats.iface_role_traffic.other }
    end

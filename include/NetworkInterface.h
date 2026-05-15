@@ -118,7 +118,7 @@ class NetworkInterface : public NetworkInterfaceAlertableEntity {
 
   UsedPorts usedPorts;
   struct {
-    u_int64_t peering_bytes, transit_bytes, other_bytes;
+    u_int64_t peering_bytes, transit_bytes, ix_bytes, other_bytes;
   } roleStats; /* AS mode only */
 
   struct ndpi_detection_module_struct *ndpi_struct, *ndpi_struct_shadow;

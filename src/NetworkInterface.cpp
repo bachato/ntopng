@@ -8479,12 +8479,15 @@ void NetworkInterface::lua(lua_State* vm, bool fullStats) {
     lua_push_uint64_table_entry(vm, "periodic_stats_update_frequency_secs",
                                 periodicStatsUpdateFrequency());
 
-    if (roleStats.peering_bytes || roleStats.transit_bytes ||
-        roleStats.other_bytes) {
+    if (roleStats.peering_bytes
+	|| roleStats.transit_bytes
+	|| roleStats.ix_bytes
+        || roleStats.other_bytes) {
       lua_newtable(vm);
 
       lua_push_uint64_table_entry(vm, "peering", roleStats.peering_bytes);
       lua_push_uint64_table_entry(vm, "transit", roleStats.transit_bytes);
+      lua_push_uint64_table_entry(vm, "ix", roleStats.ix_bytes);
       lua_push_uint64_table_entry(vm, "other", roleStats.other_bytes);
 
       lua_pushstring(vm, "iface_role_traffic");
@@ -14550,6 +14553,10 @@ void NetworkInterface::incRoleBytes(u_int64_t bytes, SNMPInterfaceRole role) {
 
     case role_peering:
       roleStats.peering_bytes += bytes;
+      break;
+
+    case role_ix:
+      roleStats.ix_bytes += bytes;
       break;
 
     default:

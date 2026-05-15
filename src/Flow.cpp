@@ -6266,6 +6266,10 @@ std::string Flow::getFlowInfo(bool isLuaRequest) {
       info_field += " Peering";
       break;
 
+    case role_ix:
+      info_field += " Internet eXchange";
+      break;
+
     default:
       /* Nothing to do */
       break;
@@ -10255,7 +10259,9 @@ void Flow::setSNMPExporterInterfaceRole(SNMPInterfaceRole r) {
     return;
   
   if((flowExporterInterfaceRole == role_peering)
-     || (flowExporterInterfaceRole == role_transit))
+     || (flowExporterInterfaceRole == role_transit)
+     || (flowExporterInterfaceRole == role_ix)
+     )
     flowExporterInterfaceRole = r; /* Priority */
   else if(flowExporterInterfaceRole == role_other /* Not yet set */)
     flowExporterInterfaceRole = r;
