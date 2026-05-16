@@ -1,3 +1,7 @@
+--
+-- (C) 2013-26 - ntop.org
+--
+
 local json = require("dkjson")
 local page_utils = require("page_utils")
 
@@ -11,7 +15,7 @@ return {
       "ip is required. vlan defaults to 0 if omitted.",
    handler = function(content)
       local req = type(content) == "table" and content
-                  or (type(content) == "string" and json.decode(content))
+	 or (type(content) == "string" and json.decode(content))
       if type(req) ~= "table" then
          return nil, "content must be JSON {ip, vlan}"
       end
@@ -29,7 +33,7 @@ return {
          bytes_sent      = info["bytes.sent"],
          bytes_rcvd      = info["bytes.rcvd"],
          num_flows       = info["active_flows.as_client"] and
-                           (info["active_flows.as_client"] + (info["active_flows.as_server"] or 0)),
+	    (info["active_flows.as_client"] + (info["active_flows.as_server"] or 0)),
          score           = info.score,
          country         = info.country,
          os              = info.os,

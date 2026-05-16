@@ -1,3 +1,7 @@
+--
+-- (C) 2013-26 - ntop.org
+--
+
 return {
    name = "get_live_flows_summary",
    description = "Return an aggregated summary of active flows on the current interface. " ..
@@ -87,7 +91,7 @@ return {
       local sorted = {}
       for k, v in pairs(groups) do
          sorted[#sorted + 1] = { key = k, bytes = v.bytes, packets = v.packets,
-            num_flows = v.num_flows, num_alerted = v.num_alerted, score = v.score }
+				 num_flows = v.num_flows, num_alerted = v.num_alerted, score = v.score }
       end
       table.sort(sorted, function(a, b) return a.bytes > b.bytes end)
 
@@ -100,7 +104,7 @@ return {
       local rows = { group_by .. ",num_flows,num_alerted,bytes,packets,score" }
       for _, r in ipairs(sorted) do
          rows[#rows + 1] = string.format("%s,%d,%d,%d,%d,%d",
-            r.key, r.num_flows, r.num_alerted, r.bytes, r.packets, r.score)
+					 r.key, r.num_flows, r.num_alerted, r.bytes, r.packets, r.score)
       end
 
       return hdr_line .. "\n" .. table.concat(rows, "\n"), nil

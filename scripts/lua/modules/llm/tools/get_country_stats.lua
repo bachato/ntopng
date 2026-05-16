@@ -1,3 +1,7 @@
+--
+-- (C) 2013-26 - ntop.org
+--
+
 return {
    name = "get_country_stats",
    description = "Return top-N countries ranked by traffic seen on the current interface. " ..
@@ -11,10 +15,10 @@ return {
       local sort_col = col_map[sort_by] or "column_bytes"
 
       local info = interface.getCountriesInfo({
-         sortColumn   = sort_col,
-         a2zSortOrder = false,
-         detailsLevel = "higher",
-         maxHits      = limit,
+	    sortColumn   = sort_col,
+	    a2zSortOrder = false,
+	    detailsLevel = "higher",
+	    maxHits      = limit,
       })
 
       if not info or not info.Countries then
@@ -24,9 +28,9 @@ return {
       local rows = { "country_code,num_hosts,bytes_sent,bytes_rcvd,score,first_seen" }
       for _, c in ipairs(info.Countries) do
          rows[#rows + 1] = string.format("%s,%d,%d,%d,%d,%d",
-            c.country or "??", c.num_hosts or 0,
-            (c.bytes and c.bytes.sent or 0), (c.bytes and c.bytes.rcvd or 0),
-            c.score or 0, c["seen.first"] or 0)
+					 c.country or "??", c.num_hosts or 0,
+					 (c.bytes and c.bytes.sent or 0), (c.bytes and c.bytes.rcvd or 0),
+					 c.score or 0, c["seen.first"] or 0)
       end
       return table.concat(rows, "\n"), nil
    end,

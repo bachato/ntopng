@@ -1,3 +1,7 @@
+--
+-- (C) 2013-26 - ntop.org
+--
+
 return {
    name = "get_live_flows_for_host",
    description = "Return active (live) flows involving a specific IP address on the current interface. " ..
@@ -38,17 +42,17 @@ return {
       local rows = { "cli_ip,cli_port,cli_country,srv_ip,srv_port,srv_country,l4_proto,app_proto,bytes_cli2srv,bytes_srv2cli,packets,duration_sec,score,alerted" }
       for _, f in ipairs(flows_data.flows) do
          rows[#rows + 1] = string.format("%s,%d,%s,%s,%d,%s,%s,%s,%d,%d,%d,%d,%d,%s",
-            f["cli.ip"] or "", f["cli.port"] or 0, f["cli.country"] or "",
-            f["srv.ip"] or "", f["srv.port"] or 0, f["srv.country"] or "",
-            f["proto.l4"] or "", f["proto.ndpi"] or f["application"] or "",
-            f["bytes.cli2srv"] or 0, f["bytes.srv2cli"] or 0,
-            f["packets"] or 0, f["duration"] or 0,
-            (f["flow_score"] or (f.score and f.score.flow_score) or 0),
-            (f["flow.alerted"] and "yes" or "no"))
+					 f["cli.ip"] or "", f["cli.port"] or 0, f["cli.country"] or "",
+					 f["srv.ip"] or "", f["srv.port"] or 0, f["srv.country"] or "",
+					 f["proto.l4"] or "", f["proto.ndpi"] or f["application"] or "",
+					 f["bytes.cli2srv"] or 0, f["bytes.srv2cli"] or 0,
+					 f["packets"] or 0, f["duration"] or 0,
+					 (f["flow_score"] or (f.score and f.score.flow_score) or 0),
+					 (f["flow.alerted"] and "yes" or "no"))
       end
 
       local hdr = string.format("Active flows for %s role=%s alerted_only=%s (showing %d of %d total)\n",
-         host_ip, role, tostring(alerted_only), #flows_data.flows, flows_data.numFlows or #flows_data.flows)
+				host_ip, role, tostring(alerted_only), #flows_data.flows, flows_data.numFlows or #flows_data.flows)
       return hdr .. table.concat(rows, "\n"), nil
    end,
    opts = { read_only = true }

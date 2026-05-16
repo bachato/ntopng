@@ -1,3 +1,7 @@
+--
+-- (C) 2013-26 - ntop.org
+--
+
 local json = require("dkjson")
 
 return {
