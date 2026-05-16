@@ -533,16 +533,6 @@ print [[/lua/vulnerability_scan.lua'>";
 					msg += NtopUtils.addCommas(rsp.vs_in_progress) +" <i class=\"fas fa-satellite-dish\"></i></span></a>";
 				}
 
-                                if(rsp.ntopcloud == true) {
-                                       msg += "<a href=']]
-print(http_prefix)
-print [[/lua/system_stats.lua?ifid=-1&page=ntopcloud'>"; 
-                                       msg += "<blink><span data-bs-toggle='tooltip' data-bs-placement='bottom' title=\"]] print(i18n('connected_to_the_cloud')) print[[\" class=\"badge bg-success\">ntop <i class=\"fas fa-cloud\"></i></span></blink></a>";
-                                } else  {
-                                       msg += "<a href=\"https://cloud.ntop.org\">"; 
-                                       msg += "<span data-bs-toggle='tooltip' data-bs-placement='bottom' title=\"]] print(i18n('not_connected_to_the_cloud')) print[[\" class=\"badge bg-danger\">ntop <i class=\"fas fa-cloud\"></i></span></a>";
-                                }
-
                                 if(rsp.is_loading == true) {
                                        msg += "<blink><span data-bs-toggle='tooltip' data-bs-placement='bottom' title=\"]] print(i18n('loading')) print[[\" class=\"badge bg-primary\"><i class=\"fas fa-spinner\"></i> ]]
 print(i18n("loading"))

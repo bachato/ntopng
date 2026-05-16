@@ -439,7 +439,6 @@ using namespace clickhouse;
 #include "ClickHouseDB.h"
 #endif
 #ifdef NTOPNG_PRO
-#include "NtopCloud.h"
 #include "NtopPro.h"
 #include "DnsHostMapping.h"
 #include "TrafficShaper.h"
