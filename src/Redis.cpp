@@ -207,12 +207,12 @@ void Redis::reconnectRedis(bool giveup_on_failure) {
 
 #ifdef __linux__
   if (!is_socket_connection)
-    ntop->getTrace()->traceEvent(TRACE_NORMAL,
+    ntop->getTrace()->traceEvent(TRACE_INFO,
                                  "Successfully connected to redis %s:%u@%u",
                                  redis_host, redis_port, redis_db_id);
   else
 #endif
-    ntop->getTrace()->traceEvent(TRACE_NORMAL,
+    ntop->getTrace()->traceEvent(TRACE_INFO,
                                  "Successfully connected to redis %s@%u",
                                  redis_host, redis_db_id);
 
