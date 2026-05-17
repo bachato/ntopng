@@ -16,6 +16,7 @@ local alert_consts = require "alert_consts"
 local host_pools = require "host_pools"
 local consts = require "consts"
 local tag_badge_utils = require "tag_badge_utils"
+require "lua_utils_get"
 local qoe_utils
 
 if ntop.isEnterpriseL() then

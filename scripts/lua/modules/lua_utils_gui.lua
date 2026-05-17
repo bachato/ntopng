@@ -4,6 +4,7 @@
 --
 -- Container for GUI-related stuff that used to be part of lua_utils.lua
 --
+
 if (pragma_once_lua_utils_gui == true) then
    -- io.write(debug.traceback().."\n")
    -- tprint("Circular dependency in lua_utils_gui.lua")
@@ -18,6 +19,7 @@ pragma_once_lua_utils_gui = true
 local clock_start = os.clock()
 
 require "gui_utils"
+require "lua_utils_get"
 local host_utils = require "host_utils"
 local format_utils = require "format_utils"
 local dns_utils = require "dns_utils"
