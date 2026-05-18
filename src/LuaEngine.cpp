@@ -38,9 +38,6 @@ extern luaL_Reg* ntop_network_reg;
 extern luaL_Reg* ntop_flow_reg;
 extern luaL_Reg* ntop_host_reg;
 
-#ifdef HAVE_NTOP_CLOUD
-extern luaL_Reg* ntop_cloud_reg;
-#endif
 
 /* #define TRACE_VM_ENGINES */
 
@@ -568,9 +565,6 @@ void LuaEngine::lua_register_classes(lua_State* L, LuaEngineMode mode) {
   luaRegister(L, "network", ntop_network_reg);
   luaRegister(L, "flow", ntop_flow_reg);
   luaRegister(L, "host", ntop_host_reg);
-#ifdef HAVE_NTOP_CLOUD
-  luaRegister(L, "cloud", ntop_cloud_reg);
-#endif
 
   switch (mode) {
     case lua_engine_mode_http:

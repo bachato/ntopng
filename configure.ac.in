@@ -273,17 +273,6 @@ if [ test -f /usr/bin/lsb_release ]; then
   fi
 fi
 
-dnl if test -d "pro"; then
-dnl   NTOPCLOUD_LIB=
-dnl   NTOPCLOUD_HOME="../ntopcloud"
-dnl   if test -d "${NTOPCLOUD_HOME}"; then
-dnl     CFLAGS="${CFLAGS} -I${NTOPCLOUD_HOME}"
-dnl     CXXFLAGS="${CXXFLAGS} -I${NTOPCLOUD_HOME}"
-dnl     NTOPCLOUD_LIB="${NTOPCLOUD_HOME}/libcloud.a"
-dnl     AC_DEFINE(HAVE_NTOP_CLOUD, 1, [ntop cloud detected])
-dnl   fi
-dnl fi
-
 JE=../jemalloc/lib/libjemalloc.a
 if ! test -f "${JE}"; then
  JE=
