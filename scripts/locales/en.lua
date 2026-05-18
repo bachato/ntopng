@@ -4541,6 +4541,8 @@ local lang = {
     ["ndpi_url_possible_rce_injection"] = "Possible Remote Code Execution (RCE)",
     ["ndpi_url_possible_sql_injection"] = "SQL Injection",
     ["ndpi_url_possible_xss"] = "XSS Attack",
+    ["ndpi_non_pqc"] = "Obsolete non-PQC Flow",
+    ["ndpi_non_pqc_descr"] = "Detects non-PQC compliant (SSH, TLS, QUIC, IPSEC) flows",
   },
   ["export"] = {
     ["select_cols"] = "Select Export Columns",
