@@ -91,52 +91,6 @@ Selectively render information pages
 if page == "historical" then
    local source_value_object = { subnet = network_name, ifid = interface.getId() }
    graph_utils.drawNewGraphs(source_value_object)
-elseif (page == "config") then
-    if(not isAdministrator()) then
-      return
-   end
-
-   print[[
-   <form id="network_config" class="form-inline" style="margin-bottom: 0px;" method="post">
-   <input id="csrf" name="csrf" type="hidden" value="]] print(ntop.getRandomCSRFValue()) print[["/>
-   <table class="table table-bordered table-striped">]]
-
-    if _SERVER["REQUEST_METHOD"] == "POST" then
-      setLocalNetworkAlias(network_name, _POST["custom_name"])
-      custom_name = getLocalNetworkAlias(network_name)
-    end
-
-   print [[<tr>
-	 <th>]] print(i18n("network_details.network_alias")) print[[</th>
-	 <td>
-         <input type="text" name="custom_name" class="form-control" placeholder="Custom Name" style="width: 280px;" value="]] print(custom_name) print[["
-         ]] 
-         local option_name = ntop.getLocalNetworkAlias(network_name) or nil
-         if option_name then
-            print[[disabled="disabled"]]
-         end
-         print[[>
-	 </td>
-      </tr>]]
-
-   print[[
-   </table>
-   <button class="btn btn-primary" style="float:right; margin-right:1em; margin-left: auto" disabled="disabled" type="submit">]] print(i18n("save_settings")) print[[</button><br><br>
-   </form>
-   <script>
-     aysHandleForm("#network_config");
-   </script>]]
-
-  print([[
-    <div class="notes bg-light border">
-      <b>]] .. i18n("notes") .. [[</b>:
-      <ul>
-        <li>
-          ]] ..  i18n("network_stats.note_aliases_not_configurable") .. [[ 
-      </ul>
-    </div>
-  ]])
-
 elseif page == "traffic_report" then
    package.path = dirs.installdir .. "/pro/scripts/lua/enterprise/?.lua;" .. package.path
    local traffic_report = require "traffic_report"

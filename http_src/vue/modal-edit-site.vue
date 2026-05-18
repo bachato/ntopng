@@ -29,29 +29,6 @@
                 </div>
             </div>
 
-            <!-- ==================== Site Networks List ==================== -->
-            <div class="row mb-3 align-items-center">
-                <div class="col-md-3">
-                    <label for="site_networks" class="form-label fw-bold mb-0">
-                        {{ _i18n("sites_page.site_networks") }}
-                        <i class="fa-solid fa-circle-question text-secondary ms-1" data-bs-toggle="tooltip"
-                            data-bs-placement="top" :title="_i18n('sites_page.networks_format')"></i>
-                    </label>
-                </div>
-                <div class="col-md-9">
-                    <!-- Name input with validation styling -->
-                    <textarea id="site_networks" type="text" class="form-control"
-                        :class="{ 'is-invalid': networks_error }" v-model="site_networks"
-                        @input="validateNetworksListDebounced"
-                        :title="isReserved ? _i18n('sites_page.reserved_message') : ''" data-bs-toggle="tooltip"
-                        data-bs-placement="top" :disabled="isReserved" required />
-                    <!-- Validation error message display -->
-                    <div v-if="networks_error" class="invalid-feedback">
-                        {{ networks_error }}
-                    </div>
-                </div>
-            </div>
-
             <!-- ==================== Site Description Field ==================== -->
             <div class="row mb-3 align-items-center">
                 <div class="col-md-3">
@@ -132,14 +109,12 @@ const geomap = ref(null);
 
 // Form field bindings
 const site_name = ref("");             // Site name
-const site_networks = ref("");             // Site networks
 const site_description = ref("");      // Site description
 const site_lat = ref(0);               // Latitude coordinate
 const site_lng = ref(0);                // Longitude coordinate
 
 // Form state management
 const name_error = ref("");                      // Validation error message for name field
-const networks_error = ref("");                      // Validation error message for name field
 const isEditMode = ref(false);                   // Flag: true = edit mode, false = add mode
 const currentItem = ref(null);                    // Currently edited item (null for add mode)
 
@@ -162,7 +137,7 @@ const isReserved = computed(() => {
 // Form validity check for enabling/disabling submit button
 // Requirements: name not empty, name length > 1, no validation errors
 const is_form_valid = computed(() => {
-    return site_name.value.trim().length > 1 && !name_error.value && !networks_error.value;
+    return site_name.value.trim().length > 1 && !name_error.value;
 });
 
 // ==================== Watchers ====================
@@ -231,31 +206,6 @@ const validateName = () => {
 
 /* ************************************** */
 
-let debounce_networks_timer = null
-
-function validateNetworksListDebounced() {
-    clearTimeout(debounce_networks_timer)
-    debounce_networks_timer = setTimeout(() => {
-        validateNetworksList()
-    }, 800) // wait 400 ms before checking the input in order to not check each single character
-}
-
-function validateNetworksList() {
-    const entries = site_networks.value
-        .split(/[\n,]+/)
-        .map(s => s.trim())
-        .filter(s => s.length > 0)
-
-    // validateCIDR returns false if there is an error, so if it's okay it !validateCIDR returns false
-    if (entries.some(entry => !regexValidation.validateCIDR(entry))) {
-        networks_error.value = _i18n("error_messages.incorrect_network")
-    } else {
-        networks_error.value = ""
-    }
-}
-
-/* ************************************** */
-
 /**
  * Updates latitude and longitude when the user clicks on the map.
  * Called by the <Geomap> component via the onMapClick prop.
@@ -292,20 +242,12 @@ function formatTooltipData(site) {
  */
 const handleSubmit = () => {
     validateName();
-    validateNetworksList();
     if (!is_form_valid.value) return;
-
-    site_networks.value = site_networks.value
-        .split(/[\n,]/)          // split newline and comma
-        .map(s => s.trim())      // remove empty spaces
-        .filter(Boolean)         // rimuove empty elements
-        .join(',')               // separates by comma
 
     // Prepare form data object
     const formData = {
         site_name: site_name.value.trim(),
         site_description: site_description.value.trim(),
-        site_networks: site_networks.value,
         site_lat: site_lat.value,
         site_lng: site_lng.value,
         item: currentItem.value
@@ -325,7 +267,6 @@ const handleSubmit = () => {
  * @param {Object|null} item - Site data for editing, null for add mode
  * @param {string} item.site_name - Site name
  * @param {string} item.site_description - Site description
- * @param {string} item.site_networks - Site Networks
  * @param {number} item.site_lat - Latitude
  * @param {number} item.site_lng - Longitude
  */
@@ -334,7 +275,6 @@ const open = (item = null) => {
     const {
         site_name: edited_site_name = "",
         site_description: edited_site_description = "",
-        site_networks: edited_site_networks = "",
         site_lat: edited_site_lat = 0,
         site_lng: edited_site_lng = 0
     } = item || {}
@@ -342,13 +282,11 @@ const open = (item = null) => {
     // Populate form fields
     site_name.value = edited_site_name;
     site_description.value = edited_site_description;
-    site_networks.value = edited_site_networks;
     site_lat.value = edited_site_lat;
     site_lng.value = edited_site_lng;
 
     // Reset state
     name_error.value = "";
-    networks_error.value = "";
     currentItem.value = item;
     // Determine mode: !!item converts to boolean (true if item exists)
     isEditMode.value = !!item;

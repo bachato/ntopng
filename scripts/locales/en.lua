@@ -7191,7 +7191,10 @@ local lang = {
   },
   ["network_details"] = {
     ["network"] = "Network",
-    ["network_alias"] = "Network Alias",
+    ["edit_network"] = "Edit Network",
+    ["network_alias"] = "Alias",
+    ["alias_description"] = "A name used to identify, inside ntopng the Network, instead of the standard Network CIDR.",
+    ["site_description"] = "A logical positioning for the Network. Multiple Networks can be part of a Site.",
     ["network_parameter_missing_message"] = "Network parameter is missing (internal error?)",
     ["no_available_stats_for_network"] = "No available stats for network %{network}",
   },

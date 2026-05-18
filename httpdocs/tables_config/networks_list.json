@@ -6,6 +6,28 @@
 	"paging": false,
 	"display_empty_rows": true,
 	"columns": [
+        {
+			"id": "actions",
+			"title_i18n": "actions",
+			"sortable": false,
+			"min-width" : "80px",
+            "max-width" : "100px",
+			"sticky": true,
+			"class": [
+				"text-nowrap",
+				"text-center"
+			],
+			"render_v_node_type": "button_list",
+			"button_def_array": [
+				{
+					"id": "edit_network",
+					"icon": "fas fa-cog",
+					"title_i18n": "edit",
+					"class": [],
+					"event_id": "click_button_edit_network"
+				}
+			]
+		},
 		{
 			"id": "network_name",
 			"title_i18n": "network_stats.network_name",

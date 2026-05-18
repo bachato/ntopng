@@ -9,12 +9,13 @@
                 <NavbarTabs :tabs="tabs" :active_tab_id="activePage" @on_click="switchActivePage" />
             </template>
 
-            <!-- add Networks -->
+            <!-- add Networks 
             <template v-slot:custom_buttons>
                 <button class="btn btn-link" type="button" @click="openAddNetworksModal">
                     <i class="fas fa-plus"></i>
                 </button>
             </template>
+            -->
         </TableWithConfig>
     </div>
     <div v-show="activePage !== 'networks'" class="m-2 mb-3">
@@ -37,6 +38,9 @@
     </div>
 
     <!-- Modal components for site management -->
+    <ModalEditNetwork ref="networkModal" :errorMessage="modalNetworkErrorMessage" :sitesList="sitesList"
+        @edit="handleEditNetwork">
+    </ModalEditNetwork>
     <ModalEditSite ref="siteModal" :errorMessage="modalErrorMessage" @edit="handleEditSite" @add="handleAddSite">
     </ModalEditSite>
     <ModalDeleteSite ref="siteModalDelete" @delete="handleDeleteSite">
@@ -51,6 +55,7 @@ import { ref, onBeforeMount } from "vue";
 import { default as NavbarTabs } from "./components/navbar-tabs.vue";
 import { default as dataUtils } from "../utilities/data-utils.js";
 import { default as ModalEditSite } from "./modal-edit-site.vue";
+import { default as ModalEditNetwork } from "./modal-edit-network.vue";
 import { default as ModalDeleteSite } from "./modal-delete-site.vue";
 import { default as sortingFunctions } from "../utilities/sorting-utils.js";
 import { default as TableWithConfig } from "./table-with-config.vue";
@@ -83,7 +88,8 @@ const API = {
     edit: `${http_prefix}/lua/pro/rest/v2/edit/sites/edit.lua`,
     add: `${http_prefix}/lua/pro/rest/v2/add/sites/add.lua`,
     delete: `${http_prefix}/lua/pro/rest/v2/delete/sites/delete.lua`,
-    get: `${http_prefix}/lua/pro/rest/v2/get/sites/list.lua`
+    get: `${http_prefix}/lua/pro/rest/v2/get/sites/list.lua`,
+    net_edit: `${http_prefix}/lua/rest/v2/edit/network/edit.lua`
 };
 
 const areNetworksTsEnabled = props.context.areNetworksTsEnabled;
@@ -97,16 +103,20 @@ const networks_table = ref('networks_list');
 const table_networks_stats = ref(null);
 
 // Sites
+const sitesList = ref([]);
 const site_table = ref("sites_list");         // Table identifier
 const table_sites_stats = ref(null);               // Reference to table component
 const editingSiteId = ref(null);             // ID of site currently being edited
 const modalErrorMessage = ref("");                    // Error message for modals
+const modalNetworkErrorMessage = ref("");     // Error message for modals
 const siteModal = ref(null);                  // Reference to edit/add modal
+const networkModal = ref(null);                  // Reference to edit/add modal
 const siteModalDelete = ref(null);            // Reference to delete modal
 
 /* ************************************** */
 
 onBeforeMount(() => {
+    retrieveSitesList()
     const activePageURL = ntopng_url_manager.get_url_entry("page")
     activePage.value = activePageURL ? activePageURL : "networks";
 })
@@ -120,9 +130,22 @@ const switchActivePage = function (tab) {
 
 /* ************************************** */
 
+const retrieveSitesList = function () {
+    sitesList.value = [];
+    // Send edit request to server
+    ntopng_utility.http_request(API.get)
+        .then(data => {
+            sitesList.value = data;
+        })
+        .catch(err => console.error('Error retrieving Sites'))
+}
+
+/* ************************************** */
+
 const refreshActiveTable = () => {
     table_sites_stats.value?.refresh_table(true);
     table_networks_stats.value?.refresh_table(true);
+    retrieveSitesList()
 }
 
 const map_table_def_columns = (columns) => {
@@ -130,15 +153,12 @@ const map_table_def_columns = (columns) => {
         /* Networks */
         "networkName": (value, row) => {
             const network_url = `${http_prefix}/lua/hosts_stats.lua?network=${row.networkId}`;
-            const network_config_url = `${http_prefix}/lua/network_details.lua?network=${row.networkId}&page=config`;
             const network_ts_url = `${http_prefix}/lua/network_details.lua?network=${row.networkId}&page=historical`;
 
             // Create href with network name and icons
             let href = `<a href="${network_url}">${value}</a>`;
-            const net_config_href = `&nbsp;<a href="${network_config_url}"><i class="fas fa-cog"></i></a>`;
             const ts_icon_href = `&nbsp;<a href="${network_ts_url}"><i class="fas fa-chart-area"></i></a>`;
 
-            href += net_config_href;
             if (areNetworksTsEnabled) {
                 href += ts_icon_href;
             }
@@ -146,13 +166,10 @@ const map_table_def_columns = (columns) => {
         },
         // Site name column - displays the name directly
         "site": (value, row) => {
-            if(!value) {
+            const netSite = sitesList.value.find((el) => el.id === value.id)
+            if (!netSite)
                 return ''
-            }
-            if(value.name) {
-                return value.name
-            }
-            return ''
+            return netSite.name
         },
         "hosts": (value, row) => {
             return formatterUtils.getFormatter("number")(value);
@@ -235,6 +252,8 @@ function columns_sorting(col, r0, r1) {
         /* Networks */
         if (col.id == "network_name") {
             return sortingFunctions.sortByName(r0.networkName, r1.networkName, col.sort);
+        } else if (col.id == "site") {
+            return sortingFunctions.sortByName(r0.site.name, r1.site.name, col.sort);
         } else if (col.id == "hosts") {
             return sortingFunctions.sortByNumber(r0.hosts, r1.hosts, col.sort);
         } else if (col.id == "score") {
@@ -267,7 +286,8 @@ function on_table_custom_event(event) {
     // Map event IDs to handler functions
     let events_managed = {
         "click_button_edit_site": click_button_edit_site,
-        "click_button_delete_site": click_button_delete_site
+        "click_button_delete_site": click_button_delete_site,
+        "click_button_edit_network": click_button_edit_network
     };
 
     if (events_managed[event.event_id] == null) {
@@ -275,6 +295,20 @@ function on_table_custom_event(event) {
     }
     events_managed[event.event_id](event);
 }
+
+// Handler for edit button click
+const click_button_edit_network = (event) => {
+    const row = event.row
+    if (!row) return;
+    if (row.id == 0) return;  // Default site cannot be edited
+
+    // Open the Edit modal with pre-filled data
+    networkModal.value.open({
+        network_cidr: row.networkCIDR,
+        network_alias: row.networkNameOnly,
+        site_id: row.site.id
+    });
+};
 
 // Handler for edit button click
 const click_button_edit_site = (event) => {
@@ -447,4 +481,38 @@ const handleDeleteSite = async (item) => {
     }
     siteModalDelete.value.close();
 };
+
+/* ************************************** */
+// Handles the edit network form submission
+const handleEditNetwork = async (data) => {
+    modalErrorMessage.value = "";  // Clear any previous error
+
+    const headers = { 'Content-Type': 'application/json' };
+
+    // Prepare request payload for new site
+    const editParams = {
+        csrf: props.context.csrf,
+        network_cidr: data.network_cidr,
+        custom_name: data.network_alias,
+        site_id: data.site_id,
+    };
+
+    // Send add request to server
+    ntopng_utility.http_request(API.net_edit, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(editParams)
+    }, false, true, true)
+        .then(data => {
+            // Handle server-side validation errors
+            if (!data || data.rc < 0) {
+                modalErrorMessage.value = data.rsp || _i18n("error");
+                return;
+            }
+            // Success - refresh data and close modal
+            refreshActiveTable();
+            networkModal.value.close();
+        })
+        .catch(err => console.error('Error during Site editing:', err))
+}
 </script>

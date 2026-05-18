@@ -11,6 +11,7 @@ local site_utils = {}
 
 -- Redis cache keys configuration for persistent storage
 local REDIS_HASH_NAME = "ntopng.prefs.sites" -- Stores all sites as hash: id -> JSON
+local REDIS_NETWORKS_SITES_KEY = "ntopng.prefs.networks.sites" -- Stores all sites as hash: id -> JSON
 local REDIS_COUNTER_KEY = "ntopng.prefs.sites_counter" -- Auto-increment counter for site IDs
 
 -- Configuration limits for sites
@@ -61,9 +62,6 @@ local function validate_site(site, existing_sites, ignore_name_duplication)
 	if type(site.site_description) ~= "string" then
 		return false, "Invalid description"
 	end
-
-	-- Step 3: Validate networks not needed, the validation is already done
-   --         by the http_lint
 
 	-- Check description length limit
 	if #site.site_description > MAX_DESCRIPTION_SIZE then
@@ -160,7 +158,6 @@ function site_utils.getSites()
 		record["id"] = tostring(site.id) -- Ensure ID is string
 		record["name"] = site.name -- Site display name
 		record["description"] = site.description -- Optional description
-		record["networks"] = site.networks -- List of networks associated with the Site
 		record["latitude"] = site.latitude -- Geographic coordinates
 		record["longitude"] = site.longitude
 		record["reserved"] = site.reserved -- System-reserved flag
@@ -217,8 +214,7 @@ function site_utils.editSite(site)
 			id = tostring(site.id),
 			name = site.site_name,
 			description = site.site_description,
-         networks = site.site_networks,
-			latitude = site.latitude,
+         latitude = site.latitude,
 			longitude = site.longitude,
 		}
 
@@ -269,7 +265,6 @@ function site_utils.addSite(site)
 			id = site_id,
 			name = site.site_name,
 			description = site.site_description,
-			networks = site.site_networks,
 			latitude = site.latitude,
 			longitude = site.longitude,
 		}
@@ -319,6 +314,66 @@ end
 function site_utils.mapHostToSite(ip)
    -- TODO: Implement this function, given an IP returns the site associated to it
    return site_utils.get_default_site()
+end
+
+-- ##############################################
+
+function site_utils.getSiteInfo(site_id)
+   local sites = site_utils.getSites()
+   local default_site = site_utils.get_default_site()
+
+   if isEmptyString(site_id) or (site_id == default_site.id) then
+      return default_site
+   end
+
+   -- Check the existence of the site, otherwise skip it
+	for _, site in pairsByKeys(sites, asc) do
+      if tostring(site_id) == site.id then
+         return site
+      end
+   end
+
+   return default_site
+end
+
+-- ##############################################
+
+function site_utils.getNetworkSite(cidr)
+   if not isIPv4Network(cidr) and not isIPv6Network(cidr) then
+      -- Not a network, return
+      return site_utils.get_default_site()
+   end
+
+   local site = ntop.getHashCache(REDIS_NETWORKS_SITES_KEY, cidr)
+
+   return site_utils.getSiteInfo(site)
+end
+
+-- ##############################################
+
+function site_utils.mapNetworkToSite(cidr, site_id)
+   -- Given a cidr, maps the cidr to the site_id
+   local sites = site_utils.getSites()
+   local skip = true
+
+   if not isIPv4Network(cidr) and not isIPv6Network(cidr) then
+      -- Not a network, return
+      return
+   end
+
+   -- Check the existence of the site, otherwise skip it
+	for _, site in pairsByKeys(sites, asc) do
+      if tostring(site_id) == site.id then
+         -- OK, site found
+         skip = false
+         break
+      end
+   end
+   
+   -- Site found, update the network + site key
+   if not skip then
+      ntop.setHashCache(REDIS_NETWORKS_SITES_KEY, cidr, tostring(site_id))
+   end
 end
 
 -- ##############################################
