@@ -4513,8 +4513,7 @@ local lang = {
     ["ndpi_risky_domain"] = "Risky Domain",
     ["ndpi_slow_dos"] = "Slow DoS",
     ["ndpi_slow_dos_descr"] = "Detect Slow DoS",
-    ["ndpi_non_pqc"] = "Non PQC",
-    ["ndpi_non_pqc"] = "Obsolete non-Post Quantum Ciphers",
+    ["ndpi_non_pqc"] = "Obsolete non-PQC Flow",
     ["ndpi_smb_insecure_version"] = "SMB Insecure Vers",
     ["ndpi_ssh_obsolete_client_version_or_cipher"] = "Obsolete SSH Client Version or Cipher",
     ["ndpi_ssh_obsolete_client_version_or_cipher_signature"] = "Obsolete SSH Client Version or Cipher [Signature: %{signature}]",
@@ -4542,7 +4541,6 @@ local lang = {
     ["ndpi_url_possible_rce_injection"] = "Possible Remote Code Execution (RCE)",
     ["ndpi_url_possible_sql_injection"] = "SQL Injection",
     ["ndpi_url_possible_xss"] = "XSS Attack",
-    ["ndpi_non_pqc"] = "Non PQC Communication",
   },
   ["export"] = {
     ["select_cols"] = "Select Export Columns",
