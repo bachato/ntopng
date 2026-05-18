@@ -71,7 +71,7 @@ rsp = {
     }, {
         name = "bgp_peer_id",
         value = {{
-            name = "table: 0x799050485480<a href=/lua/host_details.lua?host=185.54.80.3>185.54.80.3</a></a>"
+            name = "<a href=/lua/host_details.lua?host=185.54.80.3>185.54.80.3</a></a>"
         }}
     }, {
         name = "bgp_peer_asn",

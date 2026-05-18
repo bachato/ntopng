@@ -40,6 +40,7 @@ const stats_rows_client = ref([]);
 const stats_rows_server = ref([]);
 const no_client_data = ref(true);
 const no_server_data = ref(true);
+const BGP_LOOKING_GLASS_URL = '/lua/bgp_looking_glass.lua'
 const bgp_info_url = '/lua/rest/v2/get/flow/bgp/general_stats.lua'
 const stats_columns = ref([{
     class: "nowrap col-4",
@@ -70,7 +71,7 @@ const getExtraParametersUrl = () => {
 const refreshBSTable = async () => {
     const params = getExtraParametersUrl()
     const stats = await ntopng_utility.http_request(`${http_prefix}${bgp_info_url}?${params}`);
-    
+
     if (stats.client_info.length > 0)
         no_client_data.value = false
     if (stats.server_info.length > 0)
@@ -101,6 +102,9 @@ function print_stats_column(col) {
 function print_stats_row(col, row) {
     if (row[col.id] == null) {
         return `<b>${i18n('flow_details.' + row.name)}</b>`
+    } else if (row?.name === "bgp_prefix") {
+        // In case of a CIDR, remove the /
+        return `${row.value} <a href="${BGP_LOOKING_GLASS_URL}?host=${(row.value).split('/')[0]}" data-bs-toggle="tooltip" data-bs-placement="top" title="${i18n('flow_details.bgp_jump_to_looking_glass')}"><i class="fa-solid fa-route"></i></a>`
     } else {
         const info = row[col.id]
         if (typeof info === "object") {

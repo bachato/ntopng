@@ -3589,6 +3589,7 @@ local lang = {
   ["flow_details"] = {
     ["bgp_client_info"] = "BGP Client Info",
     ["bgp_server_info"] = "BGP Server Info",
+    ["bgp_jump_to_looking_glass"] = "Jump to BGP Looking Glass",
     ["bgp_peer_id"]    = "BGP Peer Id",
     ["bgp_peer_ip"]    = "BGP Peer IP",
     ["bgp_peer_asn"]   = "BGP Peer ASN",
