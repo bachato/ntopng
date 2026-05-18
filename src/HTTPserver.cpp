@@ -853,13 +853,13 @@ const char* HTTPserver::getWisprCaptiveData(char* buf, int buf_size,
 /* ****************************************** */
 
 static char* make_referer(struct mg_connection* conn, char* buf, int bufsize) {
-  snprintf(
-      buf, bufsize, "%s%s%s%s%s",
-      mg_get_header(conn, "Host") ? mg_get_header(conn, "Host") : (char*)"",
-      ntop->getPrefs()->get_http_prefix(), conn->request_info.uri,
-      conn->request_info.query_string ? "?" : "",
-      conn->request_info.query_string ? conn->request_info.query_string : "");
-
+  snprintf(buf, bufsize, // "%s"
+	   "%s%s%s%s",
+	   // mg_get_header(conn, "Host") ? mg_get_header(conn, "Host") : (char*)"",
+	   ntop->getPrefs()->get_http_prefix(), conn->request_info.uri,
+	   conn->request_info.query_string ? "?" : "",
+	   conn->request_info.query_string ? conn->request_info.query_string : "");
+  
   return buf;
 }
 
