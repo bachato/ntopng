@@ -1620,7 +1620,7 @@ function formatNextHop(ip)
    if ntop.isPro() then
       local site_utils = require "site_utils"
       local ret
-      local site = site_utils.mapHostToSite(ip)
+      local site = site_utils.mapHostToSite(ip).name
       local exporter_name = getProbeName(ip, true, true, false)
 
       if(exporter_name ~= ip) then
