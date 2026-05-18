@@ -1607,7 +1607,10 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
         -- Add both Flow devices
         if interface.getFlowDevices then -- Pro Only
             for exporter_ip, _ in pairs(getExporterList()) do
-                local group = nil -- TODO: add the site
+                local group = nil
+                if ntop.isEnterpriseM() then
+                  group = site_utils.mapHostToSite(exporter_ip).name
+                end
                 local probe_name = getProbeName(exporter_ip)
                 full_dev_list[exporter_ip] = {
                     value = exporter_ip,
@@ -1621,7 +1624,10 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
         if interface.getSFlowDevices then -- Pro Only
             for interface, device_list in pairs(interface.getSFlowDevices() or {}) do
                 for probe, _ in pairsByValues(device_list or {}, asc) do
-                    local group = nil -- TODO: Add the site
+                    local group = nil
+                    if ntop.isEnterpriseM() then
+                       group = site_utils.mapHostToSite(exporter_ip).name
+                    end
                     local probe_name = getProbeName(probe)
                     -- local label = format_name_value(probe_name, probe)
                     full_dev_list[probe] = {
@@ -1789,12 +1795,10 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
                             goto maxEntriesFallback
                         end
 
-                        --[[
                         if ntop.isEnterpriseM() then
-                            group = site_utils.getFlowDevSite(probe_ip).name
+                            group = site_utils.mapHostToSite(exporter_ip).name
                             group_cache[probe_ip] = group
                         end
-                        ]]
 
                         for if_index, if_info in pairs(interfaces) do
                             local counters = cached_interfaces.if_counters[tostring(if_index)]
@@ -1841,12 +1845,10 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
                     if ntop.isEnterpriseM() then
                         group = group_cache[exporter_ip] -- use cache first
                         
-                        --[[
                         if (group == nil) then
-                            group = site_utils.getFlowDevSite(exporter_ip).name
+                            group = site_utils.mapHostToSite(exporter_ip).name
                             group_cache[exporter_ip] = group
                         end
-                        ]]
                     end
 
                     for _, interfaces_table in pairs(interfaces or {}) do

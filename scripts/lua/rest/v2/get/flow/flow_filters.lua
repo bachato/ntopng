@@ -600,7 +600,7 @@ if ntop.isPro() and interface.isPacketInterface() == false then
       for _, device_list in pairs(devips or {}) do
          for dev_ip, dev_resolved_name in pairsByValues(device_list, asc) do
             local dev_name = dev_ip
-            local group = nil -- TODO: add the site
+            local group = site_utils.mapHostToSite(dev_ip).name
             if not isEmptyString(dev_resolved_name) and dev_resolved_name ~= dev_name then
                dev_name = dev_resolved_name
             end

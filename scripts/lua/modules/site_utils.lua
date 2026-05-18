@@ -316,5 +316,12 @@ end
 
 -- ##############################################
 
+function site_utils.mapHostToSite(ip)
+   -- TODO: Implement this function, given an IP returns the site associated to it
+   return site_utils.get_default_site()
+end
+
+-- ##############################################
+
 -- Export the module for use in other Lua files
 return site_utils

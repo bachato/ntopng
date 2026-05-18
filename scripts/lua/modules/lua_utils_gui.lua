@@ -1591,10 +1591,16 @@ function formatHTMLaTag(real_value, name, url)
 end
 
 function formatInterfaceIP(ip, href)
+   local site_utils = require "site_utils"
    local ret
+   local site = site_utils.mapHostToSite(ip).name
    local exporter_name = getProbeName(ip, true, true, false)
 
    ret = "<a href=\"" .. ntop.getHttpPrefix() .. href .. ip .. "\">" .. exporter_name
+   
+   if(site ~= nil) then
+      ret = ret .. " (".. site ..")"
+   end
 
    if(exporter_name ~= ip) then ret = ret .. '</A> [<A HREF="' .. ntop.getHttpPrefix() ..'/lua/host_details.lua?host='.. ip .. '">'..ip.."</A>]" end
    ret = ret .. "</a>"
@@ -1612,8 +1618,9 @@ end
 
 function formatNextHop(ip)
    if ntop.isPro() then
+      local site_utils = require "site_utils"
       local ret
-      local site = nil
+      local site = site_utils.mapHostToSite(ip)
       local exporter_name = getProbeName(ip, true, true, false)
 
       if(exporter_name ~= ip) then
