@@ -279,7 +279,8 @@ void Host::initialize(Mac* _mac, int32_t _iface_idx, u_int16_t _vlanId,
   name_reset_requested = 0, prefs_loaded = 0;
   host_services_bitmap = 0, disabled_alerts_tstamp = 0, num_remote_access = 0,
   num_incomplete_flows = 0, deferred_init = 0;
-  tags_bitmap = 0;
+  user_tags_bitmap = 0;
+  computed_tags_bitmap = 0;
 
   num_resolve_attempts = 0, nextResolveAttempt = 0,
   num_active_flows_as_client = 0, num_active_flows_as_server = 0,
@@ -1160,46 +1161,64 @@ char* Host::get_host_label(char* const buf, ssize_t buf_len) {
 
 /* ***************************************** */
 
-u_int64_t Host::getTags() {
-  u_int64_t bm = tags_bitmap;
+/* Return tags
+ * Set transferrable_only = true to avoid transferring host-only tags to flows */
+u_int64_t Host::getTags(bool transferrable_only) {
   Prefs* p = ntop->getPrefs();
   u_int16_t vlan = vlan_id;
+  u_int64_t bm = 0;
 
-  /* Network Configuration (admin-configured server lists) */
-  if (p->isDNSServer(&ip, vlan))  bm |= ((u_int64_t)1 << HOST_TAG_DNS_SERVER);
-  if (p->isNTPServer(&ip, vlan))  bm |= ((u_int64_t)1 << HOST_TAG_NTP_SERVER);
-  if (p->isDHCPServer(&ip, vlan)) bm |= ((u_int64_t)1 << HOST_TAG_DHCP_SERVER);
-  if (p->isSMTPServer(&ip, vlan)) bm |= ((u_int64_t)1 << HOST_TAG_SMTP_SERVER);
-  if (p->isGateway(&ip, vlan))    bm |= ((u_int64_t)1 << HOST_TAG_NETWORK_GATEWAY);
+  /* User-defined tags */
+  bm = user_tags_bitmap;
 
-  /* Traffic-observed services (auto-detected from flows) */
-  if (providesService(HOST_SERVICE_DNS))      bm |= ((u_int64_t)1 << HOST_TAG_DNS_SERVER);
-  if (providesService(HOST_SERVICE_NTP))      bm |= ((u_int64_t)1 << HOST_TAG_NTP_SERVER);
-  if (providesService(HOST_SERVICE_DHCP))     bm |= ((u_int64_t)1 << HOST_TAG_DHCP_SERVER);
-  if (providesService(HOST_SERVICE_SMTP))     bm |= ((u_int64_t)1 << HOST_TAG_SMTP_SERVER);
-  if (providesService(HOST_SERVICE_IMAP))     bm |= ((u_int64_t)1 << HOST_TAG_IMAP_SERVER);
-  if (providesService(HOST_SERVICE_POP))      bm |= ((u_int64_t)1 << HOST_TAG_POP_SERVER);
-  if (providesService(HOST_SERVICE_HTTP))     bm |= ((u_int64_t)1 << HOST_TAG_HTTP_SERVER);
-  if (providesService(HOST_SERVICE_SSH))      bm |= ((u_int64_t)1 << HOST_TAG_SSH_SERVER);
-  if (providesService(HOST_SERVICE_RDP))      bm |= ((u_int64_t)1 << HOST_TAG_RDP_SERVER);
-  if (providesService(HOST_SERVICE_MODBUS))   bm |= ((u_int64_t)1 << HOST_TAG_MODBUS_SERVER);
-  if (providesService(HOST_SERVICE_S7COMM))   bm |= ((u_int64_t)1 << HOST_TAG_S7COMM_SERVER);
-  if (providesService(HOST_SERVICE_PROFINET)) bm |= ((u_int64_t)1 << HOST_TAG_PROFINET_SERVER);
+  if (!transferrable_only) {
+    /* Network Configuration (admin-configured server lists) */
+    if (p->isDNSServer(&ip, vlan))  bm |= ((u_int64_t)1 << HOST_TAG_DNS_SERVER);
+    if (p->isNTPServer(&ip, vlan))  bm |= ((u_int64_t)1 << HOST_TAG_NTP_SERVER);
+    if (p->isDHCPServer(&ip, vlan)) bm |= ((u_int64_t)1 << HOST_TAG_DHCP_SERVER);
+    if (p->isSMTPServer(&ip, vlan)) bm |= ((u_int64_t)1 << HOST_TAG_SMTP_SERVER);
+    if (p->isGateway(&ip, vlan))    bm |= ((u_int64_t)1 << HOST_TAG_NETWORK_GATEWAY);
+
+    /* Traffic-observed services (auto-detected from flows) */
+    if (providesService(HOST_SERVICE_DNS))      bm |= ((u_int64_t)1 << HOST_TAG_DNS_SERVER);
+    if (providesService(HOST_SERVICE_NTP))      bm |= ((u_int64_t)1 << HOST_TAG_NTP_SERVER);
+    if (providesService(HOST_SERVICE_DHCP))     bm |= ((u_int64_t)1 << HOST_TAG_DHCP_SERVER);
+    if (providesService(HOST_SERVICE_SMTP))     bm |= ((u_int64_t)1 << HOST_TAG_SMTP_SERVER);
+    if (providesService(HOST_SERVICE_IMAP))     bm |= ((u_int64_t)1 << HOST_TAG_IMAP_SERVER);
+    if (providesService(HOST_SERVICE_POP))      bm |= ((u_int64_t)1 << HOST_TAG_POP_SERVER);
+    if (providesService(HOST_SERVICE_HTTP))     bm |= ((u_int64_t)1 << HOST_TAG_HTTP_SERVER);
+    if (providesService(HOST_SERVICE_SSH))      bm |= ((u_int64_t)1 << HOST_TAG_SSH_SERVER);
+    if (providesService(HOST_SERVICE_RDP))      bm |= ((u_int64_t)1 << HOST_TAG_RDP_SERVER);
+    if (providesService(HOST_SERVICE_MODBUS))   bm |= ((u_int64_t)1 << HOST_TAG_MODBUS_SERVER);
+    if (providesService(HOST_SERVICE_S7COMM))   bm |= ((u_int64_t)1 << HOST_TAG_S7COMM_SERVER);
+    if (providesService(HOST_SERVICE_PROFINET)) bm |= ((u_int64_t)1 << HOST_TAG_PROFINET_SERVER);
+
+    bm |= computed_tags_bitmap;
+  }
 
   return bm;
 }
 
 /* ***************************************** */
 
-void Host::setTags(u_int64_t bitmap) {
-  tags_bitmap = bitmap;
-  iface->setHostTags(this, bitmap);
+void Host::setUserTags(u_int64_t bitmap) {
+  /* Bits 0-31 are ntop-reserved (computed at runtime) and must never be
+   * persisted into user_tags_bitmap, which is stored in Redis. */
+  bitmap &= HOST_USER_TAGS_MASK;
+  user_tags_bitmap = bitmap;
+  iface->setPersistentHostTags(this, bitmap);
+}
+
+/* *************************************** */
+
+void Host::addTag(HostTagId tag_id) {
+  computed_tags_bitmap |= ((u_int64_t)1 << tag_id);
 }
 
 /* ***************************************** */
 
 void Host::lua_get_tags(lua_State* vm) const {
-  lua_push_uint64_table_entry(vm, "tags", tags_bitmap);
+  lua_push_uint64_table_entry(vm, "tags", user_tags_bitmap);
 }
 
 /* ***************************************** */

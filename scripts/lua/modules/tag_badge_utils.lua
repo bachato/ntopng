@@ -23,7 +23,8 @@ tag_badge_utils.builtin_tags = {
     [9]  = { i18n = "asset_details.rdp_server"      }, -- HOST_TAG_RDP_SERVER
     [10] = { i18n = "asset_details.modbus_server"   }, -- HOST_TAG_MODBUS_SERVER
     [11] = { i18n = "asset_details.s7comm_server"   }, -- HOST_TAG_S7COMM_SERVER
-    [12] = { i18n = "asset_details.profinet_server" }, -- HOST_TAG_PROFINET_SERVER
+    [12] = { i18n = "asset_details.profinet_server"    }, -- HOST_TAG_PROFINET_SERVER
+    [13] = { i18n = "asset_details.non_pqc_compliant"  }, -- HOST_TAG_NON_PQC_COMPLIANT
 }
 
 -- ##############################################

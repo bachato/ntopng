@@ -5407,7 +5407,7 @@ static int ntop_interface_get_host_tags(lua_State* vm) {
     char key_buf[CONST_MAX_LEN_REDIS_KEY];
     snprintf(key_buf, sizeof(key_buf), HOST_SERIALIZED_SHORT_KEY,
              iface->get_id(), host_ip, vlan_id);
-    bitmap = iface->getHostTags(key_buf);
+    bitmap = iface->getPersistentHostTags(key_buf);
   }
 
   lua_pushinteger(vm, (lua_Integer)bitmap);
@@ -5442,7 +5442,7 @@ static int ntop_interface_get_user_defined_host_tags(lua_State* vm) {
     char key_buf[CONST_MAX_LEN_REDIS_KEY];
     snprintf(key_buf, sizeof(key_buf), HOST_SERIALIZED_SHORT_KEY,
              iface->get_id(), host_ip, vlan_id);
-    bitmap = iface->getHostTags(key_buf) & HOST_USER_TAGS_MASK;
+    bitmap = iface->getPersistentHostTags(key_buf) & HOST_USER_TAGS_MASK;
   }
 
   lua_pushinteger(vm, (lua_Integer)bitmap);
@@ -5475,12 +5475,12 @@ static int ntop_interface_set_host_tags(lua_State* vm) {
                                    getLuaVMUservalue(vm, observationPointId));
 
   if (host) { /* Host online - set to the host (host will update redis) */
-    host->setTags(bitmap);
+    host->setUserTags(bitmap);
   } else { /* Host offline - set on redis */
     char key_buf[CONST_MAX_LEN_REDIS_KEY];
     snprintf(key_buf, sizeof(key_buf), HOST_SERIALIZED_SHORT_KEY,
              iface->get_id(), host_ip, vlan_id);
-    iface->setHostTags(key_buf, bitmap);
+    iface->setPersistentHostTags(key_buf, bitmap);
   }
 
   lua_pushnil(vm);

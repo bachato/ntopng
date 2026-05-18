@@ -489,11 +489,11 @@ class NetworkInterface : public NetworkInterfaceAlertableEntity {
     ip_reassignment_alerts_enabled = status;
   };
   inline AddressTree* getInterfaceNetworks() { return (&interface_networks); };
-  u_int64_t getHostTags(Host* host);
-  void setHostTags(Host* host, u_int64_t bitmap);
+  u_int64_t getPersistentHostTags(Host* host);
+  void setPersistentHostTags(Host* host, u_int64_t bitmap);
   /* Key-based overload used when Host is not available (e.g. inactive hosts from Lua) */
-  inline u_int64_t getHostTags(const char* key) { return host_tags.getTags(key); };
-  inline void setHostTags(const char* key, u_int64_t bitmap) { host_tags.setTags(key, bitmap); };
+  inline u_int64_t getPersistentHostTags(const char* key) { return host_tags.getTags(key); };
+  inline void setPersistentHostTags(const char* key, u_int64_t bitmap) { host_tags.setTags(key, bitmap); };
   virtual void startPacketPolling();
   virtual void startFlowDumping();
   virtual bool isLoading() { return false; };

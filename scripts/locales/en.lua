@@ -484,6 +484,7 @@ local lang = {
     ["s7comm_servers"] = "S7Comm Servers",
     ["profinet_server"] = "Profinet Server",
     ["profinet_servers"] = "Profinet Servers",
+    ["non_pqc_compliant"] = "Non-PQC Compliant",
     ["devices_distribution"] = "Assets By Device Type",
     ["delete_asset"] = "Are you sure to delete the selected host from Assets? This action cannot be undone.",
     ["delete_asset_title"] = "Delete Assets",

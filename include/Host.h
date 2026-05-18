@@ -82,7 +82,8 @@ class Host : public GenericHashEntry,
   /* END Host data */
 
   /* 64-bit tag bitmap: bits 0-31 reserved for ntop, bits 32-63 user-defined */
-  u_int64_t tags_bitmap;
+  u_int64_t user_tags_bitmap; /* user-defined */
+  u_int64_t computed_tags_bitmap; /* set programmatically */
 
   /* Counters used by host alerts */
   AttackVictimCounter flow_flood, icmp_flood, dns_flood, snmp_flood, rst_scan;
@@ -528,9 +529,12 @@ class Host : public GenericHashEntry,
   void lua_get_listening_ports(lua_State* vm);
   void lua_get_tags(lua_State* vm) const;
 
-  u_int64_t getTags();
-  inline u_int64_t getUserTags() const { return tags_bitmap /* & HOST_USER_TAGS_MASK */; }
-  void setTags(u_int64_t bitmap);
+  void addTag(HostTagId tag_id);
+
+  void setUserTags(u_int64_t bitmap);
+  inline u_int64_t getUserTags() const { return user_tags_bitmap /* & HOST_USER_TAGS_MASK */; }
+
+  u_int64_t getTags(bool transferrable_only = false);
 
   void resolveHostName();
   char* get_host_label(char* const buf, ssize_t buf_size);

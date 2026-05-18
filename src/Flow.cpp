@@ -3704,8 +3704,8 @@ u_int64_t Flow::getTags() {
   Host *srv = getViewSharedServer();
   u_int64_t bm = 0;
 
-  if (cli) bm |= cli->getTags();
-  if (srv) bm |= srv->getTags();
+  if (cli) bm |= cli->getTags(true /* transferrable_only */);
+  if (srv) bm |= srv->getTags(true /* transferrable_only */);
 
   return bm;
 }
@@ -7794,7 +7794,7 @@ void Flow::lua_get_info(lua_State* vm, bool client) const {
       lua_push_uint64_table_entry(vm, client ? "cli.pool_id" : "srv.pool_id",
                                   h->get_host_pool());
       lua_push_uint64_table_entry(vm, client ? "cli.tags" : "srv.tags",
-                                  h->getTags());
+                                  h->getTags(true /* transferrable_only */));
       lua_push_uint64_table_entry(vm, client ? "cli.asn" : "srv.asn",
                                   h->get_asn());
       lua_push_str_table_entry(vm, client ? "cli.country" : "srv.country",
@@ -9163,6 +9163,30 @@ void Flow::setJSONRiskInfo(char* r) {
 
   if (riskInfo) free(riskInfo);
   riskInfo = strdup(r);
+
+  /* Tag hosts with Non-PQC Compliant when the risk is present */
+  if (hasRisk(NDPI_NON_PQC)) {
+    json_object *o, *obj;
+    enum json_tokener_error jerr = json_tokener_success;
+    char non_pqc_key[8];
+
+    snprintf(non_pqc_key, sizeof(non_pqc_key), "%u", (unsigned) NDPI_NON_PQC);
+
+    if ((o = json_tokener_parse_verbose(r, &jerr)) != NULL) {
+      if (json_object_object_get_ex(o, non_pqc_key, &obj)) {
+        const char* info = json_object_get_string(obj);
+
+        if (info) {
+          if (strstr(info, "client") && cli_host)
+            cli_host->addTag(HOST_TAG_NON_PQC_COMPLIANT);
+          if (strstr(info, "server") && srv_host)
+            srv_host->addTag(HOST_TAG_NON_PQC_COMPLIANT);
+        }
+      }
+
+      json_object_put(o);
+    }
+  }
 }
 
 /* *************************************** */

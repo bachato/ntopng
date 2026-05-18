@@ -9747,7 +9747,7 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
 
 /* **************************************** */
 
-u_int64_t NetworkInterface::getHostTags(Host* host) {
+u_int64_t NetworkInterface::getPersistentHostTags(Host* host) {
   Mac* mac = host->getMac();
   if (mac) {
     u_int64_t v = host_tags.getTags(mac->get_mac());
@@ -9758,7 +9758,7 @@ u_int64_t NetworkInterface::getHostTags(Host* host) {
 
 /* **************************************** */
 
-void NetworkInterface::setHostTags(Host* host, u_int64_t bitmap) {
+void NetworkInterface::setPersistentHostTags(Host* host, u_int64_t bitmap) {
   char key_buf[CONST_MAX_LEN_REDIS_KEY];
   char* key = host->getSerializationKey(key_buf, sizeof(key_buf), true);
   host_tags.setTags(key, bitmap);
