@@ -191,6 +191,31 @@ static int ntop_get_interface_id(lua_State* vm) {
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
+
+/* ****************************************** */
+
+/* @brief Returns the numeric network ID of numeric IP address */
+static int ntop_get_ip_network_id(lua_State* vm) {
+  NetworkInterface* iface;
+  char *ip_addr;
+  
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+  else
+    ip_addr = (char*)lua_tostring(vm, 1);
+
+  if ((ip_addr == NULL)
+      || ((iface = getCurrentInterface(vm)) == NULL)) {
+    lua_pushnil(vm);
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+  }
+
+  lua_pushinteger(vm, iface->getNetworkId(ip_addr));
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
+}
+
 /* ****************************************** */
 
 /* @brief Returns the ID of the parent (master) interface for a sub-interface.  Lua: interface.getMasterInterfaceId() → integer */
@@ -6585,6 +6610,7 @@ static luaL_Reg _ntop_interface_reg[] = {
     {"getGroupedFlows", ntop_get_interface_get_grouped_flows},
     {"getFlowsStats", ntop_get_interface_flows_stats},
     {"getFlowKey", ntop_get_interface_flow_key},
+    {"getIPNetworkId", ntop_get_ip_network_id},
     {"getScore", ntop_get_interface_score},
     {"findFlowByKeyAndHashId", ntop_get_interface_find_flow_by_key_and_hash_id},
     {"findFlowByTuple", ntop_get_interface_find_flow_by_tuple},

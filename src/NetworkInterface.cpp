@@ -8053,8 +8053,9 @@ void NetworkInterface::getNetworkStats(lua_State* vm, u_int32_t network_id,
                                        bool fullStats) const {
   NetworkStats* network_stats;
 
-  if ((network_stats = getNetworkStats(network_id)) &&
-      network_stats->trafficSeen() && network_stats->match(allowed_nets)) {
+  if ((network_stats = getNetworkStats(network_id))
+      // && network_stats->trafficSeen()
+      && network_stats->match(allowed_nets)) {
     lua_newtable(vm);
 
     network_stats->lua(vm, diff, fullStats);
@@ -14564,4 +14565,18 @@ void NetworkInterface::incRoleBytes(u_int64_t bytes, SNMPInterfaceRole role) {
       roleStats.other_bytes += bytes;
       break;
   }
+}
+
+/* **************************************************** */
+
+int32_t NetworkInterface::getNetworkId(char *ip_address) {
+  IpAddress ip;
+  int32_t local_network_id;
+  
+  ip.set(ip_address);
+  ip.isLocalHost(&local_network_id);
+
+  // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s = %d", ip_address, local_network_id);
+  
+  return(local_network_id < 0 ? 0 : local_network_id);
 }

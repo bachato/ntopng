@@ -1,3 +1,4 @@
+--
 -- (C) 2013-26 - ntop.org
 --
 local dirs = ntop.getDirs()
@@ -17,6 +18,7 @@ local auth = require "auth"
 local ts_utils = require "ts_utils_core"
 local vs_utils = require "vs_utils"
 local cve_utils = require "cve_utils"
+local site_utils = require "site_utils"
 
 local is_pro = ntop.isPro()
 local random_csrf = ntop.getRandomCSRFValue()
@@ -715,8 +717,10 @@ else
                network_name = " (" .. network_name .. ")"
             end
 
+	    local site = site_utils.getNetworkIdSite(host["local_network_id"])
+	    local site_name = "(".. site.name .. ")"
             print(" [&nbsp;<A HREF='" .. http_prefix .. "/lua/network_details.lua?network=" .. host["local_network_id"] ..
-                     "&page=historical'>" .. host["local_network_name"] .. "</A> " .. network_name .. " &nbsp;]")
+		  "&page=historical'>" .. host["local_network_name"] .. "</A> " .. network_name .. site_name .. " &nbsp;]")
          end
 
          if ((host["city"] ~= nil) and (host["city"] ~= "")) then
