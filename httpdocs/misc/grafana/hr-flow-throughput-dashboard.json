@@ -128,7 +128,7 @@
           "refId": "A"
         }
       ],
-      "title": "HR Flow Throughput — ${src_ip} → ${dst_ip}:${dst_port}",
+      "title": "Service Flow Throughput — ${src_ip} → ${dst_ip}:${dst_port}",
       "transformations": [
         {
           "id": "partitionByValues",
@@ -358,7 +358,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "ntopng HR Flow Throughput",
-  "uid": "ntopng-hr-flow-throughput",
+  "title": "ntopng High-Resolution Charts",
+  "uid": "ntopng-hr-charts",
   "version": 1
 }
