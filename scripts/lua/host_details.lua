@@ -717,7 +717,7 @@ else
                network_name = " (" .. network_name .. ")"
             end
 
-	    local site = site_utils.getNetworkIdSite(host["local_network_id"])
+	    local site = site_utils.getNetworkSite(host["local_network_id"])
 	    local site_name = "(".. site.name .. ")"
             print(" [&nbsp;<A HREF='" .. http_prefix .. "/lua/network_details.lua?network=" .. host["local_network_id"] ..
 		  "&page=historical'>" .. host["local_network_name"] .. "</A> " .. network_name .. site_name .. " &nbsp;]")

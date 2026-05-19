@@ -312,26 +312,8 @@ end
 -- ##############################################
 
 function site_utils.mapHostToSite(ip)
-	-- Given an IP returns the site associated to it
 	local network_id = interface.getIPNetworkId(ip)
-
-	-- tprint(ip .. " = " .. network_id .. " (network id)")
-
-	local site_id = site_utils.getNetworkIdSite(network_id)
-
-	if site_id ~= nil then
-		local res = site_utils.getSites()
-
-		site_id = tonumber(site_id)
-
-		for _, rec in pairs(res) do
-			if tonumber(rec.id) == site_id then
-				return rec
-			end
-		end
-	end
-
-	return site_utils.get_default_site() -- default
+	return site_utils.getNetworkSite(network_id)
 end
 
 -- ##############################################
