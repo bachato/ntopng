@@ -123,12 +123,113 @@
             "type": "grafana-clickhouse-datasource",
             "uid": "${DS_CLICKHOUSE}"
           },
-          "rawSql": "SELECT * FROM (\nSELECT\n    toDateTime(intDiv(toUnixTimestamp(toStartOfMinute(FIRST_SEEN)) + toInt64(slot_idx - 1) * 15, greatest($__interval_s, 15)) * greatest($__interval_s, 15)) AS time,\n    'Src2Dst' AS metric,\n    sum(arrayElement(HR_SRC2DST_BYTES, slot_idx)) * 8 / greatest($__interval_s, 15) AS bps\nFROM ${db}.flows\nARRAY JOIN arrayEnumerate(arrayResize(HR_SRC2DST_BYTES, greatest(length(HR_SRC2DST_BYTES), length(HR_DST2SRC_BYTES)), toUInt64(0))) AS slot_idx\nWHERE IPV4_SRC_ADDR = IPv4StringToNum('${src_ip}')\n  AND IPV4_DST_ADDR = IPv4StringToNum('${dst_ip}')\n  AND IP_DST_PORT = toUInt16('${dst_port}')\n  AND $__timeFilter(FIRST_SEEN)\n  AND greatest(length(HR_SRC2DST_BYTES), length(HR_DST2SRC_BYTES)) > 0\nGROUP BY time\nUNION ALL\nSELECT\n    toDateTime(intDiv(toUnixTimestamp(toStartOfMinute(FIRST_SEEN)) + toInt64(slot_idx - 1) * 15, greatest($__interval_s, 15)) * greatest($__interval_s, 15)) AS time,\n    'Dst2Src' AS metric,\n    sum(arrayElement(HR_DST2SRC_BYTES, slot_idx)) * 8 / greatest($__interval_s, 15) AS bps\nFROM ${db}.flows\nARRAY JOIN arrayEnumerate(arrayResize(HR_SRC2DST_BYTES, greatest(length(HR_SRC2DST_BYTES), length(HR_DST2SRC_BYTES)), toUInt64(0))) AS slot_idx\nWHERE IPV4_SRC_ADDR = IPv4StringToNum('${src_ip}')\n  AND IPV4_DST_ADDR = IPv4StringToNum('${dst_ip}')\n  AND IP_DST_PORT = toUInt16('${dst_port}')\n  AND $__timeFilter(FIRST_SEEN)\n  AND greatest(length(HR_SRC2DST_BYTES), length(HR_DST2SRC_BYTES)) > 0\nGROUP BY time\n) ORDER BY time, metric",
+          "rawSql": "SELECT * FROM (\nSELECT\n    toDateTime(intDiv(toUnixTimestamp(toStartOfMinute(FIRST_SEEN)) + toInt64(slot_idx - 1) * 15, greatest($__interval_s, 15)) * greatest($__interval_s, 15)) AS time,\n    'Src2Dst' AS metric,\n    sum(arrayElement(HR_SRC2DST_BYTES, slot_idx)) * 8 / greatest($__interval_s, 15) AS bps\nFROM ${db}.flows\nARRAY JOIN arrayEnumerate(arrayResize(HR_SRC2DST_BYTES, greatest(length(HR_SRC2DST_BYTES), length(HR_DST2SRC_BYTES)), toUInt64(0))) AS slot_idx\nWHERE (notEmpty('${src_ip}') = 0 OR IPV4_SRC_ADDR = IPv4StringToNum(if(notEmpty('${src_ip}'), '${src_ip}', '0.0.0.1')))\n  AND (notEmpty('${dst_ip}') = 0 OR IPV4_DST_ADDR = IPv4StringToNum(if(notEmpty('${dst_ip}'), '${dst_ip}', '0.0.0.1')))\n  AND (notEmpty('${dst_port}') = 0 OR IP_DST_PORT = toUInt16(if(notEmpty('${dst_port}'), '${dst_port}', '0')))\n  AND $__timeFilter(FIRST_SEEN)\n  AND greatest(length(HR_SRC2DST_BYTES), length(HR_DST2SRC_BYTES)) > 0\nGROUP BY time\nUNION ALL\nSELECT\n    toDateTime(intDiv(toUnixTimestamp(toStartOfMinute(FIRST_SEEN)) + toInt64(slot_idx - 1) * 15, greatest($__interval_s, 15)) * greatest($__interval_s, 15)) AS time,\n    'Dst2Src' AS metric,\n    sum(arrayElement(HR_DST2SRC_BYTES, slot_idx)) * 8 / greatest($__interval_s, 15) AS bps\nFROM ${db}.flows\nARRAY JOIN arrayEnumerate(arrayResize(HR_SRC2DST_BYTES, greatest(length(HR_SRC2DST_BYTES), length(HR_DST2SRC_BYTES)), toUInt64(0))) AS slot_idx\nWHERE (notEmpty('${src_ip}') = 0 OR IPV4_SRC_ADDR = IPv4StringToNum(if(notEmpty('${src_ip}'), '${src_ip}', '0.0.0.1')))\n  AND (notEmpty('${dst_ip}') = 0 OR IPV4_DST_ADDR = IPv4StringToNum(if(notEmpty('${dst_ip}'), '${dst_ip}', '0.0.0.1')))\n  AND (notEmpty('${dst_port}') = 0 OR IP_DST_PORT = toUInt16(if(notEmpty('${dst_port}'), '${dst_port}', '0')))\n  AND $__timeFilter(FIRST_SEEN)\n  AND greatest(length(HR_SRC2DST_BYTES), length(HR_DST2SRC_BYTES)) > 0\nGROUP BY time\n) ORDER BY time, metric",
           "format": 0,
           "refId": "A"
         }
       ],
       "title": "HR Flow Throughput — ${src_ip} → ${dst_ip}:${dst_port}",
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "metric"
+            ]
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "${DS_CLICKHOUSE}"
+      },
+      "description": "Total bidirectional throughput in bits per second grouped by application protocol name, across all flows and all hosts/ports in the selected time range. Protocol names are resolved via the l7_protocols lookup table populated at ntopng startup. Each point is a 15-second HR slot; both directions are summed per protocol.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "${DS_CLICKHOUSE}"
+          },
+          "rawSql": "SELECT\n    toDateTime(intDiv(toUnixTimestamp(toStartOfMinute(FIRST_SEEN)) + toInt64(slot_idx - 1) * 15, greatest($__interval_s, 15)) * greatest($__interval_s, 15)) AS time,\n    if(p.PROTO_NAME != '', p.PROTO_NAME, toString(L7_PROTO_MASTER)) AS metric,\n    sum(arrayElement(HR_SRC2DST_BYTES, slot_idx) + arrayElement(HR_DST2SRC_BYTES, slot_idx)) * 8 / greatest($__interval_s, 15) AS bps\nFROM ${db}.flows\nLEFT JOIN ${db}.l7_protocols AS p ON p.PROTO_ID = L7_PROTO_MASTER\nARRAY JOIN arrayEnumerate(arrayResize(HR_SRC2DST_BYTES, greatest(length(HR_SRC2DST_BYTES), length(HR_DST2SRC_BYTES)), toUInt64(0))) AS slot_idx\nWHERE $__timeFilter(FIRST_SEEN)\n  AND greatest(length(HR_SRC2DST_BYTES), length(HR_DST2SRC_BYTES)) > 0\nGROUP BY time, metric\nORDER BY time, metric",
+          "format": 0,
+          "refId": "A"
+        }
+      ],
+      "title": "Application Protocol Throughput (All Traffic)",
       "transformations": [
         {
           "id": "partitionByValues",
