@@ -874,6 +874,19 @@ COMMENT 'Mapping of ntopng alert IDs and entity types to MITRE ATT&CK tactics, t
 
 @
 
+/* L7 PROTOCOLS */
+
+CREATE TABLE IF NOT EXISTS `l7_protocols` ON CLUSTER '$CLUSTER' (
+`PROTO_ID` UInt16 COMMENT 'nDPI application protocol identifier, matches L7_PROTO and L7_PROTO_MASTER in the flows table',
+`PROTO_NAME` String COMMENT 'Human-readable nDPI protocol name (e.g. TLS, HTTP, DNS)',
+`CATEGORY_ID` UInt16 COMMENT 'nDPI protocol category identifier',
+`CATEGORY_NAME` String COMMENT 'Human-readable nDPI category name (e.g. Web, Streaming, VPN)',
+`BREED` String COMMENT 'nDPI protocol breed indicating trustworthiness (e.g. Safe, Unsafe, Fun, Unrated)'
+) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/{cluster}/tables/{database}/{table}', '{replica}') PRIMARY KEY (`PROTO_ID`) ORDER BY (`PROTO_ID`)
+COMMENT 'Static lookup table mapping nDPI protocol IDs to their human-readable names, categories, and breeds. Populated at ntopng startup and used to enrich flow queries with application-layer protocol labels.';
+
+@
+
 /* ASSET */
 
 CREATE TABLE IF NOT EXISTS `assets` ON CLUSTER '$CLUSTER' (

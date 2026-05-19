@@ -382,6 +382,10 @@ ntop.delCache("ntopng.limits.exporters")
 local mitre_utils = require "mitre_utils"
 local mitre_table = mitre_utils.insertDBMitreInfo()
 
+-- initialize the nDPI protocol lookup table used by ClickHouse / Grafana queries
+local ndpi_utils = require "ndpi_utils"
+ndpi_utils.insertDBProtocols()
+
 ntop.reloadServersConfiguration()
 ntop.reloadASNConfiguration()
 ts_utils.runFirstSetup()

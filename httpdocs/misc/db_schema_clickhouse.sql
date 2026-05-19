@@ -851,8 +851,6 @@ COMMENT 'Summary reports of completed vulnerability scans. Each row represents o
 
 @
 
-/* MITRE */
-
 CREATE TABLE IF NOT EXISTS `mitre_table_info` (
 `ALERT_ID` UInt16 COMMENT 'ntopng alert type ID that maps to this MITRE entry',
 `ENTITY_ID` UInt16 COMMENT 'ntopng entity type ID (e.g. 1=host, 4=flow) for this mapping',
@@ -865,7 +863,16 @@ COMMENT 'Mapping of ntopng alert IDs and entity types to MITRE ATT&CK tactics, t
 
 @
 
-/* ASSET */
+CREATE TABLE IF NOT EXISTS `l7_protocols` (
+`PROTO_ID` UInt16 COMMENT 'nDPI application protocol identifier, matches L7_PROTO and L7_PROTO_MASTER in the flows table',
+`PROTO_NAME` String COMMENT 'Human-readable nDPI protocol name (e.g. TLS, HTTP, DNS)',
+`CATEGORY_ID` UInt16 COMMENT 'nDPI protocol category identifier',
+`CATEGORY_NAME` String COMMENT 'Human-readable nDPI category name (e.g. Web, Streaming, VPN)',
+`BREED` String COMMENT 'nDPI protocol breed indicating trustworthiness (e.g. Safe, Unsafe, Fun, Unrated)'
+) ENGINE = ReplacingMergeTree() PRIMARY KEY (PROTO_ID) ORDER BY (PROTO_ID)
+COMMENT 'Lookup table mapping nDPI protocol IDs to their human-readable names, categories, and breeds. Populated at ntopng startup and used to enrich flow queries with application-layer protocol labels.';
+
+@
 
 CREATE TABLE IF NOT EXISTS `assets` (
 `type` String COMMENT 'Asset category (e.g. host, mac, network_device)',
@@ -893,8 +900,8 @@ COMMENT 'Network asset inventory: one row per discovered or imported asset (host
 ALTER TABLE assets ADD COLUMN IF NOT EXISTS `os_type` String;
 @
 ALTER TABLE assets ADD COLUMN IF NOT EXISTS `model` String;
-@
 
+@
 
 /* VIEWS */
 
