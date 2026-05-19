@@ -76,7 +76,7 @@ const modal_id = ref(null);                    // Reference to modal component
 
 // Form field bindings
 const network_alias = ref("");                  // Network name
-const network_cidr = ref("")
+const network_id = ref("")
 const selectedSite = ref([])
 
 // Form state management
@@ -156,7 +156,7 @@ const handleSubmit = () => {
 
     // Prepare form data object
     const formData = {
-        network_cidr: network_cidr.value,
+        network_id: network_id.value,
         network_alias: network_alias.value,
         site_id: selectedSite.value.id
     };
@@ -173,13 +173,13 @@ const open = (item = null) => {
     // Destructure item with defaults (handles both edit and add modes)
     const {
         network_alias: edited_network_alias = "",
-        network_cidr: edited_network_cidr,
+        network_id: edited_network_id,
         site_id: edited_site_id = 0, // default site is 0
     } = item || {}
 
     // Populate form fields
     network_alias.value = edited_network_alias;
-    network_cidr.value = edited_network_cidr;
+    network_id.value = edited_network_id;
     selectedSite.value = _sitesList.value.find(el => el.id === edited_site_id);
 
     // Reset state

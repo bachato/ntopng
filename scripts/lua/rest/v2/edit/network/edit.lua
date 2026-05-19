@@ -11,17 +11,18 @@ require("http_lint")
 local rest_utils = require("rest_utils")
 local site_utils = require("site_utils")
 
-local network_cidr = _POST["network_cidr"]
+local network_id = _POST["network"]
 local network_alias = _POST["custom_name"]
 local network_site = _POST["site_id"]
 
 if not isEmptyString(network_site) then
 	local site_utils = require("site_utils")
-	site_utils.mapNetworkToSite(network_cidr, network_site)
+	site_utils.mapNetworkToSite(network_id, network_site)
 end
 
 if not isEmptyString(network_alias) then
-   setLocalNetworkAlias(network_cidr, network_alias)
+	local network_cidr = ntop.getNetworkNameById(tonumber(network_id))
+	setLocalNetworkAlias(network_cidr, network_alias)
 end
 
 rest_utils.answer(rest_utils.consts.success.ok)

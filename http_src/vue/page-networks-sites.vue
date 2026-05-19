@@ -304,7 +304,7 @@ const click_button_edit_network = (event) => {
 
     // Open the Edit modal with pre-filled data
     networkModal.value.open({
-        network_cidr: row.networkCIDR,
+        network_id: row.networkId,
         network_alias: row.networkNameOnly,
         site_id: row.site.id
     });
@@ -492,7 +492,7 @@ const handleEditNetwork = async (data) => {
     // Prepare request payload for new site
     const editParams = {
         csrf: props.context.csrf,
-        network_cidr: data.network_cidr,
+        network: data.network_id,
         custom_name: data.network_alias,
         site_id: data.site_id,
     };

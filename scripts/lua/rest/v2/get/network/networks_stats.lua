@@ -34,7 +34,7 @@ for network_name, data in pairs(networks_stats) do
    local total_bytes = bytes_sent + bytes_rcvd
 
    local network_data = {
-      site = site_utils.getNetworkIdSite(networkId),
+      site = site_utils.getNetworkSite(networkId),
       networkCIDR = network_name,
       networkId = networkId,
       networkNameOnly = getLocalNetworkAlias(network_name),

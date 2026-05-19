@@ -356,22 +356,27 @@ end
 
 -- ##############################################
 
-function site_utils.getNetworkIdSite(networkId)
-   local site_id = ntop.getHashCache(REDIS_NETWORKS_SITES_KEY, networkId)
+function site_utils.getNetworkSite(network_id)
+   if not tonumber(network_id) or not interface.getNetworkStats(tonumber(network_id)) then
+      -- Not a network, return
+      return site_utils.get_default_site()
+   end
 
-   return site_utils.getSiteInfo(site_id)
+   local site = ntop.getHashCache(REDIS_NETWORKS_SITES_KEY, tostring(network_id))
+
+   return site_utils.getSiteInfo(site)
 end
 
 -- ##############################################
 
-function site_utils.mapNetworkToSite(cidr, site_id)
-   -- Given a cidr, maps the cidr to the site_id
+function site_utils.mapNetworkToSite(network_id, site_id)
+   -- Given a network_id, maps the network_id to the site_id
    local sites = site_utils.getSites()
    local skip = true
 
-   if not isIPv4Network(cidr) and not isIPv6Network(cidr) then
+   if not interface.getNetworkStats(tonumber(network_id)) then
       -- Not a network, return
-      return
+      return site_utils.get_default_site()
    end
 
    -- Check the existence of the site, otherwise skip it
@@ -385,7 +390,7 @@ function site_utils.mapNetworkToSite(cidr, site_id)
    
    -- Site found, update the network + site key
    if not skip then
-      ntop.setHashCache(REDIS_NETWORKS_SITES_KEY, cidr, tostring(site_id))
+      ntop.setHashCache(REDIS_NETWORKS_SITES_KEY, tostring(network_id), tostring(site_id))
    end
 end
 
