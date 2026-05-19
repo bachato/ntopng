@@ -203,7 +203,16 @@ const map_table_def_columns = (columns) => {
         },
         // Networks column - displays the list of networks associated with the Site
         "networks": (value, row) => {
-            return value
+            let networksList = ""
+
+            value?.forEach((el) => {
+                networksList = `${networksList}${el.network_name}, `
+            })
+
+            if (!dataUtils.isEmptyString(networksList)) {
+                networksList = networksList.slice(0, -2)
+            }
+            return networksList
         },
         // Location column - formats coordinates as human-readable string
         // Only displays if coordinates are not zero/empty
