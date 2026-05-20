@@ -312,6 +312,9 @@ end
 -- ##############################################
 
 function site_utils.mapHostToSite(ip)
+	if isEmptyString(ip) then
+		return site_utils.get_default_site()
+	end
 	local network_id = interface.getIPNetworkId(ip)
 	return site_utils.getNetworkSite(network_id)
 end
