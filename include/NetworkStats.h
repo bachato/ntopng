@@ -29,6 +29,7 @@ class NetworkStats : public InterfaceMemberAlertableEntity,
                      public Score {
  private:
   u_int32_t network_id;
+  u_int16_t site_id;
   u_int32_t numHosts;
   u_int32_t alerted_flows_as_client, alerted_flows_as_server;
   TrafficStats ingress, ingress_broadcast; /* outside -> network */
@@ -64,6 +65,9 @@ class NetworkStats : public InterfaceMemberAlertableEntity,
  public:
   NetworkStats(NetworkInterface* iface, u_int32_t _network_id);
   virtual ~NetworkStats();
+
+  inline u_int16_t getSiteId() const { return site_id; }
+  void refreshSiteId();
 
   inline bool trafficSeen() {
     return ingress.getNumPkts() || egress.getNumPkts() || inner.getNumPkts();

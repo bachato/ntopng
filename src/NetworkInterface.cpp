@@ -9787,6 +9787,13 @@ NetworkStats* NetworkInterface::getNetworkStats(u_int32_t networkId) const {
 
 /* **************************************** */
 
+u_int16_t NetworkInterface::getNetworkSiteId(int32_t networkId) const {
+  NetworkStats* ns = getNetworkStats((u_int32_t)networkId);
+  return ns ? ns->getSiteId() : 0;
+}
+
+/* **************************************** */
+
 void NetworkInterface::checkPointCounters(bool drops_only) {
   if (!drops_only) {
     checkpointPktCount = getNumPackets(), checkpointBytesCount = getNumBytes();

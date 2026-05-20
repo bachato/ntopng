@@ -57,6 +57,8 @@ CREATE TABLE IF NOT EXISTS `flows` (
 `SERVER_LOCATION` UInt8 COMMENT 'Server host location type (local LAN, remote, etc.)',
 `SRC_NETWORK_ID` UInt32 COMMENT 'ntopng local-network ID for the source IP (0 if not a known local network)',
 `DST_NETWORK_ID` UInt32 COMMENT 'ntopng local-network ID for the destination IP (0 if not a known local network)',
+`SRC_SITE_ID` UInt16 COMMENT 'ntopng site ID associated with the source network (0 if none)',
+`DST_SITE_ID` UInt16 COMMENT 'ntopng site ID associated with the destination network (0 if none)',
 `CLIENT_FINGERPRINT` String COMMENT 'TLS/QUIC client fingerprint (JA3 or similar)',
 `TCP_FINGERPRINT` String COMMENT 'TCP stack fingerprint used for passive OS detection',
 `INPUT_SNMP` UInt32 COMMENT 'SNMP input interface index exported via NetFlow/IPFIX',
@@ -221,6 +223,10 @@ ALTER TABLE flows ADD COLUMN IF NOT EXISTS `HR_SRC2DST_BYTES` Array(UInt64);
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `HR_DST2SRC_BYTES` Array(UInt64);
 @
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `IS_FIRST_DUMP` Boolean;
+@
+ALTER TABLE flows ADD COLUMN IF NOT EXISTS `SRC_SITE_ID` UInt16;
+@
+ALTER TABLE flows ADD COLUMN IF NOT EXISTS `DST_SITE_ID` UInt16;
 
 @
 

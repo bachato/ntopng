@@ -1056,6 +1056,7 @@ class NetworkInterface : public NetworkInterfaceAlertableEntity {
   }
 
   NetworkStats* getNetworkStats(u_int32_t networkId) const;
+  u_int16_t getNetworkSiteId(int32_t networkId) const;
   void allocateStructures(bool disable_dump = false);
   void getsDPIStats(lua_State* vm);
   inline bool isDbCreated() {

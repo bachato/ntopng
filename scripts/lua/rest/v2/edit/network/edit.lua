@@ -18,6 +18,7 @@ local network_site = _POST["site_id"]
 if not isEmptyString(network_site) then
 	local site_utils = require("site_utils")
 	site_utils.mapNetworkToSite(network_id, network_site)
+	ntop.refreshNetworkSiteId(tonumber(network_id))
 end
 
 if not isEmptyString(network_alias) then

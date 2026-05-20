@@ -8148,6 +8148,30 @@ static int ntop_network_name_by_id(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Refreshes the cached site ID for a local network. Lua: ntop.refreshNetworkSiteId(network_id) */
+static int ntop_refresh_network_site_id(lua_State* vm) {
+  u_int32_t network_id;
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+
+  network_id = (u_int32_t)lua_tointeger(vm, 1);
+
+  for (u_int8_t i = 0; i < ntop->get_num_interfaces(); i++) {
+    NetworkInterface* iface = ntop->getInterfaceAtId(i);
+    if (!iface) continue;
+    NetworkStats* ns = iface->getNetworkStats(network_id);
+    if (ns) ns->refreshSiteId();
+  }
+
+  lua_pushboolean(vm, 1);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
+}
+
+/* ****************************************** */
+
 /* @brief Returns the internal numeric id for a local network given its CIDR or alias.  Lua: ntop.getNetworkIdByName(name) → integer */
 static int ntop_network_id_by_name(lua_State* vm) {
   u_int32_t num_local_networks = ntop->getNumLocalNetworks();
@@ -9474,6 +9498,7 @@ static luaL_Reg _ntop_reg[] = {
     {"getWebAuthnPendingToken", ntop_get_webauthn_pending_token},
 
     {"getNetworkNameById", ntop_network_name_by_id},
+    {"refreshNetworkSiteId", ntop_refresh_network_site_id},
     {"getNetworkIdByName", ntop_network_id_by_name},
     {"getNetworks", ntop_get_networks},
     {"getAddressNetwork", ntop_get_address_network},

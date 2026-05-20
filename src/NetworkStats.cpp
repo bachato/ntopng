@@ -33,6 +33,7 @@ NetworkStats::NetworkStats(NetworkInterface* iface, u_int32_t _network_id)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[new] %s", __FILE__);
 
   network_id = _network_id;
+  site_id = 0;
   numHosts = 0, alerted_flows_as_client = alerted_flows_as_server = 0;
   syn_recvd_last_min = synack_sent_last_min = 0;
   round_trip_time = 0;
@@ -45,6 +46,20 @@ NetworkStats::NetworkStats(NetworkInterface* iface, u_int32_t _network_id)
 
   netname = ntop->getLocalNetworkName(network_id);
   setEntityValue(netname ? netname : "");
+  refreshSiteId();
+}
+
+/* *************************************** */
+
+void NetworkStats::refreshSiteId() {
+  char key[32], val[16] = {0};
+  snprintf(key, sizeof(key), "%u", network_id);
+  if (ntop->getRedis() &&
+      ntop->getRedis()->hashGet("ntopng.prefs.networks.sites", key, val,
+                                sizeof(val)) == 0)
+    site_id = (u_int16_t)atoi(val);
+  else
+    site_id = 0;
 }
 
 /* *************************************** */
