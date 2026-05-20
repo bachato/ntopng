@@ -30,7 +30,7 @@ async function build_table(http_prefix, table_id, f_map_columns, f_get_extra_par
 			if (!item.class) {
 				item.class = []
 			}
-		}) 
+		})
 	}
 	if (f_map_columns != null) {
 		table_def.columns = await f_map_columns(table_def.columns);
@@ -209,7 +209,7 @@ function get_rows_func(table_def, f_get_extra_params_obj, f_on_get_rows, rows_da
 				f_on_get_rows(params);
 			}
 			rows = res.rsp;
-			
+
 			if (table_def.rsp_records_field != null) {
 				rows = res.rsp[table_def.rsp_records_field];
 			}
@@ -224,10 +224,10 @@ function get_rows_func(table_def, f_get_extra_params_obj, f_on_get_rows, rows_da
 			total_rows = res.recordsTotal;
 		}
 		else {
-		    rows = rows_data;
-     		query_info = null;
-     		total_rows = rows_data.length;
- 		}
+			rows = rows_data;
+			query_info = null;
+			total_rows = rows_data.length;
+		}
 		return { total_rows, rows, query_info };
 	}
 }
@@ -246,9 +246,8 @@ function get_f_print_column_name(table_def) {
 
 function get_column_id_func(table_def) {
 	return (col) => {
-		const table_id = table_def.id
-		if (col.id != null) { return `${table_id}.${col.id}`; }
-		if (col.data_field != null) { return `${table_id}.${col.data_field}`; }
+		if (col.id != null) { return col.id; }
+		if (col.data_field != null) { return col.data_field; }
 		return table_def.columns.findIndex((c) => c == col);
 	};
 }

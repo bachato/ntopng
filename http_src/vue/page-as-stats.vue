@@ -714,18 +714,6 @@ function on_table_custom_event(event) {
 
 /* ************************************** */
 
-const SORT_FIELDS = {
-    name: (r) => r.asname,
-    as_number: (r) => r.asn,
-    num_hosts: (r) => r.num_hosts,
-    seen_since: (r) => r.seen_since,
-    avg_host_score: (r) => r.avg_host_score,
-    score: (r) => r.score,
-    throughput: (r) => r.throughput,
-    traffic: (r) => r.traffic,
-    alerted_flows: (r) => r.alerted_flows,
-};
-
 /**
  * Custom sorting function for table columns
  * @param {Object} col - Column definition
@@ -734,11 +722,26 @@ const SORT_FIELDS = {
  * @returns {number} Comparison result
  */
 function columns_sorting(col, r0, r1) {
-    if (!col) return 0;
-    const getter = SORT_FIELDS[col.id];
-    if (!getter) return 0;
-    const sortFn = col.id === 'name' ? sortingFunctions.sortByName : sortingFunctions.sortByNumber;
-    return sortFn(getter(r0), getter(r1), col.sort);
+    if (col != null) {
+        /* Networks */
+        if (col.id == "as_number") {
+            return sortingFunctions.sortByNumber(r0.asn, r1.asn, col.sort);
+        } else if (col.id == "name") {
+            return sortingFunctions.sortByName(r0.asname, r1.asname, col.sort);
+        } else if (col.id == "num_hosts") {
+            return sortingFunctions.sortByNumber(r0.num_hosts, r1.num_hosts, col.sort);
+        } else if (col.id == "score") {
+            return sortingFunctions.sortByNumber(r0.score, r1.score, col.sort);
+        } else if (col.id == "alerted_flows") {
+            return sortingFunctions.sortByNumber(r0.alerted_flows, r1.alerted_flows, col.sort);
+        } else if (col.id == "alerted_flows") {
+            return sortingFunctions.sortByNumber(r0.alertedFlows, r1.alertedFlows, col.sort);
+        } else if (col.id == "throughput") {
+            return sortingFunctions.sortByNumber(r0.throughput, r1.throughput, col.sort);
+        } else if (col.id == "traffic") {
+            return sortingFunctions.sortByNumber(r0.traffic, r1.traffic, col.sort);
+        }
+    }
 }
 </script>
 
