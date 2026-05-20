@@ -132,7 +132,7 @@ function validateNameDebounced() {
 const validateName = () => {
     const trimmed = network_alias.value.trim();
     // Unicode-aware regex that allows letters, numbers, and spaces
-    const alphanumericRegex = /^[\p{L}0-9 .,\-@]+$/u;
+    const alphanumericRegex = /^[\p{L}0-9 .,\-@/]+$/u;
 
     if (!trimmed) {
         name_error.value = _i18n("error_messages.name_cannot_be_empty");
