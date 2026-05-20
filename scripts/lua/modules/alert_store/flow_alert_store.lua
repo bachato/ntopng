@@ -1605,6 +1605,14 @@ function flow_alert_store:get_alert_details(value)
       }
    end
 
+
+   local json = require "dkjson"
+   local q    = url_encode(json.encode(details))
+   local url = "https://www.google.com/search?q=" .. q .. "&csuir=1&udm=50"
+
+   -- Add URL to firt table entry
+   details[1].values[1] = details[1].values[1] .. ' [ <A HREF="'..url..'">' .. i18n("ask_google_ai") .. ' <i class="fas fa-external-link-alt"></i></A> ]'   
+   
    return details
 end
 

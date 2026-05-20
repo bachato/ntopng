@@ -10,6 +10,7 @@ local lang = {
    ["acknowledged_all"] = "All",
    ["acknowledged_only"] = "Acknowledged Only",
    ["action"] = "Action",
+   ["ask_google_ai" ] = "Ask Google AI",
    ["timestamp"] = "Timestamp",
    ["triggered_by"] = "Triggered By",
    ["actions"] = "Actions",
