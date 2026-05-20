@@ -1133,6 +1133,10 @@ local function dt_format_flow(processed_record, record)
       processed_record["flow"] = flow
       processed_record["tags"] = processed_record["tags_map"]
       processed_record["tags_map"] = nil
+      processed_record["src_tags"] = processed_record["src_tags_map"]
+      processed_record["src_tags_map"] = nil
+      processed_record["dst_tags"] = processed_record["dst_tags_map"]
+      processed_record["dst_tags_map"] = nil
 
       processed_record["cli_ip"] = nil
       processed_record["srv_ip"] = nil
@@ -1300,6 +1304,8 @@ local flow_columns = {
    ['DST_HOST_POOL_ID'] =     { flowfilter = "srv_host_pool_id", dt_func = dt_format_pool_id, db_type = "Number", db_raw_type = "Uint16" },
    ['ALERTS_MAP'] =           { flowfilter = "alerts_map" },
    ['TAGS_MAP'] =           { flowfilter = "tags_map", dt_func = dt_format_tags_map, db_type = "String", db_raw_type = "String" },
+   ['SRC_TAGS_MAP'] =       { flowfilter = "src_tags_map", dt_func = dt_format_tags_map, db_type = "String", db_raw_type = "String" },
+   ['DST_TAGS_MAP'] =       { flowfilter = "dst_tags_map", dt_func = dt_format_tags_map, db_type = "String", db_raw_type = "String" },
    ['SEVERITY'] =             { flowfilter = "severity" },
    ['IS_CLI_ATTACKER'] =      { flowfilter = "is_cli_attacker" },
    ['IS_CLI_VICTIM'] =        { flowfilter = "is_cli_victim" },
@@ -1414,6 +1420,8 @@ historical_flow_utils.min_db_columns = {
    "SERVER_LOCATION",
    "COMMUNITY_ID",
    "TAGS_MAP",
+   "SRC_TAGS_MAP",
+   "DST_TAGS_MAP",
    "NTOPNG_INSTANCE_NAME"
 }
 
@@ -1668,6 +1676,8 @@ function historical_flow_utils.get_flowfilters()
    flow_defined_filters["site"] = flowfilter_utils.defined_filters["site"] -- required?
    flow_defined_filters["asn"] = flowfilter_utils.defined_filters["asn"]
    flow_defined_filters["tag"] = flowfilter_utils.defined_filters["tag"]
+   flow_defined_filters["cli_tag"] = flowfilter_utils.defined_filters["cli_tag"]
+   flow_defined_filters["srv_tag"] = flowfilter_utils.defined_filters["srv_tag"]
 
    return flow_defined_filters
 end

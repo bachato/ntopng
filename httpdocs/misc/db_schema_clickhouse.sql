@@ -69,6 +69,8 @@ CREATE TABLE IF NOT EXISTS `flows` (
 `DST_PROC_USER_NAME` String COMMENT 'OS username owning the destination process',
 `ALERTS_MAP` String COMMENT 'Serialized bitmap of individual alert conditions triggered on this flow',
 `TAGS_MAP` String COMMENT 'Serialized bitmap of tags associated with this flow',
+`SRC_TAGS_MAP` String COMMENT 'Serialized bitmap of tags associated with the source host',
+`DST_TAGS_MAP` String COMMENT 'Serialized bitmap of tags associated with the destination host',
 `SEVERITY` UInt8 COMMENT 'Alert severity level; meaningful only when STATUS != 0',
 `IS_CLI_ATTACKER` UInt8 COMMENT '1 if the client host is flagged as an attacker, 0 otherwise',
 `IS_CLI_VICTIM` UInt8 COMMENT '1 if the client host is flagged as a victim, 0 otherwise',
@@ -137,6 +139,10 @@ ALTER TABLE flows ADD COLUMN IF NOT EXISTS `DST_PROC_USER_NAME` String;
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `ALERTS_MAP` String;
 @
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `TAGS_MAP` String;
+@
+ALTER TABLE flows ADD COLUMN IF NOT EXISTS `SRC_TAGS_MAP` String;
+@
+ALTER TABLE flows ADD COLUMN IF NOT EXISTS `DST_TAGS_MAP` String;
 @
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `SEVERITY` UInt8;
 @
@@ -1086,6 +1092,8 @@ SELECT
     f.SERVER_LOCATION AS srv_location,
     f.ALERTS_MAP AS alerts_map,
     f.TAGS_MAP AS tags_map,
+    f.SRC_TAGS_MAP AS src_tags_map,
+    f.DST_TAGS_MAP AS dst_tags_map,
     f.INFO AS info,
     f.PROBE_IP AS probe_ip,
     f.SRC2DST_TCP_FLAGS AS src2dst_tcp_flags,

@@ -125,6 +125,20 @@ flowfilter_utils.defined_filters = {
         operators = {'in', 'nin'},
         hourly_available = true
     },
+    cli_tag = {
+        type = flowfilter_utils.input_types.select,
+        value_type = 'tag_id',
+        i18n_label = i18n('db_search.flowfilters.cli_tag'),
+        operators = {'in', 'nin'},
+        hourly_available = true
+    },
+    srv_tag = {
+        type = flowfilter_utils.input_types.select,
+        value_type = 'tag_id',
+        i18n_label = i18n('db_search.flowfilters.srv_tag'),
+        operators = {'in', 'nin'},
+        hourly_available = true
+    },
     l4proto = {
         type = flowfilter_utils.input_types.select,
         value_type = 'l4_proto',
@@ -1187,6 +1201,22 @@ flowfilter_utils.formatters = {
         return flow_risk_list[tonumber(risk) + 1] or risk
     end,
     tag = function(id)
+        for _, lbl in ipairs(tag_badge_utils.getTags()) do
+            if tostring(lbl.id) == tostring(id) then
+                return lbl.name
+            end
+        end
+        return id
+    end,
+    cli_tag = function(id)
+        for _, lbl in ipairs(tag_badge_utils.getTags()) do
+            if tostring(lbl.id) == tostring(id) then
+                return lbl.name
+            end
+        end
+        return id
+    end,
+    srv_tag = function(id)
         for _, lbl in ipairs(tag_badge_utils.getTags()) do
             if tostring(lbl.id) == tostring(id) then
                 return lbl.name
