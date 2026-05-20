@@ -246,8 +246,9 @@ function get_f_print_column_name(table_def) {
 
 function get_column_id_func(table_def) {
 	return (col) => {
-		if (col.id != null) { return col.id; }
-		if (col.data_field != null) { return col.data_field; }
+		const table_id = table_def.id
+		if (col.id != null) { return `${table_id}.${col.id}`; }
+		if (col.data_field != null) { return `${table_id}.${col.data_field}`; }
 		return table_def.columns.findIndex((c) => c == col);
 	};
 }

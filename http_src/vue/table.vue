@@ -69,7 +69,7 @@
             </div>
         </div> <!-- TableHeader -->
 
-        <Transition name="list" mode="out-in">
+        <Transition name="list" mode="out-in" @after-enter="set_columns_resizable">
             <div :key="table_key" style="overflow:auto;width:100%;"> <!-- Table -->
 
                 <!-- Message display -->
@@ -151,7 +151,7 @@
         <div v-if="query_info != null" class="mt-2">
             <div class="text-end">
                 <small style="" class="query text-end"><span class="records">{{ query_info.num_records_processed
-                        }}</span>.</small>
+                }}</span>.</small>
             </div>
             <div class="text-start">
                 <small id="historical_flows_table-query-time" style="" class="query">Query performed in <span
@@ -234,6 +234,8 @@ const rowsPerPage = ref(get_num_pages());               // Current rows per page
 const columnWidthStore = window.store;                          // Store for column width persistence
 const searchString = ref("");                          // Search term
 const isLoading = ref(showLoading.value ? showLoading.value : false);
+
+const table_key = ref(0);                       // increase table key to force vuejs to rerender table
 
 const paginationRef = ref(null);                 // Reference to pagination component
 const query_info = ref(null);                        // Query execution info (time, records, SQL)
@@ -322,28 +324,26 @@ async function change_columns_visibility(col) {
     // redraw_table();
     await redraw_table_resizable();
     await set_columns_visibility();
-    // set_columns_resizable();
     isChangingColumnVisibility.value = false;
 }
 
 async function redraw_table_resizable() {
-    await redraw_table();
-    set_columns_resizable();
+    redraw_table();
 }
-
-// increase table key to force vuejs to rerender table
-const table_key = ref(0);
 async function redraw_table() {
+    isLoading.value = true;
     table_key.value += 1;
     await nextTick();
 }
 
-function set_columns_resizable() {
-    let options = {
+async function set_columns_resizable() {
+    const options = {
         store: columnWidthStore, // persist column width
         minWidth: 70,
     };
     $(tableRef.value).resizableColumns(options);
+    await nextTick();
+    isLoading.value = false;
 }
 
 // get table configuration
@@ -635,9 +635,7 @@ async function set_rows(do_not_reload) {
     // wait for dom to update and emit event
     await nextTick();
     emit('rows_loaded', res);
-    if (showLoading.value) {
-        isLoading.value = false;
-    }
+    set_columns_resizable();
 }
 
 // New function to filter rows based on search string
@@ -811,8 +809,12 @@ const enableLoading = () => {
     showLoading.value = true;
 }
 
+const redrawTable = () => {
+    redraw_table_resizable()
+}
+
 // expose methods for parent components
-defineExpose({ load_table, refresh_table, get_columns_defs, get_rows_num, search_value, disableLoading, enableLoading });
+defineExpose({ load_table, refresh_table, get_columns_defs, get_rows_num, search_value, disableLoading, enableLoading, redrawTable });
 
 </script>
 

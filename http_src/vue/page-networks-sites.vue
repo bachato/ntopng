@@ -1,7 +1,7 @@
 <!-- (C) 2026 - ntop.org -->
 <template>
     <div v-show="activePage === 'networks'" class="m-2 mb-3">
-        <TableWithConfig ref="table_networks_stats" :table_id="networks_table" :csrf="csrf"
+        <TableWithConfig ref="table_networks_stats" :table_id="networks_table" :csrf="csrf" showLoading="true"
             :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event">
 
             <!-- Table Selector: Networks or Sites -->
@@ -51,7 +51,7 @@
 
 
 <script setup>
-import { ref, onBeforeMount } from "vue";
+import { ref, onBeforeMount, watch } from "vue";
 import { default as NavbarTabs } from "./components/navbar-tabs.vue";
 import { default as dataUtils } from "../utilities/data-utils.js";
 import { default as ModalEditSite } from "./modal-edit-site.vue";
@@ -120,6 +120,18 @@ onBeforeMount(() => {
     const activePageURL = ntopng_url_manager.get_url_entry("page")
     activePage.value = activePageURL ? activePageURL : "networks";
 })
+
+/* ************************************** */
+
+watch(activePage, (newVal) => {
+    // This is mandatory because when switching between tables, being just "hidden" the tables
+    // to have a fast load, the jquery resize properties are not correctly loaded (size at 0)
+    if (newVal === 'networks') {
+        table_networks_stats?.value?.redrawTable()
+    } else {
+        table_sites_stats?.value?.redrawTable()
+    }
+}, { flush: 'post' })
 
 /* ************************************** */
 

@@ -117,7 +117,11 @@ const enableLoading = () => {
     table.value.enableLoading();
 }
 
-defineExpose({ refresh_table, get_columns_defs, get_rows_num, search_value, disableLoading, enableLoading });
+const redrawTable = () => {
+    table.value?.redrawTable();
+}
+
+defineExpose({ refresh_table, get_columns_defs, get_rows_num, search_value, disableLoading, enableLoading, redrawTable });
 
 </script>
 
