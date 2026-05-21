@@ -1298,6 +1298,8 @@ local flow_columns = {
    ['SERVER_LOCATION'] =      { flowfilter = "srv_location", dt_func = dt_format_location, db_type = "Number", db_raw_type = "Uint8" },
    ['SRC_NETWORK_ID'] =       { flowfilter = "cli_network", dt_func = dt_format_network, db_type = "Number", db_raw_type = "Uint32" },
    ['DST_NETWORK_ID'] =       { flowfilter = "srv_network", dt_func = dt_format_network, db_type = "Number", db_raw_type = "Uint32" },
+   ['SRC_SITE_ID'] =          { flowfilter = "cli_site", dt_func = dt_format_site, db_type = "Number", db_raw_type = "Uint16" },
+   ['DST_SITE_ID'] =          { flowfilter = "srv_site", dt_func = dt_format_site, db_type = "Number", db_raw_type = "Uint16" },
    ['INPUT_SNMP'] =           { flowfilter = "input_snmp", dt_func = dt_format_snmp_interface, db_type = "Number", db_raw_type = "Uint32" },
    ['OUTPUT_SNMP'] =          { flowfilter = "output_snmp", dt_func = dt_format_snmp_interface, db_type = "Number", db_raw_type = "Uint32" },
    ['SRC_HOST_POOL_ID'] =     { flowfilter = "cli_host_pool_id", dt_func = dt_format_pool_id, db_type = "Number", db_raw_type = "Uint16" },
