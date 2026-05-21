@@ -677,6 +677,34 @@ end
 
 -- ###############################################
 
+local function format_historical_sites(flow_details, flow)
+   local site_utils = require "site_utils"
+   local exporter_site_id = tonumber(flow["EXPORTER_SITE"])
+   local src_site_id      = tonumber(flow["SRC_SITE_ID"])
+   local dst_site_id      = tonumber(flow["DST_SITE_ID"])
+
+   if exporter_site_id and exporter_site_id ~= 0 then
+      local site = site_utils.getSiteInfo(tostring(exporter_site_id))
+      flow_details[#flow_details + 1] = {
+         name   = i18n("db_explorer.exporter_site"),
+         values = {site.name}
+      }
+   end
+
+   if (src_site_id and src_site_id ~= 0) or (dst_site_id and dst_site_id ~= 0) then
+      local src_name = (src_site_id and src_site_id ~= 0) and site_utils.getSiteInfo(tostring(src_site_id)).name or ""
+      local dst_name = (dst_site_id and dst_site_id ~= 0) and site_utils.getSiteInfo(tostring(dst_site_id)).name or ""
+      flow_details[#flow_details + 1] = {
+         name   = i18n("db_explorer.cli_srv_site"),
+         values = {src_name, dst_name}
+      }
+   end
+
+   return flow_details
+end
+
+-- ###############################################
+
 local function format_historical_proto_info(flow_details, proto_info)
    local info = format_proto_info(flow_details, proto_info)
    return info
@@ -1097,6 +1125,8 @@ function historical_flow_details_formatter.formatHistoricalFlowDetails(flow)
       if tonumber(flow["OBSERVATION_POINT_ID"]) ~= 0 then
          flow_details[#flow_details + 1] = format_historical_obs_point(flow)
       end
+
+      flow_details = format_historical_sites(flow_details, flow)
 
       if not isEmptyString(info.wlan_ssid) then
          flow_details[#flow_details + 1] = format_historical_wlan_ssid(flow, info)
