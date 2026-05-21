@@ -1499,6 +1499,8 @@ historical_flow_utils.extra_where_flowfilters = {
    ["tcp_fingerprint"] = "TCP_FINGERPRINT",
    ["duration"] = "DURATION",
    ["site"] = "EXPORTER_SITE", -- required?
+   ["cli_site"] = "SRC_SITE_ID",
+   ["srv_site"] = "DST_SITE_ID",
 }
 
 historical_flow_utils.topk_flowfilters_v4 = {
@@ -1676,6 +1678,8 @@ function historical_flow_utils.get_flowfilters()
    flow_defined_filters["verdict"] = flowfilter_utils.defined_filters["verdict"]
    flow_defined_filters["ndpi_fingerprint"] = flowfilter_utils.defined_filters["ndpi_fingerprint"]
    flow_defined_filters["site"] = flowfilter_utils.defined_filters["site"] -- required?
+   flow_defined_filters["cli_site"] = flowfilter_utils.defined_filters["cli_site"]
+   flow_defined_filters["srv_site"] = flowfilter_utils.defined_filters["srv_site"]
    flow_defined_filters["asn"] = flowfilter_utils.defined_filters["asn"]
    flow_defined_filters["tag"] = flowfilter_utils.defined_filters["tag"]
    flow_defined_filters["cli_tag"] = flowfilter_utils.defined_filters["cli_tag"]

@@ -345,6 +345,20 @@ flowfilter_utils.defined_filters = {
         operators = {'eq', 'neq'},
         hourly_available = true
     },
+    cli_site = {
+        type = flowfilter_utils.input_types.select,
+        value_type = 'site',
+        i18n_label = i18n('db_search.flowfilters.cli_site'),
+        operators = {'eq', 'neq'},
+        hourly_available = false
+    },
+    srv_site = {
+        type = flowfilter_utils.input_types.select,
+        value_type = 'site',
+        i18n_label = i18n('db_search.flowfilters.srv_site'),
+        operators = {'eq', 'neq'},
+        hourly_available = false
+    },
     vlan_id = {
         value_type = 'vlan_id',
         i18n_label = i18n('db_search.flowfilters.vlan_id'),
