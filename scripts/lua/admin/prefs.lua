@@ -65,29 +65,31 @@ end
 -- Wazuh connection test: attempts to authenticate against the Wazuh API
 -- and returns (true, nil) on success or (false, error_message) on failure.
 local function wazuh_test_connection(url, username, password)
-	if not ntop.isEnterpriseM() then
-		return false, nil
-	end
+   if not ntop.isEnterpriseM() then
+      return false, nil
+   end
 
-	if isEmptyString(url) then
-		return false, i18n("prefs.wazuh_missing_url")
-	end
+   if isEmptyString(url) then
+      return false, i18n("prefs.wazuh_missing_url")
+   end
 
-	local auth_url = url .. "/security/user/authenticate?raw=true"
-	local rc = ntop.httpGet(auth_url, username, password)
+   url = url:gsub("/$", "") -- remove trailer /
 
-	if rc == nil or rc.RESPONSE_CODE == 0 then
-		return false, i18n("prefs.wazuh_unreachable")
-	end
+   local auth_url = url .. "/security/user/authenticate?raw=true"
+   local rc = ntop.httpGet(auth_url, username, password)
 
-	if rc.RESPONSE_CODE ~= 200 then
-		return false, i18n("prefs.wazuh_auth_failed")
-	end
+   if rc == nil or rc.RESPONSE_CODE == 0 then
+      return false, i18n("prefs.wazuh_unreachable")
+   end
 
-	-- rc.CONTENT holds the raw token; a non-empty string means auth succeeded
-	if isEmptyString(rc.CONTENT) then
-		return false, i18n("prefs.wazuh_connection_failed")
-	end
+   if rc.RESPONSE_CODE ~= 200 then
+      return false, i18n("prefs.wazuh_auth_failed")
+   end
+
+   -- rc.CONTENT holds the raw token; a non-empty string means auth succeeded
+   if isEmptyString(rc.CONTENT) then
+      return false, i18n("prefs.wazuh_connection_failed")
+   end
 
    return true, nil
 end
@@ -267,55 +269,56 @@ if auth.has_capability(auth.capabilities.preferences) then
       recording_utils.setLicense(_POST["n2disk_license"])
    end
 
-	if _GET["tab"] == "assets" and not table.empty(_POST) then
-		local wazuh_url = _POST["wazuh_url"] or ""
-		local wazuh_username = _POST["wazuh_username"] or ""
-		local wazuh_password = _POST["wazuh_password"] or ""
+   if _GET["tab"] == "assets" and not table.empty(_POST) then
+      local wazuh_url = _POST["wazuh_url"] or ""
+      local wazuh_username = _POST["wazuh_username"] or ""
+      local wazuh_password = _POST["wazuh_password"] or ""
 
-		-- Only run the test when the URL is provided and at least one field changed
-		if not isEmptyString(wazuh_url) and (
-			wazuh_url ~= (ntop.getPref("ntopng.prefs.wazuh.wazuh_url") or "") or
-			wazuh_username ~= (ntop.getPref("ntopng.prefs.wazuh.wazuh_username") or "") or
-			wazuh_password ~= (ntop.getPref("ntopng.prefs.wazuh.wazuh_password") or "")
-		) then
-			local ok, err = wazuh_test_connection(wazuh_url, wazuh_username, wazuh_password)
-			if not ok then
-				message_info = err or i18n("prefs.wazuh_connection_failed")
-				message_severity = "alert-danger"
-				-- Restore the previously saved values so the bad credentials are NOT persisted
-				_POST["wazuh_url"] = ntop.getPref("ntopng.prefs.wazuh.wazuh_url") or ""
-				_POST["wazuh_username"] = ntop.getPref("ntopng.prefs.wazuh.wazuh_username") or ""
-				_POST["wazuh_password"] = ntop.getPref("ntopng.prefs.wazuh.wazuh_password") or ""
-			else
-				message_info = i18n("prefs.wazuh_connection_ok")
-				message_severity = "alert-success"
-			end
-		end
-   	end
+      -- Only run the test when the URL is provided and at least one field changed
+      if not isEmptyString(wazuh_url) and (
+	 wazuh_url ~= (ntop.getPref("ntopng.prefs.wazuh.wazuh_url") or "") or
+	 wazuh_username ~= (ntop.getPref("ntopng.prefs.wazuh.wazuh_username") or "") or
+	 wazuh_password ~= (ntop.getPref("ntopng.prefs.wazuh.wazuh_password") or "")
+      ) then
+	 wazuh_url = wazuh_url:gsub("/$", "") -- remove trailer / (if any)
+	 local ok, err = wazuh_test_connection(wazuh_url, wazuh_username, wazuh_password)
+	 if not ok then
+	    message_info = err or i18n("prefs.wazuh_connection_failed")
+	    message_severity = "alert-danger"
+	    -- Restore the previously saved values so the bad credentials are NOT persisted
+	    _POST["wazuh_url"] = ntop.getPref("ntopng.prefs.wazuh.wazuh_url") or ""
+	    _POST["wazuh_username"] = ntop.getPref("ntopng.prefs.wazuh.wazuh_username") or ""
+	    _POST["wazuh_password"] = ntop.getPref("ntopng.prefs.wazuh.wazuh_password") or ""
+	 else
+	    message_info = i18n("prefs.wazuh_connection_ok")
+	    message_severity = "alert-success"
+	 end
+      end
+   end
 
-   	if _GET["tab"] == "asn_settings" and not table.empty(_POST) then
-		local bgp_address = _POST["ip_address"] or ""
-		local bgp_port = _POST["port"] or ""
-		-- Only run the test when an address is provided and at least one field changed.
-		-- NOTE: the connection check is intentionally performed AFTER the new values have
-		-- been accepted into _POST (i.e. they will be persisted regardless of the outcome).
-		-- On failure we only warn the user; we do NOT restore the old values.
-		if not isEmptyString(bgp_address) and (
-			bgp_address ~= (ntop.getPref("ntopng.prefs.bgp_server.ip_address") or "") or
-			bgp_port ~= (ntop.getPref("ntopng.prefs.bgp_server.port") or "")
-		) then
-			ntop.setPref("ntopng.prefs.bgp_server.ip_address", bgp_address)
-			ntop.setPref("ntopng.prefs.bgp_server.port", bgp_port)
-			local ok = ntop.ribFind("1.1.1.1")
-			if not ok then
-				message_info = i18n("prefs.bgp_server_connection_failed")
-				message_severity = "alert-danger"
-			else
-				message_info = i18n("prefs.bgp_server_connection_ok")
-				message_severity = "alert-success"
-			end
-		end
-	end
+   if _GET["tab"] == "asn_settings" and not table.empty(_POST) then
+      local bgp_address = _POST["ip_address"] or ""
+      local bgp_port = _POST["port"] or ""
+      -- Only run the test when an address is provided and at least one field changed.
+      -- NOTE: the connection check is intentionally performed AFTER the new values have
+      -- been accepted into _POST (i.e. they will be persisted regardless of the outcome).
+      -- On failure we only warn the user; we do NOT restore the old values.
+      if not isEmptyString(bgp_address) and (
+	 bgp_address ~= (ntop.getPref("ntopng.prefs.bgp_server.ip_address") or "") or
+	 bgp_port ~= (ntop.getPref("ntopng.prefs.bgp_server.port") or "")
+      ) then
+	 ntop.setPref("ntopng.prefs.bgp_server.ip_address", bgp_address)
+	 ntop.setPref("ntopng.prefs.bgp_server.port", bgp_port)
+	 local ok = ntop.ribFind("1.1.1.1")
+	 if not ok then
+	    message_info = i18n("prefs.bgp_server_connection_failed")
+	    message_severity = "alert-danger"
+	 else
+	    message_info = i18n("prefs.bgp_server_connection_ok")
+	    message_severity = "alert-success"
+	 end
+      end
+   end
 
 
 
@@ -423,7 +426,7 @@ if auth.has_capability(auth.capabilities.preferences) then
    end
 
    -- ================================================================================
-   
+
    function printLLMProviders()
 
       create_table()
@@ -775,7 +778,7 @@ if auth.has_capability(auth.capabilities.preferences) then
       print('<form method="post">')
       print('<table class="table">')
 
-      
+
       if not ntop.isnEdge() then
 	 print('<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n("prefs.license") ..
 	       '</th></tr></thead>')
@@ -783,8 +786,8 @@ if auth.has_capability(auth.capabilities.preferences) then
 	 prefsInputFieldPrefs(subpage_active.entries["n2disk_license"].title,
 			      subpage_active.entries["n2disk_license"].description ..
 			      i18n("prefs.n2disk_license_description_enterprise_l") .. "<br>" ..
-			      ternary(n2disk_info.version ~= nil, i18n("prefs.n2disk_license_version",   { version = n2disk_info.version }) .. "<br>", "") .. 
-			      ternary(n2disk_info.systemid ~= nil, i18n("prefs.n2disk_license_systemid", { systemid = n2disk_info.systemid }), ""), 
+			      ternary(n2disk_info.version ~= nil, i18n("prefs.n2disk_license_version",   { version = n2disk_info.version }) .. "<br>", "") ..
+			      ternary(n2disk_info.systemid ~= nil, i18n("prefs.n2disk_license_systemid", { systemid = n2disk_info.systemid }), ""),
 			      "ntopng.prefs.", "n2disk_license", ternary(n2disk_info.license ~= nil, n2disk_info.license, ""),
 			      false, nil, nil, nil, {
 				 style = {
@@ -1033,11 +1036,11 @@ if auth.has_capability(auth.capabilities.preferences) then
 				  "toggle_host_mask", "ntopng.prefs.host_mask")
 
          if not ntop.isnEdge() then
-	 prefsToggleButton(subpage_active, {
-			      field = "toggle_use_mac_in_flow_key",
-			      default = "0",
-			      pref = "use_mac_in_flow_key"
-	 })
+	    prefsToggleButton(subpage_active, {
+				 field = "toggle_use_mac_in_flow_key",
+				 default = "0",
+				 pref = "use_mac_in_flow_key"
+	    })
          end
 
 	 prefsToggleButton(subpage_active, {
@@ -1090,7 +1093,7 @@ if auth.has_capability(auth.capabilities.preferences) then
    function printAssets()
       print('<form method="post">')
       print('<table class="table">')
-      
+
       add_section(i18n("prefs.wazuh"))
 
       prefsInputFieldPrefs(subpage_active.entries["wazuh_url"].title,
@@ -1113,7 +1116,7 @@ if auth.has_capability(auth.capabilities.preferences) then
 			      attributes = { spellcheck = "false", maxlength = 255 },
       })
 
-	  prefsToggleButton(subpage_active, {
+      prefsToggleButton(subpage_active, {
 			   field = "toggle_wazuh_automerge",
 			   default = "0",
 			   pref = "wazuh_automerge_enabled",
@@ -1129,7 +1132,7 @@ if auth.has_capability(auth.capabilities.preferences) then
       print [[" />
     </form>]]
    end
-   
+
    -- ================================================================================
 
    function printUpdates()
@@ -1460,18 +1463,18 @@ if auth.has_capability(auth.capabilities.preferences) then
 			      }
       })
 
-       local showElements = (ntop.getPref("ntopng.prefs.http_authenticator.log_positive_event_enabled") == "1")
+      local showElements = (ntop.getPref("ntopng.prefs.http_authenticator.log_positive_event_enabled") == "1")
 
       -- prefsInputFieldPrefs(subpage_active.entries["http_auth_server"].title,
-			   -- subpage_active.entries["http_auth_server"].description,
-			   -- "ntopng.prefs.http_authenticator.log_positive_event_enabled", "http_auth_url", "", nil, showElements, true,
-			   -- true --[[ allowUrls ]], {
-			    --  attributes = {
-				-- spellcheck = "false",
-				-- maxlength = 255,
-				-- required = "required",
-				-- pattern = getURLPattern()
-			     -- }
+      -- subpage_active.entries["http_auth_server"].description,
+      -- "ntopng.prefs.http_authenticator.log_positive_event_enabled", "http_auth_url", "", nil, showElements, true,
+      -- true --[[ allowUrls ]], {
+      --  attributes = {
+      -- spellcheck = "false",
+      -- maxlength = 255,
+      -- required = "required",
+      -- pattern = getURLPattern()
+      -- }
       -- })
    end
 
@@ -1679,9 +1682,9 @@ if auth.has_capability(auth.capabilities.preferences) then
 
       printOIDCAuth()
 
-	  -- printOIDCAuth() ends with skip_redis=true (all OIDC fields use it).
+      -- printOIDCAuth() ends with skip_redis=true (all OIDC fields use it).
       -- Reset here so every subsequent toggle/pref reads from Redis correctly.
-	  prefsSkipRedis(false)
+      prefsSkipRedis(false)
 
       -- Note: order must correspond to evaluation order in Ntop.cpp
       print('<thead class="table-primary"><tr><th class="info" colspan="2">' .. i18n("prefs.client_x509_auth") ..
@@ -2237,15 +2240,15 @@ if auth.has_capability(auth.capabilities.preferences) then
 					subpage_active.entries["toggle_ndpi_timeseries_creation"].description, l7_rrd_labels, l7_rrd_values,
 					"per_protocol", "primary", "interfaces_ndpi_timeseries_creation",
 					"ntopng.prefs.interface_ndpi_timeseries_creation", nil, elementToSwitch, showElementArray, nil, showElement)
-      
+
       local split_ts_direction_labels = { i18n("total"), i18n("prefs.rx_tx") }
       local split_ts_direction_values = { "total", "rx_tx" }
-      
+
       retVal = multipleTableButtonPrefs(subpage_active.entries["toggle_split_ts_direction"].title,
 					subpage_active.entries["toggle_split_ts_direction"].description, split_ts_direction_labels, split_ts_direction_values,
 					"total", "primary", "split_ts_direction",
 					"ntopng.prefs.split_ts_direction", nil, elementToSwitch, showElementArray, nil, showElement)
-      
+
       print('<thead class="table-primary"><tr><th colspan=2 class="info">' .. i18n('prefs.local_hosts_timeseries') ..
             '</th></tr></thead>')
 
@@ -2569,12 +2572,12 @@ if auth.has_capability(auth.capabilities.preferences) then
 
       local if_format_labels = { "ifAlias", "ifName" }
       local if_format_values = { "0", "1" }
-      
+
       multipleTableButtonPrefs(subpage_active.entries["snmp_interface_format"].title,
-			       subpage_active.entries["snmp_interface_format"].description, if_format_labels, if_format_values, "0", 
+			       subpage_active.entries["snmp_interface_format"].description, if_format_labels, if_format_values, "0",
 			       "primary", "snmp_interface_format", "ntopng.prefs.snmp_interface_format", disabled)
-      
-      
+
+
       prefsInputFieldPrefs(subpage_active.entries["default_snmp_timeout"].title,
 			   subpage_active.entries["default_snmp_timeout"].description, "ntopng.prefs.", "snmp_timeout_sec", 3, -- default 3 sec
 			   "number", nil, nil, nil, {
@@ -2744,7 +2747,7 @@ if auth.has_capability(auth.capabilities.preferences) then
 
       prefsInputFieldPrefs(subpage_active.entries["flow_data_retention"].title,
 			   subpage_active.entries["flow_data_retention"].description, "ntopng.prefs.",
-			   "flows_and_alerts_data_retention_days", data_retention_utils.getDefaultRetention(), "number", 
+			   "flows_and_alerts_data_retention_days", data_retention_utils.getDefaultRetention(), "number",
 			   ntop.isClickHouseEnabled(), nil, nil, {
 			      min = 1,
 			      max = 365 * 10
@@ -2837,19 +2840,19 @@ if auth.has_capability(auth.capabilities.preferences) then
       })
 
       add_section(i18n("prefs.bgp_server"))
-      
+
       prefsInputFieldPrefs(subpage_active.entries["bgp_server_address"].title,
 			   subpage_active.entries["bgp_server_address"].description,
 			   "ntopng.prefs.bgp_server", "ip_address", "", "text", true, true, false, {
 			      attributes = { spellcheck = "false", maxlength = 128 },
       })
-      
+
       prefsInputFieldPrefs(subpage_active.entries["bgp_server_port"].title,
 			   subpage_active.entries["bgp_server_port"].description,
 			   "ntopng.prefs.bgp_server", "port", "", "text", true, true, false, {
 			      attributes = { spellcheck = "false", maxlength = 128 },
       })
-      
+
       print(
 	 '<tr><th colspan=2 style="text-align:right;"><button type="submit" class="btn btn-primary" style="width:115px" disabled="disabled">' ..
 	 i18n("save") .. '</button></th></tr>')
