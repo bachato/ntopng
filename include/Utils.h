@@ -369,6 +369,12 @@ class Utils {
   static void convertIPv4ToIPv6(u_int32_t ipv4_addr /* in */,
 				struct ndpi_in6_addr *ipv6_addr /* out */);
   static void setIPv4Address(struct ndpi_in6_addr *out_addr, u_int32_t ipv4);
+  /* Returns true when addr holds an IPv4 mapped as ::ffff:a.b.c.d */
+  static inline bool isIPv4MappedAddress(const struct ndpi_in6_addr *addr) {
+    return (addr->u6_addr.u6_addr32[0] == 0 &&
+            addr->u6_addr.u6_addr32[1] == 0 &&
+            addr->u6_addr.u6_addr32[2] == htonl(0x0000ffff));
+  }
   static bool parseIPv4v6Address(const char *ip_str, struct ndpi_in6_addr *out_addr);
   static bool isNullAddress(struct ndpi_in6_addr *ip);
 };

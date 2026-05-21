@@ -339,7 +339,8 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
 
 #ifdef NTOPNG_PRO
   if (zflow->unique_source_id != 0) {
-    u_int16_t site_id = 0;
+    IpAddress exporter_ip;
+    int32_t exporter_network_id = -1;
 
 #if 0
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "unique_source_id=%u, inIndex=%u, outIndex=%u, exporter_device_ip=%u, nprobe_ip=%u [%u / %u]",
@@ -357,7 +358,14 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
       return (false);
     }
 
-    flow->setFlowSiteId(site_id);
+    if (Utils::isIPv4MappedAddress(&zflow->exporter_device_ip))
+      exporter_ip.set(zflow->exporter_device_ip.u6_addr.u6_addr32[3]);
+    else
+      exporter_ip.set(&zflow->exporter_device_ip);
+
+    exporter_ip.isLocalHost(&exporter_network_id);
+
+    flow->setFlowSiteId(getNetworkSiteId(exporter_network_id));
   }
 #endif
 
