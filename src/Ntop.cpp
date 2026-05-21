@@ -247,6 +247,8 @@ Ntop::Ntop(const char* appName) {
 #ifdef NTOPNG_PRO
   ifRoles = ifRoles_shadow = NULL;
 #endif
+
+  bgp = NULL;
 }
 
 /* ******************************************* */
@@ -424,6 +426,8 @@ Ntop::~Ntop() {
     ndpi_bitmask_free(&b->serverAllowed);
   }
 
+  if(bgp) delete bgp;
+  
 #ifdef NTOPNG_PRO
   if(ifRoles_shadow) delete ifRoles_shadow;
   if(ifRoles)        delete ifRoles;
@@ -5671,6 +5675,18 @@ void Ntop::dumpLuaCache(lua_State* vm) {
     lua_push_str_table_entry(vm, it->first.c_str(), it->second.c_str());
 
   luaCacheLock.unlock(__FILE__, __LINE__);
+}
+
+/* ******************************************* */
+
+void Ntop::startBGPPolling(char *url) {
+  if(bgp != NULL) {
+    /* Terminate an existing BGP if existing */
+    delete bgp;
+    bgp = NULL;
+  }
+
+  bgp = new BGPPrefixListener(url);
 }
 
 /* ******************************************* */

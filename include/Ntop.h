@@ -219,7 +219,8 @@ class Ntop {
   void reloadMessageBroker();
 #endif
   bool downloadCustomnDPIProtos(char* url, char* dest_file);
-
+  BGPPrefixListener *bgp;
+  
  public:
   /**
    * @brief A Constructor
@@ -976,8 +977,10 @@ class Ntop {
   static const ndpi_protocol getConstNdpiUnknownProtocol();
 
   std::string getLuaCache(std::string);
-  void setLuaCache(std::string, std::string);
+  void setLuaCache(std::string, std::string);  
   void dumpLuaCache(lua_State* vm);
+
+  void startBGPPolling(char *url);
 };
 
 extern Ntop* ntop;

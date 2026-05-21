@@ -26,13 +26,17 @@
 
 class BGPPrefixListener {
  private:
-  bool bgp_prefix_polling_active;
-
+  bool bgp_prefix_polling_active, polling;
+  void *context, *sock;
+  pthread_t threadId;
+  
  public:
   BGPPrefixListener(char *url);
   ~BGPPrefixListener();
 
   void termBGPPrefixUpdatesPolling();
+  void poll();
+  inline bool is_polling() { return(polling); }
 };
 
 #endif /* _BGP_PREFIX_LISTENER_H_ */

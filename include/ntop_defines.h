@@ -1773,6 +1773,8 @@ extern NtopngLuaContext* getUserdata(struct lua_State* vm);
 
 #define CONST_FLOW_DEV_SITES_ID  NTOPNG_PREFS_PREFIX ".flow_devices_to_sites"
 
+#define CONST_BGP_PREFIX_TOPIC  "prefix_change"
+
 #define NTOP_QOE_MAX 100
 #define NTOP_QOE_UNKNOWN 255
 #define NTOP_QOE_EXCELLENT 90

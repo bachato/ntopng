@@ -23,28 +23,70 @@
 
 /* *************************************** */
 
+static void* startPolling(void* arg) {
+  BGPPrefixListener *l = (BGPPrefixListener*)arg;
+
+  l->poll();
+
+  return(NULL);
+}
+
+/* *************************************** */
+
 BGPPrefixListener::BGPPrefixListener(char *url) {
-  void *context = zmq_ctx_new();
-  void *sock = zmq_socket(context, ZMQ_SUB);
-  const char *topic_filter = "prefix_change";
-  size_t filter_len = strlen(topic_filter) + 1;
-  
+  context = zmq_ctx_new();
+  if(context == NULL) return;
+
+  sock = zmq_socket(context, ZMQ_SUB);
+
   if(zmq_connect(sock, url) != 0) {
     ntop->getTrace()->traceEvent(TRACE_ERROR,
 				 "Unable to connect to ZMQ endpoint %s: %s (%d)", url,
 				 strerror(errno), errno);
     zmq_ctx_destroy(context);
+    context = NULL;
     return;
   }
 
-  zmq_setsockopt(sock, ZMQ_SUBSCRIBE, topic_filter, strlen(topic_filter));
+  zmq_setsockopt(sock, ZMQ_SUBSCRIBE, CONST_BGP_PREFIX_TOPIC,
+		 strlen(CONST_BGP_PREFIX_TOPIC));
 
   ntop->getTrace()->traceEvent(TRACE_NORMAL,
 			       "Subscribed to topic %s on %s",
-			       topic_filter, url);
+			       CONST_BGP_PREFIX_TOPIC, url);
+
+  polling = false;
+
+  if(pthread_create(&threadId, nullptr, startPolling, this) != 0)
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to start polling data");
+}
+
+/* *************************************** */
+
+BGPPrefixListener::~BGPPrefixListener() {
+  termBGPPrefixUpdatesPolling();
+  while(is_polling()) sleep(1);
+
+  if(sock)    zmq_close(sock);
+  if(context) zmq_ctx_destroy(context);
+}
+
+/* *************************************** */
+
+void BGPPrefixListener::termBGPPrefixUpdatesPolling() {
+  if(context)
+    bgp_prefix_polling_active = false;
+}
+
+/* *************************************** */
+
+void BGPPrefixListener::poll() {
+  size_t filter_len = strlen(CONST_BGP_PREFIX_TOPIC) + 1;
+  if(!context) return;
 
   bgp_prefix_polling_active = true;
-  
+  polling = true;
+
   while((!ntop->getGlobals()->isShutdown())
 	&& (!ntop->getGlobals()->isShutdownRequested())
 	&& bgp_prefix_polling_active) {
@@ -64,30 +106,21 @@ BGPPrefixListener::BGPPrefixListener(char *url) {
     if (items[0].revents & ZMQ_POLLIN) {
       char buffer[1024], *message;
       int bytes_received = zmq_recv(sock, buffer, sizeof(buffer) - 1, 0);
-      
+
       if (bytes_received < 0)
-	break;      
+	break;
 
       buffer[bytes_received] = '\0';
       message = &buffer[filter_len];
-      
+
       ntop->getRedis()->lpush(BGP_PREFIX_UPDATE_QUEUE_NAME,
 			      message, 100 /* max queue lenght */);
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", message);
     } else {
-      // No data arrived within the timeout      
+      // No data arrived within the timeout
     }
   }
 
-  bgp_prefix_polling_active = false;
-  zmq_close(sock);
-  zmq_ctx_destroy(context);
-}
-
-/* *************************************** */
-
-void BGPPrefixListener::termBGPPrefixUpdatesPolling() {
+  polling = false;
   bgp_prefix_polling_active = false;
 }
-
-/* *************************************** */
