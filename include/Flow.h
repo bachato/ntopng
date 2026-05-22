@@ -1378,10 +1378,10 @@ class Flow : public GenericHashEntry {
     if (collection) collection->vrfId = v;
   }
   inline void setSrcPeerAS(u_int32_t v) {
-    srcPeerAS = v;
+    if(v != srcAS) srcPeerAS = v;
   } /* Used when collecting flows via ZMQ (usually it contains the peer AS) */
   inline void setDstPeerAS(u_int32_t v) {
-    dstPeerAS = v;
+    if(v != dstAS) dstPeerAS = v;
   } /* Used when collecting flows via ZMQ (usually it contains the peer AS) */
   inline void setPrevAdjacentAS(u_int32_t v) {
     allocateCollection();
