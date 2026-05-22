@@ -4,7 +4,7 @@ Timeseries
 ##########
 
 Ntopng creates historical timeseries to be visualized in the charts. In order to
-store timeseries data, ntopng supports RRD_ and InfluxDB_ as timeseries drivers.
+store timeseries data, ntopng supports RRD_, InfluxDB_ and ClickHouse as timeseries drivers.
 
 .. figure:: ../img/basic_concepts_timeseries_preferences.png
   :align: center
