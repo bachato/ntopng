@@ -34,6 +34,17 @@ local function get_all_tags()
    return _all_tags_cache
 end
 
+local function handleIPAddress(ip)
+   -- Handle IPv4-mapped addresses (::ffff:a.b.c.d) by stripping prefix
+   local display_ip = ip
+   local ip_mapped = string.match(ip, "^::ffff:(.+)$")
+   if ip_mapped then
+      display_ip = ip_mapped
+   end
+
+   return display_ip
+end
+
 -- Parse TAGS_MAP hex string stored in ClickHouse into an array of name/color
 local function dt_format_tags_map(hex_str)
    if isEmptyString(hex_str) then return nil end
@@ -728,14 +739,7 @@ local function dt_format_probe(probe_ip)
       probe_info["label"] = ""
       probe_info["value"] = ""
    else
-
-      -- Handle IPv4-mapped addresses (::ffff:a.b.c.d) by stripping prefix
-      local display_ip = probe_ip
-      local ipv4_mapped = string.match(probe_ip, "^::ffff:(.+)$")
-      if ipv4_mapped then
-         display_ip = ipv4_mapped
-      end
-
+      local display_ip = handleIPAddress(probe_ip)
       probe_info["title"] = display_ip
       probe_info["value"] = probe_ip
       probe_info["label"] = getProbeName(display_ip)
@@ -901,10 +905,12 @@ local function dt_format_snmp_interface(interface, flow)
   local exporter = flow["PROBE_IP"]
   local label = interface
   local value = interface
+  
+  local display_ip = handleIPAddress(exporter)
 
-  if tostring(interface) ~= "0" and not isEmptyString(exporter) and exporter ~= "::" then
-    label = format_portidx_name(exporter, tostring(interface), true)
-    value = exporter .. "_" .. tostring(interface)
+  if tostring(interface) ~= "0" and not isEmptyString(display_ip) and display_ip ~= "::" then
+    label = format_portidx_name(display_ip, tostring(interface), true)
+    value = display_ip .. "_" .. tostring(interface)
   end
 
   local interface_tag = {
