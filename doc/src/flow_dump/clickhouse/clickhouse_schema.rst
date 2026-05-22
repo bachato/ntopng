@@ -181,6 +181,10 @@ Flows table description:
 +---------------------------+---------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------+
 | CLIENT_FINGERPRINT        | Client Fingerprint        | String         | Unique identifier derived from client characteristics                                                                    |
 +---------------------------+---------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------+
+| HR_SRC2DST_BYTES          | HR Src→Dst Bytes          | Array(UInt64)  | 15-second delta byte counters, source-to-destination. Populated when nProbe exports HR_SRC_TO_DST_BYTES. See :ref:`HighResolutionTimeseries`. |
++---------------------------+---------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------+
+| HR_DST2SRC_BYTES          | HR Dst→Src Bytes          | Array(UInt64)  | 15-second delta byte counters, destination-to-source. Populated when nProbe exports HR_DST_TO_SRC_BYTES. See :ref:`HighResolutionTimeseries`. |
++---------------------------+---------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------+
 
 
 The list of the Layer 7 protocols can be found `here <https://github.com/ntop/nDPI/blob/dev/src/include/ndpi_protocol_ids.h>`__

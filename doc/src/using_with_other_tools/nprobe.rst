@@ -72,6 +72,21 @@ Additional fields can be combined with the macro :code:`@NTOPNG@` to specify ext
 
 	  nprobe --zmq "tcp://*:5556" -i eth1 -n none -T "@NTOPNG@ %FLOW_TO_APPLICATION_ID %FLOW_TO_USER_ID %INITIATOR_GW_IP_ADDR %EXPORTER_IPV4_ADDRESS"
 
+High-Resolution Timeseries
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Adding :code:`%HR_SRC_TO_DST_BYTES` and :code:`%HR_DST_TO_SRC_BYTES` to the template enables
+**15-second per-flow byte counters**. ntopng automatically detects these fields and stores them
+in the ClickHouse ``flows`` table for use in high-resolution throughput charts:
+
+.. code:: bash
+
+	  nprobe -i eth1 -n none --zmq "tcp://*:5556" \
+	         -T "@NTOPNG@ %HR_DST_TO_SRC_BYTES %HR_SRC_TO_DST_BYTES"
+
+No ntopng configuration change is required — detection and storage are automatic when ClickHouse
+is configured as the flow dump backend. See :ref:`HighResolutionTimeseries` for full details.
+
 Collecting from Multiple Exporters
 ==================================
 
