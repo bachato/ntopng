@@ -1132,6 +1132,31 @@ void Ntop::loadMacManufacturers(char* dir) {
 
 /* ******************************************* */
 
+bool Ntop::startPollingBGPPrefixChanges(char *zmq_url) {
+  char buf[128];
+  
+  if((zmq_url == NULL) && (redis != NULL)) {
+    /* In case zmq_url is not specified, we read it from preferences */
+    if(redis->get((char*)CONST_BGP_PREFIX_ENDPOINT_NAME, buf, sizeof(buf)) == 0)
+      zmq_url = buf;
+  }
+
+  if((zmq_url == NULL) || (zmq_url[0] == '\0') )
+    return(false); /* Nothing to do */
+  
+  if(bgp != NULL) {
+    /* Terminate an existing BGP if existing */
+    delete bgp;
+    bgp = NULL;
+  }
+
+  bgp = new BGPPrefixListener(zmq_url);
+
+  return(true);
+}
+
+/* ******************************************* */
+
 #ifdef HAVE_SNMP_TRAP
 void Ntop::initSNMPTrapCollector() {
   if (trap_collector != NULL) return; /* already initialized */
@@ -5675,18 +5700,6 @@ void Ntop::dumpLuaCache(lua_State* vm) {
     lua_push_str_table_entry(vm, it->first.c_str(), it->second.c_str());
 
   luaCacheLock.unlock(__FILE__, __LINE__);
-}
-
-/* ******************************************* */
-
-void Ntop::startBGPPolling(char *url) {
-  if(bgp != NULL) {
-    /* Terminate an existing BGP if existing */
-    delete bgp;
-    bgp = NULL;
-  }
-
-  bgp = new BGPPrefixListener(url);
 }
 
 /* ******************************************* */

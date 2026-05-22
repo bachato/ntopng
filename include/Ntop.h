@@ -980,7 +980,7 @@ class Ntop {
   void setLuaCache(std::string, std::string);  
   void dumpLuaCache(lua_State* vm);
 
-  void startBGPPolling(char *url);
+  bool startPollingBGPPrefixChanges(char *url);
 };
 
 extern Ntop* ntop;

@@ -9150,10 +9150,23 @@ static int reload_asn_configuration(lua_State* vm) {
 
 /* **************************************************************** */
 
+/* @brief Start polling BGP changes via ZMQ → nil */
+static int start_polling_bgp_changes(lua_State* vm) {
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  
+  ntop->startPollingBGPPrefixChanges((char*)lua_tostring(vm, 1));
+  lua_pushnil(vm);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
+}
+
+/* **************************************************************** */
+
 #ifdef NTOPNG_PRO
 
 /* @brief Reloads networks policy configuration from Redis (Pro only).  Lua: ntop.reloadNetworksPolicyConfiguration() → nil */
 static int reload_networks_policy_configuration(lua_State* vm) {
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  
   if (ntop->getPrefs()->reloadNetworksPolicyConfiguration()) {
     lua_pushboolean(vm, 1);
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
@@ -9758,7 +9771,8 @@ static luaL_Reg _ntop_reg[] = {
 
     {"reloadServersConfiguration", reload_servers_configuration},
     {"reloadASNConfiguration", reload_asn_configuration},
-
+    {"startPollingBGPPrefixChanges", start_polling_bgp_changes},
+    
 #if defined(NTOPNG_PRO)
     {"reloadNetworksPolicyConfiguration", reload_networks_policy_configuration},
 #endif

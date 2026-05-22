@@ -300,17 +300,21 @@ if auth.has_capability(auth.capabilities.preferences) then
       local bgp_address = _POST["ip_address"] or ""
       local bgp_port = _POST["port"] or ""
       local bgp_pce = _POST["prefix_changes_endpoint"] or ""
+      
       -- Only run the test when an address is provided and at least one field changed.
       -- NOTE: the connection check is intentionally performed AFTER the new values have
       -- been accepted into _POST (i.e. they will be persisted regardless of the outcome).
       -- On failure we only warn the user; we do NOT restore the old values.
+
       if not isEmptyString(bgp_address) and (
 	 bgp_address ~= (ntop.getPref("ntopng.prefs.bgp_server.ip_address") or "") or
 	 bgp_port ~= (ntop.getPref("ntopng.prefs.bgp_server.port") or "")
       ) then
 	 ntop.setPref("ntopng.prefs.bgp_server.ip_address", bgp_address)
 	 ntop.setPref("ntopng.prefs.bgp_server.port", bgp_port)
+
 	 local ok = ntop.ribFind("1.1.1.1")
+
 	 if not ok then
 	    message_info = i18n("prefs.bgp_server_connection_failed")
 	    message_severity = "alert-danger"
@@ -319,8 +323,9 @@ if auth.has_capability(auth.capabilities.preferences) then
 	    message_severity = "alert-success"
 	 end
       end
+      
       if not isEmptyString(bgp_pce) then
-         --Insert here the function call passing the bgp_pce as argument
+         ntop.startPollingBGPPrefixChanges(bgp_pce)
       end
    end
 

@@ -392,4 +392,6 @@ ts_utils.runFirstSetup()
 
 cache_utils.initialize()
 
+ntop.startPollingBGPPrefixChanges()
+
 traceError(TRACE_NORMAL, TRACE_CONSOLE, "Completed startup.lua")
