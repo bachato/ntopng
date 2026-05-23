@@ -10,6 +10,16 @@ USE ntopng;
 
 @
 
+/* Utility functions */
+CREATE FUNCTION IPv6NumToNormalizedIP AS (ip) ->
+    if(
+        startsWith(IPv6NumToString(ip), '::ffff:'),
+        replaceOne(IPv6NumToString(ip), '::ffff:', ''),
+        IPv6NumToString(ip)
+    );
+
+@
+
 CREATE TABLE IF NOT EXISTS `flows` ON CLUSTER '$CLUSTER' (
 `FLOW_ID` UInt64 COMMENT 'Unique flow identifier assigned by ntopng',
 `IP_PROTOCOL_VERSION` UInt8 COMMENT 'IP version: 4 for IPv4, 6 for IPv6',

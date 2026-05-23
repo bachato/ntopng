@@ -34,17 +34,6 @@ local function get_all_tags()
    return _all_tags_cache
 end
 
-local function handleIPAddress(ip)
-   -- Handle IPv4-mapped addresses (::ffff:a.b.c.d) by stripping prefix
-   local display_ip = ip
-   local ip_mapped = string.match(ip, "^::ffff:(.+)$")
-   if ip_mapped then
-      display_ip = ip_mapped
-   end
-
-   return display_ip
-end
-
 -- Parse TAGS_MAP hex string stored in ClickHouse into an array of name/color
 local function dt_format_tags_map(hex_str)
    if isEmptyString(hex_str) then return nil end
@@ -739,7 +728,7 @@ local function dt_format_probe(probe_ip)
       probe_info["label"] = ""
       probe_info["value"] = ""
    else
-      local display_ip = handleIPAddress(probe_ip)
+      local display_ip = probe_ip
       probe_info["title"] = display_ip
       probe_info["value"] = probe_ip
       probe_info["label"] = getProbeName(display_ip)
@@ -906,7 +895,7 @@ local function dt_format_snmp_interface(interface, flow)
   local label = interface
   local value = interface
   
-  local display_ip = handleIPAddress(exporter)
+  local display_ip = exporter
 
   if tostring(interface) ~= "0" and not isEmptyString(display_ip) and display_ip ~= "::" then
     label = format_portidx_name(display_ip, tostring(interface), true)
@@ -1290,7 +1279,7 @@ local flow_columns = {
    
    ['SRC_ASN'] =              { flowfilter = "cli_asn", simple_dt_func = simple_format_src_asn, db_type = "Number", db_raw_type = "Uint32" },
    ['DST_ASN'] =              { flowfilter = "srv_asn", simple_dt_func = simple_format_dst_asn, db_type = "Number", db_raw_type = "Uint32" },
-   ['PROBE_IP'] =             { flowfilter = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv6NumToString", where_func = "toIPv6", db_type = "IPv6", db_raw_type = "IPv6" },
+   ['PROBE_IP'] =             { flowfilter = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv6NumToNormalizedIP", where_func = "toIPv6", db_type = "IPv6", db_raw_type = "IPv6" },
    ['EXPORTER_SITE'] =        { flowfilter = "site", dt_func = dt_format_site, db_type = "Number", db_raw_type = "Uint16" },
    ['OBSERVATION_POINT_ID'] = { flowfilter = "observation_point_id", dt_func = dt_format_obs_point, format_func = format_flow_observation_point, i18n = i18n("details.observation_point_id"), order = 12 , db_type = "Number", db_raw_type = "Uint16" },
    ['SRC2DST_TCP_FLAGS'] =    { flowfilter = "src2dst_tcp_flags", dt_func = dt_format_tcp_flags, db_type = "Number", db_raw_type = "Uint8" },
@@ -1380,7 +1369,7 @@ local aggregated_flow_columns = {
    ['DST_LABEL'] =            { flowfilter = "srv_name", db_type = "String", db_raw_type = "String" },
    ['SRC_MAC'] =              { flowfilter = "cli_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
    ['DST_MAC'] =              { flowfilter = "srv_mac", dt_func = dt_format_mac, db_type = "Number", db_raw_type = "Uint64" },
-   ['PROBE_IP'] =             { flowfilter = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv6NumToString", where_func = "toIPv6", db_type = "IPv6", db_raw_type = "IPv6" },
+   ['PROBE_IP'] =             { flowfilter = "probe_ip",     dt_func = dt_format_probe, select_func = "IPv6NumToNormalizedIP", where_func = "toIPv6", db_type = "IPv6", db_raw_type = "IPv6" },
    ['EXPORTER_SITE'] =        { flowfilter = "site", dt_func = dt_format_site, db_type = "Number", db_raw_type = "Uint16" },
    ['SRC_COUNTRY_CODE'] =     { flowfilter = "cli_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
    ['DST_COUNTRY_CODE'] =     { flowfilter = "srv_country", dt_func = dt_format_country, db_type = "Number", db_raw_type = "Uint16" },
