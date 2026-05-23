@@ -113,13 +113,14 @@ Sample ClickHouse query to read the per-slot throughput of a specific flow:
 Grafana Dashboard
 -----------------
 
-A ready-made Grafana dashboard is shipped with ntopng at:
+Sample Grafana dashboards are available at:
 
 .. code-block:: text
 
-   /usr/share/ntopng/httpdocs/misc/grafana/hr-flow-throughput-dashboard.json
+   https://github.com/ntop/ntopng/tree/dev/httpdocs/misc/grafana
 
-Dashboard title: **ntopng High-Resolution Charts**
+The **ntopng High-Resolution Charts** sample dashboard (hr-flow-throughput-dashboard.json)
+is a simple example demonstrating how to use High-Resolution timeseries in Grafana.
 
 The dashboard provides two panels:
 
