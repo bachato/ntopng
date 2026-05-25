@@ -4,11 +4,14 @@
 dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 
-require "check_redis_prefs"
-require "flow_utils"
-local rest_utils = require "rest_utils"
-local flow_sankey = require "flow_sankey"
-local format_utils = require "format_utils"
+require("ntop_utils")
+require("check_redis_prefs")
+require("flow_utils")
+local rest_utils = require("rest_utils")
+local flow_sankey = require("flow_sankey")
+local format_utils = require("format_utils")
+
+local operators = flow_sankey.getOperators()
 
 -- Retrieve the info from the rest
 local asn = tonumber(_GET["asn"] or 0)
@@ -23,107 +26,302 @@ local queries = {}
 
 -- Empty ASN return an error
 if isEmptyString(asn) or (asn == 0) then
-    rest_utils.answer(rest_utils.consts.err.invalid_args)
-    return
+	rest_utils.answer(rest_utils.consts.err.invalid_args)
+	return
 end
 
 -- In case historical data has been requested, add the epoch_begin and epoch_end
 if data_type == "historical" and hasClickHouseSupport() then
-    -- Handle the epoch only with the historical
-    epoch_begin = tonumber(_GET["epoch_begin"])
-    epoch_end = tonumber(_GET["epoch_end"])
+	-- Handle the epoch only with the historical
+	epoch_begin = tonumber(_GET["epoch_begin"])
+	epoch_end = tonumber(_GET["epoch_end"])
 end
 
 if criteria_as == "ingress_egress_traffic_criteria" then
-    filters = {
-        asn = asn,
-        ifid = ifid,
-        first_seen = epoch_begin,
-        last_seen = epoch_end
-    }
-    queries = {
-        {
-            select_query = {
-                "in_iface_index", "in_device", "bytes_sent", "bytes_rcvd",
-                "total_bytes"
-            },
-            where_query = {"asn"},
-            sort_by = {"total_bytes"},
-            filters = filters,
-            root = {
-                formatter = format_utils.formatASN,
-                id = asn,
-                add_root_first = false
-            }
-        }, {
-            select_query = {
-                "out_device", "out_iface_index2", "bytes_sent", "bytes_rcvd",
-                "total_bytes"
-            },
-            where_query = {"asn"},
-            sort_by = {"total_bytes"},
-            filters = filters,
-            root = {
-                formatter = format_utils.formatASN,
-                id = asn,
-                add_root_first = true
-            }
-        }
-    }
+   local probe_key = "PROBE_IP"
+   if hasClickHouseSupport() then
+      probe_key = "REPLACE(IPv6NumToString(PROBE_IP), '::ffff:', '')"
+   end
+	queries = {
+		{
+			select_query = {
+				{
+					key = "INPUT_SNMP",
+					rename = "in_iface_index",
+					is_key = true,
+					formatter = format_portidx_name,
+               depends_on = "device_in",
+					linker = generateExporterInterfaceLink,
+				},
+				{
+					key = probe_key,
+					rename = "device_in",
+					is_key = true,
+					formatter = getProbeName,
+					linker = generateExporterLink,
+				},
+				{ key = "SUM(SRC2DST_BYTES)", rename = "bytes", formatter = format_utils.bytesToSize },
+			},
+			where_query = {
+				{ key = "DST_ASN", value = asn, operator = operators.eq }, -- DST_ASN = SEARCHED_ASN
+				{ key = "SRC2DST_BYTES", value = "0", operator = operators.gt },
+			},
+			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
+				ifid = ifid, -- where generated, it is better to manually format inside
+				epoch_begin = epoch_begin,
+				epoch_end = epoch_end,
+			},
+			root = {
+				formatter = format_utils.formatASN,
+				id = asn,
+				add_root_last = true,
+			},
+		},
+		{
+			select_query = {
+				{
+					key = "INPUT_SNMP",
+					rename = "in_iface_index",
+					is_key = true,
+					formatter = format_portidx_name,
+               depends_on = "device_in",
+					linker = generateExporterInterfaceLink,
+				},
+				{
+					key = probe_key,
+					rename = "device_in",
+					is_key = true,
+					formatter = getProbeName,
+					linker = generateExporterLink,
+				},
+				{ key = "SUM(DST2SRC_BYTES)", rename = "bytes", formatter = format_utils.bytesToSize },
+			},
+			where_query = {
+				{ key = "SRC_ASN", value = asn, operator = operators.eq }, -- DST_ASN = SEARCHED_ASN
+				{ key = "DST2SRC_BYTES", value = "0", operator = operators.gt },
+			},
+			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
+				ifid = ifid, -- where generated, it is better to manually format inside
+				epoch_begin = epoch_begin,
+				epoch_end = epoch_end,
+			},
+			root = {
+				formatter = format_utils.formatASN,
+				id = asn,
+				add_root_last = true,
+			},
+		},
+		{
+			select_query = {
+				{
+					key = probe_key,
+					rename = "device_out",
+					is_key = true,
+					formatter = getProbeName,
+					linker = generateExporterLink,
+				},
+				{
+					key = "OUTPUT_SNMP",
+					rename = "out_iface_index",
+					is_key = true,
+					formatter = format_portidx_name,
+               depends_on = "device_out",
+					linker = generateExporterInterfaceLink,
+				},
+				{ key = "SUM(SRC2DST_BYTES)", rename = "bytes", formatter = format_utils.bytesToSize },
+			},
+			where_query = {
+				{ key = "SRC_ASN", value = asn, operator = operators.eq }, -- SRC_ASN != 0
+				{ key = "SRC2DST_BYTES", value = "0", operator = operators.gt },
+			},
+			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
+				ifid = ifid, -- where generated, it is better to manually format inside
+				epoch_begin = epoch_begin,
+				epoch_end = epoch_end,
+			},
+			root = {
+				formatter = format_utils.formatASN,
+				id = asn,
+				add_root_first = true,
+			},
+		},
+		{
+			select_query = {
+				{
+					key = probe_key,
+					rename = "device_out",
+					is_key = true,
+					formatter = getProbeName,
+					linker = generateExporterLink,
+				},
+				{
+					key = "OUTPUT_SNMP",
+					rename = "out_iface_index",
+					is_key = true,
+					formatter = format_portidx_name,
+               depends_on = "device_out",
+					linker = generateExporterInterfaceLink,
+				},
+				{ key = "SUM(DST2SRC_BYTES)", rename = "bytes", formatter = format_utils.bytesToSize },
+			},
+			where_query = {
+				{ key = "DST_ASN", value = asn, operator = operators.eq }, -- SRC_ASN != 0
+				{ key = "DST2SRC_BYTES", value = "0", operator = operators.gt },
+			},
+			order_by_query = {
+				{ key = "bytes", value = "DESC" },
+			},
+			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
+				ifid = ifid, -- where generated, it is better to manually format inside
+				epoch_begin = epoch_begin,
+				epoch_end = epoch_end,
+			},
+			root = {
+				formatter = format_utils.formatASN,
+				id = asn,
+				add_root_first = true,
+			},
+		},
+	}
+
+
 elseif isEmptyString(criteria_as) or (criteria_as == "traffic_between_ases") then
-    queries = {
-        {
-            select_query = {
-                "src_asn", "src_peer_asn", "dst_peer_asn", "bytes_sent",
-                "bytes_rcvd", "total_bytes"
-            },
-            different_from = {nil, "src_asn", "dst_asn"},
-            rename_key_field = {nil, "src_peer_asn_1", "dst_peer_asn_1"},
-            skip_flow = {{key = "src_asn", value = "0"}},
-            where_query = {"dst_asn"},
-            sort_by = {"total_bytes"},
-            filters = {
-                dst_asn = asn,
-                ifid = ifid,
-                first_seen = epoch_begin,
-                last_seen = epoch_end
-            },
-            root = {
-                formatter = format_utils.formatASN,
-                id = asn,
-                add_root_first = false
-            }
-        }, {
-            select_query = {
-                "src_peer_asn", "dst_peer_asn", "dst_asn", "bytes_sent",
-                "bytes_rcvd", "total_bytes"
-            },
-            where_query = {"src_asn"},
-            sort_by = {"total_bytes"},
-            different_from = {"src_asn", "dst_asn"},
-            rename_key_field = {"src_peer_asn_2", "dst_peer_asn_2"},
-            skip_flow = {{key = "dst_asn", value = 0}},
-            invert_direction = true,
-            filters = {
-                src_asn = asn,
-                ifid = ifid,
-                first_seen = epoch_begin,
-                last_seen = epoch_end
-            },
-            root = {
-                formatter = format_utils.formatASN,
-                id = asn,
-                add_root_first = true
-            }
-        }
-    }
+	queries = {
+		{
+			select_query = {
+				{ key = "SRC_ASN", rename = "src_asn", is_key = true, formatter = format_utils.formatASN, linker = generateASNLink },
+				{
+					key = "SRC_PEER_ASN",
+					rename = "src_peer_asn",
+					is_key = true,
+					remove_if_equal_to = { "src_asn", "0" },
+					formatter = format_utils.formatASN,
+					linker = generateASNLink,
+				},
+				{ key = "SUM(SRC2DST_BYTES)", rename = "bytes", formatter = format_utils.bytesToSize },
+			},
+			where_query = {
+				{ key = "src_asn", value = "0", operator = operators.neq }, -- SRC_ASN != 0
+				{ key = "DST_ASN", value = asn, operator = operators.eq }, -- DST_ASN = SEARCHED_ASN
+				{ key = "SRC2DST_BYTES", value = "0", operator = operators.gt },
+			},
+			order_by_query = {
+				{ key = "bytes", value = "DESC" },
+			},
+			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
+				ifid = ifid, -- where generated, it is better to manually format inside
+				epoch_begin = epoch_begin,
+				epoch_end = epoch_end,
+			},
+			root = {
+				formatter = format_utils.formatASN,
+				id = asn,
+				add_root_last = true,
+			},
+		},
+		{
+			select_query = {
+				{ key = "DST_ASN", rename = "src_asn", is_key = true, formatter = format_utils.formatASN, linker = generateASNLink },
+				{
+					key = "DST_PEER_ASN",
+					rename = "src_peer_asn",
+					is_key = true,
+					remove_if_equal_to = { "src_asn", "0" },
+					formatter = format_utils.formatASN,
+					linker = generateASNLink,
+				},
+				{ key = "SUM(DST2SRC_BYTES)", rename = "bytes", formatter = format_utils.bytesToSize },
+			},
+			where_query = {
+				{ key = "src_asn", value = "0", operator = operators.neq }, -- DST_ASN != 0
+				{ key = "SRC_ASN", value = asn, operator = operators.eq }, -- SRC_ASN = SEARCHED_ASN
+				{ key = "DST2SRC_BYTES", value = "0", operator = operators.gt },
+			},
+			order_by_query = {
+				{ key = "bytes", value = "DESC" },
+			},
+			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
+				ifid = ifid, -- where generated, it is better to manually format inside
+				epoch_begin = epoch_begin,
+				epoch_end = epoch_end,
+			},
+			root = {
+				formatter = format_utils.formatASN,
+				id = asn,
+				add_root_last = true,
+			},
+		},
+		{
+			select_query = {
+				{ key = "SRC_ASN", rename = "dst_asn", is_key = true, formatter = format_utils.formatASN, linker = generateASNLink },
+				{
+					key = "DST_PEER_ASN",
+					rename = "src_peer_asn_2",
+					is_key = true,
+					remove_if_equal_to = { asn, "0" },
+					formatter = format_utils.formatASN,
+					linker = generateASNLink,
+				},
+				{ key = "SUM(DST2SRC_BYTES)", rename = "bytes", formatter = format_utils.bytesToSize },
+			},
+			where_query = {
+				{ key = "dst_asn", value = "0", operator = operators.neq }, -- SRC_ASN != 0
+				{ key = "DST_ASN", value = asn, operator = operators.eq }, -- DST_ASN = SEARCHED_ASN
+				{ key = "DST2SRC_BYTES", value = "0", operator = operators.gt },
+			},
+			order_by_query = {
+				{ key = "bytes", value = "DESC" },
+			},
+			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
+				ifid = ifid, -- where generated, it is better to manually format inside
+				epoch_begin = epoch_begin,
+				epoch_end = epoch_end,
+			},
+			root = {
+				formatter = format_utils.formatASN,
+				id = asn,
+				add_root_first = true,
+			},
+		},
+		{
+			select_query = {
+				{ key = "DST_ASN", rename = "dst_asn", is_key = true, formatter = format_utils.formatASN, linker = generateASNLink },
+				{
+					key = "SRC_PEER_ASN",
+					rename = "src_peer_asn_2",
+					is_key = true,
+					remove_if_equal_to = { asn, "0" },
+					formatter = format_utils.formatASN,
+					linker = generateASNLink,
+				},
+				{ key = "SUM(SRC2DST_BYTES)", rename = "bytes", formatter = format_utils.bytesToSize },
+			},
+			where_query = {
+				{ key = "dst_asn", value = "0", operator = operators.neq }, -- DST_ASN != 0
+				{ key = "SRC_ASN", value = asn, operator = operators.eq }, -- SRC_ASN = SEARCHED_ASN
+				{ key = "SRC2DST_BYTES", value = "0", operator = operators.gt },
+			},
+			order_by_query = {
+				{ key = "bytes", value = "DESC" },
+			},
+			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
+				ifid = ifid, -- where generated, it is better to manually format inside
+				epoch_begin = epoch_begin,
+				epoch_end = epoch_end,
+			},
+			root = {
+				formatter = format_utils.formatASN,
+				id = asn,
+				add_root_first = true,
+			},
+		},
+	}
 end
 
 local nodes = {}
 local links = {}
 local MAX_NODES_PER_LEVEL = 10
-nodes, links = flow_sankey.generateSankey(queries, MAX_NODES_PER_LEVEL,
-                                          not isEmptyString(epoch_begin))
+nodes, links = flow_sankey.generateSankey(queries, MAX_NODES_PER_LEVEL, not isEmptyString(epoch_begin))
 
 res["nodes"] = nodes
 res["links"] = links

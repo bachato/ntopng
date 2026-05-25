@@ -461,7 +461,7 @@ const mapTableColumns = (columns) => {
         "customer": (value, row) => {
             return formatAS(value);
         },
-        "as": (value, row) => {
+        "asn": (value, row) => {
             return formatAS(value);
         },
         "dst_as": (value, row) => {

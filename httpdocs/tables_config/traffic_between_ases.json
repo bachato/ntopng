@@ -9,7 +9,7 @@
         {
             "id": "as",
 			"title_i18n": "as_details.as",
-			"data_field": "as",
+			"data_field": "asn",
 			"sortable": true,
 			"class": [
 				"text-nowrap"

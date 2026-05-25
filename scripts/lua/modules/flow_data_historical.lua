@@ -9,178 +9,170 @@ local flow_data_historical = {}
 
 -- ###################################################
 
--- Helper used just to correctly format the where clause using OR or AND
-local function buildWhereClause(current_where, new_filter, use_or)
-    if not current_where then
-        return new_filter
-    else
-        local operator = use_or and "OR" or "AND"
-        return string.format("%s %s %s", current_where, operator, new_filter)
-    end
+-- Helper used just to correctly format the order by clause
+local function buildOrderByClause(query_info)
+	local order_by_keys = query_info.order_by_query or {}
+	local formatted_order_by_query = "ORDER BY "
+
+	if not (order_by_keys) or (table.len(order_by_keys) == 0) then
+		formatted_order_by_query = ""
+	end
+
+	-- Multiple order by allowed only in Historical, just skip all except the first order by
+	if not isHistorical then
+		order_by_keys = { order_by_keys[1] }
+	end
+
+	-- ###### ORDER BY ######
+	for index, order_by_info in pairs(order_by_keys) do
+		formatted_order_by_query =
+			string.format("%s%s %s", formatted_order_by_query, order_by_info.key, tostring(order_by_info.value))
+		if index ~= #order_by_keys then
+			-- Add the separator
+			formatted_order_by_query = string.format("%s, ", formatted_order_by_query)
+		end
+	end
+
+	return formatted_order_by_query
 end
 
 -- ###################################################
 
--- @brief Helper used just to format a single filter
--- @param filter List, all info about the filter to be created
--- @param use_or Boolean, true if OR is needed to be used false otherwise (AND)
--- @param position Number, important to understand if OR or AND cond are to be used
--- @param where String, update the where when done
--- @param group_by String, update the group_by when done
--- @param select_query String, update the select_query when done
--- @return where, group_by, select_query
-local function processFilter(filter, use_or, position, where, group_by,
-                             select_query, isHistorical)
-    local skip_select = false
-    local column_name
-    local new_filter
+-- Helper used just to correctly format the where clause
+local function buildSelectClause(query_info)
+	local select_keys = query_info.select_query
+	local formatted_select_query = "SELECT "
 
-    -- Format the select + group by if needed
-    local column_key = nil
+	-- ###### SELECT ######
+	for index, select_info in pairs(select_keys) do
+		formatted_select_query = string.format("%s%s", formatted_select_query, select_info.key)
+		if select_info.rename then
+			-- Add the AS if requested
+			formatted_select_query = string.format("%s AS %s", formatted_select_query, select_info.rename)
+		end
+		if index ~= #select_keys then
+			-- Add the separator
+			formatted_select_query = string.format("%s, ", formatted_select_query)
+		end
+	end
 
-    -- Choose the right filter type
-    if type(filter) == "number" or type(filter) == "string" then
-        skip_select = true
-        new_filter = string.format("%s='%s'", tostring(position),
-                                   tostring(filter))
-    else
-        local value_filter = filter.filter_value
-        column_key = filter.key or filter.column_id
-        if filter.db_formatting_fun then
-            -- In case of historical, the DB needs to apply this function
-            if (isHistorical) and (filter.db_formatting_fun.historical) then
-                column_key = string.format("%s(%s)",
-                                           filter.db_formatting_fun.historical,
-                                           column_key)
-            elseif (not isHistorical) and (filter.db_formatting_fun.live) then
-                -- In case of live, it needs to be applied before (so now)
-                value_filter = filter.db_formatting_fun.live(value_filter)
-            end
-        end
-
-        column_name = filter.id or filter.key or filter.column_id
-        new_filter = string.format("%s='%s'", column_name,
-                                   tostring(value_filter))
-    end
-
-    -- Update the where
-    where = buildWhereClause(where, new_filter, use_or)
-
-    -- Skip if requested
-    if skip_select then return where, group_by, select_query end
-
-    select_query = string.format("%s, %s AS %s", select_query, column_key,
-                                 column_name)
-
-    if filter.is_key then
-        group_by = string.format("%s, %s", group_by, column_name)
-    end
-
-    return where, group_by, select_query
+	return formatted_select_query
 end
 
 -- ###################################################
 
--- @brief Given a list of columns and a flow, create a unique key using the columns
--- @param select_columns List, as key an id and as value a boolean, telling if the element
---                      has to be used as an id or not (e.g. bytes_sent are NOT ids)
--- @param where_filters List, containing all the filters
--- @param sort_columns List, containing all the columns to sort by
--- @param invert_direction Boolean, true if traffic directions needs to be inverted
--- @param first_seen Number, begin epoch used for the query
--- @param last_seen Number, end epoch used for the query
--- @return a list of data retrieved from the DB
-function flow_data_historical.retrieveFlowData(select_columns, where_filters,
-                                               sort_columns, invert_direction,
-                                               first_seen, last_seen,
-                                               isHistorical)
-    local select_query = nil
-    local group_by = nil
-    local order_by = nil
-    local where = nil
-    local results = {}
+-- Helper used just to correctly format the group by clause
+local function buildGroupByClause(query_info)
+	local select_keys = query_info.select_query
+	local formatted_group_by = "GROUP BY "
 
-    -- Iterate all the columns and format the select and group by
-    for position, column_info in pairs(select_columns or {}) do
-        local column_name = column_info.id or column_info.column_id
-        local column_key = column_info.key
-        if invert_direction and not isEmptyString(column_info.invert_with) then
-            column_name = column_info.invert_with
-        end
+	-- ###### GROUP BY ######
+	for index, select_keys_info in pairs(select_keys) do
+		if select_keys_info.is_key then
+			formatted_group_by =
+				string.format("%s%s", formatted_group_by, (select_keys_info.rename or select_keys_info.key))
+			-- Add the separator
+			formatted_group_by = string.format("%s, ", formatted_group_by)
+		end
+	end
 
-        -- In case of CH, some columns needs a special formatting function
-        -- (e.g. IPs with IPv4NumToString)
-        if column_info.db_formatting_fun then
-            -- In case of historical, the DB needs to apply this function
-            if (isHistorical) and (column_info.db_formatting_fun.historical) then
-                column_key = string.format("%s(%s)",
-                                           column_info.db_formatting_fun
-                                               .historical, column_info.key)
-            end
-        end
-        -- Format the select
-        local select_part = string.format("%s AS %s", column_key, column_name)
-        select_query = select_query and (select_query .. ", " .. select_part) or
-                           select_part
+	formatted_group_by = formatted_group_by:sub(1, -3)
 
-        -- Add also to the group by
-        if column_info.is_key then
-            group_by = group_by and (group_by .. ", " .. column_name) or
-                           column_name
-        end
-    end
+	return formatted_group_by
+end
 
-    -- Iterate the filters, same format as the columns
-    for pos, column_info in pairs(where_filters) do
-        if type(column_info) == "table" and column_info[1] then
-            -- Array of OR conditions
-            for i, sub_filter in ipairs(column_info) do
-                where, group_by, select_query =
-                    processFilter(sub_filter, i > 1, i, where, group_by,
-                                  select_query, isHistorical)
-            end
-        else
-            where, group_by, select_query =
-                processFilter(column_info, false, pos, where, group_by,
-                              select_query, isHistorical)
-        end
-    end
+-- ###################################################
 
-    for pos, column_info in pairs(sort_columns or {}) do
-        local order_col = string.format("%s DESC", column_info.id)
-        order_by = order_by and (order_by .. ", " .. order_col) or order_col
-        -- Also for each sort, add a condition where the sorting column MUST not be 0
-        where = string.format("%s AND (%s > 0)", where, column_info.column_id_no_fun)
-    end
+-- Helper used just to correctly format the where clause
+local function buildWhereClause(query_info)
+	local where_keys = query_info.where_query or {}
+	local formatted_where_query = "WHERE "
 
-    -- Add first and last_seen to the where
-    if not where then where = "" end
-    order_by = order_by and ("ORDER BY " .. order_by) or ""
-    -- In case of live table, no first_seen or last_seen used
-    if (isHistorical) then
-        where = string.format(
-                    "%s AND (FIRST_SEEN >= %u AND FIRST_SEEN <= %u AND LAST_SEEN <= %u)",
-                    where, tonumber(first_seen), tonumber(last_seen),
-                    tonumber(last_seen))
-    end
+	-- First of all add the basic filters (ifid and epoch) to the where
+	if query_info.basic_filters then
+		local basic_filters = query_info.basic_filters
+		-- IFID
+		if basic_filters.ifid then
+			formatted_where_query =
+				string.format("%sINTERFACE_ID=%s AND ", formatted_where_query, tostring(basic_filters.ifid))
+		end
+		if basic_filters.epoch_begin then
+			formatted_where_query =
+				string.format("%sFIRST_SEEN>=%s AND ", formatted_where_query, tostring(basic_filters.epoch_begin))
+		end
+		if basic_filters.epoch_end then
+			formatted_where_query = string.format(
+				"%sFIRST_SEEN<=%u AND LAST_SEEN<=%s AND ",
+				formatted_where_query,
+				tostring(basic_filters.epoch_end),
+				tostring(basic_filters.epoch_end)
+			)
+		end
+	end
 
-    if not select_query or not group_by then
-        traceError(TRACE_ERROR, TRACE_CONSOLE, "Empty list of columns\n")
-        return results
-    end
+	-- Now format the others where
+	for index, where_info in pairs(where_keys) do
+      -- It means that there is an array of keys that needs to be put in an OR condition
+      if where_info.or_condition then
+         for _, info in pairs(where_info.key) do
+            formatted_where_query = string.format(
+               "%s%s%s%s OR ",
+               formatted_where_query,
+               info.key,
+               info.operator,
+               tostring(info.value)
+            )
+         end
+      else
+         formatted_where_query = string.format(
+            "%s%s%s%s AND ",
+            formatted_where_query,
+            where_info.key,
+            where_info.operator,
+            tostring(where_info.value)
+         )
+      end
+	end
 
-    -- TODO: have a generic parameter for the different tables available
-    local query = string.format(
-                      "SELECT %s FROM %s WHERE %s GROUP BY %s %s LIMIT 2000", -- Upper floor
-                      select_query, TABLE_NAME, where, group_by, order_by)
+	-- Remove the last "AND " string alwais added
+	if not isEmptyString(formatted_where_query) then
+		formatted_where_query = formatted_where_query:sub(1, -5)
+	end
 
-    if isHistorical and hasClickHouseSupport() then
-        results, error_code = interface.execSQLQuery(query)
-    else
-       results, error_code = interface.execInMemoryQuery(query)
-    end
+	return formatted_where_query
+end
 
-    return results or {}
+-- ###################################################
+
+function flow_data_historical.retrieveFlowData(query_info)
+   local results = nil 
+   local error_code = nil
+	-- Handle the select first
+	local isHistorical = not query_info.basic_info
+		or isEmptyString(query_info.basic_info.epoch_begin)
+		or isEmptyString(query_info.basic_info.epoch_end)
+
+	-- In case no select keys are requested return empty -> error
+	if not query_info.select_query then
+		traceError(TRACE_ERROR, TRACE_CONSOLE, "No SELECT keys provided\n")
+		return {}
+	end
+
+	local select_query = buildSelectClause(query_info)
+	local group_by_query = buildGroupByClause(query_info)
+	local where_query = buildWhereClause(query_info)
+	local order_by_query = buildOrderByClause(query_info)
+
+	local query =
+		string.format("%s FROM %s %s %s %s", select_query, TABLE_NAME, where_query, group_by_query, order_by_query)
+
+	if isHistorical and hasClickHouseSupport() then
+		results, error_code = interface.execSQLQuery(query)
+	else
+		results, error_code = interface.execInMemoryQuery(query)
+	end
+
+	return results or {}
 end
 
 -- ###################################################
