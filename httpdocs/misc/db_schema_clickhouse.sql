@@ -7,7 +7,7 @@
 /* - doc/README.clickhouse_schema.md */
 
 /* Utility functions */
-CREATE FUNCTION IPv6NumToNormalizedIP AS (ip) ->
+CREATE OR REPLACE FUNCTION IPv6NumToNormalizedIP AS (ip) ->
     if(
         startsWith(IPv6NumToString(ip), '::ffff:'),
         replaceOne(IPv6NumToString(ip), '::ffff:', ''),
