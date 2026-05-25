@@ -8,7 +8,8 @@
                 @select_option="changeCriteria">
             </SelectSearch>
         </div>
-        <div v-if="props.context.isEnterpriseXL && props.context.hasClickHouseSupport" class="w-100 d-flex align-items-center button-group">
+        <div v-if="props.context.isEnterpriseXL && props.context.hasClickHouseSupport"
+            class="w-100 d-flex align-items-center button-group">
             <!--
             <CustomSwitch v-model:value="toggle_slider" :change_label_side="true" :label="toggle_slider_label" style=""
                 class="me-1" icon="fa-calendar-days" :title="toggle_slider_label" @change_value="saveSwitch">
@@ -16,8 +17,8 @@
             -->
             <div class="w-100 position-relative">
                 <Transition name="add-effect" mode="out-in">
-                    <DateTimeRangePicker class="dontprint" id="as-date-time-picker"
-                        :round_time="true" :custom_time_interval_list="time_preset_list" min_time_interval_id="live"
+                    <DateTimeRangePicker class="dontprint" id="as-date-time-picker" :round_time="true"
+                        :custom_time_interval_list="time_preset_list" min_time_interval_id="live"
                         :custom_change_select_time="changeTime" @epoch_change="setTimeInterval">
                     </DateTimeRangePicker>
                 </Transition>
@@ -34,20 +35,18 @@
     <div class="m-2 mb-3">
         <Transition name="add-effect" mode="out-in">
             <div class="position-relative">
-                <div class="mb-4 d-flex flex-column" style="height: 60vh;">
+                <div class="mb-4 d-flex flex-column" :style="{ height: show_pie ? '360px' : '60vh' }">
                     <Loading :isLoading="loading"></Loading>
                     <Sankey v-if="show_sankey" ref="sankey_chart" :no_data_message="no_data_message"
                         :sankey_data="sankey_data" @node_click="onNodeClick" @autorefresh_toggle="onAutoRefreshToggle">
                     </Sankey>
-                    <Pie v-if="show_pie" :key="reRenderPie" ref="pie_chart" :no_data_message="no_data_message"
-                        :pie_data="pie_data" @autorefresh_toggle="onAutoRefreshToggle">>
-                    </Pie>
+                    <PieChart v-if="show_pie" ref="pie_chart" :key="reRenderPie" :chart="pieChartInfo" />
                 </div>
             </div>
         </Transition>
-        <Transition name="add-effect" v-if="props.context.isEnterpriseXL && props.context.hasClickHouseSupport" mode="out-in">
-            <div class="position-relative" :key="reRenderTable"
-                style="min-height: 614px;">
+        <Transition name="add-effect" v-if="props.context.isEnterpriseXL && props.context.hasClickHouseSupport"
+            mode="out-in">
+            <div class="position-relative" :key="reRenderTable" style="min-height: 614px;">
                 <TableWithConfig ref="table_as_stats" :table_id="table_id" :csrf="props.context.csrf"
                     :showLoading="true" :f_map_columns="mapTableColumns" :f_sort_rows="columnsSorting"
                     :get_extra_params_obj="getExtraParameters" @custom_event="onTableCustomEvent">
@@ -65,7 +64,7 @@ import { ref, onMounted, onBeforeMount, computed } from "vue";
 import { default as NoteList } from "./note-list.vue";
 import { default as Loading } from "./loading.vue"
 import { default as Sankey } from "./sankey.vue";
-import { default as Pie } from "./pie-test.vue";
+import { default as PieChart } from "./charts/pie-chart.vue";
 import { default as sortingFunctions } from "../utilities/sorting-utils.js";
 import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as SelectSearch } from "./select-search.vue";
@@ -126,9 +125,23 @@ const note_list = [
 
 /* ************************************** */
 
+const updatePieData = async () => {
+    loading.value = true;
+    const data = await getPieData();
+    loading.value = false;
+
+    return data
+}
+
+const pieChartInfo = {
+    custom_fetch: updatePieData,
+    unit: "bytes"
+}
+
+/* ************************************** */
+
 onMounted(() => {
     updateSankeyData();
-    updatePieData();
 })
 
 /* ************************************** */
@@ -184,7 +197,7 @@ const onAutoRefreshToggle = (enabled) => {
     if (enabled) {
         intervalId = setInterval(() => {
             updateSankeyData()
-            updatePieData()
+            pie_chart.value?.update();
         }, 10000 /* 10 sec refresh */)
     } else {
         clearInterval(intervalId);
@@ -212,7 +225,7 @@ const changeCriteria = async (opt) => {
     checkComponentsToShow();
     ntopng_url_manager.set_key_to_url(opt.key, `${opt.value}`);
     updateSankeyData();
-    updatePieData();
+    pie_chart.value?.update();
 }
 
 /* ************************************** */
@@ -237,7 +250,7 @@ function setTimeInterval(epoch_interval) {
     }
     main_epoch_interval.value = epoch_interval;
     updateSankeyData();
-    updatePieData();
+    pie_chart.value?.update();
     reloadTable()
 }
 
@@ -245,18 +258,6 @@ function setTimeInterval(epoch_interval) {
 
 function saveSwitch() {
     localStorage.setItem("as-overview-slider", toggle_slider.value);
-}
-
-/* ************************************** */
-
-const updatePieData = async () => {
-    if (show_pie.value) {
-        reRenderPie.value = !reRenderPie.value
-        loading.value = true;
-        const data = await getPieData();
-        pie_data.value = data;
-        loading.value = false;
-    }
 }
 
 /* ************************************** */
@@ -388,7 +389,7 @@ function columnsSorting(col, r0, r1) {
         } else if (col.id == "customer") {
             return sortingFunctions.sortByName(r0.customer.name, r1.customer.name, col.sort);
         } else if (col.id == "as") {
-            return sortingFunctions.sortByName(r0.as.name, r1.as.name, col.sort);
+            return sortingFunctions.sortByNumber(r0.asn.name, r1.asn.name, col.sort);
         } else if (col.id == "dst_as") {
             return sortingFunctions.sortByName(r0.dst_as.name, r1.dst_as.name, col.sort);
         } else if (col.id == "src_as") {

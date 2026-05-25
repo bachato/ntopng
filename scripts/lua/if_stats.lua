@@ -805,7 +805,7 @@ if (ifstats.type ~= "zmq") then
 end
 
 print [[ <tr>]]
-print [[<td colspan=6>]]
+print [[<td colspan=6><div class="row"><div class="row-4">]]
 
 template.render("pages/vue_page.template", {
     vue_page_name = "MultiPieChart",
@@ -814,7 +814,7 @@ template.render("pages/vue_page.template", {
     }),
 })
 
-print [[</td></tr>]]
+print [[</div></div></td></tr>]]
     if (ifstats.zmqRecvStats ~= nil and table.len(ifstats.zmqRecvStats) > 0) then
         print("<tr><th colspan=7 nowrap>" .. i18n("if_stats_overview.zmq_rx_statistics") .. "</th></tr>\n")
         local tot_flows = (ifstats.zmqRecvStats.flows or 0) + (ifstats.zmqRecvStats.dropped_flows or 0)

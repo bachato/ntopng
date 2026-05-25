@@ -2,7 +2,7 @@
   (C) 2026 - ntop.org
 -->
 <template>
-    <div ref="container" class="pie-container" :class="{ 'layout-column': legend_below }">
+    <div ref="container" class="pie-container" :class="{ 'layout-column': legend_below }" :style="props.style">
         <!-- Title -->
         <div v-if="chart.title" class="pie-title"><strong>{{ chart.title }}</strong></div>
 
@@ -18,7 +18,7 @@
 
                 <!-- Legend -->
                 <div v-if="!loading && items.length && !no_data" class="pie-legend-wrap">
-                    <div class="pie-legend">
+                    <div class="pie-legend justify-content-center">
                         <div v-for="(it, i) in items" :key="i" class="legend-item" :class="{ clickable: !!it.url }"
                             @click="it.url && (window.location.href = it.url)">
                             <span class="legend-dot" :style="{ background: it.color }"></span>
@@ -51,7 +51,7 @@ import NoData from '../components/no-data.vue'
 const d3 = d3v7;
 const _i18n = (t) => (typeof i18n === "function" ? i18n(t) : t);
 
-const props = defineProps({ chart: { type: Object, required: true }, hideLoading: Boolean });
+const props = defineProps({ chart: { type: Object, required: true }, hideLoading: Boolean, style: String });
 const { name, update_url, url_params, refresh, unit, label, custom_fetch } = props.chart;
 const formatted_label = label ? (i18n(label) || label) : null;
 const container = ref(null);
@@ -133,7 +133,7 @@ async function load() {
     if (!has_loaded.value) loading.value = true;
     const { update_url, url_params, custom_fetch } = props.chart;
     emit("update-requested");
-
+    
     try {
         let data;
 
@@ -315,9 +315,11 @@ watch(() => props.chart.url_params, () => {
 }
 
 .pie-wrapper {
-    flex: 0 0 auto;
     /* width drives height via aspect-ratio — no height: 100% which caused circular sizing */
-    width: clamp(100px, 45%, 200px);
+    flex: 0 0 auto;
+    /* prende il minore tra 45% della larghezza e il 100% dell'altezza disponibile */
+    width: min(clamp(100px, 45%, 100%), 100%);
+    height: 100%;
     aspect-ratio: 1 / 1;
     overflow: hidden;
 }

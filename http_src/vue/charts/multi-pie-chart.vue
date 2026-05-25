@@ -3,11 +3,12 @@
 -->
 
 <template>
-  <div class="donut-charts-wrapper" :style="gridStyle">
+  <div :style="gridStyle">
     <PieChart
       v-for="chart in charts"
       :key="chart.name"
       :chart="chart"
+      :style="style"
     />
   </div>
 </template>
@@ -22,6 +23,8 @@ const props = defineProps({
   charts_per_row: { type: Number, default: null },
 });
 
+const style = "max-height:400px"
+
 const charts = computed(() => {
   if (props.context?.charts) return props.context.charts;
   if (props.chart)            return [props.chart];
@@ -33,8 +36,7 @@ const gridStyle = computed(() => {
   return {
     display:             "grid",
     gridTemplateColumns: `repeat(${perRow}, 1fr)`,
-    gap:                 "10px",
-    width:               "100%",
+    gap:                 "10px"
   };
 });
 </script>

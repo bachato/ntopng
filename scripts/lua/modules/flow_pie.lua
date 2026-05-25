@@ -15,7 +15,12 @@ local values_table = {}
 -- ##########################################
 
 local function update_section(sections, section_ref, value, formatter)
-	local section_label = formatter(section_ref)
+   local section_label
+   if section_ref == "others" then
+      section_label = i18n(section_ref)
+   else
+      section_label = formatter(section_ref)
+   end
 	local index = values_table[section_ref].index
 	local previous_value = values_table[section_ref].value
 	local new_value = previous_value + value
@@ -27,16 +32,18 @@ end
 -- ##########################################
 
 local function create_section(sections, section_ref, value, formatter)
-	local section_label = formatter(section_ref)
+	local section_label
+   if section_ref == "others" then
+      section_label = i18n(section_ref)
+   else
+      section_label = formatter(section_ref)
+   end
 	local index = #sections + 1
 	sections[index] = {
 		label = section_label .. " (" .. bytesToSize(value) .. ")",
 		value = value,
 		url = "#",
 	}
-   if sections_ref == nil then
-      return
-   end
 	values_table[section_ref] = {
 		index = index,
 		value = value,

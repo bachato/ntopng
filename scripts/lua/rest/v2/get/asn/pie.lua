@@ -95,7 +95,7 @@ if criteria_as == "user_traffic_breakdown" then
 	}
 end
 
-local sections = flow_pie.generatePie(queries, 10000, not isEmptyString(epoch_begin))
+local sections = flow_pie.generatePie(queries, 8, not isEmptyString(epoch_begin))
 
 table.sort(sections, function(a, b)
 	return a.value > b.value
