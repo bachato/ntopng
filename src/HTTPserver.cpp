@@ -1112,7 +1112,8 @@ static void oidc_start(struct mg_connection* conn,
 static void oidc_callback(struct mg_connection* conn,
                            const struct mg_request_info* request_info,
                            char* username, char* group, bool* localuser) {
-  char code[1024] = {'\0'}, state[256] = {'\0'}, error[256] = {'\0'};
+  char code[4096] = {'\0'}; /* Note: Microsoft codes can be 1-2 KB */
+  char state[256] = {'\0'}, error[256] = {'\0'};
   get_qsvar(request_info, "code", code, sizeof(code));
   get_qsvar(request_info, "state", state, sizeof(state));
   get_qsvar(request_info, "error", error, sizeof(error));
