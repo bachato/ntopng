@@ -114,6 +114,7 @@ local function buildWhereClause(query_info)
 	for index, where_info in pairs(where_keys) do
       -- It means that there is an array of keys that needs to be put in an OR condition
       if where_info.or_condition then
+         formatted_where_query = formatted_where_query .. "("
          for _, info in pairs(where_info.key) do
             formatted_where_query = string.format(
                "%s%s%s%s OR ",
@@ -123,6 +124,8 @@ local function buildWhereClause(query_info)
                tostring(info.value)
             )
          end
+		   formatted_where_query = formatted_where_query:sub(1, -4)
+         formatted_where_query = formatted_where_query .. ")"
       else
          formatted_where_query = string.format(
             "%s%s%s%s AND ",
@@ -134,8 +137,9 @@ local function buildWhereClause(query_info)
       end
 	end
 
+   tprint(formatted_where_query:sub(-5))
 	-- Remove the last "AND " string alwais added
-	if not isEmptyString(formatted_where_query) then
+	if not isEmptyString(formatted_where_query) and formatted_where_query:sub(-5) == " AND " then
 		formatted_where_query = formatted_where_query:sub(1, -5)
 	end
 
