@@ -106,6 +106,11 @@ function ts_utils.loadSchemas()
     require("ts_5sec")
     require("ts_hour")
 
+    -- HR schemas require ClickHouse and an Enterprise M (or better) license.
+    if ntop.isClickHouseEnabled() and ntop.isEnterpriseM() then
+        require("ts_hr")
+    end
+
     -- Possibly load more timeseries schemas
     script_manager.loadSchemas()
 
@@ -183,6 +188,34 @@ end
 
 -- ##############################################
 
+local cached_hr_driver = nil
+
+-- Return the ClickHouse HR driver instance.
+function ts_utils.getHRDriver()
+    if cached_hr_driver then
+        return cached_hr_driver
+    end
+    if ntop.isClickHouseEnabled() then
+        local prefs = ntop.getPrefs()
+        cached_hr_driver = require("clickhousehr"):new({
+            db = prefs.clickhouse_dbname or "ntopng",
+        })
+    end
+    return cached_hr_driver
+end
+
+-- Return the right query driver for a given schema.
+-- (schemas with data_source = "flows" will use the HR driver,
+-- all others use the standard driver).
+function ts_utils.getQueryDriverForSchema(schema)
+    if schema and schema.options and schema.options.data_source == "flows" then
+        return ts_utils.getHRDriver()
+    end
+    return ts_utils.getQueryDriver()
+end
+
+-- ##############################################
+
 function ts_utils.getDriverName()
     local driver = ntop.getPref("ntopng.prefs.timeseries_driver")
 
@@ -244,6 +277,11 @@ function ts_utils.append(schema_name, tags_and_metrics, timestamp)
 
     if not tags then
         return false
+    end
+
+    -- HR schemas have no Lua write path: data is written by the C++ flow-dump pipeline.
+    if schema.options.data_source == "flows" then
+        return true
     end
 
     if not schema.options.is_critical_ts and ntop.isDeadlineApproaching() then
@@ -315,7 +353,7 @@ function ts_utils.query(schema_name, tags, tstart, tend, options)
         return nil
     end
 
-    local driver = ts_utils.getQueryDriver()
+    local driver = ts_utils.getQueryDriverForSchema(schema)
 
     if not driver then
         return nil
@@ -360,7 +398,7 @@ function ts_utils.timeseries_query(options)
         return nil
     end
 
-    local driver = ts_utils.getQueryDriver()
+    local driver = ts_utils.getQueryDriverForSchema(options.schema_info)
 
     if not driver then
         return nil
@@ -482,12 +520,6 @@ function ts_utils.timeseries_query_top(options)
         return nil
     end
 
-    local driver = ts_utils.getQueryDriver()
-
-    if not driver then
-        return nil
-    end
-
     ts_common.clearLastError()
 
     -- Check if some tops are already pre-computed
@@ -503,6 +535,12 @@ function ts_utils.timeseries_query_top(options)
 
         if not options.schema_info then
             traceError(TRACE_ERROR, TRACE_CONSOLE, "Schema not found: " .. options.schema)
+            return nil
+        end
+
+        local driver = ts_utils.getQueryDriverForSchema(options.schema_info)
+
+        if not driver then
             return nil
         end
 
@@ -564,12 +602,13 @@ end
 -- ! @return a (possibly empty) list of tags values for the matching timeseries on success, nil on error.
 function ts_utils.listSeries(schema_name, tags_filter, start_time, end_time, not_print_error)
     local schema = ts_utils.getSchema(schema_name)
-    local driver = ts_utils.getQueryDriver()
 
     if (not schema) then
         traceError(TRACE_ERROR, TRACE_CONSOLE, "Schema not found: " .. schema_name)
         return nil
     end
+
+    local driver = ts_utils.getQueryDriverForSchema(schema)
 
     if (not driver) then
         return nil
@@ -618,25 +657,19 @@ end
 -- ! @brief Completes the current batched requests and returns the results.
 -- ! @return nil on error, otherwise a table item_id -> result is returned. See ts_utils.listSeries() for details.
 function ts_utils.getBatchedListSeriesResult()
-    local driver = ts_utils.getQueryDriver()
     local result
-
-    if not driver then
-        return nil
-    end
 
     ts_common.clearLastError()
 
-    if (driver.listSeriesBatched == nil) then
-        -- Do not batch, just call listSeries
-        result = {}
-
-        for key, item in pairs(pending_listseries_batch) do
-            result[key] = driver:listSeries(item.schema, item.filter_tags, item.wildcard_tags, item.start_time,
-                item.end_time or nil)
+    -- Dispatch each batch item to the right driver (HR schemas go to the HR
+    -- driver; everything else uses the standard query driver).
+    result = {}
+    for key, item in pairs(pending_listseries_batch) do
+        local item_driver = ts_utils.getQueryDriverForSchema(item.schema)
+        if item_driver then
+            result[key] = item_driver:listSeries(item.schema, item.filter_tags,
+                item.wildcard_tags, item.start_time, item.end_time or nil)
         end
-    else
-        result = driver:listSeriesBatched(pending_listseries_batch)
     end
 
     pending_listseries_batch = {}
@@ -651,7 +684,14 @@ end
 -- ! @param tags_filter a list of filter tags. Tags which are not specified are considered wildcard.
 -- ! @return true if the specified series exist, false otherwise.
 function ts_utils.exists(schema_name, tags_filter)
-    local driver = ts_utils.getQueryDriver()
+    local schema = ts_utils.getSchema(schema_name)
+
+    if (not schema) then
+        traceError(TRACE_ERROR, TRACE_CONSOLE, "Schema not found: " .. schema_name)
+        return nil
+    end
+
+    local driver = ts_utils.getQueryDriverForSchema(schema)
 
     if not driver then
         return nil
@@ -660,13 +700,6 @@ function ts_utils.exists(schema_name, tags_filter)
     if (driver.exists == nil) then
         -- No "exists" implementation found, use listSeries fallback
         return not table.empty(ts_utils.listSeries(schema_name, tags_filter, 0))
-    end
-
-    local schema = ts_utils.getSchema(schema_name)
-
-    if (not schema) then
-        traceError(TRACE_ERROR, TRACE_CONSOLE, "Schema not found: " .. schema_name)
-        return nil
     end
 
     local filter_tags, wildcard_tags = getWildcardTags(schema, tags_filter)
@@ -742,7 +775,7 @@ function ts_utils.queryTotal(schema_name, tstart, tend, tags, options)
         return nil
     end
 
-    local driver = ts_utils.getQueryDriver()
+    local driver = ts_utils.getQueryDriverForSchema(schema)
 
     if not driver or not driver.queryTotal then
         return nil
@@ -782,7 +815,7 @@ function ts_utils.queryLastValues(schema_name, tstart, tend, tags, options)
         return nil
     end
 
-    local driver = ts_utils.getQueryDriver()
+    local driver = ts_utils.getQueryDriverForSchema(options.schema_info)
 
     if not driver or not driver.queryLastValues then
         return nil
