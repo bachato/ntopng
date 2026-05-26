@@ -7990,7 +7990,7 @@ local lang = {
     ["enable_exporters_timeseries"] = "Flow Exporters timeseries are disabled, you can enable them from the <a href='%{link}'>preferences</a>",
     ["errors"] = "Errors",
     ["enable_timeseries_preference"] = "Option not available, please enable the Top Timeseries in the preferences",
-    ["no_top_timeseries_available"] = "The Top Timeseries for this resource are not available. Please enable them in the preferences <a href='" .. ntop.getHttpPrefix() .. "/lua/admin/prefs.lua?tab=on_disk_ts'><i class='fas fa-cog fa-sm'></i></a>",
+    ["no_top_timeseries_available"] = "The Top Timeseries for this resource are not available. Please enable the Layer-7 Applications timeseries from the Local Hosts Timeseries preferences <a href='" .. ntop.getHttpPrefix() .. "/lua/admin/prefs.lua?tab=on_disk_ts'><i class='fas fa-cog fa-sm'></i></a>",
     ["errors_and_warnings"] = "Errors and Warnings",
     ["ewma_alpha_percent_description"] = "Exponentially Weighted Moving Average (EWMA) alpha coefficient, expressed as a percentage. Used to estimate Autonomous Systems round-trip time.",
     ["ewma_alpha_percent_title"] = "EWMA alpha coefficient (percent)",
