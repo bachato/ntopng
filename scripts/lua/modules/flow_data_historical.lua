@@ -137,8 +137,7 @@ local function buildWhereClause(query_info)
       end
 	end
 
-   tprint(formatted_where_query:sub(-5))
-	-- Remove the last "AND " string alwais added
+   -- Remove the last "AND " string alwais added
 	if not isEmptyString(formatted_where_query) and formatted_where_query:sub(-5) == " AND " then
 		formatted_where_query = formatted_where_query:sub(1, -5)
 	end
