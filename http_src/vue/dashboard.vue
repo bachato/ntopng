@@ -582,7 +582,7 @@ async function load_components(epoch_interval, template_name) {
     components.value = res.list.filter((c) => components_dict[c.component] != null)
         .map((c, index) => {
             let c_ext = {
-                filters: {},
+                filters: ntopng_url_manager.get_url_object(), // This is in order to load the filters in the url
                 component_id: `auto_${c.id}_${index}`,
                 ...c
             };
@@ -592,7 +592,6 @@ async function load_components(epoch_interval, template_name) {
             update_component_epoch_interval(c_ext, epoch_interval);
             return c_ext;
         });
-    reset_filters();
     if (res.filters) {
         template_filters.value = res.filters
         filters_to_show.value = await load_filters(res.filters);

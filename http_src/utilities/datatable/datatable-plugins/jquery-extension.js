@@ -46,8 +46,6 @@ jQuery.fn.dataTableExt.showProgress = (percentage, type, row) => {
 jQuery.extend(jQuery.fn.dataTableExt.oSort, {
   "time-uni-pre": function (a) {
       var uniTime;
-      debugger;
-
       if (a.toLowerCase().indexOf("am") > -1 || (a.toLowerCase().indexOf("pm") > -1 && Number(a.split(":")[0]) === 12)) {
           uniTime = a.toLowerCase().split("pm")[0].split("am")[0];
           while (uniTime.indexOf(":") > -1) {

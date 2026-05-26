@@ -234,7 +234,6 @@ function disableLoading() {
 
 function refreshTable() {
     loading.value = true
-    debugger;
     table_ref.value?.refresh_table();
 }
 
