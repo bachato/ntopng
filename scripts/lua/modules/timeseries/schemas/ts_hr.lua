@@ -34,3 +34,18 @@ local schema = ts_utils.newSchema("iface:hr_traffic", {
 schema:addTag("ifid")
 schema:addMetric("bytes_sent")
 schema:addMetric("bytes_rcvd")
+
+-- ############################################
+
+-- host:hr_traffic
+-- Per-host traffic at 15-second slot resolution.
+schema = ts_utils.newSchema("host:hr_traffic", {
+    step           = 15,
+    metrics_type   = ts_utils.metrics.counter,
+    data_source    = "flows",
+    host_direction = "host", -- tag that determines traffic direction
+})
+schema:addTag("ifid")
+schema:addTag("host")
+schema:addMetric("bytes_sent")
+schema:addMetric("bytes_rcvd")

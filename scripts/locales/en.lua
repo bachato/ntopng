@@ -4914,6 +4914,7 @@ local lang = {
     ["zmq_received_flows"] = "Collected ZMQ Flows",
     ["metric_descr"] = {
       ["iface_hr_traffic_rxtx"] = "Per-interface traffic at high resolution (requires nProbe HR counters + ClickHouse)",
+      ["host_hr_traffic_rxtx"] = "Per-host traffic at high resolution (requires nProbe HR counters + ClickHouse)",
       ["iface_traffic_rxtx"] = "Bytes sent and received per interface",
       ["iface_traffic_ip"] = "IPv4 and IPv6 bytes per interface",
       ["iface_active_flows"] = "Number of active flows per interface",

@@ -581,6 +581,31 @@ function ts_host.getTimeseries(tags, tsOptions)
         timeseries = table.merge(timeseries, timeseries_pro)
     end
 
+    -- HR traffic chart: per-host traffic at 15-second resolution from the
+    -- ClickHouse flows table (requires nProbe HR counters + Enterprise M license).
+    if ntop.isEnterpriseM() and ntop.isClickHouseEnabled() then
+        timeseries[#timeseries + 1] = {
+            schema      = "host:hr_traffic",
+            id          = timeseries_id,
+            label       = i18n("graphs.hr_traffic_rxtx"),
+            description = i18n("graphs.metric_descr.host_hr_traffic_rxtx"),
+            priority    = 0,
+            measure_unit = "bps",
+            scale       = i18n("graphs.metric_labels.traffic"),
+            timeseries  = {
+                bytes_sent = {
+                    label = i18n("graphs.metric_labels.sent"),
+                    color = ts_gui_utils.get_timeseries_color("bytes_sent")
+                },
+                bytes_rcvd = {
+                    invert_direction = true,
+                    label = i18n("graphs.metric_labels.rcvd"),
+                    color = ts_gui_utils.get_timeseries_color("bytes_rcvd")
+                }
+            }
+        }
+    end
+
     if (not emptyEpoch) then
         -- Remove empty timeseries
         timeseries = ts_gui_utils.removeEmptyTimeseries(timeseries, tags)

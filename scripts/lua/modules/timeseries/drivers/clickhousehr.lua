@@ -12,7 +12,7 @@
 -- calling append() is not required.
 --
 -- Schemas backed by this driver must define data_source = "flows"
--- in their options table. This deriver is selected by ts_utils_core via
+-- in their options table. This driver is selected by ts_utils_core via
 -- ts_utils.getQueryDriverForSchema().
 --
 
@@ -28,15 +28,21 @@ local ts_common = require("ts_common")
 
 local HR_SLOT_SECONDS = 15
 
--- Maps schema tag names to flows table column names.
+-- Maps schema tag names to flows table column names
 local TAG_TO_COLUMN = {
    ifid = "INTERFACE_ID",
 }
 
--- Maps schema metric names to HR array column names in the flows table.
+-- For direction neutral schemas: metric name to HR array column
 local METRIC_TO_ARRAY = {
    bytes_sent = "HR_SRC2DST_BYTES",
    bytes_rcvd = "HR_DST2SRC_BYTES",
+}
+
+-- For direction aware (e.g. host direction) schemas
+local METRIC_DIRECTIONAL = {
+   bytes_sent = { as_src = "HR_SRC2DST_BYTES", as_dst = "HR_DST2SRC_BYTES" },
+   bytes_rcvd = { as_src = "HR_DST2SRC_BYTES", as_dst = "HR_SRC2DST_BYTES" },
 }
 
 -- ##############################################
@@ -55,23 +61,10 @@ local function ch_escape(s)
 end
 
 -- ##############################################
-
---! @brief Driver constructor.
---! @param options table with at least { db = "dbname" }.
-function driver:new(options)
-   if not ntop.isClickHouseEnabled() then return nil end
-
-   local obj = { db = options.db or "ntopng" }
-   setmetatable(obj, self)
-   self.__index = self
-   return obj
-end
-
--- ##############################################
--- Internal helpers
+-- Internal helpers — direction neutral
 -- ##############################################
 
--- Build the WHERE fragment for the supplied tags (conditions on flows columns).
+-- Build the WHERE fragment for simple (non-host) tags via TAG_TO_COLUMN.
 local function tags_where(tags)
    local conds = {}
    for tag, val in pairs(tags) do
@@ -83,8 +76,7 @@ local function tags_where(tags)
    return (#conds > 0) and (" AND " .. table.concat(conds, " AND ")) or ""
 end
 
--- Build the SELECT list for HR metrics.
--- Each metric maps to sum(arrayElement(<HR_array>, slot)).
+-- Build the SELECT list for direction-neutral HR metrics.
 local function metric_select(schema)
    local sel = {}
    for _, metric in ipairs(schema._metrics) do
@@ -109,7 +101,7 @@ end
 
 -- ClickHouse expression for the wall-clock time of a slot.
 -- FIRST_SEEN is UInt32 (epoch seconds); slot is 1-based from arrayEnumerate.
--- Using toUInt64 avoids overflow for flows with many slots.
+-- toUInt64 prevents overflow for long-lived flows.
 local function slot_ts_expr()
    return string.format(
       "toUInt64(FIRST_SEEN) + (toUInt64(slot) - 1) * %d",
@@ -117,7 +109,89 @@ local function slot_ts_expr()
 end
 
 -- ##############################################
+-- Internal helpers — direction aware
+-- ##############################################
+
+local function is_ipv6(ip)
+   return ip:find(":") ~= nil
+end
+
+-- Return a context table with ClickHouse conditions for the given host IP.
+--   src_cond  — "SRC column = <ip>" expression (used as CASE WHEN is_src)
+--   dst_cond  — "DST column = <ip>" expression
+--   match_any — "(src_cond OR dst_cond)" for the WHERE clause
+local function host_ip_context(ip)
+   local esc = ch_escape(ip)
+   local src_cond, dst_cond
+   if is_ipv6(ip) then
+      src_cond = string.format("IPV6_SRC_ADDR = toIPv6('%s')", esc)
+      dst_cond = string.format("IPV6_DST_ADDR = toIPv6('%s')", esc)
+   else
+      src_cond = string.format("IPV4_SRC_ADDR = toIPv4('%s')", esc)
+      dst_cond = string.format("IPV4_DST_ADDR = toIPv4('%s')", esc)
+   end
+   return {
+      src_cond  = src_cond,
+      dst_cond  = dst_cond,
+      match_any = string.format("(%s OR %s)", src_cond, dst_cond),
+   }
+end
+
+-- Build direction-aware SELECT expressions using CASE WHEN.
+-- When host is SRC: use the as_src array; when host is DST: use as_dst.
+local function metric_select_directional(schema, is_src_cond)
+   local sel = {}
+   for _, metric in ipairs(schema._metrics) do
+      local dir = METRIC_DIRECTIONAL[metric]
+      if dir then
+         sel[#sel + 1] = string.format(
+            "sum(CASE WHEN %s THEN arrayElement(%s, slot) "
+            ..           "ELSE arrayElement(%s, slot) END) AS `%s`",
+            is_src_cond,
+            ch_escape(dir.as_src), ch_escape(dir.as_dst),
+            ch_escape(metric))
+      end
+   end
+   return sel
+end
+
+-- Build (tw, sel, join_arr) for a query, handling both simple and directional schemas.
+-- Returns tw (additional WHERE fragment), sel (SELECT list), join_arr (ARRAY JOIN column).
+local function build_query_parts(schema, tags)
+   local host_dir_tag = schema.options.host_direction
+
+   if host_dir_tag then
+      local host_val = tags[host_dir_tag]
+      if not host_val then
+         traceError(TRACE_ERROR, TRACE_CONSOLE,
+            "[ClickHouse HR] host_direction tag '" .. host_dir_tag
+            .. "' missing from tags in schema " .. schema.name)
+         return nil
+      end
+      local ctx = host_ip_context(host_val)
+      local tw  = tags_where(tags) .. " AND " .. ctx.match_any
+      local sel = metric_select_directional(schema, ctx.src_cond)
+      return tw, sel, "HR_SRC2DST_BYTES"
+   end
+
+   return tags_where(tags), metric_select(schema), pick_join_array(schema)
+end
+
+-- ##############################################
 -- Driver API
+-- ##############################################
+
+--! @brief Driver constructor.
+--! @param options table with at least { db = "dbname" }.
+function driver:new(options)
+   if not ntop.isClickHouseEnabled() then return nil end
+
+   local obj = { db = options.db or "ntopng" }
+   setmetatable(obj, self)
+   self.__index = self
+   return obj
+end
+
 -- ##############################################
 
 --! @brief No-op: HR data is written by the C++ flow-dump pipeline.
@@ -131,13 +205,11 @@ end
 function driver:query(schema, tstart, tend, tags, options)
    local time_step = ts_common.calculateSampledTimeStep(
       HR_SLOT_SECONDS, tstart, tend, options)
+   local sts = slot_ts_expr()
 
-   local tw       = tags_where(tags)
-   local join_arr = pick_join_array(schema)
-   local sel      = metric_select(schema)
-   local sts      = slot_ts_expr()
+   local tw, sel, join_arr = build_query_parts(schema, tags)
 
-   if #sel == 0 then
+   if tw == nil or #sel == 0 then
       traceError(TRACE_ERROR, TRACE_CONSOLE,
          "[ClickHouse HR] schema '" .. schema.name .. "' has no supported HR metrics")
       return nil
@@ -270,21 +342,11 @@ end
 
 --! @brief Calculate per-metric totals over a time range.
 function driver:queryTotal(schema, tstart, tend, tags, options)
-   local tw       = tags_where(tags)
-   local join_arr = pick_join_array(schema)
-   local sts      = slot_ts_expr()
-   local sel      = {}
+   local sts = slot_ts_expr()
 
-   for _, metric in ipairs(schema._metrics) do
-      local arr = METRIC_TO_ARRAY[metric]
-      if arr then
-         sel[#sel + 1] = string.format(
-            "sum(arrayElement(%s, slot)) AS `%s`",
-            ch_escape(arr), ch_escape(metric))
-      end
-   end
+   local tw, sel, join_arr = build_query_parts(schema, tags)
 
-   if #sel == 0 then return {} end
+   if tw == nil or #sel == 0 then return {} end
 
    local sql = string.format(
       "SELECT %s FROM `%s`.`flows` "
@@ -342,11 +404,18 @@ end
 
 --! @brief Check whether HR data exists for the given tags / time range.
 function driver:listSeries(schema, tags_filter, wildcard_tags, start_time, end_time)
-   local tw        = tags_where(tags_filter)
    local join_arr  = pick_join_array(schema)
    local time_cond = string.format("FIRST_SEEN >= %d", start_time)
    if end_time then
       time_cond = time_cond .. string.format(" AND LAST_SEEN <= %d", end_time)
+   end
+
+   -- Build WHERE: simple tags + optional host direction condition.
+   local tw = tags_where(tags_filter)
+   local host_dir_tag = schema.options.host_direction
+   if host_dir_tag and tags_filter[host_dir_tag] then
+      local ctx = host_ip_context(tags_filter[host_dir_tag])
+      tw = tw .. " AND " .. ctx.match_any
    end
 
    local sql = string.format(
