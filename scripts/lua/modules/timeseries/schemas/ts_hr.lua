@@ -49,3 +49,25 @@ schema:addTag("ifid")
 schema:addTag("host")
 schema:addMetric("bytes_sent")
 schema:addMetric("bytes_rcvd")
+
+-- ############################################
+
+-- flow:hr_traffic
+-- Per-flow traffic at 15-second slot resolution.
+-- The flow is identified by its 5-tuple,
+-- plus first_seen to pin a specific instance.
+schema = ts_utils.newSchema("flow:hr_traffic", {
+    step          = 15,
+    metrics_type  = ts_utils.metrics.counter,
+    data_source   = "flows",
+    flow_context  = true,  -- driver uses flow-specific WHERE logic
+})
+schema:addTag("ifid")
+schema:addTag("cli_ip")
+schema:addTag("srv_ip")
+schema:addTag("cli_port")
+schema:addTag("srv_port")
+schema:addTag("protocol")
+schema:addTag("first_seen")
+schema:addMetric("bytes_sent")
+schema:addMetric("bytes_rcvd")

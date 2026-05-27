@@ -601,7 +601,8 @@ page_utils.print_navbar(title, url, {{
 			      active = page == "profinet",
 			      page_name = "profinet",
 			      label = i18n("details.label_profinet_server")
-}})
+					   }
+})
 
 if isEmptyString(page) or page == "overview" then
    if (flow == nil) then

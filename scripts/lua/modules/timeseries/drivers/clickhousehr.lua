@@ -155,10 +155,69 @@ local function metric_select_directional(schema, is_src_cond)
    return sel
 end
 
--- Build (tw, sel, join_arr) for a query, handling both simple and directional schemas.
--- Returns tw (additional WHERE fragment), sel (SELECT list), join_arr (ARRAY JOIN column).
+-- ##############################################
+-- Internal helpers — flow (5-tuple)
+-- ##############################################
+
+-- Build conditions for a flow identified by its 5-tuple.
+local function build_flow_where(tags)
+   local cli_ip   = tags["cli_ip"]
+   local srv_ip   = tags["srv_ip"]
+   local cli_port = tags["cli_port"]
+   local srv_port = tags["srv_port"]
+   local protocol = tags["protocol"]
+   local first_seen = tags["first_seen"]
+
+   if not cli_ip or not srv_ip or not cli_port or not srv_port or not protocol then
+      traceError(TRACE_ERROR, TRACE_CONSOLE,
+         "[ClickHouse HR] flow_context requires cli_ip, srv_ip, cli_port, srv_port, protocol tags")
+      return nil
+   end
+
+   local conds = {}
+
+   -- Interface
+   local ifid_col = TAG_TO_COLUMN["ifid"]
+   if ifid_col and tags["ifid"] then
+      conds[#conds + 1] = string.format("%s = '%s'", ifid_col, ch_escape(tags["ifid"]))
+   end
+
+   -- IP address
+   if is_ipv6(cli_ip) then
+      conds[#conds + 1] = string.format("IPV6_SRC_ADDR = toIPv6('%s')", ch_escape(cli_ip))
+      conds[#conds + 1] = string.format("IPV6_DST_ADDR = toIPv6('%s')", ch_escape(srv_ip))
+   else
+      conds[#conds + 1] = string.format("IPV4_SRC_ADDR = toIPv4('%s')", ch_escape(cli_ip))
+      conds[#conds + 1] = string.format("IPV4_DST_ADDR = toIPv4('%s')", ch_escape(srv_ip))
+   end
+
+   -- Port and protocol
+   conds[#conds + 1] = string.format("IP_SRC_PORT = %d", tonumber(cli_port) or 0)
+   conds[#conds + 1] = string.format("IP_DST_PORT = %d", tonumber(srv_port) or 0)
+   conds[#conds + 1] = string.format("PROTOCOL = %d",    tonumber(protocol) or 0)
+
+   -- Optional: get a specific flow by first_seen
+   if first_seen and tonumber(first_seen) then
+      conds[#conds + 1] = string.format("FIRST_SEEN = %d", tonumber(first_seen))
+   end
+
+   return " AND " .. table.concat(conds, " AND ")
+end
+
+-- ##############################################
+
+-- Returns tw (additional WHERE conditions), sel (SELECT list), join_arr (ARRAY JOIN column),
+-- handling both simple and directional schemas.
 local function build_query_parts(schema, tags)
-   local host_dir_tag = schema.options.host_direction
+   -- Exact 5-tuple match
+   if schema.options and schema.options.flow_context then
+      local tw  = build_flow_where(tags)
+      if tw == nil then return nil end
+      local sel = metric_select(schema)   -- bytes_sent→HR_SRC2DST_BYTES, bytes_rcvd→HR_DST2SRC_BYTES
+      return tw, sel, pick_join_array(schema)
+   end
+
+   local host_dir_tag = schema.options and schema.options.host_direction
 
    if host_dir_tag then
       local host_val = tags[host_dir_tag]
@@ -410,12 +469,17 @@ function driver:listSeries(schema, tags_filter, wildcard_tags, start_time, end_t
       time_cond = time_cond .. string.format(" AND LAST_SEEN <= %d", end_time)
    end
 
-   -- Build WHERE: simple tags + optional host direction condition.
-   local tw = tags_where(tags_filter)
-   local host_dir_tag = schema.options.host_direction
-   if host_dir_tag and tags_filter[host_dir_tag] then
-      local ctx = host_ip_context(tags_filter[host_dir_tag])
-      tw = tw .. " AND " .. ctx.match_any
+   -- Build WHERE: flow context, host direction, or simple tags.
+   local tw
+   if schema.options and schema.options.flow_context then
+      tw = build_flow_where(tags_filter) or ""
+   else
+      tw = tags_where(tags_filter)
+      local host_dir_tag = schema.options and schema.options.host_direction
+      if host_dir_tag and tags_filter[host_dir_tag] then
+         local ctx = host_ip_context(tags_filter[host_dir_tag])
+         tw = tw .. " AND " .. ctx.match_any
+      end
    end
 
    local sql = string.format(

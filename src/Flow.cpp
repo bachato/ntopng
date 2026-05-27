@@ -7529,7 +7529,11 @@ void Flow::lua_get_status(lua_State* vm) const {
     lua_push_uint64_table_entry(vm, "predominant_alert_score",
                                 getPredominantAlertScore());
   }
+
+  lua_push_bool_table_entry(vm, "has_hr_counters",
+    !hr_src2dst_bytes.empty() || !hr_dst2src_bytes.empty());
 }
+
 
 /* ***************************************************** */
 

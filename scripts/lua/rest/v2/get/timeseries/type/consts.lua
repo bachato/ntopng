@@ -25,6 +25,14 @@ local epoch_end = _GET["epoch_end"]
 local if_index = _GET["if_index"]
 local profile = _GET["profile"]
 
+-- flow tags (used by flow:hr_traffic schema)
+local cli_ip    = _GET["cli_ip"]
+local srv_ip    = _GET["srv_ip"]
+local cli_port  = _GET["cli_port"]
+local srv_port  = _GET["srv_port"]
+local protocol  = _GET["protocol"]
+local first_seen = _GET["first_seen"]
+
 local res = {}
 
 if ifid then
@@ -36,20 +44,27 @@ if isEmptyString(query) then
 end
 
 local tags = {
-    ifid = ifid,
-    host = host,
-    asn = asn,
-    pool = pool,
-    vlan = vlan,
-    mac = mac,
-    subnet = subnet,
-    device = device,
-    port = port,
+    ifid       = ifid,
+    host       = host,
+    asn        = asn,
+    pool       = pool,
+    vlan       = vlan,
+    mac        = mac,
+    subnet     = subnet,
+    device     = device,
+    port       = port,
     blacklist_name = blacklist_name,
-    if_index = if_index,
-    profile = profile,
+    if_index   = if_index,
+    profile    = profile,
     epoch_begin = tonumber(epoch_begin),
-    epoch_end = tonumber(epoch_end)
+    epoch_end  = tonumber(epoch_end),
+    -- flow tags
+    cli_ip     = cli_ip,
+    srv_ip     = srv_ip,
+    cli_port   = cli_port,
+    srv_port   = srv_port,
+    protocol   = protocol,
+    first_seen = first_seen,
 }
 
 res = table.merge(res, timeseries_info.getTimeseries(tags, query))

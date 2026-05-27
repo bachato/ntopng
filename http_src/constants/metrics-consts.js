@@ -139,6 +139,35 @@ const sources_types = [
 
 	},
 	{
+		id: "flow",
+		regex_page_url: "lua\/(flow_details|pro\/db_flow_details)",
+		label: i18n("page_stats.source_def.flow"),
+		query: "flow",
+		source_def_array: [{
+			value: "ifid",
+			ui_type: ui_types.hide,
+		}, {
+			main_source_def: true,
+			value: "cli_ip",
+			ui_type: ui_types.hide,
+		}, {
+			value: "srv_ip",
+			ui_type: ui_types.hide,
+		}, {
+			value: "cli_port",
+			ui_type: ui_types.hide,
+		}, {
+			value: "srv_port",
+			ui_type: ui_types.hide,
+		}, {
+			value: "protocol",
+			ui_type: ui_types.hide,
+		}, {
+			value: "first_seen",
+			ui_type: ui_types.hide,
+		}],
+	},
+	{
 		id: "host",
 		regex_page_url: "lua\/host_details",
 		label: i18n("page_stats.source_def.host"),

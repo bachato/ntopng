@@ -22,29 +22,30 @@ local timeseries_id = {
     iface = "iface",
     host = "host",
     mac = "mac",
-    network = "subnet", 
+    network = "subnet",
     asn = "asn",
     country = "country",
     os = "os",
     vlan = "vlan",
-    host_pool = "host_pool", 
+    host_pool = "host_pool",
     pod = "pod",
     container = "container",
-    hash_state = "ht", 
-    system = "system", 
+    hash_state = "ht",
+    system = "system",
     profile = "profile",
-    redis = "redis", 
+    redis = "redis",
     influxdb = "influxdb",
-    active_monitoring = "am", 
-    snmp_interface = "snmp_interface", 
-    snmp_device = "snmp_device", 
+    active_monitoring = "am",
+    snmp_interface = "snmp_interface",
+    snmp_device = "snmp_device",
     observation_point = "obs_point",
     flow_dev = "flowdev",
     flow_port = "flowdev_port",
     nedge = "nedge",
     sflow_dev = "sflowdev",
     sflow_port = "sflowdev_port",
-    vulnerability_scan = "am_vuln_scan"
+    vulnerability_scan = "am_vuln_scan",
+    flow = "flow",
 }
 
 -- #################################
@@ -103,6 +104,8 @@ local function getTimeseriesFromModules(tags, prefix, ts_options)
         module_to_use = require "ts_sflow_device_port"
     elseif prefix == timeseries_id.vulnerability_scan then
         module_to_use = require "ts_vulnerability_scan"
+    elseif prefix == timeseries_id.flow then
+        module_to_use = require "ts_flow"
     end
     if module_to_use then
         return module_to_use.getTimeseries(tags, ts_options) or {}
