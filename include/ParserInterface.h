@@ -40,9 +40,9 @@ class ParserInterface : public NetworkInterface {
                             u_int32_t if_id_out);
 #endif
 
-  inline u_int32_t getExporterUniqueSourceID(struct ndpi_in6_addr *exporter_device_ipv4,
+  inline u_int32_t getExporterUniqueSourceID(struct ndpi_in6_addr *exporter_device_ip,
                                              struct ndpi_in6_addr *nprobe_ip) {
-    return exporter_device_ipv4->u6_addr.u6_addr32[3] + nprobe_ip->u6_addr.u6_addr32[3];
+    return exporter_device_ip->u6_addr.u6_addr32[3] + nprobe_ip->u6_addr.u6_addr32[3];
   }
 
  public:
