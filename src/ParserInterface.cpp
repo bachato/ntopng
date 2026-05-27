@@ -342,8 +342,8 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
     IpAddress exporter_ip;
     int32_t exporter_network_id = -1;
 
-#if 0
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "unique_source_id=%u, inIndex=%u, outIndex=%u, exporter_device_ip=%u, nprobe_ip=%u [%u / %u]",
+#if 1
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "unique_source_id=%u, inIndex=%u, outIndex=%u, exporter_device_ip=%u, nprobe_ip=%u [%d / %d]",
 				 zflow->unique_source_id,
 				 flow->getFlowDeviceInIndex(),
 				 flow->getFlowDeviceOutIndex(),
@@ -492,8 +492,7 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
   if (zflow->hasParsedeBPF()) {
     bool swap_direction = ((ntohs(zflow->src_port) == flow->get_cli_port()) &&
                            (ntohs(zflow->dst_port) == flow->get_srv_port()))
-                              ? false
-                              : true;
+      ? false : true;
 
     flow->setParsedeBPFInfo(zflow, swap_direction);
 
@@ -502,6 +501,13 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
     flow->updateSeen();
   }
 
+#if 0
+  char buf[355];
+  
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s",
+			       Utils::intoaV6(zflow->exporter_device_ip, buf, sizeof(buf)));
+#endif
+  
   flow->setFlowDevice(&zflow->exporter_device_ip, zflow->observationPointId,
                       src2dst_direction ? flow->getFlowDeviceInIndex()
                                         : flow->getFlowDeviceOutIndex(),
