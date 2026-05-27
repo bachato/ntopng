@@ -266,7 +266,7 @@ void NetworkInterface::init(const char* interface_name) {
   ifname = interface_name ? strdup(interface_name) : NULL;
   inline_interface = false, has_vlan_packets = false, has_ebpf_events = false,
   has_seen_dhcp_addresses = false, has_seen_containers = false,
-  has_seen_pods = false, has_external_alerts = false,
+  has_seen_pods = false, has_external_alerts = false, has_hr_flows = false,
   last_pkt_rcvd = last_pkt_rcvd_remote = 0,
   next_idle_flow_purge = next_idle_host_purge = 0, running = false,
   shutting_down = false, customIftype = NULL,
@@ -4358,7 +4358,7 @@ void NetworkInterface::cleanup() {
   has_seen_dhcp_addresses = false;
   running = false, inline_interface = false;
   has_seen_containers = false, has_seen_pods = false;
-  has_external_alerts = false;
+  has_external_alerts = false, has_hr_flows = false;
 
   getStats()->cleanup();
   if (flows_hash) flows_hash->cleanup();
@@ -8464,6 +8464,7 @@ void NetworkInterface::lua(lua_State* vm, bool fullStats) {
     lua_push_bool_table_entry(vm, "has_seen_external_alerts",
                               hasSeenExternalAlerts());
     lua_push_bool_table_entry(vm, "has_seen_ebpf_events", hasSeenEBPFEvents());
+    lua_push_bool_table_entry(vm, "has_hr_flows", hasHRFlows());
 
     luaNumEngagedAlerts(vm);
     luaAlertedFlows(vm);

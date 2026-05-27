@@ -333,7 +333,7 @@ class NetworkInterface : public NetworkInterfaceAlertableEntity {
   HostPools* host_pools;
   bool has_vlan_packets, has_ebpf_events, has_mac_addresses,
       has_seen_dhcp_addresses;
-  bool has_seen_pods, has_seen_containers, has_external_alerts;
+  bool has_seen_pods, has_seen_containers, has_external_alerts, has_hr_flows;
   time_t last_pkt_rcvd,
       last_pkt_rcvd_remote, /* Meaningful only for ZMQ interfaces */
       next_idle_flow_purge, next_idle_host_purge, next_idle_other_purge;
@@ -598,6 +598,8 @@ class NetworkInterface : public NetworkInterfaceAlertableEntity {
   inline void setSeenContainers() { has_seen_containers = true; }
   inline bool hasSeenExternalAlerts() const { return (has_external_alerts); }
   inline void setSeenExternalAlerts() { has_external_alerts = true; }
+  inline bool hasHRFlows() const { return (has_hr_flows); }
+  inline void setHasHRFlows() { has_hr_flows = true; }
   virtual bool is_purge_idle_interface() { return (purge_idle_flows_hosts); };
   int dumpFlow(Flow* f);
   bool getHostMinInfo(lua_State* vm, AddressTree* allowed_nets, char* host_ip,

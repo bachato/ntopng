@@ -766,8 +766,8 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
 
     flow->setQoE(zflow->getQoESrc2Dst(), zflow->getQoEDst2Src());
 
-    if (zflow->getHRSrcToDstBytes()) flow->updateHRSrc2DstBytes(parseHRBytesString(zflow->getHRSrcToDstBytes()), zflow->first_switched);
-    if (zflow->getHRDstToSrcBytes()) flow->updateHRDst2SrcBytes(parseHRBytesString(zflow->getHRDstToSrcBytes()), zflow->first_switched);
+    if (zflow->getHRSrcToDstBytes()) { flow->updateHRSrc2DstBytes(parseHRBytesString(zflow->getHRSrcToDstBytes()), zflow->first_switched); setHasHRFlows(); }
+    if (zflow->getHRDstToSrcBytes()) { flow->updateHRDst2SrcBytes(parseHRBytesString(zflow->getHRDstToSrcBytes()), zflow->first_switched); setHasHRFlows(); }
 
     if (zflow->getOSHint() != ndpi_os_unknown) {
       if (flow->get_cli_host() != NULL)
