@@ -658,7 +658,7 @@ u_int8_t ZMQParserInterface::parseEvent(const char* payload, int payload_size,
           ExporterStats exp_stats;
           json_object* x;
 
-	  Utils::setIPv4Address(&exporter_device_ip, inet_addr(key));
+	  Utils::parseIPv4v6Address(key, &exporter_device_ip);
 	  
           memset(&exp_stats, 0, sizeof(exp_stats));
 
@@ -1358,8 +1358,9 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow* const flow,
     break;
 
   case NPROBE_IPV4_ADDRESS:
+  case NPROBE_IPV6_ADDRESS:
     if (value->string) {
-      Utils::setIPv4Address(&flow->nprobe_ip, inet_addr(value->string));
+      Utils::parseIPv4v6Address(value->string, &flow->nprobe_ip);
 
       if (Utils::isNullAddress(&flow->exporter_device_ip)) {
 	memcpy(&flow->exporter_device_ip, &flow->nprobe_ip, sizeof(struct ndpi_in6_addr));
@@ -1657,18 +1658,10 @@ bool ZMQParserInterface::matchPENZeroField(ParsedFlow* const flow,
           return (!strcmp(value->string, flow->getEndReason()));
       }
 
-    case EXPORTER_IPV4_ADDRESS:
-      Utils::setIPv4Address(&flow->exporter_device_ip, inet_addr(value->string));
+  case EXPORTER_IPV4_ADDRESS:
+  case EXPORTER_IPV6_ADDRESS:
+      Utils::parseIPv4v6Address(value->string, &flow->exporter_device_ip);
       return(Utils::isNullAddress(&flow->exporter_device_ip) ? false : true);
-
-    case EXPORTER_IPV6_ADDRESS:
-      if (value->string != NULL && strlen(value->string) > 0) {
-        struct ndpi_in6_addr ipv6;
-
-        if (inet_pton(AF_INET6, value->string, &ipv6) <= 0) return false;
-        return (memcmp(&flow->exporter_device_ip, &ipv6,
-                       sizeof(flow->exporter_device_ip)) == 0);
-      }
 
     case INPUT_SNMP:
       if (value->string)
