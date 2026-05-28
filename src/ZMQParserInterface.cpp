@@ -978,12 +978,19 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow* const flow,
     } else
       ip = 0;
 
-    if(ip != 0)
-      Utils::setIPv4Address(&flow->exporter_device_ip, ip);    
+    if(ip != 0) {
+      /* ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** IP: %u", ip); */
+      Utils::setIPv4Address(&flow->exporter_device_ip, ip);
+    }
   } break;
   case EXPORTER_IPV6_ADDRESS:
-    if (value->string != NULL && strlen(value->string) > 0)
-      inet_pton(AF_INET6, value->string, &flow->exporter_device_ip);
+    if (value->string != NULL && strlen(value->string) > 0) {
+      struct in6_addr *v6 = (struct in6_addr*)&flow->exporter_device_ip;
+
+      if(IN6_IS_ADDR_UNSPECIFIED(v6) || strncmp(value->string, "::1", 3)) {
+	inet_pton(AF_INET6, value->string, &flow->exporter_device_ip);
+      }
+    }
     break;
   case FLOW_END_REASON:
     if (value->string) flow->setEndReason(value->string);
@@ -1360,6 +1367,8 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow* const flow,
   case NPROBE_IPV4_ADDRESS:
   case NPROBE_IPV6_ADDRESS:
     if (value->string) {
+      /* ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** NPROBE_IP (%u): %s", field, value->string); */
+      
       Utils::parseIPv4v6Address(value->string, &flow->nprobe_ip);
 
       if (Utils::isNullAddress(&flow->exporter_device_ip)) {
@@ -1660,7 +1669,7 @@ bool ZMQParserInterface::matchPENZeroField(ParsedFlow* const flow,
 
   case EXPORTER_IPV4_ADDRESS:
   case EXPORTER_IPV6_ADDRESS:
-      Utils::parseIPv4v6Address(value->string, &flow->exporter_device_ip);
+    Utils::parseIPv4v6Address(value->string, &flow->exporter_device_ip);
       return(Utils::isNullAddress(&flow->exporter_device_ip) ? false : true);
 
     case INPUT_SNMP:
@@ -1820,7 +1829,8 @@ bool ZMQParserInterface::matchPENNtopField(ParsedFlow* const flow,
         return false;
 
     case NPROBE_IPV4_ADDRESS:
-      Utils::setIPv4Address(&flow->nprobe_ip, inet_addr(value->string));
+    case NPROBE_IPV6_ADDRESS:
+      Utils::parseIPv4v6Address(value->string, &flow->nprobe_ip);
       return(Utils::isNullAddress(&flow->nprobe_ip) ? false : true);
 
     case UNIQUE_SOURCE_ID:

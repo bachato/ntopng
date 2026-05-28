@@ -21,6 +21,8 @@
 
 #include "ntop_includes.h"
 
+/* **************************************************** */
+
 /* Parser for high-resolution counters string (JSON like) */
 static std::vector<uint64_t> parseHRBytesString(const char *s) {
   std::vector<uint64_t> v;
@@ -325,9 +327,9 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
             interface statistics
           */
           flow_devices_stats->incStats(
-              now, zflow->unique_source_id, flow->getFlowDeviceInIndex(),
-              flow->getStatsProtocol(), zflow->out_pkts, zflow->out_bytes,
-              zflow->in_pkts, zflow->in_bytes, zflow->nprobe_source_id);
+				       now, zflow->unique_source_id /* exporter */, flow->getFlowDeviceInIndex(),
+				       flow->getStatsProtocol(), zflow->out_pkts, zflow->out_bytes,
+				       zflow->in_pkts, zflow->in_bytes, zflow->nprobe_source_id);
         }
 #endif
 
@@ -342,12 +344,15 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
     IpAddress exporter_ip;
     int32_t exporter_network_id = -1;
 
-#if 1
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "unique_source_id=%u, inIndex=%u, outIndex=%u, exporter_device_ip=%u, nprobe_ip=%u [%d / %d]",
+#if 0
+    char buf[64], buf1[64];
+    
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "unique_source_id=%u, inIndex=%u, outIndex=%u, exporter_device_ip=%s, nprobe_ip=%s [%d / %d]",
 				 zflow->unique_source_id,
 				 flow->getFlowDeviceInIndex(),
 				 flow->getFlowDeviceOutIndex(),
-				 zflow->exporter_device_ip, zflow->nprobe_ip,
+				 Utils::intoaV6(zflow->exporter_device_ip, buf, sizeof(buf)),
+				 Utils::intoaV6(zflow->nprobe_ip, buf1, sizeof(buf1)),
 				 flow->getFlowDeviceInIndex(), flow->getFlowDeviceOutIndex());
 #endif
 

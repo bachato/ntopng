@@ -3464,7 +3464,7 @@ char* Utils::intoaV6(struct ndpi_in6_addr ipv6, char* buf, u_short bufLen) {
     buf[0] = '\0';
     return (buf);
   } else {
-    if(strncmp(ret, "::ffff:", 7) == 0)
+    if(IN6_IS_ADDR_V4MAPPED((struct in6_addr *)&ipv6))
       return (&ret[7]); /* IPv4 address */
     else
       return (ret);
