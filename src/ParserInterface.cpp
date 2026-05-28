@@ -270,7 +270,18 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
     /* Fix interface Id (if zero) */
 
     if (new_flow) {
-      flow->setFlowDeviceNextHop(zflow->getNextHop());
+      IpAddress *nh = zflow->getNextHop();
+
+      if(!IN6_IS_ADDR_V4MAPPED((struct in6_addr *)&zflow->exporter_device_ip)) {
+	/* This is an IPv6 address */
+
+	if(nh->isIPv4() && nh->isEmpty()) {
+	  /* Change 0.0.0.0 -> :: to make them consistent */
+	  nh->setEmptyIPv6();
+	}
+      }
+
+      flow->setFlowDeviceNextHop(nh);
       if (zflow->inIndex != 0) flow->setFlowDeviceInIndex(zflow->inIndex);
       if (zflow->outIndex != 0) flow->setFlowDeviceOutIndex(zflow->outIndex);
 
@@ -346,7 +357,7 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
 
 #if 0
     char buf[64], buf1[64];
-    
+
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "unique_source_id=%u, inIndex=%u, outIndex=%u, exporter_device_ip=%s, nprobe_ip=%s [%d / %d]",
 				 zflow->unique_source_id,
 				 flow->getFlowDeviceInIndex(),
@@ -508,11 +519,11 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
 
 #if 0
   char buf[355];
-  
+
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s",
 			       Utils::intoaV6(zflow->exporter_device_ip, buf, sizeof(buf)));
 #endif
-  
+
   flow->setFlowDevice(&zflow->exporter_device_ip, zflow->observationPointId,
                       src2dst_direction ? flow->getFlowDeviceInIndex()
                                         : flow->getFlowDeviceOutIndex(),
