@@ -491,3 +491,10 @@ void IpAddress::fillIP(ndpi_ip_addr_t* ip_addr) {
   else
     memcpy(&ip_addr->ipv6, get_ipv6(), sizeof(struct ndpi_in6_addr));
 }
+
+/* ****************************** */
+
+void IpAddress::setEmptyIPv6() {
+  reset();
+  addr.ipVersion = 6;
+}

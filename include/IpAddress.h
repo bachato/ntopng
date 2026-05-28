@@ -110,6 +110,7 @@ class IpAddress {
     memcpy(&addr, ip, sizeof(struct ipAddress));
     compute_key();
   };
+  void setEmptyIPv6();
   void set(union usa* ip);
   void set(const char* ip);
   void reloadBlacklist(ndpi_detection_module_struct* ndpi_struct);
