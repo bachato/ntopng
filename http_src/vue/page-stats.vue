@@ -249,6 +249,12 @@ onBeforeMount(async () => {
     if (props.context.source_value_object.is_va) {
         min_time_interval_id.value = "hour";
         ntopng_utility.check_and_set_default_time_interval("day");
+    } else if (props.context.source_value_object.epoch_begin && props.context.source_value_object.epoch_end) {
+        let url_epoch = ntopng_utility.get_url_epoch_interval();
+        if (url_epoch.epoch_begin == null || url_epoch.epoch_end == null) {
+            ntopng_url_manager.set_key_to_url("epoch_begin", props.context.source_value_object.epoch_begin);
+            ntopng_url_manager.set_key_to_url("epoch_end", props.context.source_value_object.epoch_end);
+        }
     };
 
     set_default_source_object_in_url();
