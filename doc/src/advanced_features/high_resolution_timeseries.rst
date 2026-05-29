@@ -170,6 +170,8 @@ ASN, etc.)
 
 A **high-resolution chart** aggregates the HR counters of all flows matching the active filters.
 
+.. figure:: ../img/img/hr_timeseries_aggregation.png
+
 Because the filter bar exposes the complete set of flow fields, operators can
 ask highly specific questions directly from the ntopng UI without writing SQL:
 
@@ -208,6 +210,8 @@ The dashboard provides two panels:
   source IP, destination IP, and destination port. Each data point represents one 15-second slot.
 - **Application Protocol Throughput (All Traffic)** — aggregate throughput broken down by
   application protocol across all flows in the selected time window.
+
+.. figure:: ../img/img/hr_timeseries_grafana.png
 
 To import the dashboard into Grafana:
 
