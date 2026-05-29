@@ -4,12 +4,11 @@
 
 <template>
     <!-- Search container (expandable input + button + spinner) -->
-    <div
-        :class="[
-            'ms-auto expandable-search align-items-center position-relative d-flex',
-            { expanded: expanded }
-        ]">
-        
+    <div ref="searchContainer" :class="[
+        'ms-auto expandable-search align-items-center position-relative d-flex',
+        { expanded: expanded }
+    ]">
+
         <!-- Search input -->
         <input name="search" type="text" ref="searchInput" class="form-control rounded-pill ps-4-5" autocomplete="off"
             autocorrect="off" :placeholder="_i18n('search')">
@@ -19,10 +18,8 @@
         </Spinner>
 
         <!-- Search icon button -->
-        <button 
-            class="btn btn-link search-btn"
-            @click="expanded = true">
-            
+        <button class="btn btn-link search-btn" @click="expanded = true">
+
             <i class="fa-solid fa-magnifying-glass"></i>
         </button>
     </div>
@@ -36,7 +33,7 @@
 /* ======================================================
  * Imports
  * ====================================================== */
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import { default as Spinner } from "../spinner.vue";
 import { ntopng_utility, ntopng_url_manager } from "../../services/context/ntopng_globals_services";
 
@@ -63,6 +60,7 @@ const debouncerTimer = ref(null);
 // DOM references
 const searchInput = ref(null);
 const searchList = ref(null);
+const searchContainer = ref(null);
 
 // UI state
 const loading = ref(false);
@@ -338,19 +336,32 @@ const handleKeys = function (e) {
  * Lifecycle
  * ====================================================== */
 
+const outsideClickHandler = function (e) {
+    const isOutside =
+        !searchContainer.value?.contains(e.target) &&
+        !searchList.value?.contains(e.target);
+    if (isOutside) {
+        expanded.value = false;
+        searchList.value.classList.add("d-none");
+    }
+}
+
 /**
  * Setup input listeners after component mount
  */
 onMounted(() => {
     searchInput.value.addEventListener("input", () => debounce(search));
     searchInput.value.addEventListener("keydown", handleKeys);
-    searchInput.value.addEventListener(
-        "blur",
-            () => setTimeout(() => {
-                searchList.value.classList.add("d-none");
-                expanded.value = false;
-            }, 200)
-    );
+
+    // Remove expanded class when clicking outside the search-box
+    document.addEventListener("click", outsideClickHandler);
+});
+
+// Being a document listener, on the removal of the VUE component,
+// this listener is not removed, possibly causing a memory leak.
+// For this reason it is needed to manually remove the listener
+onBeforeUnmount(() => {
+    document.removeEventListener("click", outsideClickHandler);
 });
 </script>
 <style>
