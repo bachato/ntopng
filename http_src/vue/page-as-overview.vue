@@ -365,12 +365,44 @@ function clickButtonTimeseries(event) {
     window.location.href = url
 }
 
+/* ************************************** */
+
+function clickButtonFlowsAses(event) {
+    const mainASN = ntopng_url_manager.get_url_entry("asn");
+    const epoch_begin = ntopng_url_manager.get_url_entry("epoch_begin");
+    const epoch_end = ntopng_url_manager.get_url_entry("epoch_end");
+    const row = event.row;
+    const isLive = (epoch_end - epoch_begin === 0)
+    if (isLive) {
+        window.location.href = `${http_prefix}/lua/flows_stats.lua?src_asn=${row["asn"]["id"]}&dst_asn=${mainASN}`;
+    } else {
+        window.location.href = `${http_prefix}/lua/pro/db_search.lua?ifid=${props.context.ifid}&epoch_begin=${epoch_begin}&epoch_end=${epoch_end}&asn=${row.asn.id};eq,${mainASN};eq`;
+    }
+}
+
+/* ************************************** */
+
+function clickButtonFlowsExporters(event) {
+    const mainASN = ntopng_url_manager.get_url_entry("asn");
+    const epoch_begin = ntopng_url_manager.get_url_entry("epoch_begin");
+    const epoch_end = ntopng_url_manager.get_url_entry("epoch_end");
+    const row = event.row;
+    const isLive = (epoch_end - epoch_begin === 0)
+    if (isLive) {
+        window.location.href = `${http_prefix}/lua/flows_stats.lua?deviceIP=${row.device.id}&asn=${mainASN}&ifIdx=${row.interface.id}`;
+    } else {
+        window.location.href = `${http_prefix}/lua/pro/db_search.lua?ifid=${props.context.ifid}&epoch_begin=${epoch_begin}&epoch_end=${epoch_end}&asn=${mainASN};eq&snmp_interface=${row.device.id}_${row.interface.id};eq`;
+    }
+}
+
 
 /* ************************************** */
 
 function onTableCustomEvent(event) {
     let events_managed = {
         "click_button_timeseries": clickButtonTimeseries,
+        "click_button_flows_ases": clickButtonFlowsAses,
+        "click_button_flows_exporters": clickButtonFlowsExporters,
     };
     if (events_managed[event.event_id] == null) {
         return;
@@ -491,7 +523,11 @@ const mapTableColumns = (columns) => {
     columns.forEach((c) => {
         c.render_func = map_columns[c.data_field];
         if (c.id == "actions") {
+            const epoch_begin = ntopng_url_manager.get_url_entry("epoch_begin");
+            const epoch_end = ntopng_url_manager.get_url_entry("epoch_end");
+            const isLive = (epoch_end - epoch_begin === 0)
             const visible_dict = {
+                flows: isLive ? true : props.context.hasClickHouseSupport,
                 timeseries: props.context.showTimeseries
             };
             c.button_def_array.forEach((b) => {
