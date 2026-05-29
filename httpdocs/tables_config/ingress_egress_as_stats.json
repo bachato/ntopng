@@ -17,6 +17,13 @@
 			],
 			"render_v_node_type": "button_list",
 			"button_def_array": [
+                {
+					"id": "flows",
+					"icon": "fas fa-stream",
+					"title_i18n": "flows",
+					"class": [],
+					"event_id": "click_button_flows_exporters"
+				},
 				{
 					"id": "timeseries",
 					"icon": "fas fa-chart-area",

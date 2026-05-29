@@ -6,6 +6,26 @@
 	"paging": false,
 	"display_empty_rows": true,
 	"columns": [
+		{
+			"id": "actions",
+			"title_i18n": "actions",
+			"sortable": false,
+			"sticky": true,
+			"class": [
+				"text-nowrap",
+				"text-center"
+			],
+			"render_v_node_type": "button_list",
+			"button_def_array": [
+                {
+					"id": "flows",
+					"icon": "fas fa-stream",
+					"title_i18n": "flows",
+					"class": [],
+					"event_id": "click_button_flows_ases"
+				}
+			]
+		}, 
         {
             "id": "as",
 			"title_i18n": "as_details.as",
