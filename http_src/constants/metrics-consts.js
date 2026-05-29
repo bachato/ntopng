@@ -168,6 +168,43 @@ const sources_types = [
 		}],
 	},
 	{
+		id: "flow_aggr",
+		regex_page_url: "lua\/pro\/hr_chart",
+		label: i18n("page_stats.source_def.flow_aggr"),
+		query: "flow_aggr",
+		source_def_array: [{
+			main_source_def: true,
+			value: "ifid",
+			ui_type: ui_types.hide,
+		}, {
+			/* Filter fields (";op" from tagify is stripped out to get a clean value) */
+                        /* Keep in sync this list with allowed_filter_ids in http_src/vue/page-hr-chart.vue */
+			value: "cli_ip",
+			ui_type: ui_types.hide,
+			f_get_value_url: () => (ntopng_url_manager.get_url_entry("cli_ip") || "").split(";")[0],
+		}, {
+			value: "srv_ip",
+			ui_type: ui_types.hide,
+			f_get_value_url: () => (ntopng_url_manager.get_url_entry("srv_ip") || "").split(";")[0],
+		}, {
+			value: "cli_port",
+			ui_type: ui_types.hide,
+			f_get_value_url: () => (ntopng_url_manager.get_url_entry("cli_port") || "").split(";")[0],
+		}, {
+			value: "srv_port",
+			ui_type: ui_types.hide,
+			f_get_value_url: () => (ntopng_url_manager.get_url_entry("srv_port") || "").split(";")[0],
+		}, {
+			value: "l4proto",
+			ui_type: ui_types.hide,
+			f_get_value_url: () => (ntopng_url_manager.get_url_entry("l4proto") || "").split(";")[0],
+		}, {
+			value: "l7proto",
+			ui_type: ui_types.hide,
+			f_get_value_url: () => (ntopng_url_manager.get_url_entry("l7proto") || "").split(";")[0],
+		}],
+	},
+	{
 		id: "host",
 		regex_page_url: "lua\/host_details",
 		label: i18n("page_stats.source_def.host"),

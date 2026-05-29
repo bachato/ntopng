@@ -3888,6 +3888,9 @@ local lang = {
     ["hr_traffic_chart_title"] = "High-Resolution Flow Traffic (15s slots)",
     ["hr_chart_no_data"] = "No high-resolution counter data available for this flow.",
   },
+  ["hr_chart"] = {
+    ["title"]           = "High-Resolution Timeseries",
+  },
   ["flow_devices"] = {
     ["active_sflow"] = "sFlow Counters Exporters",
     ["all_probes"] = "All Exporters",
@@ -4922,6 +4925,7 @@ local lang = {
       ["iface_hr_traffic_rxtx"] = "Per-interface traffic at high resolution (requires nProbe HR counters + ClickHouse)",
       ["host_hr_traffic_rxtx"] = "Per-host traffic at high resolution (requires nProbe HR counters + ClickHouse)",
       ["flow_hr_traffic_rxtx"] = "Per-flow traffic at high resolution (requires nProbe HR counters + ClickHouse)",
+      ["flow_hr_traffic_rxtx_aggr"] = "Aggregated traffic at high resolution (requires nProbe HR counters + ClickHouse)",
       ["iface_traffic_rxtx"] = "Bytes sent and received per interface",
       ["iface_traffic_ip"] = "IPv4 and IPv6 bytes per interface",
       ["iface_active_flows"] = "Number of active flows per interface",
@@ -7647,7 +7651,8 @@ local lang = {
       ["device"] = "Device",
       ["flow_device"] = "Flow Top Interfaces",
       ["flow_interface"] = "Flow Interface",
-      ["flow"] = "Flow",
+      ["flow"] = "High-Resolution Flow",
+      ["flow_aggr"] = "High-Resolution Flow (Aggr.)",
       ["host"] = "Host",
       ["influx"] = "Influx DB Stats",
       ["interface"] = "Interface",

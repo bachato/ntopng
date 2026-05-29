@@ -25,13 +25,15 @@ local epoch_end = _GET["epoch_end"]
 local if_index = _GET["if_index"]
 local profile = _GET["profile"]
 
--- flow tags (used by flow:hr_traffic schema)
-local cli_ip    = _GET["cli_ip"]
-local srv_ip    = _GET["srv_ip"]
-local cli_port  = _GET["cli_port"]
-local srv_port  = _GET["srv_port"]
-local protocol  = _GET["protocol"]
+-- flow / aggregation tags (used by flow:hr_traffic and flow:hr_traffic_aggr schemas)
+local cli_ip     = _GET["cli_ip"]
+local srv_ip     = _GET["srv_ip"]
+local cli_port   = _GET["cli_port"]
+local srv_port   = _GET["srv_port"]
+local protocol   = _GET["protocol"]
+local l4proto    = _GET["l4proto"]
 local first_seen = _GET["first_seen"]
+local l7proto    = _GET["l7proto"]
 
 local res = {}
 
@@ -58,13 +60,15 @@ local tags = {
     profile    = profile,
     epoch_begin = tonumber(epoch_begin),
     epoch_end  = tonumber(epoch_end),
-    -- flow tags
+    -- flow / aggregation tags
     cli_ip     = cli_ip,
     srv_ip     = srv_ip,
     cli_port   = cli_port,
     srv_port   = srv_port,
     protocol   = protocol,
+    l4proto    = l4proto,
     first_seen = first_seen,
+    l7proto    = l7proto,
 }
 
 res = table.merge(res, timeseries_info.getTimeseries(tags, query))

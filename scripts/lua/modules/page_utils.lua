@@ -208,6 +208,12 @@ page_utils.menu_entries = {
         section = "dashboard",
         help_link = "https://www.ntop.org/guides/ntopng/flow_dump/clickhouse/historical_flows.html"
     },
+    hr_chart = {
+        key = "hr_chart",
+        i18n_title = "hr_chart.title",
+        section = "dashboard",
+        help_link = "https://www.ntop.org/guides/ntopng/flow_dump/clickhouse/historical_flows.html"
+    },
 
     -- Alerts
     detected_alerts = {

@@ -312,6 +312,10 @@ else
             entry = page_utils.menu_entries.traffic_report,
             hidden = not (is_enterprise and has_ch_support) or infrastructure_view or is_viewed, -- disable if interface is viewed
             url = "/lua/pro/report.lua"
+        }, {
+            entry = page_utils.menu_entries.hr_chart,
+            hidden = (not is_enterprise_M) or (not has_ch_support) or (not ifid_stats["has_hr_flows"]),
+            url = "/lua/pro/hr_chart.lua"
         }}
     })
 

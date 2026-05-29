@@ -156,6 +156,59 @@ local function metric_select_directional(schema, is_src_cond)
 end
 
 -- ##############################################
+-- Internal helpers — aggregation (optional filters)
+-- ##############################################
+
+-- Numeric columns that map directly for aggregation queries.
+local AGG_NUMERIC_COLS = {
+   l4proto  = "PROTOCOL",
+   l7proto  = "L7_PROTO",
+   cli_port = "IP_SRC_PORT",
+   srv_port = "IP_DST_PORT",
+}
+
+local function is_non_empty(v)
+   return v ~= nil and v ~= "" and v ~= "nil" and v ~= "null"
+end
+
+-- Build WHERE conditions for the flow:hr_traffic_aggr schema.
+-- All tags except ifid are optional; missing/empty ones are skipped.
+local function build_agg_where(tags)
+   local conds = {}
+
+   if is_non_empty(tags["ifid"]) then
+      conds[#conds + 1] = string.format("INTERFACE_ID = '%s'", ch_escape(tags["ifid"]))
+   end
+
+   if is_non_empty(tags["cli_ip"]) then
+      local ip = tags["cli_ip"]
+      if is_ipv6(ip) then
+         conds[#conds + 1] = string.format("IPV6_SRC_ADDR = toIPv6('%s')", ch_escape(ip))
+      else
+         conds[#conds + 1] = string.format("IPV4_SRC_ADDR = toIPv4('%s')", ch_escape(ip))
+      end
+   end
+
+   if is_non_empty(tags["srv_ip"]) then
+      local ip = tags["srv_ip"]
+      if is_ipv6(ip) then
+         conds[#conds + 1] = string.format("IPV6_DST_ADDR = toIPv6('%s')", ch_escape(ip))
+      else
+         conds[#conds + 1] = string.format("IPV4_DST_ADDR = toIPv4('%s')", ch_escape(ip))
+      end
+   end
+
+   for tag, col in pairs(AGG_NUMERIC_COLS) do
+      local v = tags[tag]
+      if is_non_empty(tostring(v or "")) and tonumber(v) then
+         conds[#conds + 1] = string.format("%s = %d", col, tonumber(v))
+      end
+   end
+
+   return (#conds > 0) and (" AND " .. table.concat(conds, " AND ")) or ""
+end
+
+-- ##############################################
 -- Internal helpers — flow (5-tuple)
 -- ##############################################
 
@@ -214,6 +267,13 @@ local function build_query_parts(schema, tags)
       local tw  = build_flow_where(tags)
       if tw == nil then return nil end
       local sel = metric_select(schema)   -- bytes_sent→HR_SRC2DST_BYTES, bytes_rcvd→HR_DST2SRC_BYTES
+      return tw, sel, pick_join_array(schema)
+   end
+
+   -- Aggregation: optional column filters
+   if schema.options and schema.options.agg_context then
+      local tw  = build_agg_where(tags)
+      local sel = metric_select(schema)
       return tw, sel, pick_join_array(schema)
    end
 
@@ -469,10 +529,12 @@ function driver:listSeries(schema, tags_filter, wildcard_tags, start_time, end_t
       time_cond = time_cond .. string.format(" AND LAST_SEEN <= %d", end_time)
    end
 
-   -- Build WHERE: flow context, host direction, or simple tags.
+   -- Build WHERE: flow context, aggregation, host direction, or simple tags.
    local tw
    if schema.options and schema.options.flow_context then
       tw = build_flow_where(tags_filter) or ""
+   elseif schema.options and schema.options.agg_context then
+      tw = build_agg_where(tags_filter)
    else
       tw = tags_where(tags_filter)
       local host_dir_tag = schema.options and schema.options.host_direction

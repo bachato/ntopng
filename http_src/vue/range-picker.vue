@@ -4,7 +4,7 @@
             <modal-filters :filters_options="modal_data" @apply="apply_modal" ref="modal_filters"
                 :id="id_modal_filters">
             </modal-filters>
-            <date-time-range-picker :id="id_data_time_range_picker" :min_time_interval_id="min_time_interval_id"
+            <date-time-range-picker v-if="show_date_picker" :id="id_data_time_range_picker" :min_time_interval_id="min_time_interval_id"
                 :round_time="round_time">
                 <template v-slot:begin>
                     <div v-if="is_alert_stats_url" class="d-flex align-items-center me-2">
@@ -177,6 +177,8 @@ export default {
         id: String,
         min_time_interval_id: String,
         round_time: Boolean,
+        show_date_picker: { type: Boolean, default: true },
+        allowed_filter_ids: { type: Array, default: () => [] },
     },
     components: {
         'date-time-range-picker': DateTimeRangePicker,
@@ -188,12 +190,20 @@ export default {
     created() {
     },
     async mounted() {
-        let dt_range_picker_mounted = ntopng_sync.on_ready(this.id_data_time_range_picker);
+        let dt_range_picker_mounted = this.show_date_picker
+            ? ntopng_sync.on_ready(this.id_data_time_range_picker)
+            : Promise.resolve();
         let modal_filters_mounted = ntopng_sync.on_ready(this.id_modal_filters);
         await dt_range_picker_mounted;
 
         if (this.page != 'all') {
             let filters = await load_filters_data();
+
+            if (this.allowed_filter_ids.length > 0) {
+                const allowed = new Set(this.allowed_filter_ids);
+                FILTERS_CONST = FILTERS_CONST.filter((f) => allowed.has(f.id));
+                filters = filters.filter((f) => allowed.has(f.id));
+            }
 
             TAGIFY = create_tagify(this);
             ntopng_events_manager.emit_event(ntopng_events.FILTERS_CHANGE, { filters });

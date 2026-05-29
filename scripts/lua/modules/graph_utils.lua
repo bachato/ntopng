@@ -407,7 +407,7 @@ function graph_utils.drawNewGraphs(source_value_object)
 
     local context = {
         csrf = ntop.getRandomCSRFValue(),
-        enable_snapshots = ntop.isEnterpriseM(),
+        enable_snapshots = (source_value_object.enable_snapshots ~= false) and ntop.isEnterpriseM(),
         traffic_extraction_permitted = traffic_extraction_permitted,
         sources_types_enabled = sources_types_enabled,
         source_value_object = source_value_object,

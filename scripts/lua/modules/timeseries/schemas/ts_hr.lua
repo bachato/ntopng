@@ -71,3 +71,25 @@ schema:addTag("protocol")
 schema:addTag("first_seen")
 schema:addMetric("bytes_sent")
 schema:addMetric("bytes_rcvd")
+
+-- ############################################
+
+-- flow:hr_traffic_aggr
+-- Aggregated traffic from HR flow counters matching optional WHERE filters.
+-- Only ifid is required, other tags are used to build extra WHERE conditions
+-- (missing / empty tags are skipped by the driver).
+schema = ts_utils.newSchema("flow:hr_traffic_aggr", {
+    step         = 15,
+    metrics_type = ts_utils.metrics.counter,
+    data_source  = "flows",
+    agg_context  = true,
+})
+schema:addTag("ifid")
+schema:addTag("cli_ip")
+schema:addTag("srv_ip")
+schema:addTag("cli_port")
+schema:addTag("srv_port")
+schema:addTag("l4proto")
+schema:addTag("l7proto")
+schema:addMetric("bytes_sent")
+schema:addMetric("bytes_rcvd")
