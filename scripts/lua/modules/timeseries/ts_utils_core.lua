@@ -25,6 +25,7 @@ require "ntop_utils"
 
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/timeseries/drivers/?.lua;" .. package.path
+package.path = dirs.installdir .. "/scripts/lua/pro/modules/timeseries/drivers/?.lua;" .. package.path
 package.path = dirs.installdir .. "/scripts/lua/modules/timeseries/schemas/?.lua;" .. package.path
 package.path = dirs.installdir .. "/scripts/lua/modules/timeseries/custom/?.lua;" .. package.path
 

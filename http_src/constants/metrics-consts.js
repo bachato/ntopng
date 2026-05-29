@@ -177,31 +177,31 @@ const sources_types = [
 			value: "ifid",
 			ui_type: ui_types.hide,
 		}, {
-			/* Filter fields (";op" from tagify is stripped out to get a clean value) */
+			/* Filter fields ("value;op" passed to backend for clickhouse_utils.formatWhere) */
                         /* Keep in sync this list with allowed_filter_ids in http_src/vue/page-hr-chart.vue */
 			value: "cli_ip",
 			ui_type: ui_types.hide,
-			f_get_value_url: () => (ntopng_url_manager.get_url_entry("cli_ip") || "").split(";")[0],
+			f_get_value_url: () => ntopng_url_manager.get_url_entry("cli_ip") || "",
 		}, {
 			value: "srv_ip",
 			ui_type: ui_types.hide,
-			f_get_value_url: () => (ntopng_url_manager.get_url_entry("srv_ip") || "").split(";")[0],
+			f_get_value_url: () => ntopng_url_manager.get_url_entry("srv_ip") || "",
 		}, {
 			value: "cli_port",
 			ui_type: ui_types.hide,
-			f_get_value_url: () => (ntopng_url_manager.get_url_entry("cli_port") || "").split(";")[0],
+			f_get_value_url: () => ntopng_url_manager.get_url_entry("cli_port") || "",
 		}, {
 			value: "srv_port",
 			ui_type: ui_types.hide,
-			f_get_value_url: () => (ntopng_url_manager.get_url_entry("srv_port") || "").split(";")[0],
+			f_get_value_url: () => ntopng_url_manager.get_url_entry("srv_port") || "",
 		}, {
 			value: "l4proto",
 			ui_type: ui_types.hide,
-			f_get_value_url: () => (ntopng_url_manager.get_url_entry("l4proto") || "").split(";")[0],
+			f_get_value_url: () => ntopng_url_manager.get_url_entry("l4proto") || "",
 		}, {
 			value: "l7proto",
 			ui_type: ui_types.hide,
-			f_get_value_url: () => (ntopng_url_manager.get_url_entry("l7proto") || "").split(";")[0],
+			f_get_value_url: () => ntopng_url_manager.get_url_entry("l7proto") || "",
 		}],
 	},
 	{
