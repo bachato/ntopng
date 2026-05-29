@@ -126,12 +126,31 @@ function tsArrayToOptions(tsOptionsArray, tsGroupsArray, tsCompare, useFullName)
 
 /* *********************************************** */
 
+/* URL params owned by the metrics/PageStats system, never forwarded as flow filters.
+ * Keep in sync with METRICS_SYSTEM_PARAMS in metrics-manager.js. */
+const TS_QUERY_SKIP_PARAMS = new Set([
+    "epoch_begin", "epoch_end",
+    "timeseries_groups", "timeseries_groups_mode", "ts_query", "ts_schema",
+    "status", "page", "query_preset", "aggregated",
+]);
+
 function getTsQuery(tsGroup, not_metric_query, enable_source_def_value_dict) {
     let tsQuery = tsGroup.source_type.source_def_array.map((source_def, i) => {
         if (enable_source_def_value_dict != null && !enable_source_def_value_dict[source_def.value]) { return null; }
         let source_value = tsGroup.source_array[i].value;
         return `${source_def.value}:${source_value}`;
     }).filter((s) => s != null).join(",");
+
+    /* If pass_url_filters is defined, append URL filters so they reach the timeseries driver via 
+     * ts_query -> tsQueryToTags -> build_agg_where */
+    if (tsGroup.source_type.pass_url_filters) {
+        const already = new Set(tsGroup.source_type.source_def_array.map((sd) => sd.value));
+        for (const [key, value] of ntopng_url_manager.get_url_entries()) {
+            if (!TS_QUERY_SKIP_PARAMS.has(key) && !already.has(key) && value) {
+                tsQuery += `,${key}:${value}`;
+            }
+        }
+    }
 
     if (!not_metric_query && tsGroup.metric.query != null) {
         tsQuery = `${tsQuery},${tsGroup.metric.query}`

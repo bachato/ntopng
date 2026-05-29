@@ -172,36 +172,13 @@ const sources_types = [
 		regex_page_url: "lua\/pro\/hr_chart",
 		label: i18n("page_stats.source_def.flow_aggr"),
 		query: "flow_aggr",
+		/* Note: all filters (from tagify) are forwarded to the backend dinamically via
+		 * pass_url_filters, no need to enumerate them here. */
+		pass_url_filters: true,
 		source_def_array: [{
 			main_source_def: true,
 			value: "ifid",
 			ui_type: ui_types.hide,
-		}, {
-			/* Filter fields ("value;op" passed to backend for clickhouse_utils.formatWhere) */
-                        /* Keep in sync this list with allowed_filter_ids in http_src/vue/page-hr-chart.vue */
-			value: "cli_ip",
-			ui_type: ui_types.hide,
-			f_get_value_url: () => ntopng_url_manager.get_url_entry("cli_ip") || "",
-		}, {
-			value: "srv_ip",
-			ui_type: ui_types.hide,
-			f_get_value_url: () => ntopng_url_manager.get_url_entry("srv_ip") || "",
-		}, {
-			value: "cli_port",
-			ui_type: ui_types.hide,
-			f_get_value_url: () => ntopng_url_manager.get_url_entry("cli_port") || "",
-		}, {
-			value: "srv_port",
-			ui_type: ui_types.hide,
-			f_get_value_url: () => ntopng_url_manager.get_url_entry("srv_port") || "",
-		}, {
-			value: "l4proto",
-			ui_type: ui_types.hide,
-			f_get_value_url: () => ntopng_url_manager.get_url_entry("l4proto") || "",
-		}, {
-			value: "l7proto",
-			ui_type: ui_types.hide,
-			f_get_value_url: () => ntopng_url_manager.get_url_entry("l7proto") || "",
 		}],
 	},
 	{

@@ -155,9 +155,12 @@ function ts_schema:verifyTags(tags)
 
   for tag in pairs(tags) do
     if self.tags[tag] == nil then
-      -- NOTE: just ignore the additional tags
-      --traceError(TRACE_ERROR, TRACE_CONSOLE, "unknown tag '" .. tag .. "' in schema " .. self.name)
-      --return false
+      -- Schemas with pass_unknown_tags (e.g. flow:hr_traffic_aggr) forward every tag
+      -- to the driver (so that build_agg_where can pass them to formatWhere).
+      -- All other schemas just drop unrecognised tags.
+      if self.options and self.options.pass_unknown_tags then
+        actual_tags[tag] = tags[tag]
+      end
     else
       actual_tags[tag] = tags[tag]
     end

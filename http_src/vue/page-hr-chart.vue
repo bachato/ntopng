@@ -14,8 +14,7 @@
         <div class="range-picker d-flex m-auto flex-wrap">
             <AlertInfo id="alert_info" :global="true" ref="alert_info"></AlertInfo>
             <!-- Keep in sync allowed_filter_ids with flow_aggr in http_src/constants/metrics-consts.js -->
-            <RangePicker v-if="mount_range_picker" ref="range_picker" id="range_picker" :show_date_picker="false"
-                :allowed_filter_ids="['cli_ip', 'srv_ip', 'cli_port', 'srv_port', 'l4proto', 'l7proto']">
+            <RangePicker v-if="mount_range_picker" ref="range_picker" id="range_picker" :show_date_picker="false">
             </RangePicker>
         </div>
     </div>
@@ -23,7 +22,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeMount } from "vue";
-import { ntopng_status_manager, ntopng_url_manager, ntopng_sync } from "../services/context/ntopng_globals_services";
+import { ntopng_events_manager, ntopng_events, ntopng_url_manager, ntopng_sync } from "../services/context/ntopng_globals_services";
 
 import { default as Navbar } from "./page-navbar.vue";
 import { default as AlertInfo } from "./alert-info.vue";
@@ -54,18 +53,16 @@ onMounted(async () => {
 
     /* Reload the page when filter tags change so hr_chart.lua can pass the updated values to drawNewGraphs. 
      * Epoch-only changes are handled by the PageStats date picker without a reload. */
-    let last_filter_params = get_filter_url_params();
-    ntopng_status_manager.on_status_change("flow_aggr_filter", (_new_status) => {
-        const new_filter_params = get_filter_url_params();
-        if (new_filter_params === last_filter_params) return;
-        last_filter_params = new_filter_params;
-        /* PageStats writes timeseries_groups (and ts_query/ts_schema) to the URL after every render.
-         * On reload, PageStats.init() restores params via get_timeseries_groups_from_url() and never calls
-         * get_default_timeseries_groups(), so the new filter values picked up by f_get_value_url are bypassed. */
+    /* Subscribe to FILTERS_CHANGE so we fire after RangePicker's reload_status has
+     * already written the new filter values to the URL. */
+    ntopng_events_manager.on_event_change("flow_aggr_filter", ntopng_events.FILTERS_CHANGE, () => {
+        /* Clear PageStats-owned URL params so PageStats.init() calls
+         * get_default_timeseries_groups() and getTsQuery() picks up the new
+         * filter values via pass_url_filters. */
         ntopng_url_manager.delete_params([
             "timeseries_groups", "timeseries_groups_mode", "ts_query", "ts_schema"
         ]);
         ntopng_url_manager.reload_url();
-    }, false);
+    });
 });
 </script>

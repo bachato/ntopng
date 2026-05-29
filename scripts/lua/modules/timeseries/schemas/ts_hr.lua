@@ -79,17 +79,15 @@ schema:addMetric("bytes_rcvd")
 -- Only ifid is required, other tags are used to build extra WHERE conditions
 -- (missing / empty tags are skipped by the driver).
 schema = ts_utils.newSchema("flow:hr_traffic_aggr", {
-    step         = 15,
-    metrics_type = ts_utils.metrics.counter,
-    data_source  = "flows",
-    agg_context  = true,
+    step              = 15,
+    metrics_type      = ts_utils.metrics.counter,
+    data_source       = "flows",
+    agg_context       = true,
+    pass_unknown_tags = true,  -- forward all filter tags to build_agg_where / formatWhere
 })
 schema:addTag("ifid")
-schema:addTag("cli_ip")
-schema:addTag("srv_ip")
-schema:addTag("cli_port")
-schema:addTag("srv_port")
-schema:addTag("l4proto")
-schema:addTag("l7proto")
+-- Filters (cli_ip, srv_ip, cli_port, srv_port, l4proto, l7proto, ...) are
+-- handled dinamically/generically by build_agg_where via clickhouse_utils.formatWhere,
+-- no need to declare all of them here.
 schema:addMetric("bytes_sent")
 schema:addMetric("bytes_rcvd")

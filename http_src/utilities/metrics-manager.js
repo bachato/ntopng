@@ -256,16 +256,40 @@ const get_default_source_value_array = (source_type) => {
     return source_value_array;
 };
 
+/* URL params owned by the metrics/PageStats, never forwarded as flow filters. */
+const METRICS_SYSTEM_PARAMS = new Set([
+    "epoch_begin", "epoch_end",
+    "timeseries_groups", "timeseries_groups_mode", "ts_query", "ts_schema",
+    "status", "page", "query_preset", "aggregated",
+]);
+
 function get_metrics_url(http_prefix, source_type, source_array, epoch) {
     const params = source_type.source_def_array.map((source_def, i) => {
         if (source_array[i]) {
             return `${source_def.value}=${source_array[i].value}`;
         }
     }).join("&");
+
+    /* When pass_url_filters is defined, append URL parameters that are
+     * not system parameters and not already covered by source_def_array. This lets
+     * the backend (clickhouse_utils.formatWhere) receive all filter values
+     * without enumerating them explicitly in source_def_array. */
+    let filter_params = "";
+    if (source_type.pass_url_filters) {
+        const already = new Set(source_type.source_def_array.map((sd) => sd.value));
+        const extra = [];
+        for (const [key, value] of ntopng_url_manager.get_url_entries()) {
+            if (!METRICS_SYSTEM_PARAMS.has(key) && !already.has(key) && value) {
+                extra.push(`${key}=${value}`);
+            }
+        }
+        if (extra.length > 0) filter_params = "&" + extra.join("&");
+    }
+
     /* When only_basic_ts is set, all metrics are returned regardless of data availability,
      * so the epoch has no effect on the response — omit it to maximise cache hits. */
     const epoch_string = (epoch != null) ? `epoch_end=${epoch.epoch_end}&epoch_begin=${epoch.epoch_begin}` : ``;
-    const url = `${http_prefix}/lua/rest/v2/get/timeseries/type/consts.lua?query=${source_type.query}&${params}&${epoch_string}`;
+    const url = `${http_prefix}/lua/rest/v2/get/timeseries/type/consts.lua?query=${source_type.query}&${params}${filter_params}&${epoch_string}`;
     return url;
 }
 
