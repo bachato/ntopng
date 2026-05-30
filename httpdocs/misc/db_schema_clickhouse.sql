@@ -17,102 +17,101 @@ CREATE OR REPLACE FUNCTION IPv6NumToNormalizedIP AS (ip) ->
 @
 
 CREATE TABLE IF NOT EXISTS `flows` (
-`FLOW_ID` UInt64 COMMENT 'Unique flow identifier assigned by ntopng',
-`IP_PROTOCOL_VERSION` UInt8 COMMENT 'IP version: 4 for IPv4, 6 for IPv6',
-`FIRST_SEEN` DateTime COMMENT 'Timestamp of the first packet of the flow',
-`LAST_SEEN` DateTime COMMENT 'Timestamp of the last packet of the flow',
-`VLAN_ID` UInt16 /* LowCardinality */ COMMENT '802.1Q VLAN tag (0 if untagged)',
-`PACKETS` UInt32 COMMENT 'Total packet count in both directions',
-`TOTAL_BYTES` UInt64 COMMENT 'Total bytes transferred in both directions',
-`SRC2DST_BYTES` UInt64 COMMENT 'Bytes sent from client (source) to server (destination)',
-`DST2SRC_BYTES` UInt64 COMMENT 'Bytes sent from server (destination) to client (source)',
-`SRC2DST_DSCP` UInt8 COMMENT 'DSCP value observed in the client-to-server direction',
-`DST2SRC_DSCP` UInt8 COMMENT 'DSCP value observed in the server-to-client direction',
-`PROTOCOL` UInt8 COMMENT 'IP transport protocol number (6=TCP, 17=UDP, 1=ICMP, etc.)',
-`IPV4_SRC_ADDR` UInt32 COMMENT 'Source IPv4 address as a 32-bit integer; 0 for IPv6 flows',
-`IPV6_SRC_ADDR` IPv6 COMMENT 'Source IPv6 address; all-zeros for IPv4 flows',
-`IP_SRC_PORT` UInt16 COMMENT 'Source (client) port number',
-`IPV4_DST_ADDR` UInt32 COMMENT 'Destination IPv4 address as a 32-bit integer; 0 for IPv6 flows',
-`IPV6_DST_ADDR` IPv6 COMMENT 'Destination IPv6 address; all-zeros for IPv4 flows',
-`IP_DST_PORT` UInt16 COMMENT 'Destination (server) port number',
-`L7_PROTO` UInt16 COMMENT 'nDPI layer-7 application protocol identifier',
-`L7_PROTO_MASTER` UInt16 COMMENT 'nDPI master/carrier protocol ID (e.g. TLS when L7_PROTO is HTTPS)',
-`L7_CATEGORY` UInt16 COMMENT 'nDPI application category identifier',
-`FLOW_RISK` UInt64 COMMENT 'Bitmap of nDPI flow risk flags (each bit represents a distinct risk)',
-`INFO` String COMMENT 'Supplementary flow info extracted by nDPI (e.g. HTTP host, DNS query name, TLS SNI)',
-`PROFILE` String COMMENT 'Traffic policy profile name matched by this flow',
-`NTOPNG_INSTANCE_NAME` String COMMENT 'Hostname/name of the ntopng instance that captured this flow',
-`INTERFACE_ID` UInt16 COMMENT 'ntopng internal interface identifier',
-`STATUS` UInt8 COMMENT 'Flow alert type ID (0 = normal non-alert flow; non-zero = alert type)',
-`SRC_COUNTRY_CODE` UInt16 COMMENT 'Source IP geo-country: two ASCII letters packed into a UInt16 (high byte = first letter)',
-`DST_COUNTRY_CODE` UInt16 COMMENT 'Destination IP geo-country: two ASCII letters packed into a UInt16 (high byte = first letter)',
-`SRC_LABEL` String COMMENT 'Resolved hostname or user-defined label for the source host',
-`DST_LABEL` String COMMENT 'Resolved hostname or user-defined label for the destination host',
-`SRC_MAC` UInt64 COMMENT 'Source MAC address encoded as a 64-bit integer',
-`DST_MAC` UInt64 COMMENT 'Destination MAC address encoded as a 64-bit integer',
-`SRC_ASN` UInt32 COMMENT 'Autonomous System Number of the source IP',
-`DST_ASN` UInt32 COMMENT 'Autonomous System Number of the destination IP',
-`PROBE_IP` IPv6 COMMENT 'IPv4 or IPv6 address of the NetFlow/IPFIX exporter (probe); IPv4 addresses are stored as IPv4-mapped IPv6 (::ffff:a.b.c.d)',
-`EXPORTER_SITE` UInt16 COMMENT 'Site/location identifier of the flow exporter',
-`INTERFACE_ROLE` UInt8 COMMENT 'Role of the SMMP interface (e.g. peering, transit, internal network interface)',
-`OBSERVATION_POINT_ID` UInt16 COMMENT 'IPFIX observation point identifier',
-`SRC2DST_TCP_FLAGS` UInt8 COMMENT 'Bitwise OR of TCP flags seen in the client-to-server direction',
-`DST2SRC_TCP_FLAGS` UInt8 COMMENT 'Bitwise OR of TCP flags seen in the server-to-client direction',
-`SCORE` UInt16 COMMENT 'Composite flow risk/security score',
-`QOE_SCORE` UInt8 COMMENT 'Quality of Experience score (0=best)',
-`CLIENT_NW_LATENCY_US` UInt32 COMMENT 'Estimated client-side network RTT in microseconds',
-`SERVER_NW_LATENCY_US` UInt32 COMMENT 'Estimated server-side network RTT in microseconds',
-`CLIENT_LOCATION` UInt8 COMMENT 'Client host location type (local LAN, remote, etc.)',
-`SERVER_LOCATION` UInt8 COMMENT 'Server host location type (local LAN, remote, etc.)',
-`SRC_NETWORK_ID` UInt32 COMMENT 'ntopng local-network ID for the source IP (0 if not a known local network)',
-`DST_NETWORK_ID` UInt32 COMMENT 'ntopng local-network ID for the destination IP (0 if not a known local network)',
-`SRC_SITE_ID` UInt16 COMMENT 'ntopng site ID associated with the source network (0 if none)',
-`DST_SITE_ID` UInt16 COMMENT 'ntopng site ID associated with the destination network (0 if none)',
-`CLIENT_FINGERPRINT` String COMMENT 'TLS/QUIC client fingerprint (JA3 or similar)',
-`INPUT_SNMP` UInt32 COMMENT 'SNMP input interface index exported via NetFlow/IPFIX',
-`OUTPUT_SNMP` UInt32 COMMENT 'SNMP output interface index exported via NetFlow/IPFIX',
-`SRC_HOST_POOL_ID` UInt16 COMMENT 'ntopng host-pool ID of the source host',
-`DST_HOST_POOL_ID` UInt16 COMMENT 'ntopng host-pool ID of the destination host',
-`SRC_PROC_NAME` String COMMENT 'Name of the OS process that originated the flow (from eBPF/sysdig)',
-`DST_PROC_NAME` String COMMENT 'Name of the OS process that received the flow (from eBPF/sysdig)',
-`SRC_PROC_USER_NAME` String COMMENT 'OS username owning the source process',
-`DST_PROC_USER_NAME` String COMMENT 'OS username owning the destination process',
-`ALERTS_MAP` String COMMENT 'Serialized bitmap of individual alert conditions triggered on this flow',
-`TAGS_MAP` String COMMENT 'Serialized bitmap of tags associated with this flow',
-`SRC_TAGS_MAP` String COMMENT 'Serialized bitmap of tags associated with the source host',
-`DST_TAGS_MAP` String COMMENT 'Serialized bitmap of tags associated with the destination host',
-`SEVERITY` UInt8 COMMENT 'Alert severity level; meaningful only when STATUS != 0',
-`IS_CLI_ATTACKER` UInt8 COMMENT '1 if the client host is flagged as an attacker, 0 otherwise',
-`IS_CLI_VICTIM` UInt8 COMMENT '1 if the client host is flagged as a victim, 0 otherwise',
-`IS_CLI_BLACKLISTED` UInt8 COMMENT '1 if the client IP appears on a threat-intel blacklist, 0 otherwise',
-`IS_SRV_ATTACKER` UInt8 COMMENT '1 if the server host is flagged as an attacker, 0 otherwise',
-`IS_SRV_VICTIM` UInt8 COMMENT '1 if the server host is flagged as a victim, 0 otherwise',
-`IS_SRV_BLACKLISTED` UInt8 COMMENT '1 if the server IP appears on a threat-intel blacklist, 0 otherwise',
-`ALERT_STATUS` UInt8 COMMENT 'Alert lifecycle status (e.g. acknowledged, in-progress)',
-`USER_LABEL` String COMMENT 'User-defined free-text label applied to this flow',
-`USER_LABEL_TSTAMP` DateTime COMMENT 'Timestamp when USER_LABEL was last modified',
-`PROTOCOL_INFO_JSON` String COMMENT 'Protocol-specific metadata (HTTP URL, DNS answers, TLS cert info, etc.) as JSON',
-`ALERT_JSON` String COMMENT 'Alert-specific context and evidence as a JSON blob',
-`IS_ALERT_DELETED` UInt8 COMMENT '1 if the alert on this flow was manually acknowledged/deleted, 0 otherwise',
-`SRC2DST_PACKETS` UInt32 COMMENT 'Packet count from client (source) to server (destination)',
-`DST2SRC_PACKETS` UInt32 COMMENT 'Packet count from server (destination) to client (source)',
-`ALERT_CATEGORY` UInt8 COMMENT 'Alert category identifier (maps to ntopng AlertCategory enum)',
-`MINOR_CONNECTION_STATE` UInt8 COMMENT 'Fine-grained TCP/flow connection state',
-`MAJOR_CONNECTION_STATE` UInt8 COMMENT 'Coarse TCP connection state (e.g. established, closing, closed)',
-`POST_NAT_IPV4_SRC_ADDR` UInt32 COMMENT 'Source IPv4 address after NAT translation',
-`POST_NAT_SRC_PORT` UInt32 COMMENT 'Source port after NAT translation',
-`POST_NAT_IPV4_DST_ADDR` UInt32 COMMENT 'Destination IPv4 address after NAT translation',
-`POST_NAT_DST_PORT` UInt32 COMMENT 'Destination port after NAT translation',
-`DOMAIN_NAME` String COMMENT 'Domain name contacted extracted from the flow (from SNI, DNS, or HTTP Host header)',
-`SRC_PEER_ASN` UInt32 COMMENT 'BGP peer ASN upstream of the source IP',
-`DST_PEER_ASN` UInt32 COMMENT 'BGP peer ASN upstream of the destination IP',
-`REQUIRE_ATTENTION` Boolean COMMENT 'True if this flow/alert has been flagged as requiring manual review',
-`NEXT_ADJACENT_ASN` UInt32 COMMENT 'BGP next adjacent ASN (BGP_NEXT_ADJACENT_ASN / IPFIX field 128)',
-`HR_SRC2DST_BYTES` Array(UInt64) COMMENT '15-second delta byte counters src->dst from nProbe high-resolution counters',
-`HR_DST2SRC_BYTES` Array(UInt64) COMMENT '15-second delta byte counters dst->src from nProbe high-resolution counters',
-`IS_FIRST_DUMP` Boolean COMMENT 'True if this is the first time this flow is dumped to DB (i.e. it is a new flow), or false if this flows has been previously dumped (i.e. it is a continuation)',
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (FIRST_SEEN, IPV4_SRC_ADDR, IPV4_DST_ADDR)
-COMMENT 'Per-flow telemetry records captured locally or received via NetFlow/sFlow/IPFIX. Each row represents one bidirectional network flow with 5-tuple (src/dst IP, src/dst port, protocol), byte/packet counters, L7 application identification, flow-risk bitmap, DSCP, NAT addresses, process info, and optional alert metadata. Partitioned by day on FIRST_SEEN.';
+`FLOW_ID` UInt64,
+`IP_PROTOCOL_VERSION` UInt8,
+`FIRST_SEEN` DateTime,
+`LAST_SEEN` DateTime,
+`VLAN_ID` UInt16 /* LowCardinality */,
+`PACKETS` UInt32,
+`TOTAL_BYTES` UInt64,
+`SRC2DST_BYTES` UInt64,
+`DST2SRC_BYTES` UInt64,
+`SRC2DST_DSCP` UInt8,
+`DST2SRC_DSCP` UInt8,
+`PROTOCOL` UInt8,
+`IPV4_SRC_ADDR` UInt32,
+`IPV6_SRC_ADDR` IPv6,
+`IP_SRC_PORT` UInt16,
+`IPV4_DST_ADDR` UInt32,
+`IPV6_DST_ADDR` IPv6,
+`IP_DST_PORT` UInt16,
+`L7_PROTO` UInt16,
+`L7_PROTO_MASTER` UInt16,
+`L7_CATEGORY` UInt16,
+`FLOW_RISK` UInt64,
+`INFO` String,
+`PROFILE` String,
+`NTOPNG_INSTANCE_NAME` String,
+`INTERFACE_ID` UInt16,
+`STATUS` UInt8,
+`SRC_COUNTRY_CODE` UInt16,
+`DST_COUNTRY_CODE` UInt16,
+`SRC_LABEL` String,
+`DST_LABEL` String,
+`SRC_MAC` UInt64,
+`DST_MAC` UInt64,
+`SRC_ASN` UInt32,
+`DST_ASN` UInt32,
+`PROBE_IP` IPv6,
+`EXPORTER_SITE` UInt16,
+`INTERFACE_ROLE` UInt8,
+`OBSERVATION_POINT_ID` UInt16,
+`SRC2DST_TCP_FLAGS` UInt8,
+`DST2SRC_TCP_FLAGS` UInt8,
+`SCORE` UInt16,
+`QOE_SCORE` UInt8,
+`CLIENT_NW_LATENCY_US` UInt32,
+`SERVER_NW_LATENCY_US` UInt32,
+`CLIENT_LOCATION` UInt8,
+`SERVER_LOCATION` UInt8,
+`SRC_NETWORK_ID` UInt32,
+`DST_NETWORK_ID` UInt32,
+`SRC_SITE_ID` UInt16,
+`DST_SITE_ID` UInt16,
+`CLIENT_FINGERPRINT` String,
+`INPUT_SNMP` UInt32,
+`OUTPUT_SNMP` UInt32,
+`SRC_HOST_POOL_ID` UInt16,
+`DST_HOST_POOL_ID` UInt16,
+`SRC_PROC_NAME` String,
+`DST_PROC_NAME` String,
+`SRC_PROC_USER_NAME` String,
+`DST_PROC_USER_NAME` String,
+`ALERTS_MAP` String,
+`TAGS_MAP` String,
+`SRC_TAGS_MAP` String,
+`DST_TAGS_MAP` String,
+`SEVERITY` UInt8,
+`IS_CLI_ATTACKER` UInt8,
+`IS_CLI_VICTIM` UInt8,
+`IS_CLI_BLACKLISTED` UInt8,
+`IS_SRV_ATTACKER` UInt8,
+`IS_SRV_VICTIM` UInt8,
+`IS_SRV_BLACKLISTED` UInt8,
+`ALERT_STATUS` UInt8,
+`USER_LABEL` String,
+`USER_LABEL_TSTAMP` DateTime,
+`PROTOCOL_INFO_JSON` String,
+`ALERT_JSON` String,
+`IS_ALERT_DELETED` UInt8,
+`SRC2DST_PACKETS` UInt32,
+`DST2SRC_PACKETS` UInt32,
+`ALERT_CATEGORY` UInt8,
+`MINOR_CONNECTION_STATE` UInt8,
+`MAJOR_CONNECTION_STATE` UInt8,
+`POST_NAT_IPV4_SRC_ADDR` UInt32,
+`POST_NAT_SRC_PORT` UInt32,
+`POST_NAT_IPV4_DST_ADDR` UInt32,
+`POST_NAT_DST_PORT` UInt32,
+`DOMAIN_NAME` String,
+`SRC_PEER_ASN` UInt32,
+`DST_PEER_ASN` UInt32,
+`REQUIRE_ATTENTION` Boolean,
+`NEXT_ADJACENT_ASN` UInt32,
+`HR_SRC2DST_BYTES` Array(UInt64),
+`HR_DST2SRC_BYTES` Array(UInt64),
+`IS_FIRST_DUMP` Boolean,
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (FIRST_SEEN, IPV4_SRC_ADDR, IPV4_DST_ADDR);
 @
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `FLOW_ID` UInt64;
 @
@@ -227,98 +226,368 @@ ALTER TABLE flows ADD COLUMN IF NOT EXISTS `IS_FIRST_DUMP` Boolean;
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `SRC_SITE_ID` UInt16;
 @
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `DST_SITE_ID` UInt16;
+@
+ALTER TABLE `flows` MODIFY COLUMN `FLOW_ID` COMMENT 'Unique flow identifier assigned by ntopng';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IP_PROTOCOL_VERSION` COMMENT 'IP version: 4 for IPv4, 6 for IPv6';
+@
+ALTER TABLE `flows` MODIFY COLUMN `FIRST_SEEN` COMMENT 'Timestamp of the first packet of the flow';
+@
+ALTER TABLE `flows` MODIFY COLUMN `LAST_SEEN` COMMENT 'Timestamp of the last packet of the flow';
+@
+ALTER TABLE `flows` MODIFY COLUMN `VLAN_ID` COMMENT '802.1Q VLAN tag (0 if untagged)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `PACKETS` COMMENT 'Total packet count in both directions';
+@
+ALTER TABLE `flows` MODIFY COLUMN `TOTAL_BYTES` COMMENT 'Total bytes transferred in both directions';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC2DST_BYTES` COMMENT 'Bytes sent from client (source) to server (destination)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST2SRC_BYTES` COMMENT 'Bytes sent from server (destination) to client (source)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC2DST_DSCP` COMMENT 'DSCP value observed in the client-to-server direction';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST2SRC_DSCP` COMMENT 'DSCP value observed in the server-to-client direction';
+@
+ALTER TABLE `flows` MODIFY COLUMN `PROTOCOL` COMMENT 'IP transport protocol number (6=TCP, 17=UDP, 1=ICMP, etc.)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IPV4_SRC_ADDR` COMMENT 'Source IPv4 address as a 32-bit integer; 0 for IPv6 flows';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IPV6_SRC_ADDR` COMMENT 'Source IPv6 address; all-zeros for IPv4 flows';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IP_SRC_PORT` COMMENT 'Source (client) port number';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IPV4_DST_ADDR` COMMENT 'Destination IPv4 address as a 32-bit integer; 0 for IPv6 flows';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IPV6_DST_ADDR` COMMENT 'Destination IPv6 address; all-zeros for IPv4 flows';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IP_DST_PORT` COMMENT 'Destination (server) port number';
+@
+ALTER TABLE `flows` MODIFY COLUMN `L7_PROTO` COMMENT 'nDPI layer-7 application protocol identifier';
+@
+ALTER TABLE `flows` MODIFY COLUMN `L7_PROTO_MASTER` COMMENT 'nDPI master/carrier protocol ID (e.g. TLS when L7_PROTO is HTTPS)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `L7_CATEGORY` COMMENT 'nDPI application category identifier';
+@
+ALTER TABLE `flows` MODIFY COLUMN `FLOW_RISK` COMMENT 'Bitmap of nDPI flow risk flags (each bit represents a distinct risk)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `INFO` COMMENT 'Supplementary flow info extracted by nDPI (e.g. HTTP host, DNS query name, TLS SNI)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `PROFILE` COMMENT 'Traffic policy profile name matched by this flow';
+@
+ALTER TABLE `flows` MODIFY COLUMN `NTOPNG_INSTANCE_NAME` COMMENT 'Hostname/name of the ntopng instance that captured this flow';
+@
+ALTER TABLE `flows` MODIFY COLUMN `INTERFACE_ID` COMMENT 'ntopng internal interface identifier';
+@
+ALTER TABLE `flows` MODIFY COLUMN `STATUS` COMMENT 'Flow alert type ID (0 = normal non-alert flow; non-zero = alert type)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC_COUNTRY_CODE` COMMENT 'Source IP geo-country: two ASCII letters packed into a UInt16 (high byte = first letter)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST_COUNTRY_CODE` COMMENT 'Destination IP geo-country: two ASCII letters packed into a UInt16 (high byte = first letter)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC_LABEL` COMMENT 'Resolved hostname or user-defined label for the source host';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST_LABEL` COMMENT 'Resolved hostname or user-defined label for the destination host';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC_MAC` COMMENT 'Source MAC address encoded as a 64-bit integer';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST_MAC` COMMENT 'Destination MAC address encoded as a 64-bit integer';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC_ASN` COMMENT 'Autonomous System Number of the source IP';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST_ASN` COMMENT 'Autonomous System Number of the destination IP';
+@
+ALTER TABLE `flows` MODIFY COLUMN `PROBE_IP` COMMENT 'IPv4 or IPv6 address of the NetFlow/IPFIX exporter (probe); IPv4 addresses are stored as IPv4-mapped IPv6 (::ffff:a.b.c.d)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `EXPORTER_SITE` COMMENT 'Site/location identifier of the flow exporter';
+@
+ALTER TABLE `flows` MODIFY COLUMN `INTERFACE_ROLE` COMMENT 'Role of the SMMP interface where 0 = other, 1 = transit, 2 = peering, 3 = internal interface, 4 = internet exchange';
+@
+ALTER TABLE `flows` MODIFY COLUMN `OBSERVATION_POINT_ID` COMMENT 'IPFIX observation point identifier';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC2DST_TCP_FLAGS` COMMENT 'Bitwise OR of TCP flags seen in the client-to-server direction';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST2SRC_TCP_FLAGS` COMMENT 'Bitwise OR of TCP flags seen in the server-to-client direction';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SCORE` COMMENT 'Composite flow risk/security score';
+@
+ALTER TABLE `flows` MODIFY COLUMN `QOE_SCORE` COMMENT 'Quality of Experience score (0=best)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `CLIENT_NW_LATENCY_US` COMMENT 'Estimated client-side network RTT in microseconds';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SERVER_NW_LATENCY_US` COMMENT 'Estimated server-side network RTT in microseconds';
+@
+ALTER TABLE `flows` MODIFY COLUMN `CLIENT_LOCATION` COMMENT 'Client host location type (local LAN, remote, etc.)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SERVER_LOCATION` COMMENT 'Server host location type (local LAN, remote, etc.)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC_NETWORK_ID` COMMENT 'ntopng local-network ID for the source IP (0 if not a known local network)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST_NETWORK_ID` COMMENT 'ntopng local-network ID for the destination IP (0 if not a known local network)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC_SITE_ID` COMMENT 'ntopng site ID associated with the source network (0 if none)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST_SITE_ID` COMMENT 'ntopng site ID associated with the destination network (0 if none)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `CLIENT_FINGERPRINT` COMMENT 'TLS/QUIC client fingerprint (JA3 or similar)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `INPUT_SNMP` COMMENT 'SNMP input interface index exported via NetFlow/IPFIX';
+@
+ALTER TABLE `flows` MODIFY COLUMN `OUTPUT_SNMP` COMMENT 'SNMP output interface index exported via NetFlow/IPFIX';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC_HOST_POOL_ID` COMMENT 'ntopng host-pool ID of the source host';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST_HOST_POOL_ID` COMMENT 'ntopng host-pool ID of the destination host';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC_PROC_NAME` COMMENT 'Name of the OS process that originated the flow (from eBPF/sysdig)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST_PROC_NAME` COMMENT 'Name of the OS process that received the flow (from eBPF/sysdig)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC_PROC_USER_NAME` COMMENT 'OS username owning the source process';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST_PROC_USER_NAME` COMMENT 'OS username owning the destination process';
+@
+ALTER TABLE `flows` MODIFY COLUMN `ALERTS_MAP` COMMENT 'Serialized bitmap of individual alert conditions triggered on this flow';
+@
+ALTER TABLE `flows` MODIFY COLUMN `TAGS_MAP` COMMENT 'Serialized bitmap of tags associated with this flow';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC_TAGS_MAP` COMMENT 'Serialized bitmap of tags associated with the source host';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST_TAGS_MAP` COMMENT 'Serialized bitmap of tags associated with the destination host';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SEVERITY` COMMENT 'Alert severity level; meaningful only when STATUS != 0';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IS_CLI_ATTACKER` COMMENT '1 if the client host is flagged as an attacker, 0 otherwise';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IS_CLI_VICTIM` COMMENT '1 if the client host is flagged as a victim, 0 otherwise';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IS_CLI_BLACKLISTED` COMMENT '1 if the client IP appears on a threat-intel blacklist, 0 otherwise';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IS_SRV_ATTACKER` COMMENT '1 if the server host is flagged as an attacker, 0 otherwise';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IS_SRV_VICTIM` COMMENT '1 if the server host is flagged as a victim, 0 otherwise';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IS_SRV_BLACKLISTED` COMMENT '1 if the server IP appears on a threat-intel blacklist, 0 otherwise';
+@
+ALTER TABLE `flows` MODIFY COLUMN `ALERT_STATUS` COMMENT 'Alert lifecycle status (e.g. acknowledged, in-progress)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `USER_LABEL` COMMENT 'User-defined free-text label applied to this flow';
+@
+ALTER TABLE `flows` MODIFY COLUMN `USER_LABEL_TSTAMP` COMMENT 'Timestamp when USER_LABEL was last modified';
+@
+ALTER TABLE `flows` MODIFY COLUMN `PROTOCOL_INFO_JSON` COMMENT 'Protocol-specific metadata (HTTP URL, DNS answers, TLS cert info, etc.) as JSON';
+@
+ALTER TABLE `flows` MODIFY COLUMN `ALERT_JSON` COMMENT 'Alert-specific context and evidence as a JSON blob';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IS_ALERT_DELETED` COMMENT '1 if the alert on this flow was manually acknowledged/deleted, 0 otherwise';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC2DST_PACKETS` COMMENT 'Packet count from client (source) to server (destination)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST2SRC_PACKETS` COMMENT 'Packet count from server (destination) to client (source)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `ALERT_CATEGORY` COMMENT 'Alert category identifier (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `MINOR_CONNECTION_STATE` COMMENT 'Fine-grained TCP/flow connection state';
+@
+ALTER TABLE `flows` MODIFY COLUMN `MAJOR_CONNECTION_STATE` COMMENT 'Coarse TCP connection state (e.g. established, closing, closed)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `POST_NAT_IPV4_SRC_ADDR` COMMENT 'Source IPv4 address after NAT translation';
+@
+ALTER TABLE `flows` MODIFY COLUMN `POST_NAT_SRC_PORT` COMMENT 'Source port after NAT translation';
+@
+ALTER TABLE `flows` MODIFY COLUMN `POST_NAT_IPV4_DST_ADDR` COMMENT 'Destination IPv4 address after NAT translation';
+@
+ALTER TABLE `flows` MODIFY COLUMN `POST_NAT_DST_PORT` COMMENT 'Destination port after NAT translation';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DOMAIN_NAME` COMMENT 'Domain name contacted extracted from the flow (from SNI, DNS, or HTTP Host header)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `SRC_PEER_ASN` COMMENT 'BGP peer ASN upstream of the source IP';
+@
+ALTER TABLE `flows` MODIFY COLUMN `DST_PEER_ASN` COMMENT 'BGP peer ASN upstream of the destination IP';
+@
+ALTER TABLE `flows` MODIFY COLUMN `REQUIRE_ATTENTION` COMMENT 'True if this flow/alert has been flagged as requiring manual review';
+@
+ALTER TABLE `flows` MODIFY COLUMN `NEXT_ADJACENT_ASN` COMMENT 'BGP next adjacent ASN (BGP_NEXT_ADJACENT_ASN / IPFIX field 128)';
+@
+ALTER TABLE `flows` MODIFY COLUMN `HR_SRC2DST_BYTES` COMMENT '15-second delta byte counters src->dst from nProbe high-resolution counters';
+@
+ALTER TABLE `flows` MODIFY COLUMN `HR_DST2SRC_BYTES` COMMENT '15-second delta byte counters dst->src from nProbe high-resolution counters';
+@
+ALTER TABLE `flows` MODIFY COLUMN `IS_FIRST_DUMP` COMMENT 'True if this is the first time this flow is dumped to DB (i.e. it is a new flow), or false if this flows has been previously dumped (i.e. it is a continuation)';
+@
+ALTER TABLE `flows` MODIFY COMMENT 'Per-flow telemetry records captured locally or received via NetFlow/sFlow/IPFIX. Each row represents one bidirectional network flow with 5-tuple (src/dst IP, src/dst port, protocol), byte/packet counters, L7 application identification, flow-risk bitmap, DSCP, NAT addresses, process info, and optional alert metadata. Partitioned by day on FIRST_SEEN.';
 
 @
 
 CREATE TABLE IF NOT EXISTS `active_monitoring_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`resolved_ip` String COMMENT 'IP address resolved from the monitored hostname at time of check',
-`resolved_name` String COMMENT 'Hostname or target being monitored (FQDN or IP)',
-`measurement` String COMMENT 'Type of active monitoring check (e.g. icmp, http, https, tls)',
-`measure_threshold` UInt32 DEFAULT 0 COMMENT 'Configured threshold value that was exceeded to trigger the alert',
-`measure_value` REAL DEFAULT 0.0 COMMENT 'Measured value (e.g. latency in ms, HTTP response code) at alert time',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime DEFAULT toDateTime(0) COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime DEFAULT toDateTime(0) COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp)
-COMMENT 'Historical alerts generated by the active monitoring subsystem (ICMP ping, HTTP, TLS checks, etc.). Rows are appended when an engaged alert is archived. See engaged_active_monitoring_alerts for currently-firing alerts and active_monitoring_alerts_view to query both together.';
+`rowid` UUID,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`resolved_ip` String,
+`resolved_name` String,
+`measurement` String,
+`measure_threshold` UInt32 DEFAULT 0,
+`measure_value` REAL DEFAULT 0.0,
+`tstamp` DateTime,
+`tstamp_end` DateTime DEFAULT toDateTime(0),
+`severity` UInt8,
+`score` UInt16,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime DEFAULT toDateTime(0),
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp);
 @
 ALTER TABLE `active_monitoring_alerts` ADD COLUMN IF NOT EXISTS alert_category UInt8;
 @
 ALTER TABLE `active_monitoring_alerts` ADD COLUMN IF NOT EXISTS require_attention Boolean;
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `resolved_ip` COMMENT 'IP address resolved from the monitored hostname at time of check';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `resolved_name` COMMENT 'Hostname or target being monitored (FQDN or IP)';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `measurement` COMMENT 'Type of active monitoring check (e.g. icmp, http, https, tls)';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `measure_threshold` COMMENT 'Configured threshold value that was exceeded to trigger the alert';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `measure_value` COMMENT 'Measured value (e.g. latency in ms, HTTP response code) at alert time';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `active_monitoring_alerts` MODIFY COMMENT 'Historical alerts generated by the active monitoring subsystem (ICMP ping, HTTP, TLS checks, etc.). Rows are appended when an engaged alert is archived. See engaged_active_monitoring_alerts for currently-firing alerts and active_monitoring_alerts_view to query both together.';
 
 @
 
 DROP TABLE IF EXISTS `engaged_active_monitoring_alerts`;
 @
 CREATE TABLE `engaged_active_monitoring_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`resolved_ip` String COMMENT 'IP address resolved from the monitored hostname at time of check',
-`resolved_name` String COMMENT 'Hostname or target being monitored (FQDN or IP)',
-`measurement` String COMMENT 'Type of active monitoring check (e.g. icmp, http, https, tls)',
-`measure_threshold` UInt32 DEFAULT 0 COMMENT 'Configured threshold value that was exceeded to trigger the alert',
-`measure_value` REAL DEFAULT 0.0 COMMENT 'Measured value (e.g. latency in ms, HTTP response code) at alert time',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime DEFAULT toDateTime(0) COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime DEFAULT toDateTime(0) COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = Memory
-COMMENT 'In-memory table holding currently active (engaged) active-monitoring alerts. Rows are inserted when an alert fires and removed when resolved. Merged with active_monitoring_alerts in active_monitoring_alerts_view.';
-
+`rowid` UUID,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`resolved_ip` String,
+`resolved_name` String,
+`measurement` String,
+`measure_threshold` UInt32 DEFAULT 0,
+`measure_value` REAL DEFAULT 0.0,
+`tstamp` DateTime,
+`tstamp_end` DateTime DEFAULT toDateTime(0),
+`severity` UInt8,
+`score` UInt16,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime DEFAULT toDateTime(0),
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = Memory;
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `resolved_ip` COMMENT 'IP address resolved from the monitored hostname at time of check';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `resolved_name` COMMENT 'Hostname or target being monitored (FQDN or IP)';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `measurement` COMMENT 'Type of active monitoring check (e.g. icmp, http, https, tls)';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `measure_threshold` COMMENT 'Configured threshold value that was exceeded to trigger the alert';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `measure_value` COMMENT 'Measured value (e.g. latency in ms, HTTP response code) at alert time';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `engaged_active_monitoring_alerts` MODIFY COMMENT 'In-memory table holding currently active (engaged) active-monitoring alerts. Rows are inserted when an alert fires and removed when resolved. Merged with active_monitoring_alerts in active_monitoring_alerts_view.';
 @
 
 CREATE TABLE IF NOT EXISTS `host_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`ip_version` UInt8 COMMENT 'IP version of the host: 4 for IPv4, 6 for IPv6',
-`ip` String COMMENT 'IP address of the host that triggered the alert',
-`vlan_id` UInt16 COMMENT 'VLAN on which the host was observed (0 if untagged)',
-`name` String COMMENT 'Resolved hostname or user-defined name for the host',
-`is_attacker` UInt8 COMMENT '1 if the host is the attacking party in this alert',
-`is_victim` UInt8 COMMENT '1 if the host is the victim party in this alert',
-`is_client` UInt8 COMMENT '1 if the host acted as a client in the triggering flow',
-`is_server` UInt8 COMMENT '1 if the host acted as a server in the triggering flow',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`host_pool_id` UInt16 COMMENT 'ntopng host-pool ID the host belongs to',
-`network` UInt16 COMMENT 'ntopng local-network ID the host belongs to',
-`country` String COMMENT 'Two-letter ISO 3166-1 country code derived from the host IP',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention',
-`tags_map` String DEFAULT '' COMMENT 'HEX-encoded bitmap of host tags set at the time the alert triggered'
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp)
-COMMENT 'Historical alerts associated with individual hosts (identified by IP address and VLAN). Rows are appended when an engaged host alert is archived. See engaged_host_alerts for currently-firing alerts and host_alerts_view to query both together (with MITRE ATT&CK enrichment).';
+`rowid` UUID,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`ip_version` UInt8,
+`ip` String,
+`vlan_id` UInt16,
+`name` String,
+`is_attacker` UInt8,
+`is_victim` UInt8,
+`is_client` UInt8,
+`is_server` UInt8,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`host_pool_id` UInt16,
+`network` UInt16,
+`country` String,
+`alert_category` UInt8,
+`require_attention` Boolean,
+`tags_map` String DEFAULT ''
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp);
 @
 ALTER TABLE `host_alerts` ADD COLUMN IF NOT EXISTS `host_pool_id` UInt16;
 @
@@ -333,479 +602,1130 @@ ALTER TABLE `host_alerts` ADD COLUMN IF NOT EXISTS `require_attention` UInt8;
 ALTER TABLE `host_alerts` ADD COLUMN IF NOT EXISTS `tags_map` String DEFAULT '';
 @
 ALTER TABLE `host_alerts` DROP COLUMN IF EXISTS `labels_map`;
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `ip_version` COMMENT 'IP version of the host: 4 for IPv4, 6 for IPv6';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `ip` COMMENT 'IP address of the host that triggered the alert';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `vlan_id` COMMENT 'VLAN on which the host was observed (0 if untagged)';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `name` COMMENT 'Resolved hostname or user-defined name for the host';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `is_attacker` COMMENT '1 if the host is the attacking party in this alert';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `is_victim` COMMENT '1 if the host is the victim party in this alert';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `is_client` COMMENT '1 if the host acted as a client in the triggering flow';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `is_server` COMMENT '1 if the host acted as a server in the triggering flow';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `host_pool_id` COMMENT 'ntopng host-pool ID the host belongs to';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `network` COMMENT 'ntopng local-network ID the host belongs to';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `country` COMMENT 'Two-letter ISO 3166-1 country code derived from the host IP';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `host_alerts` MODIFY COLUMN `tags_map` COMMENT 'HEX-encoded bitmap of host tags set at the time the alert triggered';
+@
+ALTER TABLE `host_alerts` MODIFY COMMENT 'Historical alerts associated with individual hosts (identified by IP address and VLAN). Rows are appended when an engaged host alert is archived. See engaged_host_alerts for currently-firing alerts and host_alerts_view to query both together (with MITRE ATT&CK enrichment).';
 
 @
 
 DROP TABLE IF EXISTS `engaged_host_alerts`;
 @
 CREATE TABLE `engaged_host_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`ip_version` UInt8 COMMENT 'IP version of the host: 4 for IPv4, 6 for IPv6',
-`ip` String COMMENT 'IP address of the host that triggered the alert',
-`vlan_id` UInt16 COMMENT 'VLAN on which the host was observed (0 if untagged)',
-`name` String COMMENT 'Resolved hostname or user-defined name for the host',
-`is_attacker` UInt8 COMMENT '1 if the host is the attacking party in this alert',
-`is_victim` UInt8 COMMENT '1 if the host is the victim party in this alert',
-`is_client` UInt8 COMMENT '1 if the host acted as a client in the triggering flow',
-`is_server` UInt8 COMMENT '1 if the host acted as a server in the triggering flow',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`host_pool_id` UInt16 COMMENT 'ntopng host-pool ID the host belongs to',
-`network` UInt16 COMMENT 'ntopng local-network ID the host belongs to',
-`country` String COMMENT 'Two-letter ISO 3166-1 country code derived from the host IP',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention',
-`tags_map` String DEFAULT '' COMMENT 'HEX-encoded bitmap of host tags set at the time the alert triggered'
-) ENGINE = Memory
-COMMENT 'In-memory table holding currently active (engaged) host alerts. Rows are inserted when an alert fires and removed when resolved. Merged with host_alerts in host_alerts_view.';
-
+`rowid` UUID,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`ip_version` UInt8,
+`ip` String,
+`vlan_id` UInt16,
+`name` String,
+`is_attacker` UInt8,
+`is_victim` UInt8,
+`is_client` UInt8,
+`is_server` UInt8,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`host_pool_id` UInt16,
+`network` UInt16,
+`country` String,
+`alert_category` UInt8,
+`require_attention` Boolean,
+`tags_map` String DEFAULT ''
+) ENGINE = Memory;
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `ip_version` COMMENT 'IP version of the host: 4 for IPv4, 6 for IPv6';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `ip` COMMENT 'IP address of the host that triggered the alert';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `vlan_id` COMMENT 'VLAN on which the host was observed (0 if untagged)';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `name` COMMENT 'Resolved hostname or user-defined name for the host';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `is_attacker` COMMENT '1 if the host is the attacking party in this alert';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `is_victim` COMMENT '1 if the host is the victim party in this alert';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `is_client` COMMENT '1 if the host acted as a client in the triggering flow';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `is_server` COMMENT '1 if the host acted as a server in the triggering flow';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `host_pool_id` COMMENT 'ntopng host-pool ID the host belongs to';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `network` COMMENT 'ntopng local-network ID the host belongs to';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `country` COMMENT 'Two-letter ISO 3166-1 country code derived from the host IP';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COLUMN `tags_map` COMMENT 'HEX-encoded bitmap of host tags set at the time the alert triggered';
+@
+ALTER TABLE `engaged_host_alerts` MODIFY COMMENT 'In-memory table holding currently active (engaged) host alerts. Rows are inserted when an alert fires and removed when resolved. Merged with host_alerts in host_alerts_view.';
 @
 
 CREATE TABLE IF NOT EXISTS `mac_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`address` String COMMENT 'MAC address of the device that triggered the alert (colon-separated hex)',
-`device_type` UInt8 DEFAULT 0 COMMENT 'Device category/type identifier (maps to ntopng DeviceType enum)',
-`name` String COMMENT 'User-defined or discovered name for the device',
-`is_attacker` UInt8 COMMENT '1 if the device is the attacking party in this alert',
-`is_victim` UInt8 COMMENT '1 if the device is the victim party in this alert',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp)
-COMMENT 'Historical alerts associated with MAC addresses and layer-2 devices. See engaged_mac_alerts for currently-firing alerts and mac_alerts_view to query both together.';
+`rowid` UUID,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`address` String,
+`device_type` UInt8 DEFAULT 0,
+`name` String,
+`is_attacker` UInt8,
+`is_victim` UInt8,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp);
 @
 ALTER TABLE `mac_alerts` ADD COLUMN IF NOT EXISTS alert_category UInt8;
 @
 ALTER TABLE `mac_alerts` ADD COLUMN IF NOT EXISTS require_attention Boolean;
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `address` COMMENT 'MAC address of the device that triggered the alert (colon-separated hex)';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `device_type` COMMENT 'Device category/type identifier (maps to ntopng DeviceType enum)';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `name` COMMENT 'User-defined or discovered name for the device';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `is_attacker` COMMENT '1 if the device is the attacking party in this alert';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `is_victim` COMMENT '1 if the device is the victim party in this alert';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `mac_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `mac_alerts` MODIFY COMMENT 'Historical alerts associated with MAC addresses and layer-2 devices. See engaged_mac_alerts for currently-firing alerts and mac_alerts_view to query both together.';
 
 @
 
 DROP TABLE IF EXISTS `engaged_mac_alerts`;
 @
 CREATE TABLE `engaged_mac_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`address` String COMMENT 'MAC address of the device that triggered the alert (colon-separated hex)',
-`device_type` UInt8 DEFAULT 0 COMMENT 'Device category/type identifier (maps to ntopng DeviceType enum)',
-`name` String COMMENT 'User-defined or discovered name for the device',
-`is_attacker` UInt8 COMMENT '1 if the device is the attacking party in this alert',
-`is_victim` UInt8 COMMENT '1 if the device is the victim party in this alert',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = Memory
-COMMENT 'In-memory table holding currently active (engaged) MAC/device alerts. Rows are inserted when an alert fires and removed when resolved. Merged with mac_alerts in mac_alerts_view.';
-
+`rowid` UUID,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`address` String,
+`device_type` UInt8 DEFAULT 0,
+`name` String,
+`is_attacker` UInt8,
+`is_victim` UInt8,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = Memory;
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `address` COMMENT 'MAC address of the device that triggered the alert (colon-separated hex)';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `device_type` COMMENT 'Device category/type identifier (maps to ntopng DeviceType enum)';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `name` COMMENT 'User-defined or discovered name for the device';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `is_attacker` COMMENT '1 if the device is the attacking party in this alert';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `is_victim` COMMENT '1 if the device is the victim party in this alert';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `engaged_mac_alerts` MODIFY COMMENT 'In-memory table holding currently active (engaged) MAC/device alerts. Rows are inserted when an alert fires and removed when resolved. Merged with mac_alerts in mac_alerts_view.';
 @
 
 CREATE TABLE IF NOT EXISTS `snmp_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`ip` String COMMENT 'IP address of the SNMP-polled device that triggered the alert',
-`port` UInt32 COMMENT 'SNMP interface index (ifIndex) of the interface that triggered the alert',
-`name` String COMMENT 'SNMP sysName or user-defined name of the device',
-`port_name` String COMMENT 'SNMP ifDescr or user-defined name of the triggering interface',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp)
-COMMENT 'Historical alerts from SNMP-polled network devices and their individual ports. See engaged_snmp_alerts for currently-firing alerts and snmp_alerts_view to query both together.';
-@
-ALTER TABLE `snmp_alerts` MODIFY COLUMN `port` UInt32;
+`rowid` UUID,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`ip` String,
+`port` UInt32,
+`name` String,
+`port_name` String,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp);
 @
 ALTER TABLE `snmp_alerts` ADD COLUMN IF NOT EXISTS alert_category UInt8;
 @
 ALTER TABLE `snmp_alerts` ADD COLUMN IF NOT EXISTS require_attention Boolean;
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `ip` COMMENT 'IP address of the SNMP-polled device that triggered the alert';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `port` COMMENT 'SNMP interface index (ifIndex) of the interface that triggered the alert';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `name` COMMENT 'SNMP sysName or user-defined name of the device';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `port_name` COMMENT 'SNMP ifDescr or user-defined name of the triggering interface';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `snmp_alerts` MODIFY COMMENT 'Historical alerts from SNMP-polled network devices and their individual ports. See engaged_snmp_alerts for currently-firing alerts and snmp_alerts_view to query both together.';
+@
+ALTER TABLE `snmp_alerts` MODIFY COLUMN `port` UInt32;
 
 @
 
 DROP TABLE IF EXISTS `engaged_snmp_alerts`;
 @
 CREATE TABLE `engaged_snmp_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`ip` String COMMENT 'IP address of the SNMP-polled device that triggered the alert',
-`port` UInt32 COMMENT 'SNMP interface index (ifIndex) of the interface that triggered the alert',
-`name` String COMMENT 'SNMP sysName or user-defined name of the device',
-`port_name` String COMMENT 'SNMP ifDescr or user-defined name of the triggering interface',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = Memory
-COMMENT 'In-memory table holding currently active (engaged) SNMP alerts. Rows are inserted when an alert fires and removed when resolved. Merged with snmp_alerts in snmp_alerts_view.';
-
+`rowid` UUID,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`ip` String,
+`port` UInt32,
+`name` String,
+`port_name` String,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = Memory;
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `ip` COMMENT 'IP address of the SNMP-polled device that triggered the alert';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `port` COMMENT 'SNMP interface index (ifIndex) of the interface that triggered the alert';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `name` COMMENT 'SNMP sysName or user-defined name of the device';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `port_name` COMMENT 'SNMP ifDescr or user-defined name of the triggering interface';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `engaged_snmp_alerts` MODIFY COMMENT 'In-memory table holding currently active (engaged) SNMP alerts. Rows are inserted when an alert fires and removed when resolved. Merged with snmp_alerts in snmp_alerts_view.';
 @
 
 CREATE TABLE IF NOT EXISTS `network_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`local_network_id` UInt16 COMMENT 'ntopng internal identifier of the local network subnet',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`name` String COMMENT 'CIDR notation or user-defined name of the network (e.g. 192.168.1.0/24)',
-`alias` String COMMENT 'User-defined alias for the network',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp)
-COMMENT 'Historical alerts associated with local network subnets (identified by local_network_id). See engaged_network_alerts for currently-firing alerts and network_alerts_view to query both together.';
+`rowid` UUID,
+`local_network_id` UInt16,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`name` String,
+`alias` String,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp);
 @
 ALTER TABLE `network_alerts` ADD COLUMN IF NOT EXISTS alert_category UInt8;
 @
 ALTER TABLE `network_alerts` ADD COLUMN IF NOT EXISTS require_attention Boolean;
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `local_network_id` COMMENT 'ntopng internal identifier of the local network subnet';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `name` COMMENT 'CIDR notation or user-defined name of the network (e.g. 192.168.1.0/24)';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `alias` COMMENT 'User-defined alias for the network';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `network_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `network_alerts` MODIFY COMMENT 'Historical alerts associated with local network subnets (identified by local_network_id). See engaged_network_alerts for currently-firing alerts and network_alerts_view to query both together.';
 
 @
 
 DROP TABLE IF EXISTS `engaged_network_alerts`;
 @
 CREATE TABLE `engaged_network_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`local_network_id` UInt16 COMMENT 'ntopng internal identifier of the local network subnet',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`name` String COMMENT 'CIDR notation or user-defined name of the network (e.g. 192.168.1.0/24)',
-`alias` String COMMENT 'User-defined alias for the network',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = Memory
-COMMENT 'In-memory table holding currently active (engaged) network/subnet alerts. Rows are inserted when an alert fires and removed when resolved. Merged with network_alerts in network_alerts_view.';
-
+`rowid` UUID,
+`local_network_id` UInt16,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`name` String,
+`alias` String,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = Memory;
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `local_network_id` COMMENT 'ntopng internal identifier of the local network subnet';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `name` COMMENT 'CIDR notation or user-defined name of the network (e.g. 192.168.1.0/24)';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `alias` COMMENT 'User-defined alias for the network';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `engaged_network_alerts` MODIFY COMMENT 'In-memory table holding currently active (engaged) network/subnet alerts. Rows are inserted when an alert fires and removed when resolved. Merged with network_alerts in network_alerts_view.';
 @
 
 CREATE TABLE IF NOT EXISTS `as_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`asn` UInt32 COMMENT 'Autonomous System Number that triggered the alert',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`name` String COMMENT 'AS name/description (from WHOIS or user configuration)',
-`alias` String COMMENT 'User-defined alias for this AS',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp)
-COMMENT 'Historical alerts associated with Autonomous Systems (identified by ASN). See engaged_as_alerts for currently-firing alerts and as_alerts_view to query both together.';
-
+`rowid` UUID,
+`asn` UInt32,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`name` String,
+`alias` String,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp);
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `asn` COMMENT 'Autonomous System Number that triggered the alert';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `name` COMMENT 'AS name/description (from WHOIS or user configuration)';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `alias` COMMENT 'User-defined alias for this AS';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `as_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `as_alerts` MODIFY COMMENT 'Historical alerts associated with Autonomous Systems (identified by ASN). See engaged_as_alerts for currently-firing alerts and as_alerts_view to query both together.';
 @
 
 DROP TABLE IF EXISTS `engaged_as_alerts`;
 @
 CREATE TABLE `engaged_as_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`asn` UInt32 COMMENT 'Autonomous System Number that triggered the alert',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`name` String COMMENT 'AS name/description (from WHOIS or user configuration)',
-`alias` String COMMENT 'User-defined alias for this AS',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = Memory
-COMMENT 'In-memory table holding currently active (engaged) Autonomous System alerts. Rows are inserted when an alert fires and removed when resolved. Merged with as_alerts in as_alerts_view.';
-
+`rowid` UUID,
+`asn` UInt32,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`name` String,
+`alias` String,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = Memory;
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `asn` COMMENT 'Autonomous System Number that triggered the alert';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `name` COMMENT 'AS name/description (from WHOIS or user configuration)';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `alias` COMMENT 'User-defined alias for this AS';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `engaged_as_alerts` MODIFY COMMENT 'In-memory table holding currently active (engaged) Autonomous System alerts. Rows are inserted when an alert fires and removed when resolved. Merged with as_alerts in as_alerts_view.';
 @
 
 CREATE TABLE IF NOT EXISTS `interface_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`ifid` UInt8 COMMENT 'ntopng internal interface index',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`subtype` String COMMENT 'Alert sub-type string providing additional context',
-`name` String COMMENT 'Interface name (e.g. eth0, wlan0)',
-`alias` String COMMENT 'User-defined alias for the interface',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp)
-COMMENT 'Historical alerts associated with monitored network interfaces. See engaged_interface_alerts for currently-firing alerts and interface_alerts_view to query both together.';
+`rowid` UUID,
+`ifid` UInt8,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`subtype` String,
+`name` String,
+`alias` String,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp);
 @
 ALTER TABLE `interface_alerts` ADD COLUMN IF NOT EXISTS alert_category UInt8;
 @
 ALTER TABLE `interface_alerts` ADD COLUMN IF NOT EXISTS require_attention Boolean;
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `ifid` COMMENT 'ntopng internal interface index';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `subtype` COMMENT 'Alert sub-type string providing additional context';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `name` COMMENT 'Interface name (e.g. eth0, wlan0)';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `alias` COMMENT 'User-defined alias for the interface';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `interface_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `interface_alerts` MODIFY COMMENT 'Historical alerts associated with monitored network interfaces. See engaged_interface_alerts for currently-firing alerts and interface_alerts_view to query both together.';
 
 @
 
 DROP TABLE IF EXISTS `engaged_interface_alerts`;
 @
 CREATE TABLE `engaged_interface_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`ifid` UInt8 COMMENT 'ntopng internal interface index',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`subtype` String COMMENT 'Alert sub-type string providing additional context',
-`name` String COMMENT 'Interface name (e.g. eth0, wlan0)',
-`alias` String COMMENT 'User-defined alias for the interface',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = Memory
-COMMENT 'In-memory table holding currently active (engaged) interface alerts. Rows are inserted when an alert fires and removed when resolved. Merged with interface_alerts in interface_alerts_view.';
-
+`rowid` UUID,
+`ifid` UInt8,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`subtype` String,
+`name` String,
+`alias` String,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = Memory;
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `ifid` COMMENT 'ntopng internal interface index';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `subtype` COMMENT 'Alert sub-type string providing additional context';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `name` COMMENT 'Interface name (e.g. eth0, wlan0)';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `alias` COMMENT 'User-defined alias for the interface';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `engaged_interface_alerts` MODIFY COMMENT 'In-memory table holding currently active (engaged) interface alerts. Rows are inserted when an alert fires and removed when resolved. Merged with interface_alerts in interface_alerts_view.';
 @
 
 CREATE TABLE IF NOT EXISTS `user_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`user` String COMMENT 'ntopng username associated with this alert',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp)
-COMMENT 'Historical alerts associated with ntopng-managed users. See engaged_user_alerts for currently-firing alerts and user_alerts_view to query both together.';
+`rowid` UUID,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`user` String,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp);
 @
 ALTER TABLE `user_alerts` ADD COLUMN IF NOT EXISTS alert_category UInt8;
 @
 ALTER TABLE `user_alerts` ADD COLUMN IF NOT EXISTS require_attention Boolean;
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `user` COMMENT 'ntopng username associated with this alert';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `user_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `user_alerts` MODIFY COMMENT 'Historical alerts associated with ntopng-managed users. See engaged_user_alerts for currently-firing alerts and user_alerts_view to query both together.';
 
 @
 
 DROP TABLE IF EXISTS `engaged_user_alerts`;
 @
 CREATE TABLE `engaged_user_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`user` String COMMENT 'ntopng username associated with this alert',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = Memory
-COMMENT 'In-memory table holding currently active (engaged) user alerts. Rows are inserted when an alert fires and removed when resolved. Merged with user_alerts in user_alerts_view.';
-
+`rowid` UUID,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`user` String,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = Memory;
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `user` COMMENT 'ntopng username associated with this alert';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `engaged_user_alerts` MODIFY COMMENT 'In-memory table holding currently active (engaged) user alerts. Rows are inserted when an alert fires and removed when resolved. Merged with user_alerts in user_alerts_view.';
 @
 
 CREATE TABLE IF NOT EXISTS `system_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`name` String COMMENT 'Name of the subsystem or component that generated the alert',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp)
-COMMENT 'Historical system-level alerts (e.g. license issues, connectivity failures, internal subsystem events). See engaged_system_alerts for currently-firing alerts and system_alerts_view to query both together.';
+`rowid` UUID,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`name` String,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(tstamp) ORDER BY (tstamp);
 @
 ALTER TABLE `system_alerts` ADD COLUMN IF NOT EXISTS alert_category UInt8;
 @
 ALTER TABLE `system_alerts` ADD COLUMN IF NOT EXISTS require_attention Boolean;
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `name` COMMENT 'Name of the subsystem or component that generated the alert';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `system_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `system_alerts` MODIFY COMMENT 'Historical system-level alerts (e.g. license issues, connectivity failures, internal subsystem events). See engaged_system_alerts for currently-firing alerts and system_alerts_view to query both together.';
 
 @
 
 DROP TABLE IF EXISTS `engaged_system_alerts`;
 @
 CREATE TABLE `engaged_system_alerts` (
-`rowid` UUID COMMENT 'Unique identifier for this alert row (UUID v4)',
-`alert_id` UInt32 COMMENT 'Alert type identifier (maps to ntopng alert type enum)',
-`alert_status` UInt8 COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)',
-`interface_id` UInt16 DEFAULT 65535 COMMENT 'ntopng interface identifier; 65535 means system/global scope',
-`name` String COMMENT 'Name of the subsystem or component that generated the alert',
-`tstamp` DateTime COMMENT 'Timestamp when the alert was first triggered (alert start time)',
-`tstamp_end` DateTime COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)',
-`severity` UInt8 COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)',
-`score` UInt16 COMMENT 'Numeric risk/impact score associated with this alert',
-`granularity` UInt8 COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)',
-`counter` UInt32 COMMENT 'Number of consecutive intervals this alert condition has been detected',
-`description` String COMMENT 'Human-readable description of the alert',
-`json` String COMMENT 'Additional alert context and metadata as a JSON blob',
-`user_label` String COMMENT 'User-defined free-text label applied to this alert',
-`user_label_tstamp` DateTime COMMENT 'Timestamp when user_label was last set',
-`alert_category` UInt8 COMMENT 'Alert category (maps to ntopng AlertCategory enum)',
-`require_attention` Boolean COMMENT 'True if this alert has been flagged as requiring manual attention'
-) ENGINE = Memory
-COMMENT 'In-memory table holding currently active (engaged) system alerts. Rows are inserted when an alert fires and removed when resolved. Merged with system_alerts in system_alerts_view.';
-
+`rowid` UUID,
+`alert_id` UInt32,
+`alert_status` UInt8,
+`interface_id` UInt16 DEFAULT 65535,
+`name` String,
+`tstamp` DateTime,
+`tstamp_end` DateTime,
+`severity` UInt8,
+`score` UInt16,
+`granularity` UInt8,
+`counter` UInt32,
+`description` String,
+`json` String,
+`user_label` String,
+`user_label_tstamp` DateTime,
+`alert_category` UInt8,
+`require_attention` Boolean
+) ENGINE = Memory;
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `rowid` COMMENT 'Unique identifier for this alert row (UUID v4)';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `alert_id` COMMENT 'Alert type identifier (maps to ntopng alert type enum)';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `alert_status` COMMENT 'Alert lifecycle status (0=engaged/active, 1=released/archived)';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `interface_id` COMMENT 'ntopng interface identifier; 65535 means system/global scope';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `name` COMMENT 'Name of the subsystem or component that generated the alert';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `tstamp` COMMENT 'Timestamp when the alert was first triggered (alert start time)';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `tstamp_end` COMMENT 'Timestamp when the alert was resolved (zero/epoch if still active)';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `severity` COMMENT 'Alert severity level (maps to ntopng AlertLevel enum)';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `score` COMMENT 'Numeric risk/impact score associated with this alert';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `granularity` COMMENT 'Periodic check interval that triggered the alert (e.g. 1=1min, 2=5min)';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `counter` COMMENT 'Number of consecutive intervals this alert condition has been detected';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `description` COMMENT 'Human-readable description of the alert';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `json` COMMENT 'Additional alert context and metadata as a JSON blob';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `user_label` COMMENT 'User-defined free-text label applied to this alert';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `user_label_tstamp` COMMENT 'Timestamp when user_label was last set';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `alert_category` COMMENT 'Alert category (maps to ntopng AlertCategory enum)';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COLUMN `require_attention` COMMENT 'True if this alert has been flagged as requiring manual attention';
+@
+ALTER TABLE `engaged_system_alerts` MODIFY COMMENT 'In-memory table holding currently active (engaged) system alerts. Rows are inserted when an alert fires and removed when resolved. Merged with system_alerts in system_alerts_view.';
 @
 
 /* Remove */
 DROP TABLE IF EXISTS `aggregated_flows`;
 @
 CREATE TABLE IF NOT EXISTS `hourly_flows` (
-`FLOW_ID` UInt64 COMMENT 'Unique flow identifier assigned by ntopng',
-`IP_PROTOCOL_VERSION` UInt8 COMMENT 'IP version: 4 for IPv4, 6 for IPv6',
-`FIRST_SEEN` DateTime COMMENT 'Timestamp of the first packet of the flow',
-`LAST_SEEN` DateTime COMMENT 'Timestamp of the last packet of the flow',
-`VLAN_ID` UInt16 COMMENT '802.1Q VLAN tag (0 if untagged)',
-`PACKETS` UInt32 COMMENT 'Total packet count in both directions',
-`TOTAL_BYTES` UInt64 COMMENT 'Total bytes transferred in both directions',
-`SRC2DST_BYTES` UInt64 /* Total */ COMMENT 'Bytes sent from client (source) to server (destination)',
-`DST2SRC_BYTES` UInt64 /* Total */ COMMENT 'Bytes sent from server (destination) to client (source)',
-`SCORE` UInt16 /* Total score */ COMMENT 'Composite flow risk/security score',
-`PROTOCOL` UInt8 COMMENT 'IP transport protocol number (6=TCP, 17=UDP, 1=ICMP, etc.)',
-`IPV4_SRC_ADDR` UInt32 COMMENT 'Source IPv4 address as a 32-bit integer; 0 for IPv6 flows',
-`IPV6_SRC_ADDR` IPv6 COMMENT 'Source IPv6 address; all-zeros for IPv4 flows',
-`IPV4_DST_ADDR` UInt32 COMMENT 'Destination IPv4 address as a 32-bit integer; 0 for IPv6 flows',
-`IPV6_DST_ADDR` IPv6 COMMENT 'Destination IPv6 address; all-zeros for IPv4 flows',
-`IP_DST_PORT` UInt16 COMMENT 'Destination (server) port number',
-`L7_PROTO` UInt16 COMMENT 'nDPI layer-7 application protocol identifier',
-`L7_PROTO_MASTER` UInt16 COMMENT 'nDPI master/carrier protocol ID (e.g. TLS when L7_PROTO is HTTPS)',
-`NUM_FLOWS` UInt32 /* Total number of flows that have been aggregated */ COMMENT 'Number of raw flows aggregated into this hourly summary row',
-`FLOW_RISK` UInt64 /* OS of flow risk */ COMMENT 'Bitmap of nDPI flow risk flags (each bit represents a distinct risk)',
-`SRC_MAC` UInt64 COMMENT 'Source MAC address encoded as a 64-bit integer',
-`DST_MAC` UInt64 COMMENT 'Destination MAC address encoded as a 64-bit integer',
-`PROBE_IP` IPv6 COMMENT 'IPv4 or IPv6 address of the NetFlow/IPFIX exporter (probe); IPv4 addresses are stored as IPv4-mapped IPv6 (::ffff:a.b.c.d)',
-`EXPORTER_SITE` UInt16 COMMENT 'Site/location identifier of the flow exporter',
-`NTOPNG_INSTANCE_NAME` String COMMENT 'Hostname/name of the ntopng instance that captured this flow',
-`SRC_COUNTRY_CODE` UInt16 COMMENT 'Source IP geo-country: two ASCII letters packed into a UInt16 (high byte = first letter)',
-`DST_COUNTRY_CODE` UInt16 COMMENT 'Destination IP geo-country: two ASCII letters packed into a UInt16 (high byte = first letter)',
-`SRC_ASN` UInt32 COMMENT 'Autonomous System Number of the source IP',
-`DST_ASN` UInt32 COMMENT 'Autonomous System Number of the destination IP',
-`INPUT_SNMP` UInt32 COMMENT 'SNMP input interface index exported via NetFlow/IPFIX',
-`OUTPUT_SNMP` UInt32 COMMENT 'SNMP output interface index exported via NetFlow/IPFIX',
-`SRC_NETWORK_ID` UInt32 COMMENT 'ntopng local-network ID for the source IP (0 if not a known local network)',
-`DST_NETWORK_ID` UInt32 COMMENT 'ntopng local-network ID for the destination IP (0 if not a known local network)',
-`SRC_LABEL` String COMMENT 'Resolved hostname or user-defined label for the source host',
-`DST_LABEL` String COMMENT 'Resolved hostname or user-defined label for the destination host',
-`INTERFACE_ID` UInt16 COMMENT 'ntopng internal interface identifier',
-`CLIENT_LOCATION` UInt8 COMMENT 'Client host location type (local LAN, remote, etc.)',
-`SERVER_LOCATION` UInt8 COMMENT 'Server host location type (local LAN, remote, etc.)'
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (FIRST_SEEN, IPV4_SRC_ADDR, IPV4_DST_ADDR)
-COMMENT 'Hourly aggregated flow summaries. Multiple raw flows sharing the same 5-tuple are collapsed into one row per hour with summed byte/packet counters and OR-ed risk bitmaps. Used for long-term trend analysis and reduced-resolution historical queries.';
+`FLOW_ID` UInt64,
+`IP_PROTOCOL_VERSION` UInt8,
+`FIRST_SEEN` DateTime,
+`LAST_SEEN` DateTime,
+`VLAN_ID` UInt16,
+`PACKETS` UInt32,
+`TOTAL_BYTES` UInt64,
+`SRC2DST_BYTES` UInt64 /* Total */,
+`DST2SRC_BYTES` UInt64 /* Total */,
+`SCORE` UInt16 /* Total score */,
+`PROTOCOL` UInt8,
+`IPV4_SRC_ADDR` UInt32,
+`IPV6_SRC_ADDR` IPv6,
+`IPV4_DST_ADDR` UInt32,
+`IPV6_DST_ADDR` IPv6,
+`IP_DST_PORT` UInt16,
+`L7_PROTO` UInt16,
+`L7_PROTO_MASTER` UInt16,
+`NUM_FLOWS` UInt32 /* Total number of flows that have been aggregated */,
+`FLOW_RISK` UInt64 /* OS of flow risk */,
+`SRC_MAC` UInt64,
+`DST_MAC` UInt64,
+`PROBE_IP` IPv6,
+`EXPORTER_SITE` UInt16,
+`NTOPNG_INSTANCE_NAME` String,
+`SRC_COUNTRY_CODE` UInt16,
+`DST_COUNTRY_CODE` UInt16,
+`SRC_ASN` UInt32,
+`DST_ASN` UInt32,
+`INPUT_SNMP` UInt32,
+`OUTPUT_SNMP` UInt32,
+`SRC_NETWORK_ID` UInt32,
+`DST_NETWORK_ID` UInt32,
+`SRC_LABEL` String,
+`DST_LABEL` String,
+`INTERFACE_ID` UInt16,
+`CLIENT_LOCATION` UInt8,
+`SERVER_LOCATION` UInt8
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (FIRST_SEEN, IPV4_SRC_ADDR, IPV4_DST_ADDR);
 @
 ALTER TABLE `hourly_flows` ADD COLUMN IF NOT EXISTS SRC_LABEL String;
 @
@@ -828,84 +1748,239 @@ ALTER TABLE `hourly_flows` ADD COLUMN IF NOT EXISTS `SRC2DST_PACKETS` UInt32;
 ALTER TABLE `hourly_flows` ADD COLUMN IF NOT EXISTS `DST2SRC_PACKETS` UInt32;
 @
 ALTER TABLE `hourly_flows` ADD COLUMN IF NOT EXISTS `EXPORTER_SITE` UInt16;
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `FLOW_ID` COMMENT 'Unique flow identifier assigned by ntopng';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `IP_PROTOCOL_VERSION` COMMENT 'IP version: 4 for IPv4, 6 for IPv6';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `FIRST_SEEN` COMMENT 'Timestamp of the first packet of the flow';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `LAST_SEEN` COMMENT 'Timestamp of the last packet of the flow';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `VLAN_ID` COMMENT '802.1Q VLAN tag (0 if untagged)';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `PACKETS` COMMENT 'Total packet count in both directions';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `TOTAL_BYTES` COMMENT 'Total bytes transferred in both directions';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `SRC2DST_BYTES` COMMENT 'Bytes sent from client (source) to server (destination)';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `DST2SRC_BYTES` COMMENT 'Bytes sent from server (destination) to client (source)';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `SCORE` COMMENT 'Composite flow risk/security score';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `PROTOCOL` COMMENT 'IP transport protocol number (6=TCP, 17=UDP, 1=ICMP, etc.)';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `IPV4_SRC_ADDR` COMMENT 'Source IPv4 address as a 32-bit integer; 0 for IPv6 flows';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `IPV6_SRC_ADDR` COMMENT 'Source IPv6 address; all-zeros for IPv4 flows';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `IPV4_DST_ADDR` COMMENT 'Destination IPv4 address as a 32-bit integer; 0 for IPv6 flows';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `IPV6_DST_ADDR` COMMENT 'Destination IPv6 address; all-zeros for IPv4 flows';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `IP_DST_PORT` COMMENT 'Destination (server) port number';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `L7_PROTO` COMMENT 'nDPI layer-7 application protocol identifier';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `L7_PROTO_MASTER` COMMENT 'nDPI master/carrier protocol ID (e.g. TLS when L7_PROTO is HTTPS)';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `NUM_FLOWS` COMMENT 'Number of raw flows aggregated into this hourly summary row';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `FLOW_RISK` COMMENT 'Bitmap of nDPI flow risk flags (each bit represents a distinct risk)';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `SRC_MAC` COMMENT 'Source MAC address encoded as a 64-bit integer';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `DST_MAC` COMMENT 'Destination MAC address encoded as a 64-bit integer';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `PROBE_IP` COMMENT 'IPv4 or IPv6 address of the NetFlow/IPFIX exporter (probe); IPv4 addresses are stored as IPv4-mapped IPv6 (::ffff:a.b.c.d)';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `EXPORTER_SITE` COMMENT 'Site/location identifier of the flow exporter';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `NTOPNG_INSTANCE_NAME` COMMENT 'Hostname/name of the ntopng instance that captured this flow';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `SRC_COUNTRY_CODE` COMMENT 'Source IP geo-country: two ASCII letters packed into a UInt16 (high byte = first letter)';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `DST_COUNTRY_CODE` COMMENT 'Destination IP geo-country: two ASCII letters packed into a UInt16 (high byte = first letter)';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `SRC_ASN` COMMENT 'Autonomous System Number of the source IP';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `DST_ASN` COMMENT 'Autonomous System Number of the destination IP';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `INPUT_SNMP` COMMENT 'SNMP input interface index exported via NetFlow/IPFIX';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `OUTPUT_SNMP` COMMENT 'SNMP output interface index exported via NetFlow/IPFIX';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `SRC_NETWORK_ID` COMMENT 'ntopng local-network ID for the source IP (0 if not a known local network)';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `DST_NETWORK_ID` COMMENT 'ntopng local-network ID for the destination IP (0 if not a known local network)';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `SRC_LABEL` COMMENT 'Resolved hostname or user-defined label for the source host';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `DST_LABEL` COMMENT 'Resolved hostname or user-defined label for the destination host';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `INTERFACE_ID` COMMENT 'ntopng internal interface identifier';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `CLIENT_LOCATION` COMMENT 'Client host location type (local LAN, remote, etc.)';
+@
+ALTER TABLE `hourly_flows` MODIFY COLUMN `SERVER_LOCATION` COMMENT 'Server host location type (local LAN, remote, etc.)';
+@
+ALTER TABLE `hourly_flows` MODIFY COMMENT 'Hourly aggregated flow summaries. Multiple raw flows sharing the same 5-tuple are collapsed into one row per hour with summed byte/packet counters and OR-ed risk bitmaps. Used for long-term trend analysis and reduced-resolution historical queries.';
 
 @
 
 /* VS */
 
 CREATE TABLE IF NOT EXISTS `vulnerability_scan_data` (
-`HOST` String COMMENT 'IP address or hostname of the scanned target',
-`SCAN_TYPE` String COMMENT 'Type of vulnerability scan performed (e.g. nmap, openvas)',
-`LAST_SCAN` DateTime COMMENT 'Timestamp of when this scan was last performed',
-`JSON_INFO` String COMMENT 'Full scan results as a JSON blob',
-`VS_RESULT_FILE` String COMMENT 'Path to the raw scan result file on disk'
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(LAST_SCAN) ORDER BY (LAST_SCAN, HOST, SCAN_TYPE)
-COMMENT 'Per-host vulnerability scan results produced by the ntopng Vulnerability Scanner (VS) module. Each row stores the latest scan output for a given host and scan type as a JSON blob.';
-
+`HOST` String,
+`SCAN_TYPE` String,
+`LAST_SCAN` DateTime,
+`JSON_INFO` String,
+`VS_RESULT_FILE` String
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(LAST_SCAN) ORDER BY (LAST_SCAN, HOST, SCAN_TYPE);
+@
+ALTER TABLE `vulnerability_scan_data` MODIFY COLUMN `HOST` COMMENT 'IP address or hostname of the scanned target';
+@
+ALTER TABLE `vulnerability_scan_data` MODIFY COLUMN `SCAN_TYPE` COMMENT 'Type of vulnerability scan performed (e.g. nmap, openvas)';
+@
+ALTER TABLE `vulnerability_scan_data` MODIFY COLUMN `LAST_SCAN` COMMENT 'Timestamp of when this scan was last performed';
+@
+ALTER TABLE `vulnerability_scan_data` MODIFY COLUMN `JSON_INFO` COMMENT 'Full scan results as a JSON blob';
+@
+ALTER TABLE `vulnerability_scan_data` MODIFY COLUMN `VS_RESULT_FILE` COMMENT 'Path to the raw scan result file on disk';
+@
+ALTER TABLE `vulnerability_scan_data` MODIFY COMMENT 'Per-host vulnerability scan results produced by the ntopng Vulnerability Scanner (VS) module. Each row stores the latest scan output for a given host and scan type as a JSON blob.';
 @
 
 CREATE TABLE IF NOT EXISTS `vulnerability_scan_report` (
-`REPORT_NAME` String COMMENT 'User-defined name for this vulnerability scan report',
-`REPORT_DATE` DateTime COMMENT 'Timestamp when the report was generated',
-`REPORT_JSON_INFO` String COMMENT 'Full report metadata and summary as a JSON blob',
-`NUM_SCANNED_HOSTS` UInt32 COMMENT 'Number of hosts scanned in this report',
-`NUM_CVES` UInt32 COMMENT 'Total number of CVEs identified across all scanned hosts',
-`NUM_TCP_PORTS` UInt32 COMMENT 'Total number of open TCP ports found across all scanned hosts',
-`NUM_UDP_PORTS` UInt32 COMMENT 'Total number of open UDP ports found across all scanned hosts'
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(REPORT_DATE) ORDER BY (REPORT_DATE)
-COMMENT 'Summary reports of completed vulnerability scans. Each row represents one scan report with aggregate counts of scanned hosts, CVEs found, and open TCP/UDP ports.';
-
+`REPORT_NAME` String,
+`REPORT_DATE` DateTime,
+`REPORT_JSON_INFO` String,
+`NUM_SCANNED_HOSTS` UInt32,
+`NUM_CVES` UInt32,
+`NUM_TCP_PORTS` UInt32,
+`NUM_UDP_PORTS` UInt32
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(REPORT_DATE) ORDER BY (REPORT_DATE);
+@
+ALTER TABLE `vulnerability_scan_report` MODIFY COLUMN `REPORT_NAME` COMMENT 'User-defined name for this vulnerability scan report';
+@
+ALTER TABLE `vulnerability_scan_report` MODIFY COLUMN `REPORT_DATE` COMMENT 'Timestamp when the report was generated';
+@
+ALTER TABLE `vulnerability_scan_report` MODIFY COLUMN `REPORT_JSON_INFO` COMMENT 'Full report metadata and summary as a JSON blob';
+@
+ALTER TABLE `vulnerability_scan_report` MODIFY COLUMN `NUM_SCANNED_HOSTS` COMMENT 'Number of hosts scanned in this report';
+@
+ALTER TABLE `vulnerability_scan_report` MODIFY COLUMN `NUM_CVES` COMMENT 'Total number of CVEs identified across all scanned hosts';
+@
+ALTER TABLE `vulnerability_scan_report` MODIFY COLUMN `NUM_TCP_PORTS` COMMENT 'Total number of open TCP ports found across all scanned hosts';
+@
+ALTER TABLE `vulnerability_scan_report` MODIFY COLUMN `NUM_UDP_PORTS` COMMENT 'Total number of open UDP ports found across all scanned hosts';
+@
+ALTER TABLE `vulnerability_scan_report` MODIFY COMMENT 'Summary reports of completed vulnerability scans. Each row represents one scan report with aggregate counts of scanned hosts, CVEs found, and open TCP/UDP ports.';
 @
 
 CREATE TABLE IF NOT EXISTS `mitre_table_info` (
-`ALERT_ID` UInt16 COMMENT 'ntopng alert type ID that maps to this MITRE entry',
-`ENTITY_ID` UInt16 COMMENT 'ntopng entity type ID (e.g. 1=host, 4=flow) for this mapping',
-`TACTIC` UInt16 COMMENT 'MITRE ATT&CK tactic identifier',
-`TECHNIQUE` UInt16 COMMENT 'MITRE ATT&CK technique identifier',
-`SUB_TECHNIQUE` UInt16 COMMENT 'MITRE ATT&CK sub-technique identifier (0 if none)',
-`MITRE_ID` String COMMENT 'MITRE ATT&CK ID string (e.g. T1046, T1595.002)'
-) ENGINE = ReplacingMergeTree() PRIMARY KEY (ALERT_ID, ENTITY_ID) ORDER BY (ALERT_ID, ENTITY_ID)
-COMMENT 'Mapping of ntopng alert IDs and entity types to MITRE ATT&CK tactics, techniques, and sub-techniques. Joined by host_alerts_view and flow_alerts_view to enrich alert rows with ATT&CK context.';
-
+`ALERT_ID` UInt16,
+`ENTITY_ID` UInt16,
+`TACTIC` UInt16,
+`TECHNIQUE` UInt16,
+`SUB_TECHNIQUE` UInt16,
+`MITRE_ID` String
+) ENGINE = ReplacingMergeTree() PRIMARY KEY (ALERT_ID, ENTITY_ID) ORDER BY (ALERT_ID, ENTITY_ID);
+@
+ALTER TABLE `mitre_table_info` MODIFY COLUMN `ALERT_ID` COMMENT 'ntopng alert type ID that maps to this MITRE entry';
+@
+ALTER TABLE `mitre_table_info` MODIFY COLUMN `ENTITY_ID` COMMENT 'ntopng entity type ID (e.g. 1=host, 4=flow) for this mapping';
+@
+ALTER TABLE `mitre_table_info` MODIFY COLUMN `TACTIC` COMMENT 'MITRE ATT&CK tactic identifier';
+@
+ALTER TABLE `mitre_table_info` MODIFY COLUMN `TECHNIQUE` COMMENT 'MITRE ATT&CK technique identifier';
+@
+ALTER TABLE `mitre_table_info` MODIFY COLUMN `SUB_TECHNIQUE` COMMENT 'MITRE ATT&CK sub-technique identifier (0 if none)';
+@
+ALTER TABLE `mitre_table_info` MODIFY COLUMN `MITRE_ID` COMMENT 'MITRE ATT&CK ID string (e.g. T1046, T1595.002)';
+@
+ALTER TABLE `mitre_table_info` MODIFY COMMENT 'Mapping of ntopng alert IDs and entity types to MITRE ATT&CK tactics, techniques, and sub-techniques. Joined by host_alerts_view and flow_alerts_view to enrich alert rows with ATT&CK context.';
 @
 
 CREATE TABLE IF NOT EXISTS `l7_protocols` (
-`PROTO_ID` UInt16 COMMENT 'nDPI application protocol identifier, matches L7_PROTO and L7_PROTO_MASTER in the flows table',
-`PROTO_NAME` String COMMENT 'Human-readable nDPI protocol name (e.g. TLS, HTTP, DNS)',
-`CATEGORY_ID` UInt16 COMMENT 'nDPI protocol category identifier',
-`CATEGORY_NAME` String COMMENT 'Human-readable nDPI category name (e.g. Web, Streaming, VPN)',
-`BREED` String COMMENT 'nDPI protocol breed indicating trustworthiness (e.g. Safe, Unsafe, Fun, Unrated)'
-) ENGINE = ReplacingMergeTree() PRIMARY KEY (PROTO_ID) ORDER BY (PROTO_ID)
-COMMENT 'Lookup table mapping nDPI protocol IDs to their human-readable names, categories, and breeds. Populated at ntopng startup and used to enrich flow queries with application-layer protocol labels.';
-
+`PROTO_ID` UInt16,
+`PROTO_NAME` String,
+`CATEGORY_ID` UInt16,
+`CATEGORY_NAME` String,
+`BREED` String
+) ENGINE = ReplacingMergeTree() PRIMARY KEY (PROTO_ID) ORDER BY (PROTO_ID);
+@
+ALTER TABLE `l7_protocols` MODIFY COLUMN `PROTO_ID` COMMENT 'nDPI application protocol identifier, matches L7_PROTO and L7_PROTO_MASTER in the flows table';
+@
+ALTER TABLE `l7_protocols` MODIFY COLUMN `PROTO_NAME` COMMENT 'Human-readable nDPI protocol name (e.g. TLS, HTTP, DNS)';
+@
+ALTER TABLE `l7_protocols` MODIFY COLUMN `CATEGORY_ID` COMMENT 'nDPI protocol category identifier';
+@
+ALTER TABLE `l7_protocols` MODIFY COLUMN `CATEGORY_NAME` COMMENT 'Human-readable nDPI category name (e.g. Web, Streaming, VPN)';
+@
+ALTER TABLE `l7_protocols` MODIFY COLUMN `BREED` COMMENT 'nDPI protocol breed indicating trustworthiness (e.g. Safe, Unsafe, Fun, Unrated)';
+@
+ALTER TABLE `l7_protocols` MODIFY COMMENT 'Lookup table mapping nDPI protocol IDs to their human-readable names, categories, and breeds. Populated at ntopng startup and used to enrich flow queries with application-layer protocol labels.';
 @
 
 CREATE TABLE IF NOT EXISTS `assets` (
-`type` String COMMENT 'Asset category (e.g. host, mac, network_device)',
-`key` String COMMENT 'Unique asset key within its type (e.g. IP address, MAC address)',
-`ifid` UInt8 COMMENT 'ntopng interface on which this asset was observed',
-`ip` String DEFAULT '' COMMENT 'IP address of the asset (empty if not applicable)',
-`mac` String COMMENT 'MAC address of the asset',
-`vlan` UInt16 DEFAULT 0 COMMENT 'VLAN on which the asset was observed (0 if untagged)',
-`network` UInt16 DEFAULT 0 COMMENT 'ntopng local-network ID the asset belongs to',
-`name` String DEFAULT '' COMMENT 'Resolved hostname or user-defined name',
-`device_type` UInt16 DEFAULT 0 COMMENT 'Device category/type (maps to ntopng DeviceType enum)',
-`manufacturer` String DEFAULT '' COMMENT 'Hardware manufacturer derived from MAC OUI lookup',
-`first_seen` DateTime COMMENT 'Timestamp when this asset was first observed by ntopng',
-`last_seen` DateTime COMMENT 'Timestamp of the most recent observation of this asset',
-`gateway_mac` String DEFAULT '' COMMENT 'MAC address of the gateway used to reach this asset',
+`type` String,
+`key` String,
+`ifid` UInt8,
+`ip` String DEFAULT '',
+`mac` String,
+`vlan` UInt16 DEFAULT 0,
+`network` UInt16 DEFAULT 0,
+`name` String DEFAULT '',
+`device_type` UInt16 DEFAULT 0,
+`manufacturer` String DEFAULT '',
+`first_seen` DateTime,
+`last_seen` DateTime,
+`gateway_mac` String DEFAULT '',
 `json_info` String DEFAULT '' -- A json containing all other info
  COMMENT 'Additional asset metadata as a JSON blob (OS info, open ports, etc.)',
 `version` UInt64 -- Used to not have duplicates
  COMMENT 'Monotonically increasing version counter used by ReplacingMergeTree for deduplication',
-`os_type` String DEFAULT '' COMMENT 'Operating system type detected for this asset',
-`model` String DEFAULT '' COMMENT 'Hardware model string for this asset'
-) ENGINE = ReplacingMergeTree(version) PRIMARY KEY (`type`, `key`) ORDER BY (`type`, `key`)
-COMMENT 'Network asset inventory: one row per discovered or imported asset (host, MAC address, network device). Uses ReplacingMergeTree on version so that re-discovered assets update existing rows rather than creating duplicates. json_info holds additional metadata as a JSON blob.';
+`os_type` String DEFAULT '',
+`model` String DEFAULT ''
+) ENGINE = ReplacingMergeTree(version) PRIMARY KEY (`type`, `key`) ORDER BY (`type`, `key`);
 @
 ALTER TABLE assets ADD COLUMN IF NOT EXISTS `os_type` String;
 @
 ALTER TABLE assets ADD COLUMN IF NOT EXISTS `model` String;
+@
+ALTER TABLE `assets` MODIFY COLUMN `type` COMMENT 'Asset category (e.g. host, mac, network_device)';
+@
+ALTER TABLE `assets` MODIFY COLUMN `key` COMMENT 'Unique asset key within its type (e.g. IP address, MAC address)';
+@
+ALTER TABLE `assets` MODIFY COLUMN `ifid` COMMENT 'ntopng interface on which this asset was observed';
+@
+ALTER TABLE `assets` MODIFY COLUMN `ip` COMMENT 'IP address of the asset (empty if not applicable)';
+@
+ALTER TABLE `assets` MODIFY COLUMN `mac` COMMENT 'MAC address of the asset';
+@
+ALTER TABLE `assets` MODIFY COLUMN `vlan` COMMENT 'VLAN on which the asset was observed (0 if untagged)';
+@
+ALTER TABLE `assets` MODIFY COLUMN `network` COMMENT 'ntopng local-network ID the asset belongs to';
+@
+ALTER TABLE `assets` MODIFY COLUMN `name` COMMENT 'Resolved hostname or user-defined name';
+@
+ALTER TABLE `assets` MODIFY COLUMN `device_type` COMMENT 'Device category/type (maps to ntopng DeviceType enum)';
+@
+ALTER TABLE `assets` MODIFY COLUMN `manufacturer` COMMENT 'Hardware manufacturer derived from MAC OUI lookup';
+@
+ALTER TABLE `assets` MODIFY COLUMN `first_seen` COMMENT 'Timestamp when this asset was first observed by ntopng';
+@
+ALTER TABLE `assets` MODIFY COLUMN `last_seen` COMMENT 'Timestamp of the most recent observation of this asset';
+@
+ALTER TABLE `assets` MODIFY COLUMN `gateway_mac` COMMENT 'MAC address of the gateway used to reach this asset';
+@
+ALTER TABLE `assets` MODIFY COLUMN `os_type` COMMENT 'Operating system type detected for this asset';
+@
+ALTER TABLE `assets` MODIFY COLUMN `model` COMMENT 'Hardware model string for this asset';
+@
+ALTER TABLE `assets` MODIFY COMMENT 'Network asset inventory: one row per discovered or imported asset (host, MAC address, network device). Uses ReplacingMergeTree on version so that re-discovered assets update existing rows rather than creating duplicates. json_info holds additional metadata as a JSON blob.';
 
 @
 
@@ -1144,26 +2219,63 @@ SELECT 10 entity_id, interface_id, alert_id, alert_status, require_attention, ts
 
 /* IMPORTANT: keep in sync with db_schema_as_sqlite.sql */
 CREATE TABLE IF NOT EXISTS `hourly_asn` (
-`ID` UInt64 COMMENT 'Unique row identifier',
-`NTOPNG_INSTANCE_NAME` String COMMENT 'Name of the ntopng instance that generated this record',
-`INTERFACE_ID` UInt16 COMMENT 'ntopng interface identifier on which this traffic was observed',
-`IP_PROTOCOL_VERSION` UInt8 COMMENT 'IP version: 4 for IPv4, 6 for IPv6',
-`FIRST_SEEN` DateTime COMMENT 'Start of the one-hour aggregation window',
-`LAST_SEEN` DateTime COMMENT 'End of the one-hour aggregation window',
-`SRC2DST_BYTES` UInt64 COMMENT 'Bytes from source ASN to destination ASN in this hour',
-`DST2SRC_BYTES` UInt64 COMMENT 'Bytes from destination ASN to source ASN in this hour',
-`TOTAL_BYTES` UInt64 COMMENT 'Total bytes between the two ASNs in this hour',
-`SRC2DST_PACKETS` UInt32 COMMENT 'Packets from source ASN to destination ASN in this hour',
-`DST2SRC_PACKETS` UInt32 COMMENT 'Packets from destination ASN to source ASN in this hour',
-`SRC_ASN` UInt32 COMMENT 'Autonomous System Number of the source',
-`DST_ASN` UInt32 COMMENT 'Autonomous System Number of the destination',
-`SRC_PEER_ASN` UInt32 COMMENT 'BGP peer ASN upstream of the source (EXPORTER_IPV4_ADDRESS)',
-`DST_PEER_ASN` UInt32 COMMENT 'BGP peer ASN upstream of the destination',
-`PROBE_IP` IPv6 COMMENT 'IPv4 or IPv6 address of the NetFlow/IPFIX exporter; IPv4 addresses are stored as IPv4-mapped IPv6 (::ffff:a.b.c.d)',
-`INPUT_SNMP` UInt32 COMMENT 'SNMP input interface index from NetFlow/IPFIX',
-`OUTPUT_SNMP` UInt32 COMMENT 'SNMP output interface index from NetFlow/IPFIX'
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (FIRST_SEEN, SRC_ASN, DST_ASN)
-COMMENT 'Hourly aggregated traffic statistics per source/destination ASN pair. Used for autonomous-system level traffic analysis and BGP peer analytics. Partitioned by day on FIRST_SEEN.';
+`ID` UInt64,
+`NTOPNG_INSTANCE_NAME` String,
+`INTERFACE_ID` UInt16,
+`IP_PROTOCOL_VERSION` UInt8,
+`FIRST_SEEN` DateTime,
+`LAST_SEEN` DateTime,
+`SRC2DST_BYTES` UInt64,
+`DST2SRC_BYTES` UInt64,
+`TOTAL_BYTES` UInt64,
+`SRC2DST_PACKETS` UInt32,
+`DST2SRC_PACKETS` UInt32,
+`SRC_ASN` UInt32,
+`DST_ASN` UInt32,
+`SRC_PEER_ASN` UInt32,
+`DST_PEER_ASN` UInt32,
+`PROBE_IP` IPv6,
+`INPUT_SNMP` UInt32,
+`OUTPUT_SNMP` UInt32
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (FIRST_SEEN, SRC_ASN, DST_ASN);
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `ID` COMMENT 'Unique row identifier';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `NTOPNG_INSTANCE_NAME` COMMENT 'Name of the ntopng instance that generated this record';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `INTERFACE_ID` COMMENT 'ntopng interface identifier on which this traffic was observed';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `IP_PROTOCOL_VERSION` COMMENT 'IP version: 4 for IPv4, 6 for IPv6';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `FIRST_SEEN` COMMENT 'Start of the one-hour aggregation window';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `LAST_SEEN` COMMENT 'End of the one-hour aggregation window';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `SRC2DST_BYTES` COMMENT 'Bytes from source ASN to destination ASN in this hour';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `DST2SRC_BYTES` COMMENT 'Bytes from destination ASN to source ASN in this hour';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `TOTAL_BYTES` COMMENT 'Total bytes between the two ASNs in this hour';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `SRC2DST_PACKETS` COMMENT 'Packets from source ASN to destination ASN in this hour';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `DST2SRC_PACKETS` COMMENT 'Packets from destination ASN to source ASN in this hour';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `SRC_ASN` COMMENT 'Autonomous System Number of the source';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `DST_ASN` COMMENT 'Autonomous System Number of the destination';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `SRC_PEER_ASN` COMMENT 'BGP peer ASN upstream of the source (EXPORTER_IPV4_ADDRESS)';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `DST_PEER_ASN` COMMENT 'BGP peer ASN upstream of the destination';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `PROBE_IP` COMMENT 'IPv4 or IPv6 address of the NetFlow/IPFIX exporter; IPv4 addresses are stored as IPv4-mapped IPv6 (::ffff:a.b.c.d)';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `INPUT_SNMP` COMMENT 'SNMP input interface index from NetFlow/IPFIX';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `OUTPUT_SNMP` COMMENT 'SNMP output interface index from NetFlow/IPFIX';
+@
+ALTER TABLE `hourly_asn` MODIFY COMMENT 'Hourly aggregated traffic statistics per source/destination ASN pair. Used for autonomous-system level traffic analysis and BGP peer analytics. Partitioned by day on FIRST_SEEN.';
 @
 ALTER TABLE `hourly_asn` ADD COLUMN IF NOT EXISTS TOTAL_BYTES UInt64;
 
@@ -1184,9 +2296,9 @@ CREATE TABLE IF NOT EXISTS ai_chat_history (
     evidence_json String DEFAULT '' COMMENT 'JSON audit trail of how the answer was produced: tool calls with inputs and result metadata',
     context_summary String DEFAULT '' COMMENT 'Rolling incremental summary of the conversation up to this point (set only on summary rows where message_role = 3)',
     page_context String DEFAULT '' COMMENT 'JSON describing the UI page/entity where the chat originated (e.g. {"page":"flow_details","ifid":0,"flow_key":123,"flow_hash_id":456})',
-) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(created_at) ORDER BY (chat_id, sequence)
-COMMENT 'Chat history table storing user and assistant messages for conversations';
-
+) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(created_at) ORDER BY (chat_id, sequence);
+@
+ALTER TABLE `ai_chat_history` MODIFY COMMENT 'Chat history table storing user and assistant messages for conversations';
 @
 
 ALTER TABLE `ai_chat_history` ADD COLUMN IF NOT EXISTS context_summary String DEFAULT '';
@@ -1264,22 +2376,43 @@ ORDER BY (source, title)
 @
 
 CREATE TABLE IF NOT EXISTS `analyst_pipelines` (
-`pipeline_id` UUID DEFAULT generateUUIDv4() COMMENT 'Unique identifier for this playbook',
-`ifid`        UInt16  NOT NULL DEFAULT 0     COMMENT 'Interface scope',
-`name`        String  NOT NULL               COMMENT 'User-defined playbook name',
-`description` String  NOT NULL DEFAULT ''    COMMENT 'Human-readable description of the investigation',
-`definition`  String  NOT NULL               COMMENT 'Full JSON blob: {params, stages, explanation}',
-`created_by`  String  NOT NULL DEFAULT ''    COMMENT 'Username who created the playbook',
-`provider`    String  DEFAULT ''             COMMENT 'LLM provider used to generate the playbook (e.g. llm_anthropic, llm_openai, llm_qwen)',
-`llm_model`   String  DEFAULT ''             COMMENT 'Specific LLM model used (e.g. claude-opus-4-6, gpt-4o)',
-`created_at`  DateTime NOT NULL DEFAULT now() COMMENT 'Creation timestamp',
-`updated_at`  DateTime NOT NULL DEFAULT now() COMMENT 'Last update timestamp (used by ReplacingMergeTree)',
-`is_active`   UInt8   NOT NULL DEFAULT 1     COMMENT '1 = active playbook, 0 = soft-deleted'
+`pipeline_id` UUID DEFAULT generateUUIDv4(),
+`ifid`        UInt16  NOT NULL DEFAULT 0,
+`name`        String  NOT NULL,
+`description` String  NOT NULL DEFAULT '',
+`definition`  String  NOT NULL,
+`created_by`  String  NOT NULL DEFAULT '',
+`provider`    String  DEFAULT '',
+`llm_model`   String  DEFAULT '',
+`created_at`  DateTime NOT NULL DEFAULT now(),
+`updated_at`  DateTime NOT NULL DEFAULT now(),
+`is_active`   UInt8   NOT NULL DEFAULT 1
 ) ENGINE = ReplacingMergeTree(updated_at)
   ORDER BY (pipeline_id)
   PARTITION BY toYYYYMM(created_at)
 COMMENT 'Analyst investigation playbooks: parameterized multi-stage ClickHouse SQL pipelines generated from natural language. Each row is a reusable playbook. Soft-deleted via is_active=0.'
-
+@
+ALTER TABLE `analyst_pipelines` MODIFY COLUMN `pipeline_id` COMMENT 'Unique identifier for this playbook';
+@
+ALTER TABLE `analyst_pipelines` MODIFY COLUMN `ifid` COMMENT 'Interface scope';
+@
+ALTER TABLE `analyst_pipelines` MODIFY COLUMN `name` COMMENT 'User-defined playbook name';
+@
+ALTER TABLE `analyst_pipelines` MODIFY COLUMN `description` COMMENT 'Human-readable description of the investigation';
+@
+ALTER TABLE `analyst_pipelines` MODIFY COLUMN `definition` COMMENT 'Full JSON blob: {params, stages, explanation}';
+@
+ALTER TABLE `analyst_pipelines` MODIFY COLUMN `created_by` COMMENT 'Username who created the playbook';
+@
+ALTER TABLE `analyst_pipelines` MODIFY COLUMN `provider` COMMENT 'LLM provider used to generate the playbook (e.g. llm_anthropic, llm_openai, llm_qwen)';
+@
+ALTER TABLE `analyst_pipelines` MODIFY COLUMN `llm_model` COMMENT 'Specific LLM model used (e.g. claude-opus-4-6, gpt-4o)';
+@
+ALTER TABLE `analyst_pipelines` MODIFY COLUMN `created_at` COMMENT 'Creation timestamp';
+@
+ALTER TABLE `analyst_pipelines` MODIFY COLUMN `updated_at` COMMENT 'Last update timestamp (used by ReplacingMergeTree)';
+@
+ALTER TABLE `analyst_pipelines` MODIFY COLUMN `is_active` COMMENT '1 = active playbook, 0 = soft-deleted';
 @
 
 ALTER TABLE analyst_pipelines ADD COLUMN IF NOT EXISTS `provider`  String DEFAULT '';
@@ -1291,16 +2424,25 @@ ALTER TABLE analyst_pipelines ADD COLUMN IF NOT EXISTS `llm_model` String DEFAUL
 @
 
 CREATE TABLE IF NOT EXISTS `alert_id_info` (
-  `ALERT_ID`    UInt32                 COMMENT 'ntopng alert type identifier (maps to alert_id column in all alert tables)',
-  `ENTITY_ID`   UInt8                  COMMENT 'ntopng entity type: 0=interface 1=host 2=network 3=snmp 4=flow 5=mac 7=user 8=am_host 9=system 10=as',
-  `NAME`        LowCardinality(String) COMMENT 'Internal Lua module name of the alert definition (e.g. flow_alert_type_blacklisted)',
-  `LABEL`       String                 COMMENT 'Human-readable i18n alert label (e.g. "Blacklisted Flow")',
-  `DESCRIPTION` String                 COMMENT 'Human-readable i18n alert description (e.g. "Flow matching a known-bad threat-intel list")'
+  `ALERT_ID`    UInt32,
+  `ENTITY_ID`   UInt8,
+  `NAME`        LowCardinality(String),
+  `LABEL`       String,
+  `DESCRIPTION` String
 ) ENGINE = ReplacingMergeTree()
   PRIMARY KEY (ALERT_ID, ENTITY_ID)
   ORDER BY (ALERT_ID, ENTITY_ID)
 COMMENT 'Startup-populated lookup: maps (ALERT_ID, ENTITY_ID) to human-readable alert name, label and description. JOIN with flows.STATUS or alert tables on ALERT_ID.';
-
+@
+ALTER TABLE `alert_id_info` MODIFY COLUMN `ALERT_ID` COMMENT 'ntopng alert type identifier (maps to alert_id column in all alert tables)';
+@
+ALTER TABLE `alert_id_info` MODIFY COLUMN `ENTITY_ID` COMMENT 'ntopng entity type: 0=interface 1=host 2=network 3=snmp 4=flow 5=mac 7=user 8=am_host 9=system 10=as';
+@
+ALTER TABLE `alert_id_info` MODIFY COLUMN `NAME` COMMENT 'Internal Lua module name of the alert definition (e.g. flow_alert_type_blacklisted)';
+@
+ALTER TABLE `alert_id_info` MODIFY COLUMN `LABEL` COMMENT 'Human-readable i18n alert label (e.g. "Blacklisted Flow")';
+@
+ALTER TABLE `alert_id_info` MODIFY COLUMN `DESCRIPTION` COMMENT 'Human-readable i18n alert description (e.g. "Flow matching a known-bad threat-intel list")';
 @
 ALTER TABLE `alert_id_info` ADD COLUMN IF NOT EXISTS `DESCRIPTION` String DEFAULT '';
 
@@ -1308,9 +2450,13 @@ ALTER TABLE `alert_id_info` ADD COLUMN IF NOT EXISTS `DESCRIPTION` String DEFAUL
 
 /* L4 / IP transport protocol lookup: flows.PROTOCOL -> protocol name */
 CREATE TABLE IF NOT EXISTS `flow_l4_map` (
-  `PROTOCOL`    UInt8                  COMMENT 'IANA IP protocol number (matches flows.PROTOCOL, e.g. 6=TCP 17=UDP 1=ICMP)',
-  `NAME`        LowCardinality(String) COMMENT 'Protocol name (e.g. "TCP", "UDP", "ICMP")'
+  `PROTOCOL`    UInt8,
+  `NAME`        LowCardinality(String)
 ) ENGINE = ReplacingMergeTree()
   PRIMARY KEY (PROTOCOL)
   ORDER BY (PROTOCOL)
 COMMENT 'Startup-populated lookup: flows.PROTOCOL → L4 protocol name. JOIN: LEFT JOIN flow_l4_map ON flow_l4_map.PROTOCOL = flows.PROTOCOL';
+@
+ALTER TABLE `flow_l4_map` MODIFY COLUMN `PROTOCOL` COMMENT 'IANA IP protocol number (matches flows.PROTOCOL, e.g. 6=TCP 17=UDP 1=ICMP)';
+@
+ALTER TABLE `flow_l4_map` MODIFY COLUMN `NAME` COMMENT 'Protocol name (e.g. "TCP", "UDP", "ICMP")';
