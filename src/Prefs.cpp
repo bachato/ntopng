@@ -1461,7 +1461,6 @@ void Prefs::checkPorts() {
   // No ports set in the config, set HTTP to 3000
   if (!http_port && !https_port) {
     http_port = CONST_DEFAULT_NTOP_PORT;
-    bind_http_to_loopback();
   } else if (http_port == https_port) {
     // In case the http and https ports are the same
     // Only load the https
