@@ -312,8 +312,15 @@ const get_metrics = async (http_prefix, source_type, source_array, status) => {
         source_array = await get_default_source_array(http_prefix, source_type);
     }
     const key = get_metric_key(source_type, source_array);
-    const epoch_begin = status?.epoch_begin || ntopng_url_manager.get_url_entry("epoch_begin");
-    const epoch_end = status?.epoch_end || ntopng_url_manager.get_url_entry("epoch_end");
+    let epoch_begin = status?.epoch_begin;
+    let epoch_end = status?.epoch_end;
+    // Get the epoch only if null or undefined
+    if (epoch_begin == null) {
+        epoch_begin = ntopng_url_manager.get_url_entry("epoch_begin");
+    }
+    if (epoch_end == null) {
+        epoch_end = ntopng_url_manager.get_url_entry("epoch_end");
+    }
     const empty_epoch = (!epoch_begin || !epoch_end) ? true : false;
 
     const cache = (empty_epoch) ? cache_metrics_static : cache_metrics;

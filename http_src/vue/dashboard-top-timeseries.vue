@@ -232,7 +232,8 @@ async function resolve_any_params() {
 async function get_timeseries_groups_from_metric(metric_schema, source_def) {
     const source_type = metricsManager.get_source_type_from_id(props.params?.source_type);
     const source_array = await metricsManager.get_source_array_from_value_array(http_prefix, source_type, source_def);
-    const metric = await metricsManager.get_metric_from_schema(http_prefix, source_type, source_array, metric_schema);
+    // Force the epoch to empty
+    const metric = await metricsManager.get_metric_from_schema(http_prefix, source_type, source_array, metric_schema, null, { epoch_begin: 0, epoch_end: 0});
     const ts_group = metricsManager.get_ts_group(source_type, source_array, metric, { past: false });
     return ts_group;
 }
