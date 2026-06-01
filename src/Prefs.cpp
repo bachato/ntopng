@@ -132,7 +132,7 @@ Prefs::Prefs(Ntop* _ntop) {
   message_broker_url = NULL;
   message_broker = NULL;
   config_file_path = ndpi_proto_path = NULL;
-  http_port = CONST_DEFAULT_NTOP_PORT;
+  http_port = 0; // CONST_DEFAULT_NTOP_PORT
   http_prefix = strdup("");
   http_index_page = strdup(INDEX_URL);
   asn_mode_enabled = false;
@@ -1453,6 +1453,17 @@ static const struct option long_options[] = {
 static const int hidden_optkeys[] = {'F' /* flows export */, 'r' /* redis */,
                                      215 /* zmq encryption password */,
                                      220 /* zmq encryption secret key */, 0};
+
+/* ******************************************* */
+
+/* This function is used in order to set ports in case they were not set in the config file */
+void Prefs::checkPorts() {
+  // No ports set in the config, set HTTP to 3000
+  if (!http_port && !https_port) {
+    http_port = CONST_DEFAULT_NTOP_PORT;
+    bind_http_to_loopback();
+  }
+}
 
 /* ******************************************* */
 
@@ -2834,12 +2845,6 @@ int Prefs::loadFromCLI(int argc, char* argv[]) {
 			  long_options, NULL)) != '?') {
     if (c == 255) break;
     setOption(c, optarg);
-  }
-
-  if ((http_port == 0) && (https_port == 0)) {
-    ntop->getTrace()->traceEvent(
-				 TRACE_ERROR, "Both HTTP and HTTPS ports are disabled: quitting");
-    exit(0);
   }
 
   return (checkOptions());

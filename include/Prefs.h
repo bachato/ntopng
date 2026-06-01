@@ -502,6 +502,7 @@ class Prefs {
   void add_default_interfaces();
   int loadFromCLI(int argc, char* argv[]);
   int loadFromFile(const char* path);
+  void checkPorts();
   void add_network_interface(char* name, char* description);
   inline bool json_labels_as_strings() { return (json_labels_string_format); };
   inline void set_json_symbolic_labels_format(bool as_string) {
