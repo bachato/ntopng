@@ -154,7 +154,7 @@ const updateDescription = () => {
 
 const close = () => { modal.value?.close(); };
 
-const show = (columns = null) => {
+const show = (columns = null, pre_select_all = false) => {
     if (!columns) {
         console.error('No columns provided');
         return;
@@ -170,8 +170,13 @@ const show = (columns = null) => {
     // Reset the search filter every time the modal opens
     searchTerm.value = "";
 
-    // Select default columns on open
-    selectDefaultCols();
+    // For preset queries the column set is already restricted, so select all.
+    // For raw flows use the default column list.
+    if (pre_select_all) {
+        selectAllCols();
+    } else {
+        selectDefaultCols();
+    }
 
     updateDescription();
     modal.value?.show();

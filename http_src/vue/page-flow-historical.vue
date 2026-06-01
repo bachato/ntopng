@@ -198,8 +198,21 @@ const table_id = computed(() => {
 /* SELECT EXPORT COLUMNS MODAL */
 
 function show_modal_select_export_columns() {
-    // Get current columns from table_flows
-    modal_choose_columns_export.value.show(columns_tags_values.value);
+    if (selected_query_preset.value?.is_preset && props.context.columns_def?.length > 0) {
+        // For custom query the table only contains columns defined by the preset,
+        // restrict the export dialog to those columns and pre select all of them.
+        const preset_columns = props.context.columns_def
+            .filter(col => col.data_field != null)
+            .map(col => {
+                const name = col.title_i18n
+                    ? (_i18n(col.title_i18n) || col.title || col.data_field)
+                    : (col.title || col.data_field);
+                return { id: col.data_field, name };
+            });
+        modal_choose_columns_export.value.show(preset_columns, true);
+    } else {
+        modal_choose_columns_export.value.show(columns_tags_values.value);
+    }
 }
 
 // function to get the values of columns tag and formatted value
