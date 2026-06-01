@@ -608,6 +608,13 @@ function update_component_epoch_interval(c, epoch_interval) {
     const utc_offset = timeframes_dict[c.time_offset] || 0;
     c.epoch_begin = epoch_interval.epoch_begin - utc_offset;
     c.epoch_end = epoch_interval.epoch_end - utc_offset;
+
+    /* Keep filters in sync: widget url_params builders spread ...props.filters last,
+     * which would override the epoch props with initial URL values otherwise. */
+    if (c.filters) {
+        c.filters.epoch_begin = c.epoch_begin;
+        c.filters.epoch_end = c.epoch_end;
+    }
 }
 
 function update_component_filters(c, filter_id, filter_value) {
