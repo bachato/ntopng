@@ -18,6 +18,7 @@ ntopng can be used in combination with other ntop tools. Documentation to use nt
    flows/index
    scada/index
    qoe/index
+   asmode/index
    operating_ntopng_on_large_networks
    flow_dump/index
    advanced_features/index
