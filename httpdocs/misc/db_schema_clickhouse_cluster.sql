@@ -10,16 +10,6 @@ USE ntopng;
 
 @
 
-/* Utility functions */
-CREATE OR REPLACE FUNCTION IPv6NumToNormalizedIP AS (ip) ->
-    if(
-        startsWith(IPv6NumToString(ip), '::ffff:'),
-        replaceOne(IPv6NumToString(ip), '::ffff:', ''),
-        IPv6NumToString(ip)
-    );
-
-@
-
 CREATE TABLE IF NOT EXISTS `flows` ON CLUSTER '$CLUSTER' (
 `FLOW_ID` UInt64,
 `IP_PROTOCOL_VERSION` UInt8,
