@@ -674,10 +674,8 @@ if ntop.isPro() and not isEmptyString(_GET["deviceIP"]) then
       end
 
       for _, value in pairsByKeys(tmp_list, asc) do
-         value["key"] = "inIfIdx"
-         in_ports[#in_ports + 1] = value
-         value["key"] = "outIfIdx"
-         out_ports[#out_ports + 1] = value
+         in_ports[#in_ports + 1] = { key = "inIfIdx", value = value.value, label = value.label }
+         out_ports[#out_ports + 1] = { key = "outIfIdx", value = value.value, label = value.label }
       end
 
       rsp[#rsp + 1] = {
