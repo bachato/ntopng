@@ -1701,6 +1701,10 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
         local sites = site_utils.getSites() or {}
         local exporters = interface.getFlowDevices() or {}
         if #sites > 0 and table.len(exporters) > 0 then
+            table.sort(sites, function(a, b)
+                if a.reserved ~= b.reserved then return a.reserved end
+                return a.name < b.name
+            end)
             for _, site in pairs(sites) do
                 filter.options[#filter.options + 1] = {
                     value = site.id,
