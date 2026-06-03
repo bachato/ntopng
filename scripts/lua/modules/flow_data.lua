@@ -42,6 +42,10 @@ local function formatKey(data, query_info)
                node_key = select_info.rename
                value = data[select_info.rename]
          end
+         
+         if select_info.depends_on and data[select_info.depends_on] then
+            value = string.format("%s_%s", data[select_info.depends_on], value)
+         end
 
          if value then
                key = string.format("%s%s%s%s%s", key, node_key, node_key_id_separator, value, separator)

@@ -193,10 +193,12 @@ local function unifyNodes(new_nodes, nodes, query)
             local node_link = nil
             if node_level_key_info then
                if node_level_key_info.depends_on then
-                  local depend_value = values[node_level_key_info.depends_on]
-                  if depend_value then
-                     label = node_level_key_info.formatter(depend_value, value)
-                     url_link = node_level_key_info.linker(depend_value, value)
+                  -- In this case, the key is structured in the following way:
+                  -- FIRSTVALUE_SECONDVALUE, so simply split on the _ to get the 2 values
+                  local tmp = split(node_id, "_")
+                  if #tmp == 2 then
+                     label = node_level_key_info.formatter(tmp[1], tmp[2])
+                     url_link = node_level_key_info.linker(tmp[1], tmp[2])
                   end
                else
                   if node_level_key_info.formatter then
@@ -286,7 +288,13 @@ local function updateNodesAndLinks(stats, query)
             if not nodes[node] then
                nodes[node] = {}
             end
-            nodes[node][value] = (nodes[node][value] or 0) + total_value
+            query_info = queriesSearchInfo(node, query)
+            if query_info and query_info.depends_on then
+               value = string.format("%s_%s", info[query_info.depends_on], value)
+            end
+            nodes[node][value] = 
+               (nodes[node][value] or 0) + total_value
+         
          end
       end
 
