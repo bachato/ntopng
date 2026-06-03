@@ -43,8 +43,8 @@ local function formatKey(data, query_info)
                value = data[select_info.rename]
          end
          
-         if select_info.depends_on and data[select_info.depends_on] then
-            value = string.format("%s_%s", data[select_info.depends_on], value)
+         if select_info.depends_on then
+            value = string.format("%s_%s", (data[select_info.depends_on] or select_info.depends_on), value)
          end
 
          if value then
@@ -208,7 +208,7 @@ function flow_data.formatStats(stats_to_format, queries)
             local label = value
             local url_link = nil
             if formatters_linkers[key].depends_on then
-               local depend_value = values[formatters_linkers[key].depends_on]
+               local depend_value = (values[formatters_linkers[key].depends_on] or formatters_linkers[key].depends_on)
                if depend_value then
                   label = formatters_linkers[key]["formatter"](depend_value, value)
                   url_link = formatters_linkers[key]["linker"](depend_value, value)

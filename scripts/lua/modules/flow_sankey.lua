@@ -290,7 +290,7 @@ local function updateNodesAndLinks(stats, query)
             end
             query_info = queriesSearchInfo(node, query)
             if query_info and query_info.depends_on then
-               value = string.format("%s_%s", info[query_info.depends_on], value)
+               value = string.format("%s_%s", (info[query_info.depends_on] or query_info.depends_on), value)
             end
             nodes[node][value] = 
                (nodes[node][value] or 0) + total_value
