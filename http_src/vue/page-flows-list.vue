@@ -107,14 +107,21 @@ const handleLoadedColumns = (columns) => {
                 && (element.id !== "transit_asn"))
         })
     }
+    /* This is a trick just to show the ASN columns before the flow in case of ASN Mode and
+     * after in case of no ASN Mode
+     */
     if (props.context.ASNModeEnabled === false) {
         modified_columns = modified_columns.filter((element) => {
-            return ((element.id !== "transit_asn"))
+            return ((element.id !== "transit_asn")
+                && (element.id !== "cli_asn")
+                && (element.id !== "srv_asn"))
         })
     }
     if (props.context.ASNModeEnabled === true) {
         modified_columns = modified_columns.filter((element) => {
-            return ((element.id !== "qoe"))
+            return ((element.id !== "qoe")
+                && (element.id !== "cli_asn_asnmode_disabled")
+                && (element.id !== "srv_asn_asnmode_disabled"))
         })
     }
     return modified_columns
@@ -260,6 +267,24 @@ const map_table_def_columns = (columns) => {
         },
         "cli_asn": (value, row) => {
             if (value.asn && value.name) {
+                let formatted_asn = formatterUtils.formatAsn(value.asn, value.name)
+                return `<a href="${asn_hosts_url}${value.asn}">${formatted_asn}</a>`
+            }
+
+            return ''
+        },
+        "cli_asn_asnmode_disabled": (_, row) => {
+            const value = row?.cli_asn
+            if (value.asn && value.name) {
+                let formatted_asn = formatterUtils.formatAsn(value.asn, value.name)
+                return `<a href="${asn_hosts_url}${value.asn}">${formatted_asn}</a>`
+            }
+
+            return ''
+        },
+        "srv_asn_asnmode_disabled": (_, row) => {
+            const value = row?.srv_asn
+            if (value && value.asn && value.name) {
                 let formatted_asn = formatterUtils.formatAsn(value.asn, value.name)
                 return `<a href="${asn_hosts_url}${value.asn}">${formatted_asn}</a>`
             }
