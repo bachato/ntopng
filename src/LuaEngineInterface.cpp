@@ -3505,7 +3505,8 @@ static int ntop_get_flow_device_info_by_ip(lua_State* vm) {
   else {
     struct ndpi_in6_addr addr;
 
-    Utils::setIPv4Address(&addr, inet_addr(device_ip));
+    if (!Utils::parseIPv4v6Address(device_ip, &addr))
+      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
 
     curr_iface->getFlowDeviceInfoByIP(vm, &addr, showAllStats);
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
