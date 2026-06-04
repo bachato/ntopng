@@ -338,28 +338,28 @@ flowfilter_utils.defined_filters = {
         operators = {'eq', 'neq'},
         hourly_available = true
     },
-    site = {
+    site = { -- Exporter site
         type = flowfilter_utils.input_types.select,
         value_type = 'site',
         i18n_label = i18n('db_search.flowfilters.site'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
-    network_site = {
+    network_site = { -- Network site
         type = flowfilter_utils.input_types.select,
         value_type = 'site',
         i18n_label = i18n('db_search.flowfilters.network_site'),
         operators = {'eq', 'neq'},
         hourly_available = true
     },
-    cli_site = {
+    cli_site = { -- Client site
         type = flowfilter_utils.input_types.select,
         value_type = 'site',
         i18n_label = i18n('db_search.flowfilters.cli_site'),
         operators = {'eq', 'neq'},
         hourly_available = false
     },
-    srv_site = {
+    srv_site = { -- Server site
         type = flowfilter_utils.input_types.select,
         value_type = 'site',
         i18n_label = i18n('db_search.flowfilters.srv_site'),
@@ -1699,8 +1699,12 @@ function flowfilter_utils.get_flowfilter_info(id, entity, hide_exporters_name, r
         filter.options = {}
         local site_utils = require "site_utils"
         local sites = site_utils.getSites() or {}
-        local exporters = interface.getFlowDevices() or {}
-        if #sites > 0 and table.len(exporters) > 0 then
+        if id == 'site' then -- exporter site
+           -- check if exporters are available, otherwise skip filters
+           local exporters = interface.getFlowDevices() or {}
+           if table.len(exporters) == 0 then sites = {} end
+        end
+        if #sites > 0 then
             table.sort(sites, function(a, b)
                 if a.reserved ~= b.reserved then return a.reserved end
                 return a.name < b.name
