@@ -55,7 +55,7 @@ local function run_speedtest(hosts, granularity)
             local isp = nil
             local download_mbit = rsp["download.speed"]
 
-            if (type(rsp["client.isp"] == "string")) then
+            if (type(rsp["client.isp"]) == "string") then
                 isp = noHtml(rsp["client.isp"])
             end
 
