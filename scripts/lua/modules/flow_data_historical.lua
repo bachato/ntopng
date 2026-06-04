@@ -4,8 +4,35 @@
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 
-local TABLE_NAME = "hourly_asn"
+local TABLE_NAME = "flows"
 local flow_data_historical = {}
+
+-- ###################################################
+
+-- Helper used just to correctly format the order by clause
+local function buildLimitClause(query_info)
+	local limit_keys = query_info.limit_query or {}
+	local formatted_limit_query = "LIMIT "
+
+	if not limit_keys or (table.len(limit_keys) == 0) then
+		formatted_limit_query = ""
+	end
+
+	-- Multiple limit allowed only in Historical, just skip all except the first limit
+	if not isHistorical then
+		limit_keys = { limit_keys[1] }
+	end
+
+	for index, num_limit in pairs(limit_keys) do
+		formatted_limit_query = string.format("%s%s", formatted_limit_query, num_limit)
+		if index ~= #limit_keys then
+			-- Add the separator
+			formatted_limit_query = string.format("%s, ", formatted_limit_query)
+		end
+	end
+
+   return formatted_limit_query
+end
 
 -- ###################################################
 
@@ -14,7 +41,7 @@ local function buildOrderByClause(query_info)
 	local order_by_keys = query_info.order_by_query or {}
 	local formatted_order_by_query = "ORDER BY "
 
-	if not (order_by_keys) or (table.len(order_by_keys) == 0) then
+	if not order_by_keys or (table.len(order_by_keys) == 0) then
 		formatted_order_by_query = ""
 	end
 
@@ -112,32 +139,27 @@ local function buildWhereClause(query_info)
 
 	-- Now format the others where
 	for index, where_info in pairs(where_keys) do
-      -- It means that there is an array of keys that needs to be put in an OR condition
-      if where_info.or_condition then
-         formatted_where_query = formatted_where_query .. "("
-         for _, info in pairs(where_info.key) do
-            formatted_where_query = string.format(
-               "%s%s%s%s OR ",
-               formatted_where_query,
-               info.key,
-               info.operator,
-               tostring(info.value)
-            )
-         end
-		   formatted_where_query = formatted_where_query:sub(1, -4)
-         formatted_where_query = formatted_where_query .. ")"
-      else
-         formatted_where_query = string.format(
-            "%s%s%s%s AND ",
-            formatted_where_query,
-            where_info.key,
-            where_info.operator,
-            tostring(where_info.value)
-         )
-      end
+		-- It means that there is an array of keys that needs to be put in an OR condition
+		if where_info.or_condition then
+			formatted_where_query = formatted_where_query .. "("
+			for _, info in pairs(where_info.key) do
+				formatted_where_query =
+					string.format("%s%s%s%s OR ", formatted_where_query, info.key, info.operator, tostring(info.value))
+			end
+			formatted_where_query = formatted_where_query:sub(1, -4)
+			formatted_where_query = formatted_where_query .. ")"
+		else
+			formatted_where_query = string.format(
+				"%s%s%s%s AND ",
+				formatted_where_query,
+				where_info.key,
+				where_info.operator,
+				tostring(where_info.value)
+			)
+		end
 	end
 
-   -- Remove the last "AND " string alwais added
+	-- Remove the last "AND " string alwais added
 	if not isEmptyString(formatted_where_query) and formatted_where_query:sub(-5) == " AND " then
 		formatted_where_query = formatted_where_query:sub(1, -5)
 	end
@@ -148,8 +170,8 @@ end
 -- ###################################################
 
 function flow_data_historical.retrieveFlowData(query_info)
-   local results = nil 
-   local error_code = nil
+	local results = nil
+	local error_code = nil
 	-- Handle the select first
 	local isHistorical = not query_info.basic_info
 		or isEmptyString(query_info.basic_info.epoch_begin)
@@ -165,9 +187,10 @@ function flow_data_historical.retrieveFlowData(query_info)
 	local group_by_query = buildGroupByClause(query_info)
 	local where_query = buildWhereClause(query_info)
 	local order_by_query = buildOrderByClause(query_info)
+	local limit_query = buildLimitClause(query_info)
 
 	local query =
-		string.format("%s FROM %s %s %s %s", select_query, TABLE_NAME, where_query, group_by_query, order_by_query)
+		string.format("%s FROM %s %s %s %s %s", select_query, TABLE_NAME, where_query, group_by_query, order_by_query, limit_query)
 
 	if isHistorical and hasClickHouseSupport() then
 		results, error_code = interface.execSQLQuery(query)

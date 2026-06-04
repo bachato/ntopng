@@ -38,10 +38,10 @@ if data_type == "historical" and hasClickHouseSupport() then
 end
 
 if criteria_as == "ingress_egress_traffic_criteria" then
-   local probe_key = "PROBE_IP"
-   if hasClickHouseSupport() then
-      probe_key = "REPLACE(IPv6NumToString(PROBE_IP), '::ffff:', '')"
-   end
+	local probe_key = "PROBE_IP"
+	if hasClickHouseSupport() then
+		probe_key = "REPLACE(IPv6NumToString(PROBE_IP), '::ffff:', '')"
+	end
 	queries = {
 		{
 			select_query = {
@@ -50,7 +50,7 @@ if criteria_as == "ingress_egress_traffic_criteria" then
 					rename = "in_iface_index",
 					is_key = true,
 					formatter = format_portidx_name,
-               depends_on = "device_in",
+					depends_on = "device_in",
 					linker = generateExporterInterfaceLink,
 				},
 				{
@@ -66,6 +66,12 @@ if criteria_as == "ingress_egress_traffic_criteria" then
 				{ key = "DST_ASN", value = asn, operator = operators.eq }, -- DST_ASN = SEARCHED_ASN
 				{ key = "SRC2DST_BYTES", value = "0", operator = operators.gt },
 			},
+			order_by_query = {
+				{ key = "bytes", value = "DESC" },
+			},
+			limit_query = {
+				1000
+			},
 			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
 				ifid = ifid, -- where generated, it is better to manually format inside
 				epoch_begin = epoch_begin,
@@ -84,7 +90,7 @@ if criteria_as == "ingress_egress_traffic_criteria" then
 					rename = "in_iface_index",
 					is_key = true,
 					formatter = format_portidx_name,
-               depends_on = "device_in",
+					depends_on = "device_in",
 					linker = generateExporterInterfaceLink,
 				},
 				{
@@ -99,6 +105,12 @@ if criteria_as == "ingress_egress_traffic_criteria" then
 			where_query = {
 				{ key = "SRC_ASN", value = asn, operator = operators.eq }, -- DST_ASN = SEARCHED_ASN
 				{ key = "DST2SRC_BYTES", value = "0", operator = operators.gt },
+			},
+			order_by_query = {
+				{ key = "bytes", value = "DESC" },
+			},
+			limit_query = {
+				1000
 			},
 			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
 				ifid = ifid, -- where generated, it is better to manually format inside
@@ -125,7 +137,7 @@ if criteria_as == "ingress_egress_traffic_criteria" then
 					rename = "out_iface_index",
 					is_key = true,
 					formatter = format_portidx_name,
-               depends_on = "device_out",
+					depends_on = "device_out",
 					linker = generateExporterInterfaceLink,
 				},
 				{ key = "SUM(SRC2DST_BYTES)", rename = "bytes", formatter = format_utils.bytesToSize },
@@ -133,6 +145,12 @@ if criteria_as == "ingress_egress_traffic_criteria" then
 			where_query = {
 				{ key = "SRC_ASN", value = asn, operator = operators.eq }, -- SRC_ASN != 0
 				{ key = "SRC2DST_BYTES", value = "0", operator = operators.gt },
+			},
+			order_by_query = {
+				{ key = "bytes", value = "DESC" },
+			},
+			limit_query = {
+				1000
 			},
 			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
 				ifid = ifid, -- where generated, it is better to manually format inside
@@ -159,7 +177,7 @@ if criteria_as == "ingress_egress_traffic_criteria" then
 					rename = "out_iface_index",
 					is_key = true,
 					formatter = format_portidx_name,
-               depends_on = "device_out",
+					depends_on = "device_out",
 					linker = generateExporterInterfaceLink,
 				},
 				{ key = "SUM(DST2SRC_BYTES)", rename = "bytes", formatter = format_utils.bytesToSize },
@@ -170,6 +188,9 @@ if criteria_as == "ingress_egress_traffic_criteria" then
 			},
 			order_by_query = {
 				{ key = "bytes", value = "DESC" },
+			},
+			limit_query = {
+				1000
 			},
 			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
 				ifid = ifid, -- where generated, it is better to manually format inside
@@ -183,13 +204,17 @@ if criteria_as == "ingress_egress_traffic_criteria" then
 			},
 		},
 	}
-
-
 elseif isEmptyString(criteria_as) or (criteria_as == "traffic_between_ases") then
 	queries = {
 		{
 			select_query = {
-				{ key = "SRC_ASN", rename = "src_asn", is_key = true, formatter = format_utils.formatASN, linker = generateASNLink },
+				{
+					key = "SRC_ASN",
+					rename = "src_asn",
+					is_key = true,
+					formatter = format_utils.formatASN,
+					linker = generateASNLink,
+				},
 				{
 					key = "SRC_PEER_ASN",
 					rename = "src_peer_asn",
@@ -208,6 +233,9 @@ elseif isEmptyString(criteria_as) or (criteria_as == "traffic_between_ases") the
 			order_by_query = {
 				{ key = "bytes", value = "DESC" },
 			},
+			limit_query = {
+				1000
+			},
 			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
 				ifid = ifid, -- where generated, it is better to manually format inside
 				epoch_begin = epoch_begin,
@@ -221,7 +249,13 @@ elseif isEmptyString(criteria_as) or (criteria_as == "traffic_between_ases") the
 		},
 		{
 			select_query = {
-				{ key = "DST_ASN", rename = "src_asn", is_key = true, formatter = format_utils.formatASN, linker = generateASNLink },
+				{
+					key = "DST_ASN",
+					rename = "src_asn",
+					is_key = true,
+					formatter = format_utils.formatASN,
+					linker = generateASNLink,
+				},
 				{
 					key = "DST_PEER_ASN",
 					rename = "src_peer_asn",
@@ -240,6 +274,9 @@ elseif isEmptyString(criteria_as) or (criteria_as == "traffic_between_ases") the
 			order_by_query = {
 				{ key = "bytes", value = "DESC" },
 			},
+			limit_query = {
+				1000
+			},
 			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
 				ifid = ifid, -- where generated, it is better to manually format inside
 				epoch_begin = epoch_begin,
@@ -253,7 +290,13 @@ elseif isEmptyString(criteria_as) or (criteria_as == "traffic_between_ases") the
 		},
 		{
 			select_query = {
-				{ key = "SRC_ASN", rename = "dst_asn", is_key = true, formatter = format_utils.formatASN, linker = generateASNLink },
+				{
+					key = "SRC_ASN",
+					rename = "dst_asn",
+					is_key = true,
+					formatter = format_utils.formatASN,
+					linker = generateASNLink,
+				},
 				{
 					key = "DST_PEER_ASN",
 					rename = "src_peer_asn_2",
@@ -272,6 +315,9 @@ elseif isEmptyString(criteria_as) or (criteria_as == "traffic_between_ases") the
 			order_by_query = {
 				{ key = "bytes", value = "DESC" },
 			},
+			limit_query = {
+				1000
+			},
 			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
 				ifid = ifid, -- where generated, it is better to manually format inside
 				epoch_begin = epoch_begin,
@@ -285,7 +331,13 @@ elseif isEmptyString(criteria_as) or (criteria_as == "traffic_between_ases") the
 		},
 		{
 			select_query = {
-				{ key = "DST_ASN", rename = "dst_asn", is_key = true, formatter = format_utils.formatASN, linker = generateASNLink },
+				{
+					key = "DST_ASN",
+					rename = "dst_asn",
+					is_key = true,
+					formatter = format_utils.formatASN,
+					linker = generateASNLink,
+				},
 				{
 					key = "SRC_PEER_ASN",
 					rename = "src_peer_asn_2",
@@ -303,6 +355,9 @@ elseif isEmptyString(criteria_as) or (criteria_as == "traffic_between_ases") the
 			},
 			order_by_query = {
 				{ key = "bytes", value = "DESC" },
+			},
+			limit_query = {
+				1000
 			},
 			basic_filters = { -- These info are used internally to filter the data, being pretty strange the
 				ifid = ifid, -- where generated, it is better to manually format inside
