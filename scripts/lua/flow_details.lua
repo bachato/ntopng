@@ -1896,18 +1896,25 @@ if isEmptyString(page) or page == "overview" then
 
          -- Adding server name column
          print("<tr><th>" .. i18n("flow_details.server_name") .. "</th><td colspan=2>")
-         local s = flowinfo2hostname(flow, "srv")
+
+	 -- The trick below allows us to avoi puttind the @VLAN into the hostname
+	 local save_vlan = flow.vlan
+	 flow.vlan = nil
+	 
+         local svr_name = flowinfo2hostname(flow, "srv")
          if (not isEmptyString(flow["host_server_name"])) then
-            s = flow["host_server_name"]
+            svr_name = flow["host_server_name"]
          end
 
-         print(format_external_link(page_utils.safe_html(s), page_utils.safe_html(s), false, "http"))
+	 flow.vlan = save_vlan
+	 
+         print(format_external_link(page_utils.safe_html(svr_name), page_utils.safe_html(svr_name), false, "http"))
 
          if (flow["category"] ~= nil) then
             print(" " .. getCategoryIcon(flow["host_server_name"], flow["category"]))
          end
          -- Adding + with custom host rules next to the server name
-         printAddCustomHostRule(s)
+         printAddCustomHostRule(svr_name)
          print("</td></tr>\n")
 
          if (not isEmptyString(flow["protos.http.last_user_agent"])) then
@@ -1922,7 +1929,21 @@ if isEmptyString(page) or page == "overview" then
          print("<tr><th>" .. i18n("flow_details.url") .. "</th><td colspan=2>")
          -- if(flow["srv.port"] ~= 80) then print(":"..flow["srv.port"]) end
 
-         local last_url = page_utils.safe_html(flow["protos.http.last_url"])
+	 local base_url = flow["protos.http.last_url"]
+
+	 if(starts(base_url, '/') and (svr_name ~= nil)) then
+	    local p
+	    
+	    if(flow["srv.port"] ~= 80) then
+	       p = ":" .. flow["srv.port"]
+	    else
+	       p = ""
+	    end
+	    
+	    base_url = svr_name ..p .. base_url
+	 end
+	 
+         local last_url = page_utils.safe_html(base_url)
          local last_url_short = shortenString(last_url, 64)
          local proto = "https"
 
@@ -1933,6 +1954,7 @@ if isEmptyString(page) or page == "overview" then
             end
          end
 
+	 
          print(format_external_link(last_url, last_url_short, false, proto))
          print("</td></tr>\n")
 
