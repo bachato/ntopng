@@ -41,7 +41,6 @@ const stats_rows_server = ref([]);
 const no_client_data = ref(true);
 const no_server_data = ref(true);
 const BGP_LOOKING_GLASS_URL = '/lua/bgp_looking_glass.lua'
-const bgp_info_url = '/lua/rest/v2/get/flow/bgp/general_stats.lua'
 const stats_columns = ref([{
     class: "nowrap col-4",
     name: _i18n("map_page.info"),
@@ -52,26 +51,10 @@ const stats_columns = ref([{
 }
 ])
 
-/* ***************************************************** */
-
-const getExtraParameters = () => {
-    let extra_params = ntopng_url_manager.get_url_object();
-    return extra_params;
-};
-
-/* ***************************************************** */
-
-const getExtraParametersUrl = () => {
-    const extra_params = getExtraParameters()
-    return ntopng_url_manager.obj_to_url_params(extra_params);
-};
-
 /* ************************************** */
 
 const refreshBSTable = async () => {
-    const params = getExtraParametersUrl()
-    const stats = await ntopng_utility.http_request(`${http_prefix}${bgp_info_url}?${params}`);
-
+    const stats = props.context.bgp_info
     if (stats.client_info.length > 0)
         no_client_data.value = false
     if (stats.server_info.length > 0)

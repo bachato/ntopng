@@ -2280,6 +2280,7 @@ function historical_flow_utils.convertToLiveFlowFormat(historical_flow)
          flow.modbus = modbus_info
          flow.s7comm = s7comm_info
          flow.profinet = profinet_info
+         flow.bgp = proto_info.bgp
       end
    end
 

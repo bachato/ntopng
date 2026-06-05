@@ -32,6 +32,7 @@ local page_utils = require("page_utils")
 local icmp_utils = require("icmp_utils")
 local alert_consts = require("alert_consts")
 local mitre_utils = require("mitre_utils")
+local bgp_utils = require "bgp_utils"
 local auth = require "auth"
 local as_utils = require "as_utils"
 local live_flow_info = nil
@@ -2656,13 +2657,16 @@ elseif page == "s7comm" then
 
 elseif page == "bgp" then
    local json = require "dkjson"
+   local bgp_formatted_info = bgp_utils.formatFlowBgpBmpInfo(flow)
+
    local json_context = json.encode({
-	 csrf = ntop.getRandomCSRFValue()
+      bgp_info = bgp_formatted_info,
+	   csrf = ntop.getRandomCSRFValue()
    })
 
    template.render("pages/vue_page.template", {
-		      vue_page_name = "PageFlowDetailsBGP",
-		      page_context = json_context
+      vue_page_name = "PageFlowDetailsBGP",
+      page_context = json_context
    })
 end
 dofile(dirs.installdir .. "/scripts/lua/inc/footer.lua")
