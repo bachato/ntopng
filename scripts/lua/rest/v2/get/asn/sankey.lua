@@ -39,9 +39,6 @@ end
 
 if criteria_as == "ingress_egress_traffic_criteria" then
 	local probe_key = "PROBE_IP"
-	if hasClickHouseSupport() then
-		probe_key = "REPLACE(IPv6NumToString(PROBE_IP), '::ffff:', '')"
-	end
 	queries = {
 		{
 			select_query = {
