@@ -39,7 +39,11 @@ PSWD=$(echo ${REDIS_INFO} | cut -d'=' -f2 | cut -d'@' -f1 | cut -d':' -f3 -s)
 DBID=$(echo ${REDIS_INFO} | cut -d'@' -f2 -s)
 REDIS_CLI_OPT=""
 if [ ! -z "${HOST}" ]; then
-	REDIS_CLI_OPT="${REDIS_CLI_OPT}-h ${HOST} "
+	if [[ "${HOST}" == /* ]]; then
+		REDIS_CLI_OPT="${REDIS_CLI_OPT}-s ${HOST} "
+	else
+		REDIS_CLI_OPT="${REDIS_CLI_OPT}-h ${HOST} "
+	fi
 fi
 if [ ! -z "${PORT}" ]; then
 	REDIS_CLI_OPT="${REDIS_CLI_OPT}-p ${PORT} "
