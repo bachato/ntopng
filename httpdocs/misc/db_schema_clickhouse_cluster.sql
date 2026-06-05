@@ -203,14 +203,6 @@ ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `DST_PEER_ASN
 @
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `NEXT_ADJACENT_ASN` UInt32;
 @
-ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `PRE_NAT_IPV4_SRC_ADDR`;
-@
-ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `PRE_NAT_SRC_PORT`;
-@
-ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `PRE_NAT_IPV4_DST_ADDR`;
-@
-ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `PRE_NAT_DST_PORT`;
-@
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `EXPORTER_SITE` UInt16;
 @
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `HR_SRC2DST_BYTES` Array(UInt64);
@@ -225,8 +217,17 @@ ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `SRC_SITE_ID`
 @
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `DST_SITE_ID` UInt16;
 @
+ALTER TABLE `flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `PROBE_IP` IPv6;
+@
+ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `PRE_NAT_IPV4_SRC_ADDR`;
+@
+ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `PRE_NAT_SRC_PORT`;
+@
+ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `PRE_NAT_IPV4_DST_ADDR`;
+@
+ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `PRE_NAT_DST_PORT`;
+@
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' MODIFY COMMENT 'Per-flow telemetry records captured locally or received via NetFlow/sFlow/IPFIX. Each row represents one bidirectional network flow with 5-tuple (src/dst IP, src/dst port, protocol), byte/packet counters, L7 application identification, flow-risk bitmap, DSCP, NAT addresses, process info, and optional alert metadata. Partitioned by day on FIRST_SEEN.';
-
 @
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' MODIFY COLUMN `FLOW_ID` COMMENT 'Unique flow identifier assigned by ntopng';
 @
@@ -1755,6 +1756,8 @@ ALTER TABLE `hourly_flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `DST2S
 @
 ALTER TABLE `hourly_flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `EXPORTER_SITE` UInt16;
 @
+ALTER TABLE `hourly_flows` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `PROBE_IP` IPv6;
+@
 ALTER TABLE `hourly_flows` ON CLUSTER '$CLUSTER' MODIFY COMMENT 'Hourly aggregated flow summaries. Multiple raw flows sharing the same 5-tuple are collapsed into one row per hour with summed byte/packet counters and OR-ed risk bitmaps. Used for long-term trend analysis and reduced-resolution historical queries.';
 @
 ALTER TABLE `hourly_flows` ON CLUSTER '$CLUSTER' MODIFY COLUMN `FLOW_ID` COMMENT 'Unique flow identifier assigned by ntopng';
@@ -2267,6 +2270,8 @@ CREATE TABLE IF NOT EXISTS `hourly_asn` ON CLUSTER '$CLUSTER' (
 ) ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{database}/{table}', '{replica}') PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (FIRST_SEEN, SRC_ASN, DST_ASN);
 @
 ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS TOTAL_BYTES UInt64;
+@
+ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `PROBE_IP` IPv6;
 @
 ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' MODIFY COMMENT 'Hourly aggregated traffic statistics per source/destination ASN pair. Used for autonomous-system level traffic analysis and BGP peer analytics. Partitioned by day on FIRST_SEEN.';
 @
