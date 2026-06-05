@@ -14479,7 +14479,7 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State* vm) {
     probe_ip = Utils::intoaV6(k->probe_ip, ip_buf, sizeof(ip_buf));
 
     std::string sql =
-      "INSERT INTO hourly_asn VALUES (" + std::to_string(get_id()) + "," +
+      "INSERT INTO flows VALUES (" + std::to_string(get_id()) + "," +
       std::to_string(k->ip_protocol_version) + "," +
       std::to_string(v->first_seen) + "," + std::to_string(v->last_seen) +
       "," + std::to_string(v->src2dst_bytes) + "," +
