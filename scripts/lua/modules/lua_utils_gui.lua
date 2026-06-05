@@ -29,9 +29,7 @@ local rest_utils = require "rest_utils"
 local cache_utils = require "cache_utils"
 
 if ntop.isPro() then
-   local dirs = ntop.getDirs()
-   
-   package.path = dirs.installdir .. "/scripts/lua/pro/modules/?.lua;" .. package.path
+   package.path = dirs.installdir .. "/pro/scripts/lua/modules/?.lua;" .. package.path
    require "flow_exporter_utils"
    -- snmp_utils = require "snmp_utils"
 end
