@@ -199,14 +199,6 @@ ALTER TABLE flows ADD COLUMN IF NOT EXISTS `INTERFACE_ROLE` UInt8;
 @
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `NEXT_ADJACENT_ASN` UInt32;
 @
-ALTER TABLE flows DROP COLUMN IF EXISTS `PRE_NAT_IPV4_SRC_ADDR`;
-@
-ALTER TABLE flows DROP COLUMN IF EXISTS `PRE_NAT_SRC_PORT`;
-@
-ALTER TABLE flows DROP COLUMN IF EXISTS `PRE_NAT_IPV4_DST_ADDR`;
-@
-ALTER TABLE flows DROP COLUMN IF EXISTS `PRE_NAT_DST_PORT`;
-@
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `HR_SRC2DST_BYTES` Array(UInt64);
 @
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `HR_DST2SRC_BYTES` Array(UInt64);
@@ -216,6 +208,16 @@ ALTER TABLE flows ADD COLUMN IF NOT EXISTS `IS_FIRST_DUMP` Boolean;
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `SRC_SITE_ID` UInt16;
 @
 ALTER TABLE flows ADD COLUMN IF NOT EXISTS `DST_SITE_ID` UInt16;
+@
+ALTER TABLE flows ADD COLUMN IF NOT EXISTS `PROBE_IP` IPv6;
+@
+ALTER TABLE flows DROP COLUMN IF EXISTS `PRE_NAT_IPV4_SRC_ADDR`;
+@
+ALTER TABLE flows DROP COLUMN IF EXISTS `PRE_NAT_SRC_PORT`;
+@
+ALTER TABLE flows DROP COLUMN IF EXISTS `PRE_NAT_IPV4_DST_ADDR`;
+@
+ALTER TABLE flows DROP COLUMN IF EXISTS `PRE_NAT_DST_PORT`;
 @
 ALTER TABLE `flows` MODIFY COMMENT 'Per-flow telemetry records captured locally or received via NetFlow/sFlow/IPFIX. Each row represents one bidirectional network flow with 5-tuple (src/dst IP, src/dst port, protocol), byte/packet counters, L7 application identification, flow-risk bitmap, DSCP, NAT addresses, process info, and optional alert metadata. Partitioned by day on FIRST_SEEN.';
 @
@@ -1748,6 +1750,8 @@ ALTER TABLE `hourly_flows` ADD COLUMN IF NOT EXISTS `DST2SRC_PACKETS` UInt32;
 @
 ALTER TABLE `hourly_flows` ADD COLUMN IF NOT EXISTS `EXPORTER_SITE` UInt16;
 @
+ALTER TABLE `hourly_flows` ADD COLUMN IF NOT EXISTS `PROBE_IP` IPv6;
+@
 ALTER TABLE `hourly_flows` MODIFY COMMENT 'Hourly aggregated flow summaries. Multiple raw flows sharing the same 5-tuple are collapsed into one row per hour with summed byte/packet counters and OR-ed risk bitmaps. Used for long-term trend analysis and reduced-resolution historical queries.';
 @
 ALTER TABLE `hourly_flows` MODIFY COLUMN `FLOW_ID` COMMENT 'Unique flow identifier assigned by ntopng';
@@ -2252,6 +2256,8 @@ CREATE TABLE IF NOT EXISTS `hourly_asn` (
 `INPUT_SNMP` UInt32,
 `OUTPUT_SNMP` UInt32
 ) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (FIRST_SEEN, SRC_ASN, DST_ASN);
+@
+ALTER TABLE `hourly_asn` ADD COLUMN IF NOT EXISTS `PROBE_IP` IPv6;
 @
 ALTER TABLE `hourly_asn` MODIFY COMMENT 'Hourly aggregated traffic statistics per source/destination ASN pair. Used for autonomous-system level traffic analysis and BGP peer analytics. Partitioned by day on FIRST_SEEN.';
 @
