@@ -227,6 +227,16 @@ ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `PRE_NAT_IPV4_DS
 @
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `PRE_NAT_DST_PORT`;
 @
+ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `COMMUNITY_ID`;
+@
+ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `TCP_FINGERPRINT`;
+@
+ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `WLAN_SSID`;
+@
+ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `WTP_MAC_ADDRESS`;
+@
+ALTER TABLE `flows` ON CLUSTER '$CLUSTER' DROP COLUMN IF EXISTS `LABELS_MAP`;
+@
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' MODIFY COMMENT 'Per-flow telemetry records captured locally or received via NetFlow/sFlow/IPFIX. Each row represents one bidirectional network flow with 5-tuple (src/dst IP, src/dst port, protocol), byte/packet counters, L7 application identification, flow-risk bitmap, DSCP, NAT addresses, process info, and optional alert metadata. Partitioned by day on FIRST_SEEN.';
 @
 ALTER TABLE `flows` ON CLUSTER '$CLUSTER' MODIFY COLUMN `FLOW_ID` COMMENT 'Unique flow identifier assigned by ntopng';
@@ -2180,7 +2190,6 @@ SELECT
     f.DST_LABEL AS srv_name,
     f.SRC_ASN AS src_asn,
     f.DST_ASN AS dst_asn,
-    --f.COMMUNITY_ID AS community_id,
     f.SCORE AS score,
     f.SRC_HOST_POOL_ID AS cli_host_pool_id,
     f.DST_HOST_POOL_ID AS srv_host_pool_id,
