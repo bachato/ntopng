@@ -908,6 +908,8 @@ static int get_best_server(int *p_index)
 
   for (i = 0; i < MAX_CLOSEST_SERVER_NUM; i++) {
     double latency;
+    char *p;
+    size_t len;
 
     if (minimum != DBL_MAX && i >= MIN_SERVERS_TO_CHECK)
       break; /* MIN_SERVERS_TO_CHECK evaluated and at least one found */
@@ -915,10 +917,15 @@ static int get_best_server(int *p_index)
     if((strlen(servers[i].url) == 0))
       continue;
 
-    sscanf(servers[i].url, "http://%[^/]speedtest/upload.%*s", server);
-    if(server[0] == '\0')
-      sscanf(servers[i].url, "https://%[^/]speedtest/upload.%*s", server);
-    
+    /* Read base URL (e.g. http://speedtest1.uniconnect.it:8080) by removing /speedtest/.. */
+    p = strstr(servers[i].url, "/speedtest/");
+    server[0] = '\0';
+    if(p == NULL) continue;
+    len = (size_t)(p - servers[i].url);
+    if(len == 0 || len >= URL_LENGTH_MAX) continue;
+    strncpy(server, servers[i].url, len);
+    server[len] = '\0';
+
     if(server[0] == '\0')
       continue;
     
@@ -954,6 +961,7 @@ json_object* speedtest() {
   double  speed, download_speed;
   int     dsize, sindex;
   json_object *rc = json_object_new_object();
+  char *p;
 
   if(rc == NULL) {
 #ifdef INFO_SPEEDTEST
@@ -998,10 +1006,16 @@ json_object* speedtest() {
     return(rc);
   }
   
-  sscanf(servers[sindex].url, "http://%[^/]/speedtest/upload.%4s", server_url, ext);
-
-  if(server_url[0] == '\0')
-    sscanf(servers[sindex].url, "https://%[^/]/speedtest/upload.%4s", server_url, ext);
+  /* Read base URL and upload extension */
+  p = strstr(servers[sindex].url, "/speedtest/upload.");
+  if (p != NULL) {
+    size_t len = (size_t)(p - servers[sindex].url);
+    if(len > 0 && len < URL_LENGTH_MAX) {
+      strncpy(server_url, servers[sindex].url, len);
+      server_url[len] = '\0';
+      sscanf(p, "/speedtest/upload.%4s", ext);
+    }
+  }
   
 #ifdef DEBUG_SPEEDTEST
   printf("Best server: %s (%0.2fKM) [index: %u][%s]\n",

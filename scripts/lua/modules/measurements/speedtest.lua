@@ -8,7 +8,6 @@ local json = require("dkjson")
 local ts_utils = require("ts_utils_core")
 local format_utils = require("format_utils")
 
-local do_trace = false
 local collected_results = {}
 
 -- #################################################################
@@ -19,11 +18,7 @@ local collected_results = {}
 -- see (am_utils.key2host for the details on such format).
 local function run_speedtest(hosts, granularity)
     local rsp
-    local do_trace = ntop.getCache("ntopng.prefs.trace.active_monitoring")
-
-    if isEmptyString(do_trace) then
-        do_trace = false
-    end
+    local do_trace = toboolean(ntop.getCache("ntopng.prefs.trace.active_monitoring"))
 
     if (do_trace) then
         tprint("[run_speedtest] [" .. granularity .. "]\n")
@@ -61,24 +56,10 @@ local function run_speedtest(hosts, granularity)
 
             collected_results[key] = {
                 value = download_mbit * 1000000 / 8,
-                resolved_addr = isp
+                resolved_addr = isp,
+                upload_speed = rsp["upload.speed"],
+                latency = rsp["server.latency"]
             }
-        end
-
-        if (rsp["upload.speed"]) then
-            ts_utils.append("am_host:upload_" .. granularity, {
-                ifid = getSystemInterfaceId(),
-                speed = rsp["upload.speed"] * 1000000 / 8,
-                host = host.host
-            })
-        end
-
-        if (rsp["server.latency"]) then
-            ts_utils.append("am_host:latency_" .. granularity, {
-                ifid = getSystemInterfaceId(),
-                latency = rsp["server.latency"],
-                host = host.host
-            })
         end
     end
 end

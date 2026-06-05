@@ -367,7 +367,7 @@ end
 
 -- ##############################################
 
-function am_utils.getAmSchemaForGranularity(granularity)
+function am_utils.getAmGranularitySuffix(granularity)
     local str_granularity
 
     if (tonumber(granularity) ~= nil) then
@@ -376,7 +376,14 @@ function am_utils.getAmSchemaForGranularity(granularity)
         str_granularity = granularity
     end
 
-    return ("am_host:val_" .. (str_granularity or "min"))
+    return str_granularity or "min"
+end
+
+-- ##############################################
+
+function am_utils.getAmSchemaForGranularity(granularity)
+    local str_granularity = am_utils.getAmGranularitySuffix(granularity)
+    return ("am_host:val_" .. str_granularity)
 end
 
 -- ##############################################
@@ -914,6 +921,7 @@ end
 function am_utils.run_am_check(when, all_hosts, granularity)
     local hosts_am = {}
     local resolved_unreachable_hosts = {}
+    local str_granularity = am_utils.getAmGranularitySuffix(granularity)
     local am_schema = am_utils.getAmSchemaForGranularity(granularity)
 
     when = when - (when % 60)
@@ -1005,6 +1013,31 @@ function am_utils.run_am_check(when, all_hosts, granularity)
             end
 
             ts_utils.append(am_schema, ts_data, when)
+
+            -- Write additional timeseries (e.g. speedtest upload/latency)
+            if info.upload_speed ~= nil then
+                local _am_schema = "am_host:upload_" .. str_granularity
+
+                ts_data = {
+                    ifid = getSystemInterfaceId(),
+                    host = host.host,
+                    speed = info.upload_speed * 1000000 / 8
+                }
+
+                ts_utils.append(_am_schema, ts_data, when)
+            end
+
+            if info.latency ~= nil then
+                local _am_schema = "am_host:latency_" .. str_granularity
+
+                ts_data = {
+                    ifid = getSystemInterfaceId(),
+                    host = host.host,
+                    latency = info.latency
+                }
+
+                ts_utils.append(_am_schema, ts_data, when)
+            end
         end
 
         am_utils.setLastAmUpdate(key, when, host_value, resolved_host, jitter, mean)

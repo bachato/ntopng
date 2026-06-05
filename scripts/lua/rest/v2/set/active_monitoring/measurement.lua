@@ -20,8 +20,6 @@ local ifname      = _POST["ifname"]
 local threshold   = _POST["threshold"]
 local granularity = _POST["granularity"]
 
-tprint(action)
-
 local res = {}
 local rc  = rest_utils.consts.success.ok
 
