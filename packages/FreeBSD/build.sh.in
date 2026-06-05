@@ -65,7 +65,7 @@ find ${STAGEDIR}/usr/local/share/ntopng/pro/scripts -name "*.luar" | xargs renam
 # Vulscan
 \mkdir -p ${STAGEDIR}/usr/local/share/nmap/scripts/vulscan
 curl -o ${STAGEDIR}/usr/local/share/nmap/scripts/vulscan/vulscan.nse https://raw.githubusercontent.com/scipag/vulscan/master/vulscan.nse
-curl -o ${STAGEDIR}/usr/local/share/nmap/scripts/vulscan/cve.csv     https://www.computec.ch/projekte/vulscan/download/cve.csv
+curl -o ${STAGEDIR}/usr/local/share/nmap/scripts/vulscan/cve.csv     https://raw.githubusercontent.com/scipag/vulscan/master/cve.csv
 
 rm -f ${STAGEDIR}/usr/local/share/ntopng/httpdocs/geoip/*
 find ${STAGEDIR}/usr/local/share/ntopng -name "*~"   | xargs /bin/rm -f
@@ -76,6 +76,7 @@ find . -name "*~" -exec /bin/rm {} ';'
 
 # Add GeoIP files
 mkdir -p ${STAGEDIR}/usr/local/share/ntopng/httpdocs/geoip
+cp ~/dat_files/as.csv ${STAGEDIR}/usr/local/share/ntopng/httpdocs/geoip/as.csv
 cp ~/dat_files/dbip-asn-lite-*.mmdb ${STAGEDIR}/usr/local/share/ntopng/httpdocs/geoip/dbip-asn-lite.mmdb
 cp ~/dat_files/dbip-city-lite-*.mmdb ${STAGEDIR}/usr/local/share/ntopng/httpdocs/geoip/dbip-city-lite.mmdb
 cp ~/dat_files/dbip-country-lite-*.mmdb ${STAGEDIR}/usr/local/share/ntopng/httpdocs/geoip/dbip-country-lite.mmdb
