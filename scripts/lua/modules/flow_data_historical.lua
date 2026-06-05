@@ -4,12 +4,12 @@
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 
-local TABLE_NAME = "flows"
+local TABLE_NAME = "hourly_asn"
 local flow_data_historical = {}
 
 -- ###################################################
 
--- Helper used just to correctly format the order by clause
+-- Helper used just to correctly format the Limit clause
 local function buildLimitClause(query_info)
    local limit_keys = query_info.limit_query or {}
    local formatted_limit_query = "LIMIT "

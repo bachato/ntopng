@@ -1,6 +1,6 @@
 /* IMPORTANT: keep in sync with hourly_asn ib db_schema_clickhouse.sql */
 /* Used *only* in NetworkInterface::aggregateASNModeFlows() */
-CREATE TABLE `flows` (
+CREATE TABLE `hourly_asn` (
 /*`ID` INTEGER PRIMARY KEY AUTOINCREMENT, */
 /*`NTOPNG_INSTANCE_NAME` TEXT, */
 `INTERFACE_ID` INTEGER NOT NULL,
