@@ -21,6 +21,7 @@ During device discovery, ntopng automatically detectes the MIBs and in the devic
   :alt: SNMP Device: CPU and Memory
 
 
+	
 Network Interfaces
 ------------------
 
@@ -36,8 +37,34 @@ Clicking on an interface id a drill-down page is shown
   :align: center
   :alt: SNMP Network Interface Overview
 
+	
+
+Interface Roles
+---------------
+
+It is possible to assign a role to a network interface that spcifies the intent for which such interface is used. Roles include:
+
+- Peering
+- Transit
+- Internal LAN
+
+You can set the individual interface role as shown in the figure below
+
+.. figure:: ../../../img/snmp_port_role.png
+  :align: center
+  :alt: SNMP Interface Role
+
+or batch rename the interfaces specifying a substring that matches the interface name or alias by clicking on the cog icon under SNMP / Intefaces,
+
+
+.. figure:: ../../../img/snmp_batch_rename.png
+  :align: center
+  :alt: SNMP Batch Interface Role Set
+
+	
+
 Interface Label Format
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 From the preferences page it is possible to change the label format displayed
 for SNMP interfaces. By default, ntopng shows the interface alias, but it is
@@ -49,6 +76,7 @@ To change this setting, navigate to **Preferences → SNMP → SNMP Interface La
   :align: center
   :alt: SNMP Interface Label Format
 
+	
 
 Binding MAC Address to Interface
 --------------------------------
