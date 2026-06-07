@@ -507,10 +507,22 @@ void ZMQCollectorInterface::collect_flows() {
               uLen = uncompressed_len =
                   ndpi_min(ndpi_max(10 * size, MAX_ZMQ_FLOW_BUF),
                            MAX_ZMQ_FLOW_BUF / 3); /* Compatibility mode */
-            else
+            else {
+              /* Guard against integer overflow: a malicious sender could set
+                 uncompressed_size to UINT32_MAX causing +16 to wrap to ~15,
+                 then malloc(16) would be followed by a multi-GB uncompress write. */
+              if (received_uncompressed_size > MAX_ZMQ_FLOW_BUF) {
+                ntop->getTrace()->traceEvent(
+                    TRACE_WARNING,
+                    "ZMQ: dropping message with oversized uncompressed_size claim "
+                    "[%u > %u]",
+                    received_uncompressed_size, MAX_ZMQ_FLOW_BUF);
+                continue;
+              }
               uLen = uncompressed_len =
                   received_uncompressed_size +
                   16; /* We know already the uncompressed size */
+            }
 
             uncompressed = (char*)malloc(uncompressed_len + 1);
 

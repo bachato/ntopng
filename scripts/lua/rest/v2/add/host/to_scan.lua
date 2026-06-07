@@ -23,6 +23,14 @@ if isEmptyString(host) or isEmptyString(scan_type) then
     rest_utils.answer(rest_utils.consts.err.bad_content)
     return
 end
+
+-- Validate that host is a plain IP address or CIDR before passing to nmap,
+-- preventing OS command injection via shell metacharacters in the host parameter.
+local ip_part = host:match("^([^/]+)") or host
+if not isIPv4(ip_part) and not isIPv6(ip_part) then
+    rest_utils.answer(rest_utils.consts.err.bad_content)
+    return
+end
 local result = nil
 local id = nil
 

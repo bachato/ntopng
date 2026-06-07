@@ -1757,23 +1757,38 @@ bool Ntop::checkHTTPAuth(const char* user, const char* password,
 
   if (!password || !password[0]) return false;
 
-  postLen = 100 + strlen(user) + strlen(password);
-  if (!(httpUrl = (char*)calloc(sizeof(char), MAX_HTTP_AUTHENTICATOR_LEN)) ||
-      !(postData = (char*)calloc(sizeof(char), postLen + 1)) ||
-      !(returnData = (char*)calloc(
-            sizeof(char), MAX_HTTP_AUTHENTICATOR_RETURN_DATA_LEN + 1))) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR,
-                                 "HTTP: unable to allocate memory");
-    goto http_auth_out;
+  /* JSON-escape user and password to prevent injection via '"' or '\' in credentials.
+     user is bounded to 32 chars and password to 129, so 2x sizes cover worst case. */
+  {
+    char escaped_user[65] = {}, escaped_password[259] = {};
+    auto json_escape = [](const char* src, char* dst, size_t dst_size) {
+      size_t oi = 0;
+      for (size_t i = 0; src[i] && oi < dst_size - 2; i++) {
+        if (src[i] == '"' || src[i] == '\\') dst[oi++] = '\\';
+        dst[oi++] = src[i];
+      }
+      dst[oi] = '\0';
+    };
+    json_escape(user, escaped_user, sizeof(escaped_user));
+    json_escape(password, escaped_password, sizeof(escaped_password));
+    postLen = 100 + (int)strlen(escaped_user) + (int)strlen(escaped_password);
+    if (!(httpUrl = (char*)calloc(sizeof(char), MAX_HTTP_AUTHENTICATOR_LEN)) ||
+        !(postData = (char*)calloc(sizeof(char), postLen + 1)) ||
+        !(returnData = (char*)calloc(
+              sizeof(char), MAX_HTTP_AUTHENTICATOR_RETURN_DATA_LEN + 1))) {
+      ntop->getTrace()->traceEvent(TRACE_ERROR,
+                                   "HTTP: unable to allocate memory");
+      goto http_auth_out;
+    }
+    ntop->getRedis()->get((char*)PREF_HTTP_AUTHENTICATOR_URL, httpUrl,
+                          MAX_HTTP_AUTHENTICATOR_LEN);
+    if (!httpUrl[0]) {
+      ntop->getTrace()->traceEvent(TRACE_ERROR, "HTTP: no http url set !");
+      goto http_auth_out;
+    }
+    snprintf(postData, postLen, "{\"user\": \"%s\", \"password\": \"%s\"}",
+             escaped_user, escaped_password);
   }
-  ntop->getRedis()->get((char*)PREF_HTTP_AUTHENTICATOR_URL, httpUrl,
-                        MAX_HTTP_AUTHENTICATOR_LEN);
-  if (!httpUrl[0]) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR, "HTTP: no http url set !");
-    goto http_auth_out;
-  }
-  snprintf(postData, postLen, "{\"user\": \"%s\", \"password\": \"%s\"}", user,
-           password);
 
   if (Utils::postHTTPJsonData(NULL,  // no token
                               NULL,  // no digest user

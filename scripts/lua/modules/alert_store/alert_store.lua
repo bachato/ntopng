@@ -415,6 +415,13 @@ function alert_store:build_sql_cond(cond, is_write)
             sql_val = snmp_info[2]
         end
 
+        -- Reject non-numeric interface IDs to prevent SQL injection
+        local num_val = tonumber(sql_val)
+        if not num_val then
+            return "(1 = 0)"
+        end
+        sql_val = tostring(math.floor(num_val))
+
         if self._alert_entity == alert_entities.snmp_device then -- snmp entity
 
             sql_cond = self:get_column_name('port', is_write) .. sql_op .. sql_val
@@ -514,17 +521,18 @@ function alert_store:build_sql_cond(cond, is_write)
 
         -- String
     else
+        local escaped_val = self:_escape(cond.value)
         if cond.op == 'in' then
-            sql_cond = real_field .. ' LIKE ' .. string.format("'%%%s%%'", cond.value)
+            sql_cond = real_field .. ' LIKE ' .. string.format("'%%%s%%'", escaped_val)
         elseif cond.op == 'nin' then
-            sql_cond = real_field .. ' NOT LIKE ' .. string.format("'%%%s%%'", cond.value)
+            sql_cond = real_field .. ' NOT LIKE ' .. string.format("'%%%s%%'", escaped_val)
         elseif cond.op == 'empty' then
             sql_cond = real_field .. ' = ' .. "''"
         elseif cond.op == 'nempty' then
             sql_cond = real_field .. ' <> ' .. "''"
         else
             -- Any other operator
-            sql_cond = string.format("%s %s ('%s')", real_field, sql_op, cond.value)
+            sql_cond = string.format("%s %s ('%s')", real_field, sql_op, escaped_val)
         end
     end
 
