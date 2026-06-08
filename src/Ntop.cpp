@@ -222,8 +222,6 @@ Ntop::Ntop(const char* appName) {
   ntop->getTrace()->traceEvent(TRACE_INFO, "System Timezone offset: %+ld",
                                time_offset);
 
-  initAllowedProtocolPresets();
-
   udp_socket = Utils::openSocket(AF_INET, SOCK_DGRAM, 0, "Ntop UDP");
 
 #ifndef WIN32
@@ -545,6 +543,10 @@ void Ntop::registerPrefs(Prefs* _prefs, bool quick_registration) {
 #ifdef NTOPNG_PRO
   oidcAuth = new (std::nothrow) OIDCAuthenticator();
 #endif
+
+  /* Moved from the constructor to registerPrefs to avoid
+   * loading nDPI when --help or --verify-license is used */
+  initAllowedProtocolPresets();
 
   redis->setInitializationComplete();
 }
