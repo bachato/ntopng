@@ -3889,7 +3889,7 @@ local lang = {
     ["hr_chart_no_data"] = "No high-resolution counter data available for this flow.",
   },
   ["hr_chart"] = {
-    ["title"]           = "High-Resolution Timeseries",
+    ["title"] = "Observability",
   },
   ["flow_devices"] = {
     ["active_sflow"] = "sFlow Counters Exporters",
