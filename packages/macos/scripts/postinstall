@@ -1,0 +1,11 @@
+#!/bin/sh
+
+DATA_DIR=/var/lib/ntopng/
+if [ ! -d "$DATA_DIR" ]; then
+    # Create data directory
+    mkdir $DATA_DIR
+    chmod gou+w $DATA_DIR
+fi
+
+# Enable + start ntopng
+sudo launchctl load -w /Library/LaunchDaemons/org.ntop.ntopng.plist

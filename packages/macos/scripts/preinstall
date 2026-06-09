@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# preinstall: stop ntopng before installing/upgrading
+#
+
+PLIST="/Library/LaunchDaemons/org.ntop.ntopng.plist"
+
+if launchctl list | grep -q "org.ntop.ntopng" 2>/dev/null; then
+    launchctl unload "$PLIST" 2>/dev/null || true
+fi
+
+exit 0
