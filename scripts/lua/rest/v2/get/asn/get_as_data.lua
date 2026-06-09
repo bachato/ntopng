@@ -103,7 +103,8 @@ for key, value in pairs(ases_info or {}) do
         end
         record["asname"] = value["asname"]
     else
-        record["asname"] = ntop.getASNameFromASN(tonumber(record["asn"]))
+        local as_info = ntop.getASNameFromASN(tonumber(record["asn"]))
+        record["asname"] = as_info and (as_info.description or as_info.handle) or nil
     end
 
     if asn == 0 then

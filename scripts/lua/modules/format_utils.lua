@@ -6,6 +6,13 @@ local format_utils = {}
 
 local clock_start = os.clock()
 
+-- Returns the AS display name (description, or handle as fallback)
+local function getASDisplayName(asn)
+   local info = ntop.getASNameFromASN(asn)
+   if not info then return nil end
+   return info.description or info.handle
+end
+
 function format_utils.formatBgpBmpInfo(bgp_data)
    if bgp_data == nil then return "&nbsp;" end
 
@@ -34,7 +41,7 @@ function format_utils.formatBgpBmpInfo(bgp_data)
       for _, peer in ipairs(peer_list) do
          out[#out + 1] = "<td>"
 	    .. "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. peer.info.asn
-	    .. "\">" .. peer.info.asn .. " (" .. shortenString(ntop.getASNameFromASN(tonumber(peer.info.asn)), max_len) .. ")</A>"
+	    .. "\">" .. peer.info.asn .. " (" .. shortenString(getASDisplayName(tonumber(peer.info.asn)) or "", max_len) .. ")</A>"
       end
       out[#out + 1] = "</tr>"
 
@@ -54,7 +61,7 @@ function format_utils.formatBgpBmpInfo(bgp_data)
             local parts = {}
             for _, asn in ipairs(peer.info["as_path"]) do
                parts[#parts + 1] = "<A HREF=\"" .. ntop.getHttpPrefix() .. "/lua/hosts_stats.lua?asn=" .. asn
-                  .. "\">" .. asn .. " (" .. shortenString(ntop.getASNameFromASN(tonumber(asn)), max_len) .. ")</A>"
+                  .. "\">" .. asn .. " (" .. shortenString(getASDisplayName(tonumber(asn)) or "", max_len) .. ")</A>"
             end
             as_path_string = (#parts == 0) and "Local" or table.concat(parts, "<li>")
          end
@@ -912,7 +919,7 @@ function format_utils.formatASN(asn, short_version, shorten_stringing)
 	    name = as_info.asname
 	 else
 	    -- if no asn info is present, curl to get ASN name
-	    name = ntop.getASNameFromASN(asn)
+	    name = getASDisplayName(asn)
 	 end
 	 if (shorten_stringing) then
 	    name = shortenString(name)
@@ -960,7 +967,7 @@ function format_utils.formatASN_transit(v, peer_as, ip, is_client_as)
    -- Process peer/transit ASN if valid, non-zero, and different from main ASN
    if peer_as and peer_as ~= 0 and v ~= peer_as then
       local peer_asn = string.format('<A HREF="%s/lua/hosts_stats.lua?asn=%s">%s', ntop.getHttpPrefix(), peer_as, peer_as)
-      local peer_as_name = shortenString(ntop.getASNameFromASN(peer_as), max_len)
+      local peer_as_name = shortenString(getASDisplayName(peer_as) or "", max_len)
 
       local via = ""
       if peer_as_name and peer_as_name ~= "" then

@@ -86,7 +86,8 @@ function formatASN(v, peer_as, ip, is_client_as)
 
       local peer_as_name
       if peer_as and tonumber(peer_as) then
-         peer_as_name = shortenString(ntop.getASNameFromASN(tonumber(peer_as)), max_len)
+         local as_info = ntop.getASNameFromASN(tonumber(peer_as))
+         peer_as_name = shortenString(as_info and (as_info.description or as_info.handle) or "", max_len)
       end
 
       if (peer_as_name == nil) then

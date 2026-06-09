@@ -235,9 +235,10 @@ if (not isEmptyString(country)) then
 end
 
 if (not isEmptyString(asn)) then
+    local as_info = ntop.getASNameFromASN(tonumber(asn)) or {}
     local as_filter = {
         {key = "asn", value = "", label = i18n("all")},
-        {key = "asn", value = asn, label = ntop.getASNameFromASN(tonumber(asn))}
+        {key = "asn", value = asn, label = as_info.description or as_info.handle or nil}
     }
     rsp[#rsp + 1] = {
         action = "asn",

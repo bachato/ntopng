@@ -2319,3 +2319,25 @@ ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' MODIFY COLUMN `PROBE_IP` COMMENT 
 ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' MODIFY COLUMN `INPUT_SNMP` COMMENT 'SNMP input interface index from NetFlow/IPFIX';
 @
 ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' MODIFY COLUMN `OUTPUT_SNMP` COMMENT 'SNMP output interface index from NetFlow/IPFIX';
+
+@
+
+/* AS data (local, non replicated) populated on startup */
+CREATE TABLE IF NOT EXISTS `asn_info` (
+  `asn`          UInt32,
+  `handle`       String,
+  `description`  String,
+  `country_code` String
+) ENGINE = ReplacingMergeTree()
+  PRIMARY KEY (asn)
+  ORDER BY (asn);
+@
+ALTER TABLE `asn_info` MODIFY COMMENT 'AS (Autonomous System) reference data loaded from geoip/as.csv on startup. Maps ASN to handle, description, and ISO 3166-1 country code. Refreshed on every ntopng startup via TRUNCATE + bulk INSERT.';
+@
+ALTER TABLE `asn_info` MODIFY COLUMN `asn` COMMENT 'Autonomous System Number (matches flows.SRC_ASN / DST_ASN)';
+@
+ALTER TABLE `asn_info` MODIFY COLUMN `handle` COMMENT 'BGP handle / RIR registry object name for this AS (e.g. LVLT-1)';
+@
+ALTER TABLE `asn_info` MODIFY COLUMN `description` COMMENT 'Human-readable organization name for this AS';
+@
+ALTER TABLE `asn_info` MODIFY COLUMN `country_code` COMMENT 'ISO 3166-1 alpha-2 country code of the AS registrant';

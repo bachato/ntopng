@@ -402,12 +402,11 @@ void Geolocation::testme() {
   for (u_int32_t i = 0; i < sizeof(ips) / sizeof(char*); i++) {
     char* ip = ips[i];
 
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "Geolocating [%s]", ip);
+    ntop->getTrace()->traceEvent(TRACE_INFO, "Geolocating [%s]", ip);
     test.set(ip);
 
     if (test.get_sockaddr(&sa, &sa_len)) {
-      ntop->getTrace()->traceEvent(TRACE_NORMAL,
-                                   "Autonomous System Information", ip);
+      ntop->getTrace()->traceEvent(TRACE_NORMAL, "Autonomous System Information", ip);
 
       /* TEST Autonomous Systems database */
       result = MMDB_lookup_sockaddr(&geo_ip_asn_mmdb, sa, &mmdb_error);
@@ -431,8 +430,7 @@ void Geolocation::testme() {
                                      "autonomous_system_number", NULL)) ==
             MMDB_SUCCESS) {
           if (entry_data.has_data && entry_data.type == MMDB_DATA_TYPE_UINT32)
-            ntop->getTrace()->traceEvent(TRACE_NORMAL, "ASN: %d",
-                                         entry_data.uint32);
+            ntop->getTrace()->traceEvent(TRACE_NORMAL, "ASN: %d", entry_data.uint32);
 
         } else
           ntop->getTrace()->traceEvent(
@@ -448,8 +446,7 @@ void Geolocation::testme() {
 
             if ((org = (char*)calloc(1, entry_data.data_size + 1))) {
               memcpy(org, entry_data.utf8_string, entry_data.data_size);
-              ntop->getTrace()->traceEvent(TRACE_NORMAL, "Organization: %s",
-                                           org);
+              ntop->getTrace()->traceEvent(TRACE_NORMAL, "Organization: %s", org);
               free(org);
             }
           }
@@ -461,7 +458,6 @@ void Geolocation::testme() {
               MMDB_strerror(status));
       }
 
-      /* TEST City database */
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "City Information", ip);
 
       result = MMDB_lookup_sockaddr(&geo_ip_city_mmdb, sa, &mmdb_error);
@@ -491,19 +487,71 @@ void Geolocation::testme() {
 
 /* *************************************** */
 
-bool Geolocation::getASName(u_int32_t asn, char* asname, u_int asname_len) {
+/* Callback for getASName(): reads handle (col 0) and description (col 1) from asn_info */
+static int asn_info_cb(std::vector<std::string>* row,
+                       std::vector<std::string>* /* columns */,
+                       void* user_data) {
+  asn_info_query_ctx_t* out = (asn_info_query_ctx_t*)user_data;
+  if (!out->found && row->size() >= 2) {
+    snprintf(out->handle_buf, out->handle_len, "%s", (*row)[0].c_str());
+    snprintf(out->desc_buf,   out->desc_len,   "%s", (*row)[1].c_str());
+    out->found = true;
+  }
+  return 0;
+}
+
+bool Geolocation::getASName(u_int32_t asn, char* handle, u_int handle_len,
+                            char* description, u_int description_len) {
   char buf[256], val[16], json[2048];
   long rc;
 
   snprintf(val, sizeof(val), "%u", asn);
 
-  if (ntop->getRedis()->hashGet(AS_NANE_CACHE, val, asname, asname_len) == 0) {
-    return (true); /* Found on cache */
+  //ntop->getTrace()->traceEvent(TRACE_NORMAL, "ASN Lookup (%u)", asn);
+
+  /* Redis cache (AS data stored as "handle|description", old entries have just "description") */
+  char cached[512];
+  if (ntop->getRedis()->hashGet(AS_NAME_CACHE, val, cached, sizeof(cached)) == 0) {
+    if (cached[0] == '\0') return (false); /* previously not found */
+    char* pipe = strchr(cached, '|');
+    if (pipe) {
+      snprintf(handle,      handle_len,      "%.*s", (int)(pipe - cached), cached);
+      snprintf(description, description_len, "%s",   pipe + 1);
+    } else {
+      snprintf(handle,      handle_len,      "%s", cached);
+      snprintf(description, description_len, "%s", cached);
+    }
+
+    //ntop->getTrace()->traceEvent(TRACE_NORMAL, "AS INFO From Redis [%s]", cached);
+
+    return (true);
   }
 
-  snprintf(buf, sizeof(buf),
-           "https://stat.ripe.net/data/as-overview/data.json?resource=AS%u",
-           asn);
+  /* Check asn_info table on DB before checking RIPE */
+  NetworkInterface* iface = ntop->getFirstInterface();
+  if (iface) {
+    DB* db = iface->getFlowsDB(); /* asn_info lives only in ClickHouse */
+    if (db) {
+      asn_info_query_ctx_t ctx = {handle, handle_len, description, description_len, false};
+      snprintf(buf, sizeof(buf),
+               "SELECT handle, description FROM asn_info WHERE asn = %u LIMIT 1", asn);
+      db->execSQLQuery(buf, true, true, asn_info_cb, &ctx);
+      if (ctx.found) {
+        /* Note: if either field is empty, use the other */
+        if (handle[0] == '\0')      snprintf(handle,      handle_len,      "%s", description);
+        if (description[0] == '\0') snprintf(description, description_len, "%s", handle);
+        snprintf(cached, sizeof(cached), "%s|%s", handle, description);
+        ntop->getRedis()->hashSet(AS_NAME_CACHE, val, cached);
+
+        //ntop->getTrace()->traceEvent(TRACE_NORMAL, "AS INFO From DB [%s]", cached);
+
+        return (true);
+      }
+    }
+  }
+
+  /* Last resort: get AS info from RIPE stat */
+  snprintf(buf, sizeof(buf), "https://stat.ripe.net/data/as-overview/data.json?resource=AS%u", asn);
   json[0] = '\0';
   rc = Utils::httpGet(buf, NULL, NULL, NULL, 5 /* connect timeout */,
                       10 /* download timeout */, json, sizeof(json));
@@ -533,10 +581,16 @@ bool Geolocation::getASName(u_int32_t asn, char* asname, u_int asname_len) {
           res = &res[1]; /* Skip space */
 #endif
 
-        snprintf(asname, asname_len, "%s", res);
+        /* RIPE provides a single holder string — use it for both fields */
+        snprintf(description, description_len, "%s", res);
+        snprintf(handle,      handle_len,      "%s", res);
 
-        ntop->getRedis()->hashSet(AS_NANE_CACHE, val, asname);
+        snprintf(cached, sizeof(cached), "%s|%s", handle, description);
+        ntop->getRedis()->hashSet(AS_NAME_CACHE, val, cached);
         json_object_put(o);
+
+        //ntop->getTrace()->traceEvent(TRACE_NORMAL, "AS INFO From RIPE [%s]", cached);
+
         return (true);
       }
 
@@ -545,7 +599,7 @@ bool Geolocation::getASName(u_int32_t asn, char* asname, u_int asname_len) {
   }
 
   /* Not found */
-  ntop->getRedis()->hashSet(AS_NANE_CACHE, val, "");
+  ntop->getRedis()->hashSet(AS_NAME_CACHE, val, "");
 
   return (false);
 }

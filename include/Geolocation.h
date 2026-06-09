@@ -24,6 +24,14 @@
 
 #include "ntop_includes.h"
 
+struct asn_info_query_ctx_t {
+  char* handle_buf;
+  u_int handle_len;
+  char* desc_buf;
+  u_int desc_len;
+  bool found;
+};
+
 class Geolocation {
  private:
 #ifdef HAVE_MAXMINDDB
@@ -52,7 +60,8 @@ class Geolocation {
   bool getInfo(IpAddress* addr, char** continent_code, char** country_code,
                char** city, float* latitude, float* longitude);
   static void freeInfo(char** continent_code, char** country_code, char** city);
-  bool getASName(u_int32_t asn, char* asname, u_int asname_len);
+  bool getASName(u_int32_t asn, char* handle, u_int handle_len,
+                 char* description, u_int description_len);
 };
 
 #endif /* _GEOLOCATION_H_ */

@@ -2636,3 +2636,25 @@ ALTER TABLE `flow_l4_map` MODIFY COMMENT 'Startup-populated lookup: flows.PROTOC
 ALTER TABLE `flow_l4_map` MODIFY COLUMN `PROTOCOL` COMMENT 'IANA IP protocol number (matches flows.PROTOCOL, e.g. 6=TCP 17=UDP 1=ICMP)';
 @
 ALTER TABLE `flow_l4_map` MODIFY COLUMN `NAME` COMMENT 'Protocol name (e.g. "TCP", "UDP", "ICMP")';
+
+@
+
+/* AS data populated on startup */
+CREATE TABLE IF NOT EXISTS `asn_info` (
+  `asn`          UInt32,
+  `handle`       String,
+  `description`  String,
+  `country_code` String
+) ENGINE = ReplacingMergeTree()
+  PRIMARY KEY (asn)
+  ORDER BY (asn);
+@
+ALTER TABLE `asn_info` MODIFY COMMENT 'AS (Autonomous System) data loaded from geoip/as.csv on startup. Maps ASN to handle, description, and ISO 3166-1 country code. Refreshed on every ntopng startup via TRUNCATE + bulk INSERT.';
+@
+ALTER TABLE `asn_info` MODIFY COLUMN `asn` COMMENT 'Autonomous System Number (matches flows.SRC_ASN / DST_ASN)';
+@
+ALTER TABLE `asn_info` MODIFY COLUMN `handle` COMMENT 'BGP handle / RIR registry object name for this AS (e.g. LVLT-1)';
+@
+ALTER TABLE `asn_info` MODIFY COLUMN `description` COMMENT 'Human-readable organization name for this AS';
+@
+ALTER TABLE `asn_info` MODIFY COLUMN `country_code` COMMENT 'ISO 3166-1 alpha-2 country code of the AS registrant';

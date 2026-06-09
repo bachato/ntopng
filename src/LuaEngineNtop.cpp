@@ -8638,20 +8638,23 @@ static int ntop_get_asn_name(lua_State* vm) {
 
 /* ****************************************** */
 
-/* @brief Returns the organization name for a given autonomous system number.  Lua: ntop.getASNameFromASN(asn_number) → string */
+/* @brief Returns handle and description for a given ASN. Lua: ntop.getASNameFromASN(asn_number) → table{handle, description} or nil */
 static int ntop_get_as_name_from_asn(lua_State* vm) {
   u_int32_t asn;
-  char as_name[128];
+  char handle[128], description[256];
 
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
   else
     asn = (u_int32_t)lua_tonumber(vm, 1);
 
-  if (ntop->getGeolocation()->getASName(asn, as_name, sizeof(as_name)))
-    lua_pushstring(vm, as_name);
-  else
+  if (ntop->getGeolocation()->getASName(asn, handle, sizeof(handle), description, sizeof(description))) {
+    lua_newtable(vm);
+    lua_push_str_table_entry(vm, "handle",      handle);
+    lua_push_str_table_entry(vm, "description", description);
+  } else {
     lua_pushnil(vm);
+  }
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
