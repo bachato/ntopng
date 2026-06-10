@@ -52,6 +52,7 @@
 import { ref, watch, onMounted } from "vue";
 import { ntopng_utility, ntopng_url_manager } from "../services/context/ntopng_globals_services.js";
 import { default as Loading } from "./loading.vue";
+import { default as DataUtils } from "../utilities/data-utils.js";
 import { default as TimeseriesChart } from "./timeseries-chart.vue";
 
 const props = defineProps({
@@ -156,10 +157,19 @@ async function fetchTopData() {
  * @returns {string}  Human-readable label.
  */
 function entityLabel(el) {
-    return el.label || el.name || el.description ||
-        (el.exporter_ip && el.interface_id != null ? `${el.exporter_ip}:${el.interface_id}` : null) ||
-        (el.asn != null ? `ASN ${el.asn}` : null) ||
-        el.exporter_ip || String(el.id ?? '');
+    let label = el.label || el.name || el.description || el.id || '';
+    if (el.asn != null) {
+        // Top AS, the name is asname, if it's empty use the ASN
+        label = (DataUtils.isEmptyString(el.asname)) ? `${el.asn}` : `${el.asname}`
+    } else if (el.exporter_ip && (el.interface_id != null)) {
+        // Top Exporter+Interface, combine them
+        label = `${el.exporter_ip}:${el.interface_id}`
+    } else if (el.exporter_ip) {
+        // If only the exporter, use the exporter
+        label = el.exporter_ip
+    }
+
+    return label
 }
 
 /**
@@ -218,7 +228,6 @@ function buildQueries(topData) {
         /* Stable query ID: <componentId>_top_<index> */
         const qid = `${props.id}_top_${i}`;
         queryLabels[qid] = entityLabel(el) || qid;
-
         queries.push({
             id:       qid,
             ts_schema,
