@@ -532,8 +532,8 @@ function driver:timeseries_query(options)
       options.epoch_end = last_update
    end
 
-   local epoch_end = options.epoch_end - options.schema_info.options.step
-   local epoch_begin = options.epoch_begin - options.schema_info.options.step
+   local epoch_end = options.epoch_end
+   local epoch_begin = options.epoch_begin
    -- Query rrd to get the data
    -- tprint("rrdtool fetch ".. rrdfile.. " " .. getConsolidationFunction(schema) .. " -s ".. tstart .. " -e " .. tend)
    local consolidation = getConsolidationFunction(options.schema_info)
