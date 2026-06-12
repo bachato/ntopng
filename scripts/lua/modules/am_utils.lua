@@ -924,20 +924,14 @@ function am_utils.run_am_check(when, all_hosts, granularity)
     local str_granularity = am_utils.getAmGranularitySuffix(granularity)
     local am_schema = am_utils.getAmSchemaForGranularity(granularity)
 
+    do_trace = toboolean(ntop.getCache("ntopng.prefs.trace.active_monitoring"))
     when = when - (when % 60)
 
-    if (do_trace) then
-        print("[ActiveMonitoring] Script started\n")
-    end
-
-    if (do_trace) then
-        io.write(debug.traceback())
-    end
+    if do_trace then print("[ActiveMonitoring] Script started\n") end
+    -- if (do_trace) then io.write(debug.traceback()) end
 
     if table.empty(all_hosts) then
-        if (do_trace) then
-            print("[ActiveMonitoring] Nothing to do [" .. granularity .. "]\n")
-        end
+        if (do_trace) then print("[ActiveMonitoring] Nothing to do [" .. granularity .. "]\n") end
         return
     end
 
@@ -1008,8 +1002,8 @@ function am_utils.run_am_check(when, all_hosts, granularity)
                 value = value
             }
             if (do_trace) then
-                print("[Writing AM timeseries ")
-                -- tprint(ts_data)
+                print("[Writing AM timeseries] schema=" .. am_schema .. " host=" .. tostring(ts_data.host) ..
+                    " metric=" .. tostring(ts_data.metric) .. " value=" .. tostring(ts_data.value) .. "\n")
             end
 
             ts_utils.append(am_schema, ts_data, when)
@@ -1024,6 +1018,11 @@ function am_utils.run_am_check(when, all_hosts, granularity)
                     speed = info.upload_speed * 1000000 / 8
                 }
 
+                if (do_trace) then
+                    print("[AM upload_speed] " .. key .. " upload_speed=" .. tostring(info.upload_speed) ..
+                        " Mbps => speed=" .. tostring(ts_data.speed) .. " Bps [schema: " .. _am_schema .. "]\n")
+                end
+
                 ts_utils.append(_am_schema, ts_data, when)
             end
 
@@ -1035,6 +1034,11 @@ function am_utils.run_am_check(when, all_hosts, granularity)
                     host = host.host,
                     latency = info.latency
                 }
+
+                if (do_trace) then
+                    print("[AM latency] " .. key .. " latency=" .. tostring(info.latency) ..
+                        " ms [schema: " .. _am_schema .. "]\n")
+                end
 
                 ts_utils.append(_am_schema, ts_data, when)
             end
@@ -1068,9 +1072,8 @@ function am_utils.run_am_check(when, all_hosts, granularity)
         local ip = host.host
 
         if (hosts_am[key] == nil) then
-            if (do_trace) then
-                print("[TRIGGER] Host " .. ip .. "/" .. key .. " is unreacheable\n")
-            end
+            if (do_trace) then print("[TRIGGER] Host " .. ip .. "/" .. key .. " is unreacheable\n") end
+
             local resolved_host = resolved_unreachable_hosts[key] or ip
 
             am_utils.triggerAlert(resolved_host, key, 0, 0, granularity)
@@ -1088,9 +1091,7 @@ function am_utils.run_am_check(when, all_hosts, granularity)
         end
     end
 
-    if (do_trace) then
-        print("[ActiveMonitoring] Script is over\n")
-    end
+    if (do_trace) then print("[ActiveMonitoring] Script is over\n") end
 end
 
 -- ##############################################
