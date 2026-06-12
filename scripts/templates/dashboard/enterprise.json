@@ -84,6 +84,8 @@
 			"i18n_name" : "interfaces_traffic",
 			"width" : 8,
 			"height" : 4,
+            "time_window" : "hour",
+		    "time_offset" : "",
 			"params" : {
 				"url" : "/lua/pro/rest/v2/get/timeseries/ts_multi.lua",
 				"url_params" : { },
@@ -121,6 +123,8 @@
 			"component" : "timeseries",
 			"id" : "top_applications_chart",
 			"i18n_name" : "top_l7_proto",
+            "time_window" : "hour",
+		    "time_offset" : "",
 			"width" : 8,
 			"height" : 4,
 			"requires" : {

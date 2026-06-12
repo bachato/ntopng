@@ -82,6 +82,8 @@
 			"component" : "timeseries",
 			"id" : "single_traffic_chart",
 			"i18n_name" : "interface_traffic",
+            "time_window" : "hour",
+		    "time_offset" : "",
 			"width" : 12,
 			"height" : 6,
 			"params" : {
