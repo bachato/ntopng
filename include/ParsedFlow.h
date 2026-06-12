@@ -37,9 +37,9 @@ class ParsedFlow : public ParsedFlowCore, public ParsedeBPF {
   char *tls_server_name, *bittorrent_hash, *tcp_fingerprint;
   char* ja4c_hash;
   char* flow_risk_info;
-  char* ot_info;
   char* external_alert;
   char* l7_json;
+  char* ot_info;
   IpAddress next_hop;
   char *smtp_rcp_to, *smtp_mail_from;
   u_int32_t src_ip_addr_pre_nat, dst_ip_addr_pre_nat, src_ip_addr_post_nat,

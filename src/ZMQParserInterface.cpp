@@ -159,6 +159,9 @@ ZMQParserInterface::ZMQParserInterface(const char* endpoint,
   addMapping("TCP_STATS_SRC_TO_DST", TCP_STATS_SRC_TO_DST, NTOP_PEN);
   addMapping("TCP_STATS_DST_TO_SRC", TCP_STATS_DST_TO_SRC, NTOP_PEN);
   addMapping("OT_INFO", OT_INFO, NTOP_PEN);
+  addMapping("MODBUS_INFO", MODBUS_INFO, NTOP_PEN);
+  addMapping("PROFINET_INFO", PROFINET_INFO, NTOP_PEN);
+  addMapping("S7_INFO", S7_INFO, NTOP_PEN);
   addMapping("SRC_BGP_INFO", SRC_BGP_INFO, NTOP_PEN);
   addMapping("DST_BGP_INFO", DST_BGP_INFO, NTOP_PEN);
   addMapping("HR_SRC_TO_DST_BYTES", HR_SRC_TO_DST_BYTES, NTOP_PEN);
@@ -1343,6 +1346,9 @@ bool ZMQParserInterface::parsePENNtopField(ParsedFlow* const flow,
     if (value->string && value->string[0]) flow->setRiskInfo(value->string);
     break;
 
+  case S7_INFO:
+  case PROFINET_INFO:
+  case MODBUS_INFO:
   case OT_INFO:
     flow->setOTInfo(value->string);
     break;
