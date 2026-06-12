@@ -32,6 +32,20 @@ local historical_flow_utils = require("historical_flow_utils")
 
 local HR_SLOT_SECONDS = 15
 
+-- Maximum number of series returned when group_by is active.
+local GROUPBY_MAX_SERIES = 10
+
+-- Maps group_by tag values to ClickHouse column/expression info.
+-- expr  — ClickHouse expression producing the group key value (string or number).
+-- resolve(v) — optional Lua function mapping the raw DB value to a display name.
+local GROUPBY_TO_COL = {
+   l7proto     = { expr = "L7_PROTO",        resolve = function(v) return interface.getnDPIProtoName(tonumber(v)) or v end },
+   l7cat       = { expr = "L7_CATEGORY",     resolve = function(v) return interface.getnDPICategoryName(tonumber(v)) or v end },
+   l4proto     = { expr = "multiIf(PROTOCOL=6,'TCP',PROTOCOL=17,'UDP',PROTOCOL=1,'ICMP',PROTOCOL=58,'ICMPv6',PROTOCOL=132,'SCTP',toString(PROTOCOL))" },
+   cli_asn     = { expr = "toString(SRC_ASN)" },
+   srv_asn     = { expr = "toString(DST_ASN)" },
+}
+
 -- Maps schema tag names to flows table column names
 local TAG_TO_COLUMN = {
    ifid = "INTERFACE_ID",
@@ -168,7 +182,7 @@ end
 -- tags["ifid"] is a plain interface ID, all other filters arrive as "value;op"
 local function build_agg_where(tags)
    -- Collect non-empty tags, skip internal/epoch fields handled elsewhere.
-   local skip = { epoch_begin = true, epoch_end = true }
+   local skip = { epoch_begin = true, epoch_end = true, group_by = true }
    local filters = {}
    for key, val in pairs(tags) do
       local s = tostring(val or "")
@@ -297,8 +311,131 @@ end
 
 -- ##############################################
 
+--! @brief Query HR timeseries grouped by a single dimension (group_by tag).
+-- Returns one series per unique group value (top GROUPBY_MAX_SERIES by total bytes).
+-- Each series contains total (SRC2DST + DST2SRC) bytes per time slot.
+function driver:query_grouped(schema, tstart, tend, tags, options)
+   local gb_key = tags.group_by
+   local gb_def = GROUPBY_TO_COL[gb_key]
+   if not gb_def then
+      traceError(TRACE_WARNING, TRACE_CONSOLE,
+         "[ClickHouse HR] unsupported group_by value: " .. tostring(gb_key))
+      return nil
+   end
+
+   local time_step = ts_common.calculateSampledTimeStep(HR_SLOT_SECONDS, tstart, tend, options)
+   local sts       = slot_ts_expr()
+   local tw        = build_agg_where(tags)   -- group_by is already skipped in build_agg_where
+   local join_arr  = "HR_SRC2DST_BYTES"
+
+   local sql = string.format(
+      "SELECT toString(%s) AS group_key, intDiv(%s, %d) * %d AS t, "
+      .. "sum(arrayElement(HR_SRC2DST_BYTES, slot) + arrayElement(HR_DST2SRC_BYTES, slot)) AS bytes "
+      .. "FROM `%s`.`flows` "
+      .. "ARRAY JOIN arrayEnumerate(%s) AS slot "
+      .. "WHERE length(%s) > 0%s "
+      .. "AND FIRST_SEEN <= %d AND LAST_SEEN >= %d "
+      .. "AND %s BETWEEN %d AND %d "
+      .. "GROUP BY group_key, t ORDER BY group_key, t ASC",
+      gb_def.expr,
+      sts, time_step, time_step,
+      ch_escape(self.db),
+      ch_escape(join_arr), ch_escape(join_arr), tw,
+      tend, tstart,
+      sts, tstart, tend)
+
+   local data = ch_query(sql)
+
+   -- Compute per-group totals for ranking and collect row lists.
+   local groups_rows  = {}   -- group_key -> list of { t, bytes }
+   local groups_total = {}   -- group_key -> total bytes
+
+   if data and #data > 0 then
+      for _, row in ipairs(data) do
+         local gk = tostring(row.group_key or "")
+         if gk == "" or gk == "nil" then gk = "?" end
+         if not groups_rows[gk] then
+            groups_rows[gk]  = {}
+            groups_total[gk] = 0
+         end
+         local b = tonumber(row.bytes) or 0
+         groups_rows[gk][#groups_rows[gk]+1] = { t = tonumber(row.t), bytes = b }
+         groups_total[gk] = groups_total[gk] + b
+      end
+   end
+
+   -- Sort by total bytes descending, keep top GROUPBY_MAX_SERIES.
+   local sorted_keys = {}
+   for k in pairs(groups_total) do sorted_keys[#sorted_keys+1] = k end
+   table.sort(sorted_keys, function(a, b) return groups_total[a] > groups_total[b] end)
+
+   -- Build time-aligned series for each top group.
+   local series = {}
+   for rank, gk in ipairs(sorted_keys) do
+      if rank > GROUPBY_MAX_SERIES then break end
+
+      local display_name = gk
+      if gb_def.resolve then
+         display_name = gb_def.resolve(gk) or gk
+      end
+
+      -- Index t -> bytes for this group.
+      local t_idx = {}
+      for _, pt in ipairs(groups_rows[gk]) do
+         if pt.t then t_idx[pt.t] = (t_idx[pt.t] or 0) + pt.bytes end
+      end
+
+      -- Align the start to the same intDiv(slot_ts, time_step)*time_step boundary the DB uses,
+      -- so hash-map lookups hit rather than consistently missing due to tstart not being on a boundary.
+      local t0 = math.floor(tstart / time_step) * time_step
+      local arr       = {}
+      local expected_t = t0
+      local idx        = 1
+      while (tend - expected_t) >= 0 do
+         if (not options.fill_series) and (expected_t > os.time()) then break end
+         arr[idx] = t_idx[expected_t] or options.fill_value
+         idx        = idx + 1
+         expected_t = expected_t + time_step
+      end
+
+      local serie_stats = {}
+      if options.calculate_stats then
+         local s  = ts_common.calculateStatistics(arr, time_step, tend - tstart,
+                       schema.options.metrics_type)
+         local mm = ts_common.calculateMinMax(arr)
+         serie_stats = table.merge(s or {}, mm or {})
+      end
+
+      series[#series+1] = { id = display_name, data = arr, statistics = serie_stats }
+   end
+
+   local count = (series[1] and #series[1].data) or 0
+
+   return {
+      metadata = {
+         epoch_begin = math.floor(tstart / time_step) * time_step,
+         epoch_end   = tend,
+         epoch_step  = time_step,
+         num_point   = count,
+         schema      = schema.name,
+         query       = tags,
+      },
+      series             = series,
+      source_aggregation = "raw",
+      additional_series  = {},
+   }
+end
+
+-- ##############################################
+
 --! @brief Query HR timeseries data from the flows table.
 function driver:query(schema, tstart, tend, tags, options)
+   -- Grouped query: one series per dimension value.
+   if schema.options and schema.options.agg_context
+         and not isEmptyString(tostring(tags.group_by or "")) then
+      return self:query_grouped(schema, tstart, tend, tags, options)
+   end
+
    local time_step = ts_common.calculateSampledTimeStep(
       HR_SLOT_SECONDS, tstart, tend, options)
    local sts = slot_ts_expr()

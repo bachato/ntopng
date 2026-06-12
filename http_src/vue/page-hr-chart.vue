@@ -15,6 +15,16 @@
             <AlertInfo id="alert_info" :global="true" ref="alert_info"></AlertInfo>
             <!-- Keep in sync allowed_filter_ids with flow_aggr in http_src/constants/metrics-consts.js -->
             <RangePicker v-if="mount_range_picker" ref="range_picker" id="range_picker" :show_date_picker="false">
+                <template #filter_begin>
+                    <select class="form-select w-auto flex-shrink-0" :value="group_by_value" @change="on_group_by_change">
+                        <option value="">{{ _i18n("hr_chart.group_by_none") }}</option>
+                        <option value="l7proto">{{ _i18n("hr_chart.group_by_l7proto") }}</option>
+                        <option value="l7cat">{{ _i18n("hr_chart.group_by_l7cat") }}</option>
+                        <option value="l4proto">{{ _i18n("hr_chart.group_by_l4proto") }}</option>
+                        <option value="cli_asn">{{ _i18n("hr_chart.group_by_cli_asn") }}</option>
+                        <option value="srv_asn">{{ _i18n("hr_chart.group_by_srv_asn") }}</option>
+                    </select>
+                </template>
             </RangePicker>
         </div>
     </div>
@@ -29,15 +39,28 @@ import { default as AlertInfo } from "./alert-info.vue";
 import { default as RangePicker } from "./range-picker.vue";
 
 const props = defineProps({ context: Object });
+const _i18n = (t) => i18n(t);
 
 const mount_range_picker = ref(false);
+const group_by_value = ref("");
 
-/* Returns a string of all URL params except epoch, used to detect filter changes. */
-function get_filter_url_params() {
-    const params = new URLSearchParams(ntopng_url_manager.get_url_params());
-    params.delete("epoch_begin");
-    params.delete("epoch_end");
-    return params.toString();
+/* Clear PageStats params so PageStats.init() updates the ts_query with current URL state. */
+function clear_page_stats_params() {
+    ntopng_url_manager.delete_params([
+        "timeseries_groups", "timeseries_groups_mode", "ts_query", "ts_schema"
+    ]);
+}
+
+function on_group_by_change(event) {
+    const val = event.target.value;
+    if (val) {
+        ntopng_url_manager.set_key_to_url("group_by", val);
+    } else {
+        ntopng_url_manager.delete_params(["group_by"]);
+    }
+    group_by_value.value = val;
+    clear_page_stats_params();
+    ntopng_url_manager.reload_url();
 }
 
 onBeforeMount(() => {
@@ -45,13 +68,14 @@ onBeforeMount(() => {
     if (ifid != null && !ntopng_url_manager.get_url_entry("ifid")) {
         ntopng_url_manager.set_key_to_url("ifid", String(ifid));
     }
+    group_by_value.value = ntopng_url_manager.get_url_entry("group_by") || "";
 });
 
 onMounted(async () => {
     mount_range_picker.value = true;
     await ntopng_sync.on_ready("range_picker");
 
-    /* Reload the page when filter tags change so hr_chart.lua can pass the updated values to drawNewGraphs. 
+    /* Reload the page when filter tags change so hr_chart.lua can pass the updated values to drawNewGraphs.
      * Epoch-only changes are handled by the PageStats date picker without a reload. */
     /* Subscribe to FILTERS_CHANGE so we fire after RangePicker's reload_status has
      * already written the new filter values to the URL. */
@@ -59,9 +83,7 @@ onMounted(async () => {
         /* Clear PageStats-owned URL params so PageStats.init() calls
          * get_default_timeseries_groups() and getTsQuery() picks up the new
          * filter values via pass_url_filters. */
-        ntopng_url_manager.delete_params([
-            "timeseries_groups", "timeseries_groups_mode", "ts_query", "ts_schema"
-        ]);
+        clear_page_stats_params();
         ntopng_url_manager.reload_url();
     });
 });

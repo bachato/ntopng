@@ -107,7 +107,7 @@ local function get_schema_info(schema_name)
     if prefix then
         local mod = get_handler_module(prefix)
         if mod and mod.getTimeseries then
-            local ok, ts_list = pcall(mod.getTimeseries, {}, {})
+            local ok, ts_list = pcall(mod.getTimeseries, {}, { emptyEpoch = true })
             if ok and ts_list then
                 for _, entry in ipairs(ts_list) do
                     if entry.schema == schema_name then

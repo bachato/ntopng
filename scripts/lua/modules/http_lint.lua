@@ -1793,6 +1793,7 @@ local known_parameters = {
    ["select_values_clause"] = validateUnquoted,
    ["approx_search"] = validateBool,
    ["group_by_clause"] = validateUnquoted,
+   ["group_by"] = validateSingleWord, -- HR chart group-by dimension (l7proto, l4proto, cli_asn, ...)
    ["order_by_clause"] = validateUnquoted,
    ["alert_family"] = validateAlertFamily, -- Alert family validation
    ["where_clause"] = {whereCleanup, validateUnchecked}, -- previously defined as validateUnquoted

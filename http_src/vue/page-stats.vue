@@ -746,13 +746,19 @@ function set_stats_rows(ts_charts_options, timeseries_groups) {
             let s_metadata = ts_group.metric.timeseries[ts_id];
             let formatter = formatterUtils.getFormatter(ts_group.metric.measure_unit);
             let ts_stats;
-            let name = s_metadata.label;
-            if (s_metadata.hidden) {
-                /* Skip in case it's requested to hide the Timeserie */
-                return;
-            }
-            if (s_metadata.use_serie_name == true) {
-                name = s.name;
+            let name;
+            if (s_metadata != null) {
+                name = s_metadata.label;
+                if (s_metadata.hidden) {
+                    /* Skip in case it's requested to hide the Timeserie */
+                    return;
+                }
+                if (s_metadata.use_serie_name == true) {
+                    name = s.name;
+                }
+            } else {
+                /* Grouped series: id is the group value (e.g. "HTTP"), no schema metadata */
+                name = ts_id;
             }
             ts_stats = s.statistics ?? null;
             if (ts_stats == null) {

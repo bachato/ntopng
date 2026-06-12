@@ -34,6 +34,7 @@
 
         <!-- tagify filter bar -->
         <div v-if="page != 'all'" class="rp-filter-bar d-flex mt-1 gap-1 align-items-center" style="width:100%">
+            <slot name="filter_begin"></slot>
             <input class="w-100 form-control rp-tagify-input align-items-center" name="tags" ref="tagify"
                 :placeholder="i18n('show_alerts.filters')">
 

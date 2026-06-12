@@ -3889,7 +3889,14 @@ local lang = {
     ["hr_chart_no_data"] = "No high-resolution counter data available for this flow.",
   },
   ["hr_chart"] = {
-    ["title"] = "Observability",
+    ["title"]              = "Observability",
+    ["group_by"]           = "Group By",
+    ["group_by_none"]      = "Aggregate all",
+    ["group_by_l7proto"]   = "By Application",
+    ["group_by_l7cat"]     = "By L7 Category",
+    ["group_by_l4proto"]   = "By L4 Protocol",
+    ["group_by_cli_asn"]   = "By Client ASN",
+    ["group_by_srv_asn"]   = "By Server ASN",
   },
   ["flow_devices"] = {
     ["active_sflow"] = "sFlow Counters Exporters",
