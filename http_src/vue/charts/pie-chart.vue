@@ -318,8 +318,8 @@ watch(() => props.chart.url_params, () => {
     /* width drives height via aspect-ratio — no height: 100% which caused circular sizing */
     flex: 0 0 auto;
     /* prende il minore tra 45% della larghezza e il 100% dell'altezza disponibile */
-    width: min(clamp(100px, 45%, 100%), 100%);
-    height: 100%;
+    /*width: min(clamp(100px, 45%, 100%), 100%);*/
+    max-height: 100%;
     aspect-ratio: 1 / 1;
     overflow: hidden;
 }
@@ -438,18 +438,19 @@ watch(() => props.chart.url_params, () => {
     min-height: 0;
     display: flex;
     flex-direction: column;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    align-content: flex-start;
     justify-content: flex-start;
     align-items: flex-start;
-    gap: 4px 0;
+    gap: 4px 4px;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: auto;
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 }
 
 .pie-legend::-webkit-scrollbar {
-    width: 3px;
+    height: 3px;
 }
 
 .pie-legend::-webkit-scrollbar-thumb {
@@ -463,6 +464,8 @@ watch(() => props.chart.url_params, () => {
     gap: 5px;
     min-width: 0;
     width: 100%;
+    flex: 0 0 auto;
+    max-width: 150px;
     user-select: none;
     transition: opacity 0.3s ease;
 }
