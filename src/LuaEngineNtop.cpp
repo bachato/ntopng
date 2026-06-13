@@ -9230,6 +9230,26 @@ static int ntop_dump_lua_cache(lua_State* vm) {
 
 /* **************************************************************** */
 
+static int ntop_alloc_mem(lua_State* vm) {
+  u_int32_t new_size, size = 1024 * 1024;
+  void *p;
+  
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+  new_size = lua_tonumber(vm, 1);
+
+  if(new_size > size) size = new_size;
+
+  p = malloc(new_size);
+  if(p == NULL)
+    ntop->getTrace()->traceEvent(TRACE_INFO, "WARNING: allocatin failure");
+
+  lua_pushnil(vm);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
+}
+
+/* **************************************************************** */
+
 /* @brief Returns all RIB BGP entries for the specified IP address */
 static int ntop_rib_find(lua_State* vm) {
   char *ip_address, ip_address_s[32], port_s[8];
@@ -9785,6 +9805,8 @@ static luaL_Reg _ntop_reg[] = {
     {"setLuaCache", ntop_set_lua_cache},
     {"dumpLuaCache", ntop_dump_lua_cache},
 
+    {"allocMem", ntop_alloc_mem},
+    
     /* RIB (Routing Information Base) */
     {"ribFind", ntop_rib_find },
     
