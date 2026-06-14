@@ -4061,6 +4061,7 @@ local lang = {
     ["engine_type"] = "Flow switching engine",
     ["exporter_ipv4_address"] = "Flow Exporter IPv4 Address",
     ["exporter_ipv6_address"] = "Flow Exporter IPv6 Address",
+    ["exporter_sw_revision"]  = "Flow Exporter Software Revision",
     ["file_gaps"] = "File Gaps",
     ["file_id"] = "File ID",
     ["file_name"] = "File Name",
