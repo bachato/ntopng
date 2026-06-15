@@ -118,7 +118,7 @@ static int ntop_dump_file(lua_State* vm) {
     ntop->getTrace()->traceEvent(TRACE_INFO, "[HTTP] Serving file %s", fname);
 
     Utils::flushHTTPBuffer(vm);
-    
+
     while ((fgets(tmp,
                   sizeof(tmp) - 256 /* To make sure we have room for replacements */,
                   fd)) != NULL) {
@@ -5580,7 +5580,7 @@ static int ntop_activate_snmp_interface_roles(lua_State* vm) {
 
   ntop->activateSnmpInterfaceRoles();
   lua_pushnil(vm);
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));  
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
 /* ****************************************** */
@@ -5600,7 +5600,7 @@ static int ntop_snmp_set_interface_role(lua_State* vm) {
 
   if(Utils::parseIPv4v6Address((char*)lua_tostring(vm, 1), &exporter_ip) == false)
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE)); /* Parsing error */
-     
+
   interface_id = (u_int32_t)lua_tonumber(vm, 2);
   interface_role = (SNMPInterfaceRole)lua_tonumber(vm, 3);
 
@@ -9156,7 +9156,7 @@ static int reload_asn_configuration(lua_State* vm) {
 /* @brief Start polling BGP changes via ZMQ → nil */
 static int start_polling_bgp_changes(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  
+
   ntop->startPollingBGPPrefixChanges((char*)lua_tostring(vm, 1));
   lua_pushnil(vm);
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
@@ -9169,7 +9169,7 @@ static int start_polling_bgp_changes(lua_State* vm) {
 /* @brief Reloads networks policy configuration from Redis (Pro only).  Lua: ntop.reloadNetworksPolicyConfiguration() → nil */
 static int reload_networks_policy_configuration(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  
+
   if (ntop->getPrefs()->reloadNetworksPolicyConfiguration()) {
     lua_pushboolean(vm, 1);
     return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
@@ -9231,21 +9231,34 @@ static int ntop_dump_lua_cache(lua_State* vm) {
 /* **************************************************************** */
 
 static int ntop_alloc_mem(lua_State* vm) {
-  u_int32_t new_size, size = 1024 * 1024;
-  void *p;
-  
+  u_int32_t size = 0;
+  char *p, ret[32];
+
   if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  new_size = lua_tonumber(vm, 1);
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
+  else
+    size = lua_tonumber(vm, 1);
 
-  if(new_size > size) size = new_size;
+  if(size == 0)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ERROR));
 
-  p = malloc(new_size);
-  if(p == NULL)
-    ntop->getTrace()->traceEvent(TRACE_INFO, "WARNING: allocatin failure");
+  p = (char*)malloc(size);
+  if(p != NULL) {
+    for(u_int32_t i=0; i<size; i++) p[i] = 0xFF;
+  }
 
-  lua_pushnil(vm);
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
+  snprintf(ret, sizeof(ret), "%p", p);
+  lua_pushstring(vm, ret);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
+}
+
+/* **************************************************************** */
+
+static int ntop_revision(lua_State *vm) {
+  int revision = atoi(PACKAGE_REVISION);
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+  lua_pushnumber(vm, revision);
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
 }
 
 /* **************************************************************** */
@@ -9256,9 +9269,9 @@ static int ntop_rib_find(lua_State* vm) {
   Redis* redis = ntop->getRedis();
 
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  
+
   redis->get((char*)CONST_BGP_SERVER_ADDRESS_REDIS_KEY, ip_address_s, sizeof(ip_address_s));
-  redis->get((char*)CONST_BGP_SERVER_PORT_REDIS_KEY, port_s, sizeof(port_s));  
+  redis->get((char*)CONST_BGP_SERVER_PORT_REDIS_KEY, port_s, sizeof(port_s));
 
   if((ip_address_s[0] == '\0') || (port_s[0] == '\0')
      || (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK))
@@ -9283,14 +9296,14 @@ static int ntop_rib_find(lua_State* vm) {
 	free(rsp);
       } else
 	lua_pushnil(vm);
-      
+
       delete r;
       return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
     }
   } catch (...) {
     ;
   }
-  
+
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
 }
 
@@ -9795,7 +9808,7 @@ static luaL_Reg _ntop_reg[] = {
     {"reloadServersConfiguration", reload_servers_configuration},
     {"reloadASNConfiguration", reload_asn_configuration},
     {"startPollingBGPPrefixChanges", start_polling_bgp_changes},
-    
+
 #if defined(NTOPNG_PRO)
     {"reloadNetworksPolicyConfiguration", reload_networks_policy_configuration},
 #endif
@@ -9806,10 +9819,11 @@ static luaL_Reg _ntop_reg[] = {
     {"dumpLuaCache", ntop_dump_lua_cache},
 
     {"allocMem", ntop_alloc_mem},
-    
+    {"revision", ntop_revision},
+
     /* RIB (Routing Information Base) */
     {"ribFind", ntop_rib_find },
-    
+
     {NULL, NULL}};
 
 luaL_Reg* ntop_reg = _ntop_reg;
