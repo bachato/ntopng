@@ -10,16 +10,14 @@
             </div>
         </div>
         <div v-if="(showChart) && props.context.showTimeseries" class="position-relative" style="height: 330px;">
-            <Loading :isLoading="loading"></Loading>
             <div class="widget-name">
                 <h6 class="m-0">{{ chart_title }}</h6>
             </div>
             <Transition name="add-effect" mode="out-in">
                 <DashboardTimeseries ref="timeseries_chart" :key="timeseries_key" :id="timeseries_id"
-                    :epoch_begin="epoch_begin" :epoch_end="epoch_end" :i18n_title="chart_title"
-                    :ifid="system_interface_id" :max_width="12" :max_height="4" :params="params"
-                    :get_component_data="get_component_data" :set_component_attr="set_component_attr"
-                    :csrf="props.context.csrf">
+                    :epoch_begin="epoch_begin" :epoch_end="epoch_end" :i18n_title="chart_title" :max_width="12"
+                    :max_height="4" :params="params" :get_component_data="get_component_data"
+                    :set_component_attr="set_component_attr" :csrf="props.context.csrf">
                 </DashboardTimeseries>
             </Transition>
         </div>
@@ -39,7 +37,6 @@ import { default as sortingFunctions } from "../utilities/sorting-utils.js";
 import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as DashboardTimeseries } from "./dashboard-timeseries.vue";
 import { default as SelectSearch } from "./select-search.vue";
-import { default as Loading } from "./loading.vue"
 import formatterUtils from "../utilities/formatter-utils.js";
 import dataUtils from "../utilities/data-utils.js";
 import linksUtils from "../utilities/links-utils.js";
@@ -60,7 +57,6 @@ const table_id = computed(() => {
 
 const chart_title = _i18n('top_active_interfaces')
 const timeseries_id = ref('top_interfaces');
-const loading = ref(true);
 const timeseries_chart = ref(null);
 const table_exporters_interfaces_stats = ref(null);
 const epoch_begin = ref(current_time - seconds_one_day); // Get one day ago
@@ -71,7 +67,6 @@ const current_selected_option = ref([])
 const interfaces_filters_rest_url = `${http_prefix}/lua/pro/rest/v2/get/flowdevices/interfaces_role_filters.lua`
 const interfaces_role_filters = ref([])
 const timeseries_key = ref(true)
-const system_interface_id = '-1'
 
 const params = {
     post_params: {
@@ -122,7 +117,6 @@ onBeforeMount(async () => {
 /* *************************************************** */
 
 const add_filter = async (value) => {
-    loading.value = true;
     current_selected_option.value = value;
     ntopng_url_manager.set_key_to_url(current_selected_option.value.key, current_selected_option.value.value)
     timeseries_key.value = !timeseries_key.value
@@ -133,7 +127,6 @@ const add_filter = async (value) => {
 
 /* Callback to request REST data from components — now calls batch.lua directly */
 const get_component_data = async (url, query_params, post_params) => {
-    loading.value = true;
     const top_query = {
         csrf: props.context.csrf,
         ifid: query_params.ifid,
@@ -143,17 +136,24 @@ const get_component_data = async (url, query_params, post_params) => {
     };
     const top_url = `${http_prefix}/lua/pro/rest/v2/get/flowdevices/get_top_exporters_interfaces.lua?${ntopng_url_manager.obj_to_url_params(top_query)}`;
     const top_data = await ntopng_utility.http_request(top_url);
-    const queries = (top_data || []).map((el, i) => ({
-        id:        `top_iface_${i}`,
-        ts_schema: `flowdev_port:traffic`,
-        ts_query:  `ifid:${el.ifid},device:${el.exporter_ip},port:${el.interface_id}`,
-        ts_unify:  true,
-        limit:     post_params.limit || 180,
-    }));
+
+    const queryLabels = {};
+    const queries = (top_data || []).map((el, i) => {
+        const qid = `top_iface_${i}`;
+        queryLabels[qid] = `${(el.exporter_name) ? (el.exporter_name) : (el.exporter_ip)}: ${(el.interface_name) ? (el.interface_name) : (el.interface_id)}`;
+
+        return {
+            id: qid,
+            ts_schema: `flowdev_port:traffic`,
+            ts_query: `ifid:${el.ifid},device:${el.exporter_ip},port:${el.interface_id}`,
+            ts_unify: true,
+            limit: post_params.limit || 180,
+        }
+    });
     post_params.queries = queries;
     delete post_params.ts_requests;
     const data = await ntopng_utility.http_post_request(url, post_params);
-    loading.value = false;
+    if (data) data._queryLabels = queryLabels;
     return data;
 };
 

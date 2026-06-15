@@ -22,6 +22,7 @@ ts_utils.MAX_EXPORT_TIME = 60
 
 require "lua_trace"
 require "ntop_utils"
+require "string_utils"
 
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/timeseries/drivers/?.lua;" .. package.path
@@ -46,6 +47,21 @@ function ts_utils.newSchema(name, options)
     loaded_schemas[name] = schema
 
     return schema
+end
+
+-- ##############################################
+function ts_utils.verifySchema(options)
+    -- In some cases, some timeseries needs to be changed to others, for example
+    --      flowdev_port:traffic -> flowdev_port:traffic_min
+    -- this function handles these cases
+    local suffix = "_min"
+    local schema = options.schema
+    if (endswith(schema, "flowdev_port:traffic")) then
+        -- Could be needed to change it to minute, check the preferences
+        if (ntop.isEnterpriseM()) and (highExporterTimeseriesResolution()) then
+            options.schema = "flowdev_port:traffic" .. suffix
+        end
+    end
 end
 
 -- ##############################################
@@ -385,6 +401,7 @@ function ts_utils.timeseries_query(options)
     end
 
     options = ts_utils.getQueryOptions(options)
+    ts_utils.verifySchema(options)
     options.schema_info = ts_utils.getSchema(options.schema)
 
     if not options.schema_info then
