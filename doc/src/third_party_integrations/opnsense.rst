@@ -123,8 +123,7 @@ The link at the bottom of the page can be followed to generate the license key.
 The license can be installed through the same page by pasting it in the *License Key*
 box and saving the configuration. The service should be restarted in the *General* page.
 
-Please note that ntopng runs by default as Enterprise in demo mode. In order to run
-ntopng in Community mode please check the *Community Mode* flag, save the configuration
+In order to run ntopng in Community mode please check the *Community Mode* flag, save the configuration
 and restart the service through the *General* page.
 
 Service
