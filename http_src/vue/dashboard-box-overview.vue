@@ -7,17 +7,17 @@
         <Loading v-if="!props.hideLoading" :isLoading="isLoading"></Loading>
         <template v-for="(data, index) in box_data">
             <template v-if="data.add_separator_above">
-                <hr class="hr col-sm-12 mt-2" />
+                <hr class="hr col-md-12 mt-2" />
             </template>
             <div class="text-center"
-                :class="[data.text_color || '', data.text_width ? 'col-sm-' + data.text_width : 'col-sm-12']">
+                :class="[data.text_color || '', data.text_width ? 'col-md-' + data.text_width : 'col-md-12']">
                 <h5 class="responsive-title mb-1">{{ data.label }}</h5>
                 <template v-if="data.num_elements != null">
                     <h5 class="responsive-title mb-0">{{ data.num_elements }}</h5>
                 </template>
             </div>
             <template v-if="data.add_separator_below">
-                <hr class="hr col-sm-12 mt-2" />
+                <hr class="hr col-md-12 mt-2" />
             </template>
         </template>
     </div>

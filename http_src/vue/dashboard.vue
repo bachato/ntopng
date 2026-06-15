@@ -140,14 +140,14 @@
         <div ref="report_box" id="drag-zone" class="row" :key="components">
 
             <!-- Warning Message -->
-            <div v-if="warning_message" class="col-sm mt-1">
+            <div v-if="warning_message" class="col-md mt-1">
                 <div class="alert alert-warning">
                     {{ warning_message }}
                 </div>
             </div>
 
             <!-- Empty template message -->
-            <div v-if="components_loaded && !components.length && !edit_mode" class="col-sm mt-1">
+            <div v-if="components_loaded && !components.length && !edit_mode" class="col-md mt-1">
                 <div class="alert alert-secondary sm-1 text-center"
                     style="width:40%; margin: auto; margin-top: 5vh; margin-bottom: 5vh">
                     <h4 class="alert-heading">
@@ -1322,8 +1322,4 @@ async function delete_template() {
 /*         flex: 0 0 auto; */
 /*     } */
 /* } */
-
-.col-sm-4 {
-    min-width: 215px !important; /* It cannot be lesser then 215px as width, otherwise the component may create visual bugs */
-}
 </style>
