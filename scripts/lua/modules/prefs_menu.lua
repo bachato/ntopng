@@ -467,6 +467,10 @@ local menu_subpages = {{
 	 toggle_asset_inventory_log = {
             title = i18n("prefs.toggle_asset_inventory_log_title"),
             description = i18n("prefs.toggle_asset_inventory_log_description")
+	 },
+	 toggle_active_monitoring_log = {
+            title = i18n("prefs.toggle_active_monitoring_log_title"),
+            description = i18n("prefs.toggle_active_monitoring_log_description")
 	 }
       }
       }, {

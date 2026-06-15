@@ -2550,7 +2550,11 @@ if auth.has_capability(auth.capabilities.preferences) then
 			   pref = "enable_host_pools_log"
       })
 
-
+      prefsToggleButton(subpage_active, {
+         field = "toggle_active_monitoring_log",
+         default = "0",
+         pref = "trace.active_monitoring"
+      })
 
       print('<tr><th colspan=2 style="text-align:right;"><button type="submit" class="btn btn-primary" style="width:115px" disabled="disabled">' .. i18n("save") .. '</button></th></tr>')
 

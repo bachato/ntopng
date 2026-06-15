@@ -2488,6 +2488,7 @@ local known_parameters = {
    ["toggle_dns_cache"] = validateBool,
    ["toggle_http_enable_access_log"] = validateBool,
    ["toggle_asset_inventory_log"] = validateBool,
+   ["toggle_active_monitoring_log"] = validateBool,
    ["toggle_assets_inventory"] = validateBool,
    ["toggle_captive_portal"] = validateBool,
    ["toggle_mdns_repeater"] = validateBool,
