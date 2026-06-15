@@ -1324,6 +1324,6 @@ async function delete_template() {
 /* } */
 
 .col-sm-4 {
-    min-width: 460px !important; /* It cannot be lesser then 460px as width, otherwise the component may create visual bugs */
+    min-width: 215px !important; /* It cannot be lesser then 215px as width, otherwise the component may create visual bugs */
 }
 </style>
