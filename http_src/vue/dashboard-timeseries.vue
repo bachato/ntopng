@@ -35,15 +35,9 @@
           It never fetches data itself; it calls getChartOptions() which returns
           the pre-fetched pendingOptions.
         -->
-        <TimeseriesChart
-            ref="chartRef"
-            :id="id"
-            :get_custom_chart_options="getChartOptions"
-            :disable_fixed_height="true"
-            @zoom="onZoom"
-            @chart-updated="chartUpdatedCallback"
-            @update-requested="onUpdateRequested"
-        />
+        <TimeseriesChart ref="chartRef" :id="id" :get_custom_chart_options="getChartOptions"
+            :disable_fixed_height="true" @zoom="onZoom" @chart-updated="chartUpdatedCallback"
+            @update-requested="onUpdateRequested" />
     </div>
 </template>
 
@@ -55,19 +49,19 @@ import { default as TimeseriesChart } from "./timeseries-chart.vue";
 
 const props = defineProps({
     /** Unique chart ID; used as the query-ID prefix and for localStorage keys. */
-    id:          { type: String },
+    id: { type: String },
     /** Optional i18n key for the chart title (rendered by the parent). */
-    i18n_title:  { type: String },
+    i18n_title: { type: String },
     /** Interface ID injected into $IFID$ placeholders. */
-    ifid:        { type: String },
+    ifid: { type: String },
     /** Unix epoch start of the time window. */
     epoch_begin: { type: Number },
     /** Unix epoch end of the time window. */
-    epoch_end:   { type: Number },
+    epoch_end: { type: Number },
     /** Dashboard grid width (unused here, available to parent layouts). */
-    max_width:   { type: Number },
+    max_width: { type: Number },
     /** Dashboard grid height; controls chart pixel height (rows × height_per_row). */
-    max_height:  { type: Number },
+    max_height: { type: Number },
     /**
      * Component configuration object.  Must include:
      *   post_params.ts_requests  — template map of query definitions.
@@ -79,7 +73,7 @@ const props = defineProps({
      *   $ANY_NETWORK$   → one query per known network
      *   <any other key> → single query with $IFID$ substituted
      */
-    params:      { type: Object },
+    params: { type: Object },
     /**
      * Optional async callback invoked instead of the default batch POST.
      * Signature: (url, queryParams, postBody) => Promise<batchResponse>
@@ -89,9 +83,9 @@ const props = defineProps({
      */
     get_component_data: { type: Function },
     /** CSRF token forwarded to batch.lua. */
-    csrf:        { type: String },
+    csrf: { type: String },
     /** Extra filter object; changes trigger a chart refresh via the watcher. */
-    filters:     { type: Object },
+    filters: { type: Object },
     /** When true the loading spinner is suppressed entirely. */
     hideLoading: { type: Boolean },
     showOnlyFirstLoading: { type: Boolean },
@@ -107,7 +101,7 @@ const height_per_row = 62;
 
 const isLoading = ref(true);
 const firstLoad = ref(true);
-const chartRef  = ref(null);
+const chartRef = ref(null);
 
 /**
  * Monotonically increasing counter.  Incremented at the start of each
@@ -121,6 +115,10 @@ let generation = 0;
  * TimeseriesChart reads it through the getChartOptions() callback.
  */
 let pendingOptions = null;
+
+function escapeRegExp(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 /**
  * Expands the wildcard keys in params.post_params.ts_requests into a flat
@@ -217,7 +215,7 @@ function substituteStr(obj, placeholder, value) {
     const out = {};
     for (const k in obj) {
         out[k] = typeof obj[k] === 'string'
-            ? obj[k].replace(new RegExp('\\' + placeholder.replace('$', '\\$'), 'g'), value)
+            ? obj[k].replace(new RegExp(escapeRegExp(placeholder), 'g'), value)
             : obj[k];
     }
     return out;
@@ -254,7 +252,7 @@ function mergeResults(results, queryLabels) {
     if (nonEmpty.length <= 1) return nonEmpty[0] || entries[0];
 
     const mergedSeries = [];
-    let baseMetadata   = {};
+    let baseMetadata = {};
     /* All queries share the same schema → same unit; take from first result. */
     const measure_unit = nonEmpty[0].measure_unit || "number";
 
@@ -349,22 +347,22 @@ async function fetchChart() {
         const qid = `${props.id}_${i}`;
         if (r._label) queryLabels[qid] = r._label;
         return {
-            id:        qid,
+            id: qid,
             ts_schema: r.ts_schema,
-            ts_query:  r.ts_query,
-            tskey:     r.tskey,
-            ts_unify:  r.ts_unify,
-            limit:     props.params?.post_params?.limit || 180,
-            zoom:      props.params?.post_params?.zoom,
+            ts_query: r.ts_query,
+            tskey: r.tskey,
+            ts_unify: r.ts_unify,
+            limit: props.params?.post_params?.limit || 180,
+            zoom: props.params?.post_params?.zoom,
         };
     });
 
     const batch_url = `${http_prefix}/lua/rest/v2/get/timeseries/batch.lua`;
     const post_body = {
-        csrf:        props.csrf,
-        ifid:        props.ifid,
+        csrf: props.csrf,
+        ifid: props.ifid,
         epoch_begin: props.epoch_begin,
-        epoch_end:   props.epoch_end,
+        epoch_end: props.epoch_end,
         queries,
     };
 
@@ -411,7 +409,7 @@ async function fetchChart() {
     }
 
     /* Attach batch metadata so TimeseriesChart picks up date_format/timezone. */
-    result._meta   = batchResp.meta || {};
+    result._meta = batchResp.meta || {};
     /* Pixel height derived from the dashboard grid row count. */
     result._height = (props.max_height || 4) * height_per_row;
     pendingOptions = result;
