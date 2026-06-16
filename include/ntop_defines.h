@@ -1497,8 +1497,9 @@ extern NtopngLuaContext* getUserdata(struct lua_State* vm);
 
 #define MAX_CHECKPOINT_COMPRESSION_BUFFER_SIZE 1024
 
-/* Keep in sync with nProbe */
-#define MAX_ZMQ_FLOW_BUF 131072
+/* Upper bound on the uncompressed payload size accepted from incoming ZMQ messages. */
+#define MAX_ZMQ_FLOW_BUF 524288
+
 #define DEFAULT_ZMQ_TCP_KEEPALIVE 1       /* Keepalive ON */
 #define DEFAULT_ZMQ_TCP_KEEPALIVE_IDLE 30 /* Keepalive after 30 seconds */
 #define DEFAULT_ZMQ_TCP_KEEPALIVE_CNT 3   /* Keepalive send 3 probes */
