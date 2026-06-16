@@ -725,13 +725,13 @@ export default class NtopUtils {
             .replace(/[^0-9a-zA-Z\.:\/_-]/gi, '');
     }
 
-    /* https://stackoverflow.com/questions/2090551/parse-query-string-in-javascript */
     static parseQuery(queryString) {
-        var query = {};
-        var pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
-        for (var i = 0; i < pairs.length; i++) {
-            var pair = pairs[i].split('=');
-            query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+        const params = new URLSearchParams(
+            queryString[0] === '?' ? queryString.slice(1) : queryString
+        );
+        const query = Object.create(null);
+        for (const [key, val] of params.entries()) {
+            query[key] = val;
         }
         return query;
     }
