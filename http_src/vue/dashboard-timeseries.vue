@@ -269,7 +269,7 @@ function mergeResults(results, queryLabels) {
          *   2. entry.metadata.label — label returned by the backend (if any)
          *   3. qid               — raw query ID as final fallback
          */
-        const prefix = (queryLabels || {})[qid] || entry.metadata?.label || qid;
+        const prefix = queryLabels[qid] || entry.metadata?.label || qid;
 
         entry.series.forEach(s => {
             /* batch.lua sets s.label from the handler's timeseries definition
@@ -420,7 +420,7 @@ async function fetchChart() {
     }
 
     if (!result.series) {
-        result.series = []
+        result.series = [];
     }
 
     isLoading.value = false;

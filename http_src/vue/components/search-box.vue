@@ -344,7 +344,7 @@ const outsideClickHandler = function (e) {
         expanded.value = false;
         searchList.value.classList.add("d-none");
     }
-}
+};
 
 /**
  * Setup input listeners after component mount

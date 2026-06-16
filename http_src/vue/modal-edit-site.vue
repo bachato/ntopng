@@ -165,7 +165,7 @@ watch([site_lat, site_lng], ([newLat, newLng]) => {
 
 // ==================== Validation Methods ====================
 
-let debounce_name_timer = null
+let debounce_name_timer = null;
 
 function validateNameDebounced() {
     clearTimeout(debounce_name_timer)

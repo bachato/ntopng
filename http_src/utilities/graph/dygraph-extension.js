@@ -31,7 +31,7 @@ Dygraph.Plugins.Legend.prototype.select = function (e) {
 		var yAxisLabelWidth = e.dygraph.getOptionForAxis('axisLabelWidth', 'y');
 		// find the closest data point by checking the currently highlighted series,
 		// or fall back to using the first data point available
-		var highlightSeries = e.dygraph.getHighlightSeries()
+		var highlightSeries = e.dygraph.getHighlightSeries();
 		var point;
 		if (highlightSeries) {
 			point = points.find(p => p.name === highlightSeries);

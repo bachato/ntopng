@@ -227,7 +227,7 @@ function formatBoundsSerie(timeserie_info, timeserie_options, config) {
     /* TODO: add avg, past, ecc. timeseries to the bounds one */
 
     /* Update the config */
-    const formatted_name = `${serie_name} ${i18n('lower_value_upper')}`
+    const formatted_name = `${serie_name} ${i18n('lower_value_upper')}`;
     const formatter_found = config.formatters.find(el => el == formatter);
     if (!formatter_found)
         config.formatters.push(formatter);
@@ -289,7 +289,7 @@ function formatStandardSerie(timeserie_info, timeserie_options, config, tsCompar
         config.block_stacked = (metadata?.invert_direction === true) ? (true || config.block_stacked) : (false || config.block_stacked);
         const { timeserie_name, show_full_name } = getName(ts_info, metadata)
         /* Check if show_full_name is null or undefined */
-        const serie_name = getSerieName(timeserie_name, ts_id, timeserie_info, (show_full_name !== null || show_full_name !== undefined) ? (config.use_full_name && show_full_name) : config.use_full_name)
+        const serie_name = getSerieName(timeserie_name, ts_id, timeserie_info, (config.use_full_name && show_full_name))
         const avg_name = getSerieName(timeserie_name + " Avg", ts_id, timeserie_info, config.use_full_name)
         const perc_name = getSerieName(timeserie_name + " 95th Perc", ts_id, timeserie_info, config.use_full_name);
         const past_name = getSerieName(timeserie_name + " " + tsCompare + " " + i18n('details.ago'), ts_id, timeserie_info, config.use_full_name);
