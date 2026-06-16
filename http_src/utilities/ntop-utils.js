@@ -708,7 +708,10 @@ export default class NtopUtils {
     }
 
     static noHtml(s) {
-        return s.replace(/<[^>]+>/g, '');
+        if (typeof s !== 'string') return '';
+        const div = document.createElement('div');
+        div.innerHTML = s;            // The browser parse only the HTML
+        return div.textContent || ''; // return the text, no tags
     }
 
     static cleanCustomHostUrl(host) {
