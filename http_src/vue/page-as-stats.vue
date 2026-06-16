@@ -740,8 +740,6 @@ function columns_sorting(col, r0, r1) {
             return sortingFunctions.sortByNumber(r0.score, r1.score, col.sort);
         } else if (col.id == "alerted_flows") {
             return sortingFunctions.sortByNumber(r0.alerted_flows, r1.alerted_flows, col.sort);
-        } else if (col.id == "alerted_flows") {
-            return sortingFunctions.sortByNumber(r0.alertedFlows, r1.alertedFlows, col.sort);
         } else if (col.id == "throughput") {
             return sortingFunctions.sortByNumber(r0.throughput, r1.throughput, col.sort);
         } else if (col.id == "traffic") {
