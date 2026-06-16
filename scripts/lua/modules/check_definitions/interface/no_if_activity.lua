@@ -37,6 +37,7 @@ local function check_interface_activity(params)
    -- Get total number of packets, flows and interface id
    local num_packets = params.entity_info.eth.packets
    local num_flows = params.entity_info.stats.new_flows -- .new_flows keep the cumulative total, .flows is just a gauge
+   local num_hosts = params.entity_info.stats.hosts -- Also use the hosts, sometimes new_flows is not enough and it triggers the alert when it shouldn't
    local num_logs = 0
    if params.entity_info.syslog then
       num_logs = params.entity_info.syslog.tot_events
@@ -53,7 +54,7 @@ local function check_interface_activity(params)
    -- Check if the previous number it's equal to the actual number of both, packets and flows
    -- this distinction is done due to the fact that exist packet based interfaces
    -- and flow based interfaces
-   if delta_packets == 0 and delta_flows == 0 and delta_logs == 0 then
+   if delta_packets == 0 and delta_flows == 0 and delta_logs == 0 and num_hosts == 0 then
       no_if_activity_type:trigger(params.alert_entity, nil, params.cur_alerts)
    else -- One of the two or both stats were different, so the interface is still active
       no_if_activity_type:release(params.alert_entity, nil, params.cur_alerts)
