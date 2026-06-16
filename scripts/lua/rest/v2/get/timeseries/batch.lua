@@ -98,6 +98,9 @@ local _schema_cache = {}
 
 local function get_schema_info(schema_name)
     if _schema_cache[schema_name] ~= nil then return _schema_cache[schema_name] end
+    if schema_name == "top:iface:ndpi" then
+      schema_name = "top:" .. getIfacenDPITsName()
+    end
 
     local base_schema = schema_name:gsub("^top:", "")
     local prefix = base_schema:match("^([^:]+):")

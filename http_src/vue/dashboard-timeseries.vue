@@ -421,6 +421,10 @@ async function fetchChart() {
         chartRef.value.retrieveOptionsAndDraw('');
     }
 
+    if (!result.series) {
+        result.series = []
+    }
+
     isLoading.value = false;
     firstLoad.value = false;
 }

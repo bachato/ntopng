@@ -233,7 +233,7 @@ const convertBatchResult = function (result) {
     if (!result || result.data) return result;   // already formatted or null
 
     const seriesArr = result.series || [];
-    if (!seriesArr.length) return null;
+    //if (!seriesArr.length) return null;
 
     const metadata    = result.metadata || {};
     const epochBegin  = metadata.epoch_begin || 0;
