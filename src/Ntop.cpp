@@ -770,9 +770,8 @@ void Ntop::start() {
     usec_diff = Utils::usecTimevalDiff(&end, &begin);
 
     if (usec_diff >= nap_usec) {
-      ntop->getTrace()->traceEvent(
-          TRACE_NORMAL, "Housekeeping activities (main loop) took %.3fs",
-          (float)usec_diff / 1e6);
+      ntop->getTrace()->traceEvent(TRACE_INFO, "Housekeeping activities (main loop) took %.3fs",
+				   (float)usec_diff / 1e6);
     } else {
       while (usec_diff < nap_usec) {
         u_int32_t remaining_usec = nap_usec - usec_diff;
