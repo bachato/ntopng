@@ -777,8 +777,6 @@ void usage() {
 	 "[--instance-name|-N <name>]         | Assign a name to this ntopng "
 	 "instance.\n"
 #ifdef NTOPNG_PRO
-	 "[--community]                       | Start ntopng in community "
-	 "edition.\n"
 	 "[--fail-invalid-license]            | Exit without a valid license.\n"
 	 "[--check-license]                   | Check if the license is valid.\n"
 	 "[--check-maintenance]               | Check until maintenance is "
@@ -1440,7 +1438,7 @@ static const struct option long_options[] = {
   {"fail-invalid-license", no_argument, NULL, 251},
   {"check-maintenance", no_argument, NULL, 252},
   {"check-license", no_argument, NULL, 253},
-  {"community", no_argument, NULL, 254},
+  {"community", no_argument, NULL, 254}, /* Deprecated, kept for backward compatibility */
 #endif
 
   /* End of options */
@@ -2632,7 +2630,7 @@ int Prefs::setOption(int optkey, char* optarg) {
     break;
 
   case 254:
-    ntop->getPro()->do_force_community_edition();
+    /* Deprecated --community, kept for backward compatibility */
     break;
 #endif
 

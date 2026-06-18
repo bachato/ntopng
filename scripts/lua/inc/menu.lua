@@ -922,7 +922,7 @@ if not is_enterprise_M or has_help_enabled then
             url = '/lua/about.lua'
         }, {
             entry = page_utils.menu_entries.license,
-            hidden = info["pro.forced_community"] or (not is_admin),
+            hidden = (not is_admin),
             url = '/lua/license.lua'
         }, {
             entry = page_utils.menu_entries.limits,
@@ -1162,12 +1162,10 @@ if (_POST["ntopng_license"] == nil) and (info["pro.systemid"] and (info["pro.sys
         end
 
     else
-        if (not (info["pro.forced_community"])) then
-            print(
-                '<li class="nav-item nav-link"><a class="ntopng-external-link" href="https://shop.ntop.org" class="badge bg-warning text-decoration-none">')
-            print(i18n("about.upgrade_to_professional") .. ' <i class="fas fa-external-link-alt"></i>')
-            print('</a></li>')
-        end
+        print(
+            '<li class="nav-item nav-link"><a class="ntopng-external-link" href="https://shop.ntop.org" class="badge bg-warning text-decoration-none">')
+        print(i18n("about.upgrade_to_professional") .. ' <i class="fas fa-external-link-alt"></i>')
+        print('</a></li>')
     end
 end
 

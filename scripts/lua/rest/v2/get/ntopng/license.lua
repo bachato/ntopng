@@ -70,7 +70,6 @@ local res = {
    license_encoded    = info["pro.license_encoded"],
    license_ends_at    = info["pro.license_ends_at"],
    license_days_left  = info["pro.license_days_left"],
-   forced_community   = info["pro.forced_community"],
    use_redis_license  = info["pro.use_redis_license"],
    is_windows         = ntop.isWindows(),
    eula_url           = eula_url,

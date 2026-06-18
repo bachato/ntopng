@@ -50,7 +50,7 @@
                       <i class="fas fa-copy"></i>
                     </button>
                   </div>
-                  <div v-if="!license.forced_community" class="mt-1">
+                  <div class="mt-1">
                     <small class="text-secondary" v-html="_i18n('about.licence_generation', { purchase_url: 'https://shop.ntop.org/', universities_url: 'https://www.ntop.org/support/faq/do-you-charge-universities-no-profit-and-research/' })"></small>
                   </div>
                 </td>
