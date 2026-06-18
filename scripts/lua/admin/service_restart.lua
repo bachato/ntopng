@@ -14,7 +14,9 @@ if not isAdministratorOrPrintErr() then
   return
 end
 
-ntop.serviceRestart()
+if ntop.serviceRestart then
+  ntop.serviceRestart()
+end
 
 res = { }
 

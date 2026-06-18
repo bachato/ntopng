@@ -319,34 +319,6 @@ static int ntop_get_max_if_speed(lua_State* vm) {
 
 /* ****************************************** */
 
-#ifdef NTOPNG_PRO
-/**
- * @brief Get the SNMP statistics of interface.
- *
- * @param vm The lua state.
- * @return @ref CONST_LUA_OK
- */
-/* @brief Returns SNMP-polled statistics for the current interface (Pro only).  Lua: interface.getSNMPStats() → table */
-static int ntop_interface_get_snmp_stats(lua_State* vm) {
-  NetworkInterface* curr_iface = getCurrentInterface(vm);
-  nDPIStats stats;
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  if (curr_iface && curr_iface->getFlowInterfacesStats()) {
-    curr_iface->getFlowInterfacesStats()->lua(vm, curr_iface);
-
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-  } else {
-    lua_pushnil(vm);
-
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  }
-}
-#endif
-
-/* ****************************************** */
-
 /* @brief Returns true if the interface has observed VLAN-tagged traffic.  Lua: interface.hasVLANs() → boolean */
 static int ntop_interface_has_vlans(lua_State* vm) {
   NetworkInterface* curr_iface = getCurrentInterface(vm);
@@ -3439,82 +3411,6 @@ static int ntop_delete_interface_observation_point(lua_State* vm) {
 
 /* ****************************************** */
 
-#ifdef NTOPNG_PRO
-/* @brief Returns flow exporters (NetFlow/IPFIX probes) seen on this interface (Pro).  Lua: interface.getFlowDevices() → table */
-static int ntop_get_flow_devices(lua_State* vm) {
-  NetworkInterface* curr_iface = getCurrentInterface(vm);
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  ;
-  lua_newtable(vm);
-
-  if (!curr_iface)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  else {
-    curr_iface->getFlowDevices(vm);
-
-    /* Return a table with key, the interface id and as value,
-     * a table with the IPs of the interface
-     */
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-  }
-}
-
-/* ****************************************** */
-
-/* @brief Returns detailed information for a specific flow-exporting device (Pro).  Lua: interface.getFlowDeviceInfo(device_ip) → table */
-static int ntop_get_flow_device_info(lua_State* vm) {
-  NetworkInterface* curr_iface = getCurrentInterface(vm);
-  u_int32_t device_id;
-  bool showAllStats = true;
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  lua_newtable(vm);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  device_id = (u_int32_t)lua_tonumber(vm, 1);
-  if (lua_type(vm, 2) == LUA_TBOOLEAN)
-    showAllStats = (bool)lua_toboolean(vm, 2);
-
-  if (!curr_iface)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  else {
-    curr_iface->getFlowDeviceInfo(vm, device_id, showAllStats);
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-  }
-}
-
-/* ****************************************** */
-
-/* @brief Returns flow device information looked up by IP address (Pro).  Lua: interface.getFlowDeviceInfoByIP(ip) → table */
-static int ntop_get_flow_device_info_by_ip(lua_State* vm) {
-  NetworkInterface* curr_iface = getCurrentInterface(vm);
-  char* device_ip;
-  bool showAllStats = true;
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  lua_newtable(vm);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  device_ip = (char*)lua_tostring(vm, 1);
-  if (lua_type(vm, 2) == LUA_TBOOLEAN)
-    showAllStats = (bool)lua_toboolean(vm, 2);
-
-  if (!curr_iface)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  else {
-    struct ndpi_in6_addr addr;
-
-    if (!Utils::parseIPv4v6Address(device_ip, &addr))
-      return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-
-    curr_iface->getFlowDeviceInfoByIP(vm, &addr, showAllStats);
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-  }
-}
-#endif
 
 /* ****************************************** */
 
@@ -5035,115 +4931,6 @@ static int ntop_rrd_queue_length(lua_State* vm) {
 
 /* ****************************************** */
 
-#ifdef NTOPNG_PRO
-#ifdef HAVE_NEDGE
-/* NOTE: do no call this directly - use host_pools_utils.resetPoolsQuotas
- * instead */
-/* @brief Resets traffic quota counters for all or a specific host pool (nEdge Pro).  Lua: interface.resetPoolsQuotas([pool_id]) → nil */
-static int ntop_reset_pools_quotas(lua_State* vm) {
-  NetworkInterface* curr_iface = getCurrentInterface(vm);
-  u_int16_t pool_id_filter = (u_int16_t)-1;
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  if (lua_type(vm, 1) == LUA_TNUMBER)
-    pool_id_filter = (u_int16_t)lua_tonumber(vm, 1);
-
-  if (curr_iface) {
-    curr_iface->resetPoolsStats(pool_id_filter);
-
-    lua_pushnil(vm);
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-  } else
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-}
-
-/* ****************************************** */
-
-/* @brief Clears the dynamic blacklist for a host pool (nEdge Pro).  Lua: interface.flushPoolDynamicBlacklist(pool_id) → nil */
-static int ntop_flush_pool_dynamic_blacklist(lua_State* vm) {
-  NetworkInterface* curr_iface = getCurrentInterface(vm);
-  u_int16_t pool_id = (u_int16_t)-1;
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-
-  pool_id = (u_int16_t)lua_tonumber(vm, 1);
-
-  if (curr_iface) {
-    HostPools* hp = curr_iface->getHostPools();
-    AddressTree* at = hp->getDynamicBlacklist(pool_id);
-
-    hp->setDynamicBlacklist(pool_id, new AddressTree());
-
-    if (at != NULL) {
-      sleep(1);
-      delete at;
-    }
-
-    lua_pushnil(vm);
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-  } else
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-}
-
-/* ****************************************** */
-
-/* @brief Returns blacklist statistics for a host pool (nEdge Pro).  Lua: interface.getPoolDynamicBlacklistStats(pool_id) → table */
-static int ntop_get_pool_dynamic_blacklist_stats(lua_State* vm) {
-  NetworkInterface* curr_iface = getCurrentInterface(vm);
-  u_int16_t pool_id = (u_int16_t)-1;
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-
-  pool_id = (u_int16_t)lua_tonumber(vm, 1);
-
-  if (curr_iface) {
-    HostPools* hp = curr_iface->getHostPools();
-    AddressTree* at = hp->getDynamicBlacklist(pool_id);
-
-    lua_pushinteger(vm, at ? at->getNumAddresses() : 0);
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-  } else
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-}
-
-/* ****************************************** */
-
-/* @brief Returns the current dynamic blacklist members for a pool (nEdge Pro).  Lua: interface.getPoolDynamicBlacklistMembers(pool_id) → table */
-static int ntop_get_pool_dynamic_blacklist_members(lua_State* vm) {
-  NetworkInterface* curr_iface = getCurrentInterface(vm);
-  u_int16_t pool_id = (u_int16_t)-1;
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TNUMBER) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-
-  pool_id = (u_int16_t)lua_tonumber(vm, 1);
-
-  if (curr_iface) {
-    HostPools* hp = curr_iface->getHostPools();
-    AddressTree* at = hp->getDynamicBlacklist(pool_id);
-
-    lua_newtable(vm);
-    at->getAddresses(vm);
-
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-  } else
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-}
-
-#endif /* HAVE_NEDGE */
-#endif /* NTOPNG_PRO */
-
-/* ****************************************** */
-
 /* @brief Returns the host pool ID that a host belongs to.  Lua: interface.findMemberPool(host[,vlan]) → integer */
 static int ntop_find_member_pool(lua_State* vm) {
   NetworkInterface* curr_iface;
@@ -6242,23 +6029,6 @@ static int ntop_aggregate_asn_flows(lua_State* vm) {
 
 /* ****************************************** */
 
-#ifdef NTOPNG_PRO
-/* @brief Triggers aggregation of flows by site/organization (Pro).  Lua: interface.aggregateSiteFlows() → nil */
-static int ntop_aggregate_site_flows(lua_State* vm) {
-#ifdef NTOPNG_PRO
-  NetworkInterface* curr_iface = getLuaVMUserdata(vm, iface);
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  curr_iface->aggregateSiteFlows(vm);
-#else
-  lua_pushnil(vm);
-#endif
-
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-}
-#endif
-
-/* ****************************************** */
-
 /*
  * Execute a ClickHouse statement with no result expected (e.g. INSERT)
  */
@@ -6744,27 +6514,11 @@ static luaL_Reg _ntop_interface_reg[] = {
 
     {"getHostPoolsStats", ntop_get_host_pools_interface_stats},
     {"getHostPoolStats", ntop_get_host_pool_interface_stats},
-#ifdef NTOPNG_PRO
-#ifdef HAVE_NEDGE
-    {"resetPoolsQuotas", ntop_reset_pools_quotas},
-    {"flushPoolDynamicBlacklist", ntop_flush_pool_dynamic_blacklist},
-    {"getPoolDynamicBlacklistStats", ntop_get_pool_dynamic_blacklist_stats},
-    {"getPoolDynamicBlacklistMembers", ntop_get_pool_dynamic_blacklist_members},
+#if defined(NTOPNG_PRO) && defined(HAVE_NEDGE)
     {"getHostUsedQuotasStats", ntop_get_host_used_quotas_stats},
 #endif
 
-    /* SNMP */
-    {"getSNMPStats", ntop_interface_get_snmp_stats},
-
-#ifdef NTOPNG_PRO
-    /* Flow Devices */
-    {"getFlowDevices", ntop_get_flow_devices},
-    {"getFlowDeviceInfo", ntop_get_flow_device_info},
-    {"getFlowDeviceInfoByIP", ntop_get_flow_device_info_by_ip},
-#endif
-
-#ifdef HAVE_NEDGE
-
+#if defined(NTOPNG_PRO) && defined(HAVE_NEDGE)
     {"dropFlowTraffic", ntop_drop_flow_traffic},
     {"dropMultipleFlowsTraffic", ntop_drop_multiple_flows_traffic},
     {"dropHostTraffic", ntop_drop_host_traffic},
@@ -6776,7 +6530,6 @@ static luaL_Reg _ntop_interface_reg[] = {
     {"getPolicyChangeMarker", ntop_get_policy_change_marker},
     {"updateFlowsShapers", ntop_update_flows_shapers},
     {"getl7PolicyInfo", ntop_get_l7_policy_info},
-#endif
 #endif
 
     /* Network Discovery */
@@ -6853,10 +6606,9 @@ static luaL_Reg _ntop_interface_reg[] = {
     /* Aggregated Flows */
     {"aggregateASNFlows", ntop_aggregate_asn_flows},
     {"execInMemoryQuery", ntop_exec_in_memory_sql_query},
-#ifdef NTOPNG_PRO
-    {"aggregateSiteFlows", ntop_aggregate_site_flows},
 
     /* Ranking */
+#ifdef NTOPNG_PRO
     {"updateRanking", ntop_update_ranking},
 #endif
 

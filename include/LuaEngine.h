@@ -106,6 +106,8 @@ class LuaEngine {
 
   void luaRegister(lua_State* L, const char* class_name,
                    luaL_Reg* class_methods);
+  void luaRegisterAdditional(lua_State* L, const char* class_name,
+                             luaL_Reg* class_methods);
 
   inline lua_State* getState() const { return (L); }
 

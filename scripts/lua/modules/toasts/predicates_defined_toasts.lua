@@ -650,7 +650,9 @@ function predicates.about_page(toast, container)
     if (_POST["ntopng_license"] ~= nil) then
 
         ntop.setCache('ntopng.license', trimSpace(_POST["ntopng_license"]))
-        ntop.checkLicense()
+        if ntop.checkLicense then
+            ntop.checkLicense()
+        end
 
         info = ntop.getInfo()
 

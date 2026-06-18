@@ -37,7 +37,10 @@ extern luaL_Reg* ntop_reg;
 extern luaL_Reg* ntop_network_reg;
 extern luaL_Reg* ntop_flow_reg;
 extern luaL_Reg* ntop_host_reg;
-
+#ifdef NTOPNG_PRO
+extern luaL_Reg* ntop_pro_reg;
+extern luaL_Reg* ntop_interface_pro_reg;
+#endif
 
 /* #define TRACE_VM_ENGINES */
 
@@ -229,6 +232,23 @@ void LuaEngine::luaRegister(lua_State* L, const char* class_name,
 
   /* _G["Foo"] = newclass */
   lua_setglobal(L, class_name);
+}
+
+/* ****************************************** */
+
+/* Extend luaRegister() by appending additional methods (used for pro methods) */
+void LuaEngine::luaRegisterAdditional(lua_State* L, const char* class_name,
+                                      luaL_Reg* class_methods) {
+  lua_getglobal(L, class_name);
+
+  if (lua_getmetatable(L, -1)) {
+    lua_getfield(L, -1, "__index");
+    luaL_setfuncs(L, class_methods, 0);
+    lua_pop(L, 1); /* __index */
+    lua_pop(L, 1); /* metatable */
+  }
+
+  lua_pop(L, 1); /* class_name global */
 }
 
 /* ******************************* */
@@ -565,6 +585,12 @@ void LuaEngine::lua_register_classes(lua_State* L, LuaEngineMode mode) {
   luaRegister(L, "network", ntop_network_reg);
   luaRegister(L, "flow", ntop_flow_reg);
   luaRegister(L, "host", ntop_host_reg);
+
+#ifdef NTOPNG_PRO
+  /* ntop pro add-ons */
+  luaRegisterAdditional(L, "ntop", ntop_pro_reg);
+  luaRegisterAdditional(L, "interface", ntop_interface_pro_reg);
+#endif
 
   switch (mode) {
     case lua_engine_mode_http:

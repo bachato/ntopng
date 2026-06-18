@@ -1486,25 +1486,6 @@ static int ntop_is_flow_deduplication_enabled(lua_State* vm) {
 
 /* ****************************************** */
 
-#ifdef NTOPNG_PRO
-/* @brief Sets the whitelist of allowed Modbus function codes (Pro only).  Lua: ntop.setModbusAllowedFunctionCodes(codes_table) → boolean */
-static int ntop_set_modbus_allowed_function_codes(lua_State* vm) {
-  char* function_codes;
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  if ((function_codes = (char*)lua_tostring(vm, 1)) == NULL)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-
-  ntop->getPrefs()->setModbusAllowedFunctionCodes(function_codes);
-  lua_pushboolean(vm, true);
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-}
-#endif
-
-/* ****************************************** */
-
 /* @brief Temporarily re-acquires elevated write capabilities on Unix.  Lua: ntop.gainWriteCapabilities() → boolean */
 static int ntop_gainWriteCapabilities(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
@@ -1830,32 +1811,6 @@ static int ntop_register_runtime_interface(lua_State* vm) {
   lua_pushinteger(vm, new_if_id);
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
-
-/* ****************************************** */
-
-#if defined(NTOPNG_PRO) && defined(HAVE_KAFKA)
-/* @brief Publishes a message to a Kafka topic (Pro + Kafka build).  Lua: ntop.sendKafkaMessage(topic, msg) → boolean */
-static int ntop_send_kafka_message(lua_State* vm) {
-  char *kafka_broker_info, *message;
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  /* <brokers>;<topic>;<options> */
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  kafka_broker_info = (char*)lua_tostring(vm, 1);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  message = (char*)lua_tostring(vm, 2);
-
-  if (kafka_broker_info && message)
-    lua_pushboolean(vm, ntop->sendKafkaMessage(kafka_broker_info, message,
-                                               strlen(message)));
-
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-}
-#endif
 
 /* ****************************************** */
 
@@ -4773,20 +4728,6 @@ static int ntop_refresh_cpu_load(lua_State* vm) {
 
 /* ****************************************** */
 
-/* @brief Triggers a license validation check and returns 1.  Lua: ntop.checkLicense() → integer */
-static int ntop_check_license(lua_State* vm) {
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-#ifdef NTOPNG_PRO
-  ntop->getPro()->check_license();
-#endif
-
-  lua_pushinteger(vm, 1);
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-}
-
-/* ****************************************** */
-
 /* @brief Returns comprehensive product info: version, OS, license, uptime, listening ports.  Lua: ntop.getInfo([verbose]) → table */
 static int ntop_get_info(lua_State* vm) {
   char rsp[256];
@@ -5554,52 +5495,6 @@ static int ntop_snmp_read_responses(lua_State* vm) {
   snmp->snmp_fetch_responses(vm, timeout);
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
-
-/* ****************************************** */
-
-#if defined(NTOPNG_PRO)
-
-/* @brief Enables the SNMP interface roles set by ntop.snmpSetInterfaceRole,. Lua: ntop.activateSnmpInterfaceRoles() → nil */
-static int ntop_activate_snmp_interface_roles(lua_State* vm) {
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  ntop->activateSnmpInterfaceRoles();
-  lua_pushnil(vm);
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-}
-
-/* ****************************************** */
-
-/* @brief Sets the LAN/WAN role for an SNMP-managed interface (Pro only).  Lua: ntop.snmpSetInterfaceRole(host, ifidx, role) → nil */
-static int ntop_snmp_set_interface_role(lua_State* vm) {
-  struct ndpi_in6_addr exporter_ip;
-  u_int32_t interface_id;
-  SNMPInterfaceRole interface_role;
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  if ((ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK) ||
-      (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TNUMBER) != CONST_LUA_OK) ||
-      (ntop_lua_check(vm, __FUNCTION__, 3, LUA_TNUMBER) != CONST_LUA_OK))
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-
-  if(Utils::parseIPv4v6Address((char*)lua_tostring(vm, 1), &exporter_ip) == false)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE)); /* Parsing error */
-
-  interface_id = (u_int32_t)lua_tonumber(vm, 2);
-  interface_role = (SNMPInterfaceRole)lua_tonumber(vm, 3);
-
-  if (interface_role < role_max_value) {
-    /* Set data */
-
-    ntop->snmpSetInterfaceRole(&exporter_ip, interface_id, interface_role);
-
-    lua_pushnil(vm);
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-  } else
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-}
-#endif
 
 /* ****************************************** */
 
@@ -7148,90 +7043,6 @@ static int ntop_get_local_network_id(lua_State* vm) {
 
 /* ****************************************** */
 
-#ifndef HAVE_NEDGE
-#ifdef NTOPNG_PRO
-/* @brief Validates sub-interface configuration syntax (Pro, non-nEdge).  Lua: ntop.checkSubInterfaceSyntax(str) → boolean */
-static int ntop_check_sub_interface_syntax(lua_State* vm) {
-#ifdef HAVE_NBPF
-  char* filter;
-  NetworkInterface* curr_iface = getCurrentInterface(vm);
-#endif
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-
-#ifdef HAVE_NBPF
-  filter = (char*)lua_tostring(vm, 1);
-#endif
-
-  lua_pushboolean(vm,
-#ifdef HAVE_NBPF
-                  curr_iface ? curr_iface->checkSubInterfaceSyntax(filter) :
-#endif
-                             false);
-
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-}
-#endif
-#endif
-
-/* ****************************************** */
-
-#ifdef NTOPNG_PRO
-/* @brief Validates a BPF-like filter expression syntax (Pro).  Lua: ntop.checkFilterSyntax(str) → boolean */
-static int ntop_check_filter_syntax(lua_State* vm) {
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-#ifdef HAVE_NEDGE
-  lua_pushboolean(vm, true); /* TODO need to implement the logic */
-#else
-
-#ifdef HAVE_NBPF
-  char* filter;
-  NetworkInterface* curr_iface = getCurrentInterface(vm);
-#endif
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-
-#ifdef HAVE_NBPF
-  filter = (char*)lua_tostring(vm, 1);
-#endif
-
-  lua_pushboolean(vm,
-#ifdef HAVE_NBPF
-                  curr_iface ? curr_iface->checkFilterSyntax(filter) :
-#endif
-                             false);
-#endif
-
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-}
-#endif
-
-/* ****************************************** */
-
-#ifndef HAVE_NEDGE
-#ifdef NTOPNG_PRO
-/* @brief Reloads traffic profiles from Redis configuration (Pro, non-nEdge).  Lua: ntop.reloadProfiles() → nil */
-static int ntop_reload_traffic_profiles(lua_State* vm) {
-  NetworkInterface* curr_iface = getCurrentInterface(vm);
-
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  if (curr_iface)
-    curr_iface->updateFlowProfiles(); /* Reload profiles in memory */
-
-  lua_pushnil(vm);
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-}
-#endif
-#endif
-
-/* ****************************************** */
-
 static int _ntop_set_redis(bool do_setnx, lua_State* vm) {
   char *key, *value, buf[21];
   u_int expire_secs = 0;  // default 0 = no expiration
@@ -7329,32 +7140,6 @@ static int ntop_is_gui_access_restricted(lua_State* vm) {
   lua_pushboolean(vm, ntop->get_HTTPserver()->is_gui_access_restricted());
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-}
-
-/* ****************************************** */
-
-/* @brief Requests a ntopng service restart by writing a restart flag.  Lua: ntop.serviceRestart() → nil */
-static int ntop_service_restart(lua_State* vm) {
-#if defined(__linux__) && defined(NTOPNG_PRO)
-  extern AfterShutdownAction afterShutdownAction;
-
-  ntop->getTrace()->traceEvent(TRACE_INFO, "%s() called", __FUNCTION__);
-
-  if (!ntop->isUserAdministrator(vm))
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-
-  if (getppid() == 1 /* parent is systemd */) {
-    /* See also ntop_shutdown (used by nEdge) */
-    afterShutdownAction = after_shutdown_restart_self;
-    ntop->getGlobals()->requestShutdown();
-    lua_pushboolean(vm, true);
-  }
-
-  lua_pushboolean(vm, false);
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-#else
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-#endif
 }
 
 /* ****************************************** */
@@ -9005,69 +8790,6 @@ static int ntop_get_license_limits(lua_State* vm) {
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
-#if defined(NTOPNG_PRO)
-
-/* **************************************************************** */
-
-/* @brief Publishes a message to the internal message broker topic (Pro only).  Lua: ntop.publish(topic, message) → nil */
-static int m_broker_publish(lua_State* vm) {
-  char *topic, *message;
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  topic = (char*)lua_tostring(vm, 1);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  message = (char*)lua_tostring(vm, 2);
-
-  MessageBroker* message_broker = ntop->getMessageBroker();
-  if (!message_broker)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-
-  if (message_broker->publish(topic, message))
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-  else
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-}
-
-/* **************************************************************** */
-
-/* @brief Performs a synchronous RPC call via the internal message broker (Pro only).  Lua: ntop.rpcCall(topic, request) → string */
-static int m_broker_rpc_call(lua_State* vm) {
-  char *topic, *message, rsp[BROKER_RPC_CALL_MAX_RSP_LEN];
-  u_int64_t timeout_ms;
-
-  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  topic = (char*)lua_tostring(vm, 1);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  message = (char*)lua_tostring(vm, 2);
-
-  if (ntop_lua_check(vm, __FUNCTION__, 3, LUA_TNUMBER) != CONST_LUA_OK)
-    timeout_ms = BROKER_RPC_CALL_DEFAULT_TIMEOUT_MS;
-  else
-    timeout_ms = (u_int64_t)lua_tonumber(vm, 3);
-
-  MessageBroker* message_broker = ntop->getMessageBroker();
-
-  if (!message_broker)
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-
-  if (message_broker->rpcCall(topic, message, timeout_ms, (char*)rsp,
-                              BROKER_RPC_CALL_MAX_RSP_LEN)) {
-    lua_newtable(vm);
-    lua_push_str_table_entry(vm, "broker_rsp", rsp);
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-  } else {
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-  }
-}
-
-#endif /* defined(NTOPNG_PRO) */
-
 /* **************************************************************** */
 
 /* @brief Queries a Modbus/TCP device for its identification information.  Lua: ntop.readModbusDeviceInfo(host, port) → table */
@@ -9146,24 +8868,6 @@ static int start_polling_bgp_changes(lua_State* vm) {
   lua_pushnil(vm);
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
-
-/* **************************************************************** */
-
-#ifdef NTOPNG_PRO
-
-/* @brief Reloads networks policy configuration from Redis (Pro only).  Lua: ntop.reloadNetworksPolicyConfiguration() → nil */
-static int reload_networks_policy_configuration(lua_State* vm) {
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-  if (ntop->getPrefs()->reloadNetworksPolicyConfiguration()) {
-    lua_pushboolean(vm, 1);
-    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
-  }
-
-  lua_pushboolean(vm, 0);
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
-}
-#endif
 
 /* **************************************************************** */
 
@@ -9248,19 +8952,6 @@ static int ntop_revision(lua_State *vm) {
 
 /* **************************************************************** */
 
-static int ntop_self_check(lua_State *vm) {
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-
-#if defined(NTOPNG_PRO)
-  ntop->getPro()->selfCheck();
-#endif
-
-  lua_pushnil(vm);
-  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_OK));
-}
-
-/* **************************************************************** */
-
 /* @brief Returns all RIB BGP entries for the specified IP address */
 static int ntop_rib_find(lua_State* vm) {
   char *ip_address, ip_address_s[32], port_s[8];
@@ -9313,7 +9004,6 @@ static luaL_Reg _ntop_reg[] = {
     {"getUptime", ntop_get_uptime},
     {"dumpFile", ntop_dump_file},
     {"dumpBinaryFile", ntop_dump_binary_file},
-    {"checkLicense", ntop_check_license},
     {"systemHostStat", ntop_system_host_stat},
     {"threadsInfo", ntop_threads_info},
     {"getSystemAlertsStats", ntop_get_system_alerts_stats},
@@ -9415,14 +9105,6 @@ static luaL_Reg _ntop_reg[] = {
 
     {"reloadPreferences", ntop_reload_preferences},
     {"setDefaultFilePermissions", ntop_set_default_file_permissions},
-
-#ifdef NTOPNG_PRO
-#ifndef HAVE_NEDGE
-    {"checkSubInterfaceSyntax", ntop_check_sub_interface_syntax},
-    {"reloadProfiles", ntop_reload_traffic_profiles},
-#endif
-    {"checkFilterSyntax", ntop_check_filter_syntax},
-#endif
 
     {"isPro", ntop_is_pro},
     {"isEnterprise", ntop_is_enterprise_m},
@@ -9549,7 +9231,6 @@ static luaL_Reg _ntop_reg[] = {
     {"getNetworks", ntop_get_networks},
     {"getAddressNetwork", ntop_get_address_network},
     {"isGuiAccessRestricted", ntop_is_gui_access_restricted},
-    {"serviceRestart", ntop_service_restart},
     {"getUserObservationPointId", ntop_get_user_observation_point_id},
     {"updateRadiusLoginInfo", ntop_update_radius_login_info},
 
@@ -9616,12 +9297,6 @@ static luaL_Reg _ntop_reg[] = {
     {"snmpGetBatch", ntop_snmp_batch_get}, /* v1/v2c/v3 */
     {"snmpReadResponses", ntop_snmp_read_responses},
 
-#if defined(NTOPNG_PRO)
-    /* SNMP Interfaces */
-    {"snmpSetInterfaceRole", ntop_snmp_set_interface_role},
-    {"activateSnmpInterfaceRoles", ntop_activate_snmp_interface_roles},
-#endif
-
     /* Runtime */
     {"hasGeoIP", ntop_has_geoip},
     {"isWindows", ntop_is_windows},
@@ -9670,9 +9345,6 @@ static luaL_Reg _ntop_reg[] = {
     {"shouldResolveHost", ntop_should_resolve_host},
     {"setIEC104AllowedTypeIDs", ntop_set_iec104_allowed_typeids},
     {"isFlowDedupEnabled", ntop_is_flow_deduplication_enabled},
-#ifdef NTOPNG_PRO
-    {"setModbusAllowedFunctionCodes", ntop_set_modbus_allowed_function_codes},
-#endif
     {"getLocalNetworkAlias", ntop_check_local_network_alias},
     {"getLocalNetworkID", ntop_get_local_network_id},
     {"getRiskStr", ntop_get_risk_str},
@@ -9775,11 +9447,6 @@ static luaL_Reg _ntop_reg[] = {
     /* Register Runtime Interface (PCAP or DB) */
     {"registerRuntimeInterface", ntop_register_runtime_interface},
 
-#if defined(NTOPNG_PRO) && defined(HAVE_KAFKA)
-    /* Kafka */
-    {"sendKafkaMessage", ntop_send_kafka_message},
-#endif
-
     /* Debug */
     {"toggleNewDeleteTrace", ntop_toggle_new_delete_trace},
 
@@ -9792,12 +9459,6 @@ static luaL_Reg _ntop_reg[] = {
     {"isInfluxDBInternalAvailable", ntop_get_influxdb_internal_available},
     {"setInfluxDBInternalAvailable", ntop_set_influxdb_internal_available},
 
-#if defined(NTOPNG_PRO)
-    /* TODO: move to message_broker engine */
-    {"publish", m_broker_publish},
-    {"rpcCall", m_broker_rpc_call},
-#endif
-
     /* Modbus */
     {"readModbusDeviceInfo", read_modbus_device_info},
     {"readEthernetIPDeviceInfo", read_ether_ip_device_info},
@@ -9806,10 +9467,6 @@ static luaL_Reg _ntop_reg[] = {
     {"reloadASNConfiguration", reload_asn_configuration},
     {"startPollingBGPPrefixChanges", start_polling_bgp_changes},
 
-#if defined(NTOPNG_PRO)
-    {"reloadNetworksPolicyConfiguration", reload_networks_policy_configuration},
-#endif
-
     /* In Memory cache */
     {"getLuaCache", ntop_get_lua_cache},
     {"setLuaCache", ntop_set_lua_cache},
@@ -9817,7 +9474,6 @@ static luaL_Reg _ntop_reg[] = {
 
     {"allocMem", ntop_alloc_mem},
     {"revision", ntop_revision},
-    {"selfCheck", ntop_self_check},
 
     /* RIB (Routing Information Base) */
     {"ribFind", ntop_rib_find },
