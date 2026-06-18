@@ -14331,11 +14331,13 @@ class AggregatedASNFlowKey {
   u_int32_t src_asn, dst_asn, src_peer_asn, dst_peer_asn;
   struct ndpi_in6_addr probe_ip;
   u_int32_t input_snmp, output_snmp, key_val;
+  u_int16_t src_site_id, dst_site_id;
 
   AggregatedASNFlowKey(u_int8_t _ip_protocol_version, u_int32_t _src_asn,
                        u_int32_t _dst_asn, u_int32_t _src_peer_asn,
                        u_int32_t _dst_peer_asn, struct ndpi_in6_addr _probe_ip,
-                       u_int32_t _input_snmp, u_int32_t _output_snmp) {
+                       u_int32_t _input_snmp, u_int32_t _output_snmp, 
+                       u_int16_t _src_site_id, u_int16_t _dst_site_id) {
     ip_protocol_version = _ip_protocol_version;
     src_asn = _src_asn;
     dst_asn = _dst_asn;
@@ -14344,6 +14346,8 @@ class AggregatedASNFlowKey {
     memcpy(&probe_ip, &_probe_ip, sizeof(struct ndpi_in6_addr));
     input_snmp = _input_snmp;
     output_snmp = _output_snmp;
+    src_site_id = _src_site_id;
+    dst_site_id = _dst_site_id;
   }
 
   AggregatedASNFlowKey(Flow* f) {
@@ -14361,12 +14365,14 @@ class AggregatedASNFlowKey {
     memcpy(&probe_ip, f->getFlowDeviceIP(), sizeof(probe_ip));
     input_snmp = f->getFlowDeviceInIndex();
     output_snmp = f->getFlowDeviceOutIndex();
+    src_site_id = f->getSrcNetworkSiteId();
+    dst_site_id = f->getDstNetworkSiteId();
 
     key_val = ip_protocol_version
       + (probe_ip.u6_addr.u6_addr64[0] + probe_ip.u6_addr.u6_addr64[1])
       + src_asn * 2 + dst_asn * 3 +
       src_peer_asn * 4 + dst_peer_asn * 5 + input_snmp * 6 +
-      output_snmp * 7;
+      output_snmp * 7 + src_site_id * 8 + dst_site_id * 9;
   }
 
   inline u_int32_t get_val() const { return (key_val); }
@@ -14377,11 +14383,13 @@ class AggregatedASNFlowKey {
         (((src_asn == k->src_asn) && (dst_asn == k->dst_asn) &&
           (src_peer_asn == k->src_peer_asn) &&
           (dst_peer_asn == k->dst_peer_asn) && (input_snmp == k->input_snmp) &&
-          (output_snmp == k->output_snmp)) ||
+          (output_snmp == k->output_snmp) &&
+          (src_site_id == k->src_site_id) && (dst_site_id == k->dst_site_id)) ||
          ((src_asn == k->dst_asn) && (dst_asn == k->src_asn) &&
           (src_peer_asn == k->dst_peer_asn) &&
           (dst_peer_asn == k->src_peer_asn) && (input_snmp == k->output_snmp) &&
-          (output_snmp == k->input_snmp))))
+          (output_snmp == k->input_snmp) &&
+          (src_site_id == k->src_site_id) && (dst_site_id == k->dst_site_id))))
       return (true);
     else
       return (false);
@@ -14521,7 +14529,9 @@ bool NetworkInterface::aggregateASNModeFlows(lua_State* vm) {
       std::to_string(k->src_peer_asn) + "," +
       std::to_string(k->dst_peer_asn) + ",'" + probe_ip
       + "'," + std::to_string(k->input_snmp) + "," +
-      std::to_string(k->output_snmp) + ")";
+      std::to_string(k->output_snmp) + "," +
+      std::to_string(k->src_site_id) + "," +
+      std::to_string(k->dst_site_id) + ")";
 
     /* ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s", sql.c_str()); */
 

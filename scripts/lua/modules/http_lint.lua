@@ -3032,6 +3032,7 @@ local known_parameters = {
     ["longitude"] = validateSingleWord,
     ["site"] = validateSingleWord,
     ["site_id"] = validateSingleWord,
+    ["site_parent"] = validateNumber,
     ["site_name"] = validateUnquoted,
     ["site_description"] = validateUnquoted,
     ["site_networks"] = validateNetworksList,

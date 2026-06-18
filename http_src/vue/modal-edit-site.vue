@@ -44,6 +44,22 @@
                 </div>
             </div>
 
+            <!-- ==================== Parent Site Field ==================== -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold mb-0">
+                        {{ _i18n("sites_page.parent_site") }}
+                        <i class="fa-solid fa-circle-question" data-bs-toggle="tooltip" data-bs-placement="top"
+                            :title="_i18n('sites_page.parent_site_description')"></i>
+                    </label>
+                </div>
+
+                <div class="col-md-9">
+                    <SelectSearch :options="_sitesList" :selected_option="selectedSite"
+                        @update:selected_option="updateSelectedOption" />
+                </div>
+            </div>
+
             <!-- ==================== Geographic Location Fields ==================== -->
             <div class="row mb-3">
                 <div class="col-md-3">
@@ -97,6 +113,7 @@
 import { ref, computed, nextTick, watch } from "vue";
 import { default as modal } from "./modal.vue";
 import regexValidation from "../utilities/regex-validation"
+import SelectSearch from "./select-search.vue";
 import { default as Geomap } from "./geomap.vue";
 
 // Internationalization helper
@@ -112,6 +129,8 @@ const site_name = ref("");             // Site name
 const site_description = ref("");      // Site description
 const site_lat = ref(0);               // Latitude coordinate
 const site_lng = ref(0);                // Longitude coordinate
+const _sitesList = ref([]);
+const selectedSite = ref([]);
 
 // Form state management
 const name_error = ref("");                      // Validation error message for name field
@@ -124,7 +143,8 @@ const emit = defineEmits(["edit", "add"]);        // Emit edit or add event on f
 // ==================== Props ====================
 const props = defineProps({
     context: Object,        // Context data (csrf, etc.)
-    errorMessage: String    // Error message from parent component
+    errorMessage: String,   // Error message from parent component
+    sitesList: Object
 });
 
 // ==================== Computed Properties ====================
@@ -139,6 +159,22 @@ const isReserved = computed(() => {
 const is_form_valid = computed(() => {
     return site_name.value.trim().length > 1 && !name_error.value;
 });
+
+watch(() => [props.sitesList], (cur_value, old_value) => {
+    _sitesList.value = cur_value[0].map((t) => {
+        return {
+            id: t.id,
+            label: t.name,
+            title: t.name,
+        }
+    })
+}, { flush: 'pre', deep: true });
+
+/* ************************************** */
+
+const updateSelectedOption = (item) => {
+    selectedSite.value = item;
+}
 
 // ==================== Watchers ====================
 
@@ -250,7 +286,8 @@ const handleSubmit = () => {
         site_description: site_description.value.trim(),
         site_lat: site_lat.value,
         site_lng: site_lng.value,
-        item: currentItem.value
+        item: currentItem.value,
+        site_parent: selectedSite.value.id
     };
 
     // Emit appropriate event based on mode
@@ -276,7 +313,8 @@ const open = (item = null) => {
         site_name: edited_site_name = "",
         site_description: edited_site_description = "",
         site_lat: edited_site_lat = 0,
-        site_lng: edited_site_lng = 0
+        site_lng: edited_site_lng = 0,
+        site_parent: edited_site_id = 0, // default site is 0
     } = item || {}
 
     // Populate form fields
@@ -284,6 +322,7 @@ const open = (item = null) => {
     site_description.value = edited_site_description;
     site_lat.value = edited_site_lat;
     site_lng.value = edited_site_lng;
+    selectedSite.value = _sitesList.value.find(el => el.id === edited_site_id);
 
     // Reset state
     name_error.value = "";

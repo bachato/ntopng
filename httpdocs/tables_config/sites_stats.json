@@ -1,0 +1,94 @@
+{
+	"id": "sites_stats",
+	"data_url": "lua/pro/rest/v2/get/sites/stats.lua",
+	"use_current_page": false,
+	"enable_search": true,
+	"paging": false,
+	"display_empty_rows": true,
+	"default_sort": {
+		"column_id": "name",
+		"sort": 1
+	},
+	"columns": [
+        {
+			"id": "actions",
+			"title_i18n": "actions",
+			"sortable": false,
+			"min-width" : "80px",
+            "max-width" : "100px",
+			"sticky": true,
+			"class": [
+				"text-nowrap",
+				"text-center"
+			],
+			"render_v_node_type": "button_list",
+			"button_def_array": [
+				{
+					"id": "edit_site",
+					"icon": "fas fa-cog",
+					"title_i18n": "sites_page.edit_site",
+					"class": [],
+					"event_id": "click_button_edit_site"
+				},
+				{
+                    "id": "delete_site",
+                    "icon": "fas fa fa-trash",
+                    "title_i18n": "delete",
+                    "class": [],
+                    "event_id": "click_button_delete_site"
+                }
+			]
+		},
+		{
+			"title_i18n": "sites_page.site_a",
+			"data_field": "site_a",
+			"sortable": true,
+			"min-width" : "120px",
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
+			"title_i18n": "sites_page.site_b",
+			"data_field": "site_b",
+			"sortable": true,
+			"min-width" : "120px",
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
+            "id": "bytes_sent",
+			"title_i18n": "bytes_sent",
+			"data_field": "bytes_sent",
+			"sortable": true,
+			"exclude_from_search": true,
+			"class": [
+				"text-nowrap",
+				"text-right"
+			]
+		},
+		{
+            "id": "bytes_rcvd",
+			"title_i18n": "bytes_rcvd",
+			"data_field": "bytes_rcvd",
+			"sortable": true,
+			"exclude_from_search": true,
+			"class": [
+				"text-nowrap",
+				"text-right"
+			]
+		},
+		{
+            "id": "total_bytes",
+			"title_i18n": "total_bytes",
+			"data_field": "total_bytes",
+			"sortable": true,
+			"exclude_from_search": true,
+			"class": [
+				"text-nowrap",
+				"text-right"
+			]
+		}
+	]
+}

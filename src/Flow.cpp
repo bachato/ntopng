@@ -10320,3 +10320,21 @@ void Flow::setSNMPExporterInterfaceRole(SNMPInterfaceRole r) {
   else if(flowExporterInterfaceRole == role_other /* Not yet set */)
     flowExporterInterfaceRole = r;
 }
+
+/* *************************************** */
+
+u_int16_t Flow::getSrcNetworkSiteId() {
+    Host *cli_host = getViewSharedClient();
+    return (cli_host) ? 
+        iface->getNetworkSiteId(cli_host->get_local_network_id()) 
+        : 0;
+}
+
+/* *************************************** */
+
+u_int16_t Flow::getDstNetworkSiteId() {
+    Host *srv_host = getViewSharedServer();
+    return (srv_host) ? 
+        iface->getNetworkSiteId(srv_host->get_local_network_id()) 
+        : 0;
+}

@@ -223,7 +223,9 @@ local function unifyNodes(new_nodes, nodes, query)
       end
    end
 
-   addRootNode(nodes, query)
+   if query.root then 
+      addRootNode(nodes, query)
+   end
 end
 
 -- ##########################################

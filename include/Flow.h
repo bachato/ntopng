@@ -1479,6 +1479,9 @@ class Flow : public GenericHashEntry {
   inline void setFlowSiteId(u_int16_t id) { site_id = id; }
   inline u_int16_t getFlowSiteId() { return (site_id); }
 
+  u_int16_t getSrcNetworkSiteId();
+  u_int16_t getDstNetworkSiteId();
+
   inline const u_int16_t getScore() const { return (flow_score); };
 
 #ifdef HAVE_NEDGE

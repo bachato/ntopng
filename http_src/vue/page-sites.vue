@@ -1,85 +1,93 @@
 <!-- (C) 2026 - ntop.org -->
 <template>
-    <div v-show="activePage === 'networks'" class="m-2 mb-3">
-        <TableWithConfig ref="table_networks_stats" :table_id="networks_table" :csrf="csrf" showLoading="true"
-            :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting" @custom_event="on_table_custom_event">
+    <div class="m-2 mb-3">
+        <Transition v-if="activeTab === 'stats'" name="add-effect" mode="out-in">
+            <div class="position-relative">
+                <div class="mb-4 d-flex flex-column" style="height: 30vh;">
+                    <Loading :isLoading="loading"></Loading>
+                    <Sankey ref="sankey_chart" :no_data_message="no_data_message" :sankey_data="sankey_data">
+                    </Sankey>
+                </div>
+            </div>
+        </Transition>
+        <TableWithConfig v-if="activeTab === 'stats'" ref="tableSitesStats" :table_id="'sites_stats'" :csrf="csrf"
+            :showLoading="true" @custom_event="on_table_custom_event" :f_map_columns="map_table_def_columns"
+            :f_sort_rows="columns_sorting">
 
-            <!-- Table Selector: Networks or Sites -->
+            <!-- Table Selector: Stats or Config -->
             <template v-slot:custom_header>
-                <NavbarTabs :tabs="tabs" :active_tab_id="activePage" @on_click="switchActivePage" />
+                <NavbarTabs :tabs="tabs" :active_tab_id="activeTab" @on_click="switchActiveTab" />
             </template>
 
-            <!-- add Networks 
-            <template v-slot:custom_buttons>
-                <button class="btn btn-link" type="button" @click="openAddNetworksModal">
-                    <i class="fas fa-plus"></i>
-                </button>
-            </template>
-            -->
-        </TableWithConfig>
-    </div>
-    <div v-show="activePage !== 'networks'" class="m-2 mb-3">
-        <!-- Import feedback banners -->
-        <div v-if="importWithSuccess" class="alert alert-success alert-dismissable">
-            <span>{{ importOkText }}</span>
-        </div>
-        <div v-if="importWithError" class="alert alert-danger alert-dismissable">
-            <span>{{ importErrorText }}</span>
-        </div>
-
-        <TableWithConfig ref="table_sites_stats" :table_id="site_table" :csrf="csrf" :showLoading="true"
-            @custom_event="on_table_custom_event" :f_map_columns="map_table_def_columns" :f_sort_rows="columns_sorting">
-
-            <!-- Table Selector: Networks or Sites -->
-            <template v-slot:custom_header>
-                <NavbarTabs :tabs="tabs" :active_tab_id="activePage" @on_click="switchActivePage" />
-            </template>
-
-            <!-- Custom button slot for adding/importing/exporting sites -->
+            <!-- Custom button slot for adding new sites -->
             <template v-slot:custom_buttons>
                 <button class="btn btn-link" type="button" @click="openAddSiteModal">
                     <i class="fas fa-plus" data-bs-toggle="tooltip" data-bs-placement="top"
                         :title="_i18n('sites_page.add_site')"></i>
                 </button>
-                <button class="btn btn-link" type="button" @click="importSites">
-                    <i class="fa-solid fa-file-arrow-down" data-bs-toggle="tooltip" data-bs-placement="top"
-                        :title="_i18n('sites_page.import_sites')"></i>
-                </button>
-                <a class="btn btn-link" download="sites.csv" :href="sites_export_url">
-                    <i class="fa-solid fa-file-arrow-up" data-bs-toggle="tooltip" data-bs-placement="top"
-                        :title="_i18n('sites_page.export_sites')"></i>
-                </a>
-                <!-- Hidden file input used by the Import button -->
-                <input ref="importFileInput" type="file" accept=".csv,text/csv" class="d-none"
-                    @change="onImportFileSelected" />
             </template>
         </TableWithConfig>
+        <template v-else>
+            <!-- Import feedback banners -->
+            <div v-if="importWithSuccess" class="alert alert-success alert-dismissable">
+                <span>{{ importOkText }}</span>
+            </div>
+            <div v-if="importWithError" class="alert alert-danger alert-dismissable">
+                <span>{{ importErrorText }}</span>
+            </div>
+
+            <TableWithConfig ref="tableSitesConfig" :table_id="'sites_config'" :csrf="csrf" :showLoading="true"
+                @custom_event="on_table_custom_event" :f_map_columns="map_table_def_columns"
+                :f_sort_rows="columns_sorting" @rows_loaded="updateSitesList">
+
+                <!-- Table Selector: Stats or Config -->
+                <template v-slot:custom_header>
+                    <NavbarTabs :tabs="tabs" :active_tab_id="activeTab" @on_click="switchActiveTab" />
+                </template>
+
+                <!-- Custom button slot for adding/importing/exporting sites -->
+                <template v-slot:custom_buttons>
+                    <button class="btn btn-link" type="button" @click="openAddSiteModal">
+                        <i class="fas fa-plus" data-bs-toggle="tooltip" data-bs-placement="top"
+                            :title="_i18n('sites_page.add_site')"></i>
+                    </button>
+                    <button class="btn btn-link" type="button" @click="importSites">
+                        <i class="fa-solid fa-file-arrow-down" data-bs-toggle="tooltip" data-bs-placement="top"
+                            :title="_i18n('sites_page.import_sites')"></i>
+                    </button>
+                    <a class="btn btn-link" download="sites.csv" :href="sites_export_url">
+                        <i class="fa-solid fa-file-arrow-up" data-bs-toggle="tooltip" data-bs-placement="top"
+                            :title="_i18n('sites_page.export_sites')"></i>
+                    </a>
+                    <!-- Hidden file input used by the Import button -->
+                    <input ref="importFileInput" type="file" accept=".csv,text/csv" class="d-none"
+                        @change="onImportFileSelected" />
+                </template>
+            </TableWithConfig>
+        </template>
     </div>
 
     <!-- Modal components for site management -->
-    <ModalEditNetwork ref="networkModal" :errorMessage="modalNetworkErrorMessage" :sitesList="sitesList"
-        @edit="handleEditNetwork">
-    </ModalEditNetwork>
-    <ModalEditSite ref="siteModal" :errorMessage="modalErrorMessage" @edit="handleEditSite" @add="handleAddSite">
+    <ModalEditSite ref="siteModal" :errorMessage="modalErrorMessage" :sitesList="sitesList" @edit="handleEditSite"
+        @add="handleAddSite">
     </ModalEditSite>
     <ModalDeleteSite ref="siteModalDelete" @delete="handleDeleteSite">
     </ModalDeleteSite>
-
-    <NoteList v-if="activePage === 'networks'" :note_list="note_list"></NoteList>
 </template>
 
 
 <script setup>
-import { ref, onBeforeMount, watch } from "vue";
+import { ref, onBeforeMount, onMounted, watch } from "vue";
+import { default as Loading } from "./loading.vue"
+import { default as Sankey } from "./sankey.vue";
 import { default as NavbarTabs } from "./components/navbar-tabs.vue";
 import { default as dataUtils } from "../utilities/data-utils.js";
 import { default as ModalEditSite } from "./modal-edit-site.vue";
-import { default as ModalEditNetwork } from "./modal-edit-network.vue";
 import { default as ModalDeleteSite } from "./modal-delete-site.vue";
 import { default as sortingFunctions } from "../utilities/sorting-utils.js";
 import { default as TableWithConfig } from "./table-with-config.vue";
 import { default as NoteList } from "./note-list.vue";
-import formatterUtils from "../utilities/formatter-utils";
+import FormatterUtils from "../utilities/formatter-utils";
 import NtopUtils from "../utilities/ntop-utils.js";
 
 /* ************************************** */
@@ -92,49 +100,40 @@ const props = defineProps({
 });
 
 const tabs = [
-    { id: "networks", label_i18n: "networks" },
-    { id: "sites", label_i18n: "sites_page.sites" },
+    { id: "stats", label_i18n: "statistics" },
+    { id: "config", label_i18n: "configuration" },
 ];
-
-const note_list = [
-    _i18n("network_stats.note_overlapping_networks"),
-    _i18n("network_stats.note_see_both_network_entries"),
-    _i18n("network_stats.note_broader_network")
-];
+const sankey_url = `${http_prefix}/lua/pro/rest/v2/get/sites/sankey.lua`;
 
 // API endpoint URLs for site management
 const API = {
     edit: `${http_prefix}/lua/pro/rest/v2/edit/sites/edit.lua`,
     add: `${http_prefix}/lua/pro/rest/v2/add/sites/add.lua`,
     delete: `${http_prefix}/lua/pro/rest/v2/delete/sites/delete.lua`,
-    get: `${http_prefix}/lua/pro/rest/v2/get/sites/list.lua`,
     import: `${http_prefix}/lua/pro/rest/v2/import/sites/sites.lua`,
-    net_edit: `${http_prefix}/lua/rest/v2/edit/network/edit.lua`
+    get: `${http_prefix}/lua/pro/rest/v2/get/sites/list.lua`,
 };
 
 // Export endpoint used directly by the download anchor (CSV attachment)
 const sites_export_url = `${http_prefix}/lua/pro/rest/v2/export/sites/sites.lua?download=1`;
-
 const areNetworksTsEnabled = props.context.areNetworksTsEnabled;
 const csrf = props.context.csrf;
+const loading = ref(true);
+const sankey_chart = ref(null);
+const sankey_data = ref({});
+const no_data_message = _i18n("as_overview.no_data")
 
 /* ************************************** */
 // Reactive state variables
-const activePage = ref("networks");
-// Networks
-const networks_table = ref('networks_list');
-const table_networks_stats = ref(null);
+const activeTab = ref("stats");
 
-// Sites
-const sitesList = ref([]);
-const site_table = ref("sites_list");         // Table identifier
-const table_sites_stats = ref(null);               // Reference to table component
+const tableSitesStats = ref(null);
+const tableSitesConfig = ref(null);
 const editingSiteId = ref(null);             // ID of site currently being edited
 const modalErrorMessage = ref("");                    // Error message for modals
-const modalNetworkErrorMessage = ref("");     // Error message for modals
 const siteModal = ref(null);                  // Reference to edit/add modal
-const networkModal = ref(null);                  // Reference to edit/add modal
 const siteModalDelete = ref(null);            // Reference to delete modal
+const sitesList = ref([]);
 
 // Import (CSV) state
 const importFileInput = ref(null);
@@ -145,30 +144,17 @@ const importErrorText = ref("");
 
 /* ************************************** */
 
-onBeforeMount(() => {
-    retrieveSitesList()
-    const activePageURL = ntopng_url_manager.get_url_entry("page")
-    activePage.value = activePageURL ? activePageURL : "networks";
+onMounted(() => {
+    updateSankeyData();
 })
 
 /* ************************************** */
 
-watch(activePage, (newVal) => {
-    // This is mandatory because when switching between tables, being just "hidden" the tables
-    // to have a fast load, the jquery resize properties are not correctly loaded (size at 0)
-    if (newVal === 'networks') {
-        table_networks_stats?.value?.redrawTable()
-    } else {
-        table_sites_stats?.value?.redrawTable()
-    }
-}, { flush: 'post' })
-
-/* ************************************** */
-
-const switchActivePage = function (tab) {
-    activePage.value = tab.id
-    ntopng_url_manager.set_key_to_url("page", tab.id)
-}
+onBeforeMount(() => {
+    const activeTabURL = ntopng_url_manager.get_url_entry("tab")
+    activeTab.value = activeTabURL ? activeTabURL : "stats";
+    retrieveSitesList()
+})
 
 /* ************************************** */
 
@@ -184,60 +170,118 @@ const retrieveSitesList = function () {
 
 /* ************************************** */
 
-const refreshActiveTable = () => {
-    table_sites_stats.value?.refresh_table(true);
-    table_networks_stats.value?.refresh_table(true);
-    retrieveSitesList()
+watch(activeTab, (newVal) => {
+    // This is mandatory because when switching between tables, being just "hidden" the tables
+    // to have a fast load, the jquery resize properties are not correctly loaded (size at 0)
+    if (newVal === 'stats') {
+        tableSitesStats?.value?.redrawTable()
+    } else {
+        tableSitesConfig?.value?.redrawTable()
+    }
+}, { flush: 'post' })
+
+/* ************************************** */
+
+const switchActiveTab = function (tab) {
+    activeTab.value = tab.id
+    ntopng_url_manager.set_key_to_url("tab", tab.id)
 }
+
+/* ************************************** */
+
+const refreshActiveTable = () => {
+    tableSitesStats.value?.refresh_table(true);
+    tableSitesConfig.value?.refresh_table(true);
+}
+
+/* ************************************** */
+
+const updateSankeyData = async () => {
+    loading.value = true;
+    let data = await getSankeyData();
+    sankey_data.value = data;
+    loading.value = false;
+}
+
+/* ***************************************************** */
+
+const getExtraParameters = () => {
+    let extra_params = ntopng_url_manager.get_url_object();
+    if (!props.context.isEnterpriseXL || !props.context.hasClickHouseSupport) {
+        extra_params.epoch_begin = null
+        extra_params.epoch_end = null
+    }
+    return extra_params;
+};
+
+/* ************************************** */
+
+const getSankeyUrl = () => {
+    let params = {
+        ifid: props.context.ifid,
+        ...getExtraParameters()
+    }
+    let url_params = ntopng_url_manager.obj_to_url_params(params);
+    let url_request = `${sankey_url}?${url_params}`;
+    return url_request;
+}
+
+/* ************************************** */
+
+const getSankeyData = async () => {
+    const url_request = getSankeyUrl();
+    let graph = await ntopng_utility.http_request(url_request);
+    graph.nodes.forEach((node, i) => {
+        node.index = i
+    })
+    graph.links.forEach((link, i) => {
+        if (link.value === 0) {
+            link.value = 1
+        }
+        let node = graph.nodes.find((el) => el.node_id == link.source_node_id)
+        link.source = node.index;
+        node = graph.nodes.find((el) => el.node_id == link.target_node_id)
+        link.target = node.index;
+    })
+
+    return graph
+}
+
+/* ************************************** */
 
 const map_table_def_columns = (columns) => {
     let map_columns = {
-        /* Networks */
-        "networkName": (value, row) => {
-            const network_url = `${http_prefix}/lua/hosts_stats.lua?network=${row.networkId}`;
-            const network_ts_url = `${http_prefix}/lua/network_details.lua?network=${row.networkId}&page=historical`;
-
-            // Create href with network name and icons
-            let href = `<a href="${network_url}">${value}</a>`;
-            const ts_icon_href = `&nbsp;<a href="${network_ts_url}"><i class="fas fa-chart-area"></i></a>`;
-
-            if (areNetworksTsEnabled) {
-                href += ts_icon_href;
-            }
-            return href
+        /* Stats */
+        // Site name column - displays the name directly
+        "site_a": (value, row) => {
+            return value.name
         },
         // Site name column - displays the name directly
-        "site": (value, row) => {
-            const netSite = sitesList.value.find((el) => el.id === value.id)
-            if (!netSite)
-                return ''
-            return netSite.name
+        "site_b": (value, row) => {
+            return value.name
         },
-        "hosts": (value, row) => {
-            return formatterUtils.getFormatter("number")(value);
+        "bytes_sent": (value, row) => {
+            return FormatterUtils.getFormatter("bytes")(value);
         },
-        "score": (value, row) => {
-            return formatterUtils.getFormatter("number")(value);
+        "bytes_rcvd": (value, row) => {
+            return FormatterUtils.getFormatter("bytes")(value);
         },
-        "hostsScoreRatio": (value, row) => {
-            return formatterUtils.getFormatter("number")(value);
+        "total_bytes": (value, row) => {
+            return FormatterUtils.getFormatter("bytes")(value);
         },
-        "alertedFlows": (value, row) => {
-            return formatterUtils.getFormatter("number")(value);
-        },
-        "breakdown": (value, row) => {
-            return NtopUtils.createBreakdown(row.breakdown.percentage_bytes_sent, row.breakdown.percentage_bytes_rcvd, "Sent", "Rcvd")
-        },
-        "throughput": (value, row) => {
-            return formatterUtils.getFormatter("bps")(value);
-        },
-        "traffic": (value, row) => {
-            return formatterUtils.getFormatter("bytes")(value);
-        },
-        /* Sites */
+        /* Config */
         // Site name column - displays the name directly
         "name": (value, row) => {
             return value
+        },
+        // Site name column - displays the name directly
+        "parent": (value, row) => {
+            if (!value)
+                return ''
+            const netSite = sitesList.value.find((el) => el.id === value)
+            if (!netSite)
+                return ''
+            return netSite.name
         },
         // Description column - displays description directly
         "description": (value, row) => {
@@ -300,30 +344,23 @@ const map_table_def_columns = (columns) => {
 
 function columns_sorting(col, r0, r1) {
     if (col != null) {
-        /* Networks */
-        if (col.id == "network_name") {
-            return sortingFunctions.sortByName(r0.networkName, r1.networkName, col.sort);
-        } else if (col.id == "site") {
-            return sortingFunctions.sortByName(r0.site.name, r1.site.name, col.sort);
-        } else if (col.id == "hosts") {
-            return sortingFunctions.sortByNumber(r0.hosts, r1.hosts, col.sort);
-        } else if (col.id == "score") {
-            return sortingFunctions.sortByNumber(r0.score, r1.score, col.sort);
-        } else if (col.id == "hosts_score_ratio") {
-            return sortingFunctions.sortByNumber(r0.hostsScoreRatio, r1.hostsScoreRatio, col.sort);
-        } else if (col.id == "alerted_flows") {
-            return sortingFunctions.sortByNumber(r0.alertedFlows, r1.alertedFlows, col.sort);
-        } else if (col.id == "throughput") {
-            return sortingFunctions.sortByNumber(r0.throughput, r1.throughput, col.sort);
-        } else if (col.id == "traffic") {
-            return sortingFunctions.sortByNumber(r0.traffic, r1.traffic, col.sort);
-        }
-        /* Sites */
-        else if (col.id == "name") {
+        /* Config */
+        if (col.id == "name") {
             return sortingFunctions.sortByName(r0.name, r1.name, col.sort);
+        } else if (col.id == "parent") {
+            return sortingFunctions.sortByName(r0.parent, r1.parent, col.sort);
+        } else if (col.id == "site_a") {
+            return sortingFunctions.sortByName(r0.site_a.name, r1.site_a.name, col.sort);
+        } else if (col.id == "site_b") {
+            return sortingFunctions.sortByName(r0.site_b.name, r1.site_b.name, col.sort);
+        } else if (col.id == "bytes_sent") {
+            return sortingFunctions.sortByNumber(r0.bytes_sent, r1.bytes_sent, col.sort);
+        } else if (col.id == "bytes_rcvd") {
+            return sortingFunctions.sortByNumber(r0.bytes_rcvd, r1.bytes_rcvd, col.sort);
+        } else if (col.id == "total_bytes") {
+            return sortingFunctions.sortByNumber(r0.total_bytes, r1.total_bytes, col.sort);
         }
     }
-
 }
 
 /* ************************************** */
@@ -338,7 +375,6 @@ function on_table_custom_event(event) {
     let events_managed = {
         "click_button_edit_site": click_button_edit_site,
         "click_button_delete_site": click_button_delete_site,
-        "click_button_edit_network": click_button_edit_network
     };
 
     if (events_managed[event.event_id] == null) {
@@ -346,20 +382,6 @@ function on_table_custom_event(event) {
     }
     events_managed[event.event_id](event);
 }
-
-// Handler for edit button click
-const click_button_edit_network = (event) => {
-    const row = event.row
-    if (!row) return;
-    if (row.id == 0) return;  // Default site cannot be edited
-
-    // Open the Edit modal with pre-filled data
-    networkModal.value.open({
-        network_id: row.networkId,
-        network_alias: row.networkNameOnly,
-        site_id: row.site.id
-    });
-};
 
 // Handler for edit button click
 const click_button_edit_site = (event) => {
@@ -377,6 +399,7 @@ const click_button_edit_site = (event) => {
         site_lat: row.latitude,
         site_lng: row.longitude,
         site_reserved: row.reserved,
+        site_parent: row.site_parent
     };
 
     // Open the Edit modal with pre-filled data
@@ -397,6 +420,7 @@ async function click_button_delete_site(event) {
         site_lat: row.latitude,
         site_lng: row.longitude,
         site_id: row.id,
+        site_parent: row.site_parent
     };
 
     showDeleteModal(site_data);
@@ -407,6 +431,13 @@ async function click_button_delete_site(event) {
 function openAddSiteModal() {
     siteModal.value.open();
 }
+
+/* ************************************** */
+// Shows the delete confirmation modal
+const showDeleteModal = (item) => {
+    siteModalDelete.value.showDelete(item);
+};
+
 
 /* ************************************** */
 
@@ -482,12 +513,6 @@ const onImportFileSelected = (event) => {
 };
 
 /* ************************************** */
-// Shows the delete confirmation modal
-const showDeleteModal = (item) => {
-    siteModalDelete.value.showDelete(item);
-};
-
-/* ************************************** */
 // Handles the edit form submission
 // Sends updated site data to the server
 const handleEditSite = (data) => {
@@ -498,7 +523,8 @@ const handleEditSite = (data) => {
         site_description,
         site_networks,
         site_lat,
-        site_lng
+        site_lng,
+        site_parent
     } = data
 
     const headers = {
@@ -514,7 +540,8 @@ const handleEditSite = (data) => {
             site_description,
             site_networks,
             latitude: site_lat,
-            longitude: site_lng
+            longitude: site_lng,
+            site_parent
         }
     };
 
@@ -552,6 +579,7 @@ const handleAddSite = async (data) => {
             site_name: data.site_name,
             site_description: data.site_description,
             site_networks: data.site_networks,
+            site_parent: data.site_parent,
             latitude: data.site_lat,
             longitude: data.site_lng
         }
@@ -606,37 +634,35 @@ const handleDeleteSite = async (item) => {
     siteModalDelete.value.close();
 };
 
-/* ************************************** */
-// Handles the edit network form submission
-const handleEditNetwork = async (data) => {
-    modalErrorMessage.value = "";  // Clear any previous error
-
-    const headers = { 'Content-Type': 'application/json' };
-
-    // Prepare request payload for new site
-    const editParams = {
-        csrf: props.context.csrf,
-        network: data.network_id,
-        custom_name: data.network_alias,
-        site_id: data.site_id,
-    };
-
-    // Send add request to server
-    ntopng_utility.http_request(API.net_edit, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(editParams)
-    }, false, true, true)
-        .then(data => {
-            // Handle server-side validation errors
-            if (!data || data.rc < 0) {
-                modalErrorMessage.value = data.rsp || _i18n("error");
-                return;
-            }
-            // Success - refresh data and close modal
-            refreshActiveTable();
-            networkModal.value.close();
-        })
-        .catch(err => console.error('Error during Site editing:', err))
+const updateSitesList = function (res) {
+    sitesList.value = res?.rows?.filter(el => el.id !== "0");
 }
 </script>
+
+<style>
+.add-effect-move,
+/* apply transition to moving elements */
+.add-effect-enter-active,
+.add-effect-leave-active {
+    transition: all 0.35s ease;
+}
+
+/* Transform: positive pixels, the effects let enters the component
+ * from the right, negative pixels from the left
+ */
+.add-effect-enter-from {
+    opacity: 0;
+    transform: translateX(-60px);
+}
+
+.add-effect-leave-to {
+    opacity: 0;
+    transform: translateX(0px);
+}
+
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.add-effect-leave-active {
+    position: absolute;
+}
+</style>

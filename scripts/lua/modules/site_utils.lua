@@ -22,7 +22,8 @@ local MAX_PROFILES_NUM = 1024 -- Maximum number of sites allowed in the system
 -- This site cannot be modified or deleted and serves as a fallback
 local DEFAULT_SITE = {
 	id = "0", -- System reserved ID (always string "0")
-	name = "Default", -- Display name
+   name = "Default", -- Display name
+   parent = nil, -- No parent for the Default Site
 	description = "", -- Optional description
 	longitude = 0, -- Geographic coordinates (0,0 by default)
 	latitude = 0,
@@ -86,6 +87,13 @@ local function validate_site(site, existing_sites, ignore_name_duplication)
 	if site.longitude < -180 or site.longitude > 180 then
 		return false, "Invalid longitude"
 	end
+
+   if site.site_parent and tonumber(site.site_parent) then
+      local parent = site_utils.getSiteInfo(site.site_parent)
+      if parent.id == "0" then
+         return false, "Invalid Parent Site selected"
+      end
+   end
 
 	-- Step 5: Check for duplicate site names (unless explicitly disabled for edits)
 	if not ignore_name_duplication then
@@ -161,6 +169,7 @@ function site_utils.getSites()
 		record["latitude"] = site.latitude -- Geographic coordinates
 		record["longitude"] = site.longitude
 		record["reserved"] = site.reserved -- System-reserved flag
+      record["parent"] = site.parent -- Parent site, could be nil
 
 		-- Add to result array
 		result[#result + 1] = record
@@ -216,6 +225,7 @@ function site_utils.editSite(site)
 			description = site.site_description,
 			latitude = site.latitude,
 			longitude = site.longitude,
+         parent = site.site_parent
 		}
 
 		-- Store updated site in Redis
@@ -270,6 +280,7 @@ function site_utils.addSite(site)
 			description = site.site_description,
 			latitude = site.latitude,
 			longitude = site.longitude,
+         parent = site.site_parent
 		}
 
 		-- Store new site in Redis
@@ -522,6 +533,17 @@ function site_utils.restore(conf)
 
 	-- success
 	return nil
+end
+
+-- ##############################################
+
+function site_utils.formatSite(site_id)
+	if isEmptyString(site_id) then
+		return DEFAULT_SITE.name
+	end
+
+	local site_info = site_utils.getSiteInfo(site_id)
+	return site_info.name
 end
 
 -- ##############################################

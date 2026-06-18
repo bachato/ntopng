@@ -215,7 +215,9 @@ function flow_data.formatStats(stats_to_format, queries)
                end
             else
                label = formatters_linkers[key]["formatter"](value)
-               url_link = formatters_linkers[key]["linker"](value)
+               if formatters_linkers[key]["linker"] then
+                  url_link = formatters_linkers[key]["linker"](value)
+               end
             end
 
             formatted_element[key] = {

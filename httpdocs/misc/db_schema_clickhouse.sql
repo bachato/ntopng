@@ -2263,10 +2263,16 @@ CREATE TABLE IF NOT EXISTS `hourly_asn` (
 `DST_PEER_ASN` UInt32,
 `PROBE_IP` IPv6,
 `INPUT_SNMP` UInt32,
-`OUTPUT_SNMP` UInt32
+`OUTPUT_SNMP` UInt32,
+`SRC_SITE_ID` UInt16,
+`DST_SITE_ID` UInt16
 ) ENGINE = MergeTree() PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (FIRST_SEEN, SRC_ASN, DST_ASN);
 @
 ALTER TABLE `hourly_asn` ADD COLUMN IF NOT EXISTS `PROBE_IP` IPv6;
+@
+ALTER TABLE `hourly_asn` ADD COLUMN IF NOT EXISTS `SRC_SITE_ID` UInt16;
+@
+ALTER TABLE `hourly_asn` ADD COLUMN IF NOT EXISTS `DST_SITE_ID` UInt16;
 @
 ALTER TABLE `hourly_asn` MODIFY COMMENT 'Hourly aggregated traffic statistics per source/destination ASN pair. Used for autonomous-system level traffic analysis and BGP peer analytics. Partitioned by day on FIRST_SEEN.';
 @
@@ -2305,6 +2311,10 @@ ALTER TABLE `hourly_asn` MODIFY COLUMN `PROBE_IP` COMMENT 'IPv4 or IPv6 address 
 ALTER TABLE `hourly_asn` MODIFY COLUMN `INPUT_SNMP` COMMENT 'SNMP input interface index from NetFlow/IPFIX';
 @
 ALTER TABLE `hourly_asn` MODIFY COLUMN `OUTPUT_SNMP` COMMENT 'SNMP output interface index from NetFlow/IPFIX';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `SRC_SITE_ID` COMMENT 'ntopng site ID associated with the source network (0 if none)';
+@
+ALTER TABLE `hourly_asn` MODIFY COLUMN `DST_SITE_ID` COMMENT 'ntopng site ID associated with the destination network (0 if none)';
 @
 ALTER TABLE `hourly_asn` ADD COLUMN IF NOT EXISTS TOTAL_BYTES UInt64;
 

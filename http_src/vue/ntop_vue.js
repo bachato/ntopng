@@ -95,7 +95,8 @@ import { default as PageAlertsGraph } from "./page-alerts-graph.vue"
 import { default as PageHRChart } from "./page-hr-chart.vue"
 import { default as PageAlertsGeoMap } from "./page-alerts-geomap.vue"
 import { default as PageTrafficProfiles } from "./page-traffic-profiles.vue"
-import { default as PageNetworksSites } from "./page-networks-sites.vue"
+import { default as PageNetworks } from "./page-networks.vue"
+import { default as PageSites } from "./page-sites.vue"
 import { default as PageDHCPLeases } from "./page-DHCP-leases.vue"
 import { default as PageExporterInterfaceOverview } from "./page-exporter-interface-overview.vue"
 import { default as PageExporterMap } from "./page-exporter-map.vue"
@@ -342,7 +343,8 @@ let ntopVue = {
     PageAlertsGraph: PageAlertsGraph,
     PageHRChart: PageHRChart,
     PageAlertsGeoMap: PageAlertsGeoMap,
-    PageNetworksSites: PageNetworksSites,
+    PageNetworks: PageNetworks,
+    PageSites: PageSites,
     
     // components
     AlertInfo: AlertInfo,

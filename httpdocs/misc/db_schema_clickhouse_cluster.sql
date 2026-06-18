@@ -2275,12 +2275,18 @@ CREATE TABLE IF NOT EXISTS `hourly_asn` ON CLUSTER '$CLUSTER' (
 `DST_PEER_ASN` UInt32,
 `PROBE_IP` IPv6,
 `INPUT_SNMP` UInt32,
-`OUTPUT_SNMP` UInt32
+`OUTPUT_SNMP` UInt32,
+`SRC_SITE_ID` UInt16,
+`DST_SITE_ID` UInt16
 ) ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{database}/{table}', '{replica}') PARTITION BY toYYYYMMDD(FIRST_SEEN) ORDER BY (FIRST_SEEN, SRC_ASN, DST_ASN);
 @
 ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS TOTAL_BYTES UInt64;
 @
 ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `PROBE_IP` IPv6;
+@
+ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `SRC_SITE_ID` UInt16;
+@
+ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' ADD COLUMN IF NOT EXISTS `DST_SITE_ID` UInt16;
 @
 ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' MODIFY COMMENT 'Hourly aggregated traffic statistics per source/destination ASN pair. Used for autonomous-system level traffic analysis and BGP peer analytics. Partitioned by day on FIRST_SEEN.';
 @
@@ -2319,6 +2325,10 @@ ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' MODIFY COLUMN `PROBE_IP` COMMENT 
 ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' MODIFY COLUMN `INPUT_SNMP` COMMENT 'SNMP input interface index from NetFlow/IPFIX';
 @
 ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' MODIFY COLUMN `OUTPUT_SNMP` COMMENT 'SNMP output interface index from NetFlow/IPFIX';
+@
+ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' MODIFY COLUMN `SRC_SITE_ID` COMMENT 'ntopng site ID associated with the source network (0 if none)';
+@
+ALTER TABLE `hourly_asn` ON CLUSTER '$CLUSTER' MODIFY COLUMN `DST_SITE_ID` COMMENT 'ntopng site ID associated with the destination network (0 if none)';
 
 @
 

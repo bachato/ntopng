@@ -1,5 +1,5 @@
 {
-	"id": "sites_list",
+	"id": "sites_config",
 	"data_url": "lua/pro/rest/v2/get/sites/list.lua",
 	"use_current_page": false,
 	"enable_search": true,
@@ -42,6 +42,15 @@
 		{
 			"title_i18n": "sites_page.site_name",
 			"data_field": "name",
+			"sortable": true,
+			"min-width" : "120px",
+			"class": [
+				"text-nowrap"
+			]
+		},
+		{
+			"title_i18n": "sites_page.parent_site",
+			"data_field": "parent",
 			"sortable": true,
 			"min-width" : "120px",
 			"class": [
