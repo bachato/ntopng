@@ -258,9 +258,9 @@
   NTOP_BASE_ID + 579 /* 0 = packets, 1 = collected NetFlow/IPFIX, 2 = \
                         collected sFlow/nfLite */
 #define OT_INFO NTOP_BASE_ID + 603 /* OT protocols info (JSON) */
-#define MODBUS_INFO NTOP_BASE_ID + 604 /* ModBus protocol info (JSON) */
-#define PROFINET_INFO NTOP_BASE_ID + 605 /* Profinet protocol info (JSON) */
-#define S7_INFO NTOP_BASE_ID + 606 /* S7comm protocol info (JSON) */
+#define MODBUS_INFO NTOP_BASE_ID + 614 /* ModBus protocol info (JSON) */
+#define PROFINET_INFO NTOP_BASE_ID + 615 /* Profinet protocol info (JSON) */
+#define S7_INFO NTOP_BASE_ID + 616 /* S7comm protocol info (JSON) */
 
 /* eBPF / Process */
 #define SRC_PROC_PID NTOP_BASE_ID + 168
