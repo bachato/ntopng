@@ -3466,7 +3466,9 @@ char* Utils::intoaV6(struct ndpi_in6_addr ipv6, char* buf, u_short bufLen) {
   } else {
     if (IN6_IS_ADDR_V4MAPPED(
 #ifdef WIN32
-          (const IN6_ADDR *)
+			     (const IN6_ADDR *)
+#else
+			     (const in6_addr *)
 #endif
         & ipv6))
       return (&ret[7]); /* IPv4 address */
