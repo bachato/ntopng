@@ -990,7 +990,12 @@ bool ZMQParserInterface::parsePENZeroField(ParsedFlow* const flow,
     if (value->string != NULL && strlen(value->string) > 0) {
       struct in6_addr *v6 = (struct in6_addr*)&flow->exporter_device_ip;
 
-      if(IN6_IS_ADDR_UNSPECIFIED(v6) || strncmp(value->string, "::1", 3)) {
+      if (IN6_IS_ADDR_UNSPECIFIED(
+#ifdef WIN32
+          (const IN6_ADDR *)
+#endif
+          v6) ||
+          strncmp(value->string, "::1", 3)) {
 	inet_pton(AF_INET6, value->string, &flow->exporter_device_ip);
       }
     }

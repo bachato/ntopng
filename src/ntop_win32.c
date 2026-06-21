@@ -20,13 +20,33 @@
  */
 
 #ifdef WIN32
-
-
 #include "ntop_win32.h"
 #include "time.h"
 #include <sys/timeb.h>		/* For prototype of "_ftime()" */
 
 #define _CRT_SECURE_NO_WARNINGS 1 /* Avoid Win warnings */
+
+// Forces the process to only load Microsoft-signed binaries
+// and removes the current directory from the search path.
+void initWindows() {
+  initWinsock32();
+
+  // 1. Remove the current application directory from the DLL search path
+  if (!SetDllDirectoryW(L"")) {
+    ExitProcess(ERROR_ACCESS_DENIED);
+  }
+
+  // 2. Restrict process to ONLY load DLLs signed by Microsoft
+  PROCESS_MITIGATION_BINARY_SIGNATURE_POLICY policy = {0};
+  policy.MicrosoftSignedOnly = 1;
+
+  if (!SetProcessMitigationPolicy(ProcessSignaturePolicy, &policy,
+                                  sizeof(policy))) {
+    // Returns false if the OS doesn't support this policy (e.g.,
+    // very old Windows versions)
+    ExitProcess(ERROR_ACCESS_DENIED);
+  }
+}
 
 /* **************************************
 

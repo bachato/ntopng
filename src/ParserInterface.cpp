@@ -272,7 +272,11 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
     if (new_flow) {
       IpAddress *nh = zflow->getNextHop();
 
-      if(!IN6_IS_ADDR_V4MAPPED((struct in6_addr *)&zflow->exporter_device_ip)) {
+      if(!IN6_IS_ADDR_V4MAPPED(
+#ifdef WIN32
+          (const IN6_ADDR *)
+#endif
+          &zflow->exporter_device_ip)) {
 	/* This is an IPv6 address */
 
 	if(nh->isIPv4() && nh->isEmpty()) {

@@ -2674,6 +2674,8 @@ static int base32_decode(const char* src, uint8_t* dst, int dst_len) {
 /* Compute TOTP code for the given secret (Base32) and time counter.
  * Returns a 6-digit code or -1 on error.
  */
+
+#if OLD_CODE
 static int compute_totp(const char* secret_b32, uint64_t counter) {
   uint8_t secret[64];
   int secret_len = base32_decode(secret_b32, secret, sizeof(secret));
@@ -2700,6 +2702,55 @@ static int compute_totp(const char* secret_b32, uint64_t counter) {
 
   return (int)(code % 1000000);
 }
+
+#else
+
+#include <openssl/hmac.h>
+#include <openssl/evp.h>
+#include <openssl/rand.h> 
+
+static int compute_totp(const char* secret_b32, uint64_t counter) {
+  uint8_t secret[64];
+  int secret_len = base32_decode(secret_b32, secret, sizeof(secret));
+  if (secret_len <= 0) return -1;
+
+  /* Build 8-byte big-endian counter */
+  uint8_t msg[8];
+  for (int i = 7; i >= 0; i--) {
+    msg[i] = counter & 0xFF;
+    counter >>= 8;
+  }
+
+  /* --- OPENSSL 1.1.x COMPATIBLE HMAC-SHA1 --- */
+  unsigned char hmac[20];
+  unsigned int hmac_len = sizeof(hmac);
+  int success = 0;
+
+  // Dynamically allocate the context pointer (Required for OpenSSL 1.1.x)
+  HMAC_CTX* ctx = HMAC_CTX_new();
+  if (ctx != NULL) {
+    if (HMAC_Init_ex(ctx, secret, secret_len, EVP_sha1(), NULL) == 1 &&
+        HMAC_Update(ctx, msg, sizeof(msg)) == 1 &&
+        HMAC_Final(ctx, hmac, &hmac_len) == 1) {
+      success = 1;
+    }
+    // Safely free the context allocation
+    HMAC_CTX_free(ctx);
+  }
+
+  if (!success) return -1;
+  /* ------------------------------------------- */
+
+  /* Dynamic truncation (RFC 4226 §5.3) */
+  int offset = hmac[19] & 0x0F;
+  uint32_t code =
+      ((hmac[offset] & 0x7F) << 24) | ((hmac[offset + 1] & 0xFF) << 16) |
+      ((hmac[offset + 2] & 0xFF) << 8) | ((hmac[offset + 3] & 0xFF));
+
+  return (int)(code % 1000000);
+}
+
+#endif
 
 /* ******************************************* */
 

@@ -95,12 +95,13 @@ int main(int argc, char* argv[])
   FILE* fd;
   ThreadedActivity* boot_activity;
 
+#ifdef WIN32
+  initWindows();
+#endif
+  
   tzset(); /* Init time and timezone */
   memset((void*)&ndpiUnknownProtocol, 0, sizeof(ndpiUnknownProtocol));
 
-#ifdef WIN32
-  initWinsock32();
-#else
   sqlite3_shutdown();
 
   /* Multi-thread.
@@ -114,7 +115,6 @@ int main(int argc, char* argv[])
   }
 
   sqlite3_initialize();
-#endif
 
   if ((ntop = new (std::nothrow) Ntop(argv[0])) == NULL) _exit(0);
   if ((prefs = new (std::nothrow) Prefs(ntop)) == NULL) _exit(0);
