@@ -33,8 +33,12 @@ local as_utils = {}
 local function parseASNList(string)
     local asn = {}
     local tmp = split(string, ",")
-    for _, val in pairs(tmp or {}) do
-        asn[val] = 1
+    if not isEmptyString(tmp) then
+        for _, val in pairs(tmp or {}) do
+            if not isEmptyString(val) then
+                asn[val] = 1
+            end
+        end
     end
     return asn
 end
@@ -622,6 +626,7 @@ end
 -- @param options Table containing filtering options (epoch_begin, epoch_end, ifid, selected_asn)
 -- @return table Array of top ASN statistics, sorted by traffic
 function as_utils.getTopASHistorical(options)
+    local format_utils = require "format_utils"
     local counter = 0
     local asn_tops = {}
     local perform_profiling = ntop.getCache(ASN_PROFILING_KEY)
@@ -641,6 +646,7 @@ function as_utils.getTopASHistorical(options)
     -- Sort by traffic (descending) and take top N
     for _, as_info in pairsByField(historical_info, 'traffic', rev) do
         counter = counter + 1
+        as_info["asname"] = format_utils.formatASN(as_info["asn"], true, false)
         asn_tops[#asn_tops + 1] = as_info
         if (counter >= MAXIMUM_NUMBER_OF_TOP) then
             break
