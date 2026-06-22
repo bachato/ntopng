@@ -504,12 +504,6 @@ function create_tagify(range_picker_vue) {
 }
 
 :deep(.tagify__tag b.operator) {
-    background: var(--bg-surface, #fff);
-    border: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
-    border-radius: 3px;
-    margin-bottom: .25rem !important;
-    margin-top: .25rem !important;
-    font-size: 1rem;
     font-weight: 600;
 }
 

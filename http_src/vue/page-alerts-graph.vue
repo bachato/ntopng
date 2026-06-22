@@ -57,7 +57,7 @@
                         <div ref="alerts_graph" class="graph-content d-flex justify-content-center align-items-center">
                             <Loading :isLoading="loading" :class="'mt-1'"></Loading>
                             <div v-if="no_data" class="d-flex justify-content-center align-items-center h-100">
-                                <p class="text-center text-muted">{{ _i18n("alert.graph.no_data") }}</p>
+                                <p class="text-center">{{ _i18n("alert.graph.no_data") }}</p>
                             </div>
                         </div>
                     </div>
@@ -197,7 +197,7 @@
                                         <div v-if="selectedNodeData && selectedNodeData.host_info && selectedNodeData.host_info[role]"
                                             class="alert-summary card bg-light mt-3">
                                             <div class="card-body p-3">
-                                                <h6 class="card-subtitle mb-2 text-muted">{{
+                                                <h6 class="card-subtitle mb-2">{{
                                                     _i18n("alert.graph.alert_summary") }}</h6>
                                                 <div class="progress mb-3" style="height: 8px;">
                                                     <div v-for="(item, index) in selectedNodeData.severity_info?.[role]"
