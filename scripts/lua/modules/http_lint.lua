@@ -827,7 +827,8 @@ local function validateTransformation(t)
 end
 
 local function validateIpAddress(p)
-   if (isIPv4(p) or isIPv6(p)) then
+   local ip = p:gsub("%s+", "") -- Remove the spaces
+   if (isIPv4(ip) or isIPv6(ip)) then
       return true
    else
       return false

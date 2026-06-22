@@ -17,23 +17,28 @@ local dhcp_list = _POST["dhcp_list"]
 local gateway_list = _POST["gateway_list"]
 
 if dns_list then
-   ntop.setCache("ntopng.prefs.nw_config_dns_list", dns_list)
+   local parsed_dns_list = dns_list:gsub("%s+", "") -- Remove the empty spaces
+   ntop.setCache("ntopng.prefs.nw_config_dns_list", parsed_dns_list)
 end
 
 if ntp_list then
-   ntop.setCache("ntopng.prefs.nw_config_ntp_list", ntp_list)
+   local parsed_ntp_list = ntp_list:gsub("%s+", "") -- Remove the empty spaces
+   ntop.setCache("ntopng.prefs.nw_config_ntp_list", parsed_ntp_list)
 end
 
 if smtp_list then
-   ntop.setCache("ntopng.prefs.nw_config_smtp_list", smtp_list)
+   local parsed_smtp_list = smtp_list:gsub("%s+", "") -- Remove the empty spaces
+   ntop.setCache("ntopng.prefs.nw_config_smtp_list", parsed_smtp_list)
 end
 
 if dhcp_list then
-   ntop.setCache("ntopng.prefs.nw_config_dhcp_list", dhcp_list)
+   local parsed_dhcp_list = dhcp_list:gsub("%s+", "") -- Remove the empty spaces
+   ntop.setCache("ntopng.prefs.nw_config_dhcp_list", parsed_dhcp_list)
 end
 
 if gateway_list then
-   ntop.setCache("ntopng.prefs.nw_config_gateway_list", gateway_list)
+   local parsed_gateway_list = gateway_list:gsub("%s+", "") -- Remove the empty spaces
+   ntop.setCache("ntopng.prefs.nw_config_gateway_list", parsed_gateway_list)
 end
 
 ntop.reloadServersConfiguration()
