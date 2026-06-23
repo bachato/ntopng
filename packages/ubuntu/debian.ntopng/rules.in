@@ -61,11 +61,13 @@ binary-arch: build install
 		mv ./debian/@APP@/usr/bin/ntopng ./debian/@APP@/usr/bin/nedge; \
 	fi
 
-	if test "@APP@" = "nedge"; then \
-	  mkdir -p ./debian/nedge/usr/share/ntop ; strip --strip-all ./debian/nedge/usr/bin/nedge; ~/scripts/signature.sh ./debian/nedge/usr/bin/nedge ./debian/nedge/usr/share/ntop/nedge.sig; \
-	else \
-	  mkdir -p ./debian/ntopng/usr/share/ntop; strip --strip-all ./debian/ntopng/usr/bin/ntopng; ~/scripts/signature.sh ./debian/ntopng/usr/bin/ntopng ./debian/ntopng/usr/share/ntop/ntopng.sig; \
-	fi
+	mkdir -p ./debian/@APP@/usr/share/ntop ./debian/@APP@/usr/share/ntop/sbom
+	strip --strip-all ./debian/@APP@/usr/bin/@APP@
+	~/scripts/signature.sh ./debian/@APP@/usr/bin/@APP@ ./debian/@APP@/usr/share/ntop/@APP@.sig;
+	~/scripts/sbom/generate-sbom.sh ./debian/@APP@/usr/bin/@APP@
+	mv ./sbom-@APP@.json ./debian/@APP@/usr/share/ntop/sbom/@APP@.json
+	~/scripts/sbom/ntopng-github-sbom.sh
+	mv ./sbom.json ./debian/@APP@/usr/share/ntop/sbom/@APP@-gui,json
 
 	rm -rf ./debian/@APP@/etc/ntopng/nedge.conf
 	rm -rf ./debian/@APP@/usr/share/ntopng/httpdocs/geoip/*.dat
