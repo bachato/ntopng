@@ -59,9 +59,9 @@ mv $RPM_BUILD_ROOT/usr/share/ntopng/httpdocs/misc/ntopng-utils-manage-updates $R
 cp $HOME/ntopng/packages/usr/bin/ntopctl $RPM_BUILD_ROOT/usr/bin/
 
 # nmap vulnerability scan - https://github.com/scipag/vulscan
-\mkdir -p $RPM_BUILD_ROOT/usr/share/nmap/scripts/vulscan
-wget -O $RPM_BUILD_ROOT/usr/share/nmap/scripts/vulscan/vulscan.nse https://raw.githubusercontent.com/scipag/vulscan/master/vulscan.nse
-wget -O $RPM_BUILD_ROOT/usr/share/nmap/scripts/vulscan/cve.csv 	https://raw.githubusercontent.com/scipag/vulscan/master/cve.csv
+#\mkdir -p $RPM_BUILD_ROOT/usr/share/nmap/scripts/vulscan
+#wget -O $RPM_BUILD_ROOT/usr/share/nmap/scripts/vulscan/vulscan.nse https://raw.githubusercontent.com/scipag/vulscan/master/vulscan.nse
+#wget -O $RPM_BUILD_ROOT/usr/share/nmap/scripts/vulscan/cve.csv 	https://raw.githubusercontent.com/scipag/vulscan/master/cve.csv
 #wget -O $RPM_BUILD_ROOT/usr/share/nmap/scripts/vulscan/openvas.csv 	https://www.computec.ch/projekte/vulscan/download/openvas.csv
 
 # Make sure .mmdb files are not packaged by ntopng as they belong to ntopng-data
@@ -104,8 +104,13 @@ find $RPM_BUILD_ROOT -name ".svn" | xargs /bin/rm -rf
 find $RPM_BUILD_ROOT -name "*~"   | xargs /bin/rm -f
 
 # Already stripped
-mkdir -p $RPM_BUILD_ROOT/usr/share/ntop/
+mkdir -p $RPM_BUILD_ROOT/usr/share/ntop/sbom
 ~/scripts/signature.sh $RPM_BUILD_ROOT/usr/bin/ntopng $RPM_BUILD_ROOT/usr/share/ntop/ntopng.sig
+
+~/scripts/sbom/generate-sbom.sh $RPM_BUILD_ROOT/usr/bin/ntopng
+mv ./sbom-ntopng.json $RPM_BUILD_ROOT/usr/share/ntop/sbom/ntopng.json
+~/scripts/sbom/ntopng-github-sbom.sh
+mv ./sbom.json $RPM_BUILD_ROOT/usr/share/ntop/sbom/ntopng-gui,json
 
 
 #
@@ -131,14 +136,13 @@ rm -fr $RPM_BUILD_ROOT
 /etc/sudoers.d/ntopng
 /etc/rsyslog.d/20-ntopng.conf
 %config(noreplace) /etc/cron.d/ntopng
-/usr/share/ntop/ntopng.sig
-/usr/share/ntopng
+/usr/share/ntop
 # Don't overwrite ntopng-cert.pem is the file is already present
 %config(noreplace) /usr/share/ntopng/httpdocs/ssl/ntopng-cert.pem
 #/etc/ntopng/ntopng.conf.sample
 #/etc/ntopng/ntopng.start
-/usr/share/nmap/scripts/vulscan/vulscan.nse
-/usr/share/nmap/scripts/vulscan/cve.csv
+#/usr/share/nmap/scripts/vulscan/vulscan.nse
+#/usr/share/nmap/scripts/vulscan/cve.csv
 
 %dir %attr(700, ntopng, ntop) /var/lib/ntopng
 
