@@ -955,8 +955,8 @@ async function pollIface() {
       seeded = true;
     }
 
-    const upBps = r.throughput?.upload?.bps   ?? r.bytes_upload;
-    const dnBps = r.throughput?.download?.bps ?? r.bytes_download;
+    const upBps = r.throughput?.upload?.bps * 8   ?? r.bytes_upload;
+    const dnBps = r.throughput?.download?.bps * 8 ?? r.bytes_download;
     if (upBps != null && dnBps != null) {
       spark?.pushBoth(upBps, dnBps);
       sparkLabels.value.up = NtopUtils.bitsToSize(upBps, 1000);
