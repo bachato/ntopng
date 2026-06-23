@@ -62,10 +62,15 @@ find ${STAGEDIR}/usr/local/share/ntopng/pro/scripts -name "*.luar" | xargs renam
 
 # find ${STAGEDIR}/usr/local/share/ntopng/scripts/lua -name "*.lua" -type f -exec  ${NTOPNG_HOME}/tools/luac.sh {} ';'
 
+
+
 # Vulscan
-\mkdir -p ${STAGEDIR}/usr/local/share/nmap/scripts/vulscan
-curl -o ${STAGEDIR}/usr/local/share/nmap/scripts/vulscan/vulscan.nse https://raw.githubusercontent.com/scipag/vulscan/master/vulscan.nse
-curl -o ${STAGEDIR}/usr/local/share/nmap/scripts/vulscan/cve.csv     https://raw.githubusercontent.com/scipag/vulscan/master/cve.csv
+#\mkdir -p ${STAGEDIR}/usr/local/share/nmap/scripts/vulscan
+#curl -o ${STAGEDIR}/usr/local/share/nmap/scripts/vulscan/vulscan.nse https://raw.githubusercontent.com/scipag/vulscan/master/vulscan.nse
+#curl -o ${STAGEDIR}/usr/local/share/nmap/scripts/vulscan/cve.csv     https://raw.githubusercontent.com/scipag/vulscan/master/cve.csv
+
+mkdir -p ${STAGEDIR}/usr/local/share/ntop/sbom
+~/scripts/sbom/generate-sbom.sh ${STAGEDIR}/usr/local/bin/ntopng ${STAGEDIR}/usr/local/share/ntop/sbom/ntopng.json
 
 rm -f ${STAGEDIR}/usr/local/share/ntopng/httpdocs/geoip/*
 find ${STAGEDIR}/usr/local/share/ntopng -name "*~"   | xargs /bin/rm -f
@@ -105,7 +110,7 @@ EOF
 if ! id "ntopng" >/dev/null 2>&1; then
   sudo pw useradd ntopng -s /sbin/nologin -d /nonexistent -c "ntopng user" -w no
 fi
-chown -R ntopng:ntopng /usr/local/etc/ntopng
+chown -R ntopng:ntopng ${STAGEDIR}/usr/local/etc/ntopng
 EOF
 
 # Build +POST_DEINSTALL
