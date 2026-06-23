@@ -227,6 +227,19 @@
           </button>
         </template>
 
+        <!-- nEdge power off / reboot -->
+        <template v-if="menu.is_nedge && menu.is_admin">
+          <div class="sb-popup-divider"></div>
+          <button class="sb-popup-item sb-popup-item--danger" @click="confirmNedgePowerOff">
+            <i class="fas fa-power-off sb-popup-icon"></i>
+            <span>{{ _i18n("nedge.power_off") }}</span>
+          </button>
+          <button class="sb-popup-item" @click="confirmNedgeReboot">
+            <i class="fas fa-redo sb-popup-icon"></i>
+            <span>{{ _i18n("nedge.reboot") }}</span>
+          </button>
+        </template>
+
         <div class="sb-popup-divider"></div>
 
         <button v-if="!menu.is_no_login_user" class="sb-popup-item sb-popup-item--danger"
@@ -1149,6 +1162,28 @@ function toggleTheme() {
       csrf: ctx.value.csrf || window.__CSRF_DATATABLE__ || "",
     }),
   }).catch(() => {});
+}
+
+// nEdge power off / reboot
+let nedgePowerOffModal = null;
+let nedgeRebootModal   = null;
+
+function confirmNedgePowerOff() {
+  userPopupOpen.value = false;
+  if (!nedgePowerOffModal) {
+    const el = document.getElementById("poweroff_dialog");
+    if (el && window.bootstrap) nedgePowerOffModal = new bootstrap.Modal(el);
+  }
+  nedgePowerOffModal?.show();
+}
+
+function confirmNedgeReboot() {
+  userPopupOpen.value = false;
+  if (!nedgeRebootModal) {
+    const el = document.getElementById("reboot_dialog");
+    if (el && window.bootstrap) nedgeRebootModal = new bootstrap.Modal(el);
+  }
+  nedgeRebootModal?.show();
 }
 
 // Restart

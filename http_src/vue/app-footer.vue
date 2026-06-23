@@ -28,53 +28,42 @@
     </div>
   </div>
 
-  <!-- nEdge poweroff/reboot modals -->
-  <template v-if="ctx.is_nedge && ctx.is_admin">
-    <form id="powerOffForm" method="post">
-      <input name="csrf" :value="ctx.csrf" type="hidden" />
-      <input name="poweroff" value="" type="hidden" />
-    </form>
-    <form id="rebootForm" method="post">
-      <input name="csrf" :value="ctx.csrf" type="hidden" />
-      <input name="reboot" value="" type="hidden" />
-    </form>
-
-    <div class="modal fade" id="poweroff_dialog" tabindex="-1">
-      <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">{{ _i18n("nedge.power_off") }}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">{{ _i18n("nedge.power_off_confirm") }}</div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{{ _i18n("cancel") }}</button>
-            <button class="btn btn-danger btn-sm" @click="submitForm('powerOffForm')">
-              {{ _i18n("nedge.power_off") }}
-            </button>
-          </div>
+  <!-- nEdge poweroff/reboot modals (always rendered; visibility controlled by app-shell) -->
+  <div class="modal fade" id="poweroff_dialog" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ _i18n("nedge.power_off") }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">{{ _i18n("nedge.power_off_confirm") }}</div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{{ _i18n("cancel") }}</button>
+          <button class="btn btn-danger btn-sm" @click="doNedgePowerOff">
+            {{ _i18n("nedge.power_off") }}
+          </button>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="modal fade" id="reboot_dialog" tabindex="-1">
-      <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">{{ _i18n("nedge.reboot") }}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">{{ _i18n("nedge.reboot_corfirm") }}</div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{{ _i18n("cancel") }}</button>
-            <button class="btn btn-primary btn-sm" @click="submitForm('rebootForm')">
-              {{ _i18n("nedge.reboot") }}
-            </button>
-          </div>
+  <div class="modal fade" id="reboot_dialog" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ _i18n("nedge.reboot") }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">{{ _i18n("nedge.reboot_corfirm") }}</div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{{ _i18n("cancel") }}</button>
+          <button class="btn btn-primary btn-sm" @click="doNedgeReboot">
+            {{ _i18n("nedge.reboot") }}
+          </button>
         </div>
       </div>
     </div>
-  </template>
+  </div>
 </template>
 
 <script setup>
@@ -173,9 +162,21 @@ function onAjaxError(_evt, xhr) {
 }
 
 // ---------------------------------------------------------------
-// nEdge form submit helper
-function submitForm(id) {
-  document.getElementById(id)?.submit();
+// nEdge power off / reboot
+async function doNedgePowerOff() {
+  await ntopng_utility.http_request(`${http_prefix}/lua/rest/v2/set/ntopng/poweroff.lua`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ csrf: ctx.value.csrf || window.__CSRF_DATATABLE__ || "" }),
+  }).catch(() => {});
+}
+
+async function doNedgeReboot() {
+  await ntopng_utility.http_request(`${http_prefix}/lua/rest/v2/set/ntopng/reboot.lua`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ csrf: ctx.value.csrf || window.__CSRF_DATATABLE__ || "" }),
+  }).catch(() => {});
 }
 
 // ---------------------------------------------------------------

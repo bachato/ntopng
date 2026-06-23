@@ -119,12 +119,15 @@ local entry_hidden = {
    nedge_db_explorer = function() return not flags.is_nedge or not flags.is_nedge_enterprise or flags.no_ch_support end,
    nedge_users      = function() return not flags.is_nedge end,
    nedge_vlans      = function() return not flags.is_nedge or flags.no_vlans end,
+   nedge_networks   = function() return not flags.is_nedge end,
+   nedge_os         = function() return not flags.is_nedge end,
    nedge_geo_map    = function() return not flags.is_nedge or flags.is_loopback_interface end,
 
    -- views (ASN mode — all hidden when nedge)
    hosts_asn_mode         = function() return flags.is_nedge end,
    active_flows_asn_mode  = function() return flags.is_nedge end,
-   db_explorer_asn_mode   = function() return flags.is_nedge or flags.no_enterprise_or_nedge_with_ch_hist or flags.is_viewed or flags.is_db_type end,
+   db_explorer_asn_mode         = function() return flags.is_nedge or flags.no_enterprise_or_nedge_with_ch_hist or flags.is_viewed or flags.is_db_type end,
+   historical_flows_asn_mode    = function() return not flags.is_nedge or flags.no_enterprise_or_nedge_with_ch_hist or flags.is_viewed or flags.is_db_type end,
    server_ports_asn_mode  = function() return flags.is_nedge or flags.no_enterprise_l end,
    bgp_looking_glass_asn  = function() return flags.is_nedge or flags.no_bgp_server end,
 
@@ -178,6 +181,10 @@ local entry_hidden = {
    nedge_users            = function() return not flags.is_nedge end,
    manage_users           = function() return flags.no_local_auth_or_local_user end,
    manage_configurations  = function() return flags.no_dump_cache end,
+   divider_nedge_admin    = function() return not flags.is_nedge end,
+   remote_assistance      = function() return true end,  -- page removed (attic), hidden until restored
+   conf_backup            = function() return not flags.is_nedge or flags.no_admin or flags.is_oem end,
+   conf_restore           = function() return not flags.is_nedge or flags.no_admin or flags.is_oem end,
 
    -- dev
    manage_data = function() return flags.no_admin end,
@@ -236,11 +243,11 @@ for _, section in ipairs(def.sections) do
             if not (entry_check and entry_check()) then
                entries[#entries + 1] = {
                   key         = entry.key,
-                  label       = entry.i18n and (i18n(entry.i18n) or entry.i18n) or nil,
+                  label       = entry.i18n and (function() local v = i18n(entry.i18n); return type(v) == "string" and v or entry.i18n end)() or nil,
                   icon        = entry.icon or nil,
                   url         = resolve_url(entry),
                   is_external = (entry.is_external == true),
-                  is_divider  = (entry.key == "divider"),
+                  is_divider  = (entry.key == "divider") or (entry.is_divider == true),
                }
             end
          end

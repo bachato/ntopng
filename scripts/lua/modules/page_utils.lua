@@ -869,7 +869,47 @@ page_utils.menu_entries = {
     nedge_flows = {
         key = "nedge_flows",
         i18n_title = "flows",
-        section = "hosts"
+        section = "views"
+    },
+    nedge_hosts = {
+        key = "nedge_hosts",
+        i18n_title = "hosts",
+        section = "views"
+    },
+    nedge_devices = {
+        key = "nedge_devices",
+        i18n_title = "mac_stats.devices",
+        section = "views"
+    },
+    nedge_db_explorer = {
+        key = "nedge_db_explorer",
+        i18n_title = "historical_flows",
+        section = "views"
+    },
+    nedge_users_view = {
+        key = "nedge_users",
+        i18n_title = "manage_users.manage_users",
+        section = "views"
+    },
+    nedge_vlans = {
+        key = "nedge_vlans",
+        i18n_title = "vlan_stats.vlan_list",
+        section = "views"
+    },
+    nedge_networks = {
+        key = "nedge_networks",
+        i18n_title = "networks",
+        section = "views"
+    },
+    nedge_os = {
+        key = "nedge_os",
+        i18n_title = "operating_systems",
+        section = "views"
+    },
+    nedge_geo_map = {
+        key = "nedge_geo_map",
+        i18n_title = "geo_map",
+        section = "views"
     },
     nedge_interfaces = {
         key = "nedge_interfaces",

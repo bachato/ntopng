@@ -27,17 +27,18 @@ function ntopng_menu_visibility.get_flags()
 
    local is_system_interface  = toboolean(page_utils.is_system_view())
    local system_ifid          = getSystemInterfaceId()
-   local is_nedge             = ntop.isnEdge()
-   local is_nedge_enterprise  = ntop.isnEdgeEnterprise()
-   local is_routing_mode      = is_nedge and ntop.isRoutingMode() or false
    local is_enterprise        = ntop.isEnterprise()
    local is_enterprise_m      = ntop.isEnterpriseM()
    local is_enterprise_l      = ntop.isEnterpriseL()
    local is_enterprise_xl     = ntop.isEnterpriseXL()
    local is_pro               = ntop.isPro()
-   local is_appliance         = ntop.isAppliance()
    local is_windows           = ntop.isWindows()
    local is_oem               = (info.oem == true)
+
+   local is_nedge            = ntop.isnEdge()
+   local is_nedge_enterprise = ntop.isnEdgeEnterprise()
+   local is_appliance        = ntop.isAppliance()
+   local is_routing_mode     = is_nedge and ntop.isRoutingMode() or false
 
    local has_ch_support      = hasClickHouseSupport()
    local is_influxdb         = (ntop.getPref("ntopng.prefs.timeseries_driver") == "influxdb")
@@ -52,6 +53,8 @@ function ntopng_menu_visibility.get_flags()
    local is_asn_mode         = isASNModeEnabled()
 
    local is_pcap_dump        = interface.isPcapDumpInterface()
+   local is_packet_interface = interface.isPacketInterface()
+   local is_sub_interface    = interface.isSubInterface()
    local is_db_view          = interface.isDatabaseViewInterface()
    local is_viewed_interface = interface.isViewed()
    local is_zmq_interface    = interface.isZMQInterface()
@@ -99,8 +102,16 @@ function ntopng_menu_visibility.get_flags()
    local is_allowed_sys_iface = isAllowedSystemInterface()
 
    return {
+      -- nedge
+      is_nedge            = is_nedge,
+      is_nedge_enterprise = is_nedge_enterprise,
+      is_routing_mode     = is_routing_mode,
+      is_appliance        = is_appliance,
+
       -- interface state
       is_pcap_dump              = is_pcap_dump,
+      is_packet_interface       = is_packet_interface,
+      is_sub_interface          = is_sub_interface,
       is_system_interface       = is_system_interface,
       no_system_interface       = not is_system_interface,
       is_db_view_interface      = is_db_view,
@@ -139,23 +150,22 @@ function ntopng_menu_visibility.get_flags()
       -- license / edition
       is_pro            = is_pro,
       no_pro            = not is_pro,
-      is_nedge          = is_nedge,
-      is_nedge_enterprise = is_nedge_enterprise,
-      is_routing_mode   = is_routing_mode,
       is_oem            = is_oem,
       is_windows        = is_windows,
-      is_appliance      = is_appliance,
       is_allowed_sys_iface = is_allowed_sys_iface,
       limit_resource_usage = limit_resources,
 
-      -- enterprise tiers
-      no_enterprise             = not is_enterprise,
-      no_enterprise_m           = not is_enterprise_m,
-      no_enterprise_l           = not is_enterprise_l,
-      no_enterprise_xl          = not is_enterprise_xl,
+      -- ntopng enterprise tiers
+      is_enterprise              = is_enterprise,
+      no_enterprise              = not is_enterprise,
+      no_enterprise_m            = not is_enterprise_m,
+      no_enterprise_l            = not is_enterprise_l,
+      no_enterprise_xl           = not is_enterprise_xl,
+      no_enterprise_m_no_windows = (not is_enterprise_m or is_windows),
+
+      -- nedge enterprise (separate from ntopng enterprise)
       no_enterprise_l_or_nedge  = (not is_enterprise_l and not is_nedge_enterprise),
       no_enterprise_m_or_nedge  = (not is_enterprise_m and not is_nedge_enterprise),
-      no_enterprise_m_no_windows = (not is_enterprise_m or is_windows),
 
       -- compound conditions
       no_ch_support             = not has_ch_support,
@@ -186,12 +196,31 @@ end
 function ntopng_menu_visibility.get_dynamic_entries(section_key, flags, page_utils, http_prefix)
    local entries = {}
 
+   -- views: inject scripts_menu entries targeting the views section
+   if section_key == "views" then
+      if page_utils.scripts_menu then
+         for k, entry in pairsByField(page_utils.scripts_menu, "sort_order", rev) do
+            if entry.menu_entry and entry.menu_entry.section == "views" then
+               local label_raw = i18n(entry.menu_entry.i18n or entry.menu_entry.i18n_title or entry.menu_entry.key)
+               if type(label_raw) ~= "string" then
+                  label_raw = entry.menu_entry.key
+               end
+               entries[#entries + 1] = {
+                  key        = entry.menu_entry.key,
+                  label      = label_raw,
+                  url        = http_prefix .. entry.url,
+                  is_divider = false,
+               }
+            end
+         end
+      end
+
    -- health
-   if section_key == "health" then
+   elseif section_key == "health" then
       if page_utils.scripts_menu then
          for k, entry in pairsByField(page_utils.scripts_menu, "sort_order", rev) do
             if entry.menu_entry.section == page_utils.menu_sections.health.key then
-               local label_raw = i18n(entry.menu_entry.i18n or entry.menu_entry.key)
+               local label_raw = i18n(entry.menu_entry.i18n or entry.menu_entry.i18n_title or entry.menu_entry.key)
                entries[#entries + 1] = {
                   key        = entry.menu_entry.key,
                   label      = (type(label_raw) == "string") and label_raw or entry.menu_entry.key,
@@ -207,7 +236,7 @@ function ntopng_menu_visibility.get_dynamic_entries(section_key, flags, page_uti
       if page_utils.scripts_menu then
          for k, entry in pairsByField(page_utils.scripts_menu, "sort_order", rev) do
             if entry.menu_entry.section == page_utils.menu_sections.pollers.key then
-               local label_raw = i18n(entry.menu_entry.i18n or entry.menu_entry.key)
+               local label_raw = i18n(entry.menu_entry.i18n or entry.menu_entry.i18n_title or entry.menu_entry.key)
                entries[#entries + 1] = {
                   key        = entry.menu_entry.key,
                   label      = (type(label_raw) == "string") and label_raw or entry.menu_entry.key,
@@ -224,7 +253,7 @@ function ntopng_menu_visibility.get_dynamic_entries(section_key, flags, page_uti
       if page_utils.scripts_menu then
          for k, entry in pairsByField(page_utils.scripts_menu, "sort_order", rev) do
             if entry.menu_entry.section ~= "pollers" then
-               local label_raw = i18n(entry.menu_entry.i18n or entry.menu_entry.key)
+               local label_raw = i18n(entry.menu_entry.i18n or entry.menu_entry.i18n_title or entry.menu_entry.key)
                entries[#entries + 1] = {
                   key        = entry.menu_entry.key,
                   label      = (type(label_raw) == "string") and label_raw or entry.menu_entry.key,
@@ -245,7 +274,7 @@ function ntopng_menu_visibility.get_dynamic_entries(section_key, flags, page_uti
             { key = "dhcp_static_leases", i18n_key = "nedge.dhcp_static_leases", url = "/lua/pro/nedge/admin/dhcp_leases.lua", hidden = flags.no_admin or not flags.is_routing_mode },
             { key = "dhcp_active_leases", i18n_key = "nedge.dhcp_active_leases", url = "/lua/pro/nedge/admin/dhcp_active_leases.lua", hidden = flags.no_admin or not flags.is_routing_mode },
             { key = "port_forwarding",    i18n_key = "nedge.port_forwarding",    url = "/lua/pro/nedge/admin/port_forwarding.lua", hidden = flags.no_admin or not flags.is_routing_mode },
-            { key = "rules_config",       i18n_key = "nedge.rules_config",       url = "/lua/pro/nedge/admin/rules_config.lua", hidden = flags.no_admin or not flags.is_routing_mode },
+            { key = "rules_config",       i18n_key = "nedge.rules_config_title",       url = "/lua/pro/nedge/admin/rules_config.lua", hidden = flags.no_admin or not flags.is_routing_mode },
             { key = "forwarders_config",  i18n_key = "nedge.forwarders_config",  url = "/lua/pro/nedge/admin/forwarders_config.lua", hidden = flags.no_admin or not flags.is_routing_mode },
          }
          for _, r in ipairs(nedge_rows) do

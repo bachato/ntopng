@@ -233,8 +233,14 @@
           "url": "/lua/vlan_stats.lua"
         },
         {
+          "key": "nedge_networks",
+          "i18n": "networks",
+          "icon": "fas fa-sitemap",
+          "url": "/lua/network_stats.lua"
+        },
+        {
           "key": "nedge_geo_map",
-          "i18n": "geo_map",
+          "i18n": "geo_map.geo_map",
           "icon": "fas fa-map",
           "url": "/lua/hosts_geomap.lua"
         },
@@ -582,13 +588,13 @@
         },
         {
           "key": "nedge_users",
-          "i18n": "nedge.users",
+          "i18n": "manage_users.manage_users",
           "icon": "fas fa-users",
           "url": "/lua/pro/nedge/admin/nf_list_users.lua"
         },
         {
           "key": "manage_users",
-          "i18n": "manage_users.manage_users",
+          "i18n": "manage_users.manage_nedge_users",
           "icon": "fas fa-user-cog",
           "url": "/lua/admin/users.lua"
         },
@@ -629,6 +635,30 @@
           "i18n": "custom_categories.apps_and_categories",
           "icon": "fas fa-th-large",
           "url": "/lua/admin/edit_categories.lua"
+        },
+        {
+          "key": "divider_nedge_admin",
+          "i18n": "menu_group.nedge_config",
+          "is_divider": true
+        },
+        {
+          "key": "remote_assistance",
+          "i18n": "remote_assistance.remote_assistance",
+          "icon": "fas fa-comment-dots",
+          "url": "/lua/admin/remote_assistance.lua"
+        },
+        {
+          "key": "conf_backup",
+          "i18n": "conf_backup.conf_backup",
+          "icon": "fas fa-download",
+          "url": "/lua/get_config.lua"
+        },
+        {
+          "key": "conf_restore",
+          "i18n": "conf_backup.conf_restore",
+          "icon": "fas fa-upload",
+          "url": "https://www.ntop.org/guides/nedge/conf_backup.html#configuration-restore",
+          "is_external": true
         }
       ]
     },

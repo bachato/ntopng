@@ -6443,6 +6443,7 @@ local lang = {
   },
   ["mac_stats"] = {
     ["all_devices"] = "All",
+    ["devices"] = "MAC Addresses",
     ["all_layer_2_devices"] = "All Devices",
     ["all_manufacturers"] = "All Manufacturers",
     ["arp_total"] = "ARP",
@@ -6550,7 +6551,8 @@ local lang = {
     ["host_pool_id"] = "Host Pool Id",
     ["manage"] = "Manage",
     ["manage_user_x"] = "Manage User %{user}",
-    ["manage_users"] = "Users",
+    ["manage_users"] = "Manage Users",
+    ["manage_nedge_users"] = "Manage nEdge Users",
     ["new_password"] = "New Password",
     ["new_password_confirm"] = "Confirm New Password",
     ["no_host_pools"] = "No Host Pools defined. Please create one <a href='%{url}'>here</a>",
@@ -6900,6 +6902,8 @@ local lang = {
     ["device_protocols_blocked_warning"] = "Traffic will <b>not</b> be blocked because %{device_protocols_policies} are disabled",
     ["device_protocols_policies"] = "Device Policies",
     ["dhcp_disabled_warning"] = "If no other DHCP server is available in your network then your clients won't be able to connect automatically.",
+    ["dhcp_static_leases"] = "DHCP Static Leases",
+    ["dhcp_active_leases"] = "DHCP Active Leases",
     ["dhcp_first_ip"] = "First IP address",
     ["dhcp_first_ip_descr"] = "The first IP address of the DHCP address pool",
     ["dhcp_last_ip"] = "Last IP address",
@@ -7054,6 +7058,7 @@ local lang = {
     ["routing_policy"] = "Routing Policy",
     ["routing_policy_exists"] = "Routing policy \"%{policy}\" already exists.",
     ["rules_config_title"] = "Inter-LAN Filtering Rules",
+    ["forwarders_config"] = "Forwarders Config",
     ["safe_search_description"] = "Use the Child Safe DNS to block inappropriate content.",
     ["search_categories"] = "Search Categories",
     ["search_protocols"] = "Search Applications",
@@ -10007,6 +10012,7 @@ local lang = {
     ["documentation"]  = "Documentation",
     ["community"]      = "Community",
     ["support"]        = "Support",
+    ["nedge_config"]        = "nEdge Configurations",
   },
 }
 
