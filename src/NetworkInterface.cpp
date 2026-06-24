@@ -6551,7 +6551,7 @@ static bool mac_search_walker(GenericHashEntry* he, void* user_data,
 
     case column_manufacturer:
       r->elems[r->actNumEntries++].stringValue =
-          m->get_manufacturer() ? (char*)m->get_manufacturer() : (char*)"zzz";
+          m->get_manufacturer() ? (char*)m->get_manufacturer() : (char*)"000"; /* Using this string, so that it's alwais the "minor" manufacturer */
       break;
 
     case column_device_type:
