@@ -4817,6 +4817,13 @@ static int ntop_get_info(lua_State* vm) {
 #endif
 
   if (verbose) {
+    lua_push_str_table_entry(vm, "edition",
+#ifdef NTOPNG_PRO
+			     ntop->getPro()->get_edition()
+#else
+			     (char*)"Community"
+#endif
+			     );				 
     lua_push_str_table_entry(vm, "version.rrd", rrd_strversion());
     lua_push_str_table_entry(vm, "version.redis",
                              ntop->getRedis()->getVersion());
