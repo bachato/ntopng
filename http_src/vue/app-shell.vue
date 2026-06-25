@@ -891,7 +891,7 @@ function applyLayout() {
     p("padding-left",  "0.75rem");
     p("padding-right", "0.75rem");
     p("padding-top",   "calc(3rem + 0.5rem)");
-    p("margin-left",   "5rem");
+    p("margin-left",   "4rem");
     p("margin-right",  "0");
     p("margin-top",    "0");
     p("width",         "auto");
