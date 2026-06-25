@@ -12,7 +12,7 @@ local custom_column_utils = require "custom_column_utils"
 local format_utils = require "format_utils"
 local json = require "dkjson"
 local vs_utils = require "vs_utils"
-local have_nedge = ntop.isnEdge()
+local have_nedge = ntop.isnEdge and ntop.isnEdge()
 
 sendHTTPContentTypeHeader('text/json')
 

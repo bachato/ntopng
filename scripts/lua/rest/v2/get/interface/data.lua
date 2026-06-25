@@ -222,7 +222,7 @@ function dumpInterfaceStats(ifid)
       res["localtime"] = os.date("%H:%M:%S %z", res["epoch"])
       res["uptime_sec"] = uptime
       res["uptime"] = secondsToTime(uptime)
-      if ntop.isPro() then
+      if ntop.isPro and ntop.isPro() then
          local product_info = ntop.getInfo(true)
 
          if product_info["pro.out_of_maintenance"] then
@@ -280,7 +280,7 @@ function dumpInterfaceStats(ifid)
          upload = upload_stats
       }
 
-      if ntop.isnEdge() and ifstats.type == "netfilter" and ifstats.netfilter then
+      if ntop.isnEdge and ntop.isnEdge() and ifstats.type == "netfilter" and ifstats.netfilter then
          res["netfilter"] = ifstats.netfilter
       end
 
@@ -446,7 +446,7 @@ function dumpBriefInterfaceStats(ifid)
       res["localtime"] = os.date("%H:%M:%S %z", res["epoch"])
       res["uptime"] = secondsToTime(uptime)
       res["uptime_sec"] = uptime
-      if ntop.isPro() then
+      if ntop.isPro and ntop.isPro() then
          local product_info = ntop.getInfo(true)
 
          if product_info["pro.out_of_maintenance"] then

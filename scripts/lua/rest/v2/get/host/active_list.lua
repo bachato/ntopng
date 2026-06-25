@@ -10,7 +10,7 @@ require "ntop_utils"
 require "http_lint"
 local rest_utils = require "rest_utils"
 local vs_utils = require "vs_utils"
-local have_nedge = ntop.isnEdge()
+local have_nedge = ntop.isnEdge and ntop.isnEdge()
 
 -- Table parameters
 local all = _GET["all"]
@@ -180,7 +180,7 @@ for key, value in pairs(hosts_stats["hosts"]) do
         record.hostname.alt_name = alt_name
     end
 
-    if ntop.isnEdge() and value["mac"] then
+    if ntop.isnEdge and ntop.isnEdge() and value["mac"] then
         local mac_info = interface.getMacInfo(value["mac"])
         record["location"] = mac_info.location
     end
