@@ -180,6 +180,11 @@ function ts_data.get_timeseries(http_context)
       options.tags.port = nil
    end
 
+   if options.tags.am_host then
+      options.tags.host = options.tags.am_host
+      options.tags.am_host = nil
+   end
+
    -- Handle timeseries key (tskey) processing
    if http_context.tskey then
       local tskey = http_context.tskey -- Can contain MAC address for local hosts
