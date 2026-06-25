@@ -3355,49 +3355,67 @@ decode_packet_eth:
                        NULL /* srcMac */, NULL /* dstMac */);
               goto dissect_packet_end;
             }
-          } else if ((sport == TZSP_PORT) || (dport == TZSP_PORT)) {
-            /* https://en.wikipedia.org/wiki/TZSP */
-            u_int offset = ip_offset + ip_len + sizeof(struct ndpi_udphdr);
-            u_int8_t version = packet[offset];
-            u_int8_t type = packet[offset + 1];
-            u_int16_t encapsulates = ntohs(*((u_int16_t*)&packet[offset + 2]));
+	  } else if ((sport == TZSP_PORT) || (dport == TZSP_PORT)) {
+	    /* https://en.wikipedia.org/wiki/TZSP */
+	    u_int offset = ip_offset + ip_len + sizeof(struct ndpi_udphdr);
 
-            if ((version == 1) && (type == 0) && (encapsulates == 1)) {
-              u_int8_t stop = 0;
+	    // Ensure the 4-byte static header is within captured bounds
+	    if (offset + 4 > h->caplen) {
+	      goto dissect_packet_end;
+	    }
 
-              offset += 4;
+	    u_int8_t version = packet[offset];
+	    u_int8_t type = packet[offset + 1];
+	    u_int16_t encapsulates = ntohs(*((u_int16_t*)&packet[offset + 2]));
 
-              while ((!stop) && (offset < h->caplen)) {
-                u_int8_t tag_type = packet[offset];
-                u_int8_t tag_len;
+	    if ((version == 1) && (type == 0) && (encapsulates == 1)) {
+	      u_int8_t stop = 0;
 
-                switch (tag_type) {
-                  case 0: /* PADDING Tag */
-                    tag_len = 1;
-                    break;
-                  case 1: /* END Tag */
-                    tag_len = 1, stop = 1;
-                    break;
-                  default:
-                    tag_len = packet[offset + 1];
-                    break;
-                }
+	      offset += 4;
 
-                offset += tag_len;
+	      while ((!stop) && (offset < h->caplen)) {
+		u_int8_t tag_type = packet[offset];
 
-                if (offset >= h->caplen) {
-                  incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IPV6,
-                           NDPI_PROTOCOL_UNKNOWN,
-                           NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire,
-                           1, NULL /* srcMac */, NULL /* dstMac */);
-                  goto dissect_packet_end;
-                } else {
-                  eth_offset = offset;
-                  goto datalink_check;
-                }
-              }
-            }
-          } else if (dport == VXLAN_PORT) {
+		switch (tag_type) {
+		case 0: /* PADDING Tag (1 byte total: type only) */
+		  offset += 1;
+		  break;
+
+		case 1: /* END Tag (1 byte total: type only) */
+		  offset += 1;
+		  stop = 1;
+		  break;
+
+		default: /* Standard Tag (1 byte type + 1 byte len + X bytes data) */
+		  u_int8_t tag_data_len;
+		  
+		  if (offset + 1 >= h->caplen)
+		    goto dissect_packet_end;		  
+
+		  tag_data_len = packet[offset + 1];
+		  
+		  // Advance offset past type (1), length (1), and data payload
+		  offset += 2 + tag_data_len;
+		  break;
+		}
+
+		// Check bounds after shifting the offset
+		if (offset > h->caplen) {
+		  incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IPV6,
+			   NDPI_PROTOCOL_UNKNOWN,
+			   NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire,
+			   1, NULL /* srcMac */, NULL /* dstMac */);
+		  goto dissect_packet_end;
+		}
+
+		// If we hit the END tag safely, break out to check encapsulated data
+		if (stop) {
+		  eth_offset = offset;
+		  goto datalink_check;
+		}
+	      } /* while */
+	    }	    
+	  } else if (dport == VXLAN_PORT) {
             eth_offset = ip_offset + ip_len + sizeof(struct ndpi_udphdr) +
                          sizeof(struct ndpi_vxlanhdr);
             goto datalink_check;
