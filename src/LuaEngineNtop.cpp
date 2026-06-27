@@ -7035,6 +7035,43 @@ static int ntop_setnx_redis(lua_State* vm) {
 
 /* ****************************************** */
 
+/* @brief Atomically sets a Redis key to a new value and returns the old value (Redis GETSET).
+   Lua: ntop.getsetCache(key, value[, ttl_secs]) → old_value_string_or_empty
+   Use this instead of separate getCache + setCache when you need the old value without a
+   race window between the read and the write (e.g. computing deltas). */
+static int ntop_getset_redis(lua_State* vm) {
+  char *key, *rsp = NULL;
+  const char *value;
+  u_int expire_secs = 0;
+  Redis* redis = ntop->getRedis();
+
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
+
+  if (ntop_lua_check(vm, __FUNCTION__, 1, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+  if ((key = (char*)lua_tostring(vm, 1)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+
+  if (ntop_lua_check(vm, __FUNCTION__, 2, LUA_TSTRING) != CONST_LUA_OK)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+  if ((value = lua_tostring(vm, 2)) == NULL)
+    return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_NO_RETURN_VALUE));
+
+  if (lua_type(vm, 3) == LUA_TNUMBER) expire_secs = (u_int)lua_tonumber(vm, 3);
+
+  rsp = redis->getset(key, value, expire_secs);
+
+  if (rsp) {
+    lua_pushfstring(vm, "%s", rsp);
+    free(rsp);
+  } else
+    lua_pushfstring(vm, "");
+
+  return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
+}
+
+/* ****************************************** */
+
 /* @brief Sets a system preference in Redis (alias for setCache with ntopng.prefs. prefix).  Lua: ntop.setPref(key, value) → nil */
 static int ntop_set_preference(lua_State* vm) { return (ntop_set_redis(vm)); }
 
@@ -8977,6 +9014,7 @@ static luaL_Reg _ntop_reg[] = {
     {"getCache", ntop_get_redis},
     {"setCache", ntop_set_redis},
     {"setnxCache", ntop_setnx_redis},
+    {"getsetCache", ntop_getset_redis},
     {"incrCache", ntop_incr_redis},
     {"getCacheStats", ntop_get_redis_stats},
     {"delCache", ntop_delete_redis_key},

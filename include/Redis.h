@@ -105,6 +105,8 @@ class Redis {
   inline int setnx(const char* key, const char* value, u_int expire_secs = 0) {
     return (_set(true, key, value, expire_secs));
   }
+  /* getset = atomically set key to value and return the old value; caller must free() the result */
+  char* getset(const char* key, const char* value, u_int expire_secs = 0);
   int keys(const char* pattern, char*** keys_p);
   int hashKeys(const char* pattern, char*** keys_p);
   int hashGetAll(const char* key, char*** keys_p, char*** values_p);

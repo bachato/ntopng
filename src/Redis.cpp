@@ -754,6 +754,40 @@ int Redis::_set(bool use_nx, const char* key, const char* value,
 
 /* **************************************** */
 
+/*
+  Atomically sets key to value and returns the old value (Redis GETSET).
+  expire_secs is applied with a separate EXPIRE after the GETSET.
+  Returns a malloc'd string the caller must free(), or NULL if the key did not exist.
+*/
+char* Redis::getset(const char* key, const char* value, u_int expire_secs) {
+  char* rsp = NULL;
+  redisReply* reply;
+
+  l->lock(__FILE__, __LINE__);
+
+  stats.num_set++;
+  reply = (redisReply*)redisCommand(redis, "GETSET %s %s", key, value);
+  if (!reply) reconnectRedis(true);
+  if (reply && (reply->type == REDIS_REPLY_ERROR))
+    ntop->getTrace()->traceEvent(TRACE_ERROR, "%s",
+                                 reply->str ? reply->str : "???");
+
+  if (reply && reply->str) rsp = strdup(reply->str);
+
+  if (reply) freeReplyObject(reply);
+
+  if (expire_secs > 0) {
+    reply = (redisReply*)redisCommand(redis, "EXPIRE %s %u", key, expire_secs);
+    if (reply) freeReplyObject(reply);
+  }
+
+  l->unlock(__FILE__, __LINE__);
+
+  return rsp; /* caller must free() */
+}
+
+/* **************************************** */
+
 int Redis::keys(const char* pattern, char*** keys_p) {
   int rc = 0;
   u_int i;
