@@ -7012,10 +7012,8 @@ static int _ntop_set_redis(bool do_setnx, lua_State* vm) {
   if (lua_type(vm, 3) == LUA_TNUMBER) expire_secs = (u_int)lua_tonumber(vm, 3);
 
   if (do_setnx)
-    lua_pushboolean(vm, (redis->setnx(key, value, expire_secs) ==
-                         1 /* value added (not existing) */)
-                            ? true
-                            : false);
+    lua_pushboolean(vm, (redis->setnx(key, value, expire_secs) == 0 /* value added (not existing) */)
+		    ? true : false /* Already existing */);
   else
     lua_pushboolean(vm, (redis->set(key, value, expire_secs) == 0));
 
