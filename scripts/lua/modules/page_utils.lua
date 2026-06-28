@@ -177,6 +177,11 @@ page_utils.menu_entries = {
         i18n_title = "discover.network_discovery",
         section = "monitoring"
     },
+    vulnerability_scan = {
+        key = "vulnerability_scan",
+        i18n_title = "scan_hosts",
+        section = "monitoring"
+    },
     
     -- Dashboard
     traffic_dashboard = {

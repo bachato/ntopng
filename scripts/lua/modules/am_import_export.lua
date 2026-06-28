@@ -5,11 +5,13 @@
 local dirs = ntop.getDirs()
 package.path = dirs.installdir .. "/scripts/lua/modules/?.lua;" .. package.path
 package.path = dirs.installdir .. "/scripts/lua/modules/import_export/?.lua;" .. package.path
+package.path = dirs.installdir .. "/scripts/lua/modules/vulnerability_scan/?.lua;" .. package.path
 
 require "lua_utils" 
 local import_export = require "import_export"
 local host_pools = require "host_pools"
 local am_utils = require "am_utils"
+local vs_utils = require "vs_utils"
 
 -- ##############################################
 
@@ -61,6 +63,9 @@ function am_import_export:import(config)
       end
    end
 
+
+--   vs_utils.restore_config_backup(vs_conf)
+
    if not res.err then 
       res.success = true
    end
@@ -85,6 +90,9 @@ function am_import_export:export()
 	 res[host_key] = host_conf
       end
    end
+
+
+   local hosts_to_scan = vs_utils.retrieve_hosts_backup()
 
    local am_configs = {
       res = res,
