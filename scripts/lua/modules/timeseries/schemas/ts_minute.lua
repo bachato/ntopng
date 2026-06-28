@@ -70,6 +70,30 @@ schema:addMetric("written_alerts")
 schema:addMetric("alerts_queries")
 schema:addMetric("dropped_alerts")
 
+
+-- ################################################
+
+schema = ts_utils.newSchema("snmp:polled_device_no_qos", {
+   step = 60,
+   metrics_type = ts_utils.metrics.gauge,
+   is_critical_ts = true
+})
+schema:addTag("ifid")
+schema:addMetric("devices_polled_ok")
+schema:addMetric("devices_pooled_late")
+
+
+-- ################################################
+
+schema = ts_utils.newSchema("snmp:polled_device_qos_only", {
+   step = 60,
+   metrics_type = ts_utils.metrics.gauge,
+   is_critical_ts = true
+})
+schema:addTag("ifid")
+schema:addMetric("devices_polled_ok")
+schema:addMetric("devices_pooled_late")
+
 -------------------------------------------------------
 -- PROFILES SCHEMAS
 -------------------------------------------------------
