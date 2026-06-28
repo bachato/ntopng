@@ -105,6 +105,24 @@ int Redis::get(char *key, char *rsp, u_int rsp_len,
   return 0;
 }
 
+int Redis::getset(char *key, char *rsp, u_int rsp_len,
+		  bool cache_it /* = false */) {
+  if (rsp_len == 0) return -1;
+  
+  stats.num_get++;
+  std::string strKey(key);
+
+  if (this->store.find(strKey) == this->store.end() ||
+      snprintf(rsp, rsp_len, "%s", this->store[strKey].c_str()) < 0) {
+    rsp[0] = 0;
+    return -1;
+  }
+
+  this->store[strKey] = std::string("0");
+
+  return 0;
+}
+
 int Redis::hashGet(const char *key, const char *member, char *const rsp,
                    u_int rsp_len) {
   if (rsp_len == 0) return -1;
