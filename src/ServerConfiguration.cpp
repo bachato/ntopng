@@ -47,20 +47,19 @@ void ServerConfiguration::reloadServerConfiguration(char* key) {
   VLANAddressTree* new_tree;
 
   new_tree = new (std::nothrow) VLANAddressTree;
-  if (new_tree == NULL) {
+
+  if (new_tree == NULL)
     return;
-  }
+  
   loadConfiguration(new_tree, key);
 
   /* Swap address trees */
-  if (new_tree) {
-    if (tree) {
-      if (tree_shadow) delete tree_shadow;
-      tree_shadow = tree;
-    }
-
-    tree = new_tree;
+  if (tree) {
+    if (tree_shadow) delete tree_shadow;
+    tree_shadow = tree;
   }
+
+  tree = new_tree;
 }
 
 /* ***************************************************** */

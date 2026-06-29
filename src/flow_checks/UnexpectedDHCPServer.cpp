@@ -25,19 +25,31 @@
 /* ***************************************************** */
 
 bool UnexpectedDHCPServer::isAllowedHost(Flow* f) {
-  if (ntop->getPrefs()->getConfiguredDHCPServers()->isEmptyConfiguration())
+  if (ntop->getPrefs()->getConfiguredDHCPServers()->isEmptyConfiguration()) {
     return (true);
-  else {
-    IpAddress* ip = f->get_cli_ip_addr();
-
-    if (ip == NULL || ip->isBroadcastAddress()) return (true);
-
-    if (ntop->getPrefs()->isDHCPServer(ip, f->get_vlan_id()) ||
-        ntop->getPrefs()->isDHCPServer(ip, 0 /* Check VLAN 0 (no vlan) too */))
-      return (true);
-
-    return (false);
   }
+
+  IpAddress* ip = f->get_cli_ip_addr();
+
+  if (ip == NULL || ip->isBroadcastAddress()) {
+    return (true);
+  }
+
+  if (ntop->getPrefs()->isDHCPServer(ip, f->get_vlan_id())) {
+    return (true);
+  }
+      
+  if (ntop->getPrefs()->isDHCPServer(ip, 0 /* Check VLAN 0 (no vlan) too */)) {
+    /* Backward compatibility - now VLAN configuration is allowed */
+    return (true);
+  }
+
+  if (f->get_srv_ip_addr() && ntop->getPrefs()->isDHCPServer(f->get_srv_ip_addr(), f->get_vlan_id())) {
+    /* DHCP relay? Relay agent (cli port 67) forwards to DHCP server (srv port 67) */
+    return (true);
+  }
+
+  return (false);
 }
 
 /* ***************************************************** */
