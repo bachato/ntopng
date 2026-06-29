@@ -84,7 +84,7 @@ static void setCLIArgs(Prefs *prefs, int params...) {
   }
 
   // Create the new argv
-  char *new_argv[params];
+  std::vector<char *> new_argv(params);
   for (int i = 0; i < params; ++i) {
     const char *opt = va_arg(args, const char *);
 
@@ -104,7 +104,7 @@ static void setCLIArgs(Prefs *prefs, int params...) {
     }
   }
 
-  prefs->loadFromCLI(params, new_argv);  // = true;
+  prefs->loadFromCLI(params, new_argv.data());  // = true;
 
   // Free arguments
   for (int k = 0; k < params; ++k) free(new_argv[k]);
