@@ -180,12 +180,6 @@ const map_table_def_columns = (columns) => {
             }
             return ''
         },
-        "num_cves": (value, row) => {
-            if (value > 0) {
-                return formatterUtils.getFormatter("full_number")(value)
-            }
-            return ''
-        },
         "tcp_unresp_as_server": (value, row) => {
             if (value > 0) {
                 return formatterUtils.getFormatter("full_number")(value)

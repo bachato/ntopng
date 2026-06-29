@@ -107,14 +107,3 @@ schema = ts_utils.newSchema("am_vuln_scan:num_open_ports", {
 
 schema:addTag("ifid")
 schema:addMetric("num_open_ports")
-
--- ##############################################
-
-schema = ts_utils.newSchema("am_vuln_scan:num_cve", {
-  step = 3600,
-  metrics_type = ts_utils.metrics.gauge,
-  is_system_schema = true,
-})
-
-schema:addTag("ifid")
-schema:addMetric("num_cve")

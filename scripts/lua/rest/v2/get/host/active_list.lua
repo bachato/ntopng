@@ -200,12 +200,6 @@ for key, value in pairs(hosts_stats["hosts"]) do
         column_ip["vlan"]["id"] = value["vlan"]
     end
 
-    local host_vulnerabilities = vs_utils.retrieve_host(value["ip"])
-
-    if (host_vulnerabilities) and not isEmptyString(host_vulnerabilities.num_vulnerabilities_found) then
-        record["num_cves"] = host_vulnerabilities.num_vulnerabilities_found
-    end
-
     record["host"] = column_ip
     record["first_seen"] = value["seen.first"]
     record["last_seen"] = value["seen.last"]

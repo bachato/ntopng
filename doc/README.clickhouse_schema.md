@@ -179,7 +179,7 @@ One row per completed vulnerability scan report. Partitioned by day on `REPORT_D
 | `REPORT_DATE` | Report generation timestamp |
 | `REPORT_JSON_INFO` | Full report metadata as JSON |
 | `NUM_SCANNED_HOSTS` | Hosts scanned |
-| `NUM_CVES` | CVEs identified |
+| `NUM_CVES` | No more used |
 | `NUM_TCP_PORTS` | Open TCP ports found |
 | `NUM_UDP_PORTS` | Open UDP ports found |
 

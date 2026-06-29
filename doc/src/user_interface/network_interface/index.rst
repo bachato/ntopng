@@ -29,7 +29,7 @@ Monitoring
     :maxdepth: 2
 
     monitoring/network_discovery
-    monitoring/vulnerability_scan
+    monitoring/active_scan
 
 Alerts
 ------
