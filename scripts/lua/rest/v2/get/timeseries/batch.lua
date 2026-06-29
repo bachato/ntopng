@@ -83,6 +83,7 @@ local _prefix_to_module = {
     obs_point      = "ts_observation_point",
     am_vuln_scan   = "ts_vulnerability_scan",
     nedge          = "ts_nedge",
+    snmp           = "ts_system" -- This is a particular case. These are SNMP Stats timeseries, like devices polled ecc...
 }
 
 local function get_handler_module(prefix)
