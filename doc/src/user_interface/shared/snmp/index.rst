@@ -22,6 +22,7 @@ Alerts can be created, for example, when an interface changes its status from up
     similarity
     topology
     rules
+    statistics_and_troubleshooting
 
 
 These blog posts explain in detail how SNMP monitoring in ntopng works, and what are the best practices for its setup:
