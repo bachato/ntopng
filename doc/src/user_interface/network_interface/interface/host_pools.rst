@@ -64,5 +64,5 @@ Traffic Policies
 Host pools can also be used to enforce traffic policies (e.g, block YouTube traffic for the “John” pool and
 limit Facebook traffic at 1 Mbps for the “Guests” pool). This feature is available in nEdge (when ntopng is
 used inline as described in the “Advanced Features” section of this document), or when ntopng is used in 
-combination with `nProbe in IPS mode <https://www.ntop.org/guides/nprobe/ips_mode.html>`_ (see :ref:`UsingNtopngWithNprobeIPS`).
+combination with `nFW <https://www.ntop.org/guides/nFW>`_ (see :ref:`UsingNtopngWithNFW`).
 
