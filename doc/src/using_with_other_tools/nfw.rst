@@ -1,10 +1,10 @@
-.. _UsingNtopngWithNprobeIPS:
+.. _UsingNtopngWithNFW:
 
-Using ntopng with nProbe IPS
+Using ntopng with nFW
 ############################
 
-ntopng can be used to enforce traffic policies and report them, when ntopng is used in 
-combination with `nProbe in IPS mode <https://www.ntop.org/guides/nprobe/ips_mode.html>`_.
+ntopng can be used to enforce traffic policies when used in combination with
+`nFW <https://www.ntop.org/guides/nFW>`_.
 
 .. note::
 
@@ -12,17 +12,16 @@ combination with `nProbe in IPS mode <https://www.ntop.org/guides/nprobe/ips_mod
 
 
 Traffic policies are automatically exported to nProbe after a change to the policies configuration, or
-when a new nProbe instance connects to ntopng via ZMQ. In order to publish IPS events (including policies)
-an additional ZMQ chann
+when a new nProbe instance connects to ntopng via ZMQ. In order to publish policies to an additional ZMQ channel
 configure the ntopng ZMQ endpoint for IPS events. Example:
 
 .. code:: bash
 
-   nprobe --zmq tcp://*:1234 --ips-mode none --zmq-publish-events tcp://127.0.0.1:5557 -i nf:0
+   nfw -q 0 -z tcp://ntopng-host:5556 -p tcp://ntopng-host:5557
    ntopng -i tcp://127.0.0.1:1234 --zmq-publish-events tcp://*:5557
 
-Please refer to the `nProbe documentation <https://www.ntop.org/guides/nprobe/ips_mode.html>`_ for more 
-details about the nProbe configuration and working mode.
+Please refer to the `nFW documentation <https://www.ntop.org/guides/nFW/ntopng_integration.html>`_ for more 
+details about the nFW configuration and ntopng integration.
 
 A different traffic policy can be configured for each pool of hosts (see :ref:`HostPools`) by selecting the pool to edit, in the dropdown icon ('Actions column'), click 'Manage Pool'
 
