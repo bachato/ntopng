@@ -33,7 +33,7 @@ nAnalyst will:
 
 The monitor appears immediately in the ntopng active monitoring dashboard alongside any manually configured monitors.
 
-.. figure:: ../img/nAnalyst_active_monitoring.png
+.. figure:: ../../img/nAnalyst_active_monitoring.png
    :align: center
    :alt: nAnalyst Active Monitoring Script Add
 

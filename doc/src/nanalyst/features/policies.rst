@@ -5,7 +5,7 @@ AI-Generated Network Policies
 
 nAnalyst can translate a plain-English security or operational requirement into an executable network policy that generates ntopng alerts when violated.
 
-.. figure:: ../img/nAnalyst_policy.png
+.. figure:: ../../img/nAnalyst_policy.png
    :align: center
    :alt: nAnalyst AI Policy
 
@@ -45,7 +45,7 @@ Saved policies are listed in the nAnalyst policy panel. For each policy you can 
 
 Policies can be edited, paused, or deleted from the same panel.
 
-.. figure:: ../img/nAnalyst_policy_edit.png
+.. figure:: ../../img/nAnalyst_policy_edit.png
    :align: center
    :alt: nAnalyst Policy Edit
 

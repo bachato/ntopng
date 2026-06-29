@@ -17,7 +17,7 @@ Every chat response includes an evidence log — a structured record of:
 
 The evidence log is collapsed by default to keep responses readable, but is always one click away. You can inspect, copy, or export any part of it.
 
-.. figure:: ../img/nAnalyst_evidence_highlighted.png
+.. figure:: ../../img/nAnalyst_evidence_highlighted.png
    :align: center
    :alt: nAnalyst Response Evidence log
 

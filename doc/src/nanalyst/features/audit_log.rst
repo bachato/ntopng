@@ -37,7 +37,7 @@ The audit log is accessible from the nAnalyst observability panel. It can be fil
 
 Each row is expandable to show the full tool call payload.
 
-.. figure:: ../img/nAnalyst_audit_log.png
+.. figure:: ../../img/nAnalyst_audit_log.png
    :align: center
    :alt: nAnalyst Audit Log
 

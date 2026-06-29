@@ -33,7 +33,7 @@ The usage statistics page shows:
 - Cost per model (see model cost configuration below)
 - Cumulative spend over time
 
-.. figure:: ../img/nAnalyst_usage_stats.png
+.. figure:: ../../img/nAnalyst_usage_stats.png
    :align: center
    :alt: nAnalyst Usage Stats
 
@@ -41,7 +41,7 @@ The usage statistics page shows:
 
 Model costs can be added by clicking on the right part 'Add Model Cost':
 
-.. figure:: ../img/nAnalyst_LLM_model_cost.png
+.. figure:: ../../img/nAnalyst_LLM_model_cost.png
    :align: center
    :alt: nAnalyst Add LLM Model Cost
 
