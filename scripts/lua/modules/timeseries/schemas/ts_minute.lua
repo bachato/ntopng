@@ -80,7 +80,7 @@ schema = ts_utils.newSchema("snmp:polled_device_no_qos", {
 })
 schema:addTag("ifid")
 schema:addMetric("devices_polled_ok")
-schema:addMetric("devices_pooled_late")
+schema:addMetric("devices_polled_late")
 
 
 -- ################################################
@@ -92,7 +92,7 @@ schema = ts_utils.newSchema("snmp:polled_device_qos_only", {
 })
 schema:addTag("ifid")
 schema:addMetric("devices_polled_ok")
-schema:addMetric("devices_pooled_late")
+schema:addMetric("devices_polled_late")
 
 -------------------------------------------------------
 -- PROFILES SCHEMAS
