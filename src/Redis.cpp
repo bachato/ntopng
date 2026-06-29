@@ -765,7 +765,7 @@ char* Redis::getset(const char* key, const char* value, u_int expire_secs) {
 
   l->lock(__FILE__, __LINE__);
 
-  stats.num_set++;
+  stats.num_set++, stats.num_get++; /* Use a specific member for this on a future version */
   reply = (redisReply*)redisCommand(redis, "GETSET %s %s", key, value);
   if (!reply) reconnectRedis(true);
   if (reply && (reply->type == REDIS_REPLY_ERROR))

@@ -62,6 +62,7 @@ class Redis {
   int expire(char* key, u_int expire_sec);
   char* getWithAlloc(char* key, bool cache_it = false);
   int get(char* key, char* rsp, u_int rsp_len, bool cache_it = false);
+  char* getset(const char* key, const char* value, u_int expire_secs = 0);
   int hashGet(const char* key, const char* member, char* const rsp,
               u_int rsp_len);
   int hashDel(const char* key, const char* field);
