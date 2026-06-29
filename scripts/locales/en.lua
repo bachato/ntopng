@@ -9841,6 +9841,8 @@ local lang = {
   },
   ["updates"] = {
     ["available"] = "New",
+    ["new_update_available_banner"] = "New update available",
+    ["install_now_banner"] = "Install now",
     ["check"] = "Check for updates",
     ["checking"] = "Checking for updates..",
     ["install"] = "Install update",
