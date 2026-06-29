@@ -760,10 +760,14 @@ function set_stats_rows(ts_charts_options, timeseries_groups) {
                 /* Grouped series: id is the group value (e.g. "HTTP"), no schema metadata */
                 name = ts_id;
             }
-            ts_stats = s.statistics ?? null;
-            if (ts_stats == null) {
-                return;
-            }
+            ts_stats = s.statistics ?? {
+                total: 0,
+                average: 0,
+                max_val: 0,
+                min_val: 0,
+                "95th_percentile": 0
+            };
+            // If empty or null, put stats to 0
             if (s.label) {
                 name = s.label
             }
@@ -775,11 +779,11 @@ function set_stats_rows(ts_charts_options, timeseries_groups) {
             let total_formatter = formatterUtils.getFormatter(total_formatter_type);
             let row = {
                 metric: name,
-                total: total_formatter(ts_stats.total),
-                perc_95: formatter(ts_stats["95th_percentile"]),
-                avg: formatter(ts_stats.average),
-                max: formatter(ts_stats.max_val),
-                min: formatter(ts_stats.min_val),
+                total: total_formatter(ts_stats.total ?? 0),
+                perc_95: formatter(ts_stats["95th_percentile"] ?? 0),
+                avg: formatter(ts_stats.average ?? 0),
+                max: formatter(ts_stats.max_val ?? 0),
+                min: formatter(ts_stats.min_val ?? 0),
             };
             stats_rows.value.push(row);
         });
