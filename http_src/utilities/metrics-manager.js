@@ -212,8 +212,9 @@ const get_sources = (http_prefix, id, source_def, selected_source_value_array) =
                 throw `:Error: metrics-manager.js, missing sources_url_to_source ${source_def.value} key`;
             }
             let url = `${http_prefix}/${source_def.sources_url}`;
-            cache_sources[key] = ntopng_utility.http_request(url).then((sources) =>
-                sources.map((s) => f_map_source_element(s)).sort(NtopUtils.sortAlphabetically)
+            cache_sources[key] = ntopng_utility.http_request(url).then((sources) => {
+                return sources.map((s) => f_map_source_element(s)).sort(NtopUtils.sortAlphabetically)
+            }
             );
         } else if (source_def.sources_function) {
             cache_sources[key] = Promise.resolve(source_def.sources_function(selected_source_value_array)).then((sources) =>

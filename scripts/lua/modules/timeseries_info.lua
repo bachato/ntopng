@@ -47,6 +47,7 @@ local timeseries_id = {
     vulnerability_scan = "am_vuln_scan",
     flow   = "flow",
     flow_aggr = "flow_aggr",
+    infrastructure = "infrastructure",
 }
 
 -- #################################
@@ -109,6 +110,8 @@ local function getTimeseriesFromModules(tags, prefix, ts_options)
         module_to_use = require "ts_flow"
     elseif prefix == timeseries_id.flow_aggr then
         module_to_use = require "ts_flow_aggr"
+    elseif prefix == timeseries_id.infrastructure then
+        module_to_use = require "ts_infrastructure_monitoring"
     end
     if module_to_use then
         return module_to_use.getTimeseries(tags, ts_options) or {}
@@ -129,35 +132,7 @@ end
 function timeseries_info.getTimeseries(tags, prefix)
     local timeseries = {}
     if not prefix then
-
         return timeseries
-    end
-    
-    if ntop.isEnterprise and ntop.isEnterprise() then
-        -- Check for the infrastructure active monitoring
-        if tags.host then
-            if tags.host:find("metric:infrastructure") then
-                local host = split(tags.host, ",")
-                local am_utils = require("am_utils")
-                local active_monitoring_hosts = am_utils.getHosts() or {}
-                for key, info in pairs(active_monitoring_hosts or {}) do
-                    if key:find(host[1]) then
-                        local measurement_key = split(key, "@")[2]
-                        tags.host = measurement_key .. ",metric:" .. info.measurement
-                        timeseries = add_active_monitoring_timeseries(tags, timeseries)
-                        timeseries[#timeseries].query = 'host:' .. tags.host
-                        -- HTTP measurement has 2 timeseries, so add to both the query
-                        if info.measurement == 'http' then
-                            timeseries[#timeseries - 1].query = 'host:' .. tags.host
-                        end
-                    end
-                end
-                if table.len(timeseries) > 0 then
-                    timeseries[1].default_visible = true
-                end
-                return timeseries
-            end
-        end
     end
 
     local timeseries_options = {
@@ -167,6 +142,13 @@ function timeseries_info.getTimeseries(tags, prefix)
         emptyEpoch = not (tags.epoch_begin and tags.epoch_end),
         include_empty_ts = true
     }
+    
+    if tags.host:find("metric:infrastructure") and
+        ntop.isEnterprise and
+        ntop.isEnterprise() then
+        prefix = "infrastructure"
+    end
+    
     local timeseries_list = getTimeseriesFromModules(tags, prefix, timeseries_options)
 
     for _, info in pairs(timeseries_list) do
