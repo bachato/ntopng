@@ -133,6 +133,7 @@ Ntop::Ntop(const char* appName) {
 
   for (int i = 0; i < CONST_MAX_NUM_NETWORKS; i++)
     local_network_names[i] = local_network_aliases[i] = NULL;
+  local_network_max_id = 0;
 
   internal_alerts_queue =
       new (std::nothrow) FifoSerializerQueue(INTERNAL_ALERTS_QUEUE_SIZE);
@@ -311,12 +312,14 @@ void Ntop::initTimezone() {
 /* ******************************************* */
 
 Ntop::~Ntop() {
-  int num_local_networks = local_network_tree.getNumAddresses();
+  u_int32_t scan_limit = (local_network_tree.getNumAddresses() > 0)
+                             ? (local_network_max_id + 1)
+                             : 0;
 
   if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
 
-  for (int i = 0; i < num_local_networks; i++) {
+  for (u_int32_t i = 0; i < scan_limit; i++) {
     if (local_network_names[i] != NULL) free(local_network_names[i]);
     if (local_network_aliases[i] != NULL) free(local_network_aliases[i]);
   }
@@ -4886,8 +4889,11 @@ inline int32_t Ntop::cloudNetworkLookup(int family, void* addr,
 
 u_int32_t Ntop::getLocalNetworkId(const char* address_str) {
   u_int32_t i;
+  u_int32_t n = local_network_tree.getNumAddresses();
 
-  for (i = 0; i < local_network_tree.getNumAddresses(); i++) {
+  if (n == 0) return ((u_int32_t)-1);
+
+  for (i = 0; i <= local_network_max_id; i++) {
     if (local_network_names[i] &&
         (!strcmp(address_str, local_network_names[i])))
       return (i);
@@ -4914,13 +4920,14 @@ bool Ntop::addLocalNetwork(char* _net) {
     /* Network */
     char *net, *position_ptr;
     char alias[64] = "";
-    u_int32_t id = local_network_tree.getNumAddresses();
     u_int32_t i, pos = 0;
     char out[128] = {'\0'};
+    u_int32_t cur_count = local_network_tree.getNumAddresses();
 
-    if (id >= getMaxNumLocalNetworks()) {
+    if (cur_count >= getMaxNumLocalNetworks()) {
       ntop->getTrace()->traceEvent(
-          TRACE_ERROR, "Too many networks defined (%d): ignored %s", id, _net);
+          TRACE_ERROR, "Too many networks defined (%d): ignored %s", cur_count,
+          _net);
       return (false);
     }
 
@@ -4942,8 +4949,10 @@ bool Ntop::addLocalNetwork(char* _net) {
       return (false);
     }
 
-    for (i = 0; i < id; i++) {
-      if (strcmp(local_network_names[i], net) == 0) {
+    /* Check for duplicates across all active slots */
+    u_int32_t scan_limit = (cur_count == 0) ? 0 : (local_network_max_id + 1);
+    for (i = 0; i < scan_limit; i++) {
+      if (local_network_names[i] && strcmp(local_network_names[i], net) == 0) {
         /* Already present */
         ntop->getTrace()->traceEvent(TRACE_NORMAL, "Network %s already present",
                                      net);
@@ -4952,15 +4961,34 @@ bool Ntop::addLocalNetwork(char* _net) {
       }
     }
 
-    // Adding the Network to the local Networks
-    if (!local_network_tree.addAddresses(net)) {
-      ntop->getTrace()->traceEvent(TRACE_WARNING, "Failure adding address %s",
-                                   net);
+    /*
+     * Get a persistent ID for this network from Redis (similar to ifname2id).
+     * First time the next sequential id is used. On subsequent runs the stored ID is returned,
+     * regardless of the order of the -m options.
+     */
+    u_int32_t id;
+    char rsp[16], netidx[16];
+
+    if (ntop->getRedis() && ntop->getRedis()->hashGet((char*)CONST_LOCAL_NETS_ID_PREFS, net, rsp, sizeof(rsp)) == 0) {
+      id = (u_int32_t)atoi(rsp);
+    } else {
+      id = cur_count;
+      if (ntop->getRedis()) {
+        snprintf(netidx, sizeof(netidx), "%u", id);
+        ntop->getRedis()->hashSet((char*)CONST_LOCAL_NETS_ID_PREFS, net, netidx);
+        ntop->getRedis()->hashSet((char*)CONST_LOCAL_NETS_ID_PREFS, netidx, net);
+      }
+    }
+
+    // Adding the Network to the local Networks with the persistent ID
+    if (!local_network_tree.addAddresses(net, (int64_t)id)) {
+      ntop->getTrace()->traceEvent(TRACE_WARNING, "Failure adding address %s", net);
       free(net);
       return (false);
     }
 
     local_network_names[id] = net;
+    if (cur_count == 0 || id > local_network_max_id) local_network_max_id = id;
 
     // Adding, if available, the alias
     out[0] = '\0';

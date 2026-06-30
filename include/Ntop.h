@@ -150,6 +150,7 @@ class Ntop {
   /* Local network address list */
   char* local_network_names[CONST_MAX_NUM_NETWORKS];
   char* local_network_aliases[CONST_MAX_NUM_NETWORKS];
+  u_int32_t local_network_max_id; /* highest assigned local network ID */
   AddressTree local_network_tree, cloud_local_network_tree;
 
   /* Threads info */
@@ -839,10 +840,12 @@ class Ntop {
 
   /* Local network address list methods */
   inline u_int32_t getNumLocalNetworks() {
-    return local_network_tree.getNumAddresses();
+    u_int32_t n = local_network_tree.getNumAddresses();
+    return (n > 0) ? (local_network_max_id + 1) : 0;
   };
   inline const char* getLocalNetworkName(int32_t local_network_id) {
-    return (((u_int32_t)local_network_id < local_network_tree.getNumAddresses())
+    return (((u_int32_t)local_network_id <= local_network_max_id &&
+             local_network_names[(u_int32_t)local_network_id] != NULL)
                 ? local_network_names[(u_int32_t)local_network_id]
                 : NULL);
   };

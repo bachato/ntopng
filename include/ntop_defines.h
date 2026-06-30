@@ -782,6 +782,7 @@ typedef enum {
 #define CONST_NBOX_USER NTOPNG_PREFS_PREFIX ".nbox_user"
 #define CONST_NBOX_PASSWORD NTOPNG_PREFS_PREFIX ".nbox_password"
 #define CONST_IFACE_ID_PREFS NTOPNG_PREFS_PREFIX ".iface_id"
+#define CONST_LOCAL_NETS_ID_PREFS NTOPNG_PREFS_PREFIX ".local_nets_id"
 #define CONST_IFACE_SCALING_FACTOR_PREFS \
   NTOPNG_PREFS_PREFIX ".iface_%d.scaling_factor"
 #define CONST_IFACE_HIDE_FROM_TOP_PREFS \
