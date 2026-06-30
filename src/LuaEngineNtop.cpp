@@ -7851,7 +7851,7 @@ static int ntop_refresh_network_site_id(lua_State* vm) {
 
 /* @brief Returns the internal numeric id for a local network given its CIDR or alias.  Lua: ntop.getNetworkIdByName(name) → integer */
 static int ntop_network_id_by_name(lua_State* vm) {
-  u_int32_t num_local_networks = ntop->getNumLocalNetworks();
+  u_int32_t num_local_networks = (u_int32_t)(ntop->getMaxLocalNetworksID() + 1);
   int found_id = -1;
   char* name;
 
@@ -7863,7 +7863,8 @@ static int ntop_network_id_by_name(lua_State* vm) {
 
   for (u_int32_t network_id = 0; network_id < num_local_networks;
        network_id++) {
-    if (!strcmp(ntop->getLocalNetworkName(network_id), name)) {
+    const char* net_name = ntop->getLocalNetworkName(network_id);
+    if (net_name && !strcmp(net_name, name)) {
       found_id = network_id;
       break;
     }
@@ -7877,15 +7878,17 @@ static int ntop_network_id_by_name(lua_State* vm) {
 
 /* @brief Returns a table of all configured local networks with their ids and CIDRs.  Lua: ntop.getNetworks() → table */
 static int ntop_get_networks(lua_State* vm) {
-  u_int32_t num_local_networks = ntop->getNumLocalNetworks();
+  u_int32_t num_local_networks = (u_int32_t)(ntop->getMaxLocalNetworksID() + 1);
 
   ntop->getTrace()->traceEvent(TRACE_INFO, "%s() called", __FUNCTION__);
 
   lua_newtable(vm);
 
-  for (u_int32_t network_id = 0; network_id < num_local_networks; network_id++)
-    lua_push_uint64_table_entry(vm, ntop->getLocalNetworkName(network_id),
-                                network_id);
+  for (u_int32_t network_id = 0; network_id < num_local_networks; network_id++) {
+    const char* net_name = ntop->getLocalNetworkName(network_id);
+    if (net_name)
+      lua_push_uint64_table_entry(vm, net_name, network_id);
+  }
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }

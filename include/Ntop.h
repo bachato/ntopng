@@ -150,7 +150,7 @@ class Ntop {
   /* Local network address list */
   char* local_network_names[CONST_MAX_NUM_NETWORKS];
   char* local_network_aliases[CONST_MAX_NUM_NETWORKS];
-  u_int32_t local_network_max_id; /* highest assigned local network ID */
+  int32_t local_network_max_id; /* highest assigned local network ID, -1 if none */
   AddressTree local_network_tree, cloud_local_network_tree;
 
   /* Threads info */
@@ -195,6 +195,7 @@ class Ntop {
   inline int32_t cloudNetworkLookup(int family, void* addr,
                                     u_int8_t* network_mask_bits = NULL);
   bool addLocalNetwork(char* _net);
+  void initLocalNetworkMaxIdFromRedis();
 
   void loadLocalInterfaceAddress();
   void initAllowedProtocolPresets();
@@ -840,13 +841,14 @@ class Ntop {
 
   /* Local network address list methods */
   inline u_int32_t getNumLocalNetworks() {
-    u_int32_t n = local_network_tree.getNumAddresses();
-    return (n > 0) ? (local_network_max_id + 1) : 0;
+    return local_network_tree.getNumAddresses();
   };
+  /* Max assigned local network ID (or -1 if none) */
+  inline int32_t getMaxLocalNetworksID() { return local_network_max_id; };
   inline const char* getLocalNetworkName(int32_t local_network_id) {
-    return (((u_int32_t)local_network_id <= local_network_max_id &&
-             local_network_names[(u_int32_t)local_network_id] != NULL)
-                ? local_network_names[(u_int32_t)local_network_id]
+    return ((local_network_id >= 0 && local_network_id <= local_network_max_id &&
+             local_network_names[local_network_id] != NULL)
+                ? local_network_names[local_network_id]
                 : NULL);
   };
 

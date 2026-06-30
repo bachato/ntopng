@@ -1137,7 +1137,7 @@ NetworkInterface::~NetworkInterface() {
   if (ndpiStats) delete ndpiStats;
   if (dscpStats) delete dscpStats;
   if (networkStats) {
-    u_int32_t numNetworks = ntop->getNumLocalNetworks();
+    u_int32_t numNetworks = (u_int32_t)(ntop->getMaxLocalNetworksID() + 1);
 
     for (u_int32_t i = 0; i < numNetworks; i++) delete networkStats[i];
 
@@ -4640,7 +4640,7 @@ void NetworkInterface::periodicStatsUpdate() {
 
   if (host_pools) host_pools->updateStats(&tv);
 
-  for (u_int32_t network_id = 0; network_id < ntop->getNumLocalNetworks();
+  for (u_int32_t network_id = 0; network_id < (u_int32_t)(ntop->getMaxLocalNetworksID() + 1);
        network_id++) {
     NetworkStats* ns = getNetworkStats(network_id);
 
@@ -8111,12 +8111,15 @@ void NetworkInterface::getNetworkStats(lua_State* vm, u_int32_t network_id,
   if ((network_stats = getNetworkStats(network_id))
       // && network_stats->trafficSeen()
       && network_stats->match(allowed_nets)) {
+    const char* network_name = ntop->getLocalNetworkName(network_id);
+    if (!network_name) return; /* stale network_id, name no longer valid */
+
     lua_newtable(vm);
 
     network_stats->lua(vm, diff, fullStats);
 
     lua_push_int32_table_entry(vm, "network_id", network_id);
-    lua_pushstring(vm, ntop->getLocalNetworkName(network_id));
+    lua_pushstring(vm, network_name);
     lua_insert(vm, -2);
     lua_settable(vm, -3);
   }
@@ -8127,7 +8130,7 @@ void NetworkInterface::getNetworkStats(lua_State* vm, u_int32_t network_id,
 void NetworkInterface::getNetworksStats(lua_State* vm,
                                         AddressTree* allowed_nets, bool diff,
                                         bool fullStats) const {
-  u_int32_t num_local_networks = ntop->getNumLocalNetworks();
+  u_int32_t num_local_networks = (u_int32_t)(ntop->getMaxLocalNetworksID() + 1);
 
   lua_newtable(vm);
 
@@ -9690,7 +9693,7 @@ void NetworkInterface::FillObsHash() {
 /* **************************************** */
 
 void NetworkInterface::allocateStructures(bool disable_dump) {
-  u_int32_t numNetworks = ntop->getNumLocalNetworks();
+  u_int32_t numNetworks = (u_int32_t)(ntop->getMaxLocalNetworksID() + 1);
   char buf[16];
 
   try {
@@ -9835,7 +9838,7 @@ AlertsQueue* NetworkInterface::getAlertsQueue() const {
 /* **************************************** */
 
 NetworkStats* NetworkInterface::getNetworkStats(u_int32_t networkId) const {
-  if ((networkStats == NULL) || (networkId >= ntop->getNumLocalNetworks()))
+  if ((networkStats == NULL) || (networkId >= (u_int32_t)(ntop->getMaxLocalNetworksID() + 1)))
     return (NULL);
   else
     return (networkStats[networkId]);
@@ -11758,12 +11761,13 @@ void NetworkInterface::walkAlertables(AlertEntity alert_entity,
   /* Networks */
   if (((alert_entity == alert_entity_none) ||
        (alert_entity == alert_entity_network))) {
-    u_int32_t num_local_networks = ntop->getNumLocalNetworks();
+    u_int32_t num_local_networks = (u_int32_t)(ntop->getMaxLocalNetworksID() + 1);
 
     for (u_int32_t network_id = 0; network_id < num_local_networks;
          network_id++) {
       NetworkStats* netstats = getNetworkStats(network_id);
 
+      if (netstats == NULL) continue;
       if ((entity_value == NULL) ||
           (netstats->getEntityValue().compare(entity_value) == 0)) {
         if (netstats->matchesAllowedNetworks(allowed_nets))

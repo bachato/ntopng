@@ -133,7 +133,7 @@ Ntop::Ntop(const char* appName) {
 
   for (int i = 0; i < CONST_MAX_NUM_NETWORKS; i++)
     local_network_names[i] = local_network_aliases[i] = NULL;
-  local_network_max_id = 0;
+  local_network_max_id = -1;
 
   internal_alerts_queue =
       new (std::nothrow) FifoSerializerQueue(INTERNAL_ALERTS_QUEUE_SIZE);
@@ -312,9 +312,7 @@ void Ntop::initTimezone() {
 /* ******************************************* */
 
 Ntop::~Ntop() {
-  u_int32_t scan_limit = (local_network_tree.getNumAddresses() > 0)
-                             ? (local_network_max_id + 1)
-                             : 0;
+  u_int32_t scan_limit = (u_int32_t)(getMaxLocalNetworksID() + 1);
 
   if (trace_new_delete)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[delete] %s", __FILE__);
@@ -501,6 +499,9 @@ void Ntop::registerPrefs(Prefs* _prefs, bool quick_registration) {
 #endif
 
   if (quick_registration) return;
+
+  /* Init local_network_max_id from Redis before calling addLocalNetwork() and assign new ID */
+  initLocalNetworkMaxIdFromRedis();
 
   if (prefs->get_local_networks()) {
     setLocalNetworks(prefs->get_local_networks());
@@ -4898,13 +4899,39 @@ u_int32_t Ntop::getLocalNetworkId(const char* address_str) {
 
   if (n == 0) return ((u_int32_t)-1);
 
-  for (i = 0; i <= local_network_max_id; i++) {
+  for (i = 0; local_network_max_id >= 0 && i <= (u_int32_t)local_network_max_id; i++) {
     if (local_network_names[i] &&
         (!strcmp(address_str, local_network_names[i])))
       return (i);
   }
 
   return ((u_int32_t)-1);
+}
+
+/* ******************************************* */
+
+void Ntop::initLocalNetworkMaxIdFromRedis() {
+  char **keys, **values;
+  int n;
+
+  if (!redis) return;
+
+  n = redis->hashGetAll(CONST_LOCAL_NETS_ID_PREFS, &keys, &values);
+  for (int i = 0; i < n; i++) {
+    char* endptr;
+    u_int32_t id = (u_int32_t)strtoul(keys[i], &endptr, 10);
+    /* Numeric keys are the ID→name direction; skip name→ID entries */
+    if (*endptr == '\0') {
+      if ((int32_t)id > local_network_max_id)
+        local_network_max_id = (int32_t)id;
+    }
+    free(keys[i]);
+    free(values[i]);
+  }
+  if (n > 0) {
+    free(keys);
+    free(values);
+  }
 }
 
 /* ******************************************* */
@@ -4955,7 +4982,7 @@ bool Ntop::addLocalNetwork(char* _net) {
     }
 
     /* Check for duplicates across all active slots */
-    u_int32_t scan_limit = (cur_count == 0) ? 0 : (local_network_max_id + 1);
+    u_int32_t scan_limit = (u_int32_t)(local_network_max_id + 1); /* 0 when local_network_max_id == -1 */
     for (i = 0; i < scan_limit; i++) {
       if (local_network_names[i] && strcmp(local_network_names[i], net) == 0) {
         /* Already present */
@@ -4973,11 +5000,11 @@ bool Ntop::addLocalNetwork(char* _net) {
      */
     u_int32_t id;
     char rsp[16], netidx[16];
-
     if (ntop->getRedis() && ntop->getRedis()->hashGet((char*)CONST_LOCAL_NETS_ID_PREFS, net, rsp, sizeof(rsp)) == 0) {
       id = (u_int32_t)atoi(rsp);
     } else {
-      id = cur_count;
+      u_int32_t fresh_id = (u_int32_t)(getMaxLocalNetworksID() + 1);
+      id = fresh_id;
       if (ntop->getRedis()) {
         snprintf(netidx, sizeof(netidx), "%u", id);
         ntop->getRedis()->hashSet((char*)CONST_LOCAL_NETS_ID_PREFS, net, netidx);
@@ -4993,7 +5020,8 @@ bool Ntop::addLocalNetwork(char* _net) {
     }
 
     local_network_names[id] = net;
-    if (cur_count == 0 || id > local_network_max_id) local_network_max_id = id;
+    if (local_network_max_id < 0 || (int32_t)id > local_network_max_id)
+      local_network_max_id = (int32_t)id;
 
     // Adding, if available, the alias
     out[0] = '\0';
