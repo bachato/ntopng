@@ -318,7 +318,7 @@ const convertBatchResult = function (result) {
             y: {
                 axisLabelFormatter: axisFormatter,
                 valueFormatter:     valueFormatter,
-                axisLabelWidth:     80,
+                axisLabelWidth:     90,
             },
         },
         yRangePad:   1,
@@ -372,6 +372,10 @@ const getChartOptions = async function (url_request) {
     xAxis.valueFormatter ??= function (date) {
         return ntopng_utility.from_utc_to_server_date_format(date, date_format);
     };
+    // if the axisLabelWidth is null, set up at least at 90px, default value
+    if (!chart_options.axisLabelWidth) {
+        chart_options.axisLabelWidth = 90;
+    }
     /* Update the stacked option based on user preferences */
     chart_options = updateStackedOption(chart_options);
     /* Emit the chart_reloaded event for parent components */
