@@ -818,12 +818,15 @@ bool Ntop::isLocalAddress(int family, void* addr, int32_t* network_id,
 void Ntop::getLocalNetworkIp(int32_t local_network_id, IpAddress** network_ip,
                              u_int8_t* network_prefix) {
   char *network_address, *slash;
-  *network_ip = new (std::nothrow) IpAddress();
+
+  *network_ip = NULL;
   *network_prefix = 0;
 
-  if (local_network_id >= 0)
-    network_address = strdup(getLocalNetworkName(local_network_id));
-  else
+  if (local_network_id >= 0) {
+    const char* name = getLocalNetworkName(local_network_id);
+    if (!name) return;
+    network_address = strdup(name);
+  } else
     network_address = strdup((char*)"0.0.0.0/0"); /* Remote networks */
 
   if ((slash = strchr(network_address, '/'))) {
@@ -831,7 +834,9 @@ void Ntop::getLocalNetworkIp(int32_t local_network_id, IpAddress** network_ip,
     *slash = '\0';
   }
 
+  *network_ip = new (std::nothrow) IpAddress();
   if (*network_ip) (*network_ip)->set(network_address);
+
   if (network_address) free(network_address);
 };
 
