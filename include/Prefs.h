@@ -280,7 +280,7 @@ class Prefs {
   bool is_embedded_edition();
   bool is_nanalyst_available();
   
-  time_t pro_edition_demo_ends_at();
+  time_t pro_edition_license_expires_at();
   inline char* get_local_networks() {
     if (!local_networks_set) return NULL;
     return (local_networks);
