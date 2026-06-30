@@ -1813,9 +1813,11 @@ static int handle_lua_request(struct mg_connection* conn) {
 
     if (strstr(request_info->uri, "/lua/pro") &&
 #ifdef HAVE_NEDGE
-        !ntop->getPrefs()->is_nedge_pro_edition()
+        !ntop->getPro()->is_nedge_pro_edition()
+#elif defined(NTOPNG_PRO)
+        !ntop->getPro()->is_pro_edition()
 #else
-        !ntop->getPrefs()->is_pro_edition()
+        true
 #endif
     ) {
       if (original_uri) request_info->uri = original_uri;
@@ -1825,9 +1827,11 @@ static int handle_lua_request(struct mg_connection* conn) {
 
     if (strstr(request_info->uri, "/lua/pro/enterprise") &&
 #ifdef HAVE_NEDGE
-        !ntop->getPrefs()->is_nedge_enterprise_edition()
+        !ntop->getPro()->is_nedge_enterprise_edition()
+#elif defined(NTOPNG_PRO)
+        !ntop->getPro()->is_enterprise_m_edition()
 #else
-        !ntop->getPrefs()->is_enterprise_m_edition()
+        true
 #endif
     ) {
       if (original_uri) request_info->uri = original_uri;

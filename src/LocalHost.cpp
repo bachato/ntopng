@@ -648,7 +648,8 @@ void LocalHost::setServerPort(bool isTCP, u_int16_t port, ndpi_protocol* proto,
 
   set_port_status = usedPorts->setServerPort(isTCP, port, proto);
 
-  if (set_port_status && ntop->getPrefs()->is_enterprise_l_edition()) {
+#ifdef NTOPNG_PRO
+  if (set_port_status && ntop->getPro()->is_enterprise_l_edition()) {
     /* If the port is set for the first time set_port_status == true */
     u_int32_t learning_period = ntop->getPrefs()->hostPortLearningPeriod();
 
@@ -667,6 +668,7 @@ void LocalHost::setServerPort(bool isTCP, u_int16_t port, ndpi_protocol* proto,
       }
     }
   }
+#endif
 }
 
 /* ***************************************************** */

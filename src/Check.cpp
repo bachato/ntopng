@@ -52,20 +52,30 @@ bool Check::isCheckCompatibleWithEdition() const {
       break;
 
     case ntopng_edition_pro:
-      if (!ntop->getPrefs()
-               ->is_pro_edition() /* includes Pro, Enterprise M/L */)
+#ifndef NTOPNG_PRO
+      return (false);
+#else
+      if (!ntop->getPro()->is_pro_edition() /* includes Pro, Enterprise M/L */)
         return (false);
+#endif
       break;
 
     case ntopng_edition_enterprise_m:
-      if (!ntop->getPrefs()
-               ->is_enterprise_m_edition() /* includes Enterprise M/L */)
+#ifndef NTOPNG_PRO
+      return (false);
+#else
+      if (!ntop->getPro()->is_enterprise_m_edition() /* includes Enterprise M/L */)
         return (false);
+#endif
       break;
 
     case ntopng_edition_enterprise_l:
-      if (!ntop->getPrefs()->is_enterprise_l_edition() /* includes L */)
+#ifndef NTOPNG_PRO
+      return (false);
+#else
+      if (!ntop->getPro()->is_enterprise_l_edition() /* includes L */)
         return (false);
+#endif
       break;
   }
 
@@ -79,8 +89,12 @@ bool Check::isCheckCompatibleWithInterface(NetworkInterface* iface) {
   if (!isCheckCompatibleWithEdition()) return (false);
 
   if (packet_interface_only && (!iface->isPacketInterface())) return (false);
-  if (nedge_only && (!ntop->getPrefs()->is_nedge_pro_edition())) return (false);
-  if (nedge_exclude && ntop->getPrefs()->is_nedge_pro_edition()) return (false);
+#ifdef HAVE_NEDGE
+  if (nedge_only && !ntop->getPro()->is_nedge_pro_edition()) return (false);
+  if (nedge_exclude && ntop->getPro()->is_nedge_pro_edition()) return (false);
+#else
+  if (nedge_only) return (false);
+#endif
 
   return (true);
 }

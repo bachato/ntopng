@@ -2730,7 +2730,11 @@ long Utils::httpGet(const char* url,
 char* Utils::getURL(char* url, char* buf, u_int buf_len) {
   struct stat s;
 
-  if (!ntop->getPrefs()->is_pro_edition()) return (url);
+#ifndef NTOPNG_PRO
+  return (url);
+#else
+  if (!ntop->getPro()->is_pro_edition()) return (url);
+#endif
 
 #if 0
   snprintf(buf, buf_len, "%s/lua/pro%s",

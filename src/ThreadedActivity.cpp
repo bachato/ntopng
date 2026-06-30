@@ -354,7 +354,7 @@ LuaEngine* ThreadedActivity::loadVM(char* script_name, NetworkInterface* iface,
 #if defined(NTOPNG_PRO) && defined(TRACE_SCRIPTS)
   ntop->getTrace()->traceEvent(
       TRACE_NORMAL, "Running %s [is_pro: %s]", script_name,
-      ntop->getPrefs()->is_pro_edition() ? "YES" : "NO");
+      ntop->getPro()->is_pro_edition() ? "YES" : "NO");
 #endif
 
   try {
@@ -471,7 +471,7 @@ void ThreadedActivity::schedulePeriodicActivity(ThreadPool* pool,
 #endif
 
 #ifdef NTOPNG_PRO
-  if (ntop->getPrefs()->is_pro_edition() == false)
+  if (ntop->getPro()->is_pro_edition() == false)
     num_loops = 1; /* Skip pro scripts in community edition */
   else {
     num_loops = 2;

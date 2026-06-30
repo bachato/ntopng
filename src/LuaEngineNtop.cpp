@@ -4167,7 +4167,11 @@ static int ntop_is_package(lua_State* vm) {
 /* @brief Returns true if running Enterprise XXXL edition or higher.  Lua: ntop.isEnterpriseXXXL() → boolean */
 static int ntop_is_enterprise_xxxl(lua_State* vm) {
   ntop->getTrace()->traceEvent(TRACE_DEBUG, "%s() called", __FUNCTION__);
-  lua_pushboolean(vm, ntop->getPrefs()->is_enterprise_xxxl_edition());
+#ifdef NTOPNG_PRO
+  lua_pushboolean(vm, ntop->getPro()->is_enterprise_xxxl_edition());
+#else
+  lua_pushboolean(vm, false);
+#endif
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));
 }
 
@@ -4659,9 +4663,6 @@ static int ntop_refresh_cpu_load(lua_State* vm) {
 /* @brief Returns comprehensive product info: version, OS, license, uptime, listening ports.  Lua: ntop.getInfo([verbose]) → table */
 static int ntop_get_info(lua_State* vm) {
   char rsp[256];
-#ifdef NTOPNG_PRO
-  char buf[128];
-#endif
 #ifndef HAVE_NEDGE
   int major, minor, patch;
 #endif
@@ -4675,26 +4676,9 @@ static int ntop_get_info(lua_State* vm) {
     verbose = lua_toboolean(vm, 1) ? true : false;
 
   lua_newtable(vm);
-  lua_push_str_table_entry(vm, "product",
-#ifdef NTOPNG_PRO
-                           ntop->getPro()->get_product_name()
-#else
-                           (char*)"ntopng"
-#endif
-  );
-  lua_push_bool_table_entry(vm, "oem",
-#ifdef NTOPNG_PRO
-                            ntop->getPro()->is_oem()
-#else
-                            false
-#endif
-  );
-  lua_push_str_table_entry(
-      vm, "copyright",
-#ifdef NTOPNG_PRO
-      ntop->getPro()->is_oem() ? (char*)"" :
-#endif
-                               (char*)"&copy; 1998-26 - ntop");
+  lua_push_str_table_entry(vm, "product", (char*)"ntopng");
+  lua_push_bool_table_entry(vm, "oem", false);
+  lua_push_str_table_entry(vm, "copyright", (char*)"&copy; 1998-26 - ntop");
   lua_push_str_table_entry(vm, "authors", (char*)"The ntop team");
   lua_push_str_table_entry(vm, "license", (char*)"GNU GPLv3");
   lua_push_str_table_entry(vm, "platform", (char*)PACKAGE_MACHINE);
@@ -4745,13 +4729,7 @@ static int ntop_get_info(lua_State* vm) {
 #endif
 
   if (verbose) {
-    lua_push_str_table_entry(vm, "edition",
-#ifdef NTOPNG_PRO
-			     ntop->getPro()->get_edition()
-#else
-			     (char*)"Community"
-#endif
-			     );				 
+    lua_push_str_table_entry(vm, "edition", (char*)"Community");
     lua_push_str_table_entry(vm, "version.rrd", rrd_strversion());
     lua_push_str_table_entry(vm, "version.redis",
                              ntop->getRedis()->getVersion());
@@ -4764,58 +4742,17 @@ static int ntop_get_info(lua_State* vm) {
 #endif
     lua_push_str_table_entry(vm, "version.ndpi", ndpi_revision());
 
-    lua_push_bool_table_entry(vm, "pro.release",
-                              ntop->getPrefs()->is_pro_edition());
-    lua_push_bool_table_entry(vm, "version.enterprise_edition",
-                              ntop->getPrefs()->is_enterprise_m_edition());
-    lua_push_bool_table_entry(vm, "version.enterprise_m_edition",
-                              ntop->getPrefs()->is_enterprise_m_edition());
-    lua_push_bool_table_entry(vm, "version.enterprise_l_edition",
-                              ntop->getPrefs()->is_enterprise_l_edition());
-    lua_push_bool_table_entry(vm, "version.enterprise_xl_edition",
-                              ntop->getPrefs()->is_enterprise_xl_edition());
-    lua_push_bool_table_entry(vm, "version.enterprise_xxl_edition",
-                              ntop->getPrefs()->is_enterprise_xxl_edition());
-    lua_push_bool_table_entry(vm, "version.enterprise_xxxl_edition",
-                              ntop->getPrefs()->is_enterprise_xxxl_edition());
-
-    lua_push_bool_table_entry(vm, "version.nedge_edition",
-                              ntop->getPrefs()->is_nedge_pro_edition());
-    lua_push_bool_table_entry(vm, "version.nedge_enterprise_edition",
-                              ntop->getPrefs()->is_nedge_enterprise_edition());
-
-    lua_push_bool_table_entry(vm, "version.embedded_edition",
-                              ntop->getPrefs()->is_embedded_edition());
-
-    lua_push_uint64_table_entry(vm, "pro.license_expires_at",
-                                ntop->getPrefs()->pro_edition_license_expires_at());
-#ifdef NTOPNG_PRO
-#ifndef FORCE_VALID_LICENSE
-    time_t until_then;
-    int days_left;
-
-    if (ntop->getPro()->get_maintenance_expiration_time(&until_then,
-                                                        &days_left)) {
-      lua_push_uint64_table_entry(vm, "pro.license_ends_at",
-                                  (u_int64_t)until_then);
-      lua_push_int64_table_entry(vm, "pro.license_days_left", days_left);
-    }
-#endif
-    lua_push_str_table_entry(vm, "pro.license", ntop->getPro()->get_license());
-    lua_push_str_table_entry(vm, "pro.license_encoded",
-                             ntop->getPro()->get_encoded_license());
-    lua_push_bool_table_entry(vm, "pro.has_valid_license",
-                              ntop->getPro()->has_valid_license());
-    lua_push_str_table_entry(
-        vm, "pro.license_type",
-        ntop->getPro()->get_license_type(buf, sizeof(buf)));
-    lua_push_bool_table_entry(vm, "pro.out_of_maintenance",
-                              ntop->getPro()->is_out_of_maintenance());
-    lua_push_bool_table_entry(vm, "pro.use_redis_license",
-                              ntop->getPro()->use_redis_license());
-    lua_push_str_table_entry(vm, "pro.systemid",
-                             ntop->getPro()->get_system_id());
-#endif
+    lua_push_bool_table_entry(vm, "pro.release",                         false);
+    lua_push_bool_table_entry(vm, "version.enterprise_edition",          false);
+    lua_push_bool_table_entry(vm, "version.enterprise_m_edition",        false);
+    lua_push_bool_table_entry(vm, "version.enterprise_l_edition",        false);
+    lua_push_bool_table_entry(vm, "version.enterprise_xl_edition",       false);
+    lua_push_bool_table_entry(vm, "version.enterprise_xxl_edition",      false);
+    lua_push_bool_table_entry(vm, "version.enterprise_xxxl_edition",     false);
+    lua_push_bool_table_entry(vm, "version.nedge_edition",               false);
+    lua_push_bool_table_entry(vm, "version.nedge_enterprise_edition",    false);
+    lua_push_bool_table_entry(vm, "version.embedded_edition",            false);
+    lua_push_uint64_table_entry(vm, "pro.license_expires_at",            0);
     lua_push_uint64_table_entry(vm, "constants.max_num_host_pools",
                                 MAX_NUM_HOST_POOLS);
     lua_push_uint64_table_entry(vm, "constants.max_num_pool_members",
@@ -4833,7 +4770,7 @@ static int ntop_get_info(lua_State* vm) {
   }
 
 #ifdef NTOPNG_PRO
-  ntop->getPro()->lua(vm);
+  ntop->getPro()->lua(vm, verbose);
 #endif
 
   return (ntop_lua_return_value(vm, __FUNCTION__, CONST_LUA_ONE_RETURN_VALUE));

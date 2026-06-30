@@ -1279,7 +1279,13 @@ void Prefs::reloadPrefsFromRedis() {
 /* ******************************************* */
 
 void Prefs::refreshBehaviourAnalysis() {
-  enable_behaviour_analysis = is_enterprise_l_edition();
+  enable_behaviour_analysis =
+#ifdef NTOPNG_PRO
+    ntop->getPro()->is_enterprise_l_edition()
+#else
+    false
+#endif
+    ;
   enable_asn_behaviour_analysis =
     getDefaultBoolPrefsValue(CONST_PREFS_ASN_BEHAVIOR_ANALYSIS, false);
   enable_network_behaviour_analysis =
@@ -3346,125 +3352,25 @@ void Prefs::registerNetworkInterfaces() {
 
 /* *************************************** */
 
-bool Prefs::is_pro_edition() {
-  return
-#ifdef NTOPNG_PRO
-    ntop->getPro()->has_valid_license()
-#else
-    false
-#endif
-    ;
-}
-
-/* *************************************** */
-
-bool Prefs::is_nanalyst_available() {
-  return
-#ifdef NTOPNG_PRO
-    ntop->getPro()->is_nanalyst_available() && is_enterprise_m_edition()
-#else
-    false
-#endif
-    ;
-}
-
-/* *************************************** */
-
-bool Prefs::is_enterprise_m_edition() {
-  return
-#ifdef NTOPNG_PRO
-    ntop->getPro()->has_valid_enterprise_m_license() ||
-    is_enterprise_l_edition() /* L or higher */
-#else
-    false
-#endif
-    ;
-}
-
-/* *************************************** */
-
-bool Prefs::is_enterprise_l_edition() {
-  return
-#ifdef NTOPNG_PRO
-    ntop->getPro()->has_valid_enterprise_l_license() ||
-    is_enterprise_xl_edition() /* XL or higher */
-#else
-    false
-#endif
-    ;
-}
-
-/* *************************************** */
-
-bool Prefs::is_enterprise_xl_edition() {
-  return
-#ifdef NTOPNG_PRO
-    ntop->getPro()->has_valid_enterprise_xl_license() ||
-    is_enterprise_xxl_edition() /* XXL or higher */
-#else
-    false
-#endif
-    ;
-}
-
-/* *************************************** */
-
-bool Prefs::is_enterprise_xxl_edition() {
-  return
-#ifdef NTOPNG_PRO
-    ntop->getPro()->has_valid_enterprise_xxl_license()
-#else
-    false
-#endif
-    ;
-}
-
-/* *************************************** */
-
-bool Prefs::is_enterprise_xxxl_edition() {
-  return
-#ifdef NTOPNG_PRO
-    ntop->getPro()->has_valid_enterprise_xxxl_license()
-#else
-    false
-#endif
-    ;
-}
-
-/* *************************************** */
-
-bool Prefs::is_nedge_pro_edition() {
-  return
-#ifdef HAVE_NEDGE
-    ntop->getPro()->has_valid_license()
-#else
-    false
-#endif
-    ;
-}
-
-/* *************************************** */
-
-bool Prefs::is_nedge_enterprise_edition() {
-  return
-#ifdef HAVE_NEDGE
-    ntop->getPro()->has_valid_nedge_enterprise_license()
-#else
-    false
-#endif
-    ;
-}
-
-/* *************************************** */
-
-bool Prefs::is_embedded_edition() {
-  return
+bool Prefs::do_dump_flows_on_clickhouse() {
 #if defined(NTOPNG_PRO) || defined(HAVE_NEDGE)
-    ntop->getPro()->is_embedded_version()
+  return
+    (ntop->getPro()->is_enterprise_m_edition() ||
+     ntop->getPro()->is_nedge_enterprise_edition()) 
+    && dump_flows_on_clickhouse;
 #else
-    false
+  return false;
 #endif
-    ;
+}
+
+/* *************************************** */
+
+bool Prefs::isFlowDedupEnabled() {
+#ifdef NTOPNG_PRO
+  return ntop->getPro()->is_enterprise_xl_edition();
+#else
+  return false;
+#endif
 }
 
 /* *************************************** */
@@ -3480,27 +3386,18 @@ void Prefs::set_routing_mode(bool enabled) {
 
 /* *************************************** */
 
-time_t Prefs::pro_edition_license_expires_at() {
-  return
-#ifdef NTOPNG_PRO
-    ntop->getPro()->license_expires_at()
-#else
-    0
-#endif
-    ;
-}
-
 /* *************************************** */
 
 void Prefs::validate() {
   /* Perform here post-initialization validations */
-
-  if (is_enterprise_m_edition() /* M or higher */
-      || is_nedge_enterprise_edition()) {
-    ; /* All good */
-  } else if (dump_flows_on_clickhouse) {
-    ntop->getTrace()->traceEvent(
-				 TRACE_WARNING, "-F clickhouse is available only on Enterprise");
+#if defined(NTOPNG_PRO) || defined(HAVE_NEDGE)
+  if (ntop->getPro()->is_enterprise_m_edition() /* M or higher */
+      || ntop->getPro()->is_nedge_enterprise_edition()) {
+    /* All good */
+  } else 
+#endif
+  if (dump_flows_on_clickhouse) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "-F clickhouse is available only on Enterprise");
     dump_flows_on_clickhouse = false;
   }
 

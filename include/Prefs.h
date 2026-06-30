@@ -267,20 +267,6 @@ class Prefs {
   Prefs(Ntop* _ntop);
   virtual ~Prefs();
 
-  bool is_pro_edition();
-  bool is_enterprise_m_edition();
-  bool is_enterprise_l_edition();
-  bool is_enterprise_xl_edition();
-  bool is_enterprise_xxl_edition();
-  bool is_enterprise_xxxl_edition();
-
-  bool is_nedge_pro_edition();
-  bool is_nedge_enterprise_edition();
-
-  bool is_embedded_edition();
-  bool is_nanalyst_available();
-  
-  time_t pro_edition_license_expires_at();
   inline char* get_local_networks() {
     if (!local_networks_set) return NULL;
     return (local_networks);
@@ -341,10 +327,7 @@ class Prefs {
     return (num_interfaces);
   };
   inline bool do_dump_flows_on_es() { return (dump_flows_on_es); };
-  inline bool do_dump_flows_on_clickhouse() {
-    return ((is_enterprise_m_edition() || is_nedge_enterprise_edition()) &&
-            dump_flows_on_clickhouse);
-  };
+  bool do_dump_flows_on_clickhouse();
   inline bool do_dump_alerts_on_clickhouse() {
     return (do_dump_flows_on_clickhouse());
   };
@@ -905,9 +888,7 @@ class Prefs {
   void setCustomGeoIPDir(char* d);
 
   inline bool fullStatsEnabled() { return (full_stats_enabled); }
-  inline bool isFlowDedupEnabled() {
-    return (is_enterprise_xl_edition() ? true : false);
-  }
+  bool isFlowDedupEnabled();
 };
 
 #endif /* _PREFS_H_ */

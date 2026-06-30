@@ -615,11 +615,13 @@ void ZMQCollectorInterface::collect_flows() {
               if (tlv_encoding)
                 recvStats.num_flows +=
                     parseTLVFlows(uncompressed, uncompressed_len, this);
-              else if (ntop->getPrefs()->is_pro_edition()) {
+#ifdef NTOPNG_PRO
+              else if (ntop->getPro()->is_pro_edition()) {
                 uncompressed[uncompressed_len] = '\0';
                 recvStats.num_flows +=
                     parseJSONFlows(uncompressed, uncompressed_len);
               }
+#endif
               break;
 
             case 'c': /* counter / custom-ie */

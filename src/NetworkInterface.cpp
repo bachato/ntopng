@@ -835,7 +835,7 @@ void NetworkInterface::checkDisaggregationMode() {
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
 #ifdef HAVE_NBPF
-  sub_interfaces = ntop->getPrefs()->is_enterprise_m_edition()
+  sub_interfaces = ntop->getPro()->is_enterprise_m_edition()
                        ? new (std::nothrow) SubInterfaces(this)
                        : NULL;
 #endif
@@ -971,8 +971,11 @@ void NetworkInterface::updateSmartRecording() {
 /* **************************************************** */
 
 bool NetworkInterface::isSmartRecordingEnabled() const {
-  return is_smart_recording_enabled &&
-         ntop->getPrefs()->is_enterprise_xl_edition();
+#ifdef NTOPNG_PRO
+  return is_smart_recording_enabled && ntop->getPro()->is_enterprise_xl_edition();
+#else
+  return false;
+#endif
 }
 
 /* **************************************************** */
@@ -9765,8 +9768,8 @@ void NetworkInterface::allocateStructures(bool disable_dump) {
 #if defined(NTOPNG_PRO)
   if (ntop->getPrefs() && ntop->getPro()->has_valid_license() &&
       ntop->getPrefs()->isBehavourAnalysisEnabled() &&
-      (ntop->getPrefs()->is_enterprise_l_edition() ||
-       ntop->getPrefs()->is_nedge_enterprise_edition()) &&
+      (ntop->getPro()->is_enterprise_l_edition() ||
+       ntop->getPro()->is_nedge_enterprise_edition()) &&
       ifname && strcmp(ifname, SYSTEM_INTERFACE_NAME) &&
       !isViewed() /* Skip for viewed interface, only store service maps in the
                      view to save memory */
@@ -13482,35 +13485,35 @@ void NetworkInterface::getFilteredLiveFlowsStats(lua_State* vm) {
 #if defined(NTOPNG_PRO)
     case AnalysisCriteria::client_server_criteria:
       /* client server criteria flows stats case */
-      if (ntop->getPrefs()->is_enterprise_m_edition())
+      if (ntop->getPro()->is_enterprise_m_edition())
         walker(&begin_slot, true /* walk_all */, walker_flows,
                compute_client_server_flow_stats, &stats);
       break;
 
     case AnalysisCriteria::app_client_server_criteria:
       /* app client server criteria flows stats case */
-      if (ntop->getPrefs()->is_enterprise_m_edition())
+      if (ntop->getPro()->is_enterprise_m_edition())
         walker(&begin_slot, true /* walk_all */, walker_flows,
                compute_app_client_server_flow_stats, &stats);
       break;
 
     case AnalysisCriteria::info_criteria:
       /* info criteria flows stats case */
-      if (ntop->getPrefs()->is_enterprise_m_edition())
+      if (ntop->getPro()->is_enterprise_m_edition())
         walker(&begin_slot, true /* walk_all */, walker_flows,
                compute_info_flow_stats, &stats);
       break;
 
     case AnalysisCriteria::src_as_dst_as_criteria:
       /* src AS dst AS criteria flows stats case */
-      if (ntop->getPrefs()->is_enterprise_m_edition())
+      if (ntop->getPro()->is_enterprise_m_edition())
         walker(&begin_slot, true /* walk_all */, walker_flows,
                compute_src_as_dst_as_flow_stats, &stats);
       break;
 
     case AnalysisCriteria::src_as_transit_as_dst_as_criteria:
       /* src AS transit AS dst AS criteria flows stats case */
-      if (ntop->getPrefs()->is_enterprise_m_edition())
+      if (ntop->getPro()->is_enterprise_m_edition())
         walker(&begin_slot, true /* walk_all */, walker_flows,
                compute_src_as_transit_as_dst_as_flow_stats, &stats);
       break;
