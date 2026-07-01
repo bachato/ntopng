@@ -2193,18 +2193,23 @@ function toggle_mirrored_traffic_function_off(){
         local cur_mode = ntop.getCache(disaggregation_criterion_key)
         if isEmptyString(cur_mode) then
             cur_mode = "none"
+        -- Checking old keys for backward compatibility with saved preferences
+        elseif cur_mode == "probe_ip" then
+            cur_mode = "exporter_ip"
+        elseif cur_mode == "probe_ip_and_ingress_iface_idx" then
+            cur_mode = "exporter_ip_and_ingress_iface_idx"
         end
 
-        local labels = { i18n("prefs.none"), i18n("prefs.vlan"), i18n("prefs.probe_ip_address"),
+        local labels = { i18n("prefs.none"), i18n("prefs.vlan"), i18n("prefs.exporter_ip_address"),
             i18n("prefs.ingress_egress_flow_interface"), i18n("prefs.ingress_flow_interface"),
-            i18n("prefs.ingress_vrf_id"), i18n("prefs.probe_ip_and_ingress_iface_idx") }
+            i18n("prefs.ingress_vrf_id"), i18n("prefs.exporter_ip_and_ingress_iface_idx") }
 
         local values = {}
         if is_packet_interface then
             values = { "none", "vlan" }
         else
-            values = { "none", "vlan", "probe_ip", "iface_idx", "ingress_iface_idx", "ingress_vrf_id",
-                "probe_ip_and_ingress_iface_idx" }
+            values = { "none", "vlan", "exporter_ip", "iface_idx", "ingress_iface_idx", "ingress_vrf_id",
+                "exporter_ip_and_ingress_iface_idx" }
         end
 
         print [[

@@ -794,14 +794,16 @@ void NetworkInterface::checkDisaggregationMode() {
 
   if ((!ntop->getRedis()->get(rkey, rsp, sizeof(rsp))) && (rsp[0] != '\0')) {
     if (getIfType() == interface_type_ZMQ) { /* ZMQ interface */
-      if (!strcmp(rsp, DISAGGREGATION_PROBE_IP))
-        flowHashingMode = flowhashing_probe_ip;
+      if (!strcmp(rsp, DISAGGREGATION_EXPORTER_IP) ||
+          !strcmp(rsp, DISAGGREGATION_EXPORTER_IP_LEGACY))
+        flowHashingMode = flowhashing_exporter_ip;
       else if (!strcmp(rsp, DISAGGREGATION_IFACE_ID))
         flowHashingMode = flowhashing_iface_idx;
       else if (!strcmp(rsp, DISAGGREGATION_INGRESS_IFACE_ID))
         flowHashingMode = flowhashing_ingress_iface_idx;
-      else if (!strcmp(rsp, DISAGGREGATION_INGRESS_PROBE_IP_AND_IFACE_ID))
-        flowHashingMode = flowhashing_probe_ip_and_ingress_iface_idx;
+      else if (!strcmp(rsp, DISAGGREGATION_INGRESS_EXPORTER_IP_AND_IFACE_ID) ||
+               !strcmp(rsp, DISAGGREGATION_INGRESS_EXPORTER_IP_AND_IFACE_ID_LEGACY))
+        flowHashingMode = flowhashing_exporter_ip_and_ingress_iface_idx;
       else if (!strcmp(rsp, DISAGGREGATION_INGRESS_VRF_ID))
         flowHashingMode = flowhashing_vrfid;
       else if (!strcmp(rsp, DISAGGREGATION_VLAN))
@@ -1710,9 +1712,9 @@ NetworkInterface* NetworkInterface::getDynInterface(u_int64_t criteria,
                (unsigned int)criteria);
       break;
 
-    case flowhashing_probe_ip:
+    case flowhashing_exporter_ip:
       vIface_type = CONST_INTERFACE_TYPE_FLOW;
-      snprintf(buf, sizeof(buf), "%s [Probe IP: %s]", ifname,
+      snprintf(buf, sizeof(buf), "%s [Exporter IP: %s]", ifname,
                Utils::intoaV4((unsigned int)criteria, buf1, sizeof(buf1)));
       break;
 
@@ -1728,14 +1730,14 @@ NetworkInterface* NetworkInterface::getDynInterface(u_int64_t criteria,
                (unsigned int)criteria);
       break;
 
-    case flowhashing_probe_ip_and_ingress_iface_idx: {
-      /* 64 bit value: upper 32 bit is nProbe IP, lower 32 bit ifIdx */
-      u_int32_t nprobe_ip = (u_int32_t)(criteria >> 32);
+    case flowhashing_exporter_ip_and_ingress_iface_idx: {
+      /* 64 bit value: upper 32 bit is the exporter IP, lower 32 bit ifIdx */
+      u_int32_t exporter_ip = (u_int32_t)(criteria >> 32);
       u_int32_t if_id = (u_int32_t)(criteria & 0xFFFFFFFF);
 
       vIface_type = CONST_INTERFACE_TYPE_FLOW;
-      snprintf(buf, sizeof(buf), "%s [Probe IP: %s][InIfIdx: %u]", ifname,
-               Utils::intoaV4(nprobe_ip, buf1, sizeof(buf1)), if_id);
+      snprintf(buf, sizeof(buf), "%s [Exporter IP: %s][InIfIdx: %u]", ifname,
+               Utils::intoaV4(exporter_ip, buf1, sizeof(buf1)), if_id);
     } break;
 
     case flowhashing_vrfid:
@@ -8833,14 +8835,14 @@ void NetworkInterface::luaSubInterface(lua_State* vm) {
   char buf[64];
 
   switch (dynamic_interface_mode) {
-    case flowhashing_probe_ip:
+    case flowhashing_exporter_ip:
       lua_push_str_table_entry(
-          vm, "dynamic_interface_probe_ip",
+          vm, "dynamic_interface_exporter_ip",
           Utils::intoaV4(dynamic_interface_criteria, buf, sizeof(buf)));
       break;
-    case flowhashing_probe_ip_and_ingress_iface_idx:
+    case flowhashing_exporter_ip_and_ingress_iface_idx:
       lua_push_str_table_entry(
-          vm, "dynamic_interface_probe_ip",
+          vm, "dynamic_interface_exporter_ip",
           Utils::intoaV4(dynamic_interface_criteria >> 32, buf, sizeof(buf)));
       lua_push_uint64_table_entry(vm, "dynamic_interface_inifidx",
                                   dynamic_interface_criteria & 0xFFFFFFFF);

@@ -138,7 +138,7 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
         u_int16_t virtual_observation_point_id = zflow->vlan_id;
 
         switch (flowHashingMode) {
-          case flowhashing_probe_ip:
+          case flowhashing_exporter_ip:
             virtual_observation_point_id =
                 zflow->exporter_device_ip.u6_addr.u6_addr32[3] & 0xFFF /* 4096 */;
             break;
@@ -153,7 +153,7 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
             virtual_observation_point_id = zflow->inIndex & 0xFFF /* 4096 */;
             break;
 
-          case flowhashing_probe_ip_and_ingress_iface_idx:
+          case flowhashing_exporter_ip_and_ingress_iface_idx:
             virtual_observation_point_id =
                 ((((u_int64_t)zflow->exporter_device_ip.u6_addr.u6_addr32[3]) << 32) +
                  zflow->inIndex) &
@@ -177,9 +177,8 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
         NetworkInterface *vIface = NULL, *vIfaceEgress = NULL;
 
         switch (flowHashingMode) {
-          case flowhashing_probe_ip:
-            vIface =
-                getDynInterface((u_int64_t)zflow->exporter_device_ip.u6_addr.u6_addr32[3], true);
+          case flowhashing_exporter_ip:
+            vIface = getDynInterface((u_int64_t)zflow->exporter_device_ip.u6_addr.u6_addr32[3], true);
             break;
 
           case flowhashing_iface_idx:
@@ -195,7 +194,7 @@ bool ParserInterface::processFlow(ParsedFlow* zflow) {
               vIface = getDynInterface((u_int64_t)zflow->inIndex, true);
             break;
 
-          case flowhashing_probe_ip_and_ingress_iface_idx:
+          case flowhashing_exporter_ip_and_ingress_iface_idx:
             // ntop->getTrace()->traceEvent(TRACE_NORMAL, "[IP: %u][inIndex:
             // %u]", zflow->exporter_device_ip, zflow->inIndex);
             vIface = getDynInterface(

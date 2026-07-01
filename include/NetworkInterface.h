@@ -218,7 +218,7 @@ class NetworkInterface : public NetworkInterfaceAlertableEntity {
   u_int64_t dynamic_interface_criteria; /* Criteria identifying this dynamic
                                            interface */
   FlowHashingEnum
-      dynamic_interface_mode; /* Mode (e.g., Probe IP, VLAN ID, etc */
+      dynamic_interface_mode; /* Mode (e.g., Exporter IP, VLAN ID, etc */
   NetworkInterface* dynamic_interface_master; /* Main interface */
 
   bool is_traffic_mirrored, is_loopback;

@@ -216,10 +216,10 @@ for v, k in pairs(iface_names) do
    local descr = getHumanReadableInterfaceName(v)
    if is_windows and string.contains(descr, "{") then
       descr = s.description
-   elseif ntop.isEnterpriseM and ntop.isEnterpriseM() and is_sub and s.dynamic_interface_probe_ip then
+   elseif ntop.isEnterpriseM and ntop.isEnterpriseM() and is_sub and s.dynamic_interface_exporter_ip then
       local snmp_utils      = require "snmp_utils"
       local snmp_cached_dev = require "snmp_cached_dev"
-      local cached_device   = snmp_cached_dev:create(s.dynamic_interface_probe_ip)
+      local cached_device   = snmp_cached_dev:create(s.dynamic_interface_exporter_ip)
       local snmp_name, snmp_if_name
       if cached_device then
          if cached_device.system and cached_device.system.name then

@@ -2748,8 +2748,10 @@ local known_parameters = {
    ["message_broker_topics_list"] = validateEmptyOr(validateUnquoted),
 
    -- Multiple Choice
-   ["disaggregation_criterion"] = validateChoiceInline({"none", "vlan", "probe_ip", "iface_idx", "ingress_iface_idx",
-							"ingress_vrf_id", "probe_ip_and_ingress_iface_idx"}),
+   ["disaggregation_criterion"] = validateChoiceInline({"none", "vlan", "exporter_ip", "iface_idx", "ingress_iface_idx",
+							"ingress_vrf_id", "exporter_ip_and_ingress_iface_idx",
+							-- Old keys (backward compatibility)
+							"probe_ip", "probe_ip_and_ingress_iface_idx"}),
    ["ignored_interfaces"] = validateEmptyOr(validateListOfTypeInline(validateNumber)),
    ["hosts_ndpi_timeseries_creation"] = validateChoiceInline({"none", "per_protocol", "per_category", "both"}),
    ["interfaces_ndpi_timeseries_creation"] = validateChoiceInline({"none", "per_protocol", "per_category", "both"}),

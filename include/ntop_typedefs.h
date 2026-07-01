@@ -787,12 +787,12 @@ typedef enum {
 
 typedef enum {
   flowhashing_none = 0,
-  flowhashing_probe_ip,
+  flowhashing_exporter_ip,
   flowhashing_iface_idx,
   flowhashing_ingress_iface_idx,
   flowhashing_vlan,
   flowhashing_vrfid, /* VRF Id */
-  flowhashing_probe_ip_and_ingress_iface_idx,
+  flowhashing_exporter_ip_and_ingress_iface_idx,
 } FlowHashingEnum;
 
 typedef enum {

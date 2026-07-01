@@ -976,16 +976,19 @@ typedef enum {
 #define CONST_RUNTIME_PREFS_IFACE_FLOW_COLLECTION     \
   NTOPNG_PREFS_PREFIX                                 \
   ".dynamic_flow_collection_mode" /* {"none", "vlan", \
-                                     "probe_ip","ingress_iface_idx"} */
+                                     "exporter_ip","ingress_iface_idx"} */
 #define CONST_RUNTIME_PREFS_IGNORED_INTERFACES \
   NTOPNG_PREFS_PREFIX ".ignored_interfaces"
 #define CONST_RUNTIME_PREFS_ENABLE_MAC_NDPI_STATS \
   NTOPNG_PREFS_PREFIX ".l2_device_ndpi_timeseries_creation"
-#define DISAGGREGATION_PROBE_IP "probe_ip"
+#define DISAGGREGATION_EXPORTER_IP "exporter_ip"
+#define DISAGGREGATION_EXPORTER_IP_LEGACY "probe_ip" /* Old key, kept for backward compatibility with saved preferences */
 #define DISAGGREGATION_IFACE_ID "iface_idx"
 #define DISAGGREGATION_INGRESS_IFACE_ID "ingress_iface_idx"
-#define DISAGGREGATION_INGRESS_PROBE_IP_AND_IFACE_ID \
-  "probe_ip_and_ingress_iface_idx"
+#define DISAGGREGATION_INGRESS_EXPORTER_IP_AND_IFACE_ID \
+  "exporter_ip_and_ingress_iface_idx"
+#define DISAGGREGATION_INGRESS_EXPORTER_IP_AND_IFACE_ID_LEGACY \
+  "probe_ip_and_ingress_iface_idx" /* Old key, kept for backward compatibility with saved preferences */
 #define DISAGGREGATION_INGRESS_VRF_ID "ingress_vrf_id"
 #define DISAGGREGATION_VLAN "vlan"
 #define DISAGGREGATION_NONE "none"
