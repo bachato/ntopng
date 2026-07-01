@@ -143,7 +143,7 @@ function timeseries_info.getTimeseries(tags, prefix)
         include_empty_ts = true
     }
     
-    if tags.host:find("metric:infrastructure") and
+    if tags and tags.host and tags.host:find("metric:infrastructure") and
         ntop.isEnterprise and
         ntop.isEnterprise() then
         prefix = "infrastructure"
